@@ -63,19 +63,19 @@ class SocketClient @Inject constructor(
         )
     }
 
-    fun messagesBySubscriptionId(subscriptionId: UUID) = messagesSharedFlow
-        .filter { it.subscriptionId == subscriptionId }
+    fun messagesBySubscriptionId(id: UUID) = messagesSharedFlow.filter { it.subscriptionId == id }
 
-
-    fun <T> sendRequest(request: OutgoingMessage<T>) {
+    fun <T> sendRequest(request: OutgoingMessage<T>): UUID {
+        val subscriptionId = UUID.randomUUID()
         val message = buildOutgoingMessage(
             verb = NostrVerb.Outgoing.REQ,
-            subscriptionId = request.subscriptionId,
+            subscriptionId = subscriptionId,
             cacheVerb = request.command,
             options = request.options,
         )
         Timber.i("--> SOCKET $message")
         webSocket.send(message)
+        return subscriptionId
     }
 
     private fun <T> buildOutgoingMessage(

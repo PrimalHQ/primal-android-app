@@ -16,6 +16,7 @@ import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.model.NostrKindEventRange
 import net.primal.android.nostr.model.NostrVerb
 import net.primal.android.nostr.primal.model.request.FeedRequest
+import net.primal.android.nostr.primal.model.request.SearchContentRequest
 import net.primal.android.serialization.NostrJson
 import timber.log.Timber
 import java.util.UUID
@@ -28,11 +29,9 @@ class PrimalApiImpl @Inject constructor(
 
     private val scope = CoroutineScope(Dispatchers.IO)
 
-    override fun requestFeedUpdates(request: FeedRequest) {
-        val subscriptionId = UUID.randomUUID()
+    override fun requestFeedUpdates(request: FeedRequest) = launchSubscription {
         socketClient.sendRequest(
             request = OutgoingMessage(
-                subscriptionId = subscriptionId,
                 command = "feed",
                 options = NostrJson.encodeToString(
                     FeedRequest(
@@ -42,7 +41,23 @@ class PrimalApiImpl @Inject constructor(
                 )
             )
         )
+    }
 
+    override fun searchContent(request: SearchContentRequest) = launchSubscription {
+        socketClient.sendRequest(
+            request = OutgoingMessage(
+                command = "search",
+                options = NostrJson.encodeToString(
+                    SearchContentRequest(
+                        query = request.query,
+                    )
+                )
+            )
+        )
+    }
+
+    private fun launchSubscription(socketSubscribing: () -> UUID) {
+        val subscriptionId = socketSubscribing()
         scope.launch {
             socketClient.messagesBySubscriptionId(subscriptionId).cancellable().collect {
                 when (it.type) {
