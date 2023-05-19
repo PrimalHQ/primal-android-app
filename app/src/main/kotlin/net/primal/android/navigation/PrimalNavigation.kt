@@ -9,7 +9,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import net.primal.android.feed.FeedViewModel
-import net.primal.android.feed.ui.HomeScreen
+import net.primal.android.feed.ui.FeedScreen
 import net.primal.android.login.LoginViewModel
 import net.primal.android.login.ui.LoginScreen
 
@@ -64,7 +64,7 @@ private fun NavGraphBuilder.feed(
     }
 
 
-    HomeScreen(
+    FeedScreen(
         viewModel = viewModel
     )
 }

@@ -1,5 +1,5 @@
 [versions]
-agp = "8.1.0-beta02"
+agp = "8.1.0-beta03"
 appcompat = "1.6.1"
 coil = "2.2.2"
 datastore = "1.0.0"
@@ -7,7 +7,7 @@ kotlinx-serialization-json = "1.5.0"
 okhttp = "4.11.0"
 org-jetbrains-kotlin-android = "1.8.10"
 compose-bom = "2023.05.01"
-core-ktx = "1.10.0"
+core-ktx = "1.10.1"
 core-splashscreen = "1.0.1"
 lifecycle-runtime-ktx = "2.6.1"
 activity-compose = "1.7.1"
@@ -18,6 +18,8 @@ accompanist = "0.30.1"
 dagger = "2.44.2"
 hilt = "1.0.0"
 retrofit = "2.9.0"
+paging = "3.1.1"
+room = "2.5.1"
 
 [libraries]
 # Core libs
@@ -47,6 +49,10 @@ navigation-compose = { module = "androidx.navigation:navigation-compose", versio
 navigation-hilt = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hilt" }
 navigation-material = { module = "com.google.accompanist:accompanist-navigation-material", version.ref = "accompanist" }
 
+paging-runtime = { module = "androidx.paging:paging-runtime", version.ref = "paging" }
+paging-common = { module = "androidx.paging:paging-common", version.ref = "paging" }
+paging-compose = { module = "androidx.paging:paging-compose", version = "1.0.0-alpha19" }
+
 # DI libs
 hilt-compiler = { module = "androidx.hilt:hilt-compiler", version.ref = "hilt" }
 hilt-compiler-dagger = { module = "com.google.dagger:hilt-compiler", version.ref = "dagger" }
@@ -63,12 +69,17 @@ retrofit-serialization-converter = { module = "com.jakewharton.retrofit:retrofit
 
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization-json" }
 
+# Database libs
+room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
+room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
+room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
+room-testing = { module = "androidx.room:room-testing", version.ref = "room" }
+paging-room = { module = "androidx.room:room-paging", version.ref = "room" }
 
 # Media libs
 coil = { module = "io.coil-kt:coil", version.ref = "coil" }
 coil-svg = { module = "io.coil-kt:coil-svg", version.ref = "coil" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
-
 
 # Other libs
 timber = { module = "com.jakewharton.timber:timber", version = "5.0.1" }

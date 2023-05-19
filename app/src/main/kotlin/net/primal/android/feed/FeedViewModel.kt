@@ -13,14 +13,15 @@ import kotlinx.coroutines.launch
 import net.primal.android.feed.FeedContract.SideEffect
 import net.primal.android.feed.FeedContract.UiEvent
 import net.primal.android.feed.FeedContract.UiState
+import net.primal.android.feed.repository.FeedRepository
 import javax.inject.Inject
 
 @HiltViewModel
 class FeedViewModel @Inject constructor(
-
+    private val feedRepository: FeedRepository,
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(UiState(loading = false))
+    private val _state = MutableStateFlow(UiState())
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) {
         _state.getAndUpdate { it.reducer() }
@@ -37,5 +38,19 @@ class FeedViewModel @Inject constructor(
         viewModelScope.launch { _event.emit(event) }
     }
 
+    init {
+        subscribeToEventCount()
+        fetchLatestEvents()
+    }
+
+    private fun subscribeToEventCount() = viewModelScope.launch {
+        feedRepository.observeEventsCount().collect {
+            setState { copy(eventCount = it) }
+        }
+    }
+
+    private fun fetchLatestEvents() = viewModelScope.launch {
+        feedRepository.fetchLatestEvents()
+    }
 
 }

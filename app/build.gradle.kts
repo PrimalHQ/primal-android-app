@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.com.android.application)
     alias(libs.plugins.org.jetbrains.kotlin.android)
     kotlin("kapt")
+    kotlin("plugin.serialization")
     alias(libs.plugins.hilt)
 }
 
@@ -81,6 +82,15 @@ dependencies {
 
     implementation(libs.navigation.material)
 
+    implementation(libs.paging.runtime)
+    implementation(libs.paging.compose)
+    implementation(libs.paging.room)
+
+    kapt(libs.room.compiler)
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
+    implementation(libs.room.runtime)
+
     kapt(libs.bundles.hilt.kapt)
     implementation(libs.bundles.hilt)
 
@@ -99,12 +109,17 @@ dependencies {
 
     implementation(libs.timber)
 
+
     testImplementation(libs.junit)
+    testImplementation(libs.room.testing)
+
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.espresso.core)
     androidTestImplementation(platform(libs.compose.bom))
     androidTestImplementation(libs.compose.ui.test.junit4)
+
     debugImplementation(libs.compose.ui.tooling)
     debugImplementation(libs.compose.ui.test.manifest)
+
 
 }

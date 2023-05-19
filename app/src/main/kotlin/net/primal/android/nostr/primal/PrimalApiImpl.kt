@@ -1,0 +1,99 @@
+package net.primal.android.nostr.primal
+
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.cancellable
+import kotlinx.coroutines.launch
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.decodeFromJsonElement
+import net.primal.android.networking.sockets.SocketClient
+import net.primal.android.networking.sockets.model.OutgoingMessage
+import net.primal.android.nostr.NostrEventsHandler
+import net.primal.android.nostr.model.NostrEventKind
+import net.primal.android.nostr.model.NostrKindEventRange
+import net.primal.android.nostr.model.NostrVerb
+import net.primal.android.nostr.primal.model.request.FeedRequest
+import net.primal.android.serialization.NostrJson
+import timber.log.Timber
+import java.util.UUID
+import javax.inject.Inject
+
+class PrimalApiImpl @Inject constructor(
+    private val socketClient: SocketClient,
+    private val nostrEventsHandler: NostrEventsHandler,
+) : PrimalApi {
+
+    private val scope = CoroutineScope(Dispatchers.IO)
+
+    override fun requestFeedUpdates(request: FeedRequest) {
+        val subscriptionId = UUID.randomUUID()
+        socketClient.sendRequest(
+            request = OutgoingMessage(
+                subscriptionId = subscriptionId,
+                command = "feed",
+                options = NostrJson.encodeToString(
+                    FeedRequest(
+                        pubKey = "82341f882b6eabcd2ba7f1ef90aad961cf074af15b9ef44a09f9d2a8fbfbe6a2",
+                        userPubKey = "460c25e682fda7832b52d1f22d3d22b3176d972f60dcdc3212ed8c92ef85065c",
+                    )
+                )
+            )
+        )
+
+        scope.launch {
+            socketClient.messagesBySubscriptionId(subscriptionId).cancellable().collect {
+                when (it.type) {
+                    NostrVerb.Incoming.EVENT -> if (it.data != null) {
+                        val rawKindValue = it.data.getValue("kind")
+                        val nostrEventKind = NostrJson.decodeNostrEventKindOrUnknown(rawKindValue)
+                        when {
+                            nostrEventKind.value in NostrKindEventRange.PrimalEvents -> {
+                                nostrEventsHandler.cachePrimalEvent(
+                                    event = NostrJson.decodeFromJsonElement(it.data)
+                                )
+                            }
+
+                            nostrEventKind == NostrEventKind.Unknown -> {
+                                Timber.w(
+                                    "An unknown kind ($rawKindValue) of nostr event " +
+                                            "detected in the incoming message: $it"
+                                )
+                            }
+
+                            else -> {
+                                nostrEventsHandler.cacheEvent(
+                                    event = NostrJson.decodeFromJsonElement(it.data)
+                                )
+                            }
+                        }
+                    } else {
+                        Timber.e("Unable to process incoming message: $it")
+                    }
+
+                    NostrVerb.Incoming.EOSE -> {
+                        nostrEventsHandler.processCachedEvents()
+                        cancel()
+                    }
+
+                    NostrVerb.Incoming.NOTICE -> {
+                        Timber.e("NOTICE: $it")
+                        cancel()
+                    }
+
+                    else -> Timber.e("Ignored incoming message: $it")
+                }
+            }
+        }
+    }
+
+    private fun Json.decodeNostrEventKindOrUnknown(kind: JsonElement): NostrEventKind {
+        return try {
+            decodeFromJsonElement(kind)
+        } catch (error: IllegalArgumentException) {
+            NostrEventKind.Unknown
+        }
+    }
+}
