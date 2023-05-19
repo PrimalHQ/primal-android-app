@@ -20,6 +20,7 @@ hilt = "1.0.0"
 retrofit = "2.9.0"
 paging = "3.1.1"
 room = "2.5.1"
+ksp = "1.8.10-1.0.9"
 
 [libraries]
 # Core libs
@@ -101,4 +102,5 @@ com-android-application = { id = "com.android.application", version.ref = "agp" 
 org-jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "org-jetbrains-kotlin-android" }
 org-jetbrains-kotlin-plugin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "org-jetbrains-kotlin-android" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "dagger" }
+ksp = { id ="com.google.devtools.ksp", version.ref = "ksp" }
 

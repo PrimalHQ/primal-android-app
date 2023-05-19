@@ -5,6 +5,7 @@ plugins {
     kotlin("kapt")
     kotlin("plugin.serialization")
     alias(libs.plugins.hilt)
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -86,7 +87,7 @@ dependencies {
     implementation(libs.paging.compose)
     implementation(libs.paging.room)
 
-    kapt(libs.room.compiler)
+    ksp(libs.room.compiler)
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
     implementation(libs.room.runtime)
