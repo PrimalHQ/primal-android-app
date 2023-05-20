@@ -10,9 +10,9 @@ class FeedRepository @Inject constructor(
     private val database: PrimalDatabase,
 ) {
 
-    fun observeEventsCount() = database.events().observeCount()
+    fun observeEventsCount() = database.posts().observeCount()
 
-    fun fetchLatestEvents() {
+    fun fetchLatestPosts() {
         cachingServiceApi.requestFeedUpdates(
             request = FeedRequest(
                 userPubKey = "9b46c3f4a8dcdafdfff12a97c59758f38ff55002370fcfa7d14c8c857e9b5812",

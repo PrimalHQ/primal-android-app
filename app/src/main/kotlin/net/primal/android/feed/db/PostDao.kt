@@ -6,12 +6,12 @@ import androidx.room.Upsert
 import kotlinx.coroutines.flow.Flow
 
 @Dao
-interface ShortTextNoteDao {
+interface PostDao {
 
-    @Query("SELECT COUNT(*) FROM ShortTextNote")
+    @Query("SELECT COUNT(*) FROM Post")
     fun observeCount(): Flow<Int>
 
     @Upsert
-    fun upsertAll(events: List<ShortTextNote>)
+    fun upsertAll(events: List<Post>)
 
 }

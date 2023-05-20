@@ -40,7 +40,7 @@ class FeedViewModel @Inject constructor(
 
     init {
         subscribeToEventCount()
-        fetchLatestEvents()
+        fetchLatestPosts()
     }
 
     private fun subscribeToEventCount() = viewModelScope.launch {
@@ -49,8 +49,8 @@ class FeedViewModel @Inject constructor(
         }
     }
 
-    private fun fetchLatestEvents() = viewModelScope.launch {
-        feedRepository.fetchLatestEvents()
+    private fun fetchLatestPosts() = viewModelScope.launch {
+        feedRepository.fetchLatestPosts()
     }
 
 }

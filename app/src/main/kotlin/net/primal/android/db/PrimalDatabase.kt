@@ -7,15 +7,15 @@ import net.primal.android.feed.db.EventStats
 import net.primal.android.feed.db.EventStatsDao
 import net.primal.android.feed.db.Repost
 import net.primal.android.feed.db.RepostDao
-import net.primal.android.feed.db.ShortTextNote
-import net.primal.android.feed.db.ShortTextNoteDao
+import net.primal.android.feed.db.Post
+import net.primal.android.feed.db.PostDao
 import net.primal.android.profile.db.ProfileMetadata
 import net.primal.android.profile.db.ProfileMetadataDao
 import net.primal.android.serialization.RoomCustomTypeConverters
 
 @Database(
     entities = [
-        ShortTextNote::class,
+        Post::class,
         ProfileMetadata::class,
         Repost::class,
         EventStats::class,
@@ -28,8 +28,8 @@ abstract class PrimalDatabase : RoomDatabase() {
 
     abstract fun profiles(): ProfileMetadataDao
 
-    abstract fun events(): ShortTextNoteDao
-    
+    abstract fun posts(): PostDao
+
     abstract fun reposts(): RepostDao
 
     abstract fun eventStats(): EventStatsDao

@@ -5,7 +5,7 @@ import androidx.room.PrimaryKey
 import kotlinx.serialization.json.JsonArray
 
 @Entity
-data class ShortTextNote(
+data class Post(
     @PrimaryKey
     val eventId: String,
     val authorId: String,
