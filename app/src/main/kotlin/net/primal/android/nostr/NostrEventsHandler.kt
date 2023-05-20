@@ -65,7 +65,7 @@ class NostrEventsHandler @Inject constructor(
     private fun buildNostrPrimalEventProcessor(kind: NostrEventKind): NostrPrimalEventProcessor =
         when (kind) {
             NostrEventKind.PrimalEventStats -> PrimalEventStatsProcessor(database = database)
-            NostrEventKind.PrimalReferencedEvent -> PrimalReferencedEventProcessor()
+            NostrEventKind.PrimalReferencedEvent -> PrimalReferencedEventProcessor(database = database)
             else -> throw NotImplementedError("$kind not supported.")
         }
 

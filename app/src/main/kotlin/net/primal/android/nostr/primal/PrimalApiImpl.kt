@@ -32,12 +32,7 @@ class PrimalApiImpl @Inject constructor(
         socketClient.sendRequest(
             request = OutgoingMessage(
                 command = "feed",
-                options = NostrJson.encodeToString(
-                    FeedRequest(
-                        pubKey = "82341f882b6eabcd2ba7f1ef90aad961cf074af15b9ef44a09f9d2a8fbfbe6a2",
-                        userPubKey = "460c25e682fda7832b52d1f22d3d22b3176d972f60dcdc3212ed8c92ef85065c",
-                    )
-                )
+                options = NostrJson.encodeToString(request)
             )
         )
     }
