@@ -18,8 +18,8 @@ class NostrEventsHandler @Inject constructor(
     private val database: PrimalDatabase,
 ) {
 
-    private val nostrCache = hashMapOf<NostrEventKind, MutableList<NostrEvent>>()
-    private val nostrPrimalCache = hashMapOf<NostrEventKind, MutableList<NostrPrimalEvent>>()
+    private val nostrCache = hashMapOf<Int, MutableList<NostrEvent>>()
+    private val nostrPrimalCache = hashMapOf<Int, MutableList<NostrPrimalEvent>>()
 
     fun cacheEvent(event: NostrEvent) {
         nostrCache.putIfAbsent(event.kind, mutableListOf())
@@ -34,21 +34,23 @@ class NostrEventsHandler @Inject constructor(
     fun processCachedEvents() {
         nostrPrimalCache.keys.forEach {
             val events = nostrPrimalCache.getValue(it)
+            val nostrEventKind = NostrEventKind.valueOf(it)
 
-            Timber.d("$it has ${events.size} primal events.")
+            Timber.d("$nostrEventKind has ${events.size} primal events.")
             Timber.i(events.toString())
 
-            buildNostrPrimalEventProcessor(it).process(events = events)
+            buildNostrPrimalEventProcessor(kind = nostrEventKind).process(events = events)
         }
         nostrPrimalCache.clear()
 
         nostrCache.keys.forEach {
             val events = nostrCache.getValue(it)
+            val nostrEventKind = NostrEventKind.valueOf(it)
 
-            Timber.d("$it has ${events.size} nostr events.")
+            Timber.d("$nostrEventKind has ${events.size} nostr events.")
             Timber.i(events.toString())
 
-            buildNostrEventProcessor(kind = it).process(events = events)
+            buildNostrEventProcessor(kind = nostrEventKind).process(events = events)
         }
         nostrCache.clear()
     }

@@ -6,9 +6,8 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.decodeFromJsonElement
+import kotlinx.serialization.json.jsonPrimitive
 import net.primal.android.networking.sockets.SocketClient
 import net.primal.android.networking.sockets.model.OutgoingMessage
 import net.primal.android.nostr.NostrEventsHandler
@@ -62,8 +61,8 @@ class PrimalApiImpl @Inject constructor(
             socketClient.messagesBySubscriptionId(subscriptionId).cancellable().collect {
                 when (it.type) {
                     NostrVerb.Incoming.EVENT -> if (it.data != null) {
-                        val rawKindValue = it.data.getValue("kind")
-                        val nostrEventKind = NostrJson.decodeNostrEventKindOrUnknown(rawKindValue)
+                        val kind = it.data["kind"]?.jsonPrimitive?.content?.toIntOrNull()
+                        val nostrEventKind = NostrEventKind.valueOf(kind ?: -1)
                         when {
                             nostrEventKind.value in NostrKindEventRange.PrimalEvents -> {
                                 nostrEventsHandler.cachePrimalEvent(
@@ -73,7 +72,7 @@ class PrimalApiImpl @Inject constructor(
 
                             nostrEventKind == NostrEventKind.Unknown -> {
                                 Timber.w(
-                                    "An unknown kind ($rawKindValue) of nostr event " +
+                                    "An unknown kind ($kind) of nostr event " +
                                             "detected in the incoming message: $it"
                                 )
                             }
@@ -101,14 +100,6 @@ class PrimalApiImpl @Inject constructor(
                     else -> Timber.e("Ignored incoming message: $it")
                 }
             }
-        }
-    }
-
-    private fun Json.decodeNostrEventKindOrUnknown(kind: JsonElement): NostrEventKind {
-        return try {
-            decodeFromJsonElement(kind)
-        } catch (error: IllegalArgumentException) {
-            NostrEventKind.Unknown
         }
     }
 }
