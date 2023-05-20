@@ -23,7 +23,7 @@ class PrimalEventStatsProcessor(
     }
 
     private fun ContentPrimalEventStats.asEventStatsPO() = EventStats(
-        eventId = this.eventId,
+        postId = this.eventId,
         likes = this.likes,
         replies = this.replies,
         mentions = this.mentions,

@@ -31,7 +31,7 @@ class RepostEventProcessor(
     }
 
     private fun NostrEvent.asRepost(postId: String, postAuthorId: String) = Repost(
-        eventId = this.id,
+        repostId = this.id,
         authorId = this.pubKey,
         createdAt = this.createdAt,
         tags = this.tags,

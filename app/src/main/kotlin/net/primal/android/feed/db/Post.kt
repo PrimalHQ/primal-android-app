@@ -7,7 +7,7 @@ import kotlinx.serialization.json.JsonArray
 @Entity
 data class Post(
     @PrimaryKey
-    val eventId: String,
+    val postId: String,
     val authorId: String,
     val createdAt: Long,
     val tags: List<JsonArray>,

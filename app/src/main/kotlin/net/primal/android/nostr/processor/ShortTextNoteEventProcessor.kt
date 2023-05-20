@@ -18,7 +18,7 @@ class ShortTextNoteEventProcessor(
     }
 
     private fun NostrEvent.asPost(): Post = Post(
-        eventId = this.id,
+        postId = this.id,
         authorId = this.pubKey,
         createdAt = this.createdAt,
         tags = this.tags,

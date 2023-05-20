@@ -6,7 +6,7 @@ import androidx.room.PrimaryKey
 @Entity
 data class EventStats(
     @PrimaryKey
-    val eventId: String,
+    val postId: String,
     val likes: Int,
     val replies: Int,
     val mentions: Int,

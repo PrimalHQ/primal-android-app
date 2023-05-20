@@ -34,15 +34,21 @@ class NostrEventsHandler @Inject constructor(
     fun processCachedEvents() {
         nostrPrimalCache.keys.forEach {
             val events = nostrPrimalCache.getValue(it)
-            buildNostrPrimalEventProcessor(it).process(events = events)
+
             Timber.d("$it has ${events.size} primal events.")
+            Timber.i(events.toString())
+
+            buildNostrPrimalEventProcessor(it).process(events = events)
         }
         nostrPrimalCache.clear()
 
         nostrCache.keys.forEach {
             val events = nostrCache.getValue(it)
-            buildNostrEventProcessor(kind = it).process(events = events)
+
             Timber.d("$it has ${events.size} nostr events.")
+            Timber.i(events.toString())
+
+            buildNostrEventProcessor(kind = it).process(events = events)
         }
         nostrCache.clear()
     }

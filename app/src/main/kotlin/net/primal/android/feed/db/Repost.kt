@@ -7,7 +7,7 @@ import kotlinx.serialization.json.JsonArray
 @Entity
 data class Repost(
     @PrimaryKey
-    val eventId: String,
+    val repostId: String,
     val authorId: String,
     val createdAt: Long,
     val tags: List<JsonArray>,
