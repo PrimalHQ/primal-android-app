@@ -1,7 +1,7 @@
 package net.primal.android.nostr.processor
 
 import net.primal.android.db.PrimalDatabase
-import net.primal.android.feed.db.Post
+import net.primal.android.feed.db.PostData
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.NostrEventKind
 
@@ -17,7 +17,7 @@ class ShortTextNoteEventProcessor(
         )
     }
 
-    private fun NostrEvent.asPost(): Post = Post(
+    private fun NostrEvent.asPost(): PostData = PostData(
         postId = this.id,
         authorId = this.pubKey,
         createdAt = this.createdAt,

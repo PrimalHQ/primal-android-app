@@ -3,22 +3,27 @@ package net.primal.android.db
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import net.primal.android.feed.db.EventStats
-import net.primal.android.feed.db.EventStatsDao
-import net.primal.android.feed.db.Repost
-import net.primal.android.feed.db.RepostDao
-import net.primal.android.feed.db.Post
+import net.primal.android.feed.db.FeedPostDao
+import net.primal.android.feed.db.FeedPostData
 import net.primal.android.feed.db.PostDao
+import net.primal.android.feed.db.PostData
+import net.primal.android.feed.db.PostStats
+import net.primal.android.feed.db.PostStatsDao
+import net.primal.android.feed.db.RepostDao
+import net.primal.android.feed.db.RepostData
 import net.primal.android.profile.db.ProfileMetadata
 import net.primal.android.profile.db.ProfileMetadataDao
 import net.primal.android.serialization.RoomCustomTypeConverters
 
 @Database(
     entities = [
-        Post::class,
+        PostData::class,
         ProfileMetadata::class,
-        Repost::class,
-        EventStats::class,
+        RepostData::class,
+        PostStats::class,
+    ],
+    views = [
+        FeedPostData::class,
     ],
     version = 1,
     exportSchema = true,
@@ -32,6 +37,8 @@ abstract class PrimalDatabase : RoomDatabase() {
 
     abstract fun reposts(): RepostDao
 
-    abstract fun eventStats(): EventStatsDao
+    abstract fun eventStats(): PostStatsDao
+
+    abstract fun feedPosts(): FeedPostDao
 
 }

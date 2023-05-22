@@ -2,7 +2,7 @@ package net.primal.android.nostr.primal.processor
 
 import kotlinx.serialization.json.decodeFromJsonElement
 import net.primal.android.db.PrimalDatabase
-import net.primal.android.feed.db.Post
+import net.primal.android.feed.db.PostData
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.primal.model.NostrPrimalEvent
@@ -32,7 +32,7 @@ class PrimalReferencedEventProcessor(
         }
     }
 
-    private fun NostrEvent.asPost(): Post = Post(
+    private fun NostrEvent.asPost(): PostData = PostData(
         postId = this.id,
         authorId = this.pubKey,
         createdAt = this.createdAt,

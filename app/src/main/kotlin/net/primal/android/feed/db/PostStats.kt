@@ -4,7 +4,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity
-data class EventStats(
+data class PostStats(
     @PrimaryKey
     val postId: String,
     val likes: Int,

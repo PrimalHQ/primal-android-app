@@ -6,6 +6,6 @@ import androidx.room.Upsert
 interface RepostDao {
 
     @Upsert
-    fun upsertAll(events: List<Repost>)
+    fun upsertAll(events: List<RepostData>)
 
 }

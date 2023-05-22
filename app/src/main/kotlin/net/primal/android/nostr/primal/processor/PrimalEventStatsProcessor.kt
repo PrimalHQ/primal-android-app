@@ -2,7 +2,7 @@ package net.primal.android.nostr.primal.processor
 
 import kotlinx.serialization.decodeFromString
 import net.primal.android.db.PrimalDatabase
-import net.primal.android.feed.db.EventStats
+import net.primal.android.feed.db.PostStats
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.primal.model.ContentPrimalEventStats
 import net.primal.android.nostr.primal.model.NostrPrimalEvent
@@ -22,7 +22,7 @@ class PrimalEventStatsProcessor(
         )
     }
 
-    private fun ContentPrimalEventStats.asEventStatsPO() = EventStats(
+    private fun ContentPrimalEventStats.asEventStatsPO() = PostStats(
         postId = this.eventId,
         likes = this.likes,
         replies = this.replies,
