@@ -7,6 +7,6 @@ import androidx.room.Upsert
 interface PostDao {
 
     @Upsert
-    fun upsertAll(events: List<PostData>)
+    fun upsertAll(data: List<PostData>)
 
 }

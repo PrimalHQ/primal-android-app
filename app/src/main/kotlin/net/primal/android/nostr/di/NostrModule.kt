@@ -4,8 +4,8 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import net.primal.android.db.PrimalDatabase
 import net.primal.android.networking.sockets.SocketClient
-import net.primal.android.nostr.NostrEventsHandler
 import net.primal.android.nostr.primal.PrimalApi
 import net.primal.android.nostr.primal.PrimalApiImpl
 
@@ -14,12 +14,12 @@ import net.primal.android.nostr.primal.PrimalApiImpl
 object NostrModule {
 
     @Provides
-    fun provideCachingServiceApi(
+    fun providePrimalApi(
         socketClient: SocketClient,
-        nostrEventsHandler: NostrEventsHandler,
+        primalDatabase: PrimalDatabase,
     ): PrimalApi = PrimalApiImpl(
         socketClient = socketClient,
-        nostrEventsHandler = nostrEventsHandler,
+        database = primalDatabase,
     )
 
 }

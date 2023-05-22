@@ -8,6 +8,7 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.jsonPrimitive
+import net.primal.android.db.PrimalDatabase
 import net.primal.android.networking.sockets.SocketClient
 import net.primal.android.networking.sockets.model.OutgoingMessage
 import net.primal.android.nostr.NostrEventsHandler
@@ -18,41 +19,41 @@ import net.primal.android.nostr.primal.model.request.FeedRequest
 import net.primal.android.nostr.primal.model.request.SearchContentRequest
 import net.primal.android.serialization.NostrJson
 import timber.log.Timber
-import java.util.UUID
 import javax.inject.Inject
 
 class PrimalApiImpl @Inject constructor(
     private val socketClient: SocketClient,
-    private val nostrEventsHandler: NostrEventsHandler,
+    private val database: PrimalDatabase,
 ) : PrimalApi {
 
     private val scope = CoroutineScope(Dispatchers.IO)
 
+    override fun requestDefaultAppSettings() = launchSubscription {
+        OutgoingMessage(primalVerb = "get_default_app_settings", options = null)
+    }
+
     override fun requestFeedUpdates(request: FeedRequest) = launchSubscription {
-        socketClient.sendRequest(
-            request = OutgoingMessage(
-                command = "feed",
-                options = NostrJson.encodeToString(request)
-            )
-        )
+        OutgoingMessage(primalVerb = "feed", options = NostrJson.encodeToString(request))
     }
 
     override fun searchContent(request: SearchContentRequest) = launchSubscription {
-        socketClient.sendRequest(
-            request = OutgoingMessage(
-                command = "search",
-                options = NostrJson.encodeToString(
-                    SearchContentRequest(
-                        query = request.query,
-                    )
+        OutgoingMessage(
+            primalVerb = "search",
+            options = NostrJson.encodeToString(
+                SearchContentRequest(
+                    query = request.query,
                 )
             )
         )
     }
 
-    private fun launchSubscription(socketSubscribing: () -> UUID) {
-        val subscriptionId = socketSubscribing()
+    private fun <T> launchSubscription(
+        messageBuilder: () -> OutgoingMessage<T>,
+
+    ) {
+        val subscriptionId = socketClient.sendRequest(message = messageBuilder())
         scope.launch {
+            val nostrEventsHandler = NostrEventsHandler(database = database)
             socketClient.messagesBySubscriptionId(subscriptionId).cancellable().collect {
                 when (it.type) {
                     NostrVerb.Incoming.EVENT -> if (it.data != null) {

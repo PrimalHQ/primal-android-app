@@ -13,7 +13,7 @@ class ShortTextNoteEventProcessor(
 
     override fun process(events: List<NostrEvent>) {
         database.posts().upsertAll(
-            events = events.map { it.asPost() }
+            data = events.map { it.asPost() }
         )
     }
 

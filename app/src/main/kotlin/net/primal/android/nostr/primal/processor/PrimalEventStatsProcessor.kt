@@ -4,7 +4,7 @@ import kotlinx.serialization.decodeFromString
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.feed.db.PostStats
 import net.primal.android.nostr.model.NostrEventKind
-import net.primal.android.nostr.primal.model.ContentPrimalEventStats
+import net.primal.android.nostr.primal.model.response.ContentPrimalEventStats
 import net.primal.android.nostr.primal.model.NostrPrimalEvent
 import net.primal.android.serialization.NostrJson
 
@@ -16,7 +16,7 @@ class PrimalEventStatsProcessor(
 
     override fun process(events: List<NostrPrimalEvent>) {
         database.eventStats().upsertAll(
-            events = events
+            data = events
                 .map { NostrJson.decodeFromString<ContentPrimalEventStats>(it.content) }
                 .map { it.asEventStatsPO() }
         )

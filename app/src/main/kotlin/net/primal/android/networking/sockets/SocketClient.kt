@@ -10,7 +10,7 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.add
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
-import net.primal.android.networking.di.CachingService
+import net.primal.android.networking.di.PrimalApiWS
 import net.primal.android.networking.sockets.model.IncomingMessage
 import net.primal.android.networking.sockets.model.OutgoingMessage
 import net.primal.android.nostr.model.NostrVerb
@@ -27,7 +27,7 @@ import javax.inject.Singleton
 @Singleton
 class SocketClient @Inject constructor(
     private val okHttpClient: OkHttpClient,
-    @CachingService private val cachingServiceRequest: Request,
+    @PrimalApiWS private val primalApiRequest: Request,
 ) : WebSocketListener() {
 
     private val scope = CoroutineScope(Dispatchers.IO)
@@ -58,41 +58,43 @@ class SocketClient @Inject constructor(
 
     private fun connect() {
         webSocket = okHttpClient.newWebSocket(
-            request = cachingServiceRequest,
+            request = primalApiRequest,
             listener = socketListener
         )
     }
 
     fun messagesBySubscriptionId(id: UUID) = messagesSharedFlow.filter { it.subscriptionId == id }
 
-    fun <T> sendRequest(request: OutgoingMessage<T>): UUID {
+    fun <T> sendRequest(message: OutgoingMessage<T>): UUID {
         val subscriptionId = UUID.randomUUID()
-        val message = buildOutgoingMessage(
+        val finalMessage = buildOutgoingMessage(
             verb = NostrVerb.Outgoing.REQ,
             subscriptionId = subscriptionId,
-            cacheVerb = request.command,
-            options = request.options,
+            primalVerb = message.primalVerb,
+            options = message.options,
         )
-        Timber.i("--> SOCKET $message")
-        webSocket.send(message)
+        Timber.i("--> SOCKET $finalMessage")
+        webSocket.send(finalMessage)
         return subscriptionId
     }
 
     private fun <T> buildOutgoingMessage(
         verb: NostrVerb.Outgoing,
         subscriptionId: UUID,
-        cacheVerb: String?,
+        primalVerb: String?,
         options: T?,
     ): String {
         return buildJsonArray {
             add(verb.toString())
             add(subscriptionId.toString())
-            if (cacheVerb != null && options != null) {
+            if (primalVerb != null) {
                 add(
                     buildJsonObject {
                         put("cache", buildJsonArray {
-                            add(cacheVerb)
-                            add(NostrJson.decodeFromString(options.toString()))
+                            add(primalVerb)
+                            if (options != null) {
+                                add(NostrJson.decodeFromString(options.toString()))
+                            }
                         })
                     }
                 )

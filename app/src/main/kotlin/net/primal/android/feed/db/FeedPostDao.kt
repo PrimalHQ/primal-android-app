@@ -3,15 +3,24 @@ package net.primal.android.feed.db
 import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Query
-import kotlinx.coroutines.flow.Flow
+import androidx.room.RewriteQueriesToDropUnusedColumns
+import androidx.room.Transaction
 
 @Dao
 interface FeedPostDao {
 
-    @Query("SELECT COUNT(*) FROM FeedPostData")
-    fun observeCount(): Flow<Int>
-
-    @Query("SELECT * FROM FeedPostData ORDER BY feedCreatedAt DESC")
-    fun allPostsPaged(): PagingSource<Int, FeedPost>
+    @RewriteQueriesToDropUnusedColumns
+    @Transaction
+    @Query(
+        """
+        SELECT * FROM FeedPostData
+        INNER JOIN FeedPostDataCrossRef ON FeedPostData.postId = FeedPostDataCrossRef.postId
+        WHERE FeedPostDataCrossRef.feedId = :feedHex
+        ORDER BY feedCreatedAt DESC
+        """
+    )
+    fun allPostsByFeedHex(
+        feedHex: String,
+    ): PagingSource<Int, FeedPost>
 
 }

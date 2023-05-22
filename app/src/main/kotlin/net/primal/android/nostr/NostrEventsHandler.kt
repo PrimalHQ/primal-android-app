@@ -7,14 +7,14 @@ import net.primal.android.nostr.primal.model.NostrPrimalEvent
 import net.primal.android.nostr.primal.processor.NostrPrimalEventProcessor
 import net.primal.android.nostr.primal.processor.PrimalEventStatsProcessor
 import net.primal.android.nostr.primal.processor.PrimalReferencedEventProcessor
+import net.primal.android.nostr.primal.processor.PrimalSettingsProcessor
 import net.primal.android.nostr.processor.MetadataEventProcessor
 import net.primal.android.nostr.processor.NostrEventProcessor
 import net.primal.android.nostr.processor.RepostEventProcessor
 import net.primal.android.nostr.processor.ShortTextNoteEventProcessor
 import timber.log.Timber
-import javax.inject.Inject
 
-class NostrEventsHandler @Inject constructor(
+class NostrEventsHandler constructor(
     private val database: PrimalDatabase,
 ) {
 
@@ -39,7 +39,7 @@ class NostrEventsHandler @Inject constructor(
             Timber.d("$nostrEventKind has ${events.size} primal events.")
             Timber.i(events.toString())
 
-            buildNostrPrimalEventProcessor(kind = nostrEventKind).process(events = events)
+            buildNostrPrimalEventProcessor(kind = nostrEventKind)?.process(events = events)
         }
         nostrPrimalCache.clear()
 
@@ -50,24 +50,31 @@ class NostrEventsHandler @Inject constructor(
             Timber.d("$nostrEventKind has ${events.size} nostr events.")
             Timber.i(events.toString())
 
-            buildNostrEventProcessor(kind = nostrEventKind).process(events = events)
+            buildNostrEventProcessor(kind = nostrEventKind)?.process(events = events)
         }
         nostrCache.clear()
     }
 
-    private fun buildNostrEventProcessor(kind: NostrEventKind): NostrEventProcessor = when (kind) {
-        NostrEventKind.Metadata -> MetadataEventProcessor(database = database)
-        NostrEventKind.ShortTextNote -> ShortTextNoteEventProcessor(database = database)
-        NostrEventKind.Reposts -> RepostEventProcessor(database = database)
-        else -> throw NotImplementedError("$kind not supported.")
-    }
+    private fun buildNostrEventProcessor(kind: NostrEventKind): NostrEventProcessor? =
+        when (kind) {
+            NostrEventKind.Metadata -> MetadataEventProcessor(database = database)
+            NostrEventKind.ShortTextNote -> ShortTextNoteEventProcessor(database = database)
+            NostrEventKind.Reposts -> RepostEventProcessor(database = database)
+            else -> {
+                Timber.w("There is no event processor defined for $kind.")
+                null
+            }
+        }
 
-    private fun buildNostrPrimalEventProcessor(kind: NostrEventKind): NostrPrimalEventProcessor =
+    private fun buildNostrPrimalEventProcessor(kind: NostrEventKind): NostrPrimalEventProcessor? =
         when (kind) {
             NostrEventKind.PrimalEventStats -> PrimalEventStatsProcessor(database = database)
             NostrEventKind.PrimalReferencedEvent -> PrimalReferencedEventProcessor(database = database)
-            else -> throw NotImplementedError("$kind not supported.")
+            NostrEventKind.PrimalDefaultSettings -> PrimalSettingsProcessor(database = database)
+            else -> {
+                Timber.w("There is no event processor defined for $kind.")
+                null
+            }
         }
-
 
 }

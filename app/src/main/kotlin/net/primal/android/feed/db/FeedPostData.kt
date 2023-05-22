@@ -2,7 +2,8 @@ package net.primal.android.feed.db
 
 import androidx.room.DatabaseView
 
-@DatabaseView("""
+@DatabaseView(
+    """
     SELECT 
         PostData.postId,
         PostData.authorId,
@@ -15,7 +16,8 @@ import androidx.room.DatabaseView
         COALESCE(RepostData.createdAt, PostData.createdAt) AS feedCreatedAt
     FROM PostData
     LEFT JOIN RepostData ON RepostData.postId = PostData.postId
-""")
+    """
+)
 data class FeedPostData(
     val postId: String,
     val authorId: String,

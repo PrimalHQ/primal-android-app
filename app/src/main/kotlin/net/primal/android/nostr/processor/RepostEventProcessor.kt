@@ -16,7 +16,7 @@ class RepostEventProcessor(
 
     override fun process(events: List<NostrEvent>) {
         database.reposts().upsertAll(
-            events = events.mapNotNull {
+            data = events.mapNotNull {
                 val referencedPostId = it.tags.findPostId()
                 val referencedPostAuthorId = it.tags.findPostAuthorId()
                 if (referencedPostId != null && referencedPostAuthorId != null) {

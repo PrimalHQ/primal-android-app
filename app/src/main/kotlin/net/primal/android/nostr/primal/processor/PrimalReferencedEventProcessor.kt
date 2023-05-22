@@ -16,7 +16,7 @@ class PrimalReferencedEventProcessor(
 
     override fun process(events: List<NostrPrimalEvent>) {
         database.posts().upsertAll(
-            events = events
+            data = events
                 .mapNotNull { it.takeContentOrNull() }
                 .map { it.asPost() }
         )

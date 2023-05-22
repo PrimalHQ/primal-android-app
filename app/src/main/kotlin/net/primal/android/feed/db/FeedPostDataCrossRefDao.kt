@@ -2,10 +2,11 @@ package net.primal.android.feed.db
 
 import androidx.room.Dao
 import androidx.room.Upsert
+
 @Dao
-interface PostStatsDao {
+interface FeedPostDataCrossRefDao {
 
     @Upsert
-    fun upsertAll(data: List<PostStats>)
+    suspend fun connect(refs: List<FeedPostDataCrossRef>)
 
 }

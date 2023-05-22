@@ -10,21 +10,25 @@ import net.primal.android.nostr.primal.model.request.FeedRequest
 import javax.inject.Inject
 
 class FeedRepository @Inject constructor(
-    private val cachingServiceApi: PrimalApi,
+    private val primalApi: PrimalApi,
     private val database: PrimalDatabase,
 ) {
 
-    fun observeEventsCount() = database.feedPosts().observeCount()
+    fun feedByFeedHexPaged(feedHex: String) = createPager {
+        database.feedPosts().allPostsByFeedHex(feedHex = feedHex)
+    }.flow
 
-    fun feedPaged() = createPager { database.feedPosts().allPostsPaged() }.flow
-
-    fun fetchLatestPosts() {
-        cachingServiceApi.requestFeedUpdates(
+    fun fetchLatestPosts(feedHex: String) {
+        primalApi.requestFeedUpdates(
             request = FeedRequest(
-                pubKey = "9a500dccc084a138330a1d1b2be0d5e86394624325d25084d3eca164e7ea698a",
+                pubKey = feedHex,
                 userPubKey = "9b46c3f4a8dcdafdfff12a97c59758f38ff55002370fcfa7d14c8c857e9b5812",
             )
         )
+    }
+
+    fun fetchDefaultAppSettings() {
+        primalApi.requestDefaultAppSettings()
     }
 
     private fun createPager(pagingSourceFactory: () -> PagingSource<Int, FeedPost>) =

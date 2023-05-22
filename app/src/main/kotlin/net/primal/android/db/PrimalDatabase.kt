@@ -3,8 +3,12 @@ package net.primal.android.db
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import net.primal.android.feed.db.Feed
+import net.primal.android.feed.db.FeedDao
 import net.primal.android.feed.db.FeedPostDao
 import net.primal.android.feed.db.FeedPostData
+import net.primal.android.feed.db.FeedPostDataCrossRef
+import net.primal.android.feed.db.FeedPostDataCrossRefDao
 import net.primal.android.feed.db.PostDao
 import net.primal.android.feed.db.PostData
 import net.primal.android.feed.db.PostStats
@@ -21,6 +25,8 @@ import net.primal.android.serialization.RoomCustomTypeConverters
         ProfileMetadata::class,
         RepostData::class,
         PostStats::class,
+        Feed::class,
+        FeedPostDataCrossRef::class,
     ],
     views = [
         FeedPostData::class,
@@ -39,6 +45,10 @@ abstract class PrimalDatabase : RoomDatabase() {
 
     abstract fun eventStats(): PostStatsDao
 
+    abstract fun feeds(): FeedDao
+
     abstract fun feedPosts(): FeedPostDao
+
+    abstract fun feedsConnections(): FeedPostDataCrossRefDao
 
 }

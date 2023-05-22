@@ -11,8 +11,8 @@ import okhttp3.Request
 object SocketModule {
 
     @Provides
-    @CachingService
-    fun provideSocketRequest() = Request.Builder()
+    @PrimalApiWS
+    fun providePrimalApiWSRequest() = Request.Builder()
         .url("wss://cache3.primal.net/cache15")
         .build()
 
