@@ -2,7 +2,7 @@
 <resources>
 
     <style name="Theme.App.Starting" parent="Theme.SplashScreen">
-        <item name="windowSplashScreenBackground">#000000</item>
+        <item name="windowSplashScreenBackground">#FF1C0C14</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
         <item name="postSplashScreenTheme">@style/Theme.Primal</item>
     </style>
