@@ -1,18 +1,15 @@
-package net.primal.android.nostr.primal.processor
+package net.primal.android.nostr.processor.primal
 
 import kotlinx.serialization.json.decodeFromJsonElement
 import net.primal.android.db.PrimalDatabase
-import net.primal.android.feed.db.PostData
+import net.primal.android.nostr.ext.asPost
 import net.primal.android.nostr.model.NostrEvent
-import net.primal.android.nostr.model.NostrEventKind
-import net.primal.android.nostr.primal.model.NostrPrimalEvent
+import net.primal.android.nostr.model.primal.NostrPrimalEvent
 import net.primal.android.serialization.NostrJson
 
 class PrimalReferencedEventProcessor(
     private val database: PrimalDatabase
 ) : NostrPrimalEventProcessor {
-
-    override val kind = NostrEventKind.PrimalReferencedEvent
 
     override fun process(events: List<NostrPrimalEvent>) {
         database.posts().upsertAll(
@@ -32,12 +29,4 @@ class PrimalReferencedEventProcessor(
         }
     }
 
-    private fun NostrEvent.asPost(): PostData = PostData(
-        postId = this.id,
-        authorId = this.pubKey,
-        createdAt = this.createdAt,
-        tags = this.tags,
-        content = this.content,
-        sig = this.sig,
-    )
 }

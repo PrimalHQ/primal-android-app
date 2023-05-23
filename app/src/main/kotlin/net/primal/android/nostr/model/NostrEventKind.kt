@@ -3,7 +3,7 @@ package net.primal.android.nostr.model
 import kotlinx.serialization.Serializable
 
 @Serializable
-enum class NostrEventKind(val value: Int? = null) {
+enum class NostrEventKind(val value: Int) {
     Metadata(value = 0),
     ShortTextNote(value = 1),
     RecommendRelay(value = 2),

@@ -1,4 +1,4 @@
-package net.primal.android.nostr.primal.model
+package net.primal.android.nostr.model.primal
 
 import kotlinx.serialization.Serializable
 

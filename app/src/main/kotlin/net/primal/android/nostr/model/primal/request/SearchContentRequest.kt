@@ -1,4 +1,4 @@
-package net.primal.android.nostr.primal.model.request
+package net.primal.android.nostr.model.primal.request
 
 import kotlinx.serialization.Serializable
 

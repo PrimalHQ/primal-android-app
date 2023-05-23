@@ -6,7 +6,6 @@ import androidx.paging.PagingSource
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.feed.db.FeedPost
 import net.primal.android.nostr.primal.PrimalApi
-import net.primal.android.nostr.primal.model.request.FeedRequest
 import javax.inject.Inject
 
 class FeedRepository @Inject constructor(
@@ -20,10 +19,8 @@ class FeedRepository @Inject constructor(
 
     fun fetchLatestPosts(feedHex: String) {
         primalApi.requestFeedUpdates(
-            request = FeedRequest(
-                pubKey = feedHex,
-                userPubKey = "9b46c3f4a8dcdafdfff12a97c59758f38ff55002370fcfa7d14c8c857e9b5812",
-            )
+            feedHex = feedHex,
+            userHex = "9b46c3f4a8dcdafdfff12a97c59758f38ff55002370fcfa7d14c8c857e9b5812",
         )
     }
 

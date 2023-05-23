@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "18e4e8855bbd2ecb011632fd5ee3505f",
+    "identityHash": "c36a6ae32cd8a77d0a09b0151050f144",
     "entities": [
       {
         "tableName": "PostData",
@@ -298,7 +298,7 @@
       },
       {
         "tableName": "FeedPostDataCrossRef",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`feedId` TEXT NOT NULL, `postId` TEXT NOT NULL, PRIMARY KEY(`feedId`, `postId`), FOREIGN KEY(`postId`) REFERENCES `PostData`(`postId`) ON UPDATE NO ACTION ON DELETE NO ACTION , FOREIGN KEY(`feedId`) REFERENCES `Feed`(`hex`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`feedId` TEXT NOT NULL, `postId` TEXT NOT NULL, PRIMARY KEY(`feedId`, `postId`))",
         "fields": [
           {
             "fieldPath": "feedId",
@@ -321,30 +321,7 @@
           ]
         },
         "indices": [],
-        "foreignKeys": [
-          {
-            "table": "PostData",
-            "onDelete": "NO ACTION",
-            "onUpdate": "NO ACTION",
-            "columns": [
-              "postId"
-            ],
-            "referencedColumns": [
-              "postId"
-            ]
-          },
-          {
-            "table": "Feed",
-            "onDelete": "NO ACTION",
-            "onUpdate": "NO ACTION",
-            "columns": [
-              "feedId"
-            ],
-            "referencedColumns": [
-              "hex"
-            ]
-          }
-        ]
+        "foreignKeys": []
       }
     ],
     "views": [
@@ -355,7 +332,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '18e4e8855bbd2ecb011632fd5ee3505f')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'c36a6ae32cd8a77d0a09b0151050f144')"
     ]
   }
 }

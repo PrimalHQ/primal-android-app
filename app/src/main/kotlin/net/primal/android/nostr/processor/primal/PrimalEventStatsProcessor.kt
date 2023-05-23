@@ -1,18 +1,15 @@
-package net.primal.android.nostr.primal.processor
+package net.primal.android.nostr.processor.primal
 
 import kotlinx.serialization.decodeFromString
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.feed.db.PostStats
-import net.primal.android.nostr.model.NostrEventKind
-import net.primal.android.nostr.primal.model.response.ContentPrimalEventStats
-import net.primal.android.nostr.primal.model.NostrPrimalEvent
+import net.primal.android.nostr.model.primal.NostrPrimalEvent
+import net.primal.android.nostr.model.primal.response.ContentPrimalEventStats
 import net.primal.android.serialization.NostrJson
 
 class PrimalEventStatsProcessor(
     private val database: PrimalDatabase
 ) : NostrPrimalEventProcessor {
-
-    override val kind = NostrEventKind.PrimalEventStats
 
     override fun process(events: List<NostrPrimalEvent>) {
         database.eventStats().upsertAll(

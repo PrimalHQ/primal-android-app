@@ -14,4 +14,3 @@ data class NostrEvent(
     val content: String,
     val sig: String,
 )
-

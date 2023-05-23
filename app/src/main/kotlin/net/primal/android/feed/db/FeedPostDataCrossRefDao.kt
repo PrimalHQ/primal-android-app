@@ -7,6 +7,6 @@ import androidx.room.Upsert
 interface FeedPostDataCrossRefDao {
 
     @Upsert
-    suspend fun connect(refs: List<FeedPostDataCrossRef>)
+    fun connect(data: List<FeedPostDataCrossRef>)
 
 }

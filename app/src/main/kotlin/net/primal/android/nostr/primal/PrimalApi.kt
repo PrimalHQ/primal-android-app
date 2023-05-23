@@ -1,13 +1,12 @@
 package net.primal.android.nostr.primal
 
-import net.primal.android.nostr.primal.model.request.FeedRequest
-import net.primal.android.nostr.primal.model.request.SearchContentRequest
+import kotlinx.coroutines.Job
 
 interface PrimalApi {
 
-    fun requestDefaultAppSettings()
+    fun requestDefaultAppSettings(): Job
 
-    fun requestFeedUpdates(request: FeedRequest)
+    fun requestFeedUpdates(feedHex: String, userHex: String): Job
 
-    fun searchContent(request: SearchContentRequest)
+    fun searchContent(query: String): Job
 }
