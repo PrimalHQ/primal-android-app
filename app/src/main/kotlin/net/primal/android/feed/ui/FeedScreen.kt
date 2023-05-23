@@ -3,15 +3,21 @@ package net.primal.android.feed.ui
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberTopAppBarState
@@ -19,16 +25,23 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
+import kotlinx.coroutines.flow.flow
+import net.primal.android.R
+import net.primal.android.core.compose.ToolbarIcon
 import net.primal.android.core.compose.isEmpty
 import net.primal.android.feed.FeedContract
 import net.primal.android.feed.FeedViewModel
 import net.primal.android.feed.ui.post.FeedPostListItem
+import net.primal.android.theme.PrimalTheme
 
 @Composable
 fun FeedScreen(
@@ -88,6 +101,9 @@ fun FeedScreen(
                 }
             }
         },
+        bottomBar = {
+            PrimalNavigationBar()
+        }
     )
 }
 
@@ -97,12 +113,21 @@ fun TopAppToolbar(
     eventPublisher: (FeedContract.UiEvent) -> Unit,
     scrollBehavior: TopAppBarScrollBehavior? = null,
 ) {
-    TopAppBar(
+    CenterAlignedTopAppBar(
+        navigationIcon = {
+             ToolbarIcon(
+                 iconPainter = painterResource(id = R.drawable.ic_default_profile_photo),
+                 onClick = { },
+             )
+        },
         title = {
             Text(text = "Primal")
         },
         actions = {
-
+            ToolbarIcon(
+                iconPainter = painterResource(id = R.drawable.ic_feed_picker),
+                onClick = { },
+            )
         },
         scrollBehavior = scrollBehavior,
     )
@@ -134,4 +159,70 @@ fun FeedList(
             }
         }
     }
+}
+
+@Composable
+fun PrimalNavigationBar() {
+    NavigationBar(
+        modifier = Modifier
+            .navigationBarsPadding()
+            .height(64.dp)
+    ) {
+        PrimalNavigationBarItem(
+            selected = true,
+            onClick = {},
+            iconPainter = painterResource(id = R.drawable.ic_feed),
+        )
+
+        PrimalNavigationBarItem(
+            selected = false,
+            onClick = {},
+            iconPainter = painterResource(id = R.drawable.ic_read_articles),
+        )
+
+        PrimalNavigationBarItem(
+            selected = false,
+            onClick = {},
+            iconPainter = painterResource(id = R.drawable.ic_search),
+        )
+
+        PrimalNavigationBarItem(
+            selected = false,
+            onClick = {},
+            iconPainter = painterResource(id = R.drawable.ic_messages),
+        )
+
+        PrimalNavigationBarItem(
+            selected = false,
+            onClick = {},
+            iconPainter = painterResource(id = R.drawable.ic_notifications),
+        )
+    }
+}
+
+@Composable
+fun RowScope.PrimalNavigationBarItem(
+    selected: Boolean,
+    iconPainter: Painter,
+    onClick: () -> Unit,
+) {
+    NavigationBarItem(
+        selected = selected,
+        onClick = onClick,
+        icon = { Icon(painter = iconPainter, contentDescription = null) },
+    )
+}
+
+@Preview
+@Composable
+fun FeedScreenPreview() {
+    PrimalTheme {
+        FeedScreen(
+            state = FeedContract.UiState(
+                posts = flow { }
+            ),
+            eventPublisher = {},
+        )
+    }
+
 }
