@@ -21,6 +21,6 @@ class PrimalSettingsProcessor(
         )
     }
 
-    private fun FeedData.asFeedPO(): Feed = Feed(name = name, hex = hex, pubKey = npub)
+    private fun FeedData.asFeedPO(): Feed = Feed(name = name, hex = hex)
 
 }

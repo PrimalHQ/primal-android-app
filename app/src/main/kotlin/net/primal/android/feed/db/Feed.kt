@@ -8,5 +8,4 @@ data class Feed(
     @PrimaryKey
     val hex: String,
     val name: String,
-    val pubKey: String? = null,
 )

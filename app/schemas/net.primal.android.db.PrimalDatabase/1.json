@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "c36a6ae32cd8a77d0a09b0151050f144",
+    "identityHash": "284c08d29c3e30c5f7628bd5305e246a",
     "entities": [
       {
         "tableName": "PostData",
@@ -266,7 +266,7 @@
       },
       {
         "tableName": "Feed",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`hex` TEXT NOT NULL, `name` TEXT NOT NULL, `pubKey` TEXT, PRIMARY KEY(`hex`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`hex` TEXT NOT NULL, `name` TEXT NOT NULL, PRIMARY KEY(`hex`))",
         "fields": [
           {
             "fieldPath": "hex",
@@ -279,12 +279,6 @@
             "columnName": "name",
             "affinity": "TEXT",
             "notNull": true
-          },
-          {
-            "fieldPath": "pubKey",
-            "columnName": "pubKey",
-            "affinity": "TEXT",
-            "notNull": false
           }
         ],
         "primaryKey": {
@@ -332,7 +326,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'c36a6ae32cd8a77d0a09b0151050f144')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '284c08d29c3e30c5f7628bd5305e246a')"
     ]
   }
 }
