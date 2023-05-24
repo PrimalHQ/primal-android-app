@@ -172,6 +172,9 @@ fun TopAppToolbar(
                 onClick = { },
             )
         },
+        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+            scrolledContainerColor = PrimalTheme.colors.surface,
+        ),
         scrollBehavior = scrollBehavior,
     )
 }

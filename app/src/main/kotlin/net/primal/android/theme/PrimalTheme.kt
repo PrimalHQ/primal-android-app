@@ -74,9 +74,13 @@ private fun AdjustSystemColors(
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
+            val insetsController = WindowCompat.getInsetsController(window, view)
+
             window.statusBarColor = surfaceColor.toArgb()
+            insetsController.isAppearanceLightStatusBars = !darkTheme
+
             window.navigationBarColor = surfaceColor.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
+            insetsController.isAppearanceLightNavigationBars = !darkTheme
         }
     }
 }
