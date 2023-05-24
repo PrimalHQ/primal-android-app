@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -23,11 +24,18 @@ import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -48,6 +56,7 @@ import net.primal.android.feed.FeedContract
 import net.primal.android.feed.FeedViewModel
 import net.primal.android.feed.ui.post.FeedPostListItem
 import net.primal.android.theme.PrimalTheme
+import kotlin.math.roundToInt
 
 @Composable
 fun FeedScreen(
@@ -70,8 +79,27 @@ fun FeedScreen(
 ) {
     val topAppBarState = rememberTopAppBarState()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(topAppBarState)
+
+    val bottomBarHeight = 64.dp
+    val bottomBarHeightPx = with(LocalDensity.current) {
+        bottomBarHeight.roundToPx().toFloat()
+    }
+    val bottomBarOffsetHeightPx = remember { mutableStateOf(0f) }
+    val nestedScrollConnection = remember {
+        object : NestedScrollConnection {
+            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                val delta = available.y
+                val newOffset = bottomBarOffsetHeightPx.value + delta
+                bottomBarOffsetHeightPx.value = newOffset.coerceIn(-bottomBarHeightPx, 0f)
+                return Offset.Zero
+            }
+        }
+    }
+
     Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        modifier = Modifier
+            .nestedScroll(nestedScrollConnection)
+            .nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             TopAppToolbar(
                 eventPublisher = eventPublisher,
@@ -107,7 +135,17 @@ fun FeedScreen(
             }
         },
         bottomBar = {
-            PrimalNavigationBar()
+            PrimalNavigationBar(
+                modifier = Modifier
+                    .navigationBarsPadding()
+                    .height(bottomBarHeight)
+                    .offset {
+                        IntOffset(
+                            x = 0,
+                            y = -bottomBarOffsetHeightPx.value.roundToInt()
+                        )
+                    }
+            )
         }
     )
 }
@@ -120,10 +158,10 @@ fun TopAppToolbar(
 ) {
     CenterAlignedTopAppBar(
         navigationIcon = {
-             ToolbarIcon(
-                 icon = PrimalIcons.Settings,
-                 onClick = { },
-             )
+            ToolbarIcon(
+                icon = PrimalIcons.Settings,
+                onClick = { },
+            )
         },
         title = {
             Text(text = "Primal")
@@ -170,11 +208,10 @@ fun FeedList(
 }
 
 @Composable
-fun PrimalNavigationBar() {
+fun PrimalNavigationBar(modifier: Modifier = Modifier) {
     NavigationBar(
-        modifier = Modifier
-            .navigationBarsPadding()
-            .height(64.dp)
+        modifier = modifier,
+        tonalElevation = 0.dp,
     ) {
         PrimalNavigationBarItem(
             selected = true,
