@@ -1,6 +1,8 @@
 package net.primal.android.core.compose.icons
 
 import androidx.compose.ui.graphics.vector.ImageVector
+import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
+import net.primal.android.core.compose.icons.primaliconpack.AvatarNostrich
 import net.primal.android.core.compose.icons.primaliconpack.Delete
 import net.primal.android.core.compose.icons.primaliconpack.Discuss
 import net.primal.android.core.compose.icons.primaliconpack.Download
@@ -23,6 +25,7 @@ import net.primal.android.core.compose.icons.primaliconpack.Notifications
 import net.primal.android.core.compose.icons.primaliconpack.Read
 import net.primal.android.core.compose.icons.primaliconpack.Search
 import net.primal.android.core.compose.icons.primaliconpack.Settings
+import net.primal.android.core.compose.icons.primaliconpack.Verified
 import kotlin.collections.List as ____KtList
 
 object PrimalIcons
@@ -30,12 +33,36 @@ object PrimalIcons
 private var __PrimalIcons: ____KtList<ImageVector>? = null
 
 val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
-  get() {
-    if (__PrimalIcons != null) {
-      return __PrimalIcons!!
+    get() {
+        if (__PrimalIcons != null) {
+            return __PrimalIcons!!
+        }
+        __PrimalIcons = listOf(
+            AvatarDefault,
+            AvatarNostrich,
+            Search,
+            Home,
+            FeedRepostsFilled,
+            FeedLikesFilled,
+            FeedPicker,
+            FeedZaps,
+            FeedZapsFilled,
+            FeedLikes,
+            Settings,
+            Download,
+            FeedRepliesFilled,
+            FeedReplies,
+            Messages,
+            Explore,
+            More,
+            Edit,
+            Discuss,
+            Delete,
+            Notifications,
+            Read,
+            Help,
+            FeedReposts,
+            Verified
+        )
+        return __PrimalIcons!!
     }
-    __PrimalIcons= listOf(Search, Home, FeedRepostsFilled, FeedLikesFilled, FeedPicker, FeedZaps,
-        FeedZapsFilled, FeedLikes, Settings, Download, FeedRepliesFilled, FeedReplies, Messages,
-        Explore, More, Edit, Discuss, Delete, Notifications, Read, Help, FeedReposts)
-    return __PrimalIcons!!
-  }

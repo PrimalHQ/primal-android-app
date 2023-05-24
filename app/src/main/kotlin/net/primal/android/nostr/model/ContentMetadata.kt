@@ -6,6 +6,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class ContentMetadata(
     val name: String? = null,
+    val nip05: String? = null,
     val about: String? = null,
     @SerialName("display_name") val displayName: String? = null,
     val picture: String? = null,

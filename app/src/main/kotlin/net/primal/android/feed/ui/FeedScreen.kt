@@ -62,7 +62,6 @@ fun FeedScreen(
     )
 }
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FeedScreen(
@@ -148,20 +147,23 @@ fun FeedList(
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = contentPadding,
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
         state = listState,
     ) {
         items(
             count = pagingItems.itemCount,
-            key = pagingItems.itemKey(key = { it.postId }),
+            key = pagingItems.itemKey(key = { "${it.postId}${it.repostId}" }),
             contentType = pagingItems.itemContentType()
         ) { index ->
             val item = pagingItems[index]
 
-            if (item != null) {
-                FeedPostListItem(data = item)
-            } else {
-                // Placeholder
+            when {
+                item != null -> FeedPostListItem(
+                    data = item,
+                    onClick = {},
+                )
+
+                else -> {}
             }
         }
     }

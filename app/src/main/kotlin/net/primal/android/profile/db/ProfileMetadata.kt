@@ -11,6 +11,7 @@ data class ProfileMetadata(
     val createdAt: Long,
     val raw: String,
     val name: String? = null,
+    val internetIdentifier: String? = null,
     val about: String? = null,
     val picture: String? = null,
     val banner: String? = null,

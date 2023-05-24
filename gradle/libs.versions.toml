@@ -21,6 +21,8 @@ retrofit = "2.9.0"
 paging = "3.1.1"
 room = "2.5.1"
 ksp = "1.8.10-1.0.9"
+secp256k1-kmp-jvm = "0.6.4"
+spongycastle = "1.51.0.0"
 
 [libraries]
 # Core libs
@@ -42,7 +44,7 @@ compose-animation = { group = "androidx.compose.animation", name = "animation" }
 compose-material3 = { group = "androidx.compose.material3", name = "material3" }
 compose-systemuicontroller = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "accompanist" }
 compose-swiperefresh = { module = "com.google.accompanist:accompanist-swiperefresh", version.ref = "accompanist" }
-compose-placeholder-material = { module = "com.google.accompanist:accompanist-placeholder-material", version.ref = "accompanist" }
+compose-placeholdermaterial = { module = "com.google.accompanist:accompanist-placeholder-material", version.ref = "accompanist" }
 compose-pager = { module = "com.google.accompanist:accompanist-pager", version.ref = "accompanist" }
 compose-pager-indicators = { module = "com.google.accompanist:accompanist-pager-indicators", version.ref = "accompanist" }
 
@@ -87,6 +89,10 @@ timber = { module = "com.jakewharton.timber:timber", version = "5.0.1" }
 
 datastore = { module = "androidx.datastore:datastore", version.ref = "datastore" }
 datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
+
+# Crytpo libs
+secp256k1-kmp-jvm = { module = "fr.acinq.secp256k1:secp256k1-kmp-jvm", version.ref = "secp256k1-kmp-jvm" }
+spongycastle-core = { module = "com.madgag.spongycastle:core", version.ref = "spongycastle" }
 
 # Tests libs
 junit = { group = "junit", name = "junit", version.ref = "junit" }

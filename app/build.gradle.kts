@@ -28,11 +28,17 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+
+            signingConfig = try {
+                signingConfigs.getByName("release")
+            } catch (e: UnknownDomainObjectException) {
+                signingConfigs.getByName("debug")
+            }
         }
     }
 
@@ -85,6 +91,8 @@ dependencies {
     implementation(libs.compose.ui.tooling.preview)
     implementation(libs.compose.material3)
 
+    implementation(libs.compose.placeholdermaterial)
+
     implementation(libs.navigation.material)
 
     implementation(libs.paging.runtime)
@@ -114,6 +122,8 @@ dependencies {
 
     implementation(libs.timber)
 
+    implementation(libs.secp256k1.kmp.jvm)
+    implementation(libs.spongycastle.core)
 
     testImplementation(libs.junit)
     testImplementation(libs.room.testing)

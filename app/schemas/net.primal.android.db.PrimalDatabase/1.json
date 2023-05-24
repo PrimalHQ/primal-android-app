@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "284c08d29c3e30c5f7628bd5305e246a",
+    "identityHash": "b8d1796dfca196d13e4309e06091b02a",
     "entities": [
       {
         "tableName": "PostData",
@@ -68,7 +68,7 @@
       },
       {
         "tableName": "ProfileMetadata",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ownerId` TEXT NOT NULL, `eventId` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `raw` TEXT NOT NULL, `name` TEXT, `about` TEXT, `picture` TEXT, `banner` TEXT, `displayName` TEXT, `website` TEXT, PRIMARY KEY(`ownerId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ownerId` TEXT NOT NULL, `eventId` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `raw` TEXT NOT NULL, `name` TEXT, `internetIdentifier` TEXT, `about` TEXT, `picture` TEXT, `banner` TEXT, `displayName` TEXT, `website` TEXT, PRIMARY KEY(`ownerId`))",
         "fields": [
           {
             "fieldPath": "ownerId",
@@ -97,6 +97,12 @@
           {
             "fieldPath": "name",
             "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "internetIdentifier",
+            "columnName": "internetIdentifier",
             "affinity": "TEXT",
             "notNull": false
           },
@@ -326,7 +332,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '284c08d29c3e30c5f7628bd5305e246a')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'b8d1796dfca196d13e4309e06091b02a')"
     ]
   }
 }

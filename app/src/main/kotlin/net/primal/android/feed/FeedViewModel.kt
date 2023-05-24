@@ -17,7 +17,10 @@ import net.primal.android.feed.FeedContract.UiEvent
 import net.primal.android.feed.FeedContract.UiState
 import net.primal.android.feed.db.FeedPost
 import net.primal.android.feed.repository.FeedRepository
+import net.primal.android.feed.ui.FeedPostStatsUi
 import net.primal.android.feed.ui.FeedPostUi
+import net.primal.android.nostr.ext.displayNameUiFriendly
+import java.time.Instant
 import javax.inject.Inject
 
 @HiltViewModel
@@ -63,7 +66,22 @@ class FeedViewModel @Inject constructor(
 
     private fun FeedPost.asFeedPostUi() = FeedPostUi(
         postId = this.data.postId,
-        name = this.author?.displayName,
+        repostId = this.data.repostId,
+        repostAuthorDisplayName = this.repostAuthor?.displayNameUiFriendly(),
+        authorDisplayName = this.author.displayNameUiFriendly(),
+        authorInternetIdentifier = this.author.internetIdentifier,
+        authorAvatarUrl = this.author.picture,
+        timestamp = Instant.ofEpochSecond(this.data.createdAt),
         content = this.data.content,
+        stats = FeedPostStatsUi(
+            repliesCount = this.postStats?.replies ?: 0,
+            userReplied = false,
+            zapsCount = this.postStats?.zaps ?: 0,
+            userZapped = false,
+            likesCount = this.postStats?.likes ?: 0,
+            userLiked = false,
+            repostsCount = this.postStats?.reposts ?: 0,
+            userReposted = false,
+        )
     )
 }
