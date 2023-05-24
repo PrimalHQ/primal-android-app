@@ -12,22 +12,23 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
-import net.primal.android.R
+import net.primal.android.core.compose.icons.PrimalIcons
+import net.primal.android.core.compose.icons.primaliconpack.Search
+import net.primal.android.core.compose.icons.primaliconpack.Settings
 import net.primal.android.theme.PrimalTheme
 
 @Composable
 fun ToolbarIcon(
-    iconPainter: Painter,
+    icon: ImageVector,
     onClick: () -> Unit,
     enabled: Boolean = true,
     tint: Color = LocalContentColor.current,
 ) {
     IconButton(enabled = enabled, onClick = onClick) {
         Icon(
-            painter = iconPainter,
+            imageVector = icon,
             contentDescription = null,
             tint = tint
         )
@@ -47,7 +48,7 @@ fun PreviewToolbarIcon() {
                     },
                     actions = {
                         ToolbarIcon(
-                            iconPainter = painterResource(id = R.drawable.ic_feed_picker),
+                            icon = PrimalIcons.Settings,
                             onClick = {},
                         )
                     },

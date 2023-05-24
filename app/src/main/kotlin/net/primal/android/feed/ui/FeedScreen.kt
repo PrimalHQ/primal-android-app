@@ -25,9 +25,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.LazyPagingItems
@@ -35,8 +34,15 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
 import kotlinx.coroutines.flow.flow
-import net.primal.android.R
 import net.primal.android.core.compose.ToolbarIcon
+import net.primal.android.core.compose.icons.PrimalIcons
+import net.primal.android.core.compose.icons.primaliconpack.Discuss
+import net.primal.android.core.compose.icons.primaliconpack.FeedPicker
+import net.primal.android.core.compose.icons.primaliconpack.Messages
+import net.primal.android.core.compose.icons.primaliconpack.Notifications
+import net.primal.android.core.compose.icons.primaliconpack.Read
+import net.primal.android.core.compose.icons.primaliconpack.Search
+import net.primal.android.core.compose.icons.primaliconpack.Settings
 import net.primal.android.core.compose.isEmpty
 import net.primal.android.feed.FeedContract
 import net.primal.android.feed.FeedViewModel
@@ -116,7 +122,7 @@ fun TopAppToolbar(
     CenterAlignedTopAppBar(
         navigationIcon = {
              ToolbarIcon(
-                 iconPainter = painterResource(id = R.drawable.ic_default_profile_photo),
+                 icon = PrimalIcons.Settings,
                  onClick = { },
              )
         },
@@ -125,7 +131,7 @@ fun TopAppToolbar(
         },
         actions = {
             ToolbarIcon(
-                iconPainter = painterResource(id = R.drawable.ic_feed_picker),
+                icon = PrimalIcons.FeedPicker,
                 onClick = { },
             )
         },
@@ -171,31 +177,31 @@ fun PrimalNavigationBar() {
         PrimalNavigationBarItem(
             selected = true,
             onClick = {},
-            iconPainter = painterResource(id = R.drawable.ic_feed),
+            icon = PrimalIcons.Discuss,
         )
 
         PrimalNavigationBarItem(
             selected = false,
             onClick = {},
-            iconPainter = painterResource(id = R.drawable.ic_read_articles),
+            icon = PrimalIcons.Read,
         )
 
         PrimalNavigationBarItem(
             selected = false,
             onClick = {},
-            iconPainter = painterResource(id = R.drawable.ic_search),
+            icon = PrimalIcons.Search,
         )
 
         PrimalNavigationBarItem(
             selected = false,
             onClick = {},
-            iconPainter = painterResource(id = R.drawable.ic_messages),
+            icon = PrimalIcons.Messages,
         )
 
         PrimalNavigationBarItem(
             selected = false,
             onClick = {},
-            iconPainter = painterResource(id = R.drawable.ic_notifications),
+            icon = PrimalIcons.Notifications,
         )
     }
 }
@@ -203,13 +209,13 @@ fun PrimalNavigationBar() {
 @Composable
 fun RowScope.PrimalNavigationBarItem(
     selected: Boolean,
-    iconPainter: Painter,
+    icon: ImageVector,
     onClick: () -> Unit,
 ) {
     NavigationBarItem(
         selected = selected,
         onClick = onClick,
-        icon = { Icon(painter = iconPainter, contentDescription = null) },
+        icon = { Icon(imageVector = icon, contentDescription = null) },
     )
 }
 
