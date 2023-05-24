@@ -79,15 +79,30 @@ fun FeedPostListItem(
             authorInternetIdentifier = data.authorInternetIdentifier,
         )
 
-        Text(
-            modifier = Modifier.padding(horizontal = 16.dp),
-            text = data.content,
+        PostContent(
+            content = data.content,
         )
 
         PostStatsItem(
             postStats = data.stats,
         )
     }
+}
+
+@Composable
+fun PostContent(
+    content: String,
+) {
+    val contentText = buildAnnotatedString {
+        append(content)
+    }
+
+    Text(
+        modifier = Modifier.padding(horizontal = 16.dp),
+        text = contentText,
+        maxLines = 12,
+        overflow = TextOverflow.Ellipsis,
+    )
 }
 
 @Composable
