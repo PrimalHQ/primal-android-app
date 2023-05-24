@@ -234,7 +234,11 @@ fun PostAuthorItem(
                             imageVector = PrimalIcons.Verified,
                             contentDescription = null,
                             colorFilter = ColorFilter.tint(
-                                color = Color(0xFFAB268E)
+                                color = if (authorInternetIdentifier?.contains("primal.net") == true) {
+                                    Color(0xFFAB268E)
+                                } else {
+                                    Color(0xFF666666)
+                                }
                             )
                         )
                     }
