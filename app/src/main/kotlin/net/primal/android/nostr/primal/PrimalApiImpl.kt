@@ -83,7 +83,9 @@ class PrimalApiImpl @Inject constructor(
                 NostrVerb.Incoming.EVENT -> cache.cacheNostrEvent(
                     kind = inMessage.getMessageNostrEventKind(),
                     data = inMessage.data,
-                )
+                ).also {
+                    Timber.d(inMessage.toString())
+                }
 
                 NostrVerb.Incoming.EOSE -> {
                     onNostrEvents(cache.nostrCache)
@@ -112,7 +114,9 @@ class PrimalApiImpl @Inject constructor(
                 NostrVerb.Incoming.EVENT -> cache.cacheNostrEvent(
                     kind = inMessage.getMessageNostrEventKind(),
                     data = inMessage.data,
-                )
+                ).also {
+                    Timber.d(inMessage.toString())
+                }
 
                 NostrVerb.Incoming.EOSE -> {
                     cache.nostrCache.processAllNostrEvents()
@@ -160,7 +164,6 @@ class PrimalApiImpl @Inject constructor(
         this.keys.forEach { kind ->
             val events = getValue(kind)
             Timber.i("$kind has ${events.size} nostr events.")
-            Timber.d(events.toString())
             factory.create(kind)?.process(events = events)
         }
     }
@@ -170,7 +173,6 @@ class PrimalApiImpl @Inject constructor(
         this.keys.forEach { kind ->
             val events = getValue(kind)
             Timber.i("$kind has ${events.size} nostr primal events.")
-            Timber.d(events.toString())
             factory.create(kind)?.process(events = events)
         }
     }
