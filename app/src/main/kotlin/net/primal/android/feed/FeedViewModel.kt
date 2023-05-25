@@ -31,7 +31,7 @@ class FeedViewModel @Inject constructor(
     private val _state = MutableStateFlow(
         UiState(
             posts = feedRepository.feedByFeedHexPaged(
-                feedHex = "82341f882b6eabcd2ba7f1ef90aad961cf074af15b9ef44a09f9d2a8fbfbe6a2"
+                feedHex = "9a500dccc084a138330a1d1b2be0d5e86394624325d25084d3eca164e7ea698a"
             ).map {
                 it.map { feed -> feed.asFeedPostUi() }
             }
@@ -60,7 +60,7 @@ class FeedViewModel @Inject constructor(
     private fun fetchLatestPosts() = viewModelScope.launch {
         feedRepository.fetchDefaultAppSettings()
         feedRepository.fetchLatestPosts(
-            feedHex = "82341f882b6eabcd2ba7f1ef90aad961cf074af15b9ef44a09f9d2a8fbfbe6a2"
+            feedHex = "9a500dccc084a138330a1d1b2be0d5e86394624325d25084d3eca164e7ea698a"
         )
     }
 
