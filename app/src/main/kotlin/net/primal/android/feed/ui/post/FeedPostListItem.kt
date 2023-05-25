@@ -16,6 +16,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -37,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.R
 import net.primal.android.core.compose.AvatarThumbnailListItemImage
+import net.primal.android.core.compose.PostImageListItemImage
 import net.primal.android.core.compose.PrimalClickableText
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.FeedLikes
@@ -91,19 +93,44 @@ fun FeedPostListItem(
     }
 }
 
+private fun List<String>.filterImageUrls() = filter {
+    it.endsWith(".jpg") || it.endsWith(".jpeg") || it.endsWith(".jpe")
+            || it.endsWith(".png")
+            || it.endsWith(".gif")
+            || it.endsWith(".webp")
+            || it.endsWith(".svg")
+            || it.endsWith(".tiff") || it.endsWith(".tif")
+            || it.endsWith(".heic")
+            || it.endsWith(".bmp")
+}
+
+private fun List<String>.withoutImageUrls(imageUrls: List<String>) = this - imageUrls.toSet()
+
+private fun String.withoutImageUrls(imageUrls: List<String>): String {
+    var newContent = this
+    imageUrls.forEach {
+        newContent = newContent.replace(it, "")
+    }
+    return newContent
+}
+
 @Composable
 fun PostContent(
     content: String,
     urls: List<String>,
 ) {
+    val imageUrls = remember { urls.filterImageUrls() }
+    val refinedContent = remember { content.withoutImageUrls(imageUrls).trim() }
+    val refinedUrls = remember { urls.withoutImageUrls(imageUrls) }
+
     val contentText = buildAnnotatedString {
-        if (urls.isNotEmpty()) {
-            val urlsInContent = urls.map { Pair(content.indexOf(it), it) }
+        if (refinedUrls.isNotEmpty()) {
+            val urlsInContent = refinedUrls.map { Pair(refinedContent.indexOf(it), it) }
             var contentIndex = 0
             urlsInContent.forEach {
                 val urlIndex = it.first
                 val url = it.second
-                append(content.substring(contentIndex, urlIndex))
+                append(refinedContent.substring(contentIndex, urlIndex))
 
                 pushStringAnnotation("URL", url)
                 withStyle(
@@ -119,17 +146,37 @@ fun PostContent(
                 contentIndex = urlIndex + url.length
             }
         } else {
-            append(content)
+            append(refinedContent)
         }
     }
 
-    Text(
+    Column(
         modifier = Modifier.padding(horizontal = 16.dp),
-        style = PrimalTheme.typography.bodyLarge,
-        text = contentText,
-        maxLines = 12,
-        overflow = TextOverflow.Ellipsis,
-    )
+    ) {
+        if (contentText.isNotEmpty()) {
+            Text(
+                style = PrimalTheme.typography.bodyLarge,
+                text = contentText,
+                maxLines = 12,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+
+        if (imageUrls.isNotEmpty()) {
+            when (imageUrls.size) {
+                1 -> {
+                    PostImageListItemImage(
+                        source = imageUrls.first(),
+                        modifier = Modifier.fillMaxWidth().padding(top = 16.dp)
+                    )
+                }
+
+                else -> {}
+            }
+
+        }
+    }
+
 }
 
 @Composable
