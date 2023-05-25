@@ -125,6 +125,8 @@ dependencies {
     implementation(libs.secp256k1.kmp.jvm)
     implementation(libs.spongycastle.core)
 
+    implementation(libs.url.detector)
+
     testImplementation(libs.junit)
     testImplementation(libs.room.testing)
 

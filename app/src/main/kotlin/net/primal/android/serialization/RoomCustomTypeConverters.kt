@@ -23,4 +23,19 @@ class RoomCustomTypeConverters {
         }
     }
 
+    @TypeConverter
+    fun stringToListOfStrings(value: String?): List<String>? {
+        return when (value) {
+            null -> null
+            else -> NostrJson.decodeFromString<List<String>>(value)
+        }
+    }
+
+    @TypeConverter
+    fun listOfStringsToString(list: List<String>?): String? {
+        return when (list) {
+            null -> null
+            else -> NostrJson.encodeToString(list)
+        }
+    }
 }

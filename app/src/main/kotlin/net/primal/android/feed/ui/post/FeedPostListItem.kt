@@ -31,6 +31,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -48,8 +49,8 @@ import net.primal.android.core.compose.icons.primaliconpack.FeedZaps
 import net.primal.android.core.compose.icons.primaliconpack.FeedZapsFilled
 import net.primal.android.core.compose.icons.primaliconpack.Verified
 import net.primal.android.core.utils.asBeforeNowFormat
-import net.primal.android.feed.ui.FeedPostStatsUi
-import net.primal.android.feed.ui.FeedPostUi
+import net.primal.android.feed.ui.model.FeedPostStatsUi
+import net.primal.android.feed.ui.model.FeedPostUi
 import net.primal.android.theme.PrimalTheme
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -81,6 +82,7 @@ fun FeedPostListItem(
 
         PostContent(
             content = data.content,
+            urls = data.urls,
         )
 
         PostStatsItem(
@@ -92,13 +94,38 @@ fun FeedPostListItem(
 @Composable
 fun PostContent(
     content: String,
+    urls: List<String>,
 ) {
     val contentText = buildAnnotatedString {
-        append(content)
+        if (urls.isNotEmpty()) {
+            val urlsInContent = urls.map { Pair(content.indexOf(it), it) }
+            var contentIndex = 0
+            urlsInContent.forEach {
+                val urlIndex = it.first
+                val url = it.second
+                append(content.substring(contentIndex, urlIndex))
+
+                pushStringAnnotation("URL", url)
+                withStyle(
+                    style = SpanStyle(
+                        color = PrimalTheme.colors.primary,
+                        fontWeight = FontWeight.Bold
+                    )
+                ) {
+                    append(url)
+                }
+                pop()
+
+                contentIndex = urlIndex + url.length
+            }
+        } else {
+            append(content)
+        }
     }
 
     Text(
         modifier = Modifier.padding(horizontal = 16.dp),
+        style = PrimalTheme.typography.bodyLarge,
         text = contentText,
         maxLines = 12,
         overflow = TextOverflow.Ellipsis,
@@ -324,6 +351,7 @@ fun PreviewFeedPostListItem() {
                 postId = "random",
                 repostId = "repostRandom",
                 content = "My content.",
+                urls = emptyList(),
                 authorDisplayName = "miljan",
                 authorInternetIdentifier = "miljan@primal.net",
                 authorAvatarUrl = "https://i.imgur.com/Z8dpmvc.png",

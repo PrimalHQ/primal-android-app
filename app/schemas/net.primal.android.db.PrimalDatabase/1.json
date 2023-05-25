@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "b8d1796dfca196d13e4309e06091b02a",
+    "identityHash": "b4f2daecc094374c50bfff7d79e8e84e",
     "entities": [
       {
         "tableName": "PostData",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`postId` TEXT NOT NULL, `authorId` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `tags` TEXT NOT NULL, `content` TEXT NOT NULL, `sig` TEXT NOT NULL, `referencePostId` TEXT, `referencePostAuthorId` TEXT, PRIMARY KEY(`postId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`postId` TEXT NOT NULL, `authorId` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `tags` TEXT NOT NULL, `content` TEXT NOT NULL, `urls` TEXT NOT NULL, `sig` TEXT NOT NULL, `referencePostId` TEXT, `referencePostAuthorId` TEXT, PRIMARY KEY(`postId`))",
         "fields": [
           {
             "fieldPath": "postId",
@@ -35,6 +35,12 @@
           {
             "fieldPath": "content",
             "columnName": "content",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "urls",
+            "columnName": "urls",
             "affinity": "TEXT",
             "notNull": true
           },
@@ -327,12 +333,12 @@
     "views": [
       {
         "viewName": "FeedPostData",
-        "createSql": "CREATE VIEW `${VIEW_NAME}` AS SELECT \n        PostData.postId,\n        PostData.authorId,\n        PostData.createdAt,\n        PostData.content,\n        PostData.referencePostId,\n        PostData.referencePostAuthorId,\n        RepostData.repostId AS repostId,\n        RepostData.authorId AS repostAuthorId,\n        COALESCE(RepostData.createdAt, PostData.createdAt) AS feedCreatedAt\n    FROM PostData\n    LEFT JOIN RepostData ON RepostData.postId = PostData.postId"
+        "createSql": "CREATE VIEW `${VIEW_NAME}` AS SELECT \n        PostData.postId,\n        PostData.authorId,\n        PostData.createdAt,\n        PostData.content,\n        PostData.urls,\n        PostData.referencePostId,\n        PostData.referencePostAuthorId,\n        RepostData.repostId AS repostId,\n        RepostData.authorId AS repostAuthorId,\n        COALESCE(RepostData.createdAt, PostData.createdAt) AS feedCreatedAt\n    FROM PostData\n    LEFT JOIN RepostData ON RepostData.postId = PostData.postId"
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'b8d1796dfca196d13e4309e06091b02a')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'b4f2daecc094374c50bfff7d79e8e84e')"
     ]
   }
 }

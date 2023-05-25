@@ -2,7 +2,7 @@ package net.primal.android.feed
 
 import androidx.paging.PagingData
 import kotlinx.coroutines.flow.Flow
-import net.primal.android.feed.ui.FeedPostUi
+import net.primal.android.feed.ui.model.FeedPostUi
 
 interface FeedContract {
     data class UiState(

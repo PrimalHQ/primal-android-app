@@ -23,6 +23,7 @@ room = "2.5.1"
 ksp = "1.8.10-1.0.9"
 secp256k1-kmp-jvm = "0.6.4"
 spongycastle = "1.51.0.0"
+url-detector = "0.1.23"
 
 [libraries]
 # Core libs
@@ -69,6 +70,8 @@ okhttp-logging-interceptor = { module = "com.squareup.okhttp3:logging-intercepto
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 retrofit-converter-scalars = { module = "com.squareup.retrofit2:converter-scalars", version.ref = "retrofit" }
 retrofit-serialization-converter = { module = "com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter", version = "0.8.0" }
+
+url-detector = { module = "io.github.url-detector:url-detector", version.ref = "url-detector" }
 
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization-json" }
 

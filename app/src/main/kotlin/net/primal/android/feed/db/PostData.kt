@@ -12,6 +12,7 @@ data class PostData(
     val createdAt: Long,
     val tags: List<JsonArray>,
     val content: String,
+    val urls: List<String>,
     val sig: String,
     val referencePostId: String? = null,
     val referencePostAuthorId: String? = null,

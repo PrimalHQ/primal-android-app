@@ -1,4 +1,4 @@
-package net.primal.android.feed.ui
+package net.primal.android.feed.ui.model
 
 import java.time.Instant
 
@@ -10,6 +10,7 @@ data class FeedPostUi(
     val authorInternetIdentifier: String? = null,
     val authorAvatarUrl: String? = null,
     val content: String,
+    val urls: List<String>,
     val timestamp: Instant,
     val stats: FeedPostStatsUi,
 )

@@ -17,8 +17,8 @@ import net.primal.android.feed.FeedContract.UiEvent
 import net.primal.android.feed.FeedContract.UiState
 import net.primal.android.feed.db.FeedPost
 import net.primal.android.feed.repository.FeedRepository
-import net.primal.android.feed.ui.FeedPostStatsUi
-import net.primal.android.feed.ui.FeedPostUi
+import net.primal.android.feed.ui.model.FeedPostStatsUi
+import net.primal.android.feed.ui.model.FeedPostUi
 import net.primal.android.nostr.ext.displayNameUiFriendly
 import java.time.Instant
 import javax.inject.Inject
@@ -73,6 +73,7 @@ class FeedViewModel @Inject constructor(
         authorAvatarUrl = this.author.picture,
         timestamp = Instant.ofEpochSecond(this.data.createdAt),
         content = this.data.content,
+        urls = this.data.urls,
         stats = FeedPostStatsUi(
             repliesCount = this.postStats?.replies ?: 0,
             userReplied = false,
