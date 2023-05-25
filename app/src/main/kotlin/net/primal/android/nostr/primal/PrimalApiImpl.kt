@@ -55,7 +55,8 @@ class PrimalApiImpl @Inject constructor(
             options = NostrJson.encodeToString(
                 FeedRequest(
                     pubKey = feedHex,
-                    userPubKey = userHex
+                    userPubKey = userHex,
+                    limit = 100,
                 )
             )
         ),

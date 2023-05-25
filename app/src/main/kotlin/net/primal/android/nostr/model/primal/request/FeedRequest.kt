@@ -7,4 +7,5 @@ import kotlinx.serialization.Serializable
 data class FeedRequest(
     @SerialName("pubkey") val pubKey: String,
     @SerialName("user_pubkey") val userPubKey: String,
+    @SerialName("limit") val limit: Int,
 )
