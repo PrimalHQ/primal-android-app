@@ -1,3 +1,5 @@
+import java.util.Properties
+
 @Suppress("DSL_SCOPE_VIOLATION") // TODO: Remove once KTIJ-19369 is fixed
 plugins {
     alias(libs.plugins.com.android.application)
@@ -26,6 +28,22 @@ android {
         }
     }
 
+    signingConfigs {
+        val configFile = File("signing.properties")
+        if (configFile.exists()) {
+            val properties = Properties().apply {
+                load(configFile.reader())
+            }
+
+            signingConfigs.create("playStore") {
+                storeFile(File(properties.getProperty("playStore.storeFile")))
+                storePassword(properties.getProperty("playStore.storePassword"))
+                keyAlias(properties.getProperty("playStore.keyAlias"))
+                keyPassword(properties.getProperty("playStore.keyPassword"))
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
@@ -33,9 +51,13 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+        }
+
+        create("releasePlayStore") {
+            initWith(getByName("release"))
 
             signingConfig = try {
-                signingConfigs.getByName("release")
+                signingConfigs.getByName("playStore")
             } catch (e: UnknownDomainObjectException) {
                 signingConfigs.getByName("debug")
             }
