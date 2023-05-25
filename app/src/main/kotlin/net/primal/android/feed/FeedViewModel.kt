@@ -19,6 +19,7 @@ import net.primal.android.feed.db.FeedPost
 import net.primal.android.feed.repository.FeedRepository
 import net.primal.android.feed.ui.model.FeedPostStatsUi
 import net.primal.android.feed.ui.model.FeedPostUi
+import net.primal.android.nostr.ext.asEllipsizedNpub
 import net.primal.android.nostr.ext.displayNameUiFriendly
 import java.time.Instant
 import javax.inject.Inject
@@ -67,10 +68,10 @@ class FeedViewModel @Inject constructor(
     private fun FeedPost.asFeedPostUi() = FeedPostUi(
         postId = this.data.postId,
         repostId = this.data.repostId,
-        repostAuthorDisplayName = this.repostAuthor?.displayNameUiFriendly(),
-        authorDisplayName = this.author.displayNameUiFriendly(),
-        authorInternetIdentifier = this.author.internetIdentifier,
-        authorAvatarUrl = this.author.picture,
+        repostAuthorDisplayName = this.repostAuthor?.displayNameUiFriendly() ?: this.data.repostAuthorId?.asEllipsizedNpub(),
+        authorDisplayName = this.author?.displayNameUiFriendly() ?: this.data.authorId.asEllipsizedNpub(),
+        authorInternetIdentifier = this.author?.internetIdentifier,
+        authorAvatarUrl = this.author?.picture,
         timestamp = Instant.ofEpochSecond(this.data.createdAt),
         content = this.data.content,
         urls = this.data.urls,
