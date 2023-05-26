@@ -15,12 +15,12 @@ interface FeedPostDao {
         """
         SELECT * FROM FeedPostData
         INNER JOIN FeedPostDataCrossRef ON FeedPostData.postId = FeedPostDataCrossRef.postId
-        WHERE FeedPostDataCrossRef.feedId = :feedHex
+        WHERE FeedPostDataCrossRef.feedId = :feedId
         ORDER BY feedCreatedAt DESC
         """
     )
-    fun allPostsByFeedHex(
-        feedHex: String,
+    fun allPostsByFeedId(
+        feedId: String,
     ): PagingSource<Int, FeedPost>
 
 }

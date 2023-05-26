@@ -1,7 +1,8 @@
 <resources>
     <string name="app_name">Primal</string>
 
-    <string name="login_nsec">nsec</string>
+    <string name="nsec">nsec</string>
+    <string name="npub">npub</string>
 
     <string name="feed_reposted_suffix">reposted</string>
     

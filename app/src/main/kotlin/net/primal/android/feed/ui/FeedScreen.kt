@@ -62,14 +62,15 @@ import kotlin.math.roundToInt
 
 @Composable
 fun FeedScreen(
-    viewModel: FeedViewModel
+    viewModel: FeedViewModel,
+    onFeedsClick: () -> Unit,
 ) {
 
     val uiState = viewModel.state.collectAsState()
 
     FeedScreen(
         state = uiState.value,
-        eventPublisher = { viewModel.setEvent(it) }
+        onFeedsClick = onFeedsClick,
     )
 }
 
@@ -77,7 +78,7 @@ fun FeedScreen(
 @Composable
 fun FeedScreen(
     state: FeedContract.UiState,
-    eventPublisher: (FeedContract.UiEvent) -> Unit,
+    onFeedsClick: () -> Unit,
 ) {
     val topAppBarState = rememberTopAppBarState()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(topAppBarState)
@@ -104,8 +105,10 @@ fun FeedScreen(
             .nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             TopAppToolbar(
-                eventPublisher = eventPublisher,
+                title = state.feedTitle,
                 scrollBehavior = scrollBehavior,
+                onNavigationIconClick = {},
+                onFeedsIconClick = onFeedsClick,
             )
         },
         content = { paddingValues ->
@@ -148,28 +151,31 @@ fun FeedScreen(
             )
         }
     )
+
 }
 
 @ExperimentalMaterial3Api
 @Composable
 fun TopAppToolbar(
-    eventPublisher: (FeedContract.UiEvent) -> Unit,
-    scrollBehavior: TopAppBarScrollBehavior? = null,
+    title: String,
+    scrollBehavior: TopAppBarScrollBehavior,
+    onFeedsIconClick: () -> Unit,
+    onNavigationIconClick: () -> Unit,
 ) {
     CenterAlignedTopAppBar(
         navigationIcon = {
             ToolbarIcon(
                 icon = PrimalIcons.Settings,
-                onClick = { },
+                onClick = onNavigationIconClick,
             )
         },
         title = {
-            Text(text = "Primal")
+            Text(text = title)
         },
         actions = {
             ToolbarIcon(
                 icon = PrimalIcons.FeedPicker,
-                onClick = { },
+                onClick = onFeedsIconClick,
             )
         },
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
@@ -269,7 +275,7 @@ fun FeedScreenPreview() {
             state = FeedContract.UiState(
                 posts = flow { }
             ),
-            eventPublisher = {},
+            onFeedsClick = {},
         )
     }
 

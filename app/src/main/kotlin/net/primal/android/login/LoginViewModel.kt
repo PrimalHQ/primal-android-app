@@ -13,12 +13,13 @@ import kotlinx.coroutines.launch
 import net.primal.android.login.LoginContract.SideEffect
 import net.primal.android.login.LoginContract.UiEvent
 import net.primal.android.login.LoginContract.UiState
+import net.primal.android.settings.SettingsRepository
 import javax.inject.Inject
 
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-
+    private val settingsRepository: SettingsRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(UiState(loading = false))
@@ -36,6 +37,14 @@ class LoginViewModel @Inject constructor(
     private val _event: MutableSharedFlow<UiEvent> = MutableSharedFlow()
     fun setEvent(event: UiEvent) {
         viewModelScope.launch { _event.emit(event) }
+    }
+
+    init {
+        loadDefaultAppSettings()
+    }
+
+    private fun loadDefaultAppSettings() = viewModelScope.launch {
+        settingsRepository.fetchDefaultAppSettingsToDatabase()
     }
 
 }

@@ -14,4 +14,7 @@ interface FeedDao {
     @Query("SELECT * FROM Feed")
     fun observeAllFeeds(): Flow<List<Feed>>
 
+    @Query("SELECT * FROM Feed WHERE Feed.hex = :feedId")
+    suspend fun findFeedById(feedId: String): Feed?
+
 }

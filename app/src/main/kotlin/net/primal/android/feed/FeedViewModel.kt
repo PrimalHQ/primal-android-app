@@ -1,5 +1,6 @@
 package net.primal.android.feed
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.map
@@ -12,6 +13,7 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import net.primal.android.core.utils.ellipsizeMiddle
 import net.primal.android.feed.FeedContract.SideEffect
 import net.primal.android.feed.FeedContract.UiEvent
 import net.primal.android.feed.FeedContract.UiState
@@ -19,23 +21,27 @@ import net.primal.android.feed.db.FeedPost
 import net.primal.android.feed.repository.FeedRepository
 import net.primal.android.feed.ui.model.FeedPostStatsUi
 import net.primal.android.feed.ui.model.FeedPostUi
+import net.primal.android.navigation.feedId
 import net.primal.android.nostr.ext.asEllipsizedNpub
 import net.primal.android.nostr.ext.displayNameUiFriendly
+import net.primal.android.settings.SettingsRepository
 import java.time.Instant
 import javax.inject.Inject
 
 @HiltViewModel
 class FeedViewModel @Inject constructor(
+    savedStateHandle: SavedStateHandle,
+    settingsRepository: SettingsRepository,
     private val feedRepository: FeedRepository,
 ) : ViewModel() {
 
+    private val feedId: String = savedStateHandle.feedId ?: settingsRepository.defaultFeed
+
     private val _state = MutableStateFlow(
         UiState(
-            posts = feedRepository.feedByFeedHexPaged(
-                feedHex = "9a500dccc084a138330a1d1b2be0d5e86394624325d25084d3eca164e7ea698a"
-            ).map {
+            posts = feedRepository.feedByFeedIdPaged(feedId = feedId).map {
                 it.map { feed -> feed.asFeedPostUi() }
-            }
+            },
         )
     )
     val state = _state.asStateFlow()
@@ -55,15 +61,16 @@ class FeedViewModel @Inject constructor(
     }
 
     init {
-        fetchLatestPosts()
+        loadFeed()
     }
 
-    private fun fetchLatestPosts() = viewModelScope.launch {
-        feedRepository.fetchDefaultAppSettings()
-        feedRepository.fetchLatestPosts(
-            feedHex = "9a500dccc084a138330a1d1b2be0d5e86394624325d25084d3eca164e7ea698a"
-        )
+    private fun loadFeed() = viewModelScope.launch {
+        val feed = feedRepository.findFeedById(feedId = feedId)
+        setState {
+            copy(feedTitle = feed?.name ?: feedId.ellipsizeMiddle(size = 8))
+        }
     }
+
 
     private fun FeedPost.asFeedPostUi() = FeedPostUi(
         postId = this.data.postId,
@@ -86,4 +93,5 @@ class FeedViewModel @Inject constructor(
             userReposted = false,
         )
     )
+
 }
