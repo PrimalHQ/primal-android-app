@@ -125,7 +125,14 @@ fun PostContent(
 
     val contentText = buildAnnotatedString {
         if (refinedUrls.isNotEmpty()) {
-            val urlsInContent = refinedUrls.map { Pair(refinedContent.indexOf(it), it) }
+            // Assuming the refinedUrls are sorted by appearance in content
+            var mapIndex = 0
+            val urlsInContent = refinedUrls.map {
+                val index = refinedContent.indexOf(string = it, startIndex = mapIndex)
+                mapIndex = index + it.length
+                Pair(index, it)
+            }
+
             var contentIndex = 0
             urlsInContent.forEach {
                 val urlIndex = it.first
