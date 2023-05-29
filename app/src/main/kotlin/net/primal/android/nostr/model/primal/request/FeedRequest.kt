@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class FeedRequest(
-    @SerialName("pubkey") val pubKey: String,
+    @SerialName("directive") val directive: String,
     @SerialName("user_pubkey") val userPubKey: String,
     @SerialName("limit") val limit: Int,
 )

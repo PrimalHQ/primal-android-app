@@ -6,6 +6,6 @@ import androidx.room.PrimaryKey
 @Entity
 data class Feed(
     @PrimaryKey
-    val hex: String,
+    val directive: String,
     val name: String,
 )

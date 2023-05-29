@@ -11,13 +11,16 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import net.primal.android.R
 import net.primal.android.feed.ui.model.FeedUi
 
 
@@ -31,7 +34,7 @@ fun FeedListScreen(
 
     FeedListScreen(
         state = uiState.value,
-        onFeedClick = { onFeedSelected(it.hex) },
+        onFeedClick = { onFeedSelected(it.directive) },
     )
 }
 
@@ -42,36 +45,37 @@ fun FeedListScreen(
     state: FeedListContract.UiState,
     onFeedClick: (FeedUi) -> Unit,
 ) {
-    LazyColumn(
-        modifier = Modifier.navigationBarsPadding(),
-    ) {
-        stickyHeader {
-            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
-                CenterAlignedTopAppBar(title = {
-                    Text(text = "Feeds")
-                })
-                BottomSheetDefaults.DragHandle(height = 3.dp)
-            }
-        }
-
-        items(
-            items = state.feeds,
-            key = { it.hex },
+    Surface {
+        LazyColumn(
+            modifier = Modifier.navigationBarsPadding(),
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { onFeedClick(it) }
+            stickyHeader {
+                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
+                    CenterAlignedTopAppBar(title = {
+                        Text(text = stringResource(id = R.string.feed_list_title))
+                    })
+                    BottomSheetDefaults.DragHandle(height = 3.dp)
+                }
+            }
+
+            items(
+                items = state.feeds,
+                key = { it.directive },
             ) {
-                Text(
+                Box(
                     modifier = Modifier
-                        .padding(vertical = 16.dp)
-                        .fillMaxWidth(),
-                    text = it.name,
-                    textAlign = TextAlign.Center,
-                )
+                        .fillMaxWidth()
+                        .clickable { onFeedClick(it) }
+                ) {
+                    Text(
+                        modifier = Modifier
+                            .padding(vertical = 16.dp)
+                            .fillMaxWidth(),
+                        text = it.name,
+                        textAlign = TextAlign.Center,
+                    )
+                }
             }
         }
-
     }
 }

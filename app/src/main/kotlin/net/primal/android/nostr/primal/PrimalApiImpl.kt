@@ -49,20 +49,20 @@ class PrimalApiImpl @Inject constructor(
         )
     )
 
-    override fun requestFeedUpdates(feedHex: String, userHex: String) = launchQuery(
+    override fun requestFeedUpdates(feedDirective: String, userPubkey: String) = launchQuery(
         outgoingMessage = OutgoingMessage(
-            primalVerb = "feed",
+            primalVerb = "feed_directive",
             options = NostrJson.encodeToString(
                 FeedRequest(
-                    pubKey = feedHex,
-                    userPubKey = userHex,
+                    directive = feedDirective,
+                    userPubKey = userPubkey,
                     limit = 100,
                 )
             )
         ),
 
         onNostrEvents = { resultMap ->
-            resultMap.processShortTextNotesAndReposts(feedHex = feedHex)
+            resultMap.processShortTextNotesAndReposts(feedDirective = feedDirective)
             resultMap.filterKeys { it != NostrEventKind.Reposts && it != NostrEventKind.ShortTextNote }
                 .processAllNostrEvents()
         },
@@ -135,7 +135,7 @@ class PrimalApiImpl @Inject constructor(
     }
 
     private suspend fun Map<NostrEventKind, List<NostrEvent>>.processShortTextNotesAndReposts(
-        feedHex: String
+        feedDirective: String
     ) {
         val shortTextNoteEvents = this[NostrEventKind.ShortTextNote]
         val repostEvents = this[NostrEventKind.Reposts]
@@ -151,7 +151,7 @@ class PrimalApiImpl @Inject constructor(
             database.feedsConnections().connect(
                 data = feedConnections.map { postId ->
                     FeedPostDataCrossRef(
-                        feedId = feedHex,
+                        feedDirective = feedDirective,
                         postId = postId
                     )
                 }

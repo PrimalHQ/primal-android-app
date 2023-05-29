@@ -13,4 +13,6 @@
     <string name="timestamp_since_weeks">%1$s wk. ago</string>
     <string name="timestamp_since_months">%1$s m. ago</string>
     <string name="timestamp_since_years">%1$s y. ago</string>
+
+    <string name="feed_list_title">My Nostr Feeds</string>
 </resources>

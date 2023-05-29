@@ -24,17 +24,28 @@ import net.primal.android.feed.ui.FeedScreen
 import net.primal.android.login.LoginViewModel
 import net.primal.android.login.ui.DemoLoginScreen
 import net.primal.android.theme.PrimalTheme
+import org.apache.commons.lang3.CharEncoding
+import java.net.URLDecoder
+import java.net.URLEncoder
 
 
-const val FeedId = "feedId"
-inline val SavedStateHandle.feedId: String? get() = get(FeedId)
+const val FeedDirective = "directive"
+inline val SavedStateHandle.feedDirective: String? get() = get<String>(FeedDirective)?.asUrlDecoded()
 
 private fun NavOptionsBuilder.clearBackStack() = popUpTo(id = 0)
 private fun NavController.navigateToFeedList() = navigate(route = "feed/list")
-private fun NavController.navigateToFeed(feedId: String) = navigate(
-    route = "feed?feedId=$feedId",
+private fun NavController.navigateToFeed(directive: String) = navigate(
+    route = "feed?directive=${directive.asUrlEncoded()}",
     navOptions = navOptions { clearBackStack() }
 )
+
+fun String.asUrlEncoded(): String = URLEncoder.encode(this, CharEncoding.UTF_8)
+
+fun String?.asUrlDecoded() = when (this) {
+    null -> null
+    else -> URLDecoder.decode(this, CharEncoding.UTF_8)
+}
+
 
 @OptIn(ExperimentalMaterialNavigationApi::class)
 @Composable
@@ -58,9 +69,9 @@ fun PrimalNavigation() {
             )
 
             feed(
-                route = "feed?feedId={feedId}",
+                route = "feed?$FeedDirective={$FeedDirective}",
                 arguments = listOf(
-                    navArgument("feedId") {
+                    navArgument(FeedDirective) {
                         type = NavType.StringType
                         nullable = true
                     }
@@ -117,6 +128,6 @@ private fun NavGraphBuilder.feedList(
     val viewModel = hiltViewModel<FeedListViewModel>()
     FeedListScreen(
         viewModel = viewModel,
-        onFeedSelected = { navController.navigateToFeed(feedId = it) }
+        onFeedSelected = { navController.navigateToFeed(directive = it) }
     )
 }

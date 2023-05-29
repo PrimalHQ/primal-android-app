@@ -16,24 +16,24 @@ class FeedRepository @Inject constructor(
     private val database: PrimalDatabase,
 ) {
 
-    fun feedByFeedIdPaged(feedId: String): Flow<PagingData<FeedPost>> {
-        fetchLatestPosts(feedId = feedId)
+    fun feedByDirectivePaged(feedDirective: String): Flow<PagingData<FeedPost>> {
+        fetchLatestPosts(feedDirective = feedDirective)
         return createPager {
-            database.feedPosts().allPostsByFeedId(feedId = feedId)
+            database.feedPosts().allPostsByFeedDirective(feedDirective = feedDirective)
         }.flow
     }
 
-    private fun fetchLatestPosts(feedId: String) {
+    private fun fetchLatestPosts(feedDirective: String) {
         primalApi.requestFeedUpdates(
-            feedHex = feedId,
+            feedDirective = feedDirective,
             // User hard-coded to Nostr Highlights
-            userHex = "9a500dccc084a138330a1d1b2be0d5e86394624325d25084d3eca164e7ea698a",
+            userPubkey = "9a500dccc084a138330a1d1b2be0d5e86394624325d25084d3eca164e7ea698a",
         )
     }
 
     fun observeFeeds(): Flow<List<Feed>> = database.feeds().observeAllFeeds()
 
-    suspend fun findFeedById(feedId: String) = database.feeds().findFeedById(feedId = feedId)
+    suspend fun findFeedByDirective(feedDirective: String) = database.feeds().findFeedByDirective(feedDirective = feedDirective)
 
     private fun createPager(pagingSourceFactory: () -> PagingSource<Int, FeedPost>) =
         Pager(

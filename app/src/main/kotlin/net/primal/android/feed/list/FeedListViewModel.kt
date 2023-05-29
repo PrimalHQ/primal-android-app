@@ -36,6 +36,6 @@ class FeedListViewModel @Inject constructor(
         }
     }
 
-    private fun Feed.asFeedUi() = FeedUi(hex = this.hex, name = this.name)
+    private fun Feed.asFeedUi() = FeedUi(directive = this.directive, name = this.name)
 
 }

@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "b4f2daecc094374c50bfff7d79e8e84e",
+    "identityHash": "e0873e103aa7663147d1f29d3e18fbb2",
     "entities": [
       {
         "tableName": "PostData",
@@ -278,11 +278,11 @@
       },
       {
         "tableName": "Feed",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`hex` TEXT NOT NULL, `name` TEXT NOT NULL, PRIMARY KEY(`hex`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`directive` TEXT NOT NULL, `name` TEXT NOT NULL, PRIMARY KEY(`directive`))",
         "fields": [
           {
-            "fieldPath": "hex",
-            "columnName": "hex",
+            "fieldPath": "directive",
+            "columnName": "directive",
             "affinity": "TEXT",
             "notNull": true
           },
@@ -296,7 +296,7 @@
         "primaryKey": {
           "autoGenerate": false,
           "columnNames": [
-            "hex"
+            "directive"
           ]
         },
         "indices": [],
@@ -304,11 +304,11 @@
       },
       {
         "tableName": "FeedPostDataCrossRef",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`feedId` TEXT NOT NULL, `postId` TEXT NOT NULL, PRIMARY KEY(`feedId`, `postId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`feedDirective` TEXT NOT NULL, `postId` TEXT NOT NULL, PRIMARY KEY(`feedDirective`, `postId`))",
         "fields": [
           {
-            "fieldPath": "feedId",
-            "columnName": "feedId",
+            "fieldPath": "feedDirective",
+            "columnName": "feedDirective",
             "affinity": "TEXT",
             "notNull": true
           },
@@ -322,7 +322,7 @@
         "primaryKey": {
           "autoGenerate": false,
           "columnNames": [
-            "feedId",
+            "feedDirective",
             "postId"
           ]
         },
@@ -338,7 +338,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'b4f2daecc094374c50bfff7d79e8e84e')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e0873e103aa7663147d1f29d3e18fbb2')"
     ]
   }
 }

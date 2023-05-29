@@ -21,7 +21,7 @@ import net.primal.android.feed.db.FeedPost
 import net.primal.android.feed.repository.FeedRepository
 import net.primal.android.feed.ui.model.FeedPostStatsUi
 import net.primal.android.feed.ui.model.FeedPostUi
-import net.primal.android.navigation.feedId
+import net.primal.android.navigation.feedDirective
 import net.primal.android.nostr.ext.asEllipsizedNpub
 import net.primal.android.nostr.ext.displayNameUiFriendly
 import net.primal.android.settings.SettingsRepository
@@ -35,11 +35,12 @@ class FeedViewModel @Inject constructor(
     private val feedRepository: FeedRepository,
 ) : ViewModel() {
 
-    private val feedId: String = savedStateHandle.feedId ?: settingsRepository.defaultFeed
+    private val feedDirective: String = savedStateHandle.feedDirective
+        ?: settingsRepository.defaultFeed
 
     private val _state = MutableStateFlow(
         UiState(
-            posts = feedRepository.feedByFeedIdPaged(feedId = feedId).map {
+            posts = feedRepository.feedByDirectivePaged(feedDirective = feedDirective).map {
                 it.map { feed -> feed.asFeedPostUi() }
             },
         )
@@ -65,9 +66,9 @@ class FeedViewModel @Inject constructor(
     }
 
     private fun loadFeed() = viewModelScope.launch {
-        val feed = feedRepository.findFeedById(feedId = feedId)
+        val feed = feedRepository.findFeedByDirective(feedDirective = feedDirective)
         setState {
-            copy(feedTitle = feed?.name ?: feedId.ellipsizeMiddle(size = 8))
+            copy(feedTitle = feed?.name ?: feedDirective.ellipsizeMiddle(size = 8))
         }
     }
 
