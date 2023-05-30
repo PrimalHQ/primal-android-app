@@ -174,7 +174,9 @@ fun PostContent(
                 1 -> {
                     PostImageListItemImage(
                         source = imageUrls.first(),
-                        modifier = Modifier.fillMaxWidth().padding(top = 16.dp)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 16.dp)
                     )
                 }
 
@@ -292,24 +294,22 @@ fun PostAuthorItem(
             modifier = Modifier.padding(horizontal = 16.dp)
         ) {
 
-            Row {
-                NostrUserText(
-                    displayName = authorDisplayName,
-                    verifiedBadge = hasVerifiedBadge,
-                    internetIdentifier = authorInternetIdentifier
-                )
+            val timestamp = postTimestamp.asBeforeNowFormat(
+                res = LocalContext.current.resources
+            )
 
-                val timestamp = postTimestamp.asBeforeNowFormat(
-                    res = LocalContext.current.resources
-                )
-                Text(
-                    text = "| $timestamp",
-                )
-            }
+            NostrUserText(
+                displayName = authorDisplayName,
+                verifiedBadge = hasVerifiedBadge,
+                internetIdentifier = authorInternetIdentifier,
+                annotatedStringSuffixBuilder = {
+                    append("| $timestamp")
+                }
+            )
 
-            if (authorInternetIdentifier?.isNotEmpty() == true) {
+            if (!authorInternetIdentifier.isNullOrEmpty()) {
                 Text(
-                    text = authorInternetIdentifier.toString(),
+                    text = authorInternetIdentifier,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
@@ -382,7 +382,7 @@ fun PreviewFeedPostListItem() {
                 repostId = "repostRandom",
                 content = "My content.",
                 urls = emptyList(),
-                authorDisplayName = "miljan",
+                authorDisplayName = "signal_and_rage (go go power rangers)",
                 authorInternetIdentifier = "miljan@primal.net",
                 authorAvatarUrl = "https://i.imgur.com/Z8dpmvc.png",
                 timestamp = Instant.now().minus(30, ChronoUnit.MINUTES),
