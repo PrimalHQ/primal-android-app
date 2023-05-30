@@ -3,7 +3,6 @@ package net.primal.android.feed.ui
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -13,24 +12,22 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DrawerState
+import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.TopAppBarScrollBehavior
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -43,16 +40,16 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
 import kotlinx.coroutines.flow.flow
-import net.primal.android.core.compose.ToolbarIcon
+import kotlinx.coroutines.launch
+import net.primal.android.core.compose.PrimalNavigationBar
+import net.primal.android.core.compose.PrimalTopAppBar
+import net.primal.android.core.compose.PrimalTopLevelDestination
+import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.icons.PrimalIcons
-import net.primal.android.core.compose.icons.primaliconpack.Discuss
 import net.primal.android.core.compose.icons.primaliconpack.FeedPicker
-import net.primal.android.core.compose.icons.primaliconpack.Messages
-import net.primal.android.core.compose.icons.primaliconpack.Notifications
-import net.primal.android.core.compose.icons.primaliconpack.Read
-import net.primal.android.core.compose.icons.primaliconpack.Search
-import net.primal.android.core.compose.icons.primaliconpack.Settings
 import net.primal.android.core.compose.isEmpty
+import net.primal.android.drawer.DrawerScreenDestination
+import net.primal.android.drawer.PrimalDrawer
 import net.primal.android.feed.FeedContract
 import net.primal.android.feed.FeedViewModel
 import net.primal.android.feed.ui.model.FeedPostUi
@@ -64,6 +61,8 @@ import kotlin.math.roundToInt
 fun FeedScreen(
     viewModel: FeedViewModel,
     onFeedsClick: () -> Unit,
+    onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
+    onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
 ) {
 
     val uiState = viewModel.state.collectAsState()
@@ -71,6 +70,8 @@ fun FeedScreen(
     FeedScreen(
         state = uiState.value,
         onFeedsClick = onFeedsClick,
+        onPrimaryDestinationChanged = onTopLevelDestinationChanged,
+        onDrawerDestinationClick = onDrawerScreenClick,
     )
 }
 
@@ -79,109 +80,102 @@ fun FeedScreen(
 fun FeedScreen(
     state: FeedContract.UiState,
     onFeedsClick: () -> Unit,
+    onPrimaryDestinationChanged: (PrimalTopLevelDestination) -> Unit,
+    onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
 ) {
-    val topAppBarState = rememberTopAppBarState()
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(topAppBarState)
+    val uiScope = rememberCoroutineScope()
+    val drawerState: DrawerState = rememberDrawerState(DrawerValue.Closed)
 
-    val bottomBarHeight = 64.dp
-    val bottomBarHeightPx = with(LocalDensity.current) {
-        bottomBarHeight.roundToPx().toFloat()
-    }
-    val bottomBarOffsetHeightPx = remember { mutableStateOf(0f) }
-    val nestedScrollConnection = remember {
-        object : NestedScrollConnection {
-            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-                val delta = available.y
-                val newOffset = bottomBarOffsetHeightPx.value + delta
-                bottomBarOffsetHeightPx.value = newOffset.coerceIn(-bottomBarHeightPx, 0f)
-                return Offset.Zero
-            }
-        }
-    }
-
-    Scaffold(
-        modifier = Modifier
-            .nestedScroll(nestedScrollConnection)
-            .nestedScroll(scrollBehavior.nestedScrollConnection),
-        topBar = {
-            TopAppToolbar(
-                title = state.feedTitle,
-                scrollBehavior = scrollBehavior,
-                onNavigationIconClick = {},
-                onFeedsIconClick = onFeedsClick,
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            PrimalDrawer(
+                drawerState = drawerState,
+                onDrawerDestinationClick = onDrawerDestinationClick,
             )
         },
-        content = { paddingValues ->
-            val pagingItems = state.posts.collectAsLazyPagingItems()
+        content = {
+            val topAppBarState = rememberTopAppBarState()
+            val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(topAppBarState)
 
-            when {
-                pagingItems.isEmpty() -> {
-                    Box(
-                        modifier = Modifier.padding(paddingValues),
-                    ) {
-                        CircularProgressIndicator(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .wrapContentSize()
-                        )
+            val bottomBarHeight = 64.dp
+            val bottomBarHeightPx = with(LocalDensity.current) {
+                bottomBarHeight.roundToPx().toFloat()
+            }
+            val bottomBarOffsetHeightPx = remember { mutableStateOf(0f) }
+            val nestedScrollConnection = remember {
+                object : NestedScrollConnection {
+                    override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                        val delta = available.y
+                        val newOffset = bottomBarOffsetHeightPx.value + delta
+                        bottomBarOffsetHeightPx.value = newOffset.coerceIn(-bottomBarHeightPx, 0f)
+                        return Offset.Zero
                     }
                 }
+            }
 
-                else -> {
-                    val listState = rememberLazyListState()
-                    FeedList(
-                        contentPadding = paddingValues,
-                        pagingItems = pagingItems,
-                        listState = listState,
+            Scaffold(
+                modifier = Modifier
+                    .nestedScroll(nestedScrollConnection)
+                    .nestedScroll(scrollBehavior.nestedScrollConnection),
+                topBar = {
+                    PrimalTopAppBar(
+                        title = state.feedTitle,
+                        onNavigationIconClick = {
+                            uiScope.launch { drawerState.open() }
+                        },
+                        actions = {
+                            AppBarIcon(
+                                icon = PrimalIcons.FeedPicker,
+                                onClick = onFeedsClick,
+                            )
+                        },
+                        scrollBehavior = scrollBehavior,
+                    )
+                },
+                content = { paddingValues ->
+                    val pagingItems = state.posts.collectAsLazyPagingItems()
+
+                    when {
+                        pagingItems.isEmpty() -> {
+                            Box(
+                                modifier = Modifier.padding(paddingValues),
+                            ) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .wrapContentSize()
+                                )
+                            }
+                        }
+
+                        else -> {
+                            val listState = rememberLazyListState()
+                            FeedList(
+                                contentPadding = paddingValues,
+                                pagingItems = pagingItems,
+                                listState = listState,
+                            )
+                        }
+                    }
+                },
+                bottomBar = {
+                    PrimalNavigationBar(
+                        modifier = Modifier
+                            .navigationBarsPadding()
+                            .height(bottomBarHeight)
+                            .offset {
+                                IntOffset(
+                                    x = 0,
+                                    y = -bottomBarOffsetHeightPx.value.roundToInt()
+                                )
+                            },
+                        activeDestination = PrimalTopLevelDestination.Feed,
+                        onTopLevelDestinationChanged = onPrimaryDestinationChanged
                     )
                 }
-            }
-        },
-        bottomBar = {
-            PrimalNavigationBar(
-                modifier = Modifier
-                    .navigationBarsPadding()
-                    .height(bottomBarHeight)
-                    .offset {
-                        IntOffset(
-                            x = 0,
-                            y = -bottomBarOffsetHeightPx.value.roundToInt()
-                        )
-                    }
             )
         }
-    )
-
-}
-
-@ExperimentalMaterial3Api
-@Composable
-fun TopAppToolbar(
-    title: String,
-    scrollBehavior: TopAppBarScrollBehavior,
-    onFeedsIconClick: () -> Unit,
-    onNavigationIconClick: () -> Unit,
-) {
-    CenterAlignedTopAppBar(
-        navigationIcon = {
-            ToolbarIcon(
-                icon = PrimalIcons.Settings,
-                onClick = onNavigationIconClick,
-            )
-        },
-        title = {
-            Text(text = title)
-        },
-        actions = {
-            ToolbarIcon(
-                icon = PrimalIcons.FeedPicker,
-                onClick = onFeedsIconClick,
-            )
-        },
-        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-            scrolledContainerColor = PrimalTheme.colors.surface,
-        ),
-        scrollBehavior = scrollBehavior,
     )
 }
 
@@ -216,56 +210,6 @@ fun FeedList(
     }
 }
 
-@Composable
-fun PrimalNavigationBar(modifier: Modifier = Modifier) {
-    NavigationBar(
-        modifier = modifier,
-        tonalElevation = 0.dp,
-    ) {
-        PrimalNavigationBarItem(
-            selected = true,
-            onClick = {},
-            icon = PrimalIcons.Discuss,
-        )
-
-        PrimalNavigationBarItem(
-            selected = false,
-            onClick = {},
-            icon = PrimalIcons.Read,
-        )
-
-        PrimalNavigationBarItem(
-            selected = false,
-            onClick = {},
-            icon = PrimalIcons.Search,
-        )
-
-        PrimalNavigationBarItem(
-            selected = false,
-            onClick = {},
-            icon = PrimalIcons.Messages,
-        )
-
-        PrimalNavigationBarItem(
-            selected = false,
-            onClick = {},
-            icon = PrimalIcons.Notifications,
-        )
-    }
-}
-
-@Composable
-fun RowScope.PrimalNavigationBarItem(
-    selected: Boolean,
-    icon: ImageVector,
-    onClick: () -> Unit,
-) {
-    NavigationBarItem(
-        selected = selected,
-        onClick = onClick,
-        icon = { Icon(imageVector = icon, contentDescription = null) },
-    )
-}
 
 @Preview
 @Composable
@@ -276,6 +220,8 @@ fun FeedScreenPreview() {
                 posts = flow { }
             ),
             onFeedsClick = {},
+            onPrimaryDestinationChanged = {},
+            onDrawerDestinationClick = {},
         )
     }
 

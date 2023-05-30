@@ -2,6 +2,8 @@
 agp = "8.1.0-beta03"
 appcompat = "1.6.1"
 coil = "2.2.2"
+constraintlayout = "2.1.4"
+constraintlayout-compose = "1.0.1"
 datastore = "1.0.0"
 kotlinx-serialization-json = "1.5.0"
 okhttp = "4.11.0"
@@ -48,6 +50,8 @@ compose-swiperefresh = { module = "com.google.accompanist:accompanist-swiperefre
 compose-placeholdermaterial = { module = "com.google.accompanist:accompanist-placeholder-material", version.ref = "accompanist" }
 compose-pager = { module = "com.google.accompanist:accompanist-pager", version.ref = "accompanist" }
 compose-pager-indicators = { module = "com.google.accompanist:accompanist-pager-indicators", version.ref = "accompanist" }
+constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version.ref = "constraintlayout" }
+compose-constraintlayout = { module = "androidx.constraintlayout:constraintlayout-compose", version.ref = "constraintlayout-compose" }
 
 navigation-compose = { module = "androidx.navigation:navigation-compose", version = "2.5.3" }
 navigation-hilt = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hilt" }

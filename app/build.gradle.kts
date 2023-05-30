@@ -115,6 +115,9 @@ dependencies {
 
     implementation(libs.compose.placeholdermaterial)
 
+    implementation(libs.constraintlayout)
+    implementation(libs.compose.constraintlayout)
+
     implementation(libs.navigation.material)
 
     implementation(libs.paging.runtime)

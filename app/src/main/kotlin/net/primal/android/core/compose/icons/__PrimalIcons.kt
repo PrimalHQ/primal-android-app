@@ -3,6 +3,7 @@ package net.primal.android.core.compose.icons
 import androidx.compose.ui.graphics.vector.ImageVector
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 import net.primal.android.core.compose.icons.primaliconpack.AvatarNostrich
+import net.primal.android.core.compose.icons.primaliconpack.DarkMode
 import net.primal.android.core.compose.icons.primaliconpack.Delete
 import net.primal.android.core.compose.icons.primaliconpack.Discuss
 import net.primal.android.core.compose.icons.primaliconpack.Download
@@ -19,9 +20,11 @@ import net.primal.android.core.compose.icons.primaliconpack.FeedZaps
 import net.primal.android.core.compose.icons.primaliconpack.FeedZapsFilled
 import net.primal.android.core.compose.icons.primaliconpack.Help
 import net.primal.android.core.compose.icons.primaliconpack.Home
+import net.primal.android.core.compose.icons.primaliconpack.LightMode
 import net.primal.android.core.compose.icons.primaliconpack.Messages
 import net.primal.android.core.compose.icons.primaliconpack.More
 import net.primal.android.core.compose.icons.primaliconpack.Notifications
+import net.primal.android.core.compose.icons.primaliconpack.QrCode
 import net.primal.android.core.compose.icons.primaliconpack.Read
 import net.primal.android.core.compose.icons.primaliconpack.Search
 import net.primal.android.core.compose.icons.primaliconpack.Settings
@@ -62,7 +65,10 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             Read,
             Help,
             FeedReposts,
-            Verified
+            Verified,
+            QrCode,
+            DarkMode,
+            LightMode
         )
         return __PrimalIcons!!
     }

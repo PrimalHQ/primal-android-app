@@ -6,7 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import dagger.hilt.android.AndroidEntryPoint
-import net.primal.android.navigation.PrimalNavigation
+import net.primal.android.navigation.PrimalAppNavigation
 import net.primal.android.theme.PrimalTheme
 
 @AndroidEntryPoint
@@ -18,7 +18,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             PrimalTheme {
-                PrimalNavigation()
+                PrimalAppNavigation()
             }
         }
     }

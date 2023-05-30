@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.R
 import net.primal.android.core.compose.AvatarThumbnailListItemImage
+import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.PostImageListItemImage
 import net.primal.android.core.compose.PrimalClickableText
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -49,7 +50,6 @@ import net.primal.android.core.compose.icons.primaliconpack.FeedReposts
 import net.primal.android.core.compose.icons.primaliconpack.FeedRepostsFilled
 import net.primal.android.core.compose.icons.primaliconpack.FeedZaps
 import net.primal.android.core.compose.icons.primaliconpack.FeedZapsFilled
-import net.primal.android.core.compose.icons.primaliconpack.Verified
 import net.primal.android.core.utils.asBeforeNowFormat
 import net.primal.android.feed.ui.model.FeedPostStatsUi
 import net.primal.android.feed.ui.model.FeedPostUi
@@ -292,44 +292,20 @@ fun PostAuthorItem(
             modifier = Modifier.padding(horizontal = 16.dp)
         ) {
 
-            val titleText = buildAnnotatedString {
-                append(authorDisplayName)
-                if (hasVerifiedBadge) {
-                    appendInlineContent("verifiedBadge", "[badge]")
-                }
-                append(" | ")
-                append(postTimestamp.asBeforeNowFormat(res = LocalContext.current.resources))
+            Row {
+                NostrUserText(
+                    displayName = authorDisplayName,
+                    verifiedBadge = hasVerifiedBadge,
+                    internetIdentifier = authorInternetIdentifier
+                )
+
+                val timestamp = postTimestamp.asBeforeNowFormat(
+                    res = LocalContext.current.resources
+                )
+                Text(
+                    text = "| $timestamp",
+                )
             }
-
-            val inlineContent = mapOf(
-                "verifiedBadge" to InlineTextContent(
-                    placeholder = Placeholder(
-                        24.sp, 24.sp, PlaceholderVerticalAlign.Center
-                    )
-                ) {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Image(
-                            imageVector = PrimalIcons.Verified,
-                            contentDescription = null,
-                            colorFilter = ColorFilter.tint(
-                                color = if (authorInternetIdentifier?.contains("primal.net") == true) {
-                                    Color(0xFFAB268E)
-                                } else {
-                                    Color(0xFF666666)
-                                }
-                            )
-                        )
-                    }
-                }
-            )
-
-            Text(
-                text = titleText,
-                inlineContent = inlineContent,
-            )
 
             if (authorInternetIdentifier?.isNotEmpty() == true) {
                 Text(

@@ -19,10 +19,13 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 
 @Composable
-fun AvatarThumbnailListItemImage(source: Any?) {
+fun AvatarThumbnailListItemImage(
+    source: Any?,
+    modifier: Modifier = Modifier,
+) {
     SubcomposeAsyncImage(
         model = source,
-        modifier = Modifier
+        modifier = modifier
             .size(48.dp)
             .clip(CircleShape),
         contentDescription = null,

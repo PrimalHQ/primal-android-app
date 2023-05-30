@@ -1,6 +1,7 @@
 package net.primal.android.core.compose
 
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -14,13 +15,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import net.primal.android.core.compose.icons.PrimalIcons
-import net.primal.android.core.compose.icons.primaliconpack.Search
 import net.primal.android.core.compose.icons.primaliconpack.Settings
 import net.primal.android.theme.PrimalTheme
 
 @Composable
-fun ToolbarIcon(
+fun AppBarIcon(
     icon: ImageVector,
     onClick: () -> Unit,
     enabled: Boolean = true,
@@ -28,6 +29,7 @@ fun ToolbarIcon(
 ) {
     IconButton(enabled = enabled, onClick = onClick) {
         Icon(
+            modifier = Modifier.size(24.dp),
             imageVector = icon,
             contentDescription = null,
             tint = tint
@@ -38,7 +40,7 @@ fun ToolbarIcon(
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
-fun PreviewToolbarIcon() {
+fun PreviewAppBarIcon() {
     PrimalTheme {
         Scaffold(
             topBar = {
@@ -47,7 +49,7 @@ fun PreviewToolbarIcon() {
                         Text(text = "App name")
                     },
                     actions = {
-                        ToolbarIcon(
+                        AppBarIcon(
                             icon = PrimalIcons.Settings,
                             onClick = {},
                         )
