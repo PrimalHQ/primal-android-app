@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -16,6 +17,7 @@ import net.primal.android.core.compose.icons.primaliconpack.Messages
 import net.primal.android.core.compose.icons.primaliconpack.Notifications
 import net.primal.android.core.compose.icons.primaliconpack.Read
 import net.primal.android.core.compose.icons.primaliconpack.Search
+import net.primal.android.theme.AppTheme
 
 @Composable
 fun PrimalNavigationBar(
@@ -56,6 +58,11 @@ private fun RowScope.PrimalNavigationBarItem(
                 contentDescription = primaryDestination.label(),
             )
         },
+        colors = NavigationBarItemDefaults.colors(
+            indicatorColor = AppTheme.colorScheme.surface,
+            selectedIconColor = AppTheme.colorScheme.onSurface,
+            unselectedIconColor = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
+        ),
     )
 }
 

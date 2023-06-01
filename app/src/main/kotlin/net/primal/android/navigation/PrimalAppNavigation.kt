@@ -31,7 +31,7 @@ import net.primal.android.feed.list.FeedListViewModel
 import net.primal.android.feed.ui.FeedScreen
 import net.primal.android.login.LoginViewModel
 import net.primal.android.login.ui.DemoLoginScreen
-import net.primal.android.theme.PrimalTheme
+import net.primal.android.theme.AppTheme
 import org.apache.commons.lang3.CharEncoding
 import java.net.URLDecoder
 import java.net.URLEncoder
@@ -115,7 +115,7 @@ fun PrimalAppNavigation() {
 
     ModalBottomSheetLayout(
         bottomSheetNavigator = bottomSheetNavigator,
-        sheetShape = PrimalTheme.shapes.medium,
+        sheetShape = AppTheme.shapes.medium,
     ) {
         NavHost(
             navController = navController,
@@ -373,17 +373,18 @@ private fun NavGraphBuilder.signOut(
     route = route,
 ) {
     AlertDialog(
+        containerColor = AppTheme.colorScheme.surfaceVariant,
         onDismissRequest = { navController.popBackStack() },
         title = {
             Text(
                 text = "Sign out",
-                style = PrimalTheme.typography.titleLarge
+                style = AppTheme.typography.titleLarge
             )
         },
         text = {
             Text(
                 text = "Do you really want to sign out?",
-                style = PrimalTheme.typography.bodyLarge
+                style = AppTheme.typography.bodyLarge
             )
         },
         dismissButton = {

@@ -1,5 +1,6 @@
 package net.primal.android.feed.ui.post
 
+import android.content.res.Configuration
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -13,13 +14,11 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -29,8 +28,6 @@ import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
@@ -51,8 +48,10 @@ import net.primal.android.core.compose.icons.primaliconpack.FeedRepostsFilled
 import net.primal.android.core.compose.icons.primaliconpack.FeedZaps
 import net.primal.android.core.compose.icons.primaliconpack.FeedZapsFilled
 import net.primal.android.core.utils.asBeforeNowFormat
+import net.primal.android.core.utils.isPrimalIdentifier
 import net.primal.android.feed.ui.model.FeedPostStatsUi
 import net.primal.android.feed.ui.model.FeedPostUi
+import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -67,9 +66,6 @@ fun FeedPostListItem(
             .wrapContentHeight()
             .padding(horizontal = 4.dp)
             .clickable { onClick() },
-        colors = CardDefaults.cardColors(
-
-        ),
     ) {
         if (data.repostAuthorDisplayName != null) {
             RepostedItem(repostedBy = data.repostAuthorDisplayName)
@@ -142,8 +138,7 @@ fun PostContent(
                 pushStringAnnotation("URL", url)
                 withStyle(
                     style = SpanStyle(
-                        color = PrimalTheme.colors.primary,
-                        fontWeight = FontWeight.Bold
+                        color = AppTheme.colorScheme.primary,
                     )
                 ) {
                     append(url)
@@ -162,7 +157,7 @@ fun PostContent(
     ) {
         if (contentText.isNotEmpty()) {
             Text(
-                style = PrimalTheme.typography.bodyLarge,
+                style = AppTheme.typography.bodyMedium,
                 text = contentText,
                 maxLines = 12,
                 overflow = TextOverflow.Ellipsis,
@@ -245,7 +240,7 @@ fun SinglePostStat(
     val inlineContent = mapOf(
         "icon" to InlineTextContent(
             placeholder = Placeholder(
-                24.sp, 24.sp, PlaceholderVerticalAlign.Center
+                24.sp, 24.sp, PlaceholderVerticalAlign.TextCenter
             )
         ) {
             Box(
@@ -255,9 +250,9 @@ fun SinglePostStat(
                 Image(
                     imageVector = if (highlight) iconVectorHighlight else iconVector,
                     contentDescription = null,
-                    colorFilter = if (highlight) ColorFilter.tint(
-                        color = Color(0xFFAB268E)
-                    ) else null
+                    colorFilter = if (!highlight) {
+                        ColorFilter.tint(color = AppTheme.extraColorScheme.onSurfaceVariantAlt4)
+                    } else null
                 )
             }
         }
@@ -265,6 +260,8 @@ fun SinglePostStat(
 
     Text(
         text = titleText,
+        style = AppTheme.typography.bodyMedium,
+        color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
         inlineContent = inlineContent,
     )
 }
@@ -287,7 +284,8 @@ fun PostAuthorItem(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         AvatarThumbnailListItemImage(
-            source = authorAvatarUrl
+            source = authorAvatarUrl,
+            hasBorder = authorInternetIdentifier.isPrimalIdentifier(),
         )
 
         Column(
@@ -298,12 +296,24 @@ fun PostAuthorItem(
                 res = LocalContext.current.resources
             )
 
+            val suffixText = buildAnnotatedString {
+                if (!hasVerifiedBadge) append(' ')
+                append(
+                    AnnotatedString(
+                        text = "| $timestamp",
+                        spanStyle = SpanStyle(
+                            color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                            fontStyle = AppTheme.typography.bodyMedium.fontStyle,
+                        )
+                    )
+                )
+            }
             NostrUserText(
                 displayName = authorDisplayName,
                 verifiedBadge = hasVerifiedBadge,
                 internetIdentifier = authorInternetIdentifier,
                 annotatedStringSuffixBuilder = {
-                    append("| $timestamp")
+                    append(suffixText)
                 }
             )
 
@@ -312,6 +322,8 @@ fun PostAuthorItem(
                     text = authorInternetIdentifier,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
+                    style = AppTheme.typography.bodyMedium,
+                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
                 )
             }
         }
@@ -329,6 +341,7 @@ private fun RepostedItem(
             .padding(top = 8.dp),
         contentAlignment = Alignment.Center,
     ) {
+
         PrimalClickableText(
             modifier = Modifier.fillMaxWidth(),
             text = buildAnnotatedString {
@@ -338,24 +351,27 @@ private fun RepostedItem(
                     AnnotatedString(
                         text = repostedBy,
                         spanStyle = SpanStyle(
-                            color = PrimalTheme.colors.primary,
-                            fontWeight = FontWeight.Bold
+                            color = AppTheme.colorScheme.primary,
                         )
                     )
                 )
                 append(' ')
-                append(AnnotatedString(stringResource(id = R.string.feed_reposted_suffix)))
+                append(
+                    AnnotatedString(
+                        text = stringResource(id = R.string.feed_reposted_suffix),
+                        spanStyle = SpanStyle(
+                            color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                        )
+                    )
+                )
             },
-            style = PrimalTheme.typography.bodyLarge.copy(
-                textAlign = TextAlign.Start,
-                lineHeight = 16.sp,
-            ),
+            style = AppTheme.typography.bodyMedium,
             onClick = {
 
             },
             inlineContent = mapOf(
                 "icon" to InlineTextContent(
-                    placeholder = Placeholder(24.sp, 24.sp, PlaceholderVerticalAlign.Center)
+                    placeholder = Placeholder(24.sp, 24.sp, PlaceholderVerticalAlign.TextCenter)
                 ) {
                     Box(
                         modifier = Modifier.fillMaxSize(),
@@ -363,7 +379,10 @@ private fun RepostedItem(
                     ) {
                         Image(
                             imageVector = PrimalIcons.FeedReposts,
-                            contentDescription = null
+                            contentDescription = null,
+                            colorFilter = ColorFilter.tint(
+                                color = AppTheme.extraColorScheme.onSurfaceVariantAlt2
+                            ),
                         )
                     }
                 }
@@ -372,21 +391,68 @@ private fun RepostedItem(
     }
 }
 
-@Preview
+
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Composable
-fun PreviewFeedPostListItem() {
+fun PreviewFeedPostListItemLight() {
     PrimalTheme {
         FeedPostListItem(
             data = FeedPostUi(
                 postId = "random",
                 repostId = "repostRandom",
-                content = "My content.",
+                repostAuthorDisplayName = "jack",
+                content = """
+                    Unfortunately the days of using pseudonyms in metaspace are numbered. 
+
+                    It won't be long before non-trivial numbers of individuals and businesses 
+                    have augmented reality HUDs that incorporate real-time facial recognition. 
+                    Hiding behind a pseudonym will become a distant dream.
+                """.trimIndent(),
                 urls = emptyList(),
-                authorDisplayName = "signal_and_rage (go go power rangers)",
-                authorInternetIdentifier = "miljan@primal.net",
+                authorDisplayName = "android_robots_from_space",
+                authorInternetIdentifier = "android@primal.net",
                 authorAvatarUrl = "https://i.imgur.com/Z8dpmvc.png",
                 timestamp = Instant.now().minus(30, ChronoUnit.MINUTES),
-                stats = FeedPostStatsUi(),
+                stats = FeedPostStatsUi(
+                    repliesCount = 11,
+                    likesCount = 256,
+                    repostsCount = 42,
+                    zapsCount = 555,
+                ),
+            ),
+            onClick = {},
+        )
+    }
+
+}
+
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+fun PreviewFeedPostListItemDark() {
+    PrimalTheme {
+        FeedPostListItem(
+            data = FeedPostUi(
+                postId = "random",
+                repostId = "repostRandom",
+                repostAuthorDisplayName = "jack",
+                content = """
+                    Unfortunately the days of using pseudonyms in metaspace are numbered. 
+
+                    It won't be long before non-trivial numbers of individuals and businesses 
+                    have augmented reality HUDs that incorporate real-time facial recognition. 
+                    Hiding behind a pseudonym will become a distant dream.
+                """.trimIndent(),
+                urls = emptyList(),
+                authorDisplayName = "android",
+                authorInternetIdentifier = "android@primal.net",
+                authorAvatarUrl = "https://i.imgur.com/Z8dpmvc.png",
+                timestamp = Instant.now().minus(30, ChronoUnit.MINUTES),
+                stats = FeedPostStatsUi(
+                    repliesCount = 11,
+                    likesCount = 256,
+                    repostsCount = 42,
+                    zapsCount = 555,
+                ),
             ),
             onClick = {},
         )

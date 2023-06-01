@@ -6,7 +6,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -28,6 +30,7 @@ import fr.acinq.secp256k1.Hex
 import net.primal.android.R
 import net.primal.android.core.compose.LoadingElevatedButton
 import net.primal.android.crypto.Bech32
+import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 
 @Composable
@@ -40,6 +43,8 @@ fun DemoLoginScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
+                    .systemBarsPadding()
+                    .navigationBarsPadding()
                     .padding(paddingValues = paddingValues)
                     .padding(horizontal = 16.dp),
                 verticalArrangement = Arrangement.Center,
@@ -51,7 +56,7 @@ fun DemoLoginScreen(
                     contentAlignment = Alignment.TopCenter,
                 ) {
                     Image(
-                        modifier = Modifier.clip(PrimalTheme.shapes.extraLarge),
+                        modifier = Modifier.clip(AppTheme.shapes.extraLarge),
                         painter = painterResource(id = R.drawable.ic_launcher_background),
                         contentDescription = null,
                     )
@@ -101,7 +106,7 @@ fun DemoLoginScreen(
                     modifier = Modifier.fillMaxWidth(),
                     text = "or",
                     textAlign = TextAlign.Center,
-                    style = PrimalTheme.typography.bodySmall,
+                    style = AppTheme.typography.labelMedium,
                 )
 
                 LoadingElevatedButton(

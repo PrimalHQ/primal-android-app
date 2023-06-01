@@ -1,5 +1,6 @@
 package net.primal.android.core.compose
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
@@ -9,6 +10,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil.compose.SubcomposeAsyncImage
@@ -17,17 +20,17 @@ import com.google.accompanist.placeholder.material.placeholder
 import com.google.accompanist.placeholder.material.shimmer
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
+import net.primal.android.theme.AppTheme
 
 @Composable
 fun AvatarThumbnailListItemImage(
     source: Any?,
     modifier: Modifier = Modifier,
+    hasBorder: Boolean = false,
 ) {
     SubcomposeAsyncImage(
         model = source,
-        modifier = modifier
-            .size(48.dp)
-            .clip(CircleShape),
+        modifier = modifier.adjustAvatarBackground(hasBorder = hasBorder),
         contentDescription = null,
         contentScale = ContentScale.Crop,
         loading = {
@@ -39,6 +42,36 @@ fun AvatarThumbnailListItemImage(
         },
         error = { DefaultAvatarThumbnailPlaceholderListItemImage() },
     )
+}
+
+@Composable
+private fun Modifier.adjustAvatarBackground(
+    hasBorder: Boolean = false,
+): Modifier {
+    return if (hasBorder) {
+        this.size(50.dp)
+            .border(
+                width = 2.dp,
+                brush = Brush.linearGradient(
+                    listOf(
+                        AppTheme.extraColorScheme.brand1,
+                        AppTheme.extraColorScheme.brand2
+                    )
+                ),
+                shape = CircleShape
+            )
+            .shadow(
+                elevation = 8.dp,
+                shape = CircleShape,
+                ambientColor = AppTheme.colorScheme.primary,
+                spotColor = AppTheme.colorScheme.primary,
+            )
+            .clip(CircleShape)
+    } else {
+        this.size(48.dp)
+            .clip(CircleShape)
+    }
+
 }
 
 @Composable

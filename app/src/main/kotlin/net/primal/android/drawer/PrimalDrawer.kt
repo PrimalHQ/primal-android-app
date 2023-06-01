@@ -2,6 +2,7 @@ package net.primal.android.drawer
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,11 +24,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -37,7 +41,9 @@ import net.primal.android.core.compose.AvatarThumbnailListItemImage
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.DarkMode
+import net.primal.android.core.compose.icons.primaliconpack.LightMode
 import net.primal.android.core.compose.icons.primaliconpack.QrCode
+import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 
 
@@ -74,15 +80,20 @@ fun PrimalDrawer(
 
     PrimalDrawer(
         state = uiState.value,
-        onDrawerDestinationClick = onDrawerDestinationClick
+        onDrawerDestinationClick = onDrawerDestinationClick,
+        eventPublisher = {
+            viewModel.setEvent(it)
+        }
     )
 }
 
 @Composable
 fun PrimalDrawer(
     state: PrimalDrawerContract.UiState,
+    eventPublisher: (PrimalDrawerContract.UiEvent) -> Unit,
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
 ) {
+    val isSystemInDarkTheme = isSystemInDarkTheme()
     Surface {
         Column(
             modifier = Modifier
@@ -95,13 +106,19 @@ fun PrimalDrawer(
             DrawerHeader()
 
             DrawerMenu(
-                modifier = Modifier.weight(1.0f).padding(vertical = 32.dp),
+                modifier = Modifier
+                    .weight(1.0f)
+                    .padding(vertical = 32.dp),
                 onDrawerDestinationClick = onDrawerDestinationClick,
             )
 
             DrawerFooter(
                 onThemeSwitch = {
-
+                    eventPublisher(
+                        PrimalDrawerContract.UiEvent.ThemeSwitchClick(
+                            isSystemInDarkTheme = isSystemInDarkTheme
+                        )
+                    )
                 }
             )
         }
@@ -151,6 +168,8 @@ private fun DrawerHeader() {
 
         Text(
             text = "miljan@primal.net",
+            style = AppTheme.typography.labelLarge,
+            color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
             modifier = Modifier.constrainAs(identifierRef) {
                 start.linkTo(startGuideline)
                 top.linkTo(usernameRef.bottom, margin = 8.dp)
@@ -158,8 +177,48 @@ private fun DrawerHeader() {
         )
 
 
+        val statsAnnotatedString = buildAnnotatedString {
+            append(
+                AnnotatedString(
+                    text = "135",
+                    spanStyle = SpanStyle(
+                        color = AppTheme.colorScheme.onSurfaceVariant,
+                        fontStyle = AppTheme.typography.labelLarge.fontStyle,
+                    )
+                )
+            )
+            append(
+                AnnotatedString(
+                    text = " Following",
+                    spanStyle = SpanStyle(
+                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                        fontStyle = AppTheme.typography.labelLarge.fontStyle,
+                    )
+                )
+            )
+            append("   ")
+            append(
+                AnnotatedString(
+                    text = "345",
+                    spanStyle = SpanStyle(
+                        color = AppTheme.colorScheme.onSurfaceVariant,
+                        fontStyle = AppTheme.typography.labelLarge.fontStyle,
+                    )
+                )
+            )
+            append(
+                AnnotatedString(
+                    text = " Followers",
+                    spanStyle = SpanStyle(
+                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                        fontStyle = AppTheme.typography.labelLarge.fontStyle,
+                    )
+                )
+            )
+        }
         Text(
-            text = "135 Following  345 Followers",
+            text = statsAnnotatedString,
+            style = AppTheme.typography.labelLarge,
             modifier = Modifier.constrainAs(statsRef) {
                 start.linkTo(startGuideline)
                 top.linkTo(identifierRef.bottom, margin = 8.dp)
@@ -167,7 +226,6 @@ private fun DrawerHeader() {
         )
     }
 }
-
 
 @Composable
 private fun DrawerMenu(
@@ -189,10 +247,12 @@ private fun DrawerMenu(
                 headlineContent = {
                     Text(
                         text = it.label().uppercase(),
-                        modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
-                        fontWeight = FontWeight.ExtraBold,
-                        fontSize = 20.sp,
-                        style = PrimalTheme.typography.bodyLarge,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 8.dp),
+                        style = AppTheme.typography.titleLarge,
+                        color = AppTheme.colorScheme.onSurfaceVariant,
+                        fontWeight = FontWeight.Black,
                     )
                 }
             )
@@ -207,13 +267,14 @@ private fun DrawerFooter(
     Box(
         modifier = Modifier.padding(vertical = 16.dp, horizontal = 24.dp),
     ) {
+        val isDarkTheme = AppTheme.colorScheme.surface.luminance() < 0.5f
+        val iconVector = if (isDarkTheme) PrimalIcons.DarkMode else PrimalIcons.LightMode
         IconButton(
             onClick = onThemeSwitch,
         ) {
-            Icon(imageVector = PrimalIcons.DarkMode, contentDescription = null)
+            Icon(imageVector = iconVector, contentDescription = null)
         }
     }
-
 }
 
 enum class DrawerScreenDestination {
@@ -238,6 +299,7 @@ fun PrimalDrawerPreview() {
     PrimalTheme {
         PrimalDrawer(
             state = PrimalDrawerContract.UiState(),
+            eventPublisher = {},
             onDrawerDestinationClick = {},
         )
     }

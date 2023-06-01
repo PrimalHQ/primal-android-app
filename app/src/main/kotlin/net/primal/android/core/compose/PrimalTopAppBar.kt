@@ -9,7 +9,7 @@ import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
-import net.primal.android.theme.PrimalTheme
+import net.primal.android.theme.AppTheme
 
 @ExperimentalMaterial3Api
 @Composable
@@ -31,7 +31,8 @@ fun PrimalTopAppBar(
         },
         actions = actions,
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-            scrolledContainerColor = PrimalTheme.colors.surface,
+            containerColor = AppTheme.colorScheme.surface,
+            scrolledContainerColor = AppTheme.colorScheme.surface,
         ),
         scrollBehavior = scrollBehavior,
     )

@@ -1,101 +1,52 @@
 package net.primal.android.theme
 
-import android.app.Activity
-import android.os.Build
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ColorScheme
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Shapes
-import androidx.compose.material3.Typography
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
-import androidx.compose.material3.lightColorScheme
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
-import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalView
-import androidx.core.view.WindowCompat
+import net.primal.android.theme.colors.ExtraColorScheme
+import net.primal.android.theme.colors.iceColorScheme
+import net.primal.android.theme.colors.iceExtraColorScheme
+import net.primal.android.theme.colors.midnightColorScheme
+import net.primal.android.theme.colors.midnightExtraColorScheme
+import net.primal.android.theme.colors.sunriseColorScheme
+import net.primal.android.theme.colors.sunriseExtraColorScheme
+import net.primal.android.theme.colors.sunsetColorScheme
+import net.primal.android.theme.colors.sunsetExtraColorScheme
 
-private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
-)
-
-private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
-)
-
-@Composable
-fun PrimalTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = false,
-    content: @Composable () -> Unit
+enum class PrimalTheme(
+    val theme: String,
+    val inverseTheme: String,
+    val colorScheme: ColorScheme,
+    val extraColorScheme: ExtraColorScheme,
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+    Sunset(
+        theme = "sunset",
+        inverseTheme = "sunrise",
+        colorScheme = sunsetColorScheme,
+        extraColorScheme = sunsetExtraColorScheme,
+    ),
+
+    Sunrise(
+        theme = "sunrise",
+        inverseTheme = "sunset",
+        colorScheme = sunriseColorScheme,
+        extraColorScheme = sunriseExtraColorScheme,
+    ),
+
+    Midnight(
+        theme = "midnight",
+        inverseTheme = "ice",
+        colorScheme = midnightColorScheme,
+        extraColorScheme = midnightExtraColorScheme,
+    ),
+
+    Ice(
+        theme = "ice",
+        inverseTheme = "midnight",
+        colorScheme = iceColorScheme,
+        extraColorScheme = iceExtraColorScheme,
+    );
+
+    companion object {
+        fun valueOf(themeName: String): PrimalTheme? =
+            enumValues<PrimalTheme>().find { it.theme == themeName }
     }
-
-    AdjustSystemColors(colorScheme = colorScheme, darkTheme = darkTheme)
-
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = Typography,
-        content = content
-    )
-}
-
-@Composable
-private fun AdjustSystemColors(
-    colorScheme: ColorScheme,
-    darkTheme: Boolean,
-) {
-    val view = LocalView.current
-    val surfaceColor = colorScheme.surface
-    if (!view.isInEditMode) {
-        SideEffect {
-            val window = (view.context as Activity).window
-            val insetsController = WindowCompat.getInsetsController(window, view)
-
-            window.statusBarColor = surfaceColor.toArgb()
-            insetsController.isAppearanceLightStatusBars = !darkTheme
-
-            window.navigationBarColor = surfaceColor.toArgb()
-            insetsController.isAppearanceLightNavigationBars = !darkTheme
-        }
-    }
-}
-
-object PrimalTheme {
-
-    val colors: ColorScheme
-        @Composable
-        get() = MaterialTheme.colorScheme
-
-    val typography: Typography
-        @Composable
-        get() = MaterialTheme.typography
-
-    val shapes: Shapes
-        @Composable
-        get() = MaterialTheme.shapes
 }

@@ -9,3 +9,5 @@ fun String.ellipsizeMiddle(size: Int): String {
         "$firstEight...$lastEight"
     }
 }
+
+fun String?.isPrimalIdentifier() = this?.contains("primal.net") == true

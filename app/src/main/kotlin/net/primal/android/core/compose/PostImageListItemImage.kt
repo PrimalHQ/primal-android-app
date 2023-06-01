@@ -14,7 +14,7 @@ import com.google.accompanist.placeholder.material.placeholder
 import com.google.accompanist.placeholder.material.shimmer
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
-import net.primal.android.theme.PrimalTheme
+import net.primal.android.theme.AppTheme
 
 @Composable
 fun PostImageListItemImage(
@@ -24,7 +24,7 @@ fun PostImageListItemImage(
     SubcomposeAsyncImage(
         model = source,
         modifier = modifier
-            .clip(PrimalTheme.shapes.medium),
+            .clip(AppTheme.shapes.medium),
         contentDescription = null,
         contentScale = ContentScale.FillWidth,
         loading = {
