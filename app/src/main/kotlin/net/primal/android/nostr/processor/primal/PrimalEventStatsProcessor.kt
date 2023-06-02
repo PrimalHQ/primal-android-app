@@ -4,7 +4,7 @@ import kotlinx.serialization.decodeFromString
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.feed.db.PostStats
 import net.primal.android.nostr.model.primal.NostrPrimalEvent
-import net.primal.android.nostr.model.primal.response.ContentPrimalEventStats
+import net.primal.android.nostr.model.primal.content.ContentPrimalEventStats
 import net.primal.android.serialization.NostrJson
 
 class PrimalEventStatsProcessor(

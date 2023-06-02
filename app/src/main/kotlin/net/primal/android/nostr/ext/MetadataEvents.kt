@@ -3,7 +3,7 @@ package net.primal.android.nostr.ext
 import kotlinx.serialization.decodeFromString
 import net.primal.android.core.utils.ellipsizeMiddle
 import net.primal.android.crypto.toNpub
-import net.primal.android.nostr.model.ContentMetadata
+import net.primal.android.nostr.model.content.ContentMetadata
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.profile.db.ProfileMetadata
 import net.primal.android.serialization.NostrJson

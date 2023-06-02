@@ -4,8 +4,8 @@ import kotlinx.serialization.decodeFromString
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.feed.db.Feed
 import net.primal.android.nostr.model.primal.NostrPrimalEvent
-import net.primal.android.nostr.model.primal.response.AppSettingsResponse
-import net.primal.android.nostr.model.primal.response.FeedData
+import net.primal.android.nostr.model.primal.content.ContentAppSettings
+import net.primal.android.nostr.model.primal.content.ContentFeedData
 import net.primal.android.serialization.NostrJson
 
 class PrimalSettingsProcessor(
@@ -15,12 +15,12 @@ class PrimalSettingsProcessor(
     override fun process(events: List<NostrPrimalEvent>) {
         database.feeds().upsertAll(
             data = events
-                .map { NostrJson.decodeFromString<AppSettingsResponse>(it.content) }
+                .map { NostrJson.decodeFromString<ContentAppSettings>(it.content) }
                 .flatMap { it.feeds }
                 .map { it.asFeedPO() }
         )
     }
 
-    private fun FeedData.asFeedPO(): Feed = Feed(name = name, directive = hex)
+    private fun ContentFeedData.asFeedPO(): Feed = Feed(name = name, directive = directive)
 
 }

@@ -1,4 +1,4 @@
-package net.primal.android.nostr.model.primal.response
+package net.primal.android.nostr.model.primal.content
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
