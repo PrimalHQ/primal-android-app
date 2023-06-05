@@ -1,5 +1,5 @@
 package net.primal.android.nostr.model.primal
 
-enum class NostrPrimalTimeframe {
+enum class PrimalTimeframe {
     Trending, Zapped, Popular, Latest
 }

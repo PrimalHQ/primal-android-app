@@ -3,7 +3,7 @@ package net.primal.android.nostr.ext
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.decodeFromJsonElement
 import net.primal.android.nostr.model.NostrEvent
-import net.primal.android.nostr.model.primal.NostrPrimalEvent
+import net.primal.android.nostr.model.primal.PrimalEvent
 import net.primal.android.serialization.NostrJson
 
 fun JsonObject?.asNostrEventOrNull(): NostrEvent? {
@@ -14,7 +14,7 @@ fun JsonObject?.asNostrEventOrNull(): NostrEvent? {
     }
 }
 
-fun JsonObject?.asNostrPrimalEventOrNull(): NostrPrimalEvent? {
+fun JsonObject?.asPrimalEventOrNull(): PrimalEvent? {
     return try {
         if (this != null) NostrJson.decodeFromJsonElement(this) else null
     } catch (error: IllegalArgumentException) {

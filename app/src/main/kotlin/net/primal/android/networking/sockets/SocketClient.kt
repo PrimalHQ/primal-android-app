@@ -17,14 +17,12 @@ import net.primal.android.networking.di.PrimalApiWS
 import net.primal.android.networking.sockets.model.IncomingMessage
 import net.primal.android.networking.sockets.model.OutgoingMessage
 import net.primal.android.nostr.ext.asNostrEventOrNull
-import net.primal.android.nostr.ext.asNostrPrimalEventOrNull
+import net.primal.android.nostr.ext.asPrimalEventOrNull
 import net.primal.android.nostr.ext.isNotPrimalEventKind
 import net.primal.android.nostr.ext.isNotUnknown
 import net.primal.android.nostr.ext.isPrimalEventKind
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.model.NostrVerb
-import net.primal.android.nostr.model.primal.NostrPrimalEvent
-import net.primal.android.nostr.model.primal.content.ContentPrimalPaging
 import net.primal.android.serialization.NostrJson
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -139,13 +137,12 @@ class SocketClient @Inject constructor(
 
         val primalEvents = allEvents
             .filter { it.getMessageNostrEventKind().isPrimalEventKind() }
-            .mapNotNull { it.data.asNostrPrimalEventOrNull() }
+            .mapNotNull { it.data.asPrimalEventOrNull() }
 
         return SocketQueryResult(
             terminationMessage = terminationMessage,
             nostrEvents = nostrEvents,
             primalEvents = primalEvents,
-            pagingEvent = primalEvents.findPagingEventOrNull(),
         )
     }
 
@@ -155,16 +152,6 @@ class SocketClient @Inject constructor(
             emit(it)
             it.type == NostrVerb.Incoming.EVENT
         }
-
-    private fun List<NostrPrimalEvent>?.findPagingEventOrNull(): ContentPrimalPaging? {
-        val pagingEvent = this?.firstOrNull { it.kind == NostrEventKind.PrimalPaging.value }
-        val pagingContent = pagingEvent?.content ?: return null
-        return try {
-            NostrJson.decodeFromString(pagingContent)
-        } catch (error: IllegalArgumentException) {
-            null
-        }
-    }
 
     private fun IncomingMessage.getMessageNostrEventKind(): NostrEventKind {
         val kind = data?.get("kind")?.jsonPrimitive?.content?.toIntOrNull()

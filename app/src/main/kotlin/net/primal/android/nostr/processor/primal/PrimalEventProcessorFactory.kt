@@ -3,10 +3,10 @@ package net.primal.android.nostr.processor.primal
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.nostr.model.NostrEventKind
 
-class NostrPrimalEventProcessorFactory(
+class PrimalEventProcessorFactory(
     private val database: PrimalDatabase,
 ) {
-    fun create(kind: NostrEventKind): NostrPrimalEventProcessor? {
+    fun create(kind: NostrEventKind): PrimalEventProcessor? {
         return when (kind) {
             NostrEventKind.PrimalDefaultSettings -> PrimalSettingsProcessor(database = database)
             NostrEventKind.PrimalEventStats -> PrimalEventStatsProcessor(database = database)

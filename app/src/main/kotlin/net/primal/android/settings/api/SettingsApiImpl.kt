@@ -22,7 +22,7 @@ class SettingsApiImpl @Inject constructor(
             it.kind == NostrEventKind.PrimalDefaultSettings.value
         }
 
-        return AppSettingsResponse(event = settingsEvent)
+        return AppSettingsResponse(defaultSettings = settingsEvent)
     }
 
 }

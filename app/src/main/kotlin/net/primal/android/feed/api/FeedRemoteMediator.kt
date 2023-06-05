@@ -16,9 +16,9 @@ import net.primal.android.nostr.ext.mapNotNullAsPost
 import net.primal.android.nostr.ext.mapNotNullAsRepost
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.NostrEventKind
-import net.primal.android.nostr.model.primal.NostrPrimalEvent
+import net.primal.android.nostr.model.primal.PrimalEvent
 import net.primal.android.nostr.processor.NostrEventProcessorFactory
-import net.primal.android.nostr.processor.primal.NostrPrimalEventProcessorFactory
+import net.primal.android.nostr.processor.primal.PrimalEventProcessorFactory
 import timber.log.Timber
 
 @ExperimentalPagingApi
@@ -47,14 +47,13 @@ class FeedRemoteMediator(
                 )
             )
 
-            response.nostrEvents.apply {
-                processShortTextNotesAndReposts(feedDirective = feedDirective)
-                dropRepostsAndShortTextNotes().processAllNostrEvents()
-            }
-
-            response.primalEvents.apply {
-                processAllNostrPrimalEvents()
-            }
+            processShortTextNotesAndReposts(
+                feedDirective = feedDirective,
+                shortTextNoteEvents = response.shortTextNotes,
+                repostEvents = response.reposts,
+            )
+            response.metadata.processNostrEvents()
+            response.allPrimalEvents.processPrimalEvents()
 
             Timber.d("PagingEvent=${response.paging}")
         }
@@ -62,15 +61,14 @@ class FeedRemoteMediator(
         return MediatorResult.Success(endOfPaginationReached = true)
     }
 
-    private suspend fun List<NostrEvent>.processShortTextNotesAndReposts(
-        feedDirective: String
+    private suspend fun processShortTextNotesAndReposts(
+        feedDirective: String,
+        shortTextNoteEvents: List<NostrEvent>,
+        repostEvents: List<NostrEvent>,
     ) {
-        val mapByKind = groupBy { NostrEventKind.valueOf(it.kind) }
-        val shortTextNoteEvents = mapByKind[NostrEventKind.ShortTextNote]
-        val repostEvents = mapByKind[NostrEventKind.Reposts]
         database.withTransaction {
-            val posts = shortTextNoteEvents?.mapNotNullAsPost() ?: emptyList()
-            val reposts = repostEvents?.mapNotNullAsRepost() ?: emptyList()
+            val posts = shortTextNoteEvents.mapNotNullAsPost()
+            val reposts = repostEvents.mapNotNullAsRepost()
             Timber.i("Received ${posts.size} posts and ${reposts.size} reposts..")
 
             database.posts().upsertAll(data = posts)
@@ -88,13 +86,8 @@ class FeedRemoteMediator(
         }
     }
 
-    private fun List<NostrEvent>.dropRepostsAndShortTextNotes(): List<NostrEvent> = filter {
-        it.kind != NostrEventKind.Reposts.value && it.kind != NostrEventKind.ShortTextNote.value
-    }
-
-    private fun List<NostrEvent>.processAllNostrEvents() {
+    private fun List<NostrEvent>.processNostrEvents() {
         val factory = NostrEventProcessorFactory(database = database)
-
         this.groupBy { NostrEventKind.valueOf(it.kind) }
             .forEachKey {
                 val events = getValue(it)
@@ -103,8 +96,8 @@ class FeedRemoteMediator(
             }
     }
 
-    private fun List<NostrPrimalEvent>.processAllNostrPrimalEvents() {
-        val factory = NostrPrimalEventProcessorFactory(database = database)
+    private fun List<PrimalEvent>.processPrimalEvents() {
+        val factory = PrimalEventProcessorFactory(database = database)
         this.groupBy { NostrEventKind.valueOf(it.kind) }
             .forEachKey {
                 val events = getValue(it)

@@ -1,5 +1,5 @@
 package net.primal.android.nostr.model.primal
 
-enum class NostrPrimalScope {
+enum class PrimalScope {
     Follows, Tribe, Network, Global
 }

@@ -16,9 +16,9 @@ class SettingsRepository @Inject constructor(
 
     suspend fun fetchDefaultAppSettingsToDatabase() = withContext(Dispatchers.IO) {
         val response = settingsApi.getDefaultAppSettings()
-        if (response.event != null) {
+        if (response.defaultSettings != null) {
             val settingsProcessor = PrimalSettingsProcessor(database = database)
-            settingsProcessor.process(listOf(response.event))
+            settingsProcessor.process(listOf(response.defaultSettings))
         }
     }
 
