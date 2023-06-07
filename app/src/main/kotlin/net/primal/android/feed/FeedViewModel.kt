@@ -3,6 +3,7 @@ package net.primal.android.feed
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.cachedIn
 import androidx.paging.map
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -40,9 +41,9 @@ class FeedViewModel @Inject constructor(
 
     private val _state = MutableStateFlow(
         UiState(
-            posts = feedRepository.feedByDirectivePaged(feedDirective = feedDirective).map {
-                it.map { feed -> feed.asFeedPostUi() }
-            },
+            posts = feedRepository.feedByDirective(feedDirective = feedDirective)
+                .map { it.map { feed -> feed.asFeedPostUi() } }
+                .cachedIn(viewModelScope),
         )
     )
     val state = _state.asStateFlow()
@@ -76,8 +77,10 @@ class FeedViewModel @Inject constructor(
     private fun FeedPost.asFeedPostUi() = FeedPostUi(
         postId = this.data.postId,
         repostId = this.data.repostId,
-        repostAuthorDisplayName = this.repostAuthor?.displayNameUiFriendly() ?: this.data.repostAuthorId?.asEllipsizedNpub(),
-        authorDisplayName = this.author?.displayNameUiFriendly() ?: this.data.authorId.asEllipsizedNpub(),
+        repostAuthorDisplayName = this.repostAuthor?.displayNameUiFriendly()
+            ?: this.data.repostAuthorId?.asEllipsizedNpub(),
+        authorDisplayName = this.author?.displayNameUiFriendly()
+            ?: this.data.authorId.asEllipsizedNpub(),
         authorInternetIdentifier = this.author?.internetIdentifier,
         authorAvatarUrl = this.author?.picture,
         timestamp = Instant.ofEpochSecond(this.data.createdAt),

@@ -24,6 +24,7 @@ import net.primal.android.core.compose.icons.primaliconpack.LightMode
 import net.primal.android.core.compose.icons.primaliconpack.Messages
 import net.primal.android.core.compose.icons.primaliconpack.More
 import net.primal.android.core.compose.icons.primaliconpack.Notifications
+import net.primal.android.core.compose.icons.primaliconpack.Notrich
 import net.primal.android.core.compose.icons.primaliconpack.QrCode
 import net.primal.android.core.compose.icons.primaliconpack.Read
 import net.primal.android.core.compose.icons.primaliconpack.Search
@@ -68,7 +69,8 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             Verified,
             QrCode,
             DarkMode,
-            LightMode
+            LightMode,
+            Notrich
         )
         return __PrimalIcons!!
     }

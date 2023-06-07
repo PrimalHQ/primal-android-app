@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
@@ -26,6 +27,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
@@ -41,13 +43,14 @@ import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
+import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.PrimalNavigationBar
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.PrimalTopLevelDestination
-import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.FeedPicker
 import net.primal.android.core.compose.isEmpty
+import net.primal.android.core.compose.isMediatorAppendLoading
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.PrimalDrawer
 import net.primal.android.feed.FeedContract
@@ -105,7 +108,10 @@ fun FeedScreen(
             val bottomBarOffsetHeightPx = remember { mutableStateOf(0f) }
             val nestedScrollConnection = remember {
                 object : NestedScrollConnection {
-                    override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                    override fun onPreScroll(
+                        available: Offset,
+                        source: NestedScrollSource
+                    ): Offset {
                         val delta = available.y
                         val newOffset = bottomBarOffsetHeightPx.value + delta
                         bottomBarOffsetHeightPx.value = newOffset.coerceIn(-bottomBarHeightPx, 0f)
@@ -139,12 +145,14 @@ fun FeedScreen(
                     when {
                         pagingItems.isEmpty() -> {
                             Box(
-                                modifier = Modifier.padding(paddingValues),
+                                modifier = Modifier
+                                    .padding(paddingValues)
+                                    .fillMaxSize(),
                             ) {
                                 CircularProgressIndicator(
                                     modifier = Modifier
-                                        .fillMaxSize()
                                         .wrapContentSize()
+                                        .align(Alignment.Center)
                                 )
                             }
                         }
@@ -205,6 +213,24 @@ fun FeedList(
                 )
 
                 else -> {}
+            }
+        }
+
+        if (pagingItems.isMediatorAppendLoading()) {
+            item(
+                contentType = "Loading"
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(64.dp)
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .wrapContentSize()
+                            .align(Alignment.Center)
+                    )
+                }
             }
         }
     }

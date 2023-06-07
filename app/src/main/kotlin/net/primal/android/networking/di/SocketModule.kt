@@ -13,7 +13,7 @@ object SocketModule {
     @Provides
     @PrimalApiWS
     fun providePrimalApiWSRequest() = Request.Builder()
-        .url("wss://cache3.primal.net/cache15")
+        .url("wss://cache3.primal.net/cache17")
         .build()
 
 }
