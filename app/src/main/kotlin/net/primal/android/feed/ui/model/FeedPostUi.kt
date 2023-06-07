@@ -1,5 +1,6 @@
 package net.primal.android.feed.ui.model
 
+import net.primal.android.nostr.model.primal.PrimalResourceVariant
 import java.time.Instant
 
 data class FeedPostUi(
@@ -10,7 +11,7 @@ data class FeedPostUi(
     val authorInternetIdentifier: String? = null,
     val authorAvatarUrl: String? = null,
     val content: String,
-    val urls: List<String>,
+    val resources: List<PostResource>,
     val timestamp: Instant,
     val stats: FeedPostStatsUi,
 )
@@ -24,4 +25,10 @@ data class FeedPostStatsUi(
     val userLiked: Boolean = false,
     val repostsCount: Int = 0,
     val userReposted: Boolean = false,
+)
+
+data class PostResource(
+    val url: String,
+    val mimeType: String? = null,
+    val variants: List<PrimalResourceVariant> = emptyList(),
 )

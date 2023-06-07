@@ -4,8 +4,11 @@ appcompat = "1.6.1"
 coil = "2.2.2"
 constraintlayout = "2.1.4"
 constraintlayout-compose = "1.0.1"
+core-testing = "2.2.0"
 datastore = "1.0.0"
+kotest = "5.5.5"
 kotlinx-serialization-json = "1.5.0"
+mockk = "1.13.5"
 okhttp = "4.11.0"
 org-jetbrains-kotlin-android = "1.8.10"
 compose-bom = "2023.05.01"
@@ -104,7 +107,12 @@ spongycastle-core = { module = "com.madgag.spongycastle:core", version.ref = "sp
 # Tests libs
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidx-test-ext-junit" }
+androidx-core-testing = { module = "androidx.arch.core:core-testing", version.ref = "core-testing" }
 espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso-core" }
+mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
+mockk-android = { module = "io.mockk:mockk-android", version.ref = "mockk" }
+kotest-assertions-core = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }
+kotest-assertions-json = { module = "io.kotest:kotest-assertions-json", version.ref = "kotest" }
 
 [bundles]
 hilt = ["hilt-android", "navigation-hilt"]

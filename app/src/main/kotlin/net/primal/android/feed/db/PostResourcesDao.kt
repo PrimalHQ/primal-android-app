@@ -1,11 +1,13 @@
 package net.primal.android.feed.db
 
 import androidx.room.Dao
-import androidx.room.Upsert
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+
 @Dao
 interface PostResourcesDao {
 
-    @Upsert
-    fun upsertAll(data: List<PostResource>)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    fun insertOrIgnore(data: List<PostResource>)
 
 }

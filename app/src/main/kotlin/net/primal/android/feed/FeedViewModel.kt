@@ -22,6 +22,7 @@ import net.primal.android.feed.db.FeedPost
 import net.primal.android.feed.repository.FeedRepository
 import net.primal.android.feed.ui.model.FeedPostStatsUi
 import net.primal.android.feed.ui.model.FeedPostUi
+import net.primal.android.feed.ui.model.PostResource
 import net.primal.android.navigation.feedDirective
 import net.primal.android.nostr.ext.asEllipsizedNpub
 import net.primal.android.nostr.ext.displayNameUiFriendly
@@ -85,7 +86,13 @@ class FeedViewModel @Inject constructor(
         authorAvatarUrl = this.author?.picture,
         timestamp = Instant.ofEpochSecond(this.data.createdAt),
         content = this.data.content,
-        urls = this.data.urls,
+        resources = this.resources.map {
+           PostResource(
+               url = it.url,
+               mimeType = it.contentType,
+               variants = it.variants ?: emptyList(),
+           )
+        },
         stats = FeedPostStatsUi(
             repliesCount = this.postStats?.replies ?: 0,
             userReplied = false,

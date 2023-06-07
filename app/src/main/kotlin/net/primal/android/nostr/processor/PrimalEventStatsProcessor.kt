@@ -11,7 +11,7 @@ class PrimalEventStatsProcessor(
     private val database: PrimalDatabase
 ) : PrimalEventProcessor {
 
-    override fun process(events: List<PrimalEvent>) {
+    override suspend fun process(events: List<PrimalEvent>) {
         database.eventStats().upsertAll(
             data = events
                 .map { NostrJson.decodeFromString<ContentPrimalEventStats>(it.content) }

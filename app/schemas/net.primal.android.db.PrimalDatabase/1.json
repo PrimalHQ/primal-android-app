@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "aae9295a52a35b81d417a2d9020f0cef",
+    "identityHash": "ff48fe50908e678bcf0de9a22dca649e",
     "entities": [
       {
         "tableName": "PostData",
@@ -278,23 +278,11 @@
       },
       {
         "tableName": "PostResource",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `postId` TEXT NOT NULL, `mimeType` TEXT NOT NULL, `url` TEXT NOT NULL, `variants` TEXT NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`postId` TEXT NOT NULL, `url` TEXT NOT NULL, `contentType` TEXT, `variants` TEXT, PRIMARY KEY(`postId`, `url`))",
         "fields": [
-          {
-            "fieldPath": "id",
-            "columnName": "id",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
           {
             "fieldPath": "postId",
             "columnName": "postId",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "mimeType",
-            "columnName": "mimeType",
             "affinity": "TEXT",
             "notNull": true
           },
@@ -305,16 +293,23 @@
             "notNull": true
           },
           {
+            "fieldPath": "contentType",
+            "columnName": "contentType",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
             "fieldPath": "variants",
             "columnName": "variants",
             "affinity": "TEXT",
-            "notNull": true
+            "notNull": false
           }
         ],
         "primaryKey": {
-          "autoGenerate": true,
+          "autoGenerate": false,
           "columnNames": [
-            "id"
+            "postId",
+            "url"
           ]
         },
         "indices": [],
@@ -422,12 +417,12 @@
     "views": [
       {
         "viewName": "FeedPostData",
-        "createSql": "CREATE VIEW `${VIEW_NAME}` AS SELECT \n        PostData.postId,\n        PostData.authorId,\n        PostData.createdAt,\n        PostData.content,\n        PostData.urls,\n        PostData.referencePostId,\n        PostData.referencePostAuthorId,\n        RepostData.repostId AS repostId,\n        RepostData.authorId AS repostAuthorId,\n        COALESCE(RepostData.createdAt, PostData.createdAt) AS feedCreatedAt\n    FROM PostData\n    LEFT JOIN RepostData ON RepostData.postId = PostData.postId"
+        "createSql": "CREATE VIEW `${VIEW_NAME}` AS SELECT \n        PostData.postId,\n        PostData.authorId,\n        PostData.createdAt,\n        PostData.content,\n        PostData.referencePostId,\n        PostData.referencePostAuthorId,\n        RepostData.repostId AS repostId,\n        RepostData.authorId AS repostAuthorId,\n        COALESCE(RepostData.createdAt, PostData.createdAt) AS feedCreatedAt\n    FROM PostData\n    LEFT JOIN RepostData ON RepostData.postId = PostData.postId"
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'aae9295a52a35b81d417a2d9020f0cef')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'ff48fe50908e678bcf0de9a22dca649e')"
     ]
   }
 }

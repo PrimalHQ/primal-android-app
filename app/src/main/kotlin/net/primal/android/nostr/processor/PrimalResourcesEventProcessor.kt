@@ -12,8 +12,8 @@ class PrimalResourcesEventProcessor(
     private val database: PrimalDatabase
 ) : PrimalEventProcessor {
 
-    override fun process(events: List<PrimalEvent>) {
-        database.resources().upsertAll(
+    override suspend fun process(events: List<PrimalEvent>) {
+        database.resources().insertOrIgnore(
             data = events
                 .map { NostrJson.decodeFromString<ContentPrimalEventResources>(it.content) }
                 .flatMap {
@@ -27,7 +27,7 @@ class PrimalResourcesEventProcessor(
 
     private fun EventResource.asPostResourcePO(postId: String) = PostResource(
         postId = postId,
-        mimeType = this.mimeType,
+        contentType = this.mimeType,
         url = this.url,
         variants = this.variants,
     )

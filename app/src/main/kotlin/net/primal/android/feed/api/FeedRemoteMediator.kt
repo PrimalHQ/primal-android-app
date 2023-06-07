@@ -16,6 +16,7 @@ import net.primal.android.feed.db.FeedPostRemoteKey
 import net.primal.android.feed.isLatestFeed
 import net.primal.android.feed.isNotLatestFeed
 import net.primal.android.networking.sockets.NostrNoticeException
+import net.primal.android.nostr.ext.flatMapAsPostResources
 import net.primal.android.nostr.ext.mapAsProfileMetadata
 import net.primal.android.nostr.ext.mapNotNullAsPost
 import net.primal.android.nostr.ext.mapNotNullAsRepost
@@ -151,7 +152,9 @@ class FeedRemoteMediator(
 
                     database.withTransaction {
                         if (loadType == LoadType.REFRESH) {
-                            database.feedPostsRemoteKeys().deleteByDirective(directive = feedDirective)
+                            database.feedPostsRemoteKeys().deleteByDirective(
+                                directive = feedDirective
+                            )
                         }
                         database.feedPostsRemoteKeys().upsert(remoteKeys)
                     }
@@ -197,6 +200,8 @@ class FeedRemoteMediator(
                     )
                 }
             )
+
+            database.resources().insertOrIgnore(data = posts.flatMapAsPostResources())
         }
     }
 
@@ -206,7 +211,7 @@ class FeedRemoteMediator(
         }
     }
 
-    private fun List<PrimalEvent>.processPrimalEvents() {
+    private suspend fun List<PrimalEvent>.processPrimalEvents() {
         val factory = PrimalEventProcessorFactory(database = database)
         this.groupBy { NostrEventKind.valueOf(it.kind) }
             .forEachKey {

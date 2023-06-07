@@ -94,6 +94,10 @@ android {
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+
+            // JUnit
+            excludes += "META-INF/LICENSE.md"
+            excludes += "META-INF/LICENSE-notice.md"
         }
     }
 }
@@ -152,16 +156,28 @@ dependencies {
 
     implementation(libs.url.detector)
 
-    testImplementation(libs.junit)
-    testImplementation(libs.room.testing)
-
-    androidTestImplementation(libs.androidx.test.ext.junit)
-    androidTestImplementation(libs.espresso.core)
-    androidTestImplementation(platform(libs.compose.bom))
-    androidTestImplementation(libs.compose.ui.test.junit4)
 
     debugImplementation(libs.compose.ui.tooling)
     debugImplementation(libs.compose.ui.test.manifest)
 
+    testImplementation(libs.junit)
+    testImplementation(libs.room.testing)
+
+    androidTestImplementation(platform(libs.compose.bom))
+    androidTestImplementation(libs.compose.ui.test.junit4)
+    testImplementation(libs.androidx.core.testing)
+    testImplementation(libs.androidx.test.ext.junit)
+    androidTestImplementation(libs.androidx.test.ext.junit)
+
+    testImplementation(libs.espresso.core)
+    androidTestImplementation(libs.espresso.core)
+
+    testImplementation(libs.kotest.assertions.core)
+    androidTestImplementation(libs.kotest.assertions.core)
+    testImplementation(libs.kotest.assertions.json)
+    androidTestImplementation(libs.kotest.assertions.json)
+
+    testImplementation(libs.mockk)
+    androidTestImplementation(libs.mockk.android)
 
 }

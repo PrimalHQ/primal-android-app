@@ -1,8 +1,11 @@
-package net.primal.android.feed.ui.post
+package net.primal.android.feed.ui
 
+import android.content.ActivityNotFoundException
 import android.content.res.Configuration
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,15 +16,20 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
+import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Card
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.Placeholder
@@ -29,10 +37,10 @@ import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.AvatarThumbnailListItemImage
 import net.primal.android.core.compose.NostrUserText
@@ -51,6 +59,7 @@ import net.primal.android.core.utils.asBeforeNowFormat
 import net.primal.android.core.utils.isPrimalIdentifier
 import net.primal.android.feed.ui.model.FeedPostStatsUi
 import net.primal.android.feed.ui.model.FeedPostUi
+import net.primal.android.feed.ui.model.PostResource
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import java.time.Instant
@@ -61,15 +70,24 @@ fun FeedPostListItem(
     data: FeedPostUi,
     onClick: () -> Unit,
 ) {
+    val localUriHandler = LocalUriHandler.current
+    val uiScope = rememberCoroutineScope()
+    val interactionSource = remember { MutableInteractionSource() }
+
     Card(
         modifier = Modifier
             .wrapContentHeight()
             .padding(horizontal = 4.dp)
-            .clickable { onClick() },
+            .clickable(
+                interactionSource = interactionSource,
+                indication = rememberRipple(),
+                onClick = onClick
+            ),
     ) {
         if (data.repostAuthorDisplayName != null) {
             RepostedItem(repostedBy = data.repostAuthorDisplayName)
         }
+
 
         PostAuthorItem(
             authorDisplayName = data.authorDisplayName,
@@ -78,9 +96,28 @@ fun FeedPostListItem(
             authorInternetIdentifier = data.authorInternetIdentifier,
         )
 
+        val postAuthorGuessHeight = with(LocalDensity.current) { 128.dp.toPx() }
+
         PostContent(
             content = data.content,
-            urls = data.urls,
+            resources = data.resources,
+            onClick = {
+                uiScope.launch {
+                    val press = PressInteraction.Press(it.copy(y = it.y + postAuthorGuessHeight))
+                    interactionSource.emit(press)
+                    interactionSource.emit(PressInteraction.Release(press))
+                }
+                onClick()
+            },
+            onUrlClick = {
+                try {
+                    localUriHandler.openUri(it)
+                } catch (error: ActivityNotFoundException) {
+                    runCatching {
+                        localUriHandler.openUri("https://$it")
+                    }
+                }
+            },
         )
 
         PostStatsItem(
@@ -89,22 +126,17 @@ fun FeedPostListItem(
     }
 }
 
-private fun List<String>.filterImageUrls() = filter {
-    it.endsWith(".jpg") || it.endsWith(".jpeg") || it.endsWith(".jpe")
-            || it.endsWith(".png")
-            || it.endsWith(".gif")
-            || it.endsWith(".webp")
-            || it.endsWith(".svg")
-            || it.endsWith(".tiff") || it.endsWith(".tif")
-            || it.endsWith(".heic")
-            || it.endsWith(".bmp")
+private fun List<PostResource>.filterImages() = filter {
+    it.mimeType?.startsWith("image") == true
 }
 
-private fun List<String>.withoutImageUrls(imageUrls: List<String>) = this - imageUrls.toSet()
+private fun List<PostResource>.filterNotImages() = filterNot {
+    it.mimeType?.startsWith("image") == true
+}
 
-private fun String.withoutImageUrls(imageUrls: List<String>): String {
+private fun String.withoutUrls(urls: List<String>): String {
     var newContent = this
-    imageUrls.forEach {
+    urls.forEach {
         newContent = newContent.replace(it, "")
     }
     return newContent
@@ -113,62 +145,63 @@ private fun String.withoutImageUrls(imageUrls: List<String>): String {
 @Composable
 fun PostContent(
     content: String,
-    urls: List<String>,
+    resources: List<PostResource>,
+    onClick: (Offset) -> Unit,
+    onUrlClick: (String) -> Unit,
 ) {
-    val imageUrls = remember { urls.filterImageUrls() }
-    val refinedContent = remember { content.withoutImageUrls(imageUrls).trim() }
-    val refinedUrls = remember { urls.withoutImageUrls(imageUrls) }
+    val imageResources = remember { resources.filterImages() }
+    val refinedUrlResources = remember { resources.filterNotImages() }
+
+    val refinedContent = remember {
+        content.withoutUrls(urls = imageResources.map { it.url }).trim()
+    }
 
     val contentText = buildAnnotatedString {
-        if (refinedUrls.isNotEmpty()) {
-            // Assuming the refinedUrls are sorted by appearance in content
-            var mapIndex = 0
-            val urlsInContent = refinedUrls.map {
-                val index = refinedContent.indexOf(string = it, startIndex = mapIndex)
-                mapIndex = index + it.length
-                Pair(index, it)
-            }
-
-            var contentIndex = 0
-            urlsInContent.forEach {
-                val urlIndex = it.first
-                val url = it.second
-                append(refinedContent.substring(contentIndex, urlIndex))
-
-                pushStringAnnotation("URL", url)
-                withStyle(
+        append(refinedContent)
+        refinedUrlResources
+            .map { it.url }
+            .forEach {
+                val startIndex = refinedContent.indexOf(it)
+                val endIndex = startIndex + it.length
+                addStyle(
                     style = SpanStyle(
                         color = AppTheme.colorScheme.primary,
-                    )
-                ) {
-                    append(url)
-                }
-                pop()
-
-                contentIndex = urlIndex + url.length
+                    ),
+                    start = startIndex,
+                    end = endIndex,
+                )
+                addStringAnnotation(
+                    tag = "URL",
+                    annotation = it,
+                    start = startIndex,
+                    end = endIndex,
+                )
             }
-        } else {
-            append(refinedContent)
-        }
     }
 
     Column(
         modifier = Modifier.padding(horizontal = 16.dp),
     ) {
         if (contentText.isNotEmpty()) {
-            Text(
+            PrimalClickableText(
                 style = AppTheme.typography.bodyMedium,
                 text = contentText,
                 maxLines = 12,
                 overflow = TextOverflow.Ellipsis,
+                onClick = { position, offset ->
+                    contentText.getStringAnnotations(tag = "URL", start = position, end = position)
+                        .firstOrNull()?.let { annotation ->
+                            onUrlClick(annotation.item)
+                        } ?: onClick(offset)
+                }
             )
         }
 
-        if (imageUrls.isNotEmpty()) {
-            when (imageUrls.size) {
+        if (imageResources.isNotEmpty()) {
+            when (imageResources.size) {
                 1 -> {
                     PostImageListItemImage(
-                        source = imageUrls.first(),
+                        source = imageResources.first().url,
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(top = 16.dp)
@@ -177,7 +210,6 @@ fun PostContent(
 
                 else -> {}
             }
-
         }
     }
 
@@ -366,7 +398,7 @@ private fun RepostedItem(
                 )
             },
             style = AppTheme.typography.bodyMedium,
-            onClick = {
+            onClick = { pos, offset ->
 
             },
             inlineContent = mapOf(
@@ -408,7 +440,7 @@ fun PreviewFeedPostListItemLight() {
                     have augmented reality HUDs that incorporate real-time facial recognition. 
                     Hiding behind a pseudonym will become a distant dream.
                 """.trimIndent(),
-                urls = emptyList(),
+                resources = emptyList(),
                 authorDisplayName = "android_robots_from_space",
                 authorInternetIdentifier = "android@primal.net",
                 authorAvatarUrl = "https://i.imgur.com/Z8dpmvc.png",
@@ -442,7 +474,7 @@ fun PreviewFeedPostListItemDark() {
                     have augmented reality HUDs that incorporate real-time facial recognition. 
                     Hiding behind a pseudonym will become a distant dream.
                 """.trimIndent(),
-                urls = emptyList(),
+                resources = emptyList(),
                 authorDisplayName = "android",
                 authorInternetIdentifier = "android@primal.net",
                 authorAvatarUrl = "https://i.imgur.com/Z8dpmvc.png",

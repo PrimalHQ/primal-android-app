@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextLayoutResult
@@ -22,14 +23,14 @@ fun PrimalClickableText(
     overflow: TextOverflow = TextOverflow.Clip,
     maxLines: Int = Int.MAX_VALUE,
     onTextLayout: (TextLayoutResult) -> Unit = {},
-    onClick: (Int) -> Unit,
+    onClick: (Int, Offset) -> Unit,
     inlineContent: Map<String, InlineTextContent> = mapOf()
 ) {
     val layoutResult = remember { mutableStateOf<TextLayoutResult?>(null) }
     val pressIndicator = Modifier.pointerInput(onClick) {
         detectTapGestures { pos ->
             layoutResult.value?.let { layoutResult ->
-                onClick(layoutResult.getOffsetForPosition(pos))
+                onClick(layoutResult.getOffsetForPosition(pos), pos)
             }
         }
     }

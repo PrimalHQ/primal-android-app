@@ -56,7 +56,6 @@ import net.primal.android.drawer.PrimalDrawer
 import net.primal.android.feed.FeedContract
 import net.primal.android.feed.FeedViewModel
 import net.primal.android.feed.ui.model.FeedPostUi
-import net.primal.android.feed.ui.post.FeedPostListItem
 import net.primal.android.theme.PrimalTheme
 import kotlin.math.roundToInt
 
