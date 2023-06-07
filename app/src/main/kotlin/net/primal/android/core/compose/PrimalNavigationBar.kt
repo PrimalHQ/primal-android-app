@@ -24,6 +24,7 @@ fun PrimalNavigationBar(
     modifier: Modifier = Modifier,
     activeDestination: PrimalTopLevelDestination,
     onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
+    onActiveDestinationClick: (() -> Unit)? = null,
 ) {
     NavigationBar(
         modifier = modifier,
@@ -36,6 +37,8 @@ fun PrimalNavigationBar(
                 onClick = {
                     if (activeDestination != it) {
                         onTopLevelDestinationChanged(it)
+                    } else {
+                        onActiveDestinationClick?.invoke()
                     }
                 },
             )

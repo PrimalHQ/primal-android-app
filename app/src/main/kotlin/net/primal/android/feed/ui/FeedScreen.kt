@@ -88,6 +88,7 @@ fun FeedScreen(
 ) {
     val uiScope = rememberCoroutineScope()
     val drawerState: DrawerState = rememberDrawerState(DrawerValue.Closed)
+    val feedListState = rememberLazyListState()
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -158,11 +159,10 @@ fun FeedScreen(
                         }
 
                         else -> {
-                            val listState = rememberLazyListState()
                             FeedList(
                                 contentPadding = paddingValues,
                                 pagingItems = pagingItems,
-                                listState = listState,
+                                listState = feedListState,
                             )
                         }
                     }
@@ -179,7 +179,12 @@ fun FeedScreen(
                                 )
                             },
                         activeDestination = PrimalTopLevelDestination.Feed,
-                        onTopLevelDestinationChanged = onPrimaryDestinationChanged
+                        onTopLevelDestinationChanged = onPrimaryDestinationChanged,
+                        onActiveDestinationClick = {
+                            uiScope.launch {
+                                feedListState.animateScrollToItem(0)
+                            }
+                        }
                     )
                 }
             )
