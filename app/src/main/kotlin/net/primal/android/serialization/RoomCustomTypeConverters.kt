@@ -4,6 +4,7 @@ import androidx.room.TypeConverter
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.JsonArray
+import net.primal.android.nostr.model.primal.PrimalResourceVariant
 
 class RoomCustomTypeConverters {
 
@@ -33,6 +34,22 @@ class RoomCustomTypeConverters {
 
     @TypeConverter
     fun listOfStringsToString(list: List<String>?): String? {
+        return when (list) {
+            null -> null
+            else -> NostrJson.encodeToString(list)
+        }
+    }
+
+    @TypeConverter
+    fun stringToListOfPrimalResourceVariant(value: String?): List<PrimalResourceVariant>? {
+        return when (value) {
+            null -> null
+            else -> NostrJson.decodeFromString<List<PrimalResourceVariant>>(value)
+        }
+    }
+
+    @TypeConverter
+    fun listOfPrimalResourceVariantToString(list: List<PrimalResourceVariant>?): String? {
         return when (list) {
             null -> null
             else -> NostrJson.encodeToString(list)

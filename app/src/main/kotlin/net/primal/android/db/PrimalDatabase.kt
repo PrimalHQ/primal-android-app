@@ -13,6 +13,8 @@ import net.primal.android.feed.db.FeedPostRemoteKey
 import net.primal.android.feed.db.FeedPostRemoteKeyDao
 import net.primal.android.feed.db.PostDao
 import net.primal.android.feed.db.PostData
+import net.primal.android.feed.db.PostResource
+import net.primal.android.feed.db.PostResourcesDao
 import net.primal.android.feed.db.PostStats
 import net.primal.android.feed.db.PostStatsDao
 import net.primal.android.feed.db.RepostDao
@@ -27,6 +29,7 @@ import net.primal.android.serialization.RoomCustomTypeConverters
         ProfileMetadata::class,
         RepostData::class,
         PostStats::class,
+        PostResource::class,
         Feed::class,
         FeedPostDataCrossRef::class,
         FeedPostRemoteKey::class,
@@ -47,6 +50,8 @@ abstract class PrimalDatabase : RoomDatabase() {
     abstract fun reposts(): RepostDao
 
     abstract fun eventStats(): PostStatsDao
+
+    abstract fun resources(): PostResourcesDao
 
     abstract fun feeds(): FeedDao
 

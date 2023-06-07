@@ -11,6 +11,7 @@ class PrimalEventProcessorFactory(
             NostrEventKind.PrimalDefaultSettings -> PrimalSettingsProcessor(database = database)
             NostrEventKind.PrimalEventStats -> PrimalEventStatsProcessor(database = database)
             NostrEventKind.PrimalReferencedEvent -> PrimalReferencedEventProcessor(database = database)
+            NostrEventKind.PrimalEventResources -> PrimalResourcesEventProcessor(database = database)
             else -> null
         }
     }

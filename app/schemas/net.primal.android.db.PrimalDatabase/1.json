@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "b191aa97dff55bb1bbc2354dde01f66a",
+    "identityHash": "aae9295a52a35b81d417a2d9020f0cef",
     "entities": [
       {
         "tableName": "PostData",
@@ -277,6 +277,50 @@
         "foreignKeys": []
       },
       {
+        "tableName": "PostResource",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `postId` TEXT NOT NULL, `mimeType` TEXT NOT NULL, `url` TEXT NOT NULL, `variants` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "postId",
+            "columnName": "postId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "mimeType",
+            "columnName": "mimeType",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "url",
+            "columnName": "url",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "variants",
+            "columnName": "variants",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
         "tableName": "Feed",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`directive` TEXT NOT NULL, `name` TEXT NOT NULL, PRIMARY KEY(`directive`))",
         "fields": [
@@ -383,7 +427,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'b191aa97dff55bb1bbc2354dde01f66a')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'aae9295a52a35b81d417a2d9020f0cef')"
     ]
   }
 }
