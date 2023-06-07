@@ -3,7 +3,7 @@ package net.primal.android.settings
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import net.primal.android.db.PrimalDatabase
-import net.primal.android.nostr.processor.primal.PrimalSettingsProcessor
+import net.primal.android.nostr.processor.PrimalSettingsProcessor
 import net.primal.android.settings.api.SettingsApi
 import javax.inject.Inject
 

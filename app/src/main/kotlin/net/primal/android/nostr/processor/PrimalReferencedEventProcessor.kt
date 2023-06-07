@@ -1,4 +1,4 @@
-package net.primal.android.nostr.processor.primal
+package net.primal.android.nostr.processor
 
 import kotlinx.serialization.json.decodeFromJsonElement
 import net.primal.android.db.PrimalDatabase

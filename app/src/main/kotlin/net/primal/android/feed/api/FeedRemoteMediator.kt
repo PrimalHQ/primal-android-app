@@ -16,13 +16,13 @@ import net.primal.android.feed.db.FeedPostRemoteKey
 import net.primal.android.feed.isLatestFeed
 import net.primal.android.feed.isNotLatestFeed
 import net.primal.android.networking.sockets.NostrNoticeException
+import net.primal.android.nostr.ext.mapAsProfileMetadata
 import net.primal.android.nostr.ext.mapNotNullAsPost
 import net.primal.android.nostr.ext.mapNotNullAsRepost
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.model.primal.PrimalEvent
-import net.primal.android.nostr.processor.NostrEventProcessorFactory
-import net.primal.android.nostr.processor.primal.PrimalEventProcessorFactory
+import net.primal.android.nostr.processor.PrimalEventProcessorFactory
 import timber.log.Timber
 import java.io.IOException
 import java.time.Instant
@@ -157,12 +157,13 @@ class FeedRemoteMediator(
                     }
                 }
 
+                response.metadata.processMetadataEvents()
                 processShortTextNotesAndReposts(
                     feedDirective = feedDirective,
                     shortTextNoteEvents = response.shortTextNotes,
                     repostEvents = response.reposts,
                 )
-                response.metadata.processNostrEvents()
+
                 response.allPrimalEvents.processPrimalEvents()
             }
 
@@ -199,14 +200,10 @@ class FeedRemoteMediator(
         }
     }
 
-    private fun List<NostrEvent>.processNostrEvents() {
-        val factory = NostrEventProcessorFactory(database = database)
-        this.groupBy { NostrEventKind.valueOf(it.kind) }
-            .forEachKey {
-                val events = getValue(it)
-                Timber.i("$it has ${events.size} nostr events.")
-                factory.create(it)?.process(events = events)
-            }
+    private suspend fun List<NostrEvent>.processMetadataEvents() {
+        withContext(Dispatchers.IO) {
+            database.profiles().upsertAll(events = mapAsProfileMetadata())
+        }
     }
 
     private fun List<PrimalEvent>.processPrimalEvents() {
