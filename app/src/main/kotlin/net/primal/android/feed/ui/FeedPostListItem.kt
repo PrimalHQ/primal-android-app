@@ -1,6 +1,7 @@
 package net.primal.android.feed.ui
 
- import android.content.res.Configuration
+import android.content.res.Configuration
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material.ripple.rememberRipple
@@ -70,6 +72,7 @@ fun FeedPostListItem(
     data: FeedPostUi,
     onClick: () -> Unit,
 ) {
+    val context = LocalContext.current
     val localUriHandler = LocalUriHandler.current
     val uiScope = rememberCoroutineScope()
     val interactionSource = remember { MutableInteractionSource() }
@@ -85,9 +88,19 @@ fun FeedPostListItem(
             ),
     ) {
         if (data.repostAuthorDisplayName != null) {
-            RepostedItem(repostedBy = data.repostAuthorDisplayName)
+            RepostedItem(
+                repostedBy = data.repostAuthorDisplayName,
+                onRepostAuthorClick = {
+                    uiScope.launch {
+                        Toast.makeText(
+                            context,
+                            "${data.repostAuthorDisplayName} clicked.",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+            )
         }
-
 
         PostAuthorItem(
             authorDisplayName = data.authorDisplayName,
@@ -359,6 +372,7 @@ fun PostAuthorItem(
 @Composable
 private fun RepostedItem(
     repostedBy: String,
+    onRepostAuthorClick: () -> Unit,
 ) {
     Box(
         modifier = Modifier
@@ -369,7 +383,9 @@ private fun RepostedItem(
     ) {
 
         PrimalClickableText(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .wrapContentWidth()
+                .align(Alignment.TopStart),
             text = buildAnnotatedString {
                 appendInlineContent("icon", "[icon]")
                 append(' ')
@@ -390,10 +406,11 @@ private fun RepostedItem(
                         )
                     )
                 )
+                append(' ')
             },
             style = AppTheme.typography.bodyMedium,
-            onClick = { pos, offset ->
-
+            onClick = { _, _ ->
+                onRepostAuthorClick()
             },
             inlineContent = mapOf(
                 "icon" to InlineTextContent(

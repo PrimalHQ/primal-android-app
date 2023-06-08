@@ -1,5 +1,6 @@
 package net.primal.android.feed.ui
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -33,6 +34,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
@@ -197,6 +199,9 @@ fun FeedList(
     pagingItems: LazyPagingItems<FeedPostUi>,
     listState: LazyListState,
 ) {
+    val context = LocalContext.current
+    val uiScope = rememberCoroutineScope()
+
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = contentPadding,
@@ -213,7 +218,15 @@ fun FeedList(
             when {
                 item != null -> FeedPostListItem(
                     data = item,
-                    onClick = {},
+                    onClick = {
+                        uiScope.launch {
+                            Toast.makeText(
+                                context,
+                                "${item.authorDisplayName}'s post clicked.",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    },
                 )
 
                 else -> {}
