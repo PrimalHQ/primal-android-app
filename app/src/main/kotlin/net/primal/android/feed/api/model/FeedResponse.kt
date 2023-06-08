@@ -6,15 +6,11 @@ import net.primal.android.nostr.model.primal.content.ContentPrimalPaging
 
 data class FeedResponse(
     val paging: ContentPrimalPaging?,
-
-    val allNostrEvents: List<NostrEvent>,
     val metadata: List<NostrEvent>,
-    val shortTextNotes: List<NostrEvent>,
+    val posts: List<NostrEvent>,
     val reposts: List<NostrEvent>,
-
-    val allPrimalEvents: List<PrimalEvent>,
-    val eventStats: List<PrimalEvent>,
-    val eventUserStats: List<PrimalEvent>,
-    val eventResources: List<PrimalEvent>,
-    val referencedEvents: List<PrimalEvent>,
+    val referencedPosts: List<NostrEvent>,
+    val primalEventStats: List<PrimalEvent>,
+    val primalEventUserStats: List<PrimalEvent>,
+    val primalEventResources: List<PrimalEvent>,
 )

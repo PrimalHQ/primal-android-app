@@ -6,6 +6,7 @@ import net.primal.android.feed.api.model.FeedRequestBody
 import net.primal.android.feed.api.model.FeedResponse
 import net.primal.android.networking.sockets.SocketClient
 import net.primal.android.networking.sockets.model.OutgoingMessage
+import net.primal.android.nostr.ext.takeContentAsNostrEventOrNull
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.model.primal.PrimalEvent
 import net.primal.android.nostr.model.primal.content.ContentPrimalPaging
@@ -33,15 +34,14 @@ class FeedApiImpl @Inject constructor(
 
         return FeedResponse(
             paging = pagingEvents.firstPagingContentOrNull(),
-            allNostrEvents = nostrEvents,
             metadata = nostrEventsMap[NostrEventKind.Metadata] ?: emptyList(),
-            shortTextNotes = nostrEventsMap[NostrEventKind.ShortTextNote] ?: emptyList(),
+            posts = nostrEventsMap[NostrEventKind.ShortTextNote] ?: emptyList(),
             reposts = nostrEventsMap[NostrEventKind.Reposts] ?: emptyList(),
-            allPrimalEvents = primalEvents,
-            eventStats = primalEventsMap[NostrEventKind.PrimalEventStats] ?: emptyList(),
-            eventUserStats = primalEventsMap[NostrEventKind.PrimalEventUserStats] ?: emptyList(),
-            eventResources = primalEventsMap[NostrEventKind.PrimalEventResources] ?: emptyList(),
-            referencedEvents = primalEventsMap[NostrEventKind.PrimalReferencedEvent] ?: emptyList(),
+            primalEventStats = primalEventsMap[NostrEventKind.PrimalEventStats] ?: emptyList(),
+            primalEventUserStats = primalEventsMap[NostrEventKind.PrimalEventUserStats] ?: emptyList(),
+            primalEventResources = primalEventsMap[NostrEventKind.PrimalEventResources] ?: emptyList(),
+            referencedPosts = primalEventsMap[NostrEventKind.PrimalReferencedEvent]
+                ?.mapNotNull { it.takeContentAsNostrEventOrNull() } ?: emptyList(),
         )
 
     }

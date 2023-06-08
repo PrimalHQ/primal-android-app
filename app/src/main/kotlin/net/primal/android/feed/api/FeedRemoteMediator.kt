@@ -7,7 +7,7 @@ import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import net.primal.android.core.ext.forEachKey
+import kotlinx.serialization.decodeFromString
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.feed.api.model.FeedRequestBody
 import net.primal.android.feed.db.FeedPost
@@ -16,14 +16,17 @@ import net.primal.android.feed.db.FeedPostRemoteKey
 import net.primal.android.feed.isLatestFeed
 import net.primal.android.feed.isNotLatestFeed
 import net.primal.android.networking.sockets.NostrNoticeException
+import net.primal.android.nostr.ext.asEventStatsPO
+import net.primal.android.nostr.ext.asPostResourcePO
 import net.primal.android.nostr.ext.flatMapAsPostResources
 import net.primal.android.nostr.ext.mapAsProfileMetadata
 import net.primal.android.nostr.ext.mapNotNullAsPost
 import net.primal.android.nostr.ext.mapNotNullAsRepost
 import net.primal.android.nostr.model.NostrEvent
-import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.model.primal.PrimalEvent
-import net.primal.android.nostr.processor.PrimalEventProcessorFactory
+import net.primal.android.nostr.model.primal.content.ContentPrimalEventResources
+import net.primal.android.nostr.model.primal.content.ContentPrimalEventStats
+import net.primal.android.serialization.NostrJson
 import timber.log.Timber
 import java.io.IOException
 import java.time.Instant
@@ -139,7 +142,7 @@ class FeedRemoteMediator(
 
             withContext(Dispatchers.IO) {
                 if (pagingEvent?.sinceId != null && pagingEvent.untilId != null) {
-                    val remoteKeys = (response.shortTextNotes + response.reposts)
+                    val remoteKeys = (response.posts + response.reposts)
                         .map {
                             FeedPostRemoteKey(
                                 eventId = it.id,
@@ -160,14 +163,16 @@ class FeedRemoteMediator(
                     }
                 }
 
-                response.metadata.processMetadataEvents()
-                processShortTextNotesAndReposts(
-                    feedDirective = feedDirective,
-                    shortTextNoteEvents = response.shortTextNotes,
-                    repostEvents = response.reposts,
-                )
-
-                response.allPrimalEvents.processPrimalEvents()
+                database.withTransaction {
+                    processShortTextNotesAndReposts(
+                        feedDirective = feedDirective,
+                        shortTextNoteEvents = response.posts + response.referencedPosts,
+                        repostEvents = response.reposts,
+                    )
+                    response.metadata.processMetadataEvents()
+                    response.primalEventStats.processEventStats()
+                    response.primalEventResources.processEventResources()
+                }
             }
 
             return MediatorResult.Success(endOfPaginationReached = false)
@@ -201,24 +206,33 @@ class FeedRemoteMediator(
                 }
             )
 
-             database.resources().upsert(data = posts.flatMapAsPostResources())
+            database.resources().upsert(data = posts.flatMapAsPostResources())
         }
     }
 
-    private suspend fun List<NostrEvent>.processMetadataEvents() {
-        withContext(Dispatchers.IO) {
-            database.profiles().upsertAll(events = mapAsProfileMetadata())
-        }
+    private fun List<NostrEvent>.processMetadataEvents() {
+        database.profiles().upsertAll(events = mapAsProfileMetadata())
     }
 
-    private suspend fun List<PrimalEvent>.processPrimalEvents() {
-        val factory = PrimalEventProcessorFactory(database = database)
-        this.groupBy { NostrEventKind.valueOf(it.kind) }
-            .forEachKey {
-                val events = getValue(it)
-                Timber.i("$it has ${events.size} primal events.")
-                factory.create(it)?.process(events = events)
-            }
+    private fun List<PrimalEvent>.processEventStats() {
+        database.eventStats().upsertAll(
+            data = this
+                .map { NostrJson.decodeFromString<ContentPrimalEventStats>(it.content) }
+                .map { it.asEventStatsPO() }
+        )
+    }
+
+    private fun List<PrimalEvent>.processEventResources() {
+        database.resources().upsert(
+            data = this
+                .map { NostrJson.decodeFromString<ContentPrimalEventResources>(it.content) }
+                .flatMap {
+                    val eventId = it.eventId
+                    it.resources.map { eventResource ->
+                        eventResource.asPostResourcePO(postId = eventId)
+                    }
+                }
+        )
     }
 
 }
