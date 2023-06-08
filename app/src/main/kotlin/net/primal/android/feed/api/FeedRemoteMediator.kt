@@ -201,7 +201,7 @@ class FeedRemoteMediator(
                 }
             )
 
-            database.resources().insertOrIgnore(data = posts.flatMapAsPostResources())
+             database.resources().upsert(data = posts.flatMapAsPostResources())
         }
     }
 

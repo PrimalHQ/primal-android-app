@@ -13,7 +13,7 @@ class PrimalResourcesEventProcessor(
 ) : PrimalEventProcessor {
 
     override suspend fun process(events: List<PrimalEvent>) {
-        database.resources().insertOrIgnore(
+        database.resources().upsert(
             data = events
                 .map { NostrJson.decodeFromString<ContentPrimalEventResources>(it.content) }
                 .flatMap {

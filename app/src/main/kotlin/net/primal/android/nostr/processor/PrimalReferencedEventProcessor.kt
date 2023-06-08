@@ -20,7 +20,7 @@ class PrimalReferencedEventProcessor(
 
         database.withTransaction {
             database.posts().upsertAll(data = posts)
-            database.resources().insertOrIgnore(data = posts.flatMapAsPostResources())
+            database.resources().upsert(data = posts.flatMapAsPostResources())
         }
     }
 
