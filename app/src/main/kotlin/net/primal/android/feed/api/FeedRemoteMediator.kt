@@ -7,7 +7,7 @@ import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import net.primal.android.core.forEachKey
+import net.primal.android.core.ext.forEachKey
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.feed.api.model.FeedRequestBody
 import net.primal.android.feed.db.FeedPost

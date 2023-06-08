@@ -4,7 +4,8 @@ import com.linkedin.urls.detection.UrlDetector
 import com.linkedin.urls.detection.UrlDetectorOptions
 
 fun String.parseUrls(): List<String> {
-    val links = UrlDetector(this, UrlDetectorOptions.Default).detect()
+    val urlDetector = UrlDetector(this, UrlDetectorOptions.JSON)
+    val links = urlDetector.detect()
     return links.map { it.originalUrl }
 }
 

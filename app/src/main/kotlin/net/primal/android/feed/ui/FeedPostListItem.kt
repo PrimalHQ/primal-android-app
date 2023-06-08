@@ -1,7 +1,6 @@
 package net.primal.android.feed.ui
 
-import android.content.ActivityNotFoundException
-import android.content.res.Configuration
+ import android.content.res.Configuration
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -55,6 +54,7 @@ import net.primal.android.core.compose.icons.primaliconpack.FeedReposts
 import net.primal.android.core.compose.icons.primaliconpack.FeedRepostsFilled
 import net.primal.android.core.compose.icons.primaliconpack.FeedZaps
 import net.primal.android.core.compose.icons.primaliconpack.FeedZapsFilled
+import net.primal.android.core.ext.openUriSafely
 import net.primal.android.core.utils.asBeforeNowFormat
 import net.primal.android.core.utils.isPrimalIdentifier
 import net.primal.android.feed.ui.model.FeedPostStatsUi
@@ -110,13 +110,7 @@ fun FeedPostListItem(
                 onClick()
             },
             onUrlClick = {
-                try {
-                    localUriHandler.openUri(it)
-                } catch (error: ActivityNotFoundException) {
-                    runCatching {
-                        localUriHandler.openUri("https://$it")
-                    }
-                }
+                localUriHandler.openUriSafely(it)
             },
         )
 
