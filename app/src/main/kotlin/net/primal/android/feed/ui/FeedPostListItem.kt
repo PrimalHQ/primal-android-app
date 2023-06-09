@@ -8,11 +8,14 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.text.InlineTextContent
@@ -25,9 +28,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
@@ -39,6 +44,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
@@ -62,6 +68,7 @@ import net.primal.android.core.utils.isPrimalIdentifier
 import net.primal.android.feed.ui.model.FeedPostStatsUi
 import net.primal.android.feed.ui.model.FeedPostUi
 import net.primal.android.feed.ui.model.PostResource
+import net.primal.android.nostr.model.primal.PrimalResourceVariant
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import java.time.Instant
@@ -191,7 +198,9 @@ fun PostContent(
     ) {
         if (contentText.isNotEmpty()) {
             PrimalClickableText(
-                style = AppTheme.typography.bodyMedium,
+                style = AppTheme.typography.bodyMedium.copy(
+                    color = AppTheme.colorScheme.onSurface
+                ),
                 text = contentText,
                 maxLines = 12,
                 overflow = TextOverflow.Ellipsis,
@@ -207,12 +216,32 @@ fun PostContent(
         if (imageResources.isNotEmpty()) {
             when (imageResources.size) {
                 1 -> {
-                    PostImageListItemImage(
-                        source = imageResources.first().url,
+                    BoxWithConstraints(
                         modifier = Modifier
-                            .fillMaxWidth()
                             .padding(top = 16.dp)
-                    )
+                            .clip(AppTheme.shapes.medium),
+                    ) {
+                        val resource = imageResources.first()
+
+                        val density = LocalDensity.current.density
+                        val maxWidthPx = with(LocalDensity.current) { maxWidth.roundToPx() }
+                        val maxWidth = maxWidth.value.toInt()
+                        val maxHeight = (LocalConfiguration.current.screenHeightDp * 0.77).toInt()
+
+                        val variant = resource.variants.findNearestOrNull(maxWidthPx = maxWidthPx)
+                        val imageSizeDp = variant.calculateImageSize(
+                            maxWidth = maxWidth,
+                            maxHeight = maxHeight,
+                            density = density
+                        )
+                        val imageSource = variant?.mediaUrl ?: resource.url
+                        PostImageListItemImage(
+                            source = imageSource,
+                            modifier = Modifier
+                                .width(imageSizeDp.width)
+                                .height(imageSizeDp.height)
+                        )
+                    }
                 }
 
                 else -> {}
@@ -220,6 +249,31 @@ fun PostContent(
         }
     }
 
+}
+
+private fun List<PrimalResourceVariant>.findNearestOrNull(maxWidthPx: Int): PrimalResourceVariant? {
+    return sortedBy { it.width }.find { it.width >= maxWidthPx }
+}
+
+private fun PrimalResourceVariant?.calculateImageSize(
+    maxWidth: Int,
+    maxHeight: Int,
+    density: Float
+): DpSize {
+    if (this == null) return DpSize(maxWidth.dp, maxWidth.dp)
+
+    val variantWidth = (width / density).toInt()
+    val variantHeight = (height / density).toInt()
+    return DpSize(
+        width = when {
+            else -> maxWidth.dp
+        },
+        height = when {
+            variantHeight == 0 -> maxWidth.dp
+            variantHeight > maxHeight -> maxHeight.dp
+            else -> ((maxWidth * variantHeight) / variantWidth).dp
+        }
+    )
 }
 
 @Composable

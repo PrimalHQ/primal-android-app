@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -20,6 +21,7 @@ import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.rememberTopAppBarState
@@ -36,15 +38,19 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
+import net.primal.android.R
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.PrimalNavigationBar
 import net.primal.android.core.compose.PrimalTopAppBar
@@ -52,12 +58,12 @@ import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.FeedPicker
 import net.primal.android.core.compose.isEmpty
-import net.primal.android.core.compose.isMediatorAppendLoading
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.PrimalDrawer
 import net.primal.android.feed.FeedContract
 import net.primal.android.feed.FeedViewModel
 import net.primal.android.feed.ui.model.FeedPostUi
+import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import kotlin.math.roundToInt
 
@@ -208,6 +214,20 @@ fun FeedList(
         verticalArrangement = Arrangement.spacedBy(4.dp),
         state = listState,
     ) {
+        when (val prependLoadState = pagingItems.loadState.mediator?.prepend) {
+            is LoadState.Error -> item(contentType = "Error") {
+                ErrorItem(
+                    text = stringResource(
+                        R.string.feed_error_loading_prev_page,
+                        prependLoadState.error.message
+                            ?: prependLoadState.error.javaClass.simpleName
+                    )
+                )
+            }
+
+            else -> Unit
+        }
+
         items(
             count = pagingItems.itemCount,
             key = pagingItems.itemKey(key = { "${it.postId}${it.repostId}" }),
@@ -233,26 +253,61 @@ fun FeedList(
             }
         }
 
-        if (pagingItems.isMediatorAppendLoading()) {
-            item(
-                contentType = "Loading"
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(64.dp)
-                ) {
-                    CircularProgressIndicator(
-                        modifier = Modifier
-                            .wrapContentSize()
-                            .align(Alignment.Center)
-                    )
-                }
+        when (val appendLoadState = pagingItems.loadState.mediator?.append) {
+            LoadState.Loading -> item(contentType = "Loading") {
+                LoadingItem()
             }
+
+            is LoadState.Error -> item(contentType = "Error") {
+                ErrorItem(
+                    text = stringResource(
+                        R.string.feed_error_loading_next_page,
+                        appendLoadState.error.message
+                            ?: appendLoadState.error.javaClass.simpleName
+                    )
+                )
+            }
+
+            else -> Unit
         }
     }
 }
 
+@Composable
+private fun ErrorItem(
+    text: String
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .wrapContentHeight()
+    ) {
+        Text(
+            modifier = Modifier
+                .wrapContentSize()
+                .padding(horizontal = 32.dp, vertical = 16.dp)
+                .align(Alignment.Center),
+            text = text,
+            textAlign = TextAlign.Center,
+            style = AppTheme.typography.bodySmall,
+        )
+    }
+}
+
+@Composable
+private fun LoadingItem() {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(64.dp)
+    ) {
+        CircularProgressIndicator(
+            modifier = Modifier
+                .wrapContentSize()
+                .align(Alignment.Center)
+        )
+    }
+}
 
 @Preview
 @Composable
