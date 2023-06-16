@@ -295,7 +295,7 @@ fun PostStatsItem(
         )
 
         SinglePostStat(
-            textCount = postStats.zapsCount.toString(),
+            textCount = postStats.satsZapped.toString(),
             highlight = postStats.userZapped,
             iconVector = PrimalIcons.FeedZaps,
             iconVectorHighlight = PrimalIcons.FeedZapsFilled,
@@ -514,7 +514,7 @@ fun PreviewFeedPostListItemLight() {
                     repliesCount = 11,
                     likesCount = 256,
                     repostsCount = 42,
-                    zapsCount = 555,
+                    satsZapped = 555,
                 ),
             ),
             onClick = {},
@@ -548,7 +548,7 @@ fun PreviewFeedPostListItemDark() {
                     repliesCount = 11,
                     likesCount = 256,
                     repostsCount = 42,
-                    zapsCount = 555,
+                    satsZapped = 555,
                 ),
             ),
             onClick = {},

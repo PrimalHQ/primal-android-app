@@ -6,7 +6,6 @@ import net.primal.android.feed.api.model.FeedRequestBody
 import net.primal.android.feed.api.model.FeedResponse
 import net.primal.android.networking.sockets.SocketClient
 import net.primal.android.networking.sockets.model.OutgoingMessage
-import net.primal.android.nostr.ext.takeContentAsNostrEventOrNull
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.model.primal.PrimalEvent
 import net.primal.android.nostr.model.primal.content.ContentPrimalPaging
@@ -40,8 +39,7 @@ class FeedApiImpl @Inject constructor(
             primalEventStats = primalEventsMap[NostrEventKind.PrimalEventStats] ?: emptyList(),
             primalEventUserStats = primalEventsMap[NostrEventKind.PrimalEventUserStats] ?: emptyList(),
             primalEventResources = primalEventsMap[NostrEventKind.PrimalEventResources] ?: emptyList(),
-            referencedPosts = primalEventsMap[NostrEventKind.PrimalReferencedEvent]
-                ?.mapNotNull { it.takeContentAsNostrEventOrNull() } ?: emptyList(),
+            referencedPosts = primalEventsMap[NostrEventKind.PrimalReferencedEvent] ?: emptyList(),
         )
 
     }

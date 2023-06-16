@@ -1,17 +1,25 @@
 package net.primal.android.feed.ui
 
 import android.widget.Toast
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -26,18 +34,24 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -48,10 +62,16 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.AppBarIcon
+import net.primal.android.core.compose.AvatarThumbnailListItemImage
 import net.primal.android.core.compose.PrimalNavigationBar
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.PrimalTopLevelDestination
@@ -63,9 +83,12 @@ import net.primal.android.drawer.PrimalDrawer
 import net.primal.android.feed.FeedContract
 import net.primal.android.feed.FeedViewModel
 import net.primal.android.feed.ui.model.FeedPostUi
+import net.primal.android.feed.ui.model.FeedPostsSyncStats
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import kotlin.math.roundToInt
+import kotlin.random.Random
+import kotlin.time.Duration.Companion.seconds
 
 @Composable
 fun FeedScreen(
@@ -74,11 +97,11 @@ fun FeedScreen(
     onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
 ) {
-
     val uiState = viewModel.state.collectAsState()
 
     FeedScreen(
         state = uiState.value,
+        eventPublisher = { viewModel.setEvent(it) },
         onFeedsClick = onFeedsClick,
         onPrimaryDestinationChanged = onTopLevelDestinationChanged,
         onDrawerDestinationClick = onDrawerScreenClick,
@@ -89,6 +112,7 @@ fun FeedScreen(
 @Composable
 fun FeedScreen(
     state: FeedContract.UiState,
+    eventPublisher: (FeedContract.UiEvent) -> Unit,
     onFeedsClick: () -> Unit,
     onPrimaryDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
@@ -114,7 +138,7 @@ fun FeedScreen(
                 bottomBarHeight.roundToPx().toFloat()
             }
             val bottomBarOffsetHeightPx = remember { mutableStateOf(0f) }
-            val nestedScrollConnection = remember {
+            val bottomBarNestedScrollConnection = remember {
                 object : NestedScrollConnection {
                     override fun onPreScroll(
                         available: Offset,
@@ -130,7 +154,7 @@ fun FeedScreen(
 
             Scaffold(
                 modifier = Modifier
-                    .nestedScroll(nestedScrollConnection)
+                    .nestedScroll(bottomBarNestedScrollConnection)
                     .nestedScroll(scrollBehavior.nestedScrollConnection),
                 topBar = {
                     PrimalTopAppBar(
@@ -150,6 +174,48 @@ fun FeedScreen(
                 content = { paddingValues ->
                     val pagingItems = state.posts.collectAsLazyPagingItems()
 
+                    val seenPostIds = remember { mutableSetOf<String>() }
+                    LaunchedEffect(feedListState) {
+                        snapshotFlow { feedListState.layoutInfo.visibleItemsInfo }
+                            .mapNotNull { visibleItems ->
+                                visibleItems.mapNotNull {
+                                    if (!pagingItems.isEmpty() && it.index < pagingItems.itemCount) {
+                                        pagingItems.peek(it.index)?.postId
+                                    } else {
+                                        null
+                                    }
+                                }
+                            }
+                            .map { seenPostIds + it }
+                            .distinctUntilChanged()
+                            .collect {
+                                seenPostIds.clear()
+                                seenPostIds.addAll(it)
+                            }
+                    }
+
+                    val unseenPostsCount = state.syncStats.postIds.toSet().subtract(seenPostIds).count()
+
+                    LaunchedEffect(feedListState) {
+                        snapshotFlow { feedListState.firstVisibleItemIndex == 0 }
+                            .distinctUntilChanged()
+                            .filter { it }
+                            .collect {
+                                seenPostIds.clear()
+                                eventPublisher(FeedContract.UiEvent.FeedScrolledToTop)
+                            }
+                    }
+
+                    LaunchedEffect(pagingItems) {
+                        while (true) {
+                            val syncInterval = 30 + Random.nextInt(-5, 5)
+                            delay(syncInterval.seconds)
+                            if (unseenPostsCount < 100) {
+                                pagingItems.refresh()
+                            }
+                        }
+                    }
+
                     when {
                         pagingItems.isEmpty() -> {
                             Box(
@@ -166,11 +232,31 @@ fun FeedScreen(
                         }
 
                         else -> {
-                            FeedList(
-                                contentPadding = paddingValues,
-                                pagingItems = pagingItems,
-                                listState = feedListState,
-                            )
+                            Box {
+                                FeedList(
+                                    contentPadding = paddingValues,
+                                    pagingItems = pagingItems,
+                                    listState = feedListState,
+                                )
+
+                                if (unseenPostsCount > 0) {
+                                    NewPostsButton(
+                                        modifier = Modifier
+                                            .padding(paddingValues)
+                                            .padding(top = 42.dp)
+                                            .height(40.dp)
+                                            .wrapContentWidth()
+                                            .alpha(1 / bottomBarHeightPx * bottomBarOffsetHeightPx.value + 1),
+                                        syncStats = state.syncStats,
+                                        unseenCount = unseenPostsCount,
+                                        onClick = {
+                                            uiScope.launch {
+                                                feedListState.animateScrollToItem(0)
+                                            }
+                                        },
+                                    )
+                                }
+                            }
                         }
                     }
                 },
@@ -242,10 +328,11 @@ fun FeedList(
                         uiScope.launch {
                             Toast.makeText(
                                 context,
-                                "${item.authorDisplayName}'s post clicked.",
+                                "${item.authorDisplayName}'s post clicked. Refresh triggered.",
                                 Toast.LENGTH_SHORT
                             ).show()
                         }
+                        pagingItems.refresh()
                     },
                 )
 
@@ -270,6 +357,68 @@ fun FeedList(
 
             else -> Unit
         }
+    }
+}
+
+@Composable
+private fun BoxScope.NewPostsButton(
+    modifier: Modifier,
+    syncStats: FeedPostsSyncStats,
+    unseenCount: Int,
+    onClick: () -> Unit,
+) {
+    Row(
+        modifier = modifier
+            .background(
+                brush = Brush.horizontalGradient(
+                    colors = listOf(
+                        AppTheme.extraColorScheme.brand1,
+                        AppTheme.extraColorScheme.brand2
+                    ),
+                ),
+                shape = AppTheme.shapes.extraLarge
+            )
+            .align(Alignment.TopCenter)
+            .clickable {
+                onClick()
+            },
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(modifier = Modifier.padding(start = 6.dp)) {
+            syncStats.avatarUrls.forEachIndexed { index, imageUrl ->
+                Row {
+                    Spacer(
+                        modifier = Modifier
+                            .height(10.dp)
+                            .width((index * 24).dp)
+                    )
+
+                    AvatarThumbnailListItemImage(
+                        modifier = Modifier.size(32.dp),
+                        source = imageUrl,
+                        hasBorder = true,
+                        borderGradientColors = listOf(
+                            Color.White,
+                            Color.White
+                        ),
+                    )
+                }
+            }
+        }
+
+        Text(
+            modifier = Modifier
+                .padding(start = 12.dp, end = 16.dp)
+                .padding(bottom = 4.dp)
+                .wrapContentHeight(),
+            text = if (unseenCount <= 100) {
+                pluralStringResource(R.plurals.feed_new_posts_notice, unseenCount, unseenCount)
+            } else {
+                stringResource(id = R.string.feed_new_posts_notice_100plus)
+            },
+            style = AppTheme.typography.bodySmall,
+            color = Color.White,
+        )
     }
 }
 
@@ -314,9 +463,8 @@ private fun LoadingItem() {
 fun FeedScreenPreview() {
     PrimalTheme {
         FeedScreen(
-            state = FeedContract.UiState(
-                posts = flow { }
-            ),
+            state = FeedContract.UiState(posts = flow { }),
+            eventPublisher = {},
             onFeedsClick = {},
             onPrimaryDestinationChanged = {},
             onDrawerDestinationClick = {},

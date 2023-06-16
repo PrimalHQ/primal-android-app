@@ -11,6 +11,8 @@ import net.primal.android.feed.db.FeedPostDataCrossRef
 import net.primal.android.feed.db.FeedPostDataCrossRefDao
 import net.primal.android.feed.db.FeedPostRemoteKey
 import net.primal.android.feed.db.FeedPostRemoteKeyDao
+import net.primal.android.feed.db.FeedPostSync
+import net.primal.android.feed.db.FeedPostSyncDao
 import net.primal.android.feed.db.PostDao
 import net.primal.android.feed.db.PostData
 import net.primal.android.feed.db.PostResource
@@ -33,6 +35,7 @@ import net.primal.android.serialization.RoomCustomTypeConverters
         Feed::class,
         FeedPostDataCrossRef::class,
         FeedPostRemoteKey::class,
+        FeedPostSync::class,
     ],
     views = [
         FeedPostData::class,
@@ -49,7 +52,7 @@ abstract class PrimalDatabase : RoomDatabase() {
 
     abstract fun reposts(): RepostDao
 
-    abstract fun eventStats(): PostStatsDao
+    abstract fun postStats(): PostStatsDao
 
     abstract fun resources(): PostResourcesDao
 
@@ -60,5 +63,7 @@ abstract class PrimalDatabase : RoomDatabase() {
     abstract fun feedPosts(): FeedPostDao
 
     abstract fun feedPostsRemoteKeys(): FeedPostRemoteKeyDao
+
+    abstract fun feedPostsSync(): FeedPostSyncDao
 
 }

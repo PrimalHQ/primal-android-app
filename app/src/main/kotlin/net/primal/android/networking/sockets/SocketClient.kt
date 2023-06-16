@@ -56,6 +56,7 @@ class SocketClient @Inject constructor(
 
         override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
             // We need to implement and start auto-reconnect process here
+            Timber.e("WS connection closed. code=$code, reason=$reason")
         }
     }
 
@@ -88,7 +89,12 @@ class SocketClient @Inject constructor(
             options = message.options,
         )
         Timber.i("--> $finalMessage")
-        webSocket.send(finalMessage)
+        val success = webSocket.send(finalMessage)
+        if (success) {
+            Timber.i("Socket message was sent successfully.")
+        } else {
+            Timber.w("Socket message was not sent.")
+        }
         return subscriptionId
     }
 

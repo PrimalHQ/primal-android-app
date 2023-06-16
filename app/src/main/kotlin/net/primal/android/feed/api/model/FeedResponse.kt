@@ -9,7 +9,7 @@ data class FeedResponse(
     val metadata: List<NostrEvent>,
     val posts: List<NostrEvent>,
     val reposts: List<NostrEvent>,
-    val referencedPosts: List<NostrEvent>,
+    val referencedPosts: List<PrimalEvent>,
     val primalEventStats: List<PrimalEvent>,
     val primalEventUserStats: List<PrimalEvent>,
     val primalEventResources: List<PrimalEvent>,

@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
 import androidx.paging.map
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,6 +15,7 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import net.primal.android.core.utils.ellipsizeMiddle
 import net.primal.android.feed.FeedContract.SideEffect
 import net.primal.android.feed.FeedContract.UiEvent
@@ -22,6 +24,7 @@ import net.primal.android.feed.db.FeedPost
 import net.primal.android.feed.repository.FeedRepository
 import net.primal.android.feed.ui.model.FeedPostStatsUi
 import net.primal.android.feed.ui.model.FeedPostUi
+import net.primal.android.feed.ui.model.FeedPostsSyncStats
 import net.primal.android.feed.ui.model.PostResource
 import net.primal.android.navigation.feedDirective
 import net.primal.android.nostr.ext.asEllipsizedNpub
@@ -64,16 +67,56 @@ class FeedViewModel @Inject constructor(
     }
 
     init {
-        loadFeed()
+        loadFeedTitle()
+        subscribeToEvents()
+        subscribeToFeedSyncUpdates()
     }
 
-    private fun loadFeed() = viewModelScope.launch {
+    private fun loadFeedTitle() = viewModelScope.launch {
         val feed = feedRepository.findFeedByDirective(feedDirective = feedDirective)
         setState {
             copy(feedTitle = feed?.name ?: feedDirective.ellipsizeMiddle(size = 8))
         }
     }
 
+    private fun subscribeToFeedSyncUpdates() = viewModelScope.launch {
+        feedRepository.observeNewFeedPostsSyncUpdates(
+            feedDirective = feedDirective,
+            since = Instant.now().minusSeconds(5).epochSecond
+        ).collect { syncData ->
+            val limit = if (syncData.count <= 3) syncData.count else 3
+            val newPosts = withContext(Dispatchers.IO) {
+                feedRepository.findNewestPosts(feedDirective = feedDirective, limit = syncData.count)
+                    .distinctBy { it.author?.ownerId }
+                    .take(limit)
+            }
+            setState {
+                copy(
+                    syncStats = FeedPostsSyncStats(
+                        postsCount = this.syncStats.postsCount + syncData.count,
+                        postIds = this.syncStats.postIds + syncData.postIds,
+                        avatarUrls = newPosts.mapNotNull { feedPost ->
+                            feedPost.author?.picture
+                        }
+                    )
+                )
+            }
+        }
+    }
+
+    private fun subscribeToEvents() = viewModelScope.launch {
+        _event.collect {
+            when (it) {
+                UiEvent.FeedScrolledToTop -> clearSyncStats()
+            }
+        }
+    }
+
+    private fun clearSyncStats() {
+        setState {
+            copy(syncStats = FeedPostsSyncStats())
+        }
+    }
 
     private fun FeedPost.asFeedPostUi() = FeedPostUi(
         postId = this.data.postId,
@@ -87,16 +130,17 @@ class FeedViewModel @Inject constructor(
         timestamp = Instant.ofEpochSecond(this.data.createdAt),
         content = this.data.content,
         resources = this.resources.map {
-           PostResource(
-               url = it.url,
-               mimeType = it.contentType,
-               variants = it.variants ?: emptyList(),
-           )
+            PostResource(
+                url = it.url,
+                mimeType = it.contentType,
+                variants = it.variants ?: emptyList(),
+            )
         },
         stats = FeedPostStatsUi(
             repliesCount = this.postStats?.replies ?: 0,
             userReplied = false,
             zapsCount = this.postStats?.zaps ?: 0,
+            satsZapped = this.postStats?.satsZapped ?: 0,
             userZapped = false,
             likesCount = this.postStats?.likes ?: 0,
             userLiked = false,

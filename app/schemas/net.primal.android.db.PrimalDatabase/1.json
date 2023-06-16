@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "ff48fe50908e678bcf0de9a22dca649e",
+    "identityHash": "0216d47d96fee035f5666a4cb4d399fe",
     "entities": [
       {
         "tableName": "PostData",
@@ -412,6 +412,45 @@
         },
         "indices": [],
         "foreignKeys": []
+      },
+      {
+        "tableName": "FeedPostSync",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`timestamp` INTEGER NOT NULL, `feedDirective` TEXT NOT NULL, `count` INTEGER NOT NULL, `postIds` TEXT NOT NULL, PRIMARY KEY(`timestamp`, `feedDirective`))",
+        "fields": [
+          {
+            "fieldPath": "timestamp",
+            "columnName": "timestamp",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "feedDirective",
+            "columnName": "feedDirective",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "count",
+            "columnName": "count",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "postIds",
+            "columnName": "postIds",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "timestamp",
+            "feedDirective"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
       }
     ],
     "views": [
@@ -422,7 +461,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'ff48fe50908e678bcf0de9a22dca649e')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '0216d47d96fee035f5666a4cb4d399fe')"
     ]
   }
 }

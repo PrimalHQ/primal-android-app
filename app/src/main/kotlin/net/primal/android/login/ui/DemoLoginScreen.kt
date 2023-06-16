@@ -112,13 +112,52 @@ fun DemoLoginScreen(
                 LoadingElevatedButton(
                     modifier = Modifier
                         .fillMaxWidth(fraction = 0.8f)
-                        .padding(vertical = 16.dp)
+                        .padding(top = 16.dp)
                         .align(alignment = Alignment.CenterHorizontally),
                     onClick = {
                         onFeedSelected("9a500dccc084a138330a1d1b2be0d5e86394624325d25084d3eca164e7ea698a")
                     },
                     content = {
                         Text(text = "Go To Nostr Highlights")
+                    }
+                )
+
+                LoadingElevatedButton(
+                    modifier = Modifier
+                        .fillMaxWidth(fraction = 0.8f)
+                        .padding(top = 8.dp)
+                        .align(alignment = Alignment.CenterHorizontally),
+                    onClick = {
+                        onFeedSelected("global;trending")
+                    },
+                    content = {
+                        Text(text = "Go To Trending 24h")
+                    }
+                )
+
+                LoadingElevatedButton(
+                    modifier = Modifier
+                        .fillMaxWidth(fraction = 0.8f)
+                        .padding(top = 8.dp)
+                        .align(alignment = Alignment.CenterHorizontally),
+                    onClick = {
+                        onFeedSelected("global;mostzapped4h")
+                    },
+                    content = {
+                        Text(text = "Go To Most-Zapped")
+                    }
+                )
+
+                LoadingElevatedButton(
+                    modifier = Modifier
+                        .fillMaxWidth(fraction = 0.8f)
+                        .padding(top = 8.dp)
+                        .align(alignment = Alignment.CenterHorizontally),
+                    onClick = {
+                        onFeedSelected("global;popular")
+                    },
+                    content = {
+                        Text(text = "Go To Popular")
                     }
                 )
             }

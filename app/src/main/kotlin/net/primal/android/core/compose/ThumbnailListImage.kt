@@ -9,9 +9,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil.compose.SubcomposeAsyncImage
@@ -27,10 +29,17 @@ fun AvatarThumbnailListItemImage(
     source: Any?,
     modifier: Modifier = Modifier,
     hasBorder: Boolean = false,
+    borderGradientColors: List<Color> = listOf(
+        AppTheme.extraColorScheme.brand1,
+        AppTheme.extraColorScheme.brand2,
+    )
 ) {
     SubcomposeAsyncImage(
         model = source,
-        modifier = modifier.adjustAvatarBackground(hasBorder = hasBorder),
+        modifier = modifier.adjustAvatarBackground(
+            hasBorder = hasBorder,
+            borderGradientColors = borderGradientColors,
+        ),
         contentDescription = null,
         contentScale = ContentScale.Crop,
         loading = {
@@ -44,20 +53,15 @@ fun AvatarThumbnailListItemImage(
     )
 }
 
-@Composable
 private fun Modifier.adjustAvatarBackground(
     hasBorder: Boolean = false,
-): Modifier {
-    return if (hasBorder) {
+    borderGradientColors: List<Color>,
+): Modifier = composed {
+    if (hasBorder) {
         this.size(50.dp)
             .border(
                 width = 2.dp,
-                brush = Brush.linearGradient(
-                    listOf(
-                        AppTheme.extraColorScheme.brand1,
-                        AppTheme.extraColorScheme.brand2
-                    )
-                ),
+                brush = Brush.linearGradient(borderGradientColors),
                 shape = CircleShape
             )
             .shadow(
