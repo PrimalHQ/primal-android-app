@@ -82,11 +82,15 @@ class FeedViewModel @Inject constructor(
     private fun subscribeToFeedSyncUpdates() = viewModelScope.launch {
         feedRepository.observeNewFeedPostsSyncUpdates(
             feedDirective = feedDirective,
-            since = Instant.now().minusSeconds(5).epochSecond
+            since = Instant.now().epochSecond
         ).collect { syncData ->
             val limit = if (syncData.count <= 3) syncData.count else 3
             val newPosts = withContext(Dispatchers.IO) {
-                feedRepository.findNewestPosts(feedDirective = feedDirective, limit = syncData.count)
+                feedRepository.findNewestPosts(
+                    feedDirective = feedDirective,
+                    limit = syncData.count
+                )
+                    .filter { it.author?.picture != null }
                     .distinctBy { it.author?.ownerId }
                     .take(limit)
             }
@@ -114,7 +118,12 @@ class FeedViewModel @Inject constructor(
 
     private fun clearSyncStats() {
         setState {
-            copy(syncStats = FeedPostsSyncStats())
+            copy(
+                syncStats = this.syncStats.copy(
+                    postIds = emptyList(),
+                    postsCount = 0
+                )
+            )
         }
     }
 

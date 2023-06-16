@@ -1,11 +1,15 @@
 package net.primal.android.feed.ui
 
 import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -51,7 +55,6 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -66,7 +69,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import net.primal.android.R
@@ -186,15 +188,13 @@ fun FeedScreen(
                                     }
                                 }
                             }
-                            .map { seenPostIds + it }
                             .distinctUntilChanged()
                             .collect {
-                                seenPostIds.clear()
                                 seenPostIds.addAll(it)
                             }
                     }
 
-                    val unseenPostsCount = state.syncStats.postIds.toSet().subtract(seenPostIds).count()
+                    val newPostsCount = state.syncStats.postsCount
 
                     LaunchedEffect(feedListState) {
                         snapshotFlow { feedListState.firstVisibleItemIndex == 0 }
@@ -210,7 +210,7 @@ fun FeedScreen(
                         while (true) {
                             val syncInterval = 30 + Random.nextInt(-5, 5)
                             delay(syncInterval.seconds)
-                            if (unseenPostsCount < 100) {
+                            if (newPostsCount < 100) {
                                 pagingItems.refresh()
                             }
                         }
@@ -239,16 +239,20 @@ fun FeedScreen(
                                     listState = feedListState,
                                 )
 
-                                if (unseenPostsCount > 0) {
+                                AnimatedVisibility(
+                                    visible = newPostsCount > 0,
+                                    enter = fadeIn() + slideInVertically(),
+                                    exit = slideOutVertically() + fadeOut(),
+                                    modifier = Modifier
+                                        .padding(paddingValues)
+                                        .padding(top = 42.dp)
+                                        .height(40.dp)
+                                        .wrapContentWidth()
+                                        .align(Alignment.TopCenter)
+                                        .alpha(1 / bottomBarHeightPx * bottomBarOffsetHeightPx.value + 1),
+                                ) {
                                     NewPostsButton(
-                                        modifier = Modifier
-                                            .padding(paddingValues)
-                                            .padding(top = 42.dp)
-                                            .height(40.dp)
-                                            .wrapContentWidth()
-                                            .alpha(1 / bottomBarHeightPx * bottomBarOffsetHeightPx.value + 1),
                                         syncStats = state.syncStats,
-                                        unseenCount = unseenPostsCount,
                                         onClick = {
                                             uiScope.launch {
                                                 feedListState.animateScrollToItem(0)
@@ -361,14 +365,12 @@ fun FeedList(
 }
 
 @Composable
-private fun BoxScope.NewPostsButton(
-    modifier: Modifier,
+private fun NewPostsButton(
     syncStats: FeedPostsSyncStats,
-    unseenCount: Int,
     onClick: () -> Unit,
 ) {
     Row(
-        modifier = modifier
+        modifier = Modifier
             .background(
                 brush = Brush.horizontalGradient(
                     colors = listOf(
@@ -378,7 +380,6 @@ private fun BoxScope.NewPostsButton(
                 ),
                 shape = AppTheme.shapes.extraLarge
             )
-            .align(Alignment.TopCenter)
             .clickable {
                 onClick()
             },
@@ -411,11 +412,7 @@ private fun BoxScope.NewPostsButton(
                 .padding(start = 12.dp, end = 16.dp)
                 .padding(bottom = 4.dp)
                 .wrapContentHeight(),
-            text = if (unseenCount <= 100) {
-                pluralStringResource(R.plurals.feed_new_posts_notice, unseenCount, unseenCount)
-            } else {
-                stringResource(id = R.string.feed_new_posts_notice_100plus)
-            },
+            text = stringResource(id = R.string.feed_new_posts_notice_general),
             style = AppTheme.typography.bodySmall,
             color = Color.White,
         )

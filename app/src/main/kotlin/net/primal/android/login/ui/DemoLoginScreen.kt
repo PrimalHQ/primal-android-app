@@ -154,10 +154,10 @@ fun DemoLoginScreen(
                         .padding(top = 8.dp)
                         .align(alignment = Alignment.CenterHorizontally),
                     onClick = {
-                        onFeedSelected("global;popular")
+                        onFeedSelected("global;latest")
                     },
                     content = {
-                        Text(text = "Go To Popular")
+                        Text(text = "Go To Global Latest")
                     }
                 )
             }
