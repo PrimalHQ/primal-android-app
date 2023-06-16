@@ -96,7 +96,6 @@ fun PrimalAppNavigation() {
     val topLevelDestinationHandler: (PrimalTopLevelDestination) -> Unit = {
         when (it) {
             PrimalTopLevelDestination.Feed -> navController.popBackStack()
-            PrimalTopLevelDestination.Read -> navController.navigateToReadScreen()
             PrimalTopLevelDestination.Explore -> navController.navigateToExploreScreen()
             PrimalTopLevelDestination.Messages -> navController.navigateToMessagesScreen()
             PrimalTopLevelDestination.Notifications -> navController.navigateToNotificationsScreen()
@@ -135,13 +134,6 @@ fun PrimalAppNavigation() {
                         nullable = true
                     }
                 ),
-                navController = navController,
-                onTopLevelDestinationChanged = topLevelDestinationHandler,
-                onDrawerScreenClick = drawerDestinationHandler,
-            )
-
-            read(
-                route = "read",
                 navController = navController,
                 onTopLevelDestinationChanged = topLevelDestinationHandler,
                 onDrawerScreenClick = drawerDestinationHandler,
@@ -247,23 +239,6 @@ private fun NavGraphBuilder.feedList(
     FeedListScreen(
         viewModel = viewModel,
         onFeedSelected = { navController.navigateToFeed(directive = it) }
-    )
-}
-
-private fun NavGraphBuilder.read(
-    route: String,
-    navController: NavController,
-    onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
-    onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
-) = composable(
-    route = route,
-) {
-    DemoPrimaryScreen(
-        title = "Read",
-        description = "Coming soon.",
-        primaryDestination = PrimalTopLevelDestination.Read,
-        onTopLevelDestinationChanged = onTopLevelDestinationChanged,
-        onDrawerDestinationClick = onDrawerScreenClick,
     )
 }
 
