@@ -25,13 +25,15 @@ import net.primal.android.core.compose.DemoPrimaryScreen
 import net.primal.android.core.compose.DemoSecondaryScreen
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.drawer.DrawerScreenDestination
-import net.primal.android.feed.FeedViewModel
+import net.primal.android.feed.feed.FeedViewModel
 import net.primal.android.feed.list.FeedListScreen
 import net.primal.android.feed.list.FeedListViewModel
-import net.primal.android.feed.ui.FeedScreen
+import net.primal.android.feed.feed.FeedScreen
 import net.primal.android.login.LoginViewModel
 import net.primal.android.login.ui.DemoLoginScreen
 import net.primal.android.theme.AppTheme
+import net.primal.android.feed.thread.ThreadScreen
+import net.primal.android.feed.thread.ThreadViewModel
 import org.apache.commons.lang3.CharEncoding
 import java.net.URLDecoder
 import java.net.URLEncoder
@@ -39,6 +41,10 @@ import java.net.URLEncoder
 
 const val FeedDirective = "directive"
 inline val SavedStateHandle.feedDirective: String? get() = get<String>(FeedDirective)?.asUrlDecoded()
+
+const val PostId = "postId"
+inline val SavedStateHandle.postId: String get() = get(PostId)
+    ?: throw IllegalArgumentException("Missing required postId argument.")
 
 fun String.asUrlEncoded(): String = URLEncoder.encode(this, CharEncoding.UTF_8)
 
@@ -85,6 +91,9 @@ private fun NavController.navigateToUserListsScreen() = navigate(route = "userLi
 private fun NavController.navigateToSettingsScreen() = navigate(route = "settings")
 
 private fun NavController.navigateToSignOutScreen() = navigate(route = "signOut")
+
+private fun NavController.navigateToThreadScreen(postId: String) =
+    navigate(route = "thread/$postId")
 
 @OptIn(ExperimentalMaterialNavigationApi::class)
 @Composable
@@ -165,6 +174,16 @@ fun PrimalAppNavigation() {
                 navController = navController,
             )
 
+            thread(
+                route = "thread/{$PostId}",
+                arguments = listOf(
+                    navArgument(PostId) {
+                        type = NavType.StringType
+                    }
+                ),
+                navController = navController,
+            )
+
             profile(
                 route = "profile",
                 navController = navController
@@ -217,12 +236,13 @@ private fun NavGraphBuilder.feed(
 ) = composable(
     route = route,
     arguments = arguments,
-) {
-    val viewModel = hiltViewModel<FeedViewModel>(it)
+) { navBackEntry ->
+    val viewModel = hiltViewModel<FeedViewModel>(navBackEntry)
 
     FeedScreen(
         viewModel = viewModel,
         onFeedsClick = { navController.navigateToFeedList() },
+        onPostClick = { navController.navigateToThreadScreen(postId = it) },
         onTopLevelDestinationChanged = onTopLevelDestinationChanged,
         onDrawerScreenClick = onDrawerScreenClick,
     )
@@ -290,6 +310,22 @@ private fun NavGraphBuilder.notifications(
         primaryDestination = PrimalTopLevelDestination.Notifications,
         onTopLevelDestinationChanged = onTopLevelDestinationChanged,
         onDrawerDestinationClick = onDrawerScreenClick,
+    )
+}
+
+private fun NavGraphBuilder.thread(
+    route: String,
+    arguments: List<NamedNavArgument>,
+    navController: NavController,
+) = composable(
+    route = route,
+    arguments = arguments,
+) { navBackEntry ->
+    val viewModel = hiltViewModel<ThreadViewModel>(navBackEntry)
+    ThreadScreen(
+        viewModel = viewModel,
+        onClose = { navController.popBackStack() },
+        onPostClick = { navController.navigateToThreadScreen(it) }
     )
 }
 

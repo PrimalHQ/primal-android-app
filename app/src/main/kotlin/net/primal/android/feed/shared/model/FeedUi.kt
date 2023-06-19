@@ -1,4 +1,4 @@
-package net.primal.android.feed.ui.model
+package net.primal.android.feed.shared.model
 
 data class FeedUi(
     val directive: String,

@@ -1,6 +1,6 @@
 package net.primal.android.feed.list
 
-import net.primal.android.feed.ui.model.FeedUi
+import net.primal.android.feed.shared.model.FeedUi
 
 interface FeedListContract {
 

@@ -4,6 +4,8 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import net.primal.android.feed.api.model.FeedRequestBody
 import net.primal.android.feed.api.model.FeedResponse
+import net.primal.android.feed.api.model.ThreadRequestBody
+import net.primal.android.feed.api.model.ThreadResponse
 import net.primal.android.networking.sockets.SocketClient
 import net.primal.android.networking.sockets.model.OutgoingMessage
 import net.primal.android.nostr.model.NostrEventKind
@@ -43,6 +45,31 @@ class FeedApiImpl @Inject constructor(
         )
 
     }
+
+    override suspend fun getThread(body: ThreadRequestBody): ThreadResponse {
+        val queryResult = socketClient.query(
+            message = OutgoingMessage(
+                primalVerb = "thread_view",
+                options = NostrJson.encodeToString(body)
+            )
+        )
+
+        val nostrEvents = queryResult.nostrEvents
+        val nostrEventsMap = nostrEvents.groupBy { NostrEventKind.valueOf(it.kind) }
+
+        val primalEvents = queryResult.primalEvents
+        val primalEventsMap = primalEvents.groupBy { NostrEventKind.valueOf(it.kind) }
+
+        return ThreadResponse(
+            metadata = nostrEventsMap[NostrEventKind.Metadata] ?: emptyList(),
+            posts = nostrEventsMap[NostrEventKind.ShortTextNote] ?: emptyList(),
+            primalEventStats = primalEventsMap[NostrEventKind.PrimalEventStats] ?: emptyList(),
+            primalEventUserStats = primalEventsMap[NostrEventKind.PrimalEventUserStats] ?: emptyList(),
+            primalEventResources = primalEventsMap[NostrEventKind.PrimalEventResources] ?: emptyList(),
+            referencedPosts = primalEventsMap[NostrEventKind.PrimalReferencedEvent] ?: emptyList(),
+        )
+    }
+
 
     private fun List<PrimalEvent>?.firstPagingContentOrNull(): ContentPrimalPaging? {
         val pagingContent = this?.firstOrNull()?.content ?: return null

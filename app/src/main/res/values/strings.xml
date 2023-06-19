@@ -37,4 +37,6 @@
         <item quantity="other">%1$s new posts</item>
     </plurals>
 
+
+    <string name="thread_title">Thread</string>
 </resources>

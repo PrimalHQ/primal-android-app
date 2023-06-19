@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "0216d47d96fee035f5666a4cb4d399fe",
+    "identityHash": "dcf825b5647056e33ba90b891b55f256",
     "entities": [
       {
         "tableName": "PostData",
@@ -451,6 +451,33 @@
         },
         "indices": [],
         "foreignKeys": []
+      },
+      {
+        "tableName": "ConversationCrossRef",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`rootPostId` TEXT NOT NULL, `replyPostId` TEXT NOT NULL, PRIMARY KEY(`rootPostId`, `replyPostId`))",
+        "fields": [
+          {
+            "fieldPath": "rootPostId",
+            "columnName": "rootPostId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "replyPostId",
+            "columnName": "replyPostId",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "rootPostId",
+            "replyPostId"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
       }
     ],
     "views": [
@@ -461,7 +488,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '0216d47d96fee035f5666a4cb4d399fe')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'dcf825b5647056e33ba90b891b55f256')"
     ]
   }
 }

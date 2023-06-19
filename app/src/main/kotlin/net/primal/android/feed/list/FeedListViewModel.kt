@@ -10,7 +10,7 @@ import kotlinx.coroutines.launch
 import net.primal.android.feed.db.Feed
 import net.primal.android.feed.list.FeedListContract.UiState
 import net.primal.android.feed.repository.FeedRepository
-import net.primal.android.feed.ui.model.FeedUi
+import net.primal.android.feed.shared.model.FeedUi
 import javax.inject.Inject
 
 @HiltViewModel

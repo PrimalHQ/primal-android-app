@@ -1,6 +1,7 @@
 package net.primal.android.core.compose.icons
 
 import androidx.compose.ui.graphics.vector.ImageVector
+import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 import net.primal.android.core.compose.icons.primaliconpack.AvatarNostrich
 import net.primal.android.core.compose.icons.primaliconpack.DarkMode
@@ -70,7 +71,8 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             QrCode,
             DarkMode,
             LightMode,
-            Notrich
+            Notrich,
+            ArrowBack,
         )
         return __PrimalIcons!!
     }

@@ -2,6 +2,7 @@ package net.primal.android.feed.db
 
 import androidx.paging.PagingSource
 import androidx.room.Dao
+import androidx.room.Query
 import androidx.room.RawQuery
 import androidx.room.Transaction
 import androidx.sqlite.db.SupportSQLiteQuery
@@ -21,5 +22,9 @@ interface FeedPostDao {
     @Transaction
     @RawQuery(observedEntities = [FeedPost::class])
     fun oldestFeedPosts(query: SupportSQLiteQuery): List<FeedPost>
+
+    @Transaction
+    @Query("SELECT * FROM FeedPostData WHERE postId = :postId LIMIT 1")
+    fun findPostById(postId: String): FeedPost
 
 }

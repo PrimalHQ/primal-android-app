@@ -21,7 +21,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import net.primal.android.R
-import net.primal.android.feed.ui.model.FeedUi
+import net.primal.android.feed.shared.model.FeedUi
 
 
 @Composable
@@ -29,15 +29,14 @@ fun FeedListScreen(
     viewModel: FeedListViewModel,
     onFeedSelected: (String) -> Unit,
 ) {
-
     val uiState = viewModel.state.collectAsState()
 
     FeedListScreen(
         state = uiState.value,
         onFeedClick = { onFeedSelected(it.directive) },
     )
-}
 
+}
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable

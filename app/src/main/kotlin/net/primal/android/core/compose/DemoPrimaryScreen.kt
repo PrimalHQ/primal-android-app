@@ -18,6 +18,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
+import net.primal.android.core.compose.icons.PrimalIcons
+import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.PrimalDrawer
 
@@ -46,6 +48,7 @@ fun DemoPrimaryScreen(
                 topBar = {
                     PrimalTopAppBar(
                         title = title,
+                        navigationIcon = PrimalIcons.AvatarDefault,
                         onNavigationIconClick = {
                             uiScope.launch { drawerState.open() }
                         },

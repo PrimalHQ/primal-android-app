@@ -7,14 +7,14 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
-import net.primal.android.core.compose.icons.PrimalIcons
-import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
+import androidx.compose.ui.graphics.vector.ImageVector
 import net.primal.android.theme.AppTheme
 
 @ExperimentalMaterial3Api
 @Composable
 fun PrimalTopAppBar(
     title: String,
+    navigationIcon: ImageVector,
     onNavigationIconClick: () -> Unit,
     actions: @Composable RowScope.() -> Unit = {},
     scrollBehavior: TopAppBarScrollBehavior? = null,
@@ -22,7 +22,7 @@ fun PrimalTopAppBar(
     CenterAlignedTopAppBar(
         navigationIcon = {
             AppBarIcon(
-                icon = PrimalIcons.AvatarDefault,
+                icon = navigationIcon,
                 onClick = onNavigationIconClick,
             )
         },

@@ -18,7 +18,7 @@ import net.primal.android.feed.db.FeedPostSync
 import net.primal.android.feed.db.sql.ExploreFeedQueryBuilder
 import net.primal.android.feed.db.sql.FeedQueryBuilder
 import net.primal.android.feed.db.sql.LatestFeedQueryBuilder
-import net.primal.android.feed.isLatestFeed
+import net.primal.android.feed.feed.isLatestFeed
 import net.primal.android.networking.sockets.NostrNoticeException
 import net.primal.android.nostr.ext.asEventStatsPO
 import net.primal.android.nostr.ext.asPost

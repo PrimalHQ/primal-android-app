@@ -1,9 +1,9 @@
-package net.primal.android.feed
+package net.primal.android.feed.feed
 
 import androidx.paging.PagingData
 import kotlinx.coroutines.flow.Flow
-import net.primal.android.feed.ui.model.FeedPostUi
-import net.primal.android.feed.ui.model.FeedPostsSyncStats
+import net.primal.android.feed.shared.model.FeedPostUi
+import net.primal.android.feed.shared.model.FeedPostsSyncStats
 
 interface FeedContract {
     data class UiState(
@@ -15,10 +15,6 @@ interface FeedContract {
 
     sealed class UiEvent {
         object FeedScrolledToTop : UiEvent()
-    }
-
-    sealed class SideEffect {
-
     }
 
 }

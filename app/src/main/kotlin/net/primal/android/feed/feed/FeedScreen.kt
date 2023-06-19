@@ -1,6 +1,5 @@
-package net.primal.android.feed.ui
+package net.primal.android.feed.feed
 
-import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -53,7 +52,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -78,14 +76,14 @@ import net.primal.android.core.compose.PrimalNavigationBar
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.compose.icons.PrimalIcons
+import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 import net.primal.android.core.compose.icons.primaliconpack.FeedPicker
 import net.primal.android.core.compose.isEmpty
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.PrimalDrawer
-import net.primal.android.feed.FeedContract
-import net.primal.android.feed.FeedViewModel
-import net.primal.android.feed.ui.model.FeedPostUi
-import net.primal.android.feed.ui.model.FeedPostsSyncStats
+import net.primal.android.feed.shared.model.FeedPostUi
+import net.primal.android.feed.shared.model.FeedPostsSyncStats
+import net.primal.android.feed.shared.ui.FeedPostListItem
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import kotlin.math.roundToInt
@@ -96,6 +94,7 @@ import kotlin.time.Duration.Companion.seconds
 fun FeedScreen(
     viewModel: FeedViewModel,
     onFeedsClick: () -> Unit,
+    onPostClick: (String) -> Unit,
     onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
 ) {
@@ -105,6 +104,7 @@ fun FeedScreen(
         state = uiState.value,
         eventPublisher = { viewModel.setEvent(it) },
         onFeedsClick = onFeedsClick,
+        onPostClick = onPostClick,
         onPrimaryDestinationChanged = onTopLevelDestinationChanged,
         onDrawerDestinationClick = onDrawerScreenClick,
     )
@@ -116,6 +116,7 @@ fun FeedScreen(
     state: FeedContract.UiState,
     eventPublisher: (FeedContract.UiEvent) -> Unit,
     onFeedsClick: () -> Unit,
+    onPostClick: (String) -> Unit,
     onPrimaryDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
 ) {
@@ -161,6 +162,7 @@ fun FeedScreen(
                 topBar = {
                     PrimalTopAppBar(
                         title = state.feedTitle,
+                        navigationIcon = PrimalIcons.AvatarDefault,
                         onNavigationIconClick = {
                             uiScope.launch { drawerState.open() }
                         },
@@ -237,6 +239,7 @@ fun FeedScreen(
                                     contentPadding = paddingValues,
                                     pagingItems = pagingItems,
                                     listState = feedListState,
+                                    onPostClick = onPostClick,
                                 )
 
                                 AnimatedVisibility(
@@ -294,10 +297,8 @@ fun FeedList(
     contentPadding: PaddingValues,
     pagingItems: LazyPagingItems<FeedPostUi>,
     listState: LazyListState,
+    onPostClick: (String) -> Unit,
 ) {
-    val context = LocalContext.current
-    val uiScope = rememberCoroutineScope()
-
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = contentPadding,
@@ -328,16 +329,7 @@ fun FeedList(
             when {
                 item != null -> FeedPostListItem(
                     data = item,
-                    onClick = {
-                        uiScope.launch {
-                            Toast.makeText(
-                                context,
-                                "${item.authorDisplayName}'s post clicked. Refresh triggered.",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                        pagingItems.refresh()
-                    },
+                    onClick = { onPostClick(item.postId) },
                 )
 
                 else -> {}
@@ -463,6 +455,7 @@ fun FeedScreenPreview() {
             state = FeedContract.UiState(posts = flow { }),
             eventPublisher = {},
             onFeedsClick = {},
+            onPostClick = {},
             onPrimaryDestinationChanged = {},
             onDrawerDestinationClick = {},
         )

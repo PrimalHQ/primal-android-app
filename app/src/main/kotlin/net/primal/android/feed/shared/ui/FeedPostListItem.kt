@@ -1,4 +1,4 @@
-package net.primal.android.feed.ui
+package net.primal.android.feed.shared.ui
 
 import android.content.res.Configuration
 import android.widget.Toast
@@ -65,9 +65,9 @@ import net.primal.android.core.compose.icons.primaliconpack.FeedZapsFilled
 import net.primal.android.core.ext.openUriSafely
 import net.primal.android.core.utils.asBeforeNowFormat
 import net.primal.android.core.utils.isPrimalIdentifier
-import net.primal.android.feed.ui.model.FeedPostStatsUi
-import net.primal.android.feed.ui.model.FeedPostUi
-import net.primal.android.feed.ui.model.PostResource
+import net.primal.android.feed.shared.model.FeedPostResource
+import net.primal.android.feed.shared.model.FeedPostStatsUi
+import net.primal.android.feed.shared.model.FeedPostUi
 import net.primal.android.nostr.model.primal.PrimalResourceVariant
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
@@ -140,11 +140,11 @@ fun FeedPostListItem(
     }
 }
 
-private fun List<PostResource>.filterImages() = filter {
+private fun List<FeedPostResource>.filterImages() = filter {
     it.mimeType?.startsWith("image") == true
 }
 
-private fun List<PostResource>.filterNotImages() = filterNot {
+private fun List<FeedPostResource>.filterNotImages() = filterNot {
     it.mimeType?.startsWith("image") == true
 }
 
@@ -159,7 +159,7 @@ private fun String.withoutUrls(urls: List<String>): String {
 @Composable
 fun PostContent(
     content: String,
-    resources: List<PostResource>,
+    resources: List<FeedPostResource>,
     onClick: (Offset) -> Unit,
     onUrlClick: (String) -> Unit,
 ) {
