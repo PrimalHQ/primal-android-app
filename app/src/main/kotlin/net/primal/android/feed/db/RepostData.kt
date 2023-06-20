@@ -1,10 +1,15 @@
 package net.primal.android.feed.db
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import kotlinx.serialization.json.JsonArray
 
-@Entity
+@Entity(
+    indices = [
+        Index(value = ["postId"]),
+    ],
+)
 data class RepostData(
     @PrimaryKey
     val repostId: String,

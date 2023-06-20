@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "38ce9547b44a1ef568f75bfd7d5d9cbd",
+    "identityHash": "fd168c648b8b5926d71361fada59c3e7",
     "entities": [
       {
         "tableName": "PostData",
@@ -205,7 +205,17 @@
             "repostId"
           ]
         },
-        "indices": [],
+        "indices": [
+          {
+            "name": "index_RepostData_postId",
+            "unique": false,
+            "columnNames": [
+              "postId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_RepostData_postId` ON `${TABLE_NAME}` (`postId`)"
+          }
+        ],
         "foreignKeys": []
       },
       {
@@ -365,7 +375,26 @@
             "eventId"
           ]
         },
-        "indices": [],
+        "indices": [
+          {
+            "name": "index_FeedPostDataCrossRef_feedDirective",
+            "unique": false,
+            "columnNames": [
+              "feedDirective"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_FeedPostDataCrossRef_feedDirective` ON `${TABLE_NAME}` (`feedDirective`)"
+          },
+          {
+            "name": "index_FeedPostDataCrossRef_eventId",
+            "unique": false,
+            "columnNames": [
+              "eventId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_FeedPostDataCrossRef_eventId` ON `${TABLE_NAME}` (`eventId`)"
+          }
+        ],
         "foreignKeys": []
       },
       {
@@ -476,14 +505,33 @@
             "replyPostId"
           ]
         },
-        "indices": [],
+        "indices": [
+          {
+            "name": "index_ConversationCrossRef_postId",
+            "unique": false,
+            "columnNames": [
+              "postId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ConversationCrossRef_postId` ON `${TABLE_NAME}` (`postId`)"
+          },
+          {
+            "name": "index_ConversationCrossRef_replyPostId",
+            "unique": false,
+            "columnNames": [
+              "replyPostId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ConversationCrossRef_replyPostId` ON `${TABLE_NAME}` (`replyPostId`)"
+          }
+        ],
         "foreignKeys": []
       }
     ],
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '38ce9547b44a1ef568f75bfd7d5d9cbd')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'fd168c648b8b5926d71361fada59c3e7')"
     ]
   }
 }
