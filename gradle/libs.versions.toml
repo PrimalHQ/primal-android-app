@@ -11,7 +11,7 @@ kotlinx-serialization-json = "1.5.0"
 mockk = "1.13.5"
 okhttp = "4.11.0"
 org-jetbrains-kotlin-android = "1.8.10"
-compose-bom = "2023.05.01"
+compose-bom = "2023.06.00"
 core-ktx = "1.10.1"
 core-splashscreen = "1.0.1"
 lifecycle-runtime-ktx = "2.6.1"
@@ -23,7 +23,7 @@ accompanist = "0.30.1"
 dagger = "2.44.2"
 hilt = "1.0.0"
 retrofit = "2.9.0"
-paging = "3.1.1"
+paging = "3.2.0-beta01"
 room = "2.5.1"
 ksp = "1.8.10-1.0.9"
 secp256k1-kmp-jvm = "0.6.4"
@@ -56,13 +56,13 @@ compose-pager-indicators = { module = "com.google.accompanist:accompanist-pager-
 constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version.ref = "constraintlayout" }
 compose-constraintlayout = { module = "androidx.constraintlayout:constraintlayout-compose", version.ref = "constraintlayout-compose" }
 
-navigation-compose = { module = "androidx.navigation:navigation-compose", version = "2.5.3" }
+navigation-compose = { module = "androidx.navigation:navigation-compose", version = "2.6.0" }
 navigation-hilt = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hilt" }
 navigation-material = { module = "com.google.accompanist:accompanist-navigation-material", version.ref = "accompanist" }
 
 paging-runtime = { module = "androidx.paging:paging-runtime", version.ref = "paging" }
 paging-common = { module = "androidx.paging:paging-common", version.ref = "paging" }
-paging-compose = { module = "androidx.paging:paging-compose", version = "1.0.0-alpha20" }
+paging-compose = { module = "androidx.paging:paging-compose", version = "paging" }
 
 # DI libs
 hilt-compiler = { module = "androidx.hilt:hilt-compiler", version.ref = "hilt" }
