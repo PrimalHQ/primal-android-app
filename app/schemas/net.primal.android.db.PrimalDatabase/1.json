@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "dcf825b5647056e33ba90b891b55f256",
+    "identityHash": "f97080223e7fd172bc225b454d0d587c",
     "entities": [
       {
         "tableName": "PostData",
@@ -454,11 +454,11 @@
       },
       {
         "tableName": "ConversationCrossRef",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`rootPostId` TEXT NOT NULL, `replyPostId` TEXT NOT NULL, PRIMARY KEY(`rootPostId`, `replyPostId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`postId` TEXT NOT NULL, `replyPostId` TEXT NOT NULL, PRIMARY KEY(`postId`, `replyPostId`))",
         "fields": [
           {
-            "fieldPath": "rootPostId",
-            "columnName": "rootPostId",
+            "fieldPath": "postId",
+            "columnName": "postId",
             "affinity": "TEXT",
             "notNull": true
           },
@@ -472,7 +472,7 @@
         "primaryKey": {
           "autoGenerate": false,
           "columnNames": [
-            "rootPostId",
+            "postId",
             "replyPostId"
           ]
         },
@@ -480,15 +480,10 @@
         "foreignKeys": []
       }
     ],
-    "views": [
-      {
-        "viewName": "FeedPostData",
-        "createSql": "CREATE VIEW `${VIEW_NAME}` AS SELECT \n        PostData.postId,\n        PostData.authorId,\n        PostData.createdAt,\n        PostData.content,\n        PostData.referencePostId,\n        PostData.referencePostAuthorId,\n        RepostData.repostId AS repostId,\n        RepostData.authorId AS repostAuthorId,\n        COALESCE(RepostData.createdAt, PostData.createdAt) AS feedCreatedAt\n    FROM PostData\n    LEFT JOIN RepostData ON RepostData.postId = PostData.postId"
-      }
-    ],
+    "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'dcf825b5647056e33ba90b891b55f256')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'f97080223e7fd172bc225b454d0d587c')"
     ]
   }
 }

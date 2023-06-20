@@ -8,8 +8,19 @@ class LatestFeedQueryBuilder(
 
     companion object {
         private const val LATEST_BASIC_QUERY = """
-            SELECT FeedPostData.* FROM FeedPostData
-            INNER JOIN FeedPostDataCrossRef ON FeedPostData.postId = FeedPostDataCrossRef.postId
+            SELECT
+                PostData.postId,
+                PostData.authorId,
+                PostData.createdAt,
+                PostData.content,
+                PostData.referencePostId,
+                PostData.referencePostAuthorId,
+                RepostData.repostId AS repostId,
+                RepostData.authorId AS repostAuthorId,
+                COALESCE(RepostData.createdAt, PostData.createdAt) AS feedCreatedAt
+            FROM PostData
+            LEFT JOIN RepostData ON RepostData.postId = PostData.postId
+            INNER JOIN FeedPostDataCrossRef ON PostData.postId = FeedPostDataCrossRef.postId
             WHERE FeedPostDataCrossRef.feedDirective = ?
         """
     }

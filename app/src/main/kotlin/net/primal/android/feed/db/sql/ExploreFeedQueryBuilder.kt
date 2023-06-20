@@ -11,9 +11,19 @@ class ExploreFeedQueryBuilder(
 
     companion object {
         private const val EXPLORE_BASIC_QUERY = """
-            SELECT FeedPostData.* FROM FeedPostData
-            INNER JOIN FeedPostDataCrossRef ON FeedPostData.postId = FeedPostDataCrossRef.postId
-            INNER JOIN PostStats ON FeedPostData.postId = PostStats.postId
+            SELECT
+                PostData.postId,
+                PostData.authorId,
+                PostData.createdAt,
+                PostData.content,
+                PostData.referencePostId,
+                PostData.referencePostAuthorId,
+                NULL AS repostId,
+                NULL AS repostAuthorId,
+                NULL AS feedCreatedAt
+            FROM PostData
+            INNER JOIN FeedPostDataCrossRef ON PostData.postId = FeedPostDataCrossRef.postId
+            INNER JOIN PostStats ON PostData.postId = PostStats.postId
             WHERE FeedPostDataCrossRef.feedDirective = ?
         """
     }

@@ -9,7 +9,6 @@ import net.primal.android.feed.db.ConversationDao
 import net.primal.android.feed.db.Feed
 import net.primal.android.feed.db.FeedDao
 import net.primal.android.feed.db.FeedPostDao
-import net.primal.android.feed.db.FeedPostData
 import net.primal.android.feed.db.FeedPostDataCrossRef
 import net.primal.android.feed.db.FeedPostDataCrossRefDao
 import net.primal.android.feed.db.FeedPostRemoteKey
@@ -40,9 +39,6 @@ import net.primal.android.serialization.RoomCustomTypeConverters
         FeedPostRemoteKey::class,
         FeedPostSync::class,
         ConversationCrossRef::class,
-    ],
-    views = [
-        FeedPostData::class,
     ],
     version = 1,
     exportSchema = true,

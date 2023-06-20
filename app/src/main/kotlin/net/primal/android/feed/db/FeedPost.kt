@@ -40,17 +40,15 @@ data class FeedPost(
     val referencedPostAuthor: ProfileMetadata? = null,
 
     @Relation(
+        entityColumn = "postId",
+        parentColumn = "postId",
+    )
+    val postStats: PostStats? = null,
+
+    @Relation(
         entityColumn = "ownerId",
         parentColumn = "repostAuthorId",
     )
     val repostAuthor: ProfileMetadata? = null,
 
-    @Relation(
-        entityColumn = "postId",
-        parentColumn = "postId",
-    )
-    val postStats: PostStats? = null
-
 )
-
-

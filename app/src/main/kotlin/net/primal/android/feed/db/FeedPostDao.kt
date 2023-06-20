@@ -24,7 +24,21 @@ interface FeedPostDao {
     fun oldestFeedPosts(query: SupportSQLiteQuery): List<FeedPost>
 
     @Transaction
-    @Query("SELECT * FROM FeedPostData WHERE postId = :postId LIMIT 1")
+    @Query(
+        """
+        SELECT
+            PostData.postId,
+            PostData.authorId,
+            PostData.createdAt,
+            PostData.content,
+            PostData.referencePostId,
+            PostData.referencePostAuthorId,
+            NULL AS repostId,
+            NULL AS repostAuthorId,
+            NULL AS feedCreatedAt
+        FROM PostData WHERE postId = :postId LIMIT 1
+        """
+    )
     fun findPostById(postId: String): FeedPost
 
 }

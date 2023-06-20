@@ -13,12 +13,21 @@ interface ConversationDao {
     @RewriteQueriesToDropUnusedColumns
     @Query(
         """
-            SELECT FPD2.*
-            FROM FeedPostData AS FPD1
+            SELECT 
+                FPD2.postId,
+                FPD2.authorId,
+                FPD2.createdAt,
+                FPD2.content,
+                FPD2.referencePostId,
+                FPD2.referencePostAuthorId,
+                NULL AS repostId,
+                NULL AS repostAuthorId,
+                NULL AS feedCreatedAt
+            FROM PostData AS FPD1
             INNER JOIN ConversationCrossRef ON FPD1.postId = ConversationCrossRef.postId
-            INNER JOIN FeedPostData AS FPD2 ON ConversationCrossRef.replyPostId = FPD2.postId
+            INNER JOIN PostData AS FPD2 ON ConversationCrossRef.replyPostId = FPD2.postId
             WHERE FPD1.postId = :postId
-            ORDER BY FPD2.feedCreatedAt ASC
+            ORDER BY FPD2.createdAt ASC
         """
     )
     fun observeConversation(postId: String): Flow<List<FeedPost>>
