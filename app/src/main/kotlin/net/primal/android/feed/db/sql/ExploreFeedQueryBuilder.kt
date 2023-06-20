@@ -22,7 +22,7 @@ class ExploreFeedQueryBuilder(
                 NULL AS repostAuthorId,
                 NULL AS feedCreatedAt
             FROM PostData
-            INNER JOIN FeedPostDataCrossRef ON PostData.postId = FeedPostDataCrossRef.postId
+            INNER JOIN FeedPostDataCrossRef ON FeedPostDataCrossRef.eventId = PostData.postId
             INNER JOIN PostStats ON PostData.postId = PostStats.postId
             WHERE FeedPostDataCrossRef.feedDirective = ?
         """

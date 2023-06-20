@@ -3,9 +3,9 @@ package net.primal.android.feed.db
 import androidx.room.Entity
 
 @Entity(
-    primaryKeys = ["feedDirective", "postId"],
+    primaryKeys = ["feedDirective", "eventId"],
 )
 data class FeedPostDataCrossRef(
     val feedDirective: String,
-    val postId: String,
+    val eventId: String,
 )

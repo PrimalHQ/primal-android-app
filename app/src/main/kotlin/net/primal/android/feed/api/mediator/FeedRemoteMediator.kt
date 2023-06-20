@@ -267,12 +267,13 @@ class FeedRemoteMediator(
             database.posts().upsertAll(data = posts)
             database.reposts().upsertAll(data = reposts)
 
-            val feedConnections = posts.map { it.postId } + reposts.map { it.postId }
+            val feedConnections = posts.map { it.postId } + reposts.map { it.repostId }
+
             database.feedsConnections().connect(
                 data = feedConnections.map { postId ->
                     FeedPostDataCrossRef(
                         feedDirective = feedDirective,
-                        postId = postId
+                        eventId = postId
                     )
                 }
             )

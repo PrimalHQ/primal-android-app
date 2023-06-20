@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "f97080223e7fd172bc225b454d0d587c",
+    "identityHash": "38ce9547b44a1ef568f75bfd7d5d9cbd",
     "entities": [
       {
         "tableName": "PostData",
@@ -343,7 +343,7 @@
       },
       {
         "tableName": "FeedPostDataCrossRef",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`feedDirective` TEXT NOT NULL, `postId` TEXT NOT NULL, PRIMARY KEY(`feedDirective`, `postId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`feedDirective` TEXT NOT NULL, `eventId` TEXT NOT NULL, PRIMARY KEY(`feedDirective`, `eventId`))",
         "fields": [
           {
             "fieldPath": "feedDirective",
@@ -352,8 +352,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "postId",
-            "columnName": "postId",
+            "fieldPath": "eventId",
+            "columnName": "eventId",
             "affinity": "TEXT",
             "notNull": true
           }
@@ -362,7 +362,7 @@
           "autoGenerate": false,
           "columnNames": [
             "feedDirective",
-            "postId"
+            "eventId"
           ]
         },
         "indices": [],
@@ -483,7 +483,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'f97080223e7fd172bc225b454d0d587c')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '38ce9547b44a1ef568f75bfd7d5d9cbd')"
     ]
   }
 }
