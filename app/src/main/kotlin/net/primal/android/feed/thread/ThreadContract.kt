@@ -5,10 +5,9 @@ import net.primal.android.feed.shared.model.FeedPostUi
 interface ThreadContract {
 
     data class UiState(
-        val loading: Boolean,
-        val rootPost: FeedPostUi? = null,
-        val precedingReplies: List<FeedPostUi> = emptyList(),
-        val succeedingReplies: List<FeedPostUi> = emptyList(),
+        val highlightPost: FeedPostUi? = null,
+        val highlightPostIndex: Int = 0,
+        val conversation: List<FeedPostUi> = emptyList(),
     )
 
 }

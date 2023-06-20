@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -29,8 +30,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -44,6 +48,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -74,9 +79,14 @@ import net.primal.android.theme.PrimalTheme
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
+
 @Composable
 fun FeedPostListItem(
     data: FeedPostUi,
+    shouldIndentContent: Boolean = false,
+    connectedToPostBefore: Boolean = false,
+    connectedToPostAfter: Boolean = false,
+    highlighted: Boolean = false,
     onClick: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -84,7 +94,7 @@ fun FeedPostListItem(
     val uiScope = rememberCoroutineScope()
     val interactionSource = remember { MutableInteractionSource() }
 
-    Card(
+    CardWithHighlight(
         modifier = Modifier
             .wrapContentHeight()
             .padding(horizontal = 4.dp)
@@ -93,6 +103,9 @@ fun FeedPostListItem(
                 indication = rememberRipple(),
                 onClick = onClick
             ),
+        highlighted = highlighted,
+        connectedToPostBefore = connectedToPostBefore,
+        connectedToPostAfter = connectedToPostAfter,
     ) {
         if (data.repostAuthorDisplayName != null) {
             RepostedItem(
@@ -118,25 +131,95 @@ fun FeedPostListItem(
 
         val postAuthorGuessHeight = with(LocalDensity.current) { 128.dp.toPx() }
 
-        PostContent(
-            content = data.content,
-            resources = data.resources,
-            onClick = {
-                uiScope.launch {
-                    val press = PressInteraction.Press(it.copy(y = it.y + postAuthorGuessHeight))
-                    interactionSource.emit(press)
-                    interactionSource.emit(PressInteraction.Release(press))
-                }
-                onClick()
-            },
-            onUrlClick = {
-                localUriHandler.openUriSafely(it)
-            },
-        )
+        Column(
+            modifier = Modifier.padding(start = if (shouldIndentContent) 64.dp else 0.dp),
+        ) {
+            PostContent(
+                content = data.content,
+                resources = data.resources,
+                onClick = {
+                    uiScope.launch {
+                        val press = PressInteraction.Press(it.copy(y = it.y + postAuthorGuessHeight))
+                        interactionSource.emit(press)
+                        interactionSource.emit(PressInteraction.Release(press))
+                    }
+                    onClick()
+                },
+                onUrlClick = {
+                    localUriHandler.openUriSafely(it)
+                },
+            )
 
-        PostStatsItem(
-            postStats = data.stats,
-        )
+            PostStatsItem(
+                postStats = data.stats,
+            )
+        }
+    }
+}
+
+@Composable
+private fun CardWithHighlight(
+    modifier: Modifier = Modifier,
+    highlighted: Boolean = false,
+    highlightWidth: Dp = 8.dp,
+    connectedToPostBefore: Boolean = false,
+    connectedToPostAfter: Boolean = false,
+    connectionWidth: Dp = 1.dp,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+
+    val outlineColor = AppTheme.colorScheme.outline
+    val gradientColors = listOf(
+        AppTheme.extraColorScheme.brand1,
+        AppTheme.extraColorScheme.brand2,
+    )
+
+    Card(
+        modifier = modifier,
+    ) {
+        if (highlighted || connectedToPostBefore || connectedToPostAfter) {
+            Column(
+                modifier = Modifier.drawWithCache {
+                    onDrawBehind {
+                        if (highlighted) {
+                            drawLine(
+                                brush = Brush.verticalGradient(gradientColors),
+                                start = Offset(x = 0f, y = 0f),
+                                end = Offset(x = 0f, y = size.height),
+                                strokeWidth = highlightWidth.toPx(),
+                                cap = StrokeCap.Square
+                            )
+                        }
+
+                        val connectionX = 40.dp.toPx()
+
+                        if (connectedToPostBefore) {
+                            drawLine(
+                                color = outlineColor,
+                                start = Offset(x = connectionX, y = 0f),
+                                end = Offset(x = connectionX, y = 32.dp.toPx()),
+                                strokeWidth = connectionWidth.toPx(),
+                                cap = StrokeCap.Square
+                            )
+                        }
+
+                        if (connectedToPostAfter) {
+                            drawLine(
+                                color = outlineColor,
+                                start = Offset(x = connectionX, y = 64.dp.toPx()),
+                                end = Offset(x = connectionX, y = size.height),
+                                strokeWidth = connectionWidth.toPx(),
+                                cap = StrokeCap.Square
+                            )
+                        }
+                    }
+                }
+            ) {
+                content()
+            }
+        } else {
+            content()
+        }
     }
 }
 

@@ -23,43 +23,33 @@ class ThreadViewModel @Inject constructor(
 
     private val postId = savedStateHandle.postId
 
-    private val _state = MutableStateFlow(
-        ThreadContract.UiState(
-            loading = true,
-        )
-    )
+    private val _state = MutableStateFlow(ThreadContract.UiState())
     val state = _state.asStateFlow()
     private fun setState(reducer: ThreadContract.UiState.() -> ThreadContract.UiState) {
         _state.getAndUpdate { it.reducer() }
     }
 
     init {
+        loadInitialPost()
         observeConversation()
         fetchRepliesFromNetwork()
     }
 
-    private fun observeConversation() = viewModelScope.launch {
-        val rootPost = withContext(Dispatchers.IO) { repository.findPostById(postId =  postId) }
+    private fun loadInitialPost() = viewModelScope.launch {
+        val rootPost = withContext(Dispatchers.IO) { repository.findPostById(postId = postId) }
         setState {
-            copy(rootPost = rootPost.asFeedPostUi())
+            copy(highlightPost = rootPost.asFeedPostUi())
         }
+    }
 
+    private fun observeConversation() = viewModelScope.launch {
         repository.observeConversation(postId = postId).collect { conversation ->
-            val posts = conversation.map { it.asFeedPostUi() }
-            val rootIndex = posts.indexOfFirst { it.postId == postId }
-            val precedingReplies = posts
-                .subList(0, rootIndex.coerceAtLeast(0))
-                .sortedBy { it.timestamp }
-
-            val succeedingReplies = posts
-                .subList(rootIndex.coerceAtLeast(0), posts.size)
-                .drop(1)
-                .sortedByDescending { it.timestamp }
-
             setState {
+                val newConversation = conversation.map { it.asFeedPostUi() }
+                val highlightIndex = conversation.indexOfFirst { it.data.postId == postId }
                 copy(
-                    precedingReplies = precedingReplies,
-                    succeedingReplies = succeedingReplies,
+                    highlightPostIndex = highlightIndex,
+                    conversation = newConversation,
                 )
             }
         }

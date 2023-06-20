@@ -25,15 +25,15 @@ import net.primal.android.core.compose.DemoPrimaryScreen
 import net.primal.android.core.compose.DemoSecondaryScreen
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.drawer.DrawerScreenDestination
+import net.primal.android.feed.feed.FeedScreen
 import net.primal.android.feed.feed.FeedViewModel
 import net.primal.android.feed.list.FeedListScreen
 import net.primal.android.feed.list.FeedListViewModel
-import net.primal.android.feed.feed.FeedScreen
+import net.primal.android.feed.thread.ThreadScreen
+import net.primal.android.feed.thread.ThreadViewModel
 import net.primal.android.login.LoginViewModel
 import net.primal.android.login.ui.DemoLoginScreen
 import net.primal.android.theme.AppTheme
-import net.primal.android.feed.thread.ThreadScreen
-import net.primal.android.feed.thread.ThreadViewModel
 import org.apache.commons.lang3.CharEncoding
 import java.net.URLDecoder
 import java.net.URLEncoder
@@ -69,9 +69,6 @@ private fun NavController.navigateToFeed(directive: String) =
         route = "feed?directive=${directive.asUrlEncoded()}",
         navOptions = navOptions { clearBackStack() },
     )
-
-private fun NavController.navigateToReadScreen() =
-    navigate(route = "read", navOptions = topLevelNavOptions)
 
 private fun NavController.navigateToExploreScreen() =
     navigate(route = "explore", navOptions = topLevelNavOptions)
@@ -324,7 +321,7 @@ private fun NavGraphBuilder.thread(
     val viewModel = hiltViewModel<ThreadViewModel>(navBackEntry)
     ThreadScreen(
         viewModel = viewModel,
-        onClose = { navController.popBackStack() },
+        onClose = { navController.navigateUp() },
         onPostClick = { navController.navigateToThreadScreen(it) }
     )
 }
