@@ -15,6 +15,7 @@ import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
@@ -22,6 +23,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -55,11 +57,14 @@ fun ThreadScreen(
     val topAppBarState = rememberTopAppBarState()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(topAppBarState)
 
+    val uiScope = rememberCoroutineScope()
     val listState = rememberLazyListState()
 
     LaunchedEffect(state.highlightPostIndex) {
-        if (state.highlightPostIndex > 0) {
-            listState.scrollToItem(index = state.highlightPostIndex)
+        uiScope.launch {
+            if (state.highlightPostIndex in 0 until state.conversation.size) {
+                listState.animateScrollToItem(index = state.highlightPostIndex)
+            }
         }
     }
 
@@ -81,63 +86,52 @@ fun ThreadScreen(
                 verticalArrangement = Arrangement.spacedBy(0.dp),
                 state = listState,
             ) {
-                if (state.conversation.isEmpty() && state.highlightPost != null) {
-                    item {
+                itemsIndexed(
+                    items = state.conversation,
+                    key = { _, item -> item.postId },
+                    contentType = { index, _ ->
+                        if (index == state.highlightPostIndex) "root" else "reply"
+                    },
+                ) { index, item ->
+                    Column {
+                        val shouldIndentContent = index != state.highlightPostIndex
+                        val highlighted = index == state.highlightPostIndex
+                        val connectedToPostBefore = index in 1..state.highlightPostIndex
+                        val connectedToPostAfter = index in 0 until state.highlightPostIndex
+
                         FeedPostListItem(
-                            data = state.highlightPost,
-                            onClick = {},
-                            highlighted = true,
+                            data = item,
+                            onClick = {
+                                if (index != state.highlightPostIndex) {
+                                    onPostClick(item.postId)
+                                }
+                            },
+                            shouldIndentContent = shouldIndentContent,
+                            highlighted = highlighted,
+                            connectedToPostBefore = connectedToPostBefore,
+                            connectedToPostAfter = connectedToPostAfter,
                         )
-                    }
-                } else {
-                    itemsIndexed(
-                        items = state.conversation,
-                        key = { _, item -> item.postId },
-                        contentType = { index, _ ->
-                            if (index == state.highlightPostIndex) "root" else "reply"
-                        },
-                    ) { index, item ->
-                        Column {
-                            val shouldIndentContent = index != state.highlightPostIndex
-                            val highlighted = index == state.highlightPostIndex
-                            val connectedToPostBefore = index in 1..state.highlightPostIndex
-                            val connectedToPostAfter = index in 0 until state.highlightPostIndex
 
-                            FeedPostListItem(
-                                data = item,
-                                onClick = {
-                                    if (index != state.highlightPostIndex) {
-                                        onPostClick(item.postId)
-                                    }
-                                },
-                                shouldIndentContent = shouldIndentContent,
-                                highlighted = highlighted,
-                                connectedToPostBefore = connectedToPostBefore,
-                                connectedToPostAfter = connectedToPostAfter,
-                            )
-
-                            Spacer(
-                                modifier = Modifier
-                                    .height(4.dp)
-                                    .drawWithCache {
-                                        onDrawBehind {
-                                            if (connectedToPostAfter) {
-                                                drawLine(
-                                                    color = outlineColor,
-                                                    start = Offset(x = 44.dp.toPx() + 0.5f, y = 0f),
-                                                    end = Offset(
-                                                        x = 44.dp.toPx() + 0.5f,
-                                                        y = size.height
-                                                    ),
-                                                    strokeWidth = 1.dp.toPx(),
-                                                    cap = StrokeCap.Square
-                                                )
-                                            }
+                        Spacer(
+                            modifier = Modifier
+                                .height(4.dp)
+                                .drawWithCache {
+                                    onDrawBehind {
+                                        if (connectedToPostAfter) {
+                                            drawLine(
+                                                color = outlineColor,
+                                                start = Offset(x = 44.dp.toPx() + 0.5f, y = 0f),
+                                                end = Offset(
+                                                    x = 44.dp.toPx() + 0.5f,
+                                                    y = size.height
+                                                ),
+                                                strokeWidth = 1.dp.toPx(),
+                                                cap = StrokeCap.Square
+                                            )
                                         }
                                     }
-
-                            )
-                        }
+                                }
+                        )
                     }
                 }
             }

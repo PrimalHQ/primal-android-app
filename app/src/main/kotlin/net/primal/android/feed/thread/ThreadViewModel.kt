@@ -7,6 +7,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -38,21 +39,24 @@ class ThreadViewModel @Inject constructor(
     private fun loadInitialPost() = viewModelScope.launch {
         val rootPost = withContext(Dispatchers.IO) { repository.findPostById(postId = postId) }
         setState {
-            copy(highlightPost = rootPost.asFeedPostUi())
+            copy(
+                conversation = listOf(rootPost.asFeedPostUi()),
+                highlightPostIndex = 0,
+            )
         }
     }
 
     private fun observeConversation() = viewModelScope.launch {
-        repository.observeConversation(postId = postId).collect { conversation ->
-            setState {
-                val newConversation = conversation.map { it.asFeedPostUi() }
-                val highlightIndex = conversation.indexOfFirst { it.data.postId == postId }
-                copy(
-                    highlightPostIndex = highlightIndex,
-                    conversation = newConversation,
-                )
+        repository.observeConversation(postId = postId)
+            .filter { it.isNotEmpty() }
+            .collect { conversation ->
+                setState {
+                    copy(
+                        conversation = conversation.map { it.asFeedPostUi() },
+                        highlightPostIndex = conversation.indexOfFirst { it.data.postId == postId },
+                    )
+                }
             }
-        }
     }
 
     private fun fetchRepliesFromNetwork() = viewModelScope.launch {
