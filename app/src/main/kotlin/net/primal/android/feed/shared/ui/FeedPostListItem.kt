@@ -84,8 +84,7 @@ import java.time.temporal.ChronoUnit
 fun FeedPostListItem(
     data: FeedPostUi,
     shouldIndentContent: Boolean = false,
-    connectedToPostBefore: Boolean = false,
-    connectedToPostAfter: Boolean = false,
+    connected: Boolean = false,
     highlighted: Boolean = false,
     onClick: () -> Unit,
 ) {
@@ -104,8 +103,7 @@ fun FeedPostListItem(
                 onClick = onClick
             ),
         highlighted = highlighted,
-        connectedToPostBefore = connectedToPostBefore,
-        connectedToPostAfter = connectedToPostAfter,
+        connected = connected,
     ) {
         if (data.repostAuthorDisplayName != null) {
             RepostedItem(
@@ -162,9 +160,8 @@ private fun CardWithHighlight(
     modifier: Modifier = Modifier,
     highlighted: Boolean = false,
     highlightWidth: Dp = 8.dp,
-    connectedToPostBefore: Boolean = false,
-    connectedToPostAfter: Boolean = false,
-    connectionWidth: Dp = 1.dp,
+    connected: Boolean = false,
+    connectionWidth: Dp = 2.dp,
     content: @Composable ColumnScope.() -> Unit,
 ) {
 
@@ -177,7 +174,7 @@ private fun CardWithHighlight(
     Card(
         modifier = modifier,
     ) {
-        if (highlighted || connectedToPostBefore || connectedToPostAfter) {
+        if (highlighted || connected) {
             Column(
                 modifier = Modifier.drawWithCache {
                     onDrawBehind {
@@ -193,21 +190,11 @@ private fun CardWithHighlight(
 
                         val connectionX = 40.dp.toPx()
 
-                        if (connectedToPostBefore) {
+                        if (connected) {
                             drawLine(
                                 color = outlineColor,
-                                start = Offset(x = connectionX, y = 0f),
-                                end = Offset(x = connectionX, y = 32.dp.toPx()),
-                                strokeWidth = connectionWidth.toPx(),
-                                cap = StrokeCap.Square
-                            )
-                        }
-
-                        if (connectedToPostAfter) {
-                            drawLine(
-                                color = outlineColor,
-                                start = Offset(x = connectionX, y = 64.dp.toPx()),
-                                end = Offset(x = connectionX, y = size.height),
+                                start = Offset(x = connectionX, y = 80.dp.toPx()),
+                                end = Offset(x = connectionX, y = size.height - 16.dp.toPx()),
                                 strokeWidth = connectionWidth.toPx(),
                                 cap = StrokeCap.Square
                             )

@@ -2,9 +2,7 @@ package net.primal.android.feed.thread
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -17,9 +15,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -29,7 +24,6 @@ import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.feed.shared.ui.FeedPostListItem
-import net.primal.android.theme.AppTheme
 
 @Composable
 fun ThreadScreen(
@@ -79,11 +73,10 @@ fun ThreadScreen(
             )
         },
         content = { paddingValues ->
-            val outlineColor = AppTheme.colorScheme.outline
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = paddingValues,
-                verticalArrangement = Arrangement.spacedBy(0.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
                 state = listState,
             ) {
                 itemsIndexed(
@@ -96,8 +89,7 @@ fun ThreadScreen(
                     Column {
                         val shouldIndentContent = index != state.highlightPostIndex
                         val highlighted = index == state.highlightPostIndex
-                        val connectedToPostBefore = index in 1..state.highlightPostIndex
-                        val connectedToPostAfter = index in 0 until state.highlightPostIndex
+                        val connected = index in 0 until state.highlightPostIndex
 
                         FeedPostListItem(
                             data = item,
@@ -108,30 +100,9 @@ fun ThreadScreen(
                             },
                             shouldIndentContent = shouldIndentContent,
                             highlighted = highlighted,
-                            connectedToPostBefore = connectedToPostBefore,
-                            connectedToPostAfter = connectedToPostAfter,
+                            connected = connected,
                         )
 
-                        Spacer(
-                            modifier = Modifier
-                                .height(4.dp)
-                                .drawWithCache {
-                                    onDrawBehind {
-                                        if (connectedToPostAfter) {
-                                            drawLine(
-                                                color = outlineColor,
-                                                start = Offset(x = 44.dp.toPx() + 0.5f, y = 0f),
-                                                end = Offset(
-                                                    x = 44.dp.toPx() + 0.5f,
-                                                    y = size.height
-                                                ),
-                                                strokeWidth = 1.dp.toPx(),
-                                                cap = StrokeCap.Square
-                                            )
-                                        }
-                                    }
-                                }
-                        )
                     }
                 }
             }
