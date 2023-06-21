@@ -4,6 +4,11 @@
     <string name="nsec">nsec</string>
     <string name="npub">npub</string>
 
+    <string name="welcome_sign_in_button_title">Sign in</string>
+    <string name="welcome_sign_in_button_subtitle">Already have a Nostr account? Sign with your Nostr key.</string>
+    <string name="welcome_create_account_button_title">Create account</string>
+    <string name="welcome_create_account_button_subtitle">Your new Nostr account will be up and running in a minute.</string>
+
     <string name="primary_destination_feed_label">Feed</string>
     <string name="primary_destination_read_label">Read</string>
     <string name="primary_destination_explore_label">Explore</string>
@@ -36,7 +41,6 @@
         <item quantity="one">%1$s new post</item>
         <item quantity="other">%1$s new posts</item>
     </plurals>
-
 
     <string name="thread_title">Thread</string>
 </resources>

@@ -19,11 +19,11 @@ import net.primal.android.theme.colors.LocalExtraColors
 
 @Composable
 fun PrimalTheme(
-    userPrimalTheme: PrimalTheme? = null,
+    theme: PrimalTheme? = null,
     content: @Composable () -> Unit
 ) {
     val isDarkMode = isSystemInDarkTheme()
-    val primalTheme = userPrimalTheme ?: if (isDarkMode) PrimalTheme.Sunset else PrimalTheme.Sunrise
+    val primalTheme = theme ?: if (isDarkMode) PrimalTheme.Sunset else PrimalTheme.Sunrise
 
     AdjustSystemColors(primalTheme = primalTheme)
 

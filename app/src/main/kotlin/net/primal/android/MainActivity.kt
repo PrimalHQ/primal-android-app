@@ -27,7 +27,7 @@ class MainActivity : ComponentActivity() {
             val userTheme = themeStore.userThemeState.collectAsState(initial = null)
 
             PrimalTheme(
-                userPrimalTheme = userTheme.value
+                theme = userTheme.value
             ) {
                 PrimalAppNavigation()
             }

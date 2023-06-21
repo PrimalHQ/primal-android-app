@@ -21,6 +21,7 @@ import com.google.accompanist.navigation.material.ExperimentalMaterialNavigation
 import com.google.accompanist.navigation.material.ModalBottomSheetLayout
 import com.google.accompanist.navigation.material.bottomSheet
 import com.google.accompanist.navigation.material.rememberBottomSheetNavigator
+import net.primal.android.auth.WelcomeScreen
 import net.primal.android.core.compose.DemoPrimaryScreen
 import net.primal.android.core.compose.DemoSecondaryScreen
 import net.primal.android.core.compose.PrimalTopLevelDestination
@@ -34,6 +35,7 @@ import net.primal.android.feed.thread.ThreadViewModel
 import net.primal.android.login.LoginViewModel
 import net.primal.android.login.ui.DemoLoginScreen
 import net.primal.android.theme.AppTheme
+import net.primal.android.theme.PrimalTheme
 import org.apache.commons.lang3.CharEncoding
 import java.net.URLDecoder
 import java.net.URLEncoder
@@ -54,6 +56,8 @@ fun String?.asUrlDecoded() = when (this) {
 }
 
 private fun NavOptionsBuilder.clearBackStack() = popUpTo(id = 0)
+
+private fun NavController.navigateToSignIn() = navigate(route = "demo")
 
 private fun NavController.navigateToFeedList() = navigate(route = "feed/list")
 
@@ -124,11 +128,21 @@ fun PrimalAppNavigation() {
     ) {
         NavHost(
             navController = navController,
-            startDestination = "demo"
+            startDestination = "welcome"
         ) {
 
             demoLogin(
                 route = "demo",
+                navController = navController,
+            )
+
+            welcome(
+                route = "welcome",
+                navController = navController,
+            )
+
+            signIn(
+                route = "signIn",
                 navController = navController,
             )
 
@@ -207,6 +221,26 @@ fun PrimalAppNavigation() {
             )
         }
     }
+}
+
+private fun NavGraphBuilder.welcome(
+    route: String,
+    navController: NavController,
+) = composable(route = route) {
+    PrimalTheme(
+        theme = PrimalTheme.Sunset
+    ) {
+        WelcomeScreen(
+            onSignInClick = { navController.navigateToSignIn() },
+            onCreateAccountClick = { },
+        )
+    }
+}
+
+private fun NavGraphBuilder.signIn(
+    route: String,
+    navController: NavController,
+) = composable(route = route) {
 
 }
 
