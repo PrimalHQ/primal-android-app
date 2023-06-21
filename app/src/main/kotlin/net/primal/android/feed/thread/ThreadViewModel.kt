@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filter
@@ -31,12 +32,17 @@ class ThreadViewModel @Inject constructor(
     }
 
     init {
-        loadInitialPost()
         observeConversation()
         fetchRepliesFromNetwork()
     }
 
-    private fun loadInitialPost() = viewModelScope.launch {
+    private fun observeConversation() = viewModelScope.launch {
+        loadHighlightedPost()
+        delayShortlyToPropagateHighlightedPost()
+        subscribeToConversationChanges()
+    }
+
+    private suspend fun loadHighlightedPost() {
         val rootPost = withContext(Dispatchers.IO) { repository.findPostById(postId = postId) }
         setState {
             copy(
@@ -46,7 +52,9 @@ class ThreadViewModel @Inject constructor(
         }
     }
 
-    private fun observeConversation() = viewModelScope.launch {
+    private suspend fun delayShortlyToPropagateHighlightedPost() = delay(100)
+
+    private suspend fun subscribeToConversationChanges() {
         repository.observeConversation(postId = postId)
             .filter { it.isNotEmpty() }
             .collect { conversation ->
