@@ -24,6 +24,7 @@ import com.google.accompanist.navigation.material.rememberBottomSheetNavigator
 import net.primal.android.auth.WelcomeScreen
 import net.primal.android.core.compose.DemoPrimaryScreen
 import net.primal.android.core.compose.DemoSecondaryScreen
+import net.primal.android.core.compose.LockToOrientationPortrait
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.feed.feed.FeedScreen
@@ -227,6 +228,7 @@ private fun NavGraphBuilder.welcome(
     route: String,
     navController: NavController,
 ) = composable(route = route) {
+    LockToOrientationPortrait()
     PrimalTheme(
         theme = PrimalTheme.Sunset
     ) {
@@ -250,7 +252,7 @@ private fun NavGraphBuilder.demoLogin(
 ) = composable(route = route) {
     // Default settings are fetched in LoginViewModel for demo
     hiltViewModel<LoginViewModel>()
-
+    LockToOrientationPortrait()
     DemoLoginScreen(
         onFeedSelected = {
             navController.navigateToFeed(it)
@@ -269,7 +271,7 @@ private fun NavGraphBuilder.feed(
     arguments = arguments,
 ) { navBackEntry ->
     val viewModel = hiltViewModel<FeedViewModel>(navBackEntry)
-
+    LockToOrientationPortrait()
     FeedScreen(
         viewModel = viewModel,
         onFeedsClick = { navController.navigateToFeedList() },
@@ -287,6 +289,7 @@ private fun NavGraphBuilder.feedList(
     route = route
 ) {
     val viewModel = hiltViewModel<FeedListViewModel>(it)
+    LockToOrientationPortrait()
     FeedListScreen(
         viewModel = viewModel,
         onFeedSelected = { navController.navigateToFeed(directive = it) }
@@ -301,6 +304,7 @@ private fun NavGraphBuilder.explore(
 ) = composable(
     route = route,
 ) {
+    LockToOrientationPortrait()
     DemoPrimaryScreen(
         title = "Explore",
         description = "Coming soon.",
@@ -318,6 +322,7 @@ private fun NavGraphBuilder.messages(
 ) = composable(
     route = route,
 ) {
+    LockToOrientationPortrait()
     DemoPrimaryScreen(
         title = "Messages",
         description = "Coming soon.",
@@ -335,6 +340,7 @@ private fun NavGraphBuilder.notifications(
 ) = composable(
     route = route,
 ) {
+    LockToOrientationPortrait()
     DemoPrimaryScreen(
         title = "Notifications",
         description = "Coming soon.",
@@ -353,6 +359,7 @@ private fun NavGraphBuilder.thread(
     arguments = arguments,
 ) { navBackEntry ->
     val viewModel = hiltViewModel<ThreadViewModel>(navBackEntry)
+    LockToOrientationPortrait()
     ThreadScreen(
         viewModel = viewModel,
         onClose = { navController.navigateUp() },
@@ -366,6 +373,7 @@ private fun NavGraphBuilder.profile(
 ) = composable(
     route = route,
 ) {
+    LockToOrientationPortrait()
     DemoSecondaryScreen(
         title = "Profile",
         description = "Coming soon."
@@ -378,6 +386,7 @@ private fun NavGraphBuilder.bookmarks(
 ) = composable(
     route = route,
 ) {
+    LockToOrientationPortrait()
     DemoSecondaryScreen(
         title = "Bookmarks",
         description = "Coming soon."
@@ -390,6 +399,7 @@ private fun NavGraphBuilder.userLists(
 ) = composable(
     route = route,
 ) {
+    LockToOrientationPortrait()
     DemoSecondaryScreen(
         title = "User Lists",
         description = "Coming soon."
@@ -402,6 +412,7 @@ private fun NavGraphBuilder.settings(
 ) = composable(
     route = route,
 ) {
+    LockToOrientationPortrait()
     DemoSecondaryScreen(
         title = "Settings",
         description = "Coming soon."
@@ -414,6 +425,7 @@ private fun NavGraphBuilder.signOut(
 ) = dialog(
     route = route,
 ) {
+    LockToOrientationPortrait()
     AlertDialog(
         containerColor = AppTheme.colorScheme.surfaceVariant,
         onDismissRequest = { navController.popBackStack() },
