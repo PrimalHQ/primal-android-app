@@ -15,4 +15,4 @@
 .externalNativeBuild
 .cxx
 local.properties
-signing.properties
+config.properties

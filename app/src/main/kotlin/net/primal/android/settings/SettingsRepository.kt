@@ -16,12 +16,13 @@ class SettingsRepository @Inject constructor(
     private val database: PrimalDatabase,
 ) {
 
-    val defaultFeed: String = "9a500dccc084a138330a1d1b2be0d5e86394624325d25084d3eca164e7ea698a"
-
-    suspend fun fetchDefaultAppSettingsToDatabase() = withContext(Dispatchers.IO) {
+    suspend fun fetchDefaultAppSettingsToDatabase(pubkey: String) = withContext(Dispatchers.IO) {
         settingsApi.getDefaultAppSettings().defaultSettings?.let { primalEvent ->
             database.feeds().upsertAll(
-                data = listOf(primalEvent)
+                data = listOf(
+                    Feed(directive = pubkey, name = "Latest, following"),
+                    Feed(directive = "network;trending", name = "Trending, my network"),
+                ) + listOf(primalEvent)
                     .map { NostrJson.decodeFromString<ContentAppSettings>(it.content) }
                     .flatMap { it.feeds }
                     .map { it.asFeedPO() }

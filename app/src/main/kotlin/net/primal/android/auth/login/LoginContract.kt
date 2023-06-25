@@ -1,4 +1,4 @@
-package net.primal.android.login
+package net.primal.android.auth.login
 
 interface LoginContract {
 
@@ -7,10 +7,10 @@ interface LoginContract {
     )
 
     sealed class UiEvent {
-
+        data class LoginEvent(val nsec: String) : UiEvent()
     }
 
     sealed class SideEffect {
-
+        data class LoginSuccess(val pubkey: String) : SideEffect()
     }
 }

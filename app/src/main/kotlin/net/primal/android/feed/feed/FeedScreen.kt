@@ -76,7 +76,6 @@ import net.primal.android.core.compose.PrimalNavigationBar
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.compose.icons.PrimalIcons
-import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 import net.primal.android.core.compose.icons.primaliconpack.FeedPicker
 import net.primal.android.core.compose.isEmpty
 import net.primal.android.drawer.DrawerScreenDestination
@@ -162,7 +161,7 @@ fun FeedScreen(
                 topBar = {
                     PrimalTopAppBar(
                         title = state.feedTitle,
-                        navigationIcon = PrimalIcons.AvatarDefault,
+                        avatarUrl = state.activeAccountAvatarUrl,
                         onNavigationIconClick = {
                             uiScope.launch { drawerState.open() }
                         },

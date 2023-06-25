@@ -40,7 +40,7 @@ enum class NostrEventKind(val value: Int) {
     PrimalNetStats(value = 10000101),
     PrimalExploreLegendCounts(value = 10000102),
     PrimalDefaultSettings(value = 10000103),
-    PrimalUserProfile(value = 10000105),
+    PrimalUserProfileStats(value = 10000105),
     PrimalReferencedEvent(value = 10000107),
     PrimalUserScores(value = 10000108),
     PrimalRelays(value = 10000109),

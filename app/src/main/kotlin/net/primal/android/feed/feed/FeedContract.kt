@@ -9,6 +9,7 @@ interface FeedContract {
     data class UiState(
         val feedPostsCount: Int = 0,
         val feedTitle: String = "",
+        val activeAccountAvatarUrl: String? = null,
         val posts: Flow<PagingData<FeedPostUi>>,
         val syncStats: FeedPostsSyncStats = FeedPostsSyncStats(),
     )

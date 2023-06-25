@@ -6,15 +6,19 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.active.ActiveThemeStore
+import net.primal.android.user.active.ActiveAccountStore
+import net.primal.android.user.active.ActiveUserAccountState
 import javax.inject.Inject
 
 @HiltViewModel
 class PrimalDrawerViewModel @Inject constructor(
+    private val activeAccountStore: ActiveAccountStore,
     private val activeThemeStore: ActiveThemeStore,
 ) : ViewModel() {
 
@@ -33,6 +37,17 @@ class PrimalDrawerViewModel @Inject constructor(
 
     init {
         subscribeToEvents()
+        subscribeToActiveAccount()
+    }
+
+    private fun subscribeToActiveAccount() = viewModelScope.launch {
+        activeAccountStore.activeAccountState
+            .filterIsInstance<ActiveUserAccountState.ActiveUserAccount>()
+            .collect {
+                setState {
+                    copy(activeUserAccount = it.data)
+                }
+            }
     }
 
     private fun subscribeToEvents() = viewModelScope.launch {

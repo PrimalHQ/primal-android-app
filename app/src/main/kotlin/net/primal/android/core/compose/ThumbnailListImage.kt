@@ -32,7 +32,7 @@ fun AvatarThumbnailListItemImage(
     borderGradientColors: List<Color> = listOf(
         AppTheme.extraColorScheme.brand1,
         AppTheme.extraColorScheme.brand2,
-    )
+    ),
 ) {
     SubcomposeAsyncImage(
         model = source,

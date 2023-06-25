@@ -1,9 +1,7 @@
 package net.primal.android.navigation
 
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.navigation.NamedNavArgument
@@ -21,7 +19,11 @@ import com.google.accompanist.navigation.material.ExperimentalMaterialNavigation
 import com.google.accompanist.navigation.material.ModalBottomSheetLayout
 import com.google.accompanist.navigation.material.bottomSheet
 import com.google.accompanist.navigation.material.rememberBottomSheetNavigator
-import net.primal.android.auth.WelcomeScreen
+import net.primal.android.auth.login.LoginScreen
+import net.primal.android.auth.login.LoginViewModel
+import net.primal.android.auth.logout.LogoutScreen
+import net.primal.android.auth.logout.LogoutViewModel
+import net.primal.android.auth.welcome.WelcomeScreen
 import net.primal.android.core.compose.DemoPrimaryScreen
 import net.primal.android.core.compose.DemoSecondaryScreen
 import net.primal.android.core.compose.LockToOrientationPortrait
@@ -33,8 +35,6 @@ import net.primal.android.feed.list.FeedListScreen
 import net.primal.android.feed.list.FeedListViewModel
 import net.primal.android.feed.thread.ThreadScreen
 import net.primal.android.feed.thread.ThreadViewModel
-import net.primal.android.login.LoginViewModel
-import net.primal.android.login.ui.DemoLoginScreen
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import org.apache.commons.lang3.CharEncoding
@@ -46,8 +46,8 @@ const val FeedDirective = "directive"
 inline val SavedStateHandle.feedDirective: String? get() = get<String>(FeedDirective)?.asUrlDecoded()
 
 const val PostId = "postId"
-inline val SavedStateHandle.postId: String get() = get(PostId)
-    ?: throw IllegalArgumentException("Missing required postId argument.")
+inline val SavedStateHandle.postId: String
+    get() = get(PostId) ?: throw IllegalArgumentException("Missing required postId argument.")
 
 fun String.asUrlEncoded(): String = URLEncoder.encode(this, CharEncoding.UTF_8)
 
@@ -58,7 +58,12 @@ fun String?.asUrlDecoded() = when (this) {
 
 private fun NavOptionsBuilder.clearBackStack() = popUpTo(id = 0)
 
-private fun NavController.navigateToSignIn() = navigate(route = "demo")
+private fun NavController.navigateToWelcome() = navigate(
+    route = "welcome",
+    navOptions = navOptions { clearBackStack() }
+)
+
+private fun NavController.navigateToLogin() = navigate(route = "login")
 
 private fun NavController.navigateToFeedList() = navigate(route = "feed/list")
 
@@ -69,11 +74,10 @@ private val NavController.topLevelNavOptions
         popUpTo(id = popUpToId)
     }
 
-private fun NavController.navigateToFeed(directive: String) =
-    navigate(
-        route = "feed?directive=${directive.asUrlEncoded()}",
-        navOptions = navOptions { clearBackStack() },
-    )
+private fun NavController.navigateToFeed(directive: String) = navigate(
+    route = "feed?directive=${directive.asUrlEncoded()}",
+    navOptions = navOptions { clearBackStack() },
+)
 
 private fun NavController.navigateToExploreScreen() =
     navigate(route = "explore", navOptions = topLevelNavOptions)
@@ -123,38 +127,35 @@ fun PrimalAppNavigation() {
         }
     }
 
+    val splashViewModel: SplashViewModel = hiltViewModel()
+    LaunchedEffect(navController, splashViewModel) {
+        splashViewModel.effect.collect {
+            when (it) {
+                SplashContract.SideEffect.NoActiveAccount -> navController.navigateToWelcome()
+                is SplashContract.SideEffect.ActiveAccount -> navController.navigateToFeed(directive = it.userPubkey)
+            }
+        }
+    }
+
     ModalBottomSheetLayout(
         bottomSheetNavigator = bottomSheetNavigator,
         sheetShape = AppTheme.shapes.medium,
     ) {
         NavHost(
-            navController = navController,
-            startDestination = "welcome"
+            navController = navController, startDestination = "splash"
         ) {
+            splash(route = "splash")
 
-            demoLogin(
-                route = "demo",
-                navController = navController,
-            )
+            welcome(route = "welcome", navController = navController)
 
-            welcome(
-                route = "welcome",
-                navController = navController,
-            )
-
-            signIn(
-                route = "signIn",
-                navController = navController,
-            )
+            login(route = "login", navController = navController)
 
             feed(
                 route = "feed?$FeedDirective={$FeedDirective}",
-                arguments = listOf(
-                    navArgument(FeedDirective) {
-                        type = NavType.StringType
-                        nullable = true
-                    }
-                ),
+                arguments = listOf(navArgument(FeedDirective) {
+                    type = NavType.StringType
+                    nullable = true
+                }),
                 navController = navController,
                 onTopLevelDestinationChanged = topLevelDestinationHandler,
                 onDrawerScreenClick = drawerDestinationHandler,
@@ -188,76 +189,56 @@ fun PrimalAppNavigation() {
 
             thread(
                 route = "thread/{$PostId}",
-                arguments = listOf(
-                    navArgument(PostId) {
-                        type = NavType.StringType
-                    }
-                ),
+                arguments = listOf(navArgument(PostId) {
+                    type = NavType.StringType
+                }),
                 navController = navController,
             )
 
-            profile(
-                route = "profile",
-                navController = navController
-            )
+            profile(route = "profile", navController = navController)
 
-            bookmarks(
-                route = "bookmarks",
-                navController = navController,
-            )
+            bookmarks(route = "bookmarks", navController = navController)
 
-            userLists(
-                route = "userLists",
-                navController = navController,
-            )
+            userLists(route = "userLists", navController = navController)
 
-            settings(
-                route = "settings",
-                navController = navController,
-            )
+            settings(route = "settings", navController = navController)
 
-            signOut(
-                route = "signOut",
-                navController = navController,
-            )
+            signOut(route = "signOut", navController = navController)
         }
     }
 }
+
+private fun NavGraphBuilder.splash(route: String) = composable(route = route) {
+    val viewModel: SplashViewModel = hiltViewModel()
+    SplashScreen()
+}
+
 
 private fun NavGraphBuilder.welcome(
     route: String,
     navController: NavController,
 ) = composable(route = route) {
     LockToOrientationPortrait()
-    PrimalTheme(
-        theme = PrimalTheme.Sunset
-    ) {
+    PrimalTheme(PrimalTheme.Sunset) {
         WelcomeScreen(
-            onSignInClick = { navController.navigateToSignIn() },
+            onSignInClick = { navController.navigateToLogin() },
             onCreateAccountClick = { },
         )
     }
 }
 
-private fun NavGraphBuilder.signIn(
+private fun NavGraphBuilder.login(
     route: String,
     navController: NavController,
 ) = composable(route = route) {
-
-}
-
-private fun NavGraphBuilder.demoLogin(
-    route: String,
-    navController: NavController,
-) = composable(route = route) {
-    // Default settings are fetched in LoginViewModel for demo
-    hiltViewModel<LoginViewModel>()
-    LockToOrientationPortrait()
-    DemoLoginScreen(
-        onFeedSelected = {
-            navController.navigateToFeed(it)
-        }
-    )
+    val viewModel: LoginViewModel = hiltViewModel(it)
+    PrimalTheme(PrimalTheme.Sunset) {
+        LoginScreen(
+            viewModel = viewModel,
+            onLoginSuccess = { pubkey -> navController.navigateToFeed(pubkey) },
+            onClose = { navController.popBackStack() },
+        )
+    }
 }
 
 private fun NavGraphBuilder.feed(
@@ -290,10 +271,8 @@ private fun NavGraphBuilder.feedList(
 ) {
     val viewModel = hiltViewModel<FeedListViewModel>(it)
     LockToOrientationPortrait()
-    FeedListScreen(
-        viewModel = viewModel,
-        onFeedSelected = { navController.navigateToFeed(directive = it) }
-    )
+    FeedListScreen(viewModel = viewModel,
+        onFeedSelected = { navController.navigateToFeed(directive = it) })
 }
 
 private fun NavGraphBuilder.explore(
@@ -360,11 +339,9 @@ private fun NavGraphBuilder.thread(
 ) { navBackEntry ->
     val viewModel = hiltViewModel<ThreadViewModel>(navBackEntry)
     LockToOrientationPortrait()
-    ThreadScreen(
-        viewModel = viewModel,
+    ThreadScreen(viewModel = viewModel,
         onClose = { navController.navigateUp() },
-        onPostClick = { navController.navigateToThreadScreen(it) }
-    )
+        onPostClick = { navController.navigateToThreadScreen(it) })
 }
 
 private fun NavGraphBuilder.profile(
@@ -375,8 +352,7 @@ private fun NavGraphBuilder.profile(
 ) {
     LockToOrientationPortrait()
     DemoSecondaryScreen(
-        title = "Profile",
-        description = "Coming soon."
+        title = "Profile", description = "Coming soon."
     )
 }
 
@@ -388,8 +364,7 @@ private fun NavGraphBuilder.bookmarks(
 ) {
     LockToOrientationPortrait()
     DemoSecondaryScreen(
-        title = "Bookmarks",
-        description = "Coming soon."
+        title = "Bookmarks", description = "Coming soon."
     )
 }
 
@@ -401,8 +376,7 @@ private fun NavGraphBuilder.userLists(
 ) {
     LockToOrientationPortrait()
     DemoSecondaryScreen(
-        title = "User Lists",
-        description = "Coming soon."
+        title = "User Lists", description = "Coming soon."
     )
 }
 
@@ -414,8 +388,7 @@ private fun NavGraphBuilder.settings(
 ) {
     LockToOrientationPortrait()
     DemoSecondaryScreen(
-        title = "Settings",
-        description = "Coming soon."
+        title = "Settings", description = "Coming soon."
     )
 }
 
@@ -425,33 +398,10 @@ private fun NavGraphBuilder.signOut(
 ) = dialog(
     route = route,
 ) {
+    val viewModel: LogoutViewModel = hiltViewModel(it)
     LockToOrientationPortrait()
-    AlertDialog(
-        containerColor = AppTheme.colorScheme.surfaceVariant,
-        onDismissRequest = { navController.popBackStack() },
-        title = {
-            Text(
-                text = "Sign out",
-                style = AppTheme.typography.titleLarge
-            )
-        },
-        text = {
-            Text(
-                text = "Do you really want to sign out?",
-                style = AppTheme.typography.bodyLarge
-            )
-        },
-        dismissButton = {
-            TextButton(onClick = { navController.popBackStack() }) {
-                Text(text = "Cancel")
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = { navController.popBackStack() }) {
-                Text(
-                    text = "Sign out"
-                )
-            }
-        },
+    LogoutScreen(
+        viewModel = viewModel,
+        onClose = { navController.popBackStack() },
     )
 }

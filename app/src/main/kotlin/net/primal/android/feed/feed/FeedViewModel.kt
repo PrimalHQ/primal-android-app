@@ -10,6 +10,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -21,19 +22,19 @@ import net.primal.android.feed.repository.FeedRepository
 import net.primal.android.feed.shared.asFeedPostUi
 import net.primal.android.feed.shared.model.FeedPostsSyncStats
 import net.primal.android.navigation.feedDirective
-import net.primal.android.settings.SettingsRepository
+import net.primal.android.user.active.ActiveAccountStore
+import net.primal.android.user.active.ActiveUserAccountState
 import java.time.Instant
 import javax.inject.Inject
 
 @HiltViewModel
 class FeedViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    settingsRepository: SettingsRepository,
     private val feedRepository: FeedRepository,
+    private val activeAccountStore: ActiveAccountStore,
 ) : ViewModel() {
 
-    private val feedDirective: String = savedStateHandle.feedDirective
-        ?: settingsRepository.defaultFeed
+    private val feedDirective: String = savedStateHandle.feedDirective ?: "network;trending"
 
     private val _state = MutableStateFlow(
         UiState(
@@ -56,6 +57,7 @@ class FeedViewModel @Inject constructor(
         loadFeedTitle()
         subscribeToEvents()
         subscribeToFeedSyncUpdates()
+        subscribeToActiveAccount()
     }
 
     private fun loadFeedTitle() = viewModelScope.launch {
@@ -92,6 +94,16 @@ class FeedViewModel @Inject constructor(
                 )
             }
         }
+    }
+
+    private fun subscribeToActiveAccount() = viewModelScope.launch {
+        activeAccountStore.activeAccountState
+            .filterIsInstance<ActiveUserAccountState.ActiveUserAccount>()
+            .collect {
+                setState {
+                    copy(activeAccountAvatarUrl = it.data.pictureUrl)
+                }
+            }
     }
 
     private fun subscribeToEvents() = viewModelScope.launch {

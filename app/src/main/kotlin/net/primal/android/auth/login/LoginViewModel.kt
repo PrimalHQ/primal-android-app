@@ -1,4 +1,4 @@
-package net.primal.android.login
+package net.primal.android.auth.login
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -10,16 +10,17 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
-import net.primal.android.login.LoginContract.SideEffect
-import net.primal.android.login.LoginContract.UiEvent
-import net.primal.android.login.LoginContract.UiState
+import net.primal.android.auth.AuthRepository
+import net.primal.android.auth.login.LoginContract.SideEffect
+import net.primal.android.auth.login.LoginContract.UiEvent
+import net.primal.android.auth.login.LoginContract.UiState
 import net.primal.android.settings.SettingsRepository
 import javax.inject.Inject
-
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
+    private val authRepository: AuthRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(UiState(loading = false))
@@ -40,11 +41,23 @@ class LoginViewModel @Inject constructor(
     }
 
     init {
-        loadDefaultAppSettings()
+        observeEvents()
     }
 
-    private fun loadDefaultAppSettings() = viewModelScope.launch {
-        settingsRepository.fetchDefaultAppSettingsToDatabase()
+    private fun observeEvents() = viewModelScope.launch {
+        _event.collect {
+            when (it) {
+                is UiEvent.LoginEvent -> login(nsec = it.nsec)
+            }
+        }
+    }
+
+    private fun login(nsec: String) = viewModelScope.launch {
+        setState { copy(loading = true) }
+        val pubkey = authRepository.login(nsec = nsec)
+        settingsRepository.fetchDefaultAppSettingsToDatabase(pubkey = pubkey)
+        setEffect(SideEffect.LoginSuccess(pubkey = pubkey))
+        setState { copy(loading = false) }
     }
 
 }

@@ -2,7 +2,7 @@ package net.primal.android.crypto
 
 /**
  * Copied from:
- * https://github.com/Giszmo/NostrPostr/blob/master/nostrpostrlib/src/main/java/nostr/postr/CryptoUtils.kt
+ * https://github.com/Giszmo/NostrPostr/blob/master/nostrpostrlib/src/main/java/nostr/postr/Utils.kt
  */
 
 import fr.acinq.secp256k1.Secp256k1

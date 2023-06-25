@@ -10,6 +10,15 @@ plugins {
     alias(libs.plugins.ksp)
 }
 
+val configProperties by lazy {
+    val configFile = File("config.properties")
+    if (configFile.exists()) {
+        Properties().apply { load(configFile.reader()) }
+    } else {
+        null
+    }
+}
+
 android {
     namespace = "net.primal.android"
     compileSdk = 33
@@ -26,15 +35,17 @@ android {
         ksp {
             arg("room.schemaLocation", "$projectDir/schemas")
         }
+
+        buildConfigField(
+            type = "String",
+            name = "LOCAL_STORAGE_KEY_ALIAS",
+            value = "\"${configProperties?.getProperty("localStorage.keyAlias", "")}\""
+        )
     }
 
     signingConfigs {
-        val configFile = File("signing.properties")
-        if (configFile.exists()) {
-            val properties = Properties().apply {
-                load(configFile.reader())
-            }
-
+        val properties = configProperties
+        if (properties != null) {
             signingConfigs.create("playStore") {
                 storeFile(File(properties.getProperty("playStore.storeFile")))
                 storePassword(properties.getProperty("playStore.storePassword"))
@@ -64,8 +75,16 @@ android {
         }
     }
 
+    sourceSets {
+        named("releasePlayStore") {
+            java.srcDirs("src/release/kotlin")
+            res.srcDirs("src/release/res")
+        }
+    }
+
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     composeOptions {
@@ -152,10 +171,11 @@ dependencies {
     implementation(libs.timber)
 
     implementation(libs.secp256k1.kmp.jvm)
+    implementation(libs.secp256k1.kmp.jni.android)
     implementation(libs.spongycastle.core)
+    implementation(libs.androidx.security.crypto)
 
     implementation(libs.url.detector)
-
 
     debugImplementation(libs.compose.ui.tooling)
     debugImplementation(libs.compose.ui.test.manifest)

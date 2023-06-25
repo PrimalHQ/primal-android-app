@@ -45,6 +45,7 @@ import net.primal.android.core.compose.icons.primaliconpack.LightMode
 import net.primal.android.core.compose.icons.primaliconpack.QrCode
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
+import net.primal.android.user.domain.UserAccount
 
 
 @Composable
@@ -103,7 +104,9 @@ fun PrimalDrawer(
                 .fillMaxHeight(),
             verticalArrangement = Arrangement.Bottom,
         ) {
-            DrawerHeader()
+            DrawerHeader(
+                userAccount = state.activeUserAccount
+            )
 
             DrawerMenu(
                 modifier = Modifier
@@ -126,7 +129,9 @@ fun PrimalDrawer(
 }
 
 @Composable
-private fun DrawerHeader() {
+private fun DrawerHeader(
+    userAccount: UserAccount?,
+) {
     ConstraintLayout(
         modifier = Modifier.fillMaxWidth(),
     ) {
@@ -134,7 +139,7 @@ private fun DrawerHeader() {
         val (avatarRef, usernameRef, iconRef, identifierRef, statsRef) = createRefs()
 
         AvatarThumbnailListItemImage(
-            source = "https://i.imgur.com/Z8dpmvc.png",
+            source = userAccount?.pictureUrl,
             modifier = Modifier.constrainAs(avatarRef) {
                 start.linkTo(startGuideline)
                 top.linkTo(parent.top, margin = 16.dp)
@@ -142,9 +147,9 @@ private fun DrawerHeader() {
         )
 
         NostrUserText(
-            displayName = "miljan",
-            verifiedBadge = true,
-            internetIdentifier = "miljan@primal.net",
+            displayName = userAccount?.displayName ?: "",
+            verifiedBadge = !userAccount?.internetIdentifier.isNullOrEmpty(),
+            internetIdentifier = userAccount?.internetIdentifier,
             modifier = Modifier.constrainAs(usernameRef) {
                 start.linkTo(startGuideline)
                 top.linkTo(avatarRef.bottom, margin = 16.dp)
@@ -167,7 +172,7 @@ private fun DrawerHeader() {
 
 
         Text(
-            text = "miljan@primal.net",
+            text = userAccount?.internetIdentifier ?: "",
             style = AppTheme.typography.labelLarge,
             color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
             modifier = Modifier.constrainAs(identifierRef) {
@@ -180,7 +185,7 @@ private fun DrawerHeader() {
         val statsAnnotatedString = buildAnnotatedString {
             append(
                 AnnotatedString(
-                    text = "135",
+                    text = userAccount?.followingCount?.toString() ?: "0",
                     spanStyle = SpanStyle(
                         color = AppTheme.colorScheme.onSurfaceVariant,
                         fontStyle = AppTheme.typography.labelLarge.fontStyle,
@@ -189,7 +194,7 @@ private fun DrawerHeader() {
             )
             append(
                 AnnotatedString(
-                    text = " Following",
+                    text = " " + stringResource(id = R.string.drawer_following_suffix),
                     spanStyle = SpanStyle(
                         color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
                         fontStyle = AppTheme.typography.labelLarge.fontStyle,
@@ -199,7 +204,7 @@ private fun DrawerHeader() {
             append("   ")
             append(
                 AnnotatedString(
-                    text = "345",
+                    text = userAccount?.followersCount?.toString() ?: "0",
                     spanStyle = SpanStyle(
                         color = AppTheme.colorScheme.onSurfaceVariant,
                         fontStyle = AppTheme.typography.labelLarge.fontStyle,
@@ -208,7 +213,7 @@ private fun DrawerHeader() {
             )
             append(
                 AnnotatedString(
-                    text = " Followers",
+                    text = " " + stringResource(id = R.string.drawer_followers_suffix),
                     spanStyle = SpanStyle(
                         color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
                         fontStyle = AppTheme.typography.labelLarge.fontStyle,

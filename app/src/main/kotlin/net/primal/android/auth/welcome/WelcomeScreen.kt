@@ -1,4 +1,4 @@
-package net.primal.android.auth
+package net.primal.android.auth.welcome
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -64,18 +64,18 @@ fun WelcomeScreen(
 
             PrimalCallToActionButton(
                 modifier = Modifier.padding(horizontal = 32.dp),
-                title = stringResource(id = R.string.welcome_sign_in_button_title),
-                subtitle = stringResource(id = R.string.welcome_sign_in_button_subtitle),
-                onClick = onSignInClick,
+                title = stringResource(id = R.string.welcome_create_account_button_title),
+                subtitle = stringResource(id = R.string.welcome_create_account_button_subtitle),
+                onClick = onCreateAccountClick,
             )
 
             Spacer(modifier = Modifier.height(32.dp))
 
             PrimalCallToActionButton(
                 modifier = Modifier.padding(horizontal = 32.dp),
-                title = stringResource(id = R.string.welcome_create_account_button_title),
-                subtitle = stringResource(id = R.string.welcome_create_account_button_subtitle),
-                onClick = onCreateAccountClick,
+                title = stringResource(id = R.string.welcome_sign_in_button_title),
+                subtitle = stringResource(id = R.string.welcome_sign_in_button_subtitle),
+                onClick = onSignInClick,
             )
         }
     }
