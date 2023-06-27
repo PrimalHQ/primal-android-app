@@ -75,18 +75,18 @@ class SocketClient @Inject constructor(
     }
 
     @Throws(NostrNoticeException::class)
-    suspend fun <T> query(message: OutgoingMessage<T>): SocketQueryResult {
+    suspend fun query(message: OutgoingMessage): SocketQueryResult {
         val subscriptionId = sendRequest(message)
         return collectRequestResultBySubscriptionId(id = subscriptionId)
     }
 
-    private fun <T> sendRequest(message: OutgoingMessage<T>): UUID {
+    private fun sendRequest(message: OutgoingMessage): UUID {
         val subscriptionId = UUID.randomUUID()
         val finalMessage = buildOutgoingMessage(
             verb = NostrVerb.Outgoing.REQ,
             subscriptionId = subscriptionId,
             primalVerb = message.primalVerb,
-            options = message.options,
+            optionsJson = message.optionsJson,
         )
         Timber.i("--> $finalMessage")
         val success = webSocket.send(finalMessage)
@@ -98,11 +98,11 @@ class SocketClient @Inject constructor(
         return subscriptionId
     }
 
-    private fun <T> buildOutgoingMessage(
+    private fun buildOutgoingMessage(
         verb: NostrVerb.Outgoing,
         subscriptionId: UUID,
         primalVerb: String?,
-        options: T?,
+        optionsJson: String?,
     ): String {
         return buildJsonArray {
             add(verb.toString())
@@ -112,8 +112,8 @@ class SocketClient @Inject constructor(
                     buildJsonObject {
                         put("cache", buildJsonArray {
                             add(primalVerb)
-                            if (options != null) {
-                                add(NostrJson.decodeFromString(options.toString()))
+                            if (optionsJson != null) {
+                                add(NostrJson.decodeFromString(optionsJson))
                             }
                         })
                     }

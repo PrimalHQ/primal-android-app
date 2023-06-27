@@ -55,7 +55,7 @@ class LoginViewModel @Inject constructor(
     private fun login(nsec: String) = viewModelScope.launch {
         setState { copy(loading = true) }
         val pubkey = authRepository.login(nsec = nsec)
-        settingsRepository.fetchDefaultAppSettingsToDatabase(pubkey = pubkey)
+        settingsRepository.fetchAppSettings(pubkey = pubkey)
         setEffect(SideEffect.LoginSuccess(pubkey = pubkey))
         setState { copy(loading = false) }
     }

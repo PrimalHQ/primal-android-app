@@ -22,7 +22,7 @@ class FeedApiImpl @Inject constructor(
         val queryResult = socketClient.query(
             message = OutgoingMessage(
                 primalVerb = "feed_directive",
-                options = NostrJson.encodeToString(body)
+                optionsJson = NostrJson.encodeToString(body)
             )
         )
 
@@ -50,7 +50,7 @@ class FeedApiImpl @Inject constructor(
         val queryResult = socketClient.query(
             message = OutgoingMessage(
                 primalVerb = "thread_view",
-                options = NostrJson.encodeToString(body)
+                optionsJson = NostrJson.encodeToString(body)
             )
         )
 

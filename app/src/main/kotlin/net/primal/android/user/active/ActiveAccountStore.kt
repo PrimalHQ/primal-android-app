@@ -19,18 +19,17 @@ class ActiveAccountStore @Inject constructor(
 
     private val scope = CoroutineScope(Dispatchers.IO)
 
-    val activeAccountState = persistence.data
-        .map { it.asActiveUserAccountState() }
+    private val userAccount = persistence.data
         .stateIn(
             scope = scope,
             started = SharingStarted.Eagerly,
             initialValue = initialValue(),
         )
 
-    private fun initialValue(): ActiveUserAccountState {
-        val activeCompany = runBlocking { persistence.data.first() }
-        return activeCompany.asActiveUserAccountState()
-    }
+    val activeAccountState = userAccount.map { it.asActiveUserAccountState() }
+
+    private fun initialValue(): UserAccount = runBlocking { persistence.data.first() }
+
 
     private fun UserAccount.asActiveUserAccountState(): ActiveUserAccountState = when (this) {
         UserAccount.EMPTY -> ActiveUserAccountState.NoUserAccount

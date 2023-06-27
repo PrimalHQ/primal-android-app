@@ -9,24 +9,31 @@ import net.primal.android.nostr.model.primal.content.ContentAppSettings
 import net.primal.android.nostr.model.primal.content.ContentFeedData
 import net.primal.android.serialization.NostrJson
 import net.primal.android.settings.api.SettingsApi
+import net.primal.android.theme.active.ActiveThemeStore
 import javax.inject.Inject
 
 class SettingsRepository @Inject constructor(
     private val settingsApi: SettingsApi,
     private val database: PrimalDatabase,
+    private val activeThemeStore: ActiveThemeStore,
 ) {
 
-    suspend fun fetchDefaultAppSettingsToDatabase(pubkey: String) = withContext(Dispatchers.IO) {
-        settingsApi.getDefaultAppSettings().defaultSettings?.let { primalEvent ->
-            database.feeds().upsertAll(
-                data = listOf(
-                    Feed(directive = pubkey, name = "Latest, following"),
-                    Feed(directive = "network;trending", name = "Trending, my network"),
-                ) + listOf(primalEvent)
-                    .map { NostrJson.decodeFromString<ContentAppSettings>(it.content) }
-                    .flatMap { it.feeds }
-                    .map { it.asFeedPO() }
-            )
+    suspend fun fetchAppSettings(pubkey: String) = withContext(Dispatchers.IO) {
+        val response = settingsApi.getAppSettings(pubkey = pubkey)
+        val appSettingsJsonContent = response.userSettings?.content
+            ?: response.defaultSettings?.content
+            ?: return@withContext
+
+        val appSettings = NostrJson.decodeFromString<ContentAppSettings>(appSettingsJsonContent)
+
+        database.feeds().upsertAll(
+            data = listOf(
+                Feed(directive = pubkey, name = "Latest, following"),
+            ) + appSettings.feeds.map { it.asFeedPO() }
+        )
+
+        if (appSettings.theme != null) {
+            activeThemeStore.setUserTheme(appSettings.theme)
         }
     }
 

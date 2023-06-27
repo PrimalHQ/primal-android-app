@@ -174,6 +174,7 @@ dependencies {
     implementation(libs.secp256k1.kmp.jni.android)
     implementation(libs.spongycastle.core)
     implementation(libs.androidx.security.crypto)
+    testImplementation(libs.secp256k1.kmp.jni.jvm)
 
     implementation(libs.url.detector)
 

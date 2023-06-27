@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import net.primal.android.navigation.SplashContract.SideEffect
@@ -28,8 +29,8 @@ class SplashViewModel @Inject constructor(
         subscribeToNoAccountsState()
     }
 
-    private fun dispatchInitialScreen() {
-        val activeUserAccountState = activeAccountStore.activeAccountState.value
+    private fun dispatchInitialScreen() = viewModelScope.launch {
+        val activeUserAccountState = activeAccountStore.activeAccountState.first()
 
         setEffect(
             effect = when (activeUserAccountState) {

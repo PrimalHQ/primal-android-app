@@ -17,22 +17,20 @@ package net.primal.android.crypto
  */
 
 
-import kotlin.jvm.JvmStatic
-
 /**
  * Bech32 works with 5 bits values, we use this type to make it explicit: whenever you see Int5 it means 5 bits values,
  * and whenever you see Byte it means 8 bits values.
  */
-public typealias Int5 = Byte
+typealias Int5 = Byte
 
 /**
  * Bech32 and Bech32m address formats.
  * See https://github.com/bitcoin/bips/blob/master/bip-0173.mediawiki and https://github.com/bitcoin/bips/blob/master/bip-0350.mediawiki.
  */
-public object Bech32 {
-    public const val alphabet: String = "qpzry9x8gf2tvdw0s3jn54khce6mua7l"
+object Bech32 {
+    const val alphabet: String = "qpzry9x8gf2tvdw0s3jn54khce6mua7l"
 
-    public enum class Encoding(public val constant: Int) {
+    enum class Encoding(val constant: Int) {
         Bech32(1),
         Bech32m(0x2bc830a3),
         Beck32WithoutChecksum(0),
@@ -85,7 +83,7 @@ public object Bech32 {
      * @return hrp + data encoded as a Bech32 string
      */
     @JvmStatic
-    public fun encode(hrp: String, int5s: Array<Int5>, encoding: Encoding): String {
+    fun encode(hrp: String, int5s: Array<Int5>, encoding: Encoding): String {
         require(hrp.lowercase() == hrp || hrp.uppercase() == hrp) { "mixed case strings are not valid bech32 prefixes" }
         val data = int5s.toByteArray().toTypedArray()
         val checksum = when (encoding) {
@@ -102,7 +100,7 @@ public object Bech32 {
      * @return hrp + data encoded as a Bech32 string
      */
     @JvmStatic
-    public fun encodeBytes(hrp: String, data: ByteArray, encoding: Encoding): String = encode(hrp, eight2five(data), encoding)
+    fun encodeBytes(hrp: String, data: ByteArray, encoding: Encoding): String = encode(hrp, eight2five(data), encoding)
 
     /**
      * decodes a bech32 string
@@ -111,7 +109,7 @@ public object Bech32 {
      * @return a (hrp, data, encoding) tuple
      */
     @JvmStatic
-    public fun decode(bech32: String, noChecksum: Boolean = false): Triple<String, Array<Int5>, Encoding> {
+    fun decode(bech32: String, noChecksum: Boolean = false): Triple<String, Array<Int5>, Encoding> {
         require(bech32.lowercase() == bech32 || bech32.uppercase() == bech32) { "mixed case strings are not valid bech32" }
         bech32.forEach { require(it.code in 33..126) { "invalid character " } }
         val input = bech32.lowercase()
@@ -139,7 +137,7 @@ public object Bech32 {
      * @return a (hrp, data, encoding) tuple
      */
     @JvmStatic
-    public fun decodeBytes(bech32: String, noChecksum: Boolean = false): Triple<String, ByteArray, Encoding> {
+    fun decodeBytes(bech32: String, noChecksum: Boolean = false): Triple<String, ByteArray, Encoding> {
         val (hrp, int5s, encoding) = decode(bech32, noChecksum)
         return Triple(hrp, five2eight(int5s, 0), encoding)
     }
@@ -161,7 +159,7 @@ public object Bech32 {
      * @return a sequence of 5 bits integers
      */
     @JvmStatic
-    public fun eight2five(input: ByteArray): Array<Int5> {
+    fun eight2five(input: ByteArray): Array<Int5> {
         var buffer = 0L
         val output = ArrayList<Int5>()
         var count = 0
@@ -182,7 +180,7 @@ public object Bech32 {
      * @return a sequence of 8 bits integers
      */
     @JvmStatic
-    public fun five2eight(input: Array<Int5>, offset: Int): ByteArray {
+    fun five2eight(input: Array<Int5>, offset: Int): ByteArray {
         var buffer = 0L
         val output = ArrayList<Byte>()
         var count = 0

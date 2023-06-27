@@ -26,11 +26,11 @@ object CryptoUtils {
         return bytes
     }
 
-    fun publicKeyCreate(privKey: ByteArray) =
-        secp256k1.pubKeyCompress(secp256k1.pubkeyCreate(privKey)).copyOfRange(1, 33)
+    fun publicKeyCreate(privateKey: ByteArray) =
+        secp256k1.pubKeyCompress(secp256k1.pubkeyCreate(privateKey)).copyOfRange(1, 33)
 
-    fun sign(data: ByteArray, privKey: ByteArray): ByteArray =
-        secp256k1.signSchnorr(data, privKey, null)
+    fun sign(data: ByteArray, privateKey: ByteArray): ByteArray =
+        secp256k1.signSchnorr(data, privateKey, null)
 
     fun encrypt(msg: String, privateKey: ByteArray, pubKey: ByteArray): String {
         val sharedSecret = getSharedSecret(privateKey, pubKey)
@@ -62,9 +62,6 @@ object CryptoUtils {
         return String(cipher.doFinal(encryptedMsg))
     }
 
-    /**
-     * @return 32B shared secret
-     */
     fun getSharedSecret(privateKey: ByteArray, pubKey: ByteArray): ByteArray =
         secp256k1.pubKeyTweakMul(Hex.decode("02") + pubKey, privateKey).copyOfRange(1, 33)
 

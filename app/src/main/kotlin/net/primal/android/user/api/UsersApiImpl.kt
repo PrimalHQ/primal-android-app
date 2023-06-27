@@ -17,7 +17,7 @@ class UsersApiImpl @Inject constructor(
         val queryResult = socketClient.query(
             message = OutgoingMessage(
                 primalVerb = "user_profile",
-                options = NostrJson.encodeToString(UserProfileRequestBody(pubkey = pubkey))
+                optionsJson = NostrJson.encodeToString(UserProfileRequestBody(pubkey = pubkey))
             )
         )
 

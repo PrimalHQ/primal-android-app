@@ -4,6 +4,6 @@ import net.primal.android.settings.api.model.AppSettingsResponse
 
 interface SettingsApi {
 
-    suspend fun getDefaultAppSettings(): AppSettingsResponse
+    suspend fun getAppSettings(pubkey: String): AppSettingsResponse
 
 }
