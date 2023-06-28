@@ -3,14 +3,16 @@ package net.primal.android.core.compose
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.CopyAll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -24,6 +26,7 @@ fun PrimalButton(
     text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    leadingIcon: ImageVector? = null,
     enabled: Boolean = true,
     loading: Boolean = false,
 ) {
@@ -40,7 +43,7 @@ fun PrimalButton(
         modifier = modifier
             .then(
                 Modifier
-                    .requiredHeight(56.dp)
+                    .requiredHeight(52.dp)
                     .background(
                         brush = Brush.linearGradient(
                             colors = if (enabled) {
@@ -63,7 +66,14 @@ fun PrimalButton(
             if (loading) {
                 LoadingContent()
             } else {
-                TextContent(text = text)
+                IconText(
+                    modifier = Modifier.background(Color.Transparent),
+                    text = text,
+                    leadingIcon = leadingIcon,
+                    style = AppTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Medium,
+                    color = Color.White,
+                )
             }
         }
     )
@@ -78,22 +88,17 @@ private fun LoadingContent() {
     )
 }
 
-@Composable
-private fun TextContent(text: String) {
-    Text(
-        modifier = Modifier.background(Color.Transparent),
-        text = text,
-        style = AppTheme.typography.bodyLarge,
-        fontWeight = FontWeight.Medium,
-    )
-}
-
-data class PrimalButtonPreviewState(val enabled: Boolean, val loading: Boolean)
+data class PrimalButtonPreviewState(
+    val enabled: Boolean,
+    val loading: Boolean,
+    val leadingIcon: ImageVector? = null,
+)
 
 class PrimalButtonStatePreviewProvider : PreviewParameterProvider<PrimalButtonPreviewState> {
     override val values: Sequence<PrimalButtonPreviewState>
         get() = sequenceOf(
             PrimalButtonPreviewState(enabled = true, loading = false),
+            PrimalButtonPreviewState(enabled = true, loading = false, leadingIcon = Icons.Outlined.CopyAll),
             PrimalButtonPreviewState(enabled = false, loading = true),
             PrimalButtonPreviewState(enabled = false, loading = false),
             PrimalButtonPreviewState(enabled = true, loading = true)
@@ -112,6 +117,7 @@ fun PrimalButtonPreview(
             enabled = state.enabled,
             loading = state.loading,
             text = "Hello Primal!",
+            leadingIcon = state.leadingIcon,
         )
     }
 }

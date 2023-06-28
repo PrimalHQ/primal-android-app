@@ -22,7 +22,7 @@ class CredentialsStore @Inject constructor(
 
     private val scope = CoroutineScope(Dispatchers.IO)
 
-    private val credentials = persistence.data
+    val credentials = persistence.data
         .stateIn(
             scope = scope,
             started = SharingStarted.Eagerly,

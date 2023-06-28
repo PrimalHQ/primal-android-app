@@ -3,11 +3,9 @@ package net.primal.android.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.SavedStateHandle
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -35,28 +33,12 @@ import net.primal.android.feed.list.FeedListScreen
 import net.primal.android.feed.list.FeedListViewModel
 import net.primal.android.feed.thread.ThreadScreen
 import net.primal.android.feed.thread.ThreadViewModel
+import net.primal.android.navigation.splash.SplashContract
+import net.primal.android.navigation.splash.SplashScreen
+import net.primal.android.navigation.splash.SplashViewModel
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
-import org.apache.commons.lang3.CharEncoding
-import java.net.URLDecoder
-import java.net.URLEncoder
 
-
-const val FeedDirective = "directive"
-inline val SavedStateHandle.feedDirective: String? get() = get<String>(FeedDirective)?.asUrlDecoded()
-
-const val PostId = "postId"
-inline val SavedStateHandle.postId: String
-    get() = get(PostId) ?: throw IllegalArgumentException("Missing required postId argument.")
-
-fun String.asUrlEncoded(): String = URLEncoder.encode(this, CharEncoding.UTF_8)
-
-fun String?.asUrlDecoded() = when (this) {
-    null -> null
-    else -> URLDecoder.decode(this, CharEncoding.UTF_8)
-}
-
-private fun NavOptionsBuilder.clearBackStack() = popUpTo(id = 0)
 
 private fun NavController.navigateToWelcome() = navigate(
     route = "welcome",
@@ -64,6 +46,8 @@ private fun NavController.navigateToWelcome() = navigate(
 )
 
 private fun NavController.navigateToLogin() = navigate(route = "login")
+
+private fun NavController.navigateToLogout() = navigate(route = "logout")
 
 private fun NavController.navigateToFeedList() = navigate(route = "feed/list")
 
@@ -79,27 +63,24 @@ private fun NavController.navigateToFeed(directive: String) = navigate(
     navOptions = navOptions { clearBackStack() },
 )
 
-private fun NavController.navigateToExploreScreen() =
+private fun NavController.navigateToExplore() =
     navigate(route = "explore", navOptions = topLevelNavOptions)
 
-private fun NavController.navigateToMessagesScreen() =
+private fun NavController.navigateToMessages() =
     navigate(route = "messages", navOptions = topLevelNavOptions)
 
-private fun NavController.navigateToNotificationsScreen() =
+private fun NavController.navigateToNotifications() =
     navigate(route = "notifications", navOptions = topLevelNavOptions)
 
-private fun NavController.navigateToProfileScreen() = navigate(route = "profile")
+private fun NavController.navigateToProfile() = navigate(route = "profile")
 
-private fun NavController.navigateToBookmarksScreen() = navigate(route = "bookmarks")
+private fun NavController.navigateToBookmarks() = navigate(route = "bookmarks")
 
-private fun NavController.navigateToUserListsScreen() = navigate(route = "userLists")
+private fun NavController.navigateToUserLists() = navigate(route = "userLists")
 
-private fun NavController.navigateToSettingsScreen() = navigate(route = "settings")
+private fun NavController.navigateToSettings() = navigate(route = "settings")
 
-private fun NavController.navigateToSignOutScreen() = navigate(route = "signOut")
-
-private fun NavController.navigateToThreadScreen(postId: String) =
-    navigate(route = "thread/$postId")
+private fun NavController.navigateToThread(postId: String) = navigate(route = "thread/$postId")
 
 @OptIn(ExperimentalMaterialNavigationApi::class)
 @Composable
@@ -111,19 +92,19 @@ fun PrimalAppNavigation() {
     val topLevelDestinationHandler: (PrimalTopLevelDestination) -> Unit = {
         when (it) {
             PrimalTopLevelDestination.Feed -> navController.popBackStack()
-            PrimalTopLevelDestination.Explore -> navController.navigateToExploreScreen()
-            PrimalTopLevelDestination.Messages -> navController.navigateToMessagesScreen()
-            PrimalTopLevelDestination.Notifications -> navController.navigateToNotificationsScreen()
+            PrimalTopLevelDestination.Explore -> navController.navigateToExplore()
+            PrimalTopLevelDestination.Messages -> navController.navigateToMessages()
+            PrimalTopLevelDestination.Notifications -> navController.navigateToNotifications()
         }
     }
 
     val drawerDestinationHandler: (DrawerScreenDestination) -> Unit = {
         when (it) {
-            DrawerScreenDestination.Profile -> navController.navigateToProfileScreen()
-            DrawerScreenDestination.Bookmarks -> navController.navigateToBookmarksScreen()
-            DrawerScreenDestination.UserLists -> navController.navigateToUserListsScreen()
-            DrawerScreenDestination.Settings -> navController.navigateToSettingsScreen()
-            DrawerScreenDestination.SignOut -> navController.navigateToSignOutScreen()
+            DrawerScreenDestination.Profile -> navController.navigateToProfile()
+            DrawerScreenDestination.Bookmarks -> navController.navigateToBookmarks()
+            DrawerScreenDestination.UserLists -> navController.navigateToUserLists()
+            DrawerScreenDestination.Settings -> navController.navigateToSettings()
+            DrawerScreenDestination.SignOut -> navController.navigateToLogout()
         }
     }
 
@@ -149,6 +130,8 @@ fun PrimalAppNavigation() {
             welcome(route = "welcome", navController = navController)
 
             login(route = "login", navController = navController)
+
+            logout(route = "logout", navController = navController)
 
             feed(
                 route = "feed?$FeedDirective={$FeedDirective}",
@@ -201,18 +184,16 @@ fun PrimalAppNavigation() {
 
             userLists(route = "userLists", navController = navController)
 
-            settings(route = "settings", navController = navController)
-
-            signOut(route = "signOut", navController = navController)
+            settingsNavigation(route = "settings", navController = navController)
         }
     }
 }
 
-private fun NavGraphBuilder.splash(route: String) = composable(route = route) {
-    val viewModel: SplashViewModel = hiltViewModel()
+private fun NavGraphBuilder.splash(
+    route: String
+) = composable(route = route) {
     SplashScreen()
 }
-
 
 private fun NavGraphBuilder.welcome(
     route: String,
@@ -256,7 +237,7 @@ private fun NavGraphBuilder.feed(
     FeedScreen(
         viewModel = viewModel,
         onFeedsClick = { navController.navigateToFeedList() },
-        onPostClick = { navController.navigateToThreadScreen(postId = it) },
+        onPostClick = { navController.navigateToThread(postId = it) },
         onTopLevelDestinationChanged = onTopLevelDestinationChanged,
         onDrawerScreenClick = onDrawerScreenClick,
     )
@@ -339,9 +320,11 @@ private fun NavGraphBuilder.thread(
 ) { navBackEntry ->
     val viewModel = hiltViewModel<ThreadViewModel>(navBackEntry)
     LockToOrientationPortrait()
-    ThreadScreen(viewModel = viewModel,
+    ThreadScreen(
+        viewModel = viewModel,
         onClose = { navController.navigateUp() },
-        onPostClick = { navController.navigateToThreadScreen(it) })
+        onPostClick = { navController.navigateToThread(it) },
+    )
 }
 
 private fun NavGraphBuilder.profile(
@@ -352,7 +335,9 @@ private fun NavGraphBuilder.profile(
 ) {
     LockToOrientationPortrait()
     DemoSecondaryScreen(
-        title = "Profile", description = "Coming soon."
+        title = "Profile",
+        description = "Coming soon.",
+        onClose = { navController.navigateUp() },
     )
 }
 
@@ -364,7 +349,9 @@ private fun NavGraphBuilder.bookmarks(
 ) {
     LockToOrientationPortrait()
     DemoSecondaryScreen(
-        title = "Bookmarks", description = "Coming soon."
+        title = "Bookmarks",
+        description = "Coming soon.",
+        onClose = { navController.navigateUp() },
     )
 }
 
@@ -376,23 +363,13 @@ private fun NavGraphBuilder.userLists(
 ) {
     LockToOrientationPortrait()
     DemoSecondaryScreen(
-        title = "User Lists", description = "Coming soon."
+        title = "User Lists",
+        description = "Coming soon.",
+        onClose = { navController.navigateUp() },
     )
 }
 
-private fun NavGraphBuilder.settings(
-    route: String,
-    navController: NavController,
-) = composable(
-    route = route,
-) {
-    LockToOrientationPortrait()
-    DemoSecondaryScreen(
-        title = "Settings", description = "Coming soon."
-    )
-}
-
-private fun NavGraphBuilder.signOut(
+private fun NavGraphBuilder.logout(
     route: String,
     navController: NavController,
 ) = dialog(

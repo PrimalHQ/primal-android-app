@@ -1,4 +1,4 @@
-package net.primal.android.navigation
+package net.primal.android.navigation.splash
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.wrapContentSize

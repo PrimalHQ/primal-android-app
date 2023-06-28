@@ -57,4 +57,24 @@
     </plurals>
 
     <string name="thread_title">Thread</string>
+
+    <string name="settings_title">Settings</string>
+    <string name="settings_keys_title">Keys</string>
+    <string name="settings_keys_copy_public_key">Copy public key</string>
+    <string name="settings_keys_public_key_hint">Anyone on Nostr can find you via your public key. Feel free to share anywhere.</string>
+    <string name="settings_keys_public_key_title">Your Public Key</string>
+    <string name="settings_keys_copy_private_key">Copy private key</string>
+    <string name="settings_keys_private_key_hint">This key fully controls your Nostr account. Don’t share it with anyone. Only copy this key to store it securely or to login to another Nostr app.</string>
+    <string name="settings_keys_private_key_title">Your Private Key</string>
+    <string name="settings_keys_show_key">Show Key</string>
+    <string name="settings_keys_hide_key">Hide Key</string>
+    <string name="settings_keys_key_copied">Key copied</string>
+    <string name="settings_wallet_title">Wallet</string>
+    <string name="settings_appearance_title">Appearance</string>
+    <string name="settings_notifications_title">Notifications</string>
+    <string name="settings_network_title">Network</string>
+    <string name="settings_feeds_title">Feeds</string>
+    <string name="settings_zaps_title">Zaps</string>
+    <string name="settings_version_title">Version</string>
+
 </resources>

@@ -21,6 +21,7 @@ import net.primal.android.core.compose.icons.primaliconpack.FeedZaps
 import net.primal.android.core.compose.icons.primaliconpack.FeedZapsFilled
 import net.primal.android.core.compose.icons.primaliconpack.Help
 import net.primal.android.core.compose.icons.primaliconpack.Home
+import net.primal.android.core.compose.icons.primaliconpack.Key
 import net.primal.android.core.compose.icons.primaliconpack.LightMode
 import net.primal.android.core.compose.icons.primaliconpack.Messages
 import net.primal.android.core.compose.icons.primaliconpack.More
@@ -73,6 +74,7 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             LightMode,
             Notrich,
             ArrowBack,
+            Key,
         )
         return __PrimalIcons!!
     }

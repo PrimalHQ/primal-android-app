@@ -13,7 +13,6 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -37,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.R
 import net.primal.android.core.compose.PrimalButton
+import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
@@ -142,8 +142,7 @@ fun LoginContent(
             )
 
             OutlinedTextField(
-                modifier = Modifier
-                    .fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 value = nsecValue,
                 onValueChange = { input -> nsecValue = input },
                 placeholder = {
@@ -187,10 +186,7 @@ fun LoginContent(
                         }
                     }
                 ),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = AppTheme.extraColorScheme.surfaceVariantAlt,
-                    unfocusedContainerColor = AppTheme.extraColorScheme.surfaceVariantAlt,
-                    errorBorderColor = AppTheme.colorScheme.error.copy(alpha = 0.5f),
+                colors = PrimalDefaults.outlinedTextFieldColors(
                     focusedBorderColor = if (nsecValue.isEmpty()) {
                         AppTheme.extraColorScheme.surfaceVariantAlt
                     } else {

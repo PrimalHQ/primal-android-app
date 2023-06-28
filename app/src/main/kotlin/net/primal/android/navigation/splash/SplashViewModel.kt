@@ -1,4 +1,4 @@
-package net.primal.android.navigation
+package net.primal.android.navigation.splash
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
-import net.primal.android.navigation.SplashContract.SideEffect
+import net.primal.android.navigation.splash.SplashContract.SideEffect
 import net.primal.android.user.active.ActiveAccountStore
 import net.primal.android.user.active.ActiveUserAccountState
 import javax.inject.Inject

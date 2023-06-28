@@ -1,4 +1,4 @@
-package net.primal.android.navigation
+package net.primal.android.navigation.splash
 
 interface SplashContract {
 
