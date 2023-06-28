@@ -17,4 +17,7 @@ interface FeedDao {
     @Query("SELECT * FROM Feed WHERE Feed.directive = :feedDirective")
     suspend fun findFeedByDirective(feedDirective: String): Feed?
 
+    @Query("DELETE FROM Feed")
+    fun deleteAll()
+
 }

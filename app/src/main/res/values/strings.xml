@@ -36,7 +36,7 @@
     <string name="drawer_following_suffix">Following</string>
 
     <string name="feed_reposted_suffix">reposted</string>
-    
+
     <string name="timestamp_since_just_now">just now</string>
     <string name="timestamp_since_minutes">%1$s min. ago</string>
     <string name="timestamp_since_hours">%1$s hr. ago</string>

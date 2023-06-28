@@ -1,5 +1,6 @@
 package net.primal.android.settings
 
+import androidx.room.withTransaction
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.decodeFromString
@@ -26,11 +27,17 @@ class SettingsRepository @Inject constructor(
 
         val appSettings = NostrJson.decodeFromString<ContentAppSettings>(appSettingsJsonContent)
 
-        database.feeds().upsertAll(
-            data = listOf(
-                Feed(directive = pubkey, name = "Latest, following"),
-            ) + appSettings.feeds.map { it.asFeedPO() }
-        )
+        database.withTransaction {
+            val userFeeds = appSettings.feeds.map { it.asFeedPO() }
+            val hasLatestFeed = userFeeds.find { it.directive == pubkey } != null
+            val finalFeeds = if (hasLatestFeed) userFeeds else {
+                userFeeds.toMutableList().apply {
+                    add(0, Feed(directive = pubkey, name = "Latest"))
+                }
+            }
+            database.feeds().deleteAll()
+            database.feeds().upsertAll(data = finalFeeds)
+        }
 
         if (appSettings.theme != null) {
             activeThemeStore.setUserTheme(appSettings.theme)
