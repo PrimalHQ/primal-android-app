@@ -24,7 +24,7 @@ class MainActivity : ComponentActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
         setContent {
-            val userTheme = themeStore.userThemeState.collectAsState(initial = null)
+            val userTheme = themeStore.userThemeState.collectAsState()
 
             PrimalTheme(
                 theme = userTheme.value

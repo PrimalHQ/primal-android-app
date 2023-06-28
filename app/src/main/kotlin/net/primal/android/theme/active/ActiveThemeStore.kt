@@ -4,6 +4,7 @@ import androidx.datastore.core.DataStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -19,20 +20,20 @@ class ActiveThemeStore @Inject constructor(
 
     private val scope = CoroutineScope(Dispatchers.IO)
 
-    val userThemeState = persistence.data.stateIn(
-        scope = scope,
-        started = SharingStarted.Eagerly,
-        initialValue = runBlocking { persistence.data.first() },
-    ).map {
-        PrimalTheme.valueOf(themeName = it)
+    val userThemeState: StateFlow<PrimalTheme?> = persistence.data
+        .map { PrimalTheme.valueOf(themeName = it) }
+        .stateIn(
+            scope = scope,
+            started = SharingStarted.Eagerly,
+            initialValue = initialValue()
+        )
+
+    private fun initialValue(): PrimalTheme? = runBlocking {
+        PrimalTheme.valueOf(themeName = persistence.data.first())
     }
 
     suspend fun setUserTheme(theme: String) {
         persistence.updateData { theme }
-    }
-
-    suspend fun clearTheme() {
-        persistence.updateData { "" }
     }
 
 }

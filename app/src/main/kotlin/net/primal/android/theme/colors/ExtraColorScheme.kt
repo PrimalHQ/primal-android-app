@@ -5,7 +5,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.runtime.structuralEqualityPolicy
@@ -17,8 +16,7 @@ fun ExtraColorSchemeProvider(
     extraColorScheme: ExtraColorScheme,
     content: @Composable () -> Unit
 ) {
-    val extraColorsPalette = remember { extraColorScheme }
-    CompositionLocalProvider(LocalExtraColors provides extraColorsPalette, content = content)
+    CompositionLocalProvider(LocalExtraColors provides extraColorScheme, content = content)
 }
 
 @Stable

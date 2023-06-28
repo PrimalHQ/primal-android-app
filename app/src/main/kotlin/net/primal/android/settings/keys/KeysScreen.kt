@@ -152,7 +152,7 @@ fun PublicKeySection(
                 stringResource(id = R.string.settings_keys_key_copied)
             } else {
                 stringResource(id = R.string.settings_keys_copy_public_key)
-           },
+            },
             onClick = {
                 val clipboard = context.getSystemService(ClipboardManager::class.java)
                 val clip = ClipData.newPlainText("", npub)

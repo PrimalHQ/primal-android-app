@@ -26,7 +26,4 @@ class KeysViewModel @Inject constructor(
     )
     val state = _state.asStateFlow()
 
-    init {
-
-    }
 }
