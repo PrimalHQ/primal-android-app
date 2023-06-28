@@ -14,23 +14,23 @@ import net.primal.android.settings.keys.KeysScreen
 import net.primal.android.settings.keys.KeysViewModel
 
 
-private fun NavController.navigateToKeys() = navigate(route = "keys")
-private fun NavController.navigateToWallet() = navigate(route = "wallet")
-private fun NavController.navigateToAppearance() = navigate(route = "appearance")
-private fun NavController.navigateToNotifications() = navigate(route = "notifications")
-private fun NavController.navigateToNetwork() = navigate(route = "network")
-private fun NavController.navigateToFeeds() = navigate(route = "feeds")
-private fun NavController.navigateToZaps() = navigate(route = "zaps")
+private fun NavController.navigateToKeys() = navigate(route = "keys_settings")
+private fun NavController.navigateToWallet() = navigate(route = "wallet_settings")
+private fun NavController.navigateToAppearance() = navigate(route = "appearance_settings")
+private fun NavController.navigateToNotifications() = navigate(route = "notifications_settings")
+private fun NavController.navigateToNetwork() = navigate(route = "network_settings")
+private fun NavController.navigateToFeeds() = navigate(route = "feeds_settings")
+private fun NavController.navigateToZaps() = navigate(route = "zaps_settings")
 
 fun NavGraphBuilder.settingsNavigation(
     route: String,
     navController: NavController,
 ) = navigation(
     route = route,
-    startDestination = "home"
+    startDestination = "home_settings"
 ) {
     home(
-        route = "home",
+        route = "home_settings",
         onClose = { navController.navigateUp() },
         onSettingsSectionClick = {
             when (it) {
@@ -45,13 +45,13 @@ fun NavGraphBuilder.settingsNavigation(
         }
     )
 
-    keys(route = "keys", navController = navController)
-    wallet(route = "wallet", navController = navController)
-    appearance(route = "appearance", navController = navController)
-    notifications(route = "notifications", navController = navController)
-    network(route = "network", navController = navController)
-    feeds(route = "feeds", navController = navController)
-    zaps(route = "zaps", navController = navController)
+    keys(route = "keys_settings", navController = navController)
+    wallet(route = "wallet_settings", navController = navController)
+    appearance(route = "appearance_settings", navController = navController)
+    notifications(route = "notifications_settings", navController = navController)
+    network(route = "network_settings", navController = navController)
+    feeds(route = "feeds_settings", navController = navController)
+    zaps(route = "zaps_settings", navController = navController)
 }
 
 private fun NavGraphBuilder.home(
