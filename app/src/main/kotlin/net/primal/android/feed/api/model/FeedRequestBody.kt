@@ -7,6 +7,7 @@ import kotlinx.serialization.Serializable
 data class FeedRequestBody(
     @SerialName("directive") val directive: String,
     @SerialName("user_pubkey") val userPubKey: String,
+    @SerialName("notes") val notes: String? = null,
     @SerialName("limit") val limit: Int? = null,
     @SerialName("until") val until: Long? = null,
     @SerialName("since") val since: Long? = null,

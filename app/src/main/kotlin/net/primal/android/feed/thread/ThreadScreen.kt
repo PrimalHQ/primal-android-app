@@ -27,6 +27,7 @@ fun ThreadScreen(
     viewModel: ThreadViewModel,
     onClose: () -> Unit,
     onPostClick: (String) -> Unit,
+    onProfileClick: (String) -> Unit,
 ) {
 
     val uiState = viewModel.state.collectAsState()
@@ -35,6 +36,7 @@ fun ThreadScreen(
         state = uiState.value,
         onClose = onClose,
         onPostClick = onPostClick,
+        onProfileClick = onProfileClick,
     )
 }
 
@@ -44,6 +46,7 @@ fun ThreadScreen(
     state: ThreadContract.UiState,
     onClose: () -> Unit,
     onPostClick: (String) -> Unit,
+    onProfileClick: (String) -> Unit,
 ) {
     val topAppBarState = rememberTopAppBarState()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(topAppBarState)
@@ -80,11 +83,12 @@ fun ThreadScreen(
 
                         FeedPostListItem(
                             data = item,
-                            onClick = {
+                            onPostClick = { postId ->
                                 if (index != state.highlightPostIndex) {
-                                    onPostClick(item.postId)
+                                    onPostClick(postId)
                                 }
                             },
+                            onProfileClick = { profileId -> onProfileClick(profileId) },
                             shouldIndentContent = shouldIndentContent,
                             highlighted = highlighted,
                             connected = connected,

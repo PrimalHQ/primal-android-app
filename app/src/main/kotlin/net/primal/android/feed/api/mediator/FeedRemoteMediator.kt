@@ -18,7 +18,9 @@ import net.primal.android.feed.db.FeedPostSync
 import net.primal.android.feed.db.sql.ExploreFeedQueryBuilder
 import net.primal.android.feed.db.sql.FeedQueryBuilder
 import net.primal.android.feed.db.sql.LatestFeedQueryBuilder
+import net.primal.android.feed.feed.isAuthoredFeed
 import net.primal.android.feed.feed.isLatestFeed
+import net.primal.android.feed.feed.removeAuthoredPrefix
 import net.primal.android.networking.sockets.NostrNoticeException
 import net.primal.android.nostr.ext.asEventStatsPO
 import net.primal.android.nostr.ext.asEventUserStatsPO
@@ -171,8 +173,13 @@ class FeedRemoteMediator(
             }
 
             val initialRequestBody = FeedRequestBody(
-                directive = feedDirective,
+                directive = if (feedDirective.isAuthoredFeed()) {
+                    feedDirective.removeAuthoredPrefix()
+                } else {
+                    feedDirective
+                },
                 userPubKey = userPubkey,
+                notes = if (feedDirective.isAuthoredFeed()) "authored" else null,
                 limit = state.config.pageSize,
             )
 

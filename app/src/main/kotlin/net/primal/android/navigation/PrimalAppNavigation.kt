@@ -36,6 +36,8 @@ import net.primal.android.feed.thread.ThreadViewModel
 import net.primal.android.navigation.splash.SplashContract
 import net.primal.android.navigation.splash.SplashScreen
 import net.primal.android.navigation.splash.SplashViewModel
+import net.primal.android.profile.details.ProfileScreen
+import net.primal.android.profile.details.ProfileViewModel
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 
@@ -72,7 +74,10 @@ private fun NavController.navigateToMessages() =
 private fun NavController.navigateToNotifications() =
     navigate(route = "notifications", navOptions = topLevelNavOptions)
 
-private fun NavController.navigateToProfile() = navigate(route = "profile")
+private fun NavController.navigateToProfile(profileId: String? = null) = when {
+    profileId != null -> navigate(route = "profile?profileId=$profileId")
+    else -> navigate(route = "profile")
+}
 
 private fun NavController.navigateToBookmarks() = navigate(route = "bookmarks")
 
@@ -135,10 +140,12 @@ fun PrimalAppNavigation() {
 
             feed(
                 route = "feed?$FeedDirective={$FeedDirective}",
-                arguments = listOf(navArgument(FeedDirective) {
-                    type = NavType.StringType
-                    nullable = true
-                }),
+                arguments = listOf(
+                    navArgument(FeedDirective) {
+                        type = NavType.StringType
+                        nullable = true
+                    }
+                ),
                 navController = navController,
                 onTopLevelDestinationChanged = topLevelDestinationHandler,
                 onDrawerScreenClick = drawerDestinationHandler,
@@ -172,13 +179,24 @@ fun PrimalAppNavigation() {
 
             thread(
                 route = "thread/{$PostId}",
-                arguments = listOf(navArgument(PostId) {
-                    type = NavType.StringType
-                }),
+                arguments = listOf(
+                    navArgument(PostId) {
+                        type = NavType.StringType
+                    }
+                ),
                 navController = navController,
             )
 
-            profile(route = "profile", navController = navController)
+            profile(
+                route = "profile?$ProfileId={$ProfileId}",
+                arguments = listOf(
+                    navArgument(ProfileId) {
+                        type = NavType.StringType
+                        nullable = true
+                    }
+                ),
+                navController = navController,
+            )
 
             bookmarks(route = "bookmarks", navController = navController)
 
@@ -237,7 +255,8 @@ private fun NavGraphBuilder.feed(
     FeedScreen(
         viewModel = viewModel,
         onFeedsClick = { navController.navigateToFeedList() },
-        onPostClick = { navController.navigateToThread(postId = it) },
+        onPostClick = { postId -> navController.navigateToThread(postId = postId) },
+        onProfileClick = { profileId -> navController.navigateToProfile(profileId = profileId) },
         onTopLevelDestinationChanged = onTopLevelDestinationChanged,
         onDrawerScreenClick = onDrawerScreenClick,
     )
@@ -323,21 +342,27 @@ private fun NavGraphBuilder.thread(
     ThreadScreen(
         viewModel = viewModel,
         onClose = { navController.navigateUp() },
-        onPostClick = { navController.navigateToThread(it) },
+        onPostClick = { postId -> navController.navigateToThread(postId) },
+        onProfileClick = { profileId -> navController.navigateToProfile(profileId = profileId) },
     )
 }
 
 private fun NavGraphBuilder.profile(
     route: String,
+    arguments: List<NamedNavArgument>,
     navController: NavController,
 ) = composable(
     route = route,
+    arguments = arguments,
 ) {
+    val viewModel = hiltViewModel<ProfileViewModel>(it)
+
     LockToOrientationPortrait()
-    DemoSecondaryScreen(
-        title = "Profile",
-        description = "Coming soon.",
+    ProfileScreen(
+        viewModel = viewModel,
         onClose = { navController.navigateUp() },
+        onPostClick = { postId -> navController.navigateToThread(postId = postId) },
+        onProfileClick = { profileId -> navController.navigateToProfile(profileId = profileId) },
     )
 }
 

@@ -14,10 +14,10 @@ fun FeedPost.asFeedPostUi() = FeedPostUi(
     repostId = this.data.repostId,
     repostAuthorDisplayName = this.repostAuthor?.displayNameUiFriendly()
         ?: this.data.repostAuthorId?.asEllipsizedNpub(),
-    authorDisplayName = this.author?.displayNameUiFriendly()
-        ?: this.data.authorId.asEllipsizedNpub(),
-    authorInternetIdentifier = this.author?.internetIdentifier,
-    authorAvatarUrl = this.author?.picture,
+    authorId = this.author.ownerId,
+    authorDisplayName = this.author.displayNameUiFriendly(),
+    authorInternetIdentifier = this.author.internetIdentifier,
+    authorAvatarUrl = this.author.picture,
     timestamp = Instant.ofEpochSecond(this.data.createdAt),
     content = this.data.content,
     resources = this.resources.map {

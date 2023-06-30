@@ -86,7 +86,8 @@ fun FeedPostListItem(
     shouldIndentContent: Boolean = false,
     connected: Boolean = false,
     highlighted: Boolean = false,
-    onClick: () -> Unit,
+    onPostClick: (String) -> Unit,
+    onProfileClick: (String) -> Unit,
 ) {
     val context = LocalContext.current
     val localUriHandler = LocalUriHandler.current
@@ -100,7 +101,7 @@ fun FeedPostListItem(
             .clickable(
                 interactionSource = interactionSource,
                 indication = rememberRipple(),
-                onClick = onClick
+                onClick = { onPostClick(data.postId) },
             ),
         highlighted = highlighted,
         connected = connected,
@@ -125,6 +126,7 @@ fun FeedPostListItem(
             postTimestamp = data.timestamp,
             authorAvatarUrl = data.authorAvatarUrl,
             authorInternetIdentifier = data.authorInternetIdentifier,
+            onAuthorAvatarClick = { onProfileClick(data.authorId) },
         )
 
         val postAuthorGuessHeight = with(LocalDensity.current) { 128.dp.toPx() }
@@ -141,7 +143,7 @@ fun FeedPostListItem(
                         interactionSource.emit(press)
                         interactionSource.emit(PressInteraction.Release(press))
                     }
-                    onClick()
+                    onPostClick(data.postId)
                 },
                 onUrlClick = {
                     localUriHandler.openUriSafely(it)
@@ -437,8 +439,8 @@ fun PostAuthorItem(
     postTimestamp: Instant,
     authorAvatarUrl: String? = null,
     authorInternetIdentifier: String? = null,
+    onAuthorAvatarClick: () -> Unit,
 ) {
-
     val hasVerifiedBadge = !authorInternetIdentifier.isNullOrEmpty()
 
     Row(
@@ -451,6 +453,7 @@ fun PostAuthorItem(
         AvatarThumbnailListItemImage(
             source = authorAvatarUrl,
             hasBorder = authorInternetIdentifier.isPrimalIdentifier(),
+            modifier = Modifier.clickable { onAuthorAvatarClick() },
         )
 
         Column(
@@ -578,6 +581,7 @@ fun PreviewFeedPostListItemLight() {
                     Hiding behind a pseudonym will become a distant dream.
                 """.trimIndent(),
                 resources = emptyList(),
+                authorId = "npubSomething",
                 authorDisplayName = "android_robots_from_space",
                 authorInternetIdentifier = "android@primal.net",
                 authorAvatarUrl = "https://i.imgur.com/Z8dpmvc.png",
@@ -590,7 +594,8 @@ fun PreviewFeedPostListItemLight() {
                     satsZapped = 555,
                 ),
             ),
-            onClick = {},
+            onPostClick = {},
+            onProfileClick = {},
         )
     }
 
@@ -613,6 +618,7 @@ fun PreviewFeedPostListItemDark() {
                     Hiding behind a pseudonym will become a distant dream.
                 """.trimIndent(),
                 resources = emptyList(),
+                authorId = "npubSomething",
                 authorDisplayName = "android",
                 authorInternetIdentifier = "android@primal.net",
                 authorAvatarUrl = "https://i.imgur.com/Z8dpmvc.png",
@@ -625,7 +631,8 @@ fun PreviewFeedPostListItemDark() {
                     satsZapped = 555,
                 ),
             ),
-            onClick = {},
+            onPostClick = {},
+            onProfileClick = {},
         )
     }
 

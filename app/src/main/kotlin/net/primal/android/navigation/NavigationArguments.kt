@@ -13,3 +13,7 @@ const val PostId = "postId"
 inline val SavedStateHandle.postId: String
     get() = get(PostId) ?: throw IllegalArgumentException("Missing required postId argument.")
 
+
+const val ProfileId = "profileId"
+
+inline val SavedStateHandle.profileId: String? get() = get(ProfileId)
