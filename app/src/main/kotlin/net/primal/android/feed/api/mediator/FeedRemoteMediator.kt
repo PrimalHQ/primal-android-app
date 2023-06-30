@@ -21,6 +21,7 @@ import net.primal.android.feed.db.sql.LatestFeedQueryBuilder
 import net.primal.android.feed.feed.isLatestFeed
 import net.primal.android.networking.sockets.NostrNoticeException
 import net.primal.android.nostr.ext.asEventStatsPO
+import net.primal.android.nostr.ext.asEventUserStatsPO
 import net.primal.android.nostr.ext.asPost
 import net.primal.android.nostr.ext.asPostResourcePO
 import net.primal.android.nostr.ext.flatMapAsPostResources
@@ -32,6 +33,7 @@ import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.primal.PrimalEvent
 import net.primal.android.nostr.model.primal.content.ContentPrimalEventResources
 import net.primal.android.nostr.model.primal.content.ContentPrimalEventStats
+import net.primal.android.nostr.model.primal.content.ContentPrimalEventUserStats
 import net.primal.android.nostr.model.primal.content.ContentPrimalPaging
 import net.primal.android.serialization.NostrJson
 import timber.log.Timber
@@ -44,13 +46,20 @@ import kotlin.time.Duration.Companion.minutes
 @ExperimentalPagingApi
 class FeedRemoteMediator(
     private val feedDirective: String,
+    private val userPubkey: String,
     private val feedApi: FeedApi,
     private val database: PrimalDatabase,
 ) : RemoteMediator<Int, FeedPost>() {
 
     private val feedQueryBuilder: FeedQueryBuilder = when {
-        feedDirective.isLatestFeed() -> LatestFeedQueryBuilder(feedDirective = feedDirective)
-        else -> ExploreFeedQueryBuilder(feedDirective = feedDirective)
+        feedDirective.isLatestFeed() -> LatestFeedQueryBuilder(
+            feedDirective = feedDirective,
+            userPubkey = userPubkey,
+        )
+        else -> ExploreFeedQueryBuilder(
+            feedDirective = feedDirective,
+            userPubkey = userPubkey,
+        )
     }
 
     private var prependSyncCount = 0
@@ -163,8 +172,7 @@ class FeedRemoteMediator(
 
             val initialRequestBody = FeedRequestBody(
                 directive = feedDirective,
-                // User hard-coded to Nostr Highlights
-                userPubKey = "9a500dccc084a138330a1d1b2be0d5e86394624325d25084d3eca164e7ea698a",
+                userPubKey = userPubkey,
                 limit = state.config.pageSize,
             )
 
@@ -228,6 +236,7 @@ class FeedRemoteMediator(
 
                 response.referencedPosts.processReferencedEvents()
                 response.primalEventStats.processEventStats()
+                response.primalEventUserStats.processEventUserStats()
                 response.primalEventResources.processEventResources()
             }
             MediatorResult.Success(endOfPaginationReached = false)
@@ -300,6 +309,14 @@ class FeedRemoteMediator(
             data = this
                 .map { NostrJson.decodeFromString<ContentPrimalEventStats>(it.content) }
                 .map { it.asEventStatsPO() }
+        )
+    }
+
+    private fun List<PrimalEvent>.processEventUserStats() {
+        database.postUserStats().upsertAll(
+            data = this
+                .map { NostrJson.decodeFromString<ContentPrimalEventUserStats>(it.content) }
+                .map { it.asEventUserStatsPO(userId = userPubkey) }
         )
     }
 

@@ -45,6 +45,9 @@ data class FeedPost(
     )
     val postStats: PostStats? = null,
 
+    @Embedded
+    val userStats: FeedPostUserStats? = null,
+
     @Relation(
         entityColumn = "ownerId",
         parentColumn = "repostAuthorId",

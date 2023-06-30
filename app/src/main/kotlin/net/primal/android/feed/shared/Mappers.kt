@@ -29,13 +29,13 @@ fun FeedPost.asFeedPostUi() = FeedPostUi(
     },
     stats = FeedPostStatsUi(
         repliesCount = this.postStats?.replies ?: 0,
-        userReplied = false,
+        userReplied = this.userStats?.userReplied ?: false,
         zapsCount = this.postStats?.zaps ?: 0,
         satsZapped = this.postStats?.satsZapped ?: 0,
-        userZapped = false,
+        userZapped = this.userStats?.userZapped ?: false,
         likesCount = this.postStats?.likes ?: 0,
-        userLiked = false,
+        userLiked = this.userStats?.userLiked ?: false,
         repostsCount = this.postStats?.reposts ?: 0,
-        userReposted = false,
+        userReposted = this.userStats?.userReposted ?: false,
     )
 )

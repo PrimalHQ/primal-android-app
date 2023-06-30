@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "fd168c648b8b5926d71361fada59c3e7",
+    "identityHash": "eda981bbe0415100687c5280afd29f86",
     "entities": [
       {
         "tableName": "PostData",
@@ -526,12 +526,82 @@
           }
         ],
         "foreignKeys": []
+      },
+      {
+        "tableName": "PostUserStats",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`postId` TEXT NOT NULL, `userId` TEXT NOT NULL, `replied` INTEGER NOT NULL, `liked` INTEGER NOT NULL, `reposted` INTEGER NOT NULL, `zapped` INTEGER NOT NULL, PRIMARY KEY(`postId`, `userId`))",
+        "fields": [
+          {
+            "fieldPath": "postId",
+            "columnName": "postId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "userId",
+            "columnName": "userId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "replied",
+            "columnName": "replied",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "liked",
+            "columnName": "liked",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reposted",
+            "columnName": "reposted",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "zapped",
+            "columnName": "zapped",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "postId",
+            "userId"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_PostUserStats_postId",
+            "unique": false,
+            "columnNames": [
+              "postId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_PostUserStats_postId` ON `${TABLE_NAME}` (`postId`)"
+          },
+          {
+            "name": "index_PostUserStats_userId",
+            "unique": false,
+            "columnNames": [
+              "userId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_PostUserStats_userId` ON `${TABLE_NAME}` (`userId`)"
+          }
+        ],
+        "foreignKeys": []
       }
     ],
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'fd168c648b8b5926d71361fada59c3e7')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'eda981bbe0415100687c5280afd29f86')"
     ]
   }
 }

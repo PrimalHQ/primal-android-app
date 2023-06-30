@@ -7,6 +7,7 @@ import net.primal.android.feed.feed.isTrendingFeed
 
 class ExploreFeedQueryBuilder(
     private val feedDirective: String,
+    private val userPubkey: String,
 ) : FeedQueryBuilder {
 
     companion object {
@@ -20,10 +21,15 @@ class ExploreFeedQueryBuilder(
                 PostData.referencePostAuthorId,
                 NULL AS repostId,
                 NULL AS repostAuthorId,
+                PostUserStats.liked AS userLiked,
+                PostUserStats.replied AS userReplied,
+                PostUserStats.reposted AS userReposted,
+                PostUserStats.zapped AS userZapped,
                 NULL AS feedCreatedAt
             FROM PostData
             INNER JOIN FeedPostDataCrossRef ON FeedPostDataCrossRef.eventId = PostData.postId
             INNER JOIN PostStats ON PostData.postId = PostStats.postId
+            LEFT JOIN PostUserStats ON PostUserStats.postId = PostData.postId AND PostUserStats.userId = ?
             WHERE FeedPostDataCrossRef.feedDirective = ?
         """
     }
@@ -38,21 +44,21 @@ class ExploreFeedQueryBuilder(
     override fun feedQuery(): SimpleSQLiteQuery {
         return SimpleSQLiteQuery(
             query = "$EXPLORE_BASIC_QUERY $orderByClause DESC",
-            bindArgs = arrayOf(feedDirective),
+            bindArgs = arrayOf(userPubkey, feedDirective),
         )
     }
 
     override fun newestFeedPostsQuery(limit: Int): SimpleSQLiteQuery {
         return SimpleSQLiteQuery(
             query = "$EXPLORE_BASIC_QUERY $orderByClause DESC LIMIT ?",
-            bindArgs = arrayOf(feedDirective, limit),
+            bindArgs = arrayOf(userPubkey, feedDirective, limit),
         )
     }
 
     override fun oldestFeedPostsQuery(limit: Int): SimpleSQLiteQuery {
         return SimpleSQLiteQuery(
             query = "$EXPLORE_BASIC_QUERY $orderByClause ASC LIMIT ?",
-            bindArgs = arrayOf(feedDirective, limit),
+            bindArgs = arrayOf(userPubkey, feedDirective, limit),
         )
     }
 

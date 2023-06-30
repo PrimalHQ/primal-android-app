@@ -585,6 +585,7 @@ fun PreviewFeedPostListItemLight() {
                 stats = FeedPostStatsUi(
                     repliesCount = 11,
                     likesCount = 256,
+                    userLiked = true,
                     repostsCount = 42,
                     satsZapped = 555,
                 ),
@@ -618,6 +619,7 @@ fun PreviewFeedPostListItemDark() {
                 timestamp = Instant.now().minus(30, ChronoUnit.MINUTES),
                 stats = FeedPostStatsUi(
                     repliesCount = 11,
+                    userReplied = true,
                     likesCount = 256,
                     repostsCount = 42,
                     satsZapped = 555,

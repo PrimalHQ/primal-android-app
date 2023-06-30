@@ -23,6 +23,8 @@ import net.primal.android.feed.db.PostStats
 import net.primal.android.feed.db.PostStatsDao
 import net.primal.android.feed.db.RepostDao
 import net.primal.android.feed.db.RepostData
+import net.primal.android.profile.db.PostUserStats
+import net.primal.android.profile.db.PostUserStatsDao
 import net.primal.android.profile.db.ProfileMetadata
 import net.primal.android.profile.db.ProfileMetadataDao
 import net.primal.android.serialization.RoomCustomTypeConverters
@@ -39,6 +41,7 @@ import net.primal.android.serialization.RoomCustomTypeConverters
         FeedPostRemoteKey::class,
         FeedPostSync::class,
         ConversationCrossRef::class,
+        PostUserStats::class,
     ],
     version = 1,
     exportSchema = true,
@@ -69,5 +72,7 @@ abstract class PrimalDatabase : RoomDatabase() {
     abstract fun conversationConnections(): ConversationCrossRefDao
 
     abstract fun conversations(): ConversationDao
+
+    abstract fun postUserStats(): PostUserStatsDao
 
 }

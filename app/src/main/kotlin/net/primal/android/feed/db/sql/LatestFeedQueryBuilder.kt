@@ -4,6 +4,7 @@ import androidx.sqlite.db.SimpleSQLiteQuery
 
 class LatestFeedQueryBuilder(
     private val feedDirective: String,
+    private val userPubkey: String,
 ) : FeedQueryBuilder {
 
     companion object {
@@ -17,9 +18,14 @@ class LatestFeedQueryBuilder(
                 PostData.referencePostAuthorId,
                 NULL AS repostId,
                 NULL AS repostAuthorId,
+                PostUserStats.liked AS userLiked,
+                PostUserStats.replied AS userReplied,
+                PostUserStats.reposted AS userReposted,
+                PostUserStats.zapped AS userZapped,
                 PostData.createdAt AS feedCreatedAt 
             FROM PostData
             JOIN FeedPostDataCrossRef ON FeedPostDataCrossRef.eventId = PostData.postId
+            LEFT JOIN PostUserStats ON PostUserStats.postId = PostData.postId AND PostUserStats.userId = ? 
             WHERE FeedPostDataCrossRef.feedDirective = ?
 
             UNION ALL
@@ -33,10 +39,15 @@ class LatestFeedQueryBuilder(
                 PostData.referencePostAuthorId,
                 RepostData.repostId AS repostId,
                 RepostData.authorId AS repostAuthorId,
+                PostUserStats.liked AS userLiked,
+                PostUserStats.replied AS userReplied,
+                PostUserStats.reposted AS userReposted,
+                PostUserStats.zapped AS userZapped,
                 RepostData.createdAt AS feedCreatedAt
             FROM RepostData
             JOIN PostData ON RepostData.postId = PostData.postId
             JOIN FeedPostDataCrossRef ON FeedPostDataCrossRef.eventId = RepostData.repostId
+            LEFT JOIN PostUserStats ON PostUserStats.postId = PostData.postId AND PostUserStats.userId = ?
             WHERE FeedPostDataCrossRef.feedDirective = ?
         """
     }
@@ -44,21 +55,21 @@ class LatestFeedQueryBuilder(
     override fun feedQuery(): SimpleSQLiteQuery {
         return SimpleSQLiteQuery(
             query = "$LATEST_BASIC_QUERY ORDER BY feedCreatedAt DESC",
-            bindArgs = arrayOf(feedDirective, feedDirective),
+            bindArgs = arrayOf(userPubkey, feedDirective, userPubkey, feedDirective),
         )
     }
 
     override fun newestFeedPostsQuery(limit: Int): SimpleSQLiteQuery {
         return SimpleSQLiteQuery(
             query = "$LATEST_BASIC_QUERY ORDER BY feedCreatedAt DESC LIMIT ?",
-            bindArgs = arrayOf(feedDirective, feedDirective, limit),
+            bindArgs = arrayOf(userPubkey, feedDirective, userPubkey, feedDirective, limit),
         )
     }
 
     override fun oldestFeedPostsQuery(limit: Int): SimpleSQLiteQuery {
         return SimpleSQLiteQuery(
             query = "$LATEST_BASIC_QUERY ORDER BY feedCreatedAt ASC LIMIT ?",
-            bindArgs = arrayOf(feedDirective, feedDirective, limit),
+            bindArgs = arrayOf(userPubkey, feedDirective, userPubkey, feedDirective, limit),
         )
     }
 }

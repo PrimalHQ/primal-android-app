@@ -23,6 +23,7 @@ import net.primal.android.feed.db.sql.FeedQueryBuilder
 import net.primal.android.feed.db.sql.LatestFeedQueryBuilder
 import net.primal.android.feed.feed.isLatestFeed
 import net.primal.android.nostr.ext.asEventStatsPO
+import net.primal.android.nostr.ext.asEventUserStatsPO
 import net.primal.android.nostr.ext.asPost
 import net.primal.android.nostr.ext.asPostResourcePO
 import net.primal.android.nostr.ext.mapAsProfileMetadata
@@ -31,13 +32,18 @@ import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.primal.PrimalEvent
 import net.primal.android.nostr.model.primal.content.ContentPrimalEventResources
 import net.primal.android.nostr.model.primal.content.ContentPrimalEventStats
+import net.primal.android.nostr.model.primal.content.ContentPrimalEventUserStats
 import net.primal.android.serialization.NostrJson
+import net.primal.android.user.active.ActiveAccountStore
 import javax.inject.Inject
 
 class FeedRepository @Inject constructor(
     private val feedApi: FeedApi,
     private val database: PrimalDatabase,
+    private val activeAccountStore: ActiveAccountStore,
 ) {
+
+    private val activeUserId: String get() = activeAccountStore.userAccount.value.pubkey
 
     fun observeFeeds(): Flow<List<Feed>> = database.feeds().observeAllFeeds()
 
@@ -65,15 +71,11 @@ class FeedRepository @Inject constructor(
     fun findPostById(postId: String): FeedPost = database.feedPosts().findPostById(postId = postId)
 
     fun observeConversation(postId: String) =
-        database.conversations().observeConversation(postId = postId)
+        database.conversations().observeConversation(postId = postId, userId = activeUserId)
 
     suspend fun fetchReplies(postId: String) = withContext(Dispatchers.IO) {
         val response = feedApi.getThread(
-            ThreadRequestBody(
-                postId = postId,
-                // User hard-coded to Nostr Highlights
-                userPubKey = "9a500dccc084a138330a1d1b2be0d5e86394624325d25084d3eca164e7ea698a",
-            )
+            ThreadRequestBody(postId = postId, userPubKey = activeUserId)
         )
 
         database.withTransaction {
@@ -81,6 +83,7 @@ class FeedRepository @Inject constructor(
             response.referencedPosts.processReferencedEvents()
             response.metadata.processMetadataEvents()
             response.primalEventStats.processEventStats()
+            response.primalEventUserStats.processEventUserStats()
             response.primalEventResources.processEventResources()
 
             database.conversationConnections().connect(
@@ -106,6 +109,7 @@ class FeedRepository @Inject constructor(
             ),
             remoteMediator = FeedRemoteMediator(
                 feedDirective = feedDirective,
+                userPubkey = activeUserId,
                 feedApi = feedApi,
                 database = database,
             ),
@@ -113,8 +117,8 @@ class FeedRepository @Inject constructor(
         )
 
     private fun feedQueryBuilder(feedDirective: String): FeedQueryBuilder = when {
-        feedDirective.isLatestFeed() -> LatestFeedQueryBuilder(feedDirective = feedDirective)
-        else -> ExploreFeedQueryBuilder(feedDirective = feedDirective)
+        feedDirective.isLatestFeed() -> LatestFeedQueryBuilder(feedDirective = feedDirective, userPubkey = activeUserId)
+        else -> ExploreFeedQueryBuilder(feedDirective = feedDirective, userPubkey = activeUserId)
     }
 
 
@@ -141,6 +145,15 @@ class FeedRepository @Inject constructor(
                 .map { it.asEventStatsPO() }
         )
     }
+
+    private fun List<PrimalEvent>.processEventUserStats() {
+        database.postUserStats().upsertAll(
+            data = this
+                .map { NostrJson.decodeFromString<ContentPrimalEventUserStats>(it.content) }
+                .map { it.asEventUserStatsPO(userId = activeUserId) }
+        )
+    }
+
 
     private fun List<PrimalEvent>.processEventResources() {
         database.resources().upsert(
