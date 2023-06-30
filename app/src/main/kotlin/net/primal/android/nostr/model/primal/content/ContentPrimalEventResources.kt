@@ -13,6 +13,6 @@ data class ContentPrimalEventResources(
 @Serializable
 data class EventResource(
     val url: String,
-    @SerialName("mt") val mimeType: String?,
+    @SerialName("mt") val mimeType: String? = null,
     val variants: List<PrimalResourceVariant>
 )
