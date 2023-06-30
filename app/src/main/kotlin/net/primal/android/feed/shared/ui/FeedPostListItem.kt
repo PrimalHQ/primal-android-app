@@ -346,6 +346,8 @@ private fun PrimalResourceVariant?.calculateImageSize(
     )
 }
 
+private fun Int.toPostStatString(): String = if (this > 0) toString() else ""
+
 @Composable
 fun PostStatsItem(
     postStats: FeedPostStatsUi,
@@ -358,28 +360,28 @@ fun PostStatsItem(
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         SinglePostStat(
-            textCount = postStats.repliesCount.toString(),
+            textCount = postStats.repliesCount.toPostStatString(),
             highlight = postStats.userReplied,
             iconVector = PrimalIcons.FeedReplies,
             iconVectorHighlight = PrimalIcons.FeedRepliesFilled,
         )
 
         SinglePostStat(
-            textCount = postStats.satsZapped.toString(),
+            textCount = postStats.satsZapped.toPostStatString(),
             highlight = postStats.userZapped,
             iconVector = PrimalIcons.FeedZaps,
             iconVectorHighlight = PrimalIcons.FeedZapsFilled,
         )
 
         SinglePostStat(
-            textCount = postStats.likesCount.toString(),
+            textCount = postStats.likesCount.toPostStatString(),
             highlight = postStats.userLiked,
             iconVector = PrimalIcons.FeedLikes,
             iconVectorHighlight = PrimalIcons.FeedLikesFilled,
         )
 
         SinglePostStat(
-            textCount = postStats.repostsCount.toString(),
+            textCount = postStats.repostsCount.toPostStatString(),
             highlight = postStats.userReposted,
             iconVector = PrimalIcons.FeedReposts,
             iconVectorHighlight = PrimalIcons.FeedRepostsFilled,
