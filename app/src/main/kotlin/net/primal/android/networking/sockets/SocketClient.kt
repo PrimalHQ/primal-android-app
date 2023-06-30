@@ -2,12 +2,15 @@ package net.primal.android.networking.sockets
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.transformWhile
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.add
 import kotlinx.serialization.json.buildJsonArray
@@ -41,7 +44,9 @@ class SocketClient @Inject constructor(
 
     private val scope = CoroutineScope(Dispatchers.IO)
 
-    private lateinit var webSocket: WebSocket
+    private val webSocketMutex = Mutex()
+
+    private var webSocket: WebSocket? = null
 
     private val socketListener = object : WebSocketListener() {
         override fun onMessage(webSocket: WebSocket, text: String) {
@@ -55,32 +60,56 @@ class SocketClient @Inject constructor(
         }
 
         override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
-            // We need to implement and start auto-reconnect process here
-            Timber.e("WS connection closed. code=$code, reason=$reason")
+            Timber.w("WS connection closed with code=$code and reason=$reason")
+            this@SocketClient.webSocket = null
         }
     }
 
     private val mutableMessagesSharedFlow = MutableSharedFlow<IncomingMessage>()
     private val messagesSharedFlow = mutableMessagesSharedFlow.asSharedFlow()
 
-    init {
-        connect()
-    }
 
-    private fun connect() {
-        webSocket = okHttpClient.newWebSocket(
-            request = primalApiRequest,
-            listener = socketListener
-        )
+    private suspend fun ensureSocketConnection() = webSocketMutex.withLock {
+        if (webSocket == null) {
+            webSocket = okHttpClient.newWebSocket(
+                request = primalApiRequest,
+                listener = socketListener
+            )
+        }
     }
 
     @Throws(NostrNoticeException::class)
     suspend fun query(message: OutgoingMessage): SocketQueryResult {
-        val subscriptionId = sendRequest(message)
-        return collectRequestResultBySubscriptionId(id = subscriptionId)
+        ensureSocketConnection()
+
+        var queryAttempts = 0
+        var subscriptionId: UUID? = null
+        while (queryAttempts < MAX_QUERY_ATTEMPTS) {
+            subscriptionId = sendRequest(message)
+            queryAttempts++
+
+            if (subscriptionId != null) break
+
+            if (queryAttempts < MAX_QUERY_ATTEMPTS) {
+                delay(RETRY_DELAY_MILLIS)
+            }
+        }
+
+        return if (subscriptionId != null) {
+            try {
+                collectRequestResultBySubscriptionId(id = subscriptionId)
+            } catch (error: NostrNoticeException) {
+                throw WssException(
+                    message = error.reason,
+                    cause = error,
+                )
+            }
+        } else {
+            throw WssException(message = "Socket connection unavailable.")
+        }
     }
 
-    private fun sendRequest(message: OutgoingMessage): UUID {
+    private fun sendRequest(message: OutgoingMessage): UUID? {
         val subscriptionId = UUID.randomUUID()
         val finalMessage = buildOutgoingMessage(
             verb = NostrVerb.Outgoing.REQ,
@@ -89,13 +118,8 @@ class SocketClient @Inject constructor(
             optionsJson = message.optionsJson,
         )
         Timber.i("--> $finalMessage")
-        val success = webSocket.send(finalMessage)
-        if (success) {
-            Timber.i("Socket message was sent successfully.")
-        } else {
-            Timber.w("Socket message was not sent.")
-        }
-        return subscriptionId
+        val success = webSocket?.send(finalMessage) == true
+        return if (success) subscriptionId else null
     }
 
     private fun buildOutgoingMessage(
@@ -164,4 +188,9 @@ class SocketClient @Inject constructor(
         return if (kind != null) NostrEventKind.valueOf(kind) else NostrEventKind.Unknown
     }
 
+
+    companion object {
+        private const val MAX_QUERY_ATTEMPTS = 3
+        private const val RETRY_DELAY_MILLIS = 500L
+    }
 }
