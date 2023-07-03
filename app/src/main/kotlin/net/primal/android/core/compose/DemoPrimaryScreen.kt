@@ -12,6 +12,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
@@ -53,6 +55,8 @@ fun DemoPrimaryScreen(
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
+                    modifier = Modifier.padding(horizontal = 48.dp),
+                    textAlign = TextAlign.Center,
                     text = description,
                 )
             }

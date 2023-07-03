@@ -9,6 +9,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 
@@ -35,6 +37,8 @@ fun DemoSecondaryScreen(
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
+                    modifier = Modifier.padding(horizontal = 48.dp),
+                    textAlign = TextAlign.Center,
                     text = description,
                 )
             }

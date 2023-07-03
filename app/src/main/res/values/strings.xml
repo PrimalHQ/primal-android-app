@@ -28,8 +28,6 @@
     <string name="primary_destination_notifications_label">Notifications</string>
 
     <string name="drawer_destination_profile">Profile</string>
-    <string name="drawer_destination_bookmarks">Bookmarks</string>
-    <string name="drawer_destination_user_lists">User Lists</string>
     <string name="drawer_destination_settings">Settings</string>
     <string name="drawer_destination_sign_out">Sign Out</string>
     <string name="drawer_followers_suffix">Followers</string>
@@ -57,8 +55,9 @@
     </plurals>
 
     <string name="thread_title">Thread</string>
-
     <string name="explore_title">Explore</string>
+    <string name="notifications_title">Notifications</string>
+    <string name="messages_title">Messages</string>
 
     <string name="settings_title">Settings</string>
     <string name="settings_keys_title">Keys</string>

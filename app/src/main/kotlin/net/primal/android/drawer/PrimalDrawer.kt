@@ -283,7 +283,7 @@ private fun DrawerFooter(
 }
 
 enum class DrawerScreenDestination {
-    Profile, Bookmarks, UserLists, Settings, SignOut
+    Profile, Settings, SignOut
 }
 
 
@@ -291,8 +291,6 @@ enum class DrawerScreenDestination {
 private fun DrawerScreenDestination.label(): String {
     return when (this) {
         DrawerScreenDestination.Profile -> stringResource(id = R.string.drawer_destination_profile)
-        DrawerScreenDestination.Bookmarks -> stringResource(id = R.string.drawer_destination_bookmarks)
-        DrawerScreenDestination.UserLists -> stringResource(id = R.string.drawer_destination_user_lists)
         DrawerScreenDestination.Settings -> stringResource(id = R.string.drawer_destination_settings)
         DrawerScreenDestination.SignOut -> stringResource(id = R.string.drawer_destination_sign_out)
     }

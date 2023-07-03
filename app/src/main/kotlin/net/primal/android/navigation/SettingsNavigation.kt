@@ -1,10 +1,12 @@
 package net.primal.android.navigation
 
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
+import net.primal.android.R
 import net.primal.android.core.compose.DemoSecondaryScreen
 import net.primal.android.core.compose.LockToOrientationPortrait
 import net.primal.android.settings.home.PrimalSettingsSection
@@ -89,8 +91,8 @@ private fun NavGraphBuilder.wallet(route: String, navController: NavController) 
 ) {
     LockToOrientationPortrait()
     DemoSecondaryScreen(
-        title = "Wallet",
-        description = "Coming soon.",
+        title = stringResource(id = R.string.settings_wallet_title),
+        description = "Wallet settings will appear here. Stay tuned.",
         onClose = { navController.navigateUp() },
     )
 }
@@ -100,8 +102,8 @@ private fun NavGraphBuilder.appearance(route: String, navController: NavControll
 ) {
     LockToOrientationPortrait()
     DemoSecondaryScreen(
-        title = "Appearance",
-        description = "Coming soon.",
+        title = stringResource(id = R.string.settings_appearance_title),
+        description = "Appearance settings will appear here. Stay tuned.",
         onClose = { navController.navigateUp() },
     )
 }
@@ -111,8 +113,8 @@ private fun NavGraphBuilder.notifications(route: String, navController: NavContr
 ) {
     LockToOrientationPortrait()
     DemoSecondaryScreen(
-        title = "Notifications",
-        description = "Coming soon.",
+        title = stringResource(id = R.string.settings_notifications_title),
+        description = "Notifications settings will appear here. Stay tuned.",
         onClose = { navController.navigateUp() },
     )
 }
@@ -122,8 +124,8 @@ private fun NavGraphBuilder.network(route: String, navController: NavController)
 ) {
     LockToOrientationPortrait()
     DemoSecondaryScreen(
-        title = "Network",
-        description = "Coming soon.",
+        title = stringResource(id = R.string.settings_network_title),
+        description = "Network settings will appear here. Stay tuned.",
         onClose = { navController.navigateUp() },
     )
 }
@@ -133,8 +135,8 @@ private fun NavGraphBuilder.feeds(route: String, navController: NavController) =
 ) {
     LockToOrientationPortrait()
     DemoSecondaryScreen(
-        title = "Feeds",
-        description = "Coming soon.",
+        title = stringResource(id = R.string.settings_feeds_title),
+        description = "Feeds settings will appear here. Stay tuned.",
         onClose = { navController.navigateUp() },
     )
 }
@@ -144,8 +146,8 @@ private fun NavGraphBuilder.zaps(route: String, navController: NavController) = 
 ) {
     LockToOrientationPortrait()
     DemoSecondaryScreen(
-        title = "Zaps",
-        description = "Coming soon.",
+        title = stringResource(id = R.string.settings_zaps_title),
+        description = "Zaps settings will appear here. Stay tuned.",
         onClose = { navController.navigateUp() },
     )
 }

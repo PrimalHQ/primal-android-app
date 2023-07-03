@@ -2,6 +2,7 @@ package net.primal.android.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavController
@@ -17,13 +18,13 @@ import com.google.accompanist.navigation.material.ExperimentalMaterialNavigation
 import com.google.accompanist.navigation.material.ModalBottomSheetLayout
 import com.google.accompanist.navigation.material.bottomSheet
 import com.google.accompanist.navigation.material.rememberBottomSheetNavigator
+import net.primal.android.R
 import net.primal.android.auth.login.LoginScreen
 import net.primal.android.auth.login.LoginViewModel
 import net.primal.android.auth.logout.LogoutScreen
 import net.primal.android.auth.logout.LogoutViewModel
 import net.primal.android.auth.welcome.WelcomeScreen
 import net.primal.android.core.compose.DemoPrimaryScreen
-import net.primal.android.core.compose.DemoSecondaryScreen
 import net.primal.android.core.compose.LockToOrientationPortrait
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.discuss.feed.FeedScreen
@@ -83,10 +84,6 @@ private fun NavController.navigateToProfile(profileId: String? = null) = when {
     else -> navigate(route = "profile")
 }
 
-private fun NavController.navigateToBookmarks() = navigate(route = "bookmarks")
-
-private fun NavController.navigateToUserLists() = navigate(route = "userLists")
-
 private fun NavController.navigateToSettings() = navigate(route = "settings")
 
 private fun NavController.navigateToThread(postId: String) = navigate(route = "thread/$postId")
@@ -113,8 +110,6 @@ fun PrimalAppNavigation() {
     val drawerDestinationHandler: (DrawerScreenDestination) -> Unit = {
         when (it) {
             DrawerScreenDestination.Profile -> navController.navigateToProfile()
-            DrawerScreenDestination.Bookmarks -> navController.navigateToBookmarks()
-            DrawerScreenDestination.UserLists -> navController.navigateToUserLists()
             DrawerScreenDestination.Settings -> navController.navigateToSettings()
             DrawerScreenDestination.SignOut -> navController.navigateToLogout()
         }
@@ -214,10 +209,6 @@ fun PrimalAppNavigation() {
                 ),
                 navController = navController,
             )
-
-            bookmarks(route = "bookmarks", navController = navController)
-
-            userLists(route = "userLists", navController = navController)
 
             settingsNavigation(route = "settings", navController = navController)
         }
@@ -338,8 +329,8 @@ private fun NavGraphBuilder.messages(
 ) {
     LockToOrientationPortrait()
     DemoPrimaryScreen(
-        title = "Messages",
-        description = "Coming soon.",
+        title = stringResource(id = R.string.messages_title),
+        description = "Your messages will appear here.",
         primaryDestination = PrimalTopLevelDestination.Messages,
         onTopLevelDestinationChanged = onTopLevelDestinationChanged,
         onDrawerDestinationClick = onDrawerScreenClick,
@@ -356,8 +347,8 @@ private fun NavGraphBuilder.notifications(
 ) {
     LockToOrientationPortrait()
     DemoPrimaryScreen(
-        title = "Notifications",
-        description = "Coming soon.",
+        title = stringResource(id = R.string.notifications_title),
+        description = "Your notifications will appear here.",
         primaryDestination = PrimalTopLevelDestination.Notifications,
         onTopLevelDestinationChanged = onTopLevelDestinationChanged,
         onDrawerDestinationClick = onDrawerScreenClick,
@@ -398,34 +389,6 @@ private fun NavGraphBuilder.profile(
         onClose = { navController.navigateUp() },
         onPostClick = { postId -> navController.navigateToThread(postId = postId) },
         onProfileClick = { profileId -> navController.navigateToProfile(profileId = profileId) },
-    )
-}
-
-private fun NavGraphBuilder.bookmarks(
-    route: String,
-    navController: NavController,
-) = composable(
-    route = route,
-) {
-    LockToOrientationPortrait()
-    DemoSecondaryScreen(
-        title = "Bookmarks",
-        description = "Coming soon.",
-        onClose = { navController.navigateUp() },
-    )
-}
-
-private fun NavGraphBuilder.userLists(
-    route: String,
-    navController: NavController,
-) = composable(
-    route = route,
-) {
-    LockToOrientationPortrait()
-    DemoSecondaryScreen(
-        title = "User Lists",
-        description = "Coming soon.",
-        onClose = { navController.navigateUp() },
     )
 }
 
