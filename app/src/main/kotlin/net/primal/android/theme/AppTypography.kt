@@ -9,7 +9,7 @@ import androidx.compose.ui.unit.sp
 import net.primal.android.R
 
 val RobotoFlex = FontFamily(
-    Font(resId = R.font.roboto_flex_all),
+    Font(resId = R.font.roboto_flex_variable),
 )
 
 val PrimalTypography = Typography(
