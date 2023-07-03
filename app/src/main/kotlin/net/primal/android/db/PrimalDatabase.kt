@@ -3,9 +3,11 @@ package net.primal.android.db
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import net.primal.android.feed.db.ConversationCrossRef
-import net.primal.android.feed.db.ConversationCrossRefDao
-import net.primal.android.feed.db.ConversationDao
+import net.primal.android.explore.db.TrendingHashtag
+import net.primal.android.explore.db.TrendingHashtagDao
+import net.primal.android.thread.db.ConversationCrossRef
+import net.primal.android.thread.db.ConversationCrossRefDao
+import net.primal.android.thread.db.ConversationDao
 import net.primal.android.feed.db.Feed
 import net.primal.android.feed.db.FeedDao
 import net.primal.android.feed.db.FeedPostDao
@@ -42,6 +44,7 @@ import net.primal.android.serialization.RoomCustomTypeConverters
         FeedPostSync::class,
         ConversationCrossRef::class,
         PostUserStats::class,
+        TrendingHashtag::class,
     ],
     version = 1,
     exportSchema = true,
@@ -75,4 +78,5 @@ abstract class PrimalDatabase : RoomDatabase() {
 
     abstract fun postUserStats(): PostUserStatsDao
 
+    abstract fun trendingHashtags(): TrendingHashtagDao
 }

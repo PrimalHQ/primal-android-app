@@ -15,13 +15,13 @@ import net.primal.android.db.PrimalDatabase
 import net.primal.android.feed.api.FeedApi
 import net.primal.android.feed.api.mediator.FeedRemoteMediator
 import net.primal.android.feed.api.model.ThreadRequestBody
-import net.primal.android.feed.db.ConversationCrossRef
+import net.primal.android.thread.db.ConversationCrossRef
 import net.primal.android.feed.db.Feed
 import net.primal.android.feed.db.FeedPost
 import net.primal.android.feed.db.sql.ExploreFeedQueryBuilder
 import net.primal.android.feed.db.sql.FeedQueryBuilder
 import net.primal.android.feed.db.sql.LatestFeedQueryBuilder
-import net.primal.android.feed.feed.isLatestFeed
+import net.primal.android.core.ext.isLatestFeed
 import net.primal.android.nostr.ext.asEventStatsPO
 import net.primal.android.nostr.ext.asEventUserStatsPO
 import net.primal.android.nostr.ext.asPost

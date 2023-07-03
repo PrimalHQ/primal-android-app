@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import net.primal.android.feed.repository.FeedRepository
-import net.primal.android.feed.shared.asFeedPostUi
+import net.primal.android.core.compose.feed.asFeedPostUi
 import net.primal.android.navigation.profileId
 import net.primal.android.nostr.ext.displayNameUiFriendly
 import net.primal.android.profile.details.ProfileContract.UiState

@@ -1,9 +1,9 @@
 package net.primal.android.feed.db.sql
 
 import androidx.sqlite.db.SimpleSQLiteQuery
-import net.primal.android.feed.feed.isMostZappedFeed
-import net.primal.android.feed.feed.isPopularFeed
-import net.primal.android.feed.feed.isTrendingFeed
+import net.primal.android.core.ext.isMostZappedFeed
+import net.primal.android.core.ext.isPopularFeed
+import net.primal.android.core.ext.isTrendingFeed
 
 class ExploreFeedQueryBuilder(
     private val feedDirective: String,

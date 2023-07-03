@@ -26,13 +26,15 @@ import net.primal.android.core.compose.DemoPrimaryScreen
 import net.primal.android.core.compose.DemoSecondaryScreen
 import net.primal.android.core.compose.LockToOrientationPortrait
 import net.primal.android.core.compose.PrimalTopLevelDestination
+import net.primal.android.discuss.feed.FeedScreen
+import net.primal.android.discuss.feed.FeedViewModel
+import net.primal.android.discuss.list.FeedListScreen
+import net.primal.android.discuss.list.FeedListViewModel
 import net.primal.android.drawer.DrawerScreenDestination
-import net.primal.android.feed.feed.FeedScreen
-import net.primal.android.feed.feed.FeedViewModel
-import net.primal.android.feed.list.FeedListScreen
-import net.primal.android.feed.list.FeedListViewModel
-import net.primal.android.feed.thread.ThreadScreen
-import net.primal.android.feed.thread.ThreadViewModel
+import net.primal.android.explore.feed.ExploreFeedScreen
+import net.primal.android.explore.feed.ExploreFeedViewModel
+import net.primal.android.explore.home.ExploreHomeScreen
+import net.primal.android.explore.home.ExploreHomeViewModel
 import net.primal.android.navigation.splash.SplashContract
 import net.primal.android.navigation.splash.SplashScreen
 import net.primal.android.navigation.splash.SplashViewModel
@@ -40,6 +42,8 @@ import net.primal.android.profile.details.ProfileScreen
 import net.primal.android.profile.details.ProfileViewModel
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
+import net.primal.android.thread.ThreadScreen
+import net.primal.android.thread.ThreadViewModel
 
 
 private fun NavController.navigateToWelcome() = navigate(
@@ -86,6 +90,9 @@ private fun NavController.navigateToUserLists() = navigate(route = "userLists")
 private fun NavController.navigateToSettings() = navigate(route = "settings")
 
 private fun NavController.navigateToThread(postId: String) = navigate(route = "thread/$postId")
+
+private fun NavController.navigateToExploreFeed(query: String) =
+    navigate(route = "explore/$query")
 
 @OptIn(ExperimentalMaterialNavigationApi::class)
 @Composable
@@ -156,6 +163,16 @@ fun PrimalAppNavigation() {
                 navController = navController,
                 onTopLevelDestinationChanged = topLevelDestinationHandler,
                 onDrawerScreenClick = drawerDestinationHandler,
+            )
+
+            exploreFeed(
+                route = "explore/{$SearchQuery}",
+                arguments = listOf(
+                    navArgument(SearchQuery) {
+                        type = NavType.StringType
+                    }
+                ),
+                navController = navController,
             )
 
             messages(
@@ -283,13 +300,31 @@ private fun NavGraphBuilder.explore(
 ) = composable(
     route = route,
 ) {
+    val viewModel = hiltViewModel<ExploreHomeViewModel>(it)
     LockToOrientationPortrait()
-    DemoPrimaryScreen(
-        title = "Explore",
-        description = "Coming soon.",
-        primaryDestination = PrimalTopLevelDestination.Explore,
+    ExploreHomeScreen(
+        viewModel = viewModel,
+        onHashtagClick = { query -> navController.navigateToExploreFeed(query = query) },
         onTopLevelDestinationChanged = onTopLevelDestinationChanged,
-        onDrawerDestinationClick = onDrawerScreenClick,
+        onDrawerScreenClick = onDrawerScreenClick,
+    )
+}
+
+private fun NavGraphBuilder.exploreFeed(
+    route: String,
+    arguments: List<NamedNavArgument>,
+    navController: NavController,
+) = composable(
+    route = route,
+    arguments = arguments,
+) {
+    val viewModel = hiltViewModel<ExploreFeedViewModel>(it)
+    LockToOrientationPortrait()
+    ExploreFeedScreen(
+        viewModel = viewModel,
+        onClose = { navController.navigateUp() },
+        onPostClick = { postId -> navController.navigateToThread(postId)},
+        onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
     )
 }
 

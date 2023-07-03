@@ -2,26 +2,21 @@ package net.primal.android.core.compose
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 import net.primal.android.drawer.DrawerScreenDestination
-import net.primal.android.drawer.PrimalDrawer
+import net.primal.android.drawer.PrimalDrawerScaffold
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,48 +30,32 @@ fun DemoPrimaryScreen(
     val uiScope = rememberCoroutineScope()
     val drawerState: DrawerState = rememberDrawerState(DrawerValue.Closed)
 
-    ModalNavigationDrawer(
+    PrimalDrawerScaffold(
         drawerState = drawerState,
-        drawerContent = {
-            PrimalDrawer(
-                drawerState = drawerState,
-                onDrawerDestinationClick = onDrawerDestinationClick,
+        activeDestination = primaryDestination,
+        onPrimaryDestinationChanged = onTopLevelDestinationChanged,
+        onDrawerDestinationClick = onDrawerDestinationClick,
+        topBar = {
+            PrimalTopAppBar(
+                title = title,
+                navigationIcon = PrimalIcons.AvatarDefault,
+                onNavigationIconClick = {
+                    uiScope.launch { drawerState.open() }
+                },
+                scrollBehavior = it,
             )
         },
-        content = {
-            Scaffold(
-                topBar = {
-                    PrimalTopAppBar(
-                        title = title,
-                        navigationIcon = PrimalIcons.AvatarDefault,
-                        onNavigationIconClick = {
-                            uiScope.launch { drawerState.open() }
-                        },
-                    )
-                },
-                content = { paddingValues ->
-                    Box(
-                        modifier = Modifier
-                            .padding(paddingValues)
-                            .fillMaxSize(),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Text(
-                            text = description,
-                        )
-                    }
-                },
-                bottomBar = {
-                    PrimalNavigationBar(
-                        modifier = Modifier
-                            .navigationBarsPadding()
-                            .height(64.dp),
-                        activeDestination = primaryDestination,
-                        onTopLevelDestinationChanged = onTopLevelDestinationChanged
-                    )
-                }
-            )
+        content = { paddingValues ->
+            Box(
+                modifier = Modifier
+                    .padding(paddingValues)
+                    .fillMaxSize(),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = description,
+                )
+            }
         }
     )
-
 }

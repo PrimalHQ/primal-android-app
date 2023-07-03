@@ -1,18 +1,12 @@
-package net.primal.android.profile.details
+package net.primal.android.explore.feed
 
 import androidx.paging.PagingData
 import kotlinx.coroutines.flow.Flow
 import net.primal.android.core.compose.feed.model.FeedPostUi
 
-interface ProfileContract {
+interface ExploreFeedContract {
     data class UiState(
-        val profileId: String,
-        val profileDetails: ProfileDetailsUi? = null,
+        val title: String? = null,
         val posts: Flow<PagingData<FeedPostUi>>,
     )
-
-    sealed class UiEvent {
-
-    }
-
 }

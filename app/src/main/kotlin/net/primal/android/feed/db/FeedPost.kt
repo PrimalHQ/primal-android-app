@@ -19,7 +19,7 @@ data class FeedPost(
         entityColumn = "ownerId",
         parentColumn = "authorId",
     )
-    val author: ProfileMetadata,
+    val author: ProfileMetadata? = null,
 
     @Relation(
         entityColumn = "postId",

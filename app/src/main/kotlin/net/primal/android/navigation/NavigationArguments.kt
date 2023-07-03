@@ -17,3 +17,9 @@ inline val SavedStateHandle.postId: String
 const val ProfileId = "profileId"
 
 inline val SavedStateHandle.profileId: String? get() = get(ProfileId)
+
+
+const val SearchQuery = "searchQuery"
+
+inline val SavedStateHandle.searchQuery: String
+    get() = get(SearchQuery) ?: throw IllegalArgumentException("Missing required searchQuery argument.")

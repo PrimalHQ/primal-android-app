@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "eda981bbe0415100687c5280afd29f86",
+    "identityHash": "df9554ec9fd84abbad06f8f4a395094a",
     "entities": [
       {
         "tableName": "PostData",
@@ -596,12 +596,38 @@
           }
         ],
         "foreignKeys": []
+      },
+      {
+        "tableName": "TrendingHashtag",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`hashtag` TEXT NOT NULL, `score` REAL NOT NULL, PRIMARY KEY(`hashtag`))",
+        "fields": [
+          {
+            "fieldPath": "hashtag",
+            "columnName": "hashtag",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "score",
+            "columnName": "score",
+            "affinity": "REAL",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "hashtag"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
       }
     ],
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'eda981bbe0415100687c5280afd29f86')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'df9554ec9fd84abbad06f8f4a395094a')"
     ]
   }
 }

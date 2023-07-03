@@ -50,6 +50,7 @@ enum class NostrEventKind(val value: Int) {
     PrimalPaging(value = 10000113),
     PrimalMediaMapping(value = 10000114),
     PrimalEventUserStats(value = 10000115),
+    PrimalTrendingHashtags(value = 10000116),
     PrimalEventResources(value = 10000119),
     PrimalAppState(value = 10000999),
     Unknown(value = -1);
