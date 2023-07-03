@@ -5,6 +5,7 @@ import java.time.Instant
 data class FeedPostUi(
     val postId: String,
     val repostId: String?,
+    val repostAuthorId: String? = null,
     val repostAuthorDisplayName: String? = null,
     val authorId: String,
     val authorDisplayName: String,
@@ -15,8 +16,3 @@ data class FeedPostUi(
     val timestamp: Instant,
     val stats: FeedPostStatsUi,
 )
-
-
-
-
-

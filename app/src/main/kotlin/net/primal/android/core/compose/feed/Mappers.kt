@@ -12,10 +12,12 @@ import java.time.Instant
 fun FeedPost.asFeedPostUi() = FeedPostUi(
     postId = this.data.postId,
     repostId = this.data.repostId,
+     repostAuthorId = this.data.repostAuthorId,
     repostAuthorDisplayName = this.repostAuthor?.displayNameUiFriendly()
         ?: this.data.repostAuthorId?.asEllipsizedNpub(),
     authorId = this.author?.ownerId ?: this.data.authorId,
-    authorDisplayName = this.author?.displayNameUiFriendly() ?: this.data.authorId.asEllipsizedNpub(),
+    authorDisplayName = this.author?.displayNameUiFriendly()
+        ?: this.data.authorId.asEllipsizedNpub(),
     authorInternetIdentifier = this.author?.internetIdentifier,
     authorAvatarUrl = this.author?.picture,
     timestamp = Instant.ofEpochSecond(this.data.createdAt),

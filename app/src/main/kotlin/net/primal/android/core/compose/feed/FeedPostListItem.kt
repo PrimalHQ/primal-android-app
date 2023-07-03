@@ -1,7 +1,6 @@
 package net.primal.android.core.compose.feed
 
 import android.content.res.Configuration
-import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -58,6 +57,9 @@ import net.primal.android.core.compose.AvatarThumbnailListItemImage
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.PostImageListItemImage
 import net.primal.android.core.compose.PrimalClickableText
+import net.primal.android.core.compose.feed.model.FeedPostResource
+import net.primal.android.core.compose.feed.model.FeedPostStatsUi
+import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.FeedLikes
 import net.primal.android.core.compose.icons.primaliconpack.FeedLikesFilled
@@ -70,15 +72,11 @@ import net.primal.android.core.compose.icons.primaliconpack.FeedZapsFilled
 import net.primal.android.core.ext.openUriSafely
 import net.primal.android.core.utils.asBeforeNowFormat
 import net.primal.android.core.utils.isPrimalIdentifier
-import net.primal.android.core.compose.feed.model.FeedPostResource
-import net.primal.android.core.compose.feed.model.FeedPostStatsUi
-import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.nostr.model.primal.PrimalResourceVariant
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import java.time.Instant
 import java.time.temporal.ChronoUnit
-
 
 @Composable
 fun FeedPostListItem(
@@ -89,7 +87,6 @@ fun FeedPostListItem(
     onPostClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
 ) {
-    val context = LocalContext.current
     val localUriHandler = LocalUriHandler.current
     val uiScope = rememberCoroutineScope()
     val interactionSource = remember { MutableInteractionSource() }
@@ -110,12 +107,8 @@ fun FeedPostListItem(
             RepostedItem(
                 repostedBy = data.repostAuthorDisplayName,
                 onRepostAuthorClick = {
-                    uiScope.launch {
-                        Toast.makeText(
-                            context,
-                            "${data.repostAuthorDisplayName} clicked.",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                    if (data.repostAuthorId != null) {
+                        onProfileClick(data.repostAuthorId)
                     }
                 }
             )
@@ -572,6 +565,7 @@ fun PreviewFeedPostListItemLight() {
             data = FeedPostUi(
                 postId = "random",
                 repostId = "repostRandom",
+                repostAuthorId = "repostId",
                 repostAuthorDisplayName = "jack",
                 content = """
                     Unfortunately the days of using pseudonyms in metaspace are numbered. 
@@ -609,6 +603,7 @@ fun PreviewFeedPostListItemDark() {
             data = FeedPostUi(
                 postId = "random",
                 repostId = "repostRandom",
+                repostAuthorId = "repostId",
                 repostAuthorDisplayName = "jack",
                 content = """
                     Unfortunately the days of using pseudonyms in metaspace are numbered. 
