@@ -21,9 +21,9 @@ import net.primal.android.core.compose.feed.FeedPostList
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 import net.primal.android.core.compose.icons.primaliconpack.FeedPicker
-import net.primal.android.drawer.PrimalDrawerScaffold
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.PrimalBottomBarHeightDp
+import net.primal.android.drawer.PrimalDrawerScaffold
 import net.primal.android.theme.PrimalTheme
 
 @Composable
@@ -108,97 +108,6 @@ fun FeedScreen(
             )
         },
     )
-
-//    ModalNavigationDrawer(
-//        drawerState = drawerState,
-//        drawerContent = {
-//            PrimalDrawer(
-//                drawerState = drawerState,
-//                onDrawerDestinationClick = onDrawerDestinationClick,
-//            )
-//        },
-//        content = {
-//            val topAppBarState = rememberTopAppBarState()
-//            val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(topAppBarState)
-//
-//            val bottomBarHeight = 64.dp
-//            val bottomBarHeightPx = with(LocalDensity.current) {
-//                bottomBarHeight.roundToPx().toFloat()
-//            }
-//            val bottomBarOffsetHeightPx = remember { mutableStateOf(0f) }
-//            val bottomBarNestedScrollConnection = remember {
-//                object : NestedScrollConnection {
-//                    override fun onPreScroll(
-//                        available: Offset,
-//                        source: NestedScrollSource
-//                    ): Offset {
-//                        val delta = available.y
-//                        val newOffset = bottomBarOffsetHeightPx.value + delta
-//                        bottomBarOffsetHeightPx.value = newOffset.coerceIn(-bottomBarHeightPx, 0f)
-//                        return Offset.Zero
-//                    }
-//                }
-//            }
-//
-//            Scaffold(
-//                modifier = Modifier
-//                    .nestedScroll(bottomBarNestedScrollConnection)
-//                    .nestedScroll(scrollBehavior.nestedScrollConnection),
-//                topBar = {
-//                    PrimalTopAppBar(
-//                        title = state.feedTitle,
-//                        avatarUrl = state.activeAccountAvatarUrl,
-//                        navigationIcon = PrimalIcons.AvatarDefault,
-//                        onNavigationIconClick = {
-//                            uiScope.launch { drawerState.open() }
-//                        },
-//                        actions = {
-//                            AppBarIcon(
-//                                icon = PrimalIcons.FeedPicker,
-//                                onClick = onFeedsClick,
-//                            )
-//                        },
-//                        scrollBehavior = scrollBehavior,
-//                    )
-//                },
-//                content = { paddingValues ->
-//                    FeedPostList(
-//                        posts = state.posts,
-//                        onPostClick = onPostClick,
-//                        onProfileClick = onProfileClick,
-//                        syncStats = state.syncStats,
-//                        paddingValues = paddingValues,
-//                        feedListState = feedListState,
-//                        bottomBarHeightPx = bottomBarHeightPx,
-//                        bottomBarOffsetHeightPx = bottomBarOffsetHeightPx.value,
-//                        onScrolledToTop = {
-//                            eventPublisher(FeedContract.UiEvent.FeedScrolledToTop)
-//                        },
-//                    )
-//                },
-//                bottomBar = {
-//                    PrimalNavigationBar(
-//                        modifier = Modifier
-//                            .navigationBarsPadding()
-//                            .height(bottomBarHeight)
-//                            .offset {
-//                                IntOffset(
-//                                    x = 0,
-//                                    y = -bottomBarOffsetHeightPx.value.roundToInt()
-//                                )
-//                            },
-//                        activeDestination = PrimalTopLevelDestination.Feed,
-//                        onTopLevelDestinationChanged = onPrimaryDestinationChanged,
-//                        onActiveDestinationClick = {
-//                            uiScope.launch {
-//                                feedListState.animateScrollToItem(0)
-//                            }
-//                        }
-//                    )
-//                }
-//            )
-//        }
-//    )
 }
 
 @Preview
