@@ -80,6 +80,7 @@ import net.primal.android.core.compose.icons.primaliconpack.Link
 import net.primal.android.core.utils.isPrimalIdentifier
 import net.primal.android.nostr.ext.asEllipsizedNpub
 import net.primal.android.theme.AppTheme
+import java.text.NumberFormat
 
 @Composable
 fun ProfileScreen(
@@ -175,7 +176,7 @@ fun ProfileScreen(
     }
 
     Surface {
-        val pagingItems = state.posts.collectAsLazyPagingItems()
+        val pagingItems = state.authoredPosts.collectAsLazyPagingItems()
         FeedLazyColumn(
             contentPadding = PaddingValues(0.dp),
             pagingItems = pagingItems,
@@ -222,6 +223,7 @@ fun ProfileScreen(
                 UserProfileDetails(
                     profileId = state.profileId,
                     profileDetails = state.profileDetails,
+                    profileStats = state.profileStats,
                 )
             }
         )
@@ -321,6 +323,7 @@ private fun CoverUnavailable() {
 private fun UserProfileDetails(
     profileId: String,
     profileDetails: ProfileDetailsUi? = null,
+    profileStats: ProfileStatsUi? = null,
 ) {
     val localUriHandler = LocalUriHandler.current
     val context = LocalContext.current
@@ -379,9 +382,9 @@ private fun UserProfileDetails(
         }
 
         UserStats(
-            followingCount = profileDetails?.followingCount,
-            followersCount = profileDetails?.followersCount,
-            notesCount = profileDetails?.notesCount,
+            followingCount = profileStats?.followingCount,
+            followersCount = profileStats?.followersCount,
+            notesCount = profileStats?.notesCount,
         )
     }
 }
@@ -393,6 +396,7 @@ private fun UserStats(
     notesCount: Int?,
     placeholderText: String = "-",
 ) {
+    val numberFormat = remember { NumberFormat.getNumberInstance() }
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -401,19 +405,19 @@ private fun UserStats(
     ) {
         TextCounter(
             modifier = Modifier.weight(1f),
-            count = followingCount?.toString() ?: placeholderText,
+            count = if (followingCount != null) numberFormat.format(followingCount) else placeholderText,
             text = stringResource(id = R.string.profile_following_stat),
         )
 
         TextCounter(
             modifier = Modifier.weight(1f),
-            count = followersCount?.toString() ?: placeholderText,
+            count = if (followingCount != null) numberFormat.format(followersCount) else placeholderText,
             text = stringResource(id = R.string.profile_followers_stat),
         )
 
         TextCounter(
             modifier = Modifier.weight(1f),
-            count = notesCount?.toString() ?: placeholderText,
+            count = if (notesCount != null) numberFormat.format(notesCount) else placeholderText,
             text = stringResource(id = R.string.profile_notes_stat),
         )
     }

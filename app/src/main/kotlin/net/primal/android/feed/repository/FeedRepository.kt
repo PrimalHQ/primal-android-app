@@ -127,7 +127,7 @@ class FeedRepository @Inject constructor(
     }
 
     private fun List<NostrEvent>.processMetadataEvents() {
-        database.profiles().upsertAll(events = mapAsProfileMetadata())
+        database.profiles().upsertAll(profiles = mapAsProfileMetadata())
     }
 
     private fun List<PrimalEvent>.processReferencedEvents() {

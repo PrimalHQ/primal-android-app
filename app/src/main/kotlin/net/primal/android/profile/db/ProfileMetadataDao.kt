@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.Flow
 interface ProfileMetadataDao {
 
     @Upsert
-    fun upsertAll(events: List<ProfileMetadata>)
+    fun upsertAll(profiles: List<ProfileMetadata>)
 
     @Query("SELECT * FROM ProfileMetadata WHERE ownerId = :profileId")
     fun observeProfile(profileId: String): Flow<ProfileMetadata>

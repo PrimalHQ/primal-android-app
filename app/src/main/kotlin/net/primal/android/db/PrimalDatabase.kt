@@ -5,9 +5,6 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import net.primal.android.explore.db.TrendingHashtag
 import net.primal.android.explore.db.TrendingHashtagDao
-import net.primal.android.thread.db.ConversationCrossRef
-import net.primal.android.thread.db.ConversationCrossRefDao
-import net.primal.android.thread.db.ConversationDao
 import net.primal.android.feed.db.Feed
 import net.primal.android.feed.db.FeedDao
 import net.primal.android.feed.db.FeedPostDao
@@ -29,7 +26,12 @@ import net.primal.android.profile.db.PostUserStats
 import net.primal.android.profile.db.PostUserStatsDao
 import net.primal.android.profile.db.ProfileMetadata
 import net.primal.android.profile.db.ProfileMetadataDao
+import net.primal.android.profile.db.ProfileStats
+import net.primal.android.profile.db.ProfileStatsDao
 import net.primal.android.serialization.RoomCustomTypeConverters
+import net.primal.android.thread.db.ConversationCrossRef
+import net.primal.android.thread.db.ConversationCrossRefDao
+import net.primal.android.thread.db.ConversationDao
 
 @Database(
     entities = [
@@ -45,6 +47,7 @@ import net.primal.android.serialization.RoomCustomTypeConverters
         ConversationCrossRef::class,
         PostUserStats::class,
         TrendingHashtag::class,
+        ProfileStats::class,
     ],
     version = 1,
     exportSchema = true,
@@ -79,4 +82,6 @@ abstract class PrimalDatabase : RoomDatabase() {
     abstract fun postUserStats(): PostUserStatsDao
 
     abstract fun trendingHashtags(): TrendingHashtagDao
+
+    abstract fun profileStats(): ProfileStatsDao
 }

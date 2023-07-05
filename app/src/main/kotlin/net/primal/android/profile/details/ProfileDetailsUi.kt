@@ -8,7 +8,4 @@ data class ProfileDetailsUi(
     val internetIdentifier: String?,
     val about: String?,
     val website: String?,
-    val followingCount: Int?,
-    val followersCount: Int?,
-    val notesCount: Int?,
 )

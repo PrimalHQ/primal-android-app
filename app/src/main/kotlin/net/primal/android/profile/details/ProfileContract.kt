@@ -8,7 +8,8 @@ interface ProfileContract {
     data class UiState(
         val profileId: String,
         val profileDetails: ProfileDetailsUi? = null,
-        val posts: Flow<PagingData<FeedPostUi>>,
+        val profileStats: ProfileStatsUi? = null,
+        val authoredPosts: Flow<PagingData<FeedPostUi>>,
     )
 
     sealed class UiEvent {

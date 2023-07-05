@@ -34,7 +34,7 @@ class ProfileViewModel @Inject constructor(
     private val _state = MutableStateFlow(
         UiState(
             profileId = profileId,
-            posts = feedRepository.feedByDirective(feedDirective = "authored;$profileId")
+            authoredPosts = feedRepository.feedByDirective(feedDirective = "authored;$profileId")
                 .map { it.map { feed -> feed.asFeedPostUi() } }
                 .cachedIn(viewModelScope),
         )
@@ -45,7 +45,13 @@ class ProfileViewModel @Inject constructor(
     }
 
     init {
+        fetchLatestProfile()
         observeProfile()
+        observeProfileStats()
+    }
+
+    private fun fetchLatestProfile() = viewModelScope.launch {
+        profileRepository.requestProfileUpdate(profileId = profileId)
     }
 
     private fun observeProfile() = viewModelScope.launch {
@@ -60,9 +66,20 @@ class ProfileViewModel @Inject constructor(
                         internetIdentifier = it.internetIdentifier,
                         about = it.about,
                         website = it.website,
-                        followersCount = null,
-                        followingCount = null,
-                        notesCount = null,
+                    )
+                )
+            }
+        }
+    }
+
+    private fun observeProfileStats() = viewModelScope.launch {
+        profileRepository.observeProfileStats(profileId = profileId).collect {
+            setState {
+                copy(
+                    profileStats = ProfileStatsUi(
+                        followingCount = it.following,
+                        followersCount = it.followers,
+                        notesCount = it.notes,
                     )
                 )
             }
