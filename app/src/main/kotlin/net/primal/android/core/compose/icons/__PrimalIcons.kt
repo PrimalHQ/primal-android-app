@@ -4,6 +4,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 import net.primal.android.core.compose.icons.primaliconpack.AvatarNostrich
+import net.primal.android.core.compose.icons.primaliconpack.Copy
 import net.primal.android.core.compose.icons.primaliconpack.DarkMode
 import net.primal.android.core.compose.icons.primaliconpack.Delete
 import net.primal.android.core.compose.icons.primaliconpack.Discuss
@@ -23,15 +24,23 @@ import net.primal.android.core.compose.icons.primaliconpack.Help
 import net.primal.android.core.compose.icons.primaliconpack.Home
 import net.primal.android.core.compose.icons.primaliconpack.Key
 import net.primal.android.core.compose.icons.primaliconpack.LightMode
+import net.primal.android.core.compose.icons.primaliconpack.Link
+import net.primal.android.core.compose.icons.primaliconpack.Message
 import net.primal.android.core.compose.icons.primaliconpack.Messages
 import net.primal.android.core.compose.icons.primaliconpack.More
+import net.primal.android.core.compose.icons.primaliconpack.MuteUser
 import net.primal.android.core.compose.icons.primaliconpack.Notifications
 import net.primal.android.core.compose.icons.primaliconpack.Notrich
 import net.primal.android.core.compose.icons.primaliconpack.QrCode
 import net.primal.android.core.compose.icons.primaliconpack.Read
+import net.primal.android.core.compose.icons.primaliconpack.Report
 import net.primal.android.core.compose.icons.primaliconpack.Search
 import net.primal.android.core.compose.icons.primaliconpack.Settings
+import net.primal.android.core.compose.icons.primaliconpack.Share
+import net.primal.android.core.compose.icons.primaliconpack.UserFeedAdd
+import net.primal.android.core.compose.icons.primaliconpack.UserFeedRemove
 import net.primal.android.core.compose.icons.primaliconpack.Verified
+import net.primal.android.core.compose.icons.primaliconpack.Zap
 import kotlin.collections.List as ____KtList
 
 object PrimalIcons
@@ -75,6 +84,15 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             Notrich,
             ArrowBack,
             Key,
+            Copy,
+            Link,
+            Message,
+            MuteUser,
+            Report,
+            Share,
+            UserFeedAdd,
+            UserFeedRemove,
+            Zap,
         )
         return __PrimalIcons!!
     }

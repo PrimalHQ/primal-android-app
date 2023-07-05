@@ -78,4 +78,7 @@
     <string name="settings_zaps_title">Zaps</string>
     <string name="settings_version_title">Version</string>
 
+    <string name="profile_following_stat">following</string>
+    <string name="profile_followers_stat">followers</string>
+    <string name="profile_notes_stat">posts</string>
 </resources>

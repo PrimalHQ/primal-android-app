@@ -148,7 +148,6 @@ private fun DrawerHeader(
 
         NostrUserText(
             displayName = userAccount?.displayName ?: "",
-            verifiedBadge = !userAccount?.internetIdentifier.isNullOrEmpty(),
             internetIdentifier = userAccount?.internetIdentifier,
             modifier = Modifier.constrainAs(usernameRef) {
                 start.linkTo(startGuideline)

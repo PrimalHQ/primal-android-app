@@ -11,8 +11,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import net.primal.android.feed.repository.FeedRepository
 import net.primal.android.core.compose.feed.asFeedPostUi
+import net.primal.android.feed.repository.FeedRepository
 import net.primal.android.navigation.profileId
 import net.primal.android.nostr.ext.displayNameUiFriendly
 import net.primal.android.profile.details.ProfileContract.UiState
@@ -55,9 +55,11 @@ class ProfileViewModel @Inject constructor(
                     profileDetails = ProfileDetailsUi(
                         pubkey = it.ownerId,
                         displayName = it.displayNameUiFriendly(),
-                        pictureUrl = it.picture,
+                        coverUrl = it.banner,
+                        avatarUrl = it.picture,
                         internetIdentifier = it.internetIdentifier,
                         about = it.about,
+                        website = it.website,
                         followersCount = null,
                         followingCount = null,
                         notesCount = null,

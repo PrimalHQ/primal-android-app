@@ -471,7 +471,6 @@ fun PostAuthorItem(
             }
             NostrUserText(
                 displayName = authorDisplayName,
-                verifiedBadge = hasVerifiedBadge,
                 internetIdentifier = authorInternetIdentifier,
                 annotatedStringSuffixBuilder = {
                     append(suffixText)

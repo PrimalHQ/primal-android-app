@@ -5,6 +5,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -53,13 +54,14 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.AvatarThumbnailListItemImage
-import net.primal.android.core.compose.isEmpty
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.feed.model.FeedPostsSyncStats
+import net.primal.android.core.compose.isEmpty
 import net.primal.android.theme.AppTheme
 import kotlin.random.Random
 import kotlin.time.Duration.Companion.seconds
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun FeedPostList(
     posts: Flow<PagingData<FeedPostUi>>,
@@ -166,13 +168,16 @@ fun FeedPostList(
     }
 }
 
+@ExperimentalFoundationApi
 @Composable
-private fun FeedLazyColumn(
+fun FeedLazyColumn(
     contentPadding: PaddingValues,
     pagingItems: LazyPagingItems<FeedPostUi>,
     listState: LazyListState,
     onPostClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
+    header: @Composable (() -> Unit)? = null,
+    stickyHeader: @Composable (() -> Unit)? = null,
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -192,6 +197,18 @@ private fun FeedLazyColumn(
             }
 
             else -> Unit
+        }
+
+        if (stickyHeader != null) {
+            stickyHeader {
+                stickyHeader()
+            }
+        }
+
+        if (header != null) {
+            item {
+                header()
+            }
         }
 
         items(

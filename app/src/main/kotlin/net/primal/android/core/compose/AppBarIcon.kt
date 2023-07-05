@@ -1,7 +1,9 @@
 package net.primal.android.core.compose
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -12,6 +14,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
@@ -26,8 +29,15 @@ fun AppBarIcon(
     onClick: () -> Unit,
     enabled: Boolean = true,
     tint: Color = LocalContentColor.current,
+    backgroundColor: Color = Color.Unspecified,
 ) {
-    IconButton(enabled = enabled, onClick = onClick) {
+    IconButton(
+        modifier = Modifier
+            .clip(CircleShape)
+            .background(color = backgroundColor),
+        enabled = enabled,
+        onClick = onClick,
+    ) {
         Icon(
             modifier = Modifier.size(24.dp),
             imageVector = icon,
