@@ -13,7 +13,8 @@ data class FeedPostUi(
     val authorInternetIdentifier: String? = null,
     val authorAvatarUrl: String? = null,
     val content: String,
-    val resources: List<MediaResourceUi>,
+    val authorResources: List<MediaResourceUi>,
+    val postResources: List<MediaResourceUi>,
     val timestamp: Instant,
     val stats: FeedPostStatsUi,
 )

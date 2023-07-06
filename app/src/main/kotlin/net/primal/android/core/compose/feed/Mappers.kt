@@ -1,8 +1,8 @@
 package net.primal.android.core.compose.feed
 
-import net.primal.android.core.compose.media.model.MediaResourceUi
 import net.primal.android.core.compose.feed.model.FeedPostStatsUi
 import net.primal.android.core.compose.feed.model.FeedPostUi
+import net.primal.android.core.compose.media.model.MediaResourceUi
 import net.primal.android.feed.db.FeedPost
 import net.primal.android.nostr.ext.asEllipsizedNpub
 import net.primal.android.nostr.ext.displayNameUiFriendly
@@ -22,7 +22,14 @@ fun FeedPost.asFeedPostUi() = FeedPostUi(
     authorAvatarUrl = this.author?.picture,
     timestamp = Instant.ofEpochSecond(this.data.createdAt),
     content = this.data.content,
-    resources = this.postResources.map {
+    authorResources = this.authorResources.map {
+        MediaResourceUi(
+            url = it.url,
+            mimeType = it.contentType,
+            variants = it.variants ?: emptyList(),
+        )
+    },
+    postResources = this.postResources.map {
         MediaResourceUi(
             url = it.url,
             mimeType = it.contentType,

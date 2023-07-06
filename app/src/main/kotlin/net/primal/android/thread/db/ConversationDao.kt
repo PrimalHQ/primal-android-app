@@ -19,6 +19,7 @@ interface ConversationDao {
                 FPD2.authorId,
                 FPD2.createdAt,
                 FPD2.content,
+                FPD2.authorMetadataId,
                 FPD2.referencePostId,
                 FPD2.referencePostAuthorId,
                 NULL AS repostId,

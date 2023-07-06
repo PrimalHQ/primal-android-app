@@ -56,7 +56,6 @@ import net.primal.android.core.compose.AvatarThumbnailListItemImage
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.PostImageListItemImage
 import net.primal.android.core.compose.PrimalClickableText
-import net.primal.android.core.compose.media.model.MediaResourceUi
 import net.primal.android.core.compose.feed.model.FeedPostStatsUi
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -68,7 +67,9 @@ import net.primal.android.core.compose.icons.primaliconpack.FeedReposts
 import net.primal.android.core.compose.icons.primaliconpack.FeedRepostsFilled
 import net.primal.android.core.compose.icons.primaliconpack.FeedZaps
 import net.primal.android.core.compose.icons.primaliconpack.FeedZapsFilled
+import net.primal.android.core.compose.media.model.MediaResourceUi
 import net.primal.android.core.ext.calculateImageSize
+import net.primal.android.core.ext.findByUrl
 import net.primal.android.core.ext.findNearestOrNull
 import net.primal.android.core.ext.openUriSafely
 import net.primal.android.core.utils.asBeforeNowFormat
@@ -118,6 +119,7 @@ fun FeedPostListItem(
             authorDisplayName = data.authorDisplayName,
             postTimestamp = data.timestamp,
             authorAvatarUrl = data.authorAvatarUrl,
+            authorResources = data.authorResources,
             authorInternetIdentifier = data.authorInternetIdentifier,
             onAuthorAvatarClick = { onProfileClick(data.authorId) },
         )
@@ -129,7 +131,7 @@ fun FeedPostListItem(
         ) {
             PostContent(
                 content = data.content,
-                resources = data.resources,
+                resources = data.postResources,
                 onClick = {
                     uiScope.launch {
                         val press = PressInteraction.Press(it.copy(y = it.y + postAuthorGuessHeight))
@@ -406,6 +408,7 @@ fun PostAuthorItem(
     authorDisplayName: String,
     postTimestamp: Instant,
     authorAvatarUrl: String? = null,
+    authorResources: List<MediaResourceUi> = emptyList(),
     authorInternetIdentifier: String? = null,
     onAuthorAvatarClick: () -> Unit,
 ) {
@@ -418,8 +421,11 @@ fun PostAuthorItem(
         horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.CenterVertically,
     ) {
+        val resource = authorResources.findByUrl(url = authorAvatarUrl)
+        val variant = resource?.variants?.minByOrNull { it.width }
+        val imageSource = variant?.mediaUrl ?: authorAvatarUrl
         AvatarThumbnailListItemImage(
-            source = authorAvatarUrl,
+            source = imageSource,
             hasBorder = authorInternetIdentifier.isPrimalIdentifier(),
             modifier = Modifier.clickable { onAuthorAvatarClick() },
         )
@@ -548,12 +554,13 @@ fun PreviewFeedPostListItemLight() {
                     have augmented reality HUDs that incorporate real-time facial recognition. 
                     Hiding behind a pseudonym will become a distant dream.
                 """.trimIndent(),
-                resources = emptyList(),
+                postResources = emptyList(),
                 authorId = "npubSomething",
                 authorDisplayName = "android_robots_from_space",
                 authorInternetIdentifier = "android@primal.net",
                 authorAvatarUrl = "https://i.imgur.com/Z8dpmvc.png",
                 timestamp = Instant.now().minus(30, ChronoUnit.MINUTES),
+                authorResources = emptyList(),
                 stats = FeedPostStatsUi(
                     repliesCount = 11,
                     likesCount = 256,
@@ -586,12 +593,13 @@ fun PreviewFeedPostListItemDark() {
                     have augmented reality HUDs that incorporate real-time facial recognition. 
                     Hiding behind a pseudonym will become a distant dream.
                 """.trimIndent(),
-                resources = emptyList(),
+                postResources = emptyList(),
                 authorId = "npubSomething",
                 authorDisplayName = "android",
                 authorInternetIdentifier = "android@primal.net",
                 authorAvatarUrl = "https://i.imgur.com/Z8dpmvc.png",
                 timestamp = Instant.now().minus(30, ChronoUnit.MINUTES),
+                authorResources = emptyList(),
                 stats = FeedPostStatsUi(
                     repliesCount = 11,
                     userReplied = true,

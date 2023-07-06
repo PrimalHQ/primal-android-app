@@ -17,6 +17,7 @@ class ExploreFeedQueryBuilder(
                 PostData.authorId,
                 PostData.createdAt,
                 PostData.content,
+                 PostData.authorMetadataId,
                 PostData.referencePostId,
                 PostData.referencePostAuthorId,
                 NULL AS repostId,

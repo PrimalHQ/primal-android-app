@@ -233,6 +233,7 @@ class FeedRemoteMediator(
                 response.metadata.processMetadataEvents()
                 processShortTextNotesAndReposts(
                     feedDirective = feedDirective,
+                    metadataEvents = response.metadata,
                     postEvents = response.posts,
                     repostEvents = response.reposts,
                 )
@@ -270,13 +271,23 @@ class FeedRemoteMediator(
 
     private suspend fun processShortTextNotesAndReposts(
         feedDirective: String,
+        metadataEvents: List<NostrEvent>,
         postEvents: List<NostrEvent>,
         repostEvents: List<NostrEvent>,
     ) {
+        val mapOwnerIdToMetadataEventId = metadataEvents
+            .mapAsProfileMetadata()
+            .groupBy { it.ownerId }
+            .mapValues { it.value.first().eventId }
+
+
         database.withTransaction {
-            val posts = postEvents.mapNotNullAsPost()
-            val reposts = repostEvents.mapNotNullAsRepost()
+            val posts = postEvents
+                .mapNotNullAsPost()
+                .map { it.copy(authorMetadataId = mapOwnerIdToMetadataEventId[it.authorId]) }
             database.posts().upsertAll(data = posts)
+
+            val reposts = repostEvents.mapNotNullAsRepost()
             database.reposts().upsertAll(data = reposts)
 
             val feedConnections = posts.map { it.postId } + reposts.map { it.repostId }

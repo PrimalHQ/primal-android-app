@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "69d3cf2c0b33d36ec1a7c29c93aaa009",
+    "identityHash": "2cda575b332089cf233c013848bc270b",
     "entities": [
       {
         "tableName": "PostData",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`postId` TEXT NOT NULL, `authorId` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `tags` TEXT NOT NULL, `content` TEXT NOT NULL, `urls` TEXT NOT NULL, `sig` TEXT NOT NULL, `referencePostId` TEXT, `referencePostAuthorId` TEXT, PRIMARY KEY(`postId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`postId` TEXT NOT NULL, `authorId` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `tags` TEXT NOT NULL, `content` TEXT NOT NULL, `urls` TEXT NOT NULL, `sig` TEXT NOT NULL, `authorMetadataId` TEXT, `referencePostId` TEXT, `referencePostAuthorId` TEXT, `referencePostAuthorMetadataId` TEXT, PRIMARY KEY(`postId`))",
         "fields": [
           {
             "fieldPath": "postId",
@@ -51,6 +51,12 @@
             "notNull": true
           },
           {
+            "fieldPath": "authorMetadataId",
+            "columnName": "authorMetadataId",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
             "fieldPath": "referencePostId",
             "columnName": "referencePostId",
             "affinity": "TEXT",
@@ -59,6 +65,12 @@
           {
             "fieldPath": "referencePostAuthorId",
             "columnName": "referencePostAuthorId",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "referencePostAuthorMetadataId",
+            "columnName": "referencePostAuthorMetadataId",
             "affinity": "TEXT",
             "notNull": false
           }
@@ -665,7 +677,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '69d3cf2c0b33d36ec1a7c29c93aaa009')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '2cda575b332089cf233c013848bc270b')"
     ]
   }
 }

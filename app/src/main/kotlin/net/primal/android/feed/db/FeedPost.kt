@@ -22,6 +22,12 @@ data class FeedPost(
     val author: ProfileMetadata? = null,
 
     @Relation(
+        entityColumn = "eventId",
+        parentColumn = "authorMetadataId",
+    )
+    val authorResources: List<MediaResource>,
+
+    @Relation(
         entityColumn = "postId",
         parentColumn = "referencePostId",
     )
