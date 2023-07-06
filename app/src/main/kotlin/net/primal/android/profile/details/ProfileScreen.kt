@@ -37,6 +37,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -236,7 +237,9 @@ fun ProfileScreen(
                 if (pagingItems.isEmpty()) {
                     when (pagingItems.loadState.refresh) {
                         LoadState.Loading -> LoadingPosts()
-                        is LoadState.NotLoading -> NoAuthoredFeedContent()
+                        is LoadState.NotLoading -> NoAuthoredFeedContent(
+                            onRefresh = { pagingItems.refresh() }
+                        )
                         is LoadState.Error -> Unit
                     }
                 }
@@ -571,19 +574,31 @@ private fun LoadingPosts() {
 }
 
 @Composable
-private fun NoAuthoredFeedContent() {
-    Box(
+private fun NoAuthoredFeedContent(
+    onRefresh: () -> Unit,
+) {
+    Column(
         modifier = Modifier
             .padding(vertical = 64.dp)
             .fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
     ) {
         Text(
             modifier = Modifier
                 .wrapContentSize()
-                .padding(horizontal = 32.dp)
-                .align(Alignment.Center),
+                .padding(horizontal = 32.dp),
             text = stringResource(id = R.string.feed_no_content),
             textAlign = TextAlign.Center,
         )
+
+        TextButton(
+            modifier = Modifier.padding(vertical = 16.dp),
+            onClick = onRefresh,
+        ) {
+            Text(
+                text = stringResource(id = R.string.feed_refresh_button).uppercase(),
+            )
+        }
     }
 }

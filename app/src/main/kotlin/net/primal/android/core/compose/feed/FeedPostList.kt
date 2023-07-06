@@ -10,6 +10,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -28,6 +29,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -227,7 +229,9 @@ fun FeedLazyColumn(
                 is LoadState.NotLoading -> {
                     if (shouldShowNoContentState) {
                         item(contentType = "NoContent") {
-                            NoFeedContent()
+                            NoFeedContent(
+                                onRefresh = { pagingItems.refresh() }
+                            )
                         }
                     }
                 }
@@ -270,18 +274,30 @@ private fun LazyItemScope.InitialLoadingItem() {
 }
 
 @Composable
-private fun LazyItemScope.NoFeedContent() {
-    Box(
-        modifier = Modifier.Companion.fillParentMaxSize()
+private fun LazyItemScope.NoFeedContent(
+    onRefresh: () -> Unit,
+) {
+    Column(
+        modifier = Modifier.Companion.fillParentMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
     ) {
         Text(
             modifier = Modifier
                 .wrapContentSize()
-                .padding(horizontal = 32.dp)
-                .align(Alignment.Center),
+                .padding(horizontal = 32.dp),
             text = stringResource(id = R.string.feed_no_content),
             textAlign = TextAlign.Center,
         )
+
+        TextButton(
+            modifier = Modifier.padding(vertical = 16.dp),
+            onClick = onRefresh,
+        ) {
+            Text(
+                text = stringResource(id = R.string.feed_refresh_button).uppercase(),
+            )
+        }
     }
 }
 
