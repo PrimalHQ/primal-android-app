@@ -27,11 +27,13 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -59,9 +61,11 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.SubcomposeAsyncImage
 import kotlinx.coroutines.flow.filter
@@ -77,6 +81,7 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.Key
 import net.primal.android.core.compose.icons.primaliconpack.Link
+import net.primal.android.core.compose.isEmpty
 import net.primal.android.core.utils.isPrimalIdentifier
 import net.primal.android.nostr.ext.asEllipsizedNpub
 import net.primal.android.theme.AppTheme
@@ -187,6 +192,8 @@ fun ProfileScreen(
                     onProfileClick(it)
                 }
             },
+            shouldShowLoadingState = false,
+            shouldShowNoContentState = false,
             stickyHeader = {
                 ProfileTopCoverBar(
                     state = state,
@@ -225,6 +232,14 @@ fun ProfileScreen(
                     profileDetails = state.profileDetails,
                     profileStats = state.profileStats,
                 )
+
+                if (pagingItems.isEmpty()) {
+                    when (pagingItems.loadState.refresh) {
+                        LoadState.Loading -> LoadingPosts()
+                        is LoadState.NotLoading -> NoAuthoredFeedContent()
+                        is LoadState.Error -> Unit
+                    }
+                }
             }
         )
     }
@@ -537,5 +552,38 @@ private fun UserPublicKey(
             )
 
         }
+    }
+}
+
+@Composable
+private fun LoadingPosts() {
+    Box(
+        modifier = Modifier
+            .padding(vertical = 64.dp)
+            .fillMaxWidth(),
+    ) {
+        CircularProgressIndicator(
+            modifier = Modifier
+                .wrapContentSize()
+                .align(Alignment.Center)
+        )
+    }
+}
+
+@Composable
+private fun NoAuthoredFeedContent() {
+    Box(
+        modifier = Modifier
+            .padding(vertical = 64.dp)
+            .fillMaxWidth(),
+    ) {
+        Text(
+            modifier = Modifier
+                .wrapContentSize()
+                .padding(horizontal = 32.dp)
+                .align(Alignment.Center),
+            text = stringResource(id = R.string.feed_no_content),
+            textAlign = TextAlign.Center,
+        )
     }
 }

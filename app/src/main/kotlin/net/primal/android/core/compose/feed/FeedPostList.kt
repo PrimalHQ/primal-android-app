@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
@@ -117,53 +118,35 @@ fun FeedPostList(
         }
     }
 
-    when {
-        pagingItems.isEmpty() -> {
-            Box(
-                modifier = Modifier
-                    .padding(paddingValues)
-                    .fillMaxSize(),
-            ) {
-                CircularProgressIndicator(
-                    modifier = Modifier
-                        .wrapContentSize()
-                        .align(Alignment.Center)
-                )
-            }
-        }
+    Box {
+        FeedLazyColumn(
+            contentPadding = paddingValues,
+            pagingItems = pagingItems,
+            listState = feedListState,
+            onPostClick = onPostClick,
+            onProfileClick = onProfileClick,
+        )
 
-        else -> {
-            Box {
-                FeedLazyColumn(
-                    contentPadding = paddingValues,
-                    pagingItems = pagingItems,
-                    listState = feedListState,
-                    onPostClick = onPostClick,
-                    onProfileClick = onProfileClick,
-                )
-
-                AnimatedVisibility(
-                    visible = newPostsCount > 0,
-                    enter = fadeIn() + slideInVertically(),
-                    exit = slideOutVertically() + fadeOut(),
-                    modifier = Modifier
-                        .padding(paddingValues)
-                        .padding(top = 42.dp)
-                        .height(40.dp)
-                        .wrapContentWidth()
-                        .align(Alignment.TopCenter)
-                        .alpha(1 / bottomBarHeightPx * bottomBarOffsetHeightPx + 1f),
-                ) {
-                    NewPostsButton(
-                        syncStats = syncStats,
-                        onClick = {
-                            uiScope.launch {
-                                feedListState.animateScrollToItem(0)
-                            }
-                        },
-                    )
-                }
-            }
+        AnimatedVisibility(
+            visible = newPostsCount > 0,
+            enter = fadeIn() + slideInVertically(),
+            exit = slideOutVertically() + fadeOut(),
+            modifier = Modifier
+                .padding(paddingValues)
+                .padding(top = 42.dp)
+                .height(40.dp)
+                .wrapContentWidth()
+                .align(Alignment.TopCenter)
+                .alpha(1 / bottomBarHeightPx * bottomBarOffsetHeightPx + 1f),
+        ) {
+            NewPostsButton(
+                syncStats = syncStats,
+                onClick = {
+                    uiScope.launch {
+                        feedListState.animateScrollToItem(0)
+                    }
+                },
+            )
         }
     }
 }
@@ -176,8 +159,10 @@ fun FeedLazyColumn(
     listState: LazyListState,
     onPostClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
-    header: @Composable (() -> Unit)? = null,
-    stickyHeader: @Composable (() -> Unit)? = null,
+    shouldShowLoadingState: Boolean = true,
+    shouldShowNoContentState: Boolean = true,
+    header: @Composable (LazyItemScope.() -> Unit)? = null,
+    stickyHeader: @Composable (LazyItemScope.() -> Unit)? = null,
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -185,6 +170,18 @@ fun FeedLazyColumn(
         verticalArrangement = Arrangement.spacedBy(4.dp),
         state = listState,
     ) {
+        if (stickyHeader != null) {
+            stickyHeader {
+                stickyHeader()
+            }
+        }
+
+        if (header != null) {
+            item {
+                header()
+            }
+        }
+
         when (val prependLoadState = pagingItems.loadState.mediator?.prepend) {
             is LoadState.Error -> item(contentType = "Error") {
                 ErrorItem(
@@ -197,18 +194,6 @@ fun FeedLazyColumn(
             }
 
             else -> Unit
-        }
-
-        if (stickyHeader != null) {
-            stickyHeader {
-                stickyHeader()
-            }
-        }
-
-        if (header != null) {
-            item {
-                header()
-            }
         }
 
         items(
@@ -229,8 +214,30 @@ fun FeedLazyColumn(
             }
         }
 
+        if (pagingItems.isEmpty()) {
+            when (pagingItems.loadState.refresh) {
+                LoadState.Loading -> {
+                    if (shouldShowLoadingState) {
+                        item(contentType = "LoadingRefresh") {
+                            InitialLoadingItem()
+                        }
+                    }
+                }
+
+                is LoadState.NotLoading -> {
+                    if (shouldShowNoContentState) {
+                        item(contentType = "NoContent") {
+                            NoFeedContent()
+                        }
+                    }
+                }
+
+                is LoadState.Error -> Unit
+            }
+        }
+
         when (val appendLoadState = pagingItems.loadState.mediator?.append) {
-            LoadState.Loading -> item(contentType = "Loading") {
+            LoadState.Loading -> item(contentType = "LoadingAppend") {
                 LoadingItem()
             }
 
@@ -246,6 +253,35 @@ fun FeedLazyColumn(
 
             else -> Unit
         }
+    }
+}
+
+@Composable
+private fun LazyItemScope.InitialLoadingItem() {
+    Box(
+        modifier = Modifier.Companion.fillParentMaxSize()
+    ) {
+        CircularProgressIndicator(
+            modifier = Modifier
+                .wrapContentSize()
+                .align(Alignment.Center)
+        )
+    }
+}
+
+@Composable
+private fun LazyItemScope.NoFeedContent() {
+    Box(
+        modifier = Modifier.Companion.fillParentMaxSize()
+    ) {
+        Text(
+            modifier = Modifier
+                .wrapContentSize()
+                .padding(horizontal = 32.dp)
+                .align(Alignment.Center),
+            text = stringResource(id = R.string.feed_no_content),
+            textAlign = TextAlign.Center,
+        )
     }
 }
 

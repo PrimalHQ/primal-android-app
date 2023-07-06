@@ -16,7 +16,7 @@ class ProfileRepository @Inject constructor(
     private val usersApi: UsersApi,
 ) {
     fun observeProfile(profileId: String) =
-        database.profiles().observeProfile(profileId = profileId)
+        database.profiles().observeProfile(profileId = profileId).filterNotNull()
 
     fun observeProfileStats(profileId: String) =
         database.profileStats().observeProfileStats(profileId = profileId).filterNotNull()

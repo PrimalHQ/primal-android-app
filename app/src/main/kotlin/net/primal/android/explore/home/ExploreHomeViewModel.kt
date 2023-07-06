@@ -29,9 +29,9 @@ class ExploreHomeViewModel @Inject constructor(
     }
 
     init {
-        fetchLatestTrendingHashtags()
         subscribeToActiveAccount()
         observeTrendingHashtags()
+        fetchLatestTrendingHashtags()
     }
 
     private fun subscribeToActiveAccount() = viewModelScope.launch {

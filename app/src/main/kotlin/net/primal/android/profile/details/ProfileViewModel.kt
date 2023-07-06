@@ -45,9 +45,9 @@ class ProfileViewModel @Inject constructor(
     }
 
     init {
-        fetchLatestProfile()
         observeProfile()
         observeProfileStats()
+        fetchLatestProfile()
     }
 
     private fun fetchLatestProfile() = viewModelScope.launch {
