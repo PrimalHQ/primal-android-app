@@ -18,9 +18,6 @@ class ProfileRepository @Inject constructor(
     fun observeProfile(profileId: String) =
         database.profiles().observeProfile(profileId = profileId).filterNotNull()
 
-    fun observeProfileStats(profileId: String) =
-        database.profileStats().observeProfileStats(profileId = profileId).filterNotNull()
-
     suspend fun requestProfileUpdate(profileId: String) {
         val response = withContext(Dispatchers.IO) { usersApi.getUserProfile(pubkey = profileId) }
         val profileMetadata = response.metadata?.asProfileMetadata()

@@ -12,10 +12,13 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import net.primal.android.core.compose.feed.asFeedPostUi
+import net.primal.android.core.compose.media.model.MediaResourceUi
 import net.primal.android.feed.repository.FeedRepository
 import net.primal.android.navigation.profileId
 import net.primal.android.nostr.ext.displayNameUiFriendly
 import net.primal.android.profile.details.ProfileContract.UiState
+import net.primal.android.profile.details.model.ProfileDetailsUi
+import net.primal.android.profile.details.model.ProfileStatsUi
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.active.ActiveAccountStore
 import javax.inject.Inject
@@ -46,7 +49,6 @@ class ProfileViewModel @Inject constructor(
 
     init {
         observeProfile()
-        observeProfileStats()
         fetchLatestProfile()
     }
 
@@ -58,32 +60,37 @@ class ProfileViewModel @Inject constructor(
         profileRepository.observeProfile(profileId = profileId).collect {
             setState {
                 copy(
-                    profileDetails = ProfileDetailsUi(
-                        pubkey = it.ownerId,
-                        displayName = it.displayNameUiFriendly(),
-                        coverUrl = it.banner,
-                        avatarUrl = it.picture,
-                        internetIdentifier = it.internetIdentifier,
-                        about = it.about,
-                        website = it.website,
-                    )
+                    profileDetails = if (it.metadata != null) {
+                        ProfileDetailsUi(
+                            pubkey = it.metadata.ownerId,
+                            displayName = it.metadata.displayNameUiFriendly(),
+                            coverUrl = it.metadata.banner,
+                            avatarUrl = it.metadata.picture,
+                            internetIdentifier = it.metadata.internetIdentifier,
+                            about = it.metadata.about,
+                            website = it.metadata.website,
+                        )
+                    } else {
+                        this.profileDetails
+                    },
+                    profileStats = if (it.stats != null) {
+                        ProfileStatsUi(
+                            followingCount = it.stats.following,
+                            followersCount = it.stats.followers,
+                            notesCount = it.stats.notes,
+                        )
+                    } else {
+                        this.profileStats
+                    },
+                    resources = it.resources.map {
+                        MediaResourceUi(
+                            url = it.url,
+                            mimeType = it.contentType,
+                            variants = it.variants ?: emptyList(),
+                        )
+                    },
                 )
             }
         }
     }
-
-    private fun observeProfileStats() = viewModelScope.launch {
-        profileRepository.observeProfileStats(profileId = profileId).collect {
-            setState {
-                copy(
-                    profileStats = ProfileStatsUi(
-                        followingCount = it.following,
-                        followersCount = it.followers,
-                        notesCount = it.notes,
-                    )
-                )
-            }
-        }
-    }
-
 }

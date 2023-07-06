@@ -12,6 +12,6 @@ interface ProfileMetadataDao {
     fun upsertAll(profiles: List<ProfileMetadata>)
 
     @Query("SELECT * FROM ProfileMetadata WHERE ownerId = :profileId")
-    fun observeProfile(profileId: String): Flow<ProfileMetadata>
+    fun observeProfile(profileId: String): Flow<Profile>
 
 }

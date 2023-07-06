@@ -4,9 +4,9 @@ import androidx.room.Dao
 import androidx.room.Upsert
 
 @Dao
-interface PostResourcesDao {
+interface MediaResourcesDao {
 
     @Upsert
-    fun upsert(data: List<PostResource>)
+    fun upsert(data: List<MediaResource>)
 
 }

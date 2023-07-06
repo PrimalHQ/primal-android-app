@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "c3fab264ff97db643a0d8b61ff92da19",
+    "identityHash": "69d3cf2c0b33d36ec1a7c29c93aaa009",
     "entities": [
       {
         "tableName": "PostData",
@@ -287,12 +287,12 @@
         "foreignKeys": []
       },
       {
-        "tableName": "PostResource",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`postId` TEXT NOT NULL, `url` TEXT NOT NULL, `contentType` TEXT, `variants` TEXT, PRIMARY KEY(`postId`, `url`))",
+        "tableName": "MediaResource",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`eventId` TEXT NOT NULL, `url` TEXT NOT NULL, `contentType` TEXT, `variants` TEXT, PRIMARY KEY(`eventId`, `url`))",
         "fields": [
           {
-            "fieldPath": "postId",
-            "columnName": "postId",
+            "fieldPath": "eventId",
+            "columnName": "eventId",
             "affinity": "TEXT",
             "notNull": true
           },
@@ -318,7 +318,7 @@
         "primaryKey": {
           "autoGenerate": false,
           "columnNames": [
-            "postId",
+            "eventId",
             "url"
           ]
         },
@@ -665,7 +665,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'c3fab264ff97db643a0d8b61ff92da19')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '69d3cf2c0b33d36ec1a7c29c93aaa009')"
     ]
   }
 }

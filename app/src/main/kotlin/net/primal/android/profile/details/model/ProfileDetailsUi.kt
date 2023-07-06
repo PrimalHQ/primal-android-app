@@ -1,4 +1,4 @@
-package net.primal.android.profile.details
+package net.primal.android.profile.details.model
 
 data class ProfileDetailsUi(
     val pubkey: String,

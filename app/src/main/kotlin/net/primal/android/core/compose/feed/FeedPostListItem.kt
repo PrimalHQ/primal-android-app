@@ -48,7 +48,6 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
@@ -57,7 +56,7 @@ import net.primal.android.core.compose.AvatarThumbnailListItemImage
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.PostImageListItemImage
 import net.primal.android.core.compose.PrimalClickableText
-import net.primal.android.core.compose.feed.model.FeedPostResource
+import net.primal.android.core.compose.media.model.MediaResourceUi
 import net.primal.android.core.compose.feed.model.FeedPostStatsUi
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -69,10 +68,11 @@ import net.primal.android.core.compose.icons.primaliconpack.FeedReposts
 import net.primal.android.core.compose.icons.primaliconpack.FeedRepostsFilled
 import net.primal.android.core.compose.icons.primaliconpack.FeedZaps
 import net.primal.android.core.compose.icons.primaliconpack.FeedZapsFilled
+import net.primal.android.core.ext.calculateImageSize
+import net.primal.android.core.ext.findNearestOrNull
 import net.primal.android.core.ext.openUriSafely
 import net.primal.android.core.utils.asBeforeNowFormat
 import net.primal.android.core.utils.isPrimalIdentifier
-import net.primal.android.nostr.model.primal.PrimalResourceVariant
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import java.time.Instant
@@ -205,11 +205,11 @@ private fun CardWithHighlight(
     }
 }
 
-private fun List<FeedPostResource>.filterImages() = filter {
+private fun List<MediaResourceUi>.filterImages() = filter {
     it.mimeType?.startsWith("image") == true
 }
 
-private fun List<FeedPostResource>.filterNotImages() = filterNot {
+private fun List<MediaResourceUi>.filterNotImages() = filterNot {
     it.mimeType?.startsWith("image") == true
 }
 
@@ -224,7 +224,7 @@ private fun String.withoutUrls(urls: List<String>): String {
 @Composable
 fun PostContent(
     content: String,
-    resources: List<FeedPostResource>,
+    resources: List<MediaResourceUi>,
     onClick: (Offset) -> Unit,
     onUrlClick: (String) -> Unit,
 ) {
@@ -314,31 +314,6 @@ fun PostContent(
         }
     }
 
-}
-
-private fun List<PrimalResourceVariant>.findNearestOrNull(maxWidthPx: Int): PrimalResourceVariant? {
-    return sortedBy { it.width }.find { it.width >= maxWidthPx }
-}
-
-private fun PrimalResourceVariant?.calculateImageSize(
-    maxWidth: Int,
-    maxHeight: Int,
-    density: Float
-): DpSize {
-    if (this == null) return DpSize(maxWidth.dp, maxWidth.dp)
-
-    val variantWidth = (width / density).toInt()
-    val variantHeight = (height / density).toInt()
-    return DpSize(
-        width = when {
-            else -> maxWidth.dp
-        },
-        height = when {
-            variantHeight == 0 -> maxWidth.dp
-            variantHeight > maxHeight -> maxHeight.dp
-            else -> ((maxWidth * variantHeight) / variantWidth).dp
-        }
-    )
 }
 
 private fun Int.toPostStatString(): String = if (this > 0) toString() else ""

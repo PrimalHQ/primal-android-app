@@ -22,8 +22,8 @@ import net.primal.android.feed.db.sql.LatestFeedQueryBuilder
 import net.primal.android.networking.sockets.NostrNoticeException
 import net.primal.android.nostr.ext.asEventStatsPO
 import net.primal.android.nostr.ext.asEventUserStatsPO
+import net.primal.android.nostr.ext.asMediaResourcePO
 import net.primal.android.nostr.ext.asPost
-import net.primal.android.nostr.ext.asPostResourcePO
 import net.primal.android.nostr.ext.flatMapAsPostResources
 import net.primal.android.nostr.ext.mapAsProfileMetadata
 import net.primal.android.nostr.ext.mapNotNullAsPost
@@ -327,7 +327,7 @@ class FeedRemoteMediator(
                 .flatMap {
                     val eventId = it.eventId
                     it.resources.map { eventResource ->
-                        eventResource.asPostResourcePO(postId = eventId)
+                        eventResource.asMediaResourcePO(eventId = eventId)
                     }
                 }
         )

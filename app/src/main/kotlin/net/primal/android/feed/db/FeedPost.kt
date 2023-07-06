@@ -10,10 +10,10 @@ data class FeedPost(
     val data: FeedPostData,
 
     @Relation(
-        entityColumn = "postId",
+        entityColumn = "eventId",
         parentColumn = "postId",
     )
-    val resources: List<PostResource>,
+    val postResources: List<MediaResource>,
 
     @Relation(
         entityColumn = "ownerId",
@@ -28,10 +28,10 @@ data class FeedPost(
     val referencedPost: PostData? = null,
 
     @Relation(
-        entityColumn = "postId",
+        entityColumn = "eventId",
         parentColumn = "referencePostId",
     )
-    val referencedPostResources: List<PostResource>,
+    val referencedPostResources: List<MediaResource>,
 
     @Relation(
         entityColumn = "ownerId",
@@ -53,5 +53,4 @@ data class FeedPost(
         parentColumn = "repostAuthorId",
     )
     val repostAuthor: ProfileMetadata? = null,
-
 )

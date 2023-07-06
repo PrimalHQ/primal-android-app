@@ -81,8 +81,12 @@ import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.Key
 import net.primal.android.core.compose.icons.primaliconpack.Link
 import net.primal.android.core.compose.isEmpty
+import net.primal.android.core.ext.findByUrl
+import net.primal.android.core.ext.findNearestOrNull
 import net.primal.android.core.utils.isPrimalIdentifier
 import net.primal.android.nostr.ext.asEllipsizedNpub
+import net.primal.android.profile.details.model.ProfileDetailsUi
+import net.primal.android.profile.details.model.ProfileStatsUi
 import net.primal.android.theme.AppTheme
 import java.text.NumberFormat
 
@@ -269,10 +273,15 @@ private fun ProfileTopCoverBar(
     avatarPadding: Dp = 0.dp,
 ) {
     val coverBlur = AppTheme.colorScheme.surface.copy(alpha = coverAlpha)
-    Box(
+    BoxWithConstraints(
         modifier = Modifier.fillMaxWidth(),
         contentAlignment = Alignment.TopCenter,
     ) {
+        val resource = state.resources.findByUrl(url = state.profileDetails?.coverUrl)
+        val variant = resource?.variants.findNearestOrNull(
+            maxWidthPx = with(LocalDensity.current) { maxWidth.roundToPx() }
+        )
+        val imageSource = variant?.mediaUrl ?: state.profileDetails?.coverUrl
         SubcomposeAsyncImage(
             modifier = Modifier
                 .background(color = AppTheme.colorScheme.surface)
@@ -284,7 +293,7 @@ private fun ProfileTopCoverBar(
                         drawRect(color = coverBlur)
                     }
                 },
-            model = state.profileDetails?.coverUrl,
+            model = imageSource,
             loading = { CoverLoading() },
             error = { CoverUnavailable() },
             contentDescription = "Cover",
@@ -300,7 +309,7 @@ private fun ProfileTopCoverBar(
             title = title,
         )
 
-        BoxWithConstraints(
+        Box(
             modifier = Modifier
                 .align(Alignment.BottomStart)
                 .offset(y = avatarOffsetY, x = avatarOffsetX)
@@ -369,7 +378,7 @@ private fun UserProfileDetails(
             style = AppTheme.typography.titleLarge,
         )
 
-        if (profileDetails?.internetIdentifier != null) {
+        if (profileDetails?.internetIdentifier?.isNotEmpty() == true) {
             UserInternetIdentifier(internetIdentifier = profileDetails.internetIdentifier)
         }
 
@@ -383,11 +392,11 @@ private fun UserProfileDetails(
             }
         )
 
-        if (profileDetails?.about != null) {
+        if (profileDetails?.about?.isNotEmpty() == true) {
             UserAbout(about = profileDetails.about)
         }
 
-        if (profileDetails?.website != null) {
+        if (profileDetails?.website?.isNotEmpty() == true) {
             UserWebsiteText(
                 website = profileDetails.website,
                 onClick = {

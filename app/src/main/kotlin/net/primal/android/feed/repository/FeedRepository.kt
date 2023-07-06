@@ -25,7 +25,7 @@ import net.primal.android.core.ext.isLatestFeed
 import net.primal.android.nostr.ext.asEventStatsPO
 import net.primal.android.nostr.ext.asEventUserStatsPO
 import net.primal.android.nostr.ext.asPost
-import net.primal.android.nostr.ext.asPostResourcePO
+import net.primal.android.nostr.ext.asMediaResourcePO
 import net.primal.android.nostr.ext.mapAsProfileMetadata
 import net.primal.android.nostr.ext.takeContentAsNostrEventOrNull
 import net.primal.android.nostr.model.NostrEvent
@@ -162,7 +162,7 @@ class FeedRepository @Inject constructor(
                 .flatMap {
                     val eventId = it.eventId
                     it.resources.map { eventResource ->
-                        eventResource.asPostResourcePO(postId = eventId)
+                        eventResource.asMediaResourcePO(eventId = eventId)
                     }
                 }
         )

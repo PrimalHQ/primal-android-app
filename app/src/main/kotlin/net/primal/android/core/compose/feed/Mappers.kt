@@ -1,6 +1,6 @@
 package net.primal.android.core.compose.feed
 
-import net.primal.android.core.compose.feed.model.FeedPostResource
+import net.primal.android.core.compose.media.model.MediaResourceUi
 import net.primal.android.core.compose.feed.model.FeedPostStatsUi
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.feed.db.FeedPost
@@ -12,7 +12,7 @@ import java.time.Instant
 fun FeedPost.asFeedPostUi() = FeedPostUi(
     postId = this.data.postId,
     repostId = this.data.repostId,
-     repostAuthorId = this.data.repostAuthorId,
+    repostAuthorId = this.data.repostAuthorId,
     repostAuthorDisplayName = this.repostAuthor?.displayNameUiFriendly()
         ?: this.data.repostAuthorId?.asEllipsizedNpub(),
     authorId = this.author?.ownerId ?: this.data.authorId,
@@ -22,8 +22,8 @@ fun FeedPost.asFeedPostUi() = FeedPostUi(
     authorAvatarUrl = this.author?.picture,
     timestamp = Instant.ofEpochSecond(this.data.createdAt),
     content = this.data.content,
-    resources = this.resources.map {
-        FeedPostResource(
+    resources = this.postResources.map {
+        MediaResourceUi(
             url = it.url,
             mimeType = it.contentType,
             variants = it.variants ?: emptyList(),
