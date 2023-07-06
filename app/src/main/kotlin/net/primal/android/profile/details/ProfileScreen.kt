@@ -27,17 +27,14 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.ripple.rememberRipple
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -62,7 +59,6 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -78,6 +74,8 @@ import net.primal.android.core.compose.AvatarThumbnailListItemImage
 import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.feed.FeedLazyColumn
+import net.primal.android.core.compose.feed.LoadingItem
+import net.primal.android.core.compose.feed.NoFeedContent
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.Key
@@ -236,10 +234,19 @@ fun ProfileScreen(
 
                 if (pagingItems.isEmpty()) {
                     when (pagingItems.loadState.refresh) {
-                        LoadState.Loading -> LoadingPosts()
-                        is LoadState.NotLoading -> NoAuthoredFeedContent(
+                        LoadState.Loading -> LoadingItem(
+                            modifier = Modifier
+                                .padding(vertical = 64.dp)
+                                .fillMaxWidth(),
+                        )
+
+                        is LoadState.NotLoading -> NoFeedContent(
+                            modifier = Modifier
+                                .padding(vertical = 64.dp)
+                                .fillMaxWidth(),
                             onRefresh = { pagingItems.refresh() }
                         )
+
                         is LoadState.Error -> Unit
                     }
                 }
@@ -554,51 +561,6 @@ private fun UserPublicKey(
                 contentDescription = null
             )
 
-        }
-    }
-}
-
-@Composable
-private fun LoadingPosts() {
-    Box(
-        modifier = Modifier
-            .padding(vertical = 64.dp)
-            .fillMaxWidth(),
-    ) {
-        CircularProgressIndicator(
-            modifier = Modifier
-                .wrapContentSize()
-                .align(Alignment.Center)
-        )
-    }
-}
-
-@Composable
-private fun NoAuthoredFeedContent(
-    onRefresh: () -> Unit,
-) {
-    Column(
-        modifier = Modifier
-            .padding(vertical = 64.dp)
-            .fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-    ) {
-        Text(
-            modifier = Modifier
-                .wrapContentSize()
-                .padding(horizontal = 32.dp),
-            text = stringResource(id = R.string.feed_no_content),
-            textAlign = TextAlign.Center,
-        )
-
-        TextButton(
-            modifier = Modifier.padding(vertical = 16.dp),
-            onClick = onRefresh,
-        ) {
-            Text(
-                text = stringResource(id = R.string.feed_refresh_button).uppercase(),
-            )
         }
     }
 }

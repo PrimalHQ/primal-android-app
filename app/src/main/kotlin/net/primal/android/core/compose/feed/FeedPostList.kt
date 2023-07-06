@@ -32,8 +32,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -221,7 +223,9 @@ fun FeedLazyColumn(
                 LoadState.Loading -> {
                     if (shouldShowLoadingState) {
                         item(contentType = "LoadingRefresh") {
-                            InitialLoadingItem()
+                            LoadingItem(
+                                modifier = Modifier.fillParentMaxSize(),
+                            )
                         }
                     }
                 }
@@ -230,6 +234,7 @@ fun FeedLazyColumn(
                     if (shouldShowNoContentState) {
                         item(contentType = "NoContent") {
                             NoFeedContent(
+                                modifier = Modifier.fillParentMaxSize(),
                                 onRefresh = { pagingItems.refresh() }
                             )
                         }
@@ -242,7 +247,11 @@ fun FeedLazyColumn(
 
         when (val appendLoadState = pagingItems.loadState.mediator?.append) {
             LoadState.Loading -> item(contentType = "LoadingAppend") {
-                LoadingItem()
+                LoadingItem(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(64.dp)
+                )
             }
 
             is LoadState.Error -> item(contentType = "Error") {
@@ -261,9 +270,11 @@ fun FeedLazyColumn(
 }
 
 @Composable
-private fun LazyItemScope.InitialLoadingItem() {
+fun LoadingItem(
+    modifier: Modifier,
+) {
     Box(
-        modifier = Modifier.Companion.fillParentMaxSize()
+        modifier = modifier,
     ) {
         CircularProgressIndicator(
             modifier = Modifier
@@ -274,29 +285,43 @@ private fun LazyItemScope.InitialLoadingItem() {
 }
 
 @Composable
-private fun LazyItemScope.NoFeedContent(
+fun NoFeedContent(
+    modifier: Modifier,
     onRefresh: () -> Unit,
 ) {
-    Column(
-        modifier = Modifier.Companion.fillParentMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-    ) {
-        Text(
-            modifier = Modifier
-                .wrapContentSize()
-                .padding(horizontal = 32.dp),
-            text = stringResource(id = R.string.feed_no_content),
-            textAlign = TextAlign.Center,
-        )
+    val visible = rememberSaveable { mutableStateOf(false) }
 
-        TextButton(
-            modifier = Modifier.padding(vertical = 16.dp),
-            onClick = onRefresh,
+    LaunchedEffect(Unit) {
+        delay(500L)
+        visible.value = true
+    }
+
+    AnimatedVisibility(
+        visible = visible.value,
+        enter = fadeIn(),
+        exit = fadeOut(),
+    ) {
+        Column(
+            modifier = modifier,
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
         ) {
             Text(
-                text = stringResource(id = R.string.feed_refresh_button).uppercase(),
+                modifier = Modifier
+                    .wrapContentSize()
+                    .padding(horizontal = 32.dp),
+                text = stringResource(id = R.string.feed_no_content),
+                textAlign = TextAlign.Center,
             )
+
+            TextButton(
+                modifier = Modifier.padding(vertical = 8.dp),
+                onClick = onRefresh,
+            ) {
+                Text(
+                    text = stringResource(id = R.string.feed_refresh_button).uppercase(),
+                )
+            }
         }
     }
 }
@@ -357,7 +382,7 @@ private fun NewPostsButton(
 }
 
 @Composable
-private fun ErrorItem(
+fun ErrorItem(
     text: String
 ) {
     Box(
@@ -373,21 +398,6 @@ private fun ErrorItem(
             text = text,
             textAlign = TextAlign.Center,
             style = AppTheme.typography.bodySmall,
-        )
-    }
-}
-
-@Composable
-private fun LoadingItem() {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(64.dp)
-    ) {
-        CircularProgressIndicator(
-            modifier = Modifier
-                .wrapContentSize()
-                .align(Alignment.Center)
         )
     }
 }
