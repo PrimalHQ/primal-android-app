@@ -3,16 +3,29 @@ package net.primal.android.explore.feed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.res.stringResource
+import kotlinx.coroutines.launch
+import net.primal.android.R
+import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.feed.FeedPostList
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
+import net.primal.android.core.compose.icons.primaliconpack.UserFeedAdd
+import net.primal.android.core.compose.icons.primaliconpack.UserFeedRemove
+import net.primal.android.explore.feed.ExploreFeedContract.UiEvent.AddToUserFeeds
+import net.primal.android.explore.feed.ExploreFeedContract.UiEvent.RemoveFromUserFeeds
 
 @Composable
 fun ExploreFeedScreen(
@@ -24,44 +37,81 @@ fun ExploreFeedScreen(
     val uiState = viewModel.state.collectAsState()
 
     ExploreFeedScreen(
-        uiState = uiState.value,
+        state = uiState.value,
         onClose = onClose,
         onPostClick = onPostClick,
         onProfileClick = onProfileClick,
+        eventPublisher = { viewModel.setEvent(it) },
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExploreFeedScreen(
-    uiState: ExploreFeedContract.UiState,
+    state: ExploreFeedContract.UiState,
     onClose: () -> Unit,
     onPostClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
+    eventPublisher: (ExploreFeedContract.UiEvent) -> Unit,
 ) {
     val topAppBarState = rememberTopAppBarState()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(topAppBarState)
     val listState = rememberLazyListState()
 
+    val uiScope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val addedToUserFeedsMessage = stringResource(id = R.string.explore_feed_added_to_user_feeds)
+    val removedFromUserFeedsMessage = stringResource(id = R.string.explore_feed_removed_from_user_feeds)
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             PrimalTopAppBar(
-                title = uiState.title ?: "",
+                title = state.title,
                 navigationIcon = PrimalIcons.ArrowBack,
                 onNavigationIconClick = onClose,
+                actions = {
+                    AppBarIcon(
+                        icon = if (state.existsInUserFeeds) {
+                            PrimalIcons.UserFeedRemove
+                        } else {
+                            PrimalIcons.UserFeedAdd
+                        },
+                        onClick = {
+                            if (state.existsInUserFeeds) {
+                                eventPublisher(RemoveFromUserFeeds)
+                                uiScope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = removedFromUserFeedsMessage,
+                                        duration = SnackbarDuration.Short,
+                                    )
+                                }
+                            } else {
+                                eventPublisher(AddToUserFeeds)
+                                uiScope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = addedToUserFeedsMessage,
+                                        duration = SnackbarDuration.Short,
+                                    )
+                                }
+                            }
+                          },
+                    )
+                },
                 scrollBehavior = scrollBehavior,
             )
         },
         content = { paddingValues ->
             FeedPostList(
-                posts = uiState.posts,
+                posts = state.posts,
                 paddingValues = paddingValues,
                 feedListState = listState,
                 onPostClick = onPostClick,
                 onProfileClick = onProfileClick,
             )
         },
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
+        }
     )
 }

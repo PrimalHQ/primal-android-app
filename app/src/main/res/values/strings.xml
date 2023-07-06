@@ -59,8 +59,13 @@
     </plurals>
 
     <string name="thread_title">Thread</string>
+
     <string name="explore_title">Explore</string>
+    <string name="explore_feed_added_to_user_feeds">Added to your home feeds</string>
+    <string name="explore_feed_removed_from_user_feeds">Removed from your home feeds</string>
+
     <string name="notifications_title">Notifications</string>
+
     <string name="messages_title">Messages</string>
 
     <string name="settings_title">Settings</string>

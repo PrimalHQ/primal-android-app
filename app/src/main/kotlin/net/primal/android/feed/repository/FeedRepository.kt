@@ -11,21 +11,20 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.decodeFromString
+import net.primal.android.core.ext.isLatestFeed
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.feed.api.FeedApi
 import net.primal.android.feed.api.mediator.FeedRemoteMediator
 import net.primal.android.feed.api.model.ThreadRequestBody
-import net.primal.android.thread.db.ConversationCrossRef
 import net.primal.android.feed.db.Feed
 import net.primal.android.feed.db.FeedPost
 import net.primal.android.feed.db.sql.ExploreFeedQueryBuilder
 import net.primal.android.feed.db.sql.FeedQueryBuilder
 import net.primal.android.feed.db.sql.LatestFeedQueryBuilder
-import net.primal.android.core.ext.isLatestFeed
 import net.primal.android.nostr.ext.asEventStatsPO
 import net.primal.android.nostr.ext.asEventUserStatsPO
-import net.primal.android.nostr.ext.asPost
 import net.primal.android.nostr.ext.asMediaResourcePO
+import net.primal.android.nostr.ext.asPost
 import net.primal.android.nostr.ext.mapAsProfileMetadata
 import net.primal.android.nostr.ext.takeContentAsNostrEventOrNull
 import net.primal.android.nostr.model.NostrEvent
@@ -34,6 +33,7 @@ import net.primal.android.nostr.model.primal.content.ContentPrimalEventResources
 import net.primal.android.nostr.model.primal.content.ContentPrimalEventStats
 import net.primal.android.nostr.model.primal.content.ContentPrimalEventUserStats
 import net.primal.android.serialization.NostrJson
+import net.primal.android.thread.db.ConversationCrossRef
 import net.primal.android.user.active.ActiveAccountStore
 import javax.inject.Inject
 
@@ -45,7 +45,22 @@ class FeedRepository @Inject constructor(
 
     private val activeUserId: String get() = activeAccountStore.userAccount.value.pubkey
 
-    fun observeFeeds(): Flow<List<Feed>> = database.feeds().observeAllFeeds()
+    fun observeFeeds() = database.feeds().observeAllFeeds()
+
+    fun observeContainsFeed(directive: String) = database.feeds().observeContainsFeed(directive)
+
+    suspend fun addToUserFeeds(title: String, directive: String) {
+        val newFeed = Feed(name = title, directive = directive)
+        withContext(Dispatchers.IO) {
+            database.feeds().upsertAll(listOf(newFeed))
+        }
+    }
+
+    suspend fun removeFromUserFeeds(directive: String) {
+        withContext(Dispatchers.IO) {
+            database.feeds().delete(directive = directive)
+        }
+    }
 
     suspend fun findFeedByDirective(feedDirective: String) =
         database.feeds().findFeedByDirective(feedDirective = feedDirective)
