@@ -15,6 +15,7 @@ import net.primal.android.core.compose.feed.asFeedPostUi
 import net.primal.android.core.compose.media.model.MediaResourceUi
 import net.primal.android.feed.repository.FeedRepository
 import net.primal.android.navigation.profileId
+import net.primal.android.networking.sockets.WssException
 import net.primal.android.nostr.ext.displayNameUiFriendly
 import net.primal.android.profile.details.ProfileContract.UiState
 import net.primal.android.profile.details.model.ProfileDetailsUi
@@ -53,7 +54,11 @@ class ProfileViewModel @Inject constructor(
     }
 
     private fun fetchLatestProfile() = viewModelScope.launch {
-        profileRepository.requestProfileUpdate(profileId = profileId)
+        try {
+            profileRepository.requestProfileUpdate(profileId = profileId)
+        } catch (error: WssException) {
+            // Ignore
+        }
     }
 
     private fun observeProfile() = viewModelScope.launch {

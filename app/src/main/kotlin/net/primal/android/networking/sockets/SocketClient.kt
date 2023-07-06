@@ -105,7 +105,7 @@ class SocketClient @Inject constructor(
                 )
             }
         } else {
-            throw WssException(message = "Socket connection unavailable.")
+            throw WssException(message = "Api unavailable at the moment.")
         }
     }
 

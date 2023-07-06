@@ -20,6 +20,7 @@ import net.primal.android.feed.db.sql.ExploreFeedQueryBuilder
 import net.primal.android.feed.db.sql.FeedQueryBuilder
 import net.primal.android.feed.db.sql.LatestFeedQueryBuilder
 import net.primal.android.networking.sockets.NostrNoticeException
+import net.primal.android.networking.sockets.WssException
 import net.primal.android.nostr.ext.asEventStatsPO
 import net.primal.android.nostr.ext.asEventUserStatsPO
 import net.primal.android.nostr.ext.asMediaResourcePO
@@ -186,8 +187,10 @@ class FeedRemoteMediator(
                 LoadType.APPEND -> initialRequestBody.copy(until = remoteKey?.sinceId)
             }
 
-            val response = withContext(Dispatchers.IO) {
-                feedApi.getFeed(body = feedRequestBody)
+            val response = try {
+                withContext(Dispatchers.IO) { feedApi.getFeed(body = feedRequestBody) }
+            } catch (error: WssException) {
+                return MediatorResult.Error(error)
             }
 
             val pagingEvent = response.paging

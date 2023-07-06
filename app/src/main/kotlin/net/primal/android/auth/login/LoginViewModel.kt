@@ -14,6 +14,7 @@ import net.primal.android.auth.AuthRepository
 import net.primal.android.auth.login.LoginContract.SideEffect
 import net.primal.android.auth.login.LoginContract.UiEvent
 import net.primal.android.auth.login.LoginContract.UiState
+import net.primal.android.networking.sockets.WssException
 import net.primal.android.settings.SettingsRepository
 import javax.inject.Inject
 
@@ -54,10 +55,15 @@ class LoginViewModel @Inject constructor(
 
     private fun login(nsec: String) = viewModelScope.launch {
         setState { copy(loading = true) }
-        val pubkey = authRepository.login(nsec = nsec)
-        settingsRepository.fetchAppSettings(pubkey = pubkey)
-        setEffect(SideEffect.LoginSuccess(pubkey = pubkey))
-        setState { copy(loading = false) }
+        try {
+            val pubkey = authRepository.login(nsec = nsec)
+            settingsRepository.fetchAppSettings(pubkey = pubkey)
+            setEffect(SideEffect.LoginSuccess(pubkey = pubkey))
+        } catch (error: WssException) {
+            setState { copy(error = UiState.ApiError.GenericError) }
+        } finally {
+            setState { copy(loading = false) }
+        }
     }
 
 }

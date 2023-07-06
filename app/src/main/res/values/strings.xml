@@ -4,6 +4,8 @@
     <string name="nsec">nsec</string>
     <string name="npub">npub</string>
 
+    <string name="app_generic_error">Something went wrong, please try again in few moments.</string>
+
     <string name="welcome_sign_in_button_title">Sign in</string>
     <string name="welcome_sign_in_button_subtitle">Already have a Nostr account? Sign with your Nostr key.</string>
     <string name="welcome_create_account_button_title">Create account</string>

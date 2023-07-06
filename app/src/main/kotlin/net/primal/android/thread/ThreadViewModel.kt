@@ -12,9 +12,10 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import net.primal.android.feed.repository.FeedRepository
 import net.primal.android.core.compose.feed.asFeedPostUi
+import net.primal.android.feed.repository.FeedRepository
 import net.primal.android.navigation.postId
+import net.primal.android.networking.sockets.WssException
 import javax.inject.Inject
 
 @HiltViewModel
@@ -68,7 +69,10 @@ class ThreadViewModel @Inject constructor(
     }
 
     private fun fetchRepliesFromNetwork() = viewModelScope.launch {
-        repository.fetchReplies(postId = postId)
+        try {
+            repository.fetchReplies(postId = postId)
+        } catch (error: WssException) {
+            // Ignore
+        }
     }
-
 }
