@@ -29,6 +29,7 @@ import net.primal.android.nostr.model.NostrVerb
 import net.primal.android.serialization.NostrJson
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.Response
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 import timber.log.Timber
@@ -59,6 +60,11 @@ class SocketClient @Inject constructor(
             }
         }
 
+        override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
+            Timber.w("WS connection failure.", t, response)
+            this@SocketClient.webSocket = null
+        }
+
         override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
             Timber.w("WS connection closed with code=$code and reason=$reason")
             this@SocketClient.webSocket = null
@@ -80,11 +86,10 @@ class SocketClient @Inject constructor(
 
     @Throws(NostrNoticeException::class)
     suspend fun query(message: OutgoingMessage): SocketQueryResult {
-        ensureSocketConnection()
-
         var queryAttempts = 0
         var subscriptionId: UUID? = null
         while (queryAttempts < MAX_QUERY_ATTEMPTS) {
+            ensureSocketConnection()
             subscriptionId = sendRequest(message)
             queryAttempts++
 
