@@ -45,9 +45,10 @@ android {
 
     signingConfigs {
         val properties = configProperties
-        if (properties != null) {
+        val certificateFile = properties?.getProperty("playStore.storeFile")
+        if (properties != null && certificateFile != null) {
             signingConfigs.create("playStore") {
-                storeFile(File(properties.getProperty("playStore.storeFile")))
+                storeFile(File(certificateFile))
                 storePassword(properties.getProperty("playStore.storePassword"))
                 keyAlias(properties.getProperty("playStore.keyAlias"))
                 keyPassword(properties.getProperty("playStore.keyPassword"))
