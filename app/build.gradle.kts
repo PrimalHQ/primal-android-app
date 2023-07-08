@@ -45,13 +45,23 @@ android {
 
     signingConfigs {
         val properties = configProperties
-        val certificateFile = properties?.getProperty("playStore.storeFile")
-        if (properties != null && certificateFile != null) {
+        val playStoreCertificateFile = properties?.getProperty("playStore.storeFile")
+        if (properties != null && playStoreCertificateFile != null) {
             signingConfigs.create("playStore") {
-                storeFile(File(certificateFile))
+                storeFile(File(playStoreCertificateFile))
                 storePassword(properties.getProperty("playStore.storePassword"))
                 keyAlias(properties.getProperty("playStore.keyAlias"))
                 keyPassword(properties.getProperty("playStore.keyPassword"))
+            }
+        }
+
+        val alternativeCertificateFile = properties?.getProperty("alternative.storeFile")
+        if (properties != null && alternativeCertificateFile != null) {
+            signingConfigs.create("alternative") {
+                storeFile(File(alternativeCertificateFile))
+                storePassword(properties.getProperty("alternative.storePassword"))
+                keyAlias(properties.getProperty("alternative.keyAlias"))
+                keyPassword(properties.getProperty("alternative.keyPassword"))
             }
         }
     }
@@ -67,10 +77,18 @@ android {
 
         create("releasePlayStore") {
             initWith(getByName("release"))
-
             signingConfig = try {
                 signingConfigs.getByName("playStore")
-            } catch (e: UnknownDomainObjectException) {
+            } catch (error: UnknownDomainObjectException) {
+                signingConfigs.getByName("debug")
+            }
+        }
+
+        create("releaseAlternative") {
+            initWith(getByName("release"))
+            signingConfig = try {
+                signingConfigs.getByName("alternative")
+            } catch (error: UnknownDomainObjectException) {
                 signingConfigs.getByName("debug")
             }
         }
@@ -78,6 +96,11 @@ android {
 
     sourceSets {
         named("releasePlayStore") {
+            java.srcDirs("src/release/kotlin")
+            res.srcDirs("src/release/res")
+        }
+
+        named("releaseAlternative") {
             java.srcDirs("src/release/kotlin")
             res.srcDirs("src/release/res")
         }
