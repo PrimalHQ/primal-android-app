@@ -249,7 +249,7 @@ fun PrivateKeySection(
             text = if (keyCopied) {
                 stringResource(id = R.string.settings_keys_key_copied)
             } else {
-                stringResource(id = R.string.settings_keys_copy_public_key)
+                stringResource(id = R.string.settings_keys_copy_private_key)
             },
             onClick = {
                 val clipboard = context.getSystemService(ClipboardManager::class.java)
