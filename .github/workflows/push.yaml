@@ -26,5 +26,6 @@ jobs:
       - name: Grant execute permission to Gradle wrapper
         run: chmod +x ./gradlew
 
+
       - name: Build Android project
         run: ./gradlew assembleDebug
