@@ -1,30 +1,30 @@
-name: Push
-
+name: Build Android Project
 on:
   push:
-    branches: [ "main" ]
-  workflow_dispatch:
+    branches:
+      - main
 
 jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
+
     steps:
-        - run: echo "The job was automatically triggered by a ${{ github.event_name }} event."
-        - run: echo "This job is running on a ${{ runner.os }} server hosted by GitHub!"
-    - uses: actions/checkout@v3
-    - run: echo "The ${{ github.repository }} repository has been cloned."
-    - run: echo "Setting up JDK" 
-    - name: set up JDK 11
-      uses: actions/setup-java@v3
-      with:
-        java-version: '11'
-        distribution: 'temurin'
-        cache: gradle
-    - run: echo "The workflow is now ready to test your code."
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
-    - run: echo "Building Debug APK."  
-    - name: Build with Gradle
-      run: ./gradlew build
-    - run: echo "Build status report=${{ job.status }}."
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up JDK
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+
+      - name: Set up Android SDK
+        uses: actions/setup-android@v2
+        with:
+          sdk-version: '31'
+
+      - name: Grant execute permission to Gradle wrapper
+        run: chmod +x ./gradlew
+
+      - name: Build Android project
+        run: ./gradlew assembleDebug
