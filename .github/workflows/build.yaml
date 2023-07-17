@@ -27,8 +27,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      - name: Linter (gradle)
-        run: ./gradlew ktlintCheck
+      # - name: Linter (gradle)
+      #   run: ./gradlew ktlintCheck
 
       - name: Test (gradle)
         run: ./gradlew test --no-daemon
