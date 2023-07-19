@@ -6,11 +6,11 @@ import kotlinx.serialization.Serializable
 data class UserAccount(
     val pubkey: String,
     val displayName: String,
-    val pictureUrl: String?,
-    val internetIdentifier: String?,
-    val followingCount: Int?,
-    val followersCount: Int?,
-    val notesCount: Int?,
+    val pictureUrl: String? = null,
+    val internetIdentifier: String? = null,
+    val followingCount: Int? = null,
+    val followersCount: Int? = null,
+    val notesCount: Int? = null,
 ) {
     companion object {
         val EMPTY = UserAccount(

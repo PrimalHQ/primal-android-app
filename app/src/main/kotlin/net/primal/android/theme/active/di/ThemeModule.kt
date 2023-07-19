@@ -3,15 +3,13 @@ package net.primal.android.theme.active.di
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.DataStoreFactory
-import androidx.datastore.core.Serializer
 import androidx.datastore.dataStoreFile
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import java.io.InputStream
-import java.io.OutputStream
+import net.primal.android.serialization.StringSerializer
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -26,20 +24,4 @@ object ThemeModule {
         produceFile = { context.dataStoreFile(DATA_STORE_ACTIVE_THEME_FILE_NAME) },
         serializer = StringSerializer(),
     )
-}
-
-
-class StringSerializer : Serializer<String> {
-
-    override val defaultValue: String = ""
-
-    override suspend fun readFrom(input: InputStream): String {
-        return String(input.readBytes())
-    }
-
-    override suspend fun writeTo(t: String, output: OutputStream) {
-        output.use {
-            it.write(t.toByteArray())
-        }
-    }
 }

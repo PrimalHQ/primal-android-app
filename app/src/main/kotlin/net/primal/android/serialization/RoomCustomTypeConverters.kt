@@ -1,7 +1,6 @@
 package net.primal.android.serialization
 
 import androidx.room.TypeConverter
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.JsonArray
 import net.primal.android.nostr.model.primal.PrimalResourceVariant
@@ -9,15 +8,19 @@ import net.primal.android.nostr.model.primal.PrimalResourceVariant
 class RoomCustomTypeConverters {
 
     @TypeConverter
-    fun stringToJsonArray(value: String?): List<JsonArray>? {
+    fun stringToListOfJsonArray(value: String?): List<JsonArray>? {
         return when (value) {
             null -> null
-            else -> NostrJson.decodeFromString<List<JsonArray>>(value)
+            else -> try {
+                NostrJson.decodeFromString<List<JsonArray>>(value)
+            } catch (error: IllegalArgumentException) {
+                null
+            }
         }
     }
 
     @TypeConverter
-    fun jsonArrayToString(jsonArray: List<JsonArray>?): String? {
+    fun listOfJsonArrayToString(jsonArray: List<JsonArray>?): String? {
         return when (jsonArray) {
             null -> null
             else -> NostrJson.encodeToString(jsonArray)
@@ -25,15 +28,19 @@ class RoomCustomTypeConverters {
     }
 
     @TypeConverter
-    fun stringToListOfStrings(value: String?): List<String>? {
+    fun jsonStringToListOfStrings(value: String?): List<String>? {
         return when (value) {
             null -> null
-            else -> NostrJson.decodeFromString<List<String>>(value)
+            else -> try {
+                NostrJson.decodeFromString<List<String>>(value)
+            } catch (error: IllegalArgumentException) {
+                null
+            }
         }
     }
 
     @TypeConverter
-    fun listOfStringsToString(list: List<String>?): String? {
+    fun listOfStringsToJsonString(list: List<String>?): String? {
         return when (list) {
             null -> null
             else -> NostrJson.encodeToString(list)
@@ -44,7 +51,11 @@ class RoomCustomTypeConverters {
     fun stringToListOfPrimalResourceVariant(value: String?): List<PrimalResourceVariant>? {
         return when (value) {
             null -> null
-            else -> NostrJson.decodeFromString<List<PrimalResourceVariant>>(value)
+            else -> try {
+                NostrJson.decodeFromString<List<PrimalResourceVariant>>(value)
+            } catch (error: IllegalArgumentException) {
+                null
+            }
         }
     }
 

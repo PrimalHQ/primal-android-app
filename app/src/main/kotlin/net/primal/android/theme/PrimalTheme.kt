@@ -12,41 +12,41 @@ import net.primal.android.theme.colors.sunsetColorScheme
 import net.primal.android.theme.colors.sunsetExtraColorScheme
 
 enum class PrimalTheme(
-    val theme: String,
-    val inverseTheme: String,
+    val themeName: String,
+    val inverseThemeName: String,
     val colorScheme: ColorScheme,
     val extraColorScheme: ExtraColorScheme,
 ) {
     Sunset(
-        theme = "sunset",
-        inverseTheme = "sunrise",
+        themeName = "sunset",
+        inverseThemeName = "sunrise",
         colorScheme = sunsetColorScheme,
         extraColorScheme = sunsetExtraColorScheme,
     ),
 
     Sunrise(
-        theme = "sunrise",
-        inverseTheme = "sunset",
+        themeName = "sunrise",
+        inverseThemeName = "sunset",
         colorScheme = sunriseColorScheme,
         extraColorScheme = sunriseExtraColorScheme,
     ),
 
     Midnight(
-        theme = "midnight",
-        inverseTheme = "ice",
+        themeName = "midnight",
+        inverseThemeName = "ice",
         colorScheme = midnightColorScheme,
         extraColorScheme = midnightExtraColorScheme,
     ),
 
     Ice(
-        theme = "ice",
-        inverseTheme = "midnight",
+        themeName = "ice",
+        inverseThemeName = "midnight",
         colorScheme = iceColorScheme,
         extraColorScheme = iceExtraColorScheme,
     );
 
     companion object {
         fun valueOf(themeName: String): PrimalTheme? =
-            enumValues<PrimalTheme>().find { it.theme == themeName }
+            enumValues<PrimalTheme>().find { it.themeName == themeName }
     }
 }

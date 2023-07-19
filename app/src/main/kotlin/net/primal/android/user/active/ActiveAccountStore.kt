@@ -30,7 +30,6 @@ class ActiveAccountStore @Inject constructor(
 
     private fun initialValue(): UserAccount = runBlocking { persistence.data.first() }
 
-
     private fun UserAccount.asActiveUserAccountState(): ActiveUserAccountState = when (this) {
         UserAccount.EMPTY -> ActiveUserAccountState.NoUserAccount
         else -> ActiveUserAccountState.ActiveUserAccount(data = this)
