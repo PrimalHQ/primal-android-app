@@ -5,6 +5,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.add
 import kotlinx.serialization.json.buildJsonArray
 import net.primal.android.crypto.toNpub
+import net.primal.android.networking.UserAgentProvider
 import net.primal.android.networking.sockets.SocketClient
 import net.primal.android.networking.sockets.model.OutgoingMessage
 import net.primal.android.nostr.model.NostrEventKind
@@ -32,7 +33,7 @@ class SettingsApiImpl @Inject constructor(
             kind = NostrEventKind.ApplicationSpecificData.value,
             tags = listOf(buildJsonArray {
                 add("d")
-                add("Primal-Android App")
+                add(UserAgentProvider.USER_AGENT)
             }),
             content = NostrJson.encodeToString(
                 AppSettingsDescription(description = "Sync app settings")
