@@ -10,12 +10,13 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.runBlocking
 import net.primal.android.theme.PrimalTheme
+import net.primal.android.theme.active.di.ActiveThemeDataStore
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class ActiveThemeStore @Inject constructor(
-    private val persistence: DataStore<String>,
+    @ActiveThemeDataStore private val persistence: DataStore<String>,
 ) {
 
     private val scope = CoroutineScope(Dispatchers.IO)

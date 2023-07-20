@@ -7,6 +7,8 @@ import kotlinx.serialization.json.buildJsonArray
 import net.primal.android.crypto.toNpub
 import net.primal.android.networking.UserAgentProvider
 import net.primal.android.networking.sockets.SocketClient
+import net.primal.android.networking.sockets.findNostrEvent
+import net.primal.android.networking.sockets.findPrimalEvent
 import net.primal.android.networking.sockets.model.OutgoingMessage
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.model.NostrUnsignedEvent
@@ -41,7 +43,7 @@ class SettingsApiImpl @Inject constructor(
         )
         val signedNostrEvent = unsignedEvent.signOrThrow(nsec = credential.nsec)
 
-        val result = socketClient.query(
+        val queryResult = socketClient.query(
             message = OutgoingMessage(
                 primalVerb = "get_app_settings",
                 optionsJson = NostrJson.encodeToString(
@@ -53,12 +55,8 @@ class SettingsApiImpl @Inject constructor(
         )
 
         return AppSettingsResponse(
-            userSettings = result.nostrEvents.find {
-                it.kind == NostrEventKind.ApplicationSpecificData.value
-            },
-            defaultSettings = result.primalEvents.find {
-                it.kind == NostrEventKind.PrimalDefaultSettings.value
-            },
+            userSettings = queryResult.findNostrEvent(NostrEventKind.ApplicationSpecificData),
+            defaultSettings = queryResult.findPrimalEvent(NostrEventKind.PrimalDefaultSettings),
         )
     }
 

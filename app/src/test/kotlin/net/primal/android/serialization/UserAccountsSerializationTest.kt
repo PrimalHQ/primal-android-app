@@ -14,30 +14,30 @@ import org.junit.Test
 import java.io.InputStream
 import java.io.OutputStream
 
-class UserAccountSerializationTest {
+class UserAccountsSerializationTest {
 
     private fun encryptionMock(
         decryptResult: String = """
-            {   
+            [{   
                 "pubkey":"b10b0d5e5fae9c6c48a8c77f7e5abd42a79e9480e25a4094051d4ba4ce14456b",
                 "displayName":"alex"
-            }
+            }]
         """.trimIndent(),
     ) = mockk<Encryption>(relaxed = true) {
         every { decrypt(any()) } returns decryptResult
     }
 
     @Test
-    fun `defaultValue returns empty UserAccount`() {
-        val serializer = UserAccountSerialization(mockk(), mockk())
+    fun `defaultValue returns empty list`() {
+        val serializer = UserAccountsSerialization(mockk(), mockk())
         val actual = serializer.defaultValue
-        actual shouldBe UserAccount.EMPTY
+        actual shouldBe emptyList()
     }
 
     @Test
     fun `readFrom calls decrypt with proper inputStream`() = runTest {
         val encryptionMock = encryptionMock()
-        val serializer = UserAccountSerialization(encryption = encryptionMock)
+        val serializer = UserAccountsSerialization(encryption = encryptionMock)
 
         val inputStream = mockk<InputStream>()
         serializer.readFrom(inputStream)
@@ -52,7 +52,7 @@ class UserAccountSerializationTest {
     @Test
     fun `readFrom throws CorruptionException for invalid data`() = runTest {
         val encryptionMock = encryptionMock(decryptResult = "giberish")
-        val serializer = UserAccountSerialization(encryption = encryptionMock)
+        val serializer = UserAccountsSerialization(encryption = encryptionMock)
 
         shouldThrow<CorruptionException> {
             serializer.readFrom(mockk())
@@ -62,10 +62,10 @@ class UserAccountSerializationTest {
     @Test
     fun `writeTo calls encrypt with proper outputStream`() = runTest {
         val encryptionMock = encryptionMock()
-        val serializer = UserAccountSerialization(encryption = encryptionMock)
+        val serializer = UserAccountsSerialization(encryption = encryptionMock)
 
         val outputStream = mockk<OutputStream>()
-        serializer.writeTo(UserAccount.EMPTY, outputStream)
+        serializer.writeTo(listOf(UserAccount.EMPTY), outputStream)
 
         coVerify {
             encryptionMock.encrypt(

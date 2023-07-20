@@ -1,5 +1,8 @@
 package net.primal.android.core.utils
 
+import net.primal.android.crypto.toNpub
+import org.spongycastle.util.encoders.Hex
+
 fun String.ellipsizeMiddle(size: Int): String {
     return if (length <= size * 2) {
         this
@@ -11,3 +14,5 @@ fun String.ellipsizeMiddle(size: Int): String {
 }
 
 fun String?.isPrimalIdentifier() = this?.contains("primal.net") == true
+
+fun String.asEllipsizedNpub(): String = Hex.decode(this).toNpub().ellipsizeMiddle(size = 8)

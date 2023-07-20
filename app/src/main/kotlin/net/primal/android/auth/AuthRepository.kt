@@ -1,13 +1,9 @@
 package net.primal.android.auth
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import net.primal.android.nostr.ext.asEllipsizedNpub
-import net.primal.android.nostr.ext.asProfileMetadata
-import net.primal.android.nostr.ext.displayNameUiFriendly
-import net.primal.android.nostr.ext.takeContentAsUserProfileStatsOrNull
+import net.primal.android.networking.sockets.WssException
+import net.primal.android.user.accounts.UserAccountFetcher
+import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.active.ActiveAccountStore
-import net.primal.android.user.api.UsersApi
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.UserAccount
 import javax.inject.Inject
@@ -16,33 +12,55 @@ import javax.inject.Singleton
 @Singleton
 class AuthRepository @Inject constructor(
     private val credentialsStore: CredentialsStore,
+    private val accountsStore: UserAccountsStore,
     private val activeAccountStore: ActiveAccountStore,
-    private val usersApi: UsersApi,
+    private val userAccountFetcher: UserAccountFetcher,
 ) {
 
     suspend fun login(nsec: String): String {
         val pubkey = credentialsStore.save(nsec)
 
-        val response = withContext(Dispatchers.IO) { usersApi.getUserProfile(pubkey = pubkey) }
-        val profileMetadata = response.metadata?.asProfileMetadata()
-        val userProfileStats = response.profileStats?.takeContentAsUserProfileStatsOrNull()
-        activeAccountStore.setActiveUserAccount(
-            userAccount = UserAccount(
-                pubkey = pubkey,
-                displayName = profileMetadata?.displayNameUiFriendly() ?: pubkey.asEllipsizedNpub(),
-                pictureUrl = profileMetadata?.picture,
-                internetIdentifier = profileMetadata?.internetIdentifier,
-                followersCount = userProfileStats?.followersCount,
-                followingCount = userProfileStats?.followsCount,
-                notesCount = userProfileStats?.noteCount,
-            )
+        val userProfile = fetchUserProfileOrNulL(pubkey)
+        val userContacts = fetchUserContactsOrNulL(pubkey)
+        val userAccount = UserAccount.buildLocal(pubkey).merge(
+            profile = userProfile,
+            contacts = userContacts,
         )
 
+        accountsStore.upsertAccount(userAccount)
+        activeAccountStore.setActiveUserId(pubkey)
         return pubkey
     }
 
     suspend fun logout() {
-        activeAccountStore.clearActiveUserAccount()
         credentialsStore.clearCredentials()
+        accountsStore.clearAllAccounts()
+        activeAccountStore.clearActiveUserAccount()
     }
+
+    private fun UserAccount.merge(profile: UserAccount?, contacts: UserAccount?) = this.copy(
+        displayName = profile?.displayName ?: contacts?.displayName ?: this.displayName,
+        pictureUrl = profile?.pictureUrl,
+        internetIdentifier = profile?.internetIdentifier,
+        followersCount = profile?.followersCount,
+        followingCount = profile?.followingCount,
+        notesCount = profile?.notesCount,
+        relays = contacts?.relays ?: emptyList(),
+        following = contacts?.following ?: emptyList(),
+        followers = contacts?.followers ?: emptyList(),
+        interests = contacts?.interests ?: emptyList(),
+    )
+
+    private suspend fun fetchUserProfileOrNulL(pubkey: String) = try {
+        userAccountFetcher.fetchUserProfile(pubkey)
+    } catch (error: WssException) {
+        null
+    }
+
+    private suspend fun fetchUserContactsOrNulL(pubkey: String) = try {
+        userAccountFetcher.fetchUserContacts(pubkey)
+    } catch (error: WssException) {
+        null
+    }
+
 }

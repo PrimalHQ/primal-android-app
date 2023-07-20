@@ -6,6 +6,6 @@ import net.primal.android.nostr.model.primal.PrimalEvent
 
 @Serializable
 data class UserProfileResponse(
-    val metadata: NostrEvent?,
-    val profileStats: PrimalEvent?,
+    val metadata: NostrEvent? = null,
+    val profileStats: PrimalEvent? = null,
 )

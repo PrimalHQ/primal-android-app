@@ -26,10 +26,8 @@ class CredentialsStore @Inject constructor(
         .stateIn(
             scope = scope,
             started = SharingStarted.Eagerly,
-            initialValue = initialValue(),
+            initialValue = runBlocking { persistence.data.first() },
         )
-
-    private fun initialValue(): List<Credential> = runBlocking { persistence.data.first() }
 
     private suspend fun addCredential(credential: Credential) {
         persistence.updateData {

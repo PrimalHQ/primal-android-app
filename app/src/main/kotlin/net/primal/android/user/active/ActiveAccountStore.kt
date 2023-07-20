@@ -8,39 +8,47 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.runBlocking
+import net.primal.android.user.accounts.UserAccountsStore
+import net.primal.android.user.di.ActiveAccountDataStore
 import net.primal.android.user.domain.UserAccount
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class ActiveAccountStore @Inject constructor(
-    private val persistence: DataStore<UserAccount>,
+    @ActiveAccountDataStore private val persistence: DataStore<String>,
+    private val accountsStore: UserAccountsStore,
 ) {
 
     private val scope = CoroutineScope(Dispatchers.IO)
 
-    val userAccount = persistence.data
+    val activeUserAccount = persistence.data
+        .map { it.pubkeyToUserAccount() }
         .stateIn(
             scope = scope,
             started = SharingStarted.Eagerly,
-            initialValue = initialValue(),
+            initialValue = runBlocking { persistence.data.first().pubkeyToUserAccount() },
         )
 
-    val activeAccountState = userAccount.map { it.asActiveUserAccountState() }
+    val activeAccountState = activeUserAccount.map { it.asActiveUserAccountState() }
 
-    private fun initialValue(): UserAccount = runBlocking { persistence.data.first() }
+    fun activeUserId() = activeUserAccount.value.pubkey
+
+    private fun String.pubkeyToUserAccount(): UserAccount {
+        return accountsStore.findByIdOrNull(pubkey = this) ?: UserAccount.EMPTY
+    }
 
     private fun UserAccount.asActiveUserAccountState(): ActiveUserAccountState = when (this) {
         UserAccount.EMPTY -> ActiveUserAccountState.NoUserAccount
         else -> ActiveUserAccountState.ActiveUserAccount(data = this)
     }
 
-    fun setActiveUserAccount(userAccount: UserAccount) = runBlocking {
-        persistence.updateData { userAccount }
+    fun setActiveUserId(pubkey: String) = runBlocking {
+        persistence.updateData { pubkey }
     }
 
     suspend fun clearActiveUserAccount() {
-        persistence.updateData { UserAccount.EMPTY }
+        persistence.updateData { "" }
     }
 
 }

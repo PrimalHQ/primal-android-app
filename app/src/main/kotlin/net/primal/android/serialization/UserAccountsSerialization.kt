@@ -11,14 +11,14 @@ import timber.log.Timber
 import java.io.InputStream
 import java.io.OutputStream
 
-class UserAccountSerialization(
+class UserAccountsSerialization(
     private val json: Json = NostrJson,
     private val encryption: Encryption,
-) : Serializer<UserAccount> {
+) : Serializer<List<UserAccount>> {
 
-    override val defaultValue: UserAccount = UserAccount.EMPTY
+    override val defaultValue: List<UserAccount> = emptyList()
 
-    override suspend fun readFrom(input: InputStream): UserAccount {
+    override suspend fun readFrom(input: InputStream): List<UserAccount> {
         val decryptedJson = encryption.decrypt(input)
         return try {
             json.decodeFromString(decryptedJson)
@@ -31,7 +31,7 @@ class UserAccountSerialization(
         }
     }
 
-    override suspend fun writeTo(t: UserAccount, output: OutputStream) {
+    override suspend fun writeTo(t: List<UserAccount>, output: OutputStream) {
         encryption.encrypt(json.encodeToString(t), output)
     }
 

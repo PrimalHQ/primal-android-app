@@ -15,6 +15,8 @@ import kotlin.time.Duration.Companion.milliseconds
  * 42 milliseconds. It happens that sometimes (on Apple M1 machines)
  * [advanceUntilIdle()][TestCoroutineScheduler.advanceUntilIdle] doesn't advance enough
  * to idle which is causing tests to randomly fail (or randomly succeed).
+ *
+ * Use only if [advanceUntilIdle][TestCoroutineScheduler.advanceUntilIdle] fails.
  */
 @ExperimentalCoroutinesApi
 suspend fun TestScope.advanceUntilIdleAndDelay() {
