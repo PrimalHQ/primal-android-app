@@ -35,7 +35,7 @@ class SettingsApiImpl @Inject constructor(
             kind = NostrEventKind.ApplicationSpecificData.value,
             tags = listOf(buildJsonArray {
                 add("d")
-                add(UserAgentProvider.USER_AGENT)
+                add("${UserAgentProvider.USER_AGENT} App")
             }),
             content = NostrJson.encodeToString(
                 AppSettingsDescription(description = "Sync app settings")
