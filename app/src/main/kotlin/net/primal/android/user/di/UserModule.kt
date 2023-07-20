@@ -12,7 +12,8 @@ import dagger.hilt.components.SingletonComponent
 import net.primal.android.networking.sockets.SocketClient
 import net.primal.android.security.Encryption
 import net.primal.android.serialization.CredentialsSerialization
-import net.primal.android.serialization.UserAccountSerialization
+import net.primal.android.serialization.StringSerializer
+import net.primal.android.serialization.UserAccountsSerialization
 import net.primal.android.user.api.UsersApi
 import net.primal.android.user.api.UsersApiImpl
 import net.primal.android.user.domain.Credential
@@ -25,7 +26,7 @@ object UserModule {
 
     @Provides
     @Singleton
-    fun provideUserDataStore(
+    fun provideCredentialsStore(
         @ApplicationContext context: Context,
         encryption: Encryption,
     ): DataStore<List<Credential>> = DataStoreFactory.create(
@@ -35,12 +36,22 @@ object UserModule {
 
     @Provides
     @Singleton
-    fun provideActiveAccountDataStore(
+    fun provideUserAccountsStore(
         @ApplicationContext context: Context,
         encryption: Encryption,
-    ): DataStore<UserAccount> = DataStoreFactory.create(
-        produceFile = { context.dataStoreFile("active_account.json") },
-        serializer = UserAccountSerialization(encryption = encryption),
+    ): DataStore<List<UserAccount>> = DataStoreFactory.create(
+        produceFile = { context.dataStoreFile("accounts.json") },
+        serializer = UserAccountsSerialization(encryption = encryption),
+    )
+
+    @Provides
+    @Singleton
+    @ActiveAccountDataStore
+    fun provideActiveAccountDataStore(
+        @ApplicationContext context: Context,
+    ): DataStore<String> = DataStoreFactory.create(
+        produceFile = { context.dataStoreFile("active_account.txt") },
+        serializer = StringSerializer(),
     )
 
     @Provides

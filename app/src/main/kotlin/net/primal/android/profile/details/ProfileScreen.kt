@@ -83,8 +83,8 @@ import net.primal.android.core.compose.icons.primaliconpack.Link
 import net.primal.android.core.compose.isEmpty
 import net.primal.android.core.ext.findByUrl
 import net.primal.android.core.ext.findNearestOrNull
+import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.isPrimalIdentifier
-import net.primal.android.nostr.ext.asEllipsizedNpub
 import net.primal.android.profile.details.model.ProfileDetailsUi
 import net.primal.android.profile.details.model.ProfileStatsUi
 import net.primal.android.theme.AppTheme

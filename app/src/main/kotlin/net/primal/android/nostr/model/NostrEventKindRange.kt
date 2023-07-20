@@ -1,6 +1,6 @@
 package net.primal.android.nostr.model
 
-object NostrKindEventRange {
+object NostrEventKindRange {
     val RegularEvents = IntRange(1000, 9999)
     val ReplaceableEvents = IntRange(10000, 19999)
     val EphemeralEvents = IntRange(20000, 29999)

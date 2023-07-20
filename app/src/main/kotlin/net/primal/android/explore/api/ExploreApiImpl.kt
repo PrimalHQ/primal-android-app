@@ -1,12 +1,12 @@
 package net.primal.android.explore.api
 
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.float
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import net.primal.android.explore.api.model.HashtagScore
 import net.primal.android.networking.sockets.SocketClient
+import net.primal.android.networking.sockets.findPrimalEvent
 import net.primal.android.networking.sockets.model.OutgoingMessage
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.serialization.NostrJson
@@ -21,12 +21,10 @@ class ExploreApiImpl @Inject constructor(
             message = OutgoingMessage(primalVerb = "trending_hashtags_7d")
         )
 
-        val trendingHashtagEvent = queryResult.primalEvents.find {
-            NostrEventKind.PrimalTrendingHashtags.value == it.kind
-        } ?: return emptyList()
+        val trendingHashtagEvent = queryResult.findPrimalEvent(NostrEventKind.PrimalTrendingHashtags)
+            ?: return emptyList()
 
         val hashtags = NostrJson.decodeFromString<JsonArray>(trendingHashtagEvent.content)
-
 
         val result = mutableListOf<HashtagScore>()
         hashtags.forEach {

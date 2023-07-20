@@ -3,9 +3,9 @@ package net.primal.android.core.compose.feed
 import net.primal.android.core.compose.feed.model.FeedPostStatsUi
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.media.model.MediaResourceUi
+import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.feed.db.FeedPost
-import net.primal.android.nostr.ext.asEllipsizedNpub
-import net.primal.android.nostr.ext.displayNameUiFriendly
+import net.primal.android.profile.db.displayNameUiFriendly
 import java.time.Instant
 
 

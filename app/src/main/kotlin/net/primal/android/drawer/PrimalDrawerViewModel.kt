@@ -60,10 +60,10 @@ class PrimalDrawerViewModel @Inject constructor(
 
     private suspend fun invertTheme(event: PrimalDrawerContract.UiEvent.ThemeSwitchClick) {
         val activeTheme = activeThemeStore.userThemeState.firstOrNull()
-        val newThemeName = activeTheme?.inverseTheme
+        val newThemeName = activeTheme?.inverseThemeName
             ?: when (event.isSystemInDarkTheme) {
-                true -> PrimalTheme.Sunrise.theme
-                false -> PrimalTheme.Sunset.theme
+                true -> PrimalTheme.Sunrise.themeName
+                false -> PrimalTheme.Sunset.themeName
             }
         activeThemeStore.setUserTheme(theme = newThemeName)
     }

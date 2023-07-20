@@ -16,7 +16,7 @@ import net.primal.android.core.compose.media.model.MediaResourceUi
 import net.primal.android.feed.repository.FeedRepository
 import net.primal.android.navigation.profileId
 import net.primal.android.networking.sockets.WssException
-import net.primal.android.nostr.ext.displayNameUiFriendly
+import net.primal.android.profile.db.displayNameUiFriendly
 import net.primal.android.profile.details.ProfileContract.UiState
 import net.primal.android.profile.details.model.ProfileDetailsUi
 import net.primal.android.profile.details.model.ProfileStatsUi
@@ -33,7 +33,7 @@ class ProfileViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val profileId: String =
-        savedStateHandle.profileId ?: activeAccountStore.userAccount.value.pubkey
+        savedStateHandle.profileId ?: activeAccountStore.activeUserAccount.value.pubkey
 
     private val _state = MutableStateFlow(
         UiState(

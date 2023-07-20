@@ -10,7 +10,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.decodeFromString
 import net.primal.android.core.ext.isLatestFeed
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.feed.api.FeedApi
@@ -42,8 +41,6 @@ class FeedRepository @Inject constructor(
     private val database: PrimalDatabase,
     private val activeAccountStore: ActiveAccountStore,
 ) {
-
-    private val activeUserId: String get() = activeAccountStore.userAccount.value.pubkey
 
     fun observeFeeds() = database.feeds().observeAllFeeds()
 
@@ -86,11 +83,14 @@ class FeedRepository @Inject constructor(
     fun findPostById(postId: String): FeedPost = database.feedPosts().findPostById(postId = postId)
 
     fun observeConversation(postId: String) =
-        database.conversations().observeConversation(postId = postId, userId = activeUserId)
+        database.conversations().observeConversation(
+            postId = postId,
+            userId = activeAccountStore.activeUserId()
+        )
 
     suspend fun fetchReplies(postId: String) = withContext(Dispatchers.IO) {
         val response = feedApi.getThread(
-            ThreadRequestBody(postId = postId, userPubKey = activeUserId)
+            ThreadRequestBody(postId = postId, userPubKey = activeAccountStore.activeUserId())
         )
 
         database.withTransaction {
@@ -124,7 +124,7 @@ class FeedRepository @Inject constructor(
             ),
             remoteMediator = FeedRemoteMediator(
                 feedDirective = feedDirective,
-                userPubkey = activeUserId,
+                userPubkey = activeAccountStore.activeUserId(),
                 feedApi = feedApi,
                 database = database,
             ),
@@ -132,8 +132,14 @@ class FeedRepository @Inject constructor(
         )
 
     private fun feedQueryBuilder(feedDirective: String): FeedQueryBuilder = when {
-        feedDirective.isLatestFeed() -> LatestFeedQueryBuilder(feedDirective = feedDirective, userPubkey = activeUserId)
-        else -> ExploreFeedQueryBuilder(feedDirective = feedDirective, userPubkey = activeUserId)
+        feedDirective.isLatestFeed() -> LatestFeedQueryBuilder(
+            feedDirective = feedDirective,
+            userPubkey = activeAccountStore.activeUserId()
+        )
+        else -> ExploreFeedQueryBuilder(
+            feedDirective = feedDirective,
+            userPubkey = activeAccountStore.activeUserId()
+        )
     }
 
 
@@ -165,7 +171,7 @@ class FeedRepository @Inject constructor(
         database.postUserStats().upsertAll(
             data = this
                 .map { NostrJson.decodeFromString<ContentPrimalEventUserStats>(it.content) }
-                .map { it.asEventUserStatsPO(userId = activeUserId) }
+                .map { it.asEventUserStatsPO(userId = activeAccountStore.activeUserId()) }
         )
     }
 

@@ -109,18 +109,20 @@ fun LoginContent(
     paddingValues: PaddingValues,
     onLogin: (String) -> Unit,
 ) {
-    var nsecValue by remember { mutableStateOf("") }
-
     val keyboardController = LocalSoftwareKeyboardController.current
     val clipboardManager = LocalClipboardManager.current
-    LaunchedEffect(Unit) {
-        val clipboardText = clipboardManager.getText()?.text.orEmpty()
+
+    var nsecValue by remember { mutableStateOf("") }
+    val isValidNsec by remember { derivedStateOf { nsecValue.isValidNsec() } }
+
+    val pasteKey = {
+        val clipboardText = clipboardManager.getText()?.text.orEmpty().trim()
         if (clipboardText.isValidNsec()) {
             nsecValue = clipboardText
         }
     }
 
-    val isValidNsec by remember { derivedStateOf { nsecValue.isValidNsec() } }
+    LaunchedEffect(Unit) { pasteKey() }
 
     Column(
         modifier = Modifier
@@ -225,11 +227,7 @@ fun LoginContent(
                     keyboardController?.hide()
                     onLogin(nsecValue)
                 } else {
-                    val clipboardText = clipboardManager.getText()?.text.orEmpty()
-                    if (clipboardText.isNotEmpty()) {
-                        nsecValue = clipboardText
-                    }
-
+                    pasteKey()
                 }
             },
         )

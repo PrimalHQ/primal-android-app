@@ -19,7 +19,7 @@ class KeysViewModel @Inject constructor(
 
     private val _state = MutableStateFlow(
         UiState(
-            avatarUrl = activeAccountStore.userAccount.value.pictureUrl,
+            avatarUrl = activeAccountStore.activeUserAccount.value.pictureUrl,
             nsec = credential.nsec,
             npub = credential.npub,
         )

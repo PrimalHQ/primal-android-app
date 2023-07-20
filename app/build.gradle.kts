@@ -27,8 +27,8 @@ android {
         applicationId = "net.primal.android"
         minSdk = 26
         targetSdk = 33
-        versionCode = 16
-        versionName = "0.11.2"
+        versionCode = 17
+        versionName = "0.12.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -198,9 +198,9 @@ dependencies {
 
     implementation(libs.secp256k1.kmp.jvm)
     implementation(libs.secp256k1.kmp.jni.android)
+    testImplementation(libs.secp256k1.kmp.jni.jvm)
     implementation(libs.spongycastle.core)
     implementation(libs.androidx.security.crypto)
-    testImplementation(libs.secp256k1.kmp.jni.jvm)
 
     implementation(libs.url.detector)
 
@@ -208,23 +208,22 @@ dependencies {
     debugImplementation(libs.compose.ui.test.manifest)
 
     testImplementation(libs.junit)
+    testImplementation(libs.junit.android.runner)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.core.testing)
+    testImplementation(libs.espresso.core)
+    testImplementation(libs.mockk)
+    testImplementation(libs.kotest.assertions.core)
+    testImplementation(libs.kotest.assertions.json)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.compose.ui.test.junit4)
     testImplementation(libs.room.testing)
 
     androidTestImplementation(platform(libs.compose.bom))
+    androidTestImplementation(libs.junit.android.runner)
     androidTestImplementation(libs.compose.ui.test.junit4)
-    testImplementation(libs.androidx.core.testing)
-    testImplementation(libs.androidx.test.ext.junit)
-    androidTestImplementation(libs.androidx.test.ext.junit)
-
-    testImplementation(libs.espresso.core)
     androidTestImplementation(libs.espresso.core)
-
-    testImplementation(libs.kotest.assertions.core)
     androidTestImplementation(libs.kotest.assertions.core)
-    testImplementation(libs.kotest.assertions.json)
     androidTestImplementation(libs.kotest.assertions.json)
-
-    testImplementation(libs.mockk)
     androidTestImplementation(libs.mockk.android)
-
 }
