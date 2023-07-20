@@ -16,6 +16,12 @@ data class FeedPost(
     val postResources: List<MediaResource>,
 
     @Relation(
+        entityColumn = "eventId",
+        parentColumn = "postId",
+    )
+    val nip19Entities: List<Nip19Entity>,
+
+    @Relation(
         entityColumn = "ownerId",
         parentColumn = "authorId",
     )

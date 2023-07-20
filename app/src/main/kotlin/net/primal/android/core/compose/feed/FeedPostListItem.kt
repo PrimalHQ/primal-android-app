@@ -1,6 +1,14 @@
 package net.primal.android.core.compose.feed
 
 import android.content.res.Configuration
+import android.text.Spannable
+import android.text.SpannableString
+import android.text.SpannableStringBuilder
+import android.text.Spanned
+import android.text.style.ClickableSpan
+import android.text.style.ForegroundColorSpan
+import android.util.Log
+import android.view.View
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -46,10 +54,12 @@ import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.text.buildSpannedString
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.AvatarThumbnailListItemImage
@@ -58,6 +68,7 @@ import net.primal.android.core.compose.PostImageListItemImage
 import net.primal.android.core.compose.PrimalClickableText
 import net.primal.android.core.compose.feed.model.FeedPostStatsUi
 import net.primal.android.core.compose.feed.model.FeedPostUi
+import net.primal.android.core.compose.feed.model.ProfileLinkUi
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.FeedLikes
 import net.primal.android.core.compose.icons.primaliconpack.FeedLikesFilled
@@ -74,6 +85,8 @@ import net.primal.android.core.ext.findNearestOrNull
 import net.primal.android.core.ext.openUriSafely
 import net.primal.android.core.utils.asBeforeNowFormat
 import net.primal.android.core.utils.isPrimalIdentifier
+import net.primal.android.crypto.bechToBytes
+import net.primal.android.crypto.toHex
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import java.time.Instant
@@ -132,14 +145,17 @@ fun FeedPostListItem(
             PostContent(
                 content = data.content,
                 resources = data.postResources,
+                profileLinks = data.profileLinks,
                 onClick = {
                     uiScope.launch {
-                        val press = PressInteraction.Press(it.copy(y = it.y + postAuthorGuessHeight))
+                        val press =
+                            PressInteraction.Press(it.copy(y = it.y + postAuthorGuessHeight))
                         interactionSource.emit(press)
                         interactionSource.emit(PressInteraction.Release(press))
                     }
                     onPostClick(data.postId)
                 },
+                onProfileClick = onProfileClick,
                 onUrlClick = {
                     localUriHandler.openUriSafely(it)
                 },
@@ -227,6 +243,8 @@ private fun String.withoutUrls(urls: List<String>): String {
 fun PostContent(
     content: String,
     resources: List<MediaResourceUi>,
+    profileLinks: List<ProfileLinkUi>,
+    onProfileClick: (String) -> Unit,
     onClick: (Offset) -> Unit,
     onUrlClick: (String) -> Unit,
 ) {
@@ -237,12 +255,35 @@ fun PostContent(
         content.withoutUrls(urls = imageResources.map { it.url }).trim()
     }
 
+    val contentWithProfileLinks = buildAnnotatedString {
+        var currentIndex = 0
+        profileLinks.forEach { match ->
+            val startIndex = refinedContent.indexOf(match.link, currentIndex)
+            if (startIndex >= 0) {
+                val endIndex = startIndex + match.link.length
+                val linkText = match.displayName
+                append(refinedContent.substring(currentIndex, startIndex))
+                withStyle(
+                    style = SpanStyle(
+                        color = AppTheme.colorScheme.primary,
+                    )
+                ) {
+                    append(linkText)
+                    addStringAnnotation("profileLink", match.npub, startIndex, endIndex)
+                    currentIndex = endIndex
+
+                }
+            }
+        }
+        append(refinedContent.substring(currentIndex))
+    }
+
     val contentText = buildAnnotatedString {
-        append(refinedContent)
+        append(contentWithProfileLinks)
         refinedUrlResources
             .map { it.url }
             .forEach {
-                val startIndex = refinedContent.indexOf(it)
+                val startIndex = contentWithProfileLinks.indexOf(it)
                 val endIndex = startIndex + it.length
                 addStyle(
                     style = SpanStyle(
@@ -272,9 +313,16 @@ fun PostContent(
                 maxLines = 12,
                 overflow = TextOverflow.Ellipsis,
                 onClick = { position, offset ->
-                    contentText.getStringAnnotations(tag = "URL", start = position, end = position)
+                    contentText.getStringAnnotations(
+                        start = position,
+                        end = position
+                    )
                         .firstOrNull()?.let { annotation ->
-                            onUrlClick(annotation.item)
+                            if (annotation.tag == "profileLink") {
+                                onProfileClick(annotation.item.bechToBytes().toHex())
+                            } else if (annotation.tag == "URL"){
+                                onUrlClick(annotation.item)
+                            }
                         } ?: onClick(offset)
                 }
             )
@@ -293,9 +341,11 @@ fun PostContent(
                         val density = LocalDensity.current.density
                         val maxWidthPx = with(LocalDensity.current) { maxWidth.roundToPx() }
                         val maxWidth = maxWidth.value.toInt()
-                        val maxHeight = (LocalConfiguration.current.screenHeightDp * 0.77).toInt()
+                        val maxHeight =
+                            (LocalConfiguration.current.screenHeightDp * 0.77).toInt()
 
-                        val variant = resource.variants.findNearestOrNull(maxWidthPx = maxWidthPx)
+                        val variant =
+                            resource.variants.findNearestOrNull(maxWidthPx = maxWidthPx)
                         val imageSizeDp = variant.calculateImageSize(
                             maxWidth = maxWidth,
                             maxHeight = maxHeight,
@@ -561,6 +611,7 @@ fun PreviewFeedPostListItemLight() {
                 authorAvatarUrl = "https://i.imgur.com/Z8dpmvc.png",
                 timestamp = Instant.now().minus(30, ChronoUnit.MINUTES),
                 authorResources = emptyList(),
+                profileLinks = emptyList(),
                 stats = FeedPostStatsUi(
                     repliesCount = 11,
                     likesCount = 256,
@@ -600,6 +651,7 @@ fun PreviewFeedPostListItemDark() {
                 authorAvatarUrl = "https://i.imgur.com/Z8dpmvc.png",
                 timestamp = Instant.now().minus(30, ChronoUnit.MINUTES),
                 authorResources = emptyList(),
+                profileLinks = emptyList(),
                 stats = FeedPostStatsUi(
                     repliesCount = 11,
                     userReplied = true,

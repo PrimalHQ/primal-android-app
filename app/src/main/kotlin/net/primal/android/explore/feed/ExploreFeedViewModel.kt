@@ -32,7 +32,7 @@ class ExploreFeedViewModel @Inject constructor(
         UiState(
             title = exploreQuery.removeSearchPrefix(),
             posts = feedRepository.feedByDirective(feedDirective = exploreQuery)
-                .map { it.map { feed -> feed.asFeedPostUi() } }
+                .map { it.map { feed -> feed.asFeedPostUi(emptyList()) } }
                 .cachedIn(viewModelScope),
         )
     )

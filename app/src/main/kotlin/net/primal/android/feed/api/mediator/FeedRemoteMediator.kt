@@ -25,6 +25,7 @@ import net.primal.android.nostr.ext.asEventStatsPO
 import net.primal.android.nostr.ext.asEventUserStatsPO
 import net.primal.android.nostr.ext.asMediaResourcePO
 import net.primal.android.nostr.ext.asPost
+import net.primal.android.nostr.ext.flatMapAsPostNip19Entities
 import net.primal.android.nostr.ext.flatMapAsPostResources
 import net.primal.android.nostr.ext.mapAsProfileMetadata
 import net.primal.android.nostr.ext.mapNotNullAsPost
@@ -302,6 +303,7 @@ class FeedRemoteMediator(
             )
 
             database.resources().upsert(data = posts.flatMapAsPostResources())
+            database.nip19Entities().upsert(data = posts.flatMapAsPostNip19Entities())
             Timber.i("Received ${posts.size} posts and ${reposts.size} reposts..")
         }
     }

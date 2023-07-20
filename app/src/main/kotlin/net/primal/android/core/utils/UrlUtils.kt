@@ -9,6 +9,18 @@ fun String.parseUrls(): List<String> {
     return links.map { it.originalUrl }
 }
 
+fun String.parseNip19(): List<String> {
+    val regex = Regex("(nostr:((npub|nprofile)[0-9a-z]+))")
+    return regex.findAll(this).map { matchResult ->
+//        val npubOrNprofile = matchResult.groupValues[2]
+        val link = matchResult.groupValues[1]
+        link
+  //      ProfileLinkUi(npubOrNprofile, link, "TODO")
+    }.toList()
+}
+
+
+
 fun String?.detectContentType(): String? {
     return when {
         this == null -> null

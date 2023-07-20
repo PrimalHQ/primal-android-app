@@ -10,8 +10,8 @@
         <option name="gradleJvm" value="jbr-17" />
         <option name="modules">
           <set>
-            <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/app" />
+            <option value="/media/fmar/disk/workspace/primal-android-app" />
+            <option value="/media/fmar/disk/workspace/primal-android-app/app" />
           </set>
         </option>
       </GradleProjectSettings>

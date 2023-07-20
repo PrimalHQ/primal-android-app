@@ -16,6 +16,7 @@ import net.primal.android.feed.db.FeedPostSync
 import net.primal.android.feed.db.FeedPostSyncDao
 import net.primal.android.feed.db.MediaResource
 import net.primal.android.feed.db.MediaResourcesDao
+import net.primal.android.feed.db.Nip19EntityDao
 import net.primal.android.feed.db.PostDao
 import net.primal.android.feed.db.PostData
 import net.primal.android.feed.db.PostStats
@@ -64,6 +65,8 @@ abstract class PrimalDatabase : RoomDatabase() {
     abstract fun postStats(): PostStatsDao
 
     abstract fun resources(): MediaResourcesDao
+
+    abstract fun nip19Entities(): Nip19EntityDao
 
     abstract fun feeds(): FeedDao
 
