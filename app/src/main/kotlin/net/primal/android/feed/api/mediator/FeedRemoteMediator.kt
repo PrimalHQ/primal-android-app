@@ -7,7 +7,6 @@ import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.decodeFromString
 import net.primal.android.core.ext.isLatestFeed
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.feed.api.FeedApi
@@ -302,8 +301,14 @@ class FeedRemoteMediator(
                 }
             )
 
+            val mapOwnerIdToProfileMetadata = metadataEvents
+                .mapAsProfileMetadata()
+                .groupBy { it.ownerId }
+                .mapKeys { it.value.first().ownerId }
+                .mapValues { it.value.first() }
+
             database.resources().upsert(data = posts.flatMapAsPostResources())
-            database.nip19Entities().upsert(data = posts.flatMapAsPostNip19Entities())
+            database.nip19Entities().upsert(data = posts.flatMapAsPostNip19Entities(mapOwnerIdToProfileMetadata))
             Timber.i("Received ${posts.size} posts and ${reposts.size} reposts..")
         }
     }

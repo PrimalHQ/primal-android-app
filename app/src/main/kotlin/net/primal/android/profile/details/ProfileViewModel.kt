@@ -39,7 +39,7 @@ class ProfileViewModel @Inject constructor(
         UiState(
             profileId = profileId,
             authoredPosts = feedRepository.feedByDirective(feedDirective = "authored;$profileId")
-                .map { it.map { feed -> feed.asFeedPostUi(emptyList()) } }
+                .map { it.map { feed -> feed.asFeedPostUi() } }
                 .cachedIn(viewModelScope),
         )
     )

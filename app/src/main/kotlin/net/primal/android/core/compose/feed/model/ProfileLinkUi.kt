@@ -1,7 +1,7 @@
 package net.primal.android.core.compose.feed.model
 
 data class ProfileLinkUi(
-    val npub: String,
+    val profileId: String?,
     val link: String,
-    val displayName: String,
+    val displayName: String?,
 )

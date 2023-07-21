@@ -1,37 +1,15 @@
 package net.primal.android.core.compose.feed
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import net.primal.android.core.compose.feed.model.FeedPostStatsUi
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.feed.model.ProfileLinkUi
 import net.primal.android.core.compose.media.model.MediaResourceUi
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.feed.db.FeedPost
-import net.primal.android.nostr.ext.asEllipsizedNpub
-import net.primal.android.nostr.ext.displayNameUiFriendly
+import net.primal.android.profile.db.displayNameUiFriendly
 import java.time.Instant
 
-fun String.replaceNip21Links(): List<ProfileLinkUi> {
-    val regex = Regex("(nostr:((npub|nprofile)[0-9a-z]+))")
-    return regex.findAll(this).map { matchResult ->
-        val npubOrNprofile = matchResult.groupValues[2]
-        val link = matchResult.groupValues[1]
-        ProfileLinkUi(npubOrNprofile, link, "TODO")
-    }.toList()
-}
-
-//fun FeedPost.loadProfileLinks(profileRepository: ProfileRepository) : FeedPost {
-//    val regex = Regex("(nostr:((npub|nprofile)[0-9a-z]+))")
-//    this.profileLinks = regex.findAll(this.data.content).map { matchResult ->
-//        val npubOrNprofile = matchResult.groupValues[2]
-//        val link = matchResult.groupValues[1]
-//        ProfileMetadata()
-//    }.toList()
-//    this
-//}
-
-fun FeedPost.asFeedPostUi(profiles: List<Profile>) = FeedPostUi(
+fun FeedPost.asFeedPostUi() = FeedPostUi(
     postId = this.data.postId,
     repostId = this.data.repostId,
     repostAuthorId = this.data.repostAuthorId,
@@ -58,7 +36,13 @@ fun FeedPost.asFeedPostUi(profiles: List<Profile>) = FeedPostUi(
             variants = it.variants ?: emptyList(),
         )
     },
-    profileLinks = this.data.content.replaceNip21Links(),
+    profileLinks = this.nip19Entities.map {
+        ProfileLinkUi(
+            displayName = it.displayName,
+            link = it.link,
+            profileId = it.profileId,
+        )
+    },
     stats = FeedPostStatsUi(
         repliesCount = this.postStats?.replies ?: 0,
         userReplied = this.userStats?.userReplied ?: false,

@@ -1,14 +1,6 @@
 package net.primal.android.core.compose.feed
 
 import android.content.res.Configuration
-import android.text.Spannable
-import android.text.SpannableString
-import android.text.SpannableStringBuilder
-import android.text.Spanned
-import android.text.style.ClickableSpan
-import android.text.style.ForegroundColorSpan
-import android.util.Log
-import android.view.View
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -59,7 +51,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.text.buildSpannedString
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.AvatarThumbnailListItemImage
@@ -85,8 +76,6 @@ import net.primal.android.core.ext.findNearestOrNull
 import net.primal.android.core.ext.openUriSafely
 import net.primal.android.core.utils.asBeforeNowFormat
 import net.primal.android.core.utils.isPrimalIdentifier
-import net.primal.android.crypto.bechToBytes
-import net.primal.android.crypto.toHex
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import java.time.Instant
@@ -239,6 +228,45 @@ private fun String.withoutUrls(urls: List<String>): String {
     return newContent
 }
 
+private fun String.replaceNip19WithAnnotatedLinks(
+    links: List<ProfileLinkUi>,
+    spanStyle: SpanStyle,
+    tag: String
+): AnnotatedString {
+    val pattern = links.map { it.link }.joinToString(separator = "|") { Regex.escape(it) }
+    val regex = Regex(pattern, RegexOption.IGNORE_CASE)
+    val builder = AnnotatedString.Builder()
+    var lastEnd = 0
+
+    regex.findAll(this).forEach { result ->
+        if (result.range.first > lastEnd) {
+            builder.append(this.substring(lastEnd, result.range.first))
+        }
+        val link = links.firstOrNull { it.link == result.value }
+        if (link != null) {
+            val text = link.displayName ?: result.value
+            builder.withStyle(spanStyle) {
+                append(text)
+                addStringAnnotation(
+                    tag,
+                    link.profileId ?: "",
+                    start = builder.length - text.length,
+                    end = builder.length
+                )
+            }
+        } else {
+            builder.append(result.value)
+        }
+        lastEnd = result.range.last + 1
+    }
+    if (lastEnd < this.length) {
+        builder.append(this.substring(lastEnd))
+    }
+    return builder.toAnnotatedString()
+}
+
+private const val PROFILE_ID_ANNOTATION_TAG = "profileId"
+
 @Composable
 fun PostContent(
     content: String,
@@ -253,37 +281,20 @@ fun PostContent(
 
     val refinedContent = remember {
         content.withoutUrls(urls = imageResources.map { it.url }).trim()
-    }
-
-    val contentWithProfileLinks = buildAnnotatedString {
-        var currentIndex = 0
-        profileLinks.forEach { match ->
-            val startIndex = refinedContent.indexOf(match.link, currentIndex)
-            if (startIndex >= 0) {
-                val endIndex = startIndex + match.link.length
-                val linkText = match.displayName
-                append(refinedContent.substring(currentIndex, startIndex))
-                withStyle(
-                    style = SpanStyle(
-                        color = AppTheme.colorScheme.primary,
-                    )
-                ) {
-                    append(linkText)
-                    addStringAnnotation("profileLink", match.npub, startIndex, endIndex)
-                    currentIndex = endIndex
-
-                }
-            }
-        }
-        append(refinedContent.substring(currentIndex))
-    }
+    }.replaceNip19WithAnnotatedLinks(
+        profileLinks,
+        SpanStyle(
+            color = AppTheme.colorScheme.primary,
+        ),
+        PROFILE_ID_ANNOTATION_TAG,
+    )
 
     val contentText = buildAnnotatedString {
-        append(contentWithProfileLinks)
+        append(refinedContent)
         refinedUrlResources
             .map { it.url }
             .forEach {
-                val startIndex = contentWithProfileLinks.indexOf(it)
+                val startIndex = refinedContent.indexOf(it)
                 val endIndex = startIndex + it.length
                 addStyle(
                     style = SpanStyle(
@@ -318,9 +329,9 @@ fun PostContent(
                         end = position
                     )
                         .firstOrNull()?.let { annotation ->
-                            if (annotation.tag == "profileLink") {
-                                onProfileClick(annotation.item.bechToBytes().toHex())
-                            } else if (annotation.tag == "URL"){
+                            if (annotation.tag == PROFILE_ID_ANNOTATION_TAG) {
+                                onProfileClick(annotation.item)
+                            } else if (annotation.tag == "URL") {
                                 onUrlClick(annotation.item)
                             }
                         } ?: onClick(offset)

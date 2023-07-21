@@ -47,7 +47,7 @@ class ThreadViewModel @Inject constructor(
         val rootPost = withContext(Dispatchers.IO) { repository.findPostById(postId = postId) }
         setState {
             copy(
-                conversation = listOf(rootPost.asFeedPostUi(emptyList())),
+                conversation = listOf(rootPost.asFeedPostUi()),
                 highlightPostIndex = 0,
             )
         }
@@ -61,7 +61,7 @@ class ThreadViewModel @Inject constructor(
             .collect { conversation ->
                 setState {
                     copy(
-                        conversation = conversation.map { it.asFeedPostUi(emptyList()) },
+                        conversation = conversation.map { it.asFeedPostUi() },
                         highlightPostIndex = conversation.indexOfFirst { it.data.postId == postId },
                     )
                 }

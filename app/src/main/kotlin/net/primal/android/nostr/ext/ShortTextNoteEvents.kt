@@ -1,7 +1,6 @@
 package net.primal.android.nostr.ext
 
 import net.primal.android.core.utils.parseUrls
-import net.primal.android.core.utils.parseNip19
 import net.primal.android.feed.db.PostData
 import net.primal.android.nostr.model.NostrEvent
 
