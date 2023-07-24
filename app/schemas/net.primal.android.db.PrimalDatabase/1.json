@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "47de896f172fe423ab340c9bc94bf09f",
+    "identityHash": "2cda575b332089cf233c013848bc270b",
     "entities": [
       {
         "tableName": "PostData",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`postId` TEXT NOT NULL, `authorId` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `tags` TEXT NOT NULL, `content` TEXT NOT NULL, `urls` TEXT NOT NULL, `nip19Links` TEXT NOT NULL, `sig` TEXT NOT NULL, `authorMetadataId` TEXT, `referencePostId` TEXT, `referencePostAuthorId` TEXT, `referencePostAuthorMetadataId` TEXT, PRIMARY KEY(`postId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`postId` TEXT NOT NULL, `authorId` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `tags` TEXT NOT NULL, `content` TEXT NOT NULL, `urls` TEXT NOT NULL, `sig` TEXT NOT NULL, `authorMetadataId` TEXT, `referencePostId` TEXT, `referencePostAuthorId` TEXT, `referencePostAuthorMetadataId` TEXT, PRIMARY KEY(`postId`))",
         "fields": [
           {
             "fieldPath": "postId",
@@ -41,12 +41,6 @@
           {
             "fieldPath": "urls",
             "columnName": "urls",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "nip19Links",
-            "columnName": "nip19Links",
             "affinity": "TEXT",
             "notNull": true
           },
@@ -678,51 +672,12 @@
         },
         "indices": [],
         "foreignKeys": []
-      },
-      {
-        "tableName": "Nip19Entity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`eventId` TEXT NOT NULL, `link` TEXT NOT NULL, `profileId` TEXT, `displayName` TEXT, PRIMARY KEY(`eventId`, `link`))",
-        "fields": [
-          {
-            "fieldPath": "eventId",
-            "columnName": "eventId",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "link",
-            "columnName": "link",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "profileId",
-            "columnName": "profileId",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "displayName",
-            "columnName": "displayName",
-            "affinity": "TEXT",
-            "notNull": false
-          }
-        ],
-        "primaryKey": {
-          "autoGenerate": false,
-          "columnNames": [
-            "eventId",
-            "link"
-          ]
-        },
-        "indices": [],
-        "foreignKeys": []
       }
     ],
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '47de896f172fe423ab340c9bc94bf09f')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '2cda575b332089cf233c013848bc270b')"
     ]
   }
 }
