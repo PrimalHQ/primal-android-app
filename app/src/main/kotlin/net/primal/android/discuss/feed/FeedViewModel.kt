@@ -33,7 +33,6 @@ class FeedViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val feedRepository: FeedRepository,
     private val activeAccountStore: ActiveAccountStore,
-    private val profileRepository: ProfileRepository,
 ) : ViewModel() {
 
     private val feedDirective: String = savedStateHandle.feedDirective ?: "network;trending"
