@@ -1,6 +1,6 @@
 package net.primal.android.nostr.ext
 
-import net.primal.android.core.utils.parseUrls
+import net.primal.android.core.utils.parseUris
 import net.primal.android.feed.db.PostData
 import net.primal.android.nostr.model.NostrEvent
 
@@ -12,7 +12,6 @@ fun NostrEvent.asPost(): PostData = PostData(
     createdAt = this.createdAt,
     tags = this.tags,
     content = this.content,
-    urls = this.content.parseUrls(),
-    nip19Links = this.content.parseNip19(),
+    uris = this.content.parseUris(),
     sig = this.sig,
 )

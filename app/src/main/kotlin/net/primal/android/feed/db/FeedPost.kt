@@ -19,7 +19,7 @@ data class FeedPost(
         entityColumn = "eventId",
         parentColumn = "postId",
     )
-    val nip19Entities: List<Nip19Entity>,
+    val nostrUris: List<NostrUri>,
 
     @Relation(
         entityColumn = "ownerId",

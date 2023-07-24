@@ -4,9 +4,9 @@ import androidx.room.Dao
 import androidx.room.Upsert
 
 @Dao
-interface Nip19EntityDao {
+interface NostrUriDao {
 
     @Upsert
-    fun upsert(data: List<Nip19Entity>)
+    fun upsert(data: List<NostrUri>)
 
 }

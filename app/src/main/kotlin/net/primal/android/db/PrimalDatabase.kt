@@ -16,8 +16,8 @@ import net.primal.android.feed.db.FeedPostSync
 import net.primal.android.feed.db.FeedPostSyncDao
 import net.primal.android.feed.db.MediaResource
 import net.primal.android.feed.db.MediaResourcesDao
-import net.primal.android.feed.db.Nip19Entity
-import net.primal.android.feed.db.Nip19EntityDao
+import net.primal.android.feed.db.NostrUri
+import net.primal.android.feed.db.NostrUriDao
 import net.primal.android.feed.db.PostDao
 import net.primal.android.feed.db.PostData
 import net.primal.android.feed.db.PostStats
@@ -50,7 +50,7 @@ import net.primal.android.thread.db.ConversationDao
         PostUserStats::class,
         TrendingHashtag::class,
         ProfileStats::class,
-        Nip19Entity::class,
+        NostrUri::class,
     ],
     version = 2,
     exportSchema = true,
@@ -68,7 +68,7 @@ abstract class PrimalDatabase : RoomDatabase() {
 
     abstract fun resources(): MediaResourcesDao
 
-    abstract fun nip19Entities(): Nip19EntityDao
+    abstract fun nostrUris(): NostrUriDao
 
     abstract fun feeds(): FeedDao
 

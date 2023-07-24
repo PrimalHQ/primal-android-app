@@ -1,8 +1,6 @@
 package net.primal.android.core.compose.feed.model
 
 import net.primal.android.core.compose.media.model.MediaResourceUi
-import net.primal.android.profile.db.ProfileMetadata
-import net.primal.android.profile.details.model.ProfileDetailsUi
 import java.time.Instant
 
 data class FeedPostUi(
@@ -17,7 +15,7 @@ data class FeedPostUi(
     val content: String,
     val authorResources: List<MediaResourceUi>,
     val postResources: List<MediaResourceUi>,
-    val profileLinks: List<ProfileLinkUi>,
+    val nostrUris: List<NostrUriUi>,
     val timestamp: Instant,
     val stats: FeedPostStatsUi,
 )
