@@ -22,7 +22,6 @@ import net.primal.android.discuss.feed.FeedContract.UiEvent
 import net.primal.android.discuss.feed.FeedContract.UiState
 import net.primal.android.feed.repository.FeedRepository
 import net.primal.android.navigation.feedDirective
-import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.active.ActiveAccountStore
 import net.primal.android.user.active.ActiveUserAccountState
 import java.time.Instant
@@ -40,12 +39,7 @@ class FeedViewModel @Inject constructor(
     private val _state = MutableStateFlow(
         UiState(
             posts = feedRepository.feedByDirective(feedDirective = feedDirective)
-                .map { pagingData ->
-                    pagingData
-                        .map { post ->
-                            post.asFeedPostUi()
-                        }
-                }
+                .map { it.map { feed -> feed.asFeedPostUi() } }
                 .cachedIn(viewModelScope),
         )
     )
