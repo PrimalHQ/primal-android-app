@@ -17,6 +17,7 @@ import net.primal.android.core.ext.removeSearchPrefix
 import net.primal.android.explore.feed.ExploreFeedContract.UiEvent
 import net.primal.android.explore.feed.ExploreFeedContract.UiState
 import net.primal.android.feed.repository.FeedRepository
+import net.primal.android.feed.repository.PostRepository
 import net.primal.android.navigation.searchQuery
 import javax.inject.Inject
 
@@ -24,6 +25,7 @@ import javax.inject.Inject
 class ExploreFeedViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val feedRepository: FeedRepository,
+    private val postRepository: PostRepository,
 ) : ViewModel() {
 
     private val exploreQuery = "search;${savedStateHandle.searchQuery}"
@@ -64,6 +66,7 @@ class ExploreFeedViewModel @Inject constructor(
             when (it) {
                 UiEvent.AddToUserFeeds -> addToMyFeeds()
                 UiEvent.RemoveFromUserFeeds -> removeFromMyFeeds()
+                is UiEvent.PostLikeAction -> likePost(it)
             }
         }
     }
@@ -74,5 +77,16 @@ class ExploreFeedViewModel @Inject constructor(
 
     private suspend fun removeFromMyFeeds() {
         feedRepository.removeFromUserFeeds(directive = exploreQuery)
+    }
+
+    private fun likePost(postLikeAction: UiEvent.PostLikeAction) = viewModelScope.launch {
+        try {
+            postRepository.likePost(
+                postId = postLikeAction.postId,
+                postAuthorId = postLikeAction.postAuthorId,
+            )
+        } catch (error: PostRepository.FailedToPublishLikeEvent) {
+            // Propagate error to the UI
+        }
     }
 }

@@ -7,7 +7,6 @@ import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.decodeFromString
 import net.primal.android.core.ext.isLatestFeed
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.feed.api.FeedApi
@@ -19,8 +18,8 @@ import net.primal.android.feed.db.FeedPostSync
 import net.primal.android.feed.db.sql.ExploreFeedQueryBuilder
 import net.primal.android.feed.db.sql.FeedQueryBuilder
 import net.primal.android.feed.db.sql.LatestFeedQueryBuilder
-import net.primal.android.networking.sockets.NostrNoticeException
-import net.primal.android.networking.sockets.WssException
+import net.primal.android.networking.sockets.errors.NostrNoticeException
+import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.ext.asEventStatsPO
 import net.primal.android.nostr.ext.asEventUserStatsPO
 import net.primal.android.nostr.ext.asMediaResourcePO

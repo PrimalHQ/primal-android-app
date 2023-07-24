@@ -1,4 +1,4 @@
-package net.primal.android.nostr
+package net.primal.android.nostr.notary
 
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.add
@@ -8,7 +8,6 @@ import net.primal.android.crypto.Bech32
 import net.primal.android.crypto.CryptoUtils
 import net.primal.android.crypto.toHex
 import net.primal.android.nostr.model.NostrEvent
-import net.primal.android.nostr.model.NostrUnsignedEvent
 import net.primal.android.serialization.NostrJson
 
 

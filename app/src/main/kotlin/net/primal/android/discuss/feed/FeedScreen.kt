@@ -95,6 +95,14 @@ fun FeedScreen(
                 posts = state.posts,
                 onPostClick = onPostClick,
                 onProfileClick = onProfileClick,
+                onPostLike = {
+                    eventPublisher(
+                        FeedContract.UiEvent.PostLikeAction(
+                            postId = it.postId,
+                            postAuthorId = it.authorId,
+                        )
+                    )
+                },
                 syncStats = state.syncStats,
                 paddingValues = paddingValues,
                 feedListState = feedListState,

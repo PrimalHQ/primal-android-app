@@ -9,7 +9,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import net.primal.android.networking.sockets.SocketClient
+import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.security.Encryption
 import net.primal.android.serialization.CredentialsSerialization
 import net.primal.android.serialization.StringSerializer
@@ -56,8 +56,8 @@ object UserModule {
 
     @Provides
     fun provideUsersApi(
-        socketClient: SocketClient,
+        primalApiClient: PrimalApiClient,
     ): UsersApi = UsersApiImpl(
-        socketClient = socketClient,
+        primalApiClient = primalApiClient,
     )
 }

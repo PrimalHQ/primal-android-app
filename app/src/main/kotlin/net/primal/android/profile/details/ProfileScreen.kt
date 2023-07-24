@@ -106,6 +106,7 @@ fun ProfileScreen(
         onClose = onClose,
         onPostClick = onPostClick,
         onProfileClick = onProfileClick,
+        eventPublisher = { viewModel.setEvent(it) },
     )
 }
 
@@ -129,6 +130,7 @@ fun ProfileScreen(
     onClose: () -> Unit,
     onPostClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
+    eventPublisher: (ProfileContract.UiEvent) -> Unit,
 ) {
     val density = LocalDensity.current
 
@@ -195,6 +197,14 @@ fun ProfileScreen(
                     onProfileClick(it)
                 }
             },
+            onPostLike = {
+                eventPublisher(
+                    ProfileContract.UiEvent.PostLikeAction(
+                        postId = it.postId,
+                        postAuthorId = it.authorId,
+                    )
+                )
+            },
             shouldShowLoadingState = false,
             shouldShowNoContentState = false,
             stickyHeader = {
@@ -254,7 +264,7 @@ fun ProfileScreen(
                         is LoadState.Error -> Unit
                     }
                 }
-            }
+            },
         )
     }
 }

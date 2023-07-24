@@ -56,6 +56,7 @@ import net.primal.android.core.compose.AvatarThumbnailListItemImage
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.PostImageListItemImage
 import net.primal.android.core.compose.PrimalClickableText
+import net.primal.android.core.compose.feed.model.FeedPostAction
 import net.primal.android.core.compose.feed.model.FeedPostStatsUi
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -87,6 +88,7 @@ fun FeedPostListItem(
     highlighted: Boolean = false,
     onPostClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
+    onPostAction: (FeedPostAction) -> Unit,
 ) {
     val localUriHandler = LocalUriHandler.current
     val uiScope = rememberCoroutineScope()
@@ -147,6 +149,7 @@ fun FeedPostListItem(
 
             PostStatsItem(
                 postStats = data.stats,
+                onPostAction = onPostAction,
             )
         }
     }
@@ -323,6 +326,7 @@ private fun Int.toPostStatString(): String = if (this > 0) toString() else ""
 @Composable
 fun PostStatsItem(
     postStats: FeedPostStatsUi,
+    onPostAction: (FeedPostAction) -> Unit,
 ) {
     Row(
         modifier = Modifier
@@ -336,6 +340,7 @@ fun PostStatsItem(
             highlight = postStats.userReplied,
             iconVector = PrimalIcons.FeedReplies,
             iconVectorHighlight = PrimalIcons.FeedRepliesFilled,
+            onClick = { onPostAction(FeedPostAction.Reply) },
         )
 
         SinglePostStat(
@@ -343,6 +348,7 @@ fun PostStatsItem(
             highlight = postStats.userZapped,
             iconVector = PrimalIcons.FeedZaps,
             iconVectorHighlight = PrimalIcons.FeedZapsFilled,
+            onClick = { onPostAction(FeedPostAction.Zap) },
         )
 
         SinglePostStat(
@@ -350,6 +356,7 @@ fun PostStatsItem(
             highlight = postStats.userLiked,
             iconVector = PrimalIcons.FeedLikes,
             iconVectorHighlight = PrimalIcons.FeedLikesFilled,
+            onClick = { onPostAction(FeedPostAction.Like) },
         )
 
         SinglePostStat(
@@ -357,6 +364,7 @@ fun PostStatsItem(
             highlight = postStats.userReposted,
             iconVector = PrimalIcons.FeedReposts,
             iconVectorHighlight = PrimalIcons.FeedRepostsFilled,
+            onClick = { onPostAction(FeedPostAction.Repost) },
         )
     }
 }
@@ -367,6 +375,7 @@ fun SinglePostStat(
     highlight: Boolean,
     iconVector: ImageVector,
     iconVectorHighlight: ImageVector,
+    onClick: () -> Unit
 ) {
     val titleText = buildAnnotatedString {
         appendInlineContent("icon", "[icon]")
@@ -396,6 +405,7 @@ fun SinglePostStat(
     )
 
     Text(
+        modifier = Modifier.clickable { onClick() },
         text = titleText,
         style = AppTheme.typography.bodyMedium,
         color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
@@ -571,6 +581,7 @@ fun PreviewFeedPostListItemLight() {
             ),
             onPostClick = {},
             onProfileClick = {},
+            onPostAction = {},
         )
     }
 
@@ -610,6 +621,7 @@ fun PreviewFeedPostListItemDark() {
             ),
             onPostClick = {},
             onProfileClick = {},
+            onPostAction = {},
         )
     }
 

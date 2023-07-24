@@ -95,7 +95,7 @@ fun ExploreFeedScreen(
                                     )
                                 }
                             }
-                          },
+                        },
                     )
                 },
                 scrollBehavior = scrollBehavior,
@@ -108,6 +108,14 @@ fun ExploreFeedScreen(
                 feedListState = listState,
                 onPostClick = onPostClick,
                 onProfileClick = onProfileClick,
+                onPostLike = {
+                    eventPublisher(
+                        ExploreFeedContract.UiEvent.PostLikeAction(
+                            postId = it.postId,
+                            postAuthorId = it.authorId,
+                        )
+                    )
+                },
             )
         },
         snackbarHost = {

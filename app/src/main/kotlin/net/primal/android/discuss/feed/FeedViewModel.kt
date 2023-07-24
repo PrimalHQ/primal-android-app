@@ -15,12 +15,13 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import net.primal.android.core.compose.feed.asFeedPostUi
+import net.primal.android.core.compose.feed.model.FeedPostsSyncStats
 import net.primal.android.core.utils.ellipsizeMiddle
 import net.primal.android.discuss.feed.FeedContract.UiEvent
 import net.primal.android.discuss.feed.FeedContract.UiState
 import net.primal.android.feed.repository.FeedRepository
-import net.primal.android.core.compose.feed.asFeedPostUi
-import net.primal.android.core.compose.feed.model.FeedPostsSyncStats
+import net.primal.android.feed.repository.PostRepository
 import net.primal.android.navigation.feedDirective
 import net.primal.android.user.active.ActiveAccountStore
 import net.primal.android.user.active.ActiveUserAccountState
@@ -31,6 +32,7 @@ import javax.inject.Inject
 class FeedViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val feedRepository: FeedRepository,
+    private val postRepository: PostRepository,
     private val activeAccountStore: ActiveAccountStore,
 ) : ViewModel() {
 
@@ -110,6 +112,7 @@ class FeedViewModel @Inject constructor(
         _event.collect {
             when (it) {
                 UiEvent.FeedScrolledToTop -> clearSyncStats()
+                is UiEvent.PostLikeAction -> likePost(it)
             }
         }
     }
@@ -122,6 +125,17 @@ class FeedViewModel @Inject constructor(
                     postsCount = 0
                 )
             )
+        }
+    }
+
+    private fun likePost(postLikeAction: UiEvent.PostLikeAction) = viewModelScope.launch {
+        try {
+            postRepository.likePost(
+                postId = postLikeAction.postId,
+                postAuthorId = postLikeAction.postAuthorId,
+            )
+        } catch (error: PostRepository.FailedToPublishLikeEvent) {
+            // Propagate error to the UI
         }
     }
 

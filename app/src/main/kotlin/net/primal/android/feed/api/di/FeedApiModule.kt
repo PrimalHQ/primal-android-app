@@ -6,16 +6,16 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import net.primal.android.feed.api.FeedApi
 import net.primal.android.feed.api.FeedApiImpl
-import net.primal.android.networking.sockets.SocketClient
+import net.primal.android.networking.primal.PrimalApiClient
 
 @Module
 @InstallIn(SingletonComponent::class)
 object FeedApiModule {
     @Provides
     fun provideFeedApi(
-        socketClient: SocketClient,
+        primalApiClient: PrimalApiClient,
     ): FeedApi = FeedApiImpl(
-        socketClient = socketClient,
+        primalApiClient = primalApiClient,
     )
 
 }

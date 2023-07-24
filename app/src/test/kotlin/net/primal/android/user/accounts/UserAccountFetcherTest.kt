@@ -8,7 +8,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.add
 import kotlinx.serialization.json.buildJsonArray
-import net.primal.android.networking.sockets.WssException
+import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.primal.PrimalEvent
 import net.primal.android.user.api.UsersApi

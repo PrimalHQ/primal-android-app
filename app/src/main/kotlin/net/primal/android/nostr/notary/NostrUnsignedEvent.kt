@@ -1,4 +1,4 @@
-package net.primal.android.nostr.model
+package net.primal.android.nostr.notary
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

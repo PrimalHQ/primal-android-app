@@ -1,22 +1,21 @@
-package net.primal.android.networking.sockets
+package net.primal.android.networking.primal
 
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
-import net.primal.android.networking.sockets.model.IncomingMessage
+import net.primal.android.networking.sockets.NostrIncomingMessage
 import net.primal.android.nostr.ext.isNotPrimalEventKind
 import net.primal.android.nostr.ext.isNotUnknown
 import net.primal.android.nostr.ext.isPrimalEventKind
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.NostrEventKind
-import net.primal.android.nostr.model.NostrVerb
 import net.primal.android.nostr.model.primal.PrimalEvent
 import org.junit.Test
 import java.util.UUID
 
-class SocketQueryResultExtTests {
+class PrimalQueryResultTest {
 
     private val nostrEvents = List(50) {
         NostrEventKind.values()
@@ -47,9 +46,8 @@ class SocketQueryResultExtTests {
     private fun buildQueryResult(
         nostrEvents: List<NostrEvent> = emptyList(),
         primalEvents: List<PrimalEvent> = emptyList(),
-    ) = SocketQueryResult(
-        terminationMessage = IncomingMessage(
-            type = NostrVerb.Incoming.EOSE,
+    ) = PrimalQueryResult(
+        terminationMessage = NostrIncomingMessage.EoseMessage(
             subscriptionId = UUID.randomUUID(),
         ),
         nostrEvents = nostrEvents,

@@ -4,4 +4,8 @@ import javax.inject.Qualifier
 
 @Qualifier
 @Target(AnnotationTarget.FUNCTION, AnnotationTarget.VALUE_PARAMETER)
-annotation class PrimalApiWS
+annotation class PrimalApiBaseUrl
+
+@Qualifier
+@Target(AnnotationTarget.FUNCTION, AnnotationTarget.VALUE_PARAMETER)
+annotation class PrimalSocketClient

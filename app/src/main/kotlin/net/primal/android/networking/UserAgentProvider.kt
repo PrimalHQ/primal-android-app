@@ -4,7 +4,7 @@ import net.primal.android.BuildConfig
 
 object UserAgentProvider {
 
-    private const val APP_NAME = "Primal-Android"
+    const val APP_NAME = "Primal-Android"
 
     const val USER_AGENT = "$APP_NAME/${BuildConfig.VERSION_NAME}"
 

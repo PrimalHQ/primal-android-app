@@ -59,6 +59,7 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.AvatarThumbnailListItemImage
+import net.primal.android.core.compose.feed.model.FeedPostAction
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.feed.model.FeedPostsSyncStats
 import net.primal.android.core.compose.isEmpty
@@ -72,6 +73,7 @@ fun FeedPostList(
     posts: Flow<PagingData<FeedPostUi>>,
     onPostClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
+    onPostLike: (FeedPostUi) -> Unit,
     syncStats: FeedPostsSyncStats = FeedPostsSyncStats(),
     paddingValues: PaddingValues = PaddingValues(0.dp),
     feedListState: LazyListState = rememberLazyListState(),
@@ -129,6 +131,7 @@ fun FeedPostList(
             listState = feedListState,
             onPostClick = onPostClick,
             onProfileClick = onProfileClick,
+            onPostLike = onPostLike,
         )
 
         AnimatedVisibility(
@@ -163,6 +166,7 @@ fun FeedLazyColumn(
     listState: LazyListState,
     onPostClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
+    onPostLike: (FeedPostUi) -> Unit,
     shouldShowLoadingState: Boolean = true,
     shouldShowNoContentState: Boolean = true,
     header: @Composable (LazyItemScope.() -> Unit)? = null,
@@ -211,7 +215,16 @@ fun FeedLazyColumn(
                 item != null -> FeedPostListItem(
                     data = item,
                     onPostClick = { postId -> onPostClick(postId) },
-                    onProfileClick = { profileId -> onProfileClick(profileId) }
+                    onProfileClick = { profileId -> onProfileClick(profileId) },
+                    onPostAction = { postAction ->
+                        when (postAction) {
+                            FeedPostAction.Reply -> Unit
+                            FeedPostAction.Zap -> Unit
+                            FeedPostAction.Like -> onPostLike(item)
+                            FeedPostAction.Repost -> Unit
+
+                        }
+                   },
                 )
 
                 else -> {}

@@ -18,9 +18,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import net.primal.android.R
 import net.primal.android.core.compose.PrimalTopAppBar
+import net.primal.android.core.compose.feed.FeedPostListItem
+import net.primal.android.core.compose.feed.model.FeedPostAction
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
-import net.primal.android.core.compose.feed.FeedPostListItem
 
 @Composable
 fun ThreadScreen(
@@ -37,6 +38,7 @@ fun ThreadScreen(
         onClose = onClose,
         onPostClick = onPostClick,
         onProfileClick = onProfileClick,
+        eventPublisher = { viewModel.setEvent(it) }
     )
 }
 
@@ -47,6 +49,7 @@ fun ThreadScreen(
     onClose: () -> Unit,
     onPostClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
+    eventPublisher: (ThreadContract.UiEvent) -> Unit,
 ) {
     val topAppBarState = rememberTopAppBarState()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(topAppBarState)
@@ -89,6 +92,19 @@ fun ThreadScreen(
                                 }
                             },
                             onProfileClick = { profileId -> onProfileClick(profileId) },
+                            onPostAction = {
+                                when (it) {
+                                    FeedPostAction.Reply -> Unit
+                                    FeedPostAction.Zap -> Unit
+                                    FeedPostAction.Like -> {
+                                        eventPublisher(ThreadContract.UiEvent.PostLikeAction(
+                                            postId = item.postId,
+                                            postAuthorId = item.authorId,
+                                        ))
+                                    }
+                                    FeedPostAction.Repost -> Unit
+                                }
+                            },
                             shouldIndentContent = shouldIndentContent,
                             highlighted = highlighted,
                             connected = connected,

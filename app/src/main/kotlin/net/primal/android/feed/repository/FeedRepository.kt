@@ -175,7 +175,6 @@ class FeedRepository @Inject constructor(
         )
     }
 
-
     private fun List<PrimalEvent>.processEventResources() {
         database.resources().upsert(
             data = this

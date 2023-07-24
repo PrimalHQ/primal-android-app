@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
 import androidx.paging.map
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
@@ -14,9 +15,11 @@ import kotlinx.coroutines.launch
 import net.primal.android.core.compose.feed.asFeedPostUi
 import net.primal.android.core.compose.media.model.MediaResourceUi
 import net.primal.android.feed.repository.FeedRepository
+import net.primal.android.feed.repository.PostRepository
 import net.primal.android.navigation.profileId
-import net.primal.android.networking.sockets.WssException
+import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.profile.db.displayNameUiFriendly
+import net.primal.android.profile.details.ProfileContract.UiEvent
 import net.primal.android.profile.details.ProfileContract.UiState
 import net.primal.android.profile.details.model.ProfileDetailsUi
 import net.primal.android.profile.details.model.ProfileStatsUi
@@ -30,6 +33,7 @@ class ProfileViewModel @Inject constructor(
     activeAccountStore: ActiveAccountStore,
     feedRepository: FeedRepository,
     private val profileRepository: ProfileRepository,
+    private val postRepository: PostRepository,
 ) : ViewModel() {
 
     private val profileId: String =
@@ -48,9 +52,23 @@ class ProfileViewModel @Inject constructor(
         _state.getAndUpdate { it.reducer() }
     }
 
+    private val _event: MutableSharedFlow<UiEvent> = MutableSharedFlow()
+    fun setEvent(event: UiEvent) {
+        viewModelScope.launch { _event.emit(event) }
+    }
+
     init {
+        observeEvents()
         observeProfile()
         fetchLatestProfile()
+    }
+
+    private fun observeEvents() = viewModelScope.launch {
+        _event.collect {
+            when (it) {
+                is UiEvent.PostLikeAction -> likePost(it)
+            }
+        }
     }
 
     private fun fetchLatestProfile() = viewModelScope.launch {
@@ -96,6 +114,17 @@ class ProfileViewModel @Inject constructor(
                     },
                 )
             }
+        }
+    }
+
+    private fun likePost(postLikeAction: UiEvent.PostLikeAction) = viewModelScope.launch {
+        try {
+            postRepository.likePost(
+                postId = postLikeAction.postId,
+                postAuthorId = postLikeAction.postAuthorId,
+            )
+        } catch (error: PostRepository.FailedToPublishLikeEvent) {
+            // Propagate error to the UI
         }
     }
 }

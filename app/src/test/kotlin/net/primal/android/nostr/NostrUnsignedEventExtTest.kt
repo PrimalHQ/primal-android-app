@@ -4,10 +4,12 @@ import io.kotest.matchers.shouldBe
 import kotlinx.serialization.json.add
 import kotlinx.serialization.json.buildJsonArray
 import net.primal.android.crypto.toHex
-import net.primal.android.nostr.model.NostrUnsignedEvent
+import net.primal.android.nostr.notary.NostrUnsignedEvent
+import net.primal.android.nostr.notary.calculateEventId
+import net.primal.android.nostr.notary.signOrThrow
 import org.junit.Test
 
-class NostrUtilsTest {
+class NostrUnsignedEventExtTest {
 
     @Test
     fun `calculateEventId returns correct id`() {
