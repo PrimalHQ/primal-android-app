@@ -28,15 +28,6 @@ import net.primal.android.user.active.ActiveUserAccountState
 import java.time.Instant
 import javax.inject.Inject
 
-fun String.extractNpubs(): List<String> {
-    val regex = Regex("(nostr:((npub|nprofile)[0-9a-z]+))")
-    return regex.findAll(this).map { matchResult ->
-        val npubOrNprofile = matchResult.groupValues[2]
-        val link = matchResult.groupValues[1]
-        npubOrNprofile
-    }.toList()
-}
-
 @HiltViewModel
 class FeedViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
