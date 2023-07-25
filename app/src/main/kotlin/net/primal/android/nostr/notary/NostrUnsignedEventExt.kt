@@ -39,3 +39,4 @@ fun NostrUnsignedEvent.calculateEventId(): ByteArray {
     val rawEventJson = NostrJson.encodeToString(json)
     return CryptoUtils.sha256(rawEventJson.toByteArray())
 }
+

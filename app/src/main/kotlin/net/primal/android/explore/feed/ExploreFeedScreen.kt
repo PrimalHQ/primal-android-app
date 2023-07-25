@@ -108,6 +108,9 @@ fun ExploreFeedScreen(
                 feedListState = listState,
                 onPostClick = onPostClick,
                 onProfileClick = onProfileClick,
+                onReply = {
+
+                },
                 onPostLike = {
                     eventPublisher(
                         ExploreFeedContract.UiEvent.PostLikeAction(
@@ -115,6 +118,18 @@ fun ExploreFeedScreen(
                             postAuthorId = it.authorId,
                         )
                     )
+                },
+                onRepost = {
+                    eventPublisher(
+                        ExploreFeedContract.UiEvent.RepostAction(
+                            postId = it.postId,
+                            postAuthorId = it.authorId,
+                            postNostrEvent = it.rawNostrEventJson,
+                        )
+                    )
+                },
+                onQuote = {
+
                 },
             )
         },

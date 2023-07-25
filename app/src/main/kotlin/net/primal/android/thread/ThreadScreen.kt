@@ -12,6 +12,10 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
@@ -19,7 +23,9 @@ import androidx.compose.ui.unit.dp
 import net.primal.android.R
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.feed.FeedPostListItem
+import net.primal.android.core.compose.feed.RepostOrQuoteBottomSheet
 import net.primal.android.core.compose.feed.model.FeedPostAction
+import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 
@@ -54,6 +60,23 @@ fun ThreadScreen(
     val topAppBarState = rememberTopAppBarState()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(topAppBarState)
     val listState = rememberLazyListState()
+
+    var repostQuotePostConfirmation by remember { mutableStateOf<FeedPostUi?>(null) }
+    if (repostQuotePostConfirmation != null) repostQuotePostConfirmation?.let { post ->
+        RepostOrQuoteBottomSheet(
+            onDismiss = { repostQuotePostConfirmation = null },
+            onRepost = {
+                eventPublisher(
+                    ThreadContract.UiEvent.RepostAction(
+                        postId = post.postId,
+                        postAuthorId = post.authorId,
+                        postNostrEvent = post.rawNostrEventJson,
+                    )
+                )
+            },
+            onQuote = { },
+        )
+    }
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -97,12 +120,17 @@ fun ThreadScreen(
                                     FeedPostAction.Reply -> Unit
                                     FeedPostAction.Zap -> Unit
                                     FeedPostAction.Like -> {
-                                        eventPublisher(ThreadContract.UiEvent.PostLikeAction(
-                                            postId = item.postId,
-                                            postAuthorId = item.authorId,
-                                        ))
+                                        eventPublisher(
+                                            ThreadContract.UiEvent.PostLikeAction(
+                                                postId = item.postId,
+                                                postAuthorId = item.authorId,
+                                            )
+                                        )
                                     }
-                                    FeedPostAction.Repost -> Unit
+
+                                    FeedPostAction.Repost -> {
+                                        repostQuotePostConfirmation = item
+                                    }
                                 }
                             },
                             shouldIndentContent = shouldIndentContent,

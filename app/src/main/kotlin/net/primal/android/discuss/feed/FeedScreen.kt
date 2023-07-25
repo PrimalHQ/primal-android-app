@@ -103,6 +103,21 @@ fun FeedScreen(
                         )
                     )
                 },
+                onReply = {
+
+                },
+                onRepost = {
+                    eventPublisher(
+                        FeedContract.UiEvent.RepostAction(
+                            postId = it.postId,
+                            postAuthorId = it.authorId,
+                            postNostrEvent = it.rawNostrEventJson,
+                        )
+                    )
+                },
+                onQuote = {
+
+                },
                 syncStats = state.syncStats,
                 paddingValues = paddingValues,
                 feedListState = feedListState,

@@ -28,14 +28,17 @@ import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -67,13 +70,16 @@ import net.primal.android.theme.AppTheme
 import kotlin.random.Random
 import kotlin.time.Duration.Companion.seconds
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun FeedPostList(
     posts: Flow<PagingData<FeedPostUi>>,
     onPostClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
     onPostLike: (FeedPostUi) -> Unit,
+    onRepost: (FeedPostUi) -> Unit,
+    onReply: (FeedPostUi) -> Unit,
+    onQuote: (FeedPostUi) -> Unit,
     syncStats: FeedPostsSyncStats = FeedPostsSyncStats(),
     paddingValues: PaddingValues = PaddingValues(0.dp),
     feedListState: LazyListState = rememberLazyListState(),
@@ -132,6 +138,9 @@ fun FeedPostList(
             onPostClick = onPostClick,
             onProfileClick = onProfileClick,
             onPostLike = onPostLike,
+            onRepost = onRepost,
+            onReply = onReply,
+            onQuote = onQuote,
         )
 
         AnimatedVisibility(
@@ -158,6 +167,7 @@ fun FeedPostList(
     }
 }
 
+@ExperimentalMaterial3Api
 @ExperimentalFoundationApi
 @Composable
 fun FeedLazyColumn(
@@ -167,11 +177,24 @@ fun FeedLazyColumn(
     onPostClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
     onPostLike: (FeedPostUi) -> Unit,
+    onRepost: (FeedPostUi) -> Unit,
+    onReply: (FeedPostUi) -> Unit,
+    onQuote: (FeedPostUi) -> Unit,
     shouldShowLoadingState: Boolean = true,
     shouldShowNoContentState: Boolean = true,
     header: @Composable (LazyItemScope.() -> Unit)? = null,
     stickyHeader: @Composable (LazyItemScope.() -> Unit)? = null,
 ) {
+
+    var repostQuotePostConfirmation by remember { mutableStateOf<FeedPostUi?>(null) }
+    if (repostQuotePostConfirmation != null) repostQuotePostConfirmation?.let { post ->
+        RepostOrQuoteBottomSheet(
+            onDismiss = { repostQuotePostConfirmation = null },
+            onRepost = { onRepost(post) },
+            onQuote = { onQuote(post) },
+        )
+    }
+
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = contentPadding,
@@ -218,13 +241,14 @@ fun FeedLazyColumn(
                     onProfileClick = { profileId -> onProfileClick(profileId) },
                     onPostAction = { postAction ->
                         when (postAction) {
-                            FeedPostAction.Reply -> Unit
+                            FeedPostAction.Reply -> onReply(item)
                             FeedPostAction.Zap -> Unit
                             FeedPostAction.Like -> onPostLike(item)
-                            FeedPostAction.Repost -> Unit
-
+                            FeedPostAction.Repost -> {
+                                repostQuotePostConfirmation = item
+                            }
                         }
-                   },
+                    },
                 )
 
                 else -> {}

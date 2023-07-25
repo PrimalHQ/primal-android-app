@@ -2,8 +2,6 @@ package net.primal.android.nostr.notary
 
 import fr.acinq.secp256k1.Hex
 import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.add
-import kotlinx.serialization.json.buildJsonArray
 import net.primal.android.crypto.toNpub
 import net.primal.android.networking.UserAgentProvider
 import net.primal.android.nostr.model.NostrEvent
@@ -11,7 +9,6 @@ import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.serialization.NostrJson
 import net.primal.android.settings.api.model.AppSettingsDescription
 import net.primal.android.user.credentials.CredentialsStore
-import java.time.Instant
 import javax.inject.Inject
 
 
@@ -33,14 +30,8 @@ class NostrNotary @Inject constructor(
     ): NostrEvent {
         return NostrUnsignedEvent(
             pubKey = userId,
-            createdAt = Instant.now().epochSecond,
             kind = NostrEventKind.ApplicationSpecificData.value,
-            tags = listOf(
-                buildJsonArray {
-                    add("d")
-                    add("${UserAgentProvider.APP_NAME} App")
-                }
-            ),
+            tags = listOf("${UserAgentProvider.APP_NAME} App".asIdentifierTag()),
             content = NostrJson.encodeToString(
                 AppSettingsDescription(description = "Sync app settings")
             ),
@@ -50,23 +41,27 @@ class NostrNotary @Inject constructor(
     fun signLikeReactionNostrEvent(
         userId: String,
         postId: String,
-        postPubkey: String,
+        postAuthorId: String,
     ): NostrEvent {
         return NostrUnsignedEvent(
             pubKey = userId,
-            createdAt = Instant.now().epochSecond,
             kind = NostrEventKind.Reaction.value,
-            tags = listOf(
-                buildJsonArray {
-                    add("e")
-                    add(postId)
-                },
-                buildJsonArray {
-                    add("p")
-                    add(postPubkey)
-                },
-            ),
+            tags = listOf(postId.asEventIdTag(), postAuthorId.asPubkeyTag()),
             content = "+",
+        ).signOrThrow(nsec = findNsecOrThrow(userId))
+    }
+
+    fun signRepostNostrEvent(
+        userId: String,
+        postId: String,
+        postAuthorId: String,
+        postRawNostrEvent: String,
+    ): NostrEvent {
+        return NostrUnsignedEvent(
+            pubKey = userId,
+            kind = NostrEventKind.Reposts.value,
+            tags = listOf(postId.asEventIdTag(), postAuthorId.asPubkeyTag()),
+            content = postRawNostrEvent,
         ).signOrThrow(nsec = findNsecOrThrow(userId))
     }
 

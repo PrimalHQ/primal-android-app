@@ -19,6 +19,7 @@ import net.primal.android.explore.feed.ExploreFeedContract.UiState
 import net.primal.android.feed.repository.FeedRepository
 import net.primal.android.feed.repository.PostRepository
 import net.primal.android.navigation.searchQuery
+import net.primal.android.networking.relays.errors.NostrPublishException
 import javax.inject.Inject
 
 @HiltViewModel
@@ -67,6 +68,7 @@ class ExploreFeedViewModel @Inject constructor(
                 UiEvent.AddToUserFeeds -> addToMyFeeds()
                 UiEvent.RemoveFromUserFeeds -> removeFromMyFeeds()
                 is UiEvent.PostLikeAction -> likePost(it)
+                is UiEvent.RepostAction -> repostPost(it)
             }
         }
     }
@@ -85,7 +87,19 @@ class ExploreFeedViewModel @Inject constructor(
                 postId = postLikeAction.postId,
                 postAuthorId = postLikeAction.postAuthorId,
             )
-        } catch (error: PostRepository.FailedToPublishLikeEvent) {
+        } catch (error: NostrPublishException) {
+            // Propagate error to the UI
+        }
+    }
+
+    private fun repostPost(repostAction: UiEvent.RepostAction) = viewModelScope.launch {
+        try {
+            postRepository.repostPost(
+                postId = repostAction.postId,
+                postAuthorId = repostAction.postAuthorId,
+                postRawNostrEvent = repostAction.postNostrEvent,
+            )
+        } catch (error: NostrPublishException) {
             // Propagate error to the UI
         }
     }

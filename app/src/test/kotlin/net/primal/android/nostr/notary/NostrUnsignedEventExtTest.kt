@@ -1,12 +1,9 @@
-package net.primal.android.nostr
+package net.primal.android.nostr.notary
 
 import io.kotest.matchers.shouldBe
 import kotlinx.serialization.json.add
 import kotlinx.serialization.json.buildJsonArray
 import net.primal.android.crypto.toHex
-import net.primal.android.nostr.notary.NostrUnsignedEvent
-import net.primal.android.nostr.notary.calculateEventId
-import net.primal.android.nostr.notary.signOrThrow
 import org.junit.Test
 
 class NostrUnsignedEventExtTest {

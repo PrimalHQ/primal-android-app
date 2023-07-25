@@ -58,6 +58,9 @@
         <item quantity="other">%1$s new posts</item>
     </plurals>
 
+    <string name="post_repost_button_confirmation">Repost</string>
+    <string name="post_quote_button_confirmation">Quote</string>
+
     <string name="thread_title">Thread</string>
 
     <string name="explore_title">Explore</string>

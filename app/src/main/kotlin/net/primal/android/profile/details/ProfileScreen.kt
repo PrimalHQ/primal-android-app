@@ -123,7 +123,7 @@ private fun AdjustProfileStatusBarColor() {
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
     state: ProfileContract.UiState,
@@ -197,6 +197,9 @@ fun ProfileScreen(
                     onProfileClick(it)
                 }
             },
+            onReply = {
+
+            },
             onPostLike = {
                 eventPublisher(
                     ProfileContract.UiEvent.PostLikeAction(
@@ -204,6 +207,18 @@ fun ProfileScreen(
                         postAuthorId = it.authorId,
                     )
                 )
+            },
+            onRepost = {
+                eventPublisher(
+                    ProfileContract.UiEvent.RepostAction(
+                        postId = it.postId,
+                        postAuthorId = it.authorId,
+                        postNostrEvent = it.rawNostrEventJson,
+                    )
+                )
+            },
+            onQuote = {
+
             },
             shouldShowLoadingState = false,
             shouldShowNoContentState = false,

@@ -23,6 +23,7 @@ import net.primal.android.discuss.feed.FeedContract.UiState
 import net.primal.android.feed.repository.FeedRepository
 import net.primal.android.feed.repository.PostRepository
 import net.primal.android.navigation.feedDirective
+import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.user.active.ActiveAccountStore
 import net.primal.android.user.active.ActiveUserAccountState
 import java.time.Instant
@@ -113,6 +114,7 @@ class FeedViewModel @Inject constructor(
             when (it) {
                 UiEvent.FeedScrolledToTop -> clearSyncStats()
                 is UiEvent.PostLikeAction -> likePost(it)
+                is UiEvent.RepostAction -> repostPost(it)
             }
         }
     }
@@ -134,7 +136,19 @@ class FeedViewModel @Inject constructor(
                 postId = postLikeAction.postId,
                 postAuthorId = postLikeAction.postAuthorId,
             )
-        } catch (error: PostRepository.FailedToPublishLikeEvent) {
+        } catch (error: NostrPublishException) {
+            // Propagate error to the UI
+        }
+    }
+
+    private fun repostPost(repostAction: UiEvent.RepostAction) = viewModelScope.launch {
+        try {
+            postRepository.repostPost(
+                postId = repostAction.postId,
+                postAuthorId = repostAction.postAuthorId,
+                postRawNostrEvent = repostAction.postNostrEvent,
+            )
+        } catch (error: NostrPublishException) {
             // Propagate error to the UI
         }
     }
