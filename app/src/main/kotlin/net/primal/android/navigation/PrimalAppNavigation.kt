@@ -31,6 +31,8 @@ import net.primal.android.discuss.feed.FeedScreen
 import net.primal.android.discuss.feed.FeedViewModel
 import net.primal.android.discuss.list.FeedListScreen
 import net.primal.android.discuss.list.FeedListViewModel
+import net.primal.android.discuss.post.NewPostScreen
+import net.primal.android.discuss.post.NewPostViewModel
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.explore.feed.ExploreFeedScreen
 import net.primal.android.explore.feed.ExploreFeedViewModel
@@ -57,6 +59,8 @@ private fun NavController.navigateToLogin() = navigate(route = "login")
 private fun NavController.navigateToLogout() = navigate(route = "logout")
 
 private fun NavController.navigateToFeedList() = navigate(route = "feed/list")
+
+private fun NavController.navigateToNewPost() = navigate(route = "feed/new")
 
 private val NavController.topLevelNavOptions
     get() = navOptions {
@@ -189,6 +193,11 @@ fun PrimalAppNavigation() {
                 navController = navController,
             )
 
+            newPost(
+                route = "feed/new",
+                navController = navController,
+            )
+
             thread(
                 route = "thread/{$PostId}",
                 arguments = listOf(
@@ -263,10 +272,25 @@ private fun NavGraphBuilder.feed(
     FeedScreen(
         viewModel = viewModel,
         onFeedsClick = { navController.navigateToFeedList() },
+        onNewPostClick = { navController.navigateToNewPost() },
         onPostClick = { postId -> navController.navigateToThread(postId = postId) },
         onProfileClick = { profileId -> navController.navigateToProfile(profileId = profileId) },
         onTopLevelDestinationChanged = onTopLevelDestinationChanged,
         onDrawerScreenClick = onDrawerScreenClick,
+    )
+}
+
+private fun NavGraphBuilder.newPost(
+    route: String,
+    navController: NavController,
+) = composable(
+    route = route,
+) {
+    val viewModel = hiltViewModel<NewPostViewModel>(it)
+    LockToOrientationPortrait()
+    NewPostScreen(
+        viewModel = viewModel,
+        onClose = { navController.navigateUp() },
     )
 }
 

@@ -40,4 +40,13 @@ class PostRepositoryTest {
 
     }
 
+    @Test
+    fun `publishShortTextNote completes if post was published`() = runTest {
+
+    }
+
+    @Test
+    fun `publishShortTextNote throws exception if post was not published`() = runTest {
+
+    }
 }

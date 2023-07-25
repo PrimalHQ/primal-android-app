@@ -2,6 +2,7 @@ package net.primal.android.nostr.notary
 
 import fr.acinq.secp256k1.Hex
 import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.JsonArray
 import net.primal.android.crypto.toNpub
 import net.primal.android.networking.UserAgentProvider
 import net.primal.android.nostr.model.NostrEvent
@@ -23,6 +24,24 @@ class NostrNotary @Inject constructor(
         } catch (error: IllegalArgumentException) {
             throw NostrSignUnauthorized()
         }
+    }
+
+    fun signShortTextNoteEvent(
+        userId: String,
+        eventTags: List<String>,
+        pubkeyTags: List<String>,
+        noteContent: String,
+    ): NostrEvent {
+        val tags = mutableListOf<JsonArray>().apply {
+            eventTags.forEach { add(it.asEventIdTag()) }
+            pubkeyTags.forEach { add(it.asPubkeyTag()) }
+        }
+        return NostrUnsignedEvent(
+            pubKey = userId,
+            kind = NostrEventKind.ShortTextNote.value,
+            tags = tags.ifEmpty { null },
+            content = noteContent,
+        ).signOrThrow(nsec = findNsecOrThrow(userId))
     }
 
     fun signAppSettingsSyncNostrEvent(
