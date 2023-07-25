@@ -34,6 +34,7 @@ interface FeedPostDao {
             PostData.authorMetadataId,
             PostData.referencePostId,
             PostData.referencePostAuthorId,
+            PostData.raw,
             NULL AS repostId,
             NULL AS repostAuthorId,
             NULL AS feedCreatedAt

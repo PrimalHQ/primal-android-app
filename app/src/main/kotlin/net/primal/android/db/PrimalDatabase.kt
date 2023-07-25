@@ -49,7 +49,7 @@ import net.primal.android.thread.db.ConversationDao
         TrendingHashtag::class,
         ProfileStats::class,
     ],
-    version = 1,
+    version = 2,
     exportSchema = true,
 )
 @TypeConverters(RoomCustomTypeConverters::class)

@@ -46,5 +46,6 @@ fun FeedPost.asFeedPostUi() = FeedPostUi(
         userLiked = this.userStats?.userLiked ?: false,
         repostsCount = this.postStats?.reposts ?: 0,
         userReposted = this.userStats?.userReposted ?: false,
-    )
+    ),
+    rawNostrEventJson = this.data.raw,
 )
