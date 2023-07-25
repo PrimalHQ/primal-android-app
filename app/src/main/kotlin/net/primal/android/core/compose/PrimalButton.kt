@@ -1,7 +1,6 @@
 package net.primal.android.core.compose
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CopyAll
@@ -17,6 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
@@ -26,6 +26,7 @@ fun PrimalButton(
     text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    fontSize: TextUnit = TextUnit.Unspecified,
     leadingIcon: ImageVector? = null,
     enabled: Boolean = true,
     loading: Boolean = false,
@@ -35,31 +36,29 @@ fun PrimalButton(
         onClick = onClick,
         shape = buttonShape,
         colors = ButtonDefaults.elevatedButtonColors(
-            containerColor = Color.Transparent,
+            containerColor = Color.Unspecified,
             contentColor = AppTheme.colorScheme.onSurface,
-            disabledContainerColor = Color.Transparent,
+            disabledContainerColor = Color.Unspecified,
             disabledContentColor = AppTheme.colorScheme.outline,
         ),
         modifier = modifier
             .then(
-                Modifier
-                    .requiredHeight(52.dp)
-                    .background(
-                        brush = Brush.linearGradient(
-                            colors = if (enabled) {
-                                listOf(
-                                    AppTheme.extraColorScheme.brand1,
-                                    AppTheme.extraColorScheme.brand2,
-                                )
-                            } else {
-                                listOf(
-                                    Color(0xFF181818),
-                                    Color(0xFF181818),
-                                )
-                            },
-                        ),
-                        shape = buttonShape,
-                    )
+                Modifier.background(
+                    brush = Brush.linearGradient(
+                        colors = if (enabled) {
+                            listOf(
+                                AppTheme.extraColorScheme.brand1,
+                                AppTheme.extraColorScheme.brand2,
+                            )
+                        } else {
+                            listOf(
+                                Color(0xFF181818),
+                                Color(0xFF181818),
+                            )
+                        },
+                    ),
+                    shape = buttonShape,
+                )
             ),
         enabled = enabled,
         content = {
@@ -67,8 +66,9 @@ fun PrimalButton(
                 LoadingContent()
             } else {
                 IconText(
-                    modifier = Modifier.background(Color.Transparent),
+                    modifier = Modifier.background(Color.Unspecified),
                     text = text,
+                    fontSize = fontSize,
                     leadingIcon = leadingIcon,
                     style = AppTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Medium,
@@ -98,7 +98,11 @@ class PrimalButtonStatePreviewProvider : PreviewParameterProvider<PrimalButtonPr
     override val values: Sequence<PrimalButtonPreviewState>
         get() = sequenceOf(
             PrimalButtonPreviewState(enabled = true, loading = false),
-            PrimalButtonPreviewState(enabled = true, loading = false, leadingIcon = Icons.Outlined.CopyAll),
+            PrimalButtonPreviewState(
+                enabled = true,
+                loading = false,
+                leadingIcon = Icons.Outlined.CopyAll
+            ),
             PrimalButtonPreviewState(enabled = false, loading = true),
             PrimalButtonPreviewState(enabled = false, loading = false),
             PrimalButtonPreviewState(enabled = true, loading = true)
