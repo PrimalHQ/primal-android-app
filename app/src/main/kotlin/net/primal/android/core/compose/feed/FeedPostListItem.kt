@@ -356,7 +356,11 @@ fun PostStatsItem(
             highlight = postStats.userLiked,
             iconVector = PrimalIcons.FeedLikes,
             iconVectorHighlight = PrimalIcons.FeedLikesFilled,
-            onClick = { onPostAction(FeedPostAction.Like) },
+            onClick = {
+                if (!postStats.userLiked) {
+                    onPostAction(FeedPostAction.Like)
+                }
+            },
         )
 
         SinglePostStat(
