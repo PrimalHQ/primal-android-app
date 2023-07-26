@@ -252,7 +252,7 @@ private fun String.replaceNostrProfileUriWithAnnotatedLinks(
         }
         val link = uris.firstOrNull { it.uri == result.value }
         if (link != null) {
-            val text = link.name ?: result.value
+            val text = "@" + (link.name ?: result.value)
             builder.withStyle(spanStyle) {
                 append(text)
                 addStringAnnotation(
