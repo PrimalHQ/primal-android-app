@@ -15,7 +15,7 @@ import net.primal.android.auth.login.LoginContract.SideEffect
 import net.primal.android.auth.login.LoginContract.UiEvent
 import net.primal.android.auth.login.LoginContract.UiState
 import net.primal.android.networking.sockets.errors.WssException
-import net.primal.android.settings.SettingsRepository
+import net.primal.android.settings.repository.SettingsRepository
 import javax.inject.Inject
 
 @HiltViewModel

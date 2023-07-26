@@ -1,9 +1,8 @@
-package net.primal.android.settings
+package net.primal.android.settings.repository
 
 import androidx.room.withTransaction
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.decodeFromString
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.feed.db.Feed
 import net.primal.android.nostr.model.primal.content.ContentAppSettings

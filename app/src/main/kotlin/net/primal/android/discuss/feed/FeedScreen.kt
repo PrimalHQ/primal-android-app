@@ -16,6 +16,7 @@ import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -56,6 +57,10 @@ fun FeedScreen(
     onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
+
+    LaunchedEffect(viewModel) {
+        viewModel.setEvent(FeedContract.UiEvent.RequestSyncSettings)
+    }
 
     FeedScreen(
         state = uiState.value,
