@@ -26,7 +26,7 @@ fun List<PostData>.flatMapAsPostNostrUris(mapAsProfileMetadata: Map<String, Prof
                         when (type.lowercase()) {
                             NPUB -> {
                                 profileId = (type + key).bechToBytes().toHex()
-                                name = mapAsProfileMetadata[profileId]?.displayNameUiFriendly()
+                                name = mapAsProfileMetadata[profileId]?.name //mapAsProfileMetadata[profileId]?.displayNameUiFriendly()
                             }
 
                             NOTE -> {
@@ -47,7 +47,7 @@ fun List<PostData>.flatMapAsPostNostrUris(mapAsProfileMetadata: Map<String, Prof
                                 profileId = tlv.get(Nip19Tlv.Type.SPECIAL.id)
                                     ?.get(0)
                                     ?.toHex()
-                                name = mapAsProfileMetadata[profileId]?.displayNameUiFriendly()
+                                name = mapAsProfileMetadata[profileId]?.name // mapAsProfileMetadata[profileId]?.displayNameUiFriendly()
                             }
 
                             else -> {
