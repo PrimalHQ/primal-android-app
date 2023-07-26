@@ -155,7 +155,7 @@ fun LoginContent(
             OutlinedTextField(
                 modifier = Modifier.fillMaxWidth(),
                 value = nsecValue,
-                onValueChange = { input -> nsecValue = input },
+                onValueChange = { input -> nsecValue = input.trim() },
                 placeholder = {
                     Text(
                         modifier = Modifier.fillMaxWidth(),
