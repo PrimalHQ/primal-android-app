@@ -1,5 +1,6 @@
 package net.primal.android.discuss.post
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -15,6 +16,7 @@ import net.primal.android.discuss.post.NewPostContract.SideEffect
 import net.primal.android.discuss.post.NewPostContract.UiEvent
 import net.primal.android.discuss.post.NewPostContract.UiState
 import net.primal.android.feed.repository.PostRepository
+import net.primal.android.navigation.newPostPreFillContent
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.user.active.ActiveAccountStore
 import net.primal.android.user.active.ActiveUserAccountState
@@ -22,11 +24,12 @@ import javax.inject.Inject
 
 @HiltViewModel
 class NewPostViewModel @Inject constructor(
+    savedStateHandle: SavedStateHandle,
     private val activeAccountStore: ActiveAccountStore,
     private val postRepository: PostRepository
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(UiState())
+    private val _state = MutableStateFlow(UiState(preFillContent = savedStateHandle.newPostPreFillContent))
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
 

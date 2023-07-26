@@ -40,7 +40,7 @@ object CryptoUtils {
     fun encrypt(msg: String, sharedSecret: ByteArray): String {
         val iv = ByteArray(16)
         random.nextBytes(iv)
-        val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+        val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
         cipher.init(Cipher.ENCRYPT_MODE, SecretKeySpec(sharedSecret, "AES"), IvParameterSpec(iv))
         val ivBase64 = Base64.toBase64String(iv)
         val encryptedMsg = cipher.doFinal(msg.toByteArray())
@@ -57,7 +57,7 @@ object CryptoUtils {
         val parts = msg.split("?iv=")
         val iv = parts[1].run { Base64.decode(this) }
         val encryptedMsg = parts.first().run { Base64.decode(this) }
-        val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+        val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
         cipher.init(Cipher.DECRYPT_MODE, SecretKeySpec(sharedSecret, "AES"), IvParameterSpec(iv))
         return String(cipher.doFinal(encryptedMsg))
     }
@@ -71,32 +71,3 @@ object CryptoUtils {
 
     private val random = SecureRandom()
 }
-
-fun ByteArray.toHex() = String(Hex.encode(this))
-
-fun Int.toByteArray(): ByteArray {
-    val bytes = ByteArray(4)
-    (0..3).forEach {
-        bytes[3 - it] = ((this ushr (8 * it)) and 0xFFFF).toByte()
-    }
-    return bytes
-}
-
-fun ByteArray.toNsec() = Bech32.encodeBytes(hrp = "nsec", this, Bech32.Encoding.Bech32)
-fun ByteArray.toNpub() = Bech32.encodeBytes(hrp = "npub", this, Bech32.Encoding.Bech32)
-
-fun String.bechToBytes(hrp: String? = null): ByteArray {
-
-    val decodedForm = Bech32.decodeBytes(this)
-    hrp?.also {
-        if (it != decodedForm.first) {
-            throw IllegalArgumentException("Expected $it but obtained ${decodedForm.first}")
-        }
-    }
-    return decodedForm.second
-}
-
-/**
- * Interpret the string as Bech32 encoded and return hrp and ByteArray as Pair
- */
-fun String.bechToBytesWithHrp() = Bech32.decodeBytes(this).run { Pair(first, second) }

@@ -67,7 +67,7 @@ fun NewPostScreen(
     onClose: () -> Unit,
     eventPublisher: (NewPostContract.UiEvent) -> Unit,
 ) {
-    var content by remember { mutableStateOf("") }
+    var content by remember { mutableStateOf(state.preFillContent ?: "") }
 
     val focusRequester = remember { FocusRequester() }
     val snackbarHostState = remember { SnackbarHostState() }

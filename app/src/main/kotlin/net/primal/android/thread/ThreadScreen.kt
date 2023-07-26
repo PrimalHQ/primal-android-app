@@ -28,12 +28,14 @@ import net.primal.android.core.compose.feed.model.FeedPostAction
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
+import net.primal.android.crypto.hexToNoteHrp
 
 @Composable
 fun ThreadScreen(
     viewModel: ThreadViewModel,
     onClose: () -> Unit,
     onPostClick: (String) -> Unit,
+    onPostQuoteClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
 ) {
 
@@ -43,6 +45,7 @@ fun ThreadScreen(
         state = uiState.value,
         onClose = onClose,
         onPostClick = onPostClick,
+        onPostQuoteClick = onPostQuoteClick,
         onProfileClick = onProfileClick,
         eventPublisher = { viewModel.setEvent(it) }
     )
@@ -54,6 +57,7 @@ fun ThreadScreen(
     state: ThreadContract.UiState,
     onClose: () -> Unit,
     onPostClick: (String) -> Unit,
+    onPostQuoteClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
     eventPublisher: (ThreadContract.UiEvent) -> Unit,
 ) {
@@ -65,7 +69,7 @@ fun ThreadScreen(
     if (repostQuotePostConfirmation != null) repostQuotePostConfirmation?.let { post ->
         RepostOrQuoteBottomSheet(
             onDismiss = { repostQuotePostConfirmation = null },
-            onRepost = {
+            onRepostClick = {
                 eventPublisher(
                     ThreadContract.UiEvent.RepostAction(
                         postId = post.postId,
@@ -74,7 +78,9 @@ fun ThreadScreen(
                     )
                 )
             },
-            onQuote = { },
+            onPostQuoteClick = {
+                onPostQuoteClick("\n\nnostr:${post.postId.hexToNoteHrp()}")
+            },
         )
     }
 

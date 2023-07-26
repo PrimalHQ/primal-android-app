@@ -76,10 +76,10 @@ fun FeedPostList(
     posts: Flow<PagingData<FeedPostUi>>,
     onPostClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
-    onPostLike: (FeedPostUi) -> Unit,
-    onRepost: (FeedPostUi) -> Unit,
-    onReply: (FeedPostUi) -> Unit,
-    onQuote: (FeedPostUi) -> Unit,
+    onPostLikeClick: (FeedPostUi) -> Unit,
+    onRepostClick: (FeedPostUi) -> Unit,
+    onPostReplyClick: (FeedPostUi) -> Unit,
+    onPostQuoteClick: (FeedPostUi) -> Unit,
     syncStats: FeedPostsSyncStats = FeedPostsSyncStats(),
     paddingValues: PaddingValues = PaddingValues(0.dp),
     feedListState: LazyListState = rememberLazyListState(),
@@ -137,10 +137,10 @@ fun FeedPostList(
             listState = feedListState,
             onPostClick = onPostClick,
             onProfileClick = onProfileClick,
-            onPostLike = onPostLike,
-            onRepost = onRepost,
-            onReply = onReply,
-            onQuote = onQuote,
+            onPostLikeClick = onPostLikeClick,
+            onRepostClick = onRepostClick,
+            onPostReplyClick = onPostReplyClick,
+            onPostQuoteClick = onPostQuoteClick,
         )
 
         AnimatedVisibility(
@@ -176,10 +176,10 @@ fun FeedLazyColumn(
     listState: LazyListState,
     onPostClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
-    onPostLike: (FeedPostUi) -> Unit,
-    onRepost: (FeedPostUi) -> Unit,
-    onReply: (FeedPostUi) -> Unit,
-    onQuote: (FeedPostUi) -> Unit,
+    onPostLikeClick: (FeedPostUi) -> Unit,
+    onRepostClick: (FeedPostUi) -> Unit,
+    onPostReplyClick: (FeedPostUi) -> Unit,
+    onPostQuoteClick: (FeedPostUi) -> Unit,
     shouldShowLoadingState: Boolean = true,
     shouldShowNoContentState: Boolean = true,
     header: @Composable (LazyItemScope.() -> Unit)? = null,
@@ -190,8 +190,8 @@ fun FeedLazyColumn(
     if (repostQuotePostConfirmation != null) repostQuotePostConfirmation?.let { post ->
         RepostOrQuoteBottomSheet(
             onDismiss = { repostQuotePostConfirmation = null },
-            onRepost = { onRepost(post) },
-            onQuote = { onQuote(post) },
+            onRepostClick = { onRepostClick(post) },
+            onPostQuoteClick = { onPostQuoteClick(post) },
         )
     }
 
@@ -241,9 +241,9 @@ fun FeedLazyColumn(
                     onProfileClick = { profileId -> onProfileClick(profileId) },
                     onPostAction = { postAction ->
                         when (postAction) {
-                            FeedPostAction.Reply -> onReply(item)
+                            FeedPostAction.Reply -> onPostReplyClick(item)
                             FeedPostAction.Zap -> Unit
-                            FeedPostAction.Like -> onPostLike(item)
+                            FeedPostAction.Like -> onPostLikeClick(item)
                             FeedPostAction.Repost -> {
                                 repostQuotePostConfirmation = item
                             }

@@ -60,7 +60,9 @@ private fun NavController.navigateToLogout() = navigate(route = "logout")
 
 private fun NavController.navigateToFeedList() = navigate(route = "feed/list")
 
-private fun NavController.navigateToNewPost() = navigate(route = "feed/new")
+private fun NavController.navigateToNewPost(preFillContent: String?) =
+    navigate(route = "feed/new?$NewPostPreFillContent=${preFillContent.orEmpty().asUrlEncoded()}")
+
 
 private val NavController.topLevelNavOptions
     get() = navOptions {
@@ -84,7 +86,7 @@ private fun NavController.navigateToNotifications() =
     navigate(route = "notifications", navOptions = topLevelNavOptions)
 
 private fun NavController.navigateToProfile(profileId: String? = null) = when {
-    profileId != null -> navigate(route = "profile?profileId=$profileId")
+    profileId != null -> navigate(route = "profile?$ProfileId=$profileId")
     else -> navigate(route = "profile")
 }
 
@@ -194,7 +196,13 @@ fun PrimalAppNavigation() {
             )
 
             newPost(
-                route = "feed/new",
+                route = "feed/new?$NewPostPreFillContent={$NewPostPreFillContent}",
+                arguments = listOf(
+                    navArgument(NewPostPreFillContent) {
+                        type = NavType.StringType
+                        nullable = true
+                    }
+                ),
                 navController = navController,
             )
 
@@ -272,7 +280,7 @@ private fun NavGraphBuilder.feed(
     FeedScreen(
         viewModel = viewModel,
         onFeedsClick = { navController.navigateToFeedList() },
-        onNewPostClick = { navController.navigateToNewPost() },
+        onNewPostClick = { preFillContent -> navController.navigateToNewPost(preFillContent) },
         onPostClick = { postId -> navController.navigateToThread(postId = postId) },
         onProfileClick = { profileId -> navController.navigateToProfile(profileId = profileId) },
         onTopLevelDestinationChanged = onTopLevelDestinationChanged,
@@ -282,9 +290,11 @@ private fun NavGraphBuilder.feed(
 
 private fun NavGraphBuilder.newPost(
     route: String,
+    arguments: List<NamedNavArgument>,
     navController: NavController,
 ) = composable(
     route = route,
+    arguments = arguments,
 ) {
     val viewModel = hiltViewModel<NewPostViewModel>(it)
     LockToOrientationPortrait()
@@ -339,6 +349,7 @@ private fun NavGraphBuilder.exploreFeed(
         viewModel = viewModel,
         onClose = { navController.navigateUp() },
         onPostClick = { postId -> navController.navigateToThread(postId)},
+        onPostQuoteClick = { preFillContent -> navController.navigateToNewPost(preFillContent) },
         onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
     )
 }
@@ -393,7 +404,8 @@ private fun NavGraphBuilder.thread(
         viewModel = viewModel,
         onClose = { navController.navigateUp() },
         onPostClick = { postId -> navController.navigateToThread(postId) },
-        onProfileClick = { profileId -> navController.navigateToProfile(profileId = profileId) },
+        onPostQuoteClick = { preFillContent -> navController.navigateToNewPost(preFillContent) },
+        onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
     )
 }
 
@@ -412,6 +424,7 @@ private fun NavGraphBuilder.profile(
         viewModel = viewModel,
         onClose = { navController.navigateUp() },
         onPostClick = { postId -> navController.navigateToThread(postId = postId) },
+        onPostQuoteClick = { preFillContent -> navController.navigateToNewPost(preFillContent) },
         onProfileClick = { profileId -> navController.navigateToProfile(profileId = profileId) },
     )
 }

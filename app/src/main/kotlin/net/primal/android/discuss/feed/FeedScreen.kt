@@ -38,6 +38,7 @@ import net.primal.android.core.compose.feed.FeedPostList
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 import net.primal.android.core.compose.icons.primaliconpack.FeedPicker
+import net.primal.android.crypto.hexToNoteHrp
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.PrimalBottomBarHeightDp
 import net.primal.android.drawer.PrimalDrawerScaffold
@@ -48,7 +49,7 @@ import net.primal.android.theme.PrimalTheme
 fun FeedScreen(
     viewModel: FeedViewModel,
     onFeedsClick: () -> Unit,
-    onNewPostClick: () -> Unit,
+    onNewPostClick: (String?) -> Unit,
     onPostClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
     onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
@@ -74,7 +75,7 @@ fun FeedScreen(
     state: FeedContract.UiState,
     eventPublisher: (FeedContract.UiEvent) -> Unit,
     onFeedsClick: () -> Unit,
-    onNewPostClick: () -> Unit,
+    onNewPostClick: (String?) -> Unit,
     onPostClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
     onPrimaryDestinationChanged: (PrimalTopLevelDestination) -> Unit,
@@ -119,7 +120,7 @@ fun FeedScreen(
                 posts = state.posts,
                 onPostClick = onPostClick,
                 onProfileClick = onProfileClick,
-                onPostLike = {
+                onPostLikeClick = {
                     eventPublisher(
                         FeedContract.UiEvent.PostLikeAction(
                             postId = it.postId,
@@ -127,10 +128,10 @@ fun FeedScreen(
                         )
                     )
                 },
-                onReply = {
+                onPostReplyClick = {
 
                 },
-                onRepost = {
+                onRepostClick = {
                     eventPublisher(
                         FeedContract.UiEvent.RepostAction(
                             postId = it.postId,
@@ -139,8 +140,8 @@ fun FeedScreen(
                         )
                     )
                 },
-                onQuote = {
-
+                onPostQuoteClick = {
+                    onNewPostClick("\n\nnostr:${it.postId.hexToNoteHrp()}")
                 },
                 syncStats = state.syncStats,
                 paddingValues = paddingValues,
@@ -161,7 +162,7 @@ fun FeedScreen(
                 exit = fadeOut(),
             ) {
                 FloatingActionButton(
-                    onClick = onNewPostClick,
+                    onClick = { onNewPostClick(null) },
                     modifier = Modifier
                         .size(bottomBarHeight)
                         .background(

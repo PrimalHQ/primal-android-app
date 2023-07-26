@@ -20,8 +20,8 @@ import net.primal.android.core.compose.icons.primaliconpack.Repost
 @Composable
 fun RepostOrQuoteBottomSheet(
     onDismiss: () -> Unit,
-    onRepost: () -> Unit,
-    onQuote: () -> Unit,
+    onRepostClick: () -> Unit,
+    onPostQuoteClick: () -> Unit,
 ) {
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -31,7 +31,7 @@ fun RepostOrQuoteBottomSheet(
                 .padding(horizontal = 16.dp)
                 .clickable {
                     onDismiss()
-                    onRepost()
+                    onRepostClick()
                 },
             leadingContent = {
                 Icon(imageVector = PrimalIcons.Repost, contentDescription = null)
@@ -45,7 +45,7 @@ fun RepostOrQuoteBottomSheet(
                 .padding(horizontal = 16.dp)
                 .clickable {
                     onDismiss()
-                    onQuote()
+                    onPostQuoteClick()
                 },
             leadingContent = {
                 Icon(imageVector = PrimalIcons.Quote, contentDescription = null)
