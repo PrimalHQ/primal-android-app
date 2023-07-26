@@ -37,7 +37,6 @@ import net.primal.android.core.compose.AvatarThumbnailListItemImage
 import net.primal.android.core.compose.PrimalButton
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.theme.AppTheme
-import timber.log.Timber
 
 @Composable
 fun NewPostScreen(
@@ -156,15 +155,10 @@ private fun NewPostPublishErrorHandler(
     snackbarHostState: SnackbarHostState,
 ) {
     val context = LocalContext.current
-
     LaunchedEffect(error ?: true) {
         if (error != null) {
-            Timber.d("show snack fucking bar")
             snackbarHostState.showSnackbar(
-                message = context.getString(
-                    R.string.new_post_nostr_publish_error,
-                    error.cause?.message ?: "Unknown"
-                ),
+                message = context.getString(R.string.new_post_nostr_publish_error),
                 duration = SnackbarDuration.Short,
             )
         }

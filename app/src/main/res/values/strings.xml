@@ -4,7 +4,7 @@
     <string name="nsec">nsec</string>
     <string name="npub">npub</string>
 
-    <string name="app_generic_error">Something went wrong, please try again in few moments.</string>
+    <string name="app_generic_error">Something went wrong. Please try again soon.</string>
 
     <string name="welcome_sign_in_button_title">Sign in</string>
     <string name="welcome_sign_in_button_subtitle">Already have a Nostr account? Sign with your Nostr key.</string>
@@ -64,7 +64,7 @@
     <string name="new_post_publish_button">Post</string>
     <string name="new_post_publishing_button">Posting…</string>
     <string name="new_post_content_placeholder">Type your post here…</string>
-    <string name="new_post_nostr_publish_error">We were unable to publish your post to Nostr. Please try again shortly. Error: %1$s</string>
+    <string name="new_post_nostr_publish_error">Unable to publish your note to Nostr. Please try again soon.</string>
 
     <string name="thread_title">Thread</string>
 
