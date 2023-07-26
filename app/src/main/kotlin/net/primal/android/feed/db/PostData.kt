@@ -14,6 +14,7 @@ data class PostData(
     val content: String,
     val uris: List<String>,
     val sig: String,
+    val raw: String,
     val authorMetadataId: String? = null,
     val referencePostId: String? = null,
     val referencePostAuthorId: String? = null,

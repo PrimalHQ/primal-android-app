@@ -39,6 +39,7 @@ fun PrimalDrawerScaffold(
     onActiveDestinationClick: () -> Unit = {},
     topBar: @Composable (TopAppBarScrollBehavior?) -> Unit = {},
     content: @Composable (PaddingValues) -> Unit = {},
+    floatingActionButton: @Composable () -> Unit = {},
     bottomBarHeight: Dp = PrimalBottomBarHeightDp,
     onBottomBarOffsetChange: (Float) -> Unit = {},
 ) {
@@ -95,7 +96,8 @@ fun PrimalDrawerScaffold(
                         onTopLevelDestinationChanged = onPrimaryDestinationChanged,
                         onActiveDestinationClick = onActiveDestinationClick,
                     )
-                }
+                },
+                floatingActionButton = floatingActionButton,
             )
         }
     )

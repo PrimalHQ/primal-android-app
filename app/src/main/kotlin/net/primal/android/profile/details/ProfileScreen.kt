@@ -85,6 +85,7 @@ import net.primal.android.core.ext.findByUrl
 import net.primal.android.core.ext.findNearestOrNull
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.isPrimalIdentifier
+import net.primal.android.crypto.hexToNoteHrp
 import net.primal.android.profile.details.model.ProfileDetailsUi
 import net.primal.android.profile.details.model.ProfileStatsUi
 import net.primal.android.theme.AppTheme
@@ -95,6 +96,7 @@ fun ProfileScreen(
     viewModel: ProfileViewModel,
     onClose: () -> Unit,
     onPostClick: (String) -> Unit,
+    onPostQuoteClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
@@ -105,7 +107,9 @@ fun ProfileScreen(
         state = uiState.value,
         onClose = onClose,
         onPostClick = onPostClick,
+        onPostQuoteClick = onPostQuoteClick,
         onProfileClick = onProfileClick,
+        eventPublisher = { viewModel.setEvent(it) },
     )
 }
 
@@ -122,13 +126,15 @@ private fun AdjustProfileStatusBarColor() {
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
     state: ProfileContract.UiState,
     onClose: () -> Unit,
     onPostClick: (String) -> Unit,
+    onPostQuoteClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
+    eventPublisher: (ProfileContract.UiEvent) -> Unit,
 ) {
     val density = LocalDensity.current
 
@@ -195,6 +201,29 @@ fun ProfileScreen(
                     onProfileClick(it)
                 }
             },
+            onPostReplyClick = {
+
+            },
+            onPostLikeClick = {
+                eventPublisher(
+                    ProfileContract.UiEvent.PostLikeAction(
+                        postId = it.postId,
+                        postAuthorId = it.authorId,
+                    )
+                )
+            },
+            onRepostClick = {
+                eventPublisher(
+                    ProfileContract.UiEvent.RepostAction(
+                        postId = it.postId,
+                        postAuthorId = it.authorId,
+                        postNostrEvent = it.rawNostrEventJson,
+                    )
+                )
+            },
+            onPostQuoteClick = {
+                onPostQuoteClick("\n\nnostr:${it.postId.hexToNoteHrp()}")
+            },
             shouldShowLoadingState = false,
             shouldShowNoContentState = false,
             stickyHeader = {
@@ -254,7 +283,7 @@ fun ProfileScreen(
                         is LoadState.Error -> Unit
                     }
                 }
-            }
+            },
         )
     }
 }

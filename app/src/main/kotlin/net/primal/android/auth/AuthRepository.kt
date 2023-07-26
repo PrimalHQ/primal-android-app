@@ -1,6 +1,6 @@
 package net.primal.android.auth
 
-import net.primal.android.networking.sockets.WssException
+import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.user.accounts.UserAccountFetcher
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.active.ActiveAccountStore

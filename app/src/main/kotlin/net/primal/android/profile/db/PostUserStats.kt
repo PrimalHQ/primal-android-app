@@ -16,8 +16,8 @@ import androidx.room.Index
 data class PostUserStats(
     val postId: String,
     val userId: String,
-    val replied: Boolean,
-    val liked: Boolean,
-    val reposted: Boolean,
-    val zapped: Boolean,
+    val replied: Boolean = false,
+    val liked: Boolean = false,
+    val reposted: Boolean = false,
+    val zapped: Boolean = false,
 )

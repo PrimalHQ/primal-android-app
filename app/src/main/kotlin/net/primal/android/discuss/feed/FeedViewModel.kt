@@ -15,26 +15,35 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import net.primal.android.core.compose.feed.asFeedPostUi
+import net.primal.android.core.compose.feed.model.FeedPostsSyncStats
 import net.primal.android.core.utils.ellipsizeMiddle
 import net.primal.android.discuss.feed.FeedContract.UiEvent
 import net.primal.android.discuss.feed.FeedContract.UiState
 import net.primal.android.feed.repository.FeedRepository
-import net.primal.android.core.compose.feed.asFeedPostUi
-import net.primal.android.core.compose.feed.model.FeedPostsSyncStats
+import net.primal.android.feed.repository.PostRepository
 import net.primal.android.navigation.feedDirective
+import net.primal.android.networking.relays.errors.NostrPublishException
+import net.primal.android.settings.repository.DebouncedSettingsSyncer
+import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.user.active.ActiveAccountStore
 import net.primal.android.user.active.ActiveUserAccountState
 import java.time.Instant
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.hours
 
 @HiltViewModel
 class FeedViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val feedRepository: FeedRepository,
+    private val postRepository: PostRepository,
     private val activeAccountStore: ActiveAccountStore,
+    private val settingsRepository: SettingsRepository,
 ) : ViewModel() {
 
     private val feedDirective: String = savedStateHandle.feedDirective ?: "network;trending"
+
+    private var userSettingsUpdater: DebouncedSettingsSyncer? = null
 
     private val _state = MutableStateFlow(
         UiState(
@@ -100,6 +109,10 @@ class FeedViewModel @Inject constructor(
         activeAccountStore.activeAccountState
             .filterIsInstance<ActiveUserAccountState.ActiveUserAccount>()
             .collect {
+                userSettingsUpdater = DebouncedSettingsSyncer(
+                    userId = it.data.pubkey,
+                    repository = settingsRepository,
+                )
                 setState {
                     copy(activeAccountAvatarUrl = it.data.pictureUrl)
                 }
@@ -110,6 +123,9 @@ class FeedViewModel @Inject constructor(
         _event.collect {
             when (it) {
                 UiEvent.FeedScrolledToTop -> clearSyncStats()
+                UiEvent.RequestSyncSettings -> syncSettings()
+                is UiEvent.PostLikeAction -> likePost(it)
+                is UiEvent.RepostAction -> repostPost(it)
             }
         }
     }
@@ -122,6 +138,33 @@ class FeedViewModel @Inject constructor(
                     postsCount = 0
                 )
             )
+        }
+    }
+
+    private fun syncSettings() = viewModelScope.launch {
+        userSettingsUpdater?.updateSettingsWithDebounce(timeoutInSeconds = 6.hours.inWholeSeconds)
+    }
+
+    private fun likePost(postLikeAction: UiEvent.PostLikeAction) = viewModelScope.launch {
+        try {
+            postRepository.likePost(
+                postId = postLikeAction.postId,
+                postAuthorId = postLikeAction.postAuthorId,
+            )
+        } catch (error: NostrPublishException) {
+            // Propagate error to the UI
+        }
+    }
+
+    private fun repostPost(repostAction: UiEvent.RepostAction) = viewModelScope.launch {
+        try {
+            postRepository.repostPost(
+                postId = repostAction.postId,
+                postAuthorId = repostAction.postAuthorId,
+                postRawNostrEvent = repostAction.postNostrEvent,
+            )
+        } catch (error: NostrPublishException) {
+            // Propagate error to the UI
         }
     }
 

@@ -14,5 +14,11 @@ interface ExploreFeedContract {
     sealed class UiEvent {
         object AddToUserFeeds : UiEvent()
         object RemoveFromUserFeeds : UiEvent()
+        data class PostLikeAction(val postId: String, val postAuthorId: String) : UiEvent()
+        data class RepostAction(
+            val postId: String,
+            val postAuthorId: String,
+            val postNostrEvent: String
+        ) : UiEvent()
     }
 }

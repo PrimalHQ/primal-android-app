@@ -15,7 +15,14 @@ interface FeedContract {
     )
 
     sealed class UiEvent {
-        object FeedScrolledToTop : UiEvent()
+        data object FeedScrolledToTop : UiEvent()
+        data object RequestSyncSettings : UiEvent()
+        data class PostLikeAction(val postId: String, val postAuthorId: String) : UiEvent()
+        data class RepostAction(
+            val postId: String,
+            val postAuthorId: String,
+            val postNostrEvent: String
+        ) : UiEvent()
     }
 
 }

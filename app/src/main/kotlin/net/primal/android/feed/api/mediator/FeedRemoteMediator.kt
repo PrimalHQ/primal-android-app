@@ -19,8 +19,8 @@ import net.primal.android.feed.db.NostrUri
 import net.primal.android.feed.db.sql.ExploreFeedQueryBuilder
 import net.primal.android.feed.db.sql.FeedQueryBuilder
 import net.primal.android.feed.db.sql.LatestFeedQueryBuilder
-import net.primal.android.networking.sockets.NostrNoticeException
-import net.primal.android.networking.sockets.WssException
+import net.primal.android.networking.sockets.errors.NostrNoticeException
+import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.ext.asEventStatsPO
 import net.primal.android.nostr.ext.asEventUserStatsPO
 import net.primal.android.nostr.ext.asMediaResourcePO

@@ -15,6 +15,7 @@ class PrimalDatabaseBuilder @Inject constructor(
             "${context.dataDir.path}/databases/primal.db",
         )
             .enableMultiInstanceInvalidation()
+            .fallbackToDestructiveMigration()
             .build()
     }
 }

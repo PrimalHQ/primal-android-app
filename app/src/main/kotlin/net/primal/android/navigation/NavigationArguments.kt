@@ -23,3 +23,8 @@ const val SearchQuery = "searchQuery"
 
 inline val SavedStateHandle.searchQuery: String
     get() = get(SearchQuery) ?: throw IllegalArgumentException("Missing required searchQuery argument.")
+
+
+const val NewPostPreFillContent = "preFillContent"
+
+inline val SavedStateHandle.newPostPreFillContent: String? get() = get<String>(NewPostPreFillContent)?.asUrlDecoded()

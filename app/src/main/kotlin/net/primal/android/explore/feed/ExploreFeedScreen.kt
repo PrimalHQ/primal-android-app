@@ -24,6 +24,7 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.UserFeedAdd
 import net.primal.android.core.compose.icons.primaliconpack.UserFeedRemove
+import net.primal.android.crypto.hexToNoteHrp
 import net.primal.android.explore.feed.ExploreFeedContract.UiEvent.AddToUserFeeds
 import net.primal.android.explore.feed.ExploreFeedContract.UiEvent.RemoveFromUserFeeds
 
@@ -32,6 +33,7 @@ fun ExploreFeedScreen(
     viewModel: ExploreFeedViewModel,
     onClose: () -> Unit,
     onPostClick: (String) -> Unit,
+    onPostQuoteClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
@@ -41,6 +43,7 @@ fun ExploreFeedScreen(
         onClose = onClose,
         onPostClick = onPostClick,
         onProfileClick = onProfileClick,
+        onPostQuoteClick = onPostQuoteClick,
         eventPublisher = { viewModel.setEvent(it) },
     )
 }
@@ -51,6 +54,7 @@ fun ExploreFeedScreen(
     state: ExploreFeedContract.UiState,
     onClose: () -> Unit,
     onPostClick: (String) -> Unit,
+    onPostQuoteClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
     eventPublisher: (ExploreFeedContract.UiEvent) -> Unit,
 ) {
@@ -95,7 +99,7 @@ fun ExploreFeedScreen(
                                     )
                                 }
                             }
-                          },
+                        },
                     )
                 },
                 scrollBehavior = scrollBehavior,
@@ -108,6 +112,29 @@ fun ExploreFeedScreen(
                 feedListState = listState,
                 onPostClick = onPostClick,
                 onProfileClick = onProfileClick,
+                onPostReplyClick = {
+
+                },
+                onPostLikeClick = {
+                    eventPublisher(
+                        ExploreFeedContract.UiEvent.PostLikeAction(
+                            postId = it.postId,
+                            postAuthorId = it.authorId,
+                        )
+                    )
+                },
+                onRepostClick = {
+                    eventPublisher(
+                        ExploreFeedContract.UiEvent.RepostAction(
+                            postId = it.postId,
+                            postAuthorId = it.authorId,
+                            postNostrEvent = it.rawNostrEventJson,
+                        )
+                    )
+                },
+                onPostQuoteClick = {
+                    onPostQuoteClick("\n\nnostr:${it.postId.hexToNoteHrp()}")
+                },
             )
         },
         snackbarHost = {

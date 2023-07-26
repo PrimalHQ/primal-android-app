@@ -146,7 +146,7 @@ fun PublicKeySection(
     Box(modifier = Modifier.padding(vertical = 8.dp)) {
         var keyCopied by remember { mutableStateOf(false) }
         PrimalButton(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().height(56.dp),
             leadingIcon = if (keyCopied) Icons.Outlined.Check else Icons.Outlined.ContentCopy,
             text = if (keyCopied) {
                 stringResource(id = R.string.settings_keys_key_copied)
@@ -244,7 +244,7 @@ fun PrivateKeySection(
     Box(modifier = Modifier.padding(vertical = 8.dp)) {
         var keyCopied by remember { mutableStateOf(false) }
         PrimalButton(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().height(56.dp),
             leadingIcon = if (keyCopied) Icons.Outlined.Check else Icons.Outlined.ContentCopy,
             text = if (keyCopied) {
                 stringResource(id = R.string.settings_keys_key_copied)

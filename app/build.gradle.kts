@@ -1,6 +1,5 @@
 import java.util.Properties
 
-@Suppress("DSL_SCOPE_VIOLATION") // TODO: Remove once KTIJ-19369 is fixed
 plugins {
     alias(libs.plugins.com.android.application)
     alias(libs.plugins.org.jetbrains.kotlin.android)
@@ -27,8 +26,8 @@ android {
         applicationId = "net.primal.android"
         minSdk = 26
         targetSdk = 33
-        versionCode = 17
-        versionName = "0.12.0"
+        versionCode = 20
+        versionName = "0.12.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -112,7 +111,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.4.4"
+        kotlinCompilerExtensionVersion = "1.5.0"
     }
 
     compileOptions {
@@ -218,6 +217,7 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.compose.ui.test.junit4)
     testImplementation(libs.room.testing)
+    testImplementation(libs.okhttp.mockwebserver)
 
     androidTestImplementation(platform(libs.compose.bom))
     androidTestImplementation(libs.junit.android.runner)

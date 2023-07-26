@@ -6,7 +6,7 @@
     "entities": [
       {
         "tableName": "PostData",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`postId` TEXT NOT NULL, `authorId` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `tags` TEXT NOT NULL, `content` TEXT NOT NULL, `uris` TEXT NOT NULL, `sig` TEXT NOT NULL, `authorMetadataId` TEXT, `referencePostId` TEXT, `referencePostAuthorId` TEXT, `referencePostAuthorMetadataId` TEXT, PRIMARY KEY(`postId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`postId` TEXT NOT NULL, `authorId` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `tags` TEXT NOT NULL, `content` TEXT NOT NULL, `uris` TEXT NOT NULL, `sig` TEXT NOT NULL, `raw` TEXT NOT NULL, `authorMetadataId` TEXT, `referencePostId` TEXT, `referencePostAuthorId` TEXT, `referencePostAuthorMetadataId` TEXT, PRIMARY KEY(`postId`))",
         "fields": [
           {
             "fieldPath": "postId",
@@ -47,6 +47,12 @@
           {
             "fieldPath": "sig",
             "columnName": "sig",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "raw",
+            "columnName": "raw",
             "affinity": "TEXT",
             "notNull": true
           },

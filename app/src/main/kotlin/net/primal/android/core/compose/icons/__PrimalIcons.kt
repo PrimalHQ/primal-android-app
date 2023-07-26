@@ -32,8 +32,10 @@ import net.primal.android.core.compose.icons.primaliconpack.MuteUser
 import net.primal.android.core.compose.icons.primaliconpack.Notifications
 import net.primal.android.core.compose.icons.primaliconpack.Notrich
 import net.primal.android.core.compose.icons.primaliconpack.QrCode
+import net.primal.android.core.compose.icons.primaliconpack.Quote
 import net.primal.android.core.compose.icons.primaliconpack.Read
 import net.primal.android.core.compose.icons.primaliconpack.Report
+import net.primal.android.core.compose.icons.primaliconpack.Repost
 import net.primal.android.core.compose.icons.primaliconpack.Search
 import net.primal.android.core.compose.icons.primaliconpack.Settings
 import net.primal.android.core.compose.icons.primaliconpack.Share
@@ -93,6 +95,8 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             UserFeedAdd,
             UserFeedRemove,
             Zap,
+            Repost,
+            Quote,
         )
         return __PrimalIcons!!
     }

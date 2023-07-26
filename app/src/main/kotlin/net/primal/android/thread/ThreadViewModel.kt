@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filter
@@ -14,14 +15,18 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.core.compose.feed.asFeedPostUi
 import net.primal.android.feed.repository.FeedRepository
+import net.primal.android.feed.repository.PostRepository
 import net.primal.android.navigation.postId
-import net.primal.android.networking.sockets.WssException
+import net.primal.android.networking.relays.errors.NostrPublishException
+import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.thread.ThreadContract.UiEvent
 import javax.inject.Inject
 
 @HiltViewModel
 class ThreadViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val repository: FeedRepository,
+    private val feedRepository: FeedRepository,
+    private val postRepository: PostRepository,
 ) : ViewModel() {
 
     private val postId = savedStateHandle.postId
@@ -32,9 +37,24 @@ class ThreadViewModel @Inject constructor(
         _state.getAndUpdate { it.reducer() }
     }
 
+    private val _event: MutableSharedFlow<UiEvent> = MutableSharedFlow()
+    fun setEvent(event: UiEvent) {
+        viewModelScope.launch { _event.emit(event) }
+    }
+
     init {
+        observeEvents()
         observeConversation()
         fetchRepliesFromNetwork()
+    }
+
+    private fun observeEvents() = viewModelScope.launch {
+        _event.collect {
+            when (it) {
+                is UiEvent.PostLikeAction -> likePost(it)
+                is UiEvent.RepostAction -> repostPost(it)
+            }
+        }
     }
 
     private fun observeConversation() = viewModelScope.launch {
@@ -44,7 +64,7 @@ class ThreadViewModel @Inject constructor(
     }
 
     private suspend fun loadHighlightedPost() {
-        val rootPost = withContext(Dispatchers.IO) { repository.findPostById(postId = postId) }
+        val rootPost = withContext(Dispatchers.IO) { feedRepository.findPostById(postId = postId) }
         setState {
             copy(
                 conversation = listOf(rootPost.asFeedPostUi()),
@@ -56,7 +76,7 @@ class ThreadViewModel @Inject constructor(
     private suspend fun delayShortlyToPropagateHighlightedPost() = delay(100)
 
     private suspend fun subscribeToConversationChanges() {
-        repository.observeConversation(postId = postId)
+        feedRepository.observeConversation(postId = postId)
             .filter { it.isNotEmpty() }
             .collect { conversation ->
                 setState {
@@ -70,9 +90,32 @@ class ThreadViewModel @Inject constructor(
 
     private fun fetchRepliesFromNetwork() = viewModelScope.launch {
         try {
-            repository.fetchReplies(postId = postId)
+            feedRepository.fetchReplies(postId = postId)
         } catch (error: WssException) {
             // Ignore
+        }
+    }
+
+    private fun likePost(postLikeAction: UiEvent.PostLikeAction) = viewModelScope.launch {
+        try {
+            postRepository.likePost(
+                postId = postLikeAction.postId,
+                postAuthorId = postLikeAction.postAuthorId,
+            )
+        } catch (error: NostrPublishException) {
+            // Propagate error to the UI
+        }
+    }
+
+    private fun repostPost(repostAction: UiEvent.RepostAction) = viewModelScope.launch {
+        try {
+            postRepository.repostPost(
+                postId = repostAction.postId,
+                postAuthorId = repostAction.postAuthorId,
+                postRawNostrEvent = repostAction.postNostrEvent,
+            )
+        } catch (error: NostrPublishException) {
+            // Propagate error to the UI
         }
     }
 }

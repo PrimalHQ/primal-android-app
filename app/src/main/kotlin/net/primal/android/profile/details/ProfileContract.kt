@@ -15,4 +15,13 @@ interface ProfileContract {
         val resources: List<MediaResourceUi> = emptyList(),
         val authoredPosts: Flow<PagingData<FeedPostUi>>,
     )
+
+    sealed class UiEvent {
+        data class PostLikeAction(val postId: String, val postAuthorId: String) : UiEvent()
+        data class RepostAction(
+            val postId: String,
+            val postAuthorId: String,
+            val postNostrEvent: String
+        ) : UiEvent()
+    }
 }

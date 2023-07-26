@@ -1,5 +1,6 @@
 package net.primal.android.nostr.ext
 
+import kotlinx.serialization.encodeToString
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.content.ContentMetadata
 import net.primal.android.profile.db.ProfileMetadata
@@ -14,7 +15,7 @@ fun NostrEvent.asProfileMetadata(): ProfileMetadata {
         eventId = this.id,
         ownerId = this.pubKey,
         createdAt = this.createdAt,
-        raw = this.content,
+        raw = NostrJson.encodeToString(this),
         name = metadata.name,
         internetIdentifier = metadata.nip05,
         about = metadata.about,
