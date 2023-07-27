@@ -63,16 +63,17 @@ class FeedViewModel @Inject constructor(
     }
 
     init {
-        loadFeedTitle()
+        subscribeToFeedTitle()
         subscribeToEvents()
         subscribeToFeedSyncUpdates()
         subscribeToActiveAccount()
     }
 
-    private fun loadFeedTitle() = viewModelScope.launch {
-        val feed = feedRepository.findFeedByDirective(feedDirective = feedDirective)
-        setState {
-            copy(feedTitle = feed?.name ?: feedDirective.ellipsizeMiddle(size = 8))
+    private fun subscribeToFeedTitle() = viewModelScope.launch {
+        feedRepository.observeFeedByDirective(feedDirective = feedDirective).collect {
+            setState {
+                copy(feedTitle = it?.name ?: feedDirective.ellipsizeMiddle(size = 8))
+            }
         }
     }
 

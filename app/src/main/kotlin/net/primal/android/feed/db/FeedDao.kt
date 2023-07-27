@@ -18,7 +18,7 @@ interface FeedDao {
     fun observeContainsFeed(directive: String): Flow<Boolean>
 
     @Query("SELECT * FROM Feed WHERE Feed.directive = :feedDirective")
-    suspend fun findFeedByDirective(feedDirective: String): Feed?
+    fun observeFeedByDirective(feedDirective: String): Flow<Feed?>
 
     @Query("DELETE FROM Feed")
     fun deleteAll()
