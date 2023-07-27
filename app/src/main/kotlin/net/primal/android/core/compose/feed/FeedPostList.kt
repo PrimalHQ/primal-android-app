@@ -213,14 +213,10 @@ fun FeedLazyColumn(
             }
         }
 
-        when (val prependLoadState = pagingItems.loadState.mediator?.prepend) {
+        when (pagingItems.loadState.mediator?.prepend) {
             is LoadState.Error -> item(contentType = "Error") {
                 ErrorItem(
-                    text = stringResource(
-                        R.string.feed_error_loading_prev_page,
-                        prependLoadState.error.message
-                            ?: prependLoadState.error.javaClass.simpleName
-                    )
+                    text = stringResource(R.string.feed_error_loading_prev_page)
                 )
             }
 
@@ -282,7 +278,7 @@ fun FeedLazyColumn(
             }
         }
 
-        when (val appendLoadState = pagingItems.loadState.mediator?.append) {
+        when (pagingItems.loadState.mediator?.append) {
             LoadState.Loading -> item(contentType = "LoadingAppend") {
                 LoadingItem(
                     modifier = Modifier
@@ -293,11 +289,7 @@ fun FeedLazyColumn(
 
             is LoadState.Error -> item(contentType = "Error") {
                 ErrorItem(
-                    text = stringResource(
-                        R.string.feed_error_loading_next_page,
-                        appendLoadState.error.message
-                            ?: appendLoadState.error.javaClass.simpleName
-                    )
+                    text = stringResource(R.string.feed_error_loading_next_page)
                 )
             }
 
