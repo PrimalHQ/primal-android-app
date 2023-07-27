@@ -22,22 +22,30 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -109,6 +117,13 @@ fun ThreadScreen(
         )
     }
 
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    ReplyPublishingErrorHandler(
+        error = state.publishingError,
+        snackbarHostState = snackbarHostState,
+    )
+
     Scaffold(
         modifier = Modifier
             .nestedScroll(scrollBehavior.nestedScrollConnection)
@@ -176,25 +191,42 @@ fun ThreadScreen(
                 }
             }
         },
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
+        },
         bottomBar = {
             val replyToPost = state.conversation.getOrNull(state.highlightPostIndex)
             if (replyToPost != null) {
                 ReplyToBottomBar(
+                    publishingReply = state.publishingReply,
                     replyToAuthorDisplayName = replyToPost.authorDisplayName,
                     replyToUserDisplayName = replyToPost.userDisplayName,
+                    onReplyClick = { content ->
+                        eventPublisher(
+                            ThreadContract.UiEvent.ReplyToAction(
+                                content = content,
+                                replyToPostId = replyToPost.postId,
+                                replyToAuthorId = replyToPost.authorId,
+                            )
+                        )
+                    }
                 )
             }
         },
     )
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun ReplyToBottomBar(
+    publishingReply: Boolean,
     replyToAuthorDisplayName: String,
     replyToUserDisplayName: String,
+    onReplyClick: (String) -> Unit,
 ) {
+    val keyboardController = LocalSoftwareKeyboardController.current
     val isKeyboardVisible by keyboardVisibilityAsState()
-    var replyText by remember { mutableStateOf("") }
+    var replyText by rememberSaveable { mutableStateOf("") }
 
     val unfocusedColor = AppTheme.extraColorScheme.surfaceVariantAlt
     val focusedColor = AppTheme.colorScheme.surface
@@ -238,6 +270,7 @@ fun ReplyToBottomBar(
                 value = replyText,
                 onValueChange = { replyText = it },
                 maxLines = 10,
+                enabled = !publishingReply,
                 placeholder = {
                     AnimatedVisibility(
                         visible = !isKeyboardVisible,
@@ -248,7 +281,8 @@ fun ReplyToBottomBar(
                             text = stringResource(
                                 id = R.string.thread_reply_to,
                                 replyToAuthorDisplayName
-                            )
+                            ),
+                            color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
                         )
                     }
                 },
@@ -274,11 +308,17 @@ fun ReplyToBottomBar(
                         modifier = Modifier
                             .wrapContentWidth()
                             .height(40.dp),
-                        text = stringResource(id = R.string.thread_publish_button),
+                        text = if (publishingReply) {
+                            stringResource(id = R.string.thread_publishing_button)
+                        } else {
+                            stringResource(id = R.string.thread_publish_button)
+                        },
+                        enabled = !publishingReply,
                         fontSize = 16.sp,
                         onClick = {
-
-                        }
+                            onReplyClick(replyText)
+                            keyboardController?.hide()
+                        },
                     )
                 }
             }
@@ -293,4 +333,20 @@ fun keyboardVisibilityAsState(): State<Boolean> {
     val minKeyboardVisibility = with(density) { 128.dp.toPx() }
     val isImeVisible = imeBottom > minKeyboardVisibility
     return rememberUpdatedState(isImeVisible)
+}
+
+@Composable
+private fun ReplyPublishingErrorHandler(
+    error: ThreadContract.UiState.PublishError?,
+    snackbarHostState: SnackbarHostState,
+) {
+    val context = LocalContext.current
+    LaunchedEffect(error ?: true) {
+        if (error != null) {
+            snackbarHostState.showSnackbar(
+                message = context.getString(R.string.thread_reply_nostr_publish_error),
+                duration = SnackbarDuration.Short,
+            )
+        }
+    }
 }
