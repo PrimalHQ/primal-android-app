@@ -14,11 +14,12 @@ import net.primal.android.nostr.ext.isNotUnknown
 import net.primal.android.nostr.ext.isPrimalEventKind
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.serialization.NostrJson
+import net.primal.android.serialization.decodeFromStringOrNull
 import java.util.UUID
 
 fun String.parseIncomingMessage(): NostrIncomingMessage? {
-    val jsonArray = NostrJson.decodeFromString<JsonArray>(this)
-    val verbElement = jsonArray.elementAtOrNull(0) ?: return null
+    val jsonArray = NostrJson.decodeFromStringOrNull<JsonArray>(this)
+    val verbElement = jsonArray?.elementAtOrNull(0) ?: return null
 
     return when (verbElement.toIncomingMessageType()) {
         NostrVerb.Incoming.EVENT -> jsonArray.takeAsEventIncomingMessage()

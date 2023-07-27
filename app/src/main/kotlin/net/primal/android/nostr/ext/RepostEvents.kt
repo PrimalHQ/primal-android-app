@@ -3,9 +3,10 @@ package net.primal.android.nostr.ext
 import net.primal.android.feed.db.RepostData
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.serialization.NostrJson
+import net.primal.android.serialization.decodeFromStringOrNull
 
 fun List<NostrEvent>.mapNotNullAsRepost() = mapNotNull {
-    val repostedPost = it.content.decodeAsNostrEventOrNull()
+    val repostedPost = NostrJson.decodeFromStringOrNull<NostrEvent>(it.content)
 
     val repostedPostId = repostedPost?.id ?: it.tags?.findPostId()
     val repostedPostAuthorId = repostedPost?.pubKey ?: it.tags?.findPostAuthorId()
@@ -27,11 +28,3 @@ fun NostrEvent.asRepost(postId: String, postAuthorId: String) = RepostData(
     postId = postId,
     postAuthorId = postAuthorId
 )
-
-fun String.decodeAsNostrEventOrNull(): NostrEvent? {
-    return try {
-        NostrJson.decodeFromString(this)
-    } catch (error: IllegalArgumentException) {
-        null
-    }
-}

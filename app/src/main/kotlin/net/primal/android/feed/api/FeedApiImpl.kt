@@ -8,9 +8,8 @@ import net.primal.android.feed.api.model.ThreadResponse
 import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.primal.PrimalCacheFilter
 import net.primal.android.nostr.model.NostrEventKind
-import net.primal.android.nostr.model.primal.PrimalEvent
-import net.primal.android.nostr.model.primal.content.ContentPrimalPaging
 import net.primal.android.serialization.NostrJson
+import net.primal.android.serialization.decodeFromStringOrNull
 import javax.inject.Inject
 
 class FeedApiImpl @Inject constructor(
@@ -26,7 +25,9 @@ class FeedApiImpl @Inject constructor(
         )
 
         return FeedResponse(
-            paging = queryResult.findPrimalEvent(NostrEventKind.PrimalPaging).pagingContentOrNull(),
+            paging = queryResult.findPrimalEvent(NostrEventKind.PrimalPaging).let {
+                NostrJson.decodeFromStringOrNull(it?.content)
+            },
             metadata = queryResult.filterNostrEvents(NostrEventKind.Metadata),
             posts = queryResult.filterNostrEvents(NostrEventKind.ShortTextNote),
             reposts = queryResult.filterNostrEvents(NostrEventKind.Reposts),
@@ -56,12 +57,4 @@ class FeedApiImpl @Inject constructor(
         )
     }
 
-    private fun PrimalEvent?.pagingContentOrNull(): ContentPrimalPaging? {
-        val pagingContent = this?.content ?: return null
-        return try {
-            NostrJson.decodeFromString(pagingContent)
-        } catch (error: IllegalArgumentException) {
-            null
-        }
-    }
 }

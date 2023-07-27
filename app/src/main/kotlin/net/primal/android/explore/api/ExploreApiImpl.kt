@@ -9,6 +9,7 @@ import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.primal.PrimalCacheFilter
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.serialization.NostrJson
+import net.primal.android.serialization.decodeFromStringOrNull
 import javax.inject.Inject
 
 class ExploreApiImpl @Inject constructor(
@@ -21,12 +22,10 @@ class ExploreApiImpl @Inject constructor(
         )
 
         val trendingHashtagEvent = queryResult.findPrimalEvent(NostrEventKind.PrimalTrendingHashtags)
-            ?: return emptyList()
-
-        val hashtags = NostrJson.decodeFromString<JsonArray>(trendingHashtagEvent.content)
+        val hashtags = NostrJson.decodeFromStringOrNull<JsonArray>(trendingHashtagEvent?.content)
 
         val result = mutableListOf<HashtagScore>()
-        hashtags.forEach {
+        hashtags?.forEach {
             it.jsonObject.forEach { hashtag, score ->
                 result.add(HashtagScore(name = hashtag, score = score.jsonPrimitive.float))
             }

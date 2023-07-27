@@ -32,6 +32,7 @@ import net.primal.android.nostr.model.primal.content.ContentPrimalEventResources
 import net.primal.android.nostr.model.primal.content.ContentPrimalEventStats
 import net.primal.android.nostr.model.primal.content.ContentPrimalEventUserStats
 import net.primal.android.serialization.NostrJson
+import net.primal.android.serialization.decodeFromStringOrNull
 import net.primal.android.thread.db.ConversationCrossRef
 import net.primal.android.user.active.ActiveAccountStore
 import javax.inject.Inject
@@ -162,7 +163,7 @@ class FeedRepository @Inject constructor(
     private fun List<PrimalEvent>.processEventStats() {
         database.postStats().upsertAll(
             data = this
-                .map { NostrJson.decodeFromString<ContentPrimalEventStats>(it.content) }
+                .mapNotNull { NostrJson.decodeFromStringOrNull<ContentPrimalEventStats>(it.content) }
                 .map { it.asEventStatsPO() }
         )
     }
@@ -170,7 +171,7 @@ class FeedRepository @Inject constructor(
     private fun List<PrimalEvent>.processEventUserStats() {
         database.postUserStats().upsertAll(
             data = this
-                .map { NostrJson.decodeFromString<ContentPrimalEventUserStats>(it.content) }
+                .mapNotNull { NostrJson.decodeFromStringOrNull<ContentPrimalEventUserStats>(it.content) }
                 .map { it.asEventUserStatsPO(userId = activeAccountStore.activeUserId()) }
         )
     }
@@ -178,7 +179,7 @@ class FeedRepository @Inject constructor(
     private fun List<PrimalEvent>.processEventResources() {
         database.resources().upsert(
             data = this
-                .map { NostrJson.decodeFromString<ContentPrimalEventResources>(it.content) }
+                .mapNotNull { NostrJson.decodeFromStringOrNull<ContentPrimalEventResources>(it.content) }
                 .flatMap {
                     val eventId = it.eventId
                     it.resources.map { eventResource ->

@@ -9,14 +9,7 @@ class RoomCustomTypeConverters {
 
     @TypeConverter
     fun stringToListOfJsonArray(value: String?): List<JsonArray>? {
-        return when (value) {
-            null -> null
-            else -> try {
-                NostrJson.decodeFromString<List<JsonArray>>(value)
-            } catch (error: IllegalArgumentException) {
-                null
-            }
-        }
+        return NostrJson.decodeFromStringOrNull<List<JsonArray>>(value)
     }
 
     @TypeConverter
@@ -29,14 +22,7 @@ class RoomCustomTypeConverters {
 
     @TypeConverter
     fun jsonStringToListOfStrings(value: String?): List<String>? {
-        return when (value) {
-            null -> null
-            else -> try {
-                NostrJson.decodeFromString<List<String>>(value)
-            } catch (error: IllegalArgumentException) {
-                null
-            }
-        }
+        return NostrJson.decodeFromStringOrNull<List<String>>(value)
     }
 
     @TypeConverter
@@ -49,14 +35,7 @@ class RoomCustomTypeConverters {
 
     @TypeConverter
     fun stringToListOfPrimalResourceVariant(value: String?): List<PrimalResourceVariant>? {
-        return when (value) {
-            null -> null
-            else -> try {
-                NostrJson.decodeFromString<List<PrimalResourceVariant>>(value)
-            } catch (error: IllegalArgumentException) {
-                null
-            }
-        }
+        return NostrJson.decodeFromStringOrNull<List<PrimalResourceVariant>>(value)
     }
 
     @TypeConverter
