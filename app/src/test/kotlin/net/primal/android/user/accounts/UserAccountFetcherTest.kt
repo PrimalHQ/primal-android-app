@@ -27,7 +27,7 @@ class UserAccountFetcherTest {
         val expectedFollowingCount = 321
         val expectedNotesCount = 100
         val expectedPictureUrl = "https://test.com/image.jpg"
-        val expectedDisplayName = "alex"
+        val expectedName = "alex"
         val usersApiMock = mockk<UsersApi> {
             coEvery { getUserProfile(any()) } returns UserProfileResponse(
                 metadata = NostrEvent(
@@ -36,7 +36,7 @@ class UserAccountFetcherTest {
                     createdAt = 1683463925,
                     kind = 0,
                     tags = emptyList(),
-                    content = "{\"name\":\"$expectedDisplayName\",\"picture\":\"$expectedPictureUrl\",\"nip05\":\"$expectedInternetIdentifier\"}",
+                    content = "{\"name\":\"$expectedName\",\"picture\":\"$expectedPictureUrl\",\"nip05\":\"$expectedInternetIdentifier\"}",
                     sig = "invalidSig"
                 ),
                 profileStats = PrimalEvent(
@@ -49,7 +49,8 @@ class UserAccountFetcherTest {
         val fetcher = UserAccountFetcher(usersApi = usersApiMock)
         val actual = fetcher.fetchUserProfile(pubkey = expectedPubkey)
 
-        actual.displayName shouldBe expectedDisplayName
+        actual.authorDisplayName shouldBe expectedName
+        actual.userDisplayName shouldBe expectedName
         actual.pictureUrl shouldBe expectedPictureUrl
         actual.internetIdentifier shouldBe expectedInternetIdentifier
         actual.followersCount shouldBe expectedFollowersCount

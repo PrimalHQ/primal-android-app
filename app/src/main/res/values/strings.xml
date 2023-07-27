@@ -67,6 +67,10 @@
     <string name="new_post_nostr_publish_error">Unable to publish your note to Nostr. Please try again soon.</string>
 
     <string name="thread_title">Thread</string>
+    <string name="thread_reply_to">Reply to %1$s</string>
+    <string name="thread_replying_to">Replying to %1$s</string>
+    <string name="thread_publish_button">Reply</string>
+    <string name="thread_publishing_button">Replying…</string>
 
     <string name="explore_title">Explore</string>
     <string name="explore_feed_added_to_user_feeds">Added to your home feeds</string>

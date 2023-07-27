@@ -41,6 +41,18 @@ class ActiveAccountStoreTest {
 
     private val expectedPubkey = "pubkey"
 
+    private fun buildUserAccount(
+        expectedUserId: String = expectedPubkey,
+        expectedAuthorDisplayName: String = "Alex",
+        expectedUserDisplayName: String = "alex",
+    ): UserAccount {
+        return UserAccount(
+            pubkey = expectedUserId,
+            authorDisplayName = expectedAuthorDisplayName,
+            userDisplayName = expectedUserDisplayName,
+        )
+    }
+
     private fun mockkAccountsStore(
         findByIdResult: UserAccount = UserAccount.EMPTY,
     ) = mockk<UserAccountsStore>(relaxed = true) {
@@ -71,7 +83,7 @@ class ActiveAccountStoreTest {
 
     @Test
     fun `setActiveUserId stores active account to data store`() = runTest {
-        val expectedUserAccount = UserAccount(pubkey = expectedPubkey, displayName = "alex")
+        val expectedUserAccount = buildUserAccount()
         val activeAccountStore = ActiveAccountStore(
             persistence = persistence,
             accountsStore = mockkAccountsStore(findByIdResult = expectedUserAccount)
@@ -86,7 +98,7 @@ class ActiveAccountStoreTest {
 
     @Test
     fun `activeUserId returns user pubkey of the active user`() = runTest {
-        val expectedUserAccount = UserAccount(pubkey = expectedPubkey, displayName = "alex")
+        val expectedUserAccount = buildUserAccount()
         val activeAccountStore = ActiveAccountStore(
             persistence = persistence,
             accountsStore = mockkAccountsStore(findByIdResult = expectedUserAccount)

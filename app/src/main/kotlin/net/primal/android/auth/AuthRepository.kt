@@ -39,7 +39,8 @@ class AuthRepository @Inject constructor(
     }
 
     private fun UserAccount.merge(profile: UserAccount?, contacts: UserAccount?) = this.copy(
-        displayName = profile?.displayName ?: contacts?.displayName ?: this.displayName,
+        authorDisplayName = profile?.authorDisplayName ?: contacts?.authorDisplayName ?: this.authorDisplayName,
+        userDisplayName = profile?.userDisplayName ?: contacts?.userDisplayName ?: this.userDisplayName,
         pictureUrl = profile?.pictureUrl,
         internetIdentifier = profile?.internetIdentifier,
         followersCount = profile?.followersCount,

@@ -250,7 +250,7 @@ fun ProfileScreen(
                             exit = fadeOut(),
                         ) {
                             NostrUserText(
-                                displayName = state.profileDetails?.displayName
+                                displayName = state.profileDetails?.authorDisplayName
                                     ?: state.profileId.asEllipsizedNpub(),
                                 internetIdentifier = state.profileDetails?.internetIdentifier,
                             )
@@ -402,7 +402,7 @@ private fun UserProfileDetails(
 
         NostrUserText(
             modifier = Modifier.padding(horizontal = 16.dp),
-            displayName = profileDetails?.displayName ?: profileId.asEllipsizedNpub(),
+            displayName = profileDetails?.authorDisplayName ?: profileId.asEllipsizedNpub(),
             internetIdentifier = profileDetails?.internetIdentifier,
             style = AppTheme.typography.titleLarge,
         )

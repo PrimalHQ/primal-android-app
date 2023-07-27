@@ -41,6 +41,18 @@ class UserAccountsStoreTest {
 
     private val expectedPubkey = "pubkey"
 
+    private fun buildUserAccount(
+        expectedUserId: String = expectedPubkey,
+        expectedAuthorDisplayName: String = "Alex",
+        expectedUserDisplayName: String = "alex",
+    ): UserAccount {
+        return UserAccount(
+            pubkey = expectedUserId,
+            authorDisplayName = expectedAuthorDisplayName,
+            userDisplayName = expectedUserDisplayName,
+        )
+    }
+
     @Test
     fun `initial accounts are empty`() = runTest {
         val accountsStore = UserAccountsStore(persistence)
@@ -50,7 +62,7 @@ class UserAccountsStoreTest {
 
     @Test
     fun `upsertAccount inserts given account to data store`() = runTest {
-        val expectedAccount = UserAccount(pubkey = expectedPubkey, displayName = "alex")
+        val expectedAccount = buildUserAccount()
         val accountsStore = UserAccountsStore(persistence)
 
         accountsStore.upsertAccount(expectedAccount)
@@ -64,11 +76,11 @@ class UserAccountsStoreTest {
 
     @Test
     fun `upsertAccount updates account in data store`() = runTest {
-        val existingAccount = UserAccount(pubkey = expectedPubkey, displayName = "alex")
+        val existingAccount = buildUserAccount(expectedAuthorDisplayName = "alex")
         persistence.updateData { it.toMutableList().apply { add((existingAccount)) } }
         val accountsStore = UserAccountsStore(persistence)
 
-        val expectedAccount = UserAccount(pubkey = expectedPubkey, displayName = "updated")
+        val expectedAccount = buildUserAccount(expectedAuthorDisplayName = "updated")
         accountsStore.upsertAccount(expectedAccount)
         advanceUntilIdleAndDelay()
 
@@ -80,7 +92,7 @@ class UserAccountsStoreTest {
 
     @Test
     fun `deleteAccount deletes given account from data store`() = runTest {
-        val existingAccount = UserAccount(pubkey = expectedPubkey, displayName = "alex")
+        val existingAccount = buildUserAccount()
         persistence.updateData { it.toMutableList().apply { add((existingAccount)) } }
         val accountsStore = UserAccountsStore(persistence)
 
@@ -95,7 +107,7 @@ class UserAccountsStoreTest {
 
     @Test
     fun `clearAllAccounts deletes all accounts from data store`() = runTest {
-        val existingAccount = UserAccount(pubkey = expectedPubkey, displayName = "alex")
+        val existingAccount = buildUserAccount()
         persistence.updateData { it.toMutableList().apply { add((existingAccount)) } }
         val accountsStore = UserAccountsStore(persistence)
 
@@ -108,7 +120,7 @@ class UserAccountsStoreTest {
 
     @Test
     fun `findByIdOrNull finds account by id`() = runTest {
-        val existingAccount = UserAccount(pubkey = expectedPubkey, displayName = "alex")
+        val existingAccount = buildUserAccount()
         persistence.updateData { it.toMutableList().apply { add((existingAccount)) } }
         val accountsStore = UserAccountsStore(persistence)
 

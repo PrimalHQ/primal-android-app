@@ -6,7 +6,8 @@ import net.primal.android.core.utils.asEllipsizedNpub
 @Serializable
 data class UserAccount(
     val pubkey: String,
-    val displayName: String,
+    val authorDisplayName: String,
+    val userDisplayName: String,
     val pictureUrl: String? = null,
     val internetIdentifier: String? = null,
     val followingCount: Int? = null,
@@ -20,12 +21,14 @@ data class UserAccount(
     companion object {
         val EMPTY = UserAccount(
             pubkey = "",
-            displayName = "",
+            authorDisplayName = "",
+            userDisplayName = "",
         )
 
         fun buildLocal(pubkey: String) = UserAccount(
             pubkey = pubkey,
-            displayName = pubkey.asEllipsizedNpub(),
+            authorDisplayName = pubkey.asEllipsizedNpub(),
+            userDisplayName = pubkey.asEllipsizedNpub(),
         )
     }
 }
