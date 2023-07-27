@@ -39,7 +39,7 @@ class NostrNotary @Inject constructor(
         return NostrUnsignedEvent(
             pubKey = userId,
             kind = NostrEventKind.ShortTextNote.value,
-            tags = tags.ifEmpty { null },
+            tags = tags.toList(),
             content = noteContent,
         ).signOrThrow(nsec = findNsecOrThrow(userId))
     }
