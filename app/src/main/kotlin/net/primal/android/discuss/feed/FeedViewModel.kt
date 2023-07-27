@@ -30,7 +30,7 @@ import net.primal.android.user.active.ActiveAccountStore
 import net.primal.android.user.active.ActiveUserAccountState
 import java.time.Instant
 import javax.inject.Inject
-import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.minutes
 
 @HiltViewModel
 class FeedViewModel @Inject constructor(
@@ -142,7 +142,7 @@ class FeedViewModel @Inject constructor(
     }
 
     private fun syncSettings() = viewModelScope.launch {
-        userSettingsUpdater?.updateSettingsWithDebounce(timeoutInSeconds = 6.hours.inWholeSeconds)
+        userSettingsUpdater?.updateSettingsWithDebounce(timeoutInSeconds = 30.minutes.inWholeSeconds)
     }
 
     private fun likePost(postLikeAction: UiEvent.PostLikeAction) = viewModelScope.launch {
