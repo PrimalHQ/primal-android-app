@@ -202,7 +202,7 @@ fun ProfileScreen(
                 }
             },
             onPostReplyClick = {
-
+                onPostClick(it)
             },
             onPostLikeClick = {
                 eventPublisher(

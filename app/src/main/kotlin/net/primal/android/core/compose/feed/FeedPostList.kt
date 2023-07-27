@@ -78,7 +78,7 @@ fun FeedPostList(
     onProfileClick: (String) -> Unit,
     onPostLikeClick: (FeedPostUi) -> Unit,
     onRepostClick: (FeedPostUi) -> Unit,
-    onPostReplyClick: (FeedPostUi) -> Unit,
+    onPostReplyClick: (String) -> Unit,
     onPostQuoteClick: (FeedPostUi) -> Unit,
     syncStats: FeedPostsSyncStats = FeedPostsSyncStats(),
     paddingValues: PaddingValues = PaddingValues(0.dp),
@@ -178,7 +178,7 @@ fun FeedLazyColumn(
     onProfileClick: (String) -> Unit,
     onPostLikeClick: (FeedPostUi) -> Unit,
     onRepostClick: (FeedPostUi) -> Unit,
-    onPostReplyClick: (FeedPostUi) -> Unit,
+    onPostReplyClick: (String) -> Unit,
     onPostQuoteClick: (FeedPostUi) -> Unit,
     shouldShowLoadingState: Boolean = true,
     shouldShowNoContentState: Boolean = true,
@@ -241,7 +241,7 @@ fun FeedLazyColumn(
                     onProfileClick = { profileId -> onProfileClick(profileId) },
                     onPostAction = { postAction ->
                         when (postAction) {
-                            FeedPostAction.Reply -> onPostReplyClick(item)
+                            FeedPostAction.Reply -> onPostReplyClick(item.postId)
                             FeedPostAction.Zap -> Unit
                             FeedPostAction.Like -> onPostLikeClick(item)
                             FeedPostAction.Repost -> {

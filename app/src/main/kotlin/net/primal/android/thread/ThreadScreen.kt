@@ -166,7 +166,11 @@ fun ThreadScreen(
                             onProfileClick = { profileId -> onProfileClick(profileId) },
                             onPostAction = {
                                 when (it) {
-                                    FeedPostAction.Reply -> Unit
+                                    FeedPostAction.Reply -> {
+                                        if (index != state.highlightPostIndex) {
+                                            onPostClick(item.postId)
+                                        }
+                                    }
                                     FeedPostAction.Zap -> Unit
                                     FeedPostAction.Like -> {
                                         eventPublisher(
@@ -176,7 +180,6 @@ fun ThreadScreen(
                                             )
                                         )
                                     }
-
                                     FeedPostAction.Repost -> {
                                         repostQuotePostConfirmation = item
                                     }
