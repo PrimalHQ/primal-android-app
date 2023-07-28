@@ -8,6 +8,7 @@ import net.primal.android.feed.db.Feed
 import net.primal.android.nostr.model.primal.content.ContentAppSettings
 import net.primal.android.nostr.model.primal.content.ContentFeedData
 import net.primal.android.serialization.NostrJson
+import net.primal.android.serialization.decodeFromStringOrNull
 import net.primal.android.settings.api.SettingsApi
 import net.primal.android.theme.active.ActiveThemeStore
 import javax.inject.Inject
@@ -20,11 +21,10 @@ class SettingsRepository @Inject constructor(
 
     suspend fun fetchAppSettings(pubkey: String) = withContext(Dispatchers.IO) {
         val response = settingsApi.getAppSettings(pubkey = pubkey)
-        val appSettingsJsonContent = response.userSettings?.content
-            ?: response.defaultSettings?.content
-            ?: return@withContext
 
-        val appSettings = NostrJson.decodeFromString<ContentAppSettings>(appSettingsJsonContent)
+        val appSettings = NostrJson.decodeFromStringOrNull<ContentAppSettings>(
+            string = response.userSettings?.content ?: response.defaultSettings?.content
+        ) ?: return@withContext
 
         database.withTransaction {
             val userFeeds = appSettings.feeds.map { it.asFeedPO() }

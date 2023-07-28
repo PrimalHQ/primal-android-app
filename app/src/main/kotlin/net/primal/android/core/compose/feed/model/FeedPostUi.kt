@@ -10,6 +10,7 @@ data class FeedPostUi(
     val repostAuthorDisplayName: String? = null,
     val authorId: String,
     val authorDisplayName: String,
+    val userDisplayName: String,
     val authorInternetIdentifier: String? = null,
     val authorAvatarUrl: String? = null,
     val content: String,

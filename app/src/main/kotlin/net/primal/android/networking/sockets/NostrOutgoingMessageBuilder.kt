@@ -20,7 +20,7 @@ fun JsonObject.buildNostrEVENTMessage(): String {
     }.toString()
 }
 
-fun JsonObject.buildNostrAUTHMessage() : String {
+fun JsonObject.buildNostrAUTHMessage(): String {
     return buildJsonArray {
         add(NostrVerb.Outgoing.AUTH.toString())
         add(this@buildNostrAUTHMessage)
@@ -35,7 +35,7 @@ fun JsonObject.buildNostrCOUNTMessage(subscriptionId: UUID): String {
     }.toString()
 }
 
-fun UUID.buildNostrCLOSEMessage() : String {
+fun UUID.buildNostrCLOSEMessage(): String {
     return buildJsonArray {
         add(NostrVerb.Outgoing.CLOSE.toString())
         add(this@buildNostrCLOSEMessage.toString())

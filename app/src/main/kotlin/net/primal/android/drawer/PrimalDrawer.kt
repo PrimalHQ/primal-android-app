@@ -147,7 +147,7 @@ private fun DrawerHeader(
         )
 
         NostrUserText(
-            displayName = userAccount?.displayName ?: "",
+            displayName = userAccount?.authorDisplayName ?: "",
             internetIdentifier = userAccount?.internetIdentifier,
             modifier = Modifier.constrainAs(usernameRef) {
                 start.linkTo(startGuideline)

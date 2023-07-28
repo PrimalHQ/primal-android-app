@@ -1,5 +1,6 @@
 package net.primal.android.feed.repository
 
+import kotlinx.serialization.json.JsonArray
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.networking.relays.RelayPool
 import net.primal.android.networking.relays.errors.NostrPublishException
@@ -56,12 +57,16 @@ class PostRepository @Inject constructor(
     }
 
     @Throws(NostrPublishException::class)
-    suspend fun publishShortTextNote(content: String) {
+    suspend fun publishShortTextNote(
+        content: String,
+        eventTags: List<JsonArray> = emptyList(),
+        pubkeyTags: List<JsonArray> = emptyList(),
+    ) {
         relayPool.publishEvent(
             nostrEvent = nostrNotary.signShortTextNoteEvent(
                 userId = activeAccountStore.activeUserId(),
-                eventTags = emptyList(),
-                pubkeyTags = emptyList(),
+                eventTags = eventTags,
+                pubkeyTags = pubkeyTags,
                 noteContent = content,
             )
         )

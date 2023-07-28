@@ -28,18 +28,18 @@ class NostrNotary @Inject constructor(
 
     fun signShortTextNoteEvent(
         userId: String,
-        eventTags: List<String>,
-        pubkeyTags: List<String>,
+        eventTags: List<JsonArray>,
+        pubkeyTags: List<JsonArray>,
         noteContent: String,
     ): NostrEvent {
         val tags = mutableListOf<JsonArray>().apply {
-            eventTags.forEach { add(it.asEventIdTag()) }
-            pubkeyTags.forEach { add(it.asPubkeyTag()) }
+            eventTags.forEach { add(it) }
+            pubkeyTags.forEach { add(it) }
         }
         return NostrUnsignedEvent(
             pubKey = userId,
             kind = NostrEventKind.ShortTextNote.value,
-            tags = tags.ifEmpty { null },
+            tags = tags.toList(),
             content = noteContent,
         ).signOrThrow(nsec = findNsecOrThrow(userId))
     }

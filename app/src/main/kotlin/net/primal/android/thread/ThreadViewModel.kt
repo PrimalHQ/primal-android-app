@@ -13,14 +13,18 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.JsonArray
 import net.primal.android.core.compose.feed.asFeedPostUi
 import net.primal.android.feed.repository.FeedRepository
 import net.primal.android.feed.repository.PostRepository
 import net.primal.android.navigation.postId
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.nostr.notary.asEventIdTag
+import net.primal.android.nostr.notary.asPubkeyTag
 import net.primal.android.thread.ThreadContract.UiEvent
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.seconds
 
 @HiltViewModel
 class ThreadViewModel @Inject constructor(
@@ -53,6 +57,7 @@ class ThreadViewModel @Inject constructor(
             when (it) {
                 is UiEvent.PostLikeAction -> likePost(it)
                 is UiEvent.RepostAction -> repostPost(it)
+                is UiEvent.ReplyToAction -> publishReply(it)
             }
         }
     }
@@ -117,5 +122,38 @@ class ThreadViewModel @Inject constructor(
         } catch (error: NostrPublishException) {
             // Propagate error to the UI
         }
+    }
+
+    private fun publishReply(replyToAction: UiEvent.ReplyToAction) = viewModelScope.launch {
+        setState { copy(publishingReply = true) }
+        try {
+            val eventTags: List<JsonArray> = listOf(
+                replyToAction.replyToPostId.asEventIdTag(marker = "reply")
+            )
+            val pubkeyTags: List<JsonArray> = listOf(
+                replyToAction.replyToAuthorId.asPubkeyTag()
+            )
+            postRepository.publishShortTextNote(
+                content = replyToAction.content,
+                eventTags = eventTags,
+                pubkeyTags = pubkeyTags,
+            )
+            scheduleFetchReplies()
+        } catch (error: NostrPublishException) {
+            setState { copy(publishingError = ThreadContract.UiState.PublishError(cause = error.cause)) }
+            scheduleErrorClear()
+        } finally {
+            setState { copy(publishingReply = false) }
+        }
+    }
+
+    private fun scheduleErrorClear() = viewModelScope.launch {
+        delay(2.seconds)
+        setState { copy(publishingError = null) }
+    }
+
+    private fun scheduleFetchReplies() = viewModelScope.launch {
+        delay(2.seconds)
+        fetchRepliesFromNetwork()
     }
 }

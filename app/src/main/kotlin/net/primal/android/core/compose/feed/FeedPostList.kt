@@ -78,7 +78,7 @@ fun FeedPostList(
     onProfileClick: (String) -> Unit,
     onPostLikeClick: (FeedPostUi) -> Unit,
     onRepostClick: (FeedPostUi) -> Unit,
-    onPostReplyClick: (FeedPostUi) -> Unit,
+    onPostReplyClick: (String) -> Unit,
     onPostQuoteClick: (FeedPostUi) -> Unit,
     syncStats: FeedPostsSyncStats = FeedPostsSyncStats(),
     paddingValues: PaddingValues = PaddingValues(0.dp),
@@ -178,7 +178,7 @@ fun FeedLazyColumn(
     onProfileClick: (String) -> Unit,
     onPostLikeClick: (FeedPostUi) -> Unit,
     onRepostClick: (FeedPostUi) -> Unit,
-    onPostReplyClick: (FeedPostUi) -> Unit,
+    onPostReplyClick: (String) -> Unit,
     onPostQuoteClick: (FeedPostUi) -> Unit,
     shouldShowLoadingState: Boolean = true,
     shouldShowNoContentState: Boolean = true,
@@ -213,14 +213,10 @@ fun FeedLazyColumn(
             }
         }
 
-        when (val prependLoadState = pagingItems.loadState.mediator?.prepend) {
+        when (pagingItems.loadState.mediator?.prepend) {
             is LoadState.Error -> item(contentType = "Error") {
                 ErrorItem(
-                    text = stringResource(
-                        R.string.feed_error_loading_prev_page,
-                        prependLoadState.error.message
-                            ?: prependLoadState.error.javaClass.simpleName
-                    )
+                    text = stringResource(R.string.feed_error_loading_prev_page)
                 )
             }
 
@@ -241,7 +237,7 @@ fun FeedLazyColumn(
                     onProfileClick = { profileId -> onProfileClick(profileId) },
                     onPostAction = { postAction ->
                         when (postAction) {
-                            FeedPostAction.Reply -> onPostReplyClick(item)
+                            FeedPostAction.Reply -> onPostReplyClick(item.postId)
                             FeedPostAction.Zap -> Unit
                             FeedPostAction.Like -> onPostLikeClick(item)
                             FeedPostAction.Repost -> {
@@ -282,7 +278,7 @@ fun FeedLazyColumn(
             }
         }
 
-        when (val appendLoadState = pagingItems.loadState.mediator?.append) {
+        when (pagingItems.loadState.mediator?.append) {
             LoadState.Loading -> item(contentType = "LoadingAppend") {
                 LoadingItem(
                     modifier = Modifier
@@ -293,11 +289,7 @@ fun FeedLazyColumn(
 
             is LoadState.Error -> item(contentType = "Error") {
                 ErrorItem(
-                    text = stringResource(
-                        R.string.feed_error_loading_next_page,
-                        appendLoadState.error.message
-                            ?: appendLoadState.error.javaClass.simpleName
-                    )
+                    text = stringResource(R.string.feed_error_loading_next_page)
                 )
             }
 

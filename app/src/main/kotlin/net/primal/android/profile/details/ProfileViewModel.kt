@@ -19,7 +19,8 @@ import net.primal.android.feed.repository.PostRepository
 import net.primal.android.navigation.profileId
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
-import net.primal.android.profile.db.displayNameUiFriendly
+import net.primal.android.profile.db.authorNameUiFriendly
+import net.primal.android.profile.db.userNameUiFriendly
 import net.primal.android.profile.details.ProfileContract.UiEvent
 import net.primal.android.profile.details.ProfileContract.UiState
 import net.primal.android.profile.details.model.ProfileDetailsUi
@@ -88,7 +89,8 @@ class ProfileViewModel @Inject constructor(
                     profileDetails = if (it.metadata != null) {
                         ProfileDetailsUi(
                             pubkey = it.metadata.ownerId,
-                            displayName = it.metadata.displayNameUiFriendly(),
+                            authorDisplayName = it.metadata.authorNameUiFriendly(),
+                            userDisplayName = it.metadata.userNameUiFriendly(),
                             coverUrl = it.metadata.banner,
                             avatarUrl = it.metadata.picture,
                             internetIdentifier = it.metadata.internetIdentifier,

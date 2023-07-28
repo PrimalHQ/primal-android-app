@@ -4,7 +4,7 @@
     <string name="nsec">nsec</string>
     <string name="npub">npub</string>
 
-    <string name="app_generic_error">Something went wrong. Please try again soon.</string>
+    <string name="app_generic_error">Something went wrong. Please try again.</string>
 
     <string name="welcome_sign_in_button_title">Sign in</string>
     <string name="welcome_sign_in_button_subtitle">Already have a Nostr account? Sign with your Nostr key.</string>
@@ -46,9 +46,9 @@
     <string name="timestamp_since_years">%1$s y. ago</string>
 
     <string name="feed_list_title">My Nostr Feeds</string>
-    <string name="feed_error_loading_prev_page">Could not load previous page because of an error: %1$s</string>
-    <string name="feed_error_loading_next_page">Could not load next page because of an error: %1$s</string>
-    <string name="feed_no_content">No content found for this feed.</string>
+    <string name="feed_error_loading_prev_page">Unable to load newer content. Please try again.</string>
+    <string name="feed_error_loading_next_page">Unable to load older content. Please try again.</string>
+    <string name="feed_no_content">Unable to load content for this feed. Please try again.</string>
     <string name="feed_refresh_button">Refresh</string>
 
     <string name="feed_new_posts_notice_general">posted</string>
@@ -67,6 +67,11 @@
     <string name="new_post_nostr_publish_error">Unable to publish your note to Nostr. Please try again soon.</string>
 
     <string name="thread_title">Thread</string>
+    <string name="thread_reply_to">Reply to %1$s</string>
+    <string name="thread_replying_to">Replying to %1$s</string>
+    <string name="thread_publish_button">Reply</string>
+    <string name="thread_publishing_button">Replying…</string>
+    <string name="thread_reply_nostr_publish_error">Unable to publish your note to Nostr. Please try again soon.</string>
 
     <string name="explore_title">Explore</string>
     <string name="explore_feed_added_to_user_feeds">Added to your home feeds</string>

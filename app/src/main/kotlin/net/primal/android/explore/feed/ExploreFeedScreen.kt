@@ -113,7 +113,7 @@ fun ExploreFeedScreen(
                 onPostClick = onPostClick,
                 onProfileClick = onProfileClick,
                 onPostReplyClick = {
-
+                    onPostClick(it)
                 },
                 onPostLikeClick = {
                     eventPublisher(

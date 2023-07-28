@@ -134,7 +134,7 @@ fun FeedScreen(
                     )
                 },
                 onPostReplyClick = {
-
+                    onPostClick(it)
                 },
                 onRepostClick = {
                     eventPublisher(

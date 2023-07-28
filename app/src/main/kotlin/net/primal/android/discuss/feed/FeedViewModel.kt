@@ -30,7 +30,7 @@ import net.primal.android.user.active.ActiveAccountStore
 import net.primal.android.user.active.ActiveUserAccountState
 import java.time.Instant
 import javax.inject.Inject
-import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.minutes
 
 @HiltViewModel
 class FeedViewModel @Inject constructor(
@@ -63,16 +63,17 @@ class FeedViewModel @Inject constructor(
     }
 
     init {
-        loadFeedTitle()
+        subscribeToFeedTitle()
         subscribeToEvents()
         subscribeToFeedSyncUpdates()
         subscribeToActiveAccount()
     }
 
-    private fun loadFeedTitle() = viewModelScope.launch {
-        val feed = feedRepository.findFeedByDirective(feedDirective = feedDirective)
-        setState {
-            copy(feedTitle = feed?.name ?: feedDirective.ellipsizeMiddle(size = 8))
+    private fun subscribeToFeedTitle() = viewModelScope.launch {
+        feedRepository.observeFeedByDirective(feedDirective = feedDirective).collect {
+            setState {
+                copy(feedTitle = it?.name ?: feedDirective.ellipsizeMiddle(size = 8))
+            }
         }
     }
 
@@ -142,7 +143,7 @@ class FeedViewModel @Inject constructor(
     }
 
     private fun syncSettings() = viewModelScope.launch {
-        userSettingsUpdater?.updateSettingsWithDebounce(timeoutInSeconds = 6.hours.inWholeSeconds)
+        userSettingsUpdater?.updateSettingsWithDebounce(timeoutInSeconds = 30.minutes.inWholeSeconds)
     }
 
     private fun likePost(postLikeAction: UiEvent.PostLikeAction) = viewModelScope.launch {

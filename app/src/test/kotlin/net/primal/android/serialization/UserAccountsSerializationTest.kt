@@ -20,7 +20,8 @@ class UserAccountsSerializationTest {
         decryptResult: String = """
             [{   
                 "pubkey":"b10b0d5e5fae9c6c48a8c77f7e5abd42a79e9480e25a4094051d4ba4ce14456b",
-                "displayName":"alex"
+                "authorDisplayName":"Alex",
+                "userDisplayName":"alex"
             }]
         """.trimIndent(),
     ) = mockk<Encryption>(relaxed = true) {

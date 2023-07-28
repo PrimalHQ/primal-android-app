@@ -12,16 +12,14 @@ import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.serialization.json.encodeToJsonElement
-import kotlinx.serialization.json.jsonObject
 import net.primal.android.networking.UserAgentProvider
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.NostrIncomingMessage
 import net.primal.android.networking.sockets.NostrSocketClient
 import net.primal.android.networking.sockets.errors.NostrNoticeException
 import net.primal.android.networking.sockets.filterByEventId
+import net.primal.android.serialization.toJsonObject
 import net.primal.android.nostr.model.NostrEvent
-import net.primal.android.serialization.NostrJson
 import net.primal.android.user.active.ActiveAccountStore
 import net.primal.android.user.active.ActiveUserAccountState
 import net.primal.android.user.domain.Relay
@@ -90,7 +88,7 @@ class RelayPool @Inject constructor(
             scope.launch {
                 with(nostrSocketClient) {
                     ensureSocketConnection()
-                    sendEVENT(NostrJson.encodeToJsonElement(nostrEvent).jsonObject)
+                    sendEVENT(nostrEvent.toJsonObject())
                     try {
                         val response = collectPublishResponse(eventId = nostrEvent.id)
                         responseFlow.emit(NostrPublishResult(result = response))

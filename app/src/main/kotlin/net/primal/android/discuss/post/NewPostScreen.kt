@@ -23,6 +23,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -67,7 +68,7 @@ fun NewPostScreen(
     onClose: () -> Unit,
     eventPublisher: (NewPostContract.UiEvent) -> Unit,
 ) {
-    var content by remember { mutableStateOf(state.preFillContent ?: "") }
+    var content by rememberSaveable { mutableStateOf(state.preFillContent ?: "") }
 
     val focusRequester = remember { FocusRequester() }
     val snackbarHostState = remember { SnackbarHostState() }
