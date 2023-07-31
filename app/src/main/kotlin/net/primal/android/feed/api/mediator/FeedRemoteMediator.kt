@@ -15,7 +15,6 @@ import net.primal.android.feed.db.FeedPost
 import net.primal.android.feed.db.FeedPostDataCrossRef
 import net.primal.android.feed.db.FeedPostRemoteKey
 import net.primal.android.feed.db.FeedPostSync
-import net.primal.android.feed.db.NostrUri
 import net.primal.android.feed.db.sql.ExploreFeedQueryBuilder
 import net.primal.android.feed.db.sql.FeedQueryBuilder
 import net.primal.android.feed.db.sql.LatestFeedQueryBuilder
@@ -37,10 +36,9 @@ import net.primal.android.nostr.model.primal.content.ContentPrimalEventResources
 import net.primal.android.nostr.model.primal.content.ContentPrimalEventStats
 import net.primal.android.nostr.model.primal.content.ContentPrimalEventUserStats
 import net.primal.android.nostr.model.primal.content.ContentPrimalPaging
-import net.primal.android.profile.db.ProfileMetadata
+import net.primal.android.profile.db.userNameUiFriendly
 import net.primal.android.serialization.NostrJson
 import net.primal.android.serialization.decodeFromStringOrNull
-import timber.log.Timber
 import java.io.IOException
 import java.time.Instant
 import kotlin.time.Duration
@@ -242,7 +240,9 @@ class FeedRemoteMediator(
                     repostEvents = response.reposts,
                 )
 
-                response.referencedPosts.processReferencedEvents()
+                response.referencedPosts.processReferencedEvents(
+                    metadataEvents = response.metadata,
+                )
                 response.primalEventStats.processEventStats()
                 response.primalEventUserStats.processEventUserStats()
                 response.primalEventResources.processEventResources()
@@ -279,24 +279,35 @@ class FeedRemoteMediator(
         postEvents: List<NostrEvent>,
         repostEvents: List<NostrEvent>,
     ) {
-        val mapOwnerIdToMetadataEventId = metadataEvents
+        val profileIdToProfileMetadataMap = metadataEvents
             .mapAsProfileMetadata()
             .groupBy { it.ownerId }
-            .mapValues { it.value.first().eventId }
+            .mapValues { it.value.first() }
 
 
         database.withTransaction {
             val posts = postEvents
                 .mapNotNullAsPost()
-                .map { it.copy(authorMetadataId = mapOwnerIdToMetadataEventId[it.authorId]) }
+                .map { postData ->
+                    val eventIdMap = profileIdToProfileMetadataMap.mapValues { it.value.eventId }
+                    postData.copy(authorMetadataId = eventIdMap[postData.authorId])
+                }
             database.posts().upsertAll(data = posts)
+            database.resources().upsert(data = posts.flatMapAsPostResources())
+
+            val profileIdToUsernameMap = profileIdToProfileMetadataMap.mapValues {
+                it.value.userNameUiFriendly()
+            }
+            database.nostrUris().upsert(
+                data = posts.flatMapAsPostNostrUris(
+                    profileIdToDisplayNameMap = profileIdToUsernameMap
+                )
+            )
 
             val reposts = repostEvents.mapNotNullAsRepost()
-
             database.reposts().upsertAll(data = reposts)
 
             val feedConnections = posts.map { it.postId } + reposts.map { it.repostId }
-
             database.feedsConnections().connect(
                 data = feedConnections.map { postId ->
                     FeedPostDataCrossRef(
@@ -305,29 +316,6 @@ class FeedRemoteMediator(
                     )
                 }
             )
-
-            val mapOwnerIdToProfileMetadata = metadataEvents
-                .mapAsProfileMetadata()
-                .groupBy { it.ownerId }
-                .mapKeys { it.value.first().ownerId }
-                .mapValues { it.value.first() }
-
-
-            database.resources().upsert(data = posts.flatMapAsPostResources())
-            database.nostrUris()
-                .upsert(data = posts.flatMapAsPostNostrUris(mapOwnerIdToProfileMetadata))
-
-//            database.nostrUris()
-//                .upsert(data =
-//                reposts.map { repost ->
-//                    posts.firstOrNull { post -> repost.postId == post.postId }
-//                        ?.copy(postId = repost.repostId) ?: null
-//                }
-//                    .filterNotNull()
-//                    .flatMapAsPostNostrUris(mapOwnerIdToProfileMetadata)
-//                )
-
-            Timber.i("Received ${posts.size} posts and ${reposts.size} reposts..")
         }
     }
 
@@ -335,12 +323,25 @@ class FeedRemoteMediator(
         database.profiles().upsertAll(profiles = mapAsProfileMetadata())
     }
 
-    private fun List<PrimalEvent>.processReferencedEvents() {
-        database.posts().upsertAll(
-            data = this
-                .mapNotNull { it.takeContentAsNostrEventOrNull() }
-                .map { it.asPost() }
-        )
+    private suspend fun List<PrimalEvent>.processReferencedEvents(
+        metadataEvents: List<NostrEvent>,
+    ) {
+        database.withTransaction {
+            val posts = this.mapNotNull { it.takeContentAsNostrEventOrNull() }.map { it.asPost() }
+            database.posts().upsertAll(data = posts)
+
+            val profileIdToUsernameMap = metadataEvents
+                .mapAsProfileMetadata()
+                .groupBy { it.ownerId }
+                .mapValues { it.value.first().userNameUiFriendly() }
+            database.nostrUris().upsert(
+                data = posts.flatMapAsPostNostrUris(
+                    profileIdToDisplayNameMap = profileIdToUsernameMap
+                )
+            )
+
+            database.resources().upsert(data = posts.flatMapAsPostResources())
+        }
     }
 
     private fun List<PrimalEvent>.processEventStats() {
