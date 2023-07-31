@@ -5,7 +5,7 @@ import net.primal.android.crypto.toHex
 import net.primal.android.feed.db.NostrUri
 import net.primal.android.feed.db.PostData
 import net.primal.android.profile.db.ProfileMetadata
-import net.primal.android.profile.db.displayNameUiFriendly
+import net.primal.android.profile.db.userNameUiFriendly
 
 fun List<PostData>.flatMapAsPostNostrUris(mapAsProfileMetadata: Map<String, ProfileMetadata>) =
     flatMap { postData ->
@@ -26,7 +26,7 @@ fun List<PostData>.flatMapAsPostNostrUris(mapAsProfileMetadata: Map<String, Prof
                         when (type.lowercase()) {
                             NPUB -> {
                                 profileId = (type + key).bechToBytes().toHex()
-                                name = mapAsProfileMetadata[profileId]?.name //mapAsProfileMetadata[profileId]?.displayNameUiFriendly()
+                                name = mapAsProfileMetadata[profileId]?.userNameUiFriendly()
                             }
 
                             NOTE -> {
@@ -47,7 +47,7 @@ fun List<PostData>.flatMapAsPostNostrUris(mapAsProfileMetadata: Map<String, Prof
                                 profileId = tlv.get(Nip19Tlv.Type.SPECIAL.id)
                                     ?.get(0)
                                     ?.toHex()
-                                name = mapAsProfileMetadata[profileId]?.name // mapAsProfileMetadata[profileId]?.displayNameUiFriendly()
+                                name = mapAsProfileMetadata[profileId]?.userNameUiFriendly()
                             }
 
                             else -> {
@@ -75,4 +75,3 @@ fun List<PostData>.flatMapAsPostNostrUris(mapAsProfileMetadata: Map<String, Prof
                 )
             }
     }
-
