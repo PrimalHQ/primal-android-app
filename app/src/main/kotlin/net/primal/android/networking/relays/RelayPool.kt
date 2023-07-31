@@ -58,20 +58,26 @@ class RelayPool @Inject constructor(
         }
     }
 
-    private fun Relay.toWssRequest() = Request.Builder()
-        .url(url)
-        .addHeader("User-Agent", UserAgentProvider.USER_AGENT)
-        .build()
+    private fun Relay.toWssRequestOrNull() = try {
+        Request.Builder()
+            .url(url)
+            .addHeader("User-Agent", UserAgentProvider.USER_AGENT)
+            .build()
+    } catch (error: IllegalArgumentException) {
+        null
+    }
 
     private suspend fun createClientsPool(relays: List<Relay>) {
         clearClientsPool()
         poolMutex.withLock {
-            clientsPool = relays.map {
-                NostrSocketClient(
-                    okHttpClient = okHttpClient,
-                    wssRequest = it.toWssRequest()
-                )
-            }
+            clientsPool = relays
+                .mapNotNull { it.toWssRequestOrNull() }
+                .map {
+                    NostrSocketClient(
+                        okHttpClient = okHttpClient,
+                        wssRequest = it
+                    )
+                }
         }
     }
 
