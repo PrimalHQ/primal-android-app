@@ -1,7 +1,7 @@
 package net.primal.android.nostr.ext
 
+import net.primal.android.core.utils.parseUris
 import kotlinx.serialization.encodeToString
-import net.primal.android.core.utils.parseUrls
 import net.primal.android.feed.db.PostData
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.serialization.NostrJson
@@ -14,7 +14,7 @@ fun NostrEvent.asPost(): PostData = PostData(
     createdAt = this.createdAt,
     tags = this.tags ?: emptyList(),
     content = this.content,
-    urls = this.content.parseUrls(),
+    uris = this.content.parseUris(),
     sig = this.sig,
     raw = NostrJson.encodeToString(this),
 )

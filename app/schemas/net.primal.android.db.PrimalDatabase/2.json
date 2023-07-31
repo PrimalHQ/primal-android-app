@@ -1,12 +1,12 @@
 {
   "formatVersion": 1,
   "database": {
-    "version": 2,
-    "identityHash": "16cc234be03ec8ef070c86067b675457",
+    "version": 3,
+    "identityHash": "bb6bdc4d3c8117c20c9e9552dc47abc3",
     "entities": [
       {
         "tableName": "PostData",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`postId` TEXT NOT NULL, `authorId` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `tags` TEXT NOT NULL, `content` TEXT NOT NULL, `urls` TEXT NOT NULL, `sig` TEXT NOT NULL, `raw` TEXT NOT NULL, `authorMetadataId` TEXT, `referencePostId` TEXT, `referencePostAuthorId` TEXT, `referencePostAuthorMetadataId` TEXT, PRIMARY KEY(`postId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`postId` TEXT NOT NULL, `authorId` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `tags` TEXT NOT NULL, `content` TEXT NOT NULL, `uris` TEXT NOT NULL, `sig` TEXT NOT NULL, `raw` TEXT NOT NULL, `authorMetadataId` TEXT, `referencePostId` TEXT, `referencePostAuthorId` TEXT, `referencePostAuthorMetadataId` TEXT, PRIMARY KEY(`postId`))",
         "fields": [
           {
             "fieldPath": "postId",
@@ -39,8 +39,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "urls",
-            "columnName": "urls",
+            "fieldPath": "uris",
+            "columnName": "uris",
             "affinity": "TEXT",
             "notNull": true
           },
@@ -678,12 +678,57 @@
         },
         "indices": [],
         "foreignKeys": []
+      },
+      {
+        "tableName": "NostrUri",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`eventId` TEXT NOT NULL, `uri` TEXT NOT NULL, `profileId` TEXT, `noteId` TEXT, `name` TEXT, PRIMARY KEY(`eventId`, `uri`))",
+        "fields": [
+          {
+            "fieldPath": "eventId",
+            "columnName": "eventId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "uri",
+            "columnName": "uri",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "profileId",
+            "columnName": "profileId",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "noteId",
+            "columnName": "noteId",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "eventId",
+            "uri"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
       }
     ],
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '16cc234be03ec8ef070c86067b675457')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'bb6bdc4d3c8117c20c9e9552dc47abc3')"
     ]
   }
 }

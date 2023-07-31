@@ -2,13 +2,13 @@ package net.primal.android.core.compose.feed
 
 import net.primal.android.core.compose.feed.model.FeedPostStatsUi
 import net.primal.android.core.compose.feed.model.FeedPostUi
+import net.primal.android.core.compose.feed.model.NostrUriUi
 import net.primal.android.core.compose.media.model.MediaResourceUi
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.feed.db.FeedPost
 import net.primal.android.profile.db.authorNameUiFriendly
 import net.primal.android.profile.db.userNameUiFriendly
 import java.time.Instant
-
 
 fun FeedPost.asFeedPostUi() = FeedPostUi(
     postId = this.data.postId,
@@ -37,6 +37,14 @@ fun FeedPost.asFeedPostUi() = FeedPostUi(
             url = it.url,
             mimeType = it.contentType,
             variants = it.variants ?: emptyList(),
+        )
+    },
+    nostrUris = this.nostrUris.map {
+        NostrUriUi(
+            name = it.name,
+            uri = it.uri,
+            profileId = it.profileId,
+            noteId = it.noteId,
         )
     },
     stats = FeedPostStatsUi(

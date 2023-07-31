@@ -17,7 +17,7 @@ class UrlUtilsTest {
             https://www.bitcoinops.org/en/newsletters/2023/06/07/
         """.trimIndent()
 
-        val expectedUrls = content.parseUrls()
+        val expectedUrls = content.parseUris()
 
         expectedUrls.shouldNotBeNull()
         expectedUrls.size shouldBeExactly 4
@@ -29,7 +29,7 @@ class UrlUtilsTest {
         val hugeContent = javaClass.getResource("/core/release_notes.txt")?.readText()
         hugeContent.shouldNotBeNull()
 
-        val urls = hugeContent.parseUrls()
+        val urls = hugeContent.parseUris()
         urls.shouldNotBeNull()
         urls.forEach {
             it.shouldNotEndWith(")")

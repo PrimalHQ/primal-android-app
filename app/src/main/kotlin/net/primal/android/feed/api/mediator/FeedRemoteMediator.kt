@@ -15,6 +15,7 @@ import net.primal.android.feed.db.FeedPost
 import net.primal.android.feed.db.FeedPostDataCrossRef
 import net.primal.android.feed.db.FeedPostRemoteKey
 import net.primal.android.feed.db.FeedPostSync
+import net.primal.android.feed.db.NostrUri
 import net.primal.android.feed.db.sql.ExploreFeedQueryBuilder
 import net.primal.android.feed.db.sql.FeedQueryBuilder
 import net.primal.android.feed.db.sql.LatestFeedQueryBuilder
@@ -24,6 +25,7 @@ import net.primal.android.nostr.ext.asEventStatsPO
 import net.primal.android.nostr.ext.asEventUserStatsPO
 import net.primal.android.nostr.ext.asMediaResourcePO
 import net.primal.android.nostr.ext.asPost
+import net.primal.android.nostr.ext.flatMapAsPostNostrUris
 import net.primal.android.nostr.ext.flatMapAsPostResources
 import net.primal.android.nostr.ext.mapAsProfileMetadata
 import net.primal.android.nostr.ext.mapNotNullAsPost
@@ -35,6 +37,7 @@ import net.primal.android.nostr.model.primal.content.ContentPrimalEventResources
 import net.primal.android.nostr.model.primal.content.ContentPrimalEventStats
 import net.primal.android.nostr.model.primal.content.ContentPrimalEventUserStats
 import net.primal.android.nostr.model.primal.content.ContentPrimalPaging
+import net.primal.android.profile.db.ProfileMetadata
 import net.primal.android.serialization.NostrJson
 import net.primal.android.serialization.decodeFromStringOrNull
 import timber.log.Timber
@@ -57,6 +60,7 @@ class FeedRemoteMediator(
             feedDirective = feedDirective,
             userPubkey = userPubkey,
         )
+
         else -> ExploreFeedQueryBuilder(
             feedDirective = feedDirective,
             userPubkey = userPubkey,
@@ -288,6 +292,7 @@ class FeedRemoteMediator(
             database.posts().upsertAll(data = posts)
 
             val reposts = repostEvents.mapNotNullAsRepost()
+
             database.reposts().upsertAll(data = reposts)
 
             val feedConnections = posts.map { it.postId } + reposts.map { it.repostId }
@@ -301,7 +306,27 @@ class FeedRemoteMediator(
                 }
             )
 
+            val mapOwnerIdToProfileMetadata = metadataEvents
+                .mapAsProfileMetadata()
+                .groupBy { it.ownerId }
+                .mapKeys { it.value.first().ownerId }
+                .mapValues { it.value.first() }
+
+
             database.resources().upsert(data = posts.flatMapAsPostResources())
+            database.nostrUris()
+                .upsert(data = posts.flatMapAsPostNostrUris(mapOwnerIdToProfileMetadata))
+
+//            database.nostrUris()
+//                .upsert(data =
+//                reposts.map { repost ->
+//                    posts.firstOrNull { post -> repost.postId == post.postId }
+//                        ?.copy(postId = repost.repostId) ?: null
+//                }
+//                    .filterNotNull()
+//                    .flatMapAsPostNostrUris(mapOwnerIdToProfileMetadata)
+//                )
+
             Timber.i("Received ${posts.size} posts and ${reposts.size} reposts..")
         }
     }

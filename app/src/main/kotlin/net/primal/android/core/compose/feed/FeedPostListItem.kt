@@ -46,6 +46,7 @@ import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -59,6 +60,7 @@ import net.primal.android.core.compose.PrimalClickableText
 import net.primal.android.core.compose.feed.model.FeedPostAction
 import net.primal.android.core.compose.feed.model.FeedPostStatsUi
 import net.primal.android.core.compose.feed.model.FeedPostUi
+import net.primal.android.core.compose.feed.model.NostrUriUi
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.FeedLikes
 import net.primal.android.core.compose.icons.primaliconpack.FeedLikesFilled
@@ -134,14 +136,18 @@ fun FeedPostListItem(
             PostContent(
                 content = data.content,
                 resources = data.postResources,
+                nostrUris = data.nostrUris,
                 onClick = {
                     uiScope.launch {
-                        val press = PressInteraction.Press(it.copy(y = it.y + postAuthorGuessHeight))
+                        val press =
+                            PressInteraction.Press(it.copy(y = it.y + postAuthorGuessHeight))
                         interactionSource.emit(press)
                         interactionSource.emit(PressInteraction.Release(press))
                     }
                     onPostClick(data.postId)
                 },
+                onProfileClick = onProfileClick,
+                onPostClick = onPostClick,
                 onUrlClick = {
                     localUriHandler.openUriSafely(it)
                 },
@@ -226,10 +232,58 @@ private fun String.withoutUrls(urls: List<String>): String {
     return newContent
 }
 
+private fun String.replaceNostrProfileUriWithAnnotatedLinks(
+    uris: List<NostrUriUi>,
+    spanStyle: SpanStyle,
+    tag: String
+): AnnotatedString {
+    val pattern = uris
+        .map {
+            it.uri
+        }
+        .joinToString(separator = "|") { Regex.escape(it) }
+    val regex = Regex(pattern, RegexOption.IGNORE_CASE)
+    val builder = AnnotatedString.Builder()
+    var lastEnd = 0
+
+    regex.findAll(this).forEach { result ->
+        if (result.range.first > lastEnd) {
+            builder.append(this.substring(lastEnd, result.range.first))
+        }
+        val link = uris.firstOrNull { it.uri == result.value }
+        if (link != null) {
+            val text = "@" + (link.name ?: result.value)
+            builder.withStyle(spanStyle) {
+                append(text)
+                addStringAnnotation(
+                    tag,
+                    link.profileId ?: "",
+                    start = builder.length - text.length,
+                    end = builder.length
+                )
+            }
+        } else {
+            builder.append(result.value)
+        }
+        lastEnd = result.range.last + 1
+    }
+    if (lastEnd < this.length) {
+        builder.append(this.substring(lastEnd))
+    }
+    return builder.toAnnotatedString()
+}
+
+private const val PROFILE_ID_ANNOTATION_TAG = "profileId"
+private const val URL_ANNOTATION_TAG = "URL"
+private const val NOTE_ANNOTATION_TAG = "NOTE"
+
 @Composable
 fun PostContent(
     content: String,
     resources: List<MediaResourceUi>,
+    nostrUris: List<NostrUriUi>,
+    onProfileClick: (String) -> Unit,
+    onPostClick: (String) -> Unit,
     onClick: (Offset) -> Unit,
     onUrlClick: (String) -> Unit,
 ) {
@@ -238,7 +292,13 @@ fun PostContent(
 
     val refinedContent = remember {
         content.withoutUrls(urls = imageResources.map { it.url }).trim()
-    }
+    }.replaceNostrProfileUriWithAnnotatedLinks(
+        nostrUris.filter { it.profileId != null },
+        SpanStyle(
+            color = AppTheme.colorScheme.primary,
+        ),
+        PROFILE_ID_ANNOTATION_TAG,
+    )
 
     val contentText = buildAnnotatedString {
         append(refinedContent)
@@ -255,8 +315,27 @@ fun PostContent(
                     end = endIndex,
                 )
                 addStringAnnotation(
-                    tag = "URL",
+                    tag = URL_ANNOTATION_TAG,
                     annotation = it,
+                    start = startIndex,
+                    end = endIndex,
+                )
+            }
+        nostrUris
+            .filter { it.noteId != null }
+            .forEach {
+                val startIndex = refinedContent.indexOf(it.uri)
+                val endIndex = startIndex + it.uri.length
+                addStyle(
+                    style = SpanStyle(
+                        color = AppTheme.colorScheme.primary,
+                    ),
+                    start = startIndex,
+                    end = endIndex,
+                )
+                addStringAnnotation(
+                    tag = NOTE_ANNOTATION_TAG,
+                    annotation = it.noteId ?: "",
                     start = startIndex,
                     end = endIndex,
                 )
@@ -275,9 +354,18 @@ fun PostContent(
                 maxLines = 12,
                 overflow = TextOverflow.Ellipsis,
                 onClick = { position, offset ->
-                    contentText.getStringAnnotations(tag = "URL", start = position, end = position)
+                    contentText.getStringAnnotations(
+                        start = position,
+                        end = position
+                    )
                         .firstOrNull()?.let { annotation ->
-                            onUrlClick(annotation.item)
+                            if (annotation.tag == PROFILE_ID_ANNOTATION_TAG) {
+                                onProfileClick(annotation.item)
+                            } else if (annotation.tag == URL_ANNOTATION_TAG) {
+                                onUrlClick(annotation.item)
+                            } else if (annotation.tag == NOTE_ANNOTATION_TAG) {
+                                onPostClick(annotation.item)
+                            }
                         } ?: onClick(offset)
                 }
             )
@@ -296,9 +384,11 @@ fun PostContent(
                         val density = LocalDensity.current.density
                         val maxWidthPx = with(LocalDensity.current) { maxWidth.roundToPx() }
                         val maxWidth = maxWidth.value.toInt()
-                        val maxHeight = (LocalConfiguration.current.screenHeightDp * 0.77).toInt()
+                        val maxHeight =
+                            (LocalConfiguration.current.screenHeightDp * 0.77).toInt()
 
-                        val variant = resource.variants.findNearestOrNull(maxWidthPx = maxWidthPx)
+                        val variant =
+                            resource.variants.findNearestOrNull(maxWidthPx = maxWidthPx)
                         val imageSizeDp = variant.calculateImageSize(
                             maxWidth = maxWidth,
                             maxHeight = maxHeight,
@@ -576,6 +666,7 @@ fun PreviewFeedPostListItemLight() {
                 authorAvatarUrl = "https://i.imgur.com/Z8dpmvc.png",
                 timestamp = Instant.now().minus(30, ChronoUnit.MINUTES),
                 authorResources = emptyList(),
+                nostrUris = emptyList(),
                 stats = FeedPostStatsUi(
                     repliesCount = 11,
                     likesCount = 256,
@@ -618,6 +709,7 @@ fun PreviewFeedPostListItemDark() {
                 authorAvatarUrl = "https://i.imgur.com/Z8dpmvc.png",
                 timestamp = Instant.now().minus(30, ChronoUnit.MINUTES),
                 authorResources = emptyList(),
+                nostrUris = emptyList(),
                 stats = FeedPostStatsUi(
                     repliesCount = 11,
                     userReplied = true,
