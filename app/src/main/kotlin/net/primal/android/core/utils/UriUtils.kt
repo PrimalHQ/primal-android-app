@@ -2,12 +2,12 @@ package net.primal.android.core.utils
 
 import com.linkedin.urls.detection.UrlDetector
 import com.linkedin.urls.detection.UrlDetectorOptions
-import net.primal.android.nostr.ext.parseNip19
+import net.primal.android.nostr.ext.parseNostrUris
 
 fun String.parseUris(): List<String> {
     val urlDetector = UrlDetector(this, UrlDetectorOptions.JSON)
     val urls = urlDetector.detect().map { it.originalUrl }
-    val nostr = this.parseNip19()
+    val nostr = this.parseNostrUris()
     return urls + nostr
 }
 

@@ -25,13 +25,13 @@ fun String.isNostrUri(): Boolean {
     return this.lowercase().startsWith(NOSTR)
 }
 
-fun String.parseNip19(): List<String> {
+fun String.parseNostrUris(): List<String> {
     return nostrUriRegexPattern.toRegex().findAll(this).map { matchResult ->
         matchResult.groupValues[1] + matchResult.groupValues[2] + matchResult.groupValues[3]
     }.toList()
 }
 
-fun List<PostData>.flatMapAsPostNostrUris(profileIdToDisplayNameMap: Map<String, String>) =
+fun List<PostData>.flatMapAsPostNostrUri(profileIdToDisplayNameMap: Map<String, String>) =
     flatMap { postData ->
         postData.uris
             .filter { it.isNostrUri() }

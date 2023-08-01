@@ -24,7 +24,7 @@ import net.primal.android.nostr.ext.asEventStatsPO
 import net.primal.android.nostr.ext.asEventUserStatsPO
 import net.primal.android.nostr.ext.asMediaResourcePO
 import net.primal.android.nostr.ext.asPost
-import net.primal.android.nostr.ext.flatMapAsPostNostrUris
+import net.primal.android.nostr.ext.flatMapAsPostNostrUri
 import net.primal.android.nostr.ext.flatMapAsPostResources
 import net.primal.android.nostr.ext.mapAsProfileMetadata
 import net.primal.android.nostr.ext.mapNotNullAsPost
@@ -299,7 +299,7 @@ class FeedRemoteMediator(
                 it.value.userNameUiFriendly()
             }
             database.nostrUris().upsert(
-                data = posts.flatMapAsPostNostrUris(
+                data = posts.flatMapAsPostNostrUri(
                     profileIdToDisplayNameMap = profileIdToUsernameMap
                 )
             )
@@ -335,7 +335,7 @@ class FeedRemoteMediator(
                 .groupBy { it.ownerId }
                 .mapValues { it.value.first().userNameUiFriendly() }
             database.nostrUris().upsert(
-                data = posts.flatMapAsPostNostrUris(
+                data = posts.flatMapAsPostNostrUri(
                     profileIdToDisplayNameMap = profileIdToUsernameMap
                 )
             )
