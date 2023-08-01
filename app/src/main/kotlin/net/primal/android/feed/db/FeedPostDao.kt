@@ -39,6 +39,6 @@ interface FeedPostDao {
         FROM PostData WHERE postId = :postId LIMIT 1
         """
     )
-    fun findPostById(postId: String): FeedPost
+    fun findPostById(postId: String): FeedPost?
 
 }

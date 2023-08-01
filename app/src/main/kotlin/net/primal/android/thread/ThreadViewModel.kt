@@ -70,12 +70,14 @@ class ThreadViewModel @Inject constructor(
 
     private suspend fun loadHighlightedPost() {
         val rootPost = withContext(Dispatchers.IO) { feedRepository.findPostById(postId = postId) }
-        setState {
-            copy(
-                conversation = listOf(rootPost.asFeedPostUi()),
-                highlightPostId = postId,
-                highlightPostIndex = 0,
-            )
+        if (rootPost != null) {
+            setState {
+                copy(
+                    conversation = listOf(rootPost.asFeedPostUi()),
+                    highlightPostId = postId,
+                    highlightPostIndex = 0,
+                )
+            }
         }
     }
 

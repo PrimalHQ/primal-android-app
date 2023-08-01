@@ -81,7 +81,7 @@ class FeedRepository @Inject constructor(
             .observeFeedDirective(feedDirective = feedDirective, since = since)
             .filterNotNull()
 
-    fun findPostById(postId: String): FeedPost = database.feedPosts().findPostById(postId = postId)
+    fun findPostById(postId: String): FeedPost? = database.feedPosts().findPostById(postId = postId)
 
     fun observeConversation(postId: String) =
         database.conversations().observeConversation(
