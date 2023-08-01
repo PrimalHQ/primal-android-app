@@ -129,6 +129,13 @@ fun FeedPostListItem(
         )
 
         val postAuthorGuessHeight = with(LocalDensity.current) { 128.dp.toPx() }
+        val launchRippleEffect: (Offset) -> Unit = {
+            uiScope.launch {
+                val press = PressInteraction.Press(it.copy(y = it.y + postAuthorGuessHeight))
+                interactionSource.emit(press)
+                interactionSource.emit(PressInteraction.Release(press))
+            }
+        }
 
         Column(
             modifier = Modifier.padding(start = if (shouldIndentContent) 64.dp else 0.dp),
@@ -138,12 +145,7 @@ fun FeedPostListItem(
                 resources = data.postResources,
                 nostrUris = data.nostrUris,
                 onClick = {
-                    uiScope.launch {
-                        val press =
-                            PressInteraction.Press(it.copy(y = it.y + postAuthorGuessHeight))
-                        interactionSource.emit(press)
-                        interactionSource.emit(PressInteraction.Release(press))
-                    }
+                    launchRippleEffect(it)
                     onPostClick(data.postId)
                 },
                 onProfileClick = onProfileClick,
@@ -238,9 +240,7 @@ private fun String.replaceNostrProfileUriWithAnnotatedLinks(
     tag: String
 ): AnnotatedString {
     val pattern = uris
-        .map {
-            it.uri
-        }
+        .map { it.uri }
         .joinToString(separator = "|") { Regex.escape(it) }
     val regex = Regex(pattern, RegexOption.IGNORE_CASE)
     val builder = AnnotatedString.Builder()
@@ -290,15 +290,16 @@ fun PostContent(
     val imageResources = remember { resources.filterImages() }
     val refinedUrlResources = remember { resources.filterNotImages() }
 
+    val primaryColor = AppTheme.colorScheme.primary
     val refinedContent = remember {
-        content.withoutUrls(urls = imageResources.map { it.url }).trim()
-    }.replaceNostrProfileUriWithAnnotatedLinks(
-        nostrUris.filter { it.profileId != null },
-        SpanStyle(
-            color = AppTheme.colorScheme.primary,
-        ),
-        PROFILE_ID_ANNOTATION_TAG,
-    )
+        content.trim()
+            .withoutUrls(urls = imageResources.map { it.url })
+            .replaceNostrProfileUriWithAnnotatedLinks(
+                nostrUris.filter { it.profileId != null },
+                SpanStyle(color = primaryColor),
+                PROFILE_ID_ANNOTATION_TAG,
+            )
+    }
 
     val contentText = buildAnnotatedString {
         append(refinedContent)
@@ -308,9 +309,7 @@ fun PostContent(
                 val startIndex = refinedContent.indexOf(it)
                 val endIndex = startIndex + it.length
                 addStyle(
-                    style = SpanStyle(
-                        color = AppTheme.colorScheme.primary,
-                    ),
+                    style = SpanStyle(color = AppTheme.colorScheme.primary),
                     start = startIndex,
                     end = endIndex,
                 )
@@ -327,9 +326,7 @@ fun PostContent(
                 val startIndex = refinedContent.indexOf(it.uri)
                 val endIndex = startIndex + it.uri.length
                 addStyle(
-                    style = SpanStyle(
-                        color = AppTheme.colorScheme.primary,
-                    ),
+                    style = SpanStyle(color = AppTheme.colorScheme.primary),
                     start = startIndex,
                     end = endIndex,
                 )
@@ -357,16 +354,13 @@ fun PostContent(
                     contentText.getStringAnnotations(
                         start = position,
                         end = position
-                    )
-                        .firstOrNull()?.let { annotation ->
-                            if (annotation.tag == PROFILE_ID_ANNOTATION_TAG) {
-                                onProfileClick(annotation.item)
-                            } else if (annotation.tag == URL_ANNOTATION_TAG) {
-                                onUrlClick(annotation.item)
-                            } else if (annotation.tag == NOTE_ANNOTATION_TAG) {
-                                onPostClick(annotation.item)
-                            }
-                        } ?: onClick(offset)
+                    ).firstOrNull()?.let { annotation ->
+                        when (annotation.tag) {
+                            PROFILE_ID_ANNOTATION_TAG -> onProfileClick(annotation.item)
+                            URL_ANNOTATION_TAG -> onUrlClick(annotation.item)
+                            NOTE_ANNOTATION_TAG -> onPostClick(annotation.item)
+                        }
+                    } ?: onClick(offset)
                 }
             )
         }

@@ -1,9 +1,9 @@
-package net.primal.android.nostr.ext
+package net.primal.android.nostr.utils
 
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
-object Nip19Tlv {
+object Nip19TLV {
     enum class Type(val id: Byte) {
         SPECIAL(0),
         RELAY(1),

@@ -5,7 +5,7 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.string.shouldNotEndWith
 import org.junit.Test
 
-class UrlUtilsTest {
+class UriUtilsTest {
 
     @Test
     fun `parseUrls should recognize https and http`() {

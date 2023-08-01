@@ -8,6 +8,7 @@ interface ThreadContract {
         val publishingReply: Boolean = false,
         val publishingError: PublishError? = null,
         val conversation: List<FeedPostUi> = emptyList(),
+        val highlightPostId: String? = null,
         val highlightPostIndex: Int = 0,
     ) {
         data class PublishError(val cause: Throwable?)

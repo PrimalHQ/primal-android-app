@@ -8,7 +8,7 @@ import androidx.room.Entity
 data class NostrUri(
     val eventId: String,
     val uri: String,
-    val profileId: String?,
-    val noteId: String?,
-    val name: String?,
+    val profileId: String? = null,
+    val noteId: String? = null,
+    val name: String? = null,
 )

@@ -73,6 +73,7 @@ class ThreadViewModel @Inject constructor(
         setState {
             copy(
                 conversation = listOf(rootPost.asFeedPostUi()),
+                highlightPostId = postId,
                 highlightPostIndex = 0,
             )
         }
