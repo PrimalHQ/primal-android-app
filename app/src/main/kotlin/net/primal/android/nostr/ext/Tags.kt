@@ -5,6 +5,7 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.add
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.jsonPrimitive
+import net.primal.android.core.utils.parseHashtags
 
 fun List<JsonArray>.findPostId(): String? {
     val postTag = firstOrNull { it.isEventIdTag() }
@@ -83,6 +84,20 @@ fun String.parseEventTags(marker: String? = null): List<JsonArray> {
                 }
             )
         }
+    }
+    return tags.toList()
+}
+
+fun String.parseHashtagTags(): List<JsonArray> {
+    val hashtags = parseHashtags()
+    val tags = mutableListOf<JsonArray>()
+    hashtags.forEach {
+        tags.add(
+            buildJsonArray {
+                add("t")
+                add(it.removePrefix("#"))
+            }
+        )
     }
     return tags.toList()
 }

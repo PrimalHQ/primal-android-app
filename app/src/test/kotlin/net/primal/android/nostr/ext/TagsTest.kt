@@ -80,4 +80,17 @@ class TagsTest {
         actual[0].jsonPrimitive.content shouldBe "e"
         actual[1].jsonPrimitive.content shouldBe "139db9003d26c1797c0f5cb22c12e1c19f725ebb8f281a557bf6f69374087c42"
     }
+
+    @Test
+    fun `parseHashtagTags returns tags for hashtags`() {
+        val content = "This hashtags in brackets (#Nostr, #Bitcoin, #Primal) should be fine!"
+        val expectedHashtags = listOf("Nostr", "Bitcoin", "Primal")
+        val actual = content.parseHashtagTags()
+        actual.size shouldBe 3
+        actual.forEachIndexed { index, tag ->
+            tag[0].jsonPrimitive.content shouldBe "t"
+            tag[1].jsonPrimitive.content shouldBe expectedHashtags[index]
+        }
+    }
+
 }

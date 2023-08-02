@@ -61,14 +61,12 @@ class PostRepository @Inject constructor(
     @Throws(NostrPublishException::class)
     suspend fun publishShortTextNote(
         content: String,
-        eventTags: Set<JsonArray> = emptySet(),
-        pubkeyTags: Set<JsonArray> = emptySet(),
+        tags: Set<JsonArray> = emptySet(),
     ) {
         relayPool.publishEvent(
             nostrEvent = nostrNotary.signShortTextNoteEvent(
                 userId = activeAccountStore.activeUserId(),
-                eventTags = eventTags.toList(),
-                pubkeyTags = pubkeyTags.toList(),
+                tags = tags.toList(),
                 noteContent = content,
             )
         )

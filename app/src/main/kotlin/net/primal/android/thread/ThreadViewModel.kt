@@ -23,6 +23,7 @@ import net.primal.android.nostr.ext.asEventIdTag
 import net.primal.android.nostr.ext.asPubkeyTag
 import net.primal.android.nostr.ext.isPubKeyTag
 import net.primal.android.nostr.ext.parseEventTags
+import net.primal.android.nostr.ext.parseHashtagTags
 import net.primal.android.thread.ThreadContract.UiEvent
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
@@ -144,17 +145,20 @@ class ThreadViewModel @Inject constructor(
             }
             val existingPubkeyTags = replyPostData?.tags?.filter { it.isPubKeyTag() }?.toSet() ?: setOf()
             val replyAuthorPubkeyTag = replyToAction.replyToAuthorId.asPubkeyTag()
+            val pubkeyTags = existingPubkeyTags + setOf(replyAuthorPubkeyTag)
 
             val rootEventTag = replyToAction.rootPostId.asEventIdTag(marker = "root")
             val replyEventTag = if (replyToAction.rootPostId != replyToAction.replyToPostId) {
                 replyToAction.replyToPostId.asEventIdTag(marker = "reply")
             } else null
             val mentionEventTags = content.parseEventTags(marker = "mention")
+            val eventTags = setOfNotNull(rootEventTag, replyEventTag) + mentionEventTags
+
+            val hashtagTags = content.parseHashtagTags()
 
             postRepository.publishShortTextNote(
                 content = content,
-                eventTags = setOfNotNull(rootEventTag, replyEventTag) + mentionEventTags,
-                pubkeyTags = existingPubkeyTags + setOf(replyAuthorPubkeyTag),
+                tags = pubkeyTags + eventTags + hashtagTags,
             )
             scheduleFetchReplies()
             setState { copy(replyText = "") }

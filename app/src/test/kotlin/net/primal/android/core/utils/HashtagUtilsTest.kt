@@ -25,7 +25,7 @@ class HashtagUtilsTest {
     )
 
     @Test
-    fun `parseHashtags returns all hashtags`() {
+    fun `nostrEvent parseHashtags returns all hashtags`() {
         val event = buildNostrEvent(content = "Hello #Nostr! #Bitcoin says hi!")
         val actual = event.parseHashtags()
         actual.size shouldBe 2
@@ -34,9 +34,10 @@ class HashtagUtilsTest {
     }
 
     @Test
-    fun `parseHashtags returns hashtags with special chars before or after the hashtag`() {
-        val event =
-            buildNostrEvent(content = "This hashtags in brackets (#Nostr, #Bitcoin, #Primal) should be fine!")
+    fun `nostrEvent parseHashtags returns hashtags with special chars before or after the hashtag`() {
+        val event = buildNostrEvent(
+            content = "This hashtags in brackets (#Nostr, #Bitcoin, #Primal) should be fine!"
+        )
         val actual = event.parseHashtags()
         actual.size shouldBe 3
         actual.shouldContain("#Nostr")
@@ -45,9 +46,10 @@ class HashtagUtilsTest {
     }
 
     @Test
-    fun `parseHashtags does not return the hashtags for deprecated mentions`() {
-        val event =
-            buildNostrEvent(content = "This man #[1] and this one #[2] are part of #Nostr community!")
+    fun `nostrEvent parseHashtags does not return the hashtags for deprecated mentions`() {
+        val event = buildNostrEvent(
+            content = "This man #[1] and this one #[2] are part of #Nostr community!"
+        )
         val actual = event.parseHashtags()
         actual.size shouldBe 1
         actual.shouldContain("#Nostr")
@@ -56,7 +58,7 @@ class HashtagUtilsTest {
     }
 
     @Test
-    fun `parseHashtags includes hashtags ('t') from event tags`() {
+    fun `nostrEvent parseHashtags includes hashtags ('t') from event tags`() {
         val event = buildNostrEvent(
             content = "This is #Nostr app!",
             tags = listOf(
@@ -76,4 +78,34 @@ class HashtagUtilsTest {
         actual.shouldContain("#Bitcoin")
         actual.shouldContain("#OpenSource")
     }
+
+    @Test
+    fun `string parseHashtags returns all hashtags`() {
+        val content = "Hello #Nostr! #Bitcoin says hi!"
+        val actual = content.parseHashtags()
+        actual.size shouldBe 2
+        actual.shouldContain("#Nostr")
+        actual.shouldContain("#Bitcoin")
+    }
+
+    @Test
+    fun `string parseHashtags returns hashtags with special chars before or after the hashtag`() {
+        val content = "This hashtags in brackets (#Nostr, #Bitcoin, #Primal) should be fine!"
+        val actual = content.parseHashtags()
+        actual.size shouldBe 3
+        actual.shouldContain("#Nostr")
+        actual.shouldContain("#Bitcoin")
+        actual.shouldContain("#Primal")
+    }
+
+    @Test
+    fun `string parseHashtags does not return the hashtags for deprecated mentions`() {
+        val content = "This man #[1] and this one #[2] are part of #Nostr community!"
+        val actual = content.parseHashtags()
+        actual.size shouldBe 1
+        actual.shouldContain("#Nostr")
+        actual.shouldNotContain("#[1]")
+        actual.shouldNotContain("#[2]")
+    }
+
 }
