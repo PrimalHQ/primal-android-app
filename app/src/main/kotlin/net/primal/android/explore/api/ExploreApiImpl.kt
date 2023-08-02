@@ -7,6 +7,7 @@ import kotlinx.serialization.json.jsonPrimitive
 import net.primal.android.explore.api.model.HashtagScore
 import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.primal.PrimalCacheFilter
+import net.primal.android.networking.primal.Verb.*
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.serialization.NostrJson
 import net.primal.android.serialization.decodeFromStringOrNull
@@ -18,7 +19,7 @@ class ExploreApiImpl @Inject constructor(
 
     override suspend fun getTrendingHashtags(): List<HashtagScore> {
         val queryResult = primalApiClient.query(
-            message = PrimalCacheFilter(primalVerb = "trending_hashtags_7d")
+            message = PrimalCacheFilter(primalVerb = TRENDING_HASHTAGS_7D)
         )
 
         val trendingHashtagEvent = queryResult.findPrimalEvent(NostrEventKind.PrimalTrendingHashtags)

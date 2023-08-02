@@ -3,6 +3,7 @@ package net.primal.android.user.api
 import kotlinx.serialization.encodeToString
 import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.primal.PrimalCacheFilter
+import net.primal.android.networking.primal.Verb.*
 import net.primal.android.networking.relays.RelayPool
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.model.NostrEventKind
@@ -23,7 +24,7 @@ class UsersApiImpl @Inject constructor(
     override suspend fun getUserProfile(pubkey: String): UserProfileResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = "user_profile",
+                primalVerb = USER_PROFILE,
                 optionsJson = NostrJson.encodeToString(UserRequestBody(pubkey = pubkey))
             )
         )
@@ -37,7 +38,7 @@ class UsersApiImpl @Inject constructor(
     override suspend fun getUserContacts(pubkey: String): UserContactsResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = "contact_list",
+                primalVerb = CONTACT_LIST,
                 optionsJson = NostrJson.encodeToString(UserRequestBody(pubkey = pubkey))
             )
         )
@@ -50,16 +51,16 @@ class UsersApiImpl @Inject constructor(
         )
     }
 
-    override suspend fun followOrNull(ownerPubkey: String, followedPubkey: String, relays: List<String>): Set<String>? {
+    override suspend fun follow(ownerPubkey: String, followedPubkey: String, relays: List<String>): Set<String>? {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = "contact_list",
+                primalVerb = CONTACT_LIST,
                 optionsJson = NostrJson.encodeToString(UserRequestBody(pubkey = ownerPubkey, extendedResponse = false))
             )
         )
 
         val contacts = queryResult.findNostrEvent(NostrEventKind.Contacts)
-        val following = contacts?.tags?.parseFollowings()?.toMutableSet() ?: return null
+        val following = contacts?.tags?.parseFollowings()?.toMutableSet() ?: mutableSetOf()
 
         following.add(followedPubkey)
 
@@ -79,10 +80,10 @@ class UsersApiImpl @Inject constructor(
         return following
     }
 
-    override suspend fun unfollowOrNull(ownerPubkey: String, unfollowedPubkey: String, relays: List<String>): Set<String>? {
+    override suspend fun unfollow(ownerPubkey: String, unfollowedPubkey: String, relays: List<String>): Set<String>? {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = "contact_list",
+                primalVerb = CONTACT_LIST,
                 optionsJson = NostrJson.encodeToString(UserRequestBody(pubkey = ownerPubkey, extendedResponse = false))
             )
         )
