@@ -13,12 +13,14 @@ import net.primal.android.user.accounts.parseFollowings
 import net.primal.android.user.api.model.UserContactsResponse
 import net.primal.android.user.api.model.UserProfileResponse
 import net.primal.android.user.api.model.UserRequestBody
+import net.primal.android.user.services.ContactsService
 import javax.inject.Inject
 
 class UsersApiImpl @Inject constructor(
     private val primalApiClient: PrimalApiClient,
     private val relayPool: RelayPool,
-    private val nostrNotary: NostrNotary
+    private val nostrNotary: NostrNotary,
+    private val contactsService: ContactsService
 ) : UsersApi {
 
     override suspend fun getUserProfile(pubkey: String): UserProfileResponse {
@@ -52,15 +54,7 @@ class UsersApiImpl @Inject constructor(
     }
 
     override suspend fun follow(ownerPubkey: String, followedPubkey: String, relays: List<String>): Set<String>? {
-        val queryResult = primalApiClient.query(
-            message = PrimalCacheFilter(
-                primalVerb = CONTACT_LIST,
-                optionsJson = NostrJson.encodeToString(UserRequestBody(pubkey = ownerPubkey, extendedResponse = false))
-            )
-        )
-
-        val contacts = queryResult.findNostrEvent(NostrEventKind.Contacts)
-        val following = contacts?.tags?.parseFollowings()?.toMutableSet() ?: mutableSetOf()
+        val following = contactsService.prepareContacts().toMutableSet()
 
         following.add(followedPubkey)
 

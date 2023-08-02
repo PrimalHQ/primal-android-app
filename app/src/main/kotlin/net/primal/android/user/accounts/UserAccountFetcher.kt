@@ -55,6 +55,7 @@ class UserAccountFetcher @Inject constructor(
             relays = finalRelays,
             following = following ?: emptySet(),
             interests = interests ?: emptyList(),
+            contactsCreatedAt = contactsResponse.contactsEvent?.createdAt
         )
     }
 
