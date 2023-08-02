@@ -91,6 +91,7 @@ fun FeedPostListItem(
     onPostClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
     onPostAction: (FeedPostAction) -> Unit,
+    onHashtagClick: (String) -> Unit,
 ) {
     val localUriHandler = LocalUriHandler.current
     val uiScope = rememberCoroutineScope()
@@ -142,6 +143,7 @@ fun FeedPostListItem(
         ) {
             PostContent(
                 content = data.content,
+                hashtags = data.hashtags,
                 resources = data.postResources,
                 nostrUris = data.nostrUris,
                 onClick = {
@@ -153,6 +155,7 @@ fun FeedPostListItem(
                 onUrlClick = {
                     localUriHandler.openUriSafely(it)
                 },
+                onHashtagClick = onHashtagClick,
             )
 
             PostStatsItem(
@@ -274,18 +277,21 @@ private fun String.replaceNostrProfileUriWithAnnotatedLinks(
 }
 
 private const val PROFILE_ID_ANNOTATION_TAG = "profileId"
-private const val URL_ANNOTATION_TAG = "URL"
-private const val NOTE_ANNOTATION_TAG = "NOTE"
+private const val URL_ANNOTATION_TAG = "url"
+private const val NOTE_ANNOTATION_TAG = "note"
+private const val HASHTAG_ANNOTATION_TAG = "hashtag"
 
 @Composable
 fun PostContent(
     content: String,
+    hashtags: List<String>,
     resources: List<MediaResourceUi>,
     nostrUris: List<NostrUriUi>,
     onProfileClick: (String) -> Unit,
     onPostClick: (String) -> Unit,
     onClick: (Offset) -> Unit,
     onUrlClick: (String) -> Unit,
+    onHashtagClick: (String) -> Unit,
 ) {
     val imageResources = remember { resources.filterImages() }
     val refinedUrlResources = remember { resources.filterNotImages() }
@@ -337,6 +343,22 @@ fun PostContent(
                     end = endIndex,
                 )
             }
+
+        hashtags.forEach {
+            val startIndex = refinedContent.indexOf(it)
+            val endIndex = startIndex + it.length
+            addStyle(
+                style = SpanStyle(color = AppTheme.colorScheme.primary),
+                start = startIndex,
+                end = endIndex,
+            )
+            addStringAnnotation(
+                tag = HASHTAG_ANNOTATION_TAG,
+                annotation = it,
+                start = startIndex,
+                end = endIndex,
+            )
+        }
     }
 
     Column(
@@ -359,6 +381,7 @@ fun PostContent(
                             PROFILE_ID_ANNOTATION_TAG -> onProfileClick(annotation.item)
                             URL_ANNOTATION_TAG -> onUrlClick(annotation.item)
                             NOTE_ANNOTATION_TAG -> onPostClick(annotation.item)
+                            HASHTAG_ANNOTATION_TAG -> onHashtagClick(annotation.item)
                         }
                     } ?: onClick(offset)
                 }
@@ -646,7 +669,7 @@ fun PreviewFeedPostListItemLight() {
                 repostAuthorId = "repostId",
                 repostAuthorDisplayName = "jack",
                 content = """
-                    Unfortunately the days of using pseudonyms in metaspace are numbered. 
+                    Unfortunately the days of using pseudonyms in metaspace are numbered. #nostr 
 
                     It won't be long before non-trivial numbers of individuals and businesses 
                     have augmented reality HUDs that incorporate real-time facial recognition. 
@@ -668,11 +691,13 @@ fun PreviewFeedPostListItemLight() {
                     repostsCount = 42,
                     satsZapped = 555,
                 ),
+                hashtags = listOf("#nostr"),
                 rawNostrEventJson = "",
             ),
             onPostClick = {},
             onProfileClick = {},
             onPostAction = {},
+            onHashtagClick = {},
         )
     }
 
@@ -689,7 +714,7 @@ fun PreviewFeedPostListItemDark() {
                 repostAuthorId = "repostId",
                 repostAuthorDisplayName = "jack",
                 content = """
-                    Unfortunately the days of using pseudonyms in metaspace are numbered. 
+                    Unfortunately the days of using pseudonyms in metaspace are numbered. #nostr
 
                     It won't be long before non-trivial numbers of individuals and businesses 
                     have augmented reality HUDs that incorporate real-time facial recognition. 
@@ -711,11 +736,13 @@ fun PreviewFeedPostListItemDark() {
                     repostsCount = 42,
                     satsZapped = 555,
                 ),
+                hashtags = listOf("#nostr"),
                 rawNostrEventJson = "",
             ),
             onPostClick = {},
             onProfileClick = {},
             onPostAction = {},
+            onHashtagClick = {},
         )
     }
 

@@ -20,6 +20,8 @@ fun JsonArray.isEventIdTag() = getOrNull(0)?.jsonPrimitive?.content == "e"
 
 fun JsonArray.isPubKeyTag() = getOrNull(0)?.jsonPrimitive?.content == "p"
 
+fun JsonArray.isHashtagTag() = getOrNull(0)?.jsonPrimitive?.content == "t"
+
 fun JsonArray.getTagValueOrNull() = getOrNull(1)?.jsonPrimitive?.content
 
 fun JsonArray.hasMentionMarker() = contains(JsonPrimitive("mention"))

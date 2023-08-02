@@ -98,6 +98,7 @@ fun ProfileScreen(
     onPostClick: (String) -> Unit,
     onPostQuoteClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
+    onHashtagClick: (String) -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
 
@@ -109,6 +110,7 @@ fun ProfileScreen(
         onPostClick = onPostClick,
         onPostQuoteClick = onPostQuoteClick,
         onProfileClick = onProfileClick,
+        onHashtagClick = onHashtagClick,
         eventPublisher = { viewModel.setEvent(it) },
     )
 }
@@ -134,6 +136,7 @@ fun ProfileScreen(
     onPostClick: (String) -> Unit,
     onPostQuoteClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
+    onHashtagClick: (String) -> Unit,
     eventPublisher: (ProfileContract.UiEvent) -> Unit,
 ) {
     val density = LocalDensity.current
@@ -224,6 +227,7 @@ fun ProfileScreen(
             onPostQuoteClick = {
                 onPostQuoteClick("\n\nnostr:${it.postId.hexToNoteHrp()}")
             },
+            onHashtagClick = onHashtagClick,
             shouldShowLoadingState = false,
             shouldShowNoContentState = false,
             stickyHeader = {

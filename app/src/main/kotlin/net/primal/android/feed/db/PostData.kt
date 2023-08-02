@@ -13,6 +13,7 @@ data class PostData(
     val tags: List<JsonArray>,
     val content: String,
     val uris: List<String>,
+    val hashtags: List<String>,
     val sig: String,
     val raw: String,
     val authorMetadataId: String? = null,

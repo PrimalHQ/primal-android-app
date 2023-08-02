@@ -73,6 +73,7 @@ fun ThreadScreen(
     onPostClick: (String) -> Unit,
     onPostQuoteClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
+    onHashtagClick: (String) -> Unit,
 ) {
 
     val uiState = viewModel.state.collectAsState()
@@ -83,6 +84,7 @@ fun ThreadScreen(
         onPostClick = onPostClick,
         onPostQuoteClick = onPostQuoteClick,
         onProfileClick = onProfileClick,
+        onHashtagClick = onHashtagClick,
         eventPublisher = { viewModel.setEvent(it) }
     )
 }
@@ -95,6 +97,7 @@ fun ThreadScreen(
     onPostClick: (String) -> Unit,
     onPostQuoteClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
+    onHashtagClick: (String) -> Unit,
     eventPublisher: (ThreadContract.UiEvent) -> Unit,
 ) {
     val topAppBarState = rememberTopAppBarState()
@@ -188,6 +191,7 @@ fun ThreadScreen(
                                     }
                                 }
                             },
+                            onHashtagClick = onHashtagClick,
                             shouldIndentContent = shouldIndentContent,
                             highlighted = highlighted,
                             connected = connected,
@@ -378,12 +382,13 @@ fun ThreadScreenPreview() {
                         authorDisplayName = "alex",
                         userDisplayName = "alex",
                         authorInternetIdentifier = "alex@primal.net",
-                        content = "Hello Nostr!",
+                        content = "Hello #nostr!",
                         authorResources = emptyList(),
                         postResources = emptyList(),
                         nostrUris = emptyList(),
                         timestamp = Instant.now().minusSeconds(3600),
                         stats = FeedPostStatsUi(),
+                        hashtags = listOf("#nostr"),
                         rawNostrEventJson = "raaaw",
                     ),
                     FeedPostUi(
@@ -393,12 +398,13 @@ fun ThreadScreenPreview() {
                         authorDisplayName = "nikola",
                         userDisplayName = "nikola",
                         authorInternetIdentifier = "nikola@primal.net",
-                        content = "Nostr rocks!",
+                        content = "#nostr rocks!",
                         authorResources = emptyList(),
                         postResources = emptyList(),
                         nostrUris = emptyList(),
                         timestamp = Instant.now(),
                         stats = FeedPostStatsUi(),
+                        hashtags = listOf("#nostr"),
                         rawNostrEventJson = "raaaw",
                     ),
                 ),
@@ -407,6 +413,7 @@ fun ThreadScreenPreview() {
             onPostClick = {},
             onPostQuoteClick = {},
             onProfileClick = {},
+            onHashtagClick = {},
             eventPublisher = {},
         )
     }

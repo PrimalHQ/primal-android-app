@@ -21,6 +21,7 @@ interface ConversationDao {
                 FPD2.content,
                 FPD2.raw,
                 FPD2.authorMetadataId,
+                FPD2.hashtags,
                 NULL AS repostId,
                 NULL AS repostAuthorId,
                 PostUserStats.liked AS userLiked,

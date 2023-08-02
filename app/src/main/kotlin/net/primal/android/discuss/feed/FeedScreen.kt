@@ -53,6 +53,7 @@ fun FeedScreen(
     onNewPostClick: (String?) -> Unit,
     onPostClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
+    onHashtagClick: (String) -> Unit,
     onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
 ) {
@@ -69,6 +70,7 @@ fun FeedScreen(
         onNewPostClick = onNewPostClick,
         onPostClick = onPostClick,
         onProfileClick = onProfileClick,
+        onHashtagClick = onHashtagClick,
         onPrimaryDestinationChanged = onTopLevelDestinationChanged,
         onDrawerDestinationClick = onDrawerScreenClick,
     )
@@ -83,6 +85,7 @@ fun FeedScreen(
     onNewPostClick: (String?) -> Unit,
     onPostClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
+    onHashtagClick: (String) -> Unit,
     onPrimaryDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
 ) {
@@ -148,6 +151,7 @@ fun FeedScreen(
                 onPostQuoteClick = {
                     onNewPostClick("\n\nnostr:${it.postId.hexToNoteHrp()}")
                 },
+                onHashtagClick = onHashtagClick,
                 syncStats = state.syncStats,
                 paddingValues = paddingValues,
                 feedListState = feedListState,
@@ -201,6 +205,7 @@ fun FeedScreenPreview() {
             onNewPostClick = {},
             onPostClick = {},
             onProfileClick = {},
+            onHashtagClick = {},
             onPrimaryDestinationChanged = {},
             onDrawerDestinationClick = {},
         )
