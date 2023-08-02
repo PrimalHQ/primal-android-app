@@ -13,17 +13,19 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.json.JsonArray
 import net.primal.android.core.compose.feed.asFeedPostUi
 import net.primal.android.feed.repository.FeedRepository
 import net.primal.android.feed.repository.PostRepository
 import net.primal.android.navigation.postId
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
-import net.primal.android.nostr.notary.asEventIdTag
-import net.primal.android.nostr.notary.asPubkeyTag
+import net.primal.android.nostr.ext.asEventIdTag
+import net.primal.android.nostr.ext.asPubkeyTag
+import net.primal.android.nostr.ext.isPubKeyTag
+import net.primal.android.nostr.ext.parseEventTags
 import net.primal.android.thread.ThreadContract.UiEvent
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
 @HiltViewModel
@@ -58,6 +60,7 @@ class ThreadViewModel @Inject constructor(
                 is UiEvent.PostLikeAction -> likePost(it)
                 is UiEvent.RepostAction -> repostPost(it)
                 is UiEvent.ReplyToAction -> publishReply(it)
+                is UiEvent.UpdateReply -> updateReply(it)
             }
         }
     }
@@ -127,21 +130,34 @@ class ThreadViewModel @Inject constructor(
         }
     }
 
+    private fun updateReply(updateReplyEvent: UiEvent.UpdateReply) {
+        setState { copy(replyText = updateReplyEvent.newReply) }
+    }
+
     private fun publishReply(replyToAction: UiEvent.ReplyToAction) = viewModelScope.launch {
         setState { copy(publishingReply = true) }
         try {
-            val eventTags: List<JsonArray> = listOf(
+            val content = state.value.replyText
+
+            val replyPostData = withContext(Dispatchers.IO) {
+                postRepository.findPostDataById(postId = replyToAction.replyToPostId)
+            }
+            val existingPubkeyTags = replyPostData?.tags?.filter { it.isPubKeyTag() }?.toSet() ?: setOf()
+            val replyAuthorPubkeyTag = replyToAction.replyToAuthorId.asPubkeyTag()
+
+            val rootEventTag = replyToAction.rootPostId.asEventIdTag(marker = "root")
+            val replyEventTag = if (replyToAction.rootPostId != replyToAction.replyToPostId) {
                 replyToAction.replyToPostId.asEventIdTag(marker = "reply")
-            )
-            val pubkeyTags: List<JsonArray> = listOf(
-                replyToAction.replyToAuthorId.asPubkeyTag()
-            )
+            } else null
+            val mentionEventTags = content.parseEventTags(marker = "mention")
+
             postRepository.publishShortTextNote(
-                content = replyToAction.content,
-                eventTags = eventTags,
-                pubkeyTags = pubkeyTags,
+                content = content,
+                eventTags = setOfNotNull(rootEventTag, replyEventTag) + mentionEventTags,
+                pubkeyTags = existingPubkeyTags + setOf(replyAuthorPubkeyTag),
             )
             scheduleFetchReplies()
+            setState { copy(replyText = "") }
         } catch (error: NostrPublishException) {
             setState { copy(publishingError = ThreadContract.UiState.PublishError(cause = error.cause)) }
             scheduleErrorClear()
@@ -156,7 +172,7 @@ class ThreadViewModel @Inject constructor(
     }
 
     private fun scheduleFetchReplies() = viewModelScope.launch {
-        delay(2.seconds)
+        delay(500.milliseconds)
         fetchRepliesFromNetwork()
     }
 }

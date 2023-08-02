@@ -5,6 +5,7 @@ import net.primal.android.core.compose.feed.model.FeedPostUi
 interface ThreadContract {
 
     data class UiState(
+        val replyText: String = "",
         val publishingReply: Boolean = false,
         val publishingError: PublishError? = null,
         val conversation: List<FeedPostUi> = emptyList(),
@@ -16,6 +17,7 @@ interface ThreadContract {
 
     sealed class UiEvent {
         data class PostLikeAction(val postId: String, val postAuthorId: String) : UiEvent()
+        data class UpdateReply(val newReply: String) : UiEvent()
         data class RepostAction(
             val postId: String,
             val postAuthorId: String,
@@ -23,7 +25,7 @@ interface ThreadContract {
         ) : UiEvent()
 
         data class ReplyToAction(
-            val content: String,
+            val rootPostId: String,
             val replyToPostId: String,
             val replyToAuthorId: String,
         ) : UiEvent()
