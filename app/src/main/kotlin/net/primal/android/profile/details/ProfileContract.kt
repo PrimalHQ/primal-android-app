@@ -2,6 +2,7 @@ package net.primal.android.profile.details
 
 import androidx.paging.PagingData
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.media.model.MediaResourceUi
 import net.primal.android.profile.details.model.ProfileDetailsUi
@@ -13,7 +14,7 @@ interface ProfileContract {
         val profileDetails: ProfileDetailsUi? = null,
         val profileStats: ProfileStatsUi? = null,
         val resources: List<MediaResourceUi> = emptyList(),
-        val authoredPosts: Flow<PagingData<FeedPostUi>>,
+        val authoredPosts: Flow<PagingData<FeedPostUi>> = emptyFlow(),
     )
 
     sealed class UiEvent {

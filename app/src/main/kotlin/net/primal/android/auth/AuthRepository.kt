@@ -47,7 +47,7 @@ class AuthRepository @Inject constructor(
         followingCount = profile?.followingCount,
         notesCount = profile?.notesCount,
         relays = contacts?.relays ?: emptyList(),
-        following = contacts?.following ?: emptyList(),
+        following = contacts?.following ?: emptySet(),
         followers = contacts?.followers ?: emptyList(),
         interests = contacts?.interests ?: emptyList(),
     )

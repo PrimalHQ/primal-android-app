@@ -8,5 +8,4 @@ interface UsersApi {
     suspend fun getUserProfile(pubkey: String): UserProfileResponse
 
     suspend fun getUserContacts(pubkey: String): UserContactsResponse
-
 }

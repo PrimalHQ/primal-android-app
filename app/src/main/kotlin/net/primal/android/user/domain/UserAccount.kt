@@ -14,7 +14,7 @@ data class UserAccount(
     val followersCount: Int? = null,
     val notesCount: Int? = null,
     val relays: List<Relay> = emptyList(),
-    val following: List<String> = emptyList(),
+    val following: Set<String> = emptySet(),
     val followers: List<String> = emptyList(),
     val interests: List<String> = emptyList(),
 ) {

@@ -28,8 +28,8 @@ fun String.parseRelays(): List<Relay> {
     return relays
 }
 
-fun List<JsonArray>.parseFollowings(): List<String> {
-    val followings = mutableListOf<String>()
+fun List<JsonArray>.parseFollowings(): Set<String> {
+    val followings = mutableSetOf<String>()
     this.forEach {
         if (it[0].jsonPrimitive.content == "p") {
             val pubkey = it[1].jsonPrimitive.content

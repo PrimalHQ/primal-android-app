@@ -53,7 +53,7 @@ class UserAccountFetcher @Inject constructor(
             authorDisplayName = pubkey.asEllipsizedNpub(),
             userDisplayName = pubkey.asEllipsizedNpub(),
             relays = finalRelays,
-            following = following ?: emptyList(),
+            following = following ?: emptySet(),
             interests = interests ?: emptyList(),
         )
     }

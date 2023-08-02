@@ -5,6 +5,7 @@ import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.primal.PrimalCacheFilter
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.serialization.NostrJson
+import net.primal.android.user.accounts.parseFollowings
 import net.primal.android.user.api.model.UserContactsResponse
 import net.primal.android.user.api.model.UserProfileResponse
 import net.primal.android.user.api.model.UserRequestBody
