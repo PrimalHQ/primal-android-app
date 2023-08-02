@@ -21,7 +21,11 @@ private val nostrUriRegexPattern: Pattern = Pattern.compile(
     Pattern.CASE_INSENSITIVE
 )
 
-fun String.isNostrUri() = lowercase().startsWith(NOSTR)
+fun String.isNostrUri(): Boolean {
+    val uri = lowercase()
+    return uri.startsWith(NOSTR) || uri.startsWith(NPUB) || uri.startsWith(NOTE)
+            || uri.startsWith(NEVENT) || uri.startsWith(NPROFILE)
+}
 
 fun String.isNote() = lowercase().startsWith(NOTE)
 
