@@ -32,8 +32,6 @@ interface FeedPostDao {
             PostData.createdAt,
             PostData.content,
             PostData.authorMetadataId,
-            PostData.referencePostId,
-            PostData.referencePostAuthorId,
             PostData.raw,
             NULL AS repostId,
             NULL AS repostAuthorId,
@@ -41,6 +39,6 @@ interface FeedPostDao {
         FROM PostData WHERE postId = :postId LIMIT 1
         """
     )
-    fun findPostById(postId: String): FeedPost
+    fun findPostById(postId: String): FeedPost?
 
 }

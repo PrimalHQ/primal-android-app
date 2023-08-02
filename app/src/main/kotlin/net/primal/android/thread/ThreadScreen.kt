@@ -159,7 +159,7 @@ fun ThreadScreen(
                         FeedPostListItem(
                             data = item,
                             onPostClick = { postId ->
-                                if (index != state.highlightPostIndex) {
+                                if (state.highlightPostId != postId) {
                                     onPostClick(postId)
                                 }
                             },
@@ -167,7 +167,7 @@ fun ThreadScreen(
                             onPostAction = {
                                 when (it) {
                                     FeedPostAction.Reply -> {
-                                        if (index != state.highlightPostIndex) {
+                                        if (state.highlightPostId != item.postId) {
                                             onPostClick(item.postId)
                                         }
                                     }
