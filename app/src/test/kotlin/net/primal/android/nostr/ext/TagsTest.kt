@@ -93,4 +93,42 @@ class TagsTest {
         }
     }
 
+    @Test
+    fun `parsePubkeyTags returns tags for nostrnprofile`() {
+        val content = "nostr:nprofile1qqsrhuxx8l9ex335q7he0f09aej04zpazpl0ne2cgukyawd24mayt8gpp4mhxue69uhhytnc9e3k7mgpz4mhxue69uhkg6nzv9ejuumpv34kytnrdaksjlyr9p"
+        val actual = content.parsePubkeyTags().firstOrNull()
+        actual.shouldNotBeNull()
+        actual[0].jsonPrimitive.content shouldBe "p"
+        actual[1].jsonPrimitive.content shouldBe "3bf0c63fcb93463407af97a5e5ee64fa883d107ef9e558472c4eb9aaaefa459d"
+        actual[2].jsonPrimitive.content shouldBe "wss://r.x.com"
+    }
+
+    @Test
+    fun `parsePubkeyTags returns tags for nprofile`() {
+        val content = "nprofile1qqsrhuxx8l9ex335q7he0f09aej04zpazpl0ne2cgukyawd24mayt8gpp4mhxue69uhhytnc9e3k7mgpz4mhxue69uhkg6nzv9ejuumpv34kytnrdaksjlyr9p"
+        val actual = content.parsePubkeyTags().firstOrNull()
+        actual.shouldNotBeNull()
+        actual[0].jsonPrimitive.content shouldBe "p"
+        actual[1].jsonPrimitive.content shouldBe "3bf0c63fcb93463407af97a5e5ee64fa883d107ef9e558472c4eb9aaaefa459d"
+        actual[2].jsonPrimitive.content shouldBe "wss://r.x.com"
+    }
+
+    @Test
+    fun `parsePubkeyTags returns tags for nostrnpub`() {
+        val content = "nostr:npub10elfcs4fr0l0r8af98jlmgdh9c8tcxjvz9qkw038js35mp4dma8qzvjptg"
+        val actual = content.parsePubkeyTags().firstOrNull()
+        actual.shouldNotBeNull()
+        actual[0].jsonPrimitive.content shouldBe "p"
+        actual[1].jsonPrimitive.content shouldBe "7e7e9c42a91bfef19fa929e5fda1b72e0ebc1a4c1141673e2794234d86addf4e"
+    }
+
+    @Test
+    fun `parsePubkeyTags returns tags for npub`() {
+        val content = "npub10elfcs4fr0l0r8af98jlmgdh9c8tcxjvz9qkw038js35mp4dma8qzvjptg"
+        val actual = content.parsePubkeyTags().firstOrNull()
+        actual.shouldNotBeNull()
+        actual[0].jsonPrimitive.content shouldBe "p"
+        actual[1].jsonPrimitive.content shouldBe "7e7e9c42a91bfef19fa929e5fda1b72e0ebc1a4c1141673e2794234d86addf4e"
+    }
+
 }

@@ -88,6 +88,40 @@ fun String.parseEventTags(marker: String? = null): List<JsonArray> {
     return tags.toList()
 }
 
+fun String.parsePubkeyTags(marker: String? = null): List<JsonArray> {
+    val nostrUris = parseNostrUris()
+    if (nostrUris.isEmpty()) return emptyList()
+
+    val tags = mutableListOf<JsonArray>()
+    nostrUris.forEach {
+        when {
+            it.isNProfileUri() || it.isNProfile() -> {
+                val result = it.nostrUriToPubkeyAndRelay()
+                val pubkey = result.first
+                val relayUrl = result.second
+                tags.add(
+                    buildJsonArray {
+                        add("p")
+                        add(pubkey)
+                        add(relayUrl)
+                        if (marker != null) add(marker)
+                    }
+                )
+            }
+
+            it.isNPubUri() || it.isNPub() -> tags.add(
+                buildJsonArray {
+                    add("p")
+                    add(it.nostrUriToPubkey())
+                    add("")
+                    if (marker != null) add(marker)
+                }
+            )
+        }
+    }
+    return tags.toList()
+}
+
 fun String.parseHashtagTags(): List<JsonArray> {
     val hashtags = parseHashtags()
     val tags = mutableListOf<JsonArray>()

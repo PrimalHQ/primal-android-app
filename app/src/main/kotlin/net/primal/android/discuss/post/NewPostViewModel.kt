@@ -18,6 +18,9 @@ import net.primal.android.discuss.post.NewPostContract.UiState
 import net.primal.android.feed.repository.PostRepository
 import net.primal.android.navigation.newPostPreFillContent
 import net.primal.android.networking.relays.errors.NostrPublishException
+import net.primal.android.nostr.ext.parseEventTags
+import net.primal.android.nostr.ext.parseHashtagTags
+import net.primal.android.nostr.ext.parsePubkeyTags
 import net.primal.android.user.active.ActiveAccountStore
 import net.primal.android.user.active.ActiveUserAccountState
 import javax.inject.Inject
@@ -66,7 +69,14 @@ class NewPostViewModel @Inject constructor(
     private fun publishPost(event: UiEvent.PublishPost) = viewModelScope.launch {
         setState { copy(publishing = true) }
         try {
-            postRepository.publishShortTextNote(content = event.content)
+            val mentionEventTags = event.content.parseEventTags(marker = "mention").toSet()
+            val mentionPubkeyTags = event.content.parsePubkeyTags(marker = "mention").toSet()
+            val hashtagTags = event.content.parseHashtagTags().toSet()
+
+            postRepository.publishShortTextNote(
+                content = event.content,
+                tags = mentionEventTags + mentionPubkeyTags + hashtagTags,
+            )
             sendEffect(SideEffect.PostPublished)
         } catch (error: NostrPublishException) {
             setState { copy(error = UiState.PublishError(cause = error.cause)) }
