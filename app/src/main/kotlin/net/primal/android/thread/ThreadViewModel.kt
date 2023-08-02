@@ -59,6 +59,7 @@ class ThreadViewModel @Inject constructor(
                 is UiEvent.PostLikeAction -> likePost(it)
                 is UiEvent.RepostAction -> repostPost(it)
                 is UiEvent.ReplyToAction -> publishReply(it)
+                is UiEvent.UpdateReply -> updateReply(it)
             }
         }
     }
@@ -128,10 +129,18 @@ class ThreadViewModel @Inject constructor(
         }
     }
 
+    private fun updateReply(updateReplyEvent: UiEvent.UpdateReply) {
+        setState { copy(replyText = updateReplyEvent.newReply) }
+    }
+
     private fun publishReply(replyToAction: UiEvent.ReplyToAction) = viewModelScope.launch {
         setState { copy(publishingReply = true) }
         try {
-            val replyPostData = postRepository.findPostDataById(postId = replyToAction.replyToPostId)
+            val content = state.value.replyText
+
+            val replyPostData = withContext(Dispatchers.IO) {
+                postRepository.findPostDataById(postId = replyToAction.replyToPostId)
+            }
             val existingPubkeyTags = replyPostData?.tags?.filter { it.isPubKeyTag() } ?: emptyList()
             val replyAuthorPubkeyTag = replyToAction.replyToAuthorId.asPubkeyTag()
 
@@ -139,14 +148,15 @@ class ThreadViewModel @Inject constructor(
             val replyEventTag = if (replyToAction.rootPostId != replyToAction.replyToPostId) {
                 replyToAction.replyToPostId.asEventIdTag(marker = "reply")
             } else null
-            val mentionEventTags = replyToAction.content.parseEventTags(marker = "mention")
+            val mentionEventTags = content.parseEventTags(marker = "mention")
 
             postRepository.publishShortTextNote(
-                content = replyToAction.content,
+                content = content,
                 eventTags = listOfNotNull(rootEventTag, replyEventTag) + mentionEventTags,
                 pubkeyTags = existingPubkeyTags + listOf(replyAuthorPubkeyTag),
             )
             scheduleFetchReplies()
+            setState { copy(replyText = "") }
         } catch (error: NostrPublishException) {
             setState { copy(publishingError = ThreadContract.UiState.PublishError(cause = error.cause)) }
             scheduleErrorClear()

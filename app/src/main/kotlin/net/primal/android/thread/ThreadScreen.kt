@@ -37,7 +37,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -209,15 +208,18 @@ fun ThreadScreen(
                     publishingReply = state.publishingReply,
                     replyToAuthorDisplayName = replyToPost.authorDisplayName,
                     replyToUserDisplayName = replyToPost.userDisplayName,
-                    onReplyClick = { content ->
+                    replyTextProvider = { state.replyText },
+                    onReplyClick = {
                         eventPublisher(
                             ThreadContract.UiEvent.ReplyToAction(
-                                content = content,
                                 rootPostId = rootPost.postId,
                                 replyToPostId = replyToPost.postId,
                                 replyToAuthorId = replyToPost.authorId,
                             )
                         )
+                    },
+                    onReplyUpdated = { content ->
+                        eventPublisher(ThreadContract.UiEvent.UpdateReply(newReply = content))
                     }
                 )
             }
@@ -231,11 +233,12 @@ fun ReplyToBottomBar(
     publishingReply: Boolean,
     replyToAuthorDisplayName: String,
     replyToUserDisplayName: String,
-    onReplyClick: (String) -> Unit,
+    replyTextProvider: () -> String,
+    onReplyClick: () -> Unit,
+    onReplyUpdated: (String) -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val isKeyboardVisible by keyboardVisibilityAsState()
-    var replyText by rememberSaveable { mutableStateOf("") }
 
     val unfocusedColor = AppTheme.extraColorScheme.surfaceVariantAlt
     val focusedColor = AppTheme.colorScheme.surface
@@ -276,8 +279,8 @@ fun ReplyToBottomBar(
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp)
                     .imePadding(),
-                value = replyText,
-                onValueChange = { replyText = it },
+                value = replyTextProvider(),
+                onValueChange = { onReplyUpdated(it) },
                 maxLines = 10,
                 enabled = !publishingReply,
                 placeholder = {
@@ -325,7 +328,7 @@ fun ReplyToBottomBar(
                         enabled = !publishingReply,
                         fontSize = 16.sp,
                         onClick = {
-                            onReplyClick(replyText)
+                            onReplyClick()
                             keyboardController?.hide()
                         },
                     )
