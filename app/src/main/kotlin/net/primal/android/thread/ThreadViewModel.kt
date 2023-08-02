@@ -25,6 +25,7 @@ import net.primal.android.nostr.ext.isPubKeyTag
 import net.primal.android.nostr.ext.parseEventTags
 import net.primal.android.thread.ThreadContract.UiEvent
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
 @HiltViewModel
@@ -171,7 +172,7 @@ class ThreadViewModel @Inject constructor(
     }
 
     private fun scheduleFetchReplies() = viewModelScope.launch {
-        delay(2.seconds)
+        delay(500.milliseconds)
         fetchRepliesFromNetwork()
     }
 }
