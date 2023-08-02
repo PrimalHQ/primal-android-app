@@ -141,7 +141,7 @@ class ThreadViewModel @Inject constructor(
             val replyPostData = withContext(Dispatchers.IO) {
                 postRepository.findPostDataById(postId = replyToAction.replyToPostId)
             }
-            val existingPubkeyTags = replyPostData?.tags?.filter { it.isPubKeyTag() } ?: emptyList()
+            val existingPubkeyTags = replyPostData?.tags?.filter { it.isPubKeyTag() }?.toSet() ?: setOf()
             val replyAuthorPubkeyTag = replyToAction.replyToAuthorId.asPubkeyTag()
 
             val rootEventTag = replyToAction.rootPostId.asEventIdTag(marker = "root")
@@ -152,8 +152,8 @@ class ThreadViewModel @Inject constructor(
 
             postRepository.publishShortTextNote(
                 content = content,
-                eventTags = listOfNotNull(rootEventTag, replyEventTag) + mentionEventTags,
-                pubkeyTags = existingPubkeyTags + listOf(replyAuthorPubkeyTag),
+                eventTags = setOfNotNull(rootEventTag, replyEventTag) + mentionEventTags,
+                pubkeyTags = existingPubkeyTags + setOf(replyAuthorPubkeyTag),
             )
             scheduleFetchReplies()
             setState { copy(replyText = "") }
