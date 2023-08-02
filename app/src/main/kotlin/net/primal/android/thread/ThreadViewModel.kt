@@ -13,15 +13,16 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.json.JsonArray
 import net.primal.android.core.compose.feed.asFeedPostUi
 import net.primal.android.feed.repository.FeedRepository
 import net.primal.android.feed.repository.PostRepository
 import net.primal.android.navigation.postId
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
-import net.primal.android.nostr.notary.asEventIdTag
-import net.primal.android.nostr.notary.asPubkeyTag
+import net.primal.android.nostr.ext.asEventIdTag
+import net.primal.android.nostr.ext.asPubkeyTag
+import net.primal.android.nostr.ext.isPubKeyTag
+import net.primal.android.nostr.ext.parseEventTags
 import net.primal.android.thread.ThreadContract.UiEvent
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
@@ -130,16 +131,20 @@ class ThreadViewModel @Inject constructor(
     private fun publishReply(replyToAction: UiEvent.ReplyToAction) = viewModelScope.launch {
         setState { copy(publishingReply = true) }
         try {
-            val eventTags: List<JsonArray> = listOf(
+            val replyPostData = postRepository.findPostDataById(postId = replyToAction.replyToPostId)
+            val existingPubkeyTags = replyPostData?.tags?.filter { it.isPubKeyTag() } ?: emptyList()
+            val replyAuthorPubkeyTag = replyToAction.replyToAuthorId.asPubkeyTag()
+
+            val rootEventTag = replyToAction.rootPostId.asEventIdTag(marker = "root")
+            val replyEventTag = if (replyToAction.rootPostId != replyToAction.replyToPostId) {
                 replyToAction.replyToPostId.asEventIdTag(marker = "reply")
-            )
-            val pubkeyTags: List<JsonArray> = listOf(
-                replyToAction.replyToAuthorId.asPubkeyTag()
-            )
+            } else null
+            val mentionEventTags = replyToAction.content.parseEventTags(marker = "mention")
+
             postRepository.publishShortTextNote(
                 content = replyToAction.content,
-                eventTags = eventTags,
-                pubkeyTags = pubkeyTags,
+                eventTags = listOfNotNull(rootEventTag, replyEventTag) + mentionEventTags,
+                pubkeyTags = existingPubkeyTags + listOf(replyAuthorPubkeyTag),
             )
             scheduleFetchReplies()
         } catch (error: NostrPublishException) {

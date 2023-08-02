@@ -13,4 +13,7 @@ interface PostDao {
     @Query("DELETE FROM PostData WHERE postId NOT IN (SELECT DISTINCT postId FROM FeedPostDataCrossRef)")
     fun deleteOrphanPosts()
 
+    @Query("SELECT * FROM PostData WHERE postId = :postId")
+    fun findByPostId(postId: String): PostData?
+
 }

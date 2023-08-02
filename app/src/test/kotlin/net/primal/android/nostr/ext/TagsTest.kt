@@ -1,12 +1,13 @@
-package net.primal.android.nostr.notary
+package net.primal.android.nostr.ext
 
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.instanceOf
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.jsonPrimitive
 import org.junit.Test
 
-class TagExtTest {
+class TagsTest {
 
     @Test
     fun `asEventIdTag returns proper JsonArray tag`() {
@@ -50,5 +51,33 @@ class TagExtTest {
         actual.size shouldBe 2
         actual[0].jsonPrimitive.content shouldBe "d"
         actual[1].jsonPrimitive.content shouldBe identifier
+    }
+
+    @Test
+    fun `parseEventTags returns tags for nostrnevent`() {
+        val content = "nostr:nevent1qqs0ejzkvqdlqaej8k7edamkvzcnjv77u6npmp2qhdpvswyjvcplafqpp4mhxue69uhkummn9ekx7mqzyrhxagf6h8l9cjngatumrg60uq22v66qz979pm32v985ek54ndh8gqcyqqqqqqgpldx8x"
+        val actual = content.parseEventTags().firstOrNull()
+        actual.shouldNotBeNull()
+        actual[0].jsonPrimitive.content shouldBe "e"
+        actual[1].jsonPrimitive.content shouldBe "fcc856601bf077323dbd96f77660b13933dee6a61d8540bb42c838926603fea4"
+        actual[2].jsonPrimitive.content shouldBe "wss://nos.lol"
+    }
+
+    @Test
+    fun `parseEventTags returns tags for nostrnote`() {
+        val content = "nostr:note1zwwmjqpaymqhjlq0tjezcyhpcx0hyh4m3u5p54tm7mmfxaqg03pq3w3d6g"
+        val actual = content.parseEventTags().firstOrNull()
+        actual.shouldNotBeNull()
+        actual[0].jsonPrimitive.content shouldBe "e"
+        actual[1].jsonPrimitive.content shouldBe "139db9003d26c1797c0f5cb22c12e1c19f725ebb8f281a557bf6f69374087c42"
+    }
+
+    @Test
+    fun `parseEventTags returns tags for note`() {
+        val content = "note1zwwmjqpaymqhjlq0tjezcyhpcx0hyh4m3u5p54tm7mmfxaqg03pq3w3d6g"
+        val actual = content.parseEventTags().firstOrNull()
+        actual.shouldNotBeNull()
+        actual[0].jsonPrimitive.content shouldBe "e"
+        actual[1].jsonPrimitive.content shouldBe "139db9003d26c1797c0f5cb22c12e1c19f725ebb8f281a557bf6f69374087c42"
     }
 }

@@ -5,6 +5,9 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.JsonArray
 import net.primal.android.crypto.toNpub
 import net.primal.android.networking.UserAgentProvider
+import net.primal.android.nostr.ext.asEventIdTag
+import net.primal.android.nostr.ext.asIdentifierTag
+import net.primal.android.nostr.ext.asPubkeyTag
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.serialization.NostrJson

@@ -24,6 +24,7 @@ interface ThreadContract {
 
         data class ReplyToAction(
             val content: String,
+            val rootPostId: String,
             val replyToPostId: String,
             val replyToAuthorId: String,
         ) : UiEvent()

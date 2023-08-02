@@ -21,14 +21,39 @@ private val nostrUriRegexPattern: Pattern = Pattern.compile(
     Pattern.CASE_INSENSITIVE
 )
 
-fun String.isNostrUri(): Boolean {
-    return this.lowercase().startsWith(NOSTR)
-}
+fun String.isNostrUri() = lowercase().startsWith(NOSTR)
+
+fun String.isNote() = lowercase().startsWith(NOTE)
+
+fun String.isNoteUri() = lowercase().startsWith(NOSTR + NOTE)
+
+fun String.isNEventUri() = lowercase().startsWith(NOSTR + NEVENT)
 
 fun String.parseNostrUris(): List<String> {
     return nostrUriRegexPattern.toRegex().findAll(this).map { matchResult ->
         matchResult.groupValues[1] + matchResult.groupValues[2] + matchResult.groupValues[3]
     }.toList()
+}
+
+
+private fun String.nostrUriToBytes(): ByteArray? {
+    val matcher = nostrUriRegexPattern.matcher(this)
+    if (!matcher.find()) return null
+    val type = matcher.group(2)?.lowercase() ?: return null
+    val key = matcher.group(3)?.lowercase() ?: return null
+    return (type + key).bechToBytes()
+}
+
+fun String.nostrUriToNoteId() = nostrUriToBytes()?.toHex()
+
+fun String.nostrUriToPubkey() = nostrUriToBytes()?.toHex()
+
+fun String.nostrUriToNoteIdAndRelay(): Pair<String?, String?> {
+    val bytes = nostrUriToBytes() ?: return null to null
+    val tlv = Nip19TLV.parse(bytes)
+    val noteId = tlv[Nip19TLV.Type.SPECIAL.id]?.firstOrNull()?.toHex()
+    val relayBytes = tlv[Nip19TLV.Type.RELAY.id]?.firstOrNull()
+    return noteId to relayBytes?.let { String(it) }
 }
 
 fun List<PostData>.flatMapAsPostNostrUri(profileIdToDisplayNameMap: Map<String, String>) =

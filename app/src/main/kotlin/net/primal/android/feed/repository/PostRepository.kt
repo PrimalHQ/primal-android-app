@@ -15,6 +15,8 @@ class PostRepository @Inject constructor(
     private val nostrNotary: NostrNotary,
 ) {
 
+    fun findPostDataById(postId: String) = database.posts().findByPostId(postId = postId)
+
     @Throws(NostrPublishException::class)
     suspend fun likePost(postId: String, postAuthorId: String) {
         val userId = activeAccountStore.activeUserId()

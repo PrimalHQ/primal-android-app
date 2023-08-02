@@ -49,6 +49,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.R
@@ -57,11 +58,14 @@ import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.feed.FeedPostListItem
 import net.primal.android.core.compose.feed.RepostOrQuoteBottomSheet
 import net.primal.android.core.compose.feed.model.FeedPostAction
+import net.primal.android.core.compose.feed.model.FeedPostStatsUi
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.crypto.hexToNoteHrp
 import net.primal.android.theme.AppTheme
+import net.primal.android.theme.PrimalTheme
+import java.time.Instant
 
 @Composable
 fun ThreadScreen(
@@ -198,8 +202,9 @@ fun ThreadScreen(
             SnackbarHost(hostState = snackbarHostState)
         },
         bottomBar = {
+            val rootPost = state.conversation.firstOrNull()
             val replyToPost = state.conversation.getOrNull(state.highlightPostIndex)
-            if (replyToPost != null) {
+            if (rootPost != null && replyToPost != null) {
                 ReplyToBottomBar(
                     publishingReply = state.publishingReply,
                     replyToAuthorDisplayName = replyToPost.authorDisplayName,
@@ -208,6 +213,7 @@ fun ThreadScreen(
                         eventPublisher(
                             ThreadContract.UiEvent.ReplyToAction(
                                 content = content,
+                                rootPostId = rootPost.postId,
                                 replyToPostId = replyToPost.postId,
                                 replyToAuthorId = replyToPost.authorId,
                             )
@@ -351,5 +357,54 @@ private fun ReplyPublishingErrorHandler(
                 duration = SnackbarDuration.Short,
             )
         }
+    }
+}
+
+
+@Preview()
+@Composable
+fun ThreadScreenPreview() {
+    PrimalTheme {
+        ThreadScreen(
+            state = ThreadContract.UiState(
+                conversation = listOf(
+                    FeedPostUi(
+                        postId = "random",
+                        repostId = null,
+                        authorId = "id",
+                        authorDisplayName = "alex",
+                        userDisplayName = "alex",
+                        authorInternetIdentifier = "alex@primal.net",
+                        content = "Hello Nostr!",
+                        authorResources = emptyList(),
+                        postResources = emptyList(),
+                        nostrUris = emptyList(),
+                        timestamp = Instant.now().minusSeconds(3600),
+                        stats = FeedPostStatsUi(),
+                        rawNostrEventJson = "raaaw",
+                    ),
+                    FeedPostUi(
+                        postId = "reply",
+                        repostId = null,
+                        authorId = "id",
+                        authorDisplayName = "nikola",
+                        userDisplayName = "nikola",
+                        authorInternetIdentifier = "nikola@primal.net",
+                        content = "Nostr rocks!",
+                        authorResources = emptyList(),
+                        postResources = emptyList(),
+                        nostrUris = emptyList(),
+                        timestamp = Instant.now(),
+                        stats = FeedPostStatsUi(),
+                        rawNostrEventJson = "raaaw",
+                    ),
+                ),
+            ),
+            onClose = {},
+            onPostClick = {},
+            onPostQuoteClick = {},
+            onProfileClick = {},
+            eventPublisher = {},
+        )
     }
 }
