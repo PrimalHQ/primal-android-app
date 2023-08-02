@@ -2,6 +2,7 @@ package net.primal.android.nostr.notary
 
 import fr.acinq.secp256k1.Hex
 import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import net.primal.android.crypto.toNpub
 import net.primal.android.networking.UserAgentProvider
@@ -82,4 +83,19 @@ class NostrNotary @Inject constructor(
         ).signOrThrow(nsec = findNsecOrThrow(userId))
     }
 
+    fun signContactsNostrEvent(
+        userId: String,
+        contacts: Set<String>,
+        relays: List<String>
+    ): NostrEvent {
+        val tags = contacts.map { it.asContactTag() }
+        val content = NostrJson.encodeToString(relays)
+
+        return NostrUnsignedEvent(
+            pubKey = userId,
+            kind = NostrEventKind.Contacts.value,
+            content = content,
+            tags = tags
+        ).signOrThrow(nsec = findNsecOrThrow(userId))
+    }
 }
