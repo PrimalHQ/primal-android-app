@@ -19,5 +19,6 @@ data class FeedPostUi(
     val nostrUris: List<NostrUriUi>,
     val timestamp: Instant,
     val stats: FeedPostStatsUi,
+    val hashtags: List<String>,
     val rawNostrEventJson: String,
 )

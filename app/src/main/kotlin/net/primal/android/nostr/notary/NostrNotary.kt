@@ -31,14 +31,9 @@ class NostrNotary @Inject constructor(
 
     fun signShortTextNoteEvent(
         userId: String,
-        eventTags: List<JsonArray>,
-        pubkeyTags: List<JsonArray>,
+        tags: List<JsonArray>,
         noteContent: String,
     ): NostrEvent {
-        val tags = mutableListOf<JsonArray>().apply {
-            eventTags.forEach { add(it) }
-            pubkeyTags.forEach { add(it) }
-        }
         return NostrUnsignedEvent(
             pubKey = userId,
             kind = NostrEventKind.ShortTextNote.value,

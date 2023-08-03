@@ -80,6 +80,7 @@ fun FeedPostList(
     onRepostClick: (FeedPostUi) -> Unit,
     onPostReplyClick: (String) -> Unit,
     onPostQuoteClick: (FeedPostUi) -> Unit,
+    onHashtagClick: (String) -> Unit,
     syncStats: FeedPostsSyncStats = FeedPostsSyncStats(),
     paddingValues: PaddingValues = PaddingValues(0.dp),
     feedListState: LazyListState = rememberLazyListState(),
@@ -141,6 +142,7 @@ fun FeedPostList(
             onRepostClick = onRepostClick,
             onPostReplyClick = onPostReplyClick,
             onPostQuoteClick = onPostQuoteClick,
+            onHashtagClick = onHashtagClick,
         )
 
         AnimatedVisibility(
@@ -180,6 +182,7 @@ fun FeedLazyColumn(
     onRepostClick: (FeedPostUi) -> Unit,
     onPostReplyClick: (String) -> Unit,
     onPostQuoteClick: (FeedPostUi) -> Unit,
+    onHashtagClick: (String) -> Unit,
     shouldShowLoadingState: Boolean = true,
     shouldShowNoContentState: Boolean = true,
     header: @Composable (LazyItemScope.() -> Unit)? = null,
@@ -245,6 +248,7 @@ fun FeedLazyColumn(
                             }
                         }
                     },
+                    onHashtagClick = onHashtagClick,
                 )
 
                 else -> {}

@@ -19,6 +19,7 @@ class ExploreFeedQueryBuilder(
                 PostData.content,
                 PostData.raw,
                 PostData.authorMetadataId,
+                PostData.hashtags,
                 NULL AS repostId,
                 NULL AS repostAuthorId,
                 PostUserStats.liked AS userLiked,

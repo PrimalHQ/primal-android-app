@@ -58,5 +58,6 @@ fun FeedPost.asFeedPostUi() = FeedPostUi(
         repostsCount = this.postStats?.reposts ?: 0,
         userReposted = this.userStats?.userReposted ?: false,
     ),
+    hashtags = this.data.hashtags,
     rawNostrEventJson = this.data.raw,
 )
