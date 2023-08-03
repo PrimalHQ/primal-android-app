@@ -1,6 +1,11 @@
 package net.primal.android.feed.db
 
-class ReferencedUser(
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class ReferencedUser(
     val userId: String,
     val handle: String,
-)
+) {
+    val displayHandle get() = "@$handle"
+}

@@ -78,8 +78,8 @@ fun String.nostrUriToPubkeyAndRelay() = nostrUriToIdAndRelay()
 
 fun List<PostData>.flatMapAsPostNostrResourcePO(
     postIdToPostDataMap: Map<String, PostData>,
-    profileIdToProfileMetadataMap: Map<String, ProfileMetadata>
-) = flatMap { postData ->
+    profileIdToProfileMetadataMap: Map<String, ProfileMetadata>,
+): List<NostrResource> = flatMap { postData ->
     postData.uris
         .filter { it.isNostrUri() }
         .map { link ->
@@ -135,9 +135,15 @@ fun List<PostData>.flatMapAsPostNostrResourcePO(
                     postId = refPost.postId,
                     createdAt = refPost.createdAt,
                     content = refPost.content,
+                    authorId = refPost.authorId,
                     authorName = refPostAuthor.authorNameUiFriendly(),
                     authorAvatarUrl = refPostAuthor.picture,
                     authorInternetIdentifier = refPostAuthor.internetIdentifier,
+                    mediaResources = listOf(refPost).flatMapAsPostMediaResourcePO(),
+                    nostrResources = listOf(refPost).flatMapAsPostNostrResourcePO(
+                        postIdToPostDataMap = postIdToPostDataMap,
+                        profileIdToProfileMetadataMap = profileIdToProfileMetadataMap,
+                    ),
                 ) else null,
             )
         }

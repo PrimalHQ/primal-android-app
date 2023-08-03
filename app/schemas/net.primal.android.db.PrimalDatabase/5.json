@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 5,
-    "identityHash": "d39d5e1eb8b88a8bead2a699ec2d0160",
+    "identityHash": "51e54b701a12816b35dbe5ef6e08f01a",
     "entities": [
       {
         "tableName": "PostData",
@@ -669,7 +669,7 @@
       },
       {
         "tableName": "NostrResource",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`postId` TEXT NOT NULL, `uri` TEXT NOT NULL, `refPost_postId` TEXT, `refPost_createdAt` INTEGER, `refPost_content` TEXT, `refPost_authorAvatarUrl` TEXT, `refPost_authorName` TEXT, `refPost_authorInternetIdentifier` TEXT, `refUser_userId` TEXT, `refUser_handle` TEXT, PRIMARY KEY(`postId`, `uri`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`postId` TEXT NOT NULL, `uri` TEXT NOT NULL, `refPost_postId` TEXT, `refPost_createdAt` INTEGER, `refPost_content` TEXT, `refPost_authorId` TEXT, `refPost_authorName` TEXT, `refPost_authorAvatarUrl` TEXT, `refPost_authorInternetIdentifier` TEXT, `refPost_mediaResources` TEXT, `refPost_nostrResources` TEXT, `refUser_userId` TEXT, `refUser_handle` TEXT, PRIMARY KEY(`postId`, `uri`))",
         "fields": [
           {
             "fieldPath": "postId",
@@ -702,8 +702,8 @@
             "notNull": false
           },
           {
-            "fieldPath": "referencedPost.authorAvatarUrl",
-            "columnName": "refPost_authorAvatarUrl",
+            "fieldPath": "referencedPost.authorId",
+            "columnName": "refPost_authorId",
             "affinity": "TEXT",
             "notNull": false
           },
@@ -714,8 +714,26 @@
             "notNull": false
           },
           {
+            "fieldPath": "referencedPost.authorAvatarUrl",
+            "columnName": "refPost_authorAvatarUrl",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
             "fieldPath": "referencedPost.authorInternetIdentifier",
             "columnName": "refPost_authorInternetIdentifier",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "referencedPost.mediaResources",
+            "columnName": "refPost_mediaResources",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "referencedPost.nostrResources",
+            "columnName": "refPost_nostrResources",
             "affinity": "TEXT",
             "notNull": false
           },
@@ -746,7 +764,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'd39d5e1eb8b88a8bead2a699ec2d0160')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '51e54b701a12816b35dbe5ef6e08f01a')"
     ]
   }
 }
