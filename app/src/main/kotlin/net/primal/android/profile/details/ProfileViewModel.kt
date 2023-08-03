@@ -27,6 +27,7 @@ import net.primal.android.profile.details.model.ProfileDetailsUi
 import net.primal.android.profile.details.model.ProfileStatsUi
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.active.ActiveAccountStore
+import net.primal.android.user.api.UsersApi
 import javax.inject.Inject
 
 @HiltViewModel
@@ -36,6 +37,7 @@ class ProfileViewModel @Inject constructor(
     feedRepository: FeedRepository,
     private val profileRepository: ProfileRepository,
     private val postRepository: PostRepository,
+    private val usersApi: UsersApi
 ) : ViewModel() {
 
     private val profileId: String =
@@ -70,6 +72,8 @@ class ProfileViewModel @Inject constructor(
             when (it) {
                 is UiEvent.PostLikeAction -> likePost(it)
                 is UiEvent.RepostAction -> repostPost(it)
+                is UiEvent.FollowAction -> follow(it)
+                is UiEvent.UnfollowAction -> unfollow(it)
             }
         }
     }
@@ -140,6 +144,22 @@ class ProfileViewModel @Inject constructor(
                 postRawNostrEvent = repostAction.postNostrEvent,
             )
         } catch (error: NostrPublishException) {
+            // Propagate error to the UI
+        }
+    }
+
+    private fun follow(followAction: UiEvent.FollowAction) = viewModelScope.launch {
+        try {
+            usersApi.follow(followAction.profileId)
+        } catch (error: Exception) {
+            // Propagate error to the UI
+        }
+    }
+
+    private fun unfollow(unfollowAction: UiEvent.UnfollowAction) = viewModelScope.launch {
+        try {
+            usersApi.unfollow(unfollowAction.profileId)
+        } catch (error: Exception) {
             // Propagate error to the UI
         }
     }

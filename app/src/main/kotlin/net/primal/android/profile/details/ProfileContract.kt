@@ -24,5 +24,8 @@ interface ProfileContract {
             val postAuthorId: String,
             val postNostrEvent: String
         ) : UiEvent()
+
+        data class FollowAction(val profileId: String) : UiEvent()
+        data class UnfollowAction(val profileId: String) : UiEvent()
     }
 }

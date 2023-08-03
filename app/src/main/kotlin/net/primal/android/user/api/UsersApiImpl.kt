@@ -56,8 +56,9 @@ class UsersApiImpl @Inject constructor(
         )
     }
 
-    override suspend fun follow(followedPubkey: String, relays: List<String>): Set<String> {
+    override suspend fun follow(followedPubkey: String): Set<String> {
         val userAccount = activeUserAccountStore.activeUserAccount.value
+        val relays = userAccount.relays.map { it.url }
 
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
@@ -86,8 +87,9 @@ class UsersApiImpl @Inject constructor(
         return following
     }
 
-    override suspend fun unfollow(unfollowedPubkey: String, relays: List<String>): Set<String> {
+    override suspend fun unfollow(unfollowedPubkey: String): Set<String> {
         val userAccount = activeUserAccountStore.activeUserAccount.value
+        val relays = userAccount.relays.map { it.url }
 
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(

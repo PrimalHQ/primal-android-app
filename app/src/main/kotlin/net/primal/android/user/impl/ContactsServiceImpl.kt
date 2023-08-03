@@ -18,10 +18,12 @@ class ContactsServiceImpl @Inject constructor(): ContactsService {
 
         val followings = contactsTags.parseFollowings()
 
+        val userContactsCreatedAt = activeUserAccount.contactsCreatedAt ?: Long.MIN_VALUE
+
         val result = when {
-            activeUserAccount.contactsCreatedAt == null -> throw PrimalApiException.ContactListCreatedAtNotFound
-            activeUserAccount.contactsCreatedAt > contactsEvent.createdAt -> activeUserAccount.following
-            contactsEvent.createdAt >= activeUserAccount.contactsCreatedAt -> followings
+            userContactsCreatedAt == Long.MIN_VALUE -> followings
+            userContactsCreatedAt > contactsEvent.createdAt -> activeUserAccount.following
+            userContactsCreatedAt < contactsEvent.createdAt -> followings
             else -> setOf()
         }
 
