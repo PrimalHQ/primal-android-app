@@ -13,8 +13,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil.compose.SubcomposeAsyncImage
 import com.google.accompanist.placeholder.PlaceholderHighlight
+import com.google.accompanist.placeholder.fade
 import com.google.accompanist.placeholder.material.placeholder
-import com.google.accompanist.placeholder.material.shimmer
+import net.primal.android.theme.AppTheme
 
 @Composable
 fun PostImageListItemImage(
@@ -26,14 +27,23 @@ fun PostImageListItemImage(
         modifier = modifier,
         contentDescription = null,
         contentScale = ContentScale.Crop,
-        loading = {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .placeholder(visible = true, highlight = PlaceholderHighlight.shimmer()),
-            )
-        },
+        loading = { PostImageLoadingPlaceholder() },
         error = { PostImageErrorImage() },
+    )
+}
+
+@Composable
+fun PostImageLoadingPlaceholder() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .placeholder(
+                visible = true,
+                color = AppTheme.colorScheme.surface,
+                highlight = PlaceholderHighlight.fade(
+                    highlightColor = AppTheme.extraColorScheme.surfaceVariantAlt,
+                )
+            ),
     )
 }
 
