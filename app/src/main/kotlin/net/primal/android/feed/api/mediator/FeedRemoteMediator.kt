@@ -18,27 +18,11 @@ import net.primal.android.feed.db.FeedPostSync
 import net.primal.android.feed.db.sql.ExploreFeedQueryBuilder
 import net.primal.android.feed.db.sql.FeedQueryBuilder
 import net.primal.android.feed.db.sql.LatestFeedQueryBuilder
+import net.primal.android.feed.repository.persistToDatabaseAsTransaction
 import net.primal.android.networking.sockets.errors.NostrNoticeException
 import net.primal.android.networking.sockets.errors.WssException
-import net.primal.android.nostr.ext.asEventStatsPO
-import net.primal.android.nostr.ext.asEventUserStatsPO
-import net.primal.android.nostr.ext.asMediaResourcePO
-import net.primal.android.nostr.ext.asPost
-import net.primal.android.nostr.ext.flatMapAsPostNostrUri
-import net.primal.android.nostr.ext.flatMapAsPostResources
-import net.primal.android.nostr.ext.mapAsProfileMetadata
-import net.primal.android.nostr.ext.mapNotNullAsPost
-import net.primal.android.nostr.ext.mapNotNullAsRepost
-import net.primal.android.nostr.ext.takeContentAsNostrEventOrNull
 import net.primal.android.nostr.model.NostrEvent
-import net.primal.android.nostr.model.primal.PrimalEvent
-import net.primal.android.nostr.model.primal.content.ContentPrimalEventResources
-import net.primal.android.nostr.model.primal.content.ContentPrimalEventStats
-import net.primal.android.nostr.model.primal.content.ContentPrimalEventUserStats
 import net.primal.android.nostr.model.primal.content.ContentPrimalPaging
-import net.primal.android.profile.db.userNameUiFriendly
-import net.primal.android.serialization.NostrJson
-import net.primal.android.serialization.decodeFromStringOrNull
 import java.io.IOException
 import java.time.Instant
 import kotlin.time.Duration
@@ -189,13 +173,13 @@ class FeedRemoteMediator(
                 LoadType.APPEND -> initialRequestBody.copy(until = remoteKey?.sinceId)
             }
 
-            val response = try {
+            val feedResponse = try {
                 withContext(Dispatchers.IO) { feedApi.getFeed(body = feedRequestBody) }
             } catch (error: WssException) {
                 return MediatorResult.Error(error)
             }
 
-            val pagingEvent = response.paging
+            val pagingEvent = feedResponse.paging
             if (pagingEvent?.untilId == pagingEvent?.sinceId) {
                 if (loadType == LoadType.PREPEND) {
                     if (prependSyncCount > 1) {
@@ -225,28 +209,17 @@ class FeedRemoteMediator(
                 return MediatorResult.Success(endOfPaginationReached = true)
             } else {
                 if (loadType == LoadType.PREPEND) {
-                    prependSyncCount += response.posts.size + response.reposts.size
+                    prependSyncCount += feedResponse.posts.size + feedResponse.reposts.size
                 }
             }
 
             withContext(Dispatchers.IO) {
-                (response.posts + response.reposts).processRemoteKeys(pagingEvent)
-
-                response.metadata.processMetadataEvents()
-                processShortTextNotesAndReposts(
-                    feedDirective = feedDirective,
-                    metadataEvents = response.metadata,
-                    postEvents = response.posts,
-                    repostEvents = response.reposts,
-                )
-
-                response.referencedPosts.processReferencedEvents(
-                    metadataEvents = response.metadata,
-                )
-                response.primalEventStats.processEventStats()
-                response.primalEventUserStats.processEventUserStats()
-                response.primalEventResources.processEventResources()
+                feedResponse.persistToDatabaseAsTransaction(userId = userPubkey, database = database)
+                val feedEvents = feedResponse.posts + feedResponse.reposts
+                feedEvents.processRemoteKeys(pagingEvent)
+                feedEvents.processFeedConnections()
             }
+
             MediatorResult.Success(endOfPaginationReached = false)
         } catch (e: IOException) {
             MediatorResult.Error(e)
@@ -273,104 +246,14 @@ class FeedRemoteMediator(
         }
     }
 
-    private suspend fun processShortTextNotesAndReposts(
-        feedDirective: String,
-        metadataEvents: List<NostrEvent>,
-        postEvents: List<NostrEvent>,
-        repostEvents: List<NostrEvent>,
-    ) {
-        val profileIdToProfileMetadataMap = metadataEvents
-            .mapAsProfileMetadata()
-            .groupBy { it.ownerId }
-            .mapValues { it.value.first() }
-
-
-        database.withTransaction {
-            val posts = postEvents
-                .mapNotNullAsPost()
-                .map { postData ->
-                    val eventIdMap = profileIdToProfileMetadataMap.mapValues { it.value.eventId }
-                    postData.copy(authorMetadataId = eventIdMap[postData.authorId])
-                }
-            database.posts().upsertAll(data = posts)
-            database.resources().upsert(data = posts.flatMapAsPostResources())
-
-            val profileIdToUsernameMap = profileIdToProfileMetadataMap.mapValues {
-                it.value.userNameUiFriendly()
+    private fun List<NostrEvent>.processFeedConnections() {
+        database.feedsConnections().connect(
+            data = this.map {
+                FeedPostDataCrossRef(
+                    feedDirective = feedDirective,
+                    eventId = it.id,
+                )
             }
-            database.nostrUris().upsert(
-                data = posts.flatMapAsPostNostrUri(
-                    profileIdToDisplayNameMap = profileIdToUsernameMap
-                )
-            )
-
-            val reposts = repostEvents.mapNotNullAsRepost()
-            database.reposts().upsertAll(data = reposts)
-
-            val feedConnections = posts.map { it.postId } + reposts.map { it.repostId }
-            database.feedsConnections().connect(
-                data = feedConnections.map { postId ->
-                    FeedPostDataCrossRef(
-                        feedDirective = feedDirective,
-                        eventId = postId
-                    )
-                }
-            )
-        }
-    }
-
-    private fun List<NostrEvent>.processMetadataEvents() {
-        database.profiles().upsertAll(profiles = mapAsProfileMetadata())
-    }
-
-    private suspend fun List<PrimalEvent>.processReferencedEvents(
-        metadataEvents: List<NostrEvent>,
-    ) {
-        database.withTransaction {
-            val posts = this.mapNotNull { it.takeContentAsNostrEventOrNull() }.map { it.asPost() }
-            database.posts().upsertAll(data = posts)
-
-            val profileIdToUsernameMap = metadataEvents
-                .mapAsProfileMetadata()
-                .groupBy { it.ownerId }
-                .mapValues { it.value.first().userNameUiFriendly() }
-            database.nostrUris().upsert(
-                data = posts.flatMapAsPostNostrUri(
-                    profileIdToDisplayNameMap = profileIdToUsernameMap
-                )
-            )
-
-            database.resources().upsert(data = posts.flatMapAsPostResources())
-        }
-    }
-
-    private fun List<PrimalEvent>.processEventStats() {
-        database.postStats().upsertAll(
-            data = this
-                .mapNotNull { NostrJson.decodeFromStringOrNull<ContentPrimalEventStats>(it.content) }
-                .map { it.asEventStatsPO() }
         )
     }
-
-    private fun List<PrimalEvent>.processEventUserStats() {
-        database.postUserStats().upsertAll(
-            data = this
-                .mapNotNull { NostrJson.decodeFromStringOrNull<ContentPrimalEventUserStats>(it.content) }
-                .map { it.asEventUserStatsPO(userId = userPubkey) }
-        )
-    }
-
-    private fun List<PrimalEvent>.processEventResources() {
-        database.resources().upsert(
-            data = this
-                .mapNotNull { NostrJson.decodeFromStringOrNull<ContentPrimalEventResources>(it.content) }
-                .flatMap {
-                    val eventId = it.eventId
-                    it.resources.map { eventResource ->
-                        eventResource.asMediaResourcePO(eventId = eventId)
-                    }
-                }
-        )
-    }
-
 }

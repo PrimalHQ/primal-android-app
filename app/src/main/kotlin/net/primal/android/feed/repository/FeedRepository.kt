@@ -5,7 +5,6 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.PagingSource
-import androidx.room.withTransaction
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterNotNull
@@ -20,21 +19,6 @@ import net.primal.android.feed.db.FeedPost
 import net.primal.android.feed.db.sql.ExploreFeedQueryBuilder
 import net.primal.android.feed.db.sql.FeedQueryBuilder
 import net.primal.android.feed.db.sql.LatestFeedQueryBuilder
-import net.primal.android.nostr.ext.asEventStatsPO
-import net.primal.android.nostr.ext.asEventUserStatsPO
-import net.primal.android.nostr.ext.asMediaResourcePO
-import net.primal.android.nostr.ext.asPost
-import net.primal.android.nostr.ext.flatMapAsPostNostrUri
-import net.primal.android.nostr.ext.flatMapAsPostResources
-import net.primal.android.nostr.ext.mapAsProfileMetadata
-import net.primal.android.nostr.ext.takeContentAsNostrEventOrNull
-import net.primal.android.nostr.model.primal.PrimalEvent
-import net.primal.android.nostr.model.primal.content.ContentPrimalEventResources
-import net.primal.android.nostr.model.primal.content.ContentPrimalEventStats
-import net.primal.android.nostr.model.primal.content.ContentPrimalEventUserStats
-import net.primal.android.profile.db.userNameUiFriendly
-import net.primal.android.serialization.NostrJson
-import net.primal.android.serialization.decodeFromStringOrNull
 import net.primal.android.thread.db.ConversationCrossRef
 import net.primal.android.user.active.ActiveAccountStore
 import javax.inject.Inject
@@ -92,54 +76,20 @@ class FeedRepository @Inject constructor(
         )
 
     suspend fun fetchReplies(postId: String) = withContext(Dispatchers.IO) {
+        val userId = activeAccountStore.activeUserId()
         val response = feedApi.getThread(
-            ThreadRequestBody(
-                postId = postId,
-                userPubKey = activeAccountStore.activeUserId(),
-                limit = 100,
-            )
+            ThreadRequestBody(postId = postId, userPubKey = userId, limit = 100)
         )
 
-        database.withTransaction {
-            val profileMetadataList = response.metadata.mapAsProfileMetadata()
-            val profileIdToProfileMetadataMap = profileMetadataList
-                .groupBy { it.ownerId }
-                .mapValues { it.value.first() }
-
-            val profileIdToUsernameMap = profileIdToProfileMetadataMap.mapValues {
-                it.value.userNameUiFriendly()
-            }
-
-            database.profiles().upsertAll(profiles = profileMetadataList)
-
-            val posts = response.posts.map { it.asPost() }
-            val referencedPosts = response.referencedPosts
-                .mapNotNull { it.takeContentAsNostrEventOrNull() }
-                .map { it.asPost() }
-
-            val allPosts = posts + referencedPosts
-
-            database.posts().upsertAll(data = allPosts)
-            database.resources().upsert(data = allPosts.flatMapAsPostResources())
-            database.nostrUris().upsert(
-                data = allPosts.flatMapAsPostNostrUri(
-                    profileIdToDisplayNameMap = profileIdToUsernameMap
+        response.persistToDatabaseAsTransaction(userId = userId, database = database)
+        database.conversationConnections().connect(
+            data = response.posts.map {
+                ConversationCrossRef(
+                    postId = postId,
+                    replyPostId = it.id,
                 )
-            )
-
-            response.primalEventStats.processEventStats()
-            response.primalEventUserStats.processEventUserStats()
-            response.primalEventResources.processEventResources()
-
-            database.conversationConnections().connect(
-                data = response.posts.map {
-                    ConversationCrossRef(
-                        postId = postId,
-                        replyPostId = it.id,
-                    )
-                }
-            )
-        }
+            }
+        )
     }
 
     @OptIn(ExperimentalPagingApi::class)
@@ -169,35 +119,6 @@ class FeedRepository @Inject constructor(
         else -> ExploreFeedQueryBuilder(
             feedDirective = feedDirective,
             userPubkey = activeAccountStore.activeUserId()
-        )
-    }
-
-    private fun List<PrimalEvent>.processEventStats() {
-        database.postStats().upsertAll(
-            data = this
-                .mapNotNull { NostrJson.decodeFromStringOrNull<ContentPrimalEventStats>(it.content) }
-                .map { it.asEventStatsPO() }
-        )
-    }
-
-    private fun List<PrimalEvent>.processEventUserStats() {
-        database.postUserStats().upsertAll(
-            data = this
-                .mapNotNull { NostrJson.decodeFromStringOrNull<ContentPrimalEventUserStats>(it.content) }
-                .map { it.asEventUserStatsPO(userId = activeAccountStore.activeUserId()) }
-        )
-    }
-
-    private fun List<PrimalEvent>.processEventResources() {
-        database.resources().upsert(
-            data = this
-                .mapNotNull { NostrJson.decodeFromStringOrNull<ContentPrimalEventResources>(it.content) }
-                .flatMap {
-                    val eventId = it.eventId
-                    it.resources.map { eventResource ->
-                        eventResource.asMediaResourcePO(eventId = eventId)
-                    }
-                }
         )
     }
 

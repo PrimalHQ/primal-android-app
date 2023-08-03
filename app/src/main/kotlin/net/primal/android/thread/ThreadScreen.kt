@@ -211,8 +211,8 @@ fun ThreadScreen(
             if (rootPost != null && replyToPost != null) {
                 ReplyToBottomBar(
                     publishingReply = state.publishingReply,
-                    replyToAuthorDisplayName = replyToPost.authorDisplayName,
-                    replyToUserDisplayName = replyToPost.userDisplayName,
+                    replyToAuthorName = replyToPost.authorName,
+                    replyToAuthorHandle = replyToPost.authorHandle,
                     replyTextProvider = { state.replyText },
                     onReplyClick = {
                         eventPublisher(
@@ -236,8 +236,8 @@ fun ThreadScreen(
 @Composable
 fun ReplyToBottomBar(
     publishingReply: Boolean,
-    replyToAuthorDisplayName: String,
-    replyToUserDisplayName: String,
+    replyToAuthorName: String,
+    replyToAuthorHandle: String,
     replyTextProvider: () -> String,
     onReplyClick: () -> Unit,
     onReplyUpdated: (String) -> Unit,
@@ -257,7 +257,7 @@ fun ReplyToBottomBar(
             modifier = Modifier.fillMaxWidth(),
         ) {
             AnimatedVisibility(visible = isKeyboardVisible) {
-                val mention = "@$replyToUserDisplayName"
+                val mention = "@$replyToAuthorHandle"
                 val text = stringResource(id = R.string.thread_replying_to, mention)
                 val contentText = buildAnnotatedString {
                     append(text)
@@ -297,7 +297,7 @@ fun ReplyToBottomBar(
                         Text(
                             text = stringResource(
                                 id = R.string.thread_reply_to,
-                                replyToAuthorDisplayName
+                                replyToAuthorName
                             ),
                             color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
                         )
@@ -380,13 +380,13 @@ fun ThreadScreenPreview() {
                         postId = "random",
                         repostId = null,
                         authorId = "id",
-                        authorDisplayName = "alex",
-                        userDisplayName = "alex",
+                        authorName = "alex",
+                        authorHandle = "alex",
                         authorInternetIdentifier = "alex@primal.net",
                         content = "Hello #nostr!",
-                        authorResources = emptyList(),
-                        postResources = emptyList(),
-                        nostrUris = emptyList(),
+                        authorMediaResources = emptyList(),
+                        mediaResources = emptyList(),
+                        nostrResources = emptyList(),
                         timestamp = Instant.now().minusSeconds(3600),
                         stats = FeedPostStatsUi(),
                         hashtags = listOf("#nostr"),
@@ -396,13 +396,13 @@ fun ThreadScreenPreview() {
                         postId = "reply",
                         repostId = null,
                         authorId = "id",
-                        authorDisplayName = "nikola",
-                        userDisplayName = "nikola",
+                        authorName = "nikola",
+                        authorHandle = "nikola",
                         authorInternetIdentifier = "nikola@primal.net",
                         content = "#nostr rocks!",
-                        authorResources = emptyList(),
-                        postResources = emptyList(),
-                        nostrUris = emptyList(),
+                        authorMediaResources = emptyList(),
+                        mediaResources = emptyList(),
+                        nostrResources = emptyList(),
                         timestamp = Instant.now(),
                         stats = FeedPostStatsUi(),
                         hashtags = listOf("#nostr"),

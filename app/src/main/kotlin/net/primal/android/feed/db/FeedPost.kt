@@ -16,10 +16,10 @@ data class FeedPost(
     val postResources: List<MediaResource>,
 
     @Relation(
-        entityColumn = "eventId",
+        entityColumn = "postId",
         parentColumn = "postId",
     )
-    val nostrUris: List<NostrUri>,
+    val nostrUris: List<NostrResource>,
 
     @Relation(
         entityColumn = "ownerId",

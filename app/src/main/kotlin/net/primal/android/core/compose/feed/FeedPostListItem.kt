@@ -60,7 +60,7 @@ import net.primal.android.core.compose.PrimalClickableText
 import net.primal.android.core.compose.feed.model.FeedPostAction
 import net.primal.android.core.compose.feed.model.FeedPostStatsUi
 import net.primal.android.core.compose.feed.model.FeedPostUi
-import net.primal.android.core.compose.feed.model.NostrUriUi
+import net.primal.android.core.compose.feed.model.NostrResourceUi
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.FeedLikes
 import net.primal.android.core.compose.icons.primaliconpack.FeedLikesFilled
@@ -110,9 +110,9 @@ fun FeedPostListItem(
         highlighted = highlighted,
         connected = connected,
     ) {
-        if (data.repostAuthorDisplayName != null) {
+        if (data.repostAuthorName != null) {
             RepostedItem(
-                repostedBy = data.repostAuthorDisplayName,
+                repostedBy = data.repostAuthorName,
                 onRepostAuthorClick = {
                     if (data.repostAuthorId != null) {
                         onProfileClick(data.repostAuthorId)
@@ -122,10 +122,10 @@ fun FeedPostListItem(
         }
 
         PostAuthorItem(
-            authorDisplayName = data.authorDisplayName,
+            authorDisplayName = data.authorName,
             postTimestamp = data.timestamp,
             authorAvatarUrl = data.authorAvatarUrl,
-            authorResources = data.authorResources,
+            authorResources = data.authorMediaResources,
             authorInternetIdentifier = data.authorInternetIdentifier,
             onAuthorAvatarClick = { onProfileClick(data.authorId) },
         )
@@ -146,8 +146,8 @@ fun FeedPostListItem(
                 content = data.content.trim(),
                 expanded = expanded,
                 hashtags = data.hashtags,
-                resources = data.postResources,
-                nostrUris = data.nostrUris,
+                mediaResources = data.mediaResources,
+                nostrResources = data.nostrResources,
                 onClick = {
                     launchRippleEffect(it)
                     onPostClick(data.postId)
@@ -240,11 +240,11 @@ private fun String.withoutUrls(urls: List<String>): String {
 }
 
 private fun String.replaceNostrProfileUriWithAnnotatedLinks(
-    uris: List<NostrUriUi>,
+    nostrResources: List<NostrResourceUi>,
     spanStyle: SpanStyle,
     tag: String
 ): AnnotatedString {
-    val pattern = uris
+    val pattern = nostrResources
         .map { it.uri }
         .joinToString(separator = "|") { Regex.escape(it) }
     val regex = Regex(pattern, RegexOption.IGNORE_CASE)
@@ -255,14 +255,14 @@ private fun String.replaceNostrProfileUriWithAnnotatedLinks(
         if (result.range.first > lastEnd) {
             builder.append(this.substring(lastEnd, result.range.first))
         }
-        val link = uris.firstOrNull { it.uri == result.value }
-        if (link != null) {
-            val text = "@" + (link.name ?: result.value)
+        val resource = nostrResources.firstOrNull { it.uri == result.value }
+        if (resource != null) {
+            val text = "@" + (resource.referencedUser?.handle ?: result.value)
             builder.withStyle(spanStyle) {
                 append(text)
                 addStringAnnotation(
-                    tag,
-                    link.profileId ?: "",
+                    tag = tag,
+                    annotation = resource.referencedUser?.userId ?: "",
                     start = builder.length - text.length,
                     end = builder.length
                 )
@@ -300,16 +300,16 @@ fun PostContent(
     content: String,
     expanded: Boolean,
     hashtags: List<String>,
-    resources: List<MediaResourceUi>,
-    nostrUris: List<NostrUriUi>,
+    mediaResources: List<MediaResourceUi>,
+    nostrResources: List<NostrResourceUi>,
     onProfileClick: (String) -> Unit,
     onPostClick: (String) -> Unit,
     onClick: (Offset) -> Unit,
     onUrlClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
 ) {
-    val imageResources = remember { resources.filterImages() }
-    val refinedUrlResources = remember { resources.filterNotImages() }
+    val imageResources = remember { mediaResources.filterImages() }
+    val refinedUrlResources = remember { mediaResources.filterNotImages() }
 
     val primaryColor = AppTheme.colorScheme.primary
     val seeMoreText = stringResource(id = R.string.feed_see_more)
@@ -318,7 +318,7 @@ fun PostContent(
             .withoutUrls(urls = imageResources.map { it.url })
             .ellipsize(expanded = expanded, ellipsizeText = seeMoreText)
             .replaceNostrProfileUriWithAnnotatedLinks(
-                nostrUris.filter { it.profileId != null },
+                nostrResources.filter { it.referencedUser != null },
                 SpanStyle(color = primaryColor),
                 PROFILE_ID_ANNOTATION_TAG,
             )
@@ -352,8 +352,8 @@ fun PostContent(
                     end = endIndex,
                 )
             }
-        nostrUris
-            .filter { it.noteId != null }
+        nostrResources
+            .filter { it.referencedPost != null }
             .forEach {
                 val startIndex = refinedContent.indexOf(it.uri)
                 val endIndex = startIndex + it.uri.length
@@ -364,7 +364,7 @@ fun PostContent(
                 )
                 addStringAnnotation(
                     tag = NOTE_ANNOTATION_TAG,
-                    annotation = it.noteId ?: "",
+                    annotation = it.referencedPost?.postId ?: "",
                     start = startIndex,
                     end = endIndex,
                 )
@@ -691,7 +691,7 @@ fun PreviewFeedPostListItemLight() {
                 postId = "random",
                 repostId = "repostRandom",
                 repostAuthorId = "repostId",
-                repostAuthorDisplayName = "jack",
+                repostAuthorName = "jack",
                 content = """
                     Unfortunately the days of using pseudonyms in metaspace are numbered. #nostr 
 
@@ -699,15 +699,15 @@ fun PreviewFeedPostListItemLight() {
                     have augmented reality HUDs that incorporate real-time facial recognition. 
                     Hiding behind a pseudonym will become a distant dream.
                 """.trimIndent(),
-                postResources = emptyList(),
+                mediaResources = emptyList(),
                 authorId = "npubSomething",
-                authorDisplayName = "android_robots_from_space",
-                userDisplayName = "user",
+                authorName = "android_robots_from_space",
+                authorHandle = "user",
                 authorInternetIdentifier = "android@primal.net",
                 authorAvatarUrl = "https://i.imgur.com/Z8dpmvc.png",
                 timestamp = Instant.now().minus(30, ChronoUnit.MINUTES),
-                authorResources = emptyList(),
-                nostrUris = emptyList(),
+                authorMediaResources = emptyList(),
+                nostrResources = emptyList(),
                 stats = FeedPostStatsUi(
                     repliesCount = 11,
                     likesCount = 256,
@@ -736,7 +736,7 @@ fun PreviewFeedPostListItemDark() {
                 postId = "random",
                 repostId = "repostRandom",
                 repostAuthorId = "repostId",
-                repostAuthorDisplayName = "jack",
+                repostAuthorName = "jack",
                 content = """
                     Unfortunately the days of using pseudonyms in metaspace are numbered. #nostr
 
@@ -744,15 +744,15 @@ fun PreviewFeedPostListItemDark() {
                     have augmented reality HUDs that incorporate real-time facial recognition. 
                     Hiding behind a pseudonym will become a distant dream.
                 """.trimIndent(),
-                postResources = emptyList(),
+                mediaResources = emptyList(),
                 authorId = "npubSomething",
-                authorDisplayName = "android",
-                userDisplayName = "user",
+                authorName = "android",
+                authorHandle = "user",
                 authorInternetIdentifier = "android@primal.net",
                 authorAvatarUrl = "https://i.imgur.com/Z8dpmvc.png",
                 timestamp = Instant.now().minus(30, ChronoUnit.MINUTES),
-                authorResources = emptyList(),
-                nostrUris = emptyList(),
+                authorMediaResources = emptyList(),
+                nostrResources = emptyList(),
                 stats = FeedPostStatsUi(
                     repliesCount = 11,
                     userReplied = true,
