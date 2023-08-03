@@ -24,13 +24,15 @@ import net.primal.android.nostr.ext.asEventStatsPO
 import net.primal.android.nostr.ext.asEventUserStatsPO
 import net.primal.android.nostr.ext.asMediaResourcePO
 import net.primal.android.nostr.ext.asPost
+import net.primal.android.nostr.ext.flatMapAsPostNostrUri
+import net.primal.android.nostr.ext.flatMapAsPostResources
 import net.primal.android.nostr.ext.mapAsProfileMetadata
 import net.primal.android.nostr.ext.takeContentAsNostrEventOrNull
-import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.primal.PrimalEvent
 import net.primal.android.nostr.model.primal.content.ContentPrimalEventResources
 import net.primal.android.nostr.model.primal.content.ContentPrimalEventStats
 import net.primal.android.nostr.model.primal.content.ContentPrimalEventUserStats
+import net.primal.android.profile.db.userNameUiFriendly
 import net.primal.android.serialization.NostrJson
 import net.primal.android.serialization.decodeFromStringOrNull
 import net.primal.android.thread.db.ConversationCrossRef
@@ -99,9 +101,32 @@ class FeedRepository @Inject constructor(
         )
 
         database.withTransaction {
-            response.posts.processShortTextNoteEvents()
-            response.referencedPosts.processReferencedEvents()
-            response.metadata.processMetadataEvents()
+            val profileMetadataList = response.metadata.mapAsProfileMetadata()
+            val profileIdToProfileMetadataMap = profileMetadataList
+                .groupBy { it.ownerId }
+                .mapValues { it.value.first() }
+
+            val profileIdToUsernameMap = profileIdToProfileMetadataMap.mapValues {
+                it.value.userNameUiFriendly()
+            }
+
+            database.profiles().upsertAll(profiles = profileMetadataList)
+
+            val posts = response.posts.map { it.asPost() }
+            val referencedPosts = response.referencedPosts
+                .mapNotNull { it.takeContentAsNostrEventOrNull() }
+                .map { it.asPost() }
+
+            val allPosts = posts + referencedPosts
+
+            database.posts().upsertAll(data = allPosts)
+            database.resources().upsert(data = allPosts.flatMapAsPostResources())
+            database.nostrUris().upsert(
+                data = allPosts.flatMapAsPostNostrUri(
+                    profileIdToDisplayNameMap = profileIdToUsernameMap
+                )
+            )
+
             response.primalEventStats.processEventStats()
             response.primalEventUserStats.processEventUserStats()
             response.primalEventResources.processEventResources()
@@ -144,23 +169,6 @@ class FeedRepository @Inject constructor(
         else -> ExploreFeedQueryBuilder(
             feedDirective = feedDirective,
             userPubkey = activeAccountStore.activeUserId()
-        )
-    }
-
-
-    private fun List<NostrEvent>.processShortTextNoteEvents() {
-        database.posts().upsertAll(data = this.map { it.asPost() })
-    }
-
-    private fun List<NostrEvent>.processMetadataEvents() {
-        database.profiles().upsertAll(profiles = mapAsProfileMetadata())
-    }
-
-    private fun List<PrimalEvent>.processReferencedEvents() {
-        database.posts().upsertAll(
-            data = this
-                .mapNotNull { it.takeContentAsNostrEventOrNull() }
-                .map { it.asPost() }
         )
     }
 

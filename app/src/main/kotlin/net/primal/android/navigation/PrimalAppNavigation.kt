@@ -283,6 +283,7 @@ private fun NavGraphBuilder.feed(
         onNewPostClick = { preFillContent -> navController.navigateToNewPost(preFillContent) },
         onPostClick = { postId -> navController.navigateToThread(postId = postId) },
         onProfileClick = { profileId -> navController.navigateToProfile(profileId = profileId) },
+        onHashtagClick = { hashtag -> navController.navigateToExploreFeed(query = hashtag) },
         onTopLevelDestinationChanged = onTopLevelDestinationChanged,
         onDrawerScreenClick = onDrawerScreenClick,
     )
@@ -313,8 +314,10 @@ private fun NavGraphBuilder.feedList(
 ) {
     val viewModel = hiltViewModel<FeedListViewModel>(it)
     LockToOrientationPortrait()
-    FeedListScreen(viewModel = viewModel,
-        onFeedSelected = { navController.navigateToFeed(directive = it) })
+    FeedListScreen(
+        viewModel = viewModel,
+        onFeedSelected = { directive -> navController.navigateToFeed(directive = directive) }
+    )
 }
 
 private fun NavGraphBuilder.explore(
@@ -351,6 +354,7 @@ private fun NavGraphBuilder.exploreFeed(
         onPostClick = { postId -> navController.navigateToThread(postId)},
         onPostQuoteClick = { preFillContent -> navController.navigateToNewPost(preFillContent) },
         onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
+        onHashtagClick = { hashtag -> navController.navigateToExploreFeed(query = hashtag) },
     )
 }
 
@@ -406,6 +410,7 @@ private fun NavGraphBuilder.thread(
         onPostClick = { postId -> navController.navigateToThread(postId) },
         onPostQuoteClick = { preFillContent -> navController.navigateToNewPost(preFillContent) },
         onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
+        onHashtagClick = { hashtag -> navController.navigateToExploreFeed(query = hashtag) },
     )
 }
 
@@ -426,6 +431,7 @@ private fun NavGraphBuilder.profile(
         onPostClick = { postId -> navController.navigateToThread(postId = postId) },
         onPostQuoteClick = { preFillContent -> navController.navigateToNewPost(preFillContent) },
         onProfileClick = { profileId -> navController.navigateToProfile(profileId = profileId) },
+        onHashtagClick = { hashtag -> navController.navigateToExploreFeed(query = hashtag) },
     )
 }
 

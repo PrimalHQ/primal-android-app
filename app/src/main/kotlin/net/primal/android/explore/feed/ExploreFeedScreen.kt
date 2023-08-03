@@ -35,6 +35,7 @@ fun ExploreFeedScreen(
     onPostClick: (String) -> Unit,
     onPostQuoteClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
+    onHashtagClick: (String) -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
 
@@ -44,6 +45,7 @@ fun ExploreFeedScreen(
         onPostClick = onPostClick,
         onProfileClick = onProfileClick,
         onPostQuoteClick = onPostQuoteClick,
+        onHashtagClick = onHashtagClick,
         eventPublisher = { viewModel.setEvent(it) },
     )
 }
@@ -56,6 +58,7 @@ fun ExploreFeedScreen(
     onPostClick: (String) -> Unit,
     onPostQuoteClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
+    onHashtagClick: (String) -> Unit,
     eventPublisher: (ExploreFeedContract.UiEvent) -> Unit,
 ) {
     val topAppBarState = rememberTopAppBarState()
@@ -135,6 +138,7 @@ fun ExploreFeedScreen(
                 onPostQuoteClick = {
                     onPostQuoteClick("\n\nnostr:${it.postId.hexToNoteHrp()}")
                 },
+                onHashtagClick = onHashtagClick,
             )
         },
         snackbarHost = {
