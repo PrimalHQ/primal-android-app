@@ -1,35 +1,30 @@
 package net.primal.android.user.impl
 
-import kotlinx.serialization.encodeToString
-import net.primal.android.networking.primal.PrimalApiClient
-import net.primal.android.networking.primal.PrimalCacheFilter
-import net.primal.android.networking.primal.Verb
-import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.networking.primal.PrimalApiException
+import net.primal.android.networking.primal.PrimalQueryResult
 import net.primal.android.nostr.model.NostrEventKind
-import net.primal.android.serialization.NostrJson
-import net.primal.android.user.active.ActiveAccountStore
-import net.primal.android.user.api.model.UserRequestBody
+import net.primal.android.user.accounts.parseFollowings
+import net.primal.android.user.domain.UserAccount
 import net.primal.android.user.services.ContactsService
 import javax.inject.Inject
 
-class ContactsServiceImpl @Inject constructor(
-    private val aas: ActiveAccountStore,
-    private val pac: PrimalApiClient
-): ContactsService {
-    override suspend fun prepareContacts(): Set<String> {
-        val activeUserAccount = aas.activeUserAccount.value
-
-        val queryResult = pac.query(
-            message = PrimalCacheFilter(
-                primalVerb = Verb.CONTACT_LIST,
-                optionsJson = NostrJson.encodeToString(UserRequestBody(pubkey = aas.activeUserId(), extendedResponse = false))
-            )
-        )
-
+class ContactsServiceImpl @Inject constructor(): ContactsService {
+    override fun prepareContacts(activeUserAccount: UserAccount, queryResult: PrimalQueryResult): Set<String> {
         val contactsEvent = queryResult.findNostrEvent(NostrEventKind.Contacts)
+            ?: throw PrimalApiException.ContactListNotFound
 
-        //TODO: Multiple checks between existing contacts list and contacts list we get from the cache server
+        val contactsTags = contactsEvent.tags
+            ?: throw PrimalApiException.ContactListTagsNotFound
 
-        return mutableSetOf()
+        val followings = contactsTags.parseFollowings()
+
+        val result = when {
+            activeUserAccount.contactsCreatedAt == null -> throw PrimalApiException.ContactListCreatedAtNotFound
+            activeUserAccount.contactsCreatedAt > contactsEvent.createdAt -> activeUserAccount.following
+            contactsEvent.createdAt >= activeUserAccount.contactsCreatedAt -> followings
+            else -> setOf()
+        }
+
+        return result
     }
 }

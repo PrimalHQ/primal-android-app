@@ -54,6 +54,11 @@ fun String.asIdentifierTag(): JsonArray = buildJsonArray {
     add(this@asIdentifierTag)
 }
 
+fun String.asContactTag(): JsonArray = buildJsonArray {
+    add("p")
+    add(this@asContactTag)
+}
+
 fun String.parseEventTags(marker: String? = null): List<JsonArray> {
     val nostrUris = parseNostrUris()
     if (nostrUris.isEmpty()) return emptyList()

@@ -2,10 +2,10 @@ package net.primal.android.nostr.notary
 
 import fr.acinq.secp256k1.Hex
 import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import net.primal.android.crypto.toNpub
 import net.primal.android.networking.UserAgentProvider
+import net.primal.android.nostr.ext.asContactTag
 import net.primal.android.nostr.ext.asEventIdTag
 import net.primal.android.nostr.ext.asIdentifierTag
 import net.primal.android.nostr.ext.asPubkeyTag

@@ -610,22 +610,3 @@ private fun UserPublicKey(
         }
     }
 }
-
-@Preview
-@Composable
-fun PreviewProfileScreen() {
-    PrimalTheme {
-        ProfileScreen(
-            state = ProfileContract.UiState(
-                profileId = ProfileDetailsUi.previewExample().pubkey,
-                profileDetails = ProfileDetailsUi.previewExample(),
-                profileStats = ProfileStatsUi.previewExample()
-            ),
-            onClose = { },
-            onPostClick = { },
-            onPostQuoteClick = { },
-            onProfileClick = { },
-            eventPublisher = { }
-        )
-    }
-}

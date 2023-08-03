@@ -10,6 +10,8 @@ import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.serialization.NostrJson
 import net.primal.android.user.accounts.parseFollowings
+import net.primal.android.user.active.ActiveAccountStore
+import net.primal.android.user.active.ActiveUserAccountState
 import net.primal.android.user.api.model.UserContactsResponse
 import net.primal.android.user.api.model.UserProfileResponse
 import net.primal.android.user.api.model.UserRequestBody
@@ -20,7 +22,8 @@ class UsersApiImpl @Inject constructor(
     private val primalApiClient: PrimalApiClient,
     private val relayPool: RelayPool,
     private val nostrNotary: NostrNotary,
-    private val contactsService: ContactsService
+    private val contactsService: ContactsService,
+    private val activeUserAccountStore: ActiveAccountStore
 ) : UsersApi {
 
     override suspend fun getUserProfile(pubkey: String): UserProfileResponse {
@@ -53,15 +56,24 @@ class UsersApiImpl @Inject constructor(
         )
     }
 
-    override suspend fun follow(ownerPubkey: String, followedPubkey: String, relays: List<String>): Set<String>? {
-        val following = contactsService.prepareContacts().toMutableSet()
+    override suspend fun follow(followedPubkey: String, relays: List<String>): Set<String> {
+        val userAccount = activeUserAccountStore.activeUserAccount.value
+
+        val queryResult = primalApiClient.query(
+            message = PrimalCacheFilter(
+                primalVerb = CONTACT_LIST,
+                optionsJson = NostrJson.encodeToString(UserRequestBody(pubkey = userAccount.pubkey, extendedResponse = false))
+            )
+        )
+
+        val following = contactsService.prepareContacts(userAccount, queryResult).toMutableSet()
 
         following.add(followedPubkey)
 
         try {
             relayPool.publishEvent(
                 nostrEvent = nostrNotary.signContactsNostrEvent(
-                    userId = ownerPubkey,
+                    userId = userAccount.pubkey,
                     contacts = following,
                     relays = relays
                 )
@@ -74,23 +86,24 @@ class UsersApiImpl @Inject constructor(
         return following
     }
 
-    override suspend fun unfollow(ownerPubkey: String, unfollowedPubkey: String, relays: List<String>): Set<String>? {
+    override suspend fun unfollow(unfollowedPubkey: String, relays: List<String>): Set<String> {
+        val userAccount = activeUserAccountStore.activeUserAccount.value
+
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = CONTACT_LIST,
-                optionsJson = NostrJson.encodeToString(UserRequestBody(pubkey = ownerPubkey, extendedResponse = false))
+                optionsJson = NostrJson.encodeToString(UserRequestBody(pubkey = userAccount.pubkey, extendedResponse = false))
             )
         )
 
-        val contacts = queryResult.findNostrEvent(NostrEventKind.Contacts)
-        val following = contacts?.tags?.parseFollowings()?.toMutableSet() ?: return null
+        val following = contactsService.prepareContacts(userAccount, queryResult).toMutableSet()
 
         following.remove(unfollowedPubkey)
 
         try {
             relayPool.publishEvent(
                 nostrEvent = nostrNotary.signContactsNostrEvent(
-                    userId = ownerPubkey,
+                    userId = userAccount.pubkey,
                     contacts = following,
                     relays = relays
                 )

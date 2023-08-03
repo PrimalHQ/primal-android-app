@@ -10,19 +10,27 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import net.primal.android.networking.primal.PrimalApiClient
+import net.primal.android.networking.relays.RelayPool
+import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.security.Encryption
 import net.primal.android.serialization.CredentialsSerialization
 import net.primal.android.serialization.StringSerializer
 import net.primal.android.serialization.UserAccountsSerialization
+import net.primal.android.user.active.ActiveAccountStore
 import net.primal.android.user.api.UsersApi
 import net.primal.android.user.api.UsersApiImpl
 import net.primal.android.user.domain.Credential
 import net.primal.android.user.domain.UserAccount
+import net.primal.android.user.impl.ContactsServiceImpl
+import net.primal.android.user.services.ContactsService
 import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
 object UserModule {
+
+    @Provides
+    fun provideContactsService(): ContactsService = ContactsServiceImpl()
 
     @Provides
     @Singleton
@@ -57,7 +65,15 @@ object UserModule {
     @Provides
     fun provideUsersApi(
         primalApiClient: PrimalApiClient,
+        relayPool: RelayPool,
+        cs: ContactsService,
+        nn: NostrNotary,
+        aas: ActiveAccountStore
     ): UsersApi = UsersApiImpl(
         primalApiClient = primalApiClient,
+        relayPool = relayPool,
+        contactsService = cs,
+        nostrNotary = nn,
+        activeUserAccountStore = aas
     )
 }

@@ -1,14 +1,17 @@
 package net.primal.android.user.services
 
+import net.primal.android.networking.primal.PrimalApiException
+import net.primal.android.networking.primal.PrimalQueryResult
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.user.domain.UserAccount
 
 interface ContactsService {
     /**
-     * Fetches the latest contacts list from the cache server and
-     * compares it with the version saved locally.
+     * Compares local contacts list and the one returned from cache server and
+     * returns the latest valid one
      *
-     * @return A set of following pubkeys whose created_at date is latest
+     * @return A set of following pubkeys
      */
-    @Throws(WssException::class)
-    suspend fun prepareContacts(): Set<String>
+    @Throws(WssException::class, PrimalApiException::class)
+    fun prepareContacts(activeUserAccount: UserAccount, queryResult: PrimalQueryResult): Set<String>
 }

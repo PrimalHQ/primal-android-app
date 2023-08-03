@@ -12,8 +12,8 @@ interface UsersApi {
     suspend fun getUserContacts(pubkey: String): UserContactsResponse
 
     @Throws(WssException::class, NostrPublishException::class)
-    suspend fun follow(ownerPubkey: String, followedPubkey: String, relays: List<String>): Set<String>?
+    suspend fun follow(followedPubkey: String, relays: List<String>): Set<String>
 
     @Throws(WssException::class, NostrPublishException::class)
-    suspend fun unfollow(ownerPubkey: String, unfollowedPubkey: String, relays: List<String>): Set<String>?
+    suspend fun unfollow(unfollowedPubkey: String, relays: List<String>): Set<String>
 }
