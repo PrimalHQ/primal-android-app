@@ -11,6 +11,7 @@ import net.primal.android.networking.sockets.NostrIncomingMessage
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.model.primal.PrimalEvent
+import net.primal.android.user.accounts.parseFollowings
 import net.primal.android.user.domain.Relay
 import net.primal.android.user.domain.UserAccount
 import net.primal.android.user.impl.ContactsServiceImpl
@@ -22,82 +23,85 @@ import org.junit.runner.RunWith
 import java.util.UUID
 
 class ContactsServiceTest {
+    private fun buildNostrEvent(
+        pubKey: String = "test-pubkey",
+        content: String = "",
+        createdAt: Long = 0,
+        id: String = "test-id",
+        kind: Int = NostrEventKind.Contacts.value,
+        sig: String = "test-sig",
+        tags: List<JsonArray>? = listOf()
+    ) = NostrEvent(
+        pubKey = pubKey,
+        content = content,
+        createdAt = createdAt,
+        id = id,
+        kind = kind,
+        sig = sig,
+        tags = tags
+    )
+
     private fun buildPrimalQueryResult(
-        subId: UUID,
+        subId: UUID = UUID.fromString("2F9F48CF-C62E-4BA9-AFA1-EF47C8FC146A"),
         primalEvents: List<PrimalEvent> = listOf(),
         nostrEvents: List<NostrEvent> = listOf()
-    ): PrimalQueryResult {
-        return PrimalQueryResult(
-            primalEvents = primalEvents,
-            terminationMessage = NostrIncomingMessage.EventMessage(subId),
-            nostrEvents = nostrEvents
-        )
-    }
+    ) = PrimalQueryResult(
+        primalEvents = primalEvents,
+        terminationMessage = NostrIncomingMessage.EventMessage(subId),
+        nostrEvents = nostrEvents
+    )
 
-    private val happyPathPrimalQueryResult = buildPrimalQueryResult(
-        UUID.fromString("2F9F48CF-C62E-4BA9-AFA1-EF47C8FC146A"), nostrEvents = listOf(
-            NostrEvent(
-                pubKey = "test-pubkey",
-                content = "",
-                createdAt = 123,
-                id = "test-id",
-                kind = NostrEventKind.Contacts.value,
-                sig = "test-sig",
-                tags = listOf()
+    private fun buildUserAccount(
+        pubkey: String = "test-pubkey",
+        contactsCreatedAt: Long? = 0,
+        notesCount: Int? = 420,
+        followingCount: Int? = 1337,
+        userDisplayName: String = "test-user-display-name",
+        followersCount: Int? = 69,
+        internetIdentifier: String? = "test@test.com",
+        followers: List<String> = listOf("test1", "test2"),
+        following: Set<String> = setOf("test1", "test2"),
+        interests: List<String> = listOf("test1", "test2"),
+        authorDisplayName: String = "test-author-display-name",
+        pictureUrl: String? = "https://m.primal.net/HHPw.jpg",
+        relays: List<Relay> = listOf(
+            Relay(
+                read = true,
+                write = true,
+                url = "wss://relay.primal.net"
             )
         )
+    ) = UserAccount(
+        pubkey = pubkey,
+        contactsCreatedAt = contactsCreatedAt,
+        notesCount = notesCount,
+        followingCount = followingCount,
+        userDisplayName = userDisplayName,
+        followersCount = followersCount,
+        internetIdentifier = internetIdentifier,
+        followers = followers,
+        following = following,
+        interests = interests,
+        authorDisplayName = authorDisplayName,
+        pictureUrl = pictureUrl,
+        relays = relays
     )
 
-    private val missingContactsEventPrimalQueryResult = buildPrimalQueryResult(
-        UUID.fromString("2F9F48CF-C62E-4BA9-AFA1-EF47C8FC146A")
-    )
+    private val newerContactsUserAccount = buildUserAccount(contactsCreatedAt = 2)
+    private val olderContactsPrimalQueryResult = buildPrimalQueryResult(nostrEvents = listOf(buildNostrEvent(createdAt = 1)))
 
-    private val missingTagsInContactsEventPrimalQueryResult = buildPrimalQueryResult(
-        UUID.fromString("2F9F48CF-C62E-4BA9-AFA1-EF47C8FC146A"), nostrEvents = listOf(
-            NostrEvent(
-                pubKey = "test-pubkey",
-                content = "",
-                createdAt = 123,
-                id = "test-id",
-                kind = NostrEventKind.Contacts.value,
-                sig = "test-sig",
-                tags = null
-            )
-        )
-    )
+    private val newerContactsPrimalQueryResult = buildPrimalQueryResult(nostrEvents = listOf(buildNostrEvent(createdAt = 2)))
+    private val olderContactsUserAccount = buildUserAccount(contactsCreatedAt = 1)
 
-    private val happyPathUserAccount: UserAccount = UserAccount(
-        pubkey = "test-pubkey",
-        contactsCreatedAt = 124,
-        notesCount = 420,
-        followingCount = 1337,
-        userDisplayName = "test-user-display-name",
-        followersCount = 69,
-        internetIdentifier = "test@test.com",
-        followers = listOf("test1", "test2"),
-        following = setOf("test1", "test2"),
-        interests = listOf("test1", "test2"),
-        authorDisplayName = "test-author-display-name",
-        pictureUrl = "https://m.primal.net/HHPw.jpg",
-        relays = listOf(Relay(read = true, write = true, url = "wss://relay.primal.net"))
-    )
-
-
-    @Test
-    fun `contactsService happy path passes without fail`() {
-        val cs = ContactsServiceImpl()
-
-        val actual = cs.prepareContacts(happyPathUserAccount, happyPathPrimalQueryResult)
-
-        actual shouldBe happyPathUserAccount.followers
-    }
+    private val missingContactsEventPrimalQueryResult = buildPrimalQueryResult()
+    private val missingTagsInContactsEventPrimalQueryResult = buildPrimalQueryResult(nostrEvents = listOf(buildNostrEvent(tags = null)))
 
     @Test
     fun `contactsService should throw PrimalApiException for missing contacts event`() {
         val cs = ContactsServiceImpl()
 
         val exception = shouldThrow<PrimalApiException> {
-            cs.prepareContacts(happyPathUserAccount, missingContactsEventPrimalQueryResult)
+            cs.prepareContacts(newerContactsUserAccount, missingContactsEventPrimalQueryResult)
         }
 
         exception.message shouldBe PrimalApiException.ContactListNotFound.message
@@ -108,7 +112,10 @@ class ContactsServiceTest {
         val cs = ContactsServiceImpl()
 
         val exception = shouldThrow<PrimalApiException> {
-            cs.prepareContacts(happyPathUserAccount, missingTagsInContactsEventPrimalQueryResult)
+            cs.prepareContacts(
+                newerContactsUserAccount,
+                missingTagsInContactsEventPrimalQueryResult
+            )
         }
 
         exception.message shouldBe PrimalApiException.ContactListTagsNotFound.message
@@ -116,11 +123,19 @@ class ContactsServiceTest {
 
     @Test
     fun `contactsService should return cache server contacts when it's newer than local contacts list`() {
+        val cs = ContactsServiceImpl()
 
+        val actual = cs.prepareContacts(olderContactsUserAccount, newerContactsPrimalQueryResult)
+
+        actual shouldBe newerContactsPrimalQueryResult.findNostrEvent(NostrEventKind.Contacts)?.tags?.parseFollowings()
     }
 
     @Test
     fun `contactsService should return local contacts when it's newer than cache server contacts list`() {
+        val cs = ContactsServiceImpl()
 
+        val actual = cs.prepareContacts(newerContactsUserAccount, olderContactsPrimalQueryResult)
+
+        actual shouldBe newerContactsUserAccount.followers
     }
 }
