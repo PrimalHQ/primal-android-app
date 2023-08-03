@@ -88,6 +88,7 @@ fun FeedPostListItem(
     shouldIndentContent: Boolean = false,
     connected: Boolean = false,
     highlighted: Boolean = false,
+    expanded: Boolean = false,
     onPostClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
     onPostAction: (FeedPostAction) -> Unit,
@@ -142,7 +143,8 @@ fun FeedPostListItem(
             modifier = Modifier.padding(start = if (shouldIndentContent) 64.dp else 0.dp),
         ) {
             PostContent(
-                content = data.content,
+                content = data.content.trim(),
+                expanded = expanded,
                 hashtags = data.hashtags,
                 resources = data.postResources,
                 nostrUris = data.nostrUris,
@@ -276,6 +278,18 @@ private fun String.replaceNostrProfileUriWithAnnotatedLinks(
     return builder.toAnnotatedString()
 }
 
+private fun String.ellipsize(
+    expanded: Boolean,
+    ellipsizeText: String,
+): String {
+    val shouldEllipsize = length > 500
+    return if (expanded || !shouldEllipsize) {
+        this
+    } else {
+        substring(0, 500).plus(" $ellipsizeText")
+    }
+}
+
 private const val PROFILE_ID_ANNOTATION_TAG = "profileId"
 private const val URL_ANNOTATION_TAG = "url"
 private const val NOTE_ANNOTATION_TAG = "note"
@@ -284,6 +298,7 @@ private const val HASHTAG_ANNOTATION_TAG = "hashtag"
 @Composable
 fun PostContent(
     content: String,
+    expanded: Boolean,
     hashtags: List<String>,
     resources: List<MediaResourceUi>,
     nostrUris: List<NostrUriUi>,
@@ -297,9 +312,11 @@ fun PostContent(
     val refinedUrlResources = remember { resources.filterNotImages() }
 
     val primaryColor = AppTheme.colorScheme.primary
+    val seeMoreText = stringResource(id = R.string.feed_see_more)
     val refinedContent = remember {
-        content.trim()
+        content
             .withoutUrls(urls = imageResources.map { it.url })
+            .ellipsize(expanded = expanded, ellipsizeText = seeMoreText)
             .replaceNostrProfileUriWithAnnotatedLinks(
                 nostrUris.filter { it.profileId != null },
                 SpanStyle(color = primaryColor),
@@ -309,6 +326,15 @@ fun PostContent(
 
     val contentText = buildAnnotatedString {
         append(refinedContent)
+
+        if (refinedContent.endsWith(seeMoreText)) {
+            addStyle(
+                style = SpanStyle(color = AppTheme.colorScheme.primary),
+                start = refinedContent.length - seeMoreText.length,
+                end = refinedContent.length,
+            )
+        }
+
         refinedUrlResources
             .map { it.url }
             .forEach {
@@ -370,8 +396,6 @@ fun PostContent(
                     color = AppTheme.colorScheme.onSurface
                 ),
                 text = contentText,
-                maxLines = 12,
-                overflow = TextOverflow.Ellipsis,
                 onClick = { position, offset ->
                     contentText.getStringAnnotations(
                         start = position,

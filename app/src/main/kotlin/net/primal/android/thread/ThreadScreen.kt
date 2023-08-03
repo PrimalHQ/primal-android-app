@@ -164,6 +164,7 @@ fun ThreadScreen(
 
                         FeedPostListItem(
                             data = item,
+                            expanded = true,
                             onPostClick = { postId ->
                                 if (state.highlightPostId != postId) {
                                     onPostClick(postId)

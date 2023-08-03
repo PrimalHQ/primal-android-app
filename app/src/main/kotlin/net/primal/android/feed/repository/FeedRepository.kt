@@ -93,7 +93,11 @@ class FeedRepository @Inject constructor(
 
     suspend fun fetchReplies(postId: String) = withContext(Dispatchers.IO) {
         val response = feedApi.getThread(
-            ThreadRequestBody(postId = postId, userPubKey = activeAccountStore.activeUserId())
+            ThreadRequestBody(
+                postId = postId,
+                userPubKey = activeAccountStore.activeUserId(),
+                limit = 100,
+            )
         )
 
         database.withTransaction {
