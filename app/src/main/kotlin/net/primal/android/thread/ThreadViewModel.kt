@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.getAndUpdate
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.core.compose.feed.asFeedPostUi
@@ -89,11 +90,15 @@ class ThreadViewModel @Inject constructor(
     private suspend fun subscribeToConversationChanges() {
         feedRepository.observeConversation(postId = postId)
             .filter { it.isNotEmpty() }
+            .map { posts -> posts.map { it.asFeedPostUi() } }
             .collect { conversation ->
+                val highlightPostIndex = conversation.indexOfFirst { it.postId == postId }
+                val thread = conversation.subList(0, highlightPostIndex+1)
+                val replies = conversation.subList(highlightPostIndex+1, conversation.size)
                 setState {
                     copy(
-                        conversation = conversation.map { it.asFeedPostUi() },
-                        highlightPostIndex = conversation.indexOfFirst { it.data.postId == postId },
+                        conversation = thread + replies.sortedByDescending { it.timestamp },
+                        highlightPostIndex = highlightPostIndex,
                     )
                 }
             }
