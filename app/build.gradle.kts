@@ -193,6 +193,8 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.coil.svg)
 
+    implementation(libs.lottie.compose)
+
     implementation(libs.timber)
 
     implementation(libs.secp256k1.kmp.jvm)

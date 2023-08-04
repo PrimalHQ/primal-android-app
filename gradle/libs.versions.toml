@@ -63,6 +63,7 @@ compose-pager-indicators = { module = "com.google.accompanist:accompanist-pager-
 constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version.ref = "constraintlayout" }
 compose-constraintlayout = { module = "androidx.constraintlayout:constraintlayout-compose", version.ref = "constraintlayout-compose" }
 
+lottie-compose = { module = "com.airbnb.android:lottie-compose", version = "5.2.0" }
 navigation-compose = { module = "androidx.navigation:navigation-compose", version = "2.6.0" }
 navigation-hilt = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hilt" }
 navigation-material = { module = "com.google.accompanist:accompanist-navigation-material", version.ref = "accompanist" }
