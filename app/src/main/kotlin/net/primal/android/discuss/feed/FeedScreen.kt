@@ -6,6 +6,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material3.DrawerState
@@ -181,12 +182,16 @@ fun FeedScreen(
                                     AppTheme.extraColorScheme.brand2
                                 ),
                             ),
-                            shape = FloatingActionButtonDefaults.shape,
+                            shape = CircleShape,
                         ),
                     elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp),
                     containerColor = Color.Unspecified,
                     content = {
-                        Icon(imageVector = Icons.Outlined.Add, contentDescription = null)
+                        Icon(
+                            imageVector = Icons.Outlined.Add,
+                            contentDescription = null,
+                            tint = Color.White,
+                        )
                     },
                 )
             }
@@ -210,5 +215,4 @@ fun FeedScreenPreview() {
             onDrawerDestinationClick = {},
         )
     }
-
 }
