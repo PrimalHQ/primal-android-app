@@ -53,10 +53,10 @@
     <string name="feed_refresh_button">Refresh</string>
 
     <string name="feed_new_posts_notice_general">posted</string>
-    <string name="feed_new_posts_notice_100plus">100+ new posts</string>
+    <string name="feed_new_posts_notice_100plus">100+ new notes</string>
     <plurals name="feed_new_posts_notice">
-        <item quantity="one">%1$s new post</item>
-        <item quantity="other">%1$s new posts</item>
+        <item quantity="one">%1$s new notes</item>
+        <item quantity="other">%1$s new notes</item>
     </plurals>
 
     <string name="post_repost_button_confirmation">Repost</string>
