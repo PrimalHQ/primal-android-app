@@ -4,7 +4,6 @@ import kotlinx.serialization.encodeToString
 import net.primal.android.feed.api.model.FeedRequestBody
 import net.primal.android.feed.api.model.FeedResponse
 import net.primal.android.feed.api.model.ThreadRequestBody
-import net.primal.android.feed.api.model.ThreadResponse
 import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.primal.PrimalCacheFilter
 import net.primal.android.nostr.model.NostrEventKind
@@ -39,7 +38,7 @@ class FeedApiImpl @Inject constructor(
 
     }
 
-    override suspend fun getThread(body: ThreadRequestBody): ThreadResponse {
+    override suspend fun getThread(body: ThreadRequestBody): FeedResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = "thread_view",
@@ -47,9 +46,13 @@ class FeedApiImpl @Inject constructor(
             )
         )
 
-        return ThreadResponse(
+        return FeedResponse(
+            paging = queryResult.findPrimalEvent(NostrEventKind.PrimalPaging).let {
+                NostrJson.decodeFromStringOrNull(it?.content)
+            },
             metadata = queryResult.filterNostrEvents(NostrEventKind.Metadata),
             posts = queryResult.filterNostrEvents(NostrEventKind.ShortTextNote),
+            reposts = emptyList(),
             primalEventStats = queryResult.filterPrimalEvents(NostrEventKind.PrimalEventStats),
             primalEventUserStats = queryResult.filterPrimalEvents(NostrEventKind.PrimalEventUserStats),
             primalEventResources = queryResult.filterPrimalEvents(NostrEventKind.PrimalEventResources),

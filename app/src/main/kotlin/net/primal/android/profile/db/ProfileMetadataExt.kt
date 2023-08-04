@@ -6,14 +6,14 @@ import net.primal.android.core.utils.asEllipsizedNpub
 fun ProfileMetadata.authorNameUiFriendly(): String {
     return when {
         displayName?.isNotEmpty() == true -> displayName
-        name?.isNotEmpty() == true -> name
+        handle?.isNotEmpty() == true -> handle
         else -> ownerId.asEllipsizedNpub()
     }
 }
 
 fun ProfileMetadata.userNameUiFriendly(): String {
     return when {
-        name?.isNotEmpty() == true -> name
+        handle?.isNotEmpty() == true -> handle
         displayName?.isNotEmpty() == true -> displayName
         else -> ownerId.asEllipsizedNpub()
     }

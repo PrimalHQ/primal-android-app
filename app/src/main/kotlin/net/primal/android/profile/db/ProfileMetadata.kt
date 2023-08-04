@@ -10,7 +10,7 @@ data class ProfileMetadata(
     val eventId: String,
     val createdAt: Long,
     val raw: String,
-    val name: String? = null,
+    val handle: String? = null,
     val internetIdentifier: String? = null,
     val about: String? = null,
     val picture: String? = null,

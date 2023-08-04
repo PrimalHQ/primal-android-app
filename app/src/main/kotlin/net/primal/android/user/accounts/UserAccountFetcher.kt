@@ -3,7 +3,7 @@ package net.primal.android.user.accounts
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import net.primal.android.core.utils.asEllipsizedNpub
-import net.primal.android.nostr.ext.asProfileMetadata
+import net.primal.android.nostr.ext.asProfileMetadataPO
 import net.primal.android.nostr.ext.takeContentAsUserProfileStatsOrNull
 import net.primal.android.profile.db.authorNameUiFriendly
 import net.primal.android.profile.db.userNameUiFriendly
@@ -20,7 +20,7 @@ class UserAccountFetcher @Inject constructor(
         val userProfileResponse = withContext(Dispatchers.IO) {
             usersApi.getUserProfile(pubkey = pubkey)
         }
-        val profileMetadata = userProfileResponse.metadata?.asProfileMetadata()
+        val profileMetadata = userProfileResponse.metadata?.asProfileMetadataPO()
         val userProfileStats = userProfileResponse.profileStats?.takeContentAsUserProfileStatsOrNull()
 
         return UserAccount(

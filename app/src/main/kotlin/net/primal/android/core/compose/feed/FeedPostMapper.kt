@@ -2,10 +2,12 @@ package net.primal.android.core.compose.feed
 
 import net.primal.android.core.compose.feed.model.FeedPostStatsUi
 import net.primal.android.core.compose.feed.model.FeedPostUi
-import net.primal.android.core.compose.feed.model.NostrUriUi
+import net.primal.android.core.compose.feed.model.NostrResourceUi
 import net.primal.android.core.compose.media.model.MediaResourceUi
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.feed.db.FeedPost
+import net.primal.android.feed.db.MediaResource
+import net.primal.android.feed.db.NostrResource
 import net.primal.android.profile.db.authorNameUiFriendly
 import net.primal.android.profile.db.userNameUiFriendly
 import java.time.Instant
@@ -14,39 +16,17 @@ fun FeedPost.asFeedPostUi() = FeedPostUi(
     postId = this.data.postId,
     repostId = this.data.repostId,
     repostAuthorId = this.data.repostAuthorId,
-    repostAuthorDisplayName = this.repostAuthor?.authorNameUiFriendly()
-        ?: this.data.repostAuthorId?.asEllipsizedNpub(),
+    repostAuthorName = this.repostAuthor?.authorNameUiFriendly() ?: this.data.repostAuthorId?.asEllipsizedNpub(),
     authorId = this.author?.ownerId ?: this.data.authorId,
-    authorDisplayName = this.author?.authorNameUiFriendly()
-        ?: this.data.authorId.asEllipsizedNpub(),
-    userDisplayName = this.author?.userNameUiFriendly()
-        ?: this.data.authorId.asEllipsizedNpub(),
+    authorName = this.author?.authorNameUiFriendly() ?: this.data.authorId.asEllipsizedNpub(),
+    authorHandle = this.author?.userNameUiFriendly() ?: this.data.authorId.asEllipsizedNpub(),
     authorInternetIdentifier = this.author?.internetIdentifier,
     authorAvatarUrl = this.author?.picture,
     timestamp = Instant.ofEpochSecond(this.data.createdAt),
     content = this.data.content,
-    authorResources = this.authorResources.map {
-        MediaResourceUi(
-            url = it.url,
-            mimeType = it.contentType,
-            variants = it.variants ?: emptyList(),
-        )
-    },
-    postResources = this.postResources.map {
-        MediaResourceUi(
-            url = it.url,
-            mimeType = it.contentType,
-            variants = it.variants ?: emptyList(),
-        )
-    },
-    nostrUris = this.nostrUris.map {
-        NostrUriUi(
-            name = it.name,
-            uri = it.uri,
-            profileId = it.profileId,
-            noteId = it.noteId,
-        )
-    },
+    authorMediaResources = this.authorResources.map { it.asMediaResourceUi() },
+    mediaResources = this.postResources.map { it.asMediaResourceUi() },
+    nostrResources = this.nostrUris.map { it.asNostrResourceUi() },
     stats = FeedPostStatsUi(
         repliesCount = this.postStats?.replies ?: 0,
         userReplied = this.userStats?.userReplied ?: false,
@@ -60,4 +40,16 @@ fun FeedPost.asFeedPostUi() = FeedPostUi(
     ),
     hashtags = this.data.hashtags,
     rawNostrEventJson = this.data.raw,
+)
+
+fun NostrResource.asNostrResourceUi() = NostrResourceUi(
+    uri = this.uri,
+    referencedPost = this.referencedPost,
+    referencedUser = this.referencedUser,
+)
+
+fun MediaResource.asMediaResourceUi() =  MediaResourceUi(
+    url = this.url,
+    mimeType = this.contentType,
+    variants = this.variants ?: emptyList(),
 )

@@ -5,7 +5,7 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import org.junit.Test
 
-class NostrUriTest {
+class NostrResourcesTest {
 
     @Test
     fun `nostrUriToPubkey returns correct pubkey hex value`() {

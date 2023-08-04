@@ -15,6 +15,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.SubcomposeAsyncImage
 import com.google.accompanist.placeholder.PlaceholderHighlight
@@ -28,6 +29,7 @@ import net.primal.android.theme.AppTheme
 fun AvatarThumbnailListItemImage(
     source: Any?,
     modifier: Modifier = Modifier,
+    size: Dp = 48.dp,
     hasBorder: Boolean = false,
     borderGradientColors: List<Color> = listOf(
         AppTheme.extraColorScheme.brand1,
@@ -37,6 +39,7 @@ fun AvatarThumbnailListItemImage(
     SubcomposeAsyncImage(
         model = source,
         modifier = modifier.adjustAvatarBackground(
+            size = size,
             hasBorder = hasBorder,
             borderGradientColors = borderGradientColors,
         ),
@@ -54,11 +57,12 @@ fun AvatarThumbnailListItemImage(
 }
 
 private fun Modifier.adjustAvatarBackground(
+    size: Dp = 48.dp,
     hasBorder: Boolean = false,
     borderGradientColors: List<Color>,
 ): Modifier = composed {
     if (hasBorder) {
-        this.size(50.dp)
+        this.size(size + 2.dp)
             .border(
                 width = 2.dp,
                 brush = Brush.linearGradient(borderGradientColors),
@@ -72,7 +76,7 @@ private fun Modifier.adjustAvatarBackground(
             )
             .clip(CircleShape)
     } else {
-        this.size(48.dp)
+        this.size(size)
             .clip(CircleShape)
     }
 

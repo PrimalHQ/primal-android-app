@@ -7,7 +7,7 @@ import net.primal.android.feed.db.PostData
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.serialization.NostrJson
 
-fun List<NostrEvent>.mapNotNullAsPost() = map { it.asPost() }
+fun List<NostrEvent>.mapAsPostDataPO() = map { it.asPost() }
 
 fun NostrEvent.asPost(): PostData = PostData(
     postId = this.id,
