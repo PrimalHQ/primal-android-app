@@ -12,7 +12,7 @@ interface LoginContract {
     }
 
     sealed class UiEvent {
-        data class LoginEvent(val nsec: String) : UiEvent()
+        data class LoginEvent(val nostrKey: String) : UiEvent()
     }
 
     sealed class SideEffect {

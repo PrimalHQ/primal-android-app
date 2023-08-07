@@ -11,14 +11,14 @@ import io.kotest.matchers.equals.shouldBeEqual
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
-import net.primal.android.test.MainDispatcherRule
-import net.primal.android.test.advanceUntilIdleAndDelay
 import net.primal.android.crypto.Bech32
 import net.primal.android.crypto.CryptoUtils
 import net.primal.android.crypto.toHex
 import net.primal.android.crypto.toNpub
 import net.primal.android.security.NoEncryption
 import net.primal.android.serialization.CredentialsSerialization
+import net.primal.android.test.MainDispatcherRule
+import net.primal.android.test.advanceUntilIdleAndDelay
 import net.primal.android.user.domain.Credential
 import org.junit.Rule
 import org.junit.Test
@@ -51,17 +51,17 @@ class CredentialsStoreTest {
     )
 
     @Test
-    fun `saving invalid nsec should throw IllegalArgumentException`() = runTest {
+    fun `saving invalid input should throw InvalidNostrKeyException`() = runTest {
         val credentialsStore = CredentialsStore(persistence = persistence)
-        shouldThrow<IllegalArgumentException> {
-            credentialsStore.save(nsec = "invalid nsec")
+        shouldThrow<CredentialsStore.InvalidNostrKeyException> {
+            credentialsStore.save(nostrKey = "invalid nsec")
         }
     }
 
     @Test
     fun `save stores nsec to data store as Credential`() = runTest {
         val credentialsStore = CredentialsStore(persistence = persistence)
-        credentialsStore.save(nsec = expectedNsec)
+        credentialsStore.save(nostrKey = expectedNsec)
         advanceUntilIdleAndDelay()
 
         val actual = credentialsStore.credentials.value
@@ -72,7 +72,7 @@ class CredentialsStoreTest {
     @Test
     fun `save returns pubkey in hex value`() = runTest {
         val credentialsStore = CredentialsStore(persistence = persistence)
-        val actual = credentialsStore.save(nsec = expectedNsec)
+        val actual = credentialsStore.save(nostrKey = expectedNsec)
         actual shouldBe Bech32.decodeBytes(expectedCredential.npub).second.toHex()
     }
 
