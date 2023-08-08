@@ -1,0 +1,62 @@
+name: Create release from tag
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Create release
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: gradle
+    - name: Build apks
+      run: ./gradlew build
+
+    # Fetched https://github.com/marketplace/actions/sign-android-release
+#     - name: sign apk
+#       uses: r0adkll/sign-android-release@v1
+#       id: sign_app
+#       with:
+#         releaseDirectory: app/build/outputs/apk/release
+#         signingKeyBase64: ${{ secrets.SIGNING_KEY }}
+#         alias: ${{ secrets.ALIAS }}
+#         keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
+#         keyPassword: ${{ secrets.KEY_PASSWORD }}
+
+    - name: Upload artefact
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-apk
+#         path: ${{steps.sign_app.outputs.signedReleaseFile}}
+         path:  './app/build/outputs/apk/debig/app-debug.apk'
+
+  release:
+   name: Release APK
+   needs: build
+   runs-on: ubuntu-latest
+   steps:
+   - name: Download APK from build
+     uses: actions/download-artifact@v1
+     with:
+       name: test-apk
+   - name: Create Release
+     id: create_release
+     uses: softprops/action-gh-release@v1
+     env:
+       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+     with:
+       tag_name: v${{ github.event.inputs.version }}
+       name: Release v${{ github.event.inputs.version }}
+       draft: false
+       prerelease: false
+       files: test-apk/test-apk_${{ github.event.inputs.version }}.apk
