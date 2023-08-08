@@ -74,7 +74,8 @@
     <string name="thread_publishing_button">Replying…</string>
     <string name="thread_reply_nostr_publish_error">Unable to publish your note to Nostr. Please try again soon.</string>
 
-    <string name="explore_title">Explore</string>
+    <string name="explore_search_nostr">search nostr</string>
+    <string name="explore_enter_query">Enter text to search</string>
     <string name="explore_feed_added_to_user_feeds">Added to your home feeds</string>
     <string name="explore_feed_removed_from_user_feeds">Removed from your home feeds</string>
 
