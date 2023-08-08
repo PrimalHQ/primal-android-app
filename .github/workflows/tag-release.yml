@@ -37,8 +37,9 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: test-apk
+        path:  './app/build/outputs/apk/debig/app-debug.apk'
 #         path: ${{steps.sign_app.outputs.signedReleaseFile}}
-         path:  './app/build/outputs/apk/debig/app-debug.apk'
+
 
   release:
    name: Release APK
