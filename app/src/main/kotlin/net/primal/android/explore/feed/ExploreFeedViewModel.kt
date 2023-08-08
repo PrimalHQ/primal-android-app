@@ -29,7 +29,7 @@ class ExploreFeedViewModel @Inject constructor(
     private val postRepository: PostRepository,
 ) : ViewModel() {
 
-    private val exploreQuery = "search;${savedStateHandle.searchQuery}"
+    private val exploreQuery = "search;\"${savedStateHandle.searchQuery}\""
 
     private val _state = MutableStateFlow(
         UiState(
