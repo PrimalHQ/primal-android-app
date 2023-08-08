@@ -19,3 +19,8 @@ jobs:
         cache: gradle
     - name: Build apks, or do whatever
       run: ./gradlew build
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: pr-debug-build-${{ github.ref_name }}
+        path: app/build/outputs/apk/debug/app-debug.apk
