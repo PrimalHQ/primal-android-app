@@ -3,6 +3,8 @@ package net.primal.android.serialization
 import androidx.room.TypeConverter
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.JsonArray
+import net.primal.android.feed.db.MediaResource
+import net.primal.android.feed.db.NostrResource
 import net.primal.android.nostr.model.primal.PrimalResourceVariant
 
 class RoomCustomTypeConverters {
@@ -40,6 +42,32 @@ class RoomCustomTypeConverters {
 
     @TypeConverter
     fun listOfPrimalResourceVariantToString(list: List<PrimalResourceVariant>?): String? {
+        return when (list) {
+            null -> null
+            else -> NostrJson.encodeToString(list)
+        }
+    }
+
+    @TypeConverter
+    fun stringToListOfNostrResource(value: String?): List<NostrResource>? {
+        return NostrJson.decodeFromStringOrNull<List<NostrResource>>(value)
+    }
+
+    @TypeConverter
+    fun listOfNostrResourceToString(list: List<NostrResource>?): String? {
+        return when (list) {
+            null -> null
+            else -> NostrJson.encodeToString(list)
+        }
+    }
+
+    @TypeConverter
+    fun stringToListOfMediaResource(value: String?): List<MediaResource>? {
+        return NostrJson.decodeFromStringOrNull<List<MediaResource>>(value)
+    }
+
+    @TypeConverter
+    fun listOfMediaResourceToString(list: List<MediaResource>?): String? {
         return when (list) {
             null -> null
             else -> NostrJson.encodeToString(list)

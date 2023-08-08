@@ -5,7 +5,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.withContext
 import net.primal.android.db.PrimalDatabase
-import net.primal.android.nostr.ext.asProfileMetadata
+import net.primal.android.nostr.ext.asProfileMetadataPO
 import net.primal.android.nostr.ext.asProfileStats
 import net.primal.android.nostr.ext.takeContentAsUserProfileStatsOrNull
 import net.primal.android.user.api.UsersApi
@@ -20,7 +20,7 @@ class ProfileRepository @Inject constructor(
 
     suspend fun requestProfileUpdate(profileId: String) {
         val response = withContext(Dispatchers.IO) { usersApi.getUserProfile(pubkey = profileId) }
-        val profileMetadata = response.metadata?.asProfileMetadata()
+        val profileMetadata = response.metadata?.asProfileMetadataPO()
         val userProfileStats = response.profileStats?.takeContentAsUserProfileStatsOrNull()
 
         withContext(Dispatchers.IO) {

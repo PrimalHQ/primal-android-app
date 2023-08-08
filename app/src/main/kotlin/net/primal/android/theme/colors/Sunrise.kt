@@ -5,8 +5,8 @@ import androidx.compose.ui.graphics.Color
 
 
 private val sunriseBrand0 = Color(0xFFFA9A43)
-private val sunriseBrand1 = Color(0xFFFA3C3C)
-private val sunriseBrand2 = Color(0xFF5B09AD)
+private val sunriseBrand1 = Color(0xFFEF404A)
+private val sunriseBrand2 = Color(0xFF5B12A4)
 private val sunriseBrandText = Color(0xFF444444)
 private val sunriseBackground1 = Color(0xFFF5F5F5)
 private val sunriseBackground2 = Color(0xFFFFFFFF)

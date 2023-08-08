@@ -15,6 +15,8 @@ class PostRepository @Inject constructor(
     private val nostrNotary: NostrNotary,
 ) {
 
+    fun findPostDataById(postId: String) = database.posts().findByPostId(postId = postId)
+
     @Throws(NostrPublishException::class)
     suspend fun likePost(postId: String, postAuthorId: String) {
         val userId = activeAccountStore.activeUserId()
@@ -59,14 +61,12 @@ class PostRepository @Inject constructor(
     @Throws(NostrPublishException::class)
     suspend fun publishShortTextNote(
         content: String,
-        eventTags: List<JsonArray> = emptyList(),
-        pubkeyTags: List<JsonArray> = emptyList(),
+        tags: Set<JsonArray> = emptySet(),
     ) {
         relayPool.publishEvent(
             nostrEvent = nostrNotary.signShortTextNoteEvent(
                 userId = activeAccountStore.activeUserId(),
-                eventTags = eventTags,
-                pubkeyTags = pubkeyTags,
+                tags = tags.toList(),
                 noteContent = content,
             )
         )

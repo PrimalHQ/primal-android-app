@@ -7,9 +7,8 @@ data class FeedPostData(
     val content: String,
     val raw: String,
     val feedCreatedAt: Long = createdAt,
+    val hashtags: List<String> = emptyList(),
     val authorMetadataId: String? = null,
-    val referencePostId: String? = null,
-    val referencePostAuthorId: String? = null,
     val repostId: String? = null,
     val repostAuthorId: String? = null,
 )

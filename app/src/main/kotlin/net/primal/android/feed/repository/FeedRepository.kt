@@ -5,7 +5,6 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.PagingSource
-import androidx.room.withTransaction
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterNotNull
@@ -20,19 +19,6 @@ import net.primal.android.feed.db.FeedPost
 import net.primal.android.feed.db.sql.ExploreFeedQueryBuilder
 import net.primal.android.feed.db.sql.FeedQueryBuilder
 import net.primal.android.feed.db.sql.LatestFeedQueryBuilder
-import net.primal.android.nostr.ext.asEventStatsPO
-import net.primal.android.nostr.ext.asEventUserStatsPO
-import net.primal.android.nostr.ext.asMediaResourcePO
-import net.primal.android.nostr.ext.asPost
-import net.primal.android.nostr.ext.mapAsProfileMetadata
-import net.primal.android.nostr.ext.takeContentAsNostrEventOrNull
-import net.primal.android.nostr.model.NostrEvent
-import net.primal.android.nostr.model.primal.PrimalEvent
-import net.primal.android.nostr.model.primal.content.ContentPrimalEventResources
-import net.primal.android.nostr.model.primal.content.ContentPrimalEventStats
-import net.primal.android.nostr.model.primal.content.ContentPrimalEventUserStats
-import net.primal.android.serialization.NostrJson
-import net.primal.android.serialization.decodeFromStringOrNull
 import net.primal.android.thread.db.ConversationCrossRef
 import net.primal.android.user.active.ActiveAccountStore
 import javax.inject.Inject
@@ -81,7 +67,7 @@ class FeedRepository @Inject constructor(
             .observeFeedDirective(feedDirective = feedDirective, since = since)
             .filterNotNull()
 
-    fun findPostById(postId: String): FeedPost = database.feedPosts().findPostById(postId = postId)
+    fun findPostById(postId: String): FeedPost? = database.feedPosts().findPostById(postId = postId)
 
     fun observeConversation(postId: String) =
         database.conversations().observeConversation(
@@ -90,27 +76,20 @@ class FeedRepository @Inject constructor(
         )
 
     suspend fun fetchReplies(postId: String) = withContext(Dispatchers.IO) {
+        val userId = activeAccountStore.activeUserId()
         val response = feedApi.getThread(
-            ThreadRequestBody(postId = postId, userPubKey = activeAccountStore.activeUserId())
+            ThreadRequestBody(postId = postId, userPubKey = userId, limit = 100)
         )
 
-        database.withTransaction {
-            response.posts.processShortTextNoteEvents()
-            response.referencedPosts.processReferencedEvents()
-            response.metadata.processMetadataEvents()
-            response.primalEventStats.processEventStats()
-            response.primalEventUserStats.processEventUserStats()
-            response.primalEventResources.processEventResources()
-
-            database.conversationConnections().connect(
-                data = response.posts.map {
-                    ConversationCrossRef(
-                        postId = postId,
-                        replyPostId = it.id,
-                    )
-                }
-            )
-        }
+        response.persistToDatabaseAsTransaction(userId = userId, database = database)
+        database.conversationConnections().connect(
+            data = response.posts.map {
+                ConversationCrossRef(
+                    postId = postId,
+                    replyPostId = it.id,
+                )
+            }
+        )
     }
 
     @OptIn(ExperimentalPagingApi::class)
@@ -140,52 +119,6 @@ class FeedRepository @Inject constructor(
         else -> ExploreFeedQueryBuilder(
             feedDirective = feedDirective,
             userPubkey = activeAccountStore.activeUserId()
-        )
-    }
-
-
-    private fun List<NostrEvent>.processShortTextNoteEvents() {
-        database.posts().upsertAll(data = this.map { it.asPost() })
-    }
-
-    private fun List<NostrEvent>.processMetadataEvents() {
-        database.profiles().upsertAll(profiles = mapAsProfileMetadata())
-    }
-
-    private fun List<PrimalEvent>.processReferencedEvents() {
-        database.posts().upsertAll(
-            data = this
-                .mapNotNull { it.takeContentAsNostrEventOrNull() }
-                .map { it.asPost() }
-        )
-    }
-
-    private fun List<PrimalEvent>.processEventStats() {
-        database.postStats().upsertAll(
-            data = this
-                .mapNotNull { NostrJson.decodeFromStringOrNull<ContentPrimalEventStats>(it.content) }
-                .map { it.asEventStatsPO() }
-        )
-    }
-
-    private fun List<PrimalEvent>.processEventUserStats() {
-        database.postUserStats().upsertAll(
-            data = this
-                .mapNotNull { NostrJson.decodeFromStringOrNull<ContentPrimalEventUserStats>(it.content) }
-                .map { it.asEventUserStatsPO(userId = activeAccountStore.activeUserId()) }
-        )
-    }
-
-    private fun List<PrimalEvent>.processEventResources() {
-        database.resources().upsert(
-            data = this
-                .mapNotNull { NostrJson.decodeFromStringOrNull<ContentPrimalEventResources>(it.content) }
-                .flatMap {
-                    val eventId = it.eventId
-                    it.resources.map { eventResource ->
-                        eventResource.asMediaResourcePO(eventId = eventId)
-                    }
-                }
         )
     }
 

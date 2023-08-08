@@ -27,6 +27,8 @@ fun ByteArray.toNsec() = Bech32.encodeBytes(hrp = "nsec", this, Bech32.Encoding.
 
 fun ByteArray.toNpub() = Bech32.encodeBytes(hrp = "npub", this, Bech32.Encoding.Bech32)
 
+fun ByteArray.toNote() = Bech32.encodeBytes(hrp = "note", this, Bech32.Encoding.Bech32)
+
 fun ByteArray.toHex() = String(Hex.encode(this))
 
 fun Int.toByteArray(): ByteArray {

@@ -16,6 +16,12 @@ data class FeedPost(
     val postResources: List<MediaResource>,
 
     @Relation(
+        entityColumn = "postId",
+        parentColumn = "postId",
+    )
+    val nostrUris: List<NostrResource>,
+
+    @Relation(
         entityColumn = "ownerId",
         parentColumn = "authorId",
     )
@@ -26,24 +32,6 @@ data class FeedPost(
         parentColumn = "authorMetadataId",
     )
     val authorResources: List<MediaResource>,
-
-    @Relation(
-        entityColumn = "postId",
-        parentColumn = "referencePostId",
-    )
-    val referencedPost: PostData? = null,
-
-    @Relation(
-        entityColumn = "eventId",
-        parentColumn = "referencePostId",
-    )
-    val referencedPostResources: List<MediaResource>,
-
-    @Relation(
-        entityColumn = "ownerId",
-        parentColumn = "referencePostAuthorId",
-    )
-    val referencedPostAuthor: ProfileMetadata? = null,
 
     @Relation(
         entityColumn = "postId",

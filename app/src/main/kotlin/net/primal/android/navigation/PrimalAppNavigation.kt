@@ -38,6 +38,8 @@ import net.primal.android.explore.feed.ExploreFeedScreen
 import net.primal.android.explore.feed.ExploreFeedViewModel
 import net.primal.android.explore.home.ExploreHomeScreen
 import net.primal.android.explore.home.ExploreHomeViewModel
+import net.primal.android.explore.search.ui.SearchScreen
+import net.primal.android.explore.search.SearchViewModel
 import net.primal.android.navigation.splash.SplashContract
 import net.primal.android.navigation.splash.SplashScreen
 import net.primal.android.navigation.splash.SplashViewModel
@@ -59,6 +61,8 @@ private fun NavController.navigateToLogin() = navigate(route = "login")
 private fun NavController.navigateToLogout() = navigate(route = "logout")
 
 private fun NavController.navigateToFeedList() = navigate(route = "feed/list")
+
+private fun NavController.navigateToSearch() = navigate(route = "search")
 
 private fun NavController.navigateToNewPost(preFillContent: String?) =
     navigate(route = "feed/new?$NewPostPreFillContent=${preFillContent.orEmpty().asUrlEncoded()}")
@@ -176,6 +180,11 @@ fun PrimalAppNavigation() {
                 navController = navController,
             )
 
+            search(
+                route = "search",
+                navController = navController,
+            )
+
             messages(
                 route = "messages",
                 navController = navController,
@@ -283,6 +292,7 @@ private fun NavGraphBuilder.feed(
         onNewPostClick = { preFillContent -> navController.navigateToNewPost(preFillContent) },
         onPostClick = { postId -> navController.navigateToThread(postId = postId) },
         onProfileClick = { profileId -> navController.navigateToProfile(profileId = profileId) },
+        onHashtagClick = { hashtag -> navController.navigateToExploreFeed(query = hashtag) },
         onTopLevelDestinationChanged = onTopLevelDestinationChanged,
         onDrawerScreenClick = onDrawerScreenClick,
     )
@@ -313,8 +323,10 @@ private fun NavGraphBuilder.feedList(
 ) {
     val viewModel = hiltViewModel<FeedListViewModel>(it)
     LockToOrientationPortrait()
-    FeedListScreen(viewModel = viewModel,
-        onFeedSelected = { navController.navigateToFeed(directive = it) })
+    FeedListScreen(
+        viewModel = viewModel,
+        onFeedSelected = { directive -> navController.navigateToFeed(directive = directive) }
+    )
 }
 
 private fun NavGraphBuilder.explore(
@@ -330,6 +342,7 @@ private fun NavGraphBuilder.explore(
     ExploreHomeScreen(
         viewModel = viewModel,
         onHashtagClick = { query -> navController.navigateToExploreFeed(query = query) },
+        onSearchClick = { navController.navigateToSearch() },
         onTopLevelDestinationChanged = onTopLevelDestinationChanged,
         onDrawerScreenClick = onDrawerScreenClick,
     )
@@ -351,6 +364,23 @@ private fun NavGraphBuilder.exploreFeed(
         onPostClick = { postId -> navController.navigateToThread(postId)},
         onPostQuoteClick = { preFillContent -> navController.navigateToNewPost(preFillContent) },
         onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
+        onHashtagClick = { hashtag -> navController.navigateToExploreFeed(query = hashtag) },
+    )
+}
+
+private fun NavGraphBuilder.search(
+    route: String,
+    navController: NavController,
+) = composable(
+    route = route,
+) {
+    val viewModel = hiltViewModel<SearchViewModel>(it)
+    LockToOrientationPortrait()
+    SearchScreen(
+        viewModel = viewModel,
+        onClose = { navController.navigateUp() },
+        onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
+        onSearchContent = { query -> navController.navigateToExploreFeed(query) },
     )
 }
 
@@ -406,6 +436,7 @@ private fun NavGraphBuilder.thread(
         onPostClick = { postId -> navController.navigateToThread(postId) },
         onPostQuoteClick = { preFillContent -> navController.navigateToNewPost(preFillContent) },
         onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
+        onHashtagClick = { hashtag -> navController.navigateToExploreFeed(query = hashtag) },
     )
 }
 
@@ -426,6 +457,7 @@ private fun NavGraphBuilder.profile(
         onPostClick = { postId -> navController.navigateToThread(postId = postId) },
         onPostQuoteClick = { preFillContent -> navController.navigateToNewPost(preFillContent) },
         onProfileClick = { profileId -> navController.navigateToProfile(profileId = profileId) },
+        onHashtagClick = { hashtag -> navController.navigateToExploreFeed(query = hashtag) },
     )
 }
 

@@ -26,8 +26,8 @@ android {
         applicationId = "net.primal.android"
         minSdk = 26
         targetSdk = 33
-        versionCode = 22
-        versionName = "0.12.5"
+        versionCode = 27
+        versionName = "0.14.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -192,6 +192,8 @@ dependencies {
     implementation(libs.coil)
     implementation(libs.coil.compose)
     implementation(libs.coil.svg)
+
+    implementation(libs.lottie.compose)
 
     implementation(libs.timber)
 

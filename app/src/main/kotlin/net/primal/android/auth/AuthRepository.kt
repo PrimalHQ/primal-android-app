@@ -17,8 +17,8 @@ class AuthRepository @Inject constructor(
     private val userAccountFetcher: UserAccountFetcher,
 ) {
 
-    suspend fun login(nsec: String): String {
-        val pubkey = credentialsStore.save(nsec)
+    suspend fun login(nostrKey: String): String {
+        val pubkey = credentialsStore.save(nostrKey)
 
         val userProfile = fetchUserProfileOrNulL(pubkey)
         val userContacts = fetchUserContactsOrNulL(pubkey)

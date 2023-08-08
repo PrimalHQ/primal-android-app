@@ -6,6 +6,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material3.DrawerState
@@ -25,6 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
@@ -53,6 +55,7 @@ fun FeedScreen(
     onNewPostClick: (String?) -> Unit,
     onPostClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
+    onHashtagClick: (String) -> Unit,
     onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
 ) {
@@ -69,6 +72,7 @@ fun FeedScreen(
         onNewPostClick = onNewPostClick,
         onPostClick = onPostClick,
         onProfileClick = onProfileClick,
+        onHashtagClick = onHashtagClick,
         onPrimaryDestinationChanged = onTopLevelDestinationChanged,
         onDrawerDestinationClick = onDrawerScreenClick,
     )
@@ -83,6 +87,7 @@ fun FeedScreen(
     onNewPostClick: (String?) -> Unit,
     onPostClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
+    onHashtagClick: (String) -> Unit,
     onPrimaryDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
 ) {
@@ -148,6 +153,7 @@ fun FeedScreen(
                 onPostQuoteClick = {
                     onNewPostClick("\n\nnostr:${it.postId.hexToNoteHrp()}")
                 },
+                onHashtagClick = onHashtagClick,
                 syncStats = state.syncStats,
                 paddingValues = paddingValues,
                 feedListState = feedListState,
@@ -171,18 +177,24 @@ fun FeedScreen(
                     modifier = Modifier
                         .size(bottomBarHeight)
                         .background(
-                            brush = Brush.horizontalGradient(
+                            brush = Brush.linearGradient(
                                 colors = listOf(
                                     AppTheme.extraColorScheme.brand1,
                                     AppTheme.extraColorScheme.brand2
                                 ),
+                                start = Offset(0f, 0f),
+                                end = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY),
                             ),
-                            shape = FloatingActionButtonDefaults.shape,
+                            shape = CircleShape,
                         ),
                     elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp),
                     containerColor = Color.Unspecified,
                     content = {
-                        Icon(imageVector = Icons.Outlined.Add, contentDescription = null)
+                        Icon(
+                            imageVector = Icons.Outlined.Add,
+                            contentDescription = null,
+                            tint = Color.White,
+                        )
                     },
                 )
             }
@@ -201,9 +213,9 @@ fun FeedScreenPreview() {
             onNewPostClick = {},
             onPostClick = {},
             onProfileClick = {},
+            onHashtagClick = {},
             onPrimaryDestinationChanged = {},
             onDrawerDestinationClick = {},
         )
     }
-
 }

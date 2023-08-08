@@ -74,8 +74,8 @@ import net.primal.android.core.compose.AvatarThumbnailListItemImage
 import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.feed.FeedLazyColumn
-import net.primal.android.core.compose.feed.LoadingItem
-import net.primal.android.core.compose.feed.NoFeedContent
+import net.primal.android.core.compose.feed.FeedLoading
+import net.primal.android.core.compose.feed.FeedNoContent
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.Key
@@ -98,6 +98,7 @@ fun ProfileScreen(
     onPostClick: (String) -> Unit,
     onPostQuoteClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
+    onHashtagClick: (String) -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
 
@@ -109,6 +110,7 @@ fun ProfileScreen(
         onPostClick = onPostClick,
         onPostQuoteClick = onPostQuoteClick,
         onProfileClick = onProfileClick,
+        onHashtagClick = onHashtagClick,
         eventPublisher = { viewModel.setEvent(it) },
     )
 }
@@ -134,6 +136,7 @@ fun ProfileScreen(
     onPostClick: (String) -> Unit,
     onPostQuoteClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
+    onHashtagClick: (String) -> Unit,
     eventPublisher: (ProfileContract.UiEvent) -> Unit,
 ) {
     val density = LocalDensity.current
@@ -224,6 +227,7 @@ fun ProfileScreen(
             onPostQuoteClick = {
                 onPostQuoteClick("\n\nnostr:${it.postId.hexToNoteHrp()}")
             },
+            onHashtagClick = onHashtagClick,
             shouldShowLoadingState = false,
             shouldShowNoContentState = false,
             stickyHeader = {
@@ -267,13 +271,13 @@ fun ProfileScreen(
 
                 if (pagingItems.isEmpty()) {
                     when (pagingItems.loadState.refresh) {
-                        LoadState.Loading -> LoadingItem(
+                        LoadState.Loading -> FeedLoading(
                             modifier = Modifier
                                 .padding(vertical = 64.dp)
                                 .fillMaxWidth(),
                         )
 
-                        is LoadState.NotLoading -> NoFeedContent(
+                        is LoadState.NotLoading -> FeedNoContent(
                             modifier = Modifier
                                 .padding(vertical = 64.dp)
                                 .fillMaxWidth(),

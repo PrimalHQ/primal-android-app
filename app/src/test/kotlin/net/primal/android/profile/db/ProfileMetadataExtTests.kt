@@ -16,7 +16,7 @@ class ProfileMetadataExtTests {
         raw = "raw",
         ownerId = ownerId,
         displayName = displayName,
-        name = name,
+        handle = name,
     )
 
     @Test

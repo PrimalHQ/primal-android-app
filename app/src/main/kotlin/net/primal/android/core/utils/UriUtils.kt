@@ -1,12 +1,22 @@
 package net.primal.android.core.utils
 
+import com.linkedin.urls.Url
 import com.linkedin.urls.detection.UrlDetector
 import com.linkedin.urls.detection.UrlDetectorOptions
+import net.primal.android.nostr.ext.parseNostrUris
 
-fun String.parseUrls(): List<String> {
+fun String.parseUris(): List<String> {
     val urlDetector = UrlDetector(this, UrlDetectorOptions.JSON)
-    val links = urlDetector.detect()
-    return links.map { it.originalUrl }
+    val urls = urlDetector.detect()
+        .filterInvalidTLDs()
+        .map { it.originalUrl }
+    val nostr = this.parseNostrUris()
+    return urls + nostr
+}
+
+private fun List<Url>.filterInvalidTLDs() = filter {
+    val tld = it.host.split(".").lastOrNull()
+    tld != null && tld.all { char -> char.isLetter() }
 }
 
 fun String?.detectContentType(): String? {

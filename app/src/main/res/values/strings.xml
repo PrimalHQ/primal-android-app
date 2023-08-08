@@ -36,6 +36,7 @@
     <string name="drawer_following_suffix">Following</string>
 
     <string name="feed_reposted_suffix">reposted</string>
+    <string name="feed_see_more">See more…</string>
 
     <string name="timestamp_since_just_now">just now</string>
     <string name="timestamp_since_minutes">%1$s min. ago</string>
@@ -52,10 +53,10 @@
     <string name="feed_refresh_button">Refresh</string>
 
     <string name="feed_new_posts_notice_general">posted</string>
-    <string name="feed_new_posts_notice_100plus">100+ new posts</string>
+    <string name="feed_new_posts_notice_100plus">100+ new notes</string>
     <plurals name="feed_new_posts_notice">
-        <item quantity="one">%1$s new post</item>
-        <item quantity="other">%1$s new posts</item>
+        <item quantity="one">%1$s new notes</item>
+        <item quantity="other">%1$s new notes</item>
     </plurals>
 
     <string name="post_repost_button_confirmation">Repost</string>
@@ -73,7 +74,8 @@
     <string name="thread_publishing_button">Replying…</string>
     <string name="thread_reply_nostr_publish_error">Unable to publish your note to Nostr. Please try again soon.</string>
 
-    <string name="explore_title">Explore</string>
+    <string name="explore_search_nostr">search nostr</string>
+    <string name="explore_enter_query">Enter text to search</string>
     <string name="explore_feed_added_to_user_feeds">Added to your home feeds</string>
     <string name="explore_feed_removed_from_user_feeds">Removed from your home feeds</string>
 

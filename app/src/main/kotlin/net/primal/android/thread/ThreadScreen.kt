@@ -37,7 +37,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -49,6 +48,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.R
@@ -57,11 +57,14 @@ import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.feed.FeedPostListItem
 import net.primal.android.core.compose.feed.RepostOrQuoteBottomSheet
 import net.primal.android.core.compose.feed.model.FeedPostAction
+import net.primal.android.core.compose.feed.model.FeedPostStatsUi
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.crypto.hexToNoteHrp
 import net.primal.android.theme.AppTheme
+import net.primal.android.theme.PrimalTheme
+import java.time.Instant
 
 @Composable
 fun ThreadScreen(
@@ -70,6 +73,7 @@ fun ThreadScreen(
     onPostClick: (String) -> Unit,
     onPostQuoteClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
+    onHashtagClick: (String) -> Unit,
 ) {
 
     val uiState = viewModel.state.collectAsState()
@@ -80,6 +84,7 @@ fun ThreadScreen(
         onPostClick = onPostClick,
         onPostQuoteClick = onPostQuoteClick,
         onProfileClick = onProfileClick,
+        onHashtagClick = onHashtagClick,
         eventPublisher = { viewModel.setEvent(it) }
     )
 }
@@ -92,6 +97,7 @@ fun ThreadScreen(
     onPostClick: (String) -> Unit,
     onPostQuoteClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
+    onHashtagClick: (String) -> Unit,
     eventPublisher: (ThreadContract.UiEvent) -> Unit,
 ) {
     val topAppBarState = rememberTopAppBarState()
@@ -158,8 +164,9 @@ fun ThreadScreen(
 
                         FeedPostListItem(
                             data = item,
+                            expanded = true,
                             onPostClick = { postId ->
-                                if (index != state.highlightPostIndex) {
+                                if (state.highlightPostId != postId) {
                                     onPostClick(postId)
                                 }
                             },
@@ -167,7 +174,7 @@ fun ThreadScreen(
                             onPostAction = {
                                 when (it) {
                                     FeedPostAction.Reply -> {
-                                        if (index != state.highlightPostIndex) {
+                                        if (state.highlightPostId != item.postId) {
                                             onPostClick(item.postId)
                                         }
                                     }
@@ -185,6 +192,7 @@ fun ThreadScreen(
                                     }
                                 }
                             },
+                            onHashtagClick = onHashtagClick,
                             shouldIndentContent = shouldIndentContent,
                             highlighted = highlighted,
                             connected = connected,
@@ -198,20 +206,25 @@ fun ThreadScreen(
             SnackbarHost(hostState = snackbarHostState)
         },
         bottomBar = {
+            val rootPost = state.conversation.firstOrNull()
             val replyToPost = state.conversation.getOrNull(state.highlightPostIndex)
-            if (replyToPost != null) {
+            if (rootPost != null && replyToPost != null) {
                 ReplyToBottomBar(
                     publishingReply = state.publishingReply,
-                    replyToAuthorDisplayName = replyToPost.authorDisplayName,
-                    replyToUserDisplayName = replyToPost.userDisplayName,
-                    onReplyClick = { content ->
+                    replyToAuthorName = replyToPost.authorName,
+                    replyToAuthorHandle = replyToPost.authorHandle,
+                    replyTextProvider = { state.replyText },
+                    onReplyClick = {
                         eventPublisher(
                             ThreadContract.UiEvent.ReplyToAction(
-                                content = content,
+                                rootPostId = rootPost.postId,
                                 replyToPostId = replyToPost.postId,
                                 replyToAuthorId = replyToPost.authorId,
                             )
                         )
+                    },
+                    onReplyUpdated = { content ->
+                        eventPublisher(ThreadContract.UiEvent.UpdateReply(newReply = content))
                     }
                 )
             }
@@ -223,13 +236,14 @@ fun ThreadScreen(
 @Composable
 fun ReplyToBottomBar(
     publishingReply: Boolean,
-    replyToAuthorDisplayName: String,
-    replyToUserDisplayName: String,
-    onReplyClick: (String) -> Unit,
+    replyToAuthorName: String,
+    replyToAuthorHandle: String,
+    replyTextProvider: () -> String,
+    onReplyClick: () -> Unit,
+    onReplyUpdated: (String) -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val isKeyboardVisible by keyboardVisibilityAsState()
-    var replyText by rememberSaveable { mutableStateOf("") }
 
     val unfocusedColor = AppTheme.extraColorScheme.surfaceVariantAlt
     val focusedColor = AppTheme.colorScheme.surface
@@ -243,7 +257,7 @@ fun ReplyToBottomBar(
             modifier = Modifier.fillMaxWidth(),
         ) {
             AnimatedVisibility(visible = isKeyboardVisible) {
-                val mention = "@$replyToUserDisplayName"
+                val mention = "@$replyToAuthorHandle"
                 val text = stringResource(id = R.string.thread_replying_to, mention)
                 val contentText = buildAnnotatedString {
                     append(text)
@@ -270,8 +284,8 @@ fun ReplyToBottomBar(
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp)
                     .imePadding(),
-                value = replyText,
-                onValueChange = { replyText = it },
+                value = replyTextProvider(),
+                onValueChange = { onReplyUpdated(it) },
                 maxLines = 10,
                 enabled = !publishingReply,
                 placeholder = {
@@ -283,7 +297,7 @@ fun ReplyToBottomBar(
                         Text(
                             text = stringResource(
                                 id = R.string.thread_reply_to,
-                                replyToAuthorDisplayName
+                                replyToAuthorName
                             ),
                             color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
                         )
@@ -319,7 +333,7 @@ fun ReplyToBottomBar(
                         enabled = !publishingReply,
                         fontSize = 16.sp,
                         onClick = {
-                            onReplyClick(replyText)
+                            onReplyClick()
                             keyboardController?.hide()
                         },
                     )
@@ -351,5 +365,57 @@ private fun ReplyPublishingErrorHandler(
                 duration = SnackbarDuration.Short,
             )
         }
+    }
+}
+
+
+@Preview()
+@Composable
+fun ThreadScreenPreview() {
+    PrimalTheme {
+        ThreadScreen(
+            state = ThreadContract.UiState(
+                conversation = listOf(
+                    FeedPostUi(
+                        postId = "random",
+                        repostId = null,
+                        authorId = "id",
+                        authorName = "alex",
+                        authorHandle = "alex",
+                        authorInternetIdentifier = "alex@primal.net",
+                        content = "Hello #nostr!",
+                        authorMediaResources = emptyList(),
+                        mediaResources = emptyList(),
+                        nostrResources = emptyList(),
+                        timestamp = Instant.now().minusSeconds(3600),
+                        stats = FeedPostStatsUi(),
+                        hashtags = listOf("#nostr"),
+                        rawNostrEventJson = "raaaw",
+                    ),
+                    FeedPostUi(
+                        postId = "reply",
+                        repostId = null,
+                        authorId = "id",
+                        authorName = "nikola",
+                        authorHandle = "nikola",
+                        authorInternetIdentifier = "nikola@primal.net",
+                        content = "#nostr rocks!",
+                        authorMediaResources = emptyList(),
+                        mediaResources = emptyList(),
+                        nostrResources = emptyList(),
+                        timestamp = Instant.now(),
+                        stats = FeedPostStatsUi(),
+                        hashtags = listOf("#nostr"),
+                        rawNostrEventJson = "raaaw",
+                    ),
+                ),
+            ),
+            onClose = {},
+            onPostClick = {},
+            onPostQuoteClick = {},
+            onProfileClick = {},
+            onHashtagClick = {},
+            eventPublisher = {},
+        )
     }
 }
