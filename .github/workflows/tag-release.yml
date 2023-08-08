@@ -3,7 +3,7 @@ name: Create release from tag
 on:
   push:
     tags:
-      - 'v*'
+      - '*'
   workflow_dispatch:
 
 jobs:
