@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    name: Create release
+    name: Build, sign and upload artifact
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
@@ -18,9 +18,9 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
-        cache: gradle
+        cache: 'gradle'
     - name: Build apks
-      run: ./gradlew build
+      run: ./gradlew build --no-daemon
 
     # Fetched https://github.com/marketplace/actions/sign-android-release
 #     - name: sign apk
@@ -33,16 +33,15 @@ jobs:
 #         keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
 #         keyPassword: ${{ secrets.KEY_PASSWORD }}
 
-    - name: Upload artefact
+    - name: Upload artifact
       uses: actions/upload-artifact@v3
       with:
         name: test-apk
-        path:  './app/build/outputs/apk/debig/app-debug.apk'
+        path: app/build/outputs/apk/debug/app-debug.apk
 #         path: ${{steps.sign_app.outputs.signedReleaseFile}}
 
-
   release:
-   name: Release APK
+   name: Create github release and attach apk
    needs: build
    runs-on: ubuntu-latest
    steps:
