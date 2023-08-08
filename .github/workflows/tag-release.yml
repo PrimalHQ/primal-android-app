@@ -27,22 +27,22 @@ jobs:
       run: ./gradlew build --no-daemon
 
     # Fetched https://github.com/marketplace/actions/sign-android-release
-#     - name: sign apk
-#       uses: r0adkll/sign-android-release@v1
-#       id: sign_app
-#       with:
-#         releaseDirectory: app/build/outputs/apk/release
-#         signingKeyBase64: ${{ secrets.SIGNING_KEY }}
-#         alias: ${{ secrets.ALIAS }}
-#         keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
-#         keyPassword: ${{ secrets.KEY_PASSWORD }}
+    # Dont forget to add variables to keystore
+    - name: sign apk
+      uses: r0adkll/sign-android-release@v1
+      id: sign_app
+      with:
+        releaseDirectory: app/build/outputs/apk/release
+        signingKeyBase64: ${{ secrets.SIGNING_KEY }}
+        alias: ${{ secrets.ALIAS }}
+        keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
+        keyPassword: ${{ secrets.KEY_PASSWORD }}
 
     - name: Upload artifact
       uses: actions/upload-artifact@v3
       with:
-        name: test-apk-${{ github.ref_name }}
-        path: app/build/outputs/apk/debug/app-debug.apk
-#         path: ${{steps.sign_app.outputs.signedReleaseFile}}
+        name: ${{ github.ref_name }}
+        path: ${{steps.sign_app.outputs.signedReleaseFile}}
 
   release:
    name: Create github release and attach apk
@@ -52,9 +52,8 @@ jobs:
    - name: Download APK from build
      uses: actions/download-artifact@v1
      with:
-       name: test-apk-${{ github.ref_name }}
-   - name: Display struct of artifact
-     run: ls -R
+       name: ${{ github.ref_name }}
+   # GITHUB_TOKEN is provided in action, you need to add write permissions in action settings
    - name: Create Release
      id: create_release
      uses: softprops/action-gh-release@v1
@@ -65,4 +64,4 @@ jobs:
        name: Release ${{ github.ref_name }}
        draft: false
        prerelease: false
-       files: test-apk-${{ github.ref_name }}/app-debug.apk
+       files: ${{ github.ref_name }}/*
