@@ -65,4 +65,4 @@ jobs:
        name: Release ${{ github.ref_name }}
        draft: false
        prerelease: false
-       files: test-apk/app-debug.apk
+       files: test-apk-${{ github.ref_name }}/app-debug.apk
