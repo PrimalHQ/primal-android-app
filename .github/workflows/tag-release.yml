@@ -1,0 +1,56 @@
+name: Create release from tag
+
+on:
+  push:
+    tags:
+      - '*'
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build, sign and upload artifact
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: 'gradle'
+
+    - name: Unpack base64 config.properties
+      run:  openssl base64 -d -out config.properties <<< ${{ secrets.CONFIG_PROPERTIES }}
+
+    - name: Build apks
+      run: ./gradlew assembleReleaseAlternative --no-daemon
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ github.ref_name }}
+        path: app/build/outputs/apk/releaseAlternative/*apk
+
+  release:
+   name: Create github release and attach apk
+   needs: build
+   runs-on: ubuntu-latest
+   steps:
+   - name: Download APK from build
+     uses: actions/download-artifact@v1
+     with:
+       name: ${{ github.ref_name }}
+   # GITHUB_TOKEN is provided in action, you need to add write permissions in action settings
+   - name: Create Release
+     id: create_release
+     uses: softprops/action-gh-release@v1
+     env:
+       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+     with:
+       tag_name: ${{ github.ref_name }}
+       name: Release ${{ github.ref_name }}
+       draft: true
+       prerelease: true
+       files: ${{ github.ref_name }}/*apk
