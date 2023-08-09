@@ -48,7 +48,7 @@ import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
-import net.primal.android.core.utils.isValidNsec
+import net.primal.android.core.utils.isValidNostrKey
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 
@@ -96,7 +96,7 @@ fun LoginScreen(
                 state = state,
                 paddingValues = paddingValues,
                 onLogin = {
-                    eventPublisher(LoginContract.UiEvent.LoginEvent(nsec = it))
+                    eventPublisher(LoginContract.UiEvent.LoginEvent(nostrKey = it))
                 }
             )
         }
@@ -114,11 +114,11 @@ fun LoginContent(
     val clipboardManager = LocalClipboardManager.current
 
     var nsecValue by remember { mutableStateOf("") }
-    val isValidNsec by remember { derivedStateOf { nsecValue.isValidNsec() } }
+    val isValidNsec by remember { derivedStateOf { nsecValue.isValidNostrKey() } }
 
     val pasteKey = {
         val clipboardText = clipboardManager.getText()?.text.orEmpty().trim()
-        if (clipboardText.isValidNsec()) {
+        if (clipboardText.isValidNostrKey()) {
             nsecValue = clipboardText
         }
     }

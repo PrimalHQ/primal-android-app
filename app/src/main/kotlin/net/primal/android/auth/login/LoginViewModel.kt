@@ -48,15 +48,15 @@ class LoginViewModel @Inject constructor(
     private fun observeEvents() = viewModelScope.launch {
         _event.collect {
             when (it) {
-                is UiEvent.LoginEvent -> login(nsec = it.nsec)
+                is UiEvent.LoginEvent -> login(nostrKey = it.nostrKey)
             }
         }
     }
 
-    private fun login(nsec: String) = viewModelScope.launch {
+    private fun login(nostrKey: String) = viewModelScope.launch {
         setState { copy(loading = true) }
         try {
-            val pubkey = authRepository.login(nsec = nsec)
+            val pubkey = authRepository.login(nostrKey = nostrKey)
             settingsRepository.fetchAppSettings(pubkey = pubkey)
             setEffect(SideEffect.LoginSuccess(pubkey = pubkey))
         } catch (error: WssException) {
