@@ -104,7 +104,7 @@ fun SearchScreen(
 
                 items(
                     items = if (state.searchQuery.isEmpty()) {
-                        state.recommendedProfiles
+                        state.recommendedUsers
                     } else {
                         state.searchResults
                     },

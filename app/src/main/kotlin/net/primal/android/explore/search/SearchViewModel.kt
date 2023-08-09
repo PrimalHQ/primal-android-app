@@ -36,6 +36,7 @@ class SearchViewModel @Inject constructor(
     init {
         observeEvents()
         observeDebouncedQueryChanges()
+        fetchRecommendedUsers()
     }
 
     private fun observeEvents() = viewModelScope.launch {
@@ -65,6 +66,11 @@ class SearchViewModel @Inject constructor(
         } finally {
             setState { copy(searching = false) }
         }
+    }
+
+    private fun fetchRecommendedUsers() = viewModelScope.launch {
+        val recommendedUsers = exploreRepository.getRecommendedUsers()
+        setState { copy(recommendedUsers = recommendedUsers.map { it.mapAsUserProfileUi() }) }
     }
 
     private fun UserProfileSearchItem.mapAsUserProfileUi() = UserProfileUi(

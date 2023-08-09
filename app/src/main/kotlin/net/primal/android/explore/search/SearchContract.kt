@@ -8,7 +8,7 @@ interface SearchContract {
         val searching: Boolean = false,
         val searchQuery: String = "",
         val searchResults: List<UserProfileUi> = emptyList(),
-        val recommendedProfiles: List<UserProfileUi> = emptyList(),
+        val recommendedUsers: List<UserProfileUi> = emptyList(),
     )
 
     sealed class UiEvent {

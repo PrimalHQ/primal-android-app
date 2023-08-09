@@ -6,7 +6,8 @@ import kotlinx.coroutines.withContext
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.explore.api.ExploreApi
 import net.primal.android.explore.api.model.HashtagScore
-import net.primal.android.explore.api.model.SearchUserRequestBody
+import net.primal.android.explore.api.model.SearchUsersRequestBody
+import net.primal.android.explore.api.model.UsersResponse
 import net.primal.android.explore.db.TrendingHashtag
 import net.primal.android.nostr.ext.mapAsProfileMetadataPO
 import net.primal.android.nostr.ext.takeContentAsPrimalUserScoresOrNull
@@ -31,8 +32,8 @@ class ExploreRepository @Inject constructor(
     private fun HashtagScore.asTrendingHashtagPO() =
         TrendingHashtag(hashtag = this.name, score = this.score)
 
-    suspend fun searchUsers(query: String): List<UserProfileSearchItem> {
-        val response = exploreApi.searchUsers(SearchUserRequestBody(query = query, limit = 10))
+    private suspend fun queryRemoteUsers(apiBlock: suspend () -> UsersResponse): List<UserProfileSearchItem> {
+        val response = apiBlock()
         val profiles = response.contactsMetadata.mapAsProfileMetadataPO()
         val userScoresMap = response.userScores?.takeContentAsPrimalUserScoresOrNull()
 
@@ -46,4 +47,11 @@ class ExploreRepository @Inject constructor(
         }.sortedByDescending { it.score }
     }
 
+    suspend fun searchUsers(query: String) = queryRemoteUsers {
+        exploreApi.searchUsers(SearchUsersRequestBody(query = query, limit = 10))
+    }
+
+    suspend fun getRecommendedUsers() = queryRemoteUsers {
+        exploreApi.getRecommendedUsers()
+    }
 }
