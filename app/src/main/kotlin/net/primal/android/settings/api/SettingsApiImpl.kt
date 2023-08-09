@@ -3,7 +3,7 @@ package net.primal.android.settings.api
 import kotlinx.serialization.encodeToString
 import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.primal.PrimalCacheFilter
-import net.primal.android.networking.primal.Verb.*
+import net.primal.android.networking.primal.PrimalVerb.*
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.serialization.NostrJson

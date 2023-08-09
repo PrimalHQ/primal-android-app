@@ -6,7 +6,7 @@ import net.primal.android.feed.api.model.FeedResponse
 import net.primal.android.feed.api.model.ThreadRequestBody
 import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.primal.PrimalCacheFilter
-import net.primal.android.networking.primal.Verb.*
+import net.primal.android.networking.primal.PrimalVerb.*
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.serialization.NostrJson
 import net.primal.android.serialization.decodeFromStringOrNull

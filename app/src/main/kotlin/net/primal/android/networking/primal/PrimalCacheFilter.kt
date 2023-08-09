@@ -6,7 +6,7 @@ import kotlinx.serialization.json.buildJsonObject
 import net.primal.android.serialization.NostrJson
 
 data class PrimalCacheFilter(
-    val primalVerb: Verb? = null,
+    val primalVerb: PrimalVerb? = null,
     val optionsJson: String? = null,
 ) {
     fun toPrimalJsonObject() = buildJsonObject {
@@ -19,11 +19,13 @@ data class PrimalCacheFilter(
     }
 }
 
-enum class Verb(val identifier: String) {
+enum class PrimalVerb(val identifier: String) {
     CONTACT_LIST("contact_list"),
     USER_PROFILE("user_profile"),
     FEED_DIRECTIVE("feed_directive"),
     TRENDING_HASHTAGS_7D("trending_hashtags_7d"),
+    RECOMMENDED_USERS("get_recommended_users"),
     GET_APP_SETTINGS("get_app_settings"),
-    THREAD_VIEW("thread_view")
+    THREAD_VIEW("thread_view"),
+    USER_SEARCH("user_search"),
 }

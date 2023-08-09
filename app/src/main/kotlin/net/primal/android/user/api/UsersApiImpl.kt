@@ -3,8 +3,8 @@ package net.primal.android.user.api
 import kotlinx.serialization.encodeToString
 import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.primal.PrimalCacheFilter
-import net.primal.android.networking.primal.Verb.CONTACT_LIST
-import net.primal.android.networking.primal.Verb.USER_PROFILE
+import net.primal.android.networking.primal.PrimalVerb.CONTACT_LIST
+import net.primal.android.networking.primal.PrimalVerb.USER_PROFILE
 import net.primal.android.networking.relays.RelayPool
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.NostrEventKind
