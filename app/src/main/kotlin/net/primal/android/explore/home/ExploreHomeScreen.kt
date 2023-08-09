@@ -187,7 +187,7 @@ fun SearchBar(
 ) {
     Box(
         modifier = Modifier
-            .height(32.dp)
+            .height(34.dp)
             .fillMaxWidth()
             .padding(horizontal = 32.dp)
             .clickable { onClick() }
