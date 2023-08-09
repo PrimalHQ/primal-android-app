@@ -13,36 +13,25 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
-    - name: GitHub Tag Name example
-      run: |
-        echo "Tag name from GITHUB_REF_NAME: $GITHUB_REF_NAME"
-        echo "Tag name from github.ref_name: ${{ github.ref_name }}"
+
     - name: Set up JDK 17
       uses: actions/setup-java@v3
       with:
         java-version: '17'
         distribution: 'temurin'
         cache: 'gradle'
-    - name: Build apks
-      run: ./gradlew build --no-daemon
 
-    # Fetched https://github.com/marketplace/actions/sign-android-release
-    # Dont forget to add variables to keystore
-    - name: sign apk
-      uses: r0adkll/sign-android-release@v1
-      id: sign_app
-      with:
-        releaseDirectory: app/build/outputs/apk/release
-        signingKeyBase64: ${{ secrets.SIGNING_KEY }}
-        alias: ${{ secrets.ALIAS }}
-        keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
-        keyPassword: ${{ secrets.KEY_PASSWORD }}
+    - name: Unpack base64 config.properties
+      run:  openssl base64 -d -out config.properties <<< ${{ secrets.CONFIG_PROPERTIES }}
+
+    - name: Build apks
+      run: ./gradlew assembleReleaseAlternative --no-daemon
 
     - name: Upload artifact
       uses: actions/upload-artifact@v3
       with:
         name: ${{ github.ref_name }}
-        path: ${{steps.sign_app.outputs.signedReleaseFile}}
+        path: app/build/outputs/apk/releaseAlternative/*apk
 
   release:
    name: Create github release and attach apk
@@ -62,6 +51,6 @@ jobs:
      with:
        tag_name: ${{ github.ref_name }}
        name: Release ${{ github.ref_name }}
-       draft: false
-       prerelease: false
-       files: ${{ github.ref_name }}/*
+       draft: true
+       prerelease: true
+       files: ${{ github.ref_name }}/*apk
