@@ -27,12 +27,15 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -47,6 +50,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Color
@@ -59,12 +63,14 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.SubcomposeAsyncImage
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -89,6 +95,7 @@ import net.primal.android.crypto.hexToNoteHrp
 import net.primal.android.profile.details.model.ProfileDetailsUi
 import net.primal.android.profile.details.model.ProfileStatsUi
 import net.primal.android.theme.AppTheme
+import net.primal.android.theme.PrimalTheme
 import java.text.NumberFormat
 
 @Composable
@@ -265,8 +272,15 @@ fun ProfileScreen(
             header = {
                 UserProfileDetails(
                     profileId = state.profileId,
+                    isFollowed = state.isActiveUserFollowing,
                     profileDetails = state.profileDetails,
                     profileStats = state.profileStats,
+                    onFollow = {
+                        eventPublisher(ProfileContract.UiEvent.FollowAction(state.profileId))
+                    },
+                    onUnfollow = {
+                        eventPublisher(ProfileContract.UiEvent.UnfollowAction(state.profileId))
+                    }
                 )
 
                 if (pagingItems.isEmpty()) {
@@ -389,8 +403,11 @@ private fun CoverUnavailable() {
 @Composable
 private fun UserProfileDetails(
     profileId: String,
+    isFollowed: Boolean,
     profileDetails: ProfileDetailsUi? = null,
     profileStats: ProfileStatsUi? = null,
+    onFollow: () -> Unit,
+    onUnfollow: () -> Unit,
 ) {
     val localUriHandler = LocalUriHandler.current
     val context = LocalContext.current
@@ -402,7 +419,11 @@ private fun UserProfileDetails(
             .fillMaxWidth()
             .background(color = AppTheme.colorScheme.surfaceVariant)
     ) {
-        ProfileActions()
+        ProfileActions(
+            isFollowed = isFollowed,
+            onFollow = onFollow,
+            onUnfollow = onUnfollow,
+        )
 
         NostrUserText(
             modifier = Modifier.padding(horizontal = 16.dp),
@@ -525,16 +546,39 @@ private fun UserInternetIdentifier(
 }
 
 @Composable
-private fun ProfileActions() {
+private fun ProfileActions(
+    isFollowed: Boolean,
+    onFollow: () -> Unit,
+    onUnfollow: () -> Unit,
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .height(56.dp)
-            .padding(all = 12.dp)
+            .padding(horizontal = 16.dp)
+            .padding(top = 4.dp)
             .background(AppTheme.colorScheme.surfaceVariant),
         horizontalArrangement = Arrangement.End,
     ) {
+        OutlinedButton(
+            modifier = Modifier.wrapContentHeight(align = CenterVertically),
+            shape = AppTheme.shapes.medium,
+            colors = ButtonDefaults.outlinedButtonColors(
 
+            ),
+            onClick = {
+                if (isFollowed) onUnfollow() else onFollow()
+            },
+        ) {
+            Text(
+                text = if (isFollowed) {
+                    stringResource(id = R.string.profile_unfollow_button)
+                } else {
+                    stringResource(id = R.string.profile_follow_button)
+                },
+                style = AppTheme.typography.bodyMedium,
+            )
+        }
     }
 }
 
@@ -572,7 +616,7 @@ private fun UserPublicKey(
     onCopyClick: (String) -> Unit,
 ) {
     Row(
-        verticalAlignment = Alignment.CenterVertically,
+        verticalAlignment = CenterVertically,
     ) {
         IconText(
             modifier = Modifier
@@ -604,5 +648,25 @@ private fun UserPublicKey(
             )
 
         }
+    }
+}
+
+@Preview
+@Composable
+fun PreviewProfileScreen() {
+    PrimalTheme {
+        ProfileScreen(
+            state = ProfileContract.UiState(
+                profileId = "profileId",
+                isActiveUserFollowing = false,
+                authoredPosts = emptyFlow(),
+            ),
+            onClose = {},
+            onPostClick = {},
+            onPostQuoteClick = {},
+            onProfileClick = {},
+            onHashtagClick = {},
+            eventPublisher = {},
+        )
     }
 }

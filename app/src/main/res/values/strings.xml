@@ -105,4 +105,6 @@
     <string name="profile_following_stat">following</string>
     <string name="profile_followers_stat">followers</string>
     <string name="profile_notes_stat">posts</string>
+    <string name="profile_follow_button">follow</string>
+    <string name="profile_unfollow_button">unfollow</string>
 </resources>
