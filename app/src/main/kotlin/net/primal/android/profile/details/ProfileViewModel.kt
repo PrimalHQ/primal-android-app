@@ -25,19 +25,18 @@ import net.primal.android.profile.details.ProfileContract.UiEvent
 import net.primal.android.profile.details.ProfileContract.UiState
 import net.primal.android.profile.details.model.ProfileDetailsUi
 import net.primal.android.profile.details.model.ProfileStatsUi
+import net.primal.android.profile.repository.LatestFollowingResolver
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.active.ActiveAccountStore
-import net.primal.android.user.api.UsersApi
 import javax.inject.Inject
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    activeAccountStore: ActiveAccountStore,
     feedRepository: FeedRepository,
+    private val activeAccountStore: ActiveAccountStore,
     private val profileRepository: ProfileRepository,
     private val postRepository: PostRepository,
-    private val usersApi: UsersApi
 ) : ViewModel() {
 
     private val profileId: String =
@@ -46,6 +45,7 @@ class ProfileViewModel @Inject constructor(
     private val _state = MutableStateFlow(
         UiState(
             profileId = profileId,
+            isActiveUserFollowing = profileId.isFollowed(),
             authoredPosts = feedRepository.feedByDirective(feedDirective = "authored;$profileId")
                 .map { it.map { feed -> feed.asFeedPostUi() } }
                 .cachedIn(viewModelScope),
@@ -125,6 +125,11 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
+    private fun String.isFollowed(): Boolean {
+        val account = activeAccountStore.activeUserAccount.value
+        return account.following.contains(this)
+    }
+
     private fun likePost(postLikeAction: UiEvent.PostLikeAction) = viewModelScope.launch {
         try {
             postRepository.likePost(
@@ -150,16 +155,20 @@ class ProfileViewModel @Inject constructor(
 
     private fun follow(followAction: UiEvent.FollowAction) = viewModelScope.launch {
         try {
-            usersApi.follow(followAction.profileId)
-        } catch (error: Exception) {
-            // Propagate error to the UI
+            profileRepository.follow(followAction.profileId)
+        } catch (error: LatestFollowingResolver.RemoteFollowingsUnavailableException) {
+            // Failed to retrieve latest contacts, propagate error to the UI
+        } catch (error: NostrPublishException) {
+            // Failed to publish update, propagate error to the UI
         }
     }
 
     private fun unfollow(unfollowAction: UiEvent.UnfollowAction) = viewModelScope.launch {
         try {
-            usersApi.unfollow(unfollowAction.profileId)
-        } catch (error: Exception) {
+            profileRepository.unfollow(unfollowAction.profileId)
+        } catch (error: LatestFollowingResolver.RemoteFollowingsUnavailableException) {
+            // Failed to retrieve latest contacts, propagate error to the UI
+        } catch (error: NostrPublishException) {
             // Propagate error to the UI
         }
     }

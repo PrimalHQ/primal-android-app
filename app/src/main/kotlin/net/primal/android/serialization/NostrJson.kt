@@ -6,6 +6,8 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonArray
 import net.primal.android.nostr.model.NostrEvent
+import net.primal.android.user.domain.Relay
+import net.primal.android.user.domain.RelayPermission
 
 val NostrJson = Json {
     ignoreUnknownKeys = true
@@ -34,4 +36,10 @@ fun NostrEvent.toJsonObject(): JsonObject {
         put("content", nostrEvent.content)
         put("sig", nostrEvent.sig)
     }
+}
+
+fun List<Relay>.toNostrRelayMap(): Map<String, RelayPermission> {
+    val map = mutableMapOf<String, RelayPermission>()
+    this.forEach { map[it.url] = RelayPermission(read = it.read, write = it.write) }
+    return map
 }

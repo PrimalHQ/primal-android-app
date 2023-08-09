@@ -11,6 +11,7 @@ import net.primal.android.profile.details.model.ProfileStatsUi
 interface ProfileContract {
     data class UiState(
         val profileId: String,
+        val isActiveUserFollowing: Boolean,
         val profileDetails: ProfileDetailsUi? = null,
         val profileStats: ProfileStatsUi? = null,
         val resources: List<MediaResourceUi> = emptyList(),

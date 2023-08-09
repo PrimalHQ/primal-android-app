@@ -8,12 +8,18 @@ import net.primal.android.db.PrimalDatabase
 import net.primal.android.nostr.ext.asProfileMetadataPO
 import net.primal.android.nostr.ext.asProfileStats
 import net.primal.android.nostr.ext.takeContentAsUserProfileStatsOrNull
+import net.primal.android.user.accounts.UserAccountsStore
+import net.primal.android.user.active.ActiveAccountStore
 import net.primal.android.user.api.UsersApi
+import net.primal.android.user.domain.asUserAccount
 import javax.inject.Inject
 
 class ProfileRepository @Inject constructor(
     private val database: PrimalDatabase,
     private val usersApi: UsersApi,
+    private val userAccountsStore: UserAccountsStore,
+    private val activeAccountStore: ActiveAccountStore,
+    private val latestFollowingResolver: LatestFollowingResolver,
 ) {
     fun observeProfile(profileId: String) =
         database.profiles().observeProfile(profileId = profileId).filterNotNull()
@@ -38,4 +44,27 @@ class ProfileRepository @Inject constructor(
         }
     }
 
+    suspend fun follow(followedPubkey: String) {
+        val latestFollowing = latestFollowingResolver.getLatestFollowing()
+        val updatedFollowing = latestFollowing.toMutableSet().apply { add(followedPubkey) }
+        val activeAccount = activeAccountStore.activeUserAccount.value
+        val newContactsNostrEvent = usersApi.setUserContacts(
+            ownerId = activeAccount.pubkey,
+            contacts = updatedFollowing,
+            relays = activeAccount.relays
+        )
+        userAccountsStore.upsertAccount(userAccount = newContactsNostrEvent.asUserAccount())
+    }
+
+    suspend fun unfollow(unfollowedPubkey: String) {
+        val latestFollowing = latestFollowingResolver.getLatestFollowing()
+        val updatedFollowing = latestFollowing.toMutableSet().apply { remove(unfollowedPubkey) }
+        val activeAccount = activeAccountStore.activeUserAccount.value
+        val newContactsNostrEvent = usersApi.setUserContacts(
+            ownerId = activeAccount.pubkey,
+            contacts = updatedFollowing,
+            relays = activeAccount.relays
+        )
+        userAccountsStore.upsertAccount(userAccount = newContactsNostrEvent.asUserAccount())
+    }
 }
