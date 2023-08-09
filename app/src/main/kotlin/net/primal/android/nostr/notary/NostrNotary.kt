@@ -5,7 +5,6 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.JsonArray
 import net.primal.android.crypto.toNpub
 import net.primal.android.networking.UserAgentProvider
-import net.primal.android.nostr.ext.asContactTag
 import net.primal.android.nostr.ext.asEventIdTag
 import net.primal.android.nostr.ext.asIdentifierTag
 import net.primal.android.nostr.ext.asPubkeyTag
@@ -90,7 +89,7 @@ class NostrNotary @Inject constructor(
         contacts: Set<String>,
         relays: List<Relay>
     ): NostrEvent {
-        val tags = contacts.map { it.asContactTag() }
+        val tags = contacts.map { it.asPubkeyTag() }
         val content = NostrJson.encodeToString(relays.toNostrRelayMap())
 
         return NostrUnsignedEvent(
