@@ -19,6 +19,9 @@ import com.google.accompanist.navigation.material.ExperimentalMaterialNavigation
 import com.google.accompanist.navigation.material.ModalBottomSheetLayout
 import com.google.accompanist.navigation.material.bottomSheet
 import com.google.accompanist.navigation.material.rememberBottomSheetNavigator
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.time.delay
+import kotlinx.coroutines.withContext
 import net.primal.android.R
 import net.primal.android.auth.login.LoginScreen
 import net.primal.android.auth.login.LoginViewModel
@@ -40,8 +43,8 @@ import net.primal.android.explore.feed.ExploreFeedScreen
 import net.primal.android.explore.feed.ExploreFeedViewModel
 import net.primal.android.explore.home.ExploreHomeScreen
 import net.primal.android.explore.home.ExploreHomeViewModel
-import net.primal.android.explore.search.ui.SearchScreen
 import net.primal.android.explore.search.SearchViewModel
+import net.primal.android.explore.search.ui.SearchScreen
 import net.primal.android.navigation.splash.SplashContract
 import net.primal.android.navigation.splash.SplashScreen
 import net.primal.android.navigation.splash.SplashViewModel
@@ -51,6 +54,9 @@ import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.thread.ThreadScreen
 import net.primal.android.thread.ThreadViewModel
+import timber.log.Timber
+import java.net.URLEncoder
+import kotlin.time.Duration.Companion.seconds
 
 private fun NavController.navigateToWelcome() = navigate(
     route = "welcome",
@@ -97,7 +103,7 @@ private fun NavController.navigateToProfile(profileId: String? = null) = when {
 
 private fun NavController.navigateToSettings() = navigate(route = "settings")
 
-private fun NavController.navigateToWallet() = navigate(route = "wallet_settings")
+private fun NavController.navigateToWallet(nwcUrl: String) = navigate(route = "wallet_settings?nwcUrl=$nwcUrl")
 
 private fun NavController.navigateToThread(postId: String) = navigate(route = "thread/$postId")
 
@@ -129,22 +135,25 @@ fun PrimalAppNavigation() {
     }
 
     val splashViewModel: SplashViewModel = hiltViewModel()
+    val context = LocalContext.current
     LaunchedEffect(navController, splashViewModel) {
         splashViewModel.effect.collect {
             when (it) {
                 SplashContract.SideEffect.NoActiveAccount -> navController.navigateToWelcome()
-                is SplashContract.SideEffect.ActiveAccount -> navController.navigateToFeed(directive = it.userPubkey)
+                is SplashContract.SideEffect.ActiveAccount -> {
+                    val activity = context.findActivity()
+
+                    val url = activity?.intent?.data?.toString()?.ifBlank { null }
+
+                    if (url != null && url.startsWith("nostr+walletconnect")) {
+                        navController.navigateToWallet(nwcUrl = withContext(Dispatchers.IO) {
+                            URLEncoder.encode(url, Charsets.UTF_8.name())
+                        })
+                    } else {
+                        navController.navigateToFeed(directive = it.userPubkey)
+                    }
+                }
             }
-        }
-    }
-    val context = LocalContext.current
-    LaunchedEffect(navController) {
-        val activity = context.findActivity()
-
-        val url = activity?.intent?.data?.toString()?.ifBlank { null }
-
-        if (url != null && url.startsWith("nostr+walletconnect")) {
-            navController.navigateToWallet()
         }
     }
 
@@ -162,7 +171,7 @@ fun PrimalAppNavigation() {
             login(route = "login", navController = navController)
 
             logout(route = "logout", navController = navController)
-            
+
             feed(
                 route = "feed?$FeedDirective={$FeedDirective}",
                 arguments = listOf(

@@ -95,6 +95,9 @@
     <string name="settings_keys_hide_key">Hide Key</string>
     <string name="settings_keys_key_copied">Key copied</string>
     <string name="settings_wallet_title">Wallet</string>
+    <string name="settings_wallet_connected_title">Wallet connected</string>
+    <string name="settings_wallet_not_connected_title">Connect a wallet</string>
+    <string name="settings_wallet_not_connected_subtitle">To send and receive zaps, connect a bitcoin lightning wallet. </string>
     <string name="settings_appearance_title">Appearance</string>
     <string name="settings_notifications_title">Notifications</string>
     <string name="settings_network_title">Network</string>

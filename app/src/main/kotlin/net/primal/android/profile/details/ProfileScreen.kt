@@ -657,6 +657,7 @@ private fun UserPublicKey(
             text = pubkey.asEllipsizedNpub(),
             style = AppTheme.typography.bodySmall,
             color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
+            leadingIconTintColor = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
             leadingIcon = PrimalIcons.Key,
             leadingIconSize = 16.sp,
         )
