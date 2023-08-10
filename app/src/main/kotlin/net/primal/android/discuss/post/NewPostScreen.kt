@@ -1,5 +1,6 @@
 package net.primal.android.discuss.post
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -35,7 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.R
 import net.primal.android.core.compose.AvatarThumbnailListItemImage
-import net.primal.android.core.compose.PrimalButton
+import net.primal.android.core.compose.PrimalLoadingButton
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.theme.AppTheme
 
@@ -90,15 +91,23 @@ fun NewPostScreen(
                 navigationIcon = Icons.Outlined.Close,
                 onNavigationIconClick = onClose,
                 actions = {
-                    PrimalButton(
+                    val text = if (state.publishing) {
+                        stringResource(id = R.string.new_post_publishing_button)
+                    } else {
+                        stringResource(id = R.string.new_post_publish_button)
+                    }
+
+                    PrimalLoadingButton(
                         modifier = Modifier
-                            .wrapContentWidth()
-                            .height(40.dp),
-                        text = if (state.publishing)
-                            stringResource(id = R.string.new_post_publishing_button)
-                        else
-                            stringResource(id = R.string.new_post_publish_button),
+                            .height(36.dp)
+                            .wrapContentWidth(),
+                        text = text,
                         fontSize = 16.sp,
+                        shape = AppTheme.shapes.small,
+                        contentPadding = PaddingValues(
+                            horizontal = 24.dp,
+                            vertical = 0.dp,
+                        ),
                         enabled = !state.publishing,
                         onClick = {
                             eventPublisher(NewPostContract.UiEvent.PublishPost(content = content))

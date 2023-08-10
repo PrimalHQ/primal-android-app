@@ -52,7 +52,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.R
-import net.primal.android.core.compose.PrimalButton
+import net.primal.android.core.compose.PrimalLoadingButton
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.feed.FeedPostListItem
 import net.primal.android.core.compose.feed.RepostOrQuoteBottomSheet
@@ -321,7 +321,7 @@ fun ReplyToBottomBar(
                         .padding(top = 8.dp, bottom = 16.dp),
                     horizontalArrangement = Arrangement.End,
                 ) {
-                    PrimalButton(
+                    PrimalLoadingButton(
                         modifier = Modifier
                             .wrapContentWidth()
                             .height(40.dp),

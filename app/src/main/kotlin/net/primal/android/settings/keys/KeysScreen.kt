@@ -40,7 +40,7 @@ import androidx.compose.ui.unit.sp
 import net.primal.android.R
 import net.primal.android.core.compose.AvatarThumbnailListItemImage
 import net.primal.android.core.compose.IconText
-import net.primal.android.core.compose.PrimalButton
+import net.primal.android.core.compose.PrimalLoadingButton
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
@@ -145,7 +145,7 @@ fun PublicKeySection(
 
     Box(modifier = Modifier.padding(vertical = 8.dp)) {
         var keyCopied by remember { mutableStateOf(false) }
-        PrimalButton(
+        PrimalLoadingButton(
             modifier = Modifier.fillMaxWidth().height(56.dp),
             leadingIcon = if (keyCopied) Icons.Outlined.Check else Icons.Outlined.ContentCopy,
             text = if (keyCopied) {
@@ -243,7 +243,7 @@ fun PrivateKeySection(
 
     Box(modifier = Modifier.padding(vertical = 8.dp)) {
         var keyCopied by remember { mutableStateOf(false) }
-        PrimalButton(
+        PrimalLoadingButton(
             modifier = Modifier.fillMaxWidth().height(56.dp),
             leadingIcon = if (keyCopied) Icons.Outlined.Check else Icons.Outlined.ContentCopy,
             text = if (keyCopied) {

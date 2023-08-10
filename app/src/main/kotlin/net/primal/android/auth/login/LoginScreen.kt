@@ -43,7 +43,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import net.primal.android.R
-import net.primal.android.core.compose.PrimalButton
+import net.primal.android.core.compose.PrimalLoadingButton
 import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -212,7 +212,7 @@ fun LoginContent(
             )
         }
 
-        PrimalButton(
+        PrimalLoadingButton(
             text = if (isValidNsec) {
                 stringResource(id = R.string.login_button_continue)
             } else {
@@ -224,6 +224,7 @@ fun LoginContent(
                 .height(56.dp)
                 .align(alignment = Alignment.CenterHorizontally),
             loading = state.loading,
+            enabled = !state.loading,
             onClick = {
                 if (isValidNsec) {
                     keyboardController?.hide()

@@ -1,127 +1,117 @@
 package net.primal.android.core.compose
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.CopyAll
-import androidx.compose.material3.Button
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 
 @Composable
 fun PrimalButton(
-    text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    fontSize: TextUnit = TextUnit.Unspecified,
-    leadingIcon: ImageVector? = null,
     enabled: Boolean = true,
-    loading: Boolean = false,
-) {
-    val buttonShape = AppTheme.shapes.medium
-    Button(
-        onClick = onClick,
-        shape = buttonShape,
-        colors = ButtonDefaults.elevatedButtonColors(
-            containerColor = Color.Unspecified,
-            contentColor = AppTheme.colorScheme.onSurface,
-            disabledContainerColor = Color.Unspecified,
-            disabledContentColor = AppTheme.colorScheme.outline,
+    shape: Shape = AppTheme.shapes.medium,
+    containerBrush: Brush = Brush.linearGradient(
+        colors = listOf(
+            AppTheme.extraColorScheme.brand1,
+            AppTheme.extraColorScheme.brand2,
         ),
+    ),
+    contentColor: Color = AppTheme.colorScheme.onSurface,
+    disabledContainerBrush: Brush = containerBrush,
+    disabledContentColor: Color = contentColor.copy(alpha = 0.5f),
+    textStyle: TextStyle = AppTheme.typography.bodyLarge,
+    border: BorderStroke = BorderStroke(0.dp, Color.Unspecified),
+    contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
+    content: @Composable RowScope.() -> Unit
+) {
+    val buttonContainerBrush = rememberUpdatedState(
+        if (enabled) containerBrush else disabledContainerBrush
+    )
+    val buttonContentColor = rememberUpdatedState(
+        if (enabled) contentColor else disabledContentColor
+    )
+
+    Box(
         modifier = modifier
-            .then(
-                Modifier.background(
-                    brush = Brush.linearGradient(
-                        colors = if (enabled) {
-                            listOf(
-                                AppTheme.extraColorScheme.brand1,
-                                AppTheme.extraColorScheme.brand2,
-                            )
-                        } else {
-                            listOf(
-                                Color(0xFF181818),
-                                Color(0xFF181818),
-                            )
-                        },
-                    ),
-                    shape = buttonShape,
-                )
-            ),
-        enabled = enabled,
-        content = {
-            if (loading) {
-                LoadingContent()
-            } else {
-                IconText(
-                    modifier = Modifier.background(Color.Unspecified),
-                    text = text,
-                    fontSize = fontSize,
-                    leadingIcon = leadingIcon,
-                    style = AppTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Medium,
-                    color = Color.White,
+            .semantics { role = Role.Button }
+            .shadow(elevation = 4.dp, shape)
+            .clip(shape)
+            .clickable(enabled = enabled, onClick = onClick)
+            .background(brush = buttonContainerBrush.value, shape = shape)
+            .border(border = border, shape = shape),
+        contentAlignment = Alignment.Center,
+    ) {
+        CompositionLocalProvider(LocalContentColor provides buttonContentColor.value) {
+            ProvideTextStyle(value = textStyle) {
+                Row(
+                    modifier = Modifier
+                        .padding(contentPadding)
+                        .fillMaxHeight(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
+                    content = content
                 )
             }
         }
-    )
-}
-
-@Composable
-private fun LoadingContent() {
-    CircularProgressIndicator(
-        modifier = Modifier.size(12.dp),
-        strokeWidth = 2.dp,
-        color = AppTheme.colorScheme.onSurface,
-    )
+    }
 }
 
 data class PrimalButtonPreviewState(
     val enabled: Boolean,
-    val loading: Boolean,
-    val leadingIcon: ImageVector? = null,
 )
 
-class PrimalButtonStatePreviewProvider : PreviewParameterProvider<PrimalButtonPreviewState> {
+class PrimalStatePreviewProvider : PreviewParameterProvider<PrimalButtonPreviewState> {
     override val values: Sequence<PrimalButtonPreviewState>
         get() = sequenceOf(
-            PrimalButtonPreviewState(enabled = true, loading = false),
-            PrimalButtonPreviewState(
-                enabled = true,
-                loading = false,
-                leadingIcon = Icons.Outlined.CopyAll
-            ),
-            PrimalButtonPreviewState(enabled = false, loading = true),
-            PrimalButtonPreviewState(enabled = false, loading = false),
-            PrimalButtonPreviewState(enabled = true, loading = true)
+            PrimalButtonPreviewState(enabled = true),
+            PrimalButtonPreviewState(enabled = false),
         )
 }
 
 @Preview
 @Composable
 fun PrimalButtonPreview(
-    @PreviewParameter(PrimalButtonStatePreviewProvider::class)
+    @PreviewParameter(PrimalStatePreviewProvider::class)
     state: PrimalButtonPreviewState
 ) {
     PrimalTheme {
-        PrimalButton(
+        PrimalLoadingButton(
+            modifier = Modifier.height(48.dp),
             onClick = { },
             enabled = state.enabled,
-            loading = state.loading,
             text = "Hello Primal!",
-            leadingIcon = state.leadingIcon,
         )
     }
 }
