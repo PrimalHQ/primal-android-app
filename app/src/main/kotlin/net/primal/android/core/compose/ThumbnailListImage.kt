@@ -1,6 +1,7 @@
 package net.primal.android.core.compose
 
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
@@ -35,14 +36,17 @@ fun AvatarThumbnailListItemImage(
         AppTheme.extraColorScheme.brand1,
         AppTheme.extraColorScheme.brand2,
     ),
+    onClick: (() -> Unit)? = null,
 ) {
     SubcomposeAsyncImage(
         model = source,
-        modifier = modifier.adjustAvatarBackground(
-            size = size,
-            hasBorder = hasBorder,
-            borderGradientColors = borderGradientColors,
-        ),
+        modifier = modifier
+            .adjustAvatarBackground(
+                size = size,
+                hasBorder = hasBorder,
+                borderGradientColors = borderGradientColors,
+            )
+            .clickable(enabled = onClick != null, onClick = { onClick?.invoke() }),
         contentDescription = null,
         contentScale = ContentScale.Crop,
         loading = {
@@ -62,7 +66,8 @@ private fun Modifier.adjustAvatarBackground(
     borderGradientColors: List<Color>,
 ): Modifier = composed {
     if (hasBorder) {
-        this.size(size + 2.dp)
+        this
+            .size(size + 2.dp)
             .border(
                 width = 2.dp,
                 brush = Brush.linearGradient(borderGradientColors),
@@ -76,7 +81,8 @@ private fun Modifier.adjustAvatarBackground(
             )
             .clip(CircleShape)
     } else {
-        this.size(size)
+        this
+            .size(size)
             .clip(CircleShape)
     }
 

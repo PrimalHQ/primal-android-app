@@ -163,11 +163,11 @@ fun ExploreTopAppBar(
                 modifier = Modifier
                     .padding(horizontal = 8.dp)
                     .clip(CircleShape)
-                    .clickable(onClick = onNavigationIconClick)
             ) {
                 AvatarThumbnailListItemImage(
                     source = avatarUrl,
                     modifier = Modifier.size(32.dp),
+                    onClick = onNavigationIconClick,
                 )
             }
         },

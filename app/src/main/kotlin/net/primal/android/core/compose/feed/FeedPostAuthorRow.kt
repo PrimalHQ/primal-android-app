@@ -1,6 +1,5 @@
 package net.primal.android.core.compose.feed
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -53,7 +52,7 @@ fun FeedPostAuthorRow(
         AvatarThumbnailListItemImage(
             source = imageSource,
             hasBorder = authorInternetIdentifier.isPrimalIdentifier(),
-            modifier = Modifier.clickable { onAuthorAvatarClick() },
+            onClick = onAuthorAvatarClick,
         )
 
         Column(

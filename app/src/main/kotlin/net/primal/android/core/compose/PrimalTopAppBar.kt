@@ -1,6 +1,5 @@
 package net.primal.android.core.compose
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.padding
@@ -35,11 +34,11 @@ fun PrimalTopAppBar(
                     modifier = Modifier
                         .padding(horizontal = 8.dp)
                         .clip(CircleShape)
-                        .clickable(onClick = onNavigationIconClick)
                 ) {
                     AvatarThumbnailListItemImage(
                         source = avatarUrl,
                         modifier = Modifier.size(32.dp),
+                        onClick = onNavigationIconClick,
                     )
                 }
             } else if (navigationIcon != null) {
