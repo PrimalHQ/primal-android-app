@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -28,6 +29,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import net.primal.android.R
 import net.primal.android.core.compose.AppBarIcon
@@ -141,6 +143,9 @@ fun SearchTextField(
         colors = OutlinedTextFieldDefaults.colors(
             focusedBorderColor = Color.Unspecified,
             unfocusedBorderColor = Color.Unspecified,
+        ),
+        keyboardOptions = KeyboardOptions(
+            imeAction = ImeAction.Done,
         ),
     )
 }
