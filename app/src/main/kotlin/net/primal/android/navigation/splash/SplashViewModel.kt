@@ -48,5 +48,4 @@ class SplashViewModel @Inject constructor(
                 setEffect(effect = SideEffect.NoActiveAccount)
             }
     }
-
 }

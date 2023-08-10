@@ -2,6 +2,7 @@ package net.primal.android.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
@@ -27,6 +28,7 @@ import net.primal.android.auth.welcome.WelcomeScreen
 import net.primal.android.core.compose.DemoPrimaryScreen
 import net.primal.android.core.compose.LockToOrientationPortrait
 import net.primal.android.core.compose.PrimalTopLevelDestination
+import net.primal.android.core.compose.findActivity
 import net.primal.android.discuss.feed.FeedScreen
 import net.primal.android.discuss.feed.FeedViewModel
 import net.primal.android.discuss.list.FeedListScreen
@@ -49,7 +51,6 @@ import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.thread.ThreadScreen
 import net.primal.android.thread.ThreadViewModel
-
 
 private fun NavController.navigateToWelcome() = navigate(
     route = "welcome",
@@ -96,6 +97,8 @@ private fun NavController.navigateToProfile(profileId: String? = null) = when {
 
 private fun NavController.navigateToSettings() = navigate(route = "settings")
 
+private fun NavController.navigateToWallet() = navigate(route = "wallet_settings")
+
 private fun NavController.navigateToThread(postId: String) = navigate(route = "thread/$postId")
 
 private fun NavController.navigateToExploreFeed(query: String) =
@@ -134,6 +137,16 @@ fun PrimalAppNavigation() {
             }
         }
     }
+    val context = LocalContext.current
+    LaunchedEffect(navController) {
+        val activity = context.findActivity()
+
+        val url = activity?.intent?.data?.toString()?.ifBlank { null }
+
+        if (url != null && url.startsWith("nostr+walletconnect")) {
+            navController.navigateToWallet()
+        }
+    }
 
     ModalBottomSheetLayout(
         bottomSheetNavigator = bottomSheetNavigator,
@@ -149,7 +162,7 @@ fun PrimalAppNavigation() {
             login(route = "login", navController = navController)
 
             logout(route = "logout", navController = navController)
-
+            
             feed(
                 route = "feed?$FeedDirective={$FeedDirective}",
                 arguments = listOf(
