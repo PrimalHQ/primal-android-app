@@ -272,7 +272,7 @@ fun ProfileScreen(
             header = {
                 UserProfileDetails(
                     profileId = state.profileId,
-                    isFollowed = state.isActiveUserFollowing,
+                    isFollowed = state.isProfileFollowed,
                     profileDetails = state.profileDetails,
                     profileStats = state.profileStats,
                     onFollow = {
@@ -658,7 +658,7 @@ fun PreviewProfileScreen() {
         ProfileScreen(
             state = ProfileContract.UiState(
                 profileId = "profileId",
-                isActiveUserFollowing = false,
+                isProfileFollowed = false,
                 authoredPosts = emptyFlow(),
             ),
             onClose = {},

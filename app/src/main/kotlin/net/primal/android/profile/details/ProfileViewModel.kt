@@ -48,7 +48,7 @@ class ProfileViewModel @Inject constructor(
     private val _state = MutableStateFlow(
         UiState(
             profileId = profileId,
-            isActiveUserFollowing = profileId.isFollowed(),
+            isProfileFollowed = profileId.isProfileFollowed(),
             authoredPosts = feedRepository.feedByDirective(feedDirective = "authored;$profileId")
                 .map { it.map { feed -> feed.asFeedPostUi() } }
                 .cachedIn(viewModelScope),
@@ -87,7 +87,7 @@ class ProfileViewModel @Inject constructor(
             .mapNotNull { it.find { account -> account.pubkey == activeAccountStore.activeUserId() } }
             .collect {
                 setState {
-                    copy(isActiveUserFollowing = it.following.contains(profileId))
+                    copy(isProfileFollowed = it.following.contains(profileId))
                 }
             }
     }
@@ -131,7 +131,7 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-    private fun String.isFollowed(): Boolean {
+    private fun String.isProfileFollowed(): Boolean {
         val account = activeAccountStore.activeUserAccount.value
         return account.following.contains(this)
     }
