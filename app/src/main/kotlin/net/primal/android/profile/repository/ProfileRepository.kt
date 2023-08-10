@@ -9,6 +9,7 @@ import net.primal.android.nostr.ext.asProfileMetadataPO
 import net.primal.android.nostr.ext.asProfileStats
 import net.primal.android.nostr.ext.takeContentAsUserProfileStatsOrNull
 import net.primal.android.user.accounts.UserAccountsStore
+import net.primal.android.user.accounts.merge
 import net.primal.android.user.active.ActiveAccountStore
 import net.primal.android.user.api.UsersApi
 import net.primal.android.user.domain.asUserAccount
@@ -17,7 +18,7 @@ import javax.inject.Inject
 class ProfileRepository @Inject constructor(
     private val database: PrimalDatabase,
     private val usersApi: UsersApi,
-    private val userAccountsStore: UserAccountsStore,
+    private val accountsStore: UserAccountsStore,
     private val activeAccountStore: ActiveAccountStore,
     private val latestFollowingResolver: LatestFollowingResolver,
 ) {
@@ -45,26 +46,39 @@ class ProfileRepository @Inject constructor(
     }
 
     suspend fun follow(followedPubkey: String) {
-        val latestFollowing = latestFollowingResolver.getLatestFollowing()
-        val updatedFollowing = latestFollowing.toMutableSet().apply { add(followedPubkey) }
-        val activeAccount = activeAccountStore.activeUserAccount.value
-        val newContactsNostrEvent = usersApi.setUserContacts(
-            ownerId = activeAccount.pubkey,
-            contacts = updatedFollowing,
-            relays = activeAccount.relays
+        updateFollowing(
+            newFollowing = latestFollowingResolver.getLatestFollowing()
+                .toMutableSet()
+                .apply {
+                    add(followedPubkey)
+                }
         )
-        userAccountsStore.upsertAccount(userAccount = newContactsNostrEvent.asUserAccount())
     }
 
     suspend fun unfollow(unfollowedPubkey: String) {
-        val latestFollowing = latestFollowingResolver.getLatestFollowing()
-        val updatedFollowing = latestFollowing.toMutableSet().apply { remove(unfollowedPubkey) }
-        val activeAccount = activeAccountStore.activeUserAccount.value
+        updateFollowing(
+            newFollowing = latestFollowingResolver.getLatestFollowing()
+                .toMutableSet()
+                .apply { remove(unfollowedPubkey) }
+        )
+    }
+
+    private suspend fun updateFollowing(newFollowing: Set<String>) {
+        val userId = activeAccountStore.activeUserId()
+        val activeAccount = accountsStore.findByIdOrNull(userId) ?: throw IllegalStateException()
+
         val newContactsNostrEvent = usersApi.setUserContacts(
             ownerId = activeAccount.pubkey,
-            contacts = updatedFollowing,
+            contacts = newFollowing,
             relays = activeAccount.relays
         )
-        userAccountsStore.upsertAccount(userAccount = newContactsNostrEvent.asUserAccount())
+        accountsStore.upsertAccount(
+            userAccount = activeAccount.merge(
+                profile = activeAccount,
+                contacts = newContactsNostrEvent.asUserAccount()
+            ).copy(
+                followingCount = newFollowing.size
+            )
+        )
     }
 }

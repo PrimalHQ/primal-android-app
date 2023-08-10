@@ -42,8 +42,7 @@ class ProfileViewModel @Inject constructor(
     private val postRepository: PostRepository,
 ) : ViewModel() {
 
-    private val profileId: String = savedStateHandle.profileId
-        ?: activeAccountStore.activeUserAccount.value.pubkey
+    private val profileId: String = savedStateHandle.profileId ?: activeAccountStore.activeUserId()
 
     private val _state = MutableStateFlow(
         UiState(
@@ -67,7 +66,7 @@ class ProfileViewModel @Inject constructor(
     init {
         observeEvents()
         observeProfile()
-        observeActiveAccountChanges()
+        observeAccountDataChanges()
         fetchLatestProfile()
     }
 
@@ -82,7 +81,7 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-    private fun observeActiveAccountChanges() = viewModelScope.launch {
+    private fun observeAccountDataChanges() = viewModelScope.launch {
         accountsStore.userAccounts
             .mapNotNull { it.find { account -> account.pubkey == activeAccountStore.activeUserId() } }
             .collect {
@@ -132,8 +131,9 @@ class ProfileViewModel @Inject constructor(
     }
 
     private fun String.isProfileFollowed(): Boolean {
-        val account = activeAccountStore.activeUserAccount.value
-        return account.following.contains(this)
+        val userId = activeAccountStore.activeUserId()
+        val account = accountsStore.findByIdOrNull(userId)
+        return account?.following?.contains(this) == true
     }
 
     private fun fetchLatestProfile() = viewModelScope.launch {

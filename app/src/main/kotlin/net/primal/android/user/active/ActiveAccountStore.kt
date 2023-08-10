@@ -22,6 +22,11 @@ class ActiveAccountStore @Inject constructor(
 
     private val scope = CoroutineScope(Dispatchers.IO)
 
+    @Deprecated(
+        message = "This flow does not publish data changes for active user account. " +
+                "It only changes when active user changes.",
+        replaceWith = ReplaceWith("UserAccountsStore.userAccounts"),
+    )
     val activeUserAccount = persistence.data
         .map { it.pubkeyToUserAccount() }
         .stateIn(

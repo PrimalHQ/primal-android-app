@@ -3,6 +3,7 @@ package net.primal.android.auth
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.user.accounts.UserAccountFetcher
 import net.primal.android.user.accounts.UserAccountsStore
+import net.primal.android.user.accounts.merge
 import net.primal.android.user.active.ActiveAccountStore
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.UserAccount
@@ -20,8 +21,8 @@ class AuthRepository @Inject constructor(
     suspend fun login(nostrKey: String): String {
         val pubkey = credentialsStore.save(nostrKey)
 
-        val userProfile = fetchUserProfileOrNulL(pubkey)
-        val userContacts = fetchUserContactsOrNulL(pubkey)
+        val userProfile = fetchUserProfileOrNull(pubkey)
+        val userContacts = fetchUserContactsOrNull(pubkey)
         val userAccount = UserAccount.buildLocal(pubkey).merge(
             profile = userProfile,
             contacts = userContacts,
@@ -38,27 +39,13 @@ class AuthRepository @Inject constructor(
         activeAccountStore.clearActiveUserAccount()
     }
 
-    private fun UserAccount.merge(profile: UserAccount?, contacts: UserAccount?) = this.copy(
-        authorDisplayName = profile?.authorDisplayName ?: contacts?.authorDisplayName ?: this.authorDisplayName,
-        userDisplayName = profile?.userDisplayName ?: contacts?.userDisplayName ?: this.userDisplayName,
-        pictureUrl = profile?.pictureUrl,
-        internetIdentifier = profile?.internetIdentifier,
-        followersCount = profile?.followersCount,
-        followingCount = profile?.followingCount,
-        notesCount = profile?.notesCount,
-        relays = contacts?.relays ?: emptyList(),
-        following = contacts?.following ?: emptySet(),
-        followers = contacts?.followers ?: emptyList(),
-        interests = contacts?.interests ?: emptyList(),
-    )
-
-    private suspend fun fetchUserProfileOrNulL(pubkey: String) = try {
+    private suspend fun fetchUserProfileOrNull(pubkey: String) = try {
         userAccountFetcher.fetchUserProfile(pubkey)
     } catch (error: WssException) {
         null
     }
 
-    private suspend fun fetchUserContactsOrNulL(pubkey: String) = try {
+    private suspend fun fetchUserContactsOrNull(pubkey: String) = try {
         userAccountFetcher.fetchUserContacts(pubkey)
     } catch (error: WssException) {
         null
