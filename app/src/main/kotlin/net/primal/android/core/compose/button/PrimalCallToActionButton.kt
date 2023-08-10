@@ -1,4 +1,4 @@
-package net.primal.android.core.compose
+package net.primal.android.core.compose.button
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border

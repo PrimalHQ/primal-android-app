@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
@@ -60,6 +61,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -76,7 +78,8 @@ import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.AvatarThumbnailListItemImage
 import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.NostrUserText
-import net.primal.android.core.compose.PrimalLoadingButton
+import net.primal.android.core.compose.button.PrimalFilledButton
+import net.primal.android.core.compose.button.PrimalOutlinedButton
 import net.primal.android.core.compose.feed.FeedLazyColumn
 import net.primal.android.core.compose.feed.FeedLoading
 import net.primal.android.core.compose.feed.FeedNoContent
@@ -558,20 +561,55 @@ private fun ProfileActions(
             .background(AppTheme.colorScheme.surfaceVariant),
         horizontalArrangement = Arrangement.End,
     ) {
-        PrimalLoadingButton(
-            modifier = Modifier
-                .height(40.dp)
-                .wrapContentWidth(),
-            shape = AppTheme.shapes.medium,
-            text = if (isFollowed) {
-                stringResource(id = R.string.profile_unfollow_button)
-            } else {
-                stringResource(id = R.string.profile_follow_button)
-            },
-            fontSize = 14.sp,
-            onClick = {
-                if (isFollowed) onUnfollow() else onFollow()
-            },
+        when (isFollowed) {
+            true -> UnfollowButton(onClick = onUnfollow)
+            false -> FollowButton(onClick = onFollow)
+        }
+    }
+}
+
+@Composable
+fun FollowButton(
+    onClick: () -> Unit,
+) {
+    PrimalFilledButton(
+        modifier = Modifier
+            .height(36.dp)
+            .width(100.dp),
+        shape = AppTheme.shapes.medium,
+        contentPadding = PaddingValues(
+            horizontal = 16.dp,
+            vertical = 0.dp,
+        ),
+        textStyle = AppTheme.typography.bodySmall,
+        onClick = onClick,
+    ) {
+        Text(
+            text = stringResource(id = R.string.profile_follow_button),
+            fontWeight = FontWeight.Bold,
+        )
+    }
+}
+
+@Composable
+private fun UnfollowButton(
+    onClick: () -> Unit,
+) {
+    PrimalOutlinedButton(
+        modifier = Modifier
+            .height(36.dp)
+            .width(100.dp),
+        shape = AppTheme.shapes.medium,
+        contentPadding = PaddingValues(
+            horizontal = 16.dp,
+            vertical = 0.dp,
+        ),
+        textStyle = AppTheme.typography.bodySmall,
+        onClick = onClick,
+    ) {
+        Text(
+            text = stringResource(id = R.string.profile_unfollow_button),
+            fontWeight = FontWeight.Bold,
         )
     }
 }

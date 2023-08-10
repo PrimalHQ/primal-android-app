@@ -1,4 +1,4 @@
-package net.primal.android.core.compose
+package net.primal.android.core.compose.button
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -37,7 +37,7 @@ import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 
 @Composable
-fun PrimalButton(
+fun PrimalFilledButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
@@ -48,7 +48,7 @@ fun PrimalButton(
             AppTheme.extraColorScheme.brand2,
         ),
     ),
-    contentColor: Color = AppTheme.colorScheme.onSurface,
+    contentColor: Color = Color.White,
     disabledContainerBrush: Brush = containerBrush,
     disabledContentColor: Color = contentColor.copy(alpha = 0.5f),
     textStyle: TextStyle = AppTheme.typography.bodyLarge,

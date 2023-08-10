@@ -20,7 +20,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import net.primal.android.R
-import net.primal.android.core.compose.PrimalCallToActionButton
+import net.primal.android.core.compose.button.PrimalCallToActionButton
 import net.primal.android.core.compose.fadingBottomEdge
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme

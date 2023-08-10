@@ -1,4 +1,4 @@
-package net.primal.android.core.compose
+package net.primal.android.core.compose.button
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.PaddingValues
@@ -19,6 +19,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import net.primal.android.core.compose.IconText
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 
@@ -34,7 +35,7 @@ fun PrimalLoadingButton(
     fontSize: TextUnit = TextUnit.Unspecified,
     contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
 ) {
-    PrimalButton(
+    PrimalFilledButton(
         modifier = modifier,
         onClick = onClick,
         shape = shape,
