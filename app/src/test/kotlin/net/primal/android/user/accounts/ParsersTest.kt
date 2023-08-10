@@ -47,7 +47,7 @@ class ParsersTest {
 
     @Test
     fun `parseFollowings returns empty list for no content`() {
-        emptyList<JsonArray>().parseFollowings() shouldBe emptyList()
+        emptyList<JsonArray>().parseFollowings() shouldBe emptySet()
     }
 
     @Test
@@ -65,7 +65,7 @@ class ParsersTest {
                 add("x")
                 add("extreme")
             },
-        ).parseFollowings() shouldBe emptyList()
+        ).parseFollowings() shouldBe emptySet()
     }
 
     @Test

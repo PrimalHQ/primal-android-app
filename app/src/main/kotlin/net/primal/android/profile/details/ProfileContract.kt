@@ -10,6 +10,7 @@ import net.primal.android.profile.details.model.ProfileStatsUi
 interface ProfileContract {
     data class UiState(
         val profileId: String,
+        val isActiveUserFollowing: Boolean,
         val profileDetails: ProfileDetailsUi? = null,
         val profileStats: ProfileStatsUi? = null,
         val resources: List<MediaResourceUi> = emptyList(),
@@ -23,5 +24,8 @@ interface ProfileContract {
             val postAuthorId: String,
             val postNostrEvent: String
         ) : UiEvent()
+
+        data class FollowAction(val profileId: String) : UiEvent()
+        data class UnfollowAction(val profileId: String) : UiEvent()
     }
 }

@@ -28,12 +28,12 @@ fun String.parseRelays(): List<Relay> {
     return relays
 }
 
-fun List<JsonArray>.parseFollowings(): List<String> {
-    val followings = mutableListOf<String>()
+fun List<JsonArray>.parseFollowings(): Set<String> {
+    val followings = mutableSetOf<String>()
     this.forEach {
-        if (it[0].jsonPrimitive.content == "p") {
-            val pubkey = it[1].jsonPrimitive.content
-            followings.add(pubkey)
+        if (it.getOrNull(0)?.jsonPrimitive?.content == "p") {
+            val pubkey = it.getOrNull(1)?.jsonPrimitive?.content
+            if (pubkey != null) followings.add(pubkey)
         }
     }
     return followings
@@ -42,9 +42,9 @@ fun List<JsonArray>.parseFollowings(): List<String> {
 fun List<JsonArray>.parseInterests(): List<String> {
     val interests = mutableListOf<String>()
     this.forEach {
-        if (it[0].jsonPrimitive.content == "t") {
-            val tag = it[1].jsonPrimitive.content
-            interests.add(tag)
+        if (it.getOrNull(0)?.jsonPrimitive?.content == "t") {
+            val hashtag = it.getOrNull(1)?.jsonPrimitive?.content
+            if (hashtag != null) interests.add(hashtag)
         }
     }
     return interests

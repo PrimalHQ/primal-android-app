@@ -10,6 +10,7 @@ import net.primal.android.profile.db.userNameUiFriendly
 import net.primal.android.user.api.UsersApi
 import net.primal.android.user.domain.Relay
 import net.primal.android.user.domain.UserAccount
+import net.primal.android.user.domain.asUserAccount
 import javax.inject.Inject
 
 class UserAccountFetcher @Inject constructor(
@@ -40,22 +41,27 @@ class UserAccountFetcher @Inject constructor(
             usersApi.getUserContacts(pubkey = pubkey)
         }
 
-        val userRelays = contactsResponse.contactsEvent?.content?.parseRelays()
-        val following = contactsResponse.contactsEvent?.tags?.parseFollowings()
-        val interests = contactsResponse.contactsEvent?.tags?.parseInterests()
+        val userAccount = contactsResponse.contactsEvent?.asUserAccount()
+            ?: UserAccount(
+                pubkey = pubkey,
+                authorDisplayName = pubkey.asEllipsizedNpub(),
+                userDisplayName = pubkey.asEllipsizedNpub(),
+                relays = BOOTSTRAP_RELAYS.map { Relay(url = it, read = true, write = true) },
+                following = emptySet(),
+                interests = emptyList(),
+                contactsCreatedAt = null,
+            )
 
-        val finalRelays = if (userRelays.isNullOrEmpty()) {
-            BOOTSTRAP_RELAYS.map { Relay(url = it, read = true, write = true) }
-        } else userRelays
-
-        return UserAccount(
-            pubkey = pubkey,
-            authorDisplayName = pubkey.asEllipsizedNpub(),
-            userDisplayName = pubkey.asEllipsizedNpub(),
-            relays = finalRelays,
-            following = following ?: emptyList(),
-            interests = interests ?: emptyList(),
-        )
+        return userAccount.ensureRelaysAreAvailable()
     }
 
+    private fun UserAccount.ensureRelaysAreAvailable(): UserAccount {
+        return copy(
+            relays = if (relays.isEmpty()) {
+                BOOTSTRAP_RELAYS.map { Relay(url = it, read = true, write = true) }
+            } else {
+                this.relays
+            }
+        )
+    }
 }

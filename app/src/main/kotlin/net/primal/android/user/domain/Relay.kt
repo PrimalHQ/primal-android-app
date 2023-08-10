@@ -8,3 +8,9 @@ data class Relay(
     val read: Boolean,
     val write: Boolean,
 )
+
+@Serializable
+data class RelayPermission(
+    val read: Boolean,
+    val write: Boolean,
+)

@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import net.primal.android.core.compose.feed.asFeedPostUi
 import net.primal.android.core.compose.media.model.MediaResourceUi
@@ -25,25 +26,29 @@ import net.primal.android.profile.details.ProfileContract.UiEvent
 import net.primal.android.profile.details.ProfileContract.UiState
 import net.primal.android.profile.details.model.ProfileDetailsUi
 import net.primal.android.profile.details.model.ProfileStatsUi
+import net.primal.android.profile.repository.LatestFollowingResolver
 import net.primal.android.profile.repository.ProfileRepository
+import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.active.ActiveAccountStore
 import javax.inject.Inject
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    activeAccountStore: ActiveAccountStore,
     feedRepository: FeedRepository,
+    private val activeAccountStore: ActiveAccountStore,
+    private val accountsStore: UserAccountsStore,
     private val profileRepository: ProfileRepository,
     private val postRepository: PostRepository,
 ) : ViewModel() {
 
-    private val profileId: String =
-        savedStateHandle.profileId ?: activeAccountStore.activeUserAccount.value.pubkey
+    private val profileId: String = savedStateHandle.profileId
+        ?: activeAccountStore.activeUserAccount.value.pubkey
 
     private val _state = MutableStateFlow(
         UiState(
             profileId = profileId,
+            isActiveUserFollowing = profileId.isFollowed(),
             authoredPosts = feedRepository.feedByDirective(feedDirective = "authored;$profileId")
                 .map { it.map { feed -> feed.asFeedPostUi() } }
                 .cachedIn(viewModelScope),
@@ -62,6 +67,7 @@ class ProfileViewModel @Inject constructor(
     init {
         observeEvents()
         observeProfile()
+        observeActiveAccountChanges()
         fetchLatestProfile()
     }
 
@@ -70,16 +76,20 @@ class ProfileViewModel @Inject constructor(
             when (it) {
                 is UiEvent.PostLikeAction -> likePost(it)
                 is UiEvent.RepostAction -> repostPost(it)
+                is UiEvent.FollowAction -> follow(it)
+                is UiEvent.UnfollowAction -> unfollow(it)
             }
         }
     }
 
-    private fun fetchLatestProfile() = viewModelScope.launch {
-        try {
-            profileRepository.requestProfileUpdate(profileId = profileId)
-        } catch (error: WssException) {
-            // Ignore
-        }
+    private fun observeActiveAccountChanges() = viewModelScope.launch {
+        accountsStore.userAccounts
+            .mapNotNull { it.find { account -> account.pubkey == activeAccountStore.activeUserId() } }
+            .collect {
+                setState {
+                    copy(isActiveUserFollowing = it.following.contains(profileId))
+                }
+            }
     }
 
     private fun observeProfile() = viewModelScope.launch {
@@ -121,6 +131,19 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
+    private fun String.isFollowed(): Boolean {
+        val account = activeAccountStore.activeUserAccount.value
+        return account.following.contains(this)
+    }
+
+    private fun fetchLatestProfile() = viewModelScope.launch {
+        try {
+            profileRepository.requestProfileUpdate(profileId = profileId)
+        } catch (error: WssException) {
+            // Ignore
+        }
+    }
+
     private fun likePost(postLikeAction: UiEvent.PostLikeAction) = viewModelScope.launch {
         try {
             postRepository.likePost(
@@ -139,6 +162,26 @@ class ProfileViewModel @Inject constructor(
                 postAuthorId = repostAction.postAuthorId,
                 postRawNostrEvent = repostAction.postNostrEvent,
             )
+        } catch (error: NostrPublishException) {
+            // Propagate error to the UI
+        }
+    }
+
+    private fun follow(followAction: UiEvent.FollowAction) = viewModelScope.launch {
+        try {
+            profileRepository.follow(followAction.profileId)
+        } catch (error: LatestFollowingResolver.RemoteFollowingsUnavailableException) {
+            // Failed to retrieve latest contacts, propagate error to the UI
+        } catch (error: NostrPublishException) {
+            // Failed to publish update, propagate error to the UI
+        }
+    }
+
+    private fun unfollow(unfollowAction: UiEvent.UnfollowAction) = viewModelScope.launch {
+        try {
+            profileRepository.unfollow(unfollowAction.profileId)
+        } catch (error: LatestFollowingResolver.RemoteFollowingsUnavailableException) {
+            // Failed to retrieve latest contacts, propagate error to the UI
         } catch (error: NostrPublishException) {
             // Propagate error to the UI
         }

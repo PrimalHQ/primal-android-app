@@ -11,8 +11,10 @@ import net.primal.android.nostr.ext.asPubkeyTag
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.serialization.NostrJson
+import net.primal.android.serialization.toNostrRelayMap
 import net.primal.android.settings.api.model.AppSettingsDescription
 import net.primal.android.user.credentials.CredentialsStore
+import net.primal.android.user.domain.Relay
 import javax.inject.Inject
 
 
@@ -82,4 +84,19 @@ class NostrNotary @Inject constructor(
         ).signOrThrow(nsec = findNsecOrThrow(userId))
     }
 
+    fun signContactsNostrEvent(
+        userId: String,
+        contacts: Set<String>,
+        relays: List<Relay>
+    ): NostrEvent {
+        val tags = contacts.map { it.asPubkeyTag() }
+        val content = NostrJson.encodeToString(relays.toNostrRelayMap())
+
+        return NostrUnsignedEvent(
+            pubKey = userId,
+            kind = NostrEventKind.Contacts.value,
+            content = content,
+            tags = tags
+        ).signOrThrow(nsec = findNsecOrThrow(userId))
+    }
 }
