@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.runBlocking
+import net.primal.android.user.domain.NostrWalletConnect
 import net.primal.android.user.domain.UserAccount
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -15,7 +16,6 @@ import javax.inject.Singleton
 class UserAccountsStore @Inject constructor(
     private val persistence: DataStore<List<UserAccount>>
 ) {
-
     private val scope = CoroutineScope(Dispatchers.IO)
 
     val userAccounts = persistence.data
@@ -48,4 +48,16 @@ class UserAccountsStore @Inject constructor(
 
     fun findByIdOrNull(pubkey: String) = userAccounts.value.find { it.pubkey == pubkey }
 
+    suspend fun setNostrWalletConnect(ownerId: String, nwc: NostrWalletConnect) {
+        persistence.updateData { accounts ->
+            val owner = accounts.find { it.pubkey === ownerId }
+
+            if (owner != null) {
+                val updated = owner.copy(nostrWalletConnect = nwc)
+                accounts.toMutableList().replaceAll { updated }
+            }
+
+            accounts
+        }
+    }
 }

@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.runBlocking
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.di.ActiveAccountDataStore
+import net.primal.android.user.domain.NostrWalletConnect
 import net.primal.android.user.domain.UserAccount
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -53,5 +54,4 @@ class ActiveAccountStore @Inject constructor(
     suspend fun clearActiveUserAccount() {
         persistence.updateData { "" }
     }
-
 }

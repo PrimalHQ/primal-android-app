@@ -6,6 +6,7 @@ import net.primal.android.user.accounts.UserAccountFetcher
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.accounts.copyContactsIfNotNull
 import net.primal.android.user.accounts.copyIfNotNull
+import net.primal.android.user.domain.NostrWalletConnect
 import net.primal.android.user.domain.UserAccount
 import net.primal.android.user.domain.asUserAccount
 import javax.inject.Inject
@@ -39,6 +40,17 @@ class UserRepository @Inject constructor(
                 contacts = contactsNostrEvent.asUserAccount()
             ).copy(
                 followingCount = contactsNostrEvent.tags?.count { it.isPubKeyTag() }
+            )
+        )
+    }
+
+    suspend fun updateNostrWalletConnectForUser(userId: String, nostrWalletConnect: NostrWalletConnect) {
+        val currentUserAccount = accountsStore.findByIdOrNull(pubkey = userId)
+            ?: UserAccount.buildLocal(pubkey = userId)
+
+        accountsStore.upsertAccount(
+            userAccount = currentUserAccount.copy(
+                nostrWalletConnect = nostrWalletConnect
             )
         )
     }

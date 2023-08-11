@@ -65,6 +65,7 @@ object CryptoUtils {
     fun getSharedSecret(privateKey: ByteArray, pubKey: ByteArray): ByteArray =
         secp256k1.pubKeyTweakMul(Hex.decode("02") + pubKey, privateKey).copyOfRange(1, 33)
 
+
     fun sha256(byteArray: ByteArray): ByteArray = sha256.digest(byteArray)
 
     private val secp256k1 = Secp256k1.get()
