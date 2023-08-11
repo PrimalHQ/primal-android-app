@@ -8,18 +8,16 @@ import net.primal.android.db.PrimalDatabase
 import net.primal.android.nostr.ext.asProfileMetadataPO
 import net.primal.android.nostr.ext.asProfileStats
 import net.primal.android.nostr.ext.takeContentAsUserProfileStatsOrNull
-import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.android.user.accounts.merge
 import net.primal.android.user.api.UsersApi
-import net.primal.android.user.domain.asUserAccount
+import net.primal.android.user.repository.UserRepository
 import javax.inject.Inject
 
 class ProfileRepository @Inject constructor(
     private val database: PrimalDatabase,
     private val usersApi: UsersApi,
-    private val accountsStore: UserAccountsStore,
     private val activeAccountStore: ActiveAccountStore,
+    private val userRepository: UserRepository,
     private val latestFollowingResolver: LatestFollowingResolver,
 ) {
     fun observeProfile(profileId: String) =
@@ -65,19 +63,15 @@ class ProfileRepository @Inject constructor(
 
     private suspend fun updateFollowing(newFollowing: Set<String>) {
         val activeAccount = activeAccountStore.activeUserAccount()
-
         val newContactsNostrEvent = usersApi.setUserContacts(
             ownerId = activeAccount.pubkey,
             contacts = newFollowing,
             relays = activeAccount.relays
         )
-        accountsStore.upsertAccount(
-            userAccount = activeAccount.merge(
-                profile = activeAccount,
-                contacts = newContactsNostrEvent.asUserAccount()
-            ).copy(
-                followingCount = newFollowing.size
-            )
+
+        userRepository.updateContacts(
+            userId = activeAccount.pubkey,
+            contactsNostrEvent = newContactsNostrEvent
         )
     }
 }
