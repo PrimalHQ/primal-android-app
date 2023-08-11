@@ -146,6 +146,10 @@ fun PrimalAppNavigation() {
                     val url = activity?.intent?.data?.toString()?.ifBlank { null }
 
                     if (url != null && url.startsWith("nostr+walletconnect")) {
+                        // https://stackoverflow.com/questions/72826135/using-deeplinks-in-compose-leads-to-inability-to-navigate-backwards#:~:text=gson.toJson(statements)-,navController.popBackStack(),-navController.navigate(
+                        // for some reason if we don't do this the splash screen will show up when user tries to go back
+                        // very strange behaviour
+                        navController.popBackStack()
                         navController.navigateToWallet(nwcUrl = withContext(Dispatchers.IO) {
                             URLEncoder.encode(url, Charsets.UTF_8.name())
                         })
