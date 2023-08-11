@@ -2,16 +2,31 @@ package net.primal.android.user.accounts
 
 import net.primal.android.user.domain.UserAccount
 
-fun UserAccount.merge(profile: UserAccount?, contacts: UserAccount?) = this.copy(
-    authorDisplayName = profile?.authorDisplayName ?: contacts?.authorDisplayName ?: this.authorDisplayName,
-    userDisplayName = profile?.userDisplayName ?: contacts?.userDisplayName ?: this.userDisplayName,
-    pictureUrl = profile?.pictureUrl,
-    internetIdentifier = profile?.internetIdentifier,
-    followersCount = profile?.followersCount,
-    followingCount = profile?.followingCount,
-    notesCount = profile?.notesCount,
-    relays = contacts?.relays ?: emptyList(),
-    following = contacts?.following ?: emptySet(),
-    followers = contacts?.followers ?: emptyList(),
-    interests = contacts?.interests ?: emptyList(),
-)
+fun UserAccount.copyIfNotNull(profile: UserAccount?, contacts: UserAccount?): UserAccount {
+    return copyProfileIfNotNull(profile = profile).copyContactsIfNotNull(contacts = contacts)
+}
+
+fun UserAccount.copyProfileIfNotNull(profile: UserAccount?): UserAccount {
+    return if (profile != null) {
+        copy(
+            authorDisplayName = profile.authorDisplayName,
+            userDisplayName = profile.userDisplayName,
+            pictureUrl = profile.pictureUrl,
+            internetIdentifier = profile.internetIdentifier,
+            followersCount = profile.followersCount,
+            followingCount = profile.followingCount,
+            notesCount = profile.notesCount,
+        )
+    } else this
+}
+
+fun UserAccount.copyContactsIfNotNull(contacts: UserAccount?): UserAccount {
+    return if (contacts != null) {
+        copy(
+            relays = contacts.relays,
+            following = contacts.following,
+            followers = contacts.followers,
+            interests = contacts.interests,
+        )
+    } else this
+}

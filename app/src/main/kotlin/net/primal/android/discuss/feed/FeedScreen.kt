@@ -63,7 +63,7 @@ fun FeedScreen(
     val uiState = viewModel.state.collectAsState()
 
     LaunchedEffect(viewModel) {
-        viewModel.setEvent(FeedContract.UiEvent.RequestSyncSettings)
+        viewModel.setEvent(FeedContract.UiEvent.RequestUserDataUpdate)
     }
 
     FeedScreen(

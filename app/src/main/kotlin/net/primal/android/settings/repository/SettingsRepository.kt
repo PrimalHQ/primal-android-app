@@ -19,7 +19,7 @@ class SettingsRepository @Inject constructor(
     private val activeThemeStore: ActiveThemeStore,
 ) {
 
-    suspend fun fetchAppSettings(pubkey: String) = withContext(Dispatchers.IO) {
+    suspend fun fetchAndUpsertAppSettings(pubkey: String) = withContext(Dispatchers.IO) {
         val response = settingsApi.getAppSettings(pubkey = pubkey)
 
         val appSettings = NostrJson.decodeFromStringOrNull<ContentAppSettings>(

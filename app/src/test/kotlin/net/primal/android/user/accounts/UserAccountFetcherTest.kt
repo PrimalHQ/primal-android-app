@@ -107,7 +107,7 @@ class UserAccountFetcherTest {
         )
 
         val usersApiMock = mockk<UsersApi> {
-            coEvery { getUserContacts(any()) } returns UserContactsResponse(
+            coEvery { getUserContacts(any(), any()) } returns UserContactsResponse(
                 contactsEvent = NostrEvent(
                     id = "invalidId",
                     pubKey = expectedPubkey,
@@ -143,7 +143,7 @@ class UserAccountFetcherTest {
     fun `fetchUserContacts takes bootstrap relays if relays are missing`() = runTest {
         val expectedPubkey = "9b46c3f4a8dcdafdfff12a97c59758f38ff55002370fcfa7d14c8c857e9b5812"
         val usersApiMock = mockk<UsersApi> {
-            coEvery { getUserContacts(any()) } returns UserContactsResponse(
+            coEvery { getUserContacts(any(), any()) } returns UserContactsResponse(
                 contactsEvent = NostrEvent(
                     id = "invalidId",
                     pubKey = expectedPubkey,
@@ -166,7 +166,7 @@ class UserAccountFetcherTest {
     @Test
     fun `fetchUserContacts fails if api call fails`() = runTest {
         val usersApiMock = mockk<UsersApi> {
-            coEvery { getUserContacts(any()) } throws WssException()
+            coEvery { getUserContacts(any(), any()) } throws WssException()
         }
         val fetcher = UserAccountFetcher(usersApi = usersApiMock)
         shouldThrow<WssException> { fetcher.fetchUserContacts(pubkey = "any") }

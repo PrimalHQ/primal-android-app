@@ -3,6 +3,7 @@ package net.primal.android.user.accounts
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import net.primal.android.core.utils.asEllipsizedNpub
+import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.ext.asProfileMetadataPO
 import net.primal.android.nostr.ext.takeContentAsUserProfileStatsOrNull
 import net.primal.android.profile.db.authorNameUiFriendly
@@ -36,9 +37,15 @@ class UserAccountFetcher @Inject constructor(
         )
     }
 
+    suspend fun fetchUserProfileOrNull(pubkey: String) = try {
+        fetchUserProfile(pubkey)
+    } catch (error: WssException) {
+        null
+    }
+
     suspend fun fetchUserContacts(pubkey: String): UserAccount {
         val contactsResponse = withContext(Dispatchers.IO) {
-            usersApi.getUserContacts(pubkey = pubkey)
+            usersApi.getUserContacts(pubkey = pubkey, extendedResponse = false)
         }
 
         val userAccount = contactsResponse.contactsEvent?.asUserAccount()
@@ -53,6 +60,12 @@ class UserAccountFetcher @Inject constructor(
             )
 
         return userAccount.ensureRelaysAreAvailable()
+    }
+
+    suspend fun fetchUserContactsOrNull(pubkey: String) = try {
+        fetchUserContacts(pubkey)
+    } catch (error: WssException) {
+        null
     }
 
     private fun UserAccount.ensureRelaysAreAvailable(): UserAccount {
