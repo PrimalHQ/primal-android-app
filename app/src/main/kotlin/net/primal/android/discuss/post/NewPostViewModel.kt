@@ -21,8 +21,8 @@ import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.ext.parseEventTags
 import net.primal.android.nostr.ext.parseHashtagTags
 import net.primal.android.nostr.ext.parsePubkeyTags
-import net.primal.android.user.active.ActiveAccountStore
-import net.primal.android.user.active.ActiveUserAccountState
+import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.android.user.accounts.active.ActiveUserAccountState
 import javax.inject.Inject
 
 @HiltViewModel

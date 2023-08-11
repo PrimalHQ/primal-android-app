@@ -5,7 +5,7 @@ import net.primal.android.db.PrimalDatabase
 import net.primal.android.networking.relays.RelayPool
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.notary.NostrNotary
-import net.primal.android.user.active.ActiveAccountStore
+import net.primal.android.user.accounts.active.ActiveAccountStore
 import javax.inject.Inject
 
 class PostRepository @Inject constructor(

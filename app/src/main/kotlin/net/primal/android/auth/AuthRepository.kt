@@ -4,7 +4,7 @@ import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.user.accounts.UserAccountFetcher
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.accounts.merge
-import net.primal.android.user.active.ActiveAccountStore
+import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.UserAccount
 import javax.inject.Inject

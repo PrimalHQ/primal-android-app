@@ -13,8 +13,8 @@ import net.primal.android.explore.db.TrendingHashtag
 import net.primal.android.explore.home.ExploreHomeContract.UiState
 import net.primal.android.explore.repository.ExploreRepository
 import net.primal.android.networking.sockets.errors.WssException
-import net.primal.android.user.active.ActiveAccountStore
-import net.primal.android.user.active.ActiveUserAccountState
+import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.android.user.accounts.active.ActiveUserAccountState
 import javax.inject.Inject
 
 @HiltViewModel

@@ -1,7 +1,7 @@
 package net.primal.android.profile.repository
 
+import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.parseFollowings
-import net.primal.android.user.active.ActiveAccountStore
 import net.primal.android.user.api.UsersApi
 import javax.inject.Inject
 
@@ -11,7 +11,7 @@ class LatestFollowingResolver @Inject constructor(
 ) {
 
     suspend fun getLatestFollowing(): Set<String> {
-        val activeAccount = activeAccountStore.activeUserAccount.value
+        val activeAccount = activeAccountStore.activeUserAccount()
         val contactsResponse = usersApi.getUserContacts(
             pubkey = activeAccount.pubkey,
             extendedResponse = false,

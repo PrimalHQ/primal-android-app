@@ -20,8 +20,8 @@ import net.primal.android.networking.sockets.errors.NostrNoticeException
 import net.primal.android.networking.sockets.filterByEventId
 import net.primal.android.serialization.toJsonObject
 import net.primal.android.nostr.model.NostrEvent
-import net.primal.android.user.active.ActiveAccountStore
-import net.primal.android.user.active.ActiveUserAccountState
+import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.android.user.accounts.active.ActiveUserAccountState
 import net.primal.android.user.domain.Relay
 import okhttp3.OkHttpClient
 import okhttp3.Request

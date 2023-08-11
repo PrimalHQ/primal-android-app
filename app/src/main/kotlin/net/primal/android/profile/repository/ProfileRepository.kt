@@ -9,8 +9,8 @@ import net.primal.android.nostr.ext.asProfileMetadataPO
 import net.primal.android.nostr.ext.asProfileStats
 import net.primal.android.nostr.ext.takeContentAsUserProfileStatsOrNull
 import net.primal.android.user.accounts.UserAccountsStore
+import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.merge
-import net.primal.android.user.active.ActiveAccountStore
 import net.primal.android.user.api.UsersApi
 import net.primal.android.user.domain.asUserAccount
 import javax.inject.Inject
@@ -64,8 +64,7 @@ class ProfileRepository @Inject constructor(
     }
 
     private suspend fun updateFollowing(newFollowing: Set<String>) {
-        val userId = activeAccountStore.activeUserId()
-        val activeAccount = accountsStore.findByIdOrNull(userId) ?: throw IllegalStateException()
+        val activeAccount = activeAccountStore.activeUserAccount()
 
         val newContactsNostrEvent = usersApi.setUserContacts(
             ownerId = activeAccount.pubkey,

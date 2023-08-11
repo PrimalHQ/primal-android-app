@@ -1,4 +1,4 @@
-package net.primal.android.user.active
+package net.primal.android.user.accounts.active
 
 import android.content.Context
 import androidx.datastore.core.DataStore
@@ -7,12 +7,13 @@ import androidx.datastore.dataStoreFile
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import io.kotest.matchers.shouldBe
-import io.mockk.every
-import io.mockk.mockk
+import io.kotest.matchers.types.shouldBeInstanceOf
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.test.runTest
+import net.primal.android.security.NoEncryption
 import net.primal.android.serialization.StringSerializer
+import net.primal.android.serialization.UserAccountsSerialization
 import net.primal.android.test.MainDispatcherRule
 import net.primal.android.test.advanceUntilIdleAndDelay
 import net.primal.android.user.accounts.UserAccountsStore
@@ -27,6 +28,7 @@ class ActiveAccountStoreTest {
 
     companion object {
         private const val DATA_STORE_FILE = "testActiveAccount.json"
+        private const val DATA_ACCOUNTS_FILE = "testAccounts.json"
     }
 
     @get:Rule
@@ -34,36 +36,41 @@ class ActiveAccountStoreTest {
 
     private val testContext: Context = InstrumentationRegistry.getInstrumentation().targetContext
 
-    private val persistence: DataStore<String> = DataStoreFactory.create(
+    private val persistenceActiveAccount: DataStore<String> = DataStoreFactory.create(
         serializer = StringSerializer(),
         produceFile = { testContext.dataStoreFile(DATA_STORE_FILE) }
+    )
+
+    private val persistenceAccounts: DataStore<List<UserAccount>> = DataStoreFactory.create(
+        serializer = UserAccountsSerialization(encryption = NoEncryption()),
+        produceFile = { testContext.dataStoreFile(DATA_ACCOUNTS_FILE) }
     )
 
     private val expectedPubkey = "pubkey"
 
     private fun buildUserAccount(
-        expectedUserId: String = expectedPubkey,
-        expectedAuthorDisplayName: String = "Alex",
-        expectedUserDisplayName: String = "alex",
+        pubkey: String = expectedPubkey,
+        authorDisplayName: String = "Alex",
+        userDisplayName: String = "alex",
     ): UserAccount {
         return UserAccount(
-            pubkey = expectedUserId,
-            authorDisplayName = expectedAuthorDisplayName,
-            userDisplayName = expectedUserDisplayName,
+            pubkey = pubkey,
+            authorDisplayName = authorDisplayName,
+            userDisplayName = userDisplayName,
         )
     }
 
-    private fun mockkAccountsStore(
-        findByIdResult: UserAccount = UserAccount.EMPTY,
-    ) = mockk<UserAccountsStore>(relaxed = true) {
-        every { findByIdOrNull(any()) } returns findByIdResult
+    private suspend fun fakeAccountsStore(
+        accounts: List<UserAccount> = emptyList()
+    ) = UserAccountsStore(persistence = persistenceAccounts).apply {
+        accounts.forEach { upsertAccount(it) }
     }
 
     @Test
     fun `initial activeAccountState is NoUserAccount`() = runTest {
         val activeAccountStore = ActiveAccountStore(
-            persistence = persistence,
-            accountsStore = mockkAccountsStore()
+            persistence = persistenceActiveAccount,
+            accountsStore = fakeAccountsStore()
         )
 
         val actual = activeAccountStore.activeAccountState.firstOrNull()
@@ -71,13 +78,13 @@ class ActiveAccountStoreTest {
     }
 
     @Test
-    fun `initial userAccount is empty UserAccount`() {
+    fun `initial userAccount is empty UserAccount`() = runTest {
         val activeAccountStore = ActiveAccountStore(
-            persistence = persistence,
-            accountsStore = mockkAccountsStore()
+            persistence = persistenceActiveAccount,
+            accountsStore = fakeAccountsStore()
         )
 
-        val actual = activeAccountStore.activeUserAccount.value
+        val actual = activeAccountStore.activeUserAccount()
         actual shouldBe UserAccount.EMPTY
     }
 
@@ -85,14 +92,16 @@ class ActiveAccountStoreTest {
     fun `setActiveUserId stores active account to data store`() = runTest {
         val expectedUserAccount = buildUserAccount()
         val activeAccountStore = ActiveAccountStore(
-            persistence = persistence,
-            accountsStore = mockkAccountsStore(findByIdResult = expectedUserAccount)
+            persistence = persistenceActiveAccount,
+            accountsStore = fakeAccountsStore(
+                accounts = listOf(expectedUserAccount)
+            )
         )
 
         activeAccountStore.setActiveUserId(expectedPubkey)
         advanceUntilIdleAndDelay()
 
-        val actual = activeAccountStore.activeUserAccount.value
+        val actual = activeAccountStore.activeUserAccount()
         actual shouldBe expectedUserAccount
     }
 
@@ -100,8 +109,10 @@ class ActiveAccountStoreTest {
     fun `activeUserId returns user pubkey of the active user`() = runTest {
         val expectedUserAccount = buildUserAccount()
         val activeAccountStore = ActiveAccountStore(
-            persistence = persistence,
-            accountsStore = mockkAccountsStore(findByIdResult = expectedUserAccount)
+            persistence = persistenceActiveAccount,
+            accountsStore = fakeAccountsStore(
+                accounts = listOf(expectedUserAccount)
+            )
         )
 
         activeAccountStore.setActiveUserId(expectedPubkey)
@@ -113,25 +124,27 @@ class ActiveAccountStoreTest {
 
     @Test
     fun `clearActiveUserAccount reverts to empty UserAccount`() = runTest {
-        persistence.updateData { expectedPubkey }
+        persistenceActiveAccount.updateData { expectedPubkey }
         val activeAccountStore = ActiveAccountStore(
-            persistence = persistence,
-            accountsStore = mockkAccountsStore()
+            persistence = persistenceActiveAccount,
+            accountsStore = fakeAccountsStore()
         )
 
         activeAccountStore.clearActiveUserAccount()
         advanceUntilIdleAndDelay()
 
-        val actual = activeAccountStore.activeUserAccount.value
+        val actual = activeAccountStore.activeUserAccount()
         actual shouldBe UserAccount.EMPTY
     }
 
     @Test
     fun `clearActiveUserAccount reverts to NoUserAccount state`() = runTest {
-        persistence.updateData { expectedPubkey }
+        persistenceActiveAccount.updateData { expectedPubkey }
         val activeAccountStore = ActiveAccountStore(
-            persistence = persistence,
-            accountsStore = mockkAccountsStore()
+            persistence = persistenceActiveAccount,
+            accountsStore = fakeAccountsStore(
+                accounts = listOf(buildUserAccount())
+            )
         )
 
         activeAccountStore.clearActiveUserAccount()
@@ -141,4 +154,24 @@ class ActiveAccountStoreTest {
         actual shouldBe ActiveUserAccountState.NoUserAccount
     }
 
+    @Test
+    fun `updating account data triggers active account data to be updated`() = runTest {
+        val existingAccount = buildUserAccount(
+            pubkey = expectedPubkey,
+            authorDisplayName = "alex"
+        )
+        persistenceActiveAccount.updateData { existingAccount.pubkey }
+        val accountsStore = fakeAccountsStore(accounts = listOf(existingAccount))
+        val activeAccountStore = ActiveAccountStore(
+            persistence = persistenceActiveAccount,
+            accountsStore = accountsStore,
+        )
+
+        accountsStore.upsertAccount(existingAccount.copy(authorDisplayName = "nikola"))
+        advanceUntilIdleAndDelay()
+
+        val updatedAccount = activeAccountStore.activeAccountState.firstOrNull()
+        updatedAccount.shouldBeInstanceOf<ActiveUserAccountState.ActiveUserAccount>()
+        updatedAccount.data.authorDisplayName shouldBe "nikola"
+    }
 }

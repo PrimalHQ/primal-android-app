@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import net.primal.android.core.compose.feed.asFeedPostUi
 import net.primal.android.core.compose.media.model.MediaResourceUi
@@ -28,8 +27,7 @@ import net.primal.android.profile.details.model.ProfileDetailsUi
 import net.primal.android.profile.details.model.ProfileStatsUi
 import net.primal.android.profile.repository.LatestFollowingResolver
 import net.primal.android.profile.repository.ProfileRepository
-import net.primal.android.user.accounts.UserAccountsStore
-import net.primal.android.user.active.ActiveAccountStore
+import net.primal.android.user.accounts.active.ActiveAccountStore
 import javax.inject.Inject
 
 @HiltViewModel
@@ -37,7 +35,6 @@ class ProfileViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     feedRepository: FeedRepository,
     private val activeAccountStore: ActiveAccountStore,
-    private val accountsStore: UserAccountsStore,
     private val profileRepository: ProfileRepository,
     private val postRepository: PostRepository,
 ) : ViewModel() {
@@ -47,7 +44,7 @@ class ProfileViewModel @Inject constructor(
     private val _state = MutableStateFlow(
         UiState(
             profileId = profileId,
-            isProfileFollowed = profileId.isProfileFollowed(),
+            isProfileFollowed = false,
             authoredPosts = feedRepository.feedByDirective(feedDirective = "authored;$profileId")
                 .map { it.map { feed -> feed.asFeedPostUi() } }
                 .cachedIn(viewModelScope),
@@ -66,7 +63,7 @@ class ProfileViewModel @Inject constructor(
     init {
         observeEvents()
         observeProfile()
-        observeAccountDataChanges()
+        observeActiveAccount()
         fetchLatestProfile()
     }
 
@@ -81,14 +78,12 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-    private fun observeAccountDataChanges() = viewModelScope.launch {
-        accountsStore.userAccounts
-            .mapNotNull { it.find { account -> account.pubkey == activeAccountStore.activeUserId() } }
-            .collect {
-                setState {
-                    copy(isProfileFollowed = it.following.contains(profileId))
-                }
+    private fun observeActiveAccount() = viewModelScope.launch {
+        activeAccountStore.activeUserAccount.collect {
+            setState {
+                copy(isProfileFollowed = it.following.contains(profileId))
             }
+        }
     }
 
     private fun observeProfile() = viewModelScope.launch {
@@ -128,12 +123,6 @@ class ProfileViewModel @Inject constructor(
                 )
             }
         }
-    }
-
-    private fun String.isProfileFollowed(): Boolean {
-        val userId = activeAccountStore.activeUserId()
-        val account = accountsStore.findByIdOrNull(userId)
-        return account?.following?.contains(this) == true
     }
 
     private fun fetchLatestProfile() = viewModelScope.launch {
