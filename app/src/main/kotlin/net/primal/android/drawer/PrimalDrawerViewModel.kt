@@ -6,22 +6,17 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.getAndUpdate
-import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.active.ActiveThemeStore
-import net.primal.android.user.accounts.UserAccountsStore
-import net.primal.android.user.active.ActiveAccountStore
-import net.primal.android.user.active.ActiveUserAccountState
+import net.primal.android.user.accounts.active.ActiveAccountStore
 import javax.inject.Inject
 
 @HiltViewModel
 class PrimalDrawerViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
-    private val accountsStore: UserAccountsStore,
     private val activeThemeStore: ActiveThemeStore,
 ) : ViewModel() {
 
@@ -40,8 +35,7 @@ class PrimalDrawerViewModel @Inject constructor(
 
     init {
         subscribeToEvents()
-        observeAccountDataChanges()
-        observeActiveAccountChange()
+        observeActiveAccount()
     }
 
     private fun subscribeToEvents() = viewModelScope.launch {
@@ -52,24 +46,12 @@ class PrimalDrawerViewModel @Inject constructor(
         }
     }
 
-    private fun observeActiveAccountChange() = viewModelScope.launch {
-        activeAccountStore.activeAccountState
-            .filterIsInstance<ActiveUserAccountState.ActiveUserAccount>()
-            .collect {
-                setState {
-                    copy(activeUserAccount = it.data)
-                }
+    private fun observeActiveAccount() = viewModelScope.launch {
+        activeAccountStore.activeUserAccount.collect {
+            setState {
+                copy(activeUserAccount = it)
             }
-    }
-
-    private fun observeAccountDataChanges() = viewModelScope.launch {
-        accountsStore.userAccounts
-            .mapNotNull { it.find { account -> account.pubkey == activeAccountStore.activeUserId() } }
-            .collect {
-                setState {
-                    copy(activeUserAccount = it)
-                }
-            }
+        }
     }
 
     private suspend fun invertTheme(event: PrimalDrawerContract.UiEvent.ThemeSwitchClick) {
@@ -81,5 +63,4 @@ class PrimalDrawerViewModel @Inject constructor(
             }
         activeThemeStore.setUserTheme(theme = newThemeName)
     }
-
 }

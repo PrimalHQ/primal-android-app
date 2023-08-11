@@ -20,7 +20,7 @@ import net.primal.android.feed.db.sql.ExploreFeedQueryBuilder
 import net.primal.android.feed.db.sql.FeedQueryBuilder
 import net.primal.android.feed.db.sql.LatestFeedQueryBuilder
 import net.primal.android.thread.db.ConversationCrossRef
-import net.primal.android.user.active.ActiveAccountStore
+import net.primal.android.user.accounts.active.ActiveAccountStore
 import javax.inject.Inject
 
 class FeedRepository @Inject constructor(

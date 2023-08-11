@@ -13,7 +13,7 @@ import kotlinx.serialization.json.add
 import kotlinx.serialization.json.buildJsonArray
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.NostrEventKind
-import net.primal.android.user.active.ActiveAccountStore
+import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.api.UsersApi
 import net.primal.android.user.api.model.UserContactsResponse
 import net.primal.android.user.domain.UserAccount
@@ -95,11 +95,9 @@ class LatestFollowingResolverTest {
     fun `getLatestFollowing returns local contacts when no newer available`() = runTest {
         val resolver = buildLatestFollowingResolver(
             activeAccountStore = mockk {
-                every { activeUserAccount } returns MutableStateFlow(
-                    UserAccount.EMPTY.copy(
-                        contactsCreatedAt = Instant.now().epochSecond,
-                        following = setOf("pubkey10", "pubkey11")
-                    )
+                coEvery { activeUserAccount() } returns UserAccount.EMPTY.copy(
+                    contactsCreatedAt = Instant.now().epochSecond,
+                    following = setOf("pubkey10", "pubkey11")
                 )
             },
             usersApi = mockk {

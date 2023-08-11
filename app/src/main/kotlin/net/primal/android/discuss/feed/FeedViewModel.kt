@@ -26,8 +26,8 @@ import net.primal.android.navigation.feedDirective
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.settings.repository.DebouncedSettingsSyncer
 import net.primal.android.settings.repository.SettingsRepository
-import net.primal.android.user.active.ActiveAccountStore
-import net.primal.android.user.active.ActiveUserAccountState
+import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.android.user.accounts.active.ActiveUserAccountState
 import java.time.Instant
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.minutes
