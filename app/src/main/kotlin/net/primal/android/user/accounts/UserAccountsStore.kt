@@ -47,17 +47,4 @@ class UserAccountsStore @Inject constructor(
     }
 
     fun findByIdOrNull(pubkey: String) = userAccounts.value.find { it.pubkey == pubkey }
-
-    suspend fun setNostrWalletConnect(ownerId: String, nwc: NostrWalletConnect) {
-        persistence.updateData { accounts ->
-            val owner = accounts.find { it.pubkey === ownerId }
-
-            if (owner != null) {
-                val updated = owner.copy(nostrWalletConnect = nwc)
-                accounts.toMutableList().replaceAll { updated }
-            }
-
-            accounts
-        }
-    }
 }
