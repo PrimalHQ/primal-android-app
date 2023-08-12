@@ -55,6 +55,17 @@ class UserRepository @Inject constructor(
         )
     }
 
+    suspend fun clearNostrWalletConnectForUser(userId: String) {
+        val currentUserAccount = accountsStore.findByIdOrNull(pubkey = userId)
+            ?: UserAccount.buildLocal(pubkey = userId)
+
+        accountsStore.upsertAccount(
+            userAccount = currentUserAccount.copy(
+                nostrWalletConnect = null
+            )
+        )
+    }
+
     suspend fun removeAllUserAccounts() {
         accountsStore.clearAllAccounts()
     }
