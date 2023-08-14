@@ -242,11 +242,8 @@ private fun FeedPostImages(
         val imageSizeDp = findImageSize(resource = imageResources.first())
         val imagesCount = imageResources.size
 
-        val pagerState = rememberPagerState()
-        HorizontalPager(
-            pageCount = imagesCount,
-            state = pagerState,
-        ) {
+        val pagerState = rememberPagerState { imagesCount }
+        HorizontalPager(state = pagerState) {
             PostImage(
                 resource = imageResources[it],
                 imageSizeDp = imageSizeDp,
@@ -398,7 +395,7 @@ fun PreviewPostContentWithReferencedPost() {
                     
                     Or maybe not.
                     
-                    nostr:referencedPost2
+                    nostr:referenced2Post
                 """.trimIndent(),
                 expanded = false,
                 hashtags = listOf("#nostr"),
@@ -421,7 +418,7 @@ fun PreviewPostContentWithReferencedPost() {
                         referencedUser = null,
                     ),
                     NostrResourceUi(
-                        uri = "nostr:referencedPost2",
+                        uri = "nostr:referenced2Post",
                         referencedPost = ReferencedPost(
                             postId = "postId",
                             createdAt = 0,
