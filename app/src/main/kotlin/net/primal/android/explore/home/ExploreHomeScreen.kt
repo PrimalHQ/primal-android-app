@@ -115,7 +115,7 @@ fun ExploreHomeScreen(
                             .wrapContentWidth()
                             .fillMaxWidth(),
                         horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.Top,
+                        verticalArrangement = Arrangement.Top,
                     ) {
                         it.forEach {
                             SuggestionChip(

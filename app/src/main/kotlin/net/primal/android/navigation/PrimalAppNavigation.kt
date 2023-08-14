@@ -7,6 +7,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
+import androidx.navigation.NavOptions
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -38,8 +39,8 @@ import net.primal.android.explore.feed.ExploreFeedScreen
 import net.primal.android.explore.feed.ExploreFeedViewModel
 import net.primal.android.explore.home.ExploreHomeScreen
 import net.primal.android.explore.home.ExploreHomeViewModel
-import net.primal.android.explore.search.ui.SearchScreen
 import net.primal.android.explore.search.SearchViewModel
+import net.primal.android.explore.search.ui.SearchScreen
 import net.primal.android.navigation.splash.SplashContract
 import net.primal.android.navigation.splash.SplashScreen
 import net.primal.android.navigation.splash.SplashViewModel
@@ -67,12 +68,14 @@ private fun NavController.navigateToSearch() = navigate(route = "search")
 private fun NavController.navigateToNewPost(preFillContent: String?) =
     navigate(route = "feed/new?$NewPostPreFillContent=${preFillContent.orEmpty().asUrlEncoded()}")
 
-
-private val NavController.topLevelNavOptions
-    get() = navOptions {
-        val feedDestination = backQueue.find { it.destination.route?.contains("feed") == true }
-        val popUpToId = feedDestination?.destination?.id ?: 0
-        popUpTo(id = popUpToId)
+private val NavController.topLevelNavOptions: NavOptions
+    get() {
+        val feedDestination = currentBackStack.value.find {
+            it.destination.route?.contains("feed") == true
+        }
+        return navOptions {
+            popUpTo(id = feedDestination?.destination?.id ?: 0)
+        }
     }
 
 private fun NavController.navigateToFeed(directive: String) = navigate(

@@ -8,12 +8,12 @@ core-testing = "2.2.0"
 datastore = "1.0.0"
 kotest = "5.6.2"
 kotlinx-serialization-json = "1.5.1"
-material-icons = "1.4.3"
+material-icons = "1.5.0"
 mockk = "1.13.5"
 okhttp = "4.11.0"
 org-jetbrains-kotlin-android = "1.9.0"
 kotlinx-coroutines="1.7.2"
-compose-bom = "2023.06.01"
+compose-bom = "2023.08.00"
 core-ktx = "1.10.1"
 core-splashscreen = "1.0.1"
 lifecycle-runtime-ktx = "2.6.1"
@@ -21,7 +21,7 @@ activity-compose = "1.7.2"
 junit = "4.13.2"
 junit-android-runner = "1.1.5"
 espresso-core = "3.5.1"
-accompanist = "0.30.1"
+accompanist = "0.31.6-rc"
 dagger = "2.47"
 hilt = "1.0.0"
 retrofit = "2.9.0"
@@ -141,4 +141,3 @@ org-jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.re
 org-jetbrains-kotlin-plugin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "org-jetbrains-kotlin-android" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "dagger" }
 ksp = { id ="com.google.devtools.ksp", version.ref = "ksp" }
-
