@@ -56,13 +56,16 @@ import kotlin.time.Duration.Companion.seconds
 @Composable
 fun FeedPostList(
     posts: Flow<PagingData<FeedPostUi>>,
+    walletConnected: Boolean,
     onPostClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
     onPostLikeClick: (FeedPostUi) -> Unit,
+    onZapClick: (FeedPostUi, Int?, String?) -> Unit,
     onRepostClick: (FeedPostUi) -> Unit,
     onPostReplyClick: (String) -> Unit,
     onPostQuoteClick: (FeedPostUi) -> Unit,
     onHashtagClick: (String) -> Unit,
+    onWalletUnavailable: () -> Unit,
     syncStats: FeedPostsSyncStats = FeedPostsSyncStats(),
     paddingValues: PaddingValues = PaddingValues(0.dp),
     feedListState: LazyListState = rememberLazyListState(),
@@ -115,16 +118,19 @@ fun FeedPostList(
 
     Box {
         FeedLazyColumn(
-            contentPadding = paddingValues,
             pagingItems = pagingItems,
+            contentPadding = paddingValues,
             listState = feedListState,
+            walletConnected = walletConnected,
             onPostClick = onPostClick,
             onProfileClick = onProfileClick,
             onPostLikeClick = onPostLikeClick,
+            onZapClick = onZapClick,
             onRepostClick = onRepostClick,
             onPostReplyClick = onPostReplyClick,
             onPostQuoteClick = onPostQuoteClick,
             onHashtagClick = onHashtagClick,
+            onWalletUnavailable = onWalletUnavailable,
         )
 
         AnimatedVisibility(

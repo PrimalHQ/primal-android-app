@@ -13,6 +13,7 @@ interface ProfileContract {
         val isProfileFollowed: Boolean,
         val profileDetails: ProfileDetailsUi? = null,
         val profileStats: ProfileStatsUi? = null,
+        val walletConnected: Boolean = false,
         val resources: List<MediaResourceUi> = emptyList(),
         val authoredPosts: Flow<PagingData<FeedPostUi>>,
     )
@@ -24,7 +25,12 @@ interface ProfileContract {
             val postAuthorId: String,
             val postNostrEvent: String
         ) : UiEvent()
-
+        data class ZapAction(
+            val postId: String,
+            val postAuthorId: String,
+            val zapAmount: Int?,
+            val zapDescription: String?,
+        ) : UiEvent()
         data class FollowAction(val profileId: String) : UiEvent()
         data class UnfollowAction(val profileId: String) : UiEvent()
     }

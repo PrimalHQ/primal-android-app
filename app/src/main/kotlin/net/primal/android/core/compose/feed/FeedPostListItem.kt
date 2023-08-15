@@ -36,6 +36,7 @@ fun FeedPostListItem(
     onPostClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
     onPostAction: (FeedPostAction) -> Unit,
+    onPostLongClickAction: (FeedPostAction) -> Unit,
     onHashtagClick: (String) -> Unit,
 ) {
     val localUriHandler = LocalUriHandler.current
@@ -107,6 +108,7 @@ fun FeedPostListItem(
             FeedPostStatsRow(
                 postStats = data.stats,
                 onPostAction = onPostAction,
+                onPostLongPressAction = onPostLongClickAction,
             )
         }
     }
@@ -151,6 +153,7 @@ fun PreviewFeedPostListItemLight() {
             onPostClick = {},
             onProfileClick = {},
             onPostAction = {},
+            onPostLongClickAction = {},
             onHashtagClick = {},
         )
     }
@@ -196,6 +199,7 @@ fun PreviewFeedPostListItemDark() {
             onPostClick = {},
             onProfileClick = {},
             onPostAction = {},
+            onPostLongClickAction = {},
             onHashtagClick = {},
         )
     }

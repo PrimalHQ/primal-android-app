@@ -11,6 +11,7 @@ interface ThreadContract {
         val conversation: List<FeedPostUi> = emptyList(),
         val highlightPostId: String? = null,
         val highlightPostIndex: Int = 0,
+        val walletConnected: Boolean = false,
     ) {
         data class PublishError(val cause: Throwable?)
     }
@@ -23,7 +24,12 @@ interface ThreadContract {
             val postAuthorId: String,
             val postNostrEvent: String
         ) : UiEvent()
-
+        data class ZapAction(
+            val postId: String,
+            val postAuthorId: String,
+            val zapAmount: Int?,
+            val zapDescription: String?,
+        ) : UiEvent()
         data class ReplyToAction(
             val rootPostId: String,
             val replyToPostId: String,

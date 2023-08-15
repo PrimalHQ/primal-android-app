@@ -9,6 +9,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -20,11 +21,14 @@ import net.primal.android.feed.repository.FeedRepository
 import net.primal.android.feed.repository.PostRepository
 import net.primal.android.navigation.searchQuery
 import net.primal.android.networking.relays.errors.NostrPublishException
+import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.android.user.accounts.active.ActiveUserAccountState
 import javax.inject.Inject
 
 @HiltViewModel
 class ExploreFeedViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
+    private val activeAccountStore: ActiveAccountStore,
     private val feedRepository: FeedRepository,
     private val postRepository: PostRepository,
 ) : ViewModel() {
@@ -52,6 +56,7 @@ class ExploreFeedViewModel @Inject constructor(
     init {
         observeContainsFeed()
         observeEvents()
+        observeActiveAccount()
     }
 
     private fun observeContainsFeed() = viewModelScope.launch {
@@ -69,8 +74,19 @@ class ExploreFeedViewModel @Inject constructor(
                 UiEvent.RemoveFromUserFeeds -> removeFromMyFeeds()
                 is UiEvent.PostLikeAction -> likePost(it)
                 is UiEvent.RepostAction -> repostPost(it)
+                is UiEvent.ZapAction -> zapPost(it)
             }
         }
+    }
+
+    private fun observeActiveAccount() = viewModelScope.launch {
+        activeAccountStore.activeAccountState
+            .filterIsInstance<ActiveUserAccountState.ActiveUserAccount>()
+            .collect {
+                setState {
+                    copy(walletConnected = it.data.nostrWallet != null)
+                }
+            }
     }
 
     private suspend fun addToMyFeeds() {
@@ -102,5 +118,9 @@ class ExploreFeedViewModel @Inject constructor(
         } catch (error: NostrPublishException) {
             // Propagate error to the UI
         }
+    }
+
+    private fun zapPost(zapAction: UiEvent.ZapAction) = viewModelScope.launch {
+
     }
 }

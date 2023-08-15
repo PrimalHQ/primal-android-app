@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -27,6 +28,8 @@ import net.primal.android.nostr.ext.parseEventTags
 import net.primal.android.nostr.ext.parseHashtagTags
 import net.primal.android.nostr.ext.parsePubkeyTags
 import net.primal.android.thread.ThreadContract.UiEvent
+import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.android.user.accounts.active.ActiveUserAccountState
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
@@ -34,6 +37,7 @@ import kotlin.time.Duration.Companion.seconds
 @HiltViewModel
 class ThreadViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
+    private val activeAccountStore: ActiveAccountStore,
     private val feedRepository: FeedRepository,
     private val postRepository: PostRepository,
 ) : ViewModel() {
@@ -54,6 +58,7 @@ class ThreadViewModel @Inject constructor(
     init {
         observeEvents()
         observeConversation()
+        observeActiveAccount()
         fetchRepliesFromNetwork()
     }
 
@@ -64,6 +69,7 @@ class ThreadViewModel @Inject constructor(
                 is UiEvent.RepostAction -> repostPost(it)
                 is UiEvent.ReplyToAction -> publishReply(it)
                 is UiEvent.UpdateReply -> updateReply(it)
+                is UiEvent.ZapAction -> zapPost(it)
             }
         }
     }
@@ -72,6 +78,16 @@ class ThreadViewModel @Inject constructor(
         loadHighlightedPost()
         delayShortlyToPropagateHighlightedPost()
         subscribeToConversationChanges()
+    }
+
+    private fun observeActiveAccount() = viewModelScope.launch {
+        activeAccountStore.activeAccountState
+            .filterIsInstance<ActiveUserAccountState.ActiveUserAccount>()
+            .collect {
+                setState {
+                    copy(walletConnected = it.data.nostrWallet != null)
+                }
+            }
     }
 
     private suspend fun loadHighlightedPost() {
@@ -135,6 +151,10 @@ class ThreadViewModel @Inject constructor(
         } catch (error: NostrPublishException) {
             // Propagate error to the UI
         }
+    }
+
+    private fun zapPost(zapAction: UiEvent.ZapAction) = viewModelScope.launch {
+
     }
 
     private fun updateReply(updateReplyEvent: UiEvent.UpdateReply) {

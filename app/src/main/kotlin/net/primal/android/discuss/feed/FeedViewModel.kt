@@ -24,10 +24,10 @@ import net.primal.android.feed.repository.FeedRepository
 import net.primal.android.feed.repository.PostRepository
 import net.primal.android.navigation.feedDirective
 import net.primal.android.networking.relays.errors.NostrPublishException
-import net.primal.android.user.updater.UserDataUpdater
-import net.primal.android.user.updater.UserDataUpdaterFactory
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
+import net.primal.android.user.updater.UserDataUpdater
+import net.primal.android.user.updater.UserDataUpdaterFactory
 import java.time.Instant
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.minutes
@@ -112,7 +112,10 @@ class FeedViewModel @Inject constructor(
             .collect {
                 userDataUpdater = userDataSyncerFactory.create(userId = it.data.pubkey)
                 setState {
-                    copy(activeAccountAvatarUrl = it.data.pictureUrl)
+                    copy(
+                        activeAccountAvatarUrl = it.data.pictureUrl,
+                        walletConnected = it.data.nostrWallet != null,
+                    )
                 }
             }
     }
@@ -124,6 +127,7 @@ class FeedViewModel @Inject constructor(
                 UiEvent.RequestUserDataUpdate -> updateUserData()
                 is UiEvent.PostLikeAction -> likePost(it)
                 is UiEvent.RepostAction -> repostPost(it)
+                is UiEvent.ZapAction -> zapPost(it)
             }
         }
     }
@@ -164,6 +168,10 @@ class FeedViewModel @Inject constructor(
         } catch (error: NostrPublishException) {
             // Propagate error to the UI
         }
+    }
+
+    private fun zapPost(zapAction: UiEvent.ZapAction) = viewModelScope.launch {
+
     }
 
 }

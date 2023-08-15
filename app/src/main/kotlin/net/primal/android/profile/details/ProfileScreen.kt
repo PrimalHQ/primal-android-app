@@ -107,6 +107,7 @@ fun ProfileScreen(
     onPostQuoteClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
+    onWalletUnavailable: () -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
 
@@ -119,6 +120,7 @@ fun ProfileScreen(
         onPostQuoteClick = onPostQuoteClick,
         onProfileClick = onProfileClick,
         onHashtagClick = onHashtagClick,
+        onWalletUnavailable = onWalletUnavailable,
         eventPublisher = { viewModel.setEvent(it) },
     )
 }
@@ -145,6 +147,7 @@ fun ProfileScreen(
     onPostQuoteClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
+    onWalletUnavailable: () -> Unit,
     eventPublisher: (ProfileContract.UiEvent) -> Unit,
 ) {
     val density = LocalDensity.current
@@ -205,6 +208,7 @@ fun ProfileScreen(
         FeedLazyColumn(
             contentPadding = PaddingValues(0.dp),
             pagingItems = pagingItems,
+            walletConnected = state.walletConnected,
             listState = listState,
             onPostClick = onPostClick,
             onProfileClick = {
@@ -214,6 +218,16 @@ fun ProfileScreen(
             },
             onPostReplyClick = {
                 onPostClick(it)
+            },
+            onZapClick = { post, zapAmount, zapDescription ->
+                eventPublisher(
+                    ProfileContract.UiEvent.ZapAction(
+                        postId = post.postId,
+                        postAuthorId = post.authorId,
+                        zapAmount = zapAmount,
+                        zapDescription = zapDescription,
+                    )
+                )
             },
             onPostLikeClick = {
                 eventPublisher(
@@ -236,6 +250,7 @@ fun ProfileScreen(
                 onPostQuoteClick("\n\nnostr:${it.postId.hexToNoteHrp()}")
             },
             onHashtagClick = onHashtagClick,
+            onWalletUnavailable = onWalletUnavailable,
             shouldShowLoadingState = false,
             shouldShowNoContentState = false,
             stickyHeader = {
@@ -699,6 +714,7 @@ fun PreviewProfileScreen() {
             onPostQuoteClick = {},
             onProfileClick = {},
             onHashtagClick = {},
+            onWalletUnavailable = {},
             eventPublisher = {},
         )
     }

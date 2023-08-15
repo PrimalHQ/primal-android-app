@@ -1,7 +1,8 @@
 package net.primal.android.core.compose.feed
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -38,6 +39,7 @@ import net.primal.android.theme.AppTheme
 fun FeedPostStatsRow(
     postStats: FeedPostStatsUi,
     onPostAction: (FeedPostAction) -> Unit,
+    onPostLongPressAction: (FeedPostAction) -> Unit,
 ) {
     Row(
         modifier = Modifier
@@ -52,6 +54,7 @@ fun FeedPostStatsRow(
             iconVector = PrimalIcons.FeedReplies,
             iconVectorHighlight = PrimalIcons.FeedRepliesFilled,
             onClick = { onPostAction(FeedPostAction.Reply) },
+            onLongClick = { onPostLongPressAction(FeedPostAction.Reply) },
         )
 
         SinglePostStat(
@@ -60,6 +63,7 @@ fun FeedPostStatsRow(
             iconVector = PrimalIcons.FeedZaps,
             iconVectorHighlight = PrimalIcons.FeedZapsFilled,
             onClick = { onPostAction(FeedPostAction.Zap) },
+            onLongClick = { onPostLongPressAction(FeedPostAction.Zap) },
         )
 
         SinglePostStat(
@@ -72,6 +76,7 @@ fun FeedPostStatsRow(
                     onPostAction(FeedPostAction.Like)
                 }
             },
+            onLongClick = { onPostLongPressAction(FeedPostAction.Like) },
         )
 
         SinglePostStat(
@@ -80,18 +85,21 @@ fun FeedPostStatsRow(
             iconVector = PrimalIcons.FeedReposts,
             iconVectorHighlight = PrimalIcons.FeedRepostsFilled,
             onClick = { onPostAction(FeedPostAction.Repost) },
+            onLongClick = { onPostLongPressAction(FeedPostAction.Repost) },
         )
     }
 }
 
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun SinglePostStat(
     textCount: String,
     highlight: Boolean,
     iconVector: ImageVector,
     iconVectorHighlight: ImageVector,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onLongClick: () -> Unit,
 ) {
     val titleText = buildAnnotatedString {
         appendInlineContent("icon", "[icon]")
@@ -121,7 +129,10 @@ private fun SinglePostStat(
     )
 
     Text(
-        modifier = Modifier.clickable { onClick() },
+        modifier = Modifier.combinedClickable(
+            onClick = onClick,
+            onLongClick = onLongClick,
+        ),
         text = titleText,
         style = AppTheme.typography.bodyMedium,
         color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,

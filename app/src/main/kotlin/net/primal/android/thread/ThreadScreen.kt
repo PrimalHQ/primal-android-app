@@ -52,10 +52,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.R
-import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.PrimalTopAppBar
+import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.feed.FeedPostListItem
 import net.primal.android.core.compose.feed.RepostOrQuoteBottomSheet
+import net.primal.android.core.compose.feed.ZapBottomSheet
 import net.primal.android.core.compose.feed.model.FeedPostAction
 import net.primal.android.core.compose.feed.model.FeedPostStatsUi
 import net.primal.android.core.compose.feed.model.FeedPostUi
@@ -74,6 +75,7 @@ fun ThreadScreen(
     onPostQuoteClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
+    onWalletUnavailable: () -> Unit,
 ) {
 
     val uiState = viewModel.state.collectAsState()
@@ -85,6 +87,7 @@ fun ThreadScreen(
         onPostQuoteClick = onPostQuoteClick,
         onProfileClick = onProfileClick,
         onHashtagClick = onHashtagClick,
+        onWalletUnavailable = onWalletUnavailable,
         eventPublisher = { viewModel.setEvent(it) }
     )
 }
@@ -98,6 +101,7 @@ fun ThreadScreen(
     onPostQuoteClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
+    onWalletUnavailable: () -> Unit,
     eventPublisher: (ThreadContract.UiEvent) -> Unit,
 ) {
     val topAppBarState = rememberTopAppBarState()
@@ -123,8 +127,25 @@ fun ThreadScreen(
         )
     }
 
-    val snackbarHostState = remember { SnackbarHostState() }
+    var zapOptionsPostConfirmation by remember { mutableStateOf<FeedPostUi?>(null) }
+    if (zapOptionsPostConfirmation != null) zapOptionsPostConfirmation?.let { post ->
+        ZapBottomSheet(
+            onDismissRequest = { zapOptionsPostConfirmation = null },
+            receiverName = post.authorName,
+            onZap = { zapAmount, zapDescription ->
+                eventPublisher(
+                    ThreadContract.UiEvent.ZapAction(
+                        postId = post.postId,
+                        postAuthorId = post.authorId,
+                        zapAmount = zapAmount,
+                        zapDescription = zapDescription,
+                    )
+                )
+            }
+        )
+    }
 
+    val snackbarHostState = remember { SnackbarHostState() }
     ReplyPublishingErrorHandler(
         error = state.publishingError,
         snackbarHostState = snackbarHostState,
@@ -178,7 +199,20 @@ fun ThreadScreen(
                                             onPostClick(item.postId)
                                         }
                                     }
-                                    FeedPostAction.Zap -> Unit
+                                    FeedPostAction.Zap -> {
+                                        if (state.walletConnected) {
+                                            eventPublisher(
+                                                ThreadContract.UiEvent.ZapAction(
+                                                    postId = item.postId,
+                                                    postAuthorId = item.authorId,
+                                                    zapAmount = null,
+                                                    zapDescription = null,
+                                                )
+                                            )
+                                        } else {
+                                            onWalletUnavailable()
+                                        }
+                                    }
                                     FeedPostAction.Like -> {
                                         eventPublisher(
                                             ThreadContract.UiEvent.PostLikeAction(
@@ -190,6 +224,18 @@ fun ThreadScreen(
                                     FeedPostAction.Repost -> {
                                         repostQuotePostConfirmation = item
                                     }
+                                }
+                            },
+                            onPostLongClickAction = {
+                                when (it) {
+                                    FeedPostAction.Zap -> {
+                                        if (state.walletConnected) {
+                                            zapOptionsPostConfirmation = item
+                                        } else {
+                                            onWalletUnavailable()
+                                        }
+                                    }
+                                    else -> Unit
                                 }
                             },
                             onHashtagClick = onHashtagClick,
@@ -415,6 +461,7 @@ fun ThreadScreenPreview() {
             onPostQuoteClick = {},
             onProfileClick = {},
             onHashtagClick = {},
+            onWalletUnavailable = {},
             eventPublisher = {},
         )
     }

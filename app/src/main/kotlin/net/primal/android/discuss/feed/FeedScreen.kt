@@ -57,6 +57,7 @@ fun FeedScreen(
     onPostClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
+    onWalletUnavailable: () -> Unit,
     onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
 ) {
@@ -74,6 +75,7 @@ fun FeedScreen(
         onPostClick = onPostClick,
         onProfileClick = onProfileClick,
         onHashtagClick = onHashtagClick,
+        onWalletUnavailable = onWalletUnavailable,
         onPrimaryDestinationChanged = onTopLevelDestinationChanged,
         onDrawerDestinationClick = onDrawerScreenClick,
     )
@@ -89,6 +91,7 @@ fun FeedScreen(
     onPostClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
+    onWalletUnavailable: () -> Unit,
     onPrimaryDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
 ) {
@@ -129,8 +132,20 @@ fun FeedScreen(
         content = { paddingValues ->
             FeedPostList(
                 posts = state.posts,
+                walletConnected = state.walletConnected,
                 onPostClick = onPostClick,
                 onProfileClick = onProfileClick,
+                onPostReplyClick = {
+                    onPostClick(it)
+                },
+                onZapClick = { post, zapAmount, zapDescription ->
+                    eventPublisher(FeedContract.UiEvent.ZapAction(
+                        postId = post.postId,
+                        postAuthorId = post.authorId,
+                        zapAmount = zapAmount,
+                        zapDescription = zapDescription,
+                    ))
+                },
                 onPostLikeClick = {
                     eventPublisher(
                         FeedContract.UiEvent.PostLikeAction(
@@ -138,9 +153,6 @@ fun FeedScreen(
                             postAuthorId = it.authorId,
                         )
                     )
-                },
-                onPostReplyClick = {
-                    onPostClick(it)
                 },
                 onRepostClick = {
                     eventPublisher(
@@ -155,6 +167,7 @@ fun FeedScreen(
                     onNewPostClick("\n\nnostr:${it.postId.hexToNoteHrp()}")
                 },
                 onHashtagClick = onHashtagClick,
+                onWalletUnavailable = onWalletUnavailable,
                 syncStats = state.syncStats,
                 paddingValues = paddingValues,
                 feedListState = feedListState,
@@ -216,6 +229,7 @@ fun FeedScreenPreview() {
             onPostClick = {},
             onProfileClick = {},
             onHashtagClick = {},
+            onWalletUnavailable = {},
             onPrimaryDestinationChanged = {},
             onDrawerDestinationClick = {},
         )

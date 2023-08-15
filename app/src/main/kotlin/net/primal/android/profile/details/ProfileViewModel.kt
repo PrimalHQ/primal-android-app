@@ -74,6 +74,7 @@ class ProfileViewModel @Inject constructor(
                 is UiEvent.RepostAction -> repostPost(it)
                 is UiEvent.FollowAction -> follow(it)
                 is UiEvent.UnfollowAction -> unfollow(it)
+                is UiEvent.ZapAction -> zapPost(it)
             }
         }
     }
@@ -81,7 +82,10 @@ class ProfileViewModel @Inject constructor(
     private fun observeActiveAccount() = viewModelScope.launch {
         activeAccountStore.activeUserAccount.collect {
             setState {
-                copy(isProfileFollowed = it.following.contains(profileId))
+                copy(
+                    isProfileFollowed = it.following.contains(profileId),
+                    walletConnected = it.nostrWallet != null,
+                )
             }
         }
     }
@@ -154,6 +158,10 @@ class ProfileViewModel @Inject constructor(
         } catch (error: NostrPublishException) {
             // Propagate error to the UI
         }
+    }
+
+    private fun zapPost(zapAction: UiEvent.ZapAction) = viewModelScope.launch {
+
     }
 
     private fun follow(followAction: UiEvent.FollowAction) = viewModelScope.launch {

@@ -8,6 +8,7 @@ interface ExploreFeedContract {
     data class UiState(
         val title: String,
         val existsInUserFeeds: Boolean = false,
+        val walletConnected: Boolean = false,
         val posts: Flow<PagingData<FeedPostUi>>,
     )
 
@@ -19,6 +20,12 @@ interface ExploreFeedContract {
             val postId: String,
             val postAuthorId: String,
             val postNostrEvent: String
+        ) : UiEvent()
+        data class ZapAction(
+            val postId: String,
+            val postAuthorId: String,
+            val zapAmount: Int?,
+            val zapDescription: String?,
         ) : UiEvent()
     }
 }

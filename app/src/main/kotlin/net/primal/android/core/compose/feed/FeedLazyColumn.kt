@@ -31,16 +31,19 @@ import net.primal.android.core.compose.isEmpty
 @ExperimentalFoundationApi
 @Composable
 fun FeedLazyColumn(
-    contentPadding: PaddingValues,
     pagingItems: LazyPagingItems<FeedPostUi>,
+    contentPadding: PaddingValues,
     listState: LazyListState,
     onPostClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
     onPostLikeClick: (FeedPostUi) -> Unit,
     onRepostClick: (FeedPostUi) -> Unit,
+    onZapClick: (FeedPostUi, Int?, String?) -> Unit,
     onPostReplyClick: (String) -> Unit,
     onPostQuoteClick: (FeedPostUi) -> Unit,
     onHashtagClick: (String) -> Unit,
+    onWalletUnavailable: () -> Unit,
+    walletConnected: Boolean,
     shouldShowLoadingState: Boolean = true,
     shouldShowNoContentState: Boolean = true,
     header: @Composable (LazyItemScope.() -> Unit)? = null,
@@ -53,6 +56,17 @@ fun FeedLazyColumn(
             onDismiss = { repostQuotePostConfirmation = null },
             onRepostClick = { onRepostClick(post) },
             onPostQuoteClick = { onPostQuoteClick(post) },
+        )
+    }
+
+    var zapOptionsPostConfirmation by remember { mutableStateOf<FeedPostUi?>(null) }
+    if (zapOptionsPostConfirmation != null) zapOptionsPostConfirmation?.let { post ->
+        ZapBottomSheet(
+            onDismissRequest = { zapOptionsPostConfirmation = null },
+            receiverName = post.authorName,
+            onZap = { zapAmount, zapDescription ->
+                onZapClick(post, zapAmount, zapDescription)
+            }
         )
     }
 
@@ -99,11 +113,27 @@ fun FeedLazyColumn(
                     onPostAction = { postAction ->
                         when (postAction) {
                             FeedPostAction.Reply -> onPostReplyClick(item.postId)
-                            FeedPostAction.Zap -> Unit
-                            FeedPostAction.Like -> onPostLikeClick(item)
-                            FeedPostAction.Repost -> {
-                                repostQuotePostConfirmation = item
+                            FeedPostAction.Zap -> {
+                                if (walletConnected) {
+                                    onZapClick(item, null, null)
+                                } else {
+                                    onWalletUnavailable()
+                                }
                             }
+                            FeedPostAction.Like -> onPostLikeClick(item)
+                            FeedPostAction.Repost -> repostQuotePostConfirmation = item
+                        }
+                    },
+                    onPostLongClickAction = { postAction ->
+                        when (postAction) {
+                            FeedPostAction.Zap -> {
+                                if (walletConnected) {
+                                    zapOptionsPostConfirmation = item
+                                } else {
+                                    onWalletUnavailable()
+                                }
+                            }
+                            else -> Unit
                         }
                     },
                     onHashtagClick = onHashtagClick,

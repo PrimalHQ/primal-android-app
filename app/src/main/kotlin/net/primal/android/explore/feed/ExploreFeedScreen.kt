@@ -36,6 +36,7 @@ fun ExploreFeedScreen(
     onPostQuoteClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
+    onWalletUnavailable: () -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
 
@@ -46,6 +47,7 @@ fun ExploreFeedScreen(
         onProfileClick = onProfileClick,
         onPostQuoteClick = onPostQuoteClick,
         onHashtagClick = onHashtagClick,
+        onWalletUnavailable = onWalletUnavailable,
         eventPublisher = { viewModel.setEvent(it) },
     )
 }
@@ -59,6 +61,7 @@ fun ExploreFeedScreen(
     onPostQuoteClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
+    onWalletUnavailable: () -> Unit,
     eventPublisher: (ExploreFeedContract.UiEvent) -> Unit,
 ) {
     val topAppBarState = rememberTopAppBarState()
@@ -111,12 +114,23 @@ fun ExploreFeedScreen(
         content = { paddingValues ->
             FeedPostList(
                 posts = state.posts,
+                walletConnected = state.walletConnected,
                 paddingValues = paddingValues,
                 feedListState = listState,
                 onPostClick = onPostClick,
                 onProfileClick = onProfileClick,
                 onPostReplyClick = {
                     onPostClick(it)
+                },
+                onZapClick = { post, zapAmount, zapDescription ->
+                    eventPublisher(
+                        ExploreFeedContract.UiEvent.ZapAction(
+                            postId = post.postId,
+                            postAuthorId = post.authorId,
+                            zapAmount = zapAmount,
+                            zapDescription = zapDescription,
+                        )
+                    )
                 },
                 onPostLikeClick = {
                     eventPublisher(
@@ -139,6 +153,7 @@ fun ExploreFeedScreen(
                     onPostQuoteClick("\n\nnostr:${it.postId.hexToNoteHrp()}")
                 },
                 onHashtagClick = onHashtagClick,
+                onWalletUnavailable = onWalletUnavailable,
             )
         },
         snackbarHost = {

@@ -103,8 +103,10 @@ private fun NavController.navigateToProfile(profileId: String? = null) = when {
 
 private fun NavController.navigateToSettings() = navigate(route = "settings")
 
-private fun NavController.navigateToWallet(nwcUrl: String) =
-    navigate(route = "wallet_settings?nwcUrl=$nwcUrl")
+private fun NavController.navigateToWallet(nwcUrl: String? = null) = when {
+    nwcUrl != null -> navigate(route = "wallet_settings?nwcUrl=$nwcUrl")
+    else -> navigate(route = "wallet_settings")
+}
 
 private fun NavController.navigateToThread(postId: String) = navigate(route = "thread/$postId")
 
@@ -317,6 +319,7 @@ private fun NavGraphBuilder.feed(
         onPostClick = { postId -> navController.navigateToThread(postId = postId) },
         onProfileClick = { profileId -> navController.navigateToProfile(profileId = profileId) },
         onHashtagClick = { hashtag -> navController.navigateToExploreFeed(query = hashtag) },
+        onWalletUnavailable = { navController.navigateToWallet() },
         onTopLevelDestinationChanged = onTopLevelDestinationChanged,
         onDrawerScreenClick = onDrawerScreenClick,
     )
@@ -389,6 +392,7 @@ private fun NavGraphBuilder.exploreFeed(
         onPostQuoteClick = { preFillContent -> navController.navigateToNewPost(preFillContent) },
         onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
         onHashtagClick = { hashtag -> navController.navigateToExploreFeed(query = hashtag) },
+        onWalletUnavailable = { navController.navigateToWallet() },
     )
 }
 
@@ -461,6 +465,7 @@ private fun NavGraphBuilder.thread(
         onPostQuoteClick = { preFillContent -> navController.navigateToNewPost(preFillContent) },
         onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
         onHashtagClick = { hashtag -> navController.navigateToExploreFeed(query = hashtag) },
+        onWalletUnavailable = { navController.navigateToWallet() },
     )
 }
 
@@ -482,6 +487,7 @@ private fun NavGraphBuilder.profile(
         onPostQuoteClick = { preFillContent -> navController.navigateToNewPost(preFillContent) },
         onProfileClick = { profileId -> navController.navigateToProfile(profileId = profileId) },
         onHashtagClick = { hashtag -> navController.navigateToExploreFeed(query = hashtag) },
+        onWalletUnavailable = { navController.navigateToWallet() },
     )
 }
 

@@ -10,6 +10,7 @@ interface FeedContract {
         val feedPostsCount: Int = 0,
         val feedTitle: String = "",
         val activeAccountAvatarUrl: String? = null,
+        val walletConnected: Boolean = false,
         val posts: Flow<PagingData<FeedPostUi>>,
         val syncStats: FeedPostsSyncStats = FeedPostsSyncStats(),
     )
@@ -22,6 +23,12 @@ interface FeedContract {
             val postId: String,
             val postAuthorId: String,
             val postNostrEvent: String
+        ) : UiEvent()
+        data class ZapAction(
+            val postId: String,
+            val postAuthorId: String,
+            val zapAmount: Int?,
+            val zapDescription: String?,
         ) : UiEvent()
     }
 
