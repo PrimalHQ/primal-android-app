@@ -53,5 +53,4 @@ class ActiveAccountStore @Inject constructor(
     suspend fun clearActiveUserAccount() {
         persistence.updateData { "" }
     }
-
 }

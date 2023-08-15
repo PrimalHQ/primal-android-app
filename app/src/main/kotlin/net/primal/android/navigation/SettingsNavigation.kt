@@ -2,9 +2,12 @@ package net.primal.android.navigation
 
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
+import androidx.navigation.NavType
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import androidx.navigation.navigation
 import net.primal.android.R
 import net.primal.android.core.compose.DemoSecondaryScreen
@@ -14,6 +17,8 @@ import net.primal.android.settings.home.SettingsHomeScreen
 import net.primal.android.settings.home.SettingsHomeViewModel
 import net.primal.android.settings.keys.KeysScreen
 import net.primal.android.settings.keys.KeysViewModel
+import net.primal.android.settings.wallet.WalletScreen
+import net.primal.android.settings.wallet.WalletViewModel
 
 
 private fun NavController.navigateToKeys() = navigate(route = "keys_settings")
@@ -48,7 +53,16 @@ fun NavGraphBuilder.settingsNavigation(
     )
 
     keys(route = "keys_settings", navController = navController)
-    wallet(route = "wallet_settings", navController = navController)
+    wallet(
+        route = "wallet_settings?nwcUrl={$NWCUrl}",
+        arguments = listOf(
+            navArgument(NWCUrl) {
+                type = NavType.StringType
+                nullable = true
+            }
+        ),
+        navController = navController
+    )
     appearance(route = "appearance_settings", navController = navController)
     notifications(route = "notifications_settings", navController = navController)
     network(route = "network_settings", navController = navController)
@@ -86,14 +100,19 @@ private fun NavGraphBuilder.keys(
     )
 }
 
-private fun NavGraphBuilder.wallet(route: String, navController: NavController) = composable(
+private fun NavGraphBuilder.wallet(
+    route: String,
+    arguments: List<NamedNavArgument>,
+    navController: NavController
+) = composable(
     route = route,
-) {
+    arguments = arguments,
+) {navBackEntry ->
+    val viewModel = hiltViewModel<WalletViewModel>(navBackEntry)
     LockToOrientationPortrait()
-    DemoSecondaryScreen(
-        title = stringResource(id = R.string.settings_wallet_title),
-        description = "Wallet settings will appear here. Stay tuned.",
-        onClose = { navController.navigateUp() },
+    WalletScreen(
+        viewModel = viewModel,
+        onClose = { navController.navigateUp() }
     )
 }
 

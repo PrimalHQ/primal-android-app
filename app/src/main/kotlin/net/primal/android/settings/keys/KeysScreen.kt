@@ -267,6 +267,7 @@ fun PrivateKeySection(
         leadingIconSize = 16.sp,
         lineHeight = 20.sp,
         color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
+        leadingIconTintColor = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
         style = AppTheme.typography.bodySmall,
     )
 }

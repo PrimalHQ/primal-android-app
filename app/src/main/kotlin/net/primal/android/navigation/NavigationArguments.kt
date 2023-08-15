@@ -28,3 +28,9 @@ inline val SavedStateHandle.searchQuery: String
 const val NewPostPreFillContent = "preFillContent"
 
 inline val SavedStateHandle.newPostPreFillContent: String? get() = get<String>(NewPostPreFillContent)?.asUrlDecoded()
+
+
+const val NWCUrl = "nwcUrl"
+
+inline val SavedStateHandle.nwcUrl: String?
+    get() = get(NWCUrl)

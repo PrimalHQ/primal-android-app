@@ -2,6 +2,7 @@ package net.primal.android.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
@@ -19,6 +20,8 @@ import com.google.accompanist.navigation.material.ExperimentalMaterialNavigation
 import com.google.accompanist.navigation.material.ModalBottomSheetLayout
 import com.google.accompanist.navigation.material.bottomSheet
 import com.google.accompanist.navigation.material.rememberBottomSheetNavigator
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import net.primal.android.R
 import net.primal.android.auth.login.LoginScreen
 import net.primal.android.auth.login.LoginViewModel
@@ -28,6 +31,7 @@ import net.primal.android.auth.welcome.WelcomeScreen
 import net.primal.android.core.compose.DemoPrimaryScreen
 import net.primal.android.core.compose.LockToOrientationPortrait
 import net.primal.android.core.compose.PrimalTopLevelDestination
+import net.primal.android.core.compose.findActivity
 import net.primal.android.discuss.feed.FeedScreen
 import net.primal.android.discuss.feed.FeedViewModel
 import net.primal.android.discuss.list.FeedListScreen
@@ -50,7 +54,7 @@ import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.thread.ThreadScreen
 import net.primal.android.thread.ThreadViewModel
-
+import java.net.URLEncoder
 
 private fun NavController.navigateToWelcome() = navigate(
     route = "welcome",
@@ -99,6 +103,9 @@ private fun NavController.navigateToProfile(profileId: String? = null) = when {
 
 private fun NavController.navigateToSettings() = navigate(route = "settings")
 
+private fun NavController.navigateToWallet(nwcUrl: String) =
+    navigate(route = "wallet_settings?nwcUrl=$nwcUrl")
+
 private fun NavController.navigateToThread(postId: String) = navigate(route = "thread/$postId")
 
 private fun NavController.navigateToExploreFeed(query: String) =
@@ -129,11 +136,25 @@ fun PrimalAppNavigation() {
     }
 
     val splashViewModel: SplashViewModel = hiltViewModel()
+    val context = LocalContext.current
     LaunchedEffect(navController, splashViewModel) {
         splashViewModel.effect.collect {
             when (it) {
                 SplashContract.SideEffect.NoActiveAccount -> navController.navigateToWelcome()
-                is SplashContract.SideEffect.ActiveAccount -> navController.navigateToFeed(directive = it.userPubkey)
+                is SplashContract.SideEffect.ActiveAccount -> {
+                    val activity = context.findActivity()
+
+                    val url = activity?.intent?.data?.toString()?.ifBlank { null }
+
+                    if (url != null && url.startsWith("nostr+walletconnect")) {
+                        navController.popBackStack()
+                        navController.navigateToWallet(nwcUrl = withContext(Dispatchers.IO) {
+                            URLEncoder.encode(url, Charsets.UTF_8.name())
+                        })
+                    } else {
+                        navController.navigateToFeed(directive = it.userPubkey)
+                    }
+                }
             }
         }
     }

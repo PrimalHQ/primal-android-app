@@ -15,7 +15,6 @@ import javax.inject.Singleton
 class UserAccountsStore @Inject constructor(
     private val persistence: DataStore<List<UserAccount>>
 ) {
-
     private val scope = CoroutineScope(Dispatchers.IO)
 
     val userAccounts = persistence.data
@@ -47,5 +46,4 @@ class UserAccountsStore @Inject constructor(
     }
 
     fun findByIdOrNull(pubkey: String) = userAccounts.value.find { it.pubkey == pubkey }
-
 }
