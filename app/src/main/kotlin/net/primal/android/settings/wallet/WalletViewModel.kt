@@ -10,36 +10,37 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.navigation.nwcUrl
-import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.android.user.accounts.active.ActiveUserAccountState
-import net.primal.android.user.domain.NostrWalletConnect
-import net.primal.android.user.domain.NostrWalletConnectParseException
-import net.primal.android.user.domain.toNostrWalletConnect
-import net.primal.android.user.domain.toStringUrl
+import net.primal.android.user.domain.NWCParseException
+import net.primal.android.user.domain.parseNWCUrl
 import net.primal.android.user.repository.UserRepository
-import java.net.URLDecoder
 import javax.inject.Inject
 
 @HiltViewModel
 class WalletViewModel @Inject constructor(
-    private val savedStateHandle: SavedStateHandle,
+    savedStateHandle: SavedStateHandle,
     private val activeAccountStore: ActiveAccountStore,
     private val userRepository: UserRepository
 ) : ViewModel() {
+
     private val _state = MutableStateFlow(WalletContract.UiState())
     val state = _state.asStateFlow()
     private fun setState(reducer: WalletContract.UiState.() -> WalletContract.UiState) {
         _state.getAndUpdate { it.reducer() }
     }
+
     private val _event: MutableSharedFlow<WalletContract.UiEvent> = MutableSharedFlow()
-    fun setEvent(event: WalletContract.UiEvent) {
-        viewModelScope.launch { _event.emit(event) }
-    }
+    fun setEvent(event: WalletContract.UiEvent) = viewModelScope.launch { _event.emit(event) }
 
     init {
+        val nwcConnectionUrl = savedStateHandle.nwcUrl
+        if (nwcConnectionUrl != null) {
+            connectWallet(nwcUrl = nwcConnectionUrl)
+        } else {
+            observeUserAccount()
+        }
+
         observeEvents()
-        observeWalletState()
     }
 
     private fun observeEvents() = viewModelScope.launch {
@@ -49,61 +50,40 @@ class WalletViewModel @Inject constructor(
             }
         }
     }
-    private fun observeWalletState() = viewModelScope.launch {
-        initializeState()
-    }
 
-    private suspend fun initializeState() {
-        try {
-            val receivedNWCUrl = savedStateHandle.nwcUrl
-            val existingNwc = activeAccountStore.activeUserAccount().nostrWalletConnect
-
-            var nwcUrl: String?
-            var isWalletConnected: Boolean
-            var nostrWalletConnect: NostrWalletConnect?
-
-            when {
-                receivedNWCUrl != null -> {
-                    val nwc = receivedNWCUrl.toNostrWalletConnect()
-                    userRepository.updateNostrWalletConnectForUser(activeAccountStore.activeUserId(), nwc)
-
-                    nwcUrl = receivedNWCUrl
-                    isWalletConnected = true
-                    nostrWalletConnect = nwc
-                }
-                existingNwc != null -> {
-                    nwcUrl = existingNwc.toStringUrl()
-                    isWalletConnected = true
-                    nostrWalletConnect = existingNwc
-                }
-                else -> {
-                    nwcUrl = null
-                    isWalletConnected = false
-                    nostrWalletConnect = null
+    private fun observeUserAccount() = viewModelScope.launch {
+        activeAccountStore.activeUserAccount.collect {
+            val nostrWalletConnect = activeAccountStore.activeUserAccount().nostrWallet
+            if (nostrWalletConnect != null) {
+                setState {
+                    copy(wallet = nostrWalletConnect)
                 }
             }
-
-            setState {
-                copy(
-                    nwcUrl = nwcUrl,
-                    isWalletConnected = isWalletConnected,
-                    nwc = nostrWalletConnect
-                )
-            }
-        } catch (e: NostrWalletConnectParseException) {
-            // show some error on UI
-            return
         }
     }
+
+    private fun connectWallet(nwcUrl: String) = viewModelScope.launch {
+        try {
+            val nostrWalletConnect = nwcUrl.parseNWCUrl()
+            userRepository.connectNostrWallet(
+                userId = activeAccountStore.activeUserId(),
+                nostrWalletConnect = nostrWalletConnect
+            )
+            setState {
+                copy(wallet = nostrWalletConnect)
+            }
+        } catch (error: NWCParseException) {
+            // Propagate error to the UI
+        }
+    }
+
     private suspend fun disconnectWallet() {
-        userRepository.clearNostrWalletConnectForUser(activeAccountStore.activeUserId())
+        userRepository.disconnectNostrWallet(
+            userId = activeAccountStore.activeUserId()
+        )
 
         setState {
-            copy(
-                nwcUrl = null,
-                nwc = null,
-                isWalletConnected = false
-            )
+            copy(wallet = null)
         }
     }
 }

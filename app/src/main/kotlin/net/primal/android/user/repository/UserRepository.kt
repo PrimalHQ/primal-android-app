@@ -6,7 +6,7 @@ import net.primal.android.user.accounts.UserAccountFetcher
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.accounts.copyContactsIfNotNull
 import net.primal.android.user.accounts.copyIfNotNull
-import net.primal.android.user.domain.NostrWalletConnect
+import net.primal.android.user.domain.NostrWallet
 import net.primal.android.user.domain.UserAccount
 import net.primal.android.user.domain.asUserAccount
 import javax.inject.Inject
@@ -44,24 +44,24 @@ class UserRepository @Inject constructor(
         )
     }
 
-    suspend fun updateNostrWalletConnectForUser(userId: String, nostrWalletConnect: NostrWalletConnect) {
+    suspend fun connectNostrWallet(userId: String, nostrWalletConnect: NostrWallet) {
         val currentUserAccount = accountsStore.findByIdOrNull(pubkey = userId)
             ?: UserAccount.buildLocal(pubkey = userId)
 
         accountsStore.upsertAccount(
             userAccount = currentUserAccount.copy(
-                nostrWalletConnect = nostrWalletConnect
+                nostrWallet = nostrWalletConnect
             )
         )
     }
 
-    suspend fun clearNostrWalletConnectForUser(userId: String) {
+    suspend fun disconnectNostrWallet(userId: String) {
         val currentUserAccount = accountsStore.findByIdOrNull(pubkey = userId)
             ?: UserAccount.buildLocal(pubkey = userId)
 
         accountsStore.upsertAccount(
             userAccount = currentUserAccount.copy(
-                nostrWalletConnect = null
+                nostrWallet = null
             )
         )
     }

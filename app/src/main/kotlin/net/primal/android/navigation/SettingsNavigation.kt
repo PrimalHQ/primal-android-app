@@ -17,7 +17,7 @@ import net.primal.android.settings.home.SettingsHomeScreen
 import net.primal.android.settings.home.SettingsHomeViewModel
 import net.primal.android.settings.keys.KeysScreen
 import net.primal.android.settings.keys.KeysViewModel
-import net.primal.android.settings.wallet.ui.WalletScreen
+import net.primal.android.settings.wallet.WalletScreen
 import net.primal.android.settings.wallet.WalletViewModel
 
 

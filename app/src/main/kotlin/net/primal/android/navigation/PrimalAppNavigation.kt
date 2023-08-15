@@ -21,7 +21,6 @@ import com.google.accompanist.navigation.material.ModalBottomSheetLayout
 import com.google.accompanist.navigation.material.bottomSheet
 import com.google.accompanist.navigation.material.rememberBottomSheetNavigator
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.time.delay
 import kotlinx.coroutines.withContext
 import net.primal.android.R
 import net.primal.android.auth.login.LoginScreen
@@ -55,9 +54,7 @@ import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.thread.ThreadScreen
 import net.primal.android.thread.ThreadViewModel
-import timber.log.Timber
 import java.net.URLEncoder
-import kotlin.time.Duration.Companion.seconds
 
 private fun NavController.navigateToWelcome() = navigate(
     route = "welcome",
@@ -106,7 +103,8 @@ private fun NavController.navigateToProfile(profileId: String? = null) = when {
 
 private fun NavController.navigateToSettings() = navigate(route = "settings")
 
-private fun NavController.navigateToWallet(nwcUrl: String) = navigate(route = "wallet_settings?nwcUrl=$nwcUrl")
+private fun NavController.navigateToWallet(nwcUrl: String) =
+    navigate(route = "wallet_settings?nwcUrl=$nwcUrl")
 
 private fun NavController.navigateToThread(postId: String) = navigate(route = "thread/$postId")
 
@@ -149,9 +147,6 @@ fun PrimalAppNavigation() {
                     val url = activity?.intent?.data?.toString()?.ifBlank { null }
 
                     if (url != null && url.startsWith("nostr+walletconnect")) {
-                        // https://stackoverflow.com/questions/72826135/using-deeplinks-in-compose-leads-to-inability-to-navigate-backwards#:~:text=gson.toJson(statements)-,navController.popBackStack(),-navController.navigate(
-                        // for some reason if we don't do this the splash screen will show up when user tries to go back
-                        // very strange behaviour
                         navController.popBackStack()
                         navController.navigateToWallet(nwcUrl = withContext(Dispatchers.IO) {
                             URLEncoder.encode(url, Charsets.UTF_8.name())

@@ -53,7 +53,6 @@ fun PrimalLoadingButton(
                     leadingIcon = leadingIcon,
                     fontWeight = FontWeight.Bold,
                     color = Color.White,
-                    leadingIconTintColor = Color.White
                 )
             }
         }

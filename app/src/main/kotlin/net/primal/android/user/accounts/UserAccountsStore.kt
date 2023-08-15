@@ -7,7 +7,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.runBlocking
-import net.primal.android.user.domain.NostrWalletConnect
 import net.primal.android.user.domain.UserAccount
 import javax.inject.Inject
 import javax.inject.Singleton

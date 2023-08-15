@@ -84,6 +84,7 @@
     <string name="messages_title">Messages</string>
 
     <string name="settings_title">Settings</string>
+
     <string name="settings_keys_title">Keys</string>
     <string name="settings_keys_copy_public_key">Copy public key</string>
     <string name="settings_keys_public_key_hint">Anyone on Nostr can find you via your public key. Feel free to share anywhere.</string>
@@ -94,12 +95,15 @@
     <string name="settings_keys_show_key">Show Key</string>
     <string name="settings_keys_hide_key">Hide Key</string>
     <string name="settings_keys_key_copied">Key copied</string>
+
     <string name="settings_wallet_title">Wallet</string>
-    <string name="settings_wallet_connected_title">Wallet connected</string>
+    <string name="settings_wallet_connected_title">Wallet Connected</string>
     <string name="settings_wallet_connected_subtitle">You are currently using the following bitcoin lightning wallet:</string>
-    <string name="settings_wallet_not_connected_title">Connect a wallet</string>
+    <string name="settings_wallet_not_connected_title">Connect a Wallet</string>
     <string name="settings_wallet_not_connected_subtitle">To send and receive zaps, connect a bitcoin lightning wallet.</string>
     <string name="settings_wallet_disconnect_action">Disconnect wallet</string>
+    <string name="settings_wallet_connect_alby_wallet">Connect Alby Wallet</string>
+
     <string name="settings_appearance_title">Appearance</string>
     <string name="settings_notifications_title">Notifications</string>
     <string name="settings_network_title">Network</string>

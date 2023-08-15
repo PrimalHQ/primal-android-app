@@ -34,8 +34,7 @@ fun IconText(
     leadingIcon: ImageVector? = null,
     leadingIconSize: TextUnit = 24.sp,
     color: Color = Color.Unspecified,
-    leadingIconTintColor: Color? = null,
-    leadingIconModifier: Modifier = Modifier,
+    leadingIconTintColor: Color? = color,
     fontSize: TextUnit = TextUnit.Unspecified,
     fontStyle: FontStyle? = null,
     fontWeight: FontWeight? = null,
@@ -71,12 +70,9 @@ fun IconText(
                 Image(
                     imageVector = leadingIcon,
                     contentDescription = null,
-                    colorFilter =
-                    if (leadingIconTintColor != null)
+                    colorFilter = if (leadingIconTintColor != null) {
                         ColorFilter.tint(color = leadingIconTintColor)
-                    else
-                        null,
-                    modifier = leadingIconModifier
+                    } else null,
                 )
             }
         }

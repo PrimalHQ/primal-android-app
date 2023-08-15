@@ -14,7 +14,7 @@ data class UserAccount(
     val followersCount: Int? = null,
     val notesCount: Int? = null,
     val contactsCreatedAt: Long? = null,
-    val nostrWalletConnect: NostrWalletConnect? = null,
+    val nostrWallet: NostrWallet? = null,
     val relays: List<Relay> = emptyList(),
     val following: Set<String> = emptySet(),
     val followers: List<String> = emptyList(),
