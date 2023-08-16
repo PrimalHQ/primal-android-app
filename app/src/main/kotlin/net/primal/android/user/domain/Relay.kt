@@ -9,6 +9,8 @@ data class Relay(
     val write: Boolean,
 )
 
+fun String.toRelay(): Relay = Relay(url = this, read = true, write = true)
+
 @Serializable
 data class RelayPermission(
     val read: Boolean,

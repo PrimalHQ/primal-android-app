@@ -51,6 +51,8 @@ class NostrSocketClient constructor(
     private val mutableIncomingMessagesSharedFlow = MutableSharedFlow<NostrIncomingMessage>()
 
     val incomingMessages = mutableIncomingMessagesSharedFlow.asSharedFlow()
+    val url = wssRequest.url.toUrl().toString()
+
     suspend fun ensureSocketConnection() = webSocketMutex.withLock {
         if (webSocket == null) {
             webSocket = okHttpClient.newWebSocket(

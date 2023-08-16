@@ -23,6 +23,7 @@ import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
 import net.primal.android.user.domain.Relay
+import net.primal.android.user.domain.toRelay
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import javax.inject.Inject
@@ -43,12 +44,48 @@ class RelayPool @Inject constructor(
         observeActiveAccount()
     }
 
+    @OptIn(FlowPreview::class)
+    @Throws(NostrPublishException::class)
+    suspend fun publishEvent(nostrEvent: NostrEvent, specificRelay: String? = null) {
+        val responseFlow = MutableSharedFlow<NostrPublishResult>()
+        clientsPool.filter { it.url === specificRelay }.forEach { nostrSocketClient ->
+            scope.launch {
+                with(nostrSocketClient) {
+                    ensureSocketConnection()
+                    sendEVENT(nostrEvent.toJsonObject())
+                    try {
+                        val response = collectPublishResponse(eventId = nostrEvent.id)
+                        responseFlow.emit(NostrPublishResult(result = response))
+                    } catch (error: NostrNoticeException) {
+                        responseFlow.emit(NostrPublishResult(error = error))
+                    } catch (error: TimeoutCancellationException) {
+                        responseFlow.emit(NostrPublishResult(error = error))
+                    }
+                }
+            }
+        }
+
+        responseFlow
+            .timeout(30.seconds)
+            .catch { throw NostrPublishException(cause = it) }
+            .first { it.isSuccessful() }
+    }
+
+    suspend fun append(relay: Relay) {
+        val relays = activeAccountStore.activeUserAccount().relays + relay
+        createClientsPool(relays)
+    }
+
     private fun observeActiveAccount() = scope.launch {
         activeAccountStore.activeAccountState.collect {
             when (it) {
                 is ActiveUserAccountState.ActiveUserAccount -> {
                     val userAccount = it.data
-                    createClientsPool(relays = userAccount.relays)
+                    val relays = userAccount.relays.toMutableList()
+                    if (userAccount.nostrWallet != null) {
+                        relays += userAccount.nostrWallet.relayUrl.toRelay()
+                    }
+                    createClientsPool(relays = relays)
                 }
 
                 ActiveUserAccountState.NoUserAccount -> {
@@ -84,33 +121,6 @@ class RelayPool @Inject constructor(
     private suspend fun clearClientsPool() = poolMutex.withLock {
         clientsPool.forEach { it.close() }
         clientsPool = emptyList()
-    }
-
-    @OptIn(FlowPreview::class)
-    @Throws(NostrPublishException::class)
-    suspend fun publishEvent(nostrEvent: NostrEvent) {
-        val responseFlow = MutableSharedFlow<NostrPublishResult>()
-        clientsPool.forEach { nostrSocketClient ->
-            scope.launch {
-                with(nostrSocketClient) {
-                    ensureSocketConnection()
-                    sendEVENT(nostrEvent.toJsonObject())
-                    try {
-                        val response = collectPublishResponse(eventId = nostrEvent.id)
-                        responseFlow.emit(NostrPublishResult(result = response))
-                    } catch (error: NostrNoticeException) {
-                        responseFlow.emit(NostrPublishResult(error = error))
-                    } catch (error: TimeoutCancellationException) {
-                        responseFlow.emit(NostrPublishResult(error = error))
-                    }
-                }
-            }
-        }
-
-        responseFlow
-            .timeout(30.seconds)
-            .catch { throw NostrPublishException(cause = it) }
-            .first { it.isSuccessful() }
     }
 
     private fun NostrPublishResult.isSuccessful(): Boolean {
