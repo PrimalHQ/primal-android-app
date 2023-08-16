@@ -8,13 +8,16 @@ import net.primal.android.networking.UserAgentProvider
 import net.primal.android.nostr.ext.asEventIdTag
 import net.primal.android.nostr.ext.asIdentifierTag
 import net.primal.android.nostr.ext.asPubkeyTag
+import net.primal.android.nostr.ext.toTags
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.NostrEventKind
+import net.primal.android.nostr.model.zap.ZapTarget
 import net.primal.android.serialization.NostrJson
 import net.primal.android.serialization.toNostrRelayMap
 import net.primal.android.settings.api.model.AppSettingsDescription
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.Relay
+import net.primal.android.user.domain.toZapTag
 import javax.inject.Inject
 
 
@@ -96,6 +99,26 @@ class NostrNotary @Inject constructor(
             pubKey = userId,
             kind = NostrEventKind.Contacts.value,
             content = content,
+            tags = tags
+        ).signOrThrow(nsec = findNsecOrThrow(userId))
+    }
+
+    fun signZapRequestNostrEvent(
+        userId: String,
+        comment: String = "",
+        target: ZapTarget,
+        relays: List<Relay>
+    ): NostrEvent {
+        val tags = target.toTags()
+            .toMutableList()
+            .apply {
+                add(relays.toZapTag())
+            }
+
+        return NostrUnsignedEvent(
+            pubKey = userId,
+            kind = NostrEventKind.ZapRequest.value,
+            content = comment,
             tags = tags
         ).signOrThrow(nsec = findNsecOrThrow(userId))
     }

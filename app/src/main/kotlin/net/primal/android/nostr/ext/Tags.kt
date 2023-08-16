@@ -6,6 +6,7 @@ import kotlinx.serialization.json.add
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.jsonPrimitive
 import net.primal.android.core.utils.parseHashtags
+import net.primal.android.nostr.model.zap.ZapTarget
 
 fun List<JsonArray>.findPostId(): String? {
     val postTag = firstOrNull { it.isEventIdTag() }
@@ -134,4 +135,28 @@ fun String.parseHashtagTags(): List<JsonArray> {
         )
     }
     return tags.toList()
+}
+
+fun ZapTarget.toTags(): List<JsonArray> {
+    val tags = mutableListOf<JsonArray>()
+
+    when (this) {
+        is ZapTarget.Profile -> tags.add(buildJsonArray {
+            add("p")
+            add(this@toTags.pubkey)
+        })
+
+        is ZapTarget.Note -> {
+            tags.add(buildJsonArray {
+                add("e")
+                add(this@toTags.id)
+            })
+            tags.add(buildJsonArray {
+                add("p")
+                add(this@toTags.authorPubkey)
+            })
+        }
+    }
+
+    return tags
 }
