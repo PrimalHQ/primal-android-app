@@ -7,6 +7,7 @@ import androidx.paging.cachedIn
 import androidx.paging.map
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,6 +25,7 @@ import net.primal.android.feed.repository.FeedRepository
 import net.primal.android.feed.repository.PostRepository
 import net.primal.android.navigation.feedDirective
 import net.primal.android.networking.relays.errors.NostrPublishException
+import net.primal.android.nostr.repository.ZapRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
 import net.primal.android.user.updater.UserDataUpdater
@@ -39,6 +41,7 @@ class FeedViewModel @Inject constructor(
     private val postRepository: PostRepository,
     private val activeAccountStore: ActiveAccountStore,
     private val userDataSyncerFactory: UserDataUpdaterFactory,
+    private val zapRepository: ZapRepository
 ) : ViewModel() {
 
     private val feedDirective: String = savedStateHandle.feedDirective ?: "network;trending"
@@ -171,7 +174,14 @@ class FeedViewModel @Inject constructor(
     }
 
     private fun zapPost(zapAction: UiEvent.ZapAction) = viewModelScope.launch {
+        try {
+            if (zapAction.postAuthorLightningAddress !== null) {
+                zapRepository.zap(zapAction.postAuthorLightningAddress)
 
+            }
+        } catch (error: NostrPublishException) {
+            // Propagate error to the UI
+        }
     }
 
 }

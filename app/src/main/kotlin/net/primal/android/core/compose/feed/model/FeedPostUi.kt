@@ -12,6 +12,7 @@ data class FeedPostUi(
     val authorName: String,
     val authorHandle: String,
     val authorInternetIdentifier: String? = null,
+    val authorLightningAddress: String? = null,
     val authorAvatarUrl: String? = null,
     val authorMediaResources: List<MediaResourceUi>,
     val mediaResources: List<MediaResourceUi>,

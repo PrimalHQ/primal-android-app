@@ -12,6 +12,7 @@ data class ProfileMetadata(
     val raw: String,
     val handle: String? = null,
     val internetIdentifier: String? = null,
+    val lightningAddress: String? = null,
     val about: String? = null,
     val picture: String? = null,
     val banner: String? = null,

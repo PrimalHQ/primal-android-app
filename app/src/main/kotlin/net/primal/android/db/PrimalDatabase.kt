@@ -52,7 +52,7 @@ import net.primal.android.thread.db.ConversationDao
         ProfileStats::class,
         NostrResource::class,
     ],
-    version = 5,
+    version = 6,
     exportSchema = true,
 )
 @TypeConverters(RoomCustomTypeConverters::class)

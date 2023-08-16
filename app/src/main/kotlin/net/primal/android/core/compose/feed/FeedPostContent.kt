@@ -333,6 +333,7 @@ fun FeedReferencedPosts(
                     authorName = data.authorName,
                     authorHandle = data.authorName,
                     authorInternetIdentifier = data.authorInternetIdentifier,
+                    authorLightningAddress = data.authorLightningAddress,
                     authorAvatarUrl = data.authorAvatarUrl,
                     authorMediaResources = emptyList(),
                     mediaResources = data.mediaResources.map { it.asMediaResourceUi() },
@@ -411,6 +412,7 @@ fun PreviewPostContentWithReferencedPost() {
                             authorName = "primal",
                             authorAvatarUrl = null,
                             authorInternetIdentifier = "hi@primal.net",
+                            authorLightningAddress = "h@getalby.com",
                             mediaResources = emptyList(),
                             nostrResources = emptyList(),
 
@@ -427,6 +429,7 @@ fun PreviewPostContentWithReferencedPost() {
                             authorName = "primal",
                             authorAvatarUrl = null,
                             authorInternetIdentifier = "hi@primal.net",
+                            authorLightningAddress = "h@getalby.com",
                             mediaResources = emptyList(),
                             nostrResources = emptyList(),
                         ),

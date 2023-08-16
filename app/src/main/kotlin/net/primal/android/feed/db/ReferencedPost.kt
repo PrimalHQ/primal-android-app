@@ -12,6 +12,7 @@ data class ReferencedPost(
     val authorName: String,
     val authorAvatarUrl: String?,
     val authorInternetIdentifier: String?,
+    val authorLightningAddress: String?,
     val mediaResources: List<MediaResource>,
     val nostrResources: List<NostrResource>,
 )

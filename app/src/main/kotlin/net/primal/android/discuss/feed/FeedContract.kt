@@ -27,6 +27,7 @@ interface FeedContract {
         data class ZapAction(
             val postId: String,
             val postAuthorId: String,
+            val postAuthorLightningAddress: String?,
             val zapAmount: Int?,
             val zapDescription: String?,
         ) : UiEvent()

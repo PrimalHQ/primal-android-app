@@ -9,7 +9,7 @@ fun String.toLightningUrlOrNull(): String? {
     val host = parts[1]
     val lnurlp = parts[0]
 
-    val url = "https://$host/.well-known/lnurlp/$lnurlp)";
+    val url = "https://$host/.well-known/lnurlp/$lnurlp";
 
-    return Bech32.encodeBytes("lnurl", this.toByteArray(), Bech32.Encoding.Bech32)
+    return url
 }
