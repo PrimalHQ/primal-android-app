@@ -25,6 +25,7 @@ import net.primal.android.feed.repository.FeedRepository
 import net.primal.android.feed.repository.PostRepository
 import net.primal.android.navigation.feedDirective
 import net.primal.android.networking.relays.errors.NostrPublishException
+import net.primal.android.nostr.model.zap.ZapTarget
 import net.primal.android.nostr.repository.ZapRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
@@ -176,7 +177,14 @@ class FeedViewModel @Inject constructor(
     private fun zapPost(zapAction: UiEvent.ZapAction) = viewModelScope.launch {
         try {
             if (zapAction.postAuthorLightningAddress !== null) {
-                zapRepository.zap(zapAction.postAuthorLightningAddress)
+                val amount = zapAction.zapAmount ?: 42
+
+                zapRepository.zap(
+                    zapAction.zapDescription ?: "",
+                    amount,
+                    ZapTarget.Note(zapAction.postId, zapAction.postAuthorId, zapAction.postAuthorLightningAddress),
+                    activeAccountStore.activeUserAccount().relays
+                )
 
             }
         } catch (error: NostrPublishException) {
