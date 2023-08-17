@@ -2,7 +2,12 @@ package net.primal.android.nostr.notary
 
 import fr.acinq.secp256k1.Hex
 import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.add
+import kotlinx.serialization.json.buildJsonArray
+import net.primal.android.crypto.CryptoUtils
+import net.primal.android.crypto.hexToNsecHrp
 import net.primal.android.crypto.toNpub
 import net.primal.android.networking.UserAgentProvider
 import net.primal.android.nostr.ext.asEventIdTag
@@ -11,11 +16,14 @@ import net.primal.android.nostr.ext.asPubkeyTag
 import net.primal.android.nostr.ext.toTags
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.NostrEventKind
+import net.primal.android.nostr.model.zap.PayInvoiceRequest
+import net.primal.android.nostr.model.zap.WalletRequest
 import net.primal.android.nostr.model.zap.ZapTarget
 import net.primal.android.serialization.NostrJson
 import net.primal.android.serialization.toNostrRelayMap
 import net.primal.android.settings.api.model.AppSettingsDescription
 import net.primal.android.user.credentials.CredentialsStore
+import net.primal.android.user.domain.NostrWallet
 import net.primal.android.user.domain.Relay
 import net.primal.android.user.domain.toZapTag
 import javax.inject.Inject
@@ -24,6 +32,8 @@ import javax.inject.Inject
 class NostrNotary @Inject constructor(
     private val credentialsStore: CredentialsStore,
 ) {
+
+    private val json = Json { ignoreUnknownKeys = true }
 
     private fun findNsecOrThrow(pubkey: String): String {
         return try {
@@ -121,5 +131,27 @@ class NostrNotary @Inject constructor(
             content = comment,
             tags = tags
         ).signOrThrow(nsec = findNsecOrThrow(userId))
+    }
+
+    fun signWalletInvoiceRequestNostrEvent(
+        request: WalletRequest<PayInvoiceRequest>,
+        toPubkey: String,
+        nwc: NostrWallet
+    ): NostrEvent {
+        val tags = listOf(buildJsonArray {
+            add("p")
+            add(toPubkey)
+        })
+
+        val content = json.encodeToString(request)
+        val secret = CryptoUtils.getSharedSecret(nwc.secret.toByteArray(), toPubkey.toByteArray())
+        val encryptedMessage = CryptoUtils.encrypt(content, secret)
+
+        return NostrUnsignedEvent(
+            pubKey = nwc.pubkey,
+            kind = NostrEventKind.WalletRequest.value,
+            content = encryptedMessage,
+            tags = tags
+        ).signOrThrow(nsec = nwc.secret.hexToNsecHrp())
     }
 }

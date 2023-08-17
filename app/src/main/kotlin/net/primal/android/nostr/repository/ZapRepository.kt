@@ -5,7 +5,6 @@ import net.primal.android.nostr.model.zap.ZapTarget
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.domain.Relay
-import timber.log.Timber
 import javax.inject.Inject
 
 class ZapRepository @Inject constructor(
@@ -19,9 +18,16 @@ class ZapRepository @Inject constructor(
         target: ZapTarget,
         relays: List<Relay>
     ) {
+        val wallet = activeAccountStore.activeUserAccount().nostrWallet ?: throw RuntimeException()
+
         val lightningAddress = when (target) {
             is ZapTarget.Note -> target.authorLightningUrl
             is ZapTarget.Profile -> target.lightningUrl
+        }
+
+        val toPubkey = when (target) {
+            is ZapTarget.Note -> target.authorPubkey
+            is ZapTarget.Profile -> target.pubkey
         }
 
         val zapEvent = notary.signZapRequestNostrEvent(
@@ -31,14 +37,16 @@ class ZapRepository @Inject constructor(
             relays = relays
         )
 
-        val request = zapsApi.fetchPayRequest(lightningAddress)
-        Timber.d("ZAP PAY REQUEST: ${request?.callback}")
+        val request = zapsApi.fetchPayRequest(lightningAddress) ?: throw RuntimeException()
+        val invoice = zapsApi.fetchInvoice(
+            request,
+            zapEvent,
+            satoshiAmount = amount * 1000,
+            comment = comment
+        ) ?: throw RuntimeException()
 
-        if (request == null) {
-            throw RuntimeException()
-        }
-
-        val invoice = zapsApi.fetchInvoice(request, zapEvent, satoshiAmount = amount * 1000, comment = comment)
-        Timber.d("ZAP INVOICE: $invoice")
+        val walletPayRequest = zapsApi.createWalletPayRequest(invoice)
+        val walletPayNostrEvent =
+            notary.signWalletInvoiceRequestNostrEvent(walletPayRequest, toPubkey, wallet)
     }
 }
