@@ -1,5 +1,6 @@
 package net.primal.android.nostr.repository
 
+import net.primal.android.networking.relays.NostrWalletRelayPool
 import net.primal.android.nostr.api.ZapsApi
 import net.primal.android.nostr.model.zap.ZapTarget
 import net.primal.android.nostr.notary.NostrNotary
@@ -10,7 +11,8 @@ import javax.inject.Inject
 class ZapRepository @Inject constructor(
     private val zapsApi: ZapsApi,
     private val notary: NostrNotary,
-    private val activeAccountStore: ActiveAccountStore
+    private val activeAccountStore: ActiveAccountStore,
+    private val nostrWalletRelayPool: NostrWalletRelayPool
 ) {
     suspend fun zap(
         comment: String = "",
@@ -21,9 +23,11 @@ class ZapRepository @Inject constructor(
         val wallet = activeAccountStore.activeUserAccount().nostrWallet ?: throw RuntimeException()
 
         val lightningAddress = when (target) {
-            is ZapTarget.Note -> target.authorLightningUrl
-            is ZapTarget.Profile -> target.lightningUrl
+            is ZapTarget.Note -> target.authorLightningAddress
+            is ZapTarget.Profile -> target.lightningAddress
         }
+
+        requireNotNull(lightningAddress) { "Lightning address of the recipient is missing" }
 
         val toPubkey = when (target) {
             is ZapTarget.Note -> target.authorPubkey
@@ -48,5 +52,7 @@ class ZapRepository @Inject constructor(
         val walletPayRequest = zapsApi.createWalletPayRequest(invoice)
         val walletPayNostrEvent =
             notary.signWalletInvoiceRequestNostrEvent(walletPayRequest, toPubkey, wallet)
+
+        nostrWalletRelayPool.publishEvent(walletPayNostrEvent)
     }
 }

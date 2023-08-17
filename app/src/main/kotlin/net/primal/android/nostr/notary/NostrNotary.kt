@@ -7,6 +7,7 @@ import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.add
 import kotlinx.serialization.json.buildJsonArray
 import net.primal.android.crypto.CryptoUtils
+import net.primal.android.crypto.bechToBytes
 import net.primal.android.crypto.hexToNsecHrp
 import net.primal.android.crypto.toNpub
 import net.primal.android.networking.UserAgentProvider
@@ -144,8 +145,7 @@ class NostrNotary @Inject constructor(
         })
 
         val content = json.encodeToString(request)
-        val secret = CryptoUtils.getSharedSecret(nwc.secret.toByteArray(), toPubkey.toByteArray())
-        val encryptedMessage = CryptoUtils.encrypt(content, secret)
+        val encryptedMessage = CryptoUtils.encrypt(content, Hex.decode(nwc.secret), Hex.decode(toPubkey))
 
         return NostrUnsignedEvent(
             pubKey = nwc.pubkey,

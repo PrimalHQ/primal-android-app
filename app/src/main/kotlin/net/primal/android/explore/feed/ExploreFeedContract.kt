@@ -26,6 +26,7 @@ interface ExploreFeedContract {
             val postAuthorId: String,
             val zapAmount: Int?,
             val zapDescription: String?,
+            val postAuthorLightningAddress: String?
         ) : UiEvent()
     }
 }

@@ -46,9 +46,9 @@ class RelayPool @Inject constructor(
 
     @OptIn(FlowPreview::class)
     @Throws(NostrPublishException::class)
-    suspend fun publishEvent(nostrEvent: NostrEvent, specificRelay: String? = null) {
+    suspend fun publishEvent(nostrEvent: NostrEvent) {
         val responseFlow = MutableSharedFlow<NostrPublishResult>()
-        clientsPool.filter { it.url === specificRelay }.forEach { nostrSocketClient ->
+        clientsPool.forEach { nostrSocketClient ->
             scope.launch {
                 with(nostrSocketClient) {
                     ensureSocketConnection()
@@ -69,11 +69,6 @@ class RelayPool @Inject constructor(
             .timeout(30.seconds)
             .catch { throw NostrPublishException(cause = it) }
             .first { it.isSuccessful() }
-    }
-
-    suspend fun append(relay: Relay) {
-        val relays = activeAccountStore.activeUserAccount().relays + relay
-        createClientsPool(relays)
     }
 
     private fun observeActiveAccount() = scope.launch {

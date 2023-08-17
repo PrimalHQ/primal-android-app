@@ -21,6 +21,8 @@ import net.primal.android.feed.repository.FeedRepository
 import net.primal.android.feed.repository.PostRepository
 import net.primal.android.navigation.searchQuery
 import net.primal.android.networking.relays.errors.NostrPublishException
+import net.primal.android.nostr.model.zap.ZapTarget
+import net.primal.android.nostr.repository.ZapRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
 import javax.inject.Inject
@@ -31,6 +33,7 @@ class ExploreFeedViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val feedRepository: FeedRepository,
     private val postRepository: PostRepository,
+    private val zapRepository: ZapRepository
 ) : ViewModel() {
 
     private val exploreQuery = "search;\"${savedStateHandle.searchQuery}\""
@@ -121,6 +124,21 @@ class ExploreFeedViewModel @Inject constructor(
     }
 
     private fun zapPost(zapAction: UiEvent.ZapAction) = viewModelScope.launch {
-
+        try {
+            zapRepository.zap(
+                comment = zapAction.zapDescription ?: "",
+                amount = zapAction.zapAmount ?: 42,
+                target = ZapTarget.Note(
+                    id = zapAction.postId,
+                    authorPubkey = zapAction.postAuthorId,
+                    authorLightningAddress = zapAction.postAuthorLightningAddress
+                ),
+                relays = activeAccountStore.activeUserAccount().relays
+            )
+        } catch (error: IllegalArgumentException) {
+            // Propagate error to the UI
+        } catch (error: NostrPublishException) {
+            // Propagate error to the UI
+        }
     }
 }

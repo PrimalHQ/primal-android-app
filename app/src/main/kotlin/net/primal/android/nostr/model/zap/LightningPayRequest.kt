@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 data class PayerDataRequirement(val mandatory: Boolean)
 
 @Serializable
-data class PayerData(val name: PayerDataRequirement, val identifier: PayerDataRequirement)
+data class PayerData(val name: PayerDataRequirement, val identifier: PayerDataRequirement? = null)
 
 @Serializable
 data class LightningPayRequest(

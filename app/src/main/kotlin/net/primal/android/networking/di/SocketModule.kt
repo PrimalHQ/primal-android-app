@@ -5,6 +5,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import net.primal.android.networking.UserAgentProvider
+import net.primal.android.networking.relays.NostrWalletRelayPool
 import net.primal.android.networking.relays.RelayPool
 import net.primal.android.networking.sockets.NostrSocketClient
 import net.primal.android.user.accounts.active.ActiveAccountStore
@@ -39,6 +40,16 @@ object SocketModule {
         okHttpClient: OkHttpClient,
         activeAccountStore: ActiveAccountStore,
     ) = RelayPool(
+        okHttpClient = okHttpClient,
+        activeAccountStore = activeAccountStore,
+    )
+
+    @Provides
+    @Singleton
+    fun providesNostrWalletRelayPool(
+        okHttpClient: OkHttpClient,
+        activeAccountStore: ActiveAccountStore,
+    ) = NostrWalletRelayPool(
         okHttpClient = okHttpClient,
         activeAccountStore = activeAccountStore,
     )
