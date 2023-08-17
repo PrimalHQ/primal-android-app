@@ -29,11 +29,6 @@ class ZapRepository @Inject constructor(
 
         requireNotNull(lightningAddress) { "Lightning address of the recipient is missing" }
 
-        val toPubkey = when (target) {
-            is ZapTarget.Note -> target.authorPubkey
-            is ZapTarget.Profile -> target.pubkey
-        }
-
         val zapEvent = notary.signZapRequestNostrEvent(
             activeAccountStore.activeUserId(),
             comment = comment,
@@ -51,7 +46,7 @@ class ZapRepository @Inject constructor(
 
         val walletPayRequest = zapsApi.createWalletPayRequest(invoice)
         val walletPayNostrEvent =
-            notary.signWalletInvoiceRequestNostrEvent(walletPayRequest, toPubkey, wallet)
+            notary.signWalletInvoiceRequestNostrEvent(walletPayRequest, wallet)
 
         nostrWalletRelayPool.publishEvent(walletPayNostrEvent)
     }

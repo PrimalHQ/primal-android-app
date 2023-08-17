@@ -28,6 +28,22 @@ fun NostrUnsignedEvent.signOrThrow(nsec: String): NostrEvent {
     )
 }
 
+fun NostrUnsignedEvent.signOrThrow(hexPrivkey: ByteArray): NostrEvent {
+    val eventId = this.calculateEventId()
+    return NostrEvent(
+        id = eventId.toHex(),
+        pubKey = this.pubKey,
+        createdAt = this.createdAt,
+        kind = this.kind,
+        tags = this.tags,
+        content = this.content,
+        sig = CryptoUtils.sign(
+            data = eventId,
+            privateKey = hexPrivkey,
+        ).toHex()
+    )
+}
+
 fun NostrUnsignedEvent.calculateEventId(): ByteArray {
     val json = buildJsonArray {
         add(0)

@@ -136,22 +136,21 @@ class NostrNotary @Inject constructor(
 
     fun signWalletInvoiceRequestNostrEvent(
         request: WalletRequest<PayInvoiceRequest>,
-        toPubkey: String,
         nwc: NostrWallet
     ): NostrEvent {
         val tags = listOf(buildJsonArray {
             add("p")
-            add(toPubkey)
+            add(nwc.pubkey)
         })
 
         val content = json.encodeToString(request)
-        val encryptedMessage = CryptoUtils.encrypt(content, Hex.decode(nwc.secret), Hex.decode(toPubkey))
+        val encryptedMessage = CryptoUtils.encrypt(content, Hex.decode(nwc.keypair.privkey), Hex.decode(nwc.pubkey))
 
         return NostrUnsignedEvent(
-            pubKey = nwc.pubkey,
+            pubKey = nwc.keypair.pubkey,
             kind = NostrEventKind.WalletRequest.value,
             content = encryptedMessage,
             tags = tags
-        ).signOrThrow(nsec = nwc.secret.hexToNsecHrp())
+        ).signOrThrow(hexPrivkey = Hex.decode(nwc.keypair.privkey))
     }
 }

@@ -50,6 +50,7 @@ import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.user.domain.NostrWallet
+import net.primal.android.user.domain.NostrWalletKeypair
 
 @Composable
 fun WalletScreen(
@@ -276,7 +277,10 @@ class WalletUiStateProvider : PreviewParameterProvider<WalletContract.UiState> {
                     relayUrl = "wss://relay.getalby.com/v1",
                     lud16 = "miljan@getalby.com",
                     pubkey = "69effe7b49a6dd5cf525bd0905917a5005ffe480b58eeb8e861418cf3ae760d9",
-                    secret = "7c0dabd065b2de3299a0d0e1c26b8ac7047dae6b20aba3a62b23650eb601bbfd",
+                    keypair = NostrWalletKeypair(
+                        privkey = "7c0dabd065b2de3299a0d0e1c26b8ac7047dae6b20aba3a62b23650eb601bbfd",
+                        pubkey = "69effe7b49a6dd5cf525bd0905917a5005ffe480b58eeb8e861418cf3ae760d9"
+                    )
                 )
             ),
             WalletContract.UiState(

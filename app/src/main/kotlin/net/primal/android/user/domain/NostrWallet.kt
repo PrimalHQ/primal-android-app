@@ -7,9 +7,12 @@ data class NostrWallet(
     val lud16: String,
     val relayUrl: String,
     val pubkey: String,
-    val secret: String,
+    val keypair: NostrWalletKeypair,
 ) {
     fun toStringUrl(): String {
-        return "nostr+walletconnect://${pubkey}?relay=${relayUrl}&secret=${secret}&lud16=${lud16}"
+        return "nostr+walletconnect://${pubkey}?relay=${relayUrl}&secret=${keypair.privkey}&lud16=${lud16}"
     }
 }
+
+@Serializable
+data class NostrWalletKeypair(val privkey: String, val pubkey: String)
