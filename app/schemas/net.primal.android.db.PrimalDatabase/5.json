@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 5,
-    "identityHash": "6ad087835b1a61dbd97aed38717cfbcf",
+    "identityHash": "51e54b701a12816b35dbe5ef6e08f01a",
     "entities": [
       {
         "tableName": "PostData",
@@ -80,7 +80,7 @@
       },
       {
         "tableName": "ProfileMetadata",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ownerId` TEXT NOT NULL, `eventId` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `raw` TEXT NOT NULL, `handle` TEXT, `internetIdentifier` TEXT, `lightningAddress` TEXT, `about` TEXT, `picture` TEXT, `banner` TEXT, `displayName` TEXT, `website` TEXT, PRIMARY KEY(`ownerId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ownerId` TEXT NOT NULL, `eventId` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `raw` TEXT NOT NULL, `handle` TEXT, `internetIdentifier` TEXT, `about` TEXT, `picture` TEXT, `banner` TEXT, `displayName` TEXT, `website` TEXT, PRIMARY KEY(`ownerId`))",
         "fields": [
           {
             "fieldPath": "ownerId",
@@ -115,12 +115,6 @@
           {
             "fieldPath": "internetIdentifier",
             "columnName": "internetIdentifier",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "lightningAddress",
-            "columnName": "lightningAddress",
             "affinity": "TEXT",
             "notNull": false
           },
@@ -675,7 +669,7 @@
       },
       {
         "tableName": "NostrResource",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`postId` TEXT NOT NULL, `uri` TEXT NOT NULL, `refPost_postId` TEXT, `refPost_createdAt` INTEGER, `refPost_content` TEXT, `refPost_authorId` TEXT, `refPost_authorName` TEXT, `refPost_authorAvatarUrl` TEXT, `refPost_authorInternetIdentifier` TEXT, `refPost_authorLightningAddress` TEXT, `refPost_mediaResources` TEXT, `refPost_nostrResources` TEXT, `refUser_userId` TEXT, `refUser_handle` TEXT, PRIMARY KEY(`postId`, `uri`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`postId` TEXT NOT NULL, `uri` TEXT NOT NULL, `refPost_postId` TEXT, `refPost_createdAt` INTEGER, `refPost_content` TEXT, `refPost_authorId` TEXT, `refPost_authorName` TEXT, `refPost_authorAvatarUrl` TEXT, `refPost_authorInternetIdentifier` TEXT, `refPost_mediaResources` TEXT, `refPost_nostrResources` TEXT, `refUser_userId` TEXT, `refUser_handle` TEXT, PRIMARY KEY(`postId`, `uri`))",
         "fields": [
           {
             "fieldPath": "postId",
@@ -732,12 +726,6 @@
             "notNull": false
           },
           {
-            "fieldPath": "referencedPost.authorLightningAddress",
-            "columnName": "refPost_authorLightningAddress",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
             "fieldPath": "referencedPost.mediaResources",
             "columnName": "refPost_mediaResources",
             "affinity": "TEXT",
@@ -776,7 +764,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '6ad087835b1a61dbd97aed38717cfbcf')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '51e54b701a12816b35dbe5ef6e08f01a')"
     ]
   }
 }
