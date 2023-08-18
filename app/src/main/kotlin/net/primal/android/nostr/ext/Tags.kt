@@ -39,15 +39,17 @@ fun String.asEventIdTag(recommendedRelay: String? = null, marker: String? = null
         add("e")
         add(this@asEventIdTag)
         if (recommendedRelay != null) add(recommendedRelay)
-        if (marker != null) add(marker)
+        if (marker != null) {
+            if (recommendedRelay == null) add("")
+            add(marker)
+        }
     }
 
-fun String.asPubkeyTag(recommendedRelay: String? = null, marker: String? = null): JsonArray =
+fun String.asPubkeyTag(recommendedRelay: String? = null): JsonArray =
     buildJsonArray {
         add("p")
         add(this@asPubkeyTag)
         if (recommendedRelay != null) add(recommendedRelay)
-        if (marker != null) add(marker)
     }
 
 fun String.asIdentifierTag(): JsonArray = buildJsonArray {
@@ -141,11 +143,11 @@ fun ZapTarget.toTags(): List<JsonArray> {
     val tags = mutableListOf<JsonArray>()
 
     when (this) {
-        is ZapTarget.Profile -> tags.add(this@toTags.pubkey.asPubkeyTag())
+        is ZapTarget.Profile -> tags.add(pubkey.asPubkeyTag())
 
         is ZapTarget.Note -> {
-            tags.add(this@toTags.id.asEventIdTag())
-            tags.add(this@toTags.authorPubkey.asPubkeyTag())
+            tags.add(id.asEventIdTag())
+            tags.add(authorPubkey.asPubkeyTag())
         }
     }
 
