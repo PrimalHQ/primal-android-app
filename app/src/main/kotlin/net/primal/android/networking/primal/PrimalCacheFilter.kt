@@ -26,6 +26,7 @@ enum class PrimalVerb(val identifier: String) {
     TRENDING_HASHTAGS_7D("trending_hashtags_7d"),
     RECOMMENDED_USERS("get_recommended_users"),
     GET_APP_SETTINGS("get_app_settings"),
+    SET_APP_SETTINGS("set_app_settings"),
     THREAD_VIEW("thread_view"),
     USER_SEARCH("user_search"),
 }
