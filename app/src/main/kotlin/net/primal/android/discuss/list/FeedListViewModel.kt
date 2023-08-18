@@ -42,7 +42,7 @@ class FeedListViewModel @Inject constructor(
     }
 
     private fun fetchLatestFeeds() = viewModelScope.launch {
-        settingsRepository.fetchAndUpsertAppSettings(pubkey = activeAccountStore.activeUserId())
+        settingsRepository.fetchAndPersistAppSettings(userId = activeAccountStore.activeUserId())
     }
 
     private fun Feed.asFeedUi() = FeedUi(directive = this.directive, name = this.name)

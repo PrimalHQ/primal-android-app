@@ -19,6 +19,8 @@ import net.primal.android.settings.keys.KeysScreen
 import net.primal.android.settings.keys.KeysViewModel
 import net.primal.android.settings.wallet.WalletScreen
 import net.primal.android.settings.wallet.WalletViewModel
+import net.primal.android.settings.zaps.ZapSettingsScreen
+import net.primal.android.settings.zaps.ZapSettingsViewModel
 
 
 private fun NavController.navigateToKeys() = navigate(route = "keys_settings")
@@ -163,10 +165,10 @@ private fun NavGraphBuilder.feeds(route: String, navController: NavController) =
 private fun NavGraphBuilder.zaps(route: String, navController: NavController) = composable(
     route = route,
 ) {
+    val viewModel = hiltViewModel<ZapSettingsViewModel>(it)
     LockToOrientationPortrait()
-    DemoSecondaryScreen(
-        title = stringResource(id = R.string.settings_zaps_title),
-        description = "Zaps settings will appear here. Stay tuned.",
+    ZapSettingsScreen(
+        viewModel = viewModel,
         onClose = { navController.navigateUp() },
     )
 }

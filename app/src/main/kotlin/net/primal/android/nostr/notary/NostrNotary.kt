@@ -10,6 +10,7 @@ import net.primal.android.nostr.ext.asIdentifierTag
 import net.primal.android.nostr.ext.asPubkeyTag
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.NostrEventKind
+import net.primal.android.nostr.model.primal.content.ContentAppSettings
 import net.primal.android.serialization.NostrJson
 import net.primal.android.serialization.toNostrRelayMap
 import net.primal.android.settings.api.model.AppSettingsDescription
@@ -54,6 +55,18 @@ class NostrNotary @Inject constructor(
             content = NostrJson.encodeToString(
                 AppSettingsDescription(description = "Sync app settings")
             ),
+        ).signOrThrow(nsec = findNsecOrThrow(userId))
+    }
+
+    fun signAppSettingsNostrEvent(
+        userId: String,
+        appSettings: ContentAppSettings,
+    ): NostrEvent {
+        return NostrUnsignedEvent(
+            pubKey = userId,
+            kind = NostrEventKind.ApplicationSpecificData.value,
+            tags = listOf("${UserAgentProvider.APP_NAME} App".asIdentifierTag()),
+            content = NostrJson.encodeToString(appSettings),
         ).signOrThrow(nsec = findNsecOrThrow(userId))
     }
 
