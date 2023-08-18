@@ -14,14 +14,10 @@ import net.primal.android.user.domain.NostrWallet
 
 fun NostrUnsignedEvent.signOrThrow(nsec: String): NostrEvent {
     val hexPrivkey = Bech32.decodeBytes(nsec).second
-    return this.signOrThrowWithHexPrivkey(hexPrivkey)
+    return this.signOrThrow(hexPrivkey)
 }
 
 fun NostrUnsignedEvent.signOrThrow(hexPrivkey: ByteArray): NostrEvent {
-    return this.signOrThrowWithHexPrivkey(hexPrivkey)
-}
-
-private fun NostrUnsignedEvent.signOrThrowWithHexPrivkey(hexPrivkey: ByteArray): NostrEvent {
     val eventId = this.calculateEventId()
     return NostrEvent(
         id = eventId.toHex(),

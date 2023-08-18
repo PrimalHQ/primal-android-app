@@ -44,31 +44,16 @@ class RelayPool @Inject constructor(
         observeActiveAccount()
     }
 
-    @OptIn(FlowPreview::class)
     @Throws(NostrPublishException::class)
     suspend fun publishEvent(nostrEvent: NostrEvent) {
-        val responseFlow = MutableSharedFlow<NostrPublishResult>()
-        clientsPool.forEach { nostrSocketClient ->
-            scope.launch {
-                with(nostrSocketClient) {
-                    ensureSocketConnection()
-                    sendEVENT(nostrEvent.toJsonObject())
-                    try {
-                        val response = collectPublishResponse(eventId = nostrEvent.id)
-                        responseFlow.emit(NostrPublishResult(result = response))
-                    } catch (error: NostrNoticeException) {
-                        responseFlow.emit(NostrPublishResult(error = error))
-                    } catch (error: TimeoutCancellationException) {
-                        responseFlow.emit(NostrPublishResult(error = error))
-                    }
-                }
-            }
-        }
+        handlePublishEvent(clientsPool, nostrEvent)
+    }
+    
+    @Throws(NostrPublishException::class)
+    suspend fun publishEventTo(url: String, nostrEvent: NostrEvent) {
+        val receivers = clientsPool.filter { it.url == url }
 
-        responseFlow
-            .timeout(30.seconds)
-            .catch { throw NostrPublishException(cause = it) }
-            .first { it.isSuccessful() }
+        handlePublishEvent(receivers, nostrEvent)
     }
 
     private fun observeActiveAccount() = scope.launch {
@@ -135,5 +120,30 @@ class RelayPool @Inject constructor(
             }
             .timeout(30.seconds)
             .first()
+    }
+
+    @OptIn(FlowPreview::class)
+    private suspend fun handlePublishEvent(receivers: List<NostrSocketClient>, nostrEvent: NostrEvent) {
+        val responseFlow = MutableSharedFlow<NostrPublishResult>()
+        receivers.forEach { nostrSocketClient ->
+            scope.launch {
+                with(nostrSocketClient) {
+                    ensureSocketConnection()
+                    sendEVENT(nostrEvent.toJsonObject())
+                    try {
+                        val response = collectPublishResponse(eventId = nostrEvent.id)
+                        responseFlow.emit(NostrPublishResult(result = response))
+                    } catch (error: NostrNoticeException) {
+                        responseFlow.emit(NostrPublishResult(error = error))
+                    } catch (error: TimeoutCancellationException) {
+                        responseFlow.emit(NostrPublishResult(error = error))
+                    }
+                }
+            }
+        }
+
+        responseFlow.timeout(30.seconds)
+            .catch { throw NostrPublishException(cause = it) }
+            .first { it.isSuccessful() }
     }
 }

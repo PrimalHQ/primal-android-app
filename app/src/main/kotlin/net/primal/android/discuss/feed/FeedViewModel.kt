@@ -183,17 +183,28 @@ class FeedViewModel @Inject constructor(
             }
 
             val amount = zapAction.zapAmount ?: 42
+            val activeAccount = activeAccountStore.activeUserAccount()
+
+            if (activeAccount.nostrWallet == null) {
+                return@launch
+            }
 
             zapRepository.zap(
-                zapAction.zapDescription ?: "",
-                amount,
-                ZapTarget.Note(zapAction.postId, zapAction.postAuthorId, zapAction.postAuthorLightningAddress),
-                activeAccountStore.activeUserAccount().relays
+                userId = zapAction.zapDescription ?: "",
+                amount = amount,
+                target = ZapTarget.Note(zapAction.postId, zapAction.postAuthorId, zapAction.postAuthorLightningAddress),
+                relays = activeAccount.relays,
+                nostrWallet = activeAccount.nostrWallet,
             )
         } catch (error: MalformedLightningAddressException) {
             setState { copy( error = FeedContract.PostActionError.MalformedLightningAddress ) }
-        } catch (error: NostrPublishException) {
-            setState { copy( error = FeedContract.PostActionError.FailedToPublishZapEvent ) }
+        } catch (error: Exception) {
+            when (error) {
+                is ZapRepository.ZapFailureException, is NostrPublishException -> {
+                    setState { copy( error = FeedContract.PostActionError.FailedToPublishZapEvent ) }
+                }
+                else -> throw error
+            }
         }
     }
 

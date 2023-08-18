@@ -11,7 +11,6 @@ import net.primal.android.nostr.model.zap.LightningPayResponse
 import net.primal.android.nostr.model.zap.PayInvoiceRequest
 import net.primal.android.nostr.model.zap.WalletRequest
 import net.primal.android.serialization.toJsonObject
-import net.primal.android.user.domain.NostrWallet
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -26,7 +25,7 @@ class ZapsApi @Inject constructor(
 ) {
     private val json = Json { ignoreUnknownKeys = true }
 
-    suspend fun fetchPayRequest(lightningAddress: String): LightningPayRequest? {
+    suspend fun fetchZapPayRequest(lightningAddress: String): LightningPayRequest? {
         val lnUrl = lightningAddress.toLightningUrlOrNull() ?: throw MalformedLightningAddressException()
 
         val getRequest = Request.Builder()
