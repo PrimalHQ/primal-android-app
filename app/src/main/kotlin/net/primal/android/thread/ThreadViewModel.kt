@@ -16,17 +16,21 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.core.compose.feed.asFeedPostUi
+import net.primal.android.discuss.feed.FeedContract
 import net.primal.android.feed.repository.FeedRepository
 import net.primal.android.feed.repository.PostRepository
 import net.primal.android.navigation.postId
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.nostr.api.MalformedLightningAddressException
 import net.primal.android.nostr.ext.asEventIdTag
 import net.primal.android.nostr.ext.asPubkeyTag
 import net.primal.android.nostr.ext.isPubKeyTag
 import net.primal.android.nostr.ext.parseEventTags
 import net.primal.android.nostr.ext.parseHashtagTags
 import net.primal.android.nostr.ext.parsePubkeyTags
+import net.primal.android.nostr.model.zap.ZapTarget
+import net.primal.android.nostr.repository.ZapRepository
 import net.primal.android.thread.ThreadContract.UiEvent
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
@@ -40,6 +44,7 @@ class ThreadViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val feedRepository: FeedRepository,
     private val postRepository: PostRepository,
+    private val zapRepository: ZapRepository
 ) : ViewModel() {
 
     private val postId = savedStateHandle.postId
@@ -137,7 +142,8 @@ class ThreadViewModel @Inject constructor(
                 postAuthorId = postLikeAction.postAuthorId,
             )
         } catch (error: NostrPublishException) {
-            // Propagate error to the UI
+            setState { copy( error = ThreadContract.PostActionError.FailedToPublishLikeEvent ) }
+            scheduleErrorClear()
         }
     }
 
@@ -149,12 +155,45 @@ class ThreadViewModel @Inject constructor(
                 postRawNostrEvent = repostAction.postNostrEvent,
             )
         } catch (error: NostrPublishException) {
-            // Propagate error to the UI
+            setState { copy( error = ThreadContract.PostActionError.FailedToPublishRepostEvent ) }
+            scheduleErrorClear()
         }
     }
 
     private fun zapPost(zapAction: UiEvent.ZapAction) = viewModelScope.launch {
+        try {
+            if (zapAction.postAuthorLightningAddress == null) {
+                setState { copy( error = ThreadContract.PostActionError.MissingLightningAddress ) }
+                return@launch
+            }
 
+            val amount = zapAction.zapAmount ?: 42
+            val activeAccount = activeAccountStore.activeUserAccount()
+
+            if (activeAccount.nostrWallet == null) {
+                return@launch
+            }
+
+            zapRepository.zap(
+                userId = activeAccount.pubkey,
+                comment = zapAction.zapDescription ?: "",
+                amount = amount,
+                target = ZapTarget.Note(zapAction.postId, zapAction.postAuthorId, zapAction.postAuthorLightningAddress),
+                relays = activeAccount.relays,
+                nostrWallet = activeAccount.nostrWallet,
+            )
+        } catch (error: Exception) {
+            when (error) {
+                is ZapRepository.ZapFailureException, is NostrPublishException -> {
+                    setState { copy( error = ThreadContract.PostActionError.FailedToPublishZapEvent ) }
+                }
+                is MalformedLightningAddressException -> {
+                    setState { copy( error = ThreadContract.PostActionError.MalformedLightningAddress ) }
+                }
+                else -> return@launch
+            }
+            scheduleErrorClear()
+        }
     }
 
     private fun updateReply(updateReplyEvent: UiEvent.UpdateReply) {
@@ -190,7 +229,7 @@ class ThreadViewModel @Inject constructor(
             scheduleFetchReplies()
             setState { copy(replyText = "") }
         } catch (error: NostrPublishException) {
-            setState { copy(publishingError = ThreadContract.UiState.PublishError(cause = error.cause)) }
+            setState { copy(error = ThreadContract.PostActionError.FailedToPublishReplyEvent) }
             scheduleErrorClear()
         } finally {
             setState { copy(publishingReply = false) }
@@ -199,7 +238,7 @@ class ThreadViewModel @Inject constructor(
 
     private fun scheduleErrorClear() = viewModelScope.launch {
         delay(2.seconds)
-        setState { copy(publishingError = null) }
+        setState { copy(error = null) }
     }
 
     private fun scheduleFetchReplies() = viewModelScope.launch {

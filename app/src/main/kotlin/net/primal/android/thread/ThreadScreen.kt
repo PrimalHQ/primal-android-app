@@ -63,6 +63,7 @@ import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.crypto.hexToNoteHrp
+import net.primal.android.discuss.feed.FeedContract
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import java.time.Instant
@@ -137,6 +138,7 @@ fun ThreadScreen(
                     ThreadContract.UiEvent.ZapAction(
                         postId = post.postId,
                         postAuthorId = post.authorId,
+                        postAuthorLightningAddress = post.authorLightningAddress,
                         zapAmount = zapAmount,
                         zapDescription = zapDescription,
                     )
@@ -146,8 +148,8 @@ fun ThreadScreen(
     }
 
     val snackbarHostState = remember { SnackbarHostState() }
-    ReplyPublishingErrorHandler(
-        error = state.publishingError,
+    ErrorHandler(
+        error = state.error,
         snackbarHostState = snackbarHostState,
     )
 
@@ -205,6 +207,7 @@ fun ThreadScreen(
                                                 ThreadContract.UiEvent.ZapAction(
                                                     postId = item.postId,
                                                     postAuthorId = item.authorId,
+                                                    postAuthorLightningAddress = item.authorLightningAddress,
                                                     zapAmount = null,
                                                     zapDescription = null,
                                                 )
@@ -399,18 +402,26 @@ fun keyboardVisibilityAsState(): State<Boolean> {
 }
 
 @Composable
-private fun ReplyPublishingErrorHandler(
-    error: ThreadContract.UiState.PublishError?,
+private fun ErrorHandler(
+    error: ThreadContract.PostActionError?,
     snackbarHostState: SnackbarHostState,
 ) {
     val context = LocalContext.current
     LaunchedEffect(error ?: true) {
-        if (error != null) {
-            snackbarHostState.showSnackbar(
-                message = context.getString(R.string.thread_reply_nostr_publish_error),
-                duration = SnackbarDuration.Short,
-            )
+        val errorMessage = when (error) {
+            is ThreadContract.PostActionError.MalformedLightningAddress -> context.getString(R.string.post_action_malformed_lightning_address)
+            is ThreadContract.PostActionError.MissingLightningAddress -> context.getString(R.string.post_action_missing_lightning_address)
+            is ThreadContract.PostActionError.FailedToPublishZapEvent -> context.getString(R.string.post_action_zap_failed)
+            is ThreadContract.PostActionError.FailedToPublishLikeEvent -> context.getString(R.string.post_action_like_failed)
+            is ThreadContract.PostActionError.FailedToPublishRepostEvent -> context.getString(R.string.post_action_repost_failed)
+            is ThreadContract.PostActionError.FailedToPublishReplyEvent -> context.getString(R.string.post_action_reply_failed)
+            null -> return@LaunchedEffect
         }
+
+        snackbarHostState.showSnackbar(
+            message = errorMessage,
+            duration = SnackbarDuration.Short,
+        )
     }
 }
 
