@@ -34,19 +34,19 @@ fun JsonArray.hasRootMarker() = contains(JsonPrimitive("root"))
 
 fun JsonArray.hasAnyMarker() = hasRootMarker() || hasReplyMarker() || hasMentionMarker()
 
-fun String.asEventIdTag(recommendedRelay: String = "", marker: String? = null): JsonArray =
+fun String.asEventIdTag(recommendedRelay: String? = null, marker: String? = null): JsonArray =
     buildJsonArray {
         add("e")
         add(this@asEventIdTag)
-        add(recommendedRelay)
+        if (recommendedRelay != null) add(recommendedRelay)
         if (marker != null) add(marker)
     }
 
-fun String.asPubkeyTag(recommendedRelay: String = "", marker: String? = null): JsonArray =
+fun String.asPubkeyTag(recommendedRelay: String? = null, marker: String? = null): JsonArray =
     buildJsonArray {
         add("p")
         add(this@asPubkeyTag)
-        add(recommendedRelay)
+        if (recommendedRelay != null) add(recommendedRelay)
         if (marker != null) add(marker)
     }
 
