@@ -27,7 +27,7 @@ class ZapsApi @Inject constructor(
     private val json = Json { ignoreUnknownKeys = true }
 
     suspend fun fetchPayRequest(lightningAddress: String): LightningPayRequest? {
-        val lnUrl = lightningAddress.toLightningUrlOrNull() ?: throw InvalidParameterException()
+        val lnUrl = lightningAddress.toLightningUrlOrNull() ?: throw MalformedLightningAddressException()
 
         val getRequest = Request.Builder()
             .header("Content-Type", "application/json")
@@ -113,3 +113,5 @@ class ZapsApi @Inject constructor(
         return amount * 100
     }
 }
+
+class MalformedLightningAddressException : InvalidParameterException()

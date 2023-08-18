@@ -138,10 +138,7 @@ class NostrNotary @Inject constructor(
         request: WalletRequest<PayInvoiceRequest>,
         nwc: NostrWallet
     ): NostrEvent {
-        val tags = listOf(buildJsonArray {
-            add("p")
-            add(nwc.pubkey)
-        })
+        val tags = listOf(nwc.pubkey.asPubkeyTag())
 
         val content = json.encodeToString(request)
         val encryptedMessage = CryptoUtils.encrypt(content, Hex.decode(nwc.keypair.privkey), Hex.decode(nwc.pubkey))

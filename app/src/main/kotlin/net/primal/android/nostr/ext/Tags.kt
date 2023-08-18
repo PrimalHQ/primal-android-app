@@ -141,20 +141,11 @@ fun ZapTarget.toTags(): List<JsonArray> {
     val tags = mutableListOf<JsonArray>()
 
     when (this) {
-        is ZapTarget.Profile -> tags.add(buildJsonArray {
-            add("p")
-            add(this@toTags.pubkey)
-        })
+        is ZapTarget.Profile -> tags.add(this@toTags.pubkey.asPubkeyTag())
 
         is ZapTarget.Note -> {
-            tags.add(buildJsonArray {
-                add("e")
-                add(this@toTags.id)
-            })
-            tags.add(buildJsonArray {
-                add("p")
-                add(this@toTags.authorPubkey)
-            })
+            tags.add(this@toTags.id.asEventIdTag())
+            tags.add(this@toTags.authorPubkey.asPubkeyTag())
         }
     }
 

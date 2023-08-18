@@ -13,6 +13,7 @@ interface FeedContract {
         val walletConnected: Boolean = false,
         val posts: Flow<PagingData<FeedPostUi>>,
         val syncStats: FeedPostsSyncStats = FeedPostsSyncStats(),
+        val error: PostActionError? = null,
     )
 
     sealed class UiEvent {
@@ -33,4 +34,11 @@ interface FeedContract {
         ) : UiEvent()
     }
 
+    sealed class PostActionError {
+        data object MissingLightningAddress : PostActionError()
+        data object MalformedLightningAddress : PostActionError()
+        data object FailedToPublishZapEvent : PostActionError()
+        data object FailedToPublishRepostEvent : PostActionError()
+        data object FailedToPublishLikeEvent : PostActionError()
+    }
 }

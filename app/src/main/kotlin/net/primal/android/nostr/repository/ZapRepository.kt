@@ -27,8 +27,6 @@ class ZapRepository @Inject constructor(
             is ZapTarget.Profile -> target.lightningAddress
         }
 
-        requireNotNull(lightningAddress) { "Lightning address of the recipient is missing" }
-
         val zapEvent = notary.signZapRequestNostrEvent(
             activeAccountStore.activeUserId(),
             comment = comment,

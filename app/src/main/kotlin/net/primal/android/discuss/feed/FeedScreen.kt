@@ -15,6 +15,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -30,11 +32,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
+import net.primal.android.R
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.PrimalTopLevelDestination
@@ -103,6 +107,13 @@ fun FeedScreen(
     var bottomBarOffsetHeightPx by remember { mutableStateOf(0f) }
 
     val focusMode by remember { derivedStateOf { bottomBarOffsetHeightPx < 0f } }
+
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    NewZapErrorHandler(
+        error = state.error,
+        snackbarHostState = snackbarHostState,
+    )
 
     PrimalDrawerScaffold(
         drawerState = drawerState,
@@ -216,6 +227,29 @@ fun FeedScreen(
             }
         }
     )
+}
+
+@Composable
+private fun NewZapErrorHandler(
+    error: FeedContract.PostActionError?,
+    snackbarHostState: SnackbarHostState,
+) {
+    val context = LocalContext.current
+    LaunchedEffect(error ?: true) {
+        val errorMessage = when (error) {
+            is FeedContract.PostActionError.MalformedLightningAddress -> context.getString(R.string.post_action_malformed_lightning_address)
+            is FeedContract.PostActionError.MissingLightningAddress -> context.getString(R.string.post_action_missing_lightning_address)
+            is FeedContract.PostActionError.FailedToPublishZapEvent -> context.getString(R.string.post_action_zap_failed)
+            is FeedContract.PostActionError.FailedToPublishLikeEvent -> context.getString(R.string.post_action_like_failed)
+            is FeedContract.PostActionError.FailedToPublishRepostEvent -> context.getString(R.string.post_action_repost_failed)
+            null -> return@LaunchedEffect
+        }
+
+        snackbarHostState.showSnackbar(
+            message = errorMessage,
+            duration = SnackbarDuration.Short,
+        )
+    }
 }
 
 @Preview

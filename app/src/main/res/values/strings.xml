@@ -67,6 +67,12 @@
     <string name="new_post_content_placeholder">Type your post here…</string>
     <string name="new_post_nostr_publish_error">Unable to publish your note to Nostr. Please try again soon.</string>
 
+    <string name="post_action_missing_lightning_address">Unable to zap this user since they don\'t have a lightning address set up.</string>
+    <string name="post_action_malformed_lightning_address">Unable to zap this user since their lightning address is malformed.</string>
+    <string name="post_action_zap_failed">Failed to zap.</string>
+    <string name="post_action_like_failed">Failed to like.</string>
+    <string name="post_action_repost_failed">Failed to repost.</string>
+
     <string name="thread_title">Thread</string>
     <string name="thread_reply_to">Reply to %1$s</string>
     <string name="thread_replying_to">Replying to %1$s</string>

@@ -5,6 +5,6 @@ import kotlinx.serialization.json.add
 import kotlinx.serialization.json.buildJsonArray
 
 sealed class ZapTarget {
-    data class Profile(val pubkey: String, val lightningAddress: String?) : ZapTarget()
-    data class Note(val id: String, val authorPubkey: String, val authorLightningAddress: String?) : ZapTarget()
+    data class Profile(val pubkey: String, val lightningAddress: String) : ZapTarget()
+    data class Note(val id: String, val authorPubkey: String, val authorLightningAddress: String) : ZapTarget()
 }

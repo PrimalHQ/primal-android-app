@@ -25,6 +25,7 @@ import net.primal.android.feed.repository.FeedRepository
 import net.primal.android.feed.repository.PostRepository
 import net.primal.android.navigation.feedDirective
 import net.primal.android.networking.relays.errors.NostrPublishException
+import net.primal.android.nostr.api.MalformedLightningAddressException
 import net.primal.android.nostr.model.zap.ZapTarget
 import net.primal.android.nostr.repository.ZapRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
@@ -158,7 +159,7 @@ class FeedViewModel @Inject constructor(
                 postAuthorId = postLikeAction.postAuthorId,
             )
         } catch (error: NostrPublishException) {
-            // Propagate error to the UI
+            setState { copy( error = FeedContract.PostActionError.FailedToPublishLikeEvent ) }
         }
     }
 
@@ -170,25 +171,29 @@ class FeedViewModel @Inject constructor(
                 postRawNostrEvent = repostAction.postNostrEvent,
             )
         } catch (error: NostrPublishException) {
-            // Propagate error to the UI
+            setState { copy( error = FeedContract.PostActionError.FailedToPublishRepostEvent ) }
         }
     }
 
     private fun zapPost(zapAction: UiEvent.ZapAction) = viewModelScope.launch {
         try {
-            if (zapAction.postAuthorLightningAddress !== null) {
-                val amount = zapAction.zapAmount ?: 42
-
-                zapRepository.zap(
-                    zapAction.zapDescription ?: "",
-                    amount,
-                    ZapTarget.Note(zapAction.postId, zapAction.postAuthorId, zapAction.postAuthorLightningAddress),
-                    activeAccountStore.activeUserAccount().relays
-                )
-
+            if (zapAction.postAuthorLightningAddress == null) {
+                setState { copy( error = FeedContract.PostActionError.MissingLightningAddress ) }
+                return@launch
             }
+
+            val amount = zapAction.zapAmount ?: 42
+
+            zapRepository.zap(
+                zapAction.zapDescription ?: "",
+                amount,
+                ZapTarget.Note(zapAction.postId, zapAction.postAuthorId, zapAction.postAuthorLightningAddress),
+                activeAccountStore.activeUserAccount().relays
+            )
+        } catch (error: MalformedLightningAddressException) {
+            setState { copy( error = FeedContract.PostActionError.MalformedLightningAddress ) }
         } catch (error: NostrPublishException) {
-            // Propagate error to the UI
+            setState { copy( error = FeedContract.PostActionError.FailedToPublishZapEvent ) }
         }
     }
 
