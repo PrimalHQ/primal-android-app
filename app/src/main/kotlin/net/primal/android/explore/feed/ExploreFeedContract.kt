@@ -10,6 +10,7 @@ interface ExploreFeedContract {
         val existsInUserFeeds: Boolean = false,
         val walletConnected: Boolean = false,
         val posts: Flow<PagingData<FeedPostUi>>,
+        val error: PostActionError? = null,
     )
 
     sealed class UiEvent {
@@ -28,5 +29,13 @@ interface ExploreFeedContract {
             val zapDescription: String?,
             val postAuthorLightningAddress: String?
         ) : UiEvent()
+    }
+
+    sealed class PostActionError {
+        data object MissingLightningAddress : PostActionError()
+        data object MalformedLightningAddress : PostActionError()
+        data object FailedToPublishZapEvent : PostActionError()
+        data object FailedToPublishRepostEvent : PostActionError()
+        data object FailedToPublishLikeEvent : PostActionError()
     }
 }

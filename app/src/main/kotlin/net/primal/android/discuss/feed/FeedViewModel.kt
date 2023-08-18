@@ -190,7 +190,8 @@ class FeedViewModel @Inject constructor(
             }
 
             zapRepository.zap(
-                userId = zapAction.zapDescription ?: "",
+                userId = activeAccount.pubkey,
+                comment = zapAction.zapDescription ?: "",
                 amount = amount,
                 target = ZapTarget.Note(zapAction.postId, zapAction.postAuthorId, zapAction.postAuthorLightningAddress),
                 relays = activeAccount.relays,

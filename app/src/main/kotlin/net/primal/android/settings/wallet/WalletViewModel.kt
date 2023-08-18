@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.navigation.nwcUrl
-import net.primal.android.networking.relays.NostrWalletRelayPool
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.domain.NWCParseException
 import net.primal.android.user.domain.parseNWCUrl
@@ -22,8 +21,7 @@ import javax.inject.Inject
 class WalletViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val activeAccountStore: ActiveAccountStore,
-    private val userRepository: UserRepository,
-    private val nostrWalletRelayPool: NostrWalletRelayPool
+    private val userRepository: UserRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(WalletContract.UiState())
@@ -73,8 +71,6 @@ class WalletViewModel @Inject constructor(
                 userId = activeAccountStore.activeUserId(),
                 nostrWalletConnect = nostrWalletConnect
             )
-
-            nostrWalletRelayPool.append(nostrWalletConnect.relayUrl.toRelay())
 
             setState {
                 copy(wallet = nostrWalletConnect)

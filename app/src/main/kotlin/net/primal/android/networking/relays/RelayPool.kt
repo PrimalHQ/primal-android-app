@@ -18,14 +18,15 @@ import net.primal.android.networking.sockets.NostrIncomingMessage
 import net.primal.android.networking.sockets.NostrSocketClient
 import net.primal.android.networking.sockets.errors.NostrNoticeException
 import net.primal.android.networking.sockets.filterByEventId
-import net.primal.android.serialization.toJsonObject
 import net.primal.android.nostr.model.NostrEvent
+import net.primal.android.serialization.toJsonObject
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
 import net.primal.android.user.domain.Relay
 import net.primal.android.user.domain.toRelay
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.time.Duration.Companion.seconds
@@ -48,10 +49,15 @@ class RelayPool @Inject constructor(
     suspend fun publishEvent(nostrEvent: NostrEvent) {
         handlePublishEvent(clientsPool, nostrEvent)
     }
-    
+
     @Throws(NostrPublishException::class)
     suspend fun publishEventTo(url: String, nostrEvent: NostrEvent) {
-        val receivers = clientsPool.filter { it.url == url }
+        val receivers =
+            clientsPool.filter {
+                // okhttp3 for some inexplicable reason converts wss scheme to https
+                // so we have to do this monstrosity to do a proper comparison...
+                it.url == url.toRelay().toWssRequestOrNull()?.url.toString()
+            }
 
         handlePublishEvent(receivers, nostrEvent)
     }
@@ -123,7 +129,10 @@ class RelayPool @Inject constructor(
     }
 
     @OptIn(FlowPreview::class)
-    private suspend fun handlePublishEvent(receivers: List<NostrSocketClient>, nostrEvent: NostrEvent) {
+    private suspend fun handlePublishEvent(
+        receivers: List<NostrSocketClient>,
+        nostrEvent: NostrEvent
+    ) {
         val responseFlow = MutableSharedFlow<NostrPublishResult>()
         receivers.forEach { nostrSocketClient ->
             scope.launch {

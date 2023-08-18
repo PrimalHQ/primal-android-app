@@ -110,7 +110,7 @@ fun FeedScreen(
 
     val snackbarHostState = remember { SnackbarHostState() }
 
-    NewZapErrorHandler(
+    ErrorHandler(
         error = state.error,
         snackbarHostState = snackbarHostState,
     )
@@ -230,7 +230,7 @@ fun FeedScreen(
 }
 
 @Composable
-private fun NewZapErrorHandler(
+private fun ErrorHandler(
     error: FeedContract.PostActionError?,
     snackbarHostState: SnackbarHostState,
 ) {
