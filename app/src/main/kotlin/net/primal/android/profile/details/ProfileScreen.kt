@@ -95,7 +95,6 @@ import net.primal.android.core.ext.findNearestOrNull
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.isPrimalIdentifier
 import net.primal.android.crypto.hexToNoteHrp
-import net.primal.android.explore.feed.ExploreFeedContract
 import net.primal.android.profile.details.model.ProfileDetailsUi
 import net.primal.android.profile.details.model.ProfileStatsUi
 import net.primal.android.theme.AppTheme
@@ -174,10 +173,9 @@ fun ProfileScreen(
 
     val topBarTitleVisible = rememberSaveable { mutableStateOf(false) }
     val coverTransparency = rememberSaveable { mutableStateOf(0f) }
-    val snackbarHostState = remember { SnackbarHostState() }
-
     val listState = rememberLazyListState()
 
+    val snackbarHostState = remember { SnackbarHostState() }
     ErrorHandler(
         error = state.error,
         snackbarHostState = snackbarHostState,

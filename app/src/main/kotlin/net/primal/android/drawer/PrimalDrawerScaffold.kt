@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalNavigationDrawer
@@ -13,7 +12,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -41,6 +40,7 @@ fun PrimalDrawerScaffold(
     topBar: @Composable (TopAppBarScrollBehavior?) -> Unit = {},
     content: @Composable (PaddingValues) -> Unit = {},
     floatingActionButton: @Composable () -> Unit = {},
+    snackbarHost: @Composable () -> Unit = {},
     bottomBarHeight: Dp = PrimalBottomBarHeightDp,
     onBottomBarOffsetChange: (Float) -> Unit = {},
 ) {
@@ -60,7 +60,7 @@ fun PrimalDrawerScaffold(
             val bottomBarHeightPx = with(LocalDensity.current) {
                 bottomBarHeight.roundToPx().toFloat()
             }
-            val bottomBarOffsetHeightPx = remember { mutableStateOf(0f) }
+            val bottomBarOffsetHeightPx = remember { mutableFloatStateOf(0f) }
             val bottomBarNestedScrollConnection = remember {
                 object : NestedScrollConnection {
                     override fun onPreScroll(
@@ -68,9 +68,9 @@ fun PrimalDrawerScaffold(
                         source: NestedScrollSource
                     ): Offset {
                         val delta = available.y
-                        val newOffset = bottomBarOffsetHeightPx.value + delta
-                        bottomBarOffsetHeightPx.value = newOffset.coerceIn(-bottomBarHeightPx, 0f)
-                        onBottomBarOffsetChange(bottomBarOffsetHeightPx.value)
+                        val newOffset = bottomBarOffsetHeightPx.floatValue + delta
+                        bottomBarOffsetHeightPx.floatValue = newOffset.coerceIn(-bottomBarHeightPx, 0f)
+                        onBottomBarOffsetChange(bottomBarOffsetHeightPx.floatValue)
                         return Offset.Zero
                     }
                 }
@@ -90,7 +90,7 @@ fun PrimalDrawerScaffold(
                             .offset {
                                 IntOffset(
                                     x = 0,
-                                    y = -bottomBarOffsetHeightPx.value.roundToInt()
+                                    y = -bottomBarOffsetHeightPx.floatValue.roundToInt()
                                 )
                             },
                         activeDestination = activeDestination,
@@ -99,6 +99,7 @@ fun PrimalDrawerScaffold(
                     )
                 },
                 floatingActionButton = floatingActionButton,
+                snackbarHost = snackbarHost,
             )
         }
     )
