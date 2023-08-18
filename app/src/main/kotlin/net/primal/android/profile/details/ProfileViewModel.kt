@@ -14,11 +14,15 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import net.primal.android.core.compose.feed.asFeedPostUi
 import net.primal.android.core.compose.media.model.MediaResourceUi
+import net.primal.android.discuss.feed.FeedContract
 import net.primal.android.feed.repository.FeedRepository
 import net.primal.android.feed.repository.PostRepository
 import net.primal.android.navigation.profileId
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.nostr.api.MalformedLightningAddressException
+import net.primal.android.nostr.model.zap.ZapTarget
+import net.primal.android.nostr.repository.ZapRepository
 import net.primal.android.profile.db.authorNameUiFriendly
 import net.primal.android.profile.db.userNameUiFriendly
 import net.primal.android.profile.details.ProfileContract.UiEvent
@@ -37,6 +41,7 @@ class ProfileViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val profileRepository: ProfileRepository,
     private val postRepository: PostRepository,
+    private val zapRepository: ZapRepository
 ) : ViewModel() {
 
     private val profileId: String = savedStateHandle.profileId ?: activeAccountStore.activeUserId()
@@ -144,7 +149,7 @@ class ProfileViewModel @Inject constructor(
                 postAuthorId = postLikeAction.postAuthorId,
             )
         } catch (error: NostrPublishException) {
-            // Propagate error to the UI
+            setState { copy( error = ProfileContract.PostActionError.FailedToPublishLikeEvent ) }
         }
     }
 
@@ -156,12 +161,42 @@ class ProfileViewModel @Inject constructor(
                 postRawNostrEvent = repostAction.postNostrEvent,
             )
         } catch (error: NostrPublishException) {
-            // Propagate error to the UI
+            setState { copy( error = ProfileContract.PostActionError.FailedToPublishRepostEvent ) }
         }
     }
 
     private fun zapPost(zapAction: UiEvent.ZapAction) = viewModelScope.launch {
+        try {
+            if (zapAction.postAuthorLightningAddress == null) {
+                setState { copy( error = ProfileContract.PostActionError.MissingLightningAddress ) }
+                return@launch
+            }
 
+            val amount = zapAction.zapAmount ?: 42
+            val activeAccount = activeAccountStore.activeUserAccount()
+
+            if (activeAccount.nostrWallet == null) {
+                return@launch
+            }
+
+            zapRepository.zap(
+                userId = activeAccount.pubkey,
+                comment = zapAction.zapDescription ?: "",
+                amount = amount,
+                target = ZapTarget.Note(zapAction.postId, zapAction.postAuthorId, zapAction.postAuthorLightningAddress),
+                relays = activeAccount.relays,
+                nostrWallet = activeAccount.nostrWallet,
+            )
+        } catch (error: MalformedLightningAddressException) {
+            setState { copy( error = ProfileContract.PostActionError.MalformedLightningAddress ) }
+        } catch (error: Exception) {
+            when (error) {
+                is ZapRepository.ZapFailureException, is NostrPublishException -> {
+                    setState { copy( error = ProfileContract.PostActionError.FailedToPublishZapEvent ) }
+                }
+                else -> throw error
+            }
+        }
     }
 
     private fun follow(followAction: UiEvent.FollowAction) = viewModelScope.launch {

@@ -34,6 +34,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -93,6 +95,7 @@ import net.primal.android.core.ext.findNearestOrNull
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.isPrimalIdentifier
 import net.primal.android.crypto.hexToNoteHrp
+import net.primal.android.explore.feed.ExploreFeedContract
 import net.primal.android.profile.details.model.ProfileDetailsUi
 import net.primal.android.profile.details.model.ProfileStatsUi
 import net.primal.android.theme.AppTheme
@@ -171,8 +174,15 @@ fun ProfileScreen(
 
     val topBarTitleVisible = rememberSaveable { mutableStateOf(false) }
     val coverTransparency = rememberSaveable { mutableStateOf(0f) }
+    val snackbarHostState = remember { SnackbarHostState() }
 
     val listState = rememberLazyListState()
+
+    ErrorHandler(
+        error = state.error,
+        snackbarHostState = snackbarHostState,
+    )
+
     LaunchedEffect(listState) {
         snapshotFlow { listState.firstVisibleItemIndex to listState.firstVisibleItemScrollOffset }
             .filter { it.first == 0 }
@@ -226,6 +236,7 @@ fun ProfileScreen(
                         postAuthorId = post.authorId,
                         zapAmount = zapAmount,
                         zapDescription = zapDescription,
+                        postAuthorLightningAddress = post.authorLightningAddress
                     )
                 )
             },
@@ -696,6 +707,29 @@ private fun UserPublicKey(
             )
 
         }
+    }
+}
+
+@Composable
+private fun ErrorHandler(
+    error: ProfileContract.PostActionError?,
+    snackbarHostState: SnackbarHostState,
+) {
+    val context = LocalContext.current
+    LaunchedEffect(error ?: true) {
+        val errorMessage = when (error) {
+            is ProfileContract.PostActionError.MalformedLightningAddress -> context.getString(R.string.post_action_malformed_lightning_address)
+            is ProfileContract.PostActionError.MissingLightningAddress -> context.getString(R.string.post_action_missing_lightning_address)
+            is ProfileContract.PostActionError.FailedToPublishZapEvent -> context.getString(R.string.post_action_zap_failed)
+            is ProfileContract.PostActionError.FailedToPublishLikeEvent -> context.getString(R.string.post_action_like_failed)
+            is ProfileContract.PostActionError.FailedToPublishRepostEvent -> context.getString(R.string.post_action_repost_failed)
+            null -> return@LaunchedEffect
+        }
+
+        snackbarHostState.showSnackbar(
+            message = errorMessage,
+            duration = SnackbarDuration.Short,
+        )
     }
 }
 

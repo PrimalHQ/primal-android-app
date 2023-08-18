@@ -16,6 +16,7 @@ interface ProfileContract {
         val walletConnected: Boolean = false,
         val resources: List<MediaResourceUi> = emptyList(),
         val authoredPosts: Flow<PagingData<FeedPostUi>>,
+        val error: PostActionError? = null,
     )
 
     sealed class UiEvent {
@@ -30,8 +31,17 @@ interface ProfileContract {
             val postAuthorId: String,
             val zapAmount: Int?,
             val zapDescription: String?,
+            val postAuthorLightningAddress: String?
         ) : UiEvent()
         data class FollowAction(val profileId: String) : UiEvent()
         data class UnfollowAction(val profileId: String) : UiEvent()
+    }
+
+    sealed class PostActionError {
+        data object MissingLightningAddress : PostActionError()
+        data object MalformedLightningAddress : PostActionError()
+        data object FailedToPublishZapEvent : PostActionError()
+        data object FailedToPublishRepostEvent : PostActionError()
+        data object FailedToPublishLikeEvent : PostActionError()
     }
 }
