@@ -3,7 +3,6 @@ package net.primal.android.core.compose.feed
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,6 +32,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -43,7 +43,6 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
@@ -52,7 +51,6 @@ import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.ext.toShorthandFormat
 import net.primal.android.theme.AppTheme
-import net.primal.android.theme.PrimalTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -80,7 +78,7 @@ fun ZapBottomSheet(
     }
     val onSelectedZapAmountChange = { selected: Int ->
         selectedZapAmount = selected
-        selectedZapComment = zapOptions.find { it.first == amount }?.second ?: selectedZapComment
+        selectedZapComment = zapOptions.find { it.first == selected }?.second ?: selectedZapComment
     }
     val onSelectedZapCommentChange = { comment: String ->
         selectedZapComment = comment
@@ -194,24 +192,22 @@ private fun ZapOption(
     Box(
         modifier = Modifier
             .padding(all = 12.dp)
+            // have to add RoundedCornerShape on two places due to ripple effect going outside border shape
+            .clip(RoundedCornerShape(8.dp))
             .border(
                 width = borderWidth,
                 shape = RoundedCornerShape(8.dp),
                 brush = borderBrush
             )
             .background(
-                color = backgroundColor,
-                shape = RoundedCornerShape(8.dp)
+                color = backgroundColor
             )
+            .clickable {
+                onClick()
+            }
             .requiredHeight(88.dp)
             .requiredWidth(88.dp)
             .aspectRatio(1f)
-            .clickable(
-                indication = null,
-                interactionSource = remember { MutableInteractionSource() }
-            ) {
-                onClick()
-            },
     ) {
         Column(
             modifier = Modifier
