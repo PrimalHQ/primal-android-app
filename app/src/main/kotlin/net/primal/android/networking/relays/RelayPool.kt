@@ -19,6 +19,7 @@ import net.primal.android.networking.sockets.NostrSocketClient
 import net.primal.android.networking.sockets.errors.NostrNoticeException
 import net.primal.android.networking.sockets.filterByEventId
 import net.primal.android.nostr.model.NostrEvent
+import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.serialization.toJsonObject
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
@@ -26,7 +27,6 @@ import net.primal.android.user.domain.Relay
 import net.primal.android.user.domain.toRelay
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.time.Duration.Companion.seconds
@@ -37,46 +37,44 @@ class RelayPool @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
 ) {
     private val scope = CoroutineScope(Dispatchers.IO)
-
     private val poolMutex = Mutex()
-    private var clientsPool = listOf<NostrSocketClient>()
+
+    private var regularRelays = listOf<NostrSocketClient>()
+    private var walletRelays = listOf<NostrSocketClient>()
 
     init {
         observeActiveAccount()
     }
 
-    @Throws(NostrPublishException::class)
-    suspend fun publishEvent(nostrEvent: NostrEvent) {
-        handlePublishEvent(clientsPool, nostrEvent)
-    }
-
-    @Throws(NostrPublishException::class)
-    suspend fun publishEventTo(url: String, nostrEvent: NostrEvent) {
-        val receivers =
-            clientsPool.filter {
-                // okhttp3 for some inexplicable reason converts wss scheme to https
-                // so we have to do this monstrosity to do a proper comparison...
-                it.url == url.toRelay().toWssRequestOrNull()?.url.toString()
-            }
-
-        handlePublishEvent(receivers, nostrEvent)
-    }
-
     private fun observeActiveAccount() = scope.launch {
-        activeAccountStore.activeAccountState.collect {
-            when (it) {
+        activeAccountStore.activeAccountState.collect { activeAccountState ->
+            when (activeAccountState) {
                 is ActiveUserAccountState.ActiveUserAccount -> {
-                    val userAccount = it.data
-                    val relays = userAccount.relays.toMutableList()
-                    if (userAccount.nostrWallet != null) {
-                        relays += userAccount.nostrWallet.relayUrl.toRelay()
-                    }
-                    createClientsPool(relays = relays)
+                    val data = activeAccountState.data
+                    val regularRelays = data.relays
+                    val walletRelays = data.nostrWallet?.relays?.map { it.toRelay() } ?: emptyList()
+                    createSocketsPool(
+                        regularRelays = regularRelays,
+                        walletRelays = walletRelays,
+                    )
                 }
 
                 ActiveUserAccountState.NoUserAccount -> {
-                    clearClientsPool()
+                    clearSocketsPool()
                 }
+            }
+        }
+    }
+
+    @Throws(NostrPublishException::class)
+    suspend fun publishEvent(nostrEvent: NostrEvent) {
+        when (NostrEventKind.valueOf(nostrEvent.kind)) {
+            NostrEventKind.ZapRequest,
+            NostrEventKind.WalletRequest -> {
+                handlePublishEvent(walletRelays, nostrEvent)
+            }
+            else -> {
+                handlePublishEvent(regularRelays, nostrEvent)
             }
         }
     }
@@ -90,23 +88,31 @@ class RelayPool @Inject constructor(
         null
     }
 
-    private suspend fun createClientsPool(relays: List<Relay>) {
-        clearClientsPool()
+    private suspend fun createSocketsPool(
+        regularRelays: List<Relay>,
+        walletRelays: List<Relay>
+    ) {
+        clearSocketsPool()
         poolMutex.withLock {
-            clientsPool = relays
-                .mapNotNull { it.toWssRequestOrNull() }
-                .map {
-                    NostrSocketClient(
-                        okHttpClient = okHttpClient,
-                        wssRequest = it
-                    )
-                }
+            this.regularRelays = regularRelays.mapAsNostrSocketClient()
+            this.walletRelays = walletRelays.mapAsNostrSocketClient()
         }
     }
 
-    private suspend fun clearClientsPool() = poolMutex.withLock {
-        clientsPool.forEach { it.close() }
-        clientsPool = emptyList()
+    private fun List<Relay>.mapAsNostrSocketClient() = this
+        .mapNotNull { it.toWssRequestOrNull() }
+        .map {
+            NostrSocketClient(
+                okHttpClient = okHttpClient,
+                wssRequest = it
+            )
+        }
+
+    private suspend fun clearSocketsPool() = poolMutex.withLock {
+        regularRelays.forEach { it.close() }
+        regularRelays = emptyList()
+        walletRelays.forEach { it.close() }
+        walletRelays = emptyList()
     }
 
     private fun NostrPublishResult.isSuccessful(): Boolean {
@@ -130,11 +136,11 @@ class RelayPool @Inject constructor(
 
     @OptIn(FlowPreview::class)
     private suspend fun handlePublishEvent(
-        receivers: List<NostrSocketClient>,
+        relayConnections: List<NostrSocketClient>,
         nostrEvent: NostrEvent
     ) {
         val responseFlow = MutableSharedFlow<NostrPublishResult>()
-        receivers.forEach { nostrSocketClient ->
+        relayConnections.forEach { nostrSocketClient ->
             scope.launch {
                 with(nostrSocketClient) {
                     ensureSocketConnection()

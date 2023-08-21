@@ -5,12 +5,12 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class NostrWallet(
     val lightningAddress: String,
-    val relayUrl: String,
+    val relays: List<String>,
     val pubkey: String,
     val keypair: NostrWalletKeypair,
 ) {
     fun toStringUrl(): String {
-        return "nostr+walletconnect://${pubkey}?relay=${relayUrl}&secret=${keypair.privateKey}&lud16=${lightningAddress}"
+        return "nostr+walletconnect://${pubkey}?relay=${relays.firstOrNull()}&secret=${keypair.privateKey}&lud16=${lightningAddress}"
     }
 }
 

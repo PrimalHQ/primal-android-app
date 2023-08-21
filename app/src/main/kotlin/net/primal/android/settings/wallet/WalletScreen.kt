@@ -139,7 +139,7 @@ fun WalletConnected(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = state.wallet?.relayUrl ?: "",
+            text = state.wallet?.relays?.first() ?: "",
             textAlign = TextAlign.Center
         )
         Divider()
@@ -274,7 +274,7 @@ class WalletUiStateProvider : PreviewParameterProvider<WalletContract.UiState> {
         get() = sequenceOf(
             WalletContract.UiState(
                 wallet = NostrWallet(
-                    relayUrl = "wss://relay.getalby.com/v1",
+                    relays = listOf("wss://relay.getalby.com/v1"),
                     lightningAddress = "miljan@getalby.com",
                     pubkey = "69effe7b49a6dd5cf525bd0905917a5005ffe480b58eeb8e861418cf3ae760d9",
                     keypair = NostrWalletKeypair(

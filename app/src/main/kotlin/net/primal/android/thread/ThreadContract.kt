@@ -15,7 +15,7 @@ interface ThreadContract {
     ) {
         sealed class ThreadError {
             data class MissingLightningAddress(val cause: Throwable) : ThreadError()
-            data class MalformedLightningAddress(val cause: Throwable) : ThreadError()
+            data class InvalidZapRequest(val cause: Throwable) : ThreadError()
             data class FailedToPublishZapEvent(val cause: Throwable) : ThreadError()
             data class FailedToPublishRepostEvent(val cause: Throwable) : ThreadError()
             data class FailedToPublishReplyEvent(val cause: Throwable) : ThreadError()

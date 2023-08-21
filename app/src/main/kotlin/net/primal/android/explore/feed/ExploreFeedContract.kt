@@ -14,7 +14,7 @@ interface ExploreFeedContract {
     ) {
         sealed class ExploreFeedError {
             data class MissingLightningAddress(val cause: Throwable) : ExploreFeedError()
-            data class MalformedLightningAddress(val cause: Throwable) : ExploreFeedError()
+            data class InvalidZapRequest(val cause: Throwable) : ExploreFeedError()
             data class FailedToPublishZapEvent(val cause: Throwable) : ExploreFeedError()
             data class FailedToPublishRepostEvent(val cause: Throwable) : ExploreFeedError()
             data class FailedToPublishLikeEvent(val cause: Throwable) : ExploreFeedError()
@@ -33,9 +33,9 @@ interface ExploreFeedContract {
         data class ZapAction(
             val postId: String,
             val postAuthorId: String,
+            val postAuthorLightningAddress: String?,
             val zapAmount: Int?,
             val zapDescription: String?,
-            val postAuthorLightningAddress: String?
         ) : UiEvent()
     }
 }

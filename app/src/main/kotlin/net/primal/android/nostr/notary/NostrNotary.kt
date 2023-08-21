@@ -116,17 +116,11 @@ class NostrNotary @Inject constructor(
         target: ZapTarget,
         relays: List<Relay>
     ): NostrEvent {
-        val tags = target.toTags()
-            .toMutableList()
-            .apply {
-                add(relays.toZapTag())
-            }
-
         return NostrUnsignedEvent(
             pubKey = userId,
             kind = NostrEventKind.ZapRequest.value,
             content = comment,
-            tags = tags
+            tags = target.toTags() + listOf(relays.toZapTag()),
         ).signOrThrow(nsec = findNsecOrThrow(userId))
     }
 

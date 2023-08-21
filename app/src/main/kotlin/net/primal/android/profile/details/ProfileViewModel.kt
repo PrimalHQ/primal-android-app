@@ -173,30 +173,22 @@ class ProfileViewModel @Inject constructor(
         }
 
         try {
-            val amount = zapAction.zapAmount ?: 42
-            val activeAccount = activeAccountStore.activeUserAccount()
-            if (activeAccount.nostrWallet == null) {
-                return@launch
-            }
-
             zapRepository.zap(
-                userId = activeAccount.pubkey,
+                userId = activeAccountStore.activeUserId(),
                 comment = zapAction.zapDescription ?: "",
-                amount = amount,
+                amount = zapAction.zapAmount ?: 42,
                 target = ZapTarget.Note(
                     zapAction.postId,
                     zapAction.postAuthorId,
                     zapAction.postAuthorLightningAddress
                 ),
-                relays = activeAccount.relays,
-                nostrWallet = activeAccount.nostrWallet,
             )
         } catch (error: ZapRepository.ZapFailureException) {
             setErrorState(error = ProfileError.FailedToPublishZapEvent(error))
         } catch (error: NostrPublishException) {
             setErrorState(error = ProfileError.FailedToPublishZapEvent(error))
-        } catch (error: ZapRepository.MalformedLightningAddressException) {
-            setErrorState(error = ProfileError.MalformedLightningAddress(error))
+        } catch (error: ZapRepository.InvalidZapRequestException) {
+            setErrorState(error = ProfileError.InvalidZapRequest(error))
         }
     }
 

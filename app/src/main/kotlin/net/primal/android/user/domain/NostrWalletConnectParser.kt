@@ -28,7 +28,7 @@ fun String.parseNWCUrl(): NostrWallet {
     return NostrWallet(
         pubkey = pubkey,
         lightningAddress = lud16,
-        relayUrl = relay,
+        relays = listOf(relay),
         keypair = NostrWalletKeypair(privateKey = keypairSecret, pubkey = keypairPubkey)
     )
 }

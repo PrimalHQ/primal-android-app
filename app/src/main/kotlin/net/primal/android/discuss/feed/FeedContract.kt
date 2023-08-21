@@ -17,7 +17,7 @@ interface FeedContract {
     ) {
         sealed class FeedError {
             data class MissingLightningAddress(val cause: Throwable) : FeedError()
-            data class MalformedLightningAddress(val cause: Throwable) : FeedError()
+            data class InvalidZapRequest(val cause: Throwable) : FeedError()
             data class FailedToPublishZapEvent(val cause: Throwable) : FeedError()
             data class FailedToPublishRepostEvent(val cause: Throwable) : FeedError()
             data class FailedToPublishLikeEvent(val cause: Throwable) : FeedError()

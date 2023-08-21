@@ -22,7 +22,7 @@ class NostrWalletConnectParserTest {
 
         actual.pubkey shouldBe expectedPubkey
         actual.lightningAddress shouldBe "nikola@getalby.com"
-        actual.relayUrl shouldBe "wss://relay.getalby.com/v1"
+        actual.relays shouldBe listOf("wss://relay.getalby.com/v1")
         actual.keypair.privateKey shouldBe expectedSecret
         actual.keypair.pubkey shouldBe CryptoUtils.publicKeyCreate(Hex.decode(expectedSecret)).toHex()
     }

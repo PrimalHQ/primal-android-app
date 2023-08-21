@@ -242,7 +242,7 @@ private fun ErrorHandler(
     val context = LocalContext.current
     LaunchedEffect(error ?: true) {
         val errorMessage = when (error) {
-            is FeedError.MalformedLightningAddress -> context.getString(R.string.post_action_malformed_lightning_address)
+            is FeedError.InvalidZapRequest -> context.getString(R.string.post_action_invalid_zap_request)
             is FeedError.MissingLightningAddress -> context.getString(R.string.post_action_missing_lightning_address)
             is FeedError.FailedToPublishZapEvent -> context.getString(R.string.post_action_zap_failed)
             is FeedError.FailedToPublishLikeEvent -> context.getString(R.string.post_action_like_failed)

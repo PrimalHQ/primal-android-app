@@ -68,7 +68,7 @@
     <string name="new_post_nostr_publish_error">Unable to publish your note to Nostr. Please try again soon.</string>
 
     <string name="post_action_missing_lightning_address">Unable to zap this user since they don\'t have a lightning address set up.</string>
-    <string name="post_action_malformed_lightning_address">Unable to zap this user since their lightning address is malformed.</string>
+    <string name="post_action_invalid_zap_request">Unable to zap. Check your wallet connection and try again.</string>
     <string name="post_action_zap_failed">Unable to zap. Please try again.</string>
     <string name="post_action_like_failed">Unable to like. Please try again.</string>
     <string name="post_action_repost_failed">Unable to repost. Please try again.</string>

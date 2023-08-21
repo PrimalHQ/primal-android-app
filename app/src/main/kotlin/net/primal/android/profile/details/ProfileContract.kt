@@ -20,7 +20,7 @@ interface ProfileContract {
     ) {
         sealed class ProfileError {
             data class MissingLightningAddress(val cause: Throwable) : ProfileError()
-            data class MalformedLightningAddress(val cause: Throwable) : ProfileError()
+            data class InvalidZapRequest(val cause: Throwable) : ProfileError()
             data class FailedToPublishZapEvent(val cause: Throwable) : ProfileError()
             data class FailedToPublishRepostEvent(val cause: Throwable) : ProfileError()
             data class FailedToPublishLikeEvent(val cause: Throwable) : ProfileError()
@@ -38,9 +38,9 @@ interface ProfileContract {
         data class ZapAction(
             val postId: String,
             val postAuthorId: String,
+            val postAuthorLightningAddress: String?,
             val zapAmount: Int?,
             val zapDescription: String?,
-            val postAuthorLightningAddress: String?
         ) : UiEvent()
 
         data class FollowAction(val profileId: String) : UiEvent()
