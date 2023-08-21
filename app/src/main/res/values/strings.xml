@@ -124,5 +124,6 @@
     <string name="profile_follow_button">follow</string>
     <string name="profile_unfollow_button">unfollow</string>
 
-    <string name="zap_settings_comment_placeholder">Add a comment…</string>
+    <string name="zap_bottom_sheet_comment_placeholder">Add a comment…</string>
+    <string name="zap_bottom_sheet_zap_button">Zap</string>
 </resources>

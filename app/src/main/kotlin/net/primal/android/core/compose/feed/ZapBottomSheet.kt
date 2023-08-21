@@ -60,7 +60,6 @@ fun ZapBottomSheet(
     onDismissRequest: () -> Unit,
     onZap: (Int, String?) -> Unit,
 ) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val zapOptions = mutableListOf(
         Pair(21, "👍"),
         Pair(420, "🌿"),
@@ -70,19 +69,9 @@ fun ZapBottomSheet(
         Pair(100_000, "🚀")
     )
 
-    var selectedZapAmount by remember {
-        mutableIntStateOf(amount)
-    }
-    var selectedZapComment by remember {
-        mutableStateOf("")
-    }
-    val onSelectedZapAmountChange = { selected: Int ->
-        selectedZapAmount = selected
-        selectedZapComment = zapOptions.find { it.first == selected }?.second ?: selectedZapComment
-    }
-    val onSelectedZapCommentChange = { comment: String ->
-        selectedZapComment = comment
-    }
+    var selectedZapAmount by remember { mutableIntStateOf(amount) }
+    var selectedZapComment by remember { mutableStateOf("") }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
@@ -98,14 +87,15 @@ fun ZapBottomSheet(
             ZapOptions(
                 zapOptions = zapOptions,
                 selectedZapAmount = selectedZapAmount,
-                onSelectedZapAmountChange = onSelectedZapAmountChange
+                onSelectedZapAmountChange = { amount ->
+                    selectedZapAmount = amount
+                    selectedZapComment = zapOptions.find { it.first == amount }?.second ?: selectedZapComment
+                }
             )
             OutlinedTextField(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(
-                        horizontal = 24.dp
-                    )
+                    .padding(horizontal = 24.dp)
                     .requiredHeight(height = 54.dp),
                 singleLine = true,
                 colors = PrimalDefaults.outlinedTextFieldColors(
@@ -114,17 +104,18 @@ fun ZapBottomSheet(
                 ),
                 shape = RoundedCornerShape(8.dp),
                 value = selectedZapComment,
+                onValueChange = { selectedZapComment = it },
                 textStyle = AppTheme.typography.bodySmall,
+
                 placeholder = {
                     Text(
                         modifier = Modifier.fillMaxWidth(),
-                        text = stringResource(id = R.string.zap_settings_comment_placeholder),
+                        text = stringResource(id = R.string.zap_bottom_sheet_comment_placeholder),
                         textAlign = TextAlign.Left,
                         style = AppTheme.typography.bodySmall,
                         color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
                     )
-                },
-                onValueChange = onSelectedZapCommentChange
+                }
             )
             Spacer(modifier = Modifier.height(24.dp))
             PrimalLoadingButton(
@@ -132,9 +123,10 @@ fun ZapBottomSheet(
                     .fillMaxWidth()
                     .height(56.dp)
                     .padding(horizontal = 24.dp),
-                text = "Zap",
+                text = stringResource(id = R.string.zap_bottom_sheet_zap_button),
                 leadingIcon = ImageVector.vectorResource(id = R.drawable.zap),
                 onClick = {
+                    onDismissRequest()
                     onZap(selectedZapAmount, selectedZapComment)
                 }
             )
