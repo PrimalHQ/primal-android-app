@@ -9,12 +9,11 @@ import net.primal.android.crypto.CryptoUtils
 import net.primal.android.crypto.toHex
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.serialization.NostrJson
-import net.primal.android.user.domain.NostrWallet
 
 
 fun NostrUnsignedEvent.signOrThrow(nsec: String): NostrEvent {
-    val hexPrivkey = Bech32.decodeBytes(nsec).second
-    return this.signOrThrow(hexPrivkey)
+    val hexPrivateKey = Bech32.decodeBytes(nsec).second
+    return this.signOrThrow(hexPrivateKey)
 }
 
 fun NostrUnsignedEvent.signOrThrow(hexPrivkey: ByteArray): NostrEvent {
