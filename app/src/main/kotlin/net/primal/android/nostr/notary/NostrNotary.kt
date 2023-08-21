@@ -125,7 +125,7 @@ class NostrNotary @Inject constructor(
 
     fun signZapRequestNostrEvent(
         userId: String,
-        comment: String = "",
+        comment: String,
         target: ZapTarget,
         relays: List<Relay>
     ): NostrEvent {

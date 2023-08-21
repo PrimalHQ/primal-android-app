@@ -1,6 +1,9 @@
 package net.primal.android.wallet.repository
 
+import net.primal.android.db.PrimalDatabase
+import net.primal.android.feed.repository.PostStatsUpdater
 import net.primal.android.networking.relays.RelayPool
+import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.wallet.api.ZapsApi
@@ -13,11 +16,12 @@ class ZapRepository @Inject constructor(
     private val notary: NostrNotary,
     private val relayPool: RelayPool,
     private val accountsStore: UserAccountsStore,
+    private val database: PrimalDatabase,
 ) {
     suspend fun zap(
         userId: String,
-        comment: String = "",
-        amount: Int = 42,
+        comment: String,
+        amount: Int,
         target: ZapTarget,
     ) {
         val userAccount = accountsStore.findByIdOrNull(pubkey = userId)
@@ -63,7 +67,24 @@ class ZapRepository @Inject constructor(
             nwc = nostrWallet
         )
 
-        relayPool.publishEvent(nostrEvent = walletPayNostrEvent)
+
+        val statsUpdater = when (target) {
+            is ZapTarget.Note -> PostStatsUpdater(
+                postId = target.id,
+                userId = userId,
+                database = database
+            )
+
+            is ZapTarget.Profile -> null
+        }
+        try {
+            statsUpdater?.increaseZapStats(satsAmount = amount)
+            relayPool.publishEvent(nostrEvent = walletPayNostrEvent)
+        } catch (error: NostrPublishException) {
+            statsUpdater?.revertStats()
+            throw error
+        }
+
     }
 
     data class ZapFailureException(override val cause: Throwable) : RuntimeException()
