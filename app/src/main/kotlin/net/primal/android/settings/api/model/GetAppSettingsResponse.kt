@@ -5,7 +5,7 @@ import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.primal.PrimalEvent
 
 @Serializable
-data class AppSettingsResponse(
+data class GetAppSettingsResponse(
     val userSettings: NostrEvent? = null,
     val defaultSettings: PrimalEvent? = null,
 )

@@ -32,7 +32,7 @@ class UserDataUpdater @AssistedInject constructor(
     }
 
     private suspend fun updateData() {
-        settingsRepository.fetchAndUpsertAppSettings(pubkey = userId)
+        settingsRepository.fetchAndPersistAppSettings(userId = userId)
         userRepository.fetchAndUpsertUserAccount(userId = userId)
     }
 }
