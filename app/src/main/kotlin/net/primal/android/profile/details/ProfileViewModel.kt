@@ -20,9 +20,6 @@ import net.primal.android.feed.repository.PostRepository
 import net.primal.android.navigation.profileId
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
-import net.primal.android.nostr.api.MalformedLightningAddressException
-import net.primal.android.nostr.model.zap.ZapTarget
-import net.primal.android.nostr.repository.ZapRepository
 import net.primal.android.profile.db.authorNameUiFriendly
 import net.primal.android.profile.db.userNameUiFriendly
 import net.primal.android.profile.details.ProfileContract.UiEvent
@@ -33,6 +30,8 @@ import net.primal.android.profile.details.model.ProfileStatsUi
 import net.primal.android.profile.repository.LatestFollowingResolver
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.android.wallet.model.ZapTarget
+import net.primal.android.wallet.repository.ZapRepository
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
 
@@ -196,7 +195,7 @@ class ProfileViewModel @Inject constructor(
             setErrorState(error = ProfileError.FailedToPublishZapEvent(error))
         } catch (error: NostrPublishException) {
             setErrorState(error = ProfileError.FailedToPublishZapEvent(error))
-        } catch (error: MalformedLightningAddressException) {
+        } catch (error: ZapRepository.MalformedLightningAddressException) {
             setErrorState(error = ProfileError.MalformedLightningAddress(error))
         }
     }

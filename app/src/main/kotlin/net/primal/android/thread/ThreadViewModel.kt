@@ -21,19 +21,18 @@ import net.primal.android.feed.repository.PostRepository
 import net.primal.android.navigation.postId
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
-import net.primal.android.nostr.api.MalformedLightningAddressException
 import net.primal.android.nostr.ext.asEventIdTag
 import net.primal.android.nostr.ext.asPubkeyTag
 import net.primal.android.nostr.ext.isPubKeyTag
 import net.primal.android.nostr.ext.parseEventTags
 import net.primal.android.nostr.ext.parseHashtagTags
 import net.primal.android.nostr.ext.parsePubkeyTags
-import net.primal.android.nostr.model.zap.ZapTarget
-import net.primal.android.nostr.repository.ZapRepository
 import net.primal.android.thread.ThreadContract.UiEvent
 import net.primal.android.thread.ThreadContract.UiState.ThreadError
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
+import net.primal.android.wallet.model.ZapTarget
+import net.primal.android.wallet.repository.ZapRepository
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
@@ -187,7 +186,7 @@ class ThreadViewModel @Inject constructor(
             setErrorState(error = ThreadError.FailedToPublishZapEvent(error))
         } catch (error: NostrPublishException) {
             setErrorState(error = ThreadError.FailedToPublishZapEvent(error))
-        } catch (error: MalformedLightningAddressException) {
+        } catch (error: ZapRepository.MalformedLightningAddressException) {
             setErrorState(error = ThreadError.MalformedLightningAddress(error))
         }
     }

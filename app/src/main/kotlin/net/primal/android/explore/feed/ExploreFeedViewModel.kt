@@ -23,11 +23,10 @@ import net.primal.android.feed.repository.FeedRepository
 import net.primal.android.feed.repository.PostRepository
 import net.primal.android.navigation.searchQuery
 import net.primal.android.networking.relays.errors.NostrPublishException
-import net.primal.android.nostr.api.MalformedLightningAddressException
-import net.primal.android.nostr.model.zap.ZapTarget
-import net.primal.android.nostr.repository.ZapRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
+import net.primal.android.wallet.model.ZapTarget
+import net.primal.android.wallet.repository.ZapRepository
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
 
@@ -156,7 +155,7 @@ class ExploreFeedViewModel @Inject constructor(
             setErrorState(error = ExploreFeedError.FailedToPublishZapEvent(error))
         } catch (error: NostrPublishException) {
             setErrorState(error = ExploreFeedError.FailedToPublishZapEvent(error))
-        } catch (error: MalformedLightningAddressException) {
+        } catch (error: ZapRepository.MalformedLightningAddressException) {
             setErrorState(error = ExploreFeedError.MalformedLightningAddress(error))
         }
     }

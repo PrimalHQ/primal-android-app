@@ -6,7 +6,7 @@ import kotlinx.serialization.json.add
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.jsonPrimitive
 import net.primal.android.core.utils.parseHashtags
-import net.primal.android.nostr.model.zap.ZapTarget
+import net.primal.android.wallet.model.ZapTarget
 
 fun List<JsonArray>.findPostId(): String? {
     val postTag = firstOrNull { it.isEventIdTag() }

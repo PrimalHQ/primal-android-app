@@ -1,17 +1,15 @@
-package net.primal.android.nostr.api
+package net.primal.android.wallet.api
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
 import net.primal.android.nostr.ext.toLightningUrlOrNull
 import net.primal.android.nostr.model.NostrEvent
-import net.primal.android.nostr.model.zap.LightningPayRequest
-import net.primal.android.nostr.model.zap.LightningPayResponse
-import net.primal.android.nostr.model.zap.PayInvoiceRequest
-import net.primal.android.nostr.model.zap.WalletRequest
 import net.primal.android.serialization.NostrJson
 import net.primal.android.serialization.decodeFromStringOrNull
 import net.primal.android.serialization.toJsonObject
+import net.primal.android.wallet.model.LightningPayRequest
+import net.primal.android.wallet.model.LightningPayResponse
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -24,9 +22,9 @@ import javax.inject.Singleton
 class ZapsApi @Inject constructor(
     private val okHttpClient: OkHttpClient
 ) {
-    suspend fun fetchZapPayRequest(lightningAddress: String): LightningPayRequest? {
-        val lnUrl =
-            lightningAddress.toLightningUrlOrNull() ?: throw MalformedLightningAddressException()
+    suspend fun fetchZapPayRequest(lightningAddress: String): LightningPayRequest {
+        val lnUrl = lightningAddress.toLightningUrlOrNull()
+            ?: throw IllegalArgumentException("Invalid lightningAddress.")
 
         val getRequest = Request.Builder()
             .header("Content-Type", "application/json")
@@ -34,19 +32,16 @@ class ZapsApi @Inject constructor(
             .get()
             .build()
 
-        val result = withContext(Dispatchers.IO) {
-            try {
-                okHttpClient.newCall(getRequest).execute()
-            } catch (error: IOException) {
-                null
-            }
+        val response = withContext(Dispatchers.IO) {
+            okHttpClient.newCall(getRequest).execute()
         }
 
-        val responseBody = result?.body
+        val responseBody = response.body
         return if (responseBody != null) {
             NostrJson.decodeFromStringOrNull(string = responseBody.string())
+                ?: throw IOException("Invalid body content.")
         } else {
-            null
+            throw IOException("Empty response body.")
         }
     }
 
@@ -55,9 +50,13 @@ class ZapsApi @Inject constructor(
         zapEvent: NostrEvent,
         satoshiAmount: Int,
         comment: String = ""
-    ): LightningPayResponse? {
-        if (request.allowsNostr != null && request.allowsNostr == false) return null
-        if (request.callback == null) return null
+    ): LightningPayResponse {
+        if (request.allowsNostr != null && request.allowsNostr == false) {
+            throw IllegalArgumentException("request.allowsNostr must not be null or false.")
+        }
+        if (request.callback == null) {
+            throw IllegalArgumentException("request.callback must not be null.")
+        }
 
         val zapEventString = NostrJson.encodeToString(zapEvent.toJsonObject())
 
@@ -78,24 +77,19 @@ class ZapsApi @Inject constructor(
             .get()
             .build()
 
-        val result = withContext(Dispatchers.IO) { okHttpClient.newCall(getRequest).execute() }
-        if (result.body != null) {
-            val res = result.body!!.string()
-            val decoded = NostrJson.decodeFromStringOrNull<LightningPayResponse>(res)
-            return when {
-                decoded?.pr == null -> null
-                getAmount(decoded.pr) != satoshiAmount -> null
+        val response = withContext(Dispatchers.IO) { okHttpClient.newCall(getRequest).execute() }
+        val responseBody = response.body
+        return if (responseBody != null) {
+            val decoded = NostrJson.decodeFromStringOrNull<LightningPayResponse>(responseBody.string())
+            when {
+                decoded?.pr == null -> throw IOException("Invalid invoice response.")
+                getAmount(decoded.pr) != satoshiAmount -> throw IOException("Amount mismatch.")
                 else -> decoded
             }
+        } else {
+            throw IOException("Empty response body.")
         }
-
-        return null
     }
-
-    fun createWalletPayRequest(
-        invoice: LightningPayResponse
-    ): WalletRequest<PayInvoiceRequest> =
-        WalletRequest(method = "pay_invoice", params = PayInvoiceRequest(invoice.pr))
 
     private val invoicePattern = Pattern.compile(
         "lnbc((?<amount>\\d+)(?<multiplier>[munp])?)?1[^1\\s]+",
@@ -118,5 +112,3 @@ class ZapsApi @Inject constructor(
         return amount * 100
     }
 }
-
-class MalformedLightningAddressException : IllegalArgumentException()

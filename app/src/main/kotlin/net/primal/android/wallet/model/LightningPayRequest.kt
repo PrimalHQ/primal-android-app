@@ -1,12 +1,17 @@
-package net.primal.android.nostr.model.zap
+package net.primal.android.wallet.model
 
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class PayerDataRequirement(val mandatory: Boolean)
+data class PayerDataRequirement(
+    val mandatory: Boolean,
+)
 
 @Serializable
-data class PayerData(val name: PayerDataRequirement, val identifier: PayerDataRequirement? = null)
+data class PayerData(
+    val name: PayerDataRequirement,
+    val identifier: PayerDataRequirement? = null,
+)
 
 @Serializable
 data class LightningPayRequest(
@@ -19,5 +24,5 @@ data class LightningPayRequest(
     val tag: String? = null,
     val metadata: String? = null,
     val nostrPubkey: String? = null,
-    val payerData: PayerData? = null
+    val payerData: PayerData? = null,
 )

@@ -4,11 +4,7 @@ import fr.acinq.secp256k1.Hex
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.add
-import kotlinx.serialization.json.buildJsonArray
 import net.primal.android.crypto.CryptoUtils
-import net.primal.android.crypto.bechToBytes
-import net.primal.android.crypto.hexToNsecHrp
 import net.primal.android.crypto.toNpub
 import net.primal.android.networking.UserAgentProvider
 import net.primal.android.nostr.ext.asEventIdTag
@@ -17,9 +13,6 @@ import net.primal.android.nostr.ext.asPubkeyTag
 import net.primal.android.nostr.ext.toTags
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.NostrEventKind
-import net.primal.android.nostr.model.zap.PayInvoiceRequest
-import net.primal.android.nostr.model.zap.WalletRequest
-import net.primal.android.nostr.model.zap.ZapTarget
 import net.primal.android.serialization.NostrJson
 import net.primal.android.serialization.toNostrRelayMap
 import net.primal.android.settings.api.model.AppSettingsDescription
@@ -27,6 +20,9 @@ import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.NostrWallet
 import net.primal.android.user.domain.Relay
 import net.primal.android.user.domain.toZapTag
+import net.primal.android.wallet.model.PayInvoiceRequest
+import net.primal.android.wallet.model.WalletRequest
+import net.primal.android.wallet.model.ZapTarget
 import javax.inject.Inject
 
 
