@@ -12,7 +12,16 @@ interface ThreadContract {
         val highlightPostIndex: Int = 0,
         val walletConnected: Boolean = false,
         val error: PostActionError? = null,
-    )
+    ) {
+        sealed class PostActionError {
+            data class MissingLightningAddress(val cause: Throwable) : PostActionError()
+            data class MalformedLightningAddress(val cause: Throwable) : PostActionError()
+            data class FailedToPublishZapEvent(val cause: Throwable) : PostActionError()
+            data class FailedToPublishRepostEvent(val cause: Throwable) : PostActionError()
+            data class FailedToPublishReplyEvent(val cause: Throwable) : PostActionError()
+            data class FailedToPublishLikeEvent(val cause: Throwable) : PostActionError()
+        }
+    }
 
     sealed class UiEvent {
         data class PostLikeAction(val postId: String, val postAuthorId: String) : UiEvent()
@@ -35,14 +44,5 @@ interface ThreadContract {
             val replyToPostId: String,
             val replyToAuthorId: String,
         ) : UiEvent()
-    }
-
-    sealed class PostActionError {
-        data object MissingLightningAddress : PostActionError()
-        data object MalformedLightningAddress : PostActionError()
-        data object FailedToPublishZapEvent : PostActionError()
-        data object FailedToPublishRepostEvent : PostActionError()
-        data object FailedToPublishReplyEvent : PostActionError()
-        data object FailedToPublishLikeEvent : PostActionError()
     }
 }

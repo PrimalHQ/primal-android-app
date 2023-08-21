@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -35,6 +36,7 @@ import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -95,6 +97,7 @@ import net.primal.android.core.ext.findNearestOrNull
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.isPrimalIdentifier
 import net.primal.android.crypto.hexToNoteHrp
+import net.primal.android.profile.details.ProfileContract.UiState.PostActionError
 import net.primal.android.profile.details.model.ProfileDetailsUi
 import net.primal.android.profile.details.model.ProfileStatsUi
 import net.primal.android.theme.AppTheme
@@ -212,122 +215,132 @@ fun ProfileScreen(
     }
 
     Surface {
-        val pagingItems = state.authoredPosts.collectAsLazyPagingItems()
-        FeedLazyColumn(
-            contentPadding = PaddingValues(0.dp),
-            pagingItems = pagingItems,
-            walletConnected = state.walletConnected,
-            listState = listState,
-            onPostClick = onPostClick,
-            onProfileClick = {
-                if (state.profileId != it) {
-                    onProfileClick(it)
-                }
-            },
-            onPostReplyClick = {
-                onPostClick(it)
-            },
-            onZapClick = { post, zapAmount, zapDescription ->
-                eventPublisher(
-                    ProfileContract.UiEvent.ZapAction(
-                        postId = post.postId,
-                        postAuthorId = post.authorId,
-                        zapAmount = zapAmount,
-                        zapDescription = zapDescription,
-                        postAuthorLightningAddress = post.authorLightningAddress
-                    )
-                )
-            },
-            onPostLikeClick = {
-                eventPublisher(
-                    ProfileContract.UiEvent.PostLikeAction(
-                        postId = it.postId,
-                        postAuthorId = it.authorId,
-                    )
-                )
-            },
-            onRepostClick = {
-                eventPublisher(
-                    ProfileContract.UiEvent.RepostAction(
-                        postId = it.postId,
-                        postAuthorId = it.authorId,
-                        postNostrEvent = it.rawNostrEventJson,
-                    )
-                )
-            },
-            onPostQuoteClick = {
-                onPostQuoteClick("\n\nnostr:${it.postId.hexToNoteHrp()}")
-            },
-            onHashtagClick = onHashtagClick,
-            onWalletUnavailable = onWalletUnavailable,
-            shouldShowLoadingState = false,
-            shouldShowNoContentState = false,
-            stickyHeader = {
-                ProfileTopCoverBar(
-                    state = state,
-                    coverHeight = with(density) { coverHeightPx.value.toDp() },
-                    coverAlpha = coverTransparency.value,
-                    avatarSize = with(density) { avatarSizePx.value.toDp() },
-                    avatarPadding = with(density) { (maxAvatarSizePx - avatarSizePx.value).toDp() },
-                    avatarOffsetY = with(density) { (maxAvatarSizePx * 0.65f).toDp() },
-                    navigationIcon = {
-                        AppBarIcon(
-                            icon = PrimalIcons.ArrowBack,
-                            backgroundColor = Color.Black.copy(alpha = 0.5f),
-                            tint = Color.White,
-                            onClick = onClose,
+        Box {
+            val pagingItems = state.authoredPosts.collectAsLazyPagingItems()
+            FeedLazyColumn(
+                contentPadding = PaddingValues(0.dp),
+                pagingItems = pagingItems,
+                walletConnected = state.walletConnected,
+                listState = listState,
+                onPostClick = onPostClick,
+                onProfileClick = {
+                    if (state.profileId != it) {
+                        onProfileClick(it)
+                    }
+                },
+                onPostReplyClick = {
+                    onPostClick(it)
+                },
+                onZapClick = { post, zapAmount, zapDescription ->
+                    eventPublisher(
+                        ProfileContract.UiEvent.ZapAction(
+                            postId = post.postId,
+                            postAuthorId = post.authorId,
+                            zapAmount = zapAmount,
+                            zapDescription = zapDescription,
+                            postAuthorLightningAddress = post.authorLightningAddress
                         )
-                    },
-                    title = {
-                        AnimatedVisibility(
-                            modifier = Modifier.padding(horizontal = 4.dp),
-                            visible = topBarTitleVisible.value,
-                            enter = fadeIn(),
-                            exit = fadeOut(),
-                        ) {
-                            NostrUserText(
-                                displayName = state.profileDetails?.authorDisplayName
-                                    ?: state.profileId.asEllipsizedNpub(),
-                                internetIdentifier = state.profileDetails?.internetIdentifier,
+                    )
+                },
+                onPostLikeClick = {
+                    eventPublisher(
+                        ProfileContract.UiEvent.PostLikeAction(
+                            postId = it.postId,
+                            postAuthorId = it.authorId,
+                        )
+                    )
+                },
+                onRepostClick = {
+                    eventPublisher(
+                        ProfileContract.UiEvent.RepostAction(
+                            postId = it.postId,
+                            postAuthorId = it.authorId,
+                            postNostrEvent = it.rawNostrEventJson,
+                        )
+                    )
+                },
+                onPostQuoteClick = {
+                    onPostQuoteClick("\n\nnostr:${it.postId.hexToNoteHrp()}")
+                },
+                onHashtagClick = onHashtagClick,
+                onWalletUnavailable = onWalletUnavailable,
+                shouldShowLoadingState = false,
+                shouldShowNoContentState = false,
+                stickyHeader = {
+                    ProfileTopCoverBar(
+                        state = state,
+                        coverHeight = with(density) { coverHeightPx.value.toDp() },
+                        coverAlpha = coverTransparency.value,
+                        avatarSize = with(density) { avatarSizePx.value.toDp() },
+                        avatarPadding = with(density) { (maxAvatarSizePx - avatarSizePx.value).toDp() },
+                        avatarOffsetY = with(density) { (maxAvatarSizePx * 0.65f).toDp() },
+                        navigationIcon = {
+                            AppBarIcon(
+                                icon = PrimalIcons.ArrowBack,
+                                backgroundColor = Color.Black.copy(alpha = 0.5f),
+                                tint = Color.White,
+                                onClick = onClose,
                             )
+                        },
+                        title = {
+                            AnimatedVisibility(
+                                modifier = Modifier.padding(horizontal = 4.dp),
+                                visible = topBarTitleVisible.value,
+                                enter = fadeIn(),
+                                exit = fadeOut(),
+                            ) {
+                                NostrUserText(
+                                    displayName = state.profileDetails?.authorDisplayName
+                                        ?: state.profileId.asEllipsizedNpub(),
+                                    internetIdentifier = state.profileDetails?.internetIdentifier,
+                                )
+                            }
+                        },
+                    )
+                },
+                header = {
+                    UserProfileDetails(
+                        profileId = state.profileId,
+                        isFollowed = state.isProfileFollowed,
+                        profileDetails = state.profileDetails,
+                        profileStats = state.profileStats,
+                        onFollow = {
+                            eventPublisher(ProfileContract.UiEvent.FollowAction(state.profileId))
+                        },
+                        onUnfollow = {
+                            eventPublisher(ProfileContract.UiEvent.UnfollowAction(state.profileId))
                         }
-                    },
-                )
-            },
-            header = {
-                UserProfileDetails(
-                    profileId = state.profileId,
-                    isFollowed = state.isProfileFollowed,
-                    profileDetails = state.profileDetails,
-                    profileStats = state.profileStats,
-                    onFollow = {
-                        eventPublisher(ProfileContract.UiEvent.FollowAction(state.profileId))
-                    },
-                    onUnfollow = {
-                        eventPublisher(ProfileContract.UiEvent.UnfollowAction(state.profileId))
+                    )
+
+                    if (pagingItems.isEmpty()) {
+                        when (pagingItems.loadState.refresh) {
+                            LoadState.Loading -> FeedLoading(
+                                modifier = Modifier
+                                    .padding(vertical = 64.dp)
+                                    .fillMaxWidth(),
+                            )
+
+                            is LoadState.NotLoading -> FeedNoContent(
+                                modifier = Modifier
+                                    .padding(vertical = 64.dp)
+                                    .fillMaxWidth(),
+                                onRefresh = { pagingItems.refresh() }
+                            )
+
+                            is LoadState.Error -> Unit
+                        }
                     }
-                )
+                },
+            )
 
-                if (pagingItems.isEmpty()) {
-                    when (pagingItems.loadState.refresh) {
-                        LoadState.Loading -> FeedLoading(
-                            modifier = Modifier
-                                .padding(vertical = 64.dp)
-                                .fillMaxWidth(),
-                        )
-
-                        is LoadState.NotLoading -> FeedNoContent(
-                            modifier = Modifier
-                                .padding(vertical = 64.dp)
-                                .fillMaxWidth(),
-                            onRefresh = { pagingItems.refresh() }
-                        )
-
-                        is LoadState.Error -> Unit
-                    }
-                }
-            },
-        )
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .navigationBarsPadding()
+                ,
+            )
+        }
     }
 }
 
@@ -710,18 +723,18 @@ private fun UserPublicKey(
 
 @Composable
 private fun ErrorHandler(
-    error: ProfileContract.PostActionError?,
+    error: PostActionError?,
     snackbarHostState: SnackbarHostState,
 ) {
     val context = LocalContext.current
     LaunchedEffect(error ?: true) {
         val errorMessage = when (error) {
-            is ProfileContract.PostActionError.MalformedLightningAddress -> context.getString(R.string.post_action_malformed_lightning_address)
-            is ProfileContract.PostActionError.MissingLightningAddress -> context.getString(R.string.post_action_missing_lightning_address)
-            is ProfileContract.PostActionError.FailedToPublishZapEvent -> context.getString(R.string.post_action_zap_failed)
-            is ProfileContract.PostActionError.FailedToPublishLikeEvent -> context.getString(R.string.post_action_like_failed)
-            is ProfileContract.PostActionError.FailedToPublishRepostEvent -> context.getString(R.string.post_action_repost_failed)
-            null -> return@LaunchedEffect
+            is PostActionError.MalformedLightningAddress -> context.getString(R.string.post_action_malformed_lightning_address)
+            is PostActionError.MissingLightningAddress -> context.getString(R.string.post_action_missing_lightning_address)
+            is PostActionError.FailedToPublishZapEvent -> context.getString(R.string.post_action_zap_failed)
+            is PostActionError.FailedToPublishLikeEvent -> context.getString(R.string.post_action_like_failed)
+            is PostActionError.FailedToPublishRepostEvent -> context.getString(R.string.post_action_repost_failed)
+            else -> return@LaunchedEffect
         }
 
         snackbarHostState.showSnackbar(

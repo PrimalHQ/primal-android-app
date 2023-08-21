@@ -3,18 +3,19 @@ package net.primal.android.nostr.api
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import net.primal.android.nostr.ext.toLightningUrlOrNull
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.zap.LightningPayRequest
 import net.primal.android.nostr.model.zap.LightningPayResponse
 import net.primal.android.nostr.model.zap.PayInvoiceRequest
 import net.primal.android.nostr.model.zap.WalletRequest
+import net.primal.android.serialization.NostrJson
+import net.primal.android.serialization.decodeFromStringOrNull
 import net.primal.android.serialization.toJsonObject
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import java.security.InvalidParameterException
+import java.io.IOException
 import java.util.regex.Pattern
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -23,10 +24,9 @@ import javax.inject.Singleton
 class ZapsApi @Inject constructor(
     private val okHttpClient: OkHttpClient
 ) {
-    private val json = Json { ignoreUnknownKeys = true }
-
     suspend fun fetchZapPayRequest(lightningAddress: String): LightningPayRequest? {
-        val lnUrl = lightningAddress.toLightningUrlOrNull() ?: throw MalformedLightningAddressException()
+        val lnUrl =
+            lightningAddress.toLightningUrlOrNull() ?: throw MalformedLightningAddressException()
 
         val getRequest = Request.Builder()
             .header("Content-Type", "application/json")
@@ -34,13 +34,20 @@ class ZapsApi @Inject constructor(
             .get()
             .build()
 
-        val result = withContext(Dispatchers.IO) { okHttpClient.newCall(getRequest).execute() }
-        if (result.body != null) {
-            val res = result.body!!.string()
-            return json.decodeFromString(res)
+        val result = withContext(Dispatchers.IO) {
+            try {
+                okHttpClient.newCall(getRequest).execute()
+            } catch (error: IOException) {
+                null
+            }
         }
 
-        return null
+        val responseBody = result?.body
+        return if (responseBody != null) {
+            NostrJson.decodeFromStringOrNull(string = responseBody.string())
+        } else {
+            null
+        }
     }
 
     suspend fun fetchInvoice(
@@ -52,7 +59,7 @@ class ZapsApi @Inject constructor(
         if (request.allowsNostr != null && request.allowsNostr == false) return null
         if (request.callback == null) return null
 
-        val zapEventString = json.encodeToString(zapEvent.toJsonObject())
+        val zapEventString = NostrJson.encodeToString(zapEvent.toJsonObject())
 
         val builder = request
             .callback
@@ -74,14 +81,12 @@ class ZapsApi @Inject constructor(
         val result = withContext(Dispatchers.IO) { okHttpClient.newCall(getRequest).execute() }
         if (result.body != null) {
             val res = result.body!!.string()
-            val decoded = json.decodeFromString<LightningPayResponse>(res)
-
-            // validate the invoice amount is the same we specified
-            if (getAmount(decoded.pr) != satoshiAmount) {
-                return null
+            val decoded = NostrJson.decodeFromStringOrNull<LightningPayResponse>(res)
+            return when {
+                decoded?.pr == null -> null
+                getAmount(decoded.pr) != satoshiAmount -> null
+                else -> decoded
             }
-
-            return decoded
         }
 
         return null
@@ -89,7 +94,8 @@ class ZapsApi @Inject constructor(
 
     fun createWalletPayRequest(
         invoice: LightningPayResponse
-    ): WalletRequest<PayInvoiceRequest> = WalletRequest(method = "pay_invoice", params = PayInvoiceRequest(invoice.pr))
+    ): WalletRequest<PayInvoiceRequest> =
+        WalletRequest(method = "pay_invoice", params = PayInvoiceRequest(invoice.pr))
 
     private val invoicePattern = Pattern.compile(
         "lnbc((?<amount>\\d+)(?<multiplier>[munp])?)?1[^1\\s]+",
@@ -113,4 +119,4 @@ class ZapsApi @Inject constructor(
     }
 }
 
-class MalformedLightningAddressException : InvalidParameterException()
+class MalformedLightningAddressException : IllegalArgumentException()

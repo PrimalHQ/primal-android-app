@@ -14,7 +14,15 @@ interface FeedContract {
         val posts: Flow<PagingData<FeedPostUi>>,
         val syncStats: FeedPostsSyncStats = FeedPostsSyncStats(),
         val error: PostActionError? = null,
-    )
+    ) {
+        sealed class PostActionError {
+            data class MissingLightningAddress(val cause: Throwable) : PostActionError()
+            data class MalformedLightningAddress(val cause: Throwable) : PostActionError()
+            data class FailedToPublishZapEvent(val cause: Throwable) : PostActionError()
+            data class FailedToPublishRepostEvent(val cause: Throwable) : PostActionError()
+            data class FailedToPublishLikeEvent(val cause: Throwable) : PostActionError()
+        }
+    }
 
     sealed class UiEvent {
         data object FeedScrolledToTop : UiEvent()
@@ -25,6 +33,7 @@ interface FeedContract {
             val postAuthorId: String,
             val postNostrEvent: String
         ) : UiEvent()
+
         data class ZapAction(
             val postId: String,
             val postAuthorId: String,
@@ -34,11 +43,4 @@ interface FeedContract {
         ) : UiEvent()
     }
 
-    sealed class PostActionError {
-        data object MissingLightningAddress : PostActionError()
-        data object MalformedLightningAddress : PostActionError()
-        data object FailedToPublishZapEvent : PostActionError()
-        data object FailedToPublishRepostEvent : PostActionError()
-        data object FailedToPublishLikeEvent : PostActionError()
-    }
 }

@@ -17,7 +17,15 @@ interface ProfileContract {
         val resources: List<MediaResourceUi> = emptyList(),
         val authoredPosts: Flow<PagingData<FeedPostUi>>,
         val error: PostActionError? = null,
-    )
+    ) {
+        sealed class PostActionError {
+            data class MissingLightningAddress(val cause: Throwable) : PostActionError()
+            data class MalformedLightningAddress(val cause: Throwable) : PostActionError()
+            data class FailedToPublishZapEvent(val cause: Throwable) : PostActionError()
+            data class FailedToPublishRepostEvent(val cause: Throwable) : PostActionError()
+            data class FailedToPublishLikeEvent(val cause: Throwable) : PostActionError()
+        }
+    }
 
     sealed class UiEvent {
         data class PostLikeAction(val postId: String, val postAuthorId: String) : UiEvent()
@@ -26,6 +34,7 @@ interface ProfileContract {
             val postAuthorId: String,
             val postNostrEvent: String
         ) : UiEvent()
+
         data class ZapAction(
             val postId: String,
             val postAuthorId: String,
@@ -33,15 +42,9 @@ interface ProfileContract {
             val zapDescription: String?,
             val postAuthorLightningAddress: String?
         ) : UiEvent()
+
         data class FollowAction(val profileId: String) : UiEvent()
         data class UnfollowAction(val profileId: String) : UiEvent()
     }
 
-    sealed class PostActionError {
-        data object MissingLightningAddress : PostActionError()
-        data object MalformedLightningAddress : PostActionError()
-        data object FailedToPublishZapEvent : PostActionError()
-        data object FailedToPublishRepostEvent : PostActionError()
-        data object FailedToPublishLikeEvent : PostActionError()
-    }
 }

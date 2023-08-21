@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
 import androidx.paging.map
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -27,13 +26,13 @@ import net.primal.android.profile.db.authorNameUiFriendly
 import net.primal.android.profile.db.userNameUiFriendly
 import net.primal.android.profile.details.ProfileContract.UiEvent
 import net.primal.android.profile.details.ProfileContract.UiState
+import net.primal.android.profile.details.ProfileContract.UiState.PostActionError
 import net.primal.android.profile.details.model.ProfileDetailsUi
 import net.primal.android.profile.details.model.ProfileStatsUi
 import net.primal.android.profile.repository.LatestFollowingResolver
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import javax.inject.Inject
-import kotlin.time.Duration.Companion.seconds
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
@@ -150,8 +149,7 @@ class ProfileViewModel @Inject constructor(
                 postAuthorId = postLikeAction.postAuthorId,
             )
         } catch (error: NostrPublishException) {
-            setState { copy(error = ProfileContract.PostActionError.FailedToPublishLikeEvent) }
-            scheduleErrorClear()
+            setState { copy(error = PostActionError.FailedToPublishLikeEvent(error)) }
         }
     }
 
@@ -163,21 +161,21 @@ class ProfileViewModel @Inject constructor(
                 postRawNostrEvent = repostAction.postNostrEvent,
             )
         } catch (error: NostrPublishException) {
-            setState { copy(error = ProfileContract.PostActionError.FailedToPublishRepostEvent) }
-            scheduleErrorClear()
+            setState { copy(error = PostActionError.FailedToPublishRepostEvent(error)) }
         }
     }
 
     private fun zapPost(zapAction: UiEvent.ZapAction) = viewModelScope.launch {
-        try {
-            if (zapAction.postAuthorLightningAddress == null) {
-                setState { copy(error = ProfileContract.PostActionError.MissingLightningAddress) }
-                return@launch
+        if (zapAction.postAuthorLightningAddress == null) {
+            setState {
+                copy(error = PostActionError.MissingLightningAddress(IllegalStateException()))
             }
+            return@launch
+        }
 
+        try {
             val amount = zapAction.zapAmount ?: 42
             val activeAccount = activeAccountStore.activeUserAccount()
-
             if (activeAccount.nostrWallet == null) {
                 return@launch
             }
@@ -194,19 +192,12 @@ class ProfileViewModel @Inject constructor(
                 relays = activeAccount.relays,
                 nostrWallet = activeAccount.nostrWallet,
             )
-        } catch (error: Exception) {
-            when (error) {
-                is ZapRepository.ZapFailureException, is NostrPublishException -> {
-                    setState { copy(error = ProfileContract.PostActionError.FailedToPublishZapEvent) }
-                }
-
-                is MalformedLightningAddressException -> {
-                    setState { copy(error = ProfileContract.PostActionError.MalformedLightningAddress) }
-                }
-
-                else -> return@launch
-            }
-            scheduleErrorClear()
+        } catch (error: ZapRepository.ZapFailureException) {
+            setState { copy(error = PostActionError.FailedToPublishZapEvent(error)) }
+        } catch (error: NostrPublishException) {
+            setState { copy(error = PostActionError.FailedToPublishZapEvent(error)) }
+        } catch (error: MalformedLightningAddressException) {
+            setState { copy(error = PostActionError.MalformedLightningAddress(error)) }
         }
     }
 
@@ -228,10 +219,5 @@ class ProfileViewModel @Inject constructor(
         } catch (error: NostrPublishException) {
             // Propagate error to the UI
         }
-    }
-
-    private fun scheduleErrorClear() = viewModelScope.launch {
-        delay(2.seconds)
-        setState { copy(error = null) }
     }
 }

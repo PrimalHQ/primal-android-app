@@ -27,9 +27,9 @@ import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.UserFeedAdd
 import net.primal.android.core.compose.icons.primaliconpack.UserFeedRemove
 import net.primal.android.crypto.hexToNoteHrp
-import net.primal.android.discuss.feed.FeedContract
 import net.primal.android.explore.feed.ExploreFeedContract.UiEvent.AddToUserFeeds
 import net.primal.android.explore.feed.ExploreFeedContract.UiEvent.RemoveFromUserFeeds
+import net.primal.android.explore.feed.ExploreFeedContract.UiState.PostActionError
 
 @Composable
 fun ExploreFeedScreen(
@@ -173,17 +173,17 @@ fun ExploreFeedScreen(
 
 @Composable
 private fun ErrorHandler(
-    error: ExploreFeedContract.PostActionError?,
+    error: PostActionError?,
     snackbarHostState: SnackbarHostState,
 ) {
     val context = LocalContext.current
     LaunchedEffect(error ?: true) {
         val errorMessage = when (error) {
-            is ExploreFeedContract.PostActionError.MalformedLightningAddress -> context.getString(R.string.post_action_malformed_lightning_address)
-            is ExploreFeedContract.PostActionError.MissingLightningAddress -> context.getString(R.string.post_action_missing_lightning_address)
-            is ExploreFeedContract.PostActionError.FailedToPublishZapEvent -> context.getString(R.string.post_action_zap_failed)
-            is ExploreFeedContract.PostActionError.FailedToPublishLikeEvent -> context.getString(R.string.post_action_like_failed)
-            is ExploreFeedContract.PostActionError.FailedToPublishRepostEvent -> context.getString(R.string.post_action_repost_failed)
+            is PostActionError.MalformedLightningAddress -> context.getString(R.string.post_action_malformed_lightning_address)
+            is PostActionError.MissingLightningAddress -> context.getString(R.string.post_action_missing_lightning_address)
+            is PostActionError.FailedToPublishZapEvent -> context.getString(R.string.post_action_zap_failed)
+            is PostActionError.FailedToPublishLikeEvent -> context.getString(R.string.post_action_like_failed)
+            is PostActionError.FailedToPublishRepostEvent -> context.getString(R.string.post_action_repost_failed)
             null -> return@LaunchedEffect
         }
 
