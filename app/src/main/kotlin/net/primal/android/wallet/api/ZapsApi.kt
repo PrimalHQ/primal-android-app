@@ -54,17 +54,10 @@ class ZapsApi @Inject constructor(
         if (request.allowsNostr != null && request.allowsNostr == false) {
             throw IllegalArgumentException("request.allowsNostr must not be null or false.")
         }
-        if (request.callback == null) {
-            throw IllegalArgumentException("request.callback must not be null.")
-        }
 
         val zapEventString = NostrJson.encodeToString(zapEvent.toJsonObject())
 
-        val builder = request
-            .callback
-            .toHttpUrl()
-            .newBuilder()
-
+        val builder = request.callback.toHttpUrl().newBuilder()
         builder.addQueryParameter("nostr", zapEventString)
         builder.addQueryParameter("amount", satoshiAmount.toString())
 

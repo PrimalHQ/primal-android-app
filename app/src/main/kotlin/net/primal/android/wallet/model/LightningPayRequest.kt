@@ -3,8 +3,17 @@ package net.primal.android.wallet.model
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class PayerDataRequirement(
-    val mandatory: Boolean,
+data class LightningPayRequest(
+    val callback: String,
+    val metadata: String,
+    val minSendable: ULong,
+    val maxSendable: ULong,
+    val tag: String,
+    val allowsNostr: Boolean? = null,
+    val nostrPubkey: String? = null,
+    val commentAllowed: Int? = null,
+    val disposable: Boolean? = null,
+    val payerData: PayerData? = null,
 )
 
 @Serializable
@@ -14,15 +23,6 @@ data class PayerData(
 )
 
 @Serializable
-data class LightningPayRequest(
-    val allowsNostr: Boolean? = null,
-    val commentAllowed: Int? = null,
-    val disposable: Boolean? = null,
-    val callback: String? = null,
-    val minSendable: ULong? = null,
-    val maxSendable: ULong? = null,
-    val tag: String? = null,
-    val metadata: String? = null,
-    val nostrPubkey: String? = null,
-    val payerData: PayerData? = null,
+data class PayerDataRequirement(
+    val mandatory: Boolean,
 )
