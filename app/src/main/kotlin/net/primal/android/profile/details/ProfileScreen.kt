@@ -97,7 +97,7 @@ import net.primal.android.core.ext.findNearestOrNull
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.isPrimalIdentifier
 import net.primal.android.crypto.hexToNoteHrp
-import net.primal.android.profile.details.ProfileContract.UiState.PostActionError
+import net.primal.android.profile.details.ProfileContract.UiState.ProfileError
 import net.primal.android.profile.details.model.ProfileDetailsUi
 import net.primal.android.profile.details.model.ProfileStatsUi
 import net.primal.android.theme.AppTheme
@@ -723,17 +723,17 @@ private fun UserPublicKey(
 
 @Composable
 private fun ErrorHandler(
-    error: PostActionError?,
+    error: ProfileError?,
     snackbarHostState: SnackbarHostState,
 ) {
     val context = LocalContext.current
     LaunchedEffect(error ?: true) {
         val errorMessage = when (error) {
-            is PostActionError.MalformedLightningAddress -> context.getString(R.string.post_action_malformed_lightning_address)
-            is PostActionError.MissingLightningAddress -> context.getString(R.string.post_action_missing_lightning_address)
-            is PostActionError.FailedToPublishZapEvent -> context.getString(R.string.post_action_zap_failed)
-            is PostActionError.FailedToPublishLikeEvent -> context.getString(R.string.post_action_like_failed)
-            is PostActionError.FailedToPublishRepostEvent -> context.getString(R.string.post_action_repost_failed)
+            is ProfileError.MalformedLightningAddress -> context.getString(R.string.post_action_malformed_lightning_address)
+            is ProfileError.MissingLightningAddress -> context.getString(R.string.post_action_missing_lightning_address)
+            is ProfileError.FailedToPublishZapEvent -> context.getString(R.string.post_action_zap_failed)
+            is ProfileError.FailedToPublishLikeEvent -> context.getString(R.string.post_action_like_failed)
+            is ProfileError.FailedToPublishRepostEvent -> context.getString(R.string.post_action_repost_failed)
             else -> return@LaunchedEffect
         }
 

@@ -29,7 +29,7 @@ import net.primal.android.core.compose.icons.primaliconpack.UserFeedRemove
 import net.primal.android.crypto.hexToNoteHrp
 import net.primal.android.explore.feed.ExploreFeedContract.UiEvent.AddToUserFeeds
 import net.primal.android.explore.feed.ExploreFeedContract.UiEvent.RemoveFromUserFeeds
-import net.primal.android.explore.feed.ExploreFeedContract.UiState.PostActionError
+import net.primal.android.explore.feed.ExploreFeedContract.UiState.ExploreFeedError
 
 @Composable
 fun ExploreFeedScreen(
@@ -173,17 +173,17 @@ fun ExploreFeedScreen(
 
 @Composable
 private fun ErrorHandler(
-    error: PostActionError?,
+    error: ExploreFeedError?,
     snackbarHostState: SnackbarHostState,
 ) {
     val context = LocalContext.current
     LaunchedEffect(error ?: true) {
         val errorMessage = when (error) {
-            is PostActionError.MalformedLightningAddress -> context.getString(R.string.post_action_malformed_lightning_address)
-            is PostActionError.MissingLightningAddress -> context.getString(R.string.post_action_missing_lightning_address)
-            is PostActionError.FailedToPublishZapEvent -> context.getString(R.string.post_action_zap_failed)
-            is PostActionError.FailedToPublishLikeEvent -> context.getString(R.string.post_action_like_failed)
-            is PostActionError.FailedToPublishRepostEvent -> context.getString(R.string.post_action_repost_failed)
+            is ExploreFeedError.MalformedLightningAddress -> context.getString(R.string.post_action_malformed_lightning_address)
+            is ExploreFeedError.MissingLightningAddress -> context.getString(R.string.post_action_missing_lightning_address)
+            is ExploreFeedError.FailedToPublishZapEvent -> context.getString(R.string.post_action_zap_failed)
+            is ExploreFeedError.FailedToPublishLikeEvent -> context.getString(R.string.post_action_like_failed)
+            is ExploreFeedError.FailedToPublishRepostEvent -> context.getString(R.string.post_action_repost_failed)
             null -> return@LaunchedEffect
         }
 

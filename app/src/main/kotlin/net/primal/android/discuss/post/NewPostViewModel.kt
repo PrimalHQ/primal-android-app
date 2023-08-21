@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,6 +25,7 @@ import net.primal.android.nostr.ext.parsePubkeyTags
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.seconds
 
 @HiltViewModel
 class NewPostViewModel @Inject constructor(
@@ -79,10 +81,19 @@ class NewPostViewModel @Inject constructor(
             )
             sendEffect(SideEffect.PostPublished)
         } catch (error: NostrPublishException) {
-            setState { copy(error = UiState.PublishError(cause = error.cause)) }
+            setErrorState(error = UiState.PublishError(cause = error.cause))
         } finally {
             setState { copy(publishing = false) }
         }
     }
 
+    private fun setErrorState(error: UiState.PublishError) {
+        setState { copy(error = error) }
+        viewModelScope.launch {
+            delay(2.seconds)
+            if (state.value.error == error) {
+                setState { copy(error = null) }
+            }
+        }
+    }
 }

@@ -65,7 +65,7 @@ import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.crypto.hexToNoteHrp
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
-import net.primal.android.thread.ThreadContract.UiState.PostActionError
+import net.primal.android.thread.ThreadContract.UiState.ThreadError
 import java.time.Instant
 
 @Composable
@@ -404,18 +404,18 @@ fun keyboardVisibilityAsState(): State<Boolean> {
 
 @Composable
 private fun ErrorHandler(
-    error: PostActionError?,
+    error: ThreadError?,
     snackbarHostState: SnackbarHostState,
 ) {
     val context = LocalContext.current
     LaunchedEffect(error ?: true) {
         val errorMessage = when (error) {
-            is PostActionError.MalformedLightningAddress -> context.getString(R.string.post_action_malformed_lightning_address)
-            is PostActionError.MissingLightningAddress -> context.getString(R.string.post_action_missing_lightning_address)
-            is PostActionError.FailedToPublishZapEvent -> context.getString(R.string.post_action_zap_failed)
-            is PostActionError.FailedToPublishLikeEvent -> context.getString(R.string.post_action_like_failed)
-            is PostActionError.FailedToPublishRepostEvent -> context.getString(R.string.post_action_repost_failed)
-            is PostActionError.FailedToPublishReplyEvent -> context.getString(R.string.post_action_reply_failed)
+            is ThreadError.MalformedLightningAddress -> context.getString(R.string.post_action_malformed_lightning_address)
+            is ThreadError.MissingLightningAddress -> context.getString(R.string.post_action_missing_lightning_address)
+            is ThreadError.FailedToPublishZapEvent -> context.getString(R.string.post_action_zap_failed)
+            is ThreadError.FailedToPublishLikeEvent -> context.getString(R.string.post_action_like_failed)
+            is ThreadError.FailedToPublishRepostEvent -> context.getString(R.string.post_action_repost_failed)
+            is ThreadError.FailedToPublishReplyEvent -> context.getString(R.string.post_action_reply_failed)
             null -> return@LaunchedEffect
         }
 

@@ -7,6 +7,7 @@ import androidx.paging.cachedIn
 import androidx.paging.map
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,7 +21,7 @@ import net.primal.android.core.compose.feed.model.FeedPostsSyncStats
 import net.primal.android.core.utils.ellipsizeMiddle
 import net.primal.android.discuss.feed.FeedContract.UiEvent
 import net.primal.android.discuss.feed.FeedContract.UiState
-import net.primal.android.discuss.feed.FeedContract.UiState.PostActionError
+import net.primal.android.discuss.feed.FeedContract.UiState.FeedError
 import net.primal.android.feed.repository.FeedRepository
 import net.primal.android.feed.repository.PostRepository
 import net.primal.android.navigation.feedDirective
@@ -35,6 +36,7 @@ import net.primal.android.user.updater.UserDataUpdaterFactory
 import java.time.Instant
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
 
 @HiltViewModel
 class FeedViewModel @Inject constructor(
@@ -155,7 +157,7 @@ class FeedViewModel @Inject constructor(
                 postAuthorId = postLikeAction.postAuthorId,
             )
         } catch (error: NostrPublishException) {
-            setState { copy(error = PostActionError.FailedToPublishLikeEvent(error)) }
+            setErrorState(error = FeedError.FailedToPublishLikeEvent(error))
         }
     }
 
@@ -167,15 +169,13 @@ class FeedViewModel @Inject constructor(
                 postRawNostrEvent = repostAction.postNostrEvent,
             )
         } catch (error: NostrPublishException) {
-            setState { copy(error = PostActionError.FailedToPublishRepostEvent(error)) }
+            setErrorState(error = FeedError.FailedToPublishRepostEvent(error))
         }
     }
 
     private fun zapPost(zapAction: UiEvent.ZapAction) = viewModelScope.launch {
         if (zapAction.postAuthorLightningAddress == null) {
-            setState {
-                copy(error = PostActionError.MissingLightningAddress(IllegalStateException()))
-            }
+           setErrorState(error = FeedError.MissingLightningAddress(IllegalStateException()))
             return@launch
         }
 
@@ -199,11 +199,21 @@ class FeedViewModel @Inject constructor(
                 nostrWallet = activeAccount.nostrWallet,
             )
         } catch (error: ZapRepository.ZapFailureException) {
-            setState { copy(error = PostActionError.FailedToPublishZapEvent(error)) }
+            setErrorState(error = FeedError.FailedToPublishZapEvent(error))
         } catch (error: NostrPublishException) {
-            setState { copy(error = PostActionError.FailedToPublishZapEvent(error)) }
+            setErrorState(error = FeedError.FailedToPublishZapEvent(error))
         } catch (error: MalformedLightningAddressException) {
-            setState { copy(error = PostActionError.MalformedLightningAddress(error)) }
+            setErrorState(error = FeedError.MalformedLightningAddress(error))
+        }
+    }
+
+    private fun setErrorState(error: FeedError) {
+        setState { copy(error = error) }
+        viewModelScope.launch {
+            delay(2.seconds)
+            if (state.value.error == error) {
+                setState { copy(error = null) }
+            }
         }
     }
 }

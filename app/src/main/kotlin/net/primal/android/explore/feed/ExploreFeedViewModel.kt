@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
 import androidx.paging.map
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,7 +18,7 @@ import net.primal.android.core.compose.feed.asFeedPostUi
 import net.primal.android.core.ext.removeSearchPrefix
 import net.primal.android.explore.feed.ExploreFeedContract.UiEvent
 import net.primal.android.explore.feed.ExploreFeedContract.UiState
-import net.primal.android.explore.feed.ExploreFeedContract.UiState.PostActionError
+import net.primal.android.explore.feed.ExploreFeedContract.UiState.ExploreFeedError
 import net.primal.android.feed.repository.FeedRepository
 import net.primal.android.feed.repository.PostRepository
 import net.primal.android.navigation.searchQuery
@@ -28,6 +29,7 @@ import net.primal.android.nostr.repository.ZapRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.seconds
 
 @HiltViewModel
 class ExploreFeedViewModel @Inject constructor(
@@ -109,7 +111,7 @@ class ExploreFeedViewModel @Inject constructor(
                 postAuthorId = postLikeAction.postAuthorId,
             )
         } catch (error: NostrPublishException) {
-            setState { copy(error = PostActionError.FailedToPublishLikeEvent(error)) }
+            setErrorState(error = ExploreFeedError.FailedToPublishLikeEvent(error))
         }
     }
 
@@ -121,15 +123,13 @@ class ExploreFeedViewModel @Inject constructor(
                 postRawNostrEvent = repostAction.postNostrEvent,
             )
         } catch (error: NostrPublishException) {
-            setState { copy(error = PostActionError.FailedToPublishRepostEvent(error)) }
+            setErrorState(error = ExploreFeedError.FailedToPublishRepostEvent(error))
         }
     }
 
     private fun zapPost(zapAction: UiEvent.ZapAction) = viewModelScope.launch {
         if (zapAction.postAuthorLightningAddress == null) {
-            setState {
-                copy(error = PostActionError.MissingLightningAddress(IllegalStateException()))
-            }
+            setErrorState(error = ExploreFeedError.MissingLightningAddress(IllegalStateException()))
             return@launch
         }
 
@@ -153,12 +153,21 @@ class ExploreFeedViewModel @Inject constructor(
                 nostrWallet = activeAccount.nostrWallet,
             )
         } catch (error: ZapRepository.ZapFailureException) {
-            setState { copy(error = PostActionError.FailedToPublishZapEvent(error)) }
+            setErrorState(error = ExploreFeedError.FailedToPublishZapEvent(error))
         } catch (error: NostrPublishException) {
-            setState { copy(error = PostActionError.FailedToPublishZapEvent(error)) }
+            setErrorState(error = ExploreFeedError.FailedToPublishZapEvent(error))
         } catch (error: MalformedLightningAddressException) {
-            setState { copy(error = PostActionError.MalformedLightningAddress(error)) }
+            setErrorState(error = ExploreFeedError.MalformedLightningAddress(error))
         }
     }
 
+    private fun setErrorState(error: ExploreFeedError) {
+        setState { copy(error = error) }
+        viewModelScope.launch {
+            delay(2.seconds)
+            if (state.value.error == error) {
+                setState { copy(error = null) }
+            }
+        }
+    }
 }

@@ -48,7 +48,7 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 import net.primal.android.core.compose.icons.primaliconpack.FeedPicker
 import net.primal.android.crypto.hexToNoteHrp
-import net.primal.android.discuss.feed.FeedContract.UiState.PostActionError
+import net.primal.android.discuss.feed.FeedContract.UiState.FeedError
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.PrimalBottomBarHeightDp
 import net.primal.android.drawer.PrimalDrawerScaffold
@@ -236,17 +236,17 @@ fun FeedScreen(
 
 @Composable
 private fun ErrorHandler(
-    error: PostActionError?,
+    error: FeedError?,
     snackbarHostState: SnackbarHostState,
 ) {
     val context = LocalContext.current
     LaunchedEffect(error ?: true) {
         val errorMessage = when (error) {
-            is PostActionError.MalformedLightningAddress -> context.getString(R.string.post_action_malformed_lightning_address)
-            is PostActionError.MissingLightningAddress -> context.getString(R.string.post_action_missing_lightning_address)
-            is PostActionError.FailedToPublishZapEvent -> context.getString(R.string.post_action_zap_failed)
-            is PostActionError.FailedToPublishLikeEvent -> context.getString(R.string.post_action_like_failed)
-            is PostActionError.FailedToPublishRepostEvent -> context.getString(R.string.post_action_repost_failed)
+            is FeedError.MalformedLightningAddress -> context.getString(R.string.post_action_malformed_lightning_address)
+            is FeedError.MissingLightningAddress -> context.getString(R.string.post_action_missing_lightning_address)
+            is FeedError.FailedToPublishZapEvent -> context.getString(R.string.post_action_zap_failed)
+            is FeedError.FailedToPublishLikeEvent -> context.getString(R.string.post_action_like_failed)
+            is FeedError.FailedToPublishRepostEvent -> context.getString(R.string.post_action_repost_failed)
             else -> null
         }
 

@@ -4,10 +4,10 @@ interface LoginContract {
 
     data class UiState(
         val loading: Boolean = false,
-        val error: ApiError? = null,
+        val error: LoginError? = null,
     ) {
-        sealed class ApiError {
-            object GenericError : ApiError()
+        sealed class LoginError {
+            data class GenericError(val cause: Throwable) : LoginError()
         }
     }
 

@@ -31,11 +31,12 @@ import net.primal.android.nostr.ext.parsePubkeyTags
 import net.primal.android.nostr.model.zap.ZapTarget
 import net.primal.android.nostr.repository.ZapRepository
 import net.primal.android.thread.ThreadContract.UiEvent
-import net.primal.android.thread.ThreadContract.UiState.PostActionError
+import net.primal.android.thread.ThreadContract.UiState.ThreadError
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 @HiltViewModel
 class ThreadViewModel @Inject constructor(
@@ -141,7 +142,7 @@ class ThreadViewModel @Inject constructor(
                 postAuthorId = postLikeAction.postAuthorId,
             )
         } catch (error: NostrPublishException) {
-            setState { copy(error = PostActionError.FailedToPublishLikeEvent(error)) }
+            setErrorState(error = ThreadError.FailedToPublishLikeEvent(error))
         }
     }
 
@@ -153,15 +154,13 @@ class ThreadViewModel @Inject constructor(
                 postRawNostrEvent = repostAction.postNostrEvent,
             )
         } catch (error: NostrPublishException) {
-            setState { copy(error = PostActionError.FailedToPublishRepostEvent(error)) }
+            setErrorState(error = ThreadError.FailedToPublishRepostEvent(error))
         }
     }
 
     private fun zapPost(zapAction: UiEvent.ZapAction) = viewModelScope.launch {
         if (zapAction.postAuthorLightningAddress == null) {
-            setState {
-                copy(error = PostActionError.MissingLightningAddress(IllegalStateException()))
-            }
+            setErrorState(error = ThreadError.MissingLightningAddress(IllegalStateException()))
             return@launch
         }
 
@@ -185,11 +184,11 @@ class ThreadViewModel @Inject constructor(
                 nostrWallet = activeAccount.nostrWallet,
             )
         } catch (error: ZapRepository.ZapFailureException) {
-            setState { copy(error = PostActionError.FailedToPublishZapEvent(error)) }
+            setErrorState(error = ThreadError.FailedToPublishZapEvent(error))
         } catch (error: NostrPublishException) {
-            setState { copy(error = PostActionError.FailedToPublishZapEvent(error)) }
+            setErrorState(error = ThreadError.FailedToPublishZapEvent(error))
         } catch (error: MalformedLightningAddressException) {
-            setState { copy(error = PostActionError.MalformedLightningAddress(error)) }
+            setErrorState(error = ThreadError.MalformedLightningAddress(error))
         }
     }
 
@@ -227,7 +226,7 @@ class ThreadViewModel @Inject constructor(
             scheduleFetchReplies()
             setState { copy(replyText = "") }
         } catch (error: NostrPublishException) {
-            setState { copy(error = PostActionError.FailedToPublishReplyEvent(error)) }
+            setErrorState(error = ThreadError.FailedToPublishReplyEvent(error))
         } finally {
             setState { copy(publishingReply = false) }
         }
@@ -236,5 +235,15 @@ class ThreadViewModel @Inject constructor(
     private fun scheduleFetchReplies() = viewModelScope.launch {
         delay(500.milliseconds)
         fetchRepliesFromNetwork()
+    }
+
+    private fun setErrorState(error: ThreadError) {
+        setState { copy(error = error) }
+        viewModelScope.launch {
+            delay(2.seconds)
+            if (state.value.error == error) {
+                setState { copy(error = null) }
+            }
+        }
     }
 }

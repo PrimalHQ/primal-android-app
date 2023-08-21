@@ -16,14 +16,14 @@ interface ProfileContract {
         val walletConnected: Boolean = false,
         val resources: List<MediaResourceUi> = emptyList(),
         val authoredPosts: Flow<PagingData<FeedPostUi>>,
-        val error: PostActionError? = null,
+        val error: ProfileError? = null,
     ) {
-        sealed class PostActionError {
-            data class MissingLightningAddress(val cause: Throwable) : PostActionError()
-            data class MalformedLightningAddress(val cause: Throwable) : PostActionError()
-            data class FailedToPublishZapEvent(val cause: Throwable) : PostActionError()
-            data class FailedToPublishRepostEvent(val cause: Throwable) : PostActionError()
-            data class FailedToPublishLikeEvent(val cause: Throwable) : PostActionError()
+        sealed class ProfileError {
+            data class MissingLightningAddress(val cause: Throwable) : ProfileError()
+            data class MalformedLightningAddress(val cause: Throwable) : ProfileError()
+            data class FailedToPublishZapEvent(val cause: Throwable) : ProfileError()
+            data class FailedToPublishRepostEvent(val cause: Throwable) : ProfileError()
+            data class FailedToPublishLikeEvent(val cause: Throwable) : ProfileError()
         }
     }
 

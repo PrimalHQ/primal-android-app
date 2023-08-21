@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
 import androidx.paging.map
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -26,13 +27,14 @@ import net.primal.android.profile.db.authorNameUiFriendly
 import net.primal.android.profile.db.userNameUiFriendly
 import net.primal.android.profile.details.ProfileContract.UiEvent
 import net.primal.android.profile.details.ProfileContract.UiState
-import net.primal.android.profile.details.ProfileContract.UiState.PostActionError
+import net.primal.android.profile.details.ProfileContract.UiState.ProfileError
 import net.primal.android.profile.details.model.ProfileDetailsUi
 import net.primal.android.profile.details.model.ProfileStatsUi
 import net.primal.android.profile.repository.LatestFollowingResolver
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.seconds
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
@@ -149,7 +151,7 @@ class ProfileViewModel @Inject constructor(
                 postAuthorId = postLikeAction.postAuthorId,
             )
         } catch (error: NostrPublishException) {
-            setState { copy(error = PostActionError.FailedToPublishLikeEvent(error)) }
+            setErrorState(error = ProfileError.FailedToPublishLikeEvent(error))
         }
     }
 
@@ -161,15 +163,13 @@ class ProfileViewModel @Inject constructor(
                 postRawNostrEvent = repostAction.postNostrEvent,
             )
         } catch (error: NostrPublishException) {
-            setState { copy(error = PostActionError.FailedToPublishRepostEvent(error)) }
+            setErrorState(error = ProfileError.FailedToPublishRepostEvent(error))
         }
     }
 
     private fun zapPost(zapAction: UiEvent.ZapAction) = viewModelScope.launch {
         if (zapAction.postAuthorLightningAddress == null) {
-            setState {
-                copy(error = PostActionError.MissingLightningAddress(IllegalStateException()))
-            }
+            setErrorState(error = ProfileError.MissingLightningAddress(IllegalStateException()))
             return@launch
         }
 
@@ -193,11 +193,11 @@ class ProfileViewModel @Inject constructor(
                 nostrWallet = activeAccount.nostrWallet,
             )
         } catch (error: ZapRepository.ZapFailureException) {
-            setState { copy(error = PostActionError.FailedToPublishZapEvent(error)) }
+            setErrorState(error = ProfileError.FailedToPublishZapEvent(error))
         } catch (error: NostrPublishException) {
-            setState { copy(error = PostActionError.FailedToPublishZapEvent(error)) }
+            setErrorState(error = ProfileError.FailedToPublishZapEvent(error))
         } catch (error: MalformedLightningAddressException) {
-            setState { copy(error = PostActionError.MalformedLightningAddress(error)) }
+            setErrorState(error = ProfileError.MalformedLightningAddress(error))
         }
     }
 
@@ -218,6 +218,16 @@ class ProfileViewModel @Inject constructor(
             // Failed to retrieve latest contacts, propagate error to the UI
         } catch (error: NostrPublishException) {
             // Propagate error to the UI
+        }
+    }
+
+    private fun setErrorState(error: ProfileError) {
+        setState { copy(error = error) }
+        viewModelScope.launch {
+            delay(2.seconds)
+            if (state.value.error == error) {
+                setState { copy(error = null) }
+            }
         }
     }
 }

@@ -13,14 +13,14 @@ interface FeedContract {
         val walletConnected: Boolean = false,
         val posts: Flow<PagingData<FeedPostUi>>,
         val syncStats: FeedPostsSyncStats = FeedPostsSyncStats(),
-        val error: PostActionError? = null,
+        val error: FeedError? = null,
     ) {
-        sealed class PostActionError {
-            data class MissingLightningAddress(val cause: Throwable) : PostActionError()
-            data class MalformedLightningAddress(val cause: Throwable) : PostActionError()
-            data class FailedToPublishZapEvent(val cause: Throwable) : PostActionError()
-            data class FailedToPublishRepostEvent(val cause: Throwable) : PostActionError()
-            data class FailedToPublishLikeEvent(val cause: Throwable) : PostActionError()
+        sealed class FeedError {
+            data class MissingLightningAddress(val cause: Throwable) : FeedError()
+            data class MalformedLightningAddress(val cause: Throwable) : FeedError()
+            data class FailedToPublishZapEvent(val cause: Throwable) : FeedError()
+            data class FailedToPublishRepostEvent(val cause: Throwable) : FeedError()
+            data class FailedToPublishLikeEvent(val cause: Throwable) : FeedError()
         }
     }
 
