@@ -18,18 +18,18 @@ fun String.parseNWCUrl(): NostrWallet {
     val lud16 = uri.getQueryParameter("lud16") ?: throw NWCParseException()
 
     val secretParam = uri.getQueryParameter("secret")
-    val keypairPrivkey: String = when {
+    val keypairSecret: String = when {
         secretParam != null && secretParam.toByteArray().size == 64 -> secretParam
         else -> throw NWCParseException()
     }
 
-    val keypairPubkey = CryptoUtils.publicKeyCreate(Hex.decode(keypairPrivkey)).toHex()
+    val keypairPubkey = CryptoUtils.publicKeyCreate(Hex.decode(keypairSecret)).toHex()
 
     return NostrWallet(
         pubkey = pubkey,
-        lud16 = lud16,
+        lightningAddress = lud16,
         relayUrl = relay,
-        keypair = NostrWalletKeypair(privkey = keypairPrivkey, pubkey = keypairPubkey)
+        keypair = NostrWalletKeypair(privateKey = keypairSecret, pubkey = keypairPubkey)
     )
 }
 

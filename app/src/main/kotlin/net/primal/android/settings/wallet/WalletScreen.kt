@@ -144,7 +144,7 @@ fun WalletConnected(
         )
         Divider()
         Text(
-            text = state.wallet?.lud16 ?: "",
+            text = state.wallet?.lightningAddress ?: "",
             textAlign = TextAlign.Center
         )
     }
@@ -275,10 +275,10 @@ class WalletUiStateProvider : PreviewParameterProvider<WalletContract.UiState> {
             WalletContract.UiState(
                 wallet = NostrWallet(
                     relayUrl = "wss://relay.getalby.com/v1",
-                    lud16 = "miljan@getalby.com",
+                    lightningAddress = "miljan@getalby.com",
                     pubkey = "69effe7b49a6dd5cf525bd0905917a5005ffe480b58eeb8e861418cf3ae760d9",
                     keypair = NostrWalletKeypair(
-                        privkey = "7c0dabd065b2de3299a0d0e1c26b8ac7047dae6b20aba3a62b23650eb601bbfd",
+                        privateKey = "7c0dabd065b2de3299a0d0e1c26b8ac7047dae6b20aba3a62b23650eb601bbfd",
                         pubkey = "69effe7b49a6dd5cf525bd0905917a5005ffe480b58eeb8e861418cf3ae760d9"
                     )
                 )

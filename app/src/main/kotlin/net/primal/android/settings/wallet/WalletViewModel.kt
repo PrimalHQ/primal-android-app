@@ -13,7 +13,6 @@ import net.primal.android.navigation.nwcUrl
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.domain.NWCParseException
 import net.primal.android.user.domain.parseNWCUrl
-import net.primal.android.user.domain.toRelay
 import net.primal.android.user.repository.UserRepository
 import javax.inject.Inject
 
