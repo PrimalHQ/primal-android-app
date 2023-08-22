@@ -72,16 +72,21 @@ class ZapsApi @Inject constructor(
 
         val response = withContext(Dispatchers.IO) { okHttpClient.newCall(getRequest).execute() }
         val responseBody = response.body
-        return if (responseBody != null) {
+        if (responseBody != null) {
             val decoded = NostrJson.decodeFromStringOrNull<LightningPayResponse>(responseBody.string())
             if (decoded?.pr == null) throw IOException("Invalid invoice response.")
 
-            val invoiceAmount = LnInvoiceUtil.getAmountInSats(decoded.pr)
-            when {
-                invoiceAmount.multiply(BigDecimal(1000))
-                    .toLong() != BigDecimal(satoshiAmountInMilliSats).toLong() -> throw IOException("Amount mismatch.")
-                else -> decoded
+            val invoiceAmount = try {
+                LnInvoiceUtil.getAmountInSats(decoded.pr)
+            } catch (error: LnInvoiceUtil.AddressFormatException) {
+                throw IOException("Invalid invoice response")
             }
+
+            val amountInMillis = BigDecimal(satoshiAmountInMilliSats).toLong()
+            val invoiceAmountInMillis = invoiceAmount.multiply(BigDecimal(1000)).toLong()
+            if (amountInMillis != invoiceAmountInMillis) throw IOException("Amount mismatch.")
+
+            return decoded
         } else {
             throw IOException("Empty response body.")
         }
