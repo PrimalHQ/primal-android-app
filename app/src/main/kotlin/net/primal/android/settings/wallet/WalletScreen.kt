@@ -192,7 +192,7 @@ fun WalletDisconnected() {
             .height(56.dp)
             .padding(horizontal = 16.dp),
         onClick = {
-            uriHandler.openUri("https://nwc-callback.mutiny-web.pages.dev/settings/connections?callbackUri=primal&name=Primal-Android")
+            uriHandler.openUri("https://app.mutinywallet.com/settings/connections?callbackUri=primal&name=Primal-Android")
         },
     )
 }
