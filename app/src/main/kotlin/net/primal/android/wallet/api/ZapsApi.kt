@@ -9,11 +9,12 @@ import net.primal.android.serialization.decodeFromStringOrNull
 import net.primal.android.serialization.toJsonObject
 import net.primal.android.wallet.model.LightningPayRequest
 import net.primal.android.wallet.model.LightningPayResponse
+import net.primal.android.wallet.utils.LnInvoiceUtil
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.IOException
-import java.util.regex.Pattern
+import java.math.BigDecimal
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -72,35 +73,18 @@ class ZapsApi @Inject constructor(
         val response = withContext(Dispatchers.IO) { okHttpClient.newCall(getRequest).execute() }
         val responseBody = response.body
         return if (responseBody != null) {
-            val decoded = NostrJson.decodeFromStringOrNull<LightningPayResponse>(responseBody.string())
+            val decoded =
+                NostrJson.decodeFromStringOrNull<LightningPayResponse>(responseBody.string())
+            if (decoded?.pr == null) throw IOException("Invalid invoice response.")
+
+            val invoiceAmount = LnInvoiceUtil.getAmountInSats(decoded.pr)
             when {
-                decoded?.pr == null -> throw IOException("Invalid invoice response.")
-                getAmount(decoded.pr) != satoshiAmount -> throw IOException("Amount mismatch.")
+                invoiceAmount.multiply(BigDecimal(1000))
+                    .toLong() != BigDecimal(satoshiAmount).toLong() -> throw IOException("Amount mismatch.")
                 else -> decoded
             }
         } else {
             throw IOException("Empty response body.")
         }
-    }
-
-    private val invoicePattern = Pattern.compile(
-        "lnbc((?<amount>\\d+)(?<multiplier>[munp])?)?1[^1\\s]+",
-        Pattern.CASE_INSENSITIVE
-    )
-
-    private fun getAmount(invoice: String): Int {
-        val matcher = invoicePattern.matcher(invoice)
-        require(matcher.matches()) { "Failed to match HRP pattern" }
-        val amountGroup = matcher.group("amount")
-        val multiplierGroup = matcher.group("multiplier")
-        if (amountGroup == null) {
-            return 0
-        }
-        val amount = amountGroup.toInt()
-        if (multiplierGroup == null) {
-            return amount
-        }
-        require(!(multiplierGroup == "p" && amountGroup[amountGroup.length - 1] != '0')) { "sub-millisatoshi amount" }
-        return amount * 100
     }
 }
