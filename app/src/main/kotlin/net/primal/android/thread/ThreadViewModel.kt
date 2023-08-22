@@ -167,7 +167,7 @@ class ThreadViewModel @Inject constructor(
             zapRepository.zap(
                 userId = activeAccountStore.activeUserId(),
                 comment = zapAction.zapDescription ?: "",
-                amount = zapAction.zapAmount ?: 42,
+                amountInSats = zapAction.zapAmount ?: 42,
                 target = ZapTarget.Note(
                     zapAction.postId,
                     zapAction.postAuthorId,

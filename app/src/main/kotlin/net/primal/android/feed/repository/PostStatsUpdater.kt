@@ -30,11 +30,11 @@ class PostStatsUpdater(
         database.postUserStats().upsert(data = postUserStats.copy(reposted = true))
     }
 
-    suspend fun increaseZapStats(satsAmount: Int) = database.withTransaction {
+    suspend fun increaseZapStats(amountInSats: Int) = database.withTransaction {
         database.postStats().upsert(
             data = postStats.copy(
                 zaps = postStats.zaps + 1,
-                satsZapped = postStats.satsZapped + satsAmount,
+                satsZapped = postStats.satsZapped + amountInSats,
             )
         )
         database.postUserStats().upsert(data = postUserStats.copy(zapped = true))

@@ -48,7 +48,7 @@ class ZapsApi @Inject constructor(
     suspend fun fetchInvoice(
         request: LightningPayRequest,
         zapEvent: NostrEvent,
-        satoshiAmount: Int,
+        satoshiAmountInMilliSats: Int,
         comment: String = ""
     ): LightningPayResponse {
         if (request.allowsNostr != null && request.allowsNostr == false) {
@@ -59,7 +59,7 @@ class ZapsApi @Inject constructor(
 
         val builder = request.callback.toHttpUrl().newBuilder()
         builder.addQueryParameter("nostr", zapEventString)
-        builder.addQueryParameter("amount", satoshiAmount.toString())
+        builder.addQueryParameter("amount", satoshiAmountInMilliSats.toString())
 
         if (request.commentAllowed != null) {
             builder.addQueryParameter("comment", comment.take(request.commentAllowed))
@@ -73,14 +73,13 @@ class ZapsApi @Inject constructor(
         val response = withContext(Dispatchers.IO) { okHttpClient.newCall(getRequest).execute() }
         val responseBody = response.body
         return if (responseBody != null) {
-            val decoded =
-                NostrJson.decodeFromStringOrNull<LightningPayResponse>(responseBody.string())
+            val decoded = NostrJson.decodeFromStringOrNull<LightningPayResponse>(responseBody.string())
             if (decoded?.pr == null) throw IOException("Invalid invoice response.")
 
             val invoiceAmount = LnInvoiceUtil.getAmountInSats(decoded.pr)
             when {
                 invoiceAmount.multiply(BigDecimal(1000))
-                    .toLong() != BigDecimal(satoshiAmount).toLong() -> throw IOException("Amount mismatch.")
+                    .toLong() != BigDecimal(satoshiAmountInMilliSats).toLong() -> throw IOException("Amount mismatch.")
                 else -> decoded
             }
         } else {
