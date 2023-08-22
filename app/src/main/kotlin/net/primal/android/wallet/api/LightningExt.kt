@@ -1,4 +1,4 @@
-package net.primal.android.nostr.ext
+package net.primal.android.wallet.api
 
 fun String.toLightningUrlOrNull(): String? {
     val parts = this.split("@")
@@ -7,7 +7,5 @@ fun String.toLightningUrlOrNull(): String? {
     val host = parts[1]
     val lnurlp = parts[0]
 
-    val url = "https://$host/.well-known/lnurlp/$lnurlp";
-
-    return url
+    return  "https://$host/.well-known/lnurlp/$lnurlp"
 }

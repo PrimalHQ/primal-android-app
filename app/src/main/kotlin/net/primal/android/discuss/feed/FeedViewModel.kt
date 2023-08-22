@@ -174,7 +174,7 @@ class FeedViewModel @Inject constructor(
 
     private fun zapPost(zapAction: UiEvent.ZapAction) = viewModelScope.launch {
         if (zapAction.postAuthorLightningAddress == null) {
-           setErrorState(error = FeedError.MissingLightningAddress(IllegalStateException()))
+            setErrorState(error = FeedError.MissingLightningAddress(IllegalStateException()))
             return@launch
         }
 
@@ -182,7 +182,7 @@ class FeedViewModel @Inject constructor(
             zapRepository.zap(
                 userId = activeAccountStore.activeUserId(),
                 comment = zapAction.zapDescription ?: "",
-                amount =  zapAction.zapAmount ?: 42,
+                amount = zapAction.zapAmount ?: 42,
                 target = ZapTarget.Note(
                     zapAction.postId,
                     zapAction.postAuthorId,

@@ -154,6 +154,6 @@ class NostrNotary @Inject constructor(
             kind = NostrEventKind.WalletRequest.value,
             content = encryptedMessage,
             tags = tags
-        ).signOrThrow(hexPrivkey = Hex.decode(nwc.keypair.privateKey))
+        ).signOrThrow(hexPrivateKey = Hex.decode(nwc.keypair.privateKey))
     }
 }

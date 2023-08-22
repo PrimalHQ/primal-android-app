@@ -3,7 +3,6 @@ package net.primal.android.wallet.api
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
-import net.primal.android.nostr.ext.toLightningUrlOrNull
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.serialization.NostrJson
 import net.primal.android.serialization.decodeFromStringOrNull
