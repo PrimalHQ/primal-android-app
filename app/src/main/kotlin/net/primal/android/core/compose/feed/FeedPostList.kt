@@ -60,12 +60,14 @@ fun FeedPostList(
     onPostClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
     onPostLikeClick: (FeedPostUi) -> Unit,
-    onZapClick: (FeedPostUi, Int?, String?) -> Unit,
+    onZapClick: (FeedPostUi, ULong?, String?) -> Unit,
     onRepostClick: (FeedPostUi) -> Unit,
     onPostReplyClick: (String) -> Unit,
     onPostQuoteClick: (FeedPostUi) -> Unit,
     onHashtagClick: (String) -> Unit,
     onWalletUnavailable: () -> Unit,
+    defaultZapAmount: ULong? = null,
+    zapOptions: List<ULong>? = null,
     syncStats: FeedPostsSyncStats = FeedPostsSyncStats(),
     paddingValues: PaddingValues = PaddingValues(0.dp),
     feedListState: LazyListState = rememberLazyListState(),
@@ -131,6 +133,8 @@ fun FeedPostList(
             onPostQuoteClick = onPostQuoteClick,
             onHashtagClick = onHashtagClick,
             onWalletUnavailable = onWalletUnavailable,
+            defaultZapAmount = defaultZapAmount,
+            zapOptions = zapOptions,
         )
 
         AnimatedVisibility(

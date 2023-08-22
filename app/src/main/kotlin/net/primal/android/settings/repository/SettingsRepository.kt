@@ -27,13 +27,13 @@ class SettingsRepository @Inject constructor(
         persistAppSettings(userId = userId, appSettings = appSettings)
     }
 
-    suspend fun updateAndPersistDefaultZapAmount(userId: String, defaultAmount: Long) {
+    suspend fun updateAndPersistDefaultZapAmount(userId: String, defaultAmount: ULong) {
         updateAndPersistAppSettings(userId = userId) {
             copy(defaultZapAmount = defaultAmount)
         }
     }
 
-    suspend fun updateAndPersistZapOptions(userId: String, zapOptions: List<Long>) {
+    suspend fun updateAndPersistZapOptions(userId: String, zapOptions: List<ULong>) {
         updateAndPersistAppSettings(userId = userId) {
             copy(zapOptions = zapOptions)
         }

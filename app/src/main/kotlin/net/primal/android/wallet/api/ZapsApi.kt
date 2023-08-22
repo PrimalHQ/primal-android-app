@@ -48,7 +48,7 @@ class ZapsApi @Inject constructor(
     suspend fun fetchInvoice(
         request: LightningPayRequest,
         zapEvent: NostrEvent,
-        satoshiAmountInMilliSats: Int,
+        satoshiAmountInMilliSats: ULong,
         comment: String = ""
     ): LightningPayResponse {
         if (request.allowsNostr != null && request.allowsNostr == false) {
@@ -82,7 +82,7 @@ class ZapsApi @Inject constructor(
                 throw IOException("Invalid invoice response")
             }
 
-            val amountInMillis = BigDecimal(satoshiAmountInMilliSats).toLong()
+            val amountInMillis = BigDecimal(satoshiAmountInMilliSats.toLong()).toLong()
             val invoiceAmountInMillis = invoiceAmount.multiply(BigDecimal(1000)).toLong()
             if (amountInMillis != invoiceAmountInMillis) throw IOException("Amount mismatch.")
 

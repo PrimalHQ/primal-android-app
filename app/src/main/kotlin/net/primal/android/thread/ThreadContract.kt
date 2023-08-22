@@ -11,6 +11,8 @@ interface ThreadContract {
         val highlightPostId: String? = null,
         val highlightPostIndex: Int = 0,
         val walletConnected: Boolean = false,
+        val defaultZapAmount: ULong? = null,
+        val zapOptions: List<ULong> = emptyList(),
         val error: ThreadError? = null,
     ) {
         sealed class ThreadError {
@@ -35,7 +37,7 @@ interface ThreadContract {
             val postId: String,
             val postAuthorId: String,
             val postAuthorLightningAddress: String?,
-            val zapAmount: Int?,
+            val zapAmount: ULong?,
             val zapDescription: String?,
 
         ) : UiEvent()

@@ -38,12 +38,14 @@ fun FeedLazyColumn(
     onProfileClick: (String) -> Unit,
     onPostLikeClick: (FeedPostUi) -> Unit,
     onRepostClick: (FeedPostUi) -> Unit,
-    onZapClick: (FeedPostUi, Int?, String?) -> Unit,
+    onZapClick: (FeedPostUi, ULong?, String?) -> Unit,
     onPostReplyClick: (String) -> Unit,
     onPostQuoteClick: (FeedPostUi) -> Unit,
     onHashtagClick: (String) -> Unit,
     onWalletUnavailable: () -> Unit,
     walletConnected: Boolean,
+    defaultZapAmount: ULong? = null,
+    zapOptions: List<ULong>? = null,
     shouldShowLoadingState: Boolean = true,
     shouldShowNoContentState: Boolean = true,
     header: @Composable (LazyItemScope.() -> Unit)? = null,
@@ -64,7 +66,8 @@ fun FeedLazyColumn(
         ZapBottomSheet(
             onDismissRequest = { zapOptionsPostConfirmation = null },
             receiverName = post.authorName,
-            amount = 42,
+            defaultZapAmount = defaultZapAmount ?: 42.toULong(),
+            userZapOptions = zapOptions,
             onZap = { zapAmount, zapDescription ->
                 onZapClick(post, zapAmount, zapDescription)
             }

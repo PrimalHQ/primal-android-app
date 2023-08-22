@@ -91,6 +91,8 @@ class ProfileViewModel @Inject constructor(
                 copy(
                     isProfileFollowed = it.following.contains(profileId),
                     walletConnected = it.nostrWallet != null,
+                    defaultZapAmount = it.appSettings?.defaultZapAmount,
+                    zapOptions = it.appSettings?.zapOptions ?: emptyList(),
                 )
             }
         }
@@ -176,7 +178,7 @@ class ProfileViewModel @Inject constructor(
             zapRepository.zap(
                 userId = activeAccountStore.activeUserId(),
                 comment = zapAction.zapDescription ?: "",
-                amountInSats = zapAction.zapAmount ?: 42,
+                amountInSats = zapAction.zapAmount ?: 42.toULong(),
                 target = ZapTarget.Note(
                     zapAction.postId,
                     zapAction.postAuthorId,

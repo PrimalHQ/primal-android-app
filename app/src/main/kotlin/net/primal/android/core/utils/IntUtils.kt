@@ -1,14 +1,19 @@
 package net.primal.android.core.utils
 
-fun Int.shortened(): String {
+
+fun Int.shortened(): String = toLong().shortened()
+
+fun ULong.shortened(): String = toLong().shortened()
+
+fun Long.shortened(): String {
     if (this < 1000) {
         return this.toString()
     }
 
     val multipliers = listOf(
-        Pair("k", 1000.0),
-        Pair("m", 1000000.0),
-        Pair("b", 1000000000.0)
+        Pair("K", 1000.0),
+        Pair("M", 1000000.0),
+        Pair("B", 1000000000.0)
     )
 
     for ((shorten, multiplier) in multipliers) {
@@ -24,5 +29,5 @@ fun Int.shortened(): String {
         }
     }
 
-    return "1t+"
+    return "1T+"
 }

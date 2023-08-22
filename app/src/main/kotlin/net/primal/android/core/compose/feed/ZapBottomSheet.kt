@@ -26,7 +26,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -49,27 +48,41 @@ import androidx.compose.ui.unit.dp
 import net.primal.android.R
 import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.button.PrimalLoadingButton
-import net.primal.android.core.ext.toShorthandFormat
+import net.primal.android.core.utils.shortened
+import net.primal.android.settings.zaps.PRESETS_COUNT
 import net.primal.android.theme.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ZapBottomSheet(
     receiverName: String,
-    amount: Int,
+    defaultZapAmount: ULong,
+    userZapOptions: List<ULong>? = null,
     onDismissRequest: () -> Unit,
-    onZap: (Int, String?) -> Unit,
+    onZap: (ULong, String?) -> Unit,
 ) {
-    val zapOptions = mutableListOf(
-        Pair(21, "👍"),
-        Pair(420, "🌿"),
-        Pair(1000, "🤙"),
-        Pair(5000, "💜"),
-        Pair(10_000, "🔥"),
-        Pair(100_000, "🚀")
+    if (userZapOptions != null && userZapOptions.size != PRESETS_COUNT)
+        throw IllegalArgumentException("There should be 6 zap options.")
+
+    val zapOptionsValues = userZapOptions ?: listOf(
+        21L.toULong(),
+        420.toULong(),
+        1_000.toULong(),
+        5_000.toULong(),
+        10_000.toULong(),
+        100_000.toULong(),
     )
 
-    var selectedZapAmount by remember { mutableIntStateOf(amount) }
+    val zapOptions = mutableListOf(
+        Pair(zapOptionsValues[0], "👍"),
+        Pair(zapOptionsValues[1], "🌿"),
+        Pair(zapOptionsValues[2], "🤙"),
+        Pair(zapOptionsValues[3], "💜"),
+        Pair(zapOptionsValues[4], "🔥"),
+        Pair(zapOptionsValues[5], "🚀")
+    )
+
+    var selectedZapAmount by remember { mutableStateOf(defaultZapAmount) }
     var selectedZapComment by remember { mutableStateOf("") }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
@@ -82,6 +95,7 @@ fun ZapBottomSheet(
             verticalArrangement = Arrangement.Center,
             modifier = Modifier
                 .fillMaxWidth()
+                .padding(bottom = 8.dp)
         ) {
             ZapTitle(receiverName = receiverName, amount = selectedZapAmount)
             ZapOptions(
@@ -89,7 +103,8 @@ fun ZapBottomSheet(
                 selectedZapAmount = selectedZapAmount,
                 onSelectedZapAmountChange = { amount ->
                     selectedZapAmount = amount
-                    selectedZapComment = zapOptions.find { it.first == amount }?.second ?: selectedZapComment
+                    selectedZapComment =
+                        zapOptions.find { it.first == amount }?.second ?: selectedZapComment
                 }
             )
             OutlinedTextField(
@@ -136,9 +151,9 @@ fun ZapBottomSheet(
 
 @Composable
 private fun ZapOptions(
-    zapOptions: List<Pair<Int, String>>,
-    selectedZapAmount: Int,
-    onSelectedZapAmountChange: (Int) -> Unit
+    zapOptions: List<Pair<ULong, String>>,
+    selectedZapAmount: ULong,
+    onSelectedZapAmountChange: (ULong) -> Unit
 ) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(3),
@@ -159,7 +174,7 @@ private fun ZapOptions(
 
 @Composable
 private fun ZapOption(
-    defaultAmount: Int,
+    defaultAmount: ULong,
     defaultComment: String,
     selected: Boolean,
     onClick: () -> Unit
@@ -184,11 +199,10 @@ private fun ZapOption(
     Box(
         modifier = Modifier
             .padding(all = 12.dp)
-            // have to add RoundedCornerShape on two places due to ripple effect going outside border shape
-            .clip(RoundedCornerShape(8.dp))
+            .clip(AppTheme.shapes.small)
             .border(
                 width = borderWidth,
-                shape = RoundedCornerShape(8.dp),
+                shape = AppTheme.shapes.small,
                 brush = borderBrush
             )
             .background(
@@ -215,7 +229,7 @@ private fun ZapOption(
                     type = TextUnitType.Sp
                 )
             )
-            Text(text = defaultAmount.toShorthandFormat())
+            Text(text = defaultAmount.shortened())
         }
     }
 }
@@ -223,7 +237,7 @@ private fun ZapOption(
 @Composable
 private fun ZapTitle(
     receiverName: String,
-    amount: Int
+    amount: ULong,
 ) {
     Box(
         contentAlignment = Alignment.Center
@@ -251,7 +265,7 @@ private fun ZapTitle(
                     )
                 )
             ) {
-                append("${amount.toShorthandFormat()} ")
+                append("${amount.shortened()} ")
             }
             withStyle(
                 style = SpanStyle(

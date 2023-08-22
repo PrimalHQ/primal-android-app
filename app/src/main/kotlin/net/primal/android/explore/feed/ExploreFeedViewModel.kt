@@ -90,7 +90,11 @@ class ExploreFeedViewModel @Inject constructor(
             .filterIsInstance<ActiveUserAccountState.ActiveUserAccount>()
             .collect {
                 setState {
-                    copy(walletConnected = it.data.nostrWallet != null)
+                    copy(
+                        walletConnected = it.data.nostrWallet != null,
+                        defaultZapAmount = it.data.appSettings?.defaultZapAmount,
+                        zapOptions = it.data.appSettings?.zapOptions ?: emptyList(),
+                    )
                 }
             }
     }
@@ -136,7 +140,7 @@ class ExploreFeedViewModel @Inject constructor(
             zapRepository.zap(
                 userId = activeAccountStore.activeUserId(),
                 comment = zapAction.zapDescription ?: "",
-                amountInSats = zapAction.zapAmount ?: 42,
+                amountInSats = zapAction.zapAmount ?: 42.toULong(),
                 target = ZapTarget.Note(
                     zapAction.postId,
                     zapAction.postAuthorId,

@@ -14,6 +14,8 @@ interface ProfileContract {
         val profileDetails: ProfileDetailsUi? = null,
         val profileStats: ProfileStatsUi? = null,
         val walletConnected: Boolean = false,
+        val defaultZapAmount: ULong? = null,
+        val zapOptions: List<ULong> = emptyList(),
         val resources: List<MediaResourceUi> = emptyList(),
         val authoredPosts: Flow<PagingData<FeedPostUi>>,
         val error: ProfileError? = null,
@@ -39,7 +41,7 @@ interface ProfileContract {
             val postId: String,
             val postAuthorId: String,
             val postAuthorLightningAddress: String?,
-            val zapAmount: Int?,
+            val zapAmount: ULong?,
             val zapDescription: String?,
         ) : UiEvent()
 

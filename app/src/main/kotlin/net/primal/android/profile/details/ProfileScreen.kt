@@ -264,6 +264,8 @@ fun ProfileScreen(
                 },
                 onHashtagClick = onHashtagClick,
                 onWalletUnavailable = onWalletUnavailable,
+                defaultZapAmount = state.defaultZapAmount,
+                zapOptions = state.zapOptions,
                 shouldShowLoadingState = false,
                 shouldShowNoContentState = false,
                 stickyHeader = {

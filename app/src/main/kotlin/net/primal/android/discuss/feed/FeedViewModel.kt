@@ -117,6 +117,8 @@ class FeedViewModel @Inject constructor(
                     copy(
                         activeAccountAvatarUrl = it.data.pictureUrl,
                         walletConnected = it.data.nostrWallet != null,
+                        defaultZapAmount = it.data.appSettings?.defaultZapAmount,
+                        zapOptions = it.data.appSettings?.zapOptions ?: emptyList(),
                     )
                 }
             }
@@ -181,8 +183,8 @@ class FeedViewModel @Inject constructor(
         try {
             zapRepository.zap(
                 userId = activeAccountStore.activeUserId(),
-                comment = zapAction.zapDescription ?: "",
-                amountInSats = zapAction.zapAmount ?: 42,
+                comment = zapAction.zapDescription,
+                amountInSats = zapAction.zapAmount,
                 target = ZapTarget.Note(
                     zapAction.postId,
                     zapAction.postAuthorId,

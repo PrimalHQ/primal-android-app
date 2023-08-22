@@ -23,13 +23,14 @@ class ZapRepository @Inject constructor(
 ) {
     suspend fun zap(
         userId: String,
-        comment: String,
-        amountInSats: Int,
         target: ZapTarget,
+        amountInSats: ULong? = null,
+        comment: String? = null,
     ) {
         val userAccount = accountsStore.findByIdOrNull(pubkey = userId)
         val nostrWallet = userAccount?.nostrWallet
         val walletRelays = userAccount?.relays
+        val defaultZapAmount = userAccount?.appSettings?.defaultZapAmount
 
         val lightningAddress = when (target) {
             is ZapTarget.Note -> target.authorLightningAddress
@@ -50,20 +51,23 @@ class ZapRepository @Inject constructor(
             is ZapTarget.Profile -> null
         }
 
+        val zapAmountInSats = amountInSats ?: defaultZapAmount ?: 42L.toULong()
+        val zapComment = comment ?: ""
+
         try {
-            statsUpdater?.increaseZapStats(amountInSats = amountInSats)
+            statsUpdater?.increaseZapStats(amountInSats = zapAmountInSats.toInt())
             val zapPayRequest = zapsApi.fetchZapPayRequestOrThrow(lightningAddress)
             val zapEvent = notary.signZapRequestNostrEvent(
                 userId = userId,
-                comment = comment,
+                comment = zapComment,
                 target = target,
                 relays = walletRelays,
             )
             val invoice = zapsApi.fetchInvoiceOrThrow(
                 zapPayRequest = zapPayRequest,
                 zapEvent = zapEvent,
-                satoshiAmountInMilliSats = amountInSats * 1000,
-                comment = comment,
+                satoshiAmountInMilliSats = zapAmountInSats * 1000.toULong(),
+                comment = zapComment,
             )
             val walletPayNostrEvent = notary.signWalletInvoiceRequestNostrEvent(
                 request = invoice.toWalletPayRequest(),
@@ -92,7 +96,7 @@ class ZapRepository @Inject constructor(
     private suspend fun ZapsApi.fetchInvoiceOrThrow(
         zapPayRequest: LightningPayRequest,
         zapEvent: NostrEvent,
-        satoshiAmountInMilliSats: Int,
+        satoshiAmountInMilliSats: ULong,
         comment: String = ""
     ): LightningPayResponse {
         return try {

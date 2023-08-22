@@ -182,6 +182,8 @@ fun FeedScreen(
                 },
                 onHashtagClick = onHashtagClick,
                 onWalletUnavailable = onWalletUnavailable,
+                defaultZapAmount = state.defaultZapAmount,
+                zapOptions = state.zapOptions,
                 syncStats = state.syncStats,
                 paddingValues = paddingValues,
                 feedListState = feedListState,

@@ -9,6 +9,6 @@ data class ContentAppSettings(
     val theme: String? = null,
     val feeds: List<ContentFeedData> = emptyList(),
     val notifications: JsonObject,
-    val defaultZapAmount: Long? = null,
-    val zapOptions: List<Long> = emptyList(),
+    val defaultZapAmount: ULong? = null,
+    val zapOptions: List<ULong> = emptyList(),
 )

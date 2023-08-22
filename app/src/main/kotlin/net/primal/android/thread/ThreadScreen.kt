@@ -133,7 +133,8 @@ fun ThreadScreen(
         ZapBottomSheet(
             onDismissRequest = { zapOptionsPostConfirmation = null },
             receiverName = post.authorName,
-            amount = 42,
+            defaultZapAmount = state.defaultZapAmount ?: 42.toULong(),
+            userZapOptions = state.zapOptions,
             onZap = { zapAmount, zapDescription ->
                 eventPublisher(
                     ThreadContract.UiEvent.ZapAction(

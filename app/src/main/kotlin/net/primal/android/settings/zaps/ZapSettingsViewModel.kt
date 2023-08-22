@@ -53,13 +53,13 @@ class ZapSettingsViewModel @Inject constructor(
     private fun observeDebouncedZapOptionChanges() = viewModelScope.launch {
         _event.filterIsInstance<UiEvent.ZapOptionsChanged>()
             .debounce(1.seconds)
-            .mapNotNull { it.newOptions.toListOfLongsOrNull() }
+            .mapNotNull { it.newOptions.toListOfULongsOrNull() }
             .collect {
                 updateZapOptions(newZapOptions = it)
             }
     }
 
-    private fun List<Long?>.toListOfLongsOrNull(): List<Long>? {
+    private fun List<ULong?>.toListOfULongsOrNull(): List<ULong>? {
         return if (this.contains(null)) null else mapNotNull { it }
     }
 
@@ -79,7 +79,7 @@ class ZapSettingsViewModel @Inject constructor(
             .collect {
                 setState {
                     copy(
-                        defaultZapAmount = it.defaultZapAmount ?: 42,
+                        defaultZapAmount = it.defaultZapAmount ?: 42.toULong(),
                         zapOptions = if (it.zapOptions.size == PRESETS_COUNT) {
                             it.zapOptions
                         } else List(PRESETS_COUNT) { null },
@@ -89,7 +89,7 @@ class ZapSettingsViewModel @Inject constructor(
     }
 
 
-    private suspend fun updateDefaultZapAmount(newDefaultAmount: Long) {
+    private suspend fun updateDefaultZapAmount(newDefaultAmount: ULong) {
         try {
             val userAccount = activeAccountStore.activeUserAccount()
             settingsRepository.updateAndPersistDefaultZapAmount(
@@ -101,7 +101,7 @@ class ZapSettingsViewModel @Inject constructor(
         }
     }
 
-    private suspend fun updateZapOptions(newZapOptions: List<Long>) {
+    private suspend fun updateZapOptions(newZapOptions: List<ULong>) {
         try {
             val userAccount = activeAccountStore.activeUserAccount()
             settingsRepository.updateAndPersistZapOptions(

@@ -163,6 +163,8 @@ fun ExploreFeedScreen(
                 },
                 onHashtagClick = onHashtagClick,
                 onWalletUnavailable = onWalletUnavailable,
+                defaultZapAmount = state.defaultZapAmount,
+                zapOptions = state.zapOptions,
             )
         },
         snackbarHost = {

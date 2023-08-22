@@ -88,7 +88,7 @@ fun ZapSettingsScreen(
                             if (it.isDigitsOnly()) {
                                 eventPublisher(
                                     ZapSettingsContract.UiEvent.ZapDefaultAmountChanged(
-                                        newAmount = it.toLongOrNull()
+                                        newAmount = it.toULongOrNull()
                                     )
                                 )
                             }
@@ -142,7 +142,7 @@ fun ZapSettingsScreen(
 @Composable
 fun ZapOptionDashboard(
     modifier: Modifier,
-    zapOptions: List<Long?>,
+    zapOptions: List<ULong?>,
     editable: Boolean = true,
     zapEmojis: List<String> = listOf(
         "\uD83D\uDC4D",
@@ -152,7 +152,7 @@ fun ZapOptionDashboard(
         "\uD83D\uDD25",
         "\uD83D\uDE80",
     ),
-    onZapOptionsChanged: (List<Long?>) -> Unit,
+    onZapOptionsChanged: (List<ULong?>) -> Unit,
 ) {
     Row(
         modifier = modifier
@@ -235,7 +235,7 @@ fun ZapOptionDashboard(
     }
 }
 
-private fun List<Long?>.copy(index: Int, amount: Long?): List<Long?> {
+private fun List<ULong?>.copy(index: Int, amount: ULong?): List<ULong?> {
     val newOptions = this.toMutableList()
     newOptions[index] = amount
     return newOptions
@@ -245,9 +245,9 @@ private fun List<Long?>.copy(index: Int, amount: Long?): List<Long?> {
 fun ZapOption(
     modifier: Modifier,
     emoji: String,
-    amount: Long?,
+    amount: ULong?,
     editable: Boolean = true,
-    onZapAmountChanged: (Long?) -> Unit,
+    onZapAmountChanged: (ULong?) -> Unit,
 ) {
     Column(modifier = modifier) {
         Text(
@@ -276,7 +276,7 @@ fun ZapOption(
             value = amount?.toString() ?: "",
             onValueChange = {
                 if (it.isDigitsOnly()) {
-                    onZapAmountChanged(it.toLongOrNull())
+                    onZapAmountChanged(it.toULongOrNull())
                 }
             },
             enabled = editable,
