@@ -1,7 +1,6 @@
 package net.primal.android.navigation.deeplinking.ext
 
-import net.primal.android.core.utils.isValidNostrKey
-import net.primal.android.crypto.Bech32
+import net.primal.android.core.utils.isValidNostrPublicKey
 import net.primal.android.crypto.bech32ToHex
 import net.primal.android.navigation.deeplinking.DeepLink
 import net.primal.android.user.domain.parseNWCUrl
@@ -35,12 +34,13 @@ private fun String.handlePrimalSchema(): DeepLink? {
         startsWith(PRIMAL_PROFILE_SCHEMA) -> {
             val bechEncodedPubkey = replace(PRIMAL_PROFILE_SCHEMA, "")
 
-            if (!bechEncodedPubkey.isValidNostrKey()) {
+            if (!bechEncodedPubkey.isValidNostrPublicKey()) {
                 return null
             }
 
             DeepLink.Profile(bechEncodedPubkey.bech32ToHex())
         }
+
         startsWith(PRIMAL_NOTE_SCHEMA) -> {
             val bechEncodedNoteId = replace(PRIMAL_NOTE_SCHEMA, "")
 
@@ -48,6 +48,7 @@ private fun String.handlePrimalSchema(): DeepLink? {
 
             DeepLink.Note(noteId)
         }
+
         else -> {
             handleNostrWalletConnectSchema()
         }

@@ -4,16 +4,28 @@ import net.primal.android.crypto.Bech32
 import net.primal.android.crypto.hexToNsecHrp
 import org.spongycastle.util.encoders.DecoderException
 
-fun String?.isValidNostrKey(): Boolean {
+fun String?.isValidNostrPrivateKey(): Boolean {
     if (this == null) return false
 
     return if (startsWith("nsec")) {
         this.isValidNsec()
-    } else if (startsWith("npub")) {
-        this.isValidNpub()
     } else {
         try {
             this.hexToNsecHrp().isValidNsec()
+        } catch (error: DecoderException) {
+            false
+        }
+    }
+}
+
+fun String?.isValidNostrPublicKey(): Boolean {
+    if (this == null) return false
+
+    return if (startsWith("npub")) {
+        this.isValidNpub()
+    } else {
+        try {
+            this.hexToNsecHrp().isValidNpub()
         } catch (error: DecoderException) {
             false
         }
