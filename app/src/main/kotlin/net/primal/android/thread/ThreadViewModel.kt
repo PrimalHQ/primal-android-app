@@ -28,8 +28,11 @@ import net.primal.android.nostr.ext.parseEventTags
 import net.primal.android.nostr.ext.parseHashtagTags
 import net.primal.android.nostr.ext.parsePubkeyTags
 import net.primal.android.thread.ThreadContract.UiEvent
+import net.primal.android.thread.ThreadContract.UiState.ThreadError
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
+import net.primal.android.wallet.model.ZapTarget
+import net.primal.android.wallet.repository.ZapRepository
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
@@ -40,6 +43,7 @@ class ThreadViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val feedRepository: FeedRepository,
     private val postRepository: PostRepository,
+    private val zapRepository: ZapRepository
 ) : ViewModel() {
 
     private val postId = savedStateHandle.postId
@@ -111,8 +115,8 @@ class ThreadViewModel @Inject constructor(
             .map { posts -> posts.map { it.asFeedPostUi() } }
             .collect { conversation ->
                 val highlightPostIndex = conversation.indexOfFirst { it.postId == postId }
-                val thread = conversation.subList(0, highlightPostIndex+1)
-                val replies = conversation.subList(highlightPostIndex+1, conversation.size)
+                val thread = conversation.subList(0, highlightPostIndex + 1)
+                val replies = conversation.subList(highlightPostIndex + 1, conversation.size)
                 setState {
                     copy(
                         conversation = thread + replies.sortedByDescending { it.timestamp },
@@ -137,7 +141,7 @@ class ThreadViewModel @Inject constructor(
                 postAuthorId = postLikeAction.postAuthorId,
             )
         } catch (error: NostrPublishException) {
-            // Propagate error to the UI
+            setErrorState(error = ThreadError.FailedToPublishLikeEvent(error))
         }
     }
 
@@ -149,12 +153,34 @@ class ThreadViewModel @Inject constructor(
                 postRawNostrEvent = repostAction.postNostrEvent,
             )
         } catch (error: NostrPublishException) {
-            // Propagate error to the UI
+            setErrorState(error = ThreadError.FailedToPublishRepostEvent(error))
         }
     }
 
     private fun zapPost(zapAction: UiEvent.ZapAction) = viewModelScope.launch {
+        if (zapAction.postAuthorLightningAddress == null) {
+            setErrorState(error = ThreadError.MissingLightningAddress(IllegalStateException()))
+            return@launch
+        }
 
+        try {
+            zapRepository.zap(
+                userId = activeAccountStore.activeUserId(),
+                comment = zapAction.zapDescription ?: "",
+                amount = zapAction.zapAmount ?: 42,
+                target = ZapTarget.Note(
+                    zapAction.postId,
+                    zapAction.postAuthorId,
+                    zapAction.postAuthorLightningAddress
+                ),
+            )
+        } catch (error: ZapRepository.ZapFailureException) {
+            setErrorState(error = ThreadError.FailedToPublishZapEvent(error))
+        } catch (error: NostrPublishException) {
+            setErrorState(error = ThreadError.FailedToPublishZapEvent(error))
+        } catch (error: ZapRepository.InvalidZapRequestException) {
+            setErrorState(error = ThreadError.InvalidZapRequest(error))
+        }
     }
 
     private fun updateReply(updateReplyEvent: UiEvent.UpdateReply) {
@@ -169,7 +195,8 @@ class ThreadViewModel @Inject constructor(
             val replyPostData = withContext(Dispatchers.IO) {
                 postRepository.findPostDataById(postId = replyToAction.replyToPostId)
             }
-            val existingPubkeyTags = replyPostData?.tags?.filter { it.isPubKeyTag() }?.toSet() ?: setOf()
+            val existingPubkeyTags =
+                replyPostData?.tags?.filter { it.isPubKeyTag() }?.toSet() ?: setOf()
             val replyAuthorPubkeyTag = replyToAction.replyToAuthorId.asPubkeyTag()
             val mentionedPubkeyTags = content.parsePubkeyTags(marker = "mention").toSet()
             val pubkeyTags = existingPubkeyTags + setOf(replyAuthorPubkeyTag) + mentionedPubkeyTags
@@ -190,20 +217,24 @@ class ThreadViewModel @Inject constructor(
             scheduleFetchReplies()
             setState { copy(replyText = "") }
         } catch (error: NostrPublishException) {
-            setState { copy(publishingError = ThreadContract.UiState.PublishError(cause = error.cause)) }
-            scheduleErrorClear()
+            setErrorState(error = ThreadError.FailedToPublishReplyEvent(error))
         } finally {
             setState { copy(publishingReply = false) }
         }
     }
 
-    private fun scheduleErrorClear() = viewModelScope.launch {
-        delay(2.seconds)
-        setState { copy(publishingError = null) }
-    }
-
     private fun scheduleFetchReplies() = viewModelScope.launch {
         delay(500.milliseconds)
         fetchRepliesFromNetwork()
+    }
+
+    private fun setErrorState(error: ThreadError) {
+        setState { copy(error = error) }
+        viewModelScope.launch {
+            delay(2.seconds)
+            if (state.value.error == error) {
+                setState { copy(error = null) }
+            }
+        }
     }
 }

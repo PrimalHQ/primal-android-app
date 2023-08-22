@@ -6,6 +6,7 @@ import kotlinx.serialization.json.add
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.jsonPrimitive
 import net.primal.android.core.utils.parseHashtags
+import net.primal.android.wallet.model.ZapTarget
 
 fun List<JsonArray>.findPostId(): String? {
     val postTag = firstOrNull { it.isEventIdTag() }
@@ -33,20 +34,22 @@ fun JsonArray.hasRootMarker() = contains(JsonPrimitive("root"))
 
 fun JsonArray.hasAnyMarker() = hasRootMarker() || hasReplyMarker() || hasMentionMarker()
 
-fun String.asEventIdTag(recommendedRelay: String = "", marker: String? = null): JsonArray =
+fun String.asEventIdTag(recommendedRelay: String? = null, marker: String? = null): JsonArray =
     buildJsonArray {
         add("e")
         add(this@asEventIdTag)
-        add(recommendedRelay)
-        if (marker != null) add(marker)
+        if (recommendedRelay != null) add(recommendedRelay)
+        if (marker != null) {
+            if (recommendedRelay == null) add("")
+            add(marker)
+        }
     }
 
-fun String.asPubkeyTag(recommendedRelay: String = "", marker: String? = null): JsonArray =
+fun String.asPubkeyTag(recommendedRelay: String? = null): JsonArray =
     buildJsonArray {
         add("p")
         add(this@asPubkeyTag)
-        add(recommendedRelay)
-        if (marker != null) add(marker)
+        if (recommendedRelay != null) add(recommendedRelay)
     }
 
 fun String.asIdentifierTag(): JsonArray = buildJsonArray {
@@ -134,4 +137,19 @@ fun String.parseHashtagTags(): List<JsonArray> {
         )
     }
     return tags.toList()
+}
+
+fun ZapTarget.toTags(): List<JsonArray> {
+    val tags = mutableListOf<JsonArray>()
+
+    when (this) {
+        is ZapTarget.Profile -> tags.add(pubkey.asPubkeyTag())
+
+        is ZapTarget.Note -> {
+            tags.add(id.asEventIdTag())
+            tags.add(authorPubkey.asPubkeyTag())
+        }
+    }
+
+    return tags
 }

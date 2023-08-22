@@ -67,6 +67,13 @@
     <string name="new_post_content_placeholder">Type your post here…</string>
     <string name="new_post_nostr_publish_error">Unable to publish your note to Nostr. Please try again soon.</string>
 
+    <string name="post_action_missing_lightning_address">Unable to zap this user since they don\'t have a lightning address set up.</string>
+    <string name="post_action_invalid_zap_request">Unable to zap. Check your wallet connection and try again.</string>
+    <string name="post_action_zap_failed">Unable to zap. Please try again.</string>
+    <string name="post_action_like_failed">Unable to like. Please try again.</string>
+    <string name="post_action_repost_failed">Unable to repost. Please try again.</string>
+    <string name="post_action_reply_failed">Unable to reply. Please try again.</string>
+
     <string name="thread_title">Thread</string>
     <string name="thread_reply_to">Reply to %1$s</string>
     <string name="thread_replying_to">Replying to %1$s</string>
@@ -120,4 +127,7 @@
     <string name="profile_notes_stat">posts</string>
     <string name="profile_follow_button">follow</string>
     <string name="profile_unfollow_button">unfollow</string>
+
+    <string name="zap_bottom_sheet_comment_placeholder">Add a comment…</string>
+    <string name="zap_bottom_sheet_zap_button">Zap</string>
 </resources>

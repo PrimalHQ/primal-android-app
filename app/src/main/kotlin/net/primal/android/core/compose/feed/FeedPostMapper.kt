@@ -21,6 +21,7 @@ fun FeedPost.asFeedPostUi() = FeedPostUi(
     authorName = this.author?.authorNameUiFriendly() ?: this.data.authorId.asEllipsizedNpub(),
     authorHandle = this.author?.userNameUiFriendly() ?: this.data.authorId.asEllipsizedNpub(),
     authorInternetIdentifier = this.author?.internetIdentifier,
+    authorLightningAddress = this.author?.lightningAddress,
     authorAvatarUrl = this.author?.picture,
     timestamp = Instant.ofEpochSecond(this.data.createdAt),
     content = this.data.content,

@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
 import androidx.paging.map
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -23,12 +24,16 @@ import net.primal.android.profile.db.authorNameUiFriendly
 import net.primal.android.profile.db.userNameUiFriendly
 import net.primal.android.profile.details.ProfileContract.UiEvent
 import net.primal.android.profile.details.ProfileContract.UiState
+import net.primal.android.profile.details.ProfileContract.UiState.ProfileError
 import net.primal.android.profile.details.model.ProfileDetailsUi
 import net.primal.android.profile.details.model.ProfileStatsUi
 import net.primal.android.profile.repository.LatestFollowingResolver
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.android.wallet.model.ZapTarget
+import net.primal.android.wallet.repository.ZapRepository
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.seconds
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
@@ -37,6 +42,7 @@ class ProfileViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val profileRepository: ProfileRepository,
     private val postRepository: PostRepository,
+    private val zapRepository: ZapRepository
 ) : ViewModel() {
 
     private val profileId: String = savedStateHandle.profileId ?: activeAccountStore.activeUserId()
@@ -144,7 +150,7 @@ class ProfileViewModel @Inject constructor(
                 postAuthorId = postLikeAction.postAuthorId,
             )
         } catch (error: NostrPublishException) {
-            // Propagate error to the UI
+            setErrorState(error = ProfileError.FailedToPublishLikeEvent(error))
         }
     }
 
@@ -156,12 +162,34 @@ class ProfileViewModel @Inject constructor(
                 postRawNostrEvent = repostAction.postNostrEvent,
             )
         } catch (error: NostrPublishException) {
-            // Propagate error to the UI
+            setErrorState(error = ProfileError.FailedToPublishRepostEvent(error))
         }
     }
 
     private fun zapPost(zapAction: UiEvent.ZapAction) = viewModelScope.launch {
+        if (zapAction.postAuthorLightningAddress == null) {
+            setErrorState(error = ProfileError.MissingLightningAddress(IllegalStateException()))
+            return@launch
+        }
 
+        try {
+            zapRepository.zap(
+                userId = activeAccountStore.activeUserId(),
+                comment = zapAction.zapDescription ?: "",
+                amount = zapAction.zapAmount ?: 42,
+                target = ZapTarget.Note(
+                    zapAction.postId,
+                    zapAction.postAuthorId,
+                    zapAction.postAuthorLightningAddress
+                ),
+            )
+        } catch (error: ZapRepository.ZapFailureException) {
+            setErrorState(error = ProfileError.FailedToPublishZapEvent(error))
+        } catch (error: NostrPublishException) {
+            setErrorState(error = ProfileError.FailedToPublishZapEvent(error))
+        } catch (error: ZapRepository.InvalidZapRequestException) {
+            setErrorState(error = ProfileError.InvalidZapRequest(error))
+        }
     }
 
     private fun follow(followAction: UiEvent.FollowAction) = viewModelScope.launch {
@@ -181,6 +209,16 @@ class ProfileViewModel @Inject constructor(
             // Failed to retrieve latest contacts, propagate error to the UI
         } catch (error: NostrPublishException) {
             // Propagate error to the UI
+        }
+    }
+
+    private fun setErrorState(error: ProfileError) {
+        setState { copy(error = error) }
+        viewModelScope.launch {
+            delay(2.seconds)
+            if (state.value.error == error) {
+                setState { copy(error = null) }
+            }
         }
     }
 }

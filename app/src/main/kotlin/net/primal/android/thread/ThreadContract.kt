@@ -7,13 +7,20 @@ interface ThreadContract {
     data class UiState(
         val replyText: String = "",
         val publishingReply: Boolean = false,
-        val publishingError: PublishError? = null,
         val conversation: List<FeedPostUi> = emptyList(),
         val highlightPostId: String? = null,
         val highlightPostIndex: Int = 0,
         val walletConnected: Boolean = false,
+        val error: ThreadError? = null,
     ) {
-        data class PublishError(val cause: Throwable?)
+        sealed class ThreadError {
+            data class MissingLightningAddress(val cause: Throwable) : ThreadError()
+            data class InvalidZapRequest(val cause: Throwable) : ThreadError()
+            data class FailedToPublishZapEvent(val cause: Throwable) : ThreadError()
+            data class FailedToPublishRepostEvent(val cause: Throwable) : ThreadError()
+            data class FailedToPublishReplyEvent(val cause: Throwable) : ThreadError()
+            data class FailedToPublishLikeEvent(val cause: Throwable) : ThreadError()
+        }
     }
 
     sealed class UiEvent {
@@ -27,8 +34,10 @@ interface ThreadContract {
         data class ZapAction(
             val postId: String,
             val postAuthorId: String,
+            val postAuthorLightningAddress: String?,
             val zapAmount: Int?,
             val zapDescription: String?,
+
         ) : UiEvent()
         data class ReplyToAction(
             val rootPostId: String,

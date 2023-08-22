@@ -12,6 +12,7 @@ fun List<NostrEvent>.mapAsProfileMetadataPO() = map { it.asProfileMetadataPO() }
 
 fun NostrEvent.asProfileMetadataPO(): ProfileMetadata {
     val metadata = NostrJson.decodeFromStringOrNull<ContentMetadata>(this.content)
+
     return ProfileMetadata(
         eventId = this.id,
         ownerId = this.pubKey,
@@ -19,6 +20,7 @@ fun NostrEvent.asProfileMetadataPO(): ProfileMetadata {
         raw = NostrJson.encodeToString(this),
         handle = metadata?.name,
         internetIdentifier = metadata?.nip05,
+        lightningAddress = metadata?.lud16,
         about = metadata?.about,
         displayName = metadata?.displayName,
         picture = metadata?.picture,

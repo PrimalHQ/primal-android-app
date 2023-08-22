@@ -65,10 +65,12 @@ class WalletViewModel @Inject constructor(
     private fun connectWallet(nwcUrl: String) = viewModelScope.launch {
         try {
             val nostrWalletConnect = nwcUrl.parseNWCUrl()
+
             userRepository.connectNostrWallet(
                 userId = activeAccountStore.activeUserId(),
                 nostrWalletConnect = nostrWalletConnect
             )
+
             setState {
                 copy(wallet = nostrWalletConnect)
             }

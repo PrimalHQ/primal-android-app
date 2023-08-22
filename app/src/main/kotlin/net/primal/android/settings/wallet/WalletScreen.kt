@@ -50,6 +50,7 @@ import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.user.domain.NostrWallet
+import net.primal.android.user.domain.NostrWalletKeypair
 
 @Composable
 fun WalletScreen(
@@ -138,12 +139,12 @@ fun WalletConnected(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = state.wallet?.relayUrl ?: "",
+            text = state.wallet?.relays?.first() ?: "",
             textAlign = TextAlign.Center
         )
         Divider()
         Text(
-            text = state.wallet?.lud16 ?: "",
+            text = state.wallet?.lightningAddress ?: "",
             textAlign = TextAlign.Center
         )
     }
@@ -273,10 +274,13 @@ class WalletUiStateProvider : PreviewParameterProvider<WalletContract.UiState> {
         get() = sequenceOf(
             WalletContract.UiState(
                 wallet = NostrWallet(
-                    relayUrl = "wss://relay.getalby.com/v1",
-                    lud16 = "miljan@getalby.com",
+                    relays = listOf("wss://relay.getalby.com/v1"),
+                    lightningAddress = "miljan@getalby.com",
                     pubkey = "69effe7b49a6dd5cf525bd0905917a5005ffe480b58eeb8e861418cf3ae760d9",
-                    secret = "7c0dabd065b2de3299a0d0e1c26b8ac7047dae6b20aba3a62b23650eb601bbfd",
+                    keypair = NostrWalletKeypair(
+                        privateKey = "7c0dabd065b2de3299a0d0e1c26b8ac7047dae6b20aba3a62b23650eb601bbfd",
+                        pubkey = "69effe7b49a6dd5cf525bd0905917a5005ffe480b58eeb8e861418cf3ae760d9"
+                    )
                 )
             ),
             WalletContract.UiState(

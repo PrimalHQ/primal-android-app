@@ -30,17 +30,12 @@ class TagsTest {
     fun `asPubkeyTag returns proper JsonArray tag`() {
         val pubkey = "myPubkey"
         val expectedRecommendedRelay = ""
-        val expectedMarker = "mention"
-        val actual = pubkey.asPubkeyTag(
-            recommendedRelay = expectedRecommendedRelay,
-            marker = expectedMarker,
-        )
+        val actual = pubkey.asPubkeyTag(recommendedRelay = expectedRecommendedRelay)
         actual shouldBe instanceOf(JsonArray::class)
-        actual.size shouldBe 4
+        actual.size shouldBe 3
         actual[0].jsonPrimitive.content shouldBe "p"
         actual[1].jsonPrimitive.content shouldBe pubkey
         actual[2].jsonPrimitive.content shouldBe expectedRecommendedRelay
-        actual[3].jsonPrimitive.content shouldBe expectedMarker
     }
 
     @Test

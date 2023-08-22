@@ -7,6 +7,7 @@ import androidx.paging.cachedIn
 import androidx.paging.map
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,6 +21,7 @@ import net.primal.android.core.compose.feed.model.FeedPostsSyncStats
 import net.primal.android.core.utils.ellipsizeMiddle
 import net.primal.android.discuss.feed.FeedContract.UiEvent
 import net.primal.android.discuss.feed.FeedContract.UiState
+import net.primal.android.discuss.feed.FeedContract.UiState.FeedError
 import net.primal.android.feed.repository.FeedRepository
 import net.primal.android.feed.repository.PostRepository
 import net.primal.android.navigation.feedDirective
@@ -28,9 +30,12 @@ import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
 import net.primal.android.user.updater.UserDataUpdater
 import net.primal.android.user.updater.UserDataUpdaterFactory
+import net.primal.android.wallet.model.ZapTarget
+import net.primal.android.wallet.repository.ZapRepository
 import java.time.Instant
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
 
 @HiltViewModel
 class FeedViewModel @Inject constructor(
@@ -39,6 +44,7 @@ class FeedViewModel @Inject constructor(
     private val postRepository: PostRepository,
     private val activeAccountStore: ActiveAccountStore,
     private val userDataSyncerFactory: UserDataUpdaterFactory,
+    private val zapRepository: ZapRepository
 ) : ViewModel() {
 
     private val feedDirective: String = savedStateHandle.feedDirective ?: "network;trending"
@@ -53,14 +59,10 @@ class FeedViewModel @Inject constructor(
         )
     )
     val state = _state.asStateFlow()
-    private fun setState(reducer: UiState.() -> UiState) {
-        _state.getAndUpdate { it.reducer() }
-    }
+    private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
 
     private val _event: MutableSharedFlow<UiEvent> = MutableSharedFlow()
-    fun setEvent(event: UiEvent) {
-        viewModelScope.launch { _event.emit(event) }
-    }
+    fun setEvent(event: UiEvent) = viewModelScope.launch { _event.emit(event) }
 
     init {
         subscribeToFeedTitle()
@@ -154,7 +156,7 @@ class FeedViewModel @Inject constructor(
                 postAuthorId = postLikeAction.postAuthorId,
             )
         } catch (error: NostrPublishException) {
-            // Propagate error to the UI
+            setErrorState(error = FeedError.FailedToPublishLikeEvent(error))
         }
     }
 
@@ -166,12 +168,43 @@ class FeedViewModel @Inject constructor(
                 postRawNostrEvent = repostAction.postNostrEvent,
             )
         } catch (error: NostrPublishException) {
-            // Propagate error to the UI
+            setErrorState(error = FeedError.FailedToPublishRepostEvent(error))
         }
     }
 
     private fun zapPost(zapAction: UiEvent.ZapAction) = viewModelScope.launch {
+        if (zapAction.postAuthorLightningAddress == null) {
+            setErrorState(error = FeedError.MissingLightningAddress(IllegalStateException()))
+            return@launch
+        }
 
+        try {
+            zapRepository.zap(
+                userId = activeAccountStore.activeUserId(),
+                comment = zapAction.zapDescription ?: "",
+                amount = zapAction.zapAmount ?: 42,
+                target = ZapTarget.Note(
+                    zapAction.postId,
+                    zapAction.postAuthorId,
+                    zapAction.postAuthorLightningAddress
+                ),
+            )
+        } catch (error: ZapRepository.ZapFailureException) {
+            setErrorState(error = FeedError.FailedToPublishZapEvent(error))
+        } catch (error: NostrPublishException) {
+            setErrorState(error = FeedError.FailedToPublishZapEvent(error))
+        } catch (error: ZapRepository.InvalidZapRequestException) {
+            setErrorState(error = FeedError.InvalidZapRequest(error))
+        }
     }
 
+    private fun setErrorState(error: FeedError) {
+        setState { copy(error = error) }
+        viewModelScope.launch {
+            delay(2.seconds)
+            if (state.value.error == error) {
+                setState { copy(error = null) }
+            }
+        }
+    }
 }

@@ -10,7 +10,16 @@ interface ExploreFeedContract {
         val existsInUserFeeds: Boolean = false,
         val walletConnected: Boolean = false,
         val posts: Flow<PagingData<FeedPostUi>>,
-    )
+        val error: ExploreFeedError? = null,
+    ) {
+        sealed class ExploreFeedError {
+            data class MissingLightningAddress(val cause: Throwable) : ExploreFeedError()
+            data class InvalidZapRequest(val cause: Throwable) : ExploreFeedError()
+            data class FailedToPublishZapEvent(val cause: Throwable) : ExploreFeedError()
+            data class FailedToPublishRepostEvent(val cause: Throwable) : ExploreFeedError()
+            data class FailedToPublishLikeEvent(val cause: Throwable) : ExploreFeedError()
+        }
+    }
 
     sealed class UiEvent {
         data object AddToUserFeeds : UiEvent()
@@ -24,6 +33,7 @@ interface ExploreFeedContract {
         data class ZapAction(
             val postId: String,
             val postAuthorId: String,
+            val postAuthorLightningAddress: String?,
             val zapAmount: Int?,
             val zapDescription: String?,
         ) : UiEvent()

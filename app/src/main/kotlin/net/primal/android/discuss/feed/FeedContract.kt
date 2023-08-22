@@ -13,7 +13,16 @@ interface FeedContract {
         val walletConnected: Boolean = false,
         val posts: Flow<PagingData<FeedPostUi>>,
         val syncStats: FeedPostsSyncStats = FeedPostsSyncStats(),
-    )
+        val error: FeedError? = null,
+    ) {
+        sealed class FeedError {
+            data class MissingLightningAddress(val cause: Throwable) : FeedError()
+            data class InvalidZapRequest(val cause: Throwable) : FeedError()
+            data class FailedToPublishZapEvent(val cause: Throwable) : FeedError()
+            data class FailedToPublishRepostEvent(val cause: Throwable) : FeedError()
+            data class FailedToPublishLikeEvent(val cause: Throwable) : FeedError()
+        }
+    }
 
     sealed class UiEvent {
         data object FeedScrolledToTop : UiEvent()
@@ -24,9 +33,11 @@ interface FeedContract {
             val postAuthorId: String,
             val postNostrEvent: String
         ) : UiEvent()
+
         data class ZapAction(
             val postId: String,
             val postAuthorId: String,
+            val postAuthorLightningAddress: String?,
             val zapAmount: Int?,
             val zapDescription: String?,
         ) : UiEvent()

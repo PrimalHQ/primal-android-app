@@ -1,24 +1,30 @@
 package net.primal.android.user.domain
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import fr.acinq.secp256k1.Hex
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
+import net.primal.android.crypto.CryptoUtils
+import net.primal.android.crypto.toHex
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class NostrWalletConnectParserTest {
 
-    private val functioningNostrWalletConnectUrl = "nostr+walletconnect://69effe7b49a6dd5cf525bd0905917a5005ffe480b58eeb8e861418cf3ae760d9?relay=wss://relay.getalby.com/v1&secret=7c0dabd065b2de3299a0d0e1c26b8ac7047dae6b20aba3a62b23650eb601bbfd&lud16=nikola@getalby.com"
+    private val expectedPubkey = "69e23cd92e34922a95a5a1eb6893e82cd3af9150ae2ab5e8c2cd882ccd701159"
+    private val expectedSecret = "2a181df0a822100be8687de612d616a42febe8d99a2f99fb550f150dc364da6e"
+    private val functioningNostrWalletConnectUrl = "nostr+walletconnect://$expectedPubkey?relay=wss://relay.getalby.com/v1&secret=$expectedSecret&lud16=nikola@getalby.com"
 
     @Test
     fun `parseNWCUrl parses nostr wallet`() {
         val actual = functioningNostrWalletConnectUrl.parseNWCUrl()
 
-        actual.pubkey shouldBe "69effe7b49a6dd5cf525bd0905917a5005ffe480b58eeb8e861418cf3ae760d9"
-        actual.lud16 shouldBe "nikola@getalby.com"
-        actual.relayUrl shouldBe "wss://relay.getalby.com/v1"
-        actual.secret shouldBe "7c0dabd065b2de3299a0d0e1c26b8ac7047dae6b20aba3a62b23650eb601bbfd"
+        actual.pubkey shouldBe expectedPubkey
+        actual.lightningAddress shouldBe "nikola@getalby.com"
+        actual.relays shouldBe listOf("wss://relay.getalby.com/v1")
+        actual.keypair.privateKey shouldBe expectedSecret
+        actual.keypair.pubkey shouldBe CryptoUtils.publicKeyCreate(Hex.decode(expectedSecret)).toHex()
     }
 
     @Test

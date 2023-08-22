@@ -15,6 +15,9 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -30,11 +33,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
+import net.primal.android.R
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.PrimalTopLevelDestination
@@ -43,6 +48,7 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 import net.primal.android.core.compose.icons.primaliconpack.FeedPicker
 import net.primal.android.crypto.hexToNoteHrp
+import net.primal.android.discuss.feed.FeedContract.UiState.FeedError
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.PrimalBottomBarHeightDp
 import net.primal.android.drawer.PrimalDrawerScaffold
@@ -104,6 +110,13 @@ fun FeedScreen(
 
     val focusMode by remember { derivedStateOf { bottomBarOffsetHeightPx < 0f } }
 
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    ErrorHandler(
+        error = state.error,
+        snackbarHostState = snackbarHostState,
+    )
+
     PrimalDrawerScaffold(
         drawerState = drawerState,
         activeDestination = PrimalTopLevelDestination.Feed,
@@ -144,6 +157,7 @@ fun FeedScreen(
                         postAuthorId = post.authorId,
                         zapAmount = zapAmount,
                         zapDescription = zapDescription,
+                        postAuthorLightningAddress = post.authorLightningAddress
                     ))
                 },
                 onPostLikeClick = {
@@ -213,8 +227,36 @@ fun FeedScreen(
                     },
                 )
             }
-        }
+        },
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
+        },
     )
+}
+
+@Composable
+private fun ErrorHandler(
+    error: FeedError?,
+    snackbarHostState: SnackbarHostState,
+) {
+    val context = LocalContext.current
+    LaunchedEffect(error ?: true) {
+        val errorMessage = when (error) {
+            is FeedError.InvalidZapRequest -> context.getString(R.string.post_action_invalid_zap_request)
+            is FeedError.MissingLightningAddress -> context.getString(R.string.post_action_missing_lightning_address)
+            is FeedError.FailedToPublishZapEvent -> context.getString(R.string.post_action_zap_failed)
+            is FeedError.FailedToPublishLikeEvent -> context.getString(R.string.post_action_like_failed)
+            is FeedError.FailedToPublishRepostEvent -> context.getString(R.string.post_action_repost_failed)
+            else -> null
+        }
+
+        if (errorMessage != null) {
+            snackbarHostState.showSnackbar(
+                message = errorMessage,
+                duration = SnackbarDuration.Short,
+            )
+        }
+    }
 }
 
 @Preview

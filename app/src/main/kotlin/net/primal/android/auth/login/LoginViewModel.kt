@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,6 +18,7 @@ import net.primal.android.auth.login.LoginContract.UiState
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.settings.repository.SettingsRepository
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.seconds
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
@@ -60,10 +62,19 @@ class LoginViewModel @Inject constructor(
             settingsRepository.fetchAndPersistAppSettings(userId = pubkey)
             setEffect(SideEffect.LoginSuccess(pubkey = pubkey))
         } catch (error: WssException) {
-            setState { copy(error = UiState.ApiError.GenericError) }
+            setErrorState(error = UiState.LoginError.GenericError(error))
         } finally {
             setState { copy(loading = false) }
         }
     }
 
+    private fun setErrorState(error: UiState.LoginError) {
+        setState { copy(error = error) }
+        viewModelScope.launch {
+            delay(2.seconds)
+            if (state.value.error == error) {
+                setState { copy(error = null) }
+            }
+        }
+    }
 }

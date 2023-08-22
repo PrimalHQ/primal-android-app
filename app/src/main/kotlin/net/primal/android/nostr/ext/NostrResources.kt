@@ -139,6 +139,7 @@ fun List<PostData>.flatMapAsPostNostrResourcePO(
                     authorName = refPostAuthor.authorNameUiFriendly(),
                     authorAvatarUrl = refPostAuthor.picture,
                     authorInternetIdentifier = refPostAuthor.internetIdentifier,
+                    authorLightningAddress = refPostAuthor.lightningAddress,
                     mediaResources = listOf(refPost).flatMapAsPostMediaResourcePO(),
                     nostrResources = listOf(refPost).flatMapAsPostNostrResourcePO(
                         postIdToPostDataMap = postIdToPostDataMap,

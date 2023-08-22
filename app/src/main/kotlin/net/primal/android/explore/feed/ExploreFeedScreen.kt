@@ -9,11 +9,13 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import kotlinx.coroutines.launch
 import net.primal.android.R
@@ -27,6 +29,7 @@ import net.primal.android.core.compose.icons.primaliconpack.UserFeedRemove
 import net.primal.android.crypto.hexToNoteHrp
 import net.primal.android.explore.feed.ExploreFeedContract.UiEvent.AddToUserFeeds
 import net.primal.android.explore.feed.ExploreFeedContract.UiEvent.RemoveFromUserFeeds
+import net.primal.android.explore.feed.ExploreFeedContract.UiState.ExploreFeedError
 
 @Composable
 fun ExploreFeedScreen(
@@ -72,6 +75,11 @@ fun ExploreFeedScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val addedToUserFeedsMessage = stringResource(id = R.string.explore_feed_added_to_user_feeds)
     val removedFromUserFeedsMessage = stringResource(id = R.string.explore_feed_removed_from_user_feeds)
+
+    ErrorHandler(
+        error = state.error,
+        snackbarHostState = snackbarHostState,
+    )
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -129,6 +137,7 @@ fun ExploreFeedScreen(
                             postAuthorId = post.authorId,
                             zapAmount = zapAmount,
                             zapDescription = zapDescription,
+                            postAuthorLightningAddress = post.authorLightningAddress
                         )
                     )
                 },
@@ -160,4 +169,27 @@ fun ExploreFeedScreen(
             SnackbarHost(hostState = snackbarHostState)
         }
     )
+}
+
+@Composable
+private fun ErrorHandler(
+    error: ExploreFeedError?,
+    snackbarHostState: SnackbarHostState,
+) {
+    val context = LocalContext.current
+    LaunchedEffect(error ?: true) {
+        val errorMessage = when (error) {
+            is ExploreFeedError.InvalidZapRequest -> context.getString(R.string.post_action_invalid_zap_request)
+            is ExploreFeedError.MissingLightningAddress -> context.getString(R.string.post_action_missing_lightning_address)
+            is ExploreFeedError.FailedToPublishZapEvent -> context.getString(R.string.post_action_zap_failed)
+            is ExploreFeedError.FailedToPublishLikeEvent -> context.getString(R.string.post_action_like_failed)
+            is ExploreFeedError.FailedToPublishRepostEvent -> context.getString(R.string.post_action_repost_failed)
+            null -> return@LaunchedEffect
+        }
+
+        snackbarHostState.showSnackbar(
+            message = errorMessage,
+            duration = SnackbarDuration.Short,
+        )
+    }
 }
