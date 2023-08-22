@@ -15,7 +15,7 @@ fun String.parseNWCUrl(): NostrWallet {
     }
 
     val relay = uri.getQueryParameter("relay") ?: throw NWCParseException()
-    val lud16 = uri.getQueryParameter("lud16") ?: throw NWCParseException()
+    val lud16 = uri.getQueryParameter("lud16")
 
     val secretParam = uri.getQueryParameter("secret")
     val keypairSecret: String = when {

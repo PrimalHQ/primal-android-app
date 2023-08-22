@@ -9,6 +9,8 @@ fun String?.isValidNostrKey(): Boolean {
 
     return if (startsWith("nsec")) {
         this.isValidNsec()
+    } else if (startsWith("npub")) {
+        this.isValidNpub()
     } else {
         try {
             this.hexToNsecHrp().isValidNsec()
@@ -29,3 +31,13 @@ private fun String.isValidNsec(): Boolean {
     }
 }
 
+private fun String.isValidNpub(): Boolean {
+    if (!this.startsWith("npub")) return false
+
+    return try {
+        val decoded = Bech32.decodeBytes(this)
+        decoded.first == "npub" && this.length >= 64
+    } catch (error: IllegalArgumentException) {
+        false
+    }
+}

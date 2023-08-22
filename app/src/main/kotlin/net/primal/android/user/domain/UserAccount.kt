@@ -11,6 +11,7 @@ data class UserAccount(
     val userDisplayName: String,
     val pictureUrl: String? = null,
     val internetIdentifier: String? = null,
+    val lightningAddress: String? = null,
     val followingCount: Int? = null,
     val followersCount: Int? = null,
     val notesCount: Int? = null,

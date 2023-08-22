@@ -110,6 +110,7 @@
     <string name="settings_wallet_not_connected_subtitle">To send and receive zaps, connect a bitcoin lightning wallet.</string>
     <string name="settings_wallet_disconnect_action">Disconnect wallet</string>
     <string name="settings_wallet_connect_alby_wallet">Connect Alby Wallet</string>
+    <string name="settings_wallet_connect_mutiny_wallet">Connect Mutiny Wallet</string>
 
     <string name="settings_appearance_title">Appearance</string>
     <string name="settings_notifications_title">Notifications</string>
