@@ -201,6 +201,7 @@ private fun NewPostsButton(
                             Color.White,
                             Color.White
                         ),
+                        onClick = onClick,
                     )
                 }
             }

@@ -24,6 +24,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -106,7 +107,7 @@ fun FeedScreen(
     val feedListState = rememberLazyListState()
 
     val bottomBarHeight = PrimalBottomBarHeightDp
-    var bottomBarOffsetHeightPx by remember { mutableStateOf(0f) }
+    var bottomBarOffsetHeightPx by remember { mutableFloatStateOf(0f) }
 
     val focusMode by remember { derivedStateOf { bottomBarOffsetHeightPx < 0f } }
 
