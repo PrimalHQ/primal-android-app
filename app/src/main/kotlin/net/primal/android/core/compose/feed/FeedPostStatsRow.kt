@@ -1,5 +1,6 @@
 package net.primal.android.core.compose.feed
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.combinedClickable
@@ -15,11 +16,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.core.compose.feed.model.FeedPostAction
@@ -50,27 +53,30 @@ fun FeedPostStatsRow(
     ) {
         SinglePostStat(
             textCount = postStats.repliesCount.toPostStatString(),
-            highlight = postStats.userReplied,
+            highlighted = postStats.userReplied,
             iconVector = PrimalIcons.FeedReplies,
             iconVectorHighlight = PrimalIcons.FeedRepliesFilled,
+            colorHighlight = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
             onClick = { onPostAction(FeedPostAction.Reply) },
             onLongClick = { onPostLongPressAction(FeedPostAction.Reply) },
         )
 
         SinglePostStat(
             textCount = postStats.satsZapped.toPostStatString(),
-            highlight = postStats.userZapped,
+            highlighted = postStats.userZapped,
             iconVector = PrimalIcons.FeedZaps,
             iconVectorHighlight = PrimalIcons.FeedZapsFilled,
+            colorHighlight = Color(0xFFFFA02F),
             onClick = { onPostAction(FeedPostAction.Zap) },
             onLongClick = { onPostLongPressAction(FeedPostAction.Zap) },
         )
 
         SinglePostStat(
             textCount = postStats.likesCount.toPostStatString(),
-            highlight = postStats.userLiked,
+            highlighted = postStats.userLiked,
             iconVector = PrimalIcons.FeedLikes,
             iconVectorHighlight = PrimalIcons.FeedLikesFilled,
+            colorHighlight = Color(0xFFCA079F),
             onClick = {
                 if (!postStats.userLiked) {
                     onPostAction(FeedPostAction.Like)
@@ -81,9 +87,10 @@ fun FeedPostStatsRow(
 
         SinglePostStat(
             textCount = postStats.repostsCount.toPostStatString(),
-            highlight = postStats.userReposted,
+            highlighted = postStats.userReposted,
             iconVector = PrimalIcons.FeedReposts,
             iconVectorHighlight = PrimalIcons.FeedRepostsFilled,
+            colorHighlight = Color(0xFF66E205),
             onClick = { onPostAction(FeedPostAction.Repost) },
             onLongClick = { onPostLongPressAction(FeedPostAction.Repost) },
         )
@@ -95,9 +102,10 @@ fun FeedPostStatsRow(
 @Composable
 private fun SinglePostStat(
     textCount: String,
-    highlight: Boolean,
+    highlighted: Boolean,
     iconVector: ImageVector,
     iconVectorHighlight: ImageVector,
+    colorHighlight: Color,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
 ) {
@@ -118,9 +126,9 @@ private fun SinglePostStat(
                 contentAlignment = Alignment.Center,
             ) {
                 Image(
-                    imageVector = if (highlight) iconVectorHighlight else iconVector,
+                    imageVector = if (!highlighted) iconVector else iconVectorHighlight,
                     contentDescription = null,
-                    colorFilter = if (!highlight) {
+                    colorFilter = if (!highlighted) {
                         ColorFilter.tint(color = AppTheme.extraColorScheme.onSurfaceVariantAlt4)
                     } else null
                 )
@@ -129,13 +137,17 @@ private fun SinglePostStat(
     )
 
     Text(
-        modifier = Modifier.combinedClickable(
-            onClick = onClick,
-            onLongClick = onLongClick,
-        ),
+        modifier = Modifier
+            .animateContentSize()
+            .combinedClickable(
+                onClick = onClick,
+                onLongClick = onLongClick,
+            ),
         text = titleText,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
         style = AppTheme.typography.bodyMedium,
-        color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
+        color = if (!highlighted) AppTheme.extraColorScheme.onSurfaceVariantAlt4 else colorHighlight,
         inlineContent = inlineContent,
     )
 }
