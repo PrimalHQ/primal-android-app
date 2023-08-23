@@ -13,6 +13,7 @@ fun UserAccount.copyProfileIfNotNull(profile: UserAccount?): UserAccount {
             userDisplayName = profile.userDisplayName,
             pictureUrl = profile.pictureUrl,
             internetIdentifier = profile.internetIdentifier,
+            lightningAddress = profile.lightningAddress,
             followersCount = profile.followersCount,
             followingCount = profile.followingCount,
             notesCount = profile.notesCount,

@@ -54,9 +54,14 @@ class WalletViewModel @Inject constructor(
     private fun observeUserAccount() = viewModelScope.launch {
         activeAccountStore.activeUserAccount.collect {
             val nostrWalletConnect = activeAccountStore.activeUserAccount().nostrWallet
+            val lightningAddress = activeAccountStore.activeUserAccount().lightningAddress
+
             if (nostrWalletConnect != null) {
                 setState {
-                    copy(wallet = nostrWalletConnect)
+                    copy(
+                        wallet = nostrWalletConnect,
+                        userLightningAddress = lightningAddress
+                    )
                 }
             }
         }
@@ -65,6 +70,7 @@ class WalletViewModel @Inject constructor(
     private fun connectWallet(nwcUrl: String) = viewModelScope.launch {
         try {
             val nostrWalletConnect = nwcUrl.parseNWCUrl()
+            val lightningAddress = activeAccountStore.activeUserAccount().lightningAddress
 
             userRepository.connectNostrWallet(
                 userId = activeAccountStore.activeUserId(),
@@ -72,7 +78,10 @@ class WalletViewModel @Inject constructor(
             )
 
             setState {
-                copy(wallet = nostrWalletConnect)
+                copy(
+                    wallet = nostrWalletConnect,
+                    userLightningAddress = lightningAddress
+                )
             }
         } catch (error: NWCParseException) {
             // Propagate error to the UI
@@ -85,7 +94,10 @@ class WalletViewModel @Inject constructor(
         )
 
         setState {
-            copy(wallet = null)
+            copy(
+                wallet = null,
+                userLightningAddress = null
+            )
         }
     }
 }

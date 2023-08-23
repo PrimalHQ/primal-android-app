@@ -48,7 +48,7 @@ import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
-import net.primal.android.core.utils.isValidNostrKey
+import net.primal.android.core.utils.isValidNostrPrivateKey
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 
@@ -114,11 +114,11 @@ fun LoginContent(
     val clipboardManager = LocalClipboardManager.current
 
     var nsecValue by remember { mutableStateOf("") }
-    val isValidNsec by remember { derivedStateOf { nsecValue.isValidNostrKey() } }
+    val isValidNsec by remember { derivedStateOf { nsecValue.isValidNostrPrivateKey() } }
 
     val pasteKey = {
         val clipboardText = clipboardManager.getText()?.text.orEmpty().trim()
-        if (clipboardText.isValidNostrKey()) {
+        if (clipboardText.isValidNostrPrivateKey()) {
             nsecValue = clipboardText
         }
     }

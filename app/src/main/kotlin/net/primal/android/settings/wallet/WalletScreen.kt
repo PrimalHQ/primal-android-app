@@ -144,7 +144,7 @@ fun WalletConnected(
         )
         Divider()
         Text(
-            text = state.wallet?.lightningAddress ?: "",
+            text = state.wallet?.lightningAddress ?: state.userLightningAddress ?: "",
             textAlign = TextAlign.Center
         )
     }
@@ -183,6 +183,16 @@ fun WalletDisconnected() {
             .padding(horizontal = 16.dp),
         onClick = {
             uriHandler.openUri("https://nwc.getalby.com/apps/new?c=Primal-Android")
+        },
+    )
+    Spacer(modifier = Modifier.height(20.dp))
+    ConnectMutinyWalletButton(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(56.dp)
+            .padding(horizontal = 16.dp),
+        onClick = {
+            uriHandler.openUri("https://app.mutinywallet.com/settings/connections?callbackUri=primal&name=Primal-Android")
         },
     )
 }
@@ -264,6 +274,33 @@ fun ConnectAlbyWalletButton(
             style = AppTheme.typography.bodyLarge,
             fontWeight = FontWeight.Medium,
             color = Color.Black,
+            leadingIconTintColor = null,
+        )
+    }
+}
+
+@Composable
+fun ConnectMutinyWalletButton(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    PrimalFilledButton(
+        modifier = modifier,
+        containerBrush = Brush.linearGradient(
+            colors = listOf(
+                Color(0xFF4F1425),
+                Color(0xFF2E0A11),
+            )
+        ),
+        onClick = onClick,
+    ) {
+        IconText(
+            text = stringResource(id = R.string.settings_wallet_connect_mutiny_wallet),
+            leadingIcon = ImageVector.vectorResource(id = R.drawable.mutiny_logo),
+            leadingIconSize = 42.sp,
+            style = AppTheme.typography.bodyLarge,
+            fontWeight = FontWeight.Medium,
+            color = Color.White,
             leadingIconTintColor = null,
         )
     }

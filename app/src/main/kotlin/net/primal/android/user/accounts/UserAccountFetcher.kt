@@ -31,6 +31,7 @@ class UserAccountFetcher @Inject constructor(
             userDisplayName = profileMetadata?.userNameUiFriendly() ?: pubkey.asEllipsizedNpub(),
             pictureUrl = profileMetadata?.picture,
             internetIdentifier = profileMetadata?.internetIdentifier,
+            lightningAddress = profileMetadata?.lightningAddress,
             followersCount = userProfileStats?.followersCount,
             followingCount = userProfileStats?.followsCount,
             notesCount = userProfileStats?.noteCount,

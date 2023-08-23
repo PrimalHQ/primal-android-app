@@ -33,6 +33,8 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data android:scheme="nostr+walletconnect"/>
+                <data android:scheme="nostrwalletconnect"/>
+                <data android:scheme="primal"/>
             </intent-filter>
         </activity>
     </application>

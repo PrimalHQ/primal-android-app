@@ -45,6 +45,8 @@ import net.primal.android.explore.home.ExploreHomeScreen
 import net.primal.android.explore.home.ExploreHomeViewModel
 import net.primal.android.explore.search.SearchViewModel
 import net.primal.android.explore.search.ui.SearchScreen
+import net.primal.android.navigation.deeplinking.DeepLink
+import net.primal.android.navigation.deeplinking.ext.handleDeeplink
 import net.primal.android.navigation.splash.SplashContract
 import net.primal.android.navigation.splash.SplashScreen
 import net.primal.android.navigation.splash.SplashViewModel
@@ -148,13 +150,16 @@ fun PrimalAppNavigation() {
 
                     val url = activity?.intent?.data?.toString()?.ifBlank { null }
 
-                    if (url != null && url.startsWith("nostr+walletconnect")) {
-                        navController.popBackStack()
-                        navController.navigateToWallet(nwcUrl = withContext(Dispatchers.IO) {
-                            URLEncoder.encode(url, Charsets.UTF_8.name())
-                        })
-                    } else {
-                        navController.navigateToFeed(directive = it.userPubkey)
+                    when (url.handleDeeplink()) {
+                        is DeepLink.Profile, is DeepLink.Note, null -> {
+                            navController.navigateToFeed(directive = it.userPubkey)
+                        }
+                        is DeepLink.NostrWalletConnect -> {
+                            navController.popBackStack()
+                            navController.navigateToWallet(nwcUrl = withContext(Dispatchers.IO) {
+                                URLEncoder.encode(url, Charsets.UTF_8.name())
+                            })
+                        }
                     }
                 }
             }
