@@ -736,6 +736,9 @@ private fun ErrorHandler(
             is ProfileError.FailedToPublishZapEvent -> context.getString(R.string.post_action_zap_failed)
             is ProfileError.FailedToPublishLikeEvent -> context.getString(R.string.post_action_like_failed)
             is ProfileError.FailedToPublishRepostEvent -> context.getString(R.string.post_action_repost_failed)
+            is ProfileError.FailedToFollowProfile -> context.getString(R.string.profile_error_unable_to_follow)
+            is ProfileError.FailedToUnfollowProfile -> context.getString(R.string.profile_error_unable_to_unfollow)
+            is ProfileError.MissingRelaysConfiguration -> context.getString(R.string.app_missing_relays_config)
             else -> return@LaunchedEffect
         }
 

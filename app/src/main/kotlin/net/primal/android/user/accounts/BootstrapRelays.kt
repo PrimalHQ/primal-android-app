@@ -13,4 +13,3 @@ val BOOTSTRAP_RELAYS = listOf(
     "wss://nostr.bitcoiner.social",
     "wss://relay.primal.net",
 )
-

@@ -25,6 +25,7 @@ import net.primal.android.discuss.feed.FeedContract.UiState.FeedError
 import net.primal.android.feed.repository.FeedRepository
 import net.primal.android.feed.repository.PostRepository
 import net.primal.android.navigation.feedDirective
+import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
@@ -159,6 +160,8 @@ class FeedViewModel @Inject constructor(
             )
         } catch (error: NostrPublishException) {
             setErrorState(error = FeedError.FailedToPublishLikeEvent(error))
+        } catch (error: MissingRelaysException) {
+            setErrorState(error = FeedError.MissingRelaysConfiguration(error))
         }
     }
 
@@ -171,6 +174,8 @@ class FeedViewModel @Inject constructor(
             )
         } catch (error: NostrPublishException) {
             setErrorState(error = FeedError.FailedToPublishRepostEvent(error))
+        } catch (error: MissingRelaysException) {
+            setErrorState(error = FeedError.MissingRelaysConfiguration(error))
         }
     }
 
@@ -195,6 +200,8 @@ class FeedViewModel @Inject constructor(
             setErrorState(error = FeedError.FailedToPublishZapEvent(error))
         } catch (error: NostrPublishException) {
             setErrorState(error = FeedError.FailedToPublishZapEvent(error))
+        } catch (error: MissingRelaysException) {
+            setErrorState(error = FeedError.MissingRelaysConfiguration(error))
         } catch (error: ZapRepository.InvalidZapRequestException) {
             setErrorState(error = FeedError.InvalidZapRequest(error))
         }

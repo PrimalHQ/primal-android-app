@@ -417,6 +417,7 @@ private fun ErrorHandler(
             is ThreadError.FailedToPublishLikeEvent -> context.getString(R.string.post_action_like_failed)
             is ThreadError.FailedToPublishRepostEvent -> context.getString(R.string.post_action_repost_failed)
             is ThreadError.FailedToPublishReplyEvent -> context.getString(R.string.post_action_reply_failed)
+            is ThreadError.MissingRelaysConfiguration -> context.getString(R.string.app_missing_relays_config)
             null -> return@LaunchedEffect
         }
 

@@ -22,6 +22,7 @@ import net.primal.android.explore.feed.ExploreFeedContract.UiState.ExploreFeedEr
 import net.primal.android.feed.repository.FeedRepository
 import net.primal.android.feed.repository.PostRepository
 import net.primal.android.navigation.searchQuery
+import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
@@ -115,6 +116,8 @@ class ExploreFeedViewModel @Inject constructor(
             )
         } catch (error: NostrPublishException) {
             setErrorState(error = ExploreFeedError.FailedToPublishLikeEvent(error))
+        } catch (error: MissingRelaysException) {
+            setErrorState(error = ExploreFeedError.MissingRelaysConfiguration(error))
         }
     }
 
@@ -127,6 +130,8 @@ class ExploreFeedViewModel @Inject constructor(
             )
         } catch (error: NostrPublishException) {
             setErrorState(error = ExploreFeedError.FailedToPublishRepostEvent(error))
+        } catch (error: MissingRelaysException) {
+            setErrorState(error = ExploreFeedError.MissingRelaysConfiguration(error))
         }
     }
 
@@ -151,6 +156,8 @@ class ExploreFeedViewModel @Inject constructor(
             setErrorState(error = ExploreFeedError.FailedToPublishZapEvent(error))
         } catch (error: NostrPublishException) {
             setErrorState(error = ExploreFeedError.FailedToPublishZapEvent(error))
+        } catch (error: MissingRelaysException) {
+            setErrorState(error = ExploreFeedError.MissingRelaysConfiguration(error))
         } catch (error: ZapRepository.InvalidZapRequestException) {
             setErrorState(error = ExploreFeedError.InvalidZapRequest(error))
         }

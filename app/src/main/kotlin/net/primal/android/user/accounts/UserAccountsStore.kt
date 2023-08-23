@@ -24,6 +24,16 @@ class UserAccountsStore @Inject constructor(
             initialValue = runBlocking { persistence.data.first() },
         )
 
+    suspend fun getAndUpdateAccount(
+        userId: String,
+        reducer: UserAccount.() -> UserAccount,
+    ): UserAccount {
+        val current = findByIdOrNull(userId = userId) ?: UserAccount.buildLocal(pubkey = userId)
+        val updated = current.reducer()
+        upsertAccount(updated)
+        return updated
+    }
+
     suspend fun upsertAccount(userAccount: UserAccount) {
         persistence.updateData { accounts ->
             val existingIndex = accounts.indexOfFirst { it.pubkey == userAccount.pubkey }
@@ -45,5 +55,5 @@ class UserAccountsStore @Inject constructor(
         persistence.updateData { emptyList() }
     }
 
-    fun findByIdOrNull(pubkey: String) = userAccounts.value.find { it.pubkey == pubkey }
+    fun findByIdOrNull(userId: String) = userAccounts.value.find { it.pubkey == userId }
 }

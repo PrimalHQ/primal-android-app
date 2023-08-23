@@ -19,6 +19,7 @@ import net.primal.android.core.compose.feed.asFeedPostUi
 import net.primal.android.feed.repository.FeedRepository
 import net.primal.android.feed.repository.PostRepository
 import net.primal.android.navigation.postId
+import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.ext.asEventIdTag
@@ -146,6 +147,8 @@ class ThreadViewModel @Inject constructor(
             )
         } catch (error: NostrPublishException) {
             setErrorState(error = ThreadError.FailedToPublishLikeEvent(error))
+        } catch (error: MissingRelaysException) {
+            setErrorState(error = ThreadError.MissingRelaysConfiguration(error))
         }
     }
 
@@ -158,6 +161,8 @@ class ThreadViewModel @Inject constructor(
             )
         } catch (error: NostrPublishException) {
             setErrorState(error = ThreadError.FailedToPublishRepostEvent(error))
+        } catch (error: MissingRelaysException) {
+            setErrorState(error = ThreadError.MissingRelaysConfiguration(error))
         }
     }
 
@@ -182,6 +187,8 @@ class ThreadViewModel @Inject constructor(
             setErrorState(error = ThreadError.FailedToPublishZapEvent(error))
         } catch (error: NostrPublishException) {
             setErrorState(error = ThreadError.FailedToPublishZapEvent(error))
+        } catch (error: MissingRelaysException) {
+            setErrorState(error = ThreadError.MissingRelaysConfiguration(error))
         } catch (error: ZapRepository.InvalidZapRequestException) {
             setErrorState(error = ThreadError.InvalidZapRequest(error))
         }
@@ -227,6 +234,8 @@ class ThreadViewModel @Inject constructor(
             setState { copy(replyText = "") }
         } catch (error: NostrPublishException) {
             setErrorState(error = ThreadError.FailedToPublishReplyEvent(error))
+        } catch (error: MissingRelaysException) {
+            setErrorState(error = ThreadError.MissingRelaysConfiguration(error))
         } finally {
             setState { copy(publishingReply = false) }
         }

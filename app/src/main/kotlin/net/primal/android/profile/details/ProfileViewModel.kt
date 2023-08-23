@@ -18,6 +18,7 @@ import net.primal.android.core.compose.media.model.MediaResourceUi
 import net.primal.android.feed.repository.FeedRepository
 import net.primal.android.feed.repository.PostRepository
 import net.primal.android.navigation.profileId
+import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.profile.db.authorNameUiFriendly
@@ -27,7 +28,6 @@ import net.primal.android.profile.details.ProfileContract.UiState
 import net.primal.android.profile.details.ProfileContract.UiState.ProfileError
 import net.primal.android.profile.details.model.ProfileDetailsUi
 import net.primal.android.profile.details.model.ProfileStatsUi
-import net.primal.android.profile.repository.LatestFollowingResolver
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.model.ZapTarget
@@ -153,6 +153,8 @@ class ProfileViewModel @Inject constructor(
             )
         } catch (error: NostrPublishException) {
             setErrorState(error = ProfileError.FailedToPublishLikeEvent(error))
+        } catch (error: MissingRelaysException) {
+            setErrorState(error = ProfileError.MissingRelaysConfiguration(error))
         }
     }
 
@@ -165,6 +167,8 @@ class ProfileViewModel @Inject constructor(
             )
         } catch (error: NostrPublishException) {
             setErrorState(error = ProfileError.FailedToPublishRepostEvent(error))
+        } catch (error: MissingRelaysException) {
+            setErrorState(error = ProfileError.MissingRelaysConfiguration(error))
         }
     }
 
@@ -189,6 +193,8 @@ class ProfileViewModel @Inject constructor(
             setErrorState(error = ProfileError.FailedToPublishZapEvent(error))
         } catch (error: NostrPublishException) {
             setErrorState(error = ProfileError.FailedToPublishZapEvent(error))
+        } catch (error: MissingRelaysException) {
+            setErrorState(error = ProfileError.MissingRelaysConfiguration(error))
         } catch (error: ZapRepository.InvalidZapRequestException) {
             setErrorState(error = ProfileError.InvalidZapRequest(error))
         }
@@ -196,21 +202,31 @@ class ProfileViewModel @Inject constructor(
 
     private fun follow(followAction: UiEvent.FollowAction) = viewModelScope.launch {
         try {
-            profileRepository.follow(followAction.profileId)
-        } catch (error: LatestFollowingResolver.RemoteFollowingsUnavailableException) {
-            // Failed to retrieve latest contacts, propagate error to the UI
+            profileRepository.follow(
+                userId = activeAccountStore.activeUserId(),
+                followedUserId = followAction.profileId,
+            )
+        } catch (error: WssException) {
+            setErrorState(error = ProfileError.FailedToFollowProfile(error))
         } catch (error: NostrPublishException) {
-            // Failed to publish update, propagate error to the UI
+            setErrorState(error = ProfileError.FailedToFollowProfile(error))
+        } catch (error: MissingRelaysException) {
+            setErrorState(error = ProfileError.MissingRelaysConfiguration(error))
         }
     }
 
     private fun unfollow(unfollowAction: UiEvent.UnfollowAction) = viewModelScope.launch {
         try {
-            profileRepository.unfollow(unfollowAction.profileId)
-        } catch (error: LatestFollowingResolver.RemoteFollowingsUnavailableException) {
-            // Failed to retrieve latest contacts, propagate error to the UI
+            profileRepository.unfollow(
+                userId = activeAccountStore.activeUserId(),
+                unfollowedUserId = unfollowAction.profileId,
+            )
+        } catch (error: WssException) {
+            setErrorState(error = ProfileError.FailedToUnfollowProfile(error))
         } catch (error: NostrPublishException) {
-            // Propagate error to the UI
+            setErrorState(error = ProfileError.FailedToUnfollowProfile(error))
+        } catch (error: MissingRelaysException) {
+            setErrorState(error = ProfileError.MissingRelaysConfiguration(error))
         }
     }
 

@@ -5,20 +5,21 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.withContext
 import net.primal.android.db.PrimalDatabase
+import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.nostr.ext.asProfileMetadataPO
 import net.primal.android.nostr.ext.asProfileStats
 import net.primal.android.nostr.ext.takeContentAsUserProfileStatsOrNull
-import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.android.user.accounts.UserAccountFetcher
 import net.primal.android.user.api.UsersApi
+import net.primal.android.user.domain.asUserAccount
 import net.primal.android.user.repository.UserRepository
 import javax.inject.Inject
 
 class ProfileRepository @Inject constructor(
     private val database: PrimalDatabase,
     private val usersApi: UsersApi,
-    private val activeAccountStore: ActiveAccountStore,
     private val userRepository: UserRepository,
-    private val latestFollowingResolver: LatestFollowingResolver,
+    private val userAccountFetcher: UserAccountFetcher,
 ) {
     fun observeProfile(profileId: String) =
         database.profiles().observeProfile(profileId = profileId).filterNotNull()
@@ -43,35 +44,32 @@ class ProfileRepository @Inject constructor(
         }
     }
 
-    suspend fun follow(followedPubkey: String) {
-        updateFollowing(
-            newFollowing = latestFollowingResolver.getLatestFollowing()
-                .toMutableSet()
-                .apply {
-                    add(followedPubkey)
-                }
-        )
+    suspend fun follow(userId: String, followedUserId: String) {
+        updateFollowing(userId = userId) {
+            toMutableSet().apply { add(followedUserId) }
+        }
     }
 
-    suspend fun unfollow(unfollowedPubkey: String) {
-        updateFollowing(
-            newFollowing = latestFollowingResolver.getLatestFollowing()
-                .toMutableSet()
-                .apply { remove(unfollowedPubkey) }
-        )
+    suspend fun unfollow(userId: String, unfollowedUserId: String) {
+        updateFollowing(userId = userId) {
+            toMutableSet().apply { remove(unfollowedUserId) }
+        }
     }
 
-    private suspend fun updateFollowing(newFollowing: Set<String>) {
-        val activeAccount = activeAccountStore.activeUserAccount()
+    private suspend fun updateFollowing(
+        userId: String,
+        reducer: Set<String>.() -> Set<String>
+    ) {
+        val userContacts = userAccountFetcher.fetchUserContacts(pubkey = userId)
+            ?: throw MissingRelaysException()
+
+        userRepository.updateContacts(userId, userContacts)
+
         val newContactsNostrEvent = usersApi.setUserContacts(
-            ownerId = activeAccount.pubkey,
-            contacts = newFollowing,
-            relays = activeAccount.relays
+            ownerId = userId,
+            contacts = userContacts.following.reducer(),
+            relays = userContacts.relays,
         )
-
-        userRepository.updateContacts(
-            userId = activeAccount.pubkey,
-            contactsNostrEvent = newContactsNostrEvent
-        )
+        userRepository.updateContacts(userId, newContactsNostrEvent.asUserAccount())
     }
 }

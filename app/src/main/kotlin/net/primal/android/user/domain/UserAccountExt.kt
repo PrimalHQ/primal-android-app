@@ -13,5 +13,4 @@ fun NostrEvent.asUserAccount() = UserAccount(
     relays = content.parseRelays(),
     following = tags?.parseFollowings() ?: emptySet(),
     interests = tags?.parseInterests() ?: emptyList(),
-    contactsCreatedAt = createdAt,
 )

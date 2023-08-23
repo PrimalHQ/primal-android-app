@@ -20,6 +20,8 @@ interface ExploreFeedContract {
             data class FailedToPublishZapEvent(val cause: Throwable) : ExploreFeedError()
             data class FailedToPublishRepostEvent(val cause: Throwable) : ExploreFeedError()
             data class FailedToPublishLikeEvent(val cause: Throwable) : ExploreFeedError()
+            data class MissingRelaysConfiguration(val cause: Throwable) : ExploreFeedError()
+
         }
     }
 

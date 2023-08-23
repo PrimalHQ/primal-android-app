@@ -3,13 +3,11 @@ package net.primal.android.user.accounts
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import net.primal.android.core.utils.asEllipsizedNpub
-import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.ext.asProfileMetadataPO
 import net.primal.android.nostr.ext.takeContentAsUserProfileStatsOrNull
 import net.primal.android.profile.db.authorNameUiFriendly
 import net.primal.android.profile.db.userNameUiFriendly
 import net.primal.android.user.api.UsersApi
-import net.primal.android.user.domain.Relay
 import net.primal.android.user.domain.UserAccount
 import net.primal.android.user.domain.asUserAccount
 import javax.inject.Inject
@@ -38,44 +36,11 @@ class UserAccountFetcher @Inject constructor(
         )
     }
 
-    suspend fun fetchUserProfileOrNull(pubkey: String) = try {
-        fetchUserProfile(pubkey)
-    } catch (error: WssException) {
-        null
-    }
-
-    suspend fun fetchUserContacts(pubkey: String): UserAccount {
+    suspend fun fetchUserContacts(pubkey: String): UserAccount? {
         val contactsResponse = withContext(Dispatchers.IO) {
             usersApi.getUserContacts(pubkey = pubkey, extendedResponse = false)
         }
 
-        val userAccount = contactsResponse.contactsEvent?.asUserAccount()
-            ?: UserAccount(
-                pubkey = pubkey,
-                authorDisplayName = pubkey.asEllipsizedNpub(),
-                userDisplayName = pubkey.asEllipsizedNpub(),
-                relays = BOOTSTRAP_RELAYS.map { Relay(url = it, read = true, write = true) },
-                following = emptySet(),
-                interests = emptyList(),
-                contactsCreatedAt = null,
-            )
-
-        return userAccount.ensureRelaysAreAvailable()
-    }
-
-    suspend fun fetchUserContactsOrNull(pubkey: String) = try {
-        fetchUserContacts(pubkey)
-    } catch (error: WssException) {
-        null
-    }
-
-    private fun UserAccount.ensureRelaysAreAvailable(): UserAccount {
-        return copy(
-            relays = if (relays.isEmpty()) {
-                BOOTSTRAP_RELAYS.map { Relay(url = it, read = true, write = true) }
-            } else {
-                this.relays
-            }
-        )
+        return contactsResponse.contactsEvent?.asUserAccount()
     }
 }

@@ -26,6 +26,9 @@ interface ProfileContract {
             data class FailedToPublishZapEvent(val cause: Throwable) : ProfileError()
             data class FailedToPublishRepostEvent(val cause: Throwable) : ProfileError()
             data class FailedToPublishLikeEvent(val cause: Throwable) : ProfileError()
+            data class MissingRelaysConfiguration(val cause: Throwable) : ProfileError()
+            data class FailedToFollowProfile(val cause: Throwable) : ProfileError()
+            data class FailedToUnfollowProfile(val cause: Throwable) : ProfileError()
         }
     }
 

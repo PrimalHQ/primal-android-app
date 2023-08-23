@@ -18,6 +18,7 @@ import net.primal.android.discuss.post.NewPostContract.UiEvent
 import net.primal.android.discuss.post.NewPostContract.UiState
 import net.primal.android.feed.repository.PostRepository
 import net.primal.android.navigation.newPostPreFillContent
+import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.ext.parseEventTags
 import net.primal.android.nostr.ext.parseHashtagTags
@@ -81,13 +82,15 @@ class NewPostViewModel @Inject constructor(
             )
             sendEffect(SideEffect.PostPublished)
         } catch (error: NostrPublishException) {
-            setErrorState(error = UiState.PublishError(cause = error.cause))
+            setErrorState(error = UiState.NewPostError.PublishError(cause = error.cause))
+        } catch (error: MissingRelaysException) {
+            setErrorState(error = UiState.NewPostError.MissingRelaysConfiguration(cause = error))
         } finally {
             setState { copy(publishing = false) }
         }
     }
 
-    private fun setErrorState(error: UiState.PublishError) {
+    private fun setErrorState(error: UiState.NewPostError) {
         setState { copy(error = error) }
         viewModelScope.launch {
             delay(2.seconds)

@@ -13,6 +13,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import net.primal.android.networking.UserAgentProvider
+import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.NostrIncomingMessage
 import net.primal.android.networking.sockets.NostrSocketClient
@@ -71,10 +72,18 @@ class RelayPool @Inject constructor(
         when (NostrEventKind.valueOf(nostrEvent.kind)) {
             NostrEventKind.ZapRequest,
             NostrEventKind.WalletRequest -> {
-                handlePublishEvent(walletRelays, nostrEvent)
+                if (walletRelays.isEmpty()) {
+                    throw MissingRelaysException()
+                } else {
+                    handlePublishEvent(walletRelays, nostrEvent)
+                }
             }
             else -> {
-                handlePublishEvent(regularRelays, nostrEvent)
+                if (regularRelays.isEmpty()) {
+                    throw MissingRelaysException()
+                } else {
+                    handlePublishEvent(regularRelays, nostrEvent)
+                }
             }
         }
     }

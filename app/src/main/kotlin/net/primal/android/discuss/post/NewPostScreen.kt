@@ -36,8 +36,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.R
 import net.primal.android.core.compose.AvatarThumbnailListItemImage
-import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.PrimalTopAppBar
+import net.primal.android.core.compose.button.PrimalLoadingButton
+import net.primal.android.discuss.post.NewPostContract.UiState.NewPostError
 import net.primal.android.theme.AppTheme
 
 @Composable
@@ -161,14 +162,20 @@ fun NewPostScreen(
 
 @Composable
 private fun NewPostPublishErrorHandler(
-    error: NewPostContract.UiState.PublishError?,
+    error: NewPostError?,
     snackbarHostState: SnackbarHostState,
 ) {
     val context = LocalContext.current
     LaunchedEffect(error ?: true) {
-        if (error != null) {
+        val errorMessage = when (error) {
+            is NewPostError.MissingRelaysConfiguration -> context.getString(R.string.app_missing_relays_config)
+            is NewPostError.PublishError -> context.getString(R.string.new_post_nostr_publish_error)
+            else -> null
+        }
+
+        if (errorMessage != null) {
             snackbarHostState.showSnackbar(
-                message = context.getString(R.string.new_post_nostr_publish_error),
+                message = errorMessage,
                 duration = SnackbarDuration.Short,
             )
         }

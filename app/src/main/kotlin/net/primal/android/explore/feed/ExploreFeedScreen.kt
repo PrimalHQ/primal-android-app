@@ -186,6 +186,7 @@ private fun ErrorHandler(
             is ExploreFeedError.FailedToPublishZapEvent -> context.getString(R.string.post_action_zap_failed)
             is ExploreFeedError.FailedToPublishLikeEvent -> context.getString(R.string.post_action_like_failed)
             is ExploreFeedError.FailedToPublishRepostEvent -> context.getString(R.string.post_action_repost_failed)
+            is ExploreFeedError.MissingRelaysConfiguration -> context.getString(R.string.app_missing_relays_config)
             null -> return@LaunchedEffect
         }
 

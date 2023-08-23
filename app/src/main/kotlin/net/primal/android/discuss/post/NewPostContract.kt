@@ -5,10 +5,14 @@ interface NewPostContract {
     data class UiState(
         val preFillContent: String? = null,
         val publishing: Boolean = false,
-        val error: PublishError? = null,
+        val error: NewPostError? = null,
         val activeAccountAvatarUrl: String? = null,
     ) {
-        data class PublishError(val cause: Throwable?)
+        sealed class NewPostError {
+            data class PublishError(val cause: Throwable?) : NewPostError()
+            data class MissingRelaysConfiguration(val cause: Throwable) : NewPostError()
+        }
+
     }
 
     sealed class UiEvent {

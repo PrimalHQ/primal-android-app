@@ -134,33 +134,10 @@ class UserAccountFetcherTest {
         val fetcher = UserAccountFetcher(usersApi = usersApiMock)
         val actual = fetcher.fetchUserContacts(pubkey = expectedPubkey)
 
+        actual.shouldNotBeNull()
         actual.relays shouldBe expectedRelays
         actual.following shouldBe expectedFollowing
         actual.interests shouldBe listOf("#bitcoin")
-    }
-
-    @Test
-    fun `fetchUserContacts takes bootstrap relays if relays are missing`() = runTest {
-        val expectedPubkey = "9b46c3f4a8dcdafdfff12a97c59758f38ff55002370fcfa7d14c8c857e9b5812"
-        val usersApiMock = mockk<UsersApi> {
-            coEvery { getUserContacts(any(), any()) } returns UserContactsResponse(
-                contactsEvent = NostrEvent(
-                    id = "invalidId",
-                    pubKey = expectedPubkey,
-                    createdAt = 1683463925,
-                    kind = 3,
-                    tags = emptyList(),
-                    content = "",
-                    sig = "invalidSig"
-                ),
-            )
-        }
-
-        val fetcher = UserAccountFetcher(usersApi = usersApiMock)
-        val actual = fetcher.fetchUserContacts(pubkey = expectedPubkey).relays
-
-        actual.shouldNotBeNull()
-        actual.map { it.url } shouldBe BOOTSTRAP_RELAYS
     }
 
     @Test

@@ -33,6 +33,6 @@ class UserDataUpdater @AssistedInject constructor(
 
     private suspend fun updateData() {
         settingsRepository.fetchAndPersistAppSettings(userId = userId)
-        userRepository.fetchAndUpsertUserAccount(userId = userId)
+        userRepository.fetchAndUpdateUserAccount(userId = userId)
     }
 }

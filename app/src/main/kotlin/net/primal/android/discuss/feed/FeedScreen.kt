@@ -25,7 +25,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -250,6 +249,7 @@ private fun ErrorHandler(
             is FeedError.FailedToPublishZapEvent -> context.getString(R.string.post_action_zap_failed)
             is FeedError.FailedToPublishLikeEvent -> context.getString(R.string.post_action_like_failed)
             is FeedError.FailedToPublishRepostEvent -> context.getString(R.string.post_action_repost_failed)
+            is FeedError.MissingRelaysConfiguration -> context.getString(R.string.app_missing_relays_config)
             else -> null
         }
 

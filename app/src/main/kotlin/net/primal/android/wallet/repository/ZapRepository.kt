@@ -27,7 +27,7 @@ class ZapRepository @Inject constructor(
         amountInSats: ULong? = null,
         comment: String? = null,
     ) {
-        val userAccount = accountsStore.findByIdOrNull(pubkey = userId)
+        val userAccount = accountsStore.findByIdOrNull(userId = userId)
         val nostrWallet = userAccount?.nostrWallet
         val walletRelays = userAccount?.relays
         val defaultZapAmount = userAccount?.appSettings?.defaultZapAmount

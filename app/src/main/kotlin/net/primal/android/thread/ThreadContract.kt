@@ -22,6 +22,7 @@ interface ThreadContract {
             data class FailedToPublishRepostEvent(val cause: Throwable) : ThreadError()
             data class FailedToPublishReplyEvent(val cause: Throwable) : ThreadError()
             data class FailedToPublishLikeEvent(val cause: Throwable) : ThreadError()
+            data class MissingRelaysConfiguration(val cause: Throwable) : ThreadError()
         }
     }
 

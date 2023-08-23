@@ -23,6 +23,7 @@ interface FeedContract {
             data class FailedToPublishZapEvent(val cause: Throwable) : FeedError()
             data class FailedToPublishRepostEvent(val cause: Throwable) : FeedError()
             data class FailedToPublishLikeEvent(val cause: Throwable) : FeedError()
+            data class MissingRelaysConfiguration(val cause: Throwable) : FeedError()
         }
     }
 

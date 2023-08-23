@@ -57,7 +57,7 @@ class SettingsRepository @Inject constructor(
     }
 
     private suspend fun persistAppSettings(userId: String, appSettings: ContentAppSettings) {
-        val currentUserAccount = accountsStore.findByIdOrNull(pubkey = userId)
+        val currentUserAccount = accountsStore.findByIdOrNull(userId = userId)
             ?: UserAccount.buildLocal(pubkey = userId)
 
         accountsStore.upsertAccount(
