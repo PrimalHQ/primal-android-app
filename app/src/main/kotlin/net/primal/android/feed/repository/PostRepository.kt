@@ -2,8 +2,11 @@ package net.primal.android.feed.repository
 
 import kotlinx.serialization.json.JsonArray
 import net.primal.android.db.PrimalDatabase
+import net.primal.android.networking.primal.api.PrimalImportApi
+import net.primal.android.networking.primal.api.model.ImportRequestBody
 import net.primal.android.networking.relays.RelayPool
 import net.primal.android.networking.relays.errors.NostrPublishException
+import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import javax.inject.Inject
@@ -13,6 +16,7 @@ class PostRepository @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val relayPool: RelayPool,
     private val nostrNotary: NostrNotary,
+    private val primalImportApi: PrimalImportApi,
 ) {
 
     fun findPostDataById(postId: String) = database.posts().findByPostId(postId = postId)
@@ -62,13 +66,17 @@ class PostRepository @Inject constructor(
     suspend fun publishShortTextNote(
         content: String,
         tags: Set<JsonArray> = emptySet(),
-    ) {
-        relayPool.publishEvent(
-            nostrEvent = nostrNotary.signShortTextNoteEvent(
-                userId = activeAccountStore.activeUserId(),
-                tags = tags.toList(),
-                noteContent = content,
-            )
+    ): Boolean {
+        val noteEvent = nostrNotary.signShortTextNoteEvent(
+            userId = activeAccountStore.activeUserId(),
+            tags = tags.toList(),
+            noteContent = content,
         )
+        relayPool.publishEvent(nostrEvent = noteEvent)
+        return try {
+            primalImportApi.importEvents(body = ImportRequestBody(events = listOf(noteEvent)))
+        } catch (error: WssException) {
+            false
+        }
     }
 }

@@ -214,11 +214,16 @@ class ThreadViewModel @Inject constructor(
 
             val hashtagTags = content.parseHashtagTags().toSet()
 
-            postRepository.publishShortTextNote(
+            val imported = postRepository.publishShortTextNote(
                 content = content,
                 tags = pubkeyTags + eventTags + hashtagTags,
             )
-            scheduleFetchReplies()
+            if (imported) {
+                fetchRepliesFromNetwork()
+            } else {
+                scheduleFetchReplies()
+            }
+
             setState { copy(replyText = "") }
         } catch (error: NostrPublishException) {
             setErrorState(error = ThreadError.FailedToPublishReplyEvent(error))
@@ -228,7 +233,7 @@ class ThreadViewModel @Inject constructor(
     }
 
     private fun scheduleFetchReplies() = viewModelScope.launch {
-        delay(500.milliseconds)
+        delay(750.milliseconds)
         fetchRepliesFromNetwork()
     }
 
