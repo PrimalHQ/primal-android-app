@@ -139,8 +139,8 @@ class ExploreFeedViewModel @Inject constructor(
         try {
             zapRepository.zap(
                 userId = activeAccountStore.activeUserId(),
-                comment = zapAction.zapDescription ?: "",
-                amountInSats = zapAction.zapAmount ?: 42.toULong(),
+                comment = zapAction.zapDescription,
+                amountInSats = zapAction.zapAmount,
                 target = ZapTarget.Note(
                     zapAction.postId,
                     zapAction.postAuthorId,
