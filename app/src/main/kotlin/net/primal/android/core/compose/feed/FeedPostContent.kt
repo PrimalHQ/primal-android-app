@@ -40,6 +40,7 @@ import net.primal.android.core.compose.feed.model.NostrResourceUi
 import net.primal.android.core.compose.media.model.MediaResourceUi
 import net.primal.android.core.ext.calculateImageSize
 import net.primal.android.core.ext.findNearestOrNull
+import net.primal.android.core.utils.HashtagMatcher
 import net.primal.android.core.utils.parseHashtags
 import net.primal.android.feed.db.ReferencedPost
 import net.primal.android.feed.db.ReferencedUser
@@ -145,53 +146,57 @@ fun FeedPostContent(
 
             refinedUrlResources.map { it.url }.forEach {
                 val startIndex = refinedContent.indexOf(it)
-                val endIndex = startIndex + it.length
-                addStyle(
-                    style = SpanStyle(color = primaryColor),
-                    start = startIndex,
-                    end = endIndex,
-                )
-                addStringAnnotation(
-                    tag = URL_ANNOTATION_TAG,
-                    annotation = it,
-                    start = startIndex,
-                    end = endIndex,
-                )
+                if (startIndex >= 0) {
+                    val endIndex = startIndex + it.length
+                    addStyle(
+                        style = SpanStyle(color = primaryColor),
+                        start = startIndex,
+                        end = endIndex,
+                    )
+                    addStringAnnotation(
+                        tag = URL_ANNOTATION_TAG,
+                        annotation = it,
+                        start = startIndex,
+                        end = endIndex,
+                    )
+                }
             }
 
             referencedUserResources.forEach {
                 checkNotNull(it.referencedUser)
                 val displayHandle = it.referencedUser.displayHandle
                 val startIndex = refinedContent.indexOf(displayHandle)
-                val endIndex = startIndex + displayHandle.length
-                addStyle(
-                    style = SpanStyle(color = primaryColor),
-                    start = startIndex,
-                    end = endIndex,
-                )
-                addStringAnnotation(
-                    tag = PROFILE_ID_ANNOTATION_TAG,
-                    annotation = it.referencedUser.userId,
-                    start = startIndex,
-                    end = endIndex,
-                )
+                if (startIndex >= 0) {
+                    val endIndex = startIndex + displayHandle.length
+                    addStyle(
+                        style = SpanStyle(color = primaryColor),
+                        start = startIndex,
+                        end = endIndex,
+                    )
+                    addStringAnnotation(
+                        tag = PROFILE_ID_ANNOTATION_TAG,
+                        annotation = it.referencedUser.userId,
+                        start = startIndex,
+                        end = endIndex,
+                    )
+                }
             }
 
-            hashtags.forEach {
-                val startIndex = refinedContent.indexOf(it)
-                val endIndex = startIndex + it.length
-                addStyle(
-                    style = SpanStyle(color = primaryColor),
-                    start = startIndex,
-                    end = endIndex,
-                )
-                addStringAnnotation(
-                    tag = HASHTAG_ANNOTATION_TAG,
-                    annotation = it,
-                    start = startIndex,
-                    end = endIndex,
-                )
-            }
+            HashtagMatcher(content = refinedContent, hashtags = hashtags)
+                .matches()
+                .forEach {
+                    addStyle(
+                        style = SpanStyle(color = primaryColor),
+                        start = it.startIndex,
+                        end = it.endIndex,
+                    )
+                    addStringAnnotation(
+                        tag = HASHTAG_ANNOTATION_TAG,
+                        annotation = it.value,
+                        start = it.startIndex,
+                        end = it.endIndex,
+                    )
+                }
         }
     }
 
