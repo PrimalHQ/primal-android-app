@@ -69,5 +69,5 @@ jobs:
        name: Primal ${{ github.ref_name }}
        draft: true
        prerelease: true
-       body_path: release_notes
+       body_path: RELEASE_NOTES.md
        files: ${{ github.ref_name }}/*apk
