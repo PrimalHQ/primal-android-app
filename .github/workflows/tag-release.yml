@@ -57,7 +57,7 @@ jobs:
    - name: Download release notes
      uses: actions/download-artifact@v1
      with:
-       name: release_notes
+       name: release_notes.md
 
    - name: Create Release
      id: create_release
