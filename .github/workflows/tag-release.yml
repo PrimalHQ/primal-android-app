@@ -41,7 +41,7 @@ jobs:
     - name: Upload release notes
       uses: actions/upload-artifact@v3
       with:
-        name: release_notes
+        name: release_notes.md
         path: RELEASE_NOTES.md
 
   release:
@@ -69,5 +69,5 @@ jobs:
        name: Primal ${{ github.ref_name }}
        draft: true
        prerelease: true
-       body_path: RELEASE_NOTES.md
+       body_path: ${{ github.workspace }}/release_notes.md
        files: ${{ github.ref_name }}/*apk
