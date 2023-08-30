@@ -32,24 +32,21 @@ jobs:
     - name: Build apks
       run: ./gradlew assembleReleaseAlternative --no-daemon
 
-    - name: Upload artifact
+    - name: Upload artifacts
       uses: actions/upload-artifact@v3
       with:
         name: ${{ github.ref_name }}
-        path: app/build/outputs/apk/releaseAlternative/*apk
-
-    - name: Upload release notes
-      uses: actions/upload-artifact@v3
-      with:
-        name: ${{ github.ref_name }}
-        path: RELEASE_NOTES.md
+        path: |
+          app/build/outputs/apk/releaseAlternative/*apk
+          app/build/outputs/mapping/releaseAlternative/mapping.txt
+          RELEASE_NOTES.md
 
   release:
    name: Create GitHub release
    needs: build
    runs-on: ubuntu-latest
    steps:
-   - name: Download build files
+   - name: Download artifacts
      uses: actions/download-artifact@v1
      with:
        name: ${{ github.ref_name }}
@@ -65,4 +62,6 @@ jobs:
        draft: true
        prerelease: true
        body_path: ${{ github.ref_name }}/RELEASE_NOTES.md
-       files: ${{ github.ref_name }}/*apk
+       files: |
+          ${{ github.ref_name }}/*apk
+          ${{ github.ref_name }}/mapping.txt
