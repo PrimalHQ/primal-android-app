@@ -70,6 +70,4 @@ jobs:
        draft: true
        prerelease: true
        body_path: RELEASE_NOTES.md
-       files: |
-         primal-${{ github.ref_name }}.apk
-         primal-${{ github.ref_name }}-mapping.zip
+       files: primal-${{ github.ref_name }}/*
