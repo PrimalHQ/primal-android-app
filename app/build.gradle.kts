@@ -36,8 +36,7 @@ fun extractSigningConfigProperties(storeName: String): SigningConfigProperties? 
     val storeFile = when {
         absoluteStoreFile.exists() -> absoluteStoreFile
         projectStoreFile.exists() -> projectStoreFile
-        else -> throw IllegalArgumentException("storeFile for $storeName can not be found " +
-                "at $absoluteStoreFile or $projectStoreFile")
+        else -> return null
     }
 
     return SigningConfigProperties(
