@@ -18,6 +18,37 @@ val configProperties by lazy {
     }
 }
 
+data class SigningConfigProperties(
+    val storeName: String,
+    val storeFile: File,
+    val storePassword: String,
+    val keyAlias: String,
+    val keyAliasPassword: String,
+)
+
+fun extractSigningConfigProperties(storeName: String): SigningConfigProperties? {
+    val properties = configProperties
+    val storeFilePath = properties?.getProperty("$storeName.storeFile")
+    if (properties == null || storeFilePath == null) return null
+
+    val absoluteStoreFile = File(storeFilePath)
+    val projectStoreFile = File(projectDir, storeFilePath)
+    val storeFile = when {
+        absoluteStoreFile.exists() -> absoluteStoreFile
+        projectStoreFile.exists() -> projectStoreFile
+        else -> throw IllegalArgumentException("storeFile for $storeName can not be found " +
+                "at $absoluteStoreFile or $projectStoreFile")
+    }
+
+    return SigningConfigProperties(
+        storeName = storeName,
+        storeFile = storeFile,
+        storePassword = properties.getProperty("$storeName.storePassword"),
+        keyAlias = properties.getProperty("$storeName.keyAlias"),
+        keyAliasPassword = properties.getProperty("$storeName.keyPassword")
+    )
+}
+
 android {
     namespace = "net.primal.android"
     compileSdk = 34
@@ -43,24 +74,21 @@ android {
     }
 
     signingConfigs {
-        val properties = configProperties
-        val playStoreCertificateFile = properties?.getProperty("playStore.storeFile")
-        if (properties != null && playStoreCertificateFile != null) {
-            signingConfigs.create("playStore") {
-                storeFile(File(playStoreCertificateFile))
-                storePassword(properties.getProperty("playStore.storePassword"))
-                keyAlias(properties.getProperty("playStore.keyAlias"))
-                keyPassword(properties.getProperty("playStore.keyPassword"))
+        extractSigningConfigProperties("playStore")?.let {
+            signingConfigs.create(it.storeName) {
+                storeFile(it.storeFile)
+                storePassword(it.storePassword)
+                keyAlias(it.keyAlias)
+                keyPassword(it.keyAliasPassword)
             }
         }
 
-        val alternativeCertificateFile = properties?.getProperty("alternative.storeFile")
-        if (properties != null && alternativeCertificateFile != null) {
-            signingConfigs.create("alternative") {
-                storeFile(File(alternativeCertificateFile))
-                storePassword(properties.getProperty("alternative.storePassword"))
-                keyAlias(properties.getProperty("alternative.keyAlias"))
-                keyPassword(properties.getProperty("alternative.keyPassword"))
+        extractSigningConfigProperties("alternative")?.let {
+            signingConfigs.create(it.storeName) {
+                storeFile(it.storeFile)
+                storePassword(it.storePassword)
+                keyAlias(it.keyAlias)
+                keyPassword(it.keyAliasPassword)
             }
         }
     }
@@ -89,6 +117,14 @@ android {
                 signingConfigs.getByName("alternative")
             } catch (error: UnknownDomainObjectException) {
                 signingConfigs.getByName("debug")
+            }
+        }
+    }
+
+    applicationVariants.all {
+        outputs.forEach { output ->
+            if (output is com.android.build.gradle.internal.api.BaseVariantOutputImpl) {
+                output.outputFileName = "primal-${versionName}.${output.outputFile.extension}"
             }
         }
     }
