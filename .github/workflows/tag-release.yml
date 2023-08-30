@@ -32,6 +32,9 @@ jobs:
     - name: Build APK
       run: ./gradlew assembleReleaseAlternative --no-daemon
 
+    - name: Prepare APK
+      run: mv app/build/outputs/apk/releaseAlternative/*apk primal-${{ github.ref_name }}.apk
+
     - name: Zip R8 mapping file
       run: zip -j primal-${{ github.ref_name }}-mapping.zip app/build/outputs/mapping/releaseAlternative/mapping.txt
 
@@ -40,7 +43,7 @@ jobs:
       with:
         name: primal-${{ github.ref_name }}
         path: |
-          app/build/outputs/apk/releaseAlternative/*apk
+          primal-${{ github.ref_name }}.apk
           primal-${{ github.ref_name }}-mapping.zip
 
   release:
@@ -68,5 +71,5 @@ jobs:
        prerelease: true
        body_path: RELEASE_NOTES.md
        files: |
-         ${{ github.ref_name }}/*apk
+         primal-${{ github.ref_name }}.apk
          primal-${{ github.ref_name }}-mapping.zip

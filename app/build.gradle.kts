@@ -121,14 +121,6 @@ android {
         }
     }
 
-    applicationVariants.all {
-        outputs.forEach { output ->
-            if (output is com.android.build.gradle.internal.api.BaseVariantOutputImpl) {
-                output.outputFileName = "primal-${versionName}.${output.outputFile.extension}"
-            }
-        }
-    }
-
     sourceSets {
         named("releasePlayStore") {
             java.srcDirs("src/release/kotlin")
