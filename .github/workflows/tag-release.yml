@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    name: Build, sign and upload artifact
+    name: Build, sign and upload artifacts
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
@@ -35,17 +35,17 @@ jobs:
     - name: Upload APK artifact
       uses: actions/upload-artifact@v3
       with:
-        name: primal-${{ github.ref_name }}.apk
+        name: primal-${{ github.ref_name }}
         path: app/build/outputs/apk/releaseAlternative/*apk
 
     - name: Zip R8 mapping file
-      run: zip primal-${{ github.ref_name }}-mapping.zip app/build/outputs/mapping/releaseAlternative/mapping.txt
+      run: zip -j primal-${{ github.ref_name }}-mapping.zip app/build/outputs/mapping/releaseAlternative/mapping.txt
 
     - name: Upload R8 mapping file
       uses: actions/upload-artifact@v3
       with:
-        name: primal-${{ github.ref_name }}-mapping.zip
-        path: primal-${{ github.ref_name }}-mapping.zip
+        name: primal-${{ github.ref_name }}-mapping
+        path: app/build/outputs/mapping/releaseAlternative/mapping.txt
 
   release:
    name: Create GitHub release
@@ -58,12 +58,12 @@ jobs:
    - name: Download APK artifact
      uses: actions/download-artifact@v1
      with:
-       name: primal-${{ github.ref_name }}.apk
+       name: primal-${{ github.ref_name }}
 
    - name: Download APK artifact
      uses: actions/download-artifact@v1
      with:
-       name: primal-${{ github.ref_name }}-mapping.zip
+       name: primal-${{ github.ref_name }}-mapping
 
    - name: Create Release
      id: create_release
@@ -77,5 +77,5 @@ jobs:
        prerelease: true
        body_path: RELEASE_NOTES.md
        files: |
-         primal-${{ github.ref_name }}.apk
-         primal-${{ github.ref_name }}-mapping.zip
+         ${{ github.ref_name }}/*apk
+         primal-${{ github.ref_name }}-mapping
