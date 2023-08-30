@@ -64,4 +64,4 @@ jobs:
        body_path: ${{ github.ref_name }}/RELEASE_NOTES.md
        files: |
           ${{ github.ref_name }}/*apk
-          ${{ github.ref_name }}/mapping.txt
+          ${{ github.ref_name }}/app/build/outputs/mapping/releaseAlternative/mapping.txt
