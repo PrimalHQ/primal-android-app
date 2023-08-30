@@ -26,9 +26,7 @@ jobs:
 
     - name: Unpack Certificates
       run: |
-        openssl base64 -d -out primal_alternative_android.jks <<< "${{ secrets.CERT_ALTERNATIVE }}"
         openssl base64 -d -out app/primal_alternative_android.jks <<< "${{ secrets.CERT_ALTERNATIVE }}"
-        openssl base64 -d -out primal_googlePlay_android.jks <<< "${{ secrets.CERT_PLAYSTORE }}"
         openssl base64 -d -out app/primal_googlePlay_android.jks <<< "${{ secrets.CERT_PLAYSTORE }}"
 
     - name: Build apks
@@ -61,4 +59,5 @@ jobs:
        name: Primal ${{ github.ref_name }}
        draft: true
        prerelease: true
+       body_path: RELEASE_NOTES.md
        files: ${{ github.ref_name }}/*apk
