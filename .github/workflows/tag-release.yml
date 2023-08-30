@@ -25,7 +25,7 @@ jobs:
       run:  openssl base64 -d -out config.properties <<< "${{ secrets.CONFIG_PROPERTIES }}"
 
     - name: Unpack Certificate
-      run:  openssl base64 -d -out certificates/primal_alternative_android.jks <<< "${{ secrets.CERT_ALTERNATIVE }}"
+      run:  openssl base64 -d -out primal_alternative_android.jks <<< "${{ secrets.CERT_ALTERNATIVE }}"
 
     - name: Build apks
       run: ./gradlew assembleReleaseAlternative --no-daemon
