@@ -29,23 +29,19 @@ jobs:
         openssl base64 -d -out app/primal_alternative_android.jks <<< "${{ secrets.CERT_ALTERNATIVE }}"
         openssl base64 -d -out app/primal_googlePlay_android.jks <<< "${{ secrets.CERT_PLAYSTORE }}"
 
-    - name: Build apks
+    - name: Build APK
       run: ./gradlew assembleReleaseAlternative --no-daemon
-
-    - name: Upload APK artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: primal-${{ github.ref_name }}
-        path: app/build/outputs/apk/releaseAlternative/*apk
 
     - name: Zip R8 mapping file
       run: zip -j primal-${{ github.ref_name }}-mapping.zip app/build/outputs/mapping/releaseAlternative/mapping.txt
 
-    - name: Upload R8 mapping file
+    - name: Upload artifacts
       uses: actions/upload-artifact@v3
       with:
-        name: primal-${{ github.ref_name }}-mapping
-        path: app/build/outputs/mapping/releaseAlternative/mapping.txt
+        name: primal-${{ github.ref_name }}
+        path: |
+          app/build/outputs/apk/releaseAlternative/*apk
+          primal-${{ github.ref_name }}-mapping.zip
 
   release:
    name: Create GitHub release
@@ -55,15 +51,10 @@ jobs:
    - name: Checkout code
      uses: actions/checkout@v3
 
-   - name: Download APK artifact
+   - name: Download artifacts
      uses: actions/download-artifact@v1
      with:
        name: primal-${{ github.ref_name }}
-
-   - name: Download APK artifact
-     uses: actions/download-artifact@v1
-     with:
-       name: primal-${{ github.ref_name }}-mapping
 
    - name: Create Release
      id: create_release
@@ -78,4 +69,4 @@ jobs:
        body_path: RELEASE_NOTES.md
        files: |
          ${{ github.ref_name }}/*apk
-         primal-${{ github.ref_name }}-mapping
+         primal-${{ github.ref_name }}-mapping.zip
