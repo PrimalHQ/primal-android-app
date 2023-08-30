@@ -38,8 +38,14 @@ jobs:
         name: ${{ github.ref_name }}
         path: app/build/outputs/apk/releaseAlternative/*apk
 
+    - name: Upload release notes
+      uses: actions/upload-artifact@v3
+      with:
+        name: release_notes
+        path: RELEASE_NOTES.md
+
   release:
-   name: Create github release and attach apk
+   name: Create GitHub release
    needs: build
    runs-on: ubuntu-latest
    steps:
@@ -48,6 +54,10 @@ jobs:
      with:
        name: ${{ github.ref_name }}
 
+   - name: Download release notes
+     uses: actions/download-artifact@v1
+     with:
+       name: release_notes
 
    - name: Create Release
      id: create_release
@@ -59,5 +69,5 @@ jobs:
        name: Primal ${{ github.ref_name }}
        draft: true
        prerelease: true
-       body_path: ${{ github.workspace }}/RELEASE_NOTES.md
+       body_path: release_notes
        files: ${{ github.ref_name }}/*apk
