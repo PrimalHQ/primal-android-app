@@ -686,6 +686,7 @@ private fun UserPublicKey(
     pubkey: String,
     onCopyClick: (String) -> Unit,
 ) {
+    val npub = pubkey.asEllipsizedNpub()
     Row(
         verticalAlignment = CenterVertically,
     ) {
@@ -693,7 +694,7 @@ private fun UserPublicKey(
             modifier = Modifier
                 .padding(horizontal = 16.dp)
                 .wrapContentWidth(),
-            text = pubkey.asEllipsizedNpub(),
+            text = npub,
             style = AppTheme.typography.bodySmall,
             color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
             leadingIconTintColor = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
@@ -706,7 +707,7 @@ private fun UserPublicKey(
             modifier = Modifier
                 .size(20.dp)
                 .clickable(
-                    onClick = { onCopyClick(pubkey) },
+                    onClick = { onCopyClick(npub) },
                     role = Role.Button,
                     interactionSource = remember { MutableInteractionSource() },
                     indication = rememberRipple()
