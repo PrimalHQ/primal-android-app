@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    name: Build, sign and upload artifact
+    name: Build, sign and upload artifacts
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
@@ -21,28 +21,44 @@ jobs:
         distribution: 'temurin'
         cache: 'gradle'
 
-    - name: Unpack base64 config.properties
-      run:  openssl base64 -d -out config.properties <<< ${{ secrets.CONFIG_PROPERTIES }}
+    - name: Unpack Config file
+      run:  openssl base64 -d -out config.properties <<< "${{ secrets.CONFIG_PROPERTIES }}"
 
-    - name: Build apks
+    - name: Unpack Certificates
+      run: |
+        openssl base64 -d -out app/primal_alternative_android.jks <<< "${{ secrets.CERT_ALTERNATIVE }}"
+        openssl base64 -d -out app/primal_googlePlay_android.jks <<< "${{ secrets.CERT_PLAYSTORE }}"
+
+    - name: Build APK
       run: ./gradlew assembleReleaseAlternative --no-daemon
 
-    - name: Upload artifact
+    - name: Prepare APK
+      run: mv app/build/outputs/apk/releaseAlternative/*apk primal-${{ github.ref_name }}.apk
+
+    - name: Zip R8 mapping file
+      run: zip -j primal-${{ github.ref_name }}-mapping.zip app/build/outputs/mapping/releaseAlternative/mapping.txt
+
+    - name: Upload artifacts
       uses: actions/upload-artifact@v3
       with:
-        name: ${{ github.ref_name }}
-        path: app/build/outputs/apk/releaseAlternative/*apk
+        name: primal-${{ github.ref_name }}
+        path: |
+          primal-${{ github.ref_name }}.apk
+          primal-${{ github.ref_name }}-mapping.zip
 
   release:
-   name: Create github release and attach apk
+   name: Create GitHub release
    needs: build
    runs-on: ubuntu-latest
    steps:
-   - name: Download APK from build
+   - name: Checkout code
+     uses: actions/checkout@v3
+
+   - name: Download artifacts
      uses: actions/download-artifact@v1
      with:
-       name: ${{ github.ref_name }}
-   # GITHUB_TOKEN is provided in action, you need to add write permissions in action settings
+       name: primal-${{ github.ref_name }}
+
    - name: Create Release
      id: create_release
      uses: softprops/action-gh-release@v1
@@ -50,7 +66,8 @@ jobs:
        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
      with:
        tag_name: ${{ github.ref_name }}
-       name: Release ${{ github.ref_name }}
+       name: Primal ${{ github.ref_name }}
        draft: true
        prerelease: true
-       files: ${{ github.ref_name }}/*apk
+       body_path: RELEASE_NOTES.md
+       files: primal-${{ github.ref_name }}/*
