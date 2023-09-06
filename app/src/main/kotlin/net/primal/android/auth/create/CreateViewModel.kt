@@ -42,20 +42,25 @@ class CreateViewModel @Inject constructor(
         viewModelScope.launch { _event.emit(event) }
     }
 
+    init {
+        observeEvents()
+    }
+
     private fun observeEvents() = viewModelScope.launch {
         _event.collect {
             when (it) {
-                is UiEvent.MetadataCreateEvent -> createMetadata(profileMetadata = it.profileMetadata)
-                is UiEvent.FollowEvent -> follow(pubkeys = it.followedPubkeys)
+                is UiEvent.MetadataCreateEvent -> createMetadata()
+                is UiEvent.AvatarUriChangedEvent -> setState { copy(avatarUri = it.avatarUri) }
+                is UiEvent.BannerUriChangedEvent -> setState { copy(bannerUri = it.bannerUri) }
+                is UiEvent.NameChangedEvent -> setState { copy(name = it.name) }
+                is UiEvent.HandleChangedEvent -> setState { copy(handle = it.handle) }
+                is UiEvent.WebsiteChangedEvent -> setState { copy(website = it.website) }
+                is UiEvent.AboutMeChangedEvent -> setState { copy(aboutMe = it.aboutMe) }
             }
         }
     }
 
-    private fun createMetadata(profileMetadata: ProfileMetadata) = viewModelScope.launch {
-
-    }
-
-    private fun follow(pubkeys: Set<String>) = viewModelScope.launch {
+    private fun createMetadata() = viewModelScope.launch {
 
     }
 }
