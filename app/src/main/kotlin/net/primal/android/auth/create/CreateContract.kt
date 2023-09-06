@@ -1,11 +1,11 @@
 package net.primal.android.auth.create
 
 import android.net.Uri
-import net.primal.android.profile.db.ProfileMetadata
 
 interface CreateContract {
     data class UiState(
-        val currentStep: StepState = StepState.NewAccount(null),
+        val currentStep: Int = 1,
+        val loading: Boolean = false,
         val error: CreateError? = null,
         val name: String = "",
         val handle: String = "",
@@ -23,9 +23,12 @@ interface CreateContract {
     }
 
     sealed class UiEvent {
-        data object MetadataCreateEvent: UiEvent()
-        data class AvatarUriChangedEvent(val avatarUri: Uri): UiEvent()
-        data class BannerUriChangedEvent(val bannerUri: Uri): UiEvent()
+        data object GoToProfilePreviewStepEvent: UiEvent()
+        data object GoToNostrCreatedStepEvent: UiEvent()
+        data object GoBack: UiEvent()
+        data object FinishEvent: UiEvent()
+        data class AvatarUriChangedEvent(val avatarUri: Uri?): UiEvent()
+        data class BannerUriChangedEvent(val bannerUri: Uri?): UiEvent()
         data class NameChangedEvent(val name: String): UiEvent()
         data class HandleChangedEvent(val handle: String): UiEvent()
         data class WebsiteChangedEvent(val website: String): UiEvent()
@@ -36,12 +39,5 @@ interface CreateContract {
         data object MetadataCreated: SideEffect()
         data class AccountCreated(val pubkey: String): SideEffect()
         data object AccountsFollowed: SideEffect()
-    }
-
-    sealed class StepState {
-        data class NewAccount(val profileMetadata: ProfileMetadata?): StepState()
-        data class ProfilePreview(val profileMetadata: ProfileMetadata): StepState()
-        data class AccountCreated(val profileMetadata: ProfileMetadata): StepState()
-        data class FindWhoToFollow(val profileMetadata: ProfileMetadata, val followedPubkeys: List<String>)
     }
 }

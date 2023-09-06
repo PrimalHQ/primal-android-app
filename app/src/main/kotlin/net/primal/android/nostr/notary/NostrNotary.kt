@@ -157,4 +157,19 @@ class NostrNotary @Inject constructor(
             tags = tags
         ).signOrThrow(hexPrivateKey = Hex.decode(nwc.keypair.privateKey))
     }
+
+    fun signMetadataEvent(
+        privkey: String,
+        pubkey: String,
+        name: String,
+        handle: String,
+        website: String,
+        aboutMe: String
+    ): NostrEvent {
+        return NostrUnsignedEvent(
+            pubKey = pubkey,
+            content = "",
+            kind = NostrEventKind.Metadata.value
+        ).signOrThrow(hexPrivateKey = Hex.decode(privkey))
+    }
 }
