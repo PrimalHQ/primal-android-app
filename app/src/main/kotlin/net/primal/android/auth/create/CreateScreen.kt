@@ -112,14 +112,14 @@ fun CreateContent(
                     modifier = Modifier
                         .width(32.dp)
                         .height(4.dp)
-                        .background(AppTheme.extraColorScheme.onSurfaceVariantAlt1)
+                        .background(AppTheme.colorScheme.outline)
                 )
                 Spacer(modifier = Modifier.width(2.dp))
                 Box(
                     modifier = Modifier
                         .width(32.dp)
                         .height(4.dp)
-                        .background(AppTheme.extraColorScheme.onSurfaceVariantAlt1)
+                        .background(AppTheme.colorScheme.outline)
                 )
             }
         }
@@ -127,265 +127,10 @@ fun CreateContent(
             modifier = Modifier
                 .verticalScroll(rememberScrollState())
                 .fillMaxHeight()
-                .weight(weight = 1f, fill = false)
+                .weight(weight = 1f, fill = true)
 
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .height(179.dp)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(124.dp)
-                        .background(color = Color(0xFF181818))
-                )
-
-                Box(
-                    modifier = Modifier
-                        .padding(horizontal = 16.dp)
-                        .background(color = Color.Black, shape = CircleShape)
-                        .align(Alignment.BottomStart)
-                ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.default_avatar),
-                        contentDescription = null,
-                    )
-                }
-
-                Row(
-                    modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .padding(bottom = 24.dp)
-                        .padding(end = 32.dp)
-                        .height(20.dp)
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(
-                        text = "set photo",
-                        fontSize = 16.sp,
-                        textAlign = TextAlign.Center,
-                        style = TextStyle(
-                            brush = Brush.linearGradient(
-                                colors = listOf(
-                                    AppTheme.extraColorScheme.brand1,
-                                    AppTheme.extraColorScheme.brand2,
-                                ),
-                            )
-                        )
-                    )
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Divider(
-                        modifier = Modifier
-                            .height(16.dp)
-                            .width(1.dp)
-                    )
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(
-                        text = "set banner",
-                        fontSize = 16.sp,
-                        textAlign = TextAlign.Center,
-                        style = TextStyle(
-                            brush = Brush.linearGradient(
-                                colors = listOf(
-                                    AppTheme.extraColorScheme.brand1,
-                                    AppTheme.extraColorScheme.brand2,
-                                ),
-                            )
-                        )
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.height(32.dp))
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(72.dp)
-                    .padding(horizontal = 32.dp)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = "DISPLAY NAME",
-                        fontWeight = FontWeight.W400,
-                        fontSize = 16.sp,
-                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt4
-                    )
-                    Text(
-                        buildAnnotatedString {
-                            withStyle(
-                                style = SpanStyle(
-                                    color = Color.Red,
-                                    fontWeight = FontWeight.W400,
-                                    fontSize = 16.sp
-                                )
-                            ) {
-                                append("*")
-                            }
-                            withStyle(
-                                style = SpanStyle(
-                                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
-                                    fontWeight = FontWeight.W400,
-                                    fontSize = 16.sp
-                                )
-                            ) {
-                                append(" required")
-                            }
-                        }
-                    )
-                }
-                Spacer(modifier = Modifier.height(4.dp))
-                OutlinedTextField(
-                    modifier = Modifier
-                        .height(48.dp)
-                        .clip(shape = RoundedCornerShape(12.dp))
-                        .fillMaxWidth(),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        unfocusedContainerColor = Color(0xFF181818),
-                        unfocusedBorderColor = Color.Transparent
-                    ),
-                    maxLines = 1,
-                    value = "",
-                    onValueChange = {}
-                )
-            }
-            Spacer(modifier = Modifier.height(12.dp))
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(72.dp)
-                    .padding(horizontal = 32.dp)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = "HANDLE",
-                        fontWeight = FontWeight.W400,
-                        fontSize = 16.sp,
-                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt4
-                    )
-                    Text(
-                        buildAnnotatedString {
-                            withStyle(
-                                style = SpanStyle(
-                                    color = Color.Red,
-                                    fontWeight = FontWeight.W400,
-                                    fontSize = 16.sp
-                                )
-                            ) {
-                                append("*")
-                            }
-                            withStyle(
-                                style = SpanStyle(
-                                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
-                                    fontWeight = FontWeight.W400,
-                                    fontSize = 16.sp
-                                )
-                            ) {
-                                append(" required")
-                            }
-                        }
-                    )
-                }
-                Spacer(modifier = Modifier.height(4.dp))
-                OutlinedTextField(
-                    modifier = Modifier
-                        .height(48.dp)
-                        .clip(shape = RoundedCornerShape(12.dp))
-                        .fillMaxWidth(),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        unfocusedContainerColor = Color(0xFF181818),
-                        unfocusedBorderColor = Color.Transparent
-                    ),
-                    maxLines = 1,
-                    value = "",
-                    leadingIcon = {
-                        Text(
-                            modifier = Modifier
-                                .align(alignment = Alignment.CenterHorizontally)
-                                .padding(bottom = 6.dp), // nothing else worked to center this god damn text vertically
-                            text = "@",
-                            fontWeight = FontWeight.W500,
-                            fontSize = 18.sp,
-                            color = AppTheme.extraColorScheme.onSurfaceVariantAlt4
-                        )
-                    },
-                    onValueChange = {}
-                )
-            }
-            Spacer(modifier = Modifier.height(12.dp))
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(72.dp)
-                    .padding(horizontal = 32.dp)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = "WEBSITE",
-                        fontWeight = FontWeight.W400,
-                        fontSize = 16.sp,
-                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt4
-                    )
-                }
-                Spacer(modifier = Modifier.height(4.dp))
-                OutlinedTextField(
-                    modifier = Modifier
-                        .height(48.dp)
-                        .clip(shape = RoundedCornerShape(12.dp))
-                        .fillMaxWidth(),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        unfocusedContainerColor = Color(0xFF181818),
-                        unfocusedBorderColor = Color.Transparent
-                    ),
-                    maxLines = 1,
-                    value = "",
-                    onValueChange = {}
-                )
-            }
-            Spacer(modifier = Modifier.height(12.dp))
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(72.dp)
-                    .padding(horizontal = 32.dp)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = "ABOUT ME",
-                        fontWeight = FontWeight.W400,
-                        fontSize = 16.sp,
-                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt4
-                    )
-                }
-                Spacer(modifier = Modifier.height(4.dp))
-                OutlinedTextField(
-                    modifier = Modifier
-                        .height(48.dp)
-                        .clip(shape = RoundedCornerShape(12.dp))
-                        .fillMaxWidth(),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        unfocusedContainerColor = Color(0xFF181818),
-                        unfocusedBorderColor = Color.Transparent
-                    ),
-                    maxLines = 3,
-                    value = "",
-                    onValueChange = {}
-                )
-            }
+            CrateAccountStep()
         }
         Row(
             modifier = Modifier
@@ -405,6 +150,163 @@ fun CreateContent(
     }
 }
 
+@Composable
+fun CrateAccountStep() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .height(179.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(124.dp)
+                .background(color = Color(0xFF181818))
+        )
+
+        Box(
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .background(color = Color.Black, shape = CircleShape)
+                .align(Alignment.BottomStart)
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.default_avatar),
+                contentDescription = null,
+            )
+        }
+
+        Row(
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(bottom = 24.dp)
+                .padding(end = 32.dp)
+                .height(20.dp)
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = "set photo",
+                fontSize = 16.sp,
+                textAlign = TextAlign.Center,
+                style = TextStyle(
+                    brush = Brush.linearGradient(
+                        colors = listOf(
+                            AppTheme.extraColorScheme.brand1,
+                            AppTheme.extraColorScheme.brand2,
+                        ),
+                    )
+                )
+            )
+            Spacer(modifier = Modifier.width(6.dp))
+            Divider(
+                modifier = Modifier
+                    .height(16.dp)
+                    .width(1.dp)
+            )
+            Spacer(modifier = Modifier.width(6.dp))
+            Text(
+                text = "set banner",
+                fontSize = 16.sp,
+                textAlign = TextAlign.Center,
+                style = TextStyle(
+                    brush = Brush.linearGradient(
+                        colors = listOf(
+                            AppTheme.extraColorScheme.brand1,
+                            AppTheme.extraColorScheme.brand2,
+                        ),
+                    )
+                )
+            )
+        }
+    }
+    Spacer(modifier = Modifier.height(32.dp))
+    InputField(text = "DISPLAY NAME", isRequired = true)
+    Spacer(modifier = Modifier.height(12.dp))
+    InputField(text = "HANDLE", isRequired = true, prefix = "@")
+    Spacer(modifier = Modifier.height(12.dp))
+    InputField(text = "WEBSITE")
+    Spacer(modifier = Modifier.height(12.dp))
+    InputField(text = "ABOUT ME")
+}
+
+@Composable
+fun InputField(
+    text: String,
+    isRequired: Boolean = false,
+    prefix: String? = null
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(72.dp)
+            .padding(horizontal = 32.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = text,
+                fontWeight = FontWeight.W400,
+                fontSize = 16.sp,
+                color = AppTheme.extraColorScheme.onSurfaceVariantAlt4
+            )
+            if (isRequired) {
+                Text(
+                    buildAnnotatedString {
+                        withStyle(
+                            style = SpanStyle(
+                                color = Color.Red,
+                                fontWeight = FontWeight.W400,
+                                fontSize = 16.sp
+                            )
+                        ) {
+                            append("*")
+                        }
+                        withStyle(
+                            style = SpanStyle(
+                                color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
+                                fontWeight = FontWeight.W400,
+                                fontSize = 16.sp
+                            )
+                        ) {
+                            append(" required")
+                        }
+                    }
+                )
+            }
+        }
+        Spacer(modifier = Modifier.height(4.dp))
+        OutlinedTextField(
+            modifier = Modifier
+                .height(48.dp)
+                .clip(shape = RoundedCornerShape(12.dp))
+                .fillMaxWidth(),
+            colors = OutlinedTextFieldDefaults.colors(
+                unfocusedContainerColor = Color(0xFF181818),
+                unfocusedBorderColor = Color.Transparent
+            ),
+            maxLines = 1,
+            value = "",
+            leadingIcon = if (prefix != null) {
+                {
+                    Text(
+                        modifier = Modifier
+                            .align(alignment = Alignment.CenterHorizontally)
+                            .padding(bottom = 6.dp), // nothing else worked to center this god damn text vertically
+                        text = prefix,
+                        fontWeight = FontWeight.W500,
+                        fontSize = 18.sp,
+                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt4
+                    )
+                }
+            } else null,
+            onValueChange = {}
+        )
+    }
+}
 
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
