@@ -1,11 +1,18 @@
 package net.primal.android.auth.create
 
+import android.net.Uri
 import net.primal.android.profile.db.ProfileMetadata
 
 interface CreateContract {
     data class UiState(
         val currentStep: StepState = StepState.NewAccount(null),
-        val error: CreateError? = null
+        val error: CreateError? = null,
+        val name: String = "",
+        val handle: String = "",
+        val website: String = "",
+        val aboutMe: String = "",
+        val avatarUri: Uri? = null,
+        val bannerUri: Uri? = null
     ) {
         sealed class CreateError {
             data class FailedToUploadAvatar(val cause: Throwable): CreateError()
@@ -16,8 +23,13 @@ interface CreateContract {
     }
 
     sealed class UiEvent {
-        data class MetadataCreateEvent(val profileMetadata: ProfileMetadata): UiEvent()
-        data class FollowEvent(val followedPubkeys: Set<String>): UiEvent()
+        data object MetadataCreateEvent: UiEvent()
+        data class AvatarUriChangedEvent(val avatarUri: Uri): UiEvent()
+        data class BannerUriChangedEvent(val bannerUri: Uri): UiEvent()
+        data class NameChangedEvent(val name: String): UiEvent()
+        data class HandleChangedEvent(val handle: String): UiEvent()
+        data class WebsiteChangedEvent(val website: String): UiEvent()
+        data class AboutMeChangedEvent(val aboutMe: String): UiEvent()
     }
 
     sealed class SideEffect {
