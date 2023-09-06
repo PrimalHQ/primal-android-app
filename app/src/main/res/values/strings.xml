@@ -12,6 +12,19 @@
     <string name="welcome_create_account_button_title">Create account</string>
     <string name="welcome_create_account_button_subtitle">Your new Nostr account will be up and running in a minute.</string>
 
+    <string name="create_title_new_account">New Account</string>
+    <string name="create_title_profile_preview">Profile Preview</string>
+    <string name="create_title_nostr_account_created">Nostr Account Created</string>
+    <string name="create_set_banner">set banner</string>
+    <string name="create_change_banner">change banner</string>
+    <string name="create_set_avatar">set avatar</string>
+    <string name="create_change_avatar">change avatar</string>
+    <string name="create_action_next">Next</string>
+    <string name="create_action_create_nostr_account">Create Nostr Account</string>
+    <string name="create_action_finish">Finish</string>
+    <string name="create_success_subtitle">Your Nostr account has been created!</string>
+    <string name="create_finish_subtitle">Your Nostr key is safely stored on your phone. You can access it in app settings.</string>
+
     <string name="login_title">Sign in</string>
     <string name="login_description">Paste your Nostr key to sign in:</string>
     <string name="login_button_continue">Continue</string>
