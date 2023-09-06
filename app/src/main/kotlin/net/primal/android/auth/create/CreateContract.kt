@@ -4,7 +4,8 @@ import net.primal.android.profile.db.ProfileMetadata
 
 interface CreateContract {
     data class UiState(
-        val currentStep: StepState = StepState.NewAccount(null)
+        val currentStep: StepState = StepState.NewAccount(null),
+        val error: CreateError? = null
     ) {
         sealed class CreateError {
             data class FailedToUploadAvatar(val cause: Throwable): CreateError()
@@ -21,7 +22,7 @@ interface CreateContract {
 
     sealed class SideEffect {
         data object MetadataCreated: SideEffect()
-        data object AccountCreated: SideEffect()
+        data class AccountCreated(val pubkey: String): SideEffect()
         data object AccountsFollowed: SideEffect()
     }
 

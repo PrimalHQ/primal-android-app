@@ -1,6 +1,7 @@
 package net.primal.android.auth.create
 
 import android.content.res.Configuration
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -30,13 +31,18 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -46,13 +52,45 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import net.primal.android.R
+import net.primal.android.auth.login.LaunchedErrorHandler
+import net.primal.android.auth.login.LoginContract
+import net.primal.android.auth.login.LoginViewModel
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
+
+@Composable
+fun CreateScreen(
+    viewModel: CreateViewModel,
+    onClose: () -> Unit,
+    onCreateSuccess: (String) -> Unit,
+) {
+    LaunchedEffect(viewModel, onCreateSuccess) {
+        viewModel.effect.collect {
+            when (it) {
+                is CreateContract.SideEffect.AccountCreated -> onCreateSuccess(it.pubkey)
+                else -> null
+            }
+        }
+    }
+
+    LaunchedErrorHandler(viewModel = viewModel)
+
+    val uiState = viewModel.state.collectAsState()
+    CreateScreen(
+        state = uiState.value,
+        eventPublisher = { viewModel.setEvent(it) },
+        onClose = onClose,
+    )
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -232,6 +270,16 @@ fun CrateAccountStep() {
 }
 
 @Composable
+fun ProfilePreviewStep() {
+
+}
+
+@Composable
+fun NostrAccountCreatedStep() {
+
+}
+
+@Composable
 fun InputField(
     text: String,
     isRequired: Boolean = false,
@@ -305,6 +353,30 @@ fun InputField(
             } else null,
             onValueChange = {}
         )
+    }
+}
+
+@Composable
+fun LaunchedErrorHandler(
+    viewModel: CreateViewModel
+) {
+    val genericMessage = stringResource(id = R.string.app_generic_error)
+    val context = LocalContext.current
+    val uiScope = rememberCoroutineScope()
+    LaunchedEffect(viewModel) {
+        viewModel.state
+            .filter { it.error != null }
+            .map { it.error }
+            .filterNotNull()
+            .collect {
+                uiScope.launch {
+                    Toast.makeText(
+                        context,
+                        genericMessage,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
     }
 }
 

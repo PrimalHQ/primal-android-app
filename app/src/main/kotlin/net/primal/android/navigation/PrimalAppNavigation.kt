@@ -23,6 +23,8 @@ import com.google.accompanist.navigation.material.rememberBottomSheetNavigator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import net.primal.android.R
+import net.primal.android.auth.create.CreateScreen
+import net.primal.android.auth.create.CreateViewModel
 import net.primal.android.auth.login.LoginScreen
 import net.primal.android.auth.login.LoginViewModel
 import net.primal.android.auth.logout.LogoutScreen
@@ -64,6 +66,8 @@ private fun NavController.navigateToWelcome() = navigate(
 )
 
 private fun NavController.navigateToLogin() = navigate(route = "login")
+
+private fun NavController.navigateToCreate() = navigate(route = "create")
 
 private fun NavController.navigateToLogout() = navigate(route = "logout")
 
@@ -179,6 +183,8 @@ fun PrimalAppNavigation() {
 
             login(route = "login", navController = navController)
 
+            create(route = "create", navController = navController)
+
             logout(route = "logout", navController = navController)
 
             feed(
@@ -286,7 +292,7 @@ private fun NavGraphBuilder.welcome(
     PrimalTheme(PrimalTheme.Sunset) {
         WelcomeScreen(
             onSignInClick = { navController.navigateToLogin() },
-            onCreateAccountClick = { },
+            onCreateAccountClick = { navController.navigateToCreate() },
         )
     }
 }
@@ -301,6 +307,20 @@ private fun NavGraphBuilder.login(
             viewModel = viewModel,
             onLoginSuccess = { pubkey -> navController.navigateToFeed(pubkey) },
             onClose = { navController.popBackStack() },
+        )
+    }
+}
+
+private fun NavGraphBuilder.create(
+    route: String,
+    navController: NavController
+) = composable(route = route) {
+    val viewModel: CreateViewModel = hiltViewModel(it)
+    PrimalTheme(PrimalTheme.Sunset) {
+        CreateScreen(
+            viewModel = viewModel,
+            onCreateSuccess = { pubkey -> navController.navigateToFeed(pubkey) },
+            onClose = { navController.popBackStack() }
         )
     }
 }
