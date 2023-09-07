@@ -84,6 +84,8 @@ class CreateViewModel @Inject constructor(
                 is UiEvent.BannerUriChangedEvent -> setState { copy(bannerUri = it.bannerUri) }
                 is UiEvent.NameChangedEvent -> setState { copy(name = it.name) }
                 is UiEvent.HandleChangedEvent -> setState { copy(handle = it.handle) }
+                is UiEvent.LightningAddressChangedEvent -> setState { copy(lightningAddress = it.lightningAddress) }
+                is UiEvent.Nip05IdentifierChangedEvent -> setState { copy(nip05Identifier = it.nip05Identifier) }
                 is UiEvent.WebsiteChangedEvent -> setState { copy(website = it.website) }
                 is UiEvent.AboutMeChangedEvent -> setState { copy(aboutMe = it.aboutMe) }
             }

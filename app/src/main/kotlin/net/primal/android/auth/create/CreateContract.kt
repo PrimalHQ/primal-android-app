@@ -12,6 +12,8 @@ interface CreateContract {
         val handle: String = "",
         val website: String = "",
         val aboutMe: String = "",
+        val lightningAddress: String = "",
+        val nip05Identifier: String = "",
         val avatarUri: Uri? = null,
         val bannerUri: Uri? = null,
         val keypair: CryptoUtils.Keypair? = null
@@ -33,6 +35,8 @@ interface CreateContract {
         data class BannerUriChangedEvent(val bannerUri: Uri?): UiEvent()
         data class NameChangedEvent(val name: String): UiEvent()
         data class HandleChangedEvent(val handle: String): UiEvent()
+        data class LightningAddressChangedEvent(val lightningAddress: String): UiEvent()
+        data class Nip05IdentifierChangedEvent(val nip05Identifier: String): UiEvent()
         data class WebsiteChangedEvent(val website: String): UiEvent()
         data class AboutMeChangedEvent(val aboutMe: String): UiEvent()
     }
