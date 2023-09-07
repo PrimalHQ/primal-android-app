@@ -157,18 +157,16 @@ class NostrNotary @Inject constructor(
         ).signOrThrow(hexPrivateKey = Hex.decode(nwc.keypair.privateKey))
     }
 
-    fun signMetadataEvent(
+    fun signImageUploadNostrEvent(
         privkey: String,
         pubkey: String,
-        name: String,
-        handle: String,
-        website: String,
-        aboutMe: String
+        base64Image: String
     ): NostrEvent {
         return NostrUnsignedEvent(
             pubKey = pubkey,
-            content = "",
-            kind = NostrEventKind.Metadata.value
+            kind = NostrEventKind.PrimalImageUploadRequest.value,
+            content = base64Image,
+            tags = listOf()
         ).signOrThrow(hexPrivateKey = Hex.decode(privkey))
     }
 }
