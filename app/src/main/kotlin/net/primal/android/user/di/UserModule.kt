@@ -9,7 +9,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import net.primal.android.networking.primal.PrimalApiClient
+import net.primal.android.networking.primal.PrimalClient
 import net.primal.android.networking.relays.RelayPool
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.security.Encryption
@@ -20,6 +20,7 @@ import net.primal.android.user.api.UsersApi
 import net.primal.android.user.api.UsersApiImpl
 import net.primal.android.user.domain.Credential
 import net.primal.android.user.domain.UserAccount
+import javax.inject.Named
 import javax.inject.Singleton
 
 @Module
@@ -58,11 +59,11 @@ object UserModule {
 
     @Provides
     fun provideUsersApi(
-        primalApiClient: PrimalApiClient,
+        @Named("Api") primalClient: PrimalClient,
         relayPool: RelayPool,
         nostrNotary: NostrNotary,
     ): UsersApi = UsersApiImpl(
-        primalApiClient = primalApiClient,
+        primalClient = primalClient,
         relayPool = relayPool,
         nostrNotary = nostrNotary,
     )

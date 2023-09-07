@@ -4,20 +4,21 @@ import kotlinx.serialization.encodeToString
 import net.primal.android.feed.api.model.FeedRequestBody
 import net.primal.android.feed.api.model.FeedResponse
 import net.primal.android.feed.api.model.ThreadRequestBody
-import net.primal.android.networking.primal.PrimalApiClient
+import net.primal.android.networking.primal.PrimalClient
 import net.primal.android.networking.primal.PrimalCacheFilter
 import net.primal.android.networking.primal.PrimalVerb.*
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.serialization.NostrJson
 import net.primal.android.serialization.decodeFromStringOrNull
 import javax.inject.Inject
+import javax.inject.Named
 
 class FeedApiImpl @Inject constructor(
-    private val primalApiClient: PrimalApiClient,
+    @Named("Api") private val primalClient: PrimalClient,
 ) : FeedApi {
 
     override suspend fun getFeed(body: FeedRequestBody): FeedResponse {
-        val queryResult = primalApiClient.query(
+        val queryResult = primalClient.query(
             message = PrimalCacheFilter(
                 primalVerb = FEED_DIRECTIVE,
                 optionsJson = NostrJson.encodeToString(body)
@@ -40,7 +41,7 @@ class FeedApiImpl @Inject constructor(
     }
 
     override suspend fun getThread(body: ThreadRequestBody): FeedResponse {
-        val queryResult = primalApiClient.query(
+        val queryResult = primalClient.query(
             message = PrimalCacheFilter(
                 primalVerb = THREAD_VIEW,
                 optionsJson = NostrJson.encodeToString(body)

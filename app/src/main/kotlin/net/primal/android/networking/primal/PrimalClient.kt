@@ -13,11 +13,9 @@ import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.networking.sockets.filterBySubscriptionId
 import java.util.UUID
 import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class PrimalApiClient @Inject constructor(
-    @PrimalSocketClient private val socketClient: NostrSocketClient,
+class PrimalClient @Inject constructor(
+    private val socketClient: NostrSocketClient,
 ) {
 
     private suspend fun sendREQWithRetry(data: JsonObject): UUID? {

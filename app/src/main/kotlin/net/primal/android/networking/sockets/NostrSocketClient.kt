@@ -15,8 +15,9 @@ import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 import timber.log.Timber
 import java.util.UUID
+import javax.inject.Inject
 
-class NostrSocketClient constructor(
+class NostrSocketClient @Inject constructor(
     private val okHttpClient: OkHttpClient,
     private val wssRequest: Request,
 ) {

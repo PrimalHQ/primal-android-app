@@ -4,10 +4,11 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import net.primal.android.networking.primal.PrimalApiClient
+import net.primal.android.networking.primal.PrimalClient
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.settings.api.SettingsApi
 import net.primal.android.settings.api.SettingsApiImpl
+import javax.inject.Named
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -15,10 +16,10 @@ object SettingsApiModule {
 
     @Provides
     fun provideSettingsApi(
-        primalApiClient: PrimalApiClient,
+        @Named("Api") primalClient: PrimalClient,
         nostrNotary: NostrNotary,
     ): SettingsApi = SettingsApiImpl(
-        primalApiClient = primalApiClient,
+        primalClient = primalClient,
         nostrNotary = nostrNotary,
     )
 

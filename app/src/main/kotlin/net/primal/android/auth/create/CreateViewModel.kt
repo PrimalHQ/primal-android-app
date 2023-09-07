@@ -22,7 +22,7 @@ import net.primal.android.auth.create.CreateContract.UiEvent
 import net.primal.android.auth.create.CreateContract.UiState
 import net.primal.android.core.api.model.UploadImageRequest
 import net.primal.android.crypto.CryptoUtils
-import net.primal.android.networking.primal.PrimalApiClient
+import net.primal.android.networking.primal.PrimalClient
 import net.primal.android.networking.primal.PrimalCacheFilter
 import net.primal.android.networking.primal.PrimalVerb
 import net.primal.android.networking.relays.RelayPool
@@ -37,6 +37,7 @@ import net.primal.android.user.domain.toRelay
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import javax.inject.Inject
+import javax.inject.Named
 
 
 @HiltViewModel
@@ -45,7 +46,7 @@ class CreateViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
     private val nostrNotary: NostrNotary,
     private val relayPool: RelayPool,
-    private val primalApiClient: PrimalApiClient,
+    @Named("Upload") private val primalUploadClient: PrimalClient,
     private val application: Application
 ) : AndroidViewModel(application) {
     private val _state = MutableStateFlow(UiState())
@@ -162,7 +163,7 @@ class CreateViewModel @Inject constructor(
             base64Image = "data:image/svg+xml;base64,$base64AvatarImage" // yuck
         )
 
-        val queryResult = primalApiClient.query(
+        val queryResult = primalUploadClient.query(
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.UPLOAD,
                 optionsJson = NostrJson.encodeToString(
