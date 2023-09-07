@@ -1,6 +1,7 @@
 package net.primal.android.auth.create
 
 import android.net.Uri
+import net.primal.android.auth.create.api.model.CreateNostrProfileMetadata
 import net.primal.android.crypto.CryptoUtils
 
 interface CreateContract {
@@ -19,31 +20,44 @@ interface CreateContract {
         val keypair: CryptoUtils.Keypair? = null
     ) {
         sealed class CreateError {
-            data class FailedToUploadAvatar(val cause: Throwable): CreateError()
-            data class FailedToUploadBanner(val cause: Throwable): CreateError()
-            data class FailedToCreateMetadata(val cause: Throwable): CreateError()
-            data class FailedToFollow(val cause: Throwable): CreateError()
+            data class FailedToUploadAvatar(val cause: Throwable) : CreateError()
+            data class FailedToUploadBanner(val cause: Throwable) : CreateError()
+            data class FailedToCreateMetadata(val cause: Throwable) : CreateError()
+            data class FailedToFollow(val cause: Throwable) : CreateError()
         }
     }
 
     sealed class UiEvent {
-        data object GoToProfilePreviewStepEvent: UiEvent()
-        data object GoToNostrCreatedStepEvent: UiEvent()
-        data object GoBack: UiEvent()
-        data object FinishEvent: UiEvent()
-        data class AvatarUriChangedEvent(val avatarUri: Uri?): UiEvent()
-        data class BannerUriChangedEvent(val bannerUri: Uri?): UiEvent()
-        data class NameChangedEvent(val name: String): UiEvent()
-        data class HandleChangedEvent(val handle: String): UiEvent()
-        data class LightningAddressChangedEvent(val lightningAddress: String): UiEvent()
-        data class Nip05IdentifierChangedEvent(val nip05Identifier: String): UiEvent()
-        data class WebsiteChangedEvent(val website: String): UiEvent()
-        data class AboutMeChangedEvent(val aboutMe: String): UiEvent()
+        data object GoToProfilePreviewStepEvent : UiEvent()
+        data object GoToNostrCreatedStepEvent : UiEvent()
+        data object GoBack : UiEvent()
+        data object FinishEvent : UiEvent()
+        data class AvatarUriChangedEvent(val avatarUri: Uri?) : UiEvent()
+        data class BannerUriChangedEvent(val bannerUri: Uri?) : UiEvent()
+        data class NameChangedEvent(val name: String) : UiEvent()
+        data class HandleChangedEvent(val handle: String) : UiEvent()
+        data class LightningAddressChangedEvent(val lightningAddress: String) : UiEvent()
+        data class Nip05IdentifierChangedEvent(val nip05Identifier: String) : UiEvent()
+        data class WebsiteChangedEvent(val website: String) : UiEvent()
+        data class AboutMeChangedEvent(val aboutMe: String) : UiEvent()
     }
 
     sealed class SideEffect {
-        data object MetadataCreated: SideEffect()
-        data class AccountCreated(val pubkey: String): SideEffect()
-        data object AccountsFollowed: SideEffect()
+        data class AccountCreatedAndPersisted(val pubkey: String) : SideEffect()
     }
 }
+
+fun CreateContract.UiState.toCreateNostrProfileMetadata(
+    resolvedAvatarUrl: String?,
+    resolvedBannerUrl: String?
+): CreateNostrProfileMetadata = CreateNostrProfileMetadata(
+    name = this.name,
+    displayName = this.handle,
+    website = this.website,
+    about = this.aboutMe,
+    picture = resolvedAvatarUrl ?: "",
+    banner = resolvedBannerUrl ?: "",
+    lud06 = null,
+    lud16 = this.lightningAddress,
+    nip05 = this.nip05Identifier
+)

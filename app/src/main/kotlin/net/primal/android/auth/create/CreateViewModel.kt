@@ -4,7 +4,6 @@ import android.app.Application
 import android.net.Uri
 import android.util.Base64
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -27,20 +26,23 @@ import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.primal.PrimalCacheFilter
 import net.primal.android.networking.primal.PrimalVerb
 import net.primal.android.networking.relays.RelayPool
+import net.primal.android.networking.relays.errors.NostrPublishException
+import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.serialization.NostrJson
-import timber.log.Timber
+import net.primal.android.settings.repository.SettingsRepository
+import net.primal.android.user.accounts.BOOTSTRAP_RELAYS
+import net.primal.android.user.domain.toRelay
 import java.io.ByteArrayOutputStream
-import java.io.FileInputStream
 import java.io.IOException
-import java.io.InputStream
 import javax.inject.Inject
 
 
 @HiltViewModel
 class CreateViewModel @Inject constructor(
     private val authRepository: AuthRepository,
+    private val settingsRepository: SettingsRepository,
     private val nostrNotary: NostrNotary,
     private val relayPool: RelayPool,
     private val primalApiClient: PrimalApiClient,
@@ -95,12 +97,42 @@ class CreateViewModel @Inject constructor(
     private fun nostrCreated() = viewModelScope.launch {
         setState { copy(loading = true) }
         try {
-            val avatarUrl = uploadImage(state.value.avatarUri!!)
-            Timber.d(avatarUrl)
-            val bannerUrl = uploadImage(state.value.bannerUri!!)
-            Timber.d(bannerUrl)
+            var avatarUrl: String? = null
+            var bannerUrl: String? = null
+
+            if (state.value.avatarUri != null) {
+                avatarUrl = uploadImage(state.value.avatarUri!!)
+            }
+
+            if (state.value.bannerUri != null) {
+                bannerUrl = uploadImage(state.value.bannerUri!!)
+            }
+
+            val metadata = state.value.toCreateNostrProfileMetadata(
+                resolvedAvatarUrl = avatarUrl,
+                resolvedBannerUrl = bannerUrl
+            )
+            val metadataNostrEvent = nostrNotary.signMetadataNostrEvent(
+                pubkey = state.value.keypair!!.pubkey,
+                privkey = state.value.keypair!!.privkey,
+                metadata = metadata
+            )
+            val firstContactEvent = nostrNotary.signFirstContactNostrEvent(
+                pubkey = state.value.keypair!!.pubkey,
+                privkey = state.value.keypair!!.privkey,
+                relays = BOOTSTRAP_RELAYS.map { it.toRelay() }
+            )
+
+            relayPool.publishEvent(metadataNostrEvent)
+            relayPool.publishEvent(firstContactEvent)
+
+            // GREAT SUCCESS
             setState { copy(currentStep = 3) }
         } catch (e: IOException) {
+
+        } catch (e: NostrPublishException) {
+
+        } catch (e: WssException) {
 
         } finally {
             setState { copy(loading = false) }
@@ -108,7 +140,11 @@ class CreateViewModel @Inject constructor(
     }
 
     private fun finish() = viewModelScope.launch {
-
+        // save keypair and profile info locally, i.e login
+        // navigate to feed
+        val pubkey = authRepository.login(state.value.keypair!!.privkey)
+        settingsRepository.fetchAndPersistAppSettings(userId = pubkey)
+        setEffect(SideEffect.AccountCreatedAndPersisted(pubkey = pubkey))
     }
 
     private fun goBack() = viewModelScope.launch {
@@ -123,7 +159,7 @@ class CreateViewModel @Inject constructor(
         val uploadImageNostrEvent = nostrNotary.signImageUploadNostrEvent(
             privkey = state.value.keypair!!.privkey,
             pubkey = state.value.keypair!!.pubkey,
-            base64Image = "data:image/svg+xml;base64,$base64AvatarImage"
+            base64Image = "data:image/svg+xml;base64,$base64AvatarImage" // yuck
         )
 
         val queryResult = primalApiClient.query(

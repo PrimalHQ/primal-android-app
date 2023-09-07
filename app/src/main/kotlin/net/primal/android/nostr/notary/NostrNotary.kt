@@ -4,6 +4,8 @@ import fr.acinq.secp256k1.Hex
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.buildJsonArray
+import net.primal.android.auth.create.api.model.CreateNostrProfileMetadata
 import net.primal.android.crypto.CryptoUtils
 import net.primal.android.crypto.toNpub
 import net.primal.android.networking.UserAgentProvider
@@ -166,8 +168,35 @@ class NostrNotary @Inject constructor(
         return NostrUnsignedEvent(
             pubKey = pubkey,
             kind = NostrEventKind.PrimalImageUploadRequest.value,
-            content = base64Image,
-            tags = listOf()
+            content = base64Image
+        ).signOrThrow(hexPrivateKey = Hex.decode(privkey))
+    }
+
+    fun signMetadataNostrEvent(
+        privkey: String,
+        pubkey: String,
+        metadata: CreateNostrProfileMetadata
+    ): NostrEvent {
+        return NostrUnsignedEvent(
+            pubKey = pubkey,
+            kind = NostrEventKind.Metadata.value,
+            content = json.encodeToString(metadata)
+        ).signOrThrow(hexPrivateKey = Hex.decode(privkey))
+    }
+
+    fun signFirstContactNostrEvent(
+        privkey: String,
+        pubkey: String,
+        relays: List<Relay>
+    ): NostrEvent {
+        val tags = listOf(pubkey.asPubkeyTag())
+        val content = NostrJson.encodeToString(relays.toNostrRelayMap())
+
+        return NostrUnsignedEvent(
+            pubKey = pubkey,
+            kind = NostrEventKind.Contacts.value,
+            content = content,
+            tags = tags
         ).signOrThrow(hexPrivateKey = Hex.decode(privkey))
     }
 }
