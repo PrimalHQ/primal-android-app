@@ -24,6 +24,13 @@ object SocketModule {
         .build()
 
     @Provides
+    @PrimalUploadBaseUrl
+    fun providePrimalUploadWSRequest() = Request.Builder()
+        .url("wss://uploads.primal.net/v1")
+        .addHeader("User-Agent", UserAgentProvider.USER_AGENT)
+        .build()
+
+    @Provides
     @PrimalSocketClient
     fun providePrimalSocketClient(
         okHttpClient: OkHttpClient,
@@ -31,6 +38,16 @@ object SocketModule {
     ) = NostrSocketClient(
         okHttpClient = okHttpClient,
         wssRequest = wssRequest,
+    )
+
+    @Provides
+    @PrimalUploadSocketClient
+    fun providePrimalUploadSocketClient(
+        okHttpClient: OkHttpClient,
+        @PrimalUploadBaseUrl wssRequest: Request
+    ) = NostrSocketClient(
+        okHttpClient = okHttpClient,
+        wssRequest = wssRequest
     )
 
     @Provides

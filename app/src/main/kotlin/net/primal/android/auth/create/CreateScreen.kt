@@ -86,8 +86,7 @@ fun CreateScreen(
     LaunchedEffect(viewModel, onCreateSuccess) {
         viewModel.effect.collect {
             when (it) {
-                is CreateContract.SideEffect.AccountCreated -> onCreateSuccess(it.pubkey)
-                else -> null
+                is CreateContract.SideEffect.AccountCreatedAndPersisted -> onCreateSuccess(it.pubkey)
             }
         }
     }
