@@ -5,11 +5,13 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import net.primal.android.networking.UserAgentProvider
+import net.primal.android.networking.primal.PrimalClient
 import net.primal.android.networking.relays.RelayPool
 import net.primal.android.networking.sockets.NostrSocketClient
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import javax.inject.Named
 import javax.inject.Singleton
 
 @Module
@@ -58,5 +60,23 @@ object SocketModule {
     ) = RelayPool(
         okHttpClient = okHttpClient,
         activeAccountStore = activeAccountStore,
+    )
+
+    @Provides
+    @Singleton
+    @Named("Api")
+    fun providesPrimalApiClient(
+        @PrimalSocketClient socketClient: NostrSocketClient
+    ) = PrimalClient(
+        socketClient = socketClient
+    )
+
+    @Provides
+    @Singleton
+    @Named("Upload")
+    fun providesPrimalUploadClient(
+        @PrimalUploadSocketClient socketClient: NostrSocketClient
+    ) = PrimalClient(
+        socketClient = socketClient
     )
 }

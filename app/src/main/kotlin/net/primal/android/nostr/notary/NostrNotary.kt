@@ -167,7 +167,8 @@ class NostrNotary @Inject constructor(
         return NostrUnsignedEvent(
             pubKey = pubkey,
             kind = NostrEventKind.PrimalImageUploadRequest.value,
-            content = base64Image
+            content = base64Image,
+            tags = emptyList()
         ).signOrThrow(hexPrivateKey = Hex.decode(privkey))
     }
 
@@ -179,7 +180,8 @@ class NostrNotary @Inject constructor(
         return NostrUnsignedEvent(
             pubKey = pubkey,
             kind = NostrEventKind.Metadata.value,
-            content = json.encodeToString(metadata)
+            content = json.encodeToString(metadata),
+            tags = emptyList()
         ).signOrThrow(hexPrivateKey = Hex.decode(privkey))
     }
 

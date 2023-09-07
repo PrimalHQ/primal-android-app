@@ -4,7 +4,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.transformWhile
-import net.primal.android.networking.di.PrimalSocketClient
 import net.primal.android.networking.sockets.NostrIncomingMessage
 import net.primal.android.networking.sockets.NostrSocketClient
 import net.primal.android.networking.sockets.errors.NostrNoticeException
@@ -12,11 +11,9 @@ import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.networking.sockets.filterBySubscriptionId
 import java.util.UUID
 import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class PrimalApiClient @Inject constructor(
-    @PrimalSocketClient private val socketClient: NostrSocketClient,
+class PrimalClient @Inject constructor(
+    private val socketClient: NostrSocketClient,
 ) {
 
     @Throws(WssException::class)
