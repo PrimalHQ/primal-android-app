@@ -54,6 +54,8 @@ enum class NostrEventKind(val value: Int) {
     PrimalEventUserStats(value = 10_000_115),
     PrimalTrendingHashtags(value = 10_000_116),
     PrimalEventResources(value = 10_000_119),
+    PrimalImageUploadRequest(value = 10_000_120),
+    PrimalImageUploadResponse(value = 10_000_121),
     PrimalAppState(value = 10_000_999),
     Unknown(value = -1);
 

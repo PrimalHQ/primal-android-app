@@ -15,7 +15,16 @@ import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
 
 object CryptoUtils {
+    data class Keypair(val privkey: String, val pubkey: String)
+
     private val sha256: MessageDigest = MessageDigest.getInstance("SHA-256")
+
+    fun generateHexEncodedKeypair(): Keypair {
+        val privkeyByteArray = privateKeyCreate()
+        val pubkeyByteArray = publicKeyCreate(privateKey = privkeyByteArray)
+
+        return Keypair(privkey = privkeyByteArray.toHex(), pubkey = pubkeyByteArray.toHex())
+    }
 
     /**
      * Provides a 32B "private key" aka random number

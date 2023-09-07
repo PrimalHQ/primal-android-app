@@ -1,6 +1,7 @@
 package net.primal.android.auth.create
 
 import android.net.Uri
+import net.primal.android.crypto.CryptoUtils
 
 interface CreateContract {
     data class UiState(
@@ -12,7 +13,8 @@ interface CreateContract {
         val website: String = "",
         val aboutMe: String = "",
         val avatarUri: Uri? = null,
-        val bannerUri: Uri? = null
+        val bannerUri: Uri? = null,
+        val keypair: CryptoUtils.Keypair? = null
     ) {
         sealed class CreateError {
             data class FailedToUploadAvatar(val cause: Throwable): CreateError()
