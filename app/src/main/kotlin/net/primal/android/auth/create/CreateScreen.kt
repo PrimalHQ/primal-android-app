@@ -389,7 +389,18 @@ fun CreateAccountStep(
     InputField(
         header = "ABOUT ME",
         value = state.aboutMe,
+        isMultiline = true,
         onValueChange = { eventPublisher(CreateContract.UiEvent.AboutMeChangedEvent(it)) })
+    Spacer(modifier = Modifier.height(12.dp))
+    InputField(
+        header = "BITCOIN LIGHTNING ADDRESS",
+        value = state.lightningAddress,
+        onValueChange = { eventPublisher(CreateContract.UiEvent.LightningAddressChangedEvent(it)) })
+    Spacer(modifier = Modifier.height(12.dp))
+    InputField(
+        header = "NOSTR VERIFICATION (NIP 05)",
+        value = state.nip05Identifier,
+        onValueChange = { eventPublisher(CreateContract.UiEvent.Nip05IdentifierChangedEvent(it)) })
 }
 
 @Composable
@@ -681,7 +692,8 @@ fun InputField(
     value: String,
     onValueChange: (String) -> Unit,
     isRequired: Boolean = false,
-    prefix: String? = null
+    prefix: String? = null,
+    isMultiline: Boolean = false
 ) {
     Column(
         modifier = Modifier
@@ -733,7 +745,8 @@ fun InputField(
                 focusedBorderColor = Color.Transparent,
             ),
             shape = RoundedCornerShape(size = 12.dp),
-            singleLine = true,
+            singleLine = !isMultiline,
+            minLines = if (isMultiline) 6 else 0,
             value = value,
             onValueChange = onValueChange,
             textStyle = AppTheme.typography.bodySmall,
