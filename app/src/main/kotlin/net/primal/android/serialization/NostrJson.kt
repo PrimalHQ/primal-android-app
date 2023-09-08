@@ -11,6 +11,7 @@ import net.primal.android.user.domain.RelayPermission
 
 val NostrJson = Json {
     ignoreUnknownKeys = true
+    encodeDefaults = true
 }
 
 inline fun <reified T> Json.decodeFromStringOrNull(string: String?): T? {

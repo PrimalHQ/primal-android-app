@@ -22,9 +22,11 @@ import net.primal.android.networking.sockets.filterByEventId
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.serialization.toJsonObject
+import net.primal.android.user.accounts.BOOTSTRAP_RELAYS
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
 import net.primal.android.user.domain.Relay
+import net.primal.android.user.domain.UserAccount
 import net.primal.android.user.domain.toRelay
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -42,6 +44,7 @@ class RelayPool @Inject constructor(
 
     private var regularRelays = listOf<NostrSocketClient>()
     private var walletRelays = listOf<NostrSocketClient>()
+    private var bootstrapRelays = listOf<NostrSocketClient>()
 
     init {
         observeActiveAccount()
@@ -57,11 +60,16 @@ class RelayPool @Inject constructor(
                     createSocketsPool(
                         regularRelays = regularRelays,
                         walletRelays = walletRelays,
+                        bootstrapRelays = emptyList()
                     )
                 }
 
                 ActiveUserAccountState.NoUserAccount -> {
-                    clearSocketsPool()
+                    createSocketsPool(
+                        regularRelays = emptyList(),
+                        walletRelays = emptyList(),
+                        bootstrapRelays = BOOTSTRAP_RELAYS.map { it.toRelay() }
+                    )
                 }
             }
         }
@@ -76,6 +84,29 @@ class RelayPool @Inject constructor(
                     throw MissingRelaysException()
                 } else {
                     handlePublishEvent(walletRelays, nostrEvent)
+                }
+            }
+            NostrEventKind.Metadata -> {
+                if (bootstrapRelays.isEmpty()) {
+                    throw MissingRelaysException()
+                } else {
+                    handlePublishEvent(bootstrapRelays, nostrEvent)
+                }
+            }
+            NostrEventKind.Contacts -> {
+                val activeUserAccount = activeAccountStore.activeUserAccount()
+                if (activeUserAccount == UserAccount.EMPTY) {
+                    if (bootstrapRelays.isEmpty()) {
+                        throw MissingRelaysException()
+                    } else {
+                        handlePublishEvent(bootstrapRelays, nostrEvent)
+                    }
+                } else {
+                    if (regularRelays.isEmpty()) {
+                        throw MissingRelaysException()
+                    } else {
+                        handlePublishEvent(regularRelays, nostrEvent)
+                    }
                 }
             }
             else -> {
@@ -99,12 +130,14 @@ class RelayPool @Inject constructor(
 
     private suspend fun createSocketsPool(
         regularRelays: List<Relay>,
-        walletRelays: List<Relay>
+        walletRelays: List<Relay>,
+        bootstrapRelays: List<Relay>
     ) {
         clearSocketsPool()
         poolMutex.withLock {
             this.regularRelays = regularRelays.mapAsNostrSocketClient()
             this.walletRelays = walletRelays.mapAsNostrSocketClient()
+            this.bootstrapRelays = bootstrapRelays.mapAsNostrSocketClient()
         }
     }
 
@@ -122,6 +155,8 @@ class RelayPool @Inject constructor(
         regularRelays = emptyList()
         walletRelays.forEach { it.close() }
         walletRelays = emptyList()
+        bootstrapRelays.forEach { it.close() }
+        bootstrapRelays = emptyList()
     }
 
     private fun NostrPublishResult.isSuccessful(): Boolean {
