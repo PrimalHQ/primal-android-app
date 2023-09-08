@@ -47,6 +47,7 @@ enum class NostrEventKind(val value: Int) {
     PrimalNotification(value = 10_000_110),
     PrimalNotificationsSeenUntil(value = 10_000_111),
     PrimalNotificationsSummary(value = 10_000_112),
+    PrimalNotificationsSummary2(value = 10_000_132),
     PrimalPaging(value = 10_000_113),
     PrimalMediaMapping(value = 10_000_114),
     PrimalEventUserStats(value = 10_000_115),

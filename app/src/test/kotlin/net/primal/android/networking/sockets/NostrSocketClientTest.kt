@@ -34,6 +34,26 @@ class NostrSocketClientTest {
     )
 
     @Test
+    fun `sendREQ with subscriptionId returns true if message was sent`() = runTest {
+        successfulNostrSocketClient.ensureSocketConnection()
+        val actual = successfulNostrSocketClient.sendREQ(
+            subscriptionId = UUID.randomUUID(),
+            data = buildJsonObject {},
+        )
+        actual shouldBe true
+    }
+
+    @Test
+    fun `sendREQ with subscriptionId returns false if message was sent`() = runTest {
+        successfulNostrSocketClient.ensureSocketConnection()
+        val actual = failingNostrSocketClient.sendREQ(
+            subscriptionId = UUID.randomUUID(),
+            data = buildJsonObject {},
+        )
+        actual shouldBe false
+    }
+
+    @Test
     fun `sendREQ returns subscription UUID if message was sent`() = runTest {
         successfulNostrSocketClient.ensureSocketConnection()
         val actual = successfulNostrSocketClient.sendREQ(data = buildJsonObject {})
