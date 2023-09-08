@@ -30,7 +30,7 @@ import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.notary.NostrNotary
-import net.primal.android.serialization.NostrJson
+import net.primal.android.serialization.nostrJsonSerializer
 import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.user.accounts.BOOTSTRAP_RELAYS
 import net.primal.android.user.domain.toRelay
@@ -130,11 +130,11 @@ class CreateViewModel @Inject constructor(
             // GREAT SUCCESS
             setState { copy(currentStep = 3) }
         } catch (e: IOException) {
-
+            setState { copy(error = UiState.CreateError.FailedToUploadImage(e)) }
         } catch (e: NostrPublishException) {
-
+            setState { copy(error = UiState.CreateError.FailedToCreateMetadata(e)) }
         } catch (e: WssException) {
-
+            setState { copy(error = UiState.CreateError.FailedToCreateMetadata(e)) }
         } finally {
             setState { copy(loading = false) }
         }
@@ -166,7 +166,7 @@ class CreateViewModel @Inject constructor(
         val queryResult = primalUploadClient.query(
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.UPLOAD,
-                optionsJson = NostrJson.encodeToString(
+                optionsJson = nostrJsonSerializer(shouldEncodeDefaults = true).encodeToString(
                     UploadImageRequest(uploadImageEvent = uploadImageNostrEvent)
                 )
             )

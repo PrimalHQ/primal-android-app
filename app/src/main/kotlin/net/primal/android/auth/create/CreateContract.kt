@@ -20,10 +20,8 @@ interface CreateContract {
         val keypair: CryptoUtils.Keypair? = null
     ) {
         sealed class CreateError {
-            data class FailedToUploadAvatar(val cause: Throwable) : CreateError()
-            data class FailedToUploadBanner(val cause: Throwable) : CreateError()
+            data class FailedToUploadImage(val cause: Throwable) : CreateError()
             data class FailedToCreateMetadata(val cause: Throwable) : CreateError()
-            data class FailedToFollow(val cause: Throwable) : CreateError()
         }
     }
 
@@ -51,8 +49,8 @@ fun CreateContract.UiState.toCreateNostrProfileMetadata(
     resolvedAvatarUrl: String?,
     resolvedBannerUrl: String?
 ): CreateNostrProfileMetadata = CreateNostrProfileMetadata(
-    name = this.name,
-    displayName = this.handle,
+    name = this.handle,
+    displayName = this.name,
     website = this.website,
     about = this.aboutMe,
     picture = resolvedAvatarUrl ?: "",

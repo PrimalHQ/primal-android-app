@@ -10,6 +10,7 @@ import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.serialization.NostrJson
+import net.primal.android.user.api.model.ContactsRequestBody
 import net.primal.android.user.api.model.UserContactsResponse
 import net.primal.android.user.api.model.UserProfileResponse
 import net.primal.android.user.api.model.UserRequestBody
@@ -45,7 +46,7 @@ class UsersApiImpl @Inject constructor(
             message = PrimalCacheFilter(
                 primalVerb = CONTACT_LIST,
                 optionsJson = NostrJson.encodeToString(
-                    UserRequestBody(pubkey = pubkey, extendedResponse = extendedResponse)
+                    ContactsRequestBody(pubkey = pubkey, extendedResponse = extendedResponse)
                 )
             )
         )
