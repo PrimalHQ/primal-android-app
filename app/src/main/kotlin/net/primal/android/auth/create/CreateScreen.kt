@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
@@ -216,8 +217,8 @@ fun CreateContent(
         ) {
             when (state.currentStep) {
                 1 -> CreateAccountStep(state = state, eventPublisher = eventPublisher)
-                2 -> ProfilePreviewStep(state = state)
-                3 -> NostrAccountCreatedStep(state = state)
+                2 -> ProfilePreviewStep(state = state, isFinalized = false)
+                3 -> ProfilePreviewStep(state = state, isFinalized = true)
             }
         }
         Row(
@@ -404,7 +405,8 @@ fun CreateAccountStep(
 
 @Composable
 fun ProfilePreviewStep(
-    state: CreateContract.UiState
+    state: CreateContract.UiState,
+    isFinalized: Boolean
 ) {
     Column(
         modifier = Modifier
@@ -420,7 +422,7 @@ fun ProfilePreviewStep(
                 .clip(RoundedCornerShape(size = 12.dp))
                 .border(
                     width = 1.dp,
-                    color = Color.White,
+                    color = if (isFinalized) AppTheme.extraColorScheme.successBright else Color.White,
                     shape = RoundedCornerShape(size = 12.dp)
                 ),
         ) {
@@ -517,169 +519,54 @@ fun ProfilePreviewStep(
                 )
             }
         }
-        Spacer(modifier = Modifier.height(48.dp))
-        Text(
-            text = "We will use this info to create \n" +
-                    "your Nostr account. If you wish to\n" +
-                    "make any changes, you can always \n" +
-                    "do so in your profile settings.",
-            modifier = Modifier.padding(horizontal = 32.dp),
-            fontWeight = FontWeight.W400,
-            fontSize = 20.sp,
-            lineHeight = 24.sp,
-            textAlign = TextAlign.Center,
-            color = AppTheme.extraColorScheme.onSurfaceVariantAlt1
-        )
-    }
-}
-
-@Composable
-fun NostrAccountCreatedStep(
-    state: CreateContract.UiState
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Top
-    ) {
-        Box(
-            modifier = Modifier
-                .height(336.dp)
-                .fillMaxWidth()
-                .padding(horizontal = 32.dp)
-                .padding(top = 32.dp)
-                .clip(RoundedCornerShape(size = 12.dp))
-                .border(
-                    width = 1.dp,
-                    color = AppTheme.extraColorScheme.successBright,
-                    shape = RoundedCornerShape(size = 12.dp)
-                ),
-        ) {
-            if (state.bannerUri != null) {
-                val model = ImageRequest.Builder(LocalContext.current)
-                    .data(state.bannerUri)
-                    .build()
-                AsyncImage(
-                    model = model,
-                    contentDescription = null,
-                    contentScale = ContentScale.FillWidth,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(102.dp)
-                )
-            } else {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(102.dp)
-                        .background(color = Color(0xFF181818))
-                )
-            }
-
-            Box(
-                modifier = Modifier
-                    .padding(horizontal = 16.dp)
-                    .padding(bottom = 78.dp)
-                    .size(size = 78.dp)
-                    .clip(shape = CircleShape)
-                    .background(color = Color.Black)
-                    .align(Alignment.CenterStart)
-            ) {
-                if (state.avatarUri != null) {
-                    val model = ImageRequest.Builder(LocalContext.current)
-                        .data(state.avatarUri)
-                        .build()
-
-                    AsyncImage(
-                        model = model,
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                    )
-                } else {
-                    Image(
-                        painter = painterResource(id = R.drawable.default_avatar),
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                    )
-                }
-            }
-
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(all = 16.dp)
-                    .align(alignment = Alignment.BottomCenter),
-                horizontalAlignment = Alignment.Start,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Row(
-                    horizontalArrangement = Arrangement.Start,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = state.name,
-                        fontWeight = FontWeight.W700,
-                        fontSize = 20.sp,
-                        lineHeight = 20.sp,
-                        color = AppTheme.colorScheme.onPrimary
-                    )
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(
-                        text = "@${state.handle}",
-                        fontWeight = FontWeight.W400,
-                        fontSize = 14.sp,
-                        lineHeight = 16.sp,
-                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt4
-                    )
-                }
-                Text(
-                    text = state.aboutMe,
-                    fontWeight = FontWeight.W400,
-                    fontSize = 14.sp,
-                    lineHeight = 18.sp,
-                    color = AppTheme.colorScheme.onPrimary
-                )
-                Text(
-                    text = state.website,
-                    fontWeight = FontWeight.W400,
-                    fontSize = 14.sp,
-                    lineHeight = 20.sp,
-                    color = AppTheme.colorScheme.primary
-                )
-            }
-        }
-        Text(
-            text = stringResource(id = R.string.create_success_subtitle),
-            fontWeight = FontWeight.W400,
-            fontSize = 14.sp,
-            lineHeight = 16.41.sp,
-            color = AppTheme.extraColorScheme.successBright,
-            textAlign = TextAlign.Center
-        )
-        Spacer(modifier = Modifier.height(32.dp))
-        Row(
-            modifier = Modifier
-                .padding(start = 32.dp, end = 32.dp)
-                .fillMaxWidth()
-                .height(100.dp)
-                .background(color = Color(0xFF181818), shape = RoundedCornerShape(size = 12.dp)),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.key),
-                contentDescription = null,
-                colorFilter = ColorFilter.tint(color = AppTheme.extraColorScheme.onSurfaceVariantAlt1),
-                modifier = Modifier.padding(horizontal = 24.dp)
-            )
+        if (isFinalized) {
             Text(
-                text = stringResource(id = R.string.create_finish_subtitle),
-                fontWeight = FontWeight.W600,
-                fontSize = 16.sp,
-                lineHeight = 22.sp,
-                color = AppTheme.colorScheme.onPrimary,
-                modifier = Modifier.padding(end = 24.dp)
+                text = stringResource(id = R.string.create_success_subtitle),
+                fontWeight = FontWeight.W400,
+                fontSize = 14.sp,
+                lineHeight = 16.41.sp,
+                color = AppTheme.extraColorScheme.successBright,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.offset(y = (-32).dp) // yuck
+            )
+        }
+        if (isFinalized) {
+            Row(
+                modifier = Modifier
+                    .padding(start = 32.dp, end = 32.dp)
+                    .fillMaxWidth()
+                    .height(100.dp)
+                    .background(color = Color(0xFF181818), shape = RoundedCornerShape(size = 12.dp)),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.key),
+                    contentDescription = null,
+                    colorFilter = ColorFilter.tint(color = AppTheme.extraColorScheme.onSurfaceVariantAlt1),
+                    modifier = Modifier.padding(horizontal = 24.dp)
+                )
+                Text(
+                    text = stringResource(id = R.string.create_finish_subtitle),
+                    fontWeight = FontWeight.W600,
+                    fontSize = 16.sp,
+                    lineHeight = 22.sp,
+                    color = AppTheme.colorScheme.onPrimary,
+                    modifier = Modifier.padding(end = 24.dp)
+                )
+            }
+        } else {
+            Text(
+                text = "We will use this info to create \n" +
+                        "your Nostr account. If you wish to\n" +
+                        "make any changes, you can always \n" +
+                        "do so in your profile settings.",
+                modifier = Modifier.padding(horizontal = 32.dp),
+                fontWeight = FontWeight.W400,
+                fontSize = 20.sp,
+                lineHeight = 24.sp,
+                textAlign = TextAlign.Center,
+                color = AppTheme.extraColorScheme.onSurfaceVariantAlt1
             )
         }
     }
