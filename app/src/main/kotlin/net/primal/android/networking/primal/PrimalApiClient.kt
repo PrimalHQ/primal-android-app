@@ -4,6 +4,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.transformWhile
+import kotlinx.serialization.json.JsonObject
 import net.primal.android.networking.di.PrimalSocketClient
 import net.primal.android.networking.sockets.NostrIncomingMessage
 import net.primal.android.networking.sockets.NostrSocketClient
@@ -19,35 +20,47 @@ class PrimalApiClient @Inject constructor(
     @PrimalSocketClient private val socketClient: NostrSocketClient,
 ) {
 
-    @Throws(WssException::class)
-    suspend fun query(message: PrimalCacheFilter): PrimalQueryResult {
+    private suspend fun sendREQWithRetry(data: JsonObject): UUID? {
         var queryAttempts = 0
-        var subscriptionId: UUID? = null
         while (queryAttempts < MAX_QUERY_ATTEMPTS) {
             socketClient.ensureSocketConnection()
-            val data = message.toPrimalJsonObject()
-            subscriptionId = socketClient.sendREQ(data = data)
+            val subscriptionId = socketClient.sendREQ(data = data)
+            if (subscriptionId != null) return subscriptionId
+
             queryAttempts++
-
-            if (subscriptionId != null) break
-
             if (queryAttempts < MAX_QUERY_ATTEMPTS) {
                 delay(RETRY_DELAY_MILLIS)
             }
         }
+        return null
+    }
 
-        return if (subscriptionId != null) {
-            try {
-                collectQueryResult(subscriptionId = subscriptionId)
-            } catch (error: NostrNoticeException) {
-                throw WssException(
-                    message = error.reason,
-                    cause = error,
-                )
-            }
-        } else {
-            throw WssException(message = "Api unreachable at the moment.")
+    @Throws(WssException::class)
+    suspend fun query(message: PrimalCacheFilter): PrimalQueryResult {
+        val subscriptionId = sendREQWithRetry(data = message.toPrimalJsonObject())
+            ?: throw WssException(message = "Api unreachable at the moment.")
+
+        return try {
+            collectQueryResult(subscriptionId = subscriptionId)
+        } catch (error: NostrNoticeException) {
+            throw WssException(message = error.reason, cause = error)
         }
+    }
+
+    suspend fun subscribe(subscriptionId: UUID, message: PrimalCacheFilter): Flow<NostrIncomingMessage> {
+        socketClient.ensureSocketConnection()
+        val success = socketClient.sendREQ(
+            subscriptionId = subscriptionId,
+            data = message.toPrimalJsonObject(),
+        )
+        if (!success) throw WssException(message = "Api unreachable at the moment.")
+
+        return socketClient.incomingMessages.filterBySubscriptionId(id = subscriptionId)
+    }
+
+    suspend fun closeSubscription(subscriptionId: UUID) {
+        socketClient.ensureSocketConnection()
+        socketClient.sendCLOSE(subscriptionId = subscriptionId)
     }
 
     @Throws(NostrNoticeException::class)

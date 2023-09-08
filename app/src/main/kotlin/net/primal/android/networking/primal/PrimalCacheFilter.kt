@@ -30,4 +30,7 @@ enum class PrimalVerb(val identifier: String) {
     THREAD_VIEW("thread_view"),
     USER_SEARCH("user_search"),
     IMPORT_EVENTS("import_events"),
+    GET_NOTIFICATIONS("get_notifications"),
+    GET_LAST_SEEN_NOTIFICATIONS("get_notifications_seen"),
+    NEW_NOTIFICATIONS_COUNT("notification_counts_2")
 }

@@ -70,10 +70,14 @@ class NostrSocketClient constructor(
         return webSocket?.send(text) == true
     }
 
+    fun sendREQ(subscriptionId: UUID, data: JsonObject): Boolean {
+        val reqMessage = data.buildNostrREQMessage(subscriptionId)
+        return sendMessage(text = reqMessage)
+    }
+
     fun sendREQ(data: JsonObject): UUID? {
         val subscriptionId: UUID = UUID.randomUUID()
-        val reqMessage = data.buildNostrREQMessage(subscriptionId)
-        val success = sendMessage(text = reqMessage)
+        val success = sendREQ(data = data, subscriptionId = subscriptionId)
         return if (success) subscriptionId else null
     }
 

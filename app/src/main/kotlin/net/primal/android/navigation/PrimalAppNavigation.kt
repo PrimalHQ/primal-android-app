@@ -50,6 +50,8 @@ import net.primal.android.navigation.deeplinking.ext.handleDeeplink
 import net.primal.android.navigation.splash.SplashContract
 import net.primal.android.navigation.splash.SplashScreen
 import net.primal.android.navigation.splash.SplashViewModel
+import net.primal.android.notifications.list.NotificationsScreen
+import net.primal.android.notifications.list.NotificationsViewModel
 import net.primal.android.profile.details.ProfileScreen
 import net.primal.android.profile.details.ProfileViewModel
 import net.primal.android.theme.AppTheme
@@ -442,14 +444,15 @@ private fun NavGraphBuilder.notifications(
     onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
 ) = composable(
     route = route,
-) {
+) { navBackEntry ->
+    val viewModel = hiltViewModel<NotificationsViewModel>(navBackEntry)
     LockToOrientationPortrait()
-    DemoPrimaryScreen(
-        title = stringResource(id = R.string.notifications_title),
-        description = "Your notifications will appear here.",
-        primaryDestination = PrimalTopLevelDestination.Notifications,
+    NotificationsScreen(
+        viewModel = viewModel,
+        onProfileClick = { navController.navigateToProfile(profileId = it) },
+        onNoteClick = { navController.navigateToThread(postId = it) },
         onTopLevelDestinationChanged = onTopLevelDestinationChanged,
-        onDrawerDestinationClick = onDrawerScreenClick,
+        onDrawerScreenClick = onDrawerScreenClick,
     )
 }
 
