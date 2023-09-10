@@ -5,6 +5,7 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -26,6 +27,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -77,6 +79,7 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
+import net.primal.android.auth.create.CreateContract.UiState.CreateAccountStep
 
 @Composable
 fun CreateScreen(
@@ -103,22 +106,22 @@ fun CreateScreen(
 }
 
 @Composable
-private fun stepTitle(step: Int): String {
+private fun stepTitle(step: CreateAccountStep): String {
     return when (step) {
-        1 -> stringResource(id = R.string.create_title_new_account)
-        2 -> stringResource(id = R.string.create_title_profile_preview)
-        3 -> stringResource(id = R.string.create_title_nostr_account_created)
-        else -> stringResource(id = R.string.create_title_new_account)
+        CreateAccountStep.NEW_ACCOUNT -> stringResource(id = R.string.create_title_new_account)
+        CreateAccountStep.PROFILE_PREVIEW -> stringResource(id = R.string.create_title_profile_preview)
+        CreateAccountStep.ACCOUNT_CREATED -> stringResource(id = R.string.create_title_nostr_account_created)
+        CreateAccountStep.FOLLOW_RECOMMENDED_ACCOUNTS -> stringResource(id = R.string.create_title_people_to_follow)
     }
 }
 
 @Composable
-private fun stepActionText(step: Int): String {
+private fun stepActionText(step: CreateAccountStep): String {
     return when (step) {
-        1 -> stringResource(id = R.string.create_action_next)
-        2 -> stringResource(id = R.string.create_action_create_nostr_account)
-        3 -> stringResource(id = R.string.create_action_finish)
-        else -> stringResource(id = R.string.create_action_next)
+        CreateAccountStep.NEW_ACCOUNT -> stringResource(id = R.string.create_action_next)
+        CreateAccountStep.PROFILE_PREVIEW -> stringResource(id = R.string.create_action_create_nostr_account)
+        CreateAccountStep.ACCOUNT_CREATED -> stringResource(id = R.string.create_action_find_people_to_follow)
+        CreateAccountStep.FOLLOW_RECOMMENDED_ACCOUNTS -> stringResource(id = R.string.create_action_finish)
     }
 }
 
@@ -135,7 +138,7 @@ fun CreateScreen(
                 title = stepTitle(step = state.currentStep),
                 navigationIcon = PrimalIcons.ArrowBack,
                 onNavigationIconClick = {
-                    if (state.currentStep == 1) {
+                    if (state.currentStep == CreateAccountStep.NEW_ACCOUNT) {
                         onClose()
                     } else {
                         eventPublisher(CreateContract.UiEvent.GoBack)
@@ -154,8 +157,8 @@ fun CreateScreen(
 }
 
 @Composable
-private fun stepColor(step: Int, position: Int): Color {
-    return if (position <= step) AppTheme.extraColorScheme.onSurfaceVariantAlt1 else AppTheme.colorScheme.outline
+private fun stepColor(step: CreateAccountStep, position: Int): Color {
+    return if (position <= step.step) AppTheme.extraColorScheme.onSurfaceVariantAlt1 else AppTheme.colorScheme.outline
 }
 
 @Composable
@@ -180,30 +183,32 @@ fun CreateContent(
                 .fillMaxWidth(),
             horizontalArrangement = Arrangement.Center
         ) {
-            Row(
-                modifier = Modifier
-                    .clip(shape = RoundedCornerShape(2.dp))
-            ) {
-                Box(
+            if (state.currentStep != CreateAccountStep.FOLLOW_RECOMMENDED_ACCOUNTS) {
+                Row(
                     modifier = Modifier
-                        .width(32.dp)
-                        .height(4.dp)
-                        .background(stepColor(step = state.currentStep, position = 1))
-                )
-                Spacer(modifier = Modifier.width(2.dp))
-                Box(
-                    modifier = Modifier
-                        .width(32.dp)
-                        .height(4.dp)
-                        .background(stepColor(step = state.currentStep, position = 2))
-                )
-                Spacer(modifier = Modifier.width(2.dp))
-                Box(
-                    modifier = Modifier
-                        .width(32.dp)
-                        .height(4.dp)
-                        .background(stepColor(step = state.currentStep, position = 3))
-                )
+                        .clip(shape = RoundedCornerShape(2.dp))
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .width(32.dp)
+                            .height(4.dp)
+                            .background(stepColor(step = state.currentStep, position = 1))
+                    )
+                    Spacer(modifier = Modifier.width(2.dp))
+                    Box(
+                        modifier = Modifier
+                            .width(32.dp)
+                            .height(4.dp)
+                            .background(stepColor(step = state.currentStep, position = 2))
+                    )
+                    Spacer(modifier = Modifier.width(2.dp))
+                    Box(
+                        modifier = Modifier
+                            .width(32.dp)
+                            .height(4.dp)
+                            .background(stepColor(step = state.currentStep, position = 3))
+                    )
+                }
             }
         }
         Column(
@@ -216,9 +221,10 @@ fun CreateContent(
 
         ) {
             when (state.currentStep) {
-                1 -> CreateAccountStep(state = state, eventPublisher = eventPublisher)
-                2 -> ProfilePreviewStep(state = state, isFinalized = false)
-                3 -> ProfilePreviewStep(state = state, isFinalized = true)
+                CreateAccountStep.NEW_ACCOUNT -> CreateAccountStep(state = state, eventPublisher = eventPublisher)
+                CreateAccountStep.PROFILE_PREVIEW -> ProfilePreviewStep(state = state, isFinalized = false)
+                CreateAccountStep.ACCOUNT_CREATED -> ProfilePreviewStep(state = state, isFinalized = true)
+                CreateAccountStep.FOLLOW_RECOMMENDED_ACCOUNTS -> FollowRecommendedAccountsStep(state = state)
             }
         }
         Row(
@@ -233,9 +239,10 @@ fun CreateContent(
                 loading = state.loading,
                 onClick = {
                     when (state.currentStep) {
-                        1 -> eventPublisher(CreateContract.UiEvent.GoToProfilePreviewStepEvent)
-                        2 -> eventPublisher(CreateContract.UiEvent.GoToNostrCreatedStepEvent)
-                        3 -> eventPublisher(CreateContract.UiEvent.FinishEvent)
+                        CreateAccountStep.NEW_ACCOUNT -> eventPublisher(CreateContract.UiEvent.GoToProfilePreviewStepEvent)
+                        CreateAccountStep.PROFILE_PREVIEW -> eventPublisher(CreateContract.UiEvent.GoToNostrCreatedStepEvent)
+                        CreateAccountStep.ACCOUNT_CREATED -> eventPublisher(CreateContract.UiEvent.FinishEvent)
+                        CreateAccountStep.FOLLOW_RECOMMENDED_ACCOUNTS -> eventPublisher(CreateContract.UiEvent.GoToFollowContactsStepEvent)
                     }
                 },
                 modifier = Modifier
@@ -572,6 +579,18 @@ fun ProfilePreviewStep(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun FollowRecommendedAccountsStep(
+    state: CreateContract.UiState
+) {
+    LazyColumn {
+        stickyHeader {
+
+        }
+    }
+}
+
 @Composable
 fun InputField(
     header: String,
@@ -679,7 +698,7 @@ fun LaunchedErrorHandler(
 }
 
 data class CreateScreenPreviewState(
-    val currentStep: Int,
+    val currentStep: CreateAccountStep,
     val name: String = "",
     val handle: String = "",
     val website: String = "",
@@ -689,16 +708,24 @@ data class CreateScreenPreviewState(
 class CreateScreenPreviewProvider : PreviewParameterProvider<CreateScreenPreviewState> {
     override val values: Sequence<CreateScreenPreviewState>
         get() = sequenceOf(
-            CreateScreenPreviewState(currentStep = 1),
+            CreateScreenPreviewState(currentStep = CreateAccountStep.NEW_ACCOUNT),
             CreateScreenPreviewState(
-                currentStep = 2,
+                currentStep = CreateAccountStep.PROFILE_PREVIEW,
                 name = "Preston Pysh",
                 handle = "PrestonPysh",
                 aboutMe = "Bitcoin & books. My bitcoin can remain in cold storage far longer than the market can remain irrational.",
                 website = "https://theinvestorspodcast.com/"
             ),
             CreateScreenPreviewState(
-                currentStep = 3, name = "Preston Pysh",
+                currentStep = CreateAccountStep.ACCOUNT_CREATED,
+                name = "Preston Pysh",
+                handle = "PrestonPysh",
+                aboutMe = "Bitcoin & books. My bitcoin can remain in cold storage far longer than the market can remain irrational.",
+                website = "https://theinvestorspodcast.com/"
+            ),
+            CreateScreenPreviewState(
+                currentStep = CreateAccountStep.FOLLOW_RECOMMENDED_ACCOUNTS,
+                name = "Preston Pysh",
                 handle = "PrestonPysh",
                 aboutMe = "Bitcoin & books. My bitcoin can remain in cold storage far longer than the market can remain irrational.",
                 website = "https://theinvestorspodcast.com/"
