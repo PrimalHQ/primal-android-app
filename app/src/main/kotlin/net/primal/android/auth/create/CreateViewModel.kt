@@ -74,13 +74,13 @@ class CreateViewModel @Inject constructor(
     private fun observeEvents() = viewModelScope.launch {
         _event.collect {
             when (it) {
-                is UiEvent.GoToProfilePreviewStepEvent -> setState { copy(currentStep = 2) }
+                is UiEvent.GoToProfilePreviewStepEvent -> setState { copy(currentStep = UiState.CreateAccountStep.PROFILE_PREVIEW) }
                 is UiEvent.GoToNostrCreatedStepEvent -> {
                     val keypair = CryptoUtils.generateHexEncodedKeypair()
                     setState { copy(keypair = keypair) }
-                    nostrCreated()
+                    createNostrAccount()
                 }
-
+                is UiEvent.GoToFollowContactsStepEvent -> setState { copy(currentStep = UiState.CreateAccountStep.ACCOUNT_CREATED) }
                 is UiEvent.GoBack -> goBack()
                 is UiEvent.FinishEvent -> finish()
                 is UiEvent.AvatarUriChangedEvent -> setState { copy(avatarUri = it.avatarUri) }
@@ -95,7 +95,7 @@ class CreateViewModel @Inject constructor(
         }
     }
 
-    private fun nostrCreated() = viewModelScope.launch {
+    private fun createNostrAccount() = viewModelScope.launch {
         setState { copy(loading = true) }
         try {
             var avatarUrl: String? = null
@@ -128,7 +128,7 @@ class CreateViewModel @Inject constructor(
             relayPool.publishEvent(firstContactEvent)
 
             // GREAT SUCCESS
-            setState { copy(currentStep = 3) }
+            setState { copy(currentStep = UiState.CreateAccountStep.FOLLOW_RECOMMENDED_ACCOUNTS) }
         } catch (e: IOException) {
             setState { copy(error = UiState.CreateError.FailedToUploadImage(e)) }
         } catch (e: NostrPublishException) {
@@ -149,9 +149,9 @@ class CreateViewModel @Inject constructor(
     }
 
     private fun goBack() = viewModelScope.launch {
-        var step = state.value.currentStep - 1
+        var step = state.value.currentStep.step - 1
         if (step <= 1) step = 1
-        setState { copy(currentStep = step) }
+        setState { copy(currentStep = UiState.CreateAccountStep(step)!!) }
     }
 
     private suspend fun uploadImage(uri: Uri): String? {

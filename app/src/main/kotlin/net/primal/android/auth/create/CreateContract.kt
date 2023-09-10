@@ -6,7 +6,7 @@ import net.primal.android.crypto.CryptoUtils
 
 interface CreateContract {
     data class UiState(
-        val currentStep: Int = 1,
+        val currentStep: CreateAccountStep = CreateAccountStep.NEW_ACCOUNT,
         val loading: Boolean = false,
         val error: CreateError? = null,
         val name: String = "",
@@ -23,11 +23,24 @@ interface CreateContract {
             data class FailedToUploadImage(val cause: Throwable) : CreateError()
             data class FailedToCreateMetadata(val cause: Throwable) : CreateError()
         }
+
+        enum class CreateAccountStep(val step: Int) {
+            NEW_ACCOUNT(1),
+            PROFILE_PREVIEW(2),
+            ACCOUNT_CREATED(3),
+            FOLLOW_RECOMMENDED_ACCOUNTS(4);
+
+            companion object {
+                operator fun invoke(step: Int): CreateAccountStep? =
+                    CreateAccountStep.values().firstOrNull { it.step == step }
+            }
+        }
     }
 
     sealed class UiEvent {
         data object GoToProfilePreviewStepEvent : UiEvent()
         data object GoToNostrCreatedStepEvent : UiEvent()
+        data object GoToFollowContactsStepEvent : UiEvent()
         data object GoBack : UiEvent()
         data object FinishEvent : UiEvent()
         data class AvatarUriChangedEvent(val avatarUri: Uri?) : UiEvent()
