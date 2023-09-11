@@ -27,9 +27,10 @@ class RecommendedFollowsApi @Inject constructor(
         }
 
         val responseBody = response.body
-        return if (responseBody != null) {
-            NostrJson.decodeFromStringOrNull(string = responseBody.string())
-                ?: throw IOException("Invalid body content.")
+
+        if (responseBody != null) {
+            val result = NostrJson.decodeFromStringOrNull<RecommendedFollowsResponse>(string = responseBody.string())
+            return result ?: throw IOException("Invalid body content.")
         } else {
             throw IOException("Empty response body.")
         }
