@@ -584,11 +584,7 @@ fun ProfilePreviewStep(
 fun FollowRecommendedAccountsStep(
     state: CreateContract.UiState
 ) {
-    LazyColumn {
-        stickyHeader {
 
-        }
-    }
 }
 
 @Composable

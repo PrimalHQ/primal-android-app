@@ -2,6 +2,7 @@ package net.primal.android.auth.create
 
 import android.net.Uri
 import net.primal.android.auth.create.api.model.CreateNostrProfileMetadata
+import net.primal.android.auth.create.api.model.RecommendedFollowsResponse
 import net.primal.android.crypto.CryptoUtils
 
 interface CreateContract {
@@ -17,11 +18,13 @@ interface CreateContract {
         val nip05Identifier: String = "",
         val avatarUri: Uri? = null,
         val bannerUri: Uri? = null,
-        val keypair: CryptoUtils.Keypair? = null
+        val keypair: CryptoUtils.Keypair? = null,
+        val recommendedFollowsResponse: RecommendedFollowsResponse? = null
     ) {
         sealed class CreateError {
             data class FailedToUploadImage(val cause: Throwable) : CreateError()
             data class FailedToCreateMetadata(val cause: Throwable) : CreateError()
+            data class FailedToFetchRecommendedFollows(val cause: Throwable) : CreateError()
         }
 
         enum class CreateAccountStep(val step: Int) {
