@@ -9,20 +9,23 @@ import net.primal.android.networking.primal.PrimalVerb
 import net.primal.android.networking.sockets.NostrIncomingMessage
 import net.primal.android.nostr.ext.asNotificationSummary
 import net.primal.android.nostr.model.NostrEventKind
+import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.notifications.api.model.NotificationsRequestBody
 import net.primal.android.notifications.api.model.NotificationsResponse
 import net.primal.android.notifications.api.model.PubkeyRequestBody
 import net.primal.android.notifications.domain.NotificationsSummary
 import net.primal.android.serialization.NostrJson
+import net.primal.android.settings.api.model.AppSpecificDataRequest
 import java.time.Instant
 import java.util.UUID
 import javax.inject.Inject
 
 class NotificationsApiImpl @Inject constructor(
     private val primalApiClient: PrimalApiClient,
+    private val nostrNotary: NostrNotary,
 ) : NotificationsApi {
 
-    override suspend fun getLastSeen(userId: String): Instant? {
+    override suspend fun getLastSeenTimestamp(userId: String): Instant? {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.GET_LAST_SEEN_NOTIFICATIONS,
@@ -40,6 +43,22 @@ class NotificationsApiImpl @Inject constructor(
         } else {
             null
         }
+    }
+
+    override suspend fun updateLastSeenTimestamp(userId: String) {
+        primalApiClient.query(
+            message = PrimalCacheFilter(
+                primalVerb = PrimalVerb.SET_LAST_SEEN_NOTIFICATIONS,
+                optionsJson = NostrJson.encodeToString(
+                    AppSpecificDataRequest(
+                        eventFromUser = nostrNotary.signAppSettingsSyncNostrEvent(
+                            userId = userId,
+                            description = "Update notifications last seen timestamp.",
+                        ),
+                    )
+                ),
+            )
+        )
     }
 
     override suspend fun getNotifications(body: NotificationsRequestBody): NotificationsResponse {

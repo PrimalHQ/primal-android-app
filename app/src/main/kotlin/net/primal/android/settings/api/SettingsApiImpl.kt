@@ -9,7 +9,7 @@ import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.model.primal.content.ContentAppSettings
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.serialization.NostrJson
-import net.primal.android.settings.api.model.GetAppSettingsRequest
+import net.primal.android.settings.api.model.AppSpecificDataRequest
 import net.primal.android.settings.api.model.GetAppSettingsResponse
 import net.primal.android.settings.api.model.SetAppSettingsRequest
 import javax.inject.Inject
@@ -24,8 +24,11 @@ class SettingsApiImpl @Inject constructor(
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.GET_APP_SETTINGS,
                 optionsJson = NostrJson.encodeToString(
-                    GetAppSettingsRequest(
-                        eventFromUser = nostrNotary.signAppSettingsSyncNostrEvent(pubkey),
+                    AppSpecificDataRequest(
+                        eventFromUser = nostrNotary.signAppSettingsSyncNostrEvent(
+                            userId = pubkey,
+                            description = "Sync app settings",
+                        ),
                     )
                 ),
             )

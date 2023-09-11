@@ -56,14 +56,15 @@ class NostrNotary @Inject constructor(
     }
 
     fun signAppSettingsSyncNostrEvent(
-        userId: String
+        userId: String,
+        description: String,
     ): NostrEvent {
         return NostrUnsignedEvent(
             pubKey = userId,
             kind = NostrEventKind.ApplicationSpecificData.value,
             tags = listOf("${UserAgentProvider.APP_NAME} App".asIdentifierTag()),
             content = NostrJson.encodeToString(
-                AppSettingsDescription(description = "Sync app settings")
+                AppSettingsDescription(description = description)
             ),
         ).signOrThrow(nsec = findNsecOrThrow(userId))
     }

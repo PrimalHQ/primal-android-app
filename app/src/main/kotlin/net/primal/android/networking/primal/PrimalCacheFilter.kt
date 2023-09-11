@@ -32,5 +32,6 @@ enum class PrimalVerb(val identifier: String) {
     IMPORT_EVENTS("import_events"),
     GET_NOTIFICATIONS("get_notifications"),
     GET_LAST_SEEN_NOTIFICATIONS("get_notifications_seen"),
-    NEW_NOTIFICATIONS_COUNT("notification_counts_2")
+    SET_LAST_SEEN_NOTIFICATIONS("set_notifications_seen"),
+    NEW_NOTIFICATIONS_COUNT("notification_counts_2"),
 }
