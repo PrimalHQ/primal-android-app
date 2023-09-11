@@ -16,7 +16,7 @@ data class Metadata(
     @SerialName("created_at")
     val createdAt: Int,
     val id: String,
-    val kind: NostrEventKind,
+    val kind: Int,
     val pubkey: String,
     val sig: String
 )
