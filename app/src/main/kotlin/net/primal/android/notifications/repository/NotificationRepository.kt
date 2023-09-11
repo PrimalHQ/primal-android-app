@@ -9,8 +9,12 @@ class NotificationRepository @Inject constructor(
     private val notificationsApi: NotificationsApi,
 ) {
 
-    suspend fun fetchLastSeen(userId: String): Instant? {
-        return notificationsApi.getLastSeen(userId = userId)
+    suspend fun fetchLastSeenTimestamp(userId: String): Instant? {
+        return notificationsApi.getLastSeenTimestamp(userId = userId)
+    }
+
+    suspend fun updateLastSeenTimestamp(userId: String) {
+        notificationsApi.updateLastSeenTimestamp(userId = userId)
     }
 
     suspend fun fetchNotificationsSummary(userId: String): NotificationsSummary? {

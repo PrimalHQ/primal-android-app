@@ -7,7 +7,9 @@ import java.time.Instant
 
 interface NotificationsApi {
 
-    suspend fun getLastSeen(userId: String): Instant?
+    suspend fun getLastSeenTimestamp(userId: String): Instant?
+
+    suspend fun updateLastSeenTimestamp(userId: String)
 
     suspend fun getNotifications(body: NotificationsRequestBody): NotificationsResponse
 
