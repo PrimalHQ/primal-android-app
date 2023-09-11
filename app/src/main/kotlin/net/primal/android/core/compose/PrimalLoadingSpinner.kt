@@ -16,7 +16,7 @@ import com.airbnb.lottie.compose.rememberLottieComposition
 import net.primal.android.R
 
 @Composable
-fun PrimalLoadingSinner(
+fun PrimalLoadingSpinner(
     size: Dp = 96.dp,
 ) {
     val composition by rememberLottieComposition(

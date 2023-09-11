@@ -27,7 +27,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -80,6 +79,7 @@ import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.auth.create.CreateContract.UiState.CreateAccountStep
+import net.primal.android.core.compose.PrimalLoadingSpinner
 
 @Composable
 fun CreateScreen(
@@ -236,7 +236,7 @@ fun CreateContent(
             PrimalLoadingButton(
                 text = stepActionText(state.currentStep),
                 enabled = state.name != "" && state.handle != "",
-                loading = state.loading,
+                loading = state.creatingAccount,
                 onClick = {
                     when (state.currentStep) {
                         CreateAccountStep.NEW_ACCOUNT -> eventPublisher(CreateContract.UiEvent.GoToProfilePreviewStepEvent)
@@ -584,7 +584,15 @@ fun ProfilePreviewStep(
 fun FollowRecommendedAccountsStep(
     state: CreateContract.UiState
 ) {
+    if (state.fetchingRecommendedFollows) {
+        Column(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            PrimalLoadingSpinner()
+        }
+    } else {
 
+    }
 }
 
 @Composable

@@ -83,12 +83,7 @@ class CreateViewModel @Inject constructor(
                 is UiEvent.GoToNostrCreatedStepEvent -> {
                     val keypair = CryptoUtils.generateHexEncodedKeypair()
                     setState { copy(keypair = keypair) }
-                    try {
-                        setState { copy(loading = true) }
-                        listOf(createNostrAccount(), fetchRecommendedFollows()).joinAll()
-                    } finally {
-                        setState { copy(loading = false) }
-                    }
+                    createNostrAccount()
                 }
 
                 is UiEvent.GoToFollowContactsStepEvent -> setState { copy(currentStep = UiState.CreateAccountStep.ACCOUNT_CREATED) }
@@ -110,6 +105,8 @@ class CreateViewModel @Inject constructor(
         try {
             var avatarUrl: String? = null
             var bannerUrl: String? = null
+
+            setState { copy(creatingAccount = true) }
 
             if (state.value.avatarUri != null) {
                 avatarUrl = uploadImage(state.value.avatarUri!!)
@@ -145,6 +142,8 @@ class CreateViewModel @Inject constructor(
             setState { copy(error = UiState.CreateError.FailedToCreateMetadata(e)) }
         } catch (e: WssException) {
             setState { copy(error = UiState.CreateError.FailedToCreateMetadata(e)) }
+        } finally {
+            setState { copy(creatingAccount = false) }
         }
     }
 

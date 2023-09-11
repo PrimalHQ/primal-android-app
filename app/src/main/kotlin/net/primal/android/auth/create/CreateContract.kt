@@ -8,7 +8,7 @@ import net.primal.android.crypto.CryptoUtils
 interface CreateContract {
     data class UiState(
         val currentStep: CreateAccountStep = CreateAccountStep.NEW_ACCOUNT,
-        val loading: Boolean = false,
+        val creatingAccount: Boolean = false,
         val error: CreateError? = null,
         val name: String = "",
         val handle: String = "",
@@ -19,6 +19,7 @@ interface CreateContract {
         val avatarUri: Uri? = null,
         val bannerUri: Uri? = null,
         val keypair: CryptoUtils.Keypair? = null,
+        val fetchingRecommendedFollows: Boolean = false,
         val recommendedFollowsResponse: RecommendedFollowsResponse? = null
     ) {
         sealed class CreateError {
