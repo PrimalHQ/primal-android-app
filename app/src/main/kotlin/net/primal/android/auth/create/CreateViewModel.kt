@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
@@ -20,10 +21,11 @@ import net.primal.android.auth.AuthRepository
 import net.primal.android.auth.create.CreateContract.SideEffect
 import net.primal.android.auth.create.CreateContract.UiEvent
 import net.primal.android.auth.create.CreateContract.UiState
+import net.primal.android.auth.create.api.RecommendedFollowsApi
 import net.primal.android.core.api.model.UploadImageRequest
 import net.primal.android.crypto.CryptoUtils
-import net.primal.android.networking.primal.PrimalClient
 import net.primal.android.networking.primal.PrimalCacheFilter
+import net.primal.android.networking.primal.PrimalClient
 import net.primal.android.networking.primal.PrimalVerb
 import net.primal.android.networking.relays.RelayPool
 import net.primal.android.networking.relays.errors.NostrPublishException
@@ -34,6 +36,7 @@ import net.primal.android.serialization.nostrJsonSerializer
 import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.user.accounts.BOOTSTRAP_RELAYS
 import net.primal.android.user.domain.toRelay
+import timber.log.Timber
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import javax.inject.Inject
@@ -46,7 +49,9 @@ class CreateViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
     private val nostrNotary: NostrNotary,
     private val relayPool: RelayPool,
-    @Named("Upload") private val primalUploadClient: PrimalClient,
+    @Named("Upload")
+    private val primalUploadClient: PrimalClient,
+    private val recommendedFollowsApi: RecommendedFollowsApi,
     private val application: Application
 ) : AndroidViewModel(application) {
     private val _state = MutableStateFlow(UiState())
@@ -78,8 +83,14 @@ class CreateViewModel @Inject constructor(
                 is UiEvent.GoToNostrCreatedStepEvent -> {
                     val keypair = CryptoUtils.generateHexEncodedKeypair()
                     setState { copy(keypair = keypair) }
-                    createNostrAccount()
+                    try {
+                        setState { copy(loading = true) }
+                        listOf(createNostrAccount(), fetchRecommendedFollows()).joinAll()
+                    } finally {
+                        setState { copy(loading = false) }
+                    }
                 }
+
                 is UiEvent.GoToFollowContactsStepEvent -> setState { copy(currentStep = UiState.CreateAccountStep.ACCOUNT_CREATED) }
                 is UiEvent.GoBack -> goBack()
                 is UiEvent.FinishEvent -> finish()
@@ -96,7 +107,6 @@ class CreateViewModel @Inject constructor(
     }
 
     private fun createNostrAccount() = viewModelScope.launch {
-        setState { copy(loading = true) }
         try {
             var avatarUrl: String? = null
             var bannerUrl: String? = null
@@ -135,8 +145,15 @@ class CreateViewModel @Inject constructor(
             setState { copy(error = UiState.CreateError.FailedToCreateMetadata(e)) }
         } catch (e: WssException) {
             setState { copy(error = UiState.CreateError.FailedToCreateMetadata(e)) }
-        } finally {
-            setState { copy(loading = false) }
+        }
+    }
+
+    private fun fetchRecommendedFollows() = viewModelScope.launch {
+        try {
+            val response = recommendedFollowsApi.fetch(state.value.name)
+            setState { copy(recommendedFollowsResponse = response) }
+        } catch (e: IOException) {
+            setState { copy(error = UiState.CreateError.FailedToFetchRecommendedFollows(e)) }
         }
     }
 
