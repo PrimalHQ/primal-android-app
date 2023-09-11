@@ -40,7 +40,10 @@ class ExploreHomeViewModel @Inject constructor(
             .filterIsInstance<ActiveUserAccountState.ActiveUserAccount>()
             .collect {
                 setState {
-                    copy(activeAccountAvatarUrl = it.data.pictureUrl)
+                    copy(
+                        activeAccountAvatarUrl = it.data.pictureUrl,
+                        badges = it.data.badges,
+                    )
                 }
             }
     }

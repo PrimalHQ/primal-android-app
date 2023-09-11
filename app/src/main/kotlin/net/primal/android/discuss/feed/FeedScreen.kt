@@ -123,6 +123,7 @@ fun FeedScreen(
         onActiveDestinationClick = { uiScope.launch { feedListState.animateScrollToItem(0) } },
         onPrimaryDestinationChanged = onPrimaryDestinationChanged,
         onDrawerDestinationClick = onDrawerDestinationClick,
+        badges = state.badges,
         bottomBarHeight = bottomBarHeight,
         onBottomBarOffsetChange = { bottomBarOffsetHeightPx = it },
         topBar = {

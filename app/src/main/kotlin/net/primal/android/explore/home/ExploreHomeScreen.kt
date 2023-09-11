@@ -88,6 +88,7 @@ fun ExploreHomeScreen(
         onActiveDestinationClick = { uiScope.launch { listState.animateScrollToItem(0) } },
         onPrimaryDestinationChanged = onPrimaryDestinationChanged,
         onDrawerDestinationClick = onDrawerDestinationClick,
+        badges = state.badges,
         topBar = {
             ExploreTopAppBar(
                 title = { SearchBar(

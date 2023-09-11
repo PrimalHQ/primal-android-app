@@ -3,7 +3,6 @@ package net.primal.android.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavController
@@ -22,13 +21,11 @@ import com.google.accompanist.navigation.material.bottomSheet
 import com.google.accompanist.navigation.material.rememberBottomSheetNavigator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import net.primal.android.R
 import net.primal.android.auth.login.LoginScreen
 import net.primal.android.auth.login.LoginViewModel
 import net.primal.android.auth.logout.LogoutScreen
 import net.primal.android.auth.logout.LogoutViewModel
 import net.primal.android.auth.welcome.WelcomeScreen
-import net.primal.android.core.compose.DemoPrimaryScreen
 import net.primal.android.core.compose.LockToOrientationPortrait
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.compose.findActivity
@@ -45,6 +42,8 @@ import net.primal.android.explore.home.ExploreHomeScreen
 import net.primal.android.explore.home.ExploreHomeViewModel
 import net.primal.android.explore.search.SearchViewModel
 import net.primal.android.explore.search.ui.SearchScreen
+import net.primal.android.messages.list.MessageListScreen
+import net.primal.android.messages.list.MessageListViewModel
 import net.primal.android.navigation.deeplinking.DeepLink
 import net.primal.android.navigation.deeplinking.ext.handleDeeplink
 import net.primal.android.navigation.splash.SplashContract
@@ -426,14 +425,13 @@ private fun NavGraphBuilder.messages(
     onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
 ) = composable(
     route = route,
-) {
+) { navBackEntry ->
+    val viewModel = hiltViewModel<MessageListViewModel>(navBackEntry)
     LockToOrientationPortrait()
-    DemoPrimaryScreen(
-        title = stringResource(id = R.string.messages_title),
-        description = "Your messages will appear here.",
-        primaryDestination = PrimalTopLevelDestination.Messages,
+    MessageListScreen(
+        viewModel = viewModel,
         onTopLevelDestinationChanged = onTopLevelDestinationChanged,
-        onDrawerDestinationClick = onDrawerScreenClick,
+        onDrawerScreenClick = onDrawerScreenClick,
     )
 }
 

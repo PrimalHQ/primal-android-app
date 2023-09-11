@@ -19,7 +19,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import net.primal.android.R
-import net.primal.android.core.compose.DemoPrimaryScreen
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -35,14 +34,6 @@ fun NotificationsScreen(
     onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
 ) {
-    DemoPrimaryScreen(
-        title = stringResource(id = R.string.notifications_title),
-        description = "Building...",
-        primaryDestination = PrimalTopLevelDestination.Notifications,
-        onTopLevelDestinationChanged = onTopLevelDestinationChanged,
-        onDrawerDestinationClick = onDrawerScreenClick,
-    )
-
     val uiState = viewModel.state.collectAsState()
 
     NotificationsScreen(
@@ -73,6 +64,7 @@ fun NotificationsScreen(
         onActiveDestinationClick = { uiScope.launch { listState.animateScrollToItem(0) } },
         onPrimaryDestinationChanged = onPrimaryDestinationChanged,
         onDrawerDestinationClick = onDrawerDestinationClick,
+        badges = state.badges,
         topBar = {
             PrimalTopAppBar(
                 title = stringResource(id = R.string.notifications_title),

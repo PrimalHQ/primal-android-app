@@ -29,6 +29,7 @@ import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
+import net.primal.android.user.repository.UserRepository
 import net.primal.android.user.updater.UserDataUpdater
 import net.primal.android.user.updater.UserDataUpdaterFactory
 import net.primal.android.wallet.model.ZapTarget
@@ -45,7 +46,8 @@ class FeedViewModel @Inject constructor(
     private val postRepository: PostRepository,
     private val activeAccountStore: ActiveAccountStore,
     private val userDataSyncerFactory: UserDataUpdaterFactory,
-    private val zapRepository: ZapRepository
+    private val zapRepository: ZapRepository,
+    private val userRepository: UserRepository,
 ) : ViewModel() {
 
     private val feedDirective: String = savedStateHandle.feedDirective ?: "network;trending"
@@ -66,6 +68,7 @@ class FeedViewModel @Inject constructor(
     fun setEvent(event: UiEvent) = viewModelScope.launch { _event.emit(event) }
 
     init {
+        refreshBadges()
         subscribeToFeedTitle()
         subscribeToEvents()
         subscribeToFeedSyncUpdates()
@@ -113,13 +116,20 @@ class FeedViewModel @Inject constructor(
         activeAccountStore.activeAccountState
             .filterIsInstance<ActiveUserAccountState.ActiveUserAccount>()
             .collect {
-                userDataUpdater = userDataSyncerFactory.create(userId = it.data.pubkey)
+                val activeUserId = it.data.pubkey
+                userDataUpdater = if (userDataUpdater?.userId != activeUserId) {
+                    userDataSyncerFactory.create(userId = it.data.pubkey)
+                } else {
+                    userDataUpdater
+                }
+
                 setState {
                     copy(
                         activeAccountAvatarUrl = it.data.pictureUrl,
                         walletConnected = it.data.nostrWallet != null,
                         defaultZapAmount = it.data.appSettings?.defaultZapAmount,
                         zapOptions = it.data.appSettings?.zapOptions ?: emptyList(),
+                        badges = it.data.badges,
                     )
                 }
             }
@@ -135,6 +145,10 @@ class FeedViewModel @Inject constructor(
                 is UiEvent.ZapAction -> zapPost(it)
             }
         }
+    }
+
+    private fun refreshBadges() = viewModelScope.launch {
+        userRepository.refreshBadges(userId = activeAccountStore.activeUserId())
     }
 
     private fun clearSyncStats() {
