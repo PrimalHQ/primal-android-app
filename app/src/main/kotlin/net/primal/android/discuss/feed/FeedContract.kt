@@ -4,6 +4,7 @@ import androidx.paging.PagingData
 import kotlinx.coroutines.flow.Flow
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.feed.model.FeedPostsSyncStats
+import net.primal.android.user.domain.Badges
 
 interface FeedContract {
     data class UiState(
@@ -15,6 +16,7 @@ interface FeedContract {
         val zapOptions: List<ULong> = emptyList(),
         val posts: Flow<PagingData<FeedPostUi>>,
         val syncStats: FeedPostsSyncStats = FeedPostsSyncStats(),
+        val badges: Badges = Badges(),
         val error: FeedError? = null,
     ) {
         sealed class FeedError {

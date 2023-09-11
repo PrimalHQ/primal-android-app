@@ -9,7 +9,7 @@ import timber.log.Timber
 import java.time.Instant
 
 class UserDataUpdater @AssistedInject constructor(
-    @Assisted private val userId: String,
+    @Assisted val userId: String,
     private val settingsRepository: SettingsRepository,
     private val userRepository: UserRepository,
 ) {

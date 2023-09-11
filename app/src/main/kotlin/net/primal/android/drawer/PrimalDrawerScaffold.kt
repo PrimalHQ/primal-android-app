@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import net.primal.android.core.compose.PrimalNavigationBar
 import net.primal.android.core.compose.PrimalTopLevelDestination
+import net.primal.android.user.domain.Badges
 import kotlin.math.roundToInt
 
 val PrimalBottomBarHeightDp = 64.dp
@@ -36,6 +37,7 @@ fun PrimalDrawerScaffold(
     activeDestination: PrimalTopLevelDestination,
     onPrimaryDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
+    badges: Badges = Badges(),
     onActiveDestinationClick: () -> Unit = {},
     topBar: @Composable (TopAppBarScrollBehavior?) -> Unit = {},
     content: @Composable (PaddingValues) -> Unit = {},
@@ -96,6 +98,7 @@ fun PrimalDrawerScaffold(
                         activeDestination = activeDestination,
                         onTopLevelDestinationChanged = onPrimaryDestinationChanged,
                         onActiveDestinationClick = onActiveDestinationClick,
+                        badges = badges,
                     )
                 },
                 floatingActionButton = floatingActionButton,

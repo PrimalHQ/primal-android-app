@@ -1,4 +1,4 @@
-package net.primal.android.notifications.list
+package net.primal.android.messages.list
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -8,16 +8,14 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
-import net.primal.android.notifications.list.NotificationsContract.UiState
-import net.primal.android.notifications.repository.NotificationRepository
+import net.primal.android.messages.list.MessageListContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
 import javax.inject.Inject
 
 @HiltViewModel
-class NotificationsViewModel @Inject constructor(
+class MessageListViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
-    private val notificationsRepository: NotificationRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(UiState())

@@ -1,6 +1,9 @@
 package net.primal.android.core.compose
 
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -17,6 +20,7 @@ import net.primal.android.core.compose.icons.primaliconpack.Messages
 import net.primal.android.core.compose.icons.primaliconpack.Notifications
 import net.primal.android.core.compose.icons.primaliconpack.Search
 import net.primal.android.theme.AppTheme
+import net.primal.android.user.domain.Badges
 
 @Composable
 fun PrimalNavigationBar(
@@ -24,11 +28,16 @@ fun PrimalNavigationBar(
     activeDestination: PrimalTopLevelDestination,
     onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onActiveDestinationClick: (() -> Unit)? = null,
+    badges: Badges = Badges(),
 ) {
     NavigationBar(
         modifier = modifier,
         tonalElevation = 0.dp,
     ) {
+        val badgesMap = mapOf(
+            Pair(PrimalTopLevelDestination.Messages, badges.messages),
+            Pair(PrimalTopLevelDestination.Notifications, badges.notifications)
+        )
         PrimalTopLevelDestination.values().forEach {
             PrimalNavigationBarItem(
                 primaryDestination = it,
@@ -40,25 +49,31 @@ fun PrimalNavigationBar(
                         onActiveDestinationClick?.invoke()
                     }
                 },
+                badge = badgesMap.getOrDefault(it, 0),
             )
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun RowScope.PrimalNavigationBarItem(
     primaryDestination: PrimalTopLevelDestination,
     activeDestination: PrimalTopLevelDestination,
     onClick: () -> Unit,
+    badge: Int = 0,
 ) {
     NavigationBarItem(
         selected = primaryDestination == activeDestination,
         onClick = onClick,
         icon = {
-            Icon(
-                imageVector = primaryDestination.imageVector(),
-                contentDescription = primaryDestination.label(),
-            )
+            BadgedBox(badge = { if (badge > 0) Badge() }) {
+                Icon(
+                    imageVector = primaryDestination.imageVector(),
+                    contentDescription = primaryDestination.label(),
+                )
+            }
+
         },
         colors = NavigationBarItemDefaults.colors(
             indicatorColor = AppTheme.colorScheme.surface,
