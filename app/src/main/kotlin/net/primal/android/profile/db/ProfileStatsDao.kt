@@ -9,4 +9,7 @@ interface ProfileStatsDao {
     @Upsert
     fun upsert(data: ProfileStats)
 
+    @Upsert
+    fun upsertAll(data: List<ProfileStats>)
+
 }
