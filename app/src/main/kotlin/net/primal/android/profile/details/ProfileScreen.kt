@@ -85,8 +85,8 @@ import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.button.PrimalOutlinedButton
 import net.primal.android.core.compose.feed.FeedLazyColumn
-import net.primal.android.core.compose.feed.FeedLoading
-import net.primal.android.core.compose.feed.FeedNoContent
+import net.primal.android.core.compose.ListLoading
+import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.Key
@@ -316,16 +316,17 @@ fun ProfileScreen(
 
                     if (pagingItems.isEmpty()) {
                         when (pagingItems.loadState.refresh) {
-                            LoadState.Loading -> FeedLoading(
+                            LoadState.Loading -> ListLoading(
                                 modifier = Modifier
                                     .padding(vertical = 64.dp)
                                     .fillMaxWidth(),
                             )
 
-                            is LoadState.NotLoading -> FeedNoContent(
+                            is LoadState.NotLoading -> ListNoContent(
                                 modifier = Modifier
                                     .padding(vertical = 64.dp)
                                     .fillMaxWidth(),
+                                noContentText = stringResource(id = R.string.feed_no_content),
                                 onRefresh = { pagingItems.refresh() }
                             )
 
@@ -339,8 +340,7 @@ fun ProfileScreen(
                 hostState = snackbarHostState,
                 modifier = Modifier
                     .align(Alignment.BottomStart)
-                    .navigationBarsPadding()
-                ,
+                    .navigationBarsPadding(),
             )
         }
     }
