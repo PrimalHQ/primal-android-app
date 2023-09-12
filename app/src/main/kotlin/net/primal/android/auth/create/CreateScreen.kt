@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.absolutePadding
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -72,6 +73,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import kotlinx.coroutines.flow.filter
@@ -460,6 +462,7 @@ fun ProfilePreviewStep(
 
             Box(
                 modifier = Modifier
+                    .offset(y = (-36).dp)
                     .padding(horizontal = 16.dp)
                     .size(size = 78.dp)
                     .clip(shape = CircleShape)
@@ -490,7 +493,7 @@ fun ProfilePreviewStep(
                     .padding(all = 16.dp)
                     .align(alignment = Alignment.BottomCenter),
                 horizontalAlignment = Alignment.Start,
-                verticalArrangement = Arrangement.Center
+                verticalArrangement = Arrangement.Top
             ) {
                 Row(
                     horizontalArrangement = Arrangement.Start,
@@ -608,8 +611,8 @@ fun FollowRecommendedAccountsStep(
                                     )
                                 ), shape = RoundedCornerShape(8.dp)
                             )
-                            .border(width = 1.dp, color = Color(0xFF222222))
-                            .padding(8.dp),
+                            .padding(8.dp)
+                            .border(width = 1.dp, color = Color(0xFF222222)),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
