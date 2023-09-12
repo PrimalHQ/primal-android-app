@@ -9,7 +9,7 @@ import net.primal.android.nostr.model.content.ContentMetadata
 interface CreateContract {
     data class UiState(
         val currentStep: CreateAccountStep = CreateAccountStep.NEW_ACCOUNT,
-        val creatingAccount: Boolean = false,
+        val loading: Boolean = false,
         val error: CreateError? = null,
         val name: String = "",
         val handle: String = "",
@@ -20,7 +20,6 @@ interface CreateContract {
         val avatarUri: Uri? = null,
         val bannerUri: Uri? = null,
         val keypair: CryptoUtils.Keypair? = null,
-        val fetchingRecommendedFollows: Boolean = false,
         val recommendedFollows: Map<String, List<RecommendedFollow>> = emptyMap(),
         val following: MutableSet<String> = mutableSetOf()
     ) {
@@ -28,6 +27,7 @@ interface CreateContract {
             data class FailedToUploadImage(val cause: Throwable) : CreateError()
             data class FailedToCreateMetadata(val cause: Throwable) : CreateError()
             data class FailedToFetchRecommendedFollows(val cause: Throwable) : CreateError()
+            data class FailedToFollow(val cause: Throwable) : CreateError()
         }
 
         enum class CreateAccountStep(val step: Int) {

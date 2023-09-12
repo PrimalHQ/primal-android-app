@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -250,7 +251,7 @@ fun CreateContent(
             PrimalLoadingButton(
                 text = stepActionText(state.currentStep),
                 enabled = state.name != "" && state.handle != "",
-                loading = state.creatingAccount || state.fetchingRecommendedFollows,
+                loading = state.loading,
                 onClick = {
                     when (state.currentStep) {
                         CreateAccountStep.NEW_ACCOUNT -> eventPublisher(CreateContract.UiEvent.GoToProfilePreviewStepEvent)
@@ -586,113 +587,109 @@ fun ProfilePreviewStep(
 fun FollowRecommendedAccountsStep(
     state: CreateContract.UiState,
     eventPublisher: (CreateContract.UiEvent) -> Unit
-) {
-    if (state.fetchingRecommendedFollows && state.recommendedFollows.isEmpty()) {
-        Column(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            PrimalLoadingSpinner()
-        }
-    } else {
-        LazyColumn(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            state.recommendedFollows.forEach {
-                stickyHeader {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(70.dp)
-                            .background(
-                                brush = Brush.linearGradient(
-                                    colors = listOf(
-                                        Color(0xFF181818), Color(0xFF222222)
-                                    )
+) = if (state.loading && state.recommendedFollows.isEmpty()) {
+    Column(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        PrimalLoadingSpinner()
+    }
+} else {
+    LazyColumn(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        state.recommendedFollows.forEach {
+            stickyHeader {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(70.dp)
+                        .background(
+                            brush = Brush.linearGradient(
+                                colors = listOf(
+                                    Color(0xFF181818), Color(0xFF222222)
                                 )
                             )
-                            .border(
-                                width = 1.dp,
-                                color = Color(0xFF222222),
-                                shape = RoundedCornerShape(8.dp),
-                            )
-                            .padding(8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
+                        )
+                        .border(
+                            width = 1.dp,
+                            color = Color(0xFF222222),
+                            shape = RoundedCornerShape(8.dp),
+                        )
+                        .padding(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(it.key)
+                    PrimalOutlinedButton(
+                        onClick = {}
                     ) {
-                        Text(it.key)
-                        PrimalOutlinedButton(
-                            onClick = {}
-                        ) {
-                            Text("Follow All")
-                        }
+                        Text("Follow All")
                     }
                 }
+            }
 
-                items(it.value) { suggestion ->
-                    Row(
+            items(it.value) { suggestion ->
+                Row(
+                    modifier = Modifier
+                        .padding(horizontal = 32.dp, vertical = 12.dp)
+                        .fillMaxWidth()
+                        .height(48.dp)
+                        .background(Color.Black),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    val model =
+                        ImageRequest.Builder(LocalContext.current)
+                            .data(suggestion.content.picture)
+                            .build()
+                    AsyncImage(
+                        model = model,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
                         modifier = Modifier
-                            .padding(horizontal = 32.dp, vertical = 12.dp)
-                            .fillMaxWidth()
                             .height(48.dp)
-                            .background(Color.Black),
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            .width(48.dp)
+                            .clip(CircleShape)
+                    )
+                    Column(
+                        modifier = Modifier
+                            .padding(start = 8.dp)
+                            .fillMaxWidth(0.65f),
+                        horizontalAlignment = Alignment.Start,
+                        verticalArrangement = Arrangement.Center
                     ) {
-                        val model =
-                            ImageRequest.Builder(LocalContext.current)
-                                .data(suggestion.content.picture)
-                                .build()
-                        AsyncImage(
-                            model = model,
-                            contentDescription = null,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .height(48.dp)
-                                .width(48.dp)
-                                .clip(CircleShape)
+                        Text(
+                            text = suggestion.content.displayName ?: suggestion.content.name
+                            ?: "",
+                            fontWeight = FontWeight.W700,
+                            fontSize = 14.sp,
+                            lineHeight = 12.sp,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            color = Color.White
                         )
-                        Column(
-                            modifier = Modifier
-                                .padding(start = 8.dp)
-                                .fillMaxWidth(0.65f),
-                            horizontalAlignment = Alignment.Start,
-                            verticalArrangement = Arrangement.Center
-                        ) {
-                            Text(
-                                text = suggestion.content.displayName ?: suggestion.content.name
-                                ?: "",
-                                fontWeight = FontWeight.W700,
-                                fontSize = 14.sp,
-                                lineHeight = 12.sp,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                color = Color.White
-                            )
-                            Text(
-                                text = suggestion.content.nip05 ?: "",
-                                fontWeight = FontWeight.W400,
-                                fontSize = 12.sp,
-                                lineHeight = 16.sp,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                color = Color(0xFF666666)
-                            )
-                        }
-                        PrimalOutlinedButton(
-                            onClick = {
-                                if (state.following.contains(suggestion.pubkey)) {
-                                    eventPublisher(CreateContract.UiEvent.UnfollowEvent(pubkey = suggestion.pubkey))
-                                } else {
-                                    eventPublisher(CreateContract.UiEvent.FollowEvent(pubkey = suggestion.pubkey))
-                                }
-                            },
-                            content = {
-                                val isFollowing = state.following.contains(suggestion.pubkey)
-                                Text(text = if (isFollowing) "Unfollow" else "Follow")
-                            },
-                            modifier = Modifier
-                                .defaultMinSize(minWidth = 92.dp)
-                                .height(36.dp)
+                        Text(
+                            text = suggestion.content.nip05 ?: "",
+                            fontWeight = FontWeight.W400,
+                            fontSize = 12.sp,
+                            lineHeight = 16.sp,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            color = Color(0xFF666666)
                         )
+                    }
+                    PrimalOutlinedButton(
+                        onClick = {
+                            if (state.following.contains(suggestion.pubkey)) {
+                                eventPublisher(CreateContract.UiEvent.UnfollowEvent(pubkey = suggestion.pubkey))
+                            } else {
+                                eventPublisher(CreateContract.UiEvent.FollowEvent(pubkey = suggestion.pubkey))
+                            }
+                        },
+                        modifier = Modifier
+                            .defaultMinSize(minWidth = 92.dp)
+                            .height(36.dp)
+                    ) {
+                        Text("Follow")
                     }
                 }
             }

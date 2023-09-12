@@ -125,7 +125,7 @@ class CreateViewModel @Inject constructor(
             var avatarUrl: String? = null
             var bannerUrl: String? = null
 
-            setState { copy(creatingAccount = true) }
+            setState { copy(loading = true) }
 
             if (state.value.avatarUri != null) {
                 avatarUrl = uploadImage(state.value.avatarUri!!)
@@ -162,13 +162,13 @@ class CreateViewModel @Inject constructor(
         } catch (e: WssException) {
             setState { copy(error = UiState.CreateError.FailedToCreateMetadata(e)) }
         } finally {
-            setState { copy(creatingAccount = false) }
+            setState { copy(loading = false) }
         }
     }
 
     private fun fetchRecommendedFollows() = viewModelScope.launch {
         try {
-            setState { copy(fetchingRecommendedFollows = true) }
+            setState { copy(loading = true) }
             val response = recommendedFollowsApi.fetch(state.value.name)
 
             val result = response.suggestions.groupBy { it.group }.map { grouped ->
@@ -185,7 +185,7 @@ class CreateViewModel @Inject constructor(
         } catch (e: IOException) {
             setState { copy(error = UiState.CreateError.FailedToFetchRecommendedFollows(e)) }
         } finally {
-            setState { copy(fetchingRecommendedFollows = false) }
+            setState { copy(loading = false) }
         }
     }
 
@@ -194,7 +194,25 @@ class CreateViewModel @Inject constructor(
         // navigate to feed
         val pubkey = authRepository.login(state.value.keypair!!.privkey)
         settingsRepository.fetchAndPersistAppSettings(userId = pubkey)
-        setEffect(SideEffect.AccountCreatedAndPersisted(pubkey = pubkey))
+        try {
+            setState { copy(loading = true) }
+            follow()
+            setEffect(SideEffect.AccountCreatedAndPersisted(pubkey = pubkey))
+        } catch (e: NostrPublishException) {
+            setState { copy(error = UiState.CreateError.FailedToFollow(e)) }
+        } finally {
+            setState { copy(loading = false) }
+        }
+    }
+
+    private suspend fun follow() {
+        val contactsEvent = nostrNotary.signContactsNostrEvent(
+            userId = state.value.keypair!!.pubkey,
+            contacts = state.value.following,
+            relays = BOOTSTRAP_RELAYS.map { it.toRelay() }
+        )
+
+        relayPool.publishEvent(contactsEvent)
     }
 
     private fun goBack() = viewModelScope.launch {
