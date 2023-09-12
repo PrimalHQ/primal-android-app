@@ -86,10 +86,12 @@ class CreateViewModel @Inject constructor(
                     val keypair = CryptoUtils.generateHexEncodedKeypair()
                     setState { copy(keypair = keypair) }
                     createNostrAccount()
-                    fetchRecommendedFollows()
                 }
 
-                is UiEvent.GoToFollowContactsStepEvent -> setState { copy(currentStep = UiState.CreateAccountStep.FOLLOW_RECOMMENDED_ACCOUNTS) }
+                is UiEvent.GoToFollowContactsStepEvent -> {
+                    fetchRecommendedFollows()
+                    setState { copy(currentStep = UiState.CreateAccountStep.FOLLOW_RECOMMENDED_ACCOUNTS) }
+                }
                 is UiEvent.GoBack -> goBack()
                 is UiEvent.FinishEvent -> finish()
                 is UiEvent.AvatarUriChangedEvent -> setState { copy(avatarUri = it.avatarUri) }
