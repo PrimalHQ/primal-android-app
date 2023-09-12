@@ -23,6 +23,8 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
 import net.primal.android.R
+import net.primal.android.core.compose.ListLoading
+import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.feed.model.FeedPostAction
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.isEmpty
@@ -152,7 +154,7 @@ fun FeedLazyColumn(
                 LoadState.Loading -> {
                     if (shouldShowLoadingState) {
                         item(contentType = "LoadingRefresh") {
-                            FeedLoading(
+                            ListLoading(
                                 modifier = Modifier.fillParentMaxSize(),
                             )
                         }
@@ -162,8 +164,9 @@ fun FeedLazyColumn(
                 is LoadState.NotLoading -> {
                     if (shouldShowNoContentState) {
                         item(contentType = "NoContent") {
-                            FeedNoContent(
+                            ListNoContent(
                                 modifier = Modifier.fillParentMaxSize(),
+                                noContentText = stringResource(id = R.string.feed_no_content),
                                 onRefresh = { pagingItems.refresh() }
                             )
                         }
@@ -176,7 +179,7 @@ fun FeedLazyColumn(
 
         when (pagingItems.loadState.mediator?.append) {
             LoadState.Loading -> item(contentType = "LoadingAppend") {
-                FeedLoading(
+                ListLoading(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(64.dp)

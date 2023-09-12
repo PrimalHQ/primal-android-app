@@ -1,8 +1,8 @@
 package net.primal.android.notifications.list
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
@@ -13,15 +13,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.PrimalTopLevelDestination
+import net.primal.android.core.compose.ListLoading
+import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 import net.primal.android.drawer.DrawerScreenDestination
@@ -82,18 +82,36 @@ fun NotificationsScreen(
             )
         },
         content = { paddingValues ->
-            Box(
-                modifier = Modifier
-                    .padding(paddingValues)
-                    .fillMaxSize(),
-                contentAlignment = Alignment.Center,
+            LazyColumn(
+                contentPadding = paddingValues
             ) {
-                Text(
-                    modifier = Modifier.padding(horizontal = 48.dp),
-                    textAlign = TextAlign.Center,
-                    text = "Working on it...",
-                )
+                items(
+                    items = state.notifications,
+                    key = { "${it.type};${it.createdAt};${it.userId}" },
+                    contentType = { it.type },
+                ) {
+                    Text(
+                        modifier = Modifier.padding(all = 16.dp),
+                        text = "Notification type = ${it.type}",
+                    )
+                }
+
+                if (state.notifications.isEmpty()) {
+                    item {
+                        if (state.loading) {
+                            ListLoading(
+                                modifier = Modifier.fillParentMaxSize(),
+                            )
+                        } else {
+                            ListNoContent(
+                                modifier = Modifier.fillParentMaxSize(),
+                                refreshButtonVisible = false,
+                                noContentText = "No notifications."
+                            )
+                        }
+                    }
+                }
             }
-        }
+        },
     )
 }

@@ -1,4 +1,4 @@
-package net.primal.android.core.compose.feed
+package net.primal.android.core.compose
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -22,9 +22,11 @@ import kotlinx.coroutines.delay
 import net.primal.android.R
 
 @Composable
-fun FeedNoContent(
+fun ListNoContent(
     modifier: Modifier,
-    onRefresh: () -> Unit,
+    noContentText: String,
+    refreshButtonVisible: Boolean = true,
+    onRefresh: () -> Unit = {},
 ) {
     val visible = rememberSaveable { mutableStateOf(false) }
 
@@ -47,17 +49,19 @@ fun FeedNoContent(
                 modifier = Modifier
                     .wrapContentSize()
                     .padding(horizontal = 32.dp),
-                text = stringResource(id = R.string.feed_no_content),
+                text = noContentText,
                 textAlign = TextAlign.Center,
             )
 
-            TextButton(
-                modifier = Modifier.padding(vertical = 8.dp),
-                onClick = onRefresh,
-            ) {
-                Text(
-                    text = stringResource(id = R.string.feed_refresh_button).uppercase(),
-                )
+            if (refreshButtonVisible) {
+                TextButton(
+                    modifier = Modifier.padding(vertical = 8.dp),
+                    onClick = onRefresh,
+                ) {
+                    Text(
+                        text = stringResource(id = R.string.feed_refresh_button).uppercase(),
+                    )
+                }
             }
         }
     }
