@@ -9,4 +9,8 @@ interface NotificationsContract {
         val activeAccountAvatarUrl: String? = null,
         val badges: Badges = Badges(),
     )
+
+    sealed class UiEvent {
+        data object NotificationsSeen : UiEvent()
+    }
 }

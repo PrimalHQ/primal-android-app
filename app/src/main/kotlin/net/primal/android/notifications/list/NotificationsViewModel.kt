@@ -3,29 +3,45 @@ package net.primal.android.notifications.list
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
+import net.primal.android.notifications.list.NotificationsContract.UiEvent
 import net.primal.android.notifications.list.NotificationsContract.UiState
 import net.primal.android.notifications.repository.NotificationRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
+import net.primal.android.user.repository.UserRepository
 import javax.inject.Inject
 
 @HiltViewModel
 class NotificationsViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val notificationsRepository: NotificationRepository,
+    private val userRepository: UserRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(UiState())
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
 
+    private val _event: MutableSharedFlow<UiEvent> = MutableSharedFlow()
+    fun setEvent(event: UiEvent) = viewModelScope.launch { _event.emit(event) }
+
     init {
+        subscribeToEvents()
         subscribeToActiveAccount()
+    }
+
+    private fun subscribeToEvents() = viewModelScope.launch {
+        _event.collect {
+            when (it) {
+                UiEvent.NotificationsSeen -> updateNotificationsSeenTimestamp()
+            }
+        }
     }
 
     private fun subscribeToActiveAccount() = viewModelScope.launch {
@@ -40,4 +56,11 @@ class NotificationsViewModel @Inject constructor(
                 }
             }
     }
+
+    private fun updateNotificationsSeenTimestamp() = viewModelScope.launch {
+        val activeUserId = activeAccountStore.activeUserId()
+        notificationsRepository.updateLastSeenTimestamp(userId = activeUserId)
+        userRepository.refreshBadges(userId = activeUserId)
+    }
+
 }
