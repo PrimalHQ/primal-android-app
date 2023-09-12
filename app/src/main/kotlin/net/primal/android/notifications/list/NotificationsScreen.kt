@@ -10,6 +10,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -35,6 +36,10 @@ fun NotificationsScreen(
     onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
+
+    LaunchedEffect(viewModel) {
+        viewModel.setEvent(NotificationsContract.UiEvent.NotificationsSeen)
+    }
 
     NotificationsScreen(
         state = uiState.value,
