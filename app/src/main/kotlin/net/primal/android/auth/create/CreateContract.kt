@@ -21,7 +21,8 @@ interface CreateContract {
         val bannerUri: Uri? = null,
         val keypair: CryptoUtils.Keypair? = null,
         val fetchingRecommendedFollows: Boolean = false,
-        val recommendedFollows: Map<String, List<ContentMetadata>> = emptyMap()
+        val recommendedFollows: Map<String, List<RecommendedFollow>> = emptyMap(),
+        val following: MutableSet<String> = mutableSetOf()
     ) {
         sealed class CreateError {
             data class FailedToUploadImage(val cause: Throwable) : CreateError()
@@ -56,12 +57,16 @@ interface CreateContract {
         data class Nip05IdentifierChangedEvent(val nip05Identifier: String) : UiEvent()
         data class WebsiteChangedEvent(val website: String) : UiEvent()
         data class AboutMeChangedEvent(val aboutMe: String) : UiEvent()
+        data class FollowEvent(val pubkey: String) : UiEvent()
+        data class UnfollowEvent(val pubkey: String) : UiEvent()
     }
 
     sealed class SideEffect {
         data class AccountCreatedAndPersisted(val pubkey: String) : SideEffect()
     }
 }
+
+data class RecommendedFollow(val pubkey: String, val content: ContentMetadata)
 
 fun CreateContract.UiState.toCreateNostrProfileMetadata(
     resolvedAvatarUrl: String?,
