@@ -84,9 +84,10 @@ class CreateViewModel @Inject constructor(
                     val keypair = CryptoUtils.generateHexEncodedKeypair()
                     setState { copy(keypair = keypair) }
                     createNostrAccount()
+                    fetchRecommendedFollows()
                 }
 
-                is UiEvent.GoToFollowContactsStepEvent -> setState { copy(currentStep = UiState.CreateAccountStep.ACCOUNT_CREATED) }
+                is UiEvent.GoToFollowContactsStepEvent -> setState { copy(currentStep = UiState.CreateAccountStep.FOLLOW_RECOMMENDED_ACCOUNTS) }
                 is UiEvent.GoBack -> goBack()
                 is UiEvent.FinishEvent -> finish()
                 is UiEvent.AvatarUriChangedEvent -> setState { copy(avatarUri = it.avatarUri) }
@@ -135,7 +136,7 @@ class CreateViewModel @Inject constructor(
             relayPool.publishEvent(firstContactEvent)
 
             // GREAT SUCCESS
-            setState { copy(currentStep = UiState.CreateAccountStep.FOLLOW_RECOMMENDED_ACCOUNTS) }
+            setState { copy(currentStep = UiState.CreateAccountStep.ACCOUNT_CREATED) }
         } catch (e: IOException) {
             setState { copy(error = UiState.CreateError.FailedToUploadImage(e)) }
         } catch (e: NostrPublishException) {
@@ -149,10 +150,13 @@ class CreateViewModel @Inject constructor(
 
     private fun fetchRecommendedFollows() = viewModelScope.launch {
         try {
+            setState { copy(fetchingRecommendedFollows = true) }
             val response = recommendedFollowsApi.fetch(state.value.name)
             setState { copy(recommendedFollowsResponse = response) }
         } catch (e: IOException) {
             setState { copy(error = UiState.CreateError.FailedToFetchRecommendedFollows(e)) }
+        } finally {
+            setState { copy(fetchingRecommendedFollows = false) }
         }
     }
 

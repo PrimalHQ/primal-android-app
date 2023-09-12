@@ -27,6 +27,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -72,14 +74,21 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import net.primal.android.R
+import net.primal.android.auth.create.CreateContract.UiState.CreateAccountStep
+import net.primal.android.auth.create.api.model.RecommendedFollowsResponse
+import net.primal.android.auth.create.api.model.Suggestion
+import net.primal.android.auth.create.api.model.SuggestionGroup
+import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.button.PrimalLoadingButton
+import net.primal.android.core.compose.button.PrimalOutlinedButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
+import net.primal.android.nostr.model.content.ContentMetadata
+import net.primal.android.profile.db.ProfileMetadata
+import net.primal.android.serialization.NostrJson
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
-import net.primal.android.auth.create.CreateContract.UiState.CreateAccountStep
-import net.primal.android.core.compose.PrimalLoadingSpinner
 
 @Composable
 fun CreateScreen(
@@ -132,28 +141,23 @@ fun CreateScreen(
     eventPublisher: (CreateContract.UiEvent) -> Unit,
     onClose: () -> Unit,
 ) {
-    Scaffold(
-        topBar = {
-            PrimalTopAppBar(
-                title = stepTitle(step = state.currentStep),
-                navigationIcon = PrimalIcons.ArrowBack,
-                onNavigationIconClick = {
-                    if (state.currentStep == CreateAccountStep.NEW_ACCOUNT) {
-                        onClose()
-                    } else {
-                        eventPublisher(CreateContract.UiEvent.GoBack)
-                    }
-                },
-            )
-        },
-        content = { paddingValues ->
-            CreateContent(
-                state = state,
-                eventPublisher = eventPublisher,
-                paddingValues = paddingValues
-            )
-        }
-    )
+    Scaffold(topBar = {
+        PrimalTopAppBar(
+            title = stepTitle(step = state.currentStep),
+            navigationIcon = if (state.currentStep == CreateAccountStep.FOLLOW_RECOMMENDED_ACCOUNTS) null else PrimalIcons.ArrowBack,
+            onNavigationIconClick = {
+                if (state.currentStep == CreateAccountStep.NEW_ACCOUNT) {
+                    onClose()
+                } else {
+                    eventPublisher(CreateContract.UiEvent.GoBack)
+                }
+            },
+        )
+    }, content = { paddingValues ->
+        CreateContent(
+            state = state, eventPublisher = eventPublisher, paddingValues = paddingValues
+        )
+    })
 }
 
 @Composable
@@ -185,8 +189,7 @@ fun CreateContent(
         ) {
             if (state.currentStep != CreateAccountStep.FOLLOW_RECOMMENDED_ACCOUNTS) {
                 Row(
-                    modifier = Modifier
-                        .clip(shape = RoundedCornerShape(2.dp))
+                    modifier = Modifier.clip(shape = RoundedCornerShape(2.dp))
                 ) {
                     Box(
                         modifier = Modifier
@@ -211,19 +214,31 @@ fun CreateContent(
                 }
             }
         }
-        Column(
-            modifier = Modifier
+        val columnModifier =
+            if (state.currentStep != CreateAccountStep.FOLLOW_RECOMMENDED_ACCOUNTS) Modifier
                 .verticalScroll(rememberScrollState())
                 .fillMaxHeight()
-                .weight(weight = 1f, fill = true),
+                .weight(weight = 1f, fill = true) else Modifier
+                .fillMaxHeight()
+                .weight(weight = 1f, fill = true)
+        Column(
+            modifier = columnModifier,
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
-
         ) {
             when (state.currentStep) {
-                CreateAccountStep.NEW_ACCOUNT -> CreateAccountStep(state = state, eventPublisher = eventPublisher)
-                CreateAccountStep.PROFILE_PREVIEW -> ProfilePreviewStep(state = state, isFinalized = false)
-                CreateAccountStep.ACCOUNT_CREATED -> ProfilePreviewStep(state = state, isFinalized = true)
+                CreateAccountStep.NEW_ACCOUNT -> CreateAccountStep(
+                    state = state, eventPublisher = eventPublisher
+                )
+
+                CreateAccountStep.PROFILE_PREVIEW -> ProfilePreviewStep(
+                    state = state, isFinalized = false
+                )
+
+                CreateAccountStep.ACCOUNT_CREATED -> ProfilePreviewStep(
+                    state = state, isFinalized = true
+                )
+
                 CreateAccountStep.FOLLOW_RECOMMENDED_ACCOUNTS -> FollowRecommendedAccountsStep(state = state)
             }
         }
@@ -241,8 +256,10 @@ fun CreateContent(
                     when (state.currentStep) {
                         CreateAccountStep.NEW_ACCOUNT -> eventPublisher(CreateContract.UiEvent.GoToProfilePreviewStepEvent)
                         CreateAccountStep.PROFILE_PREVIEW -> eventPublisher(CreateContract.UiEvent.GoToNostrCreatedStepEvent)
-                        CreateAccountStep.ACCOUNT_CREATED -> eventPublisher(CreateContract.UiEvent.FinishEvent)
-                        CreateAccountStep.FOLLOW_RECOMMENDED_ACCOUNTS -> eventPublisher(CreateContract.UiEvent.GoToFollowContactsStepEvent)
+                        CreateAccountStep.ACCOUNT_CREATED -> eventPublisher(CreateContract.UiEvent.GoToFollowContactsStepEvent)
+                        CreateAccountStep.FOLLOW_RECOMMENDED_ACCOUNTS -> eventPublisher(
+                            CreateContract.UiEvent.FinishEvent
+                        )
                     }
                 },
                 modifier = Modifier
@@ -256,8 +273,7 @@ fun CreateContent(
 
 @Composable
 fun CreateAccountStep(
-    state: CreateContract.UiState,
-    eventPublisher: (CreateContract.UiEvent) -> Unit
+    state: CreateContract.UiState, eventPublisher: (CreateContract.UiEvent) -> Unit
 ) {
     val avatarPickMedia =
         rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
@@ -274,9 +290,7 @@ fun CreateAccountStep(
             .height(179.dp)
     ) {
         if (state.bannerUri != null) {
-            val model = ImageRequest.Builder(LocalContext.current)
-                .data(state.bannerUri)
-                .build()
+            val model = ImageRequest.Builder(LocalContext.current).data(state.bannerUri).build()
             AsyncImage(
                 model = model,
                 contentDescription = null,
@@ -303,9 +317,7 @@ fun CreateAccountStep(
                 .align(Alignment.BottomStart)
         ) {
             if (state.avatarUri != null) {
-                val model = ImageRequest.Builder(LocalContext.current)
-                    .data(state.avatarUri)
-                    .build()
+                val model = ImageRequest.Builder(LocalContext.current).data(state.avatarUri).build()
 
                 AsyncImage(
                     model = model,
@@ -388,36 +400,30 @@ fun CreateAccountStep(
         prefix = "@"
     )
     Spacer(modifier = Modifier.height(12.dp))
-    InputField(
-        header = "WEBSITE",
+    InputField(header = "WEBSITE",
         value = state.website,
         onValueChange = { eventPublisher(CreateContract.UiEvent.WebsiteChangedEvent(it.trim())) })
     Spacer(modifier = Modifier.height(12.dp))
-    InputField(
-        header = "ABOUT ME",
+    InputField(header = "ABOUT ME",
         value = state.aboutMe,
         isMultiline = true,
         onValueChange = { eventPublisher(CreateContract.UiEvent.AboutMeChangedEvent(it)) })
     Spacer(modifier = Modifier.height(12.dp))
-    InputField(
-        header = "BITCOIN LIGHTNING ADDRESS",
+    InputField(header = "BITCOIN LIGHTNING ADDRESS",
         value = state.lightningAddress,
         onValueChange = { eventPublisher(CreateContract.UiEvent.LightningAddressChangedEvent(it)) })
     Spacer(modifier = Modifier.height(12.dp))
-    InputField(
-        header = "NOSTR VERIFICATION (NIP 05)",
+    InputField(header = "NOSTR VERIFICATION (NIP 05)",
         value = state.nip05Identifier,
         onValueChange = { eventPublisher(CreateContract.UiEvent.Nip05IdentifierChangedEvent(it)) })
 }
 
 @Composable
 fun ProfilePreviewStep(
-    state: CreateContract.UiState,
-    isFinalized: Boolean
+    state: CreateContract.UiState, isFinalized: Boolean
 ) {
     Column(
-        modifier = Modifier
-            .fillMaxSize(),
+        modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top
     ) {
@@ -434,9 +440,7 @@ fun ProfilePreviewStep(
                 ),
         ) {
             if (state.bannerUri != null) {
-                val model = ImageRequest.Builder(LocalContext.current)
-                    .data(state.bannerUri)
-                    .build()
+                val model = ImageRequest.Builder(LocalContext.current).data(state.bannerUri).build()
                 AsyncImage(
                     model = model,
                     contentDescription = null,
@@ -464,9 +468,8 @@ fun ProfilePreviewStep(
                     .align(Alignment.CenterStart)
             ) {
                 if (state.avatarUri != null) {
-                    val model = ImageRequest.Builder(LocalContext.current)
-                        .data(state.avatarUri)
-                        .build()
+                    val model =
+                        ImageRequest.Builder(LocalContext.current).data(state.avatarUri).build()
 
                     AsyncImage(
                         model = model,
@@ -543,7 +546,9 @@ fun ProfilePreviewStep(
                     .padding(start = 32.dp, end = 32.dp)
                     .fillMaxWidth()
                     .height(100.dp)
-                    .background(color = Color(0xFF181818), shape = RoundedCornerShape(size = 12.dp)),
+                    .background(
+                        color = Color(0xFF181818), shape = RoundedCornerShape(size = 12.dp)
+                    ),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
@@ -564,10 +569,7 @@ fun ProfilePreviewStep(
             }
         } else {
             Text(
-                text = "We will use this info to create \n" +
-                        "your Nostr account. If you wish to\n" +
-                        "make any changes, you can always \n" +
-                        "do so in your profile settings.",
+                text = "We will use this info to create \n" + "your Nostr account. If you wish to\n" + "make any changes, you can always \n" + "do so in your profile settings.",
                 modifier = Modifier.padding(horizontal = 32.dp),
                 fontWeight = FontWeight.W400,
                 fontSize = 20.sp,
@@ -584,14 +586,69 @@ fun ProfilePreviewStep(
 fun FollowRecommendedAccountsStep(
     state: CreateContract.UiState
 ) {
-    if (state.fetchingRecommendedFollows) {
+    if (state.fetchingRecommendedFollows || state.recommendedFollowsResponse == null) {
         Column(
             modifier = Modifier.fillMaxSize()
         ) {
             PrimalLoadingSpinner()
         }
     } else {
+        val res = state.recommendedFollowsResponse.suggestions.groupBy { it.group }.map { grouped ->
+            val key = grouped.key
+            val values = grouped.value.flatMap { it.members }.map { suggestion ->
+                val metadata = state.recommendedFollowsResponse.metadata[suggestion.pubkey]!!
 
+                return@map NostrJson.decodeFromString<ContentMetadata>(metadata.content)
+            }
+
+
+            return@map Pair<String, List<ContentMetadata>>(key, values)
+        }.toMap()
+
+        LazyColumn(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            res.forEach {
+                stickyHeader {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(70.dp)
+                            .background(
+                                brush = Brush.linearGradient(
+                                    colors = listOf(
+                                        Color(0xFF181818), Color(0xFF222222)
+                                    )
+                                ), shape = RoundedCornerShape(8.dp)
+                            )
+                            .border(width = 1.dp, color = Color(0xFF222222))
+                            .padding(8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(it.key)
+                        PrimalOutlinedButton(
+                            onClick = {}
+                        ) {
+                            Text("Follow All")
+                        }
+                    }
+                }
+
+                items(it.value) { suggestion ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth()
+                            .height(48.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(suggestion.name ?: "")
+                        Text(suggestion.displayName ?: "")
+                        Text(suggestion.nip05 ?: "")
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -610,8 +667,7 @@ fun InputField(
             .padding(horizontal = 32.dp)
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
+            modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
                 text = header,
@@ -620,34 +676,29 @@ fun InputField(
                 color = AppTheme.extraColorScheme.onSurfaceVariantAlt4
             )
             if (isRequired) {
-                Text(
-                    buildAnnotatedString {
-                        withStyle(
-                            style = SpanStyle(
-                                color = Color.Red,
-                                fontWeight = FontWeight.W400,
-                                fontSize = 16.sp
-                            )
-                        ) {
-                            append("*")
-                        }
-                        withStyle(
-                            style = SpanStyle(
-                                color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
-                                fontWeight = FontWeight.W400,
-                                fontSize = 16.sp
-                            )
-                        ) {
-                            append(" required")
-                        }
+                Text(buildAnnotatedString {
+                    withStyle(
+                        style = SpanStyle(
+                            color = Color.Red, fontWeight = FontWeight.W400, fontSize = 16.sp
+                        )
+                    ) {
+                        append("*")
                     }
-                )
+                    withStyle(
+                        style = SpanStyle(
+                            color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
+                            fontWeight = FontWeight.W400,
+                            fontSize = 16.sp
+                        )
+                    ) {
+                        append(" required")
+                    }
+                })
             }
         }
         Spacer(modifier = Modifier.height(4.dp))
         OutlinedTextField(
-            modifier = Modifier
-                .fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             colors = OutlinedTextFieldDefaults.colors(
                 unfocusedContainerColor = Color(0xFF181818),
                 unfocusedBorderColor = Color.Transparent,
@@ -685,19 +736,13 @@ fun LaunchedErrorHandler(
     val context = LocalContext.current
     val uiScope = rememberCoroutineScope()
     LaunchedEffect(viewModel) {
-        viewModel.state
-            .filter { it.error != null }
-            .map { it.error }
-            .filterNotNull()
-            .collect {
-                uiScope.launch {
-                    Toast.makeText(
-                        context,
-                        genericMessage,
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
+        viewModel.state.filter { it.error != null }.map { it.error }.filterNotNull().collect {
+            uiScope.launch {
+                Toast.makeText(
+                    context, genericMessage, Toast.LENGTH_SHORT
+                ).show()
             }
+        }
     }
 }
 
@@ -706,7 +751,9 @@ data class CreateScreenPreviewState(
     val name: String = "",
     val handle: String = "",
     val website: String = "",
-    val aboutMe: String = ""
+    val aboutMe: String = "",
+    val fetchingRecommendedFollows: Boolean = false,
+    val recommendedFollowsResponse: RecommendedFollowsResponse? = null
 )
 
 class CreateScreenPreviewProvider : PreviewParameterProvider<CreateScreenPreviewState> {
@@ -732,7 +779,39 @@ class CreateScreenPreviewProvider : PreviewParameterProvider<CreateScreenPreview
                 name = "Preston Pysh",
                 handle = "PrestonPysh",
                 aboutMe = "Bitcoin & books. My bitcoin can remain in cold storage far longer than the market can remain irrational.",
-                website = "https://theinvestorspodcast.com/"
+                website = "https://theinvestorspodcast.com/",
+                fetchingRecommendedFollows = true
+            ),
+            CreateScreenPreviewState(
+                currentStep = CreateAccountStep.FOLLOW_RECOMMENDED_ACCOUNTS,
+                name = "Preston Pysh",
+                handle = "PrestonPysh",
+                aboutMe = "Bitcoin & books. My bitcoin can remain in cold storage far longer than the market can remain irrational.",
+                website = "https://theinvestorspodcast.com/",
+                fetchingRecommendedFollows = false,
+                recommendedFollowsResponse = RecommendedFollowsResponse(
+                    metadata = mapOf(
+                        "00000000827ffaa94bfea288c3dfce4422c794fbb96625b6b31e9049f729d700" to net.primal.android.auth.create.api.model.Metadata(
+                            content = "{\"banner\":\"https://nostr.build/i/nostr.build_90a51a2e50c9f42288260d01b3a2a4a1c7a9df085423abad7809e76429da7cdc.gif\",\"website\":\"https://primal.net/cameri\",\"damus_donation_v2\":100,\"nip05\":\"cameri@elder.nostr.land\",\"lud16\":\"cameri@getalby.com\",\"picture\":\"https://nostr.build/i/8cd2fc3d7e6637dc26c6e80b5e1b6ccb4a1e5ba5f2bec67904fe6912a23a85be.jpg\",\"display_name\":\"Camerið\u009Fª½\",\"about\":\"@HodlWithLedn. All opinions are my own.\\nBitcoiner class of 2021. Core Nostr Developer. Author of Nostream. Ex Relay Operator.\",\"name\":\"cameri\"}",
+                            createdAt = 1692488679,
+                            id = "1c42d032a1eb4c4fca337598165a7513d90c71f1059ea03475189858c5afc630",
+                            kind = 0,
+                            pubkey = "00000000827ffaa94bfea288c3dfce4422c794fbb96625b6b31e9049f729d700",
+                            sig = "b89b9e7771d762fe81809a0699a8088eb6f71564590eff514a176838e09c306aeeb90c9437bee590dd8d8899f16a64acf335af1003d065c75799de066c6d319d"
+                        )
+                    ),
+                    suggestions = listOf(
+                        SuggestionGroup(
+                            group = "PROMINENT NOSTRICHES",
+                            members = listOf(
+                                Suggestion(
+                                    name = "cameri",
+                                    pubkey = "00000000827ffaa94bfea288c3dfce4422c794fbb96625b6b31e9049f729d700"
+                                )
+                            )
+                        )
+                    )
+                )
             )
         )
 }
@@ -740,20 +819,15 @@ class CreateScreenPreviewProvider : PreviewParameterProvider<CreateScreenPreview
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun PreviewCreateScreen(
-    @PreviewParameter(CreateScreenPreviewProvider::class)
-    state: CreateScreenPreviewState
+    @PreviewParameter(CreateScreenPreviewProvider::class) state: CreateScreenPreviewState
 ) {
     PrimalTheme {
-        CreateScreen(
-            state = CreateContract.UiState(
-                currentStep = state.currentStep,
-                name = state.name,
-                handle = state.handle,
-                website = state.website,
-                aboutMe = state.aboutMe
-            ),
-            eventPublisher = {},
-            onClose = {}
-        )
+        CreateScreen(state = CreateContract.UiState(
+            currentStep = state.currentStep,
+            name = state.name,
+            handle = state.handle,
+            website = state.website,
+            aboutMe = state.aboutMe
+        ), eventPublisher = {}, onClose = {})
     }
 }
