@@ -13,9 +13,12 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,6 +30,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -61,6 +65,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -75,9 +80,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.auth.create.CreateContract.UiState.CreateAccountStep
-import net.primal.android.auth.create.api.model.RecommendedFollowsResponse
-import net.primal.android.auth.create.api.model.Suggestion
-import net.primal.android.auth.create.api.model.SuggestionGroup
 import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.button.PrimalLoadingButton
@@ -85,8 +87,6 @@ import net.primal.android.core.compose.button.PrimalOutlinedButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.nostr.model.content.ContentMetadata
-import net.primal.android.profile.db.ProfileMetadata
-import net.primal.android.serialization.NostrJson
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 
@@ -461,7 +461,6 @@ fun ProfilePreviewStep(
             Box(
                 modifier = Modifier
                     .padding(horizontal = 16.dp)
-                    .padding(bottom = 78.dp)
                     .size(size = 78.dp)
                     .clip(shape = CircleShape)
                     .background(color = Color.Black)
@@ -586,29 +585,17 @@ fun ProfilePreviewStep(
 fun FollowRecommendedAccountsStep(
     state: CreateContract.UiState
 ) {
-    if (state.fetchingRecommendedFollows || state.recommendedFollowsResponse == null) {
+    if (state.fetchingRecommendedFollows && state.recommendedFollows.isEmpty()) {
         Column(
             modifier = Modifier.fillMaxSize()
         ) {
             PrimalLoadingSpinner()
         }
     } else {
-        val res = state.recommendedFollowsResponse.suggestions.groupBy { it.group }.map { grouped ->
-            val key = grouped.key
-            val values = grouped.value.flatMap { it.members }.map { suggestion ->
-                val metadata = state.recommendedFollowsResponse.metadata[suggestion.pubkey]!!
-
-                return@map NostrJson.decodeFromString<ContentMetadata>(metadata.content)
-            }
-
-
-            return@map Pair<String, List<ContentMetadata>>(key, values)
-        }.toMap()
-
         LazyColumn(
             modifier = Modifier.fillMaxSize()
         ) {
-            res.forEach {
+            state.recommendedFollows.forEach {
                 stickyHeader {
                     Row(
                         modifier = Modifier
@@ -637,14 +624,59 @@ fun FollowRecommendedAccountsStep(
 
                 items(it.value) { suggestion ->
                     Row(
-                        modifier = Modifier.fillMaxWidth()
-                            .height(48.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
+                        modifier = Modifier
+                            .padding(horizontal = 32.dp, vertical = 12.dp)
+                            .fillMaxWidth()
+                            .height(48.dp)
+                            .background(Color.Black),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        Text(suggestion.name ?: "")
-                        Text(suggestion.displayName ?: "")
-                        Text(suggestion.nip05 ?: "")
+                        val model =
+                            ImageRequest.Builder(LocalContext.current).data(suggestion.picture)
+                                .build()
+                        AsyncImage(
+                            model = model,
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .height(48.dp)
+                                .width(48.dp)
+                                .clip(CircleShape)
+                        )
+                        Column(
+                            modifier = Modifier
+                                .padding(start = 8.dp)
+                                .fillMaxWidth(0.65f),
+                            horizontalAlignment = Alignment.Start,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Text(
+                                text = suggestion.displayName ?: suggestion.name ?: "",
+                                fontWeight = FontWeight.W700,
+                                fontSize = 14.sp,
+                                lineHeight = 12.sp,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                color = Color.White
+                            )
+                            Text(
+                                text = suggestion.nip05 ?: "",
+                                fontWeight = FontWeight.W400,
+                                fontSize = 12.sp,
+                                lineHeight = 16.sp,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                color = Color(0xFF666666)
+                            )
+                        }
+                        PrimalOutlinedButton(
+                            onClick = {},
+                            modifier = Modifier
+                                .defaultMinSize(minWidth = 92.dp)
+                                .height(36.dp)
+                        ) {
+                            Text("Follow")
+                        }
                     }
                 }
             }
@@ -753,7 +785,7 @@ data class CreateScreenPreviewState(
     val website: String = "",
     val aboutMe: String = "",
     val fetchingRecommendedFollows: Boolean = false,
-    val recommendedFollowsResponse: RecommendedFollowsResponse? = null
+    val recommendedFollows: Map<String, List<ContentMetadata>> = emptyMap()
 )
 
 class CreateScreenPreviewProvider : PreviewParameterProvider<CreateScreenPreviewState> {
@@ -789,26 +821,17 @@ class CreateScreenPreviewProvider : PreviewParameterProvider<CreateScreenPreview
                 aboutMe = "Bitcoin & books. My bitcoin can remain in cold storage far longer than the market can remain irrational.",
                 website = "https://theinvestorspodcast.com/",
                 fetchingRecommendedFollows = false,
-                recommendedFollowsResponse = RecommendedFollowsResponse(
-                    metadata = mapOf(
-                        "00000000827ffaa94bfea288c3dfce4422c794fbb96625b6b31e9049f729d700" to net.primal.android.auth.create.api.model.Metadata(
-                            content = "{\"banner\":\"https://nostr.build/i/nostr.build_90a51a2e50c9f42288260d01b3a2a4a1c7a9df085423abad7809e76429da7cdc.gif\",\"website\":\"https://primal.net/cameri\",\"damus_donation_v2\":100,\"nip05\":\"cameri@elder.nostr.land\",\"lud16\":\"cameri@getalby.com\",\"picture\":\"https://nostr.build/i/8cd2fc3d7e6637dc26c6e80b5e1b6ccb4a1e5ba5f2bec67904fe6912a23a85be.jpg\",\"display_name\":\"Camerið\u009Fª½\",\"about\":\"@HodlWithLedn. All opinions are my own.\\nBitcoiner class of 2021. Core Nostr Developer. Author of Nostream. Ex Relay Operator.\",\"name\":\"cameri\"}",
-                            createdAt = 1692488679,
-                            id = "1c42d032a1eb4c4fca337598165a7513d90c71f1059ea03475189858c5afc630",
-                            kind = 0,
-                            pubkey = "00000000827ffaa94bfea288c3dfce4422c794fbb96625b6b31e9049f729d700",
-                            sig = "b89b9e7771d762fe81809a0699a8088eb6f71564590eff514a176838e09c306aeeb90c9437bee590dd8d8899f16a64acf335af1003d065c75799de066c6d319d"
-                        )
-                    ),
-                    suggestions = listOf(
-                        SuggestionGroup(
-                            group = "PROMINENT NOSTRICHES",
-                            members = listOf(
-                                Suggestion(
-                                    name = "cameri",
-                                    pubkey = "00000000827ffaa94bfea288c3dfce4422c794fbb96625b6b31e9049f729d700"
-                                )
-                            )
+                recommendedFollows = mapOf(
+                    "PROMINENT NOSTRICHES" to listOf(
+                        ContentMetadata(
+                            name = "cameri",
+                            displayName = "Camerið\\u009Fª½\\",
+                            nip05 = "cameri@elder.nostr.land",
+                            picture = "https://nostr.build/i/8cd2fc3d7e6637dc26c6e80b5e1b6ccb4a1e5ba5f2bec67904fe6912a23a85be.jpg",
+                            banner = "https://nostr.build/i/nostr.build_90a51a2e50c9f42288260d01b3a2a4a1c7a9df085423abad7809e76429da7cdc.gif",
+                            website = "https://primal.net/cameri",
+                            about = "@HodlWithLedn. All opinions are my own.\nBitcoiner class of 2021. Core Nostr Developer. Author of Nostream. Ex Relay Operator.",
+                            lud16 = "cameri@getalby.com"
                         )
                     )
                 )

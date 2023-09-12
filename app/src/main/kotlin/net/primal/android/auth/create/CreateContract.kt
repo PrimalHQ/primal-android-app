@@ -4,6 +4,7 @@ import android.net.Uri
 import net.primal.android.auth.create.api.model.CreateNostrProfileMetadata
 import net.primal.android.auth.create.api.model.RecommendedFollowsResponse
 import net.primal.android.crypto.CryptoUtils
+import net.primal.android.nostr.model.content.ContentMetadata
 
 interface CreateContract {
     data class UiState(
@@ -20,7 +21,7 @@ interface CreateContract {
         val bannerUri: Uri? = null,
         val keypair: CryptoUtils.Keypair? = null,
         val fetchingRecommendedFollows: Boolean = false,
-        val recommendedFollowsResponse: RecommendedFollowsResponse? = null
+        val recommendedFollows: Map<String, List<ContentMetadata>> = emptyMap()
     ) {
         sealed class CreateError {
             data class FailedToUploadImage(val cause: Throwable) : CreateError()
