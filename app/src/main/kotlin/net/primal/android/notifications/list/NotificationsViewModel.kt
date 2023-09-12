@@ -39,7 +39,7 @@ class NotificationsViewModel @Inject constructor(
     private fun subscribeToEvents() = viewModelScope.launch {
         _event.collect {
             when (it) {
-                UiEvent.NotificationsSeen -> updateNotificationsSeenTimestamp()
+                UiEvent.RequestDataUpdate -> handleRequestUpdateData()
             }
         }
     }
@@ -55,6 +55,13 @@ class NotificationsViewModel @Inject constructor(
                     )
                 }
             }
+    }
+
+    private fun handleRequestUpdateData() = viewModelScope.launch {
+        val activeUserId = activeAccountStore.activeUserId()
+        notificationsRepository.deleteNotifications(userId = activeUserId)
+        notificationsRepository.fetchNotifications(userId = activeUserId)
+        updateNotificationsSeenTimestamp()
     }
 
     private fun updateNotificationsSeenTimestamp() = viewModelScope.launch {

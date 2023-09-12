@@ -1,7 +1,9 @@
 package net.primal.android.notifications.api.model
 
 import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class NotificationsRequestBody(
     @SerialName("pubkey") val pubkey: String,
     @SerialName("user_pubkey") val userPubkey: String,

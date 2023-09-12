@@ -61,17 +61,27 @@ class NotificationsApiImpl @Inject constructor(
         )
     }
 
-    override suspend fun getNotifications(body: NotificationsRequestBody): NotificationsResponse {
+    override suspend fun getNotifications(userId: String): NotificationsResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.GET_NOTIFICATIONS,
-                optionsJson = NostrJson.encodeToString(body)
+                optionsJson = NostrJson.encodeToString(
+                    NotificationsRequestBody(
+                        pubkey = userId,
+                        userPubkey = userId,
+                    )
+                )
             )
         )
 
         return NotificationsResponse(
             metadata = queryResult.filterNostrEvents(NostrEventKind.Metadata),
-            posts = queryResult.filterNostrEvents(NostrEventKind.ShortTextNote),
+            notes = queryResult.filterNostrEvents(NostrEventKind.ShortTextNote),
+            primalNoteStats = queryResult.filterPrimalEvents(NostrEventKind.PrimalEventStats),
+            primalMediaResources = queryResult.filterPrimalEvents(NostrEventKind.PrimalEventResources),
+            primalReferencedNotes = queryResult.filterPrimalEvents(NostrEventKind.PrimalReferencedEvent),
+            primalUserProfileStats = queryResult.filterPrimalEvents(NostrEventKind.PrimalUserProfileStats),
+            primalNotifications = queryResult.filterPrimalEvents(NostrEventKind.PrimalNotification),
         )
     }
 

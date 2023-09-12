@@ -24,6 +24,8 @@ import net.primal.android.feed.db.PostStats
 import net.primal.android.feed.db.PostStatsDao
 import net.primal.android.feed.db.RepostDao
 import net.primal.android.feed.db.RepostData
+import net.primal.android.notifications.db.Notification
+import net.primal.android.notifications.db.NotificationDao
 import net.primal.android.profile.db.PostUserStats
 import net.primal.android.profile.db.PostUserStatsDao
 import net.primal.android.profile.db.ProfileMetadata
@@ -51,8 +53,9 @@ import net.primal.android.thread.db.ConversationDao
         TrendingHashtag::class,
         ProfileStats::class,
         NostrResource::class,
+        Notification::class,
     ],
-    version = 6,
+    version = 7,
     exportSchema = true,
 )
 @TypeConverters(RoomCustomTypeConverters::class)
@@ -89,4 +92,6 @@ abstract class PrimalDatabase : RoomDatabase() {
     abstract fun trendingHashtags(): TrendingHashtagDao
 
     abstract fun profileStats(): ProfileStatsDao
+
+    abstract fun notifications(): NotificationDao
 }
