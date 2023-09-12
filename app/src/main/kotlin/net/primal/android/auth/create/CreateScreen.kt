@@ -13,12 +13,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.absolutePadding
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -31,7 +28,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -73,7 +69,6 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.zIndex
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import kotlinx.coroutines.flow.filter
@@ -183,13 +178,13 @@ fun CreateContent(
             .padding(paddingValues = paddingValues),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Row(
-            modifier = Modifier
-                .height(18.dp)
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center
-        ) {
-            if (state.currentStep != CreateAccountStep.FOLLOW_RECOMMENDED_ACCOUNTS) {
+        if (state.currentStep != CreateAccountStep.FOLLOW_RECOMMENDED_ACCOUNTS) {
+            Row(
+                modifier = Modifier
+                    .height(18.dp)
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
+            ) {
                 Row(
                     modifier = Modifier.clip(shape = RoundedCornerShape(2.dp))
                 ) {
@@ -241,7 +236,9 @@ fun CreateContent(
                     state = state, isFinalized = true
                 )
 
-                CreateAccountStep.FOLLOW_RECOMMENDED_ACCOUNTS -> FollowRecommendedAccountsStep(state = state)
+                CreateAccountStep.FOLLOW_RECOMMENDED_ACCOUNTS -> FollowRecommendedAccountsStep(
+                    state = state, eventPublisher = eventPublisher
+                )
             }
         }
         Row(
@@ -253,7 +250,7 @@ fun CreateContent(
             PrimalLoadingButton(
                 text = stepActionText(state.currentStep),
                 enabled = state.name != "" && state.handle != "",
-                loading = state.creatingAccount,
+                loading = state.creatingAccount || state.fetchingRecommendedFollows,
                 onClick = {
                     when (state.currentStep) {
                         CreateAccountStep.NEW_ACCOUNT -> eventPublisher(CreateContract.UiEvent.GoToProfilePreviewStepEvent)
@@ -422,7 +419,8 @@ fun CreateAccountStep(
 
 @Composable
 fun ProfilePreviewStep(
-    state: CreateContract.UiState, isFinalized: Boolean
+    state: CreateContract.UiState,
+    isFinalized: Boolean
 ) {
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -586,7 +584,8 @@ fun ProfilePreviewStep(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun FollowRecommendedAccountsStep(
-    state: CreateContract.UiState
+    state: CreateContract.UiState,
+    eventPublisher: (CreateContract.UiEvent) -> Unit
 ) {
     if (state.fetchingRecommendedFollows && state.recommendedFollows.isEmpty()) {
         Column(
@@ -609,10 +608,14 @@ fun FollowRecommendedAccountsStep(
                                     colors = listOf(
                                         Color(0xFF181818), Color(0xFF222222)
                                     )
-                                ), shape = RoundedCornerShape(8.dp)
+                                )
                             )
-                            .padding(8.dp)
-                            .border(width = 1.dp, color = Color(0xFF222222)),
+                            .border(
+                                width = 1.dp,
+                                color = Color(0xFF222222),
+                                shape = RoundedCornerShape(8.dp),
+                            )
+                            .padding(8.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
@@ -635,7 +638,8 @@ fun FollowRecommendedAccountsStep(
                         horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
                         val model =
-                            ImageRequest.Builder(LocalContext.current).data(suggestion.picture)
+                            ImageRequest.Builder(LocalContext.current)
+                                .data(suggestion.content.picture)
                                 .build()
                         AsyncImage(
                             model = model,
@@ -654,7 +658,8 @@ fun FollowRecommendedAccountsStep(
                             verticalArrangement = Arrangement.Center
                         ) {
                             Text(
-                                text = suggestion.displayName ?: suggestion.name ?: "",
+                                text = suggestion.content.displayName ?: suggestion.content.name
+                                ?: "",
                                 fontWeight = FontWeight.W700,
                                 fontSize = 14.sp,
                                 lineHeight = 12.sp,
@@ -663,7 +668,7 @@ fun FollowRecommendedAccountsStep(
                                 color = Color.White
                             )
                             Text(
-                                text = suggestion.nip05 ?: "",
+                                text = suggestion.content.nip05 ?: "",
                                 fontWeight = FontWeight.W400,
                                 fontSize = 12.sp,
                                 lineHeight = 16.sp,
@@ -673,13 +678,21 @@ fun FollowRecommendedAccountsStep(
                             )
                         }
                         PrimalOutlinedButton(
-                            onClick = {},
+                            onClick = {
+                                if (state.following.contains(suggestion.pubkey)) {
+                                    eventPublisher(CreateContract.UiEvent.UnfollowEvent(pubkey = suggestion.pubkey))
+                                } else {
+                                    eventPublisher(CreateContract.UiEvent.FollowEvent(pubkey = suggestion.pubkey))
+                                }
+                            },
+                            content = {
+                                val isFollowing = state.following.contains(suggestion.pubkey)
+                                Text(text = if (isFollowing) "Unfollow" else "Follow")
+                            },
                             modifier = Modifier
                                 .defaultMinSize(minWidth = 92.dp)
                                 .height(36.dp)
-                        ) {
-                            Text("Follow")
-                        }
+                        )
                     }
                 }
             }

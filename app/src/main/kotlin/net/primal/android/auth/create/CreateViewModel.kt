@@ -13,7 +13,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
-import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
@@ -38,7 +37,6 @@ import net.primal.android.serialization.nostrJsonSerializer
 import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.user.accounts.BOOTSTRAP_RELAYS
 import net.primal.android.user.domain.toRelay
-import timber.log.Timber
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import javax.inject.Inject
@@ -92,6 +90,7 @@ class CreateViewModel @Inject constructor(
                     fetchRecommendedFollows()
                     setState { copy(currentStep = UiState.CreateAccountStep.FOLLOW_RECOMMENDED_ACCOUNTS) }
                 }
+
                 is UiEvent.GoBack -> goBack()
                 is UiEvent.FinishEvent -> finish()
                 is UiEvent.AvatarUriChangedEvent -> setState { copy(avatarUri = it.avatarUri) }
@@ -102,6 +101,21 @@ class CreateViewModel @Inject constructor(
                 is UiEvent.Nip05IdentifierChangedEvent -> setState { copy(nip05Identifier = it.nip05Identifier) }
                 is UiEvent.WebsiteChangedEvent -> setState { copy(website = it.website) }
                 is UiEvent.AboutMeChangedEvent -> setState { copy(aboutMe = it.aboutMe) }
+                is UiEvent.FollowEvent -> {
+                    setState {
+                        copy(following = following.apply {
+                            add(it.pubkey)
+                        })
+                    }
+                }
+
+                is UiEvent.UnfollowEvent -> {
+                    setState {
+                        copy(following = following.apply {
+                            remove(it.pubkey)
+                        })
+                    }
+                }
             }
         }
     }
@@ -160,9 +174,11 @@ class CreateViewModel @Inject constructor(
             val result = response.suggestions.groupBy { it.group }.map { grouped ->
                 val values = grouped.value.flatMap { it.members }.map { suggestion ->
                     val metadata = response.metadata[suggestion.pubkey]!!
-                    return@map NostrJson.decodeFromString<ContentMetadata>(metadata.content)
+                    val content = NostrJson.decodeFromString<ContentMetadata>(metadata.content)
+
+                    return@map RecommendedFollow(pubkey = suggestion.pubkey, content = content)
                 }
-                return@map Pair<String, List<ContentMetadata>>(grouped.key, values)
+                return@map Pair<String, List<RecommendedFollow>>(grouped.key, values)
             }.toMap()
 
             setState { copy(recommendedFollows = result) }
