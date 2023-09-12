@@ -31,7 +31,9 @@ import net.primal.android.networking.relays.RelayPool
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.model.NostrEventKind
+import net.primal.android.nostr.model.content.ContentMetadata
 import net.primal.android.nostr.notary.NostrNotary
+import net.primal.android.serialization.NostrJson
 import net.primal.android.serialization.nostrJsonSerializer
 import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.user.accounts.BOOTSTRAP_RELAYS
@@ -152,7 +154,16 @@ class CreateViewModel @Inject constructor(
         try {
             setState { copy(fetchingRecommendedFollows = true) }
             val response = recommendedFollowsApi.fetch(state.value.name)
-            setState { copy(recommendedFollowsResponse = response) }
+
+            val result = response.suggestions.groupBy { it.group }.map { grouped ->
+                val values = grouped.value.flatMap { it.members }.map { suggestion ->
+                    val metadata = response.metadata[suggestion.pubkey]!!
+                    return@map NostrJson.decodeFromString<ContentMetadata>(metadata.content)
+                }
+                return@map Pair<String, List<ContentMetadata>>(grouped.key, values)
+            }.toMap()
+
+            setState { copy(recommendedFollows = result) }
         } catch (e: IOException) {
             setState { copy(error = UiState.CreateError.FailedToFetchRecommendedFollows(e)) }
         } finally {
