@@ -38,7 +38,7 @@ fun NotificationsScreen(
     val uiState = viewModel.state.collectAsState()
 
     LaunchedEffect(viewModel) {
-        viewModel.setEvent(NotificationsContract.UiEvent.RequestDataUpdate)
+        viewModel.setEvent(NotificationsContract.UiEvent.NotificationsSeen)
     }
 
     NotificationsScreen(
