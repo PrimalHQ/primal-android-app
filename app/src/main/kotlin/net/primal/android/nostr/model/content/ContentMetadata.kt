@@ -2,6 +2,8 @@ package net.primal.android.nostr.model.content
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import net.primal.android.core.utils.asEllipsizedNpub
+import net.primal.android.crypto.hexToNpubHrp
 
 @Serializable
 data class ContentMetadata(
@@ -15,14 +17,10 @@ data class ContentMetadata(
     val website: String? = null,
 )
 
-fun ContentMetadata.displayableName(npub: String): String {
-    return if (this.displayName == null || this.displayName == "") {
-        if (this.name == null || this.name == "") {
-            npub
-        } else {
-            this.name
-        }
-    } else {
-        this.displayName
+fun ContentMetadata.userNameUiFriendly(pubkey: String): String {
+    return when {
+        displayName?.isNotEmpty() == true -> displayName
+        name?.isNotEmpty() == true -> name
+        else -> pubkey.hexToNpubHrp().asEllipsizedNpub()
     }
 }
