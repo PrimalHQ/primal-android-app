@@ -63,6 +63,8 @@ class NotificationsViewModel @Inject constructor(
             setState { copy(badges = it) }
             if (it.notifications > 0) {
                 fetchNotifications()
+            } else if (notificationsRepository.countNotifications() == 0) {
+                fetchNotifications()
             }
         }
     }

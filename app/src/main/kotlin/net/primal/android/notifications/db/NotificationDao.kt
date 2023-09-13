@@ -9,11 +9,14 @@ import kotlinx.coroutines.flow.Flow
 interface NotificationDao {
 
     @Upsert
-    fun upsertAll(data: List<Notification>)
+    fun upsertAll(data: List<NotificationData>)
 
-    @Query("DELETE FROM Notification WHERE userId = :userId")
+    @Query("DELETE FROM NotificationData WHERE userId = :userId")
     fun deleteAlL(userId: String)
 
-    @Query("SELECT * FROM Notification ORDER BY createdAt DESC")
+    @Query("SELECT COUNT(*) FROM NotificationData")
+    fun count(): Int
+
+    @Query("SELECT * FROM NotificationData ORDER BY createdAt DESC")
     fun allSortedByCreatedAtDesc(): Flow<List<Notification>>
 }
