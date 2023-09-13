@@ -83,7 +83,9 @@ import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.button.PrimalOutlinedButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
+import net.primal.android.crypto.hexToNpubHrp
 import net.primal.android.nostr.model.content.ContentMetadata
+import net.primal.android.nostr.model.content.displayableName
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 
@@ -670,8 +672,7 @@ fun FollowRecommendedAccountsStep(
                             verticalArrangement = Arrangement.Center
                         ) {
                             Text(
-                                text = suggestion.content.displayName ?: suggestion.content.name
-                                ?: "",
+                                text = suggestion.content.displayableName(suggestion.pubkey.hexToNpubHrp()),
                                 fontWeight = FontWeight.W700,
                                 fontSize = 14.sp,
                                 lineHeight = 12.sp,

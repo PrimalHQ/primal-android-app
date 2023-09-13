@@ -14,3 +14,15 @@ data class ContentMetadata(
     val banner: String? = null,
     val website: String? = null,
 )
+
+fun ContentMetadata.displayableName(npub: String): String {
+    return if (this.displayName == null || this.displayName == "") {
+        if (this.name == null || this.name == "") {
+            npub
+        } else {
+            this.name
+        }
+    } else {
+        this.displayName
+    }
+}
