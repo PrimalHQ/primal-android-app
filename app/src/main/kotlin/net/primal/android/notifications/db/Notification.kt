@@ -12,68 +12,35 @@ data class Notification(
 
     @Relation(
         entityColumn = "ownerId",
-        parentColumn = "follower"
+        parentColumn = "ownerId"
     )
-    val follower: ProfileMetadata? = null,
+    val owner: ProfileMetadata? = null,
 
     @Relation(
         entityColumn = "postId",
-        parentColumn = "yourPost"
+        parentColumn = "ownerPostId"
     )
-    val yourPost: PostData? = null,
+    val ownerPost: PostData? = null,
+    // Is any of my posts involved in user's action?
 
     @Relation(
         entityColumn = "ownerId",
-        parentColumn = "whoLikedIt"
+        parentColumn = "actionByUserId"
     )
-    val whoLikedIt: ProfileMetadata? = null,
-
-    @Relation(
-        entityColumn = "ownerId",
-        parentColumn = "whoRepostedIt"
-    )
-    val whoRepostedIt: ProfileMetadata? = null,
-
-    @Relation(
-        entityColumn = "ownerId",
-        parentColumn = "whoZappedIt"
-    )
-    val whoZappedIt: ProfileMetadata? = null,
-
-    @Relation(
-        entityColumn = "ownerId",
-        parentColumn = "whoRepliedToIt"
-    )
-    val whoRepliedToIt: ProfileMetadata? = null,
+    val actionByUser: ProfileMetadata? = null,
+    // Which user performed an action I'm being notified about?
 
     @Relation(
         entityColumn = "postId",
-        parentColumn = "reply"
+        parentColumn = "actionOnPostId"
     )
-    val reply: PostData? = null,
+    val actionOnPostId: PostData? = null,
+    // What is the id of the post action was performed to?
 
     @Relation(
         entityColumn = "postId",
-        parentColumn = "youWereMentionedIn"
+        parentColumn = "replyPostId"
     )
-    val youWereMentionedIn: PostData? = null,
-
-    @Relation(
-        entityColumn = "postId",
-        parentColumn = "yourPostWereMentionedIn"
-    )
-    val yourPostWereMentionedIn: PostData? = null,
-
-    @Relation(
-        entityColumn = "postId",
-        parentColumn = "postYouWereMentionedIn"
-    )
-    val postYouWereMentionedIn: PostData? = null,
-
-    @Relation(
-        entityColumn = "postId",
-        parentColumn = "postYourPostWasMentionedIn"
-    )
-    val postYourPostWasMentionedIn: PostData? = null
-
+    val replyPost: PostData? = null,
+    // Was there a new post involved in this action?
 )
