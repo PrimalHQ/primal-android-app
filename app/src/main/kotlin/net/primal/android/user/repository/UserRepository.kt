@@ -1,7 +1,5 @@
 package net.primal.android.user.repository
 
-import net.primal.android.networking.sockets.errors.WssException
-import net.primal.android.notifications.repository.NotificationRepository
 import net.primal.android.user.accounts.UserAccountFetcher
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.accounts.copyContactsIfNotNull
@@ -13,7 +11,6 @@ import javax.inject.Inject
 class UserRepository @Inject constructor(
     private val userAccountFetcher: UserAccountFetcher,
     private val accountsStore: UserAccountsStore,
-    private val notificationRepository: NotificationRepository,
 ) {
 
     suspend fun createNewUserAccount(userId: String): UserAccount {
@@ -54,23 +51,5 @@ class UserRepository @Inject constructor(
 
     suspend fun removeAllUserAccounts() {
         accountsStore.clearAllAccounts()
-    }
-
-    suspend fun refreshBadges(userId: String) {
-        val notificationsCount = try {
-            notificationRepository.fetchNotificationsSummary(userId = userId)?.count
-        } catch (error: WssException) {
-            null
-        }
-
-        if (notificationsCount != null) {
-            accountsStore.getAndUpdateAccount(userId = userId) {
-                this.copy(
-                    badges = this.badges.copy(
-                        notifications = notificationsCount
-                    )
-                )
-            }
-        }
     }
 }

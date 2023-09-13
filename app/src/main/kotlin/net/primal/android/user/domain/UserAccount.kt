@@ -17,7 +17,6 @@ data class UserAccount(
     val notesCount: Int? = null,
     val nostrWallet: NostrWallet? = null,
     val appSettings: ContentAppSettings? = null,
-    val badges: Badges = Badges(),
     val relays: List<Relay> = emptyList(),
     val following: Set<String> = emptySet(),
     val followers: List<String> = emptyList(),

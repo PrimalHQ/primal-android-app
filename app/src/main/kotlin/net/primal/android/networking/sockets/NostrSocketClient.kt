@@ -88,8 +88,8 @@ class NostrSocketClient constructor(
         return if (success) subscriptionId else null
     }
 
-    fun sendCLOSE(subscriptionId: UUID) {
-        sendMessage(text = subscriptionId.buildNostrCLOSEMessage())
+    fun sendCLOSE(subscriptionId: UUID): Boolean {
+        return sendMessage(text = subscriptionId.buildNostrCLOSEMessage())
     }
 
     fun sendEVENT(signedEvent: JsonObject): Boolean {

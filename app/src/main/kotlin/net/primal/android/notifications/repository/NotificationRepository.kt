@@ -9,7 +9,6 @@ import net.primal.android.feed.repository.persistToDatabaseAsTransaction
 import net.primal.android.nostr.ext.mapNotNullAsNotificationPO
 import net.primal.android.nostr.ext.mapNotNullAsProfileStatsPO
 import net.primal.android.notifications.api.NotificationsApi
-import net.primal.android.notifications.domain.NotificationsSummary
 import java.time.Instant
 import javax.inject.Inject
 
@@ -59,7 +58,4 @@ class NotificationRepository @Inject constructor(
         notificationsApi.updateLastSeenTimestamp(userId = userId)
     }
 
-    suspend fun fetchNotificationsSummary(userId: String): NotificationsSummary? {
-        return notificationsApi.getNotificationsSummary(userId = userId)
-    }
 }

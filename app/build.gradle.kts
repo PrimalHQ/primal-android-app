@@ -178,6 +178,7 @@ dependencies {
     implementation(libs.core.splashscreen)
     implementation(libs.lifecycle.runtime.ktx)
     implementation(libs.activity.compose)
+    implementation(libs.androidx.lifecycle.process)
     runtimeOnly(libs.androidx.appcompat)
 
     implementation(platform(libs.compose.bom))

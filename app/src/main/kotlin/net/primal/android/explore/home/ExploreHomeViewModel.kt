@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -14,14 +13,15 @@ import net.primal.android.explore.home.ExploreHomeContract.UiState
 import net.primal.android.explore.repository.ExploreRepository
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.android.user.accounts.active.ActiveUserAccountState
+import net.primal.android.user.badges.BadgesManager
 import javax.inject.Inject
 
 @HiltViewModel
 class ExploreHomeViewModel @Inject constructor(
     private val exploreRepository: ExploreRepository,
     private val activeAccountStore: ActiveAccountStore,
-): ViewModel() {
+    private val badgesManager: BadgesManager,
+) : ViewModel() {
 
     private val _state = MutableStateFlow(UiState())
     val state = _state.asStateFlow()
@@ -33,19 +33,15 @@ class ExploreHomeViewModel @Inject constructor(
         subscribeToActiveAccount()
         observeTrendingHashtags()
         fetchLatestTrendingHashtags()
+        subscribeToBadgesUpdates()
     }
 
     private fun subscribeToActiveAccount() = viewModelScope.launch {
-        activeAccountStore.activeAccountState
-            .filterIsInstance<ActiveUserAccountState.ActiveUserAccount>()
-            .collect {
-                setState {
-                    copy(
-                        activeAccountAvatarUrl = it.data.pictureUrl,
-                        badges = it.data.badges,
-                    )
-                }
+        activeAccountStore.activeUserAccount.collect {
+            setState {
+                copy(activeAccountAvatarUrl = it.pictureUrl)
             }
+        }
     }
 
     private fun observeTrendingHashtags() = viewModelScope.launch {
@@ -54,6 +50,14 @@ class ExploreHomeViewModel @Inject constructor(
             .collect {
                 setState { copy(hashtags = it.chunked(3)) }
             }
+    }
+
+    private fun subscribeToBadgesUpdates() = viewModelScope.launch {
+        badgesManager.badges.collect {
+            setState {
+                copy(badges = it)
+            }
+        }
     }
 
     private fun fetchLatestTrendingHashtags() = viewModelScope.launch {
