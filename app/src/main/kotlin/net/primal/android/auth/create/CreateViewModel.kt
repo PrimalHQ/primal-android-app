@@ -30,7 +30,6 @@ import net.primal.android.networking.relays.RelayPool
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.model.NostrEventKind
-import net.primal.android.nostr.model.content.ContentMetadata
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.serialization.NostrJson
 import net.primal.android.serialization.nostrJsonSerializer
@@ -42,15 +41,13 @@ import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Named
 
-
 @HiltViewModel
 class CreateViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val settingsRepository: SettingsRepository,
     private val nostrNotary: NostrNotary,
     private val relayPool: RelayPool,
-    @Named("Upload")
-    private val primalUploadClient: PrimalClient,
+    @Named("Upload") private val primalUploadClient: PrimalClient,
     private val recommendedFollowsApi: RecommendedFollowsApi,
     private val application: Application
 ) : AndroidViewModel(application) {
@@ -77,8 +74,8 @@ class CreateViewModel @Inject constructor(
     }
 
     private fun observeEvents() = viewModelScope.launch {
-        _event.collect {
-            when (it) {
+        _event.collect { event ->
+            when (event) {
                 is UiEvent.GoToProfilePreviewStepEvent -> setState { copy(currentStep = UiState.CreateAccountStep.PROFILE_PREVIEW) }
                 is UiEvent.GoToNostrCreatedStepEvent -> {
                     val keypair = CryptoUtils.generateHexEncodedKeypair()
@@ -93,48 +90,44 @@ class CreateViewModel @Inject constructor(
 
                 is UiEvent.GoBack -> goBack()
                 is UiEvent.FinishEvent -> finish()
-                is UiEvent.AvatarUriChangedEvent -> setState { copy(avatarUri = it.avatarUri) }
-                is UiEvent.BannerUriChangedEvent -> setState { copy(bannerUri = it.bannerUri) }
-                is UiEvent.NameChangedEvent -> setState { copy(name = it.name) }
-                is UiEvent.HandleChangedEvent -> setState { copy(handle = it.handle) }
-                is UiEvent.LightningAddressChangedEvent -> setState { copy(lightningAddress = it.lightningAddress) }
-                is UiEvent.Nip05IdentifierChangedEvent -> setState { copy(nip05Identifier = it.nip05Identifier) }
-                is UiEvent.WebsiteChangedEvent -> setState { copy(website = it.website) }
-                is UiEvent.AboutMeChangedEvent -> setState { copy(aboutMe = it.aboutMe) }
-                is UiEvent.FollowEvent -> {
-                    setState {
-                        copy(following = following.apply {
-                            add(it.pubkey)
-                        })
-                    }
+                is UiEvent.AvatarUriChangedEvent -> setState { copy(avatarUri = event.avatarUri) }
+                is UiEvent.BannerUriChangedEvent -> setState { copy(bannerUri = event.bannerUri) }
+                is UiEvent.NameChangedEvent -> setState { copy(name = event.name) }
+                is UiEvent.HandleChangedEvent -> setState { copy(handle = event.handle) }
+                is UiEvent.LightningAddressChangedEvent -> setState { copy(lightningAddress = event.lightningAddress) }
+                is UiEvent.Nip05IdentifierChangedEvent -> setState { copy(nip05Identifier = event.nip05Identifier) }
+                is UiEvent.WebsiteChangedEvent -> setState { copy(website = event.website) }
+                is UiEvent.AboutMeChangedEvent -> setState { copy(aboutMe = event.aboutMe) }
+                is UiEvent.ToggleFollowEvent -> {
+                    val oldFollow =
+                        state.value.recommendedFollows.first { it.pubkey == event.pubkey && it.groupName == event.groupName }
+
+                    val index = state.value.recommendedFollows.indexOf(oldFollow)
+
+                    val newFollow =
+                        oldFollow.copy(isCurrentUserFollowing = !oldFollow.isCurrentUserFollowing)
+
+                    val newFollows = state.value.recommendedFollows.toMutableList()
+                    newFollows[index] = newFollow
+
+                    setState { copy(recommendedFollows = newFollows) }
                 }
 
-                is UiEvent.UnfollowEvent -> {
-                    setState {
-                        copy(following = following.apply {
-                            remove(it.pubkey)
-                        })
+                is UiEvent.ToggleGroupFollowEvent -> {
+                    val newFollows = state.value.recommendedFollows.toMutableList()
+
+                    val groupFollowState =
+                        state.value.recommendedFollows.filter { it.groupName == event.groupName }
+                            .any { !it.isCurrentUserFollowing }
+
+                    for (f in newFollows) {
+                        if (f.groupName == event.groupName) {
+                            newFollows[newFollows.indexOf(f)] =
+                                f.copy(isCurrentUserFollowing = groupFollowState)
+                        }
                     }
-                }
 
-                is UiEvent.GroupFollowEvent -> {
-                    val pubkeys =
-                        state.value.recommendedFollows[it.groupName]!!.map { rf -> rf.pubkey }
-                            .toSet()
-
-                    setState {
-                        copy(following = following.apply { addAll(pubkeys) })
-                    }
-                }
-
-                is UiEvent.GroupUnfollowEvent -> {
-                    val pubkeys =
-                        state.value.recommendedFollows[it.groupName]!!.map { rf -> rf.pubkey }
-                            .toSet()
-
-                    setState {
-                        copy(following = following.apply { removeAll(pubkeys) })
-                    }
+                    setState { copy(recommendedFollows = newFollows) }
                 }
             }
         }
@@ -156,19 +149,17 @@ class CreateViewModel @Inject constructor(
             }
 
             val metadata = state.value.toCreateNostrProfileMetadata(
-                resolvedAvatarUrl = avatarUrl,
-                resolvedBannerUrl = bannerUrl
+                resolvedAvatarUrl = avatarUrl, resolvedBannerUrl = bannerUrl
             )
             val metadataNostrEvent = nostrNotary.signMetadataNostrEvent(
                 pubkey = state.value.keypair!!.pubkey,
                 privkey = state.value.keypair!!.privkey,
                 metadata = metadata
             )
-            val firstContactEvent = nostrNotary.signFirstContactNostrEvent(
-                pubkey = state.value.keypair!!.pubkey,
-                privkey = state.value.keypair!!.privkey,
-                relays = BOOTSTRAP_RELAYS.map { it.toRelay() }
-            )
+            val firstContactEvent =
+                nostrNotary.signFirstContactNostrEvent(pubkey = state.value.keypair!!.pubkey,
+                    privkey = state.value.keypair!!.privkey,
+                    relays = BOOTSTRAP_RELAYS.map { it.toRelay() })
 
             relayPool.publishEvent(metadataNostrEvent)
             relayPool.publishEvent(firstContactEvent)
@@ -191,15 +182,16 @@ class CreateViewModel @Inject constructor(
             setState { copy(loading = true) }
             val response = recommendedFollowsApi.fetch(state.value.name)
 
-            val result = response.suggestions.groupBy { it.group }.map { grouped ->
-                val values = grouped.value.flatMap { it.members }.map { suggestion ->
-                    val metadata = response.metadata[suggestion.pubkey]!!
-                    val content = NostrJson.decodeFromString<ContentMetadata>(metadata.content)
-
-                    return@map RecommendedFollow(pubkey = suggestion.pubkey, content = content)
-                }
-                return@map Pair<String, List<RecommendedFollow>>(grouped.key, values)
-            }.toMap()
+            val result = response.suggestions.map { sg ->
+                return@map sg.members.map { Pair(sg.group, it) }
+            }.flatten().map {
+                return@map RecommendedFollow(
+                    pubkey = it.second.pubkey,
+                    groupName = it.first,
+                    content = NostrJson.decodeFromString(response.metadata[it.second.pubkey]!!.content),
+                    isCurrentUserFollowing = false
+                )
+            }
 
             setState { copy(recommendedFollows = result) }
         } catch (e: IOException) {
@@ -224,12 +216,12 @@ class CreateViewModel @Inject constructor(
     }
 
     private suspend fun follow() {
-        val contactsEvent = nostrNotary.signInitialContactsNostrEvent(
-            privkey = state.value.keypair!!.privkey,
-            pubkey = state.value.keypair!!.pubkey,
-            contacts = state.value.following,
-            relays = BOOTSTRAP_RELAYS.map { it.toRelay() }
-        )
+        val contactsEvent =
+            nostrNotary.signInitialContactsNostrEvent(privkey = state.value.keypair!!.privkey,
+                pubkey = state.value.keypair!!.pubkey,
+                contacts = state.value.recommendedFollows.filter { it.isCurrentUserFollowing }
+                    .map { it.pubkey }.toSet(),
+                relays = BOOTSTRAP_RELAYS.map { it.toRelay() })
 
         relayPool.publishEvent(contactsEvent)
     }

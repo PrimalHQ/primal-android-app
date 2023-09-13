@@ -2,7 +2,6 @@ package net.primal.android.auth.create
 
 import android.net.Uri
 import net.primal.android.auth.create.api.model.CreateNostrProfileMetadata
-import net.primal.android.auth.create.api.model.RecommendedFollowsResponse
 import net.primal.android.crypto.CryptoUtils
 import net.primal.android.nostr.model.content.ContentMetadata
 
@@ -20,8 +19,7 @@ interface CreateContract {
         val avatarUri: Uri? = null,
         val bannerUri: Uri? = null,
         val keypair: CryptoUtils.Keypair? = null,
-        val recommendedFollows: Map<String, List<RecommendedFollow>> = emptyMap(),
-        val following: MutableSet<String> = mutableSetOf()
+        val recommendedFollows: List<RecommendedFollow> = listOf()
     ) {
         sealed class CreateError {
             data class FailedToUploadImage(val cause: Throwable) : CreateError()
@@ -57,10 +55,8 @@ interface CreateContract {
         data class Nip05IdentifierChangedEvent(val nip05Identifier: String) : UiEvent()
         data class WebsiteChangedEvent(val website: String) : UiEvent()
         data class AboutMeChangedEvent(val aboutMe: String) : UiEvent()
-        data class FollowEvent(val pubkey: String) : UiEvent()
-        data class UnfollowEvent(val pubkey: String) : UiEvent()
-        data class GroupFollowEvent(val groupName: String) : UiEvent()
-        data class GroupUnfollowEvent(val groupName: String) : UiEvent()
+        data class ToggleFollowEvent(val groupName: String, val pubkey: String) : UiEvent()
+        data class ToggleGroupFollowEvent(val groupName: String) : UiEvent()
     }
 
     sealed class SideEffect {
@@ -68,7 +64,7 @@ interface CreateContract {
     }
 }
 
-data class RecommendedFollow(val pubkey: String, val content: ContentMetadata)
+data class RecommendedFollow(val pubkey: String, val isCurrentUserFollowing: Boolean = false, val groupName: String, val content: ContentMetadata)
 
 fun CreateContract.UiState.toCreateNostrProfileMetadata(
     resolvedAvatarUrl: String?,
