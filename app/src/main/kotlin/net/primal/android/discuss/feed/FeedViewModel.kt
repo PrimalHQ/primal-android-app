@@ -11,7 +11,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -28,12 +27,12 @@ import net.primal.android.navigation.feedDirective
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.android.user.accounts.active.ActiveUserAccountState
-import net.primal.android.user.repository.UserRepository
+import net.primal.android.user.badges.BadgesManager
 import net.primal.android.user.updater.UserDataUpdater
 import net.primal.android.user.updater.UserDataUpdaterFactory
 import net.primal.android.wallet.model.ZapTarget
 import net.primal.android.wallet.repository.ZapRepository
+import timber.log.Timber
 import java.time.Instant
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.minutes
@@ -47,7 +46,7 @@ class FeedViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val userDataSyncerFactory: UserDataUpdaterFactory,
     private val zapRepository: ZapRepository,
-    private val userRepository: UserRepository,
+    private val badgesManager: BadgesManager,
 ) : ViewModel() {
 
     private val feedDirective: String = savedStateHandle.feedDirective ?: "network;trending"
@@ -68,11 +67,11 @@ class FeedViewModel @Inject constructor(
     fun setEvent(event: UiEvent) = viewModelScope.launch { _event.emit(event) }
 
     init {
-        refreshBadges()
         subscribeToFeedTitle()
         subscribeToEvents()
         subscribeToFeedSyncUpdates()
         subscribeToActiveAccount()
+        subscribeToBadgesUpdates()
     }
 
     private fun subscribeToFeedTitle() = viewModelScope.launch {
@@ -113,26 +112,23 @@ class FeedViewModel @Inject constructor(
     }
 
     private fun subscribeToActiveAccount() = viewModelScope.launch {
-        activeAccountStore.activeAccountState
-            .filterIsInstance<ActiveUserAccountState.ActiveUserAccount>()
-            .collect {
-                val activeUserId = it.data.pubkey
-                userDataUpdater = if (userDataUpdater?.userId != activeUserId) {
-                    userDataSyncerFactory.create(userId = it.data.pubkey)
-                } else {
-                    userDataUpdater
-                }
-
-                setState {
-                    copy(
-                        activeAccountAvatarUrl = it.data.pictureUrl,
-                        walletConnected = it.data.nostrWallet != null,
-                        defaultZapAmount = it.data.appSettings?.defaultZapAmount,
-                        zapOptions = it.data.appSettings?.zapOptions ?: emptyList(),
-                        badges = it.data.badges,
-                    )
-                }
+        activeAccountStore.activeUserAccount.collect {
+            val activeUserId = it.pubkey
+            userDataUpdater = if (userDataUpdater?.userId != activeUserId) {
+                userDataSyncerFactory.create(userId = activeUserId)
+            } else {
+                userDataUpdater
             }
+
+            setState {
+                copy(
+                    activeAccountAvatarUrl = it.pictureUrl,
+                    walletConnected = it.nostrWallet != null,
+                    defaultZapAmount = it.appSettings?.defaultZapAmount,
+                    zapOptions = it.appSettings?.zapOptions ?: emptyList(),
+                )
+            }
+        }
     }
 
     private fun subscribeToEvents() = viewModelScope.launch {
@@ -147,8 +143,13 @@ class FeedViewModel @Inject constructor(
         }
     }
 
-    private fun refreshBadges() = viewModelScope.launch {
-        userRepository.refreshBadges(userId = activeAccountStore.activeUserId())
+    private fun subscribeToBadgesUpdates() = viewModelScope.launch {
+        badgesManager.badges.collect {
+            Timber.d(it.toString())
+            setState {
+                copy(badges = it)
+            }
+        }
     }
 
     private fun clearSyncStats() {

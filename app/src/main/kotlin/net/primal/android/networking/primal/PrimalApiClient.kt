@@ -58,9 +58,9 @@ class PrimalApiClient @Inject constructor(
         return socketClient.incomingMessages.filterBySubscriptionId(id = subscriptionId)
     }
 
-    suspend fun closeSubscription(subscriptionId: UUID) {
+    suspend fun closeSubscription(subscriptionId: UUID): Boolean {
         socketClient.ensureSocketConnection()
-        socketClient.sendCLOSE(subscriptionId = subscriptionId)
+        return socketClient.sendCLOSE(subscriptionId = subscriptionId)
     }
 
     @Throws(NostrNoticeException::class)
