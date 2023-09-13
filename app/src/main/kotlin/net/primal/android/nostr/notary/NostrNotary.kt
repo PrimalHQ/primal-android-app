@@ -201,4 +201,21 @@ class NostrNotary @Inject constructor(
             tags = tags
         ).signOrThrow(hexPrivateKey = Hex.decode(privkey))
     }
+
+    fun signInitialContactsNostrEvent(
+        privkey: String,
+        pubkey: String,
+        contacts: Set<String>,
+        relays: List<Relay>
+    ): NostrEvent {
+        val tags = contacts.map { it.asPubkeyTag() }
+        val content = NostrJson.encodeToString(relays.toNostrRelayMap())
+
+        return NostrUnsignedEvent(
+            pubKey = pubkey,
+            kind = NostrEventKind.Contacts.value,
+            content = content,
+            tags = tags
+        ).signOrThrow(hexPrivateKey = Hex.decode(privkey))
+    }
 }

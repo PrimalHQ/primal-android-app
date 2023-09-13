@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -46,6 +45,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -621,7 +621,16 @@ fun FollowRecommendedAccountsStep(
                 ) {
                     Text(it.key)
                     PrimalOutlinedButton(
-                        onClick = {}
+                        onClick = {
+                            val pubkeys =
+                                state.recommendedFollows[it.key]!!.map { rf -> rf.pubkey }.toSet()
+
+                            if (state.following.containsAll(pubkeys)) {
+                                eventPublisher(CreateContract.UiEvent.GroupUnfollowEvent(groupName = it.key))
+                            } else {
+                                eventPublisher(CreateContract.UiEvent.GroupFollowEvent(groupName = it.key))
+                            }
+                        }
                     ) {
                         Text("Follow All")
                     }
