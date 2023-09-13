@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 7,
-    "identityHash": "eba191a58dd4e32c192130e7326c4c7b",
+    "identityHash": "3ce39cdf131147c3832b2eab979759ea",
     "entities": [
       {
         "tableName": "PostData",
@@ -774,11 +774,11 @@
       },
       {
         "tableName": "NotificationData",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`userId` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `type` TEXT NOT NULL, `follower` TEXT, `yourPost` TEXT, `whoLikedIt` TEXT, `whoRepostedIt` TEXT, `whoZappedIt` TEXT, `satsZapped` INTEGER, `whoRepliedToIt` TEXT, `reply` TEXT, `youWereMentionedIn` TEXT, `yourPostWereMentionedIn` TEXT, `postYouWereMentionedIn` TEXT, `postYourPostWasMentionedIn` TEXT, PRIMARY KEY(`userId`, `createdAt`, `type`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ownerId` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `type` TEXT NOT NULL, `actionByUserId` TEXT NOT NULL, `ownerPostId` TEXT, `actionOnPostId` TEXT, `replyPostId` TEXT, `satsZapped` INTEGER, PRIMARY KEY(`ownerId`, `createdAt`, `type`))",
         "fields": [
           {
-            "fieldPath": "userId",
-            "columnName": "userId",
+            "fieldPath": "ownerId",
+            "columnName": "ownerId",
             "affinity": "TEXT",
             "notNull": true
           },
@@ -795,32 +795,26 @@
             "notNull": true
           },
           {
-            "fieldPath": "follower",
-            "columnName": "follower",
+            "fieldPath": "actionByUserId",
+            "columnName": "actionByUserId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ownerPostId",
+            "columnName": "ownerPostId",
             "affinity": "TEXT",
             "notNull": false
           },
           {
-            "fieldPath": "yourPost",
-            "columnName": "yourPost",
+            "fieldPath": "actionOnPostId",
+            "columnName": "actionOnPostId",
             "affinity": "TEXT",
             "notNull": false
           },
           {
-            "fieldPath": "whoLikedIt",
-            "columnName": "whoLikedIt",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "whoRepostedIt",
-            "columnName": "whoRepostedIt",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "whoZappedIt",
-            "columnName": "whoZappedIt",
+            "fieldPath": "replyPostId",
+            "columnName": "replyPostId",
             "affinity": "TEXT",
             "notNull": false
           },
@@ -829,48 +823,12 @@
             "columnName": "satsZapped",
             "affinity": "INTEGER",
             "notNull": false
-          },
-          {
-            "fieldPath": "whoRepliedToIt",
-            "columnName": "whoRepliedToIt",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "reply",
-            "columnName": "reply",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "youWereMentionedIn",
-            "columnName": "youWereMentionedIn",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "yourPostWereMentionedIn",
-            "columnName": "yourPostWereMentionedIn",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "postYouWereMentionedIn",
-            "columnName": "postYouWereMentionedIn",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "postYourPostWasMentionedIn",
-            "columnName": "postYourPostWasMentionedIn",
-            "affinity": "TEXT",
-            "notNull": false
           }
         ],
         "primaryKey": {
           "autoGenerate": false,
           "columnNames": [
-            "userId",
+            "ownerId",
             "createdAt",
             "type"
           ]
@@ -882,7 +840,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'eba191a58dd4e32c192130e7326c4c7b')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '3ce39cdf131147c3832b2eab979759ea')"
     ]
   }
 }

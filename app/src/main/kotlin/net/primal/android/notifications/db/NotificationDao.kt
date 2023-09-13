@@ -11,7 +11,7 @@ interface NotificationDao {
     @Upsert
     fun upsertAll(data: List<NotificationData>)
 
-    @Query("DELETE FROM NotificationData WHERE userId = :userId")
+    @Query("DELETE FROM NotificationData WHERE ownerId = :userId")
     fun deleteAlL(userId: String)
 
     @Query("SELECT COUNT(*) FROM NotificationData")
