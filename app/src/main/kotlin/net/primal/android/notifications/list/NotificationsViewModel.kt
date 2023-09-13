@@ -39,7 +39,7 @@ class NotificationsViewModel @Inject constructor(
     private fun subscribeToEvents() = viewModelScope.launch {
         _event.collect {
             when (it) {
-                UiEvent.RequestDataUpdate -> handleRequestUpdateData()
+                UiEvent.NotificationsSeen -> handleNotificationsSeen()
             }
         }
     }
@@ -54,35 +54,32 @@ class NotificationsViewModel @Inject constructor(
 
     private fun observeNotifications() = viewModelScope.launch {
         notificationsRepository.observeNotifications().collect {
-            setState {
-                copy(notifications = it)
-            }
+            setState { copy(notifications = it) }
         }
     }
 
     private fun subscribeToBadgesUpdates() = viewModelScope.launch {
         badgesManager.badges.collect {
-            setState {
-                copy(badges = it)
+            setState { copy(badges = it) }
+            if (it.notifications > 0) {
+                fetchNotifications()
             }
         }
     }
 
-    private fun handleRequestUpdateData() = viewModelScope.launch {
-        val activeUserId = activeAccountStore.activeUserId()
+    private fun fetchNotifications() = viewModelScope.launch {
         setState { copy(loading = true) }
         try {
+            val activeUserId = activeAccountStore.activeUserId()
             notificationsRepository.deleteNotifications(userId = activeUserId)
             notificationsRepository.fetchNotifications(userId = activeUserId)
         } finally {
             setState { copy(loading = false) }
         }
-        updateNotificationsSeenTimestamp()
     }
 
-    private fun updateNotificationsSeenTimestamp() = viewModelScope.launch {
+    private fun handleNotificationsSeen() = viewModelScope.launch {
         val activeUserId = activeAccountStore.activeUserId()
         notificationsRepository.updateLastSeenTimestamp(userId = activeUserId)
     }
-
 }

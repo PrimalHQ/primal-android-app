@@ -13,6 +13,6 @@ interface NotificationsContract {
     )
 
     sealed class UiEvent {
-        data object RequestDataUpdate : UiEvent()
+        data object NotificationsSeen : UiEvent()
     }
 }
