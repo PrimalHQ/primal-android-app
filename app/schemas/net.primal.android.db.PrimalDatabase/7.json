@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 7,
-    "identityHash": "44317bf890c5ff7c5666e3e95047392f",
+    "identityHash": "eba191a58dd4e32c192130e7326c4c7b",
     "entities": [
       {
         "tableName": "PostData",
@@ -773,7 +773,7 @@
         "foreignKeys": []
       },
       {
-        "tableName": "Notification",
+        "tableName": "NotificationData",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`userId` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `type` TEXT NOT NULL, `follower` TEXT, `yourPost` TEXT, `whoLikedIt` TEXT, `whoRepostedIt` TEXT, `whoZappedIt` TEXT, `satsZapped` INTEGER, `whoRepliedToIt` TEXT, `reply` TEXT, `youWereMentionedIn` TEXT, `yourPostWereMentionedIn` TEXT, `postYouWereMentionedIn` TEXT, `postYourPostWasMentionedIn` TEXT, PRIMARY KEY(`userId`, `createdAt`, `type`))",
         "fields": [
           {
@@ -882,7 +882,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '44317bf890c5ff7c5666e3e95047392f')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'eba191a58dd4e32c192130e7326c4c7b')"
     ]
   }
 }

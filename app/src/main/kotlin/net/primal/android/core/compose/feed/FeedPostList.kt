@@ -11,11 +11,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyListState
@@ -44,7 +41,7 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import net.primal.android.R
-import net.primal.android.core.compose.AvatarThumbnailListItemImage
+import net.primal.android.core.compose.AvatarThumbnailsRow
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.feed.model.FeedPostsSyncStats
 import net.primal.android.core.compose.isEmpty
@@ -185,26 +182,10 @@ private fun NewPostsButton(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(modifier = Modifier.padding(start = 6.dp)) {
-            syncStats.avatarUrls.forEachIndexed { index, imageUrl ->
-                Row {
-                    Spacer(
-                        modifier = Modifier
-                            .height(10.dp)
-                            .width((index * 24).dp)
-                    )
-
-                    AvatarThumbnailListItemImage(
-                        modifier = Modifier.size(32.dp),
-                        source = imageUrl,
-                        hasBorder = true,
-                        borderGradientColors = listOf(
-                            Color.White,
-                            Color.White
-                        ),
-                        onClick = onClick,
-                    )
-                }
-            }
+            AvatarThumbnailsRow(
+                avatarUrls = syncStats.avatarUrls,
+                onClick = onClick,
+            )
         }
 
         Text(

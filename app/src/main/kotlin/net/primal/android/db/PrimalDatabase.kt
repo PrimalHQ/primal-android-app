@@ -24,7 +24,7 @@ import net.primal.android.feed.db.PostStats
 import net.primal.android.feed.db.PostStatsDao
 import net.primal.android.feed.db.RepostDao
 import net.primal.android.feed.db.RepostData
-import net.primal.android.notifications.db.Notification
+import net.primal.android.notifications.db.NotificationData
 import net.primal.android.notifications.db.NotificationDao
 import net.primal.android.profile.db.PostUserStats
 import net.primal.android.profile.db.PostUserStatsDao
@@ -53,7 +53,7 @@ import net.primal.android.thread.db.ConversationDao
         TrendingHashtag::class,
         ProfileStats::class,
         NostrResource::class,
-        Notification::class,
+        NotificationData::class,
     ],
     version = 7,
     exportSchema = true,

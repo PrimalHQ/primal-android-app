@@ -5,7 +5,7 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import net.primal.android.nostr.model.primal.PrimalEvent
 import net.primal.android.nostr.model.primal.content.ContentPrimalNotification
-import net.primal.android.notifications.db.Notification
+import net.primal.android.notifications.db.NotificationData
 import net.primal.android.notifications.domain.NotificationType
 import net.primal.android.notifications.domain.NotificationsSummary
 import net.primal.android.serialization.NostrJson
@@ -23,9 +23,9 @@ fun PrimalEvent.asNotificationSummary(): NotificationsSummary {
     )
 }
 
-fun ContentPrimalNotification.asNotificationPOOrNull(): Notification? {
+fun ContentPrimalNotification.asNotificationPOOrNull(): NotificationData? {
     val type = NotificationType.valueOf(type = this.type) ?: return null
-    return Notification(
+    return NotificationData(
         userId = this.pubkey,
         createdAt = this.createdAt,
         type = type,

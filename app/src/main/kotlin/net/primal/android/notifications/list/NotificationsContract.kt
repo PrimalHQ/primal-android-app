@@ -6,7 +6,7 @@ import net.primal.android.user.domain.Badges
 interface NotificationsContract {
 
     data class UiState(
-        val loading: Boolean = true,
+        val loading: Boolean = false,
         val activeAccountAvatarUrl: String? = null,
         val badges: Badges = Badges(),
         val notifications: List<Notification> = emptyList(),

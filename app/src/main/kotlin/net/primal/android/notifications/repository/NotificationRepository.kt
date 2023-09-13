@@ -19,6 +19,12 @@ class NotificationRepository @Inject constructor(
 
     fun observeNotifications() = database.notifications().allSortedByCreatedAtDesc()
 
+    suspend fun countNotifications(): Int {
+        return withContext(Dispatchers.IO) {
+            database.notifications().count()
+        }
+    }
+
     suspend fun deleteNotifications(userId: String) {
         withContext(Dispatchers.IO) {
             database.notifications().deleteAlL(userId = userId)
