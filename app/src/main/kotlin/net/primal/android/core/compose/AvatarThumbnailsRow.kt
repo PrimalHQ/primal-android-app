@@ -1,5 +1,6 @@
 package net.primal.android.core.compose
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -12,27 +13,30 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun AvatarThumbnailsRow(
+    modifier: Modifier = Modifier,
     avatarUrls: List<Any?>,
     onClick: () -> Unit,
 ) {
-    avatarUrls.forEachIndexed { index, imageUrl ->
-        Row {
-            Spacer(
-                modifier = Modifier
-                    .height(10.dp)
-                    .width((index * 24).dp)
-            )
+    Box(modifier = modifier) {
+        avatarUrls.forEachIndexed { index, imageUrl ->
+            Row {
+                Spacer(
+                    modifier = Modifier
+                        .height(10.dp)
+                        .width((index * 24).dp)
+                )
 
-            AvatarThumbnailListItemImage(
-                modifier = Modifier.size(32.dp),
-                source = imageUrl,
-                hasBorder = true,
-                borderGradientColors = listOf(
-                    Color.White,
-                    Color.White
-                ),
-                onClick = onClick,
-            )
+                AvatarThumbnailListItemImage(
+                    modifier = Modifier.size(32.dp),
+                    source = imageUrl,
+                    hasBorder = true,
+                    borderGradientColors = listOf(
+                        Color.White,
+                        Color.White
+                    ),
+                    onClick = onClick,
+                )
+            }
         }
     }
 }

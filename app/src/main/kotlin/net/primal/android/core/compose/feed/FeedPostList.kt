@@ -181,12 +181,11 @@ private fun NewPostsButton(
             },
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Box(modifier = Modifier.padding(start = 6.dp)) {
-            AvatarThumbnailsRow(
-                avatarUrls = syncStats.avatarUrls,
-                onClick = onClick,
-            )
-        }
+        AvatarThumbnailsRow(
+            modifier = Modifier.padding(start = 6.dp),
+            avatarUrls = syncStats.avatarUrls,
+            onClick = onClick,
+        )
 
         Text(
             modifier = Modifier
