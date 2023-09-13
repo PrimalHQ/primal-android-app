@@ -88,6 +88,12 @@
     <string name="explore_feed_removed_from_user_feeds">Removed from your home feeds</string>
 
     <string name="notifications_title">Notifications</string>
+    <plurals name="notification_list_item_and_others">
+        <item quantity="one">and %1$s other</item>
+        <item quantity="other">and %1$s others</item>
+    </plurals>
+    <string name="notification_list_item_followed_you">followed you.</string>
+    <string name="notification_list_item_unfollowed_you">unfollowed you.</string>
 
     <string name="messages_title">Messages</string>
 
