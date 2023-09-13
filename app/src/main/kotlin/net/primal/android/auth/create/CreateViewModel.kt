@@ -116,11 +116,31 @@ class CreateViewModel @Inject constructor(
                         })
                     }
                 }
+
+                is UiEvent.GroupFollowEvent -> {
+                    val pubkeys =
+                        state.value.recommendedFollows[it.groupName]!!.map { rf -> rf.pubkey }
+                            .toSet()
+
+                    setState {
+                        copy(following = following.apply { addAll(pubkeys) })
+                    }
+                }
+
+                is UiEvent.GroupUnfollowEvent -> {
+                    val pubkeys =
+                        state.value.recommendedFollows[it.groupName]!!.map { rf -> rf.pubkey }
+                            .toSet()
+
+                    setState {
+                        copy(following = following.apply { removeAll(pubkeys) })
+                    }
+                }
             }
         }
     }
 
-    private fun createNostrAccount() = viewModelScope.launch {
+    private suspend fun createNostrAccount() = viewModelScope.launch {
         try {
             var avatarUrl: String? = null
             var bannerUrl: String? = null
@@ -166,7 +186,7 @@ class CreateViewModel @Inject constructor(
         }
     }
 
-    private fun fetchRecommendedFollows() = viewModelScope.launch {
+    private suspend fun fetchRecommendedFollows() = viewModelScope.launch {
         try {
             setState { copy(loading = true) }
             val response = recommendedFollowsApi.fetch(state.value.name)
@@ -189,14 +209,12 @@ class CreateViewModel @Inject constructor(
         }
     }
 
-    private fun finish() = viewModelScope.launch {
-        // save keypair and profile info locally, i.e login
-        // navigate to feed
-        val pubkey = authRepository.login(state.value.keypair!!.privkey)
-        settingsRepository.fetchAndPersistAppSettings(userId = pubkey)
+    private suspend fun finish() = viewModelScope.launch {
         try {
             setState { copy(loading = true) }
             follow()
+            val pubkey = authRepository.login(state.value.keypair!!.privkey)
+            settingsRepository.fetchAndPersistAppSettings(userId = pubkey)
             setEffect(SideEffect.AccountCreatedAndPersisted(pubkey = pubkey))
         } catch (e: NostrPublishException) {
             setState { copy(error = UiState.CreateError.FailedToFollow(e)) }
@@ -206,8 +224,9 @@ class CreateViewModel @Inject constructor(
     }
 
     private suspend fun follow() {
-        val contactsEvent = nostrNotary.signContactsNostrEvent(
-            userId = state.value.keypair!!.pubkey,
+        val contactsEvent = nostrNotary.signInitialContactsNostrEvent(
+            privkey = state.value.keypair!!.privkey,
+            pubkey = state.value.keypair!!.pubkey,
             contacts = state.value.following,
             relays = BOOTSTRAP_RELAYS.map { it.toRelay() }
         )

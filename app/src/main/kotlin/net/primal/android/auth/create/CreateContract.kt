@@ -59,6 +59,8 @@ interface CreateContract {
         data class AboutMeChangedEvent(val aboutMe: String) : UiEvent()
         data class FollowEvent(val pubkey: String) : UiEvent()
         data class UnfollowEvent(val pubkey: String) : UiEvent()
+        data class GroupFollowEvent(val groupName: String) : UiEvent()
+        data class GroupUnfollowEvent(val groupName: String) : UiEvent()
     }
 
     sealed class SideEffect {
