@@ -23,7 +23,7 @@ import com.google.accompanist.navigation.material.rememberBottomSheetNavigator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import net.primal.android.R
-import net.primal.android.auth.create.CreateScreen
+import net.primal.android.auth.create.compose.CreateScreen
 import net.primal.android.auth.create.CreateViewModel
 import net.primal.android.auth.login.LoginScreen
 import net.primal.android.auth.login.LoginViewModel

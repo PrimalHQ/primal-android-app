@@ -26,6 +26,17 @@
     <string name="create_action_finish">Finish</string>
     <string name="create_success_subtitle">Your Nostr account has been created!</string>
     <string name="create_finish_subtitle">Your Nostr key is safely stored on your phone. You can access it in app settings.</string>
+    <string name="create_recommended_follow">Follow</string>
+    <string name="create_recommended_unfollow">Unfollow</string>
+    <string name="create_recommended_follow_all">Follow all</string>
+    <string name="create_recommended_unfollow_all">Unfollow all</string>
+    <string name="create_subtitle_profile_preview">We will use this info to create your Nostr account. If you wish to make any changes, you can always do so in your profile settings.</string>
+    <string name="create_input_header_display_name">DISPLAY NAME</string>
+    <string name="create_input_header_handle">HANDLE</string>
+    <string name="create_input_header_website">WEBSITE</string>
+    <string name="create_input_header_about_me">ABOUT ME</string>
+    <string name="create_input_header_bitcoin_lightning_address">BITCOIN LIGHTNING ADDRESS</string>
+    <string name="create_input_header_nip_05">NOSTR VERIFICATION (NIP 05)</string>
 
     <string name="login_title">Sign in</string>
     <string name="login_description">Paste your Nostr key to sign in:</string>

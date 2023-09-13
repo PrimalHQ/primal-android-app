@@ -98,42 +98,13 @@ class CreateViewModel @Inject constructor(
                 is UiEvent.Nip05IdentifierChangedEvent -> setState { copy(nip05Identifier = event.nip05Identifier) }
                 is UiEvent.WebsiteChangedEvent -> setState { copy(website = event.website) }
                 is UiEvent.AboutMeChangedEvent -> setState { copy(aboutMe = event.aboutMe) }
-                is UiEvent.ToggleFollowEvent -> {
-                    val oldFollow =
-                        state.value.recommendedFollows.first { it.pubkey == event.pubkey && it.groupName == event.groupName }
-
-                    val index = state.value.recommendedFollows.indexOf(oldFollow)
-
-                    val newFollow =
-                        oldFollow.copy(isCurrentUserFollowing = !oldFollow.isCurrentUserFollowing)
-
-                    val newFollows = state.value.recommendedFollows.toMutableList()
-                    newFollows[index] = newFollow
-
-                    setState { copy(recommendedFollows = newFollows) }
-                }
-
-                is UiEvent.ToggleGroupFollowEvent -> {
-                    val newFollows = state.value.recommendedFollows.toMutableList()
-
-                    val groupFollowState =
-                        state.value.recommendedFollows.filter { it.groupName == event.groupName }
-                            .any { !it.isCurrentUserFollowing }
-
-                    for (f in newFollows) {
-                        if (f.groupName == event.groupName) {
-                            newFollows[newFollows.indexOf(f)] =
-                                f.copy(isCurrentUserFollowing = groupFollowState)
-                        }
-                    }
-
-                    setState { copy(recommendedFollows = newFollows) }
-                }
+                is UiEvent.ToggleFollowEvent -> toggleFollow(event = event)
+                is UiEvent.ToggleGroupFollowEvent -> toggleGroupFollow(event = event)
             }
         }
     }
 
-    private suspend fun createNostrAccount() = viewModelScope.launch {
+    private suspend fun createNostrAccount() {
         try {
             var avatarUrl: String? = null
             var bannerUrl: String? = null
@@ -164,7 +135,6 @@ class CreateViewModel @Inject constructor(
             relayPool.publishEvent(metadataNostrEvent)
             relayPool.publishEvent(firstContactEvent)
 
-            // GREAT SUCCESS
             setState { copy(currentStep = UiState.CreateAccountStep.ACCOUNT_CREATED) }
         } catch (e: IOException) {
             setState { copy(error = UiState.CreateError.FailedToUploadImage(e)) }
@@ -177,7 +147,7 @@ class CreateViewModel @Inject constructor(
         }
     }
 
-    private suspend fun fetchRecommendedFollows() = viewModelScope.launch {
+    private suspend fun fetchRecommendedFollows() {
         try {
             setState { copy(loading = true) }
             val response = recommendedFollowsApi.fetch(state.value.name)
@@ -201,10 +171,12 @@ class CreateViewModel @Inject constructor(
         }
     }
 
-    private suspend fun finish() = viewModelScope.launch {
+    private suspend fun finish() {
         try {
             setState { copy(loading = true) }
-            follow()
+
+            followSelectedAccounts()
+
             val pubkey = authRepository.login(state.value.keypair!!.privkey)
             settingsRepository.fetchAndPersistAppSettings(userId = pubkey)
             setEffect(SideEffect.AccountCreatedAndPersisted(pubkey = pubkey))
@@ -215,7 +187,7 @@ class CreateViewModel @Inject constructor(
         }
     }
 
-    private suspend fun follow() {
+    private suspend fun followSelectedAccounts() {
         val contactsEvent =
             nostrNotary.signInitialContactsNostrEvent(privkey = state.value.keypair!!.privkey,
                 pubkey = state.value.keypair!!.pubkey,
@@ -226,10 +198,42 @@ class CreateViewModel @Inject constructor(
         relayPool.publishEvent(contactsEvent)
     }
 
-    private fun goBack() = viewModelScope.launch {
+    private fun goBack() {
         var step = state.value.currentStep.step - 1
         if (step <= 1) step = 1
         setState { copy(currentStep = UiState.CreateAccountStep(step)!!) }
+    }
+
+    private fun toggleFollow(event: UiEvent.ToggleFollowEvent) {
+        val oldFollow =
+            state.value.recommendedFollows.first { it.pubkey == event.pubkey && it.groupName == event.groupName }
+
+        val index = state.value.recommendedFollows.indexOf(oldFollow)
+
+        val newFollow =
+            oldFollow.copy(isCurrentUserFollowing = !oldFollow.isCurrentUserFollowing)
+
+        val newFollows = state.value.recommendedFollows.toMutableList()
+        newFollows[index] = newFollow
+
+        setState { copy(recommendedFollows = newFollows) }
+    }
+
+    private fun toggleGroupFollow(event: UiEvent.ToggleGroupFollowEvent) {
+        val newFollows = state.value.recommendedFollows.toMutableList()
+
+        val groupFollowState =
+            state.value.recommendedFollows.filter { it.groupName == event.groupName }
+                .any { !it.isCurrentUserFollowing }
+
+        for (f in newFollows) {
+            if (f.groupName == event.groupName) {
+                newFollows[newFollows.indexOf(f)] =
+                    f.copy(isCurrentUserFollowing = groupFollowState)
+            }
+        }
+
+        setState { copy(recommendedFollows = newFollows) }
     }
 
     private suspend fun uploadImage(uri: Uri): String? {
