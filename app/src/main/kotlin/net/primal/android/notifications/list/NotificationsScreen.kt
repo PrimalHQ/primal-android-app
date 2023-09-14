@@ -3,6 +3,7 @@ package net.primal.android.notifications.list
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.Divider
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -12,7 +13,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.ListLoading
@@ -21,11 +24,13 @@ import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
+import net.primal.android.core.compose.res.painterResource
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.PrimalDrawerScaffold
 import net.primal.android.notifications.domain.NotificationType
-import net.primal.android.notifications.list.ui.UserFollowedYouListItem
-import net.primal.android.notifications.list.ui.UserUnfollowedYouListItem
+import net.primal.android.notifications.list.ui.NotificationListItem
+import net.primal.android.notifications.list.ui.NotificationUi
+import net.primal.android.theme.AppTheme
 
 @Composable
 fun NotificationsScreen(
@@ -87,37 +92,21 @@ fun NotificationsScreen(
             ) {
                 items(
                     items = state.notifications,
-                    key = { "${it.data.type};${it.data.createdAt};${it.data.ownerId}" },
-                    contentType = { it.data.type },
+                    key = { "${it.notificationType};${it.createdAt};${it.ownerId}" },
+                    contentType = { it.notificationType },
                 ) {
-                    when (it.data.type) {
-                        NotificationType.NEW_USER_FOLLOWED_YOU -> UserFollowedYouListItem(
-                            notifications = listOf(it),
-                            onProfileClick = onProfileClick,
+                    NotificationListItem(
+                        notifications = listOf(it),
+                        type = it.notificationType,
+                        onProfileClick = onProfileClick,
+                        onPostClick = onNoteClick,
+                    )
+
+                    if (state.notifications.lastOrNull() != it) {
+                        Divider(
+                            color = AppTheme.colorScheme.outline,
+                            thickness = 1.dp,
                         )
-
-                        NotificationType.USER_UNFOLLOWED_YOU -> UserUnfollowedYouListItem(
-                            notifications = listOf(it),
-                            onProfileClick = onProfileClick,
-                        )
-
-                        NotificationType.YOUR_POST_WAS_ZAPPED -> Unit
-                        NotificationType.YOUR_POST_WAS_LIKED -> Unit
-                        NotificationType.YOUR_POST_WAS_REPOSTED -> Unit
-                        NotificationType.YOUR_POST_WAS_REPLIED_TO -> Unit // Skip grouping
-
-                        NotificationType.YOU_WERE_MENTIONED_IN_POST -> Unit
-                        NotificationType.YOUR_POST_WAS_MENTIONED_IN_POST -> Unit
-
-                        NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_ZAPPED -> Unit
-                        NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_LIKED -> Unit
-                        NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_REPOSTED -> Unit
-                        NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_REPLIED_TO -> Unit // Skip grouping
-
-                        NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_ZAPPED -> Unit
-                        NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_LIKED -> Unit
-                        NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPOSTED -> Unit
-                        NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO -> Unit // Skip grouping
                     }
                 }
 
@@ -141,3 +130,125 @@ fun NotificationsScreen(
     )
 }
 
+//// Skip grouping //NotificationType.YOUR_POST_WAS_REPLIED_TO ->
+//// Skip grouping //NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_REPLIED_TO ->
+//// Skip grouping //NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO ->
+
+@Composable
+private fun NotificationListItem(
+    notifications: List<NotificationUi>,
+    type: NotificationType,
+    onProfileClick: (String) -> Unit,
+    onPostClick: (String) -> Unit,
+) {
+    NotificationListItem(
+        notifications = notifications,
+        imagePainter = type.toImagePainter(),
+        suffixText = type.toSuffixText(),
+        onProfileClick = onProfileClick,
+        onPostClick = onPostClick,
+    )
+}
+
+@Composable
+private fun NotificationType.toImagePainter(): Painter = when (this) {
+    NotificationType.NEW_USER_FOLLOWED_YOU -> painterResource(
+        darkResId = R.drawable.notification_type_new_user_followed_you_dark,
+        lightResId = R.drawable.notification_type_new_user_followed_you_light,
+    )
+
+    NotificationType.USER_UNFOLLOWED_YOU -> painterResource(
+        darkResId = R.drawable.notification_type_user_unfollowed_you_dark,
+        lightResId = R.drawable.notification_type_user_unfollowed_you_light,
+    )
+
+    NotificationType.YOUR_POST_WAS_ZAPPED -> painterResource(
+        darkResId = R.drawable.notification_type_your_post_was_zapped_dark,
+        lightResId = R.drawable.notification_type_your_post_was_zapped_light,
+    )
+
+    NotificationType.YOUR_POST_WAS_LIKED -> painterResource(
+        darkResId = R.drawable.notification_type_your_post_was_liked_dark,
+        lightResId = R.drawable.notification_type_your_post_was_liked_light,
+    )
+
+    NotificationType.YOUR_POST_WAS_REPOSTED -> painterResource(
+        darkResId = R.drawable.notification_type_your_post_was_reposted_dark,
+        lightResId = R.drawable.notification_type_your_post_was_reposted_light,
+    )
+
+    NotificationType.YOUR_POST_WAS_REPLIED_TO -> painterResource(
+        darkResId = R.drawable.notification_type_your_post_was_replied_to_dark,
+        lightResId = R.drawable.notification_type_your_post_was_replied_to_light,
+    )
+
+    NotificationType.YOU_WERE_MENTIONED_IN_POST -> painterResource(
+        darkResId = R.drawable.ic_launcher_foreground,
+        lightResId = R.drawable.ic_launcher_foreground,
+    )
+
+    NotificationType.YOUR_POST_WAS_MENTIONED_IN_POST -> painterResource(
+        darkResId = R.drawable.ic_launcher_foreground,
+        lightResId = R.drawable.ic_launcher_foreground,
+    )
+
+    NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_ZAPPED -> painterResource(
+        darkResId = R.drawable.notification_type_post_you_were_mentioned_in_was_zapped_dark,
+        lightResId = R.drawable.notification_type_post_you_were_mentioned_in_was_zapped_light,
+    )
+
+    NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_LIKED -> painterResource(
+        darkResId = R.drawable.notification_type_post_you_were_mentioned_in_was_liked_dark,
+        lightResId = R.drawable.notification_type_post_you_were_mentioned_in_was_liked_light,
+    )
+
+    NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_REPOSTED -> painterResource(
+        darkResId = R.drawable.notification_type_post_you_were_mentioned_in_was_reposted_dark,
+        lightResId = R.drawable.notification_type_post_you_were_mentioned_in_was_reposted_light,
+    )
+
+    NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_REPLIED_TO -> painterResource(
+        darkResId = R.drawable.notification_type_post_you_were_mentioned_in_was_replied_to_dark,
+        lightResId = R.drawable.notification_type_post_you_were_mentioned_in_was_replied_to_light,
+    )
+
+    NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_ZAPPED -> painterResource(
+        darkResId = R.drawable.notification_type_post_your_post_was_mentioned_in_was_zapped_dark,
+        lightResId = R.drawable.notification_type_post_your_post_was_mentioned_in_was_zapped_light,
+    )
+
+    NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_LIKED -> painterResource(
+        darkResId = R.drawable.notification_type_post_your_post_was_mentioned_in_was_liked_dark,
+        lightResId = R.drawable.notification_type_post_your_post_was_mentioned_in_was_liked_light,
+    )
+
+    NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPOSTED -> painterResource(
+        darkResId = R.drawable.notification_type_post_your_post_was_mentioned_in_was_reposted_dark,
+        lightResId = R.drawable.notification_type_post_your_post_was_mentioned_in_was_reposted_light,
+    )
+
+    NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO -> painterResource(
+        darkResId = R.drawable.notification_type_post_your_post_was_mentioned_in_was_replied_to_dark,
+        lightResId = R.drawable.notification_type_post_your_post_was_mentioned_in_was_replied_to_light,
+    )
+}
+
+@Composable
+private fun NotificationType.toSuffixText(): String = when (this) {
+    NotificationType.NEW_USER_FOLLOWED_YOU -> stringResource(id = R.string.notification_list_item_followed_you)
+    NotificationType.USER_UNFOLLOWED_YOU -> stringResource(id = R.string.notification_list_item_unfollowed_you)
+    NotificationType.YOUR_POST_WAS_ZAPPED -> stringResource(id = R.string.notification_list_item_zapped_your_post)
+    NotificationType.YOUR_POST_WAS_LIKED -> stringResource(id = R.string.notification_list_item_liked_your_post)
+    NotificationType.YOUR_POST_WAS_REPOSTED -> stringResource(id = R.string.notification_list_item_reposted_your_post)
+    NotificationType.YOUR_POST_WAS_REPLIED_TO -> stringResource(id = R.string.notification_list_item_replied_to_your_post)
+    NotificationType.YOU_WERE_MENTIONED_IN_POST -> stringResource(id = R.string.notification_list_item_mentioned_you_in_post)
+    NotificationType.YOUR_POST_WAS_MENTIONED_IN_POST -> stringResource(id = R.string.notification_list_item_mentioned_your_post)
+    NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_ZAPPED -> stringResource(id = R.string.notification_list_item_post_you_were_mentioned_in_was_zapped)
+    NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_LIKED -> stringResource(id = R.string.notification_list_item_post_you_were_mentioned_in_was_liked)
+    NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_REPOSTED -> stringResource(id = R.string.notification_list_item_post_you_were_mentioned_in_was_reposted)
+    NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_REPLIED_TO -> stringResource(id = R.string.notification_list_item_post_you_were_mentioned_in_was_replied_to)
+    NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_ZAPPED -> stringResource(id = R.string.notification_list_item_post_where_you_post_was_mentioned_was_zapped)
+    NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_LIKED -> stringResource(id = R.string.notification_list_item_post_where_you_post_was_mentioned_was_liked)
+    NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPOSTED -> stringResource(id = R.string.notification_list_item_post_where_you_post_was_mentioned_was_reposted)
+    NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO -> stringResource(id = R.string.notification_list_item_post_where_you_post_was_mentioned_was_replied_to)
+}

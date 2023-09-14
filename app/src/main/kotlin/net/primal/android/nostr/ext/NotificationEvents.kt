@@ -23,7 +23,7 @@ fun PrimalEvent.asNotificationSummary(): NotificationsSummary {
     )
 }
 
-private fun ContentPrimalNotification.parseActionByUserId(type: NotificationType): String? {
+private fun ContentPrimalNotification.parseActionUserId(type: NotificationType): String? {
     return when (type) {
         NotificationType.NEW_USER_FOLLOWED_YOU -> this.follower
         NotificationType.USER_UNFOLLOWED_YOU -> this.follower
@@ -44,39 +44,37 @@ private fun ContentPrimalNotification.parseActionByUserId(type: NotificationType
     }
 }
 
-private fun ContentPrimalNotification.parseActionOnPostId(type: NotificationType): String? {
+private fun ContentPrimalNotification.parseActionPostId(type: NotificationType): String? {
     return when (type) {
         NotificationType.YOUR_POST_WAS_ZAPPED -> this.yourPost
         NotificationType.YOUR_POST_WAS_LIKED -> this.yourPost
         NotificationType.YOUR_POST_WAS_REPOSTED -> this.yourPost
-        NotificationType.YOUR_POST_WAS_REPLIED_TO -> this.yourPost
+        NotificationType.YOUR_POST_WAS_REPLIED_TO -> this.reply
         NotificationType.YOU_WERE_MENTIONED_IN_POST -> this.youWereMentionedIn
         NotificationType.YOUR_POST_WAS_MENTIONED_IN_POST -> this.yourPostWereMentionedIn
         NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_ZAPPED -> this.postYouWereMentionedIn
         NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_LIKED -> this.postYouWereMentionedIn
         NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_REPOSTED -> this.postYouWereMentionedIn
-        NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_REPLIED_TO -> this.postYouWereMentionedIn
+        NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_REPLIED_TO -> this.reply
         NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_ZAPPED -> this.postYourPostWasMentionedIn
         NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_LIKED -> this.postYourPostWasMentionedIn
         NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPOSTED -> this.postYourPostWasMentionedIn
-        NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO -> this.postYourPostWasMentionedIn
+        NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO -> this.reply
         else -> null
     }
 }
 
 fun ContentPrimalNotification.asNotificationPOOrNull(): NotificationData? {
     val type = NotificationType.valueOf(type = this.type) ?: return null
-    val actionByUserId = parseActionByUserId(type = type) ?: return null
-    val actionOnPostId = parseActionOnPostId(type = type)
+    val actionUserId = parseActionUserId(type = type) ?: return null
+    val actionOnPostId = parseActionPostId(type = type)
 
     return NotificationData(
         ownerId = this.pubkey,
         createdAt = this.createdAt,
         type = type,
-        actionByUserId = actionByUserId,
-        replyPostId = this.reply,
-        ownerPostId = this.yourPost,
-        actionOnPostId = actionOnPostId,
+        actionUserId = actionUserId,
+        actionPostId = actionOnPostId,
         satsZapped = this.satsZapped,
     )
 }
