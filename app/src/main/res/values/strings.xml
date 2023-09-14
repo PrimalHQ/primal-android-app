@@ -92,8 +92,22 @@
         <item quantity="one">and %1$s other</item>
         <item quantity="other">and %1$s others</item>
     </plurals>
-    <string name="notification_list_item_followed_you">followed you.</string>
-    <string name="notification_list_item_unfollowed_you">unfollowed you.</string>
+    <string name="notification_list_item_followed_you">followed you</string>
+    <string name="notification_list_item_unfollowed_you">unfollowed you</string>
+    <string name="notification_list_item_zapped_your_post">zapped your note</string>
+    <string name="notification_list_item_liked_your_post">liked your note</string>
+    <string name="notification_list_item_reposted_your_post">reposted your note</string>
+    <string name="notification_list_item_replied_to_your_post">replied to your note</string>
+    <string name="notification_list_item_mentioned_you_in_post">mentioned you in a note</string>
+    <string name="notification_list_item_mentioned_your_post">mentioned your note</string>
+    <string name="notification_list_item_post_you_were_mentioned_in_was_zapped">zapped a note you were mentioned in</string>
+    <string name="notification_list_item_post_you_were_mentioned_in_was_liked">liked a note you were mentioned in</string>
+    <string name="notification_list_item_post_you_were_mentioned_in_was_reposted">reposted a note you were mentioned in</string>
+    <string name="notification_list_item_post_you_were_mentioned_in_was_replied_to">replied to a note you were mentioned in</string>
+    <string name="notification_list_item_post_where_you_post_was_mentioned_was_zapped">zapped a note your note was mentioned in</string>
+    <string name="notification_list_item_post_where_you_post_was_mentioned_was_liked">liked a note your note was mentioned in</string>
+    <string name="notification_list_item_post_where_you_post_was_mentioned_was_reposted">reposted a note your note was mentioned in</string>
+    <string name="notification_list_item_post_where_you_post_was_mentioned_was_replied_to">replied to a note your note was mentioned in</string>
 
     <string name="messages_title">Messages</string>
 

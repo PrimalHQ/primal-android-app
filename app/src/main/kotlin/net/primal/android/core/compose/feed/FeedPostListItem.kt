@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.ripple.rememberRipple
@@ -88,6 +89,7 @@ fun FeedPostListItem(
             modifier = Modifier.padding(start = if (shouldIndentContent) 64.dp else 0.dp),
         ) {
             FeedPostContent(
+                modifier = Modifier.padding(horizontal = 16.dp),
                 content = data.content,
                 expanded = expanded,
                 hashtags = data.hashtags,
@@ -106,6 +108,10 @@ fun FeedPostListItem(
             )
 
             FeedPostStatsRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+                    .padding(vertical = 16.dp),
                 postStats = data.stats,
                 onPostAction = onPostAction,
                 onPostLongPressAction = onPostLongClickAction,

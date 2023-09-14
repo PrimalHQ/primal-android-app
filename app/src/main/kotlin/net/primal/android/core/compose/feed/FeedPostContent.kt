@@ -106,6 +106,7 @@ private fun String.ellipsize(
 
 @Composable
 fun FeedPostContent(
+    modifier: Modifier = Modifier,
     content: String,
     expanded: Boolean,
     hashtags: List<String>,
@@ -201,7 +202,7 @@ fun FeedPostContent(
     }
 
     Column(
-        modifier = Modifier.padding(horizontal = 16.dp),
+        modifier = modifier,
     ) {
         if (contentText.isNotEmpty()) {
             PrimalClickableText(

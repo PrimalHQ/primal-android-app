@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 7,
-    "identityHash": "3ce39cdf131147c3832b2eab979759ea",
+    "identityHash": "fd618d915f0a2515df6b523ae057debd",
     "entities": [
       {
         "tableName": "PostData",
@@ -774,7 +774,7 @@
       },
       {
         "tableName": "NotificationData",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ownerId` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `type` TEXT NOT NULL, `actionByUserId` TEXT NOT NULL, `ownerPostId` TEXT, `actionOnPostId` TEXT, `replyPostId` TEXT, `satsZapped` INTEGER, PRIMARY KEY(`ownerId`, `createdAt`, `type`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ownerId` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `type` TEXT NOT NULL, `actionUserId` TEXT, `actionPostId` TEXT, `satsZapped` INTEGER, PRIMARY KEY(`ownerId`, `createdAt`, `type`))",
         "fields": [
           {
             "fieldPath": "ownerId",
@@ -795,26 +795,14 @@
             "notNull": true
           },
           {
-            "fieldPath": "actionByUserId",
-            "columnName": "actionByUserId",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "ownerPostId",
-            "columnName": "ownerPostId",
+            "fieldPath": "actionUserId",
+            "columnName": "actionUserId",
             "affinity": "TEXT",
             "notNull": false
           },
           {
-            "fieldPath": "actionOnPostId",
-            "columnName": "actionOnPostId",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "replyPostId",
-            "columnName": "replyPostId",
+            "fieldPath": "actionPostId",
+            "columnName": "actionPostId",
             "affinity": "TEXT",
             "notNull": false
           },
@@ -840,7 +828,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '3ce39cdf131147c3832b2eab979759ea')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'fd618d915f0a2515df6b523ae057debd')"
     ]
   }
 }

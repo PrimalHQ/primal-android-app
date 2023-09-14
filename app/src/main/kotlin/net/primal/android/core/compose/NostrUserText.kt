@@ -11,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.Placeholder
@@ -35,6 +36,7 @@ fun NostrUserText(
     displayName: String,
     internetIdentifier: String?,
     modifier: Modifier = Modifier,
+    displayNameColor: Color = AppTheme.colorScheme.onSurface,
     fontSize: TextUnit = TextUnit.Unspecified,
     style: TextStyle = LocalTextStyle.current,
     overflow: TextOverflow = TextOverflow.Clip,
@@ -51,7 +53,7 @@ fun NostrUserText(
             AnnotatedString(
                 text = displayName,
                 spanStyle = SpanStyle(
-                    color = AppTheme.colorScheme.onSurface,
+                    color = displayNameColor,
                     fontStyle = AppTheme.typography.titleMedium.fontStyle,
                     fontWeight = FontWeight.Bold
                 )
