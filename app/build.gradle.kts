@@ -57,8 +57,8 @@ android {
         applicationId = "net.primal.android"
         minSdk = 26
         targetSdk = 34
-        versionCode = 34
-        versionName = "0.16.0-feature-create-account-pre-release"
+        versionCode = 35
+        versionName = "0.16.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 

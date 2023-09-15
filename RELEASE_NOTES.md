@@ -1,3 +1,3 @@
 ## Changes
 
-- Implemented automated release with GitHub Actions
+- Implemented full create account feature
