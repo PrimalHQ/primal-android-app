@@ -25,7 +25,7 @@ fun AvatarThumbnailsRow(
     modifier: Modifier = Modifier,
     avatarUrls: List<Any?>,
     authorInternetIdentifiers: List<String?>,
-    onClick: () -> Unit,
+    onClick: (Int) -> Unit,
 ) {
     val avatarVisibleWidth = 24.dp
     BoxWithConstraints(modifier = modifier) {
@@ -50,7 +50,7 @@ fun AvatarThumbnailsRow(
                             Color.White,
                         )
                     },
-                    onClick = onClick,
+                    onClick = { onClick(index) },
                 )
             }
         }

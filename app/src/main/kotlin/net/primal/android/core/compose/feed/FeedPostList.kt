@@ -185,7 +185,7 @@ private fun NewPostsButton(
             modifier = Modifier.padding(start = 6.dp),
             avatarUrls = syncStats.avatarUrls,
             authorInternetIdentifiers = syncStats.avatarUrls.map { null },
-            onClick = onClick,
+            onClick = { onClick() },
         )
 
         Text(

@@ -47,6 +47,7 @@ fun NotificationsScreen(
     viewModel: NotificationsViewModel,
     onProfileClick: (String) -> Unit,
     onNoteClick: (String) -> Unit,
+    onHashtagClick: (String) -> Unit,
     onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
 ) {
@@ -60,6 +61,7 @@ fun NotificationsScreen(
         state = uiState.value,
         onProfileClick = onProfileClick,
         onNoteClick = onNoteClick,
+        onHashtagClick = onHashtagClick,
         onPrimaryDestinationChanged = onTopLevelDestinationChanged,
         onDrawerDestinationClick = onDrawerScreenClick,
     )
@@ -71,6 +73,7 @@ fun NotificationsScreen(
     state: NotificationsContract.UiState,
     onProfileClick: (String) -> Unit,
     onNoteClick: (String) -> Unit,
+    onHashtagClick: (String) -> Unit,
     onPrimaryDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
 ) {
@@ -119,6 +122,7 @@ fun NotificationsScreen(
                         type = it.first().notificationType,
                         onProfileClick = onProfileClick,
                         onPostClick = onNoteClick,
+                        onHashtagClick = onHashtagClick,
                     )
 
                     if (state.unseenNotifications.last() != it || seenPagingItems.isNotEmpty()) {
@@ -143,6 +147,7 @@ fun NotificationsScreen(
                                 type = item.notificationType,
                                 onProfileClick = onProfileClick,
                                 onPostClick = onNoteClick,
+                                onHashtagClick = onHashtagClick,
                             )
 
                             if (it < seenPagingItems.itemCount - 1) {
@@ -217,6 +222,7 @@ private fun NotificationListItem(
     type: NotificationType,
     onProfileClick: (String) -> Unit,
     onPostClick: (String) -> Unit,
+    onHashtagClick: (String) -> Unit,
 ) {
     val totalSatsZapped = notifications
         .firstOrNull { it.actionPost?.stats != null }
@@ -234,6 +240,7 @@ private fun NotificationListItem(
         ),
         onProfileClick = onProfileClick,
         onPostClick = onPostClick,
+        onHashtagClick = onHashtagClick,
     )
 }
 

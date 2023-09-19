@@ -449,6 +449,7 @@ private fun NavGraphBuilder.notifications(
         viewModel = viewModel,
         onProfileClick = { navController.navigateToProfile(profileId = it) },
         onNoteClick = { navController.navigateToThread(postId = it) },
+        onHashtagClick = { navController.navigateToExploreFeed(query = it) },
         onTopLevelDestinationChanged = onTopLevelDestinationChanged,
         onDrawerScreenClick = onDrawerScreenClick,
     )

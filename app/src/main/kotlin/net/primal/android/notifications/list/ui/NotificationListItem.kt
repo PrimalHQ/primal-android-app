@@ -1,6 +1,7 @@
 package net.primal.android.notifications.list.ui
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.unit.dp
 import net.primal.android.R
@@ -22,6 +24,7 @@ import net.primal.android.core.compose.AvatarThumbnailsRow
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.feed.FeedPostContent
 import net.primal.android.core.compose.feed.FeedPostStatsRow
+import net.primal.android.core.ext.openUriSafely
 import net.primal.android.core.utils.shortened
 import net.primal.android.notifications.domain.NotificationType
 import net.primal.android.theme.AppTheme
@@ -38,10 +41,26 @@ fun NotificationListItem(
     suffixText: String,
     onProfileClick: (String) -> Unit,
     onPostClick: (String) -> Unit,
+    onHashtagClick: (String) -> Unit,
 ) {
     val firstNotification = notifications.first()
 
-    Row {
+    Row(
+        modifier = Modifier.clickable(
+            enabled = notifications.size == 1 || firstNotification.actionPost != null,
+            onClick = {
+                when (notifications.size) {
+                    1 -> when (firstNotification.notificationType) {
+                        NotificationType.NEW_USER_FOLLOWED_YOU -> {
+                            firstNotification.actionUserId?.let(onProfileClick)
+                        }
+                        else -> firstNotification.actionPost?.postId?.let(onPostClick)
+                    }
+                    else -> firstNotification.actionPost?.postId?.let(onPostClick)
+                }
+            },
+        ),
+    ) {
         Box(
             modifier = Modifier.padding(all = 16.dp),
         ) {
@@ -90,8 +109,8 @@ fun NotificationListItem(
                 AvatarThumbnailsRow(
                     avatarUrls = notifications.map { it.actionUserPicture },
                     authorInternetIdentifiers = notifications.map { null },
-                    onClick = {
-                        firstNotification.actionUserId?.let(onPostClick)
+                    onClick = { index ->
+                        notifications.getOrNull(index)?.actionUserId?.let(onProfileClick)
                     },
                 )
 
@@ -117,6 +136,8 @@ fun NotificationListItem(
                     }
                 )
 
+                val localUriHandler = LocalUriHandler.current
+
                 if (actionPost != null) {
                     FeedPostContent(
                         modifier = Modifier.padding(end = 16.dp),
@@ -125,18 +146,11 @@ fun NotificationListItem(
                         hashtags = actionPost.hashtags,
                         mediaResources = actionPost.mediaResources,
                         nostrResources = actionPost.nostrResources,
-                        onClick = {
-                            //TODO launchRippleEffect(it)
-                            onPostClick(actionPost.postId)
-                        },
+                        onClick = { onPostClick(actionPost.postId) },
                         onProfileClick = onProfileClick,
                         onPostClick = onPostClick,
-                        onUrlClick = {
-                            //TODO localUriHandler.openUriSafely(it)
-                        },
-                        onHashtagClick = {
-                            //TODO Handle hashtag clicks
-                        },
+                        onUrlClick = { localUriHandler.openUriSafely(it) },
+                        onHashtagClick = {onHashtagClick(it) },
                     )
 
                     FeedPostStatsRow(
