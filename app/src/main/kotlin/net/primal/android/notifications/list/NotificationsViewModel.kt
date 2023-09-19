@@ -81,11 +81,18 @@ class NotificationsViewModel @Inject constructor(
         notificationsRepository.observeUnseenNotifications().collect { newUnseenNotifications ->
             setState {
                 val unseenNotifications = mutableListOf<List<Notification>>()
-                val groups = newUnseenNotifications.groupBy { it.data.type }
-                groups.keys.forEach { notificationType ->
-                    groups[notificationType]?.let { notificationsByType ->
+                val groupByType = newUnseenNotifications.groupBy { it.data.type }
+                groupByType.keys.forEach { notificationType ->
+                    groupByType[notificationType]?.let { notificationsByType ->
                         when (notificationType.collapsable) {
-                            true -> unseenNotifications.add(notificationsByType)
+                            true -> {
+                                val groupByPostId = notificationsByType.groupBy { it.data.actionPostId }
+                                groupByPostId.keys.forEach { postId ->
+                                    groupByPostId[postId]?.let {
+                                        unseenNotifications.add(it)
+                                    }
+                                }
+                            }
                             false -> notificationsByType.forEach {
                                 unseenNotifications.add(listOf(it))
                             }
