@@ -1,6 +1,7 @@
 package net.primal.android.settings.notifications
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -20,15 +22,23 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -43,6 +53,8 @@ fun NotificationsSettingsScreen(
     onClose: () -> Unit
 ) {
     val state = viewModel.state.collectAsState()
+
+    LaunchedErrorHandler(viewModel = viewModel)
 
     NotificationsSettingsScreen(
         state = state.value,
@@ -70,12 +82,12 @@ fun NotificationsSettingsScreen(
             Column(
                 modifier = Modifier
                     .verticalScroll(rememberScrollState())
-                    .padding(paddingValues)
-                    .padding(top = 56.dp),
+                    .padding(paddingValues),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                state.notifications.entries.forEach {
+                val grouped = state.notifications.groupBy { it.group }
+                grouped.forEach {
                     NotificationsSettingsBlock(
                         title = it.key,
                         values = it.value,
@@ -133,10 +145,13 @@ fun NotificationsSettingsBlock(
                             lightResId = value.lightResId,
                             darkResId = value.darkResId
                         ),
+                        modifier = Modifier
+                            .width(28.dp)
+                            .height(20.dp), // normalize the size since we're mixing svgs and pngs with different sizes
                         contentDescription = null
                     )
                     Text(
-                        text = value.name,
+                        text = stringResource(id = value.textResId),
                         fontWeight = FontWeight.W400,
                         fontSize = 16.sp,
                         lineHeight = 20.sp,
@@ -163,130 +178,150 @@ fun NotificationsSettingsBlock(
     }
 }
 
+@Composable
+fun LaunchedErrorHandler(
+    viewModel: NotificationsSettingsViewModel
+) {
+    val genericMessage = stringResource(id = R.string.app_generic_error)
+    val context = LocalContext.current
+    val uiScope = rememberCoroutineScope()
+    LaunchedEffect(viewModel) {
+        viewModel.state.filter { it.error != null }.map { it.error }.filterNotNull().collect {
+            uiScope.launch {
+                Toast.makeText(
+                    context, genericMessage, Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+    }
+}
+
 @Preview(uiMode = UI_MODE_NIGHT_YES)
 @Composable
 fun PreviewNotificationsSettingsScreen() {
     PrimalTheme {
         NotificationsSettingsScreen(
             state = NotificationsSettingsContract.UiState(
-                mapOf(
-                    "CORE NOTIFICATIONS" to listOf(
-                        NotificationsSettingsContract.Notification(
-                            id = "NEW_USER_FOLLOWED_YOU",
-                            name = "new user followed you",
-                            lightResId = R.drawable.notification_type_new_user_followed_you_light,
-                            darkResId = R.drawable.notification_type_new_user_followed_you_dark,
-                            value = true
-                        ),
-                        NotificationsSettingsContract.Notification(
-                            id = "USER_UNFOLLOWED_YOU",
-                            name = "user unfollowed you",
-                            lightResId = R.drawable.notification_type_user_unfollowed_you_light,
-                            darkResId = R.drawable.notification_type_user_unfollowed_you_dark,
-                            value = false
-                        ),
-                        NotificationsSettingsContract.Notification(
-                            id = "YOUR_POST_WAS_ZAPPED",
-                            name = "your post was zapped",
-                            lightResId = R.drawable.notification_type_your_post_was_zapped_light,
-                            darkResId = R.drawable.notification_type_your_post_was_zapped_dark,
-                            value = true
-                        ),
-                        NotificationsSettingsContract.Notification(
-                            id = "YOUR_POST_WAS_LIKED",
-                            name = "your post was liked",
-                            lightResId = R.drawable.notification_type_your_post_was_liked_light,
-                            darkResId = R.drawable.notification_type_your_post_was_liked_dark,
-                            value = true
-                        ),
-                        NotificationsSettingsContract.Notification(
-                            id = "YOUR_POST_WAS_REPOSTED",
-                            name = "your post was reposted",
-                            lightResId = R.drawable.notification_type_your_post_was_reposted_light,
-                            darkResId = R.drawable.notification_type_your_post_was_reposted_dark,
-                            value = true
-                        ),
-                        NotificationsSettingsContract.Notification(
-                            id = "YOUR_POST_WAS_REPLIED_TO",
-                            name = "your post was replied to",
-                            lightResId = R.drawable.notification_type_your_post_was_replied_to_light,
-                            darkResId = R.drawable.notification_type_your_post_was_replied_to_dark,
-                            value = true
-                        ),
-                        NotificationsSettingsContract.Notification(
-                            id = "YOU_WERE_MENTIONED_IN_POST",
-                            name = "you were mentioned",
-                            lightResId = R.drawable.notification_type_new_user_followed_you_light, // TODO: update when new icons become available
-                            darkResId = R.drawable.notification_type_new_user_followed_you_dark, // TODO: update when new icons become available
-                            value = true
-                        ),
-                        NotificationsSettingsContract.Notification(
-                            id = "YOUR_POST_WAS_MENTIONED_IN_POST",
-                            name = "your post was mentioned",
-                            lightResId = R.drawable.notification_type_post_your_post_was_mentioned_in_was_liked_light, // TODO: update when new icons become available
-                            darkResId = R.drawable.notification_type_post_your_post_was_mentioned_in_was_liked_dark, // TODO: update when new icons become available
-                            value = true
-                        )
+                notifications = listOf(
+                    NotificationsSettingsContract.Notification(
+                        id = "NEW_USER_FOLLOWED_YOU",
+                        textResId = R.string.settings_notifications_new_user_followed_you_text,
+                        lightResId = R.drawable.notification_type_new_user_followed_you_light,
+                        darkResId = R.drawable.notification_type_new_user_followed_you_dark,
+                        group = "CORE NOTIFICATIONS",
+                        value = true
                     ),
-                    "A NOTE YOU WERE MENTIONED IN WAS" to listOf(
-                        NotificationsSettingsContract.Notification(
-                            id = "POST_YOU_WERE_MENTIONED_IN_WAS_ZAPPED",
-                            name = "zapped",
-                            lightResId = R.drawable.notification_type_post_you_were_mentioned_in_was_zapped_light,
-                            darkResId = R.drawable.notification_type_post_you_were_mentioned_in_was_zapped_dark,
-                            value = true
-                        ),
-                        NotificationsSettingsContract.Notification(
-                            id = "POST_YOU_WERE_MENTIONED_IN_WAS_LIKED",
-                            name = "liked",
-                            lightResId = R.drawable.notification_type_post_you_were_mentioned_in_was_liked_light,
-                            darkResId = R.drawable.notification_type_post_you_were_mentioned_in_was_liked_dark,
-                            value = true
-                        ),
-                        NotificationsSettingsContract.Notification(
-                            id = "POST_YOU_WERE_MENTIONED_IN_WAS_REPOSTED",
-                            name = "reposted",
-                            lightResId = R.drawable.notification_type_post_you_were_mentioned_in_was_reposted_light,
-                            darkResId = R.drawable.notification_type_post_you_were_mentioned_in_was_reposted_dark,
-                            value = true
-                        ),
-                        NotificationsSettingsContract.Notification(
-                            id = "POST_YOU_WERE_MENTIONED_IN_WAS_REPLIED_TO",
-                            name = "replied to",
-                            lightResId = R.drawable.notification_type_post_you_were_mentioned_in_was_replied_to_light,
-                            darkResId = R.drawable.notification_type_post_you_were_mentioned_in_was_replied_to_dark,
-                            value = true
-                        )
+                    NotificationsSettingsContract.Notification(
+                        id = "YOUR_POST_WAS_ZAPPED",
+                        textResId = R.string.settings_notifications_your_post_was_zapped_text,
+                        lightResId = R.drawable.notification_type_your_post_was_zapped_light,
+                        darkResId = R.drawable.notification_type_your_post_was_zapped_dark,
+                        group = "CORE NOTIFICATIONS",
+                        value = true
                     ),
-                    "A NOTE YOUR NOTE WAS MENTIONED IN WAS" to listOf(
-                        NotificationsSettingsContract.Notification(
-                            id = "POST_YOUR_POST_WAS_MENTIONED_IN_WAS_ZAPPED",
-                            name = "zapped",
-                            lightResId = R.drawable.notification_type_post_your_post_was_mentioned_in_was_zapped_light,
-                            darkResId = R.drawable.notification_type_post_your_post_was_mentioned_in_was_zapped_dark,
-                            value = false
-                        ),
-                        NotificationsSettingsContract.Notification(
-                            id = "POST_YOUR_POST_WAS_MENTIONED_IN_WAS_LIKED",
-                            name = "liked",
-                            lightResId = R.drawable.notification_type_post_your_post_was_mentioned_in_was_liked_light,
-                            darkResId = R.drawable.notification_type_post_your_post_was_mentioned_in_was_liked_dark,
-                            value = false
-                        ),
-                        NotificationsSettingsContract.Notification(
-                            id = "POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPOSTED",
-                            name = "reposted",
-                            lightResId = R.drawable.notification_type_post_your_post_was_mentioned_in_was_reposted_light,
-                            darkResId = R.drawable.notification_type_post_your_post_was_mentioned_in_was_reposted_dark,
-                            value = false
-                        ),
-                        NotificationsSettingsContract.Notification(
-                            id = "POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO",
-                            name = "replied to",
-                            lightResId = R.drawable.notification_type_post_your_post_was_mentioned_in_was_replied_to_light,
-                            darkResId = R.drawable.notification_type_post_your_post_was_mentioned_in_was_replied_to_dark,
-                            value = false
-                        )
+                    NotificationsSettingsContract.Notification(
+                        id = "YOUR_POST_WAS_LIKED",
+                        textResId = R.string.settings_notifications_your_post_was_liked_text,
+                        lightResId = R.drawable.notification_type_your_post_was_liked_light,
+                        darkResId = R.drawable.notification_type_your_post_was_liked_dark,
+                        group = "CORE NOTIFICATIONS",
+                        value = true
+                    ),
+                    NotificationsSettingsContract.Notification(
+                        id = "YOUR_POST_WAS_REPOSTED",
+                        textResId = R.string.settings_notifications_your_post_was_reposted_text,
+                        lightResId = R.drawable.notification_type_your_post_was_reposted_light,
+                        darkResId = R.drawable.notification_type_your_post_was_reposted_dark,
+                        group = "CORE NOTIFICATIONS",
+                        value = true
+                    ),
+                    NotificationsSettingsContract.Notification(
+                        id = "YOUR_POST_WAS_REPLIED_TO",
+                        textResId = R.string.settings_notifications_your_post_was_replied_to_text,
+                        lightResId = R.drawable.notification_type_your_post_was_replied_to_light,
+                        darkResId = R.drawable.notification_type_your_post_was_replied_to_dark,
+                        group = "CORE NOTIFICATIONS",
+                        value = true
+                    ),
+                    NotificationsSettingsContract.Notification(
+                        id = "YOU_WERE_MENTIONED_IN_POST",
+                        textResId = R.string.settings_notifications_you_were_mentioned_text,
+                        lightResId = R.drawable.notification_type_you_were_mentioned_in_a_post_light,
+                        darkResId = R.drawable.notification_type_you_were_mentioned_in_a_post_dark,
+                        group = "CORE NOTIFICATIONS",
+                        value = true
+                    ),
+                    NotificationsSettingsContract.Notification(
+                        id = "YOUR_POST_WAS_MENTIONED_IN_POST",
+                        textResId = R.string.settings_notifications_your_post_was_mentioned_text,
+                        lightResId = R.drawable.notification_type_your_post_was_mentioned_in_a_post_light,
+                        darkResId = R.drawable.notification_type_your_post_was_mentioned_in_a_post_dark,
+                        group = "CORE NOTIFICATIONS",
+                        value = true
+                    ),
+                    NotificationsSettingsContract.Notification(
+                        id = "POST_YOU_WERE_MENTIONED_IN_WAS_ZAPPED",
+                        textResId = R.string.settings_notifications_post_you_were_mentioned_in_was_zapped_text,
+                        lightResId = R.drawable.notification_type_post_you_were_mentioned_in_was_zapped_light,
+                        darkResId = R.drawable.notification_type_post_you_were_mentioned_in_was_zapped_dark,
+                        group = "A NOTE YOU WERE MENTIONED IN WAS",
+                        value = true
+                    ),
+                    NotificationsSettingsContract.Notification(
+                        id = "POST_YOU_WERE_MENTIONED_IN_WAS_LIKED",
+                        textResId = R.string.settings_notifications_post_you_were_mentioned_in_was_liked_text,
+                        lightResId = R.drawable.notification_type_post_you_were_mentioned_in_was_liked_light,
+                        darkResId = R.drawable.notification_type_post_you_were_mentioned_in_was_liked_dark,
+                        group = "A NOTE YOU WERE MENTIONED IN WAS",
+                        value = true
+                    ),
+                    NotificationsSettingsContract.Notification(
+                        id = "POST_YOU_WERE_MENTIONED_IN_WAS_REPOSTED",
+                        textResId = R.string.settings_notifications_post_you_were_mentioned_in_was_reposted_text,
+                        lightResId = R.drawable.notification_type_post_you_were_mentioned_in_was_reposted_light,
+                        darkResId = R.drawable.notification_type_post_you_were_mentioned_in_was_reposted_dark,
+                        group = "A NOTE YOU WERE MENTIONED IN WAS",
+                        value = true
+                    ),
+                    NotificationsSettingsContract.Notification(
+                        id = "POST_YOU_WERE_MENTIONED_IN_WAS_REPLIED_TO",
+                        textResId = R.string.settings_notifications_post_you_were_mentioned_in_was_replied_to_text,
+                        lightResId = R.drawable.notification_type_post_you_were_mentioned_in_was_replied_to_light,
+                        darkResId = R.drawable.notification_type_post_you_were_mentioned_in_was_replied_to_dark,
+                        group = "A NOTE YOU WERE MENTIONED IN WAS",
+                        value = true
+                    ),
+                    NotificationsSettingsContract.Notification(
+                        id = "POST_YOUR_POST_WAS_MENTIONED_IN_WAS_ZAPPED",
+                        textResId = R.string.settings_notifications_post_your_post_was_mentioned_in_was_zapped_text,
+                        lightResId = R.drawable.notification_type_post_your_post_was_mentioned_in_was_zapped_light,
+                        darkResId = R.drawable.notification_type_post_your_post_was_mentioned_in_was_zapped_dark,
+                        group = "A NOTE YOUR NOTE WAS MENTIONED IN WAS",
+                        value = false
+                    ),
+                    NotificationsSettingsContract.Notification(
+                        id = "POST_YOUR_POST_WAS_MENTIONED_IN_WAS_LIKED",
+                        textResId = R.string.settings_notifications_post_your_post_was_mentioned_in_was_liked_text,
+                        lightResId = R.drawable.notification_type_post_your_post_was_mentioned_in_was_liked_light,
+                        darkResId = R.drawable.notification_type_post_your_post_was_mentioned_in_was_liked_dark,
+                        group = "A NOTE YOUR NOTE WAS MENTIONED IN WAS",
+                        value = false
+                    ),
+                    NotificationsSettingsContract.Notification(
+                        id = "POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPOSTED",
+                        textResId = R.string.settings_notifications_post_your_post_was_mentioned_in_was_reposted_text,
+                        lightResId = R.drawable.notification_type_post_your_post_was_mentioned_in_was_reposted_light,
+                        darkResId = R.drawable.notification_type_post_your_post_was_mentioned_in_was_reposted_dark,
+                        group = "A NOTE YOUR NOTE WAS MENTIONED IN WAS",
+                        value = false
+                    ),
+                    NotificationsSettingsContract.Notification(
+                        id = "POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO",
+                        textResId = R.string.settings_notifications_post_your_post_was_mentioned_in_was_replied_to_text,
+                        lightResId = R.drawable.notification_type_post_your_post_was_mentioned_in_was_replied_to_light,
+                        darkResId = R.drawable.notification_type_post_your_post_was_mentioned_in_was_replied_to_dark,
+                        group = "A NOTE YOUR NOTE WAS MENTIONED IN WAS",
+                        value = false
                     )
                 )
             ),

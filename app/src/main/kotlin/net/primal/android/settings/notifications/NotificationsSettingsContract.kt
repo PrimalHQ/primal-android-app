@@ -4,7 +4,8 @@ import kotlinx.serialization.json.JsonObject
 
 interface NotificationsSettingsContract {
     data class UiState(
-        val notifications: Map<String, List<Notification>>
+        val notifications: List<Notification>,
+        val error: Throwable? = null
     )
 
     sealed class UiEvent {
@@ -13,9 +14,10 @@ interface NotificationsSettingsContract {
 
     data class Notification(
         val id: String,
-        val name: String,
+        val textResId: Int,
         val value: Boolean,
         val lightResId: Int,
-        val darkResId: Int
+        val darkResId: Int,
+        val group: String
     )
 }
