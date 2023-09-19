@@ -16,8 +16,10 @@ data class ContentPrimalNotification(
     @SerialName("satszapped") val satsZapped: Int? = null, //    (:satszapped, Int),
     @SerialName("who_replied_to_it") val whoRepliedToIt: String? = null, //    (:who_replied_to_it, Nostr.PubKeyId),
     val reply: String? = null, //    (:reply, Nostr.EventId),
+    @SerialName("you_were_mentioned_by") val youWereMentionedBy: String? = null,
     @SerialName("you_were_mentioned_in") val youWereMentionedIn: String? = null, //    (:you_were_mentioned_in, Nostr.EventId),
     @SerialName("your_post_were_mentioned_in") val yourPostWereMentionedIn: String? = null, //    (:your_post_were_mentioned_in, Nostr.EventId),
+    @SerialName("your_post_was_mentioned_by") val yourPostWasMentionedBy: String? = null,
     @SerialName("post_you_were_mentioned_in") val postYouWereMentionedIn: String? = null, //    (:post_you_were_mentioned_in, Nostr.EventId),
     @SerialName("post_your_post_was_mentioned_in") val postYourPostWasMentionedIn: String? = null, //    (:post_your_post_was_mentioned_in, Nostr.EventId),
 )

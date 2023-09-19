@@ -30,8 +30,8 @@ private fun ContentPrimalNotification.parseActionUserId(type: NotificationType):
         NotificationType.YOUR_POST_WAS_LIKED -> this.whoLikedIt
         NotificationType.YOUR_POST_WAS_REPOSTED -> this.whoRepostedIt
         NotificationType.YOUR_POST_WAS_REPLIED_TO -> this.whoRepliedToIt
-        NotificationType.YOU_WERE_MENTIONED_IN_POST -> null // TODO Waiting on backend
-        NotificationType.YOUR_POST_WAS_MENTIONED_IN_POST -> null // TODO Waiting on backend
+        NotificationType.YOU_WERE_MENTIONED_IN_POST -> this.youWereMentionedBy
+        NotificationType.YOUR_POST_WAS_MENTIONED_IN_POST -> this.yourPostWasMentionedBy
         NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_ZAPPED -> this.whoZappedIt
         NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_LIKED -> this.whoLikedIt
         NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_REPOSTED -> this.whoRepostedIt
