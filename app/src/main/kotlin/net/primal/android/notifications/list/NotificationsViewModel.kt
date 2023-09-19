@@ -2,6 +2,8 @@ package net.primal.android.notifications.list
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.cachedIn
+import androidx.paging.map
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,7 +35,13 @@ class NotificationsViewModel @Inject constructor(
     private val badgesManager: BadgesManager,
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(UiState())
+    private val _state = MutableStateFlow(
+        UiState(
+            seenNotifications = notificationsRepository.observeSeenNotifications()
+                .map { it.map { notification -> notification.asNotificationUi() } }
+                .cachedIn(viewModelScope)
+        )
+    )
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
 
@@ -43,8 +51,8 @@ class NotificationsViewModel @Inject constructor(
     init {
         subscribeToEvents()
         subscribeToActiveAccount()
-        observeNotifications()
         subscribeToBadgesUpdates()
+        observeUnseenNotifications()
     }
 
     private fun subscribeToEvents() = viewModelScope.launch {
@@ -63,39 +71,39 @@ class NotificationsViewModel @Inject constructor(
         }
     }
 
-    private fun observeNotifications() = viewModelScope.launch {
-        notificationsRepository.observeNotifications()
-            .map { list -> list.map { it.asNotificationUi() } }
-            .collect {
-                setState { copy(notifications = it) }
-            }
-    }
-
     private fun subscribeToBadgesUpdates() = viewModelScope.launch {
         badgesManager.badges.collect {
             setState { copy(badges = it) }
-            if (it.notifications > 0) {
-                fetchNotifications()
-            } else if (notificationsRepository.countNotifications() == 0) {
-                fetchNotifications()
-            }
         }
     }
 
-    private fun fetchNotifications() = viewModelScope.launch {
-        setState { copy(loading = true) }
-        try {
-            val activeUserId = activeAccountStore.activeUserId()
-            notificationsRepository.deleteNotifications(userId = activeUserId)
-            notificationsRepository.fetchNotifications(userId = activeUserId)
-        } finally {
-            setState { copy(loading = false) }
+    private fun observeUnseenNotifications() = viewModelScope.launch {
+        notificationsRepository.observeUnseenNotifications().collect { newUnseenNotifications ->
+            setState {
+                val unseenNotifications = mutableListOf<List<Notification>>()
+                val groups = newUnseenNotifications.groupBy { it.data.type }
+                groups.keys.forEach { notificationType ->
+                    groups[notificationType]?.let { notificationsByType ->
+                        when (notificationType.collapsable) {
+                            true -> unseenNotifications.add(notificationsByType)
+                            false -> notificationsByType.forEach {
+                                unseenNotifications.add(listOf(it))
+                            }
+                        }
+                    }
+                }
+
+                copy(
+                    unseenNotifications = unseenNotifications.map { byType ->
+                        byType.map { it.asNotificationUi() }
+                    }
+                )
+            }
         }
     }
 
     private fun handleNotificationsSeen() = viewModelScope.launch {
-        val activeUserId = activeAccountStore.activeUserId()
-        notificationsRepository.updateLastSeenTimestamp(userId = activeUserId)
+//        notificationsRepository.markAllNotificationsAsSeen()
     }
 
     private fun Notification.asNotificationUi(): NotificationUi {
@@ -119,8 +127,10 @@ class NotificationsViewModel @Inject constructor(
         return FeedPostUi(
             postId = this.actionPost.postId,
             authorId = this.actionPost.authorId,
-            authorName = this.actionByUser?.authorNameUiFriendly() ?: this.actionPost.authorId.asEllipsizedNpub(),
-            authorHandle = this.actionByUser?.userNameUiFriendly() ?: this.actionPost.authorId.asEllipsizedNpub(),
+            authorName = this.actionByUser?.authorNameUiFriendly()
+                ?: this.actionPost.authorId.asEllipsizedNpub(),
+            authorHandle = this.actionByUser?.userNameUiFriendly()
+                ?: this.actionPost.authorId.asEllipsizedNpub(),
             authorInternetIdentifier = this.actionByUser?.internetIdentifier,
             authorLightningAddress = this.actionByUser?.lightningAddress,
             authorAvatarUrl = this.actionByUser?.picture,

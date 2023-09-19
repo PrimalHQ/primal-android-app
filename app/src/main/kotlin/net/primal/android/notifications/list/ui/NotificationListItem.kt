@@ -89,6 +89,7 @@ fun NotificationListItem(
             Column {
                 AvatarThumbnailsRow(
                     avatarUrls = notifications.map { it.actionUserPicture },
+                    authorInternetIdentifiers = notifications.map { null },
                     onClick = {
                         firstNotification.actionUserId?.let(onPostClick)
                     },

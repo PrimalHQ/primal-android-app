@@ -24,6 +24,7 @@ import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
 import net.primal.android.R
 import net.primal.android.core.compose.ListLoading
+import net.primal.android.core.compose.ListLoadingError
 import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.feed.model.FeedPostAction
 import net.primal.android.core.compose.feed.model.FeedPostUi
@@ -96,8 +97,8 @@ fun FeedLazyColumn(
 
         when (pagingItems.loadState.mediator?.prepend) {
             is LoadState.Error -> item(contentType = "Error") {
-                FeedErrorLoading(
-                    text = stringResource(R.string.feed_error_loading_prev_page)
+                ListLoadingError(
+                    text = stringResource(R.string.app_error_loading_prev_page)
                 )
             }
 
@@ -187,8 +188,8 @@ fun FeedLazyColumn(
             }
 
             is LoadState.Error -> item(contentType = "Error") {
-                FeedErrorLoading(
-                    text = stringResource(R.string.feed_error_loading_next_page)
+                ListLoadingError(
+                    text = stringResource(R.string.app_error_loading_next_page)
                 )
             }
 

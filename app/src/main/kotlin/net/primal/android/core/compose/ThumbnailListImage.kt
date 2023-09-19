@@ -1,5 +1,6 @@
 package net.primal.android.core.compose
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -7,10 +8,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
@@ -60,12 +61,12 @@ fun AvatarThumbnailListItemImage(
     )
 }
 
-private fun Modifier.adjustAvatarBackground(
+fun Modifier.adjustAvatarBackground(
     size: Dp = 48.dp,
     hasBorder: Boolean = false,
     borderGradientColors: List<Color>,
-): Modifier = composed {
-    if (hasBorder) {
+): Modifier {
+    return if (hasBorder) {
         this
             .size(size + 2.dp)
             .border(
@@ -74,10 +75,10 @@ private fun Modifier.adjustAvatarBackground(
                 shape = CircleShape
             )
             .shadow(
-                elevation = 8.dp,
+                elevation = 4.dp,
                 shape = CircleShape,
-                ambientColor = AppTheme.colorScheme.primary,
-                spotColor = AppTheme.colorScheme.primary,
+                ambientColor = borderGradientColors.first(),
+                spotColor = borderGradientColors.first(),
             )
             .clip(CircleShape)
     } else {
@@ -91,13 +92,16 @@ private fun Modifier.adjustAvatarBackground(
 @Composable
 fun DefaultAvatarThumbnailPlaceholderListItemImage() {
     Box(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .background(color = AppTheme.extraColorScheme.surfaceVariantAlt)
+            .fillMaxSize(),
         contentAlignment = Alignment.Center,
     ) {
         Icon(
             imageVector = PrimalIcons.AvatarDefault,
             contentDescription = null,
             modifier = Modifier.fillMaxSize(),
+            tint = LocalContentColor.current,
         )
     }
 }

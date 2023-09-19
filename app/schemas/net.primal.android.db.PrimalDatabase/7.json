@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 7,
-    "identityHash": "fd618d915f0a2515df6b523ae057debd",
+    "identityHash": "201f7578e34493bee737f06f3c9061db",
     "entities": [
       {
         "tableName": "PostData",
@@ -774,7 +774,7 @@
       },
       {
         "tableName": "NotificationData",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ownerId` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `type` TEXT NOT NULL, `actionUserId` TEXT, `actionPostId` TEXT, `satsZapped` INTEGER, PRIMARY KEY(`ownerId`, `createdAt`, `type`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ownerId` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `type` TEXT NOT NULL, `seenLocallyAt` INTEGER, `actionUserId` TEXT, `actionPostId` TEXT, `satsZapped` INTEGER, PRIMARY KEY(`ownerId`, `createdAt`, `type`))",
         "fields": [
           {
             "fieldPath": "ownerId",
@@ -793,6 +793,12 @@
             "columnName": "type",
             "affinity": "TEXT",
             "notNull": true
+          },
+          {
+            "fieldPath": "seenLocallyAt",
+            "columnName": "seenLocallyAt",
+            "affinity": "INTEGER",
+            "notNull": false
           },
           {
             "fieldPath": "actionUserId",
@@ -828,7 +834,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'fd618d915f0a2515df6b523ae057debd')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '201f7578e34493bee737f06f3c9061db')"
     ]
   }
 }
