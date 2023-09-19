@@ -105,11 +105,12 @@ fun NotificationsScreen(
             }
 
             LazyColumn(
-                contentPadding = paddingValues
+                contentPadding = paddingValues,
+                state = listState,
             ) {
                 items(
                     items = state.unseenNotifications,
-                    key = { it.map { notificationUi ->  notificationUi.uniqueKey }.toString() },
+                    key = { it.map { notificationUi -> notificationUi.uniqueKey }.toString() },
                     contentType = { it.first().notificationType },
                 ) {
                     NotificationListItem(
