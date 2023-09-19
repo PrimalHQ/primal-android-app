@@ -1,22 +1,39 @@
 package net.primal.android.notifications.db
 
+import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Query
+import androidx.room.Transaction
 import androidx.room.Upsert
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface NotificationDao {
 
+    @Query("SELECT COUNT(*) FROM NotificationData")
+    fun allCount(): Int
+
+    @Query("SELECT COUNT(*) FROM NotificationData WHERE seenLocallyAt IS NULL")
+    fun unseenCount(): Int
+
+    @Query("SELECT * FROM NotificationData ORDER BY createdAt DESC LIMIT 1")
+    fun first(): NotificationData?
+
+    @Query("SELECT * FROM NotificationData ORDER BY createdAt ASC LIMIT 1")
+    fun last(): NotificationData?
+
+    @Transaction
+    @Query("SELECT * FROM NotificationData WHERE seenLocallyAt IS NULL ORDER BY createdAt DESC")
+    fun allUnseenNotifications(): Flow<List<Notification>>
+
+    @Transaction
+    @Query("SELECT * FROM NotificationData WHERE seenLocallyAt IS NOT NULL ORDER BY createdAt DESC")
+    fun allSeenNotificationsPaged(): PagingSource<Int, Notification>
+
+    @Query("UPDATE NotificationData SET seenLocallyAt = :seenAt WHERE seenLocallyAt IS NULL")
+    fun markAllUnseenNotificationsAsSeen(seenAt: Long)
+
     @Upsert
     fun upsertAll(data: List<NotificationData>)
 
-    @Query("DELETE FROM NotificationData WHERE ownerId = :userId")
-    fun deleteAlL(userId: String)
-
-    @Query("SELECT COUNT(*) FROM NotificationData")
-    fun count(): Int
-
-    @Query("SELECT * FROM NotificationData ORDER BY createdAt DESC")
-    fun allSortedByCreatedAtDesc(): Flow<List<Notification>>
 }

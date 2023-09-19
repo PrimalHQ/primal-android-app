@@ -6,6 +6,8 @@
 
     <string name="app_generic_error">Something went wrong. Please try again.</string>
     <string name="app_missing_relays_config">No relays found. Please configure your Network.</string>
+    <string name="app_error_loading_prev_page">Unable to load newer content. Please try again.</string>
+    <string name="app_error_loading_next_page">Unable to load older content. Please try again.</string>
 
     <string name="welcome_sign_in_button_title">Sign in</string>
     <string name="welcome_sign_in_button_subtitle">Already have a Nostr account? Sign with your Nostr key.</string>
@@ -48,8 +50,6 @@
     <string name="timestamp_since_years">%1$s y. ago</string>
 
     <string name="feed_list_title">My Nostr Feeds</string>
-    <string name="feed_error_loading_prev_page">Unable to load newer content. Please try again.</string>
-    <string name="feed_error_loading_next_page">Unable to load older content. Please try again.</string>
     <string name="feed_no_content">Unable to load content for this feed. Please try again.</string>
     <string name="feed_refresh_button">Refresh</string>
 
@@ -88,6 +88,8 @@
     <string name="explore_feed_removed_from_user_feeds">Removed from your home feeds</string>
 
     <string name="notifications_title">Notifications</string>
+    <string name="notifications_no_content">No notifications.</string>
+    <string name="notifications_initial_loading_error">Unable to load notifications. Please try again.</string>
     <plurals name="notification_list_item_and_others">
         <item quantity="one">and %1$s other</item>
         <item quantity="other">and %1$s others</item>

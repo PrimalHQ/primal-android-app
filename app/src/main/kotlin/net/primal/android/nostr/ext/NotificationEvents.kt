@@ -26,7 +26,6 @@ fun PrimalEvent.asNotificationSummary(): NotificationsSummary {
 private fun ContentPrimalNotification.parseActionUserId(type: NotificationType): String? {
     return when (type) {
         NotificationType.NEW_USER_FOLLOWED_YOU -> this.follower
-        NotificationType.USER_UNFOLLOWED_YOU -> this.follower
         NotificationType.YOUR_POST_WAS_ZAPPED -> this.whoZappedIt
         NotificationType.YOUR_POST_WAS_LIKED -> this.whoLikedIt
         NotificationType.YOUR_POST_WAS_REPOSTED -> this.whoRepostedIt

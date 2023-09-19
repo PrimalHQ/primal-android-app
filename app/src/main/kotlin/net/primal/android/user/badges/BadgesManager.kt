@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.transform
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
@@ -64,6 +65,7 @@ class BadgesManager @Inject constructor(
                 }
 
                 ActiveUserAccountState.NoUserAccount -> {
+                    mutableBadges.update { Badges() }
                     unsubscribeAll()
                     withContext(Dispatchers.Main) {
                         ProcessLifecycleOwner.get().lifecycle.removeObserver(this@BadgesManager)

@@ -1,67 +1,64 @@
 package net.primal.android.notifications.repository
 
-import androidx.room.withTransaction
+import androidx.paging.ExperimentalPagingApi
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import androidx.paging.PagingSource
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 import net.primal.android.db.PrimalDatabase
-import net.primal.android.feed.api.model.FeedResponse
-import net.primal.android.feed.repository.persistToDatabaseAsTransaction
-import net.primal.android.nostr.ext.mapNotNullAsNotificationPO
-import net.primal.android.nostr.ext.mapNotNullAsProfileStatsPO
 import net.primal.android.notifications.api.NotificationsApi
+import net.primal.android.notifications.api.mediator.NotificationsRemoteMediator
+import net.primal.android.notifications.db.Notification
+import net.primal.android.user.accounts.active.ActiveAccountStore
 import java.time.Instant
 import javax.inject.Inject
 
+@OptIn(ExperimentalPagingApi::class)
 class NotificationRepository @Inject constructor(
     private val database: PrimalDatabase,
     private val notificationsApi: NotificationsApi,
+    private val activeAccountStore: ActiveAccountStore,
 ) {
 
-    fun observeNotifications() = database.notifications().allSortedByCreatedAtDesc()
+    fun observeUnseenNotifications() = database.notifications().allUnseenNotifications()
 
-    suspend fun countNotifications(): Int {
-        return withContext(Dispatchers.IO) {
-            database.notifications().count()
+    suspend fun updateLastSeenTimestamp() {
+        notificationsApi.getLastSeenTimestamp(userId = activeAccountStore.activeUserId())?.let {
+            remoteMediator.updateLastSeenTimestamp(lastSeen = it)
         }
     }
 
-    suspend fun deleteNotifications(userId: String) {
+    suspend fun markAllNotificationsAsSeen() {
         withContext(Dispatchers.IO) {
-            database.notifications().deleteAlL(userId = userId)
+            val seenAt = Instant.now()
+            val userId = activeAccountStore.activeUserId()
+            notificationsApi.updateLastSeenTimestamp(userId = userId)
+            remoteMediator.updateLastSeenTimestamp(lastSeen = seenAt)
+            database.notifications().markAllUnseenNotificationsAsSeen(seenAt = seenAt.epochSecond)
         }
     }
 
-    suspend fun fetchNotifications(userId: String) = withContext(Dispatchers.IO) {
-        val response = notificationsApi.getNotifications(userId = userId)
-        FeedResponse(
-            paging = null,
-            metadata = response.metadata,
-            posts = response.notes,
-            reposts = emptyList(),
-            referencedPosts = response.primalReferencedNotes,
-            primalEventStats = response.primalNoteStats,
-            primalEventUserStats = emptyList(),
-            primalEventResources = response.primalMediaResources,
-        ).persistToDatabaseAsTransaction(
-            userId = userId,
-            database = database
-        )
-
-        val userProfileStats = response.primalUserProfileStats.mapNotNullAsProfileStatsPO()
-        val notifications = response.primalNotifications.mapNotNullAsNotificationPO()
-
-        database.withTransaction {
-            database.profileStats().upsertAll(data = userProfileStats)
-            database.notifications().upsertAll(data = notifications)
-        }
+    fun observeSeenNotifications(): Flow<PagingData<Notification>> {
+        return createPager {
+            database.notifications().allSeenNotificationsPaged()
+        }.flow
     }
 
-    suspend fun fetchLastSeenTimestamp(userId: String): Instant? {
-        return notificationsApi.getLastSeenTimestamp(userId = userId)
-    }
+    private val remoteMediator = NotificationsRemoteMediator(
+        userId = activeAccountStore.activeUserId(),
+        notificationsApi = notificationsApi,
+        database = database,
+    )
 
-    suspend fun updateLastSeenTimestamp(userId: String) {
-        notificationsApi.updateLastSeenTimestamp(userId = userId)
-    }
+    private fun createPager(
+        pagingSourceFactory: () -> PagingSource<Int, Notification>,
+    ) = Pager(
+        config = PagingConfig(pageSize = 25, enablePlaceholders = false),
+        remoteMediator = remoteMediator,
+        pagingSourceFactory = pagingSourceFactory,
+    )
 
 }

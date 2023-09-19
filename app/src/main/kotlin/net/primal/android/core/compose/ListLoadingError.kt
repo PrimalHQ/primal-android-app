@@ -1,4 +1,4 @@
-package net.primal.android.core.compose.feed
+package net.primal.android.core.compose
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,7 +15,7 @@ import net.primal.android.theme.AppTheme
 
 
 @Composable
-fun FeedErrorLoading(
+fun ListLoadingError(
     text: String
 ) {
     Box(

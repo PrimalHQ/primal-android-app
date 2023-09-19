@@ -1,5 +1,7 @@
 package net.primal.android.notifications.list
 
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -16,14 +18,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.paging.LoadState
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemContentType
+import androidx.paging.compose.itemKey
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.ListLoading
+import net.primal.android.core.compose.ListLoadingError
 import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
+import net.primal.android.core.compose.isEmpty
+import net.primal.android.core.compose.isNotEmpty
 import net.primal.android.core.compose.res.painterResource
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.PrimalDrawerScaffold
@@ -87,22 +96,30 @@ fun NotificationsScreen(
             )
         },
         content = { paddingValues ->
+            val seenPagingItems = state.seenNotifications.collectAsLazyPagingItems()
+
+            LaunchedEffect(state.badges) {
+                if (state.badges.notifications > 0) {
+                    seenPagingItems.refresh()
+                }
+            }
+
             LazyColumn(
                 contentPadding = paddingValues
             ) {
                 items(
-                    items = state.notifications,
-                    key = { "${it.notificationType};${it.createdAt};${it.ownerId}" },
-                    contentType = { it.notificationType },
+                    items = state.unseenNotifications,
+                    key = { it.map { notificationUi ->  notificationUi.uniqueKey }.toString() },
+                    contentType = { it.first().notificationType },
                 ) {
                     NotificationListItem(
-                        notifications = listOf(it),
-                        type = it.notificationType,
+                        notifications = it,
+                        type = it.first().notificationType,
                         onProfileClick = onProfileClick,
                         onPostClick = onNoteClick,
                     )
 
-                    if (state.notifications.lastOrNull() != it) {
+                    if (state.unseenNotifications.last() != it || seenPagingItems.isNotEmpty()) {
                         Divider(
                             color = AppTheme.colorScheme.outline,
                             thickness = 1.dp,
@@ -110,29 +127,87 @@ fun NotificationsScreen(
                     }
                 }
 
-                if (state.notifications.isEmpty()) {
-                    item {
-                        if (state.loading) {
-                            ListLoading(
-                                modifier = Modifier.fillParentMaxSize(),
+                items(
+                    count = seenPagingItems.itemCount,
+                    key = seenPagingItems.itemKey(key = { it.uniqueKey }),
+                    contentType = seenPagingItems.itemContentType { it.notificationType },
+                ) {
+                    val item = seenPagingItems[it]
+
+                    when {
+                        item != null -> {
+                            NotificationListItem(
+                                notifications = listOf(item),
+                                type = item.notificationType,
+                                onProfileClick = onProfileClick,
+                                onPostClick = onNoteClick,
                             )
-                        } else {
-                            ListNoContent(
-                                modifier = Modifier.fillParentMaxSize(),
-                                refreshButtonVisible = false,
-                                noContentText = "No notifications."
-                            )
+
+                            if (it < seenPagingItems.itemCount - 1) {
+                                Divider(
+                                    color = AppTheme.colorScheme.outline,
+                                    thickness = 1.dp,
+                                )
+                            }
+                        }
+
+                        else -> {}
+                    }
+                }
+
+                if (seenPagingItems.isEmpty() && state.unseenNotifications.isEmpty()) {
+                    when (seenPagingItems.loadState.refresh) {
+                        LoadState.Loading -> {
+                            item(contentType = "LoadingRefresh") {
+                                ListLoading(
+                                    modifier = Modifier.fillParentMaxSize(),
+                                )
+                            }
+                        }
+
+                        is LoadState.NotLoading -> {
+                            item(contentType = "NoContent") {
+                                ListNoContent(
+                                    modifier = Modifier.fillParentMaxSize(),
+                                    noContentText = stringResource(id = R.string.notifications_no_content),
+                                    refreshButtonVisible = false,
+                                )
+                            }
+                        }
+
+                        is LoadState.Error -> {
+                            item(contentType = "RefreshError") {
+                                ListNoContent(
+                                    modifier = Modifier.fillParentMaxSize(),
+                                    noContentText = stringResource(id = R.string.notifications_initial_loading_error),
+                                    onRefresh = { seenPagingItems.refresh() }
+                                )
+                            }
                         }
                     }
+                }
+
+                when (seenPagingItems.loadState.mediator?.append) {
+                    LoadState.Loading -> item(contentType = "LoadingAppend") {
+                        ListLoading(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(64.dp)
+                        )
+                    }
+
+                    is LoadState.Error -> item(contentType = "AppendError") {
+                        ListLoadingError(
+                            text = stringResource(R.string.app_error_loading_next_page)
+                        )
+                    }
+
+                    else -> Unit
                 }
             }
         },
     )
 }
-
-//// Skip grouping //NotificationType.YOUR_POST_WAS_REPLIED_TO ->
-//// Skip grouping //NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_REPLIED_TO ->
-//// Skip grouping //NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO ->
 
 @Composable
 private fun NotificationListItem(
@@ -155,11 +230,6 @@ private fun NotificationType.toImagePainter(): Painter = when (this) {
     NotificationType.NEW_USER_FOLLOWED_YOU -> painterResource(
         darkResId = R.drawable.notification_type_new_user_followed_you_dark,
         lightResId = R.drawable.notification_type_new_user_followed_you_light,
-    )
-
-    NotificationType.USER_UNFOLLOWED_YOU -> painterResource(
-        darkResId = R.drawable.notification_type_user_unfollowed_you_dark,
-        lightResId = R.drawable.notification_type_user_unfollowed_you_light,
     )
 
     NotificationType.YOUR_POST_WAS_ZAPPED -> painterResource(
@@ -236,7 +306,6 @@ private fun NotificationType.toImagePainter(): Painter = when (this) {
 @Composable
 private fun NotificationType.toSuffixText(): String = when (this) {
     NotificationType.NEW_USER_FOLLOWED_YOU -> stringResource(id = R.string.notification_list_item_followed_you)
-    NotificationType.USER_UNFOLLOWED_YOU -> stringResource(id = R.string.notification_list_item_unfollowed_you)
     NotificationType.YOUR_POST_WAS_ZAPPED -> stringResource(id = R.string.notification_list_item_zapped_your_post)
     NotificationType.YOUR_POST_WAS_LIKED -> stringResource(id = R.string.notification_list_item_liked_your_post)
     NotificationType.YOUR_POST_WAS_REPOSTED -> stringResource(id = R.string.notification_list_item_reposted_your_post)
