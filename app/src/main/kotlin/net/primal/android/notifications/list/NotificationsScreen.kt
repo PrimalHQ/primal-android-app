@@ -272,13 +272,13 @@ private fun NotificationType.toImagePainter(): Painter = when (this) {
     )
 
     NotificationType.YOU_WERE_MENTIONED_IN_POST -> painterResource(
-        darkResId = R.drawable.ic_launcher_foreground,
-        lightResId = R.drawable.ic_launcher_foreground,
+        darkResId = R.drawable.notification_type_you_were_mentioned_in_a_post_dark,
+        lightResId = R.drawable.notification_type_you_were_mentioned_in_a_post_light,
     )
 
     NotificationType.YOUR_POST_WAS_MENTIONED_IN_POST -> painterResource(
-        darkResId = R.drawable.ic_launcher_foreground,
-        lightResId = R.drawable.ic_launcher_foreground,
+        darkResId = R.drawable.notification_type_your_post_was_mentioned_in_a_post_dark,
+        lightResId = R.drawable.notification_type_your_post_was_mentioned_in_a_post_light,
     )
 
     NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_ZAPPED -> painterResource(
