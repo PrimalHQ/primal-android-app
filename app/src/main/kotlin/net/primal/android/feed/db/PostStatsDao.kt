@@ -13,6 +13,6 @@ interface PostStatsDao {
     fun upsertAll(data: List<PostStats>)
 
     @Query("SELECT * FROM PostStats WHERE postId = :postId")
-    fun find(postId: String): PostStats
+    fun find(postId: String): PostStats?
 
 }
