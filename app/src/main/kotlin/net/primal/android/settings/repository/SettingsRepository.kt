@@ -3,6 +3,7 @@ package net.primal.android.settings.repository
 import androidx.room.withTransaction
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.JsonObject
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.feed.db.Feed
 import net.primal.android.nostr.model.primal.content.ContentAppSettings
@@ -36,6 +37,12 @@ class SettingsRepository @Inject constructor(
     suspend fun updateAndPersistZapOptions(userId: String, zapOptions: List<ULong>) {
         updateAndPersistAppSettings(userId = userId) {
             copy(zapOptions = zapOptions)
+        }
+    }
+
+    suspend fun updateAndPersistNotifications(userId: String, notifications: JsonObject) {
+        updateAndPersistAppSettings(userId = userId) {
+            copy(notifications = notifications)
         }
     }
 
