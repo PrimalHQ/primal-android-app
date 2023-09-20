@@ -44,10 +44,10 @@ class NotificationsSettingsViewModel @Inject constructor(
         viewModelScope.launch { _event.emit(event) }
 
     init {
+        fetchLatestAppSettings()
         observeEvents()
         observeActiveAccount()
         observeDebouncedNotificationSettingsChanges()
-        fetchLatestAppSettings()
     }
 
     private fun observeEvents() = viewModelScope.launch {
