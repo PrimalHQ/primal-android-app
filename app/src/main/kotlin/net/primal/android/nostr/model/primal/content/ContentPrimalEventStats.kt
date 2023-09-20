@@ -6,12 +6,12 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class ContentPrimalEventStats(
     @SerialName("event_id") val eventId: String,
-    val likes: Int,
-    val replies: Int,
-    val mentions: Int,
-    val reposts: Int,
-    val zaps: Int,
-    @SerialName("satszapped") val satsZapped: Int,
-    val score: Int,
-    val score24h: Int,
+    val likes: Long,
+    val replies: Long,
+    val mentions: Long,
+    val reposts: Long,
+    val zaps: Long,
+    @SerialName("satszapped") val satsZapped: Long,
+    val score: Long,
+    val score24h: Long,
 )

@@ -13,7 +13,7 @@ data class NotificationUi(
     val actionUserInternetIdentifier: String? = null,
     val actionUserPicture: String? = null,
     val actionPost: FeedPostUi? = null,
-    val actionUserSatsZapped: Int? = null,
+    val actionUserSatsZapped: Long? = null,
 ) {
     val uniqueKey = "$notificationType;${createdAt};${actionUserId}"
 }

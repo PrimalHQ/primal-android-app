@@ -147,5 +147,5 @@ private fun SinglePostStat(
     )
 }
 
-private fun Int.toPostStatString(): String = if (this > 0) toString() else ""
+private fun Long.toPostStatString(): String = if (this > 0) toString() else ""
 
