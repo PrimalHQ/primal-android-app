@@ -15,7 +15,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
@@ -33,7 +32,7 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 import net.primal.android.core.compose.isEmpty
 import net.primal.android.core.compose.isNotEmpty
-import net.primal.android.core.compose.res.painterResource
+import net.primal.android.core.compose.notifications.toImagePainter
 import net.primal.android.core.utils.shortened
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.PrimalDrawerScaffold
@@ -241,84 +240,6 @@ private fun NotificationListItem(
         onProfileClick = onProfileClick,
         onPostClick = onPostClick,
         onHashtagClick = onHashtagClick,
-    )
-}
-
-@Composable
-private fun NotificationType.toImagePainter(): Painter = when (this) {
-    NotificationType.NEW_USER_FOLLOWED_YOU -> painterResource(
-        darkResId = R.drawable.notification_type_new_user_followed_you_dark,
-        lightResId = R.drawable.notification_type_new_user_followed_you_light,
-    )
-
-    NotificationType.YOUR_POST_WAS_ZAPPED -> painterResource(
-        darkResId = R.drawable.notification_type_your_post_was_zapped_dark,
-        lightResId = R.drawable.notification_type_your_post_was_zapped_light,
-    )
-
-    NotificationType.YOUR_POST_WAS_LIKED -> painterResource(
-        darkResId = R.drawable.notification_type_your_post_was_liked_dark,
-        lightResId = R.drawable.notification_type_your_post_was_liked_light,
-    )
-
-    NotificationType.YOUR_POST_WAS_REPOSTED -> painterResource(
-        darkResId = R.drawable.notification_type_your_post_was_reposted_dark,
-        lightResId = R.drawable.notification_type_your_post_was_reposted_light,
-    )
-
-    NotificationType.YOUR_POST_WAS_REPLIED_TO -> painterResource(
-        darkResId = R.drawable.notification_type_your_post_was_replied_to_dark,
-        lightResId = R.drawable.notification_type_your_post_was_replied_to_light,
-    )
-
-    NotificationType.YOU_WERE_MENTIONED_IN_POST -> painterResource(
-        darkResId = R.drawable.notification_type_you_were_mentioned_in_a_post_dark,
-        lightResId = R.drawable.notification_type_you_were_mentioned_in_a_post_light,
-    )
-
-    NotificationType.YOUR_POST_WAS_MENTIONED_IN_POST -> painterResource(
-        darkResId = R.drawable.notification_type_your_post_was_mentioned_in_a_post_dark,
-        lightResId = R.drawable.notification_type_your_post_was_mentioned_in_a_post_light,
-    )
-
-    NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_ZAPPED -> painterResource(
-        darkResId = R.drawable.notification_type_post_you_were_mentioned_in_was_zapped_dark,
-        lightResId = R.drawable.notification_type_post_you_were_mentioned_in_was_zapped_light,
-    )
-
-    NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_LIKED -> painterResource(
-        darkResId = R.drawable.notification_type_post_you_were_mentioned_in_was_liked_dark,
-        lightResId = R.drawable.notification_type_post_you_were_mentioned_in_was_liked_light,
-    )
-
-    NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_REPOSTED -> painterResource(
-        darkResId = R.drawable.notification_type_post_you_were_mentioned_in_was_reposted_dark,
-        lightResId = R.drawable.notification_type_post_you_were_mentioned_in_was_reposted_light,
-    )
-
-    NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_REPLIED_TO -> painterResource(
-        darkResId = R.drawable.notification_type_post_you_were_mentioned_in_was_replied_to_dark,
-        lightResId = R.drawable.notification_type_post_you_were_mentioned_in_was_replied_to_light,
-    )
-
-    NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_ZAPPED -> painterResource(
-        darkResId = R.drawable.notification_type_post_your_post_was_mentioned_in_was_zapped_dark,
-        lightResId = R.drawable.notification_type_post_your_post_was_mentioned_in_was_zapped_light,
-    )
-
-    NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_LIKED -> painterResource(
-        darkResId = R.drawable.notification_type_post_your_post_was_mentioned_in_was_liked_dark,
-        lightResId = R.drawable.notification_type_post_your_post_was_mentioned_in_was_liked_light,
-    )
-
-    NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPOSTED -> painterResource(
-        darkResId = R.drawable.notification_type_post_your_post_was_mentioned_in_was_reposted_dark,
-        lightResId = R.drawable.notification_type_post_your_post_was_mentioned_in_was_reposted_light,
-    )
-
-    NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO -> painterResource(
-        darkResId = R.drawable.notification_type_post_your_post_was_mentioned_in_was_replied_to_dark,
-        lightResId = R.drawable.notification_type_post_your_post_was_mentioned_in_was_replied_to_light,
     )
 }
 

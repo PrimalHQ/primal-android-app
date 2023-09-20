@@ -140,6 +140,12 @@
     <string name="settings_wallet_connect_alby_wallet">Connect Alby Wallet</string>
     <string name="settings_wallet_connect_mutiny_wallet">Connect Mutiny Wallet</string>
 
+    <string name="settings_notifications_title">Notifications</string>
+    <string name="settings_notifications_error_update_settings">Unable to update notification settings.</string>
+    <string name="settings_notifications_error_fetch_settings">Unable to retrieve latest notification settings.</string>
+    <string name="settings_notifications_section_core">Core notifications</string>
+    <string name="settings_notifications_section_note_you_were_mentioned_in">A note you were mentioned in was</string>
+    <string name="settings_notifications_section_note_your_note_was_mentioned_in">A note your note was mentioned in was</string>
     <string name="settings_notifications_new_user_followed_you_text">new user followed you</string>
     <string name="settings_notifications_your_post_was_zapped_text">your post was zapped</string>
     <string name="settings_notifications_your_post_was_liked_text">your post was liked</string>
@@ -157,7 +163,6 @@
     <string name="settings_notifications_post_your_post_was_mentioned_in_was_replied_to_text">replied to</string>
 
     <string name="settings_appearance_title">Appearance</string>
-    <string name="settings_notifications_title">Notifications</string>
     <string name="settings_network_title">Network</string>
     <string name="settings_feeds_title">Feeds</string>
 
