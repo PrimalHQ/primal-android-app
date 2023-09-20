@@ -23,6 +23,7 @@ import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
 import kotlinx.coroutines.launch
 import net.primal.android.R
+import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.ListLoading
 import net.primal.android.core.compose.ListLoadingError
 import net.primal.android.core.compose.ListNoContent
@@ -30,6 +31,7 @@ import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
+import net.primal.android.core.compose.icons.primaliconpack.Settings
 import net.primal.android.core.compose.isEmpty
 import net.primal.android.core.compose.isNotEmpty
 import net.primal.android.core.compose.notifications.toImagePainter
@@ -47,6 +49,7 @@ fun NotificationsScreen(
     onProfileClick: (String) -> Unit,
     onNoteClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
+    onNotificationSettings: () -> Unit,
     onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
 ) {
@@ -61,6 +64,7 @@ fun NotificationsScreen(
         onProfileClick = onProfileClick,
         onNoteClick = onNoteClick,
         onHashtagClick = onHashtagClick,
+        onNotificationSettings = onNotificationSettings,
         onPrimaryDestinationChanged = onTopLevelDestinationChanged,
         onDrawerDestinationClick = onDrawerScreenClick,
     )
@@ -73,6 +77,7 @@ fun NotificationsScreen(
     onProfileClick: (String) -> Unit,
     onNoteClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
+    onNotificationSettings: () -> Unit,
     onPrimaryDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
 ) {
@@ -96,6 +101,12 @@ fun NotificationsScreen(
                     uiScope.launch { drawerState.open() }
                 },
                 scrollBehavior = it,
+                actions = {
+                    AppBarIcon(
+                        icon = PrimalIcons.Settings,
+                        onClick = onNotificationSettings,
+                    )
+                }
             )
         },
         content = { paddingValues ->
