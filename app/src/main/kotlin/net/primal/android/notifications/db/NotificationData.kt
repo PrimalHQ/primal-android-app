@@ -13,5 +13,5 @@ data class NotificationData(
     val seenLocallyAt: Long? = null,
     val actionUserId: String? = null,
     val actionPostId: String? = null,
-    val satsZapped: Int? = null,
+    val satsZapped: Long? = null,
 )

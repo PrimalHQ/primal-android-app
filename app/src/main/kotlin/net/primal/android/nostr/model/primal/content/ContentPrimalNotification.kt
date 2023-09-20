@@ -13,7 +13,7 @@ data class ContentPrimalNotification(
     @SerialName("who_liked_it") val whoLikedIt: String? = null, //    (:who_liked_it, Nostr.PubKeyId),
     @SerialName("who_reposted_it") val whoRepostedIt: String? = null, //    (:who_reposted_it, Nostr.PubKeyId),
     @SerialName("who_zapped_it") val whoZappedIt: String? = null, //    (:who_zapped_it, Nostr.PubKeyId),
-    @SerialName("satszapped") val satsZapped: Int? = null, //    (:satszapped, Int),
+    @SerialName("satszapped") val satsZapped: Long? = null, //    (:satszapped, Int),
     @SerialName("who_replied_to_it") val whoRepliedToIt: String? = null, //    (:who_replied_to_it, Nostr.PubKeyId),
     val reply: String? = null, //    (:reply, Nostr.EventId),
     @SerialName("you_were_mentioned_by") val youWereMentionedBy: String? = null,
