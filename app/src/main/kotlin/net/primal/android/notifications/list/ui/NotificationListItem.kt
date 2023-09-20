@@ -24,6 +24,7 @@ import net.primal.android.core.compose.AvatarThumbnailsRow
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.feed.FeedPostContent
 import net.primal.android.core.compose.feed.FeedPostStatsRow
+import net.primal.android.core.compose.feed.model.FeedPostAction
 import net.primal.android.core.ext.openUriSafely
 import net.primal.android.core.utils.shortened
 import net.primal.android.notifications.domain.NotificationType
@@ -42,6 +43,8 @@ fun NotificationListItem(
     onProfileClick: (String) -> Unit,
     onPostClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
+    onPostAction: (FeedPostAction) -> Unit,
+    onPostLongPressAction: (FeedPostAction) -> Unit,
 ) {
     val firstNotification = notifications.first()
 
@@ -159,12 +162,8 @@ fun NotificationListItem(
                             .padding(vertical = 16.dp)
                             .padding(end = 16.dp),
                         postStats = actionPost.stats,
-                        onPostAction = {
-                            // TODO onPostAction,
-                        },
-                        onPostLongPressAction = {
-                            // TODO onPostLongClickAction,
-                        },
+                        onPostAction = onPostAction,
+                        onPostLongPressAction = onPostLongPressAction,
                     )
                 } else {
                     Spacer(modifier = Modifier.height(8.dp))

@@ -450,7 +450,9 @@ private fun NavGraphBuilder.notifications(
         onProfileClick = { navController.navigateToProfile(profileId = it) },
         onNoteClick = { navController.navigateToThread(postId = it) },
         onHashtagClick = { navController.navigateToExploreFeed(query = it) },
+        onPostQuoteClick = { preFillContent -> navController.navigateToNewPost(preFillContent) },
         onNotificationSettings = { navController.navigateToNotificationsSettings() },
+        onWalletUnavailable = { navController.navigateToWallet() },
         onTopLevelDestinationChanged = onTopLevelDestinationChanged,
         onDrawerScreenClick = onDrawerScreenClick,
     )
