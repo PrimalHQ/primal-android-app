@@ -17,6 +17,8 @@ import net.primal.android.settings.home.SettingsHomeScreen
 import net.primal.android.settings.home.SettingsHomeViewModel
 import net.primal.android.settings.keys.KeysScreen
 import net.primal.android.settings.keys.KeysViewModel
+import net.primal.android.settings.notifications.NotificationsSettingsScreen
+import net.primal.android.settings.notifications.NotificationsSettingsViewModel
 import net.primal.android.settings.wallet.WalletScreen
 import net.primal.android.settings.wallet.WalletViewModel
 import net.primal.android.settings.zaps.ZapSettingsScreen
@@ -118,6 +120,20 @@ private fun NavGraphBuilder.wallet(
     )
 }
 
+private fun NavGraphBuilder.notifications(
+    route: String,
+    navController: NavController
+) = composable(
+    route = route
+) {navBackEntry ->
+    val viewModel = hiltViewModel<NotificationsSettingsViewModel>(navBackEntry)
+    LockToOrientationPortrait()
+    NotificationsSettingsScreen(
+        viewModel = viewModel,
+        onClose = { navController.navigateUp() }
+    )
+}
+
 private fun NavGraphBuilder.appearance(route: String, navController: NavController) = composable(
     route = route,
 ) {
@@ -125,17 +141,6 @@ private fun NavGraphBuilder.appearance(route: String, navController: NavControll
     DemoSecondaryScreen(
         title = stringResource(id = R.string.settings_appearance_title),
         description = "Appearance settings will appear here. Stay tuned.",
-        onClose = { navController.navigateUp() },
-    )
-}
-
-private fun NavGraphBuilder.notifications(route: String, navController: NavController) = composable(
-    route = route,
-) {
-    LockToOrientationPortrait()
-    DemoSecondaryScreen(
-        title = stringResource(id = R.string.settings_notifications_title),
-        description = "Notifications settings will appear here. Stay tuned.",
         onClose = { navController.navigateUp() },
     )
 }

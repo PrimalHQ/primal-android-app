@@ -140,6 +140,22 @@
     <string name="settings_wallet_connect_alby_wallet">Connect Alby Wallet</string>
     <string name="settings_wallet_connect_mutiny_wallet">Connect Mutiny Wallet</string>
 
+    <string name="settings_notifications_new_user_followed_you_text">new user followed you</string>
+    <string name="settings_notifications_your_post_was_zapped_text">your post was zapped</string>
+    <string name="settings_notifications_your_post_was_liked_text">your post was liked</string>
+    <string name="settings_notifications_your_post_was_reposted_text">your post was reposted</string>
+    <string name="settings_notifications_your_post_was_replied_to_text">your post was replied to</string>
+    <string name="settings_notifications_you_were_mentioned_text">you were mentioned</string>
+    <string name="settings_notifications_your_post_was_mentioned_text">your post was mentioned</string>
+    <string name="settings_notifications_post_you_were_mentioned_in_was_zapped_text">zapped</string>
+    <string name="settings_notifications_post_you_were_mentioned_in_was_liked_text">liked</string>
+    <string name="settings_notifications_post_you_were_mentioned_in_was_reposted_text">reposted</string>
+    <string name="settings_notifications_post_you_were_mentioned_in_was_replied_to_text">replied to</string>
+    <string name="settings_notifications_post_your_post_was_mentioned_in_was_zapped_text">zapped</string>
+    <string name="settings_notifications_post_your_post_was_mentioned_in_was_liked_text">liked</string>
+    <string name="settings_notifications_post_your_post_was_mentioned_in_was_reposted_text">reposted</string>
+    <string name="settings_notifications_post_your_post_was_mentioned_in_was_replied_to_text">replied to</string>
+
     <string name="settings_appearance_title">Appearance</string>
     <string name="settings_notifications_title">Notifications</string>
     <string name="settings_network_title">Network</string>
