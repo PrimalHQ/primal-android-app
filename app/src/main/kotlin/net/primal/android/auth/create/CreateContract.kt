@@ -1,7 +1,6 @@
 package net.primal.android.auth.create
 
 import android.net.Uri
-import net.primal.android.auth.create.api.model.CreateNostrProfileMetadata
 import net.primal.android.crypto.CryptoUtils
 import net.primal.android.nostr.model.content.ContentMetadata
 
@@ -69,14 +68,13 @@ data class RecommendedFollow(val pubkey: String, val isCurrentUserFollowing: Boo
 fun CreateContract.UiState.toCreateNostrProfileMetadata(
     resolvedAvatarUrl: String?,
     resolvedBannerUrl: String?
-): CreateNostrProfileMetadata = CreateNostrProfileMetadata(
+): ContentMetadata = ContentMetadata(
     name = this.handle,
     displayName = this.name,
     website = this.website,
     about = this.aboutMe,
     picture = resolvedAvatarUrl ?: "",
     banner = resolvedBannerUrl ?: "",
-    lud06 = null,
     lud16 = this.lightningAddress,
     nip05 = this.nip05Identifier
 )

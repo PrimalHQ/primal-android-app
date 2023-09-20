@@ -17,11 +17,10 @@ import timber.log.Timber
 import java.util.UUID
 import javax.inject.Inject
 
-class NostrSocketClient @Inject constructor(
+class NostrSocketClient constructor(
     private val okHttpClient: OkHttpClient,
     private val wssRequest: Request,
 ) {
-
     private val scope = CoroutineScope(Dispatchers.IO)
 
     private val webSocketMutex = Mutex()

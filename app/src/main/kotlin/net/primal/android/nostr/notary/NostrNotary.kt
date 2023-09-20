@@ -4,8 +4,6 @@ import fr.acinq.secp256k1.Hex
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.buildJsonArray
-import net.primal.android.auth.create.api.model.CreateNostrProfileMetadata
 import net.primal.android.crypto.CryptoUtils
 import net.primal.android.crypto.toNpub
 import net.primal.android.networking.UserAgentProvider
@@ -15,6 +13,7 @@ import net.primal.android.nostr.ext.asPubkeyTag
 import net.primal.android.nostr.ext.toTags
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.NostrEventKind
+import net.primal.android.nostr.model.content.ContentMetadata
 import net.primal.android.nostr.model.primal.content.ContentAppSettings
 import net.primal.android.serialization.NostrJson
 import net.primal.android.serialization.toNostrRelayMap
@@ -176,7 +175,7 @@ class NostrNotary @Inject constructor(
     fun signMetadataNostrEvent(
         privkey: String,
         pubkey: String,
-        metadata: CreateNostrProfileMetadata
+        metadata: ContentMetadata
     ): NostrEvent {
         return NostrUnsignedEvent(
             pubKey = pubkey,
