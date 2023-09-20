@@ -1,14 +1,13 @@
 ## Changes
 
-- Implement notifications pagination; 
-- Implement collapsing new notifications; 
-- Improve AvatarThumbnailsRow to have max limit; 
-- Implement error states in notifications list; 
-- Disable marking notifications as seen;
-- Set notifications page size to 50
-- Add missing icons
-- Add mentionedBy fields
-- Implement hashtag, posts and profile clicks on notification list items;
-- Implement zap amounts descriptions
-- Fix scroll to top when notification bottom icon is clicked
-- Improve collapsing by type and then by postId;
+- Improve total zaps amount calculation in notifications list
+- Implement post actions on notifications list
+- Increase search users page size to 20
+- Fix crash in PostStatsUpdater if PostStats is unavailable
+- Change post stat fields to Long (fixes missing Post Stats);
+- Implement settings app icon on notifications screen
+- Update app settings on zap settings screen start;
+- Change notification settings to dynamically read items;
+- Update app settings on notifications settings screen start;
+- Implement Notifications settings (#41)
+- 
