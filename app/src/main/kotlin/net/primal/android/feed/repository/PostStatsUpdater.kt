@@ -13,6 +13,7 @@ class PostStatsUpdater(
 
     private val postStats: PostStats by lazy {
         database.postStats().find(postId = postId)
+            ?: PostStats(postId = postId)
     }
 
     private val postUserStats: PostUserStats by lazy {
