@@ -3,154 +3,35 @@ package net.primal.android.settings.notifications
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.boolean
+import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.jsonPrimitive
-import net.primal.android.R
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.notifications.domain.NotificationType
+import net.primal.android.settings.notifications.NotificationsSettingsContract.UiEvent.NotificationSettingChanged
+import net.primal.android.settings.notifications.NotificationsSettingsContract.UiState.ApiError.FetchAppSettingsError
+import net.primal.android.settings.notifications.NotificationsSettingsContract.UiState.ApiError.UpdateAppSettingsError
 import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import timber.log.Timber
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.seconds
 
 @HiltViewModel
 class NotificationsSettingsViewModel @Inject constructor(
     val settingsRepository: SettingsRepository,
     val activeAccountStore: ActiveAccountStore
 ) : ViewModel() {
-    private val _state = MutableStateFlow(
-        NotificationsSettingsContract.UiState(
-            notifications = listOf(
-                NotificationsSettingsContract.Notification(
-                    id = "NEW_USER_FOLLOWED_YOU",
-                    textResId = R.string.settings_notifications_new_user_followed_you_text,
-                    lightResId = R.drawable.notification_type_new_user_followed_you_light,
-                    darkResId = R.drawable.notification_type_new_user_followed_you_dark,
-                    group = "CORE NOTIFICATIONS",
-                    value = true
-                ),
-                NotificationsSettingsContract.Notification(
-                    id = "YOUR_POST_WAS_ZAPPED",
-                    textResId = R.string.settings_notifications_your_post_was_zapped_text,
-                    lightResId = R.drawable.notification_type_your_post_was_zapped_light,
-                    darkResId = R.drawable.notification_type_your_post_was_zapped_dark,
-                    group = "CORE NOTIFICATIONS",
-                    value = true
-                ),
-                NotificationsSettingsContract.Notification(
-                    id = "YOUR_POST_WAS_LIKED",
-                    textResId = R.string.settings_notifications_your_post_was_liked_text,
-                    lightResId = R.drawable.notification_type_your_post_was_liked_light,
-                    darkResId = R.drawable.notification_type_your_post_was_liked_dark,
-                    group = "CORE NOTIFICATIONS",
-                    value = true
-                ),
-                NotificationsSettingsContract.Notification(
-                    id = "YOUR_POST_WAS_REPOSTED",
-                    textResId = R.string.settings_notifications_your_post_was_reposted_text,
-                    lightResId = R.drawable.notification_type_your_post_was_reposted_light,
-                    darkResId = R.drawable.notification_type_your_post_was_reposted_dark,
-                    group = "CORE NOTIFICATIONS",
-                    value = true
-                ),
-                NotificationsSettingsContract.Notification(
-                    id = "YOUR_POST_WAS_REPLIED_TO",
-                    textResId = R.string.settings_notifications_your_post_was_replied_to_text,
-                    lightResId = R.drawable.notification_type_your_post_was_replied_to_light,
-                    darkResId = R.drawable.notification_type_your_post_was_replied_to_dark,
-                    group = "CORE NOTIFICATIONS",
-                    value = true
-                ),
-                NotificationsSettingsContract.Notification(
-                    id = "YOU_WERE_MENTIONED_IN_POST",
-                    textResId = R.string.settings_notifications_you_were_mentioned_text,
-                    lightResId = R.drawable.notification_type_you_were_mentioned_in_a_post_light,
-                    darkResId = R.drawable.notification_type_you_were_mentioned_in_a_post_dark,
-                    group = "CORE NOTIFICATIONS",
-                    value = true
-                ),
-                NotificationsSettingsContract.Notification(
-                    id = "YOUR_POST_WAS_MENTIONED_IN_POST",
-                    textResId = R.string.settings_notifications_your_post_was_mentioned_text,
-                    lightResId = R.drawable.notification_type_your_post_was_mentioned_in_a_post_light,
-                    darkResId = R.drawable.notification_type_your_post_was_mentioned_in_a_post_dark,
-                    group = "CORE NOTIFICATIONS",
-                    value = true
-                ),
-                NotificationsSettingsContract.Notification(
-                    id = "POST_YOU_WERE_MENTIONED_IN_WAS_ZAPPED",
-                    textResId = R.string.settings_notifications_post_you_were_mentioned_in_was_zapped_text,
-                    lightResId = R.drawable.notification_type_post_you_were_mentioned_in_was_zapped_light,
-                    darkResId = R.drawable.notification_type_post_you_were_mentioned_in_was_zapped_dark,
-                    group = "A NOTE YOU WERE MENTIONED IN WAS",
-                    value = true
-                ),
-                NotificationsSettingsContract.Notification(
-                    id = "POST_YOU_WERE_MENTIONED_IN_WAS_LIKED",
-                    textResId = R.string.settings_notifications_post_you_were_mentioned_in_was_liked_text,
-                    lightResId = R.drawable.notification_type_post_you_were_mentioned_in_was_liked_light,
-                    darkResId = R.drawable.notification_type_post_you_were_mentioned_in_was_liked_dark,
-                    group = "A NOTE YOU WERE MENTIONED IN WAS",
-                    value = true
-                ),
-                NotificationsSettingsContract.Notification(
-                    id = "POST_YOU_WERE_MENTIONED_IN_WAS_REPOSTED",
-                    textResId = R.string.settings_notifications_post_you_were_mentioned_in_was_reposted_text,
-                    lightResId = R.drawable.notification_type_post_you_were_mentioned_in_was_reposted_light,
-                    darkResId = R.drawable.notification_type_post_you_were_mentioned_in_was_reposted_dark,
-                    group = "A NOTE YOU WERE MENTIONED IN WAS",
-                    value = true
-                ),
-                NotificationsSettingsContract.Notification(
-                    id = "POST_YOU_WERE_MENTIONED_IN_WAS_REPLIED_TO",
-                    textResId = R.string.settings_notifications_post_you_were_mentioned_in_was_replied_to_text,
-                    lightResId = R.drawable.notification_type_post_you_were_mentioned_in_was_replied_to_light,
-                    darkResId = R.drawable.notification_type_post_you_were_mentioned_in_was_replied_to_dark,
-                    group = "A NOTE YOU WERE MENTIONED IN WAS",
-                    value = true
-                ),
-                NotificationsSettingsContract.Notification(
-                    id = "POST_YOUR_POST_WAS_MENTIONED_IN_WAS_ZAPPED",
-                    textResId = R.string.settings_notifications_post_your_post_was_mentioned_in_was_zapped_text,
-                    lightResId = R.drawable.notification_type_post_your_post_was_mentioned_in_was_zapped_light,
-                    darkResId = R.drawable.notification_type_post_your_post_was_mentioned_in_was_zapped_dark,
-                    group = "A NOTE YOUR NOTE WAS MENTIONED IN WAS",
-                    value = false
-                ),
-                NotificationsSettingsContract.Notification(
-                    id = "POST_YOUR_POST_WAS_MENTIONED_IN_WAS_LIKED",
-                    textResId = R.string.settings_notifications_post_your_post_was_mentioned_in_was_liked_text,
-                    lightResId = R.drawable.notification_type_post_your_post_was_mentioned_in_was_liked_light,
-                    darkResId = R.drawable.notification_type_post_your_post_was_mentioned_in_was_liked_dark,
-                    group = "A NOTE YOUR NOTE WAS MENTIONED IN WAS",
-                    value = false
-                ),
-                NotificationsSettingsContract.Notification(
-                    id = "POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPOSTED",
-                    textResId = R.string.settings_notifications_post_your_post_was_mentioned_in_was_reposted_text,
-                    lightResId = R.drawable.notification_type_post_your_post_was_mentioned_in_was_reposted_light,
-                    darkResId = R.drawable.notification_type_post_your_post_was_mentioned_in_was_reposted_dark,
-                    group = "A NOTE YOUR NOTE WAS MENTIONED IN WAS",
-                    value = false
-                ),
-                NotificationsSettingsContract.Notification(
-                    id = "POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO",
-                    textResId = R.string.settings_notifications_post_your_post_was_mentioned_in_was_replied_to_text,
-                    lightResId = R.drawable.notification_type_post_your_post_was_mentioned_in_was_replied_to_light,
-                    darkResId = R.drawable.notification_type_post_your_post_was_mentioned_in_was_replied_to_dark,
-                    group = "A NOTE YOUR NOTE WAS MENTIONED IN WAS",
-                    value = false
-                )
-            )
-        )
-    )
+    private val _state = MutableStateFlow(NotificationsSettingsContract.UiState())
     val state = _state.asStateFlow()
     private fun setState(reducer: NotificationsSettingsContract.UiState.() -> NotificationsSettingsContract.UiState) {
         _state.getAndUpdate { it.reducer() }
@@ -165,59 +46,83 @@ class NotificationsSettingsViewModel @Inject constructor(
     init {
         observeEvents()
         observeActiveAccount()
+        observeDebouncedNotificationSettingsChanges()
+        fetchLatestAppSettings()
     }
 
     private fun observeEvents() = viewModelScope.launch {
-        _event.collect {
-            when (it) {
-                is NotificationsSettingsContract.UiEvent.NotificationSettingsChanged -> updateNotificationsSettings(
-                    id = it.id, value = it.value
-                )
+        _event.collect { event ->
+            when (event) {
+                is NotificationSettingChanged -> setState {
+                    copy(
+                        notificationSwitches = this.notificationSwitches.toMutableList().apply {
+                            val existingSetting = first { it.notificationType == event.type }
+                            val existingSettingIndex = indexOf(existingSetting)
+                            this[existingSettingIndex] = existingSetting.copy(enabled = event.value)
+                        }
+                    )
+                }
+
+                NotificationsSettingsContract.UiEvent.DismissErrors -> setState { copy(error = null) }
             }
         }
+    }
+
+    @OptIn(FlowPreview::class)
+    private fun observeDebouncedNotificationSettingsChanges() = viewModelScope.launch {
+        _event.filterIsInstance<NotificationSettingChanged>()
+            .debounce(1.seconds)
+            .collect {
+                updateNotificationsSettings(
+                    notifications = state.value.notificationSwitches
+                )
+            }
     }
 
     private fun observeActiveAccount() = viewModelScope.launch {
         activeAccountStore.activeUserAccount
             .mapNotNull { it.appSettings }
             .collect { appSettings ->
-                val dbNotifications = appSettings.notifications.toMap()
-                val localNotifications = state.value.notifications.toMutableList()
-
-                for (dbn in dbNotifications) {
-                    val localNotification = localNotifications.find { it.id == dbn.key }
-                    if (localNotification != null) {
-                        val index = localNotifications.indexOf(localNotification)
-                        localNotifications[index] =
-                            localNotification.copy(value = dbn.value.jsonPrimitive.boolean)
+                val notificationSettings = appSettings.notifications.toMap()
+                    .mapNotNull {
+                        val type = NotificationType.valueOf(id = it.key)
+                        val enabled = it.value.jsonPrimitive.booleanOrNull
+                        if (type != null && enabled != null) {
+                            NotificationSwitchUi(notificationType = type, enabled = enabled)
+                        } else null
                     }
-                }
+                    .sortedBy { it.notificationType.type }
 
-                setState { copy(notifications = localNotifications) }
+                setState {
+                    copy(notificationSwitches = notificationSettings)
+                }
             }
     }
 
-    private suspend fun updateNotificationsSettings(id: String, value: Boolean) {
+    private fun fetchLatestAppSettings() = viewModelScope.launch {
         try {
-            val newNotificationsList = state.value.notifications.toMutableList()
+            settingsRepository.fetchAndPersistAppSettings(userId = activeAccountStore.activeUserId())
+        } catch (error: WssException) {
+            setState { copy(error = FetchAppSettingsError(cause = error)) }
+        }
+    }
 
-            val existingSetting = newNotificationsList.first { it.id == id }
-            val existingSettingIndex = newNotificationsList.indexOf(existingSetting)
-            newNotificationsList[existingSettingIndex] = existingSetting.copy(value = value)
+    private suspend fun updateNotificationsSettings(
+        notifications: List<NotificationSwitchUi>,
+    ) = viewModelScope.launch {
+        val notificationsJsonObject = JsonObject(
+            content = notifications.associate {
+                it.notificationType.id to JsonPrimitive(value = it.enabled)
+            }
+        )
 
-            val notificationsJsonObject = JsonObject(content = newNotificationsList.associate {
-                it.id to JsonPrimitive(
-                    value = it.value
-                )
-            })
-
+        try {
             settingsRepository.updateAndPersistNotifications(
                 userId = activeAccountStore.activeUserId(),
                 notifications = notificationsJsonObject
             )
-            setState { copy(notifications = newNotificationsList) }
         } catch (error: WssException) {
-            setState { copy(error = error) }
+            setState { copy(error = UpdateAppSettingsError(cause = error)) }
         }
     }
 }
