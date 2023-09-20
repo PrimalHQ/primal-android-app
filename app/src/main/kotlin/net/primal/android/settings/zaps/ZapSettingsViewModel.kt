@@ -34,6 +34,7 @@ class ZapSettingsViewModel @Inject constructor(
     fun setEvent(event: UiEvent) = viewModelScope.launch { _event.emit(event) }
 
     init {
+        fetchLatestAppSettings()
         observeEvents()
         observeActiveAccount()
         observeDebouncedZapOptionChanges()
@@ -88,6 +89,13 @@ class ZapSettingsViewModel @Inject constructor(
             }
     }
 
+    private fun fetchLatestAppSettings() = viewModelScope.launch {
+        try {
+            settingsRepository.fetchAndPersistAppSettings(userId = activeAccountStore.activeUserId())
+        } catch (error: WssException) {
+            // Ignore
+        }
+    }
 
     private suspend fun updateDefaultZapAmount(newDefaultAmount: ULong) {
         try {
