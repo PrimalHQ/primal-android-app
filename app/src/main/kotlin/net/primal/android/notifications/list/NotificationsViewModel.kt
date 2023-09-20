@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
 import androidx.paging.map
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,22 +17,39 @@ import net.primal.android.core.compose.feed.asNostrResourceUi
 import net.primal.android.core.compose.feed.model.FeedPostStatsUi
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.utils.asEllipsizedNpub
+import net.primal.android.feed.repository.PostRepository
+import net.primal.android.networking.relays.errors.MissingRelaysException
+import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.notifications.db.Notification
 import net.primal.android.notifications.list.NotificationsContract.UiEvent
+import net.primal.android.notifications.list.NotificationsContract.UiEvent.NotificationsSeen
+import net.primal.android.notifications.list.NotificationsContract.UiEvent.PostLikeAction
+import net.primal.android.notifications.list.NotificationsContract.UiEvent.RepostAction
 import net.primal.android.notifications.list.NotificationsContract.UiState
+import net.primal.android.notifications.list.NotificationsContract.UiState.NotificationsError.FailedToPublishLikeEvent
+import net.primal.android.notifications.list.NotificationsContract.UiState.NotificationsError.FailedToPublishRepostEvent
+import net.primal.android.notifications.list.NotificationsContract.UiState.NotificationsError.FailedToPublishZapEvent
+import net.primal.android.notifications.list.NotificationsContract.UiState.NotificationsError.InvalidZapRequest
+import net.primal.android.notifications.list.NotificationsContract.UiState.NotificationsError.MissingLightningAddress
+import net.primal.android.notifications.list.NotificationsContract.UiState.NotificationsError.MissingRelaysConfiguration
 import net.primal.android.notifications.list.ui.NotificationUi
 import net.primal.android.notifications.repository.NotificationRepository
 import net.primal.android.profile.db.authorNameUiFriendly
 import net.primal.android.profile.db.userNameUiFriendly
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.badges.BadgesManager
+import net.primal.android.wallet.model.ZapTarget
+import net.primal.android.wallet.repository.ZapRepository
 import java.time.Instant
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.seconds
 
 @HiltViewModel
 class NotificationsViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val notificationsRepository: NotificationRepository,
+    private val postRepository: PostRepository,
+    private val zapRepository: ZapRepository,
     private val badgesManager: BadgesManager,
 ) : ViewModel() {
 
@@ -58,7 +76,10 @@ class NotificationsViewModel @Inject constructor(
     private fun subscribeToEvents() = viewModelScope.launch {
         _event.collect {
             when (it) {
-                UiEvent.NotificationsSeen -> handleNotificationsSeen()
+                NotificationsSeen -> handleNotificationsSeen()
+                is PostLikeAction -> likePost(it)
+                is RepostAction -> repostPost(it)
+                is UiEvent.ZapAction -> zapPost(it)
             }
         }
     }
@@ -66,7 +87,12 @@ class NotificationsViewModel @Inject constructor(
     private fun subscribeToActiveAccount() = viewModelScope.launch {
         activeAccountStore.activeUserAccount.collect {
             setState {
-                copy(activeAccountAvatarUrl = it.pictureUrl)
+                copy(
+                    activeAccountAvatarUrl = it.pictureUrl,
+                    walletConnected = it.nostrWallet != null,
+                    defaultZapAmount = it.appSettings?.defaultZapAmount,
+                    zapOptions = it.appSettings?.zapOptions ?: emptyList(),
+                )
             }
         }
     }
@@ -111,6 +137,71 @@ class NotificationsViewModel @Inject constructor(
 
     private fun handleNotificationsSeen() = viewModelScope.launch {
 //        notificationsRepository.markAllNotificationsAsSeen()
+    }
+
+    private fun likePost(postLikeAction: PostLikeAction) = viewModelScope.launch {
+        try {
+            postRepository.likePost(
+                postId = postLikeAction.postId,
+                postAuthorId = postLikeAction.postAuthorId,
+            )
+        } catch (error: NostrPublishException) {
+            setErrorState(error = FailedToPublishLikeEvent(error))
+        } catch (error: MissingRelaysException) {
+            setErrorState(error = MissingRelaysConfiguration(error))
+        }
+    }
+
+    private fun repostPost(repostAction: RepostAction) = viewModelScope.launch {
+        try {
+            postRepository.repostPost(
+                postId = repostAction.postId,
+                postAuthorId = repostAction.postAuthorId,
+                postRawNostrEvent = repostAction.postNostrEvent,
+            )
+        } catch (error: NostrPublishException) {
+            setErrorState(error = FailedToPublishRepostEvent(error))
+        } catch (error: MissingRelaysException) {
+            setErrorState(error = MissingRelaysConfiguration(error))
+        }
+    }
+
+    private fun zapPost(zapAction: UiEvent.ZapAction) = viewModelScope.launch {
+        if (zapAction.postAuthorLightningAddress == null) {
+            setErrorState(error = MissingLightningAddress(IllegalStateException()))
+            return@launch
+        }
+
+        try {
+            zapRepository.zap(
+                userId = activeAccountStore.activeUserId(),
+                comment = zapAction.zapDescription,
+                amountInSats = zapAction.zapAmount,
+                target = ZapTarget.Note(
+                    zapAction.postId,
+                    zapAction.postAuthorId,
+                    zapAction.postAuthorLightningAddress
+                ),
+            )
+        } catch (error: ZapRepository.ZapFailureException) {
+            setErrorState(error = FailedToPublishZapEvent(error))
+        } catch (error: NostrPublishException) {
+            setErrorState(error = FailedToPublishZapEvent(error))
+        } catch (error: MissingRelaysException) {
+            setErrorState(error = MissingRelaysConfiguration(error))
+        } catch (error: ZapRepository.InvalidZapRequestException) {
+            setErrorState(error = InvalidZapRequest(error))
+        }
+    }
+
+    private fun setErrorState(error: UiState.NotificationsError) {
+        setState { copy(error = error) }
+        viewModelScope.launch {
+            delay(2.seconds)
+            if (state.value.error == error) {
+                setState { copy(error = null) }
+            }
+        }
     }
 
     private fun Notification.asNotificationUi(): NotificationUi {
