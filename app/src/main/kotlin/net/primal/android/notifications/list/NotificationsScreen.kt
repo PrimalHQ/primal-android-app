@@ -42,19 +42,15 @@ import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.compose.feed.RepostOrQuoteBottomSheet
 import net.primal.android.core.compose.feed.ZapBottomSheet
-import net.primal.android.core.compose.feed.model.FeedPostAction
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 import net.primal.android.core.compose.icons.primaliconpack.Settings
 import net.primal.android.core.compose.isEmpty
 import net.primal.android.core.compose.isNotEmpty
-import net.primal.android.core.compose.notifications.toImagePainter
-import net.primal.android.core.utils.shortened
 import net.primal.android.crypto.hexToNoteHrp
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.PrimalDrawerScaffold
-import net.primal.android.notifications.domain.NotificationType
 import net.primal.android.notifications.list.ui.NotificationListItem
 import net.primal.android.notifications.list.ui.NotificationUi
 import net.primal.android.theme.AppTheme
@@ -356,77 +352,6 @@ private fun NotificationsList(
 }
 
 @Composable
-private fun NotificationListItem(
-    notifications: List<NotificationUi>,
-    type: NotificationType,
-    walletConnected: Boolean,
-    onProfileClick: (String) -> Unit,
-    onNoteClick: (String) -> Unit,
-    onHashtagClick: (String) -> Unit,
-    onReplyClick: (String) -> Unit,
-    onPostLikeClick: (FeedPostUi) -> Unit,
-    onRepostClick: (FeedPostUi) -> Unit,
-    onDefaultZapClick: (FeedPostUi) -> Unit,
-    onZapOptionsClick: (FeedPostUi) -> Unit,
-    onWalletUnavailable: () -> Unit,
-) {
-    val totalSatsZapped = notifications
-        .firstOrNull { it.actionPost?.stats != null }
-        ?.actionPost
-        ?.stats
-        ?.satsZapped
-        .takeIf { it != null && it > 0 }
-
-    val postData = notifications.first().actionPost
-
-    NotificationListItem(
-        notifications = notifications,
-        imagePainter = type.toImagePainter(),
-        suffixText = type.toSuffixText(
-            usersZappedCount = notifications.size,
-            totalSatsZapped = totalSatsZapped?.shortened(),
-        ),
-        onProfileClick = onProfileClick,
-        onPostClick = onNoteClick,
-        onHashtagClick = onHashtagClick,
-        onPostAction = { postAction ->
-            when (postAction) {
-                FeedPostAction.Reply -> {
-                    postData?.postId?.let(onReplyClick)
-                }
-                FeedPostAction.Zap -> {
-                    if (walletConnected) {
-                        postData?.let { postData ->
-                            onDefaultZapClick(postData)
-                        }
-                    } else {
-                        onWalletUnavailable()
-                    }
-                }
-                FeedPostAction.Like -> {
-                    postData?.let(onPostLikeClick)
-                }
-                FeedPostAction.Repost -> {
-                    postData?.let(onRepostClick)
-                }
-            }
-        },
-        onPostLongPressAction = { postAction ->
-            when (postAction) {
-                FeedPostAction.Zap -> {
-                    if (walletConnected) {
-                        postData?.let(onZapOptionsClick)
-                    } else {
-                        onWalletUnavailable()
-                    }
-                }
-                else -> Unit
-            }
-        },
-    )
-}
-
-@Composable
 private fun ErrorHandler(
     error: NotificationsContract.UiState.NotificationsError?,
     snackbarHostState: SnackbarHostState,
@@ -448,69 +373,4 @@ private fun ErrorHandler(
             duration = SnackbarDuration.Short,
         )
     }
-}
-
-@Composable
-private fun NotificationType.toSuffixText(
-    usersZappedCount: Int = 0,
-    totalSatsZapped: String? = null,
-): String = when (this) {
-    NotificationType.NEW_USER_FOLLOWED_YOU -> stringResource(id = R.string.notification_list_item_followed_you)
-
-    NotificationType.YOUR_POST_WAS_ZAPPED -> when (totalSatsZapped) {
-        null -> stringResource(id = R.string.notification_list_item_zapped_your_post)
-        else -> stringResource(
-            id = R.string.notification_list_item_zapped_your_post_for_total_amount,
-            totalSatsZapped
-        )
-    }
-
-    NotificationType.YOUR_POST_WAS_LIKED -> stringResource(id = R.string.notification_list_item_liked_your_post)
-    NotificationType.YOUR_POST_WAS_REPOSTED -> stringResource(id = R.string.notification_list_item_reposted_your_post)
-    NotificationType.YOUR_POST_WAS_REPLIED_TO -> stringResource(id = R.string.notification_list_item_replied_to_your_post)
-
-    NotificationType.YOU_WERE_MENTIONED_IN_POST -> stringResource(id = R.string.notification_list_item_mentioned_you_in_post)
-    NotificationType.YOUR_POST_WAS_MENTIONED_IN_POST -> stringResource(id = R.string.notification_list_item_mentioned_your_post)
-
-    NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_ZAPPED -> when (totalSatsZapped) {
-        null -> stringResource(id = R.string.notification_list_item_post_you_were_mentioned_in_was_zapped)
-        else -> when (usersZappedCount) {
-            1 -> stringResource(
-                id = R.string.notification_list_item_post_you_were_mentioned_in_was_zapped_for,
-                totalSatsZapped
-            )
-
-            in 2..Int.MAX_VALUE -> stringResource(
-                id = R.string.notification_list_item_post_you_were_mentioned_in_was_zapped_for_total_amount,
-                totalSatsZapped
-            )
-
-            else -> stringResource(id = R.string.notification_list_item_post_you_were_mentioned_in_was_zapped)
-        }
-    }
-
-    NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_LIKED -> stringResource(id = R.string.notification_list_item_post_you_were_mentioned_in_was_liked)
-    NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_REPOSTED -> stringResource(id = R.string.notification_list_item_post_you_were_mentioned_in_was_reposted)
-    NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_REPLIED_TO -> stringResource(id = R.string.notification_list_item_post_you_were_mentioned_in_was_replied_to)
-
-    NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_ZAPPED -> when (totalSatsZapped) {
-        null -> stringResource(id = R.string.notification_list_item_post_where_you_post_was_mentioned_was_zapped)
-        else -> when (usersZappedCount) {
-            1 -> stringResource(
-                id = R.string.notification_list_item_post_where_you_post_was_mentioned_was_zapped_for,
-                totalSatsZapped
-            )
-
-            in 2..Int.MAX_VALUE -> stringResource(
-                id = R.string.notification_list_item_post_where_you_post_was_mentioned_was_zapped_for_total_amount,
-                totalSatsZapped
-            )
-
-            else -> stringResource(id = R.string.notification_list_item_post_where_you_post_was_mentioned_was_zapped)
-        }
-    }
-
-    NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_LIKED -> stringResource(id = R.string.notification_list_item_post_where_you_post_was_mentioned_was_liked)
-    NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPOSTED -> stringResource(id = R.string.notification_list_item_post_where_you_post_was_mentioned_was_reposted)
-    NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO -> stringResource(id = R.string.notification_list_item_post_where_you_post_was_mentioned_was_replied_to)
 }
