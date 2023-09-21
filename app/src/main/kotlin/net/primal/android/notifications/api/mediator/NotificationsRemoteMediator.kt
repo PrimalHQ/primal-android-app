@@ -28,6 +28,8 @@ class NotificationsRemoteMediator(
 
     private var lastSeenTimestamp: Long = Instant.EPOCH.epochSecond
 
+    private val lastRequests: MutableMap<LoadType, NotificationsRequestBody> = mutableMapOf()
+
     fun updateLastSeenTimestamp(lastSeen: Instant) {
         lastSeenTimestamp = lastSeen.epochSecond
     }
@@ -92,6 +94,10 @@ class NotificationsRemoteMediator(
             LoadType.APPEND -> initialRequestBody.copy(until = timestamp)
         }
 
+        if (lastRequests[loadType] == requestBody) {
+            return MediatorResult.Success(endOfPaginationReached = true)
+        }
+
         val response = try {
             withContext(Dispatchers.IO) {
                 notificationsApi.getNotifications(body = requestBody)
@@ -100,6 +106,7 @@ class NotificationsRemoteMediator(
             return MediatorResult.Error(error)
         }
 
+        lastRequests[loadType] = requestBody
         ensureLastSeenTimestamp()
 
         val userProfileStats = response.primalUserProfileStats.mapNotNullAsProfileStatsPO()
@@ -126,21 +133,7 @@ class NotificationsRemoteMediator(
             }
         }
 
-        val unseenCount = withContext(Dispatchers.IO) {
-            database.notifications().unseenCount()
-        }
-
-        return when (loadType) {
-            LoadType.REFRESH -> MediatorResult.Success(
-                endOfPaginationReached = false
-            )
-            LoadType.PREPEND -> MediatorResult.Success(
-                endOfPaginationReached = notifications.size <= 1 + unseenCount
-            )
-            LoadType.APPEND -> MediatorResult.Success(
-                endOfPaginationReached = notifications.size <= 1
-            )
-        }
+        return MediatorResult.Success(endOfPaginationReached = false)
     }
 
     private fun List<NotificationData>.mapWithSeenAtTimestamps(): List<NotificationData> {

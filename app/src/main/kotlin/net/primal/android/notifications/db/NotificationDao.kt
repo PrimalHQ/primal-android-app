@@ -13,9 +13,6 @@ interface NotificationDao {
     @Query("SELECT COUNT(*) FROM NotificationData")
     fun allCount(): Int
 
-    @Query("SELECT COUNT(*) FROM NotificationData WHERE seenLocallyAt IS NULL")
-    fun unseenCount(): Int
-
     @Query("SELECT * FROM NotificationData ORDER BY createdAt DESC LIMIT 1")
     fun first(): NotificationData?
 
