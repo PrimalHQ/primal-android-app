@@ -136,7 +136,7 @@ class NotificationsViewModel @Inject constructor(
     }
 
     private fun handleNotificationsSeen() = viewModelScope.launch {
-//        notificationsRepository.markAllNotificationsAsSeen()
+        notificationsRepository.markAllNotificationsAsSeen()
     }
 
     private fun likePost(postLikeAction: PostLikeAction) = viewModelScope.launch {
