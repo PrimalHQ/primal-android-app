@@ -77,7 +77,10 @@ fun NotificationListItem(
         suffixText = type.toSuffixText(
             usersZappedCount = notifications.size,
             totalSatsZapped = when (notifications.size) {
-                1 -> activeUsersTotalSatsZapped?.shortened()
+                1 -> when (type) {
+                    NotificationType.YOUR_POST_WAS_ZAPPED -> postTotalSatsZapped?.shortened()
+                    else -> activeUsersTotalSatsZapped?.shortened()
+                }
                 else -> postTotalSatsZapped?.shortened()
             }
         ),
