@@ -6,7 +6,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -27,8 +26,6 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -44,6 +41,7 @@ import net.primal.android.R
 import net.primal.android.core.compose.AvatarThumbnailsRow
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.feed.model.FeedPostsSyncStats
+import net.primal.android.core.compose.foundation.brandBackground
 import net.primal.android.core.compose.isEmpty
 import net.primal.android.theme.AppTheme
 import kotlin.random.Random
@@ -165,20 +163,8 @@ private fun NewPostsButton(
 ) {
     Row(
         modifier = Modifier
-            .background(
-                brush = Brush.linearGradient(
-                    colors = listOf(
-                        AppTheme.extraColorScheme.brand1,
-                        AppTheme.extraColorScheme.brand2
-                    ),
-                    start = Offset(0f, 0f),
-                    end = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY),
-                ),
-                shape = AppTheme.shapes.extraLarge
-            )
-            .clickable {
-                onClick()
-            },
+            .brandBackground(shape = AppTheme.shapes.extraLarge)
+            .clickable { onClick() },
         verticalAlignment = Alignment.CenterVertically,
     ) {
         AvatarThumbnailsRow(

@@ -115,6 +115,7 @@
     <string name="notification_list_item_post_where_you_post_was_mentioned_was_liked">liked a note your note was mentioned in</string>
     <string name="notification_list_item_post_where_you_post_was_mentioned_was_reposted">reposted a note your note was mentioned in</string>
     <string name="notification_list_item_post_where_you_post_was_mentioned_was_replied_to">replied to a note your note was mentioned in</string>
+    <string name="notification_list_button_jump_to_start">New notifications</string>
 
     <string name="messages_title">Messages</string>
 
