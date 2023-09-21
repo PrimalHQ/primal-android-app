@@ -25,12 +25,6 @@ class NotificationRepository @Inject constructor(
 
     fun observeUnseenNotifications() = database.notifications().allUnseenNotifications()
 
-    suspend fun updateLastSeenTimestamp() {
-        notificationsApi.getLastSeenTimestamp(userId = activeAccountStore.activeUserId())?.let {
-            remoteMediator.updateLastSeenTimestamp(lastSeen = it)
-        }
-    }
-
     suspend fun markAllNotificationsAsSeen() {
         withContext(Dispatchers.IO) {
             val seenAt = Instant.now()

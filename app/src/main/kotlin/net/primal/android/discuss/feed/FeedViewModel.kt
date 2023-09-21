@@ -32,7 +32,6 @@ import net.primal.android.user.updater.UserDataUpdater
 import net.primal.android.user.updater.UserDataUpdaterFactory
 import net.primal.android.wallet.model.ZapTarget
 import net.primal.android.wallet.repository.ZapRepository
-import timber.log.Timber
 import java.time.Instant
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.minutes
@@ -145,7 +144,6 @@ class FeedViewModel @Inject constructor(
 
     private fun subscribeToBadgesUpdates() = viewModelScope.launch {
         badgesManager.badges.collect {
-            Timber.d(it.toString())
             setState {
                 copy(badges = it)
             }
