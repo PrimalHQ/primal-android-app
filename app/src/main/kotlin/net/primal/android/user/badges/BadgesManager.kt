@@ -7,11 +7,10 @@ import androidx.lifecycle.ProcessLifecycleOwner
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.getAndUpdate
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.transform
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
@@ -43,11 +42,20 @@ class BadgesManager @Inject constructor(
     private var notificationsSummarySubscriptionId: UUID? = null
     private var notificationsSummarySubscriptionJob: Job? = null
 
-    private val mutableBadges = MutableStateFlow(Badges())
-    val badges = mutableBadges.asStateFlow()
+    private var latestBadge: Badges = Badges()
+    private val mutableBadges = MutableSharedFlow<Badges>(
+        replay = 1,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST,
+    )
+    val badges = mutableBadges.asSharedFlow()
 
     init {
         observeActiveAccount()
+    }
+
+    private suspend fun emitBadgesUpdate(updateReducer: (Badges) -> Badges) {
+        val updatedBadges = updateReducer(latestBadge)
+        mutableBadges.emit(updatedBadges)
     }
 
     private fun observeActiveAccount() = scope.launch {
@@ -65,7 +73,7 @@ class BadgesManager @Inject constructor(
                 }
 
                 ActiveUserAccountState.NoUserAccount -> {
-                    mutableBadges.update { Badges() }
+                    emitBadgesUpdate { Badges() }
                     unsubscribeAll()
                     withContext(Dispatchers.Main) {
                         ProcessLifecycleOwner.get().lifecycle.removeObserver(this@BadgesManager)
@@ -130,7 +138,7 @@ class BadgesManager @Inject constructor(
                 else -> Unit
             }
         }.collect {
-            mutableBadges.getAndUpdate { currentState ->
+            emitBadgesUpdate { currentState ->
                 currentState.copy(notifications = it.count)
             }
         }
