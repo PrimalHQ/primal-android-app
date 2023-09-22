@@ -1,23 +1,17 @@
 package net.primal.android.notifications.api
 
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.transformWhile
 import kotlinx.serialization.encodeToString
 import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.primal.PrimalCacheFilter
 import net.primal.android.networking.primal.PrimalVerb
-import net.primal.android.networking.sockets.NostrIncomingMessage
-import net.primal.android.nostr.ext.asNotificationSummary
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.notifications.api.model.NotificationsRequestBody
 import net.primal.android.notifications.api.model.NotificationsResponse
 import net.primal.android.notifications.api.model.PubkeyRequestBody
-import net.primal.android.notifications.domain.NotificationsSummary
 import net.primal.android.serialization.NostrJson
 import net.primal.android.settings.api.model.AppSpecificDataRequest
 import java.time.Instant
-import java.util.UUID
 import javax.inject.Inject
 
 class NotificationsApiImpl @Inject constructor(
@@ -45,7 +39,7 @@ class NotificationsApiImpl @Inject constructor(
         }
     }
 
-    override suspend fun updateLastSeenTimestamp(userId: String) {
+    override suspend fun setLastSeenTimestamp(userId: String) {
         primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.SET_LAST_SEEN_NOTIFICATIONS,
@@ -78,30 +72,5 @@ class NotificationsApiImpl @Inject constructor(
             primalUserProfileStats = queryResult.filterPrimalEvents(NostrEventKind.PrimalUserProfileStats),
             primalNotifications = queryResult.filterPrimalEvents(NostrEventKind.PrimalNotification),
         )
-    }
-
-    override suspend fun getNotificationsSummary(userId: String): NotificationsSummary? {
-        val subscriptionId = UUID.randomUUID()
-        val firstEventMessage: NostrIncomingMessage.EventMessage = primalApiClient.subscribe(
-            subscriptionId = subscriptionId,
-            message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.NEW_NOTIFICATIONS_COUNT,
-                optionsJson = NostrJson.encodeToString(PubkeyRequestBody(pubkey = userId))
-            )
-        ).transformWhile {
-            if (it is NostrIncomingMessage.EventMessage) {
-                emit(it)
-                false
-            } else {
-                true
-            }
-        }.first()
-        primalApiClient.closeSubscription(subscriptionId = subscriptionId)
-
-        val summaryEvent = firstEventMessage.primalEvent
-        return when (summaryEvent?.kind) {
-            NostrEventKind.PrimalNotificationsSummary2.value -> summaryEvent.asNotificationSummary()
-            else -> null
-        }
     }
 }

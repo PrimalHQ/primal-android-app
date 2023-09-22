@@ -10,6 +10,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -47,7 +48,7 @@ class BadgesManager @Inject constructor(
         replay = 1,
         onBufferOverflow = BufferOverflow.DROP_OLDEST,
     )
-    val badges = mutableBadges.asSharedFlow()
+    val badges = mutableBadges.asSharedFlow().distinctUntilChanged()
 
     init {
         observeActiveAccount()

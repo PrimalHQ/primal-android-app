@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -164,7 +165,7 @@ private fun NotificationListItem(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Image(
-                    modifier = Modifier.padding(top = 8.dp),
+                    modifier = Modifier.padding(top = 2.dp).size(28.dp),
                     painter = imagePainter,
                     contentDescription = null,
                 )

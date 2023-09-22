@@ -10,7 +10,7 @@ data class NotificationData(
     val ownerId: String,
     val createdAt: Long,
     val type: NotificationType,
-    val seenLocallyAt: Long? = null,
+    val seenGloballyAt: Long? = null,
     val actionUserId: String? = null,
     val actionPostId: String? = null,
     val satsZapped: Long? = null,

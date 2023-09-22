@@ -24,7 +24,6 @@ interface NotificationsContract {
             data class FailedToPublishRepostEvent(val cause: Throwable) : NotificationsError()
             data class FailedToPublishLikeEvent(val cause: Throwable) : NotificationsError()
             data class MissingRelaysConfiguration(val cause: Throwable) : NotificationsError()
-
         }
     }
 

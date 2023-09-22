@@ -20,14 +20,14 @@ interface NotificationDao {
     fun last(): NotificationData?
 
     @Transaction
-    @Query("SELECT * FROM NotificationData WHERE seenLocallyAt IS NULL ORDER BY createdAt DESC")
+    @Query("SELECT * FROM NotificationData WHERE seenGloballyAt IS NULL ORDER BY createdAt DESC")
     fun allUnseenNotifications(): Flow<List<Notification>>
 
     @Transaction
-    @Query("SELECT * FROM NotificationData WHERE seenLocallyAt IS NOT NULL ORDER BY createdAt DESC")
+    @Query("SELECT * FROM NotificationData WHERE seenGloballyAt IS NOT NULL ORDER BY createdAt DESC")
     fun allSeenNotificationsPaged(): PagingSource<Int, Notification>
 
-    @Query("UPDATE NotificationData SET seenLocallyAt = :seenAt WHERE seenLocallyAt IS NULL")
+    @Query("UPDATE NotificationData SET seenGloballyAt = :seenAt WHERE seenGloballyAt IS NULL")
     fun markAllUnseenNotificationsAsSeen(seenAt: Long)
 
     @Upsert
