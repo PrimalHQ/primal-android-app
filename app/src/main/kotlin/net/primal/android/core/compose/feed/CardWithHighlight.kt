@@ -78,7 +78,7 @@ fun CardWithHighlight(
 @Preview
 @Composable
 fun PreviewCardWithHighlight() {
-    PrimalTheme {
+    PrimalTheme(primalTheme = PrimalTheme.Sunset) {
         CardWithHighlight(
             highlighted = true,
             highlightWidth = 16.dp,

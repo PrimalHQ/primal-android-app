@@ -298,7 +298,7 @@ private fun DrawerScreenDestination.label(): String {
 @Preview
 @Composable
 fun PrimalDrawerPreview() {
-    PrimalTheme {
+    PrimalTheme(primalTheme = PrimalTheme.Sunset) {
         PrimalDrawer(
             state = PrimalDrawerContract.UiState(),
             eventPublisher = {},

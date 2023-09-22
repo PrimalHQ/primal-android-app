@@ -429,10 +429,10 @@ private fun ErrorHandler(
 }
 
 
-@Preview()
+@Preview
 @Composable
 fun ThreadScreenPreview() {
-    PrimalTheme {
+    PrimalTheme(primalTheme = PrimalTheme.Sunset) {
         ThreadScreen(
             state = ThreadContract.UiState(
                 conversation = listOf(

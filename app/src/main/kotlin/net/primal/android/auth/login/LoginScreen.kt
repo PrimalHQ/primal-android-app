@@ -264,7 +264,7 @@ fun LaunchedErrorHandler(
 @Preview
 @Composable
 fun PreviewLoginScreen() {
-    PrimalTheme {
+    PrimalTheme(primalTheme = PrimalTheme.Sunset) {
         LoginScreen(
             state = LoginContract.UiState(loading = false),
             eventPublisher = {},

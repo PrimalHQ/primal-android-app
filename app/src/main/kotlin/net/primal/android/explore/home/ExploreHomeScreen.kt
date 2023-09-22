@@ -213,7 +213,7 @@ fun SearchBar(
 @Preview
 @Composable
 fun PreviewExploreTopAppBar() {
-    PrimalTheme {
+    PrimalTheme(primalTheme = PrimalTheme.Sunset) {
         Surface {
             ExploreTopAppBar(
                 title = {

@@ -86,7 +86,7 @@ fun WelcomeScreen(
 @Composable
 fun PreviewWelcomeScreen() {
     PrimalTheme(
-        theme = PrimalTheme.Sunset
+        primalTheme = PrimalTheme.Sunset
     ) {
         WelcomeScreen(
             onSignInClick = {},

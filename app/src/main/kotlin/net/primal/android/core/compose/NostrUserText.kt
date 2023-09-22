@@ -107,7 +107,7 @@ fun NostrUserText(
 @Preview
 @Composable
 fun PreviewNostrUserTextWithPrimalBadge() {
-    PrimalTheme {
+    PrimalTheme(primalTheme = PrimalTheme.Sunset) {
         Surface {
             NostrUserText(
                 displayName = "Nostr Adamus",
@@ -123,7 +123,7 @@ fun PreviewNostrUserTextWithPrimalBadge() {
 @Preview
 @Composable
 fun PreviewNostrUserTextWithRandomBadge() {
-    PrimalTheme {
+    PrimalTheme(primalTheme = PrimalTheme.Sunset) {
         Surface {
             NostrUserText(
                 displayName = "Nostr Adamus",
@@ -139,7 +139,7 @@ fun PreviewNostrUserTextWithRandomBadge() {
 @Preview
 @Composable
 fun PreviewNostrUserTextWithoutBadge() {
-    PrimalTheme {
+    PrimalTheme(primalTheme = PrimalTheme.Sunset) {
         Surface {
             NostrUserText(
                 displayName = "Nostr Adamus",

@@ -1,6 +1,5 @@
 package net.primal.android.core.compose.feed
 
-import android.content.res.Configuration
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
@@ -120,10 +119,10 @@ fun FeedPostListItem(
     }
 }
 
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
+@Preview
 @Composable
 fun PreviewFeedPostListItemLight() {
-    PrimalTheme {
+    PrimalTheme(primalTheme = PrimalTheme.Sunrise) {
         FeedPostListItem(
             data = FeedPostUi(
                 postId = "random",
@@ -163,13 +162,12 @@ fun PreviewFeedPostListItemLight() {
             onHashtagClick = {},
         )
     }
-
 }
 
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Preview
 @Composable
 fun PreviewFeedPostListItemDark() {
-    PrimalTheme {
+    PrimalTheme(primalTheme = PrimalTheme.Sunset) {
         FeedPostListItem(
             data = FeedPostUi(
                 postId = "random",

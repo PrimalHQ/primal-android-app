@@ -1,6 +1,5 @@
 package net.primal.android.core.compose.feed
 
-import android.content.res.Configuration
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -62,10 +61,10 @@ fun ReferencedPostListItem(
     }
 }
 
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
+@Preview
 @Composable
 fun PreviewReferencedPostListItemLight() {
-    PrimalTheme {
+    PrimalTheme(primalTheme = PrimalTheme.Sunrise) {
         ReferencedPostListItem(
             data = FeedPostUi(
                 postId = "random",
@@ -104,10 +103,10 @@ fun PreviewReferencedPostListItemLight() {
 
 }
 
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Preview
 @Composable
 fun PreviewReferencedPostListItemDark() {
-    PrimalTheme {
+    PrimalTheme(primalTheme = PrimalTheme.Sunset) {
         ReferencedPostListItem(
             data = FeedPostUi(
                 postId = "random",

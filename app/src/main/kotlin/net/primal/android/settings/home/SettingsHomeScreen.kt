@@ -180,7 +180,7 @@ private fun PrimalSettingsSection.title(): String {
 @Preview
 @Composable
 fun PreviewSettingsHomeScreen() {
-    PrimalTheme {
+    PrimalTheme(primalTheme = PrimalTheme.Sunset) {
         SettingsHomeScreen(
             state = SettingsHomeContract.UiState(version = "1.1"),
             onClose = { },
