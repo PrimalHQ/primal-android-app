@@ -36,7 +36,7 @@ import net.primal.android.R
 import net.primal.android.auth.create.CreateContract
 import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.button.PrimalOutlinedButton
-import net.primal.android.nostr.model.content.userNameUiFriendly
+import net.primal.android.core.utils.userNameUiFriendly
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable

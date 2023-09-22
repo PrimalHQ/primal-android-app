@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import net.primal.android.core.compose.feed.asFeedPostUi
 import net.primal.android.core.compose.media.model.MediaResourceUi
+import net.primal.android.core.utils.userNameUiFriendly
 import net.primal.android.feed.repository.FeedRepository
 import net.primal.android.feed.repository.PostRepository
 import net.primal.android.navigation.profileId
@@ -22,7 +23,6 @@ import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.profile.db.authorNameUiFriendly
-import net.primal.android.profile.db.userNameUiFriendly
 import net.primal.android.profile.details.ProfileContract.UiEvent
 import net.primal.android.profile.details.ProfileContract.UiState
 import net.primal.android.profile.details.ProfileContract.UiState.ProfileError

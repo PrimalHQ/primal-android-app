@@ -16,11 +16,3 @@ data class ContentMetadata(
     val banner: String? = null,
     val website: String? = null,
 )
-
-fun ContentMetadata.userNameUiFriendly(pubkey: String): String {
-    return when {
-        displayName?.isNotEmpty() == true -> displayName
-        name?.isNotEmpty() == true -> name
-        else -> pubkey.hexToNpubHrp().asEllipsizedNpub()
-    }
-}

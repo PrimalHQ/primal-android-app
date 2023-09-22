@@ -10,11 +10,3 @@ fun ProfileMetadata.authorNameUiFriendly(): String {
         else -> ownerId.asEllipsizedNpub()
     }
 }
-
-fun ProfileMetadata.userNameUiFriendly(): String {
-    return when {
-        handle?.isNotEmpty() == true -> handle
-        displayName?.isNotEmpty() == true -> displayName
-        else -> ownerId.asEllipsizedNpub()
-    }
-}
