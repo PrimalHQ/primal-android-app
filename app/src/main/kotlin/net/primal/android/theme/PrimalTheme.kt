@@ -14,12 +14,14 @@ import net.primal.android.theme.colors.sunsetExtraColorScheme
 enum class PrimalTheme(
     val themeName: String,
     val inverseThemeName: String,
+    val isDarkTheme: Boolean,
     val colorScheme: ColorScheme,
     val extraColorScheme: ExtraColorScheme,
 ) {
     Sunset(
         themeName = "sunset",
         inverseThemeName = "sunrise",
+        isDarkTheme = true,
         colorScheme = sunsetColorScheme,
         extraColorScheme = sunsetExtraColorScheme,
     ),
@@ -27,6 +29,7 @@ enum class PrimalTheme(
     Sunrise(
         themeName = "sunrise",
         inverseThemeName = "sunset",
+        isDarkTheme = false,
         colorScheme = sunriseColorScheme,
         extraColorScheme = sunriseExtraColorScheme,
     ),
@@ -34,6 +37,7 @@ enum class PrimalTheme(
     Midnight(
         themeName = "midnight",
         inverseThemeName = "ice",
+        isDarkTheme = true,
         colorScheme = midnightColorScheme,
         extraColorScheme = midnightExtraColorScheme,
     ),
@@ -41,6 +45,7 @@ enum class PrimalTheme(
     Ice(
         themeName = "ice",
         inverseThemeName = "midnight",
+        isDarkTheme = false,
         colorScheme = iceColorScheme,
         extraColorScheme = iceExtraColorScheme,
     );

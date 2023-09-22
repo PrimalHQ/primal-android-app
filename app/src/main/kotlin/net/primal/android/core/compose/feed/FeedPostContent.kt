@@ -359,7 +359,7 @@ fun FeedReferencedPosts(
 @Preview
 @Composable
 fun PreviewPostContent() {
-    PrimalTheme {
+    PrimalTheme(primalTheme = PrimalTheme.Sunset) {
         Surface {
             FeedPostContent(
                 content = """
@@ -392,7 +392,7 @@ fun PreviewPostContent() {
 @Preview
 @Composable
 fun PreviewPostContentWithReferencedPost() {
-    PrimalTheme {
+    PrimalTheme(primalTheme = PrimalTheme.Sunset) {
         Surface {
             FeedPostContent(
                 content = """

@@ -753,7 +753,7 @@ private fun ErrorHandler(
 @Preview
 @Composable
 fun PreviewProfileScreen() {
-    PrimalTheme {
+    PrimalTheme(primalTheme = PrimalTheme.Sunset) {
         ProfileScreen(
             state = ProfileContract.UiState(
                 profileId = "profileId",

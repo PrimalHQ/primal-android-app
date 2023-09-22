@@ -106,7 +106,7 @@ fun PrimalButtonPreview(
     @PreviewParameter(PrimalStatePreviewProvider::class)
     state: PrimalButtonPreviewState
 ) {
-    PrimalTheme {
+    PrimalTheme(primalTheme = PrimalTheme.Sunset) {
         PrimalLoadingButton(
             modifier = Modifier.height(48.dp),
             onClick = { },

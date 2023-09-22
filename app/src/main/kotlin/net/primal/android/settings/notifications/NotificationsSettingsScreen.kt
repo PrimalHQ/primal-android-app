@@ -1,6 +1,5 @@
 package net.primal.android.settings.notifications
 
-import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -236,10 +235,10 @@ fun LaunchedErrorHandler(
     }
 }
 
-@Preview(uiMode = UI_MODE_NIGHT_YES)
+@Preview
 @Composable
 fun PreviewNotificationsSettingsScreen() {
-    PrimalTheme {
+    PrimalTheme(primalTheme = PrimalTheme.Sunset) {
         NotificationsSettingsScreen(
             state = NotificationsSettingsContract.UiState(),
             onClose = {},

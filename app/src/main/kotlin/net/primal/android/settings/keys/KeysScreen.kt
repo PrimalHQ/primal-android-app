@@ -276,7 +276,7 @@ fun PrivateKeySection(
 @Preview
 @Composable
 fun PreviewSettingsHomeScreen() {
-    PrimalTheme {
+    PrimalTheme(primalTheme = PrimalTheme.Sunset) {
         KeysScreen(
             state = KeysContract.UiState(
                 avatarUrl = "https://i.imgur.com/Z8dpmvc.png",

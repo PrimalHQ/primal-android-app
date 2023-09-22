@@ -253,7 +253,7 @@ private fun ErrorHandler(
 @Preview
 @Composable
 fun FeedScreenPreview() {
-    PrimalTheme {
+    PrimalTheme(primalTheme = PrimalTheme.Sunset) {
         FeedScreen(
             state = FeedContract.UiState(posts = flow { }),
             eventPublisher = {},

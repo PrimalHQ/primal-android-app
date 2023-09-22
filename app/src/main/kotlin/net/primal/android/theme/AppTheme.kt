@@ -7,6 +7,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Shapes
 import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.toArgb
@@ -17,16 +18,18 @@ import net.primal.android.theme.colors.ExtraColorSchemeProvider
 import net.primal.android.theme.colors.LocalExtraColors
 
 
+@ReadOnlyComposable
+@Composable
+fun defaultPrimalTheme(): PrimalTheme {
+    return if (isSystemInDarkTheme()) PrimalTheme.Sunset else PrimalTheme.Sunrise
+}
+
 @Composable
 fun PrimalTheme(
-    theme: PrimalTheme? = null,
+    primalTheme: PrimalTheme,
     content: @Composable () -> Unit
 ) {
-    val isDarkMode = isSystemInDarkTheme()
-    val primalTheme = theme ?: if (isDarkMode) PrimalTheme.Sunset else PrimalTheme.Sunrise
-
     AdjustSystemColors(primalTheme = primalTheme)
-
     ExtraColorSchemeProvider(extraColorScheme = primalTheme.extraColorScheme) {
         MaterialTheme(
             colorScheme = primalTheme.colorScheme,

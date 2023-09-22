@@ -101,7 +101,7 @@ fun ReferencedPostAuthorRow(
 @Composable
 fun PreviewLightReferencedPostAuthorRow() {
     PrimalTheme(
-        theme = PrimalTheme.Sunrise,
+        primalTheme = PrimalTheme.Sunrise,
     ) {
         Surface {
             ReferencedPostAuthorRow(
@@ -119,7 +119,7 @@ fun PreviewLightReferencedPostAuthorRow() {
 @Composable
 fun PreviewDarkReferencedPostAuthorRow() {
     PrimalTheme(
-        theme = PrimalTheme.Sunset,
+        primalTheme = PrimalTheme.Sunset,
     ) {
         Surface {
             ReferencedPostAuthorRow(

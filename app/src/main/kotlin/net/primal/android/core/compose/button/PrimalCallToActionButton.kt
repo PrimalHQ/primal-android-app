@@ -92,7 +92,7 @@ fun PrimalCallToActionButton(
 @Preview
 @Composable
 fun PreviewButton() {
-    PrimalTheme(theme = PrimalTheme.Sunset) {
+    PrimalTheme(primalTheme = PrimalTheme.Sunset) {
         PrimalCallToActionButton(
             title = "Sign in",
             subtitle = "Already have a Nostr account? Sign in with your Nostr key.",

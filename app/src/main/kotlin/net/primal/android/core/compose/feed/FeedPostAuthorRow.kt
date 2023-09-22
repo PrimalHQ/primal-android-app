@@ -100,7 +100,7 @@ fun FeedPostAuthorRow(
 @Composable
 fun PreviewLightPostAuthorRow() {
     PrimalTheme(
-        theme = PrimalTheme.Sunrise,
+        primalTheme = PrimalTheme.Sunrise,
     ) {
         Surface {
             FeedPostAuthorRow(
@@ -119,7 +119,7 @@ fun PreviewLightPostAuthorRow() {
 @Composable
 fun PreviewDarkPostAuthorRow() {
     PrimalTheme(
-        theme = PrimalTheme.Sunset,
+        primalTheme = PrimalTheme.Sunset,
     ) {
         Surface {
             FeedPostAuthorRow(

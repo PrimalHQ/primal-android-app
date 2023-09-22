@@ -2,7 +2,6 @@ package net.primal.android.notifications.list.ui
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -28,6 +27,7 @@ import net.primal.android.core.compose.feed.FeedPostContent
 import net.primal.android.core.compose.feed.FeedPostStatsRow
 import net.primal.android.core.compose.feed.model.FeedPostAction
 import net.primal.android.core.compose.feed.model.FeedPostUi
+import net.primal.android.core.compose.foundation.isAppInDarkPrimalTheme
 import net.primal.android.core.compose.notifications.toImagePainter
 import net.primal.android.core.ext.openUriSafely
 import net.primal.android.core.utils.shortened
@@ -187,7 +187,7 @@ private fun NotificationListItem(
                             NotificationType.YOUR_POST_WAS_ZAPPED -> ZapColor
                             NotificationType.YOUR_POST_WAS_LIKED -> LikeColor
                             NotificationType.YOUR_POST_WAS_REPOSTED -> RepostColor
-                            NotificationType.YOUR_POST_WAS_REPLIED_TO -> if (isSystemInDarkTheme()) ReplyDarkColor else ReplyLightColor
+                            NotificationType.YOUR_POST_WAS_REPLIED_TO -> if (isAppInDarkPrimalTheme()) ReplyDarkColor else ReplyLightColor
                             else -> Color.Unspecified
                         }
                     )

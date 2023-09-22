@@ -4,7 +4,9 @@ import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
@@ -13,6 +15,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 import net.primal.android.navigation.PrimalAppNavigation
+import net.primal.android.theme.defaultPrimalTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.active.ActiveThemeStore
 import javax.inject.Inject
@@ -31,11 +34,16 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val userTheme = themeStore.userThemeState.collectAsState()
+            val primalTheme = userTheme.value ?: defaultPrimalTheme()
 
             PrimalTheme(
-                theme = userTheme.value
+                primalTheme = primalTheme
             ) {
-                PrimalAppNavigation()
+                CompositionLocalProvider(
+                    LocalPrimalTheme provides primalTheme,
+                ) {
+                    PrimalAppNavigation()
+                }
             }
         }
     }
@@ -53,3 +61,5 @@ class MainActivity : ComponentActivity() {
         window.setBackgroundDrawable(backgroundDrawable)
     }
 }
+
+val LocalPrimalTheme = compositionLocalOf<PrimalTheme> { error("No PrimalTheme Provided") }
