@@ -81,12 +81,12 @@ import net.primal.android.R
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.AvatarThumbnailListItemImage
 import net.primal.android.core.compose.IconText
+import net.primal.android.core.compose.ListLoading
+import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.button.PrimalOutlinedButton
 import net.primal.android.core.compose.feed.FeedLazyColumn
-import net.primal.android.core.compose.ListLoading
-import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.Key
@@ -97,6 +97,7 @@ import net.primal.android.core.ext.findNearestOrNull
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.isPrimalIdentifier
 import net.primal.android.crypto.hexToNoteHrp
+import net.primal.android.crypto.hexToNpubHrp
 import net.primal.android.profile.details.ProfileContract.UiState.ProfileError
 import net.primal.android.profile.details.model.ProfileDetailsUi
 import net.primal.android.profile.details.model.ProfileStatsUi
@@ -686,7 +687,6 @@ private fun UserPublicKey(
     pubkey: String,
     onCopyClick: (String) -> Unit,
 ) {
-    val npub = pubkey.asEllipsizedNpub()
     Row(
         verticalAlignment = CenterVertically,
     ) {
@@ -694,7 +694,7 @@ private fun UserPublicKey(
             modifier = Modifier
                 .padding(horizontal = 16.dp)
                 .wrapContentWidth(),
-            text = npub,
+            text = pubkey.asEllipsizedNpub(),
             style = AppTheme.typography.bodySmall,
             color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
             leadingIconTintColor = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
@@ -707,7 +707,7 @@ private fun UserPublicKey(
             modifier = Modifier
                 .size(20.dp)
                 .clickable(
-                    onClick = { onCopyClick(npub) },
+                    onClick = { onCopyClick(pubkey.hexToNpubHrp()) },
                     role = Role.Button,
                     interactionSource = remember { MutableInteractionSource() },
                     indication = rememberRipple()
