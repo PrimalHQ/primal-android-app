@@ -131,7 +131,6 @@ fun NotificationsScreen(
     val listState = rememberLazyListState()
     val snackbarHostState = remember { SnackbarHostState() }
 
-
     val bottomBarHeight = PrimalBottomBarHeightDp
     var bottomBarOffsetHeightPx by remember { mutableFloatStateOf(0f) }
 

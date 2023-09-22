@@ -46,6 +46,7 @@ enum class NostrEventKind(val value: Int) {
     PrimalRelays(value = 10_000_109),
     PrimalNotification(value = 10_000_110),
     PrimalNotificationsSeenUntil(value = 10_000_111),
+    @Deprecated("Use PrimalNotificationsSummary2.")
     PrimalNotificationsSummary(value = 10_000_112),
     PrimalNotificationsSummary2(value = 10_000_132),
     PrimalPaging(value = 10_000_113),

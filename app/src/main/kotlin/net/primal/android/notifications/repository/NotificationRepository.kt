@@ -29,7 +29,7 @@ class NotificationRepository @Inject constructor(
         withContext(Dispatchers.IO) {
             val seenAt = Instant.now()
             val userId = activeAccountStore.activeUserId()
-            notificationsApi.updateLastSeenTimestamp(userId = userId)
+            notificationsApi.setLastSeenTimestamp(userId = userId)
             remoteMediator.updateLastSeenTimestamp(lastSeen = seenAt)
             database.notifications().markAllUnseenNotificationsAsSeen(seenAt = seenAt.epochSecond)
         }

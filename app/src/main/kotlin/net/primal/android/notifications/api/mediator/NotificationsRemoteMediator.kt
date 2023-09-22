@@ -139,7 +139,7 @@ class NotificationsRemoteMediator(
     private fun List<NotificationData>.mapWithSeenAtTimestamps(): List<NotificationData> {
         return this.map {
             val seenAt = if (it.createdAt <= lastSeenTimestamp) lastSeenTimestamp else null
-            it.copy(seenLocallyAt = seenAt)
+            it.copy(seenGloballyAt = seenAt)
         }
     }
 }
