@@ -1,7 +1,7 @@
 package net.primal.android.notifications.api
 
 import kotlinx.serialization.encodeToString
-import net.primal.android.networking.primal.PrimalApiClient
+import net.primal.android.networking.primal.PrimalClient
 import net.primal.android.networking.primal.PrimalCacheFilter
 import net.primal.android.networking.primal.PrimalVerb
 import net.primal.android.nostr.model.NostrEventKind
@@ -13,9 +13,10 @@ import net.primal.android.serialization.NostrJson
 import net.primal.android.settings.api.model.AppSpecificDataRequest
 import java.time.Instant
 import javax.inject.Inject
+import javax.inject.Named
 
 class NotificationsApiImpl @Inject constructor(
-    private val primalApiClient: PrimalApiClient,
+    @Named("Api") private val primalApiClient: PrimalClient,
     private val nostrNotary: NostrNotary,
 ) : NotificationsApi {
 
