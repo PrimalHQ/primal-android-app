@@ -204,6 +204,7 @@
     <string name="profile_notes_stat">posts</string>
     <string name="profile_follow_button">follow</string>
     <string name="profile_unfollow_button">unfollow</string>
+    <string name="profile_edit_profile_button">edit profile</string>
     <string name="profile_error_unable_to_follow">Unable to follow profile. Please try again.</string>
     <string name="profile_error_unable_to_unfollow">Unable to unfollow profile. Please try again.</string>
 

@@ -16,11 +16,14 @@ fun CreateAccountStep(
     state: CreateContract.UiState,
     eventPublisher: (CreateContract.UiEvent) -> Unit,
 ) {
-    ProfileHero(onBannerUriChange = {
-        eventPublisher(CreateContract.UiEvent.BannerUriChangedEvent(bannerUri = it))
-    }, onAvatarUriChange = {
-        eventPublisher(CreateContract.UiEvent.AvatarUriChangedEvent(avatarUri = it))
-    })
+    ProfileHero(
+        avatar = state.avatarUri,
+        banner = state.bannerUri,
+        onBannerUriChange = {
+            eventPublisher(CreateContract.UiEvent.BannerUriChangedEvent(bannerUri = it))
+        }, onAvatarUriChange = {
+            eventPublisher(CreateContract.UiEvent.AvatarUriChangedEvent(avatarUri = it))
+        })
     Spacer(modifier = Modifier.height(32.dp))
     InputField(
         header = stringResource(id = R.string.create_input_header_display_name),

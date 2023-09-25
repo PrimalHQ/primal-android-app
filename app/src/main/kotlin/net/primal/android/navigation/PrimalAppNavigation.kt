@@ -55,6 +55,8 @@ import net.primal.android.notifications.list.NotificationsScreen
 import net.primal.android.notifications.list.NotificationsViewModel
 import net.primal.android.profile.details.ProfileScreen
 import net.primal.android.profile.details.ProfileViewModel
+import net.primal.android.profile.edit.EditProfileScreen
+import net.primal.android.profile.edit.EditProfileViewModel
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.thread.ThreadScreen
@@ -107,6 +109,8 @@ private fun NavController.navigateToProfile(profileId: String? = null) = when {
     profileId != null -> navigate(route = "profile?$ProfileId=$profileId")
     else -> navigate(route = "profile")
 }
+
+private fun NavController.navigateToEditProfile() = navigate(route = "edit-profile")
 
 private fun NavController.navigateToSettings() = navigate(route = "settings")
 
@@ -273,6 +277,8 @@ fun PrimalAppNavigation() {
                 ),
                 navController = navController,
             )
+
+            editProfile(route = "edit-profile", navController = navController)
 
             settingsNavigation(route = "settings", navController = navController)
         }
@@ -516,9 +522,22 @@ private fun NavGraphBuilder.profile(
         onPostClick = { postId -> navController.navigateToThread(postId = postId) },
         onPostQuoteClick = { preFillContent -> navController.navigateToNewPost(preFillContent) },
         onProfileClick = { profileId -> navController.navigateToProfile(profileId = profileId) },
+        onEditProfileClick = { navController.navigateToEditProfile() },
         onHashtagClick = { hashtag -> navController.navigateToExploreFeed(query = hashtag) },
         onWalletUnavailable = { navController.navigateToWallet() },
     )
+}
+
+private fun NavGraphBuilder.editProfile(
+    route: String,
+    navController: NavController,
+) = composable(
+    route = route
+) {
+    val viewModel = hiltViewModel<EditProfileViewModel>()
+
+    LockToOrientationPortrait()
+    EditProfileScreen(viewModel = viewModel, onClose = { navController.navigateUp() })
 }
 
 private fun NavGraphBuilder.logout(
