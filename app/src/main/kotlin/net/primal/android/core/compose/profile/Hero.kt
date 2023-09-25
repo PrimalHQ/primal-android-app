@@ -45,21 +45,17 @@ import net.primal.android.theme.AppTheme
 
 @Composable
 fun ProfileHero(
-    banner: Uri?,
-    avatar: Uri?,
+    bannerUri: Uri?,
+    avatarUri: Uri?,
     onBannerUriChange: (Uri?) -> Unit,
     onAvatarUriChange: (Uri?) -> Unit
 ) {
-    var avatarUri by remember { mutableStateOf(avatar) }
-    var bannerUri by remember { mutableStateOf(banner) }
     val avatarPickMedia =
         rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-            avatarUri = uri
             onAvatarUriChange(uri)
         }
     val bannerPickMedia =
         rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-            bannerUri = uri
             onBannerUriChange(uri)
         }
 

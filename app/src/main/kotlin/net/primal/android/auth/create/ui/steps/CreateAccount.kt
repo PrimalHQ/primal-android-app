@@ -17,8 +17,8 @@ fun CreateAccountStep(
     eventPublisher: (CreateContract.UiEvent) -> Unit,
 ) {
     ProfileHero(
-        avatar = state.avatarUri,
-        banner = state.bannerUri,
+        avatarUri = state.avatarUri,
+        bannerUri = state.bannerUri,
         onBannerUriChange = {
             eventPublisher(CreateContract.UiEvent.BannerUriChangedEvent(bannerUri = it))
         }, onAvatarUriChange = {

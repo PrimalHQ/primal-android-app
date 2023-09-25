@@ -98,8 +98,8 @@ fun EditProfileContent(
         verticalArrangement = Arrangement.Top
     ) {
         ProfileHero(
-            avatar = state.avatarUri,
-            banner = state.bannerUri,
+            avatarUri = state.avatarUri,
+            bannerUri = state.bannerUri,
             onBannerUriChange = {
                 eventPublisher(EditProfileContract.UiEvent.BannerUriChangedEvent(bannerUri = it))
             }, onAvatarUriChange = {
