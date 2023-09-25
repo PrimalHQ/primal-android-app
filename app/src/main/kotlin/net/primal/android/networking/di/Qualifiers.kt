@@ -4,11 +4,11 @@ import javax.inject.Qualifier
 
 @Qualifier
 @Target(AnnotationTarget.FUNCTION, AnnotationTarget.VALUE_PARAMETER)
-annotation class PrimalApiBaseUrl
+annotation class PrimalCacheApiBaseUrl
 
 @Qualifier
 @Target(AnnotationTarget.FUNCTION, AnnotationTarget.VALUE_PARAMETER)
-annotation class PrimalUploadBaseUrl
+annotation class PrimalUploadApiBaseUrl
 
 @Qualifier
 @Target(AnnotationTarget.FUNCTION, AnnotationTarget.VALUE_PARAMETER)

@@ -18,43 +18,25 @@ import javax.inject.Singleton
 object SocketModule {
 
     @Provides
-    @PrimalApiBaseUrl
+    @PrimalCacheApiBaseUrl
     fun providePrimalApiWSRequest() = Request.Builder()
         .url("wss://cache1.primal.net/v1")
         .addHeader("User-Agent", UserAgentProvider.USER_AGENT)
         .build()
 
     @Provides
-    @PrimalUploadBaseUrl
+    @PrimalUploadApiBaseUrl
     fun providePrimalUploadWSRequest() = Request.Builder()
         .url("wss://uploads.primal.net/v1")
         .addHeader("User-Agent", UserAgentProvider.USER_AGENT)
         .build()
 
     @Provides
-    fun providePrimalSocketClient(
-        okHttpClient: OkHttpClient,
-        @PrimalApiBaseUrl wssRequest: Request,
-    ) = NostrSocketClient(
-        okHttpClient = okHttpClient,
-        wssRequest = wssRequest,
-    )
-
-    @Provides
-    fun providePrimalUploadSocketClient(
-        okHttpClient: OkHttpClient,
-        @PrimalUploadBaseUrl wssRequest: Request
-    ) = NostrSocketClient(
-        okHttpClient = okHttpClient,
-        wssRequest = wssRequest
-    )
-
-    @Provides
     @Singleton
     @PrimalCacheApiClient
     fun providesPrimalApiClient(
         okHttpClient: OkHttpClient,
-        @PrimalApiBaseUrl wssRequest: Request,
+        @PrimalCacheApiBaseUrl wssRequest: Request,
     ) = PrimalApiClient(
         socketClient = NostrSocketClient(
             okHttpClient = okHttpClient,
@@ -67,7 +49,7 @@ object SocketModule {
     @PrimalUploadApiClient
     fun providesPrimalUploadClient(
         okHttpClient: OkHttpClient,
-        @PrimalUploadBaseUrl wssRequest: Request
+        @PrimalUploadApiBaseUrl wssRequest: Request
     ) = PrimalApiClient(
         socketClient = NostrSocketClient(
             okHttpClient = okHttpClient,
