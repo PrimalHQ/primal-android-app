@@ -1,9 +1,9 @@
 package net.primal.android.auth.create
 
-import android.app.Application
+import android.content.ContentResolver
 import android.net.Uri
 import android.util.Base64
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -43,14 +43,15 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CreateViewModel @Inject constructor(
+    private val contentResolver: ContentResolver,
     private val authRepository: AuthRepository,
     private val settingsRepository: SettingsRepository,
     private val nostrNotary: NostrNotary,
     private val relayPool: RelayPool,
     @PrimalUploadApiClient private val primalUploadClient: PrimalApiClient,
     private val recommendedFollowsApi: RecommendedFollowsApi,
-    private val application: Application
-) : AndroidViewModel(application) {
+) : ViewModel() {
+
     private val _state = MutableStateFlow(UiState())
     val state = _state.asStateFlow()
 
@@ -259,11 +260,9 @@ class CreateViewModel @Inject constructor(
         return event?.content
     }
 
-    private suspend fun readImageAndConvertToBase64(path: Uri): String =
+    private suspend fun readImageAndConvertToBase64(path: Uri): String? =
         withContext(Dispatchers.IO) {
-            val inputStream = application.contentResolver.openInputStream(path)!!
-
-            inputStream.use { stream ->
+            contentResolver.openInputStream(path)?.use { stream ->
                 val bytes: ByteArray
                 val buffer = ByteArray(8192)
                 var bytesRead: Int
