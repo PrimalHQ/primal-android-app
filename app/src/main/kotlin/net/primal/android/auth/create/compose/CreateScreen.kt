@@ -1,6 +1,5 @@
 package net.primal.android.auth.create.compose
 
-import android.content.res.Configuration
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -294,12 +293,12 @@ class CreateScreenPreviewProvider : PreviewParameterProvider<CreateScreenPreview
         )
 }
 
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Preview
 @Composable
 fun PreviewCreateScreen(
     @PreviewParameter(CreateScreenPreviewProvider::class) state: CreateScreenPreviewState
 ) {
-    PrimalTheme {
+    PrimalTheme(primalTheme = PrimalTheme.Sunset) {
         CreateScreen(state = CreateContract.UiState(
             currentStep = state.currentStep,
             name = state.name,
