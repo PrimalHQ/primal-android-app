@@ -1,4 +1,4 @@
-package net.primal.android.auth.create.compose.steps
+package net.primal.android.auth.create.ui.steps
 
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height

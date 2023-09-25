@@ -1,4 +1,4 @@
-package net.primal.android.auth.create.compose
+package net.primal.android.auth.create.ui
 
 import android.widget.Toast
 import androidx.compose.foundation.background
@@ -44,9 +44,9 @@ import net.primal.android.R
 import net.primal.android.auth.create.CreateContract
 import net.primal.android.auth.create.CreateContract.UiState.CreateAccountStep
 import net.primal.android.auth.create.CreateViewModel
-import net.primal.android.auth.create.compose.steps.CreateAccountStep
-import net.primal.android.auth.create.compose.steps.FollowRecommendedAccountsStep
-import net.primal.android.auth.create.compose.steps.ProfilePreviewStep
+import net.primal.android.auth.create.ui.steps.CreateAccountStep
+import net.primal.android.auth.create.ui.steps.FollowRecommendedAccountsStep
+import net.primal.android.auth.create.ui.steps.ProfilePreviewStep
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons

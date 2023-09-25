@@ -1,4 +1,4 @@
-package net.primal.android.auth.create.compose
+package net.primal.android.auth.create.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
