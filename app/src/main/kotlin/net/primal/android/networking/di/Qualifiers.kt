@@ -12,8 +12,9 @@ annotation class PrimalUploadBaseUrl
 
 @Qualifier
 @Target(AnnotationTarget.FUNCTION, AnnotationTarget.VALUE_PARAMETER)
-annotation class PrimalSocketClient
+annotation class PrimalCacheApiClient
 
 @Qualifier
 @Target(AnnotationTarget.FUNCTION, AnnotationTarget.VALUE_PARAMETER)
-annotation class PrimalUploadSocketClient
+annotation class PrimalUploadApiClient
+

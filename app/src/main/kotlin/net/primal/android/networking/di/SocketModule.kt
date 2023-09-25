@@ -11,7 +11,6 @@ import net.primal.android.networking.sockets.NostrSocketClient
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import javax.inject.Named
 import javax.inject.Singleton
 
 @Module
@@ -33,7 +32,6 @@ object SocketModule {
         .build()
 
     @Provides
-    @PrimalSocketClient
     fun providePrimalSocketClient(
         okHttpClient: OkHttpClient,
         @PrimalApiBaseUrl wssRequest: Request,
@@ -43,7 +41,6 @@ object SocketModule {
     )
 
     @Provides
-    @PrimalUploadSocketClient
     fun providePrimalUploadSocketClient(
         okHttpClient: OkHttpClient,
         @PrimalUploadBaseUrl wssRequest: Request
@@ -54,29 +51,37 @@ object SocketModule {
 
     @Provides
     @Singleton
+    @PrimalCacheApiClient
+    fun providesPrimalApiClient(
+        okHttpClient: OkHttpClient,
+        @PrimalApiBaseUrl wssRequest: Request,
+    ) = PrimalApiClient(
+        socketClient = NostrSocketClient(
+            okHttpClient = okHttpClient,
+            wssRequest = wssRequest
+        )
+    )
+
+    @Provides
+    @Singleton
+    @PrimalUploadApiClient
+    fun providesPrimalUploadClient(
+        okHttpClient: OkHttpClient,
+        @PrimalUploadBaseUrl wssRequest: Request
+    ) = PrimalApiClient(
+        socketClient = NostrSocketClient(
+            okHttpClient = okHttpClient,
+            wssRequest = wssRequest
+        )
+    )
+
+    @Provides
+    @Singleton
     fun providesRelayPool(
         okHttpClient: OkHttpClient,
         activeAccountStore: ActiveAccountStore,
     ) = RelayPool(
         okHttpClient = okHttpClient,
         activeAccountStore = activeAccountStore,
-    )
-
-    @Provides
-    @Singleton
-    @Named("Api")
-    fun providesPrimalApiClient(
-        @PrimalSocketClient socketClient: NostrSocketClient
-    ) = PrimalApiClient(
-        socketClient = socketClient
-    )
-
-    @Provides
-    @Singleton
-    @Named("Upload")
-    fun providesPrimalUploadClient(
-        @PrimalUploadSocketClient socketClient: NostrSocketClient
-    ) = PrimalApiClient(
-        socketClient = socketClient
     )
 }

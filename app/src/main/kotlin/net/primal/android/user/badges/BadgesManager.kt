@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
+import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.primal.PrimalCacheFilter
 import net.primal.android.networking.primal.PrimalVerb
@@ -28,13 +29,12 @@ import net.primal.android.user.accounts.active.ActiveUserAccountState
 import net.primal.android.user.domain.Badges
 import java.util.UUID
 import javax.inject.Inject
-import javax.inject.Named
 import javax.inject.Singleton
 
 @Singleton
 class BadgesManager @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
-    @Named("Api") private val primalApiClient: PrimalApiClient,
+    @PrimalCacheApiClient private val primalApiClient: PrimalApiClient,
 ) : LifecycleEventObserver {
 
     private val scope = CoroutineScope(Dispatchers.IO)

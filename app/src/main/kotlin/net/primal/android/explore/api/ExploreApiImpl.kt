@@ -8,6 +8,7 @@ import kotlinx.serialization.json.jsonPrimitive
 import net.primal.android.explore.api.model.HashtagScore
 import net.primal.android.explore.api.model.SearchUsersRequestBody
 import net.primal.android.explore.api.model.UsersResponse
+import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.primal.PrimalCacheFilter
 import net.primal.android.networking.primal.PrimalVerb.RECOMMENDED_USERS
@@ -17,10 +18,9 @@ import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.serialization.NostrJson
 import net.primal.android.serialization.decodeFromStringOrNull
 import javax.inject.Inject
-import javax.inject.Named
 
 class ExploreApiImpl @Inject constructor(
-    @Named("Api") private val primalApiClient: PrimalApiClient,
+    @PrimalCacheApiClient private val primalApiClient: PrimalApiClient,
 ) : ExploreApi {
 
     override suspend fun getTrendingHashtags(): List<HashtagScore> {

@@ -23,8 +23,9 @@ import net.primal.android.auth.create.CreateContract.UiState
 import net.primal.android.auth.create.api.RecommendedFollowsApi
 import net.primal.android.core.api.model.UploadImageRequest
 import net.primal.android.crypto.CryptoUtils
-import net.primal.android.networking.primal.PrimalCacheFilter
+import net.primal.android.networking.di.PrimalUploadApiClient
 import net.primal.android.networking.primal.PrimalApiClient
+import net.primal.android.networking.primal.PrimalCacheFilter
 import net.primal.android.networking.primal.PrimalVerb
 import net.primal.android.networking.relays.RelayPool
 import net.primal.android.networking.relays.errors.NostrPublishException
@@ -39,7 +40,6 @@ import net.primal.android.user.domain.toRelay
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import javax.inject.Inject
-import javax.inject.Named
 
 @HiltViewModel
 class CreateViewModel @Inject constructor(
@@ -47,7 +47,7 @@ class CreateViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
     private val nostrNotary: NostrNotary,
     private val relayPool: RelayPool,
-    @Named("Upload") private val primalUploadClient: PrimalApiClient,
+    @PrimalUploadApiClient private val primalUploadClient: PrimalApiClient,
     private val recommendedFollowsApi: RecommendedFollowsApi,
     private val application: Application
 ) : AndroidViewModel(application) {
