@@ -3,10 +3,10 @@ package net.primal.android.user.accounts
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import net.primal.android.core.utils.asEllipsizedNpub
+import net.primal.android.core.utils.userNameUiFriendly
 import net.primal.android.nostr.ext.asProfileMetadataPO
 import net.primal.android.nostr.ext.takeContentAsUserProfileStatsOrNull
 import net.primal.android.profile.db.authorNameUiFriendly
-import net.primal.android.profile.db.userNameUiFriendly
 import net.primal.android.user.api.UsersApi
 import net.primal.android.user.domain.UserAccount
 import net.primal.android.user.domain.asUserAccount

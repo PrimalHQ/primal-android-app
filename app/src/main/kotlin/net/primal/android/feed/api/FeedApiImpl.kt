@@ -4,6 +4,7 @@ import kotlinx.serialization.encodeToString
 import net.primal.android.feed.api.model.FeedRequestBody
 import net.primal.android.feed.api.model.FeedResponse
 import net.primal.android.feed.api.model.ThreadRequestBody
+import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.primal.PrimalCacheFilter
 import net.primal.android.networking.primal.PrimalVerb.*
@@ -13,7 +14,7 @@ import net.primal.android.serialization.decodeFromStringOrNull
 import javax.inject.Inject
 
 class FeedApiImpl @Inject constructor(
-    private val primalApiClient: PrimalApiClient,
+    @PrimalCacheApiClient private val primalApiClient: PrimalApiClient,
 ) : FeedApi {
 
     override suspend fun getFeed(body: FeedRequestBody): FeedResponse {

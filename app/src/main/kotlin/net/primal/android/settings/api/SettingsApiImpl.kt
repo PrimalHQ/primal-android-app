@@ -1,6 +1,7 @@
 package net.primal.android.settings.api
 
 import kotlinx.serialization.encodeToString
+import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.primal.PrimalCacheFilter
 import net.primal.android.networking.primal.PrimalVerb
@@ -15,7 +16,7 @@ import net.primal.android.settings.api.model.SetAppSettingsRequest
 import javax.inject.Inject
 
 class SettingsApiImpl @Inject constructor(
-    private val primalApiClient: PrimalApiClient,
+    @PrimalCacheApiClient private val primalApiClient: PrimalApiClient,
     private val nostrNotary: NostrNotary,
 ) : SettingsApi {
 

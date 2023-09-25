@@ -13,6 +13,7 @@ import net.primal.android.nostr.ext.asPubkeyTag
 import net.primal.android.nostr.ext.toTags
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.NostrEventKind
+import net.primal.android.nostr.model.content.ContentMetadata
 import net.primal.android.nostr.model.primal.content.ContentAppSettings
 import net.primal.android.serialization.NostrJson
 import net.primal.android.serialization.toNostrRelayMap
@@ -156,5 +157,64 @@ class NostrNotary @Inject constructor(
             content = encryptedMessage,
             tags = tags
         ).signOrThrow(hexPrivateKey = Hex.decode(nwc.keypair.privateKey))
+    }
+
+    fun signImageUploadNostrEvent(
+        privkey: String,
+        pubkey: String,
+        base64Image: String
+    ): NostrEvent {
+        return NostrUnsignedEvent(
+            pubKey = pubkey,
+            kind = NostrEventKind.PrimalImageUploadRequest.value,
+            content = base64Image,
+            tags = emptyList()
+        ).signOrThrow(hexPrivateKey = Hex.decode(privkey))
+    }
+
+    fun signMetadataNostrEvent(
+        privkey: String,
+        pubkey: String,
+        metadata: ContentMetadata
+    ): NostrEvent {
+        return NostrUnsignedEvent(
+            pubKey = pubkey,
+            kind = NostrEventKind.Metadata.value,
+            content = json.encodeToString(metadata),
+            tags = emptyList()
+        ).signOrThrow(hexPrivateKey = Hex.decode(privkey))
+    }
+
+    fun signFirstContactNostrEvent(
+        privkey: String,
+        pubkey: String,
+        relays: List<Relay>
+    ): NostrEvent {
+        val tags = listOf(pubkey.asPubkeyTag())
+        val content = NostrJson.encodeToString(relays.toNostrRelayMap())
+
+        return NostrUnsignedEvent(
+            pubKey = pubkey,
+            kind = NostrEventKind.Contacts.value,
+            content = content,
+            tags = tags
+        ).signOrThrow(hexPrivateKey = Hex.decode(privkey))
+    }
+
+    fun signInitialContactsNostrEvent(
+        privkey: String,
+        pubkey: String,
+        contacts: Set<String>,
+        relays: List<Relay>
+    ): NostrEvent {
+        val tags = contacts.map { it.asPubkeyTag() }
+        val content = NostrJson.encodeToString(relays.toNostrRelayMap())
+
+        return NostrUnsignedEvent(
+            pubKey = pubkey,
+            kind = NostrEventKind.Contacts.value,
+            content = content,
+            tags = tags
+        ).signOrThrow(hexPrivateKey = Hex.decode(privkey))
     }
 }

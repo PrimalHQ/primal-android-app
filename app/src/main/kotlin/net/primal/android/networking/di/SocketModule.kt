@@ -5,6 +5,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import net.primal.android.networking.UserAgentProvider
+import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.relays.RelayPool
 import net.primal.android.networking.sockets.NostrSocketClient
 import net.primal.android.user.accounts.active.ActiveAccountStore
@@ -17,20 +18,43 @@ import javax.inject.Singleton
 object SocketModule {
 
     @Provides
-    @PrimalApiBaseUrl
+    @PrimalCacheApiBaseUrl
     fun providePrimalApiWSRequest() = Request.Builder()
         .url("wss://cache1.primal.net/v1")
         .addHeader("User-Agent", UserAgentProvider.USER_AGENT)
         .build()
 
     @Provides
-    @PrimalSocketClient
-    fun providePrimalSocketClient(
+    @PrimalUploadApiBaseUrl
+    fun providePrimalUploadWSRequest() = Request.Builder()
+        .url("wss://uploads.primal.net/v1")
+        .addHeader("User-Agent", UserAgentProvider.USER_AGENT)
+        .build()
+
+    @Provides
+    @Singleton
+    @PrimalCacheApiClient
+    fun providesPrimalApiClient(
         okHttpClient: OkHttpClient,
-        @PrimalApiBaseUrl wssRequest: Request,
-    ) = NostrSocketClient(
-        okHttpClient = okHttpClient,
-        wssRequest = wssRequest,
+        @PrimalCacheApiBaseUrl wssRequest: Request,
+    ) = PrimalApiClient(
+        socketClient = NostrSocketClient(
+            okHttpClient = okHttpClient,
+            wssRequest = wssRequest
+        )
+    )
+
+    @Provides
+    @Singleton
+    @PrimalUploadApiClient
+    fun providesPrimalUploadClient(
+        okHttpClient: OkHttpClient,
+        @PrimalUploadApiBaseUrl wssRequest: Request
+    ) = PrimalApiClient(
+        socketClient = NostrSocketClient(
+            okHttpClient = okHttpClient,
+            wssRequest = wssRequest
+        )
     )
 
     @Provides

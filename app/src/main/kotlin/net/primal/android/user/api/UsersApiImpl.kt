@@ -1,6 +1,7 @@
 package net.primal.android.user.api
 
 import kotlinx.serialization.encodeToString
+import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.primal.PrimalCacheFilter
 import net.primal.android.networking.primal.PrimalVerb.CONTACT_LIST
@@ -10,6 +11,7 @@ import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.serialization.NostrJson
+import net.primal.android.user.api.model.ContactsRequestBody
 import net.primal.android.user.api.model.UserContactsResponse
 import net.primal.android.user.api.model.UserProfileResponse
 import net.primal.android.user.api.model.UserRequestBody
@@ -17,7 +19,7 @@ import net.primal.android.user.domain.Relay
 import javax.inject.Inject
 
 class UsersApiImpl @Inject constructor(
-    private val primalApiClient: PrimalApiClient,
+    @PrimalCacheApiClient private val primalApiClient: PrimalApiClient,
     private val relayPool: RelayPool,
     private val nostrNotary: NostrNotary,
 ) : UsersApi {
@@ -44,7 +46,7 @@ class UsersApiImpl @Inject constructor(
             message = PrimalCacheFilter(
                 primalVerb = CONTACT_LIST,
                 optionsJson = NostrJson.encodeToString(
-                    UserRequestBody(pubkey = pubkey, extendedResponse = extendedResponse)
+                    ContactsRequestBody(pubkey = pubkey, extendedResponse = extendedResponse)
                 )
             )
         )

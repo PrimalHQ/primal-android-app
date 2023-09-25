@@ -2,6 +2,8 @@ package net.primal.android.nostr.model.content
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import net.primal.android.core.utils.asEllipsizedNpub
+import net.primal.android.crypto.hexToNpubHrp
 
 @Serializable
 data class ContentMetadata(

@@ -9,6 +9,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.relays.RelayPool
 import net.primal.android.nostr.notary.NostrNotary
@@ -58,7 +59,7 @@ object UserModule {
 
     @Provides
     fun provideUsersApi(
-        primalApiClient: PrimalApiClient,
+        @PrimalCacheApiClient primalApiClient: PrimalApiClient,
         relayPool: RelayPool,
         nostrNotary: NostrNotary,
     ): UsersApi = UsersApiImpl(

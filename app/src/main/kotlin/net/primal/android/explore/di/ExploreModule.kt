@@ -6,6 +6,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import net.primal.android.explore.api.ExploreApi
 import net.primal.android.explore.api.ExploreApiImpl
+import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.android.networking.primal.PrimalApiClient
 
 @Module
@@ -13,7 +14,7 @@ import net.primal.android.networking.primal.PrimalApiClient
 object ExploreModule {
     @Provides
     fun provideExploreApi(
-        primalApiClient: PrimalApiClient,
+        @PrimalCacheApiClient primalApiClient: PrimalApiClient,
     ): ExploreApi = ExploreApiImpl(
         primalApiClient = primalApiClient,
     )

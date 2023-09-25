@@ -15,12 +15,12 @@ import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 import timber.log.Timber
 import java.util.UUID
+import javax.inject.Inject
 
 class NostrSocketClient constructor(
     private val okHttpClient: OkHttpClient,
     private val wssRequest: Request,
 ) {
-
     private val scope = CoroutineScope(Dispatchers.IO)
 
     private val webSocketMutex = Mutex()
