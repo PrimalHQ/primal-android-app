@@ -6,7 +6,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import net.primal.android.feed.api.FeedApi
 import net.primal.android.feed.api.FeedApiImpl
-import net.primal.android.networking.primal.PrimalClient
+import net.primal.android.networking.primal.PrimalApiClient
 import javax.inject.Named
 
 @Module
@@ -14,9 +14,9 @@ import javax.inject.Named
 object FeedApiModule {
     @Provides
     fun provideFeedApi(
-        @Named("Api") primalClient: PrimalClient,
+        @Named("Api") primalApiClient: PrimalApiClient,
     ): FeedApi = FeedApiImpl(
-        primalClient = primalClient,
+        primalApiClient = primalApiClient,
     )
 
 }

@@ -1,7 +1,7 @@
 package net.primal.android.user.api
 
 import kotlinx.serialization.encodeToString
-import net.primal.android.networking.primal.PrimalClient
+import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.primal.PrimalCacheFilter
 import net.primal.android.networking.primal.PrimalVerb.CONTACT_LIST
 import net.primal.android.networking.primal.PrimalVerb.USER_PROFILE
@@ -19,13 +19,13 @@ import javax.inject.Inject
 import javax.inject.Named
 
 class UsersApiImpl @Inject constructor(
-    @Named("Api") private val primalClient: PrimalClient,
+    @Named("Api") private val primalApiClient: PrimalApiClient,
     private val relayPool: RelayPool,
     private val nostrNotary: NostrNotary,
 ) : UsersApi {
 
     override suspend fun getUserProfile(pubkey: String): UserProfileResponse {
-        val queryResult = primalClient.query(
+        val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = USER_PROFILE,
                 optionsJson = NostrJson.encodeToString(UserRequestBody(pubkey = pubkey))
@@ -42,7 +42,7 @@ class UsersApiImpl @Inject constructor(
         pubkey: String,
         extendedResponse: Boolean,
     ): UserContactsResponse {
-        val queryResult = primalClient.query(
+        val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = CONTACT_LIST,
                 optionsJson = NostrJson.encodeToString(

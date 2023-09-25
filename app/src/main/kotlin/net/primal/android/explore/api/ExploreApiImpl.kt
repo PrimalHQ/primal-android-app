@@ -8,7 +8,7 @@ import kotlinx.serialization.json.jsonPrimitive
 import net.primal.android.explore.api.model.HashtagScore
 import net.primal.android.explore.api.model.SearchUsersRequestBody
 import net.primal.android.explore.api.model.UsersResponse
-import net.primal.android.networking.primal.PrimalClient
+import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.primal.PrimalCacheFilter
 import net.primal.android.networking.primal.PrimalVerb.RECOMMENDED_USERS
 import net.primal.android.networking.primal.PrimalVerb.TRENDING_HASHTAGS_7D
@@ -20,11 +20,11 @@ import javax.inject.Inject
 import javax.inject.Named
 
 class ExploreApiImpl @Inject constructor(
-    @Named("Api") private val primalClient: PrimalClient,
+    @Named("Api") private val primalApiClient: PrimalApiClient,
 ) : ExploreApi {
 
     override suspend fun getTrendingHashtags(): List<HashtagScore> {
-        val queryResult = primalClient.query(
+        val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(primalVerb = TRENDING_HASHTAGS_7D)
         )
 
@@ -42,7 +42,7 @@ class ExploreApiImpl @Inject constructor(
     }
 
     override suspend fun getRecommendedUsers(): UsersResponse {
-        val queryResult = primalClient.query(
+        val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(primalVerb = RECOMMENDED_USERS)
         )
 
@@ -53,7 +53,7 @@ class ExploreApiImpl @Inject constructor(
     }
 
     override suspend fun searchUsers(body: SearchUsersRequestBody): UsersResponse{
-        val queryResult = primalClient.query(
+        val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = USER_SEARCH,
                 optionsJson = NostrJson.encodeToString(body),

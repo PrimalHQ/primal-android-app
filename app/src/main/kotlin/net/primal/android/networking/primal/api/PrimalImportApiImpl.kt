@@ -1,7 +1,7 @@
 package net.primal.android.networking.primal.api
 
 import kotlinx.serialization.encodeToString
-import net.primal.android.networking.primal.PrimalClient
+import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.primal.PrimalCacheFilter
 import net.primal.android.networking.primal.PrimalVerb
 import net.primal.android.networking.primal.api.model.ImportRequestBody
@@ -11,11 +11,11 @@ import javax.inject.Inject
 import javax.inject.Named
 
 class PrimalImportApiImpl @Inject constructor(
-    @Named("Api") private val primalClient: PrimalClient,
+    @Named("Api") private val primalApiClient: PrimalApiClient,
 ) : PrimalImportApi {
 
     override suspend fun importEvents(body: ImportRequestBody): Boolean {
-        val result = primalClient.query(
+        val result = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.IMPORT_EVENTS,
                 optionsJson = NostrJson.encodeToString(body)

@@ -5,7 +5,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import net.primal.android.networking.UserAgentProvider
-import net.primal.android.networking.primal.PrimalClient
+import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.relays.RelayPool
 import net.primal.android.networking.sockets.NostrSocketClient
 import net.primal.android.user.accounts.active.ActiveAccountStore
@@ -67,7 +67,7 @@ object SocketModule {
     @Named("Api")
     fun providesPrimalApiClient(
         @PrimalSocketClient socketClient: NostrSocketClient
-    ) = PrimalClient(
+    ) = PrimalApiClient(
         socketClient = socketClient
     )
 
@@ -76,7 +76,7 @@ object SocketModule {
     @Named("Upload")
     fun providesPrimalUploadClient(
         @PrimalUploadSocketClient socketClient: NostrSocketClient
-    ) = PrimalClient(
+    ) = PrimalApiClient(
         socketClient = socketClient
     )
 }

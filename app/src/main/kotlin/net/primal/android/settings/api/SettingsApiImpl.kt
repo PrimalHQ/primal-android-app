@@ -1,7 +1,7 @@
 package net.primal.android.settings.api
 
 import kotlinx.serialization.encodeToString
-import net.primal.android.networking.primal.PrimalClient
+import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.primal.PrimalCacheFilter
 import net.primal.android.networking.primal.PrimalVerb
 import net.primal.android.nostr.model.NostrEvent
@@ -16,12 +16,12 @@ import javax.inject.Inject
 import javax.inject.Named
 
 class SettingsApiImpl @Inject constructor(
-    @Named("Api") private val primalClient: PrimalClient,
+    @Named("Api") private val primalApiClient: PrimalApiClient,
     private val nostrNotary: NostrNotary,
 ) : SettingsApi {
 
     override suspend fun getAppSettings(pubkey: String): GetAppSettingsResponse {
-        val queryResult = primalClient.query(
+        val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.GET_APP_SETTINGS,
                 optionsJson = NostrJson.encodeToString(
@@ -50,7 +50,7 @@ class SettingsApiImpl @Inject constructor(
             appSettings = appSettings,
         )
 
-        primalClient.query(
+        primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.SET_APP_SETTINGS,
                 optionsJson = NostrJson.encodeToString(
