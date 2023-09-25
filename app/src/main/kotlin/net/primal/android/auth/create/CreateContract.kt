@@ -1,8 +1,8 @@
 package net.primal.android.auth.create
 
 import android.net.Uri
+import net.primal.android.auth.create.ui.RecommendedFollow
 import net.primal.android.crypto.CryptoUtils
-import net.primal.android.nostr.model.content.ContentMetadata
 
 interface CreateContract {
     data class UiState(
@@ -62,19 +62,3 @@ interface CreateContract {
         data class AccountCreatedAndPersisted(val pubkey: String) : SideEffect()
     }
 }
-
-data class RecommendedFollow(val pubkey: String, val isCurrentUserFollowing: Boolean = false, val groupName: String, val content: ContentMetadata)
-
-fun CreateContract.UiState.toCreateNostrProfileMetadata(
-    resolvedAvatarUrl: String?,
-    resolvedBannerUrl: String?
-): ContentMetadata = ContentMetadata(
-    name = this.handle,
-    displayName = this.name,
-    website = this.website,
-    about = this.aboutMe,
-    picture = resolvedAvatarUrl ?: "",
-    banner = resolvedBannerUrl ?: "",
-    lud16 = this.lightningAddress,
-    nip05 = this.nip05Identifier
-)

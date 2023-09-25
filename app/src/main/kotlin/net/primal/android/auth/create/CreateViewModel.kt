@@ -21,6 +21,7 @@ import net.primal.android.auth.create.CreateContract.SideEffect
 import net.primal.android.auth.create.CreateContract.UiEvent
 import net.primal.android.auth.create.CreateContract.UiState
 import net.primal.android.auth.create.api.RecommendedFollowsApi
+import net.primal.android.auth.create.ui.RecommendedFollow
 import net.primal.android.core.api.model.UploadImageRequest
 import net.primal.android.crypto.CryptoUtils
 import net.primal.android.networking.di.PrimalUploadApiClient
@@ -31,6 +32,7 @@ import net.primal.android.networking.relays.RelayPool
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.model.NostrEventKind
+import net.primal.android.nostr.model.content.ContentMetadata
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.serialization.NostrJson
 import net.primal.android.serialization.nostrJsonSerializer
@@ -156,7 +158,7 @@ class CreateViewModel @Inject constructor(
             val result = response.suggestions.map { sg ->
                 return@map sg.members.map { Pair(sg.group, it) }
             }.flatten().map {
-                return@map RecommendedFollow(
+                RecommendedFollow(
                     pubkey = it.second.pubkey,
                     groupName = it.first,
                     content = NostrJson.decodeFromString(response.metadata[it.second.pubkey]!!.content),
@@ -277,4 +279,19 @@ class CreateViewModel @Inject constructor(
                 return@withContext Base64.encodeToString(bytes, Base64.DEFAULT)
             }
         }
+
+    private fun UiState.toCreateNostrProfileMetadata(
+        resolvedAvatarUrl: String?,
+        resolvedBannerUrl: String?
+    ): ContentMetadata = ContentMetadata(
+        name = this.handle,
+        displayName = this.name,
+        website = this.website,
+        about = this.aboutMe,
+        picture = resolvedAvatarUrl ?: "",
+        banner = resolvedBannerUrl ?: "",
+        lud16 = this.lightningAddress,
+        nip05 = this.nip05Identifier
+    )
+
 }

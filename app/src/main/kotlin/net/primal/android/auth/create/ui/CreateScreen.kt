@@ -30,6 +30,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -52,6 +53,7 @@ import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.nostr.model.content.ContentMetadata
+import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 
 @Composable
@@ -212,6 +214,31 @@ fun CreateContent(
             )
         }
     }
+}
+
+@Composable
+private fun stepTitle(step: CreateAccountStep): String {
+    return when (step) {
+        CreateAccountStep.NEW_ACCOUNT -> stringResource(id = R.string.create_title_new_account)
+        CreateAccountStep.PROFILE_PREVIEW -> stringResource(id = R.string.create_title_profile_preview)
+        CreateAccountStep.ACCOUNT_CREATED -> stringResource(id = R.string.create_title_nostr_account_created)
+        CreateAccountStep.FOLLOW_RECOMMENDED_ACCOUNTS -> stringResource(id = R.string.create_title_people_to_follow)
+    }
+}
+
+@Composable
+private fun stepActionText(step: CreateAccountStep): String {
+    return when (step) {
+        CreateAccountStep.NEW_ACCOUNT -> stringResource(id = R.string.create_action_next)
+        CreateAccountStep.PROFILE_PREVIEW -> stringResource(id = R.string.create_action_create_nostr_account)
+        CreateAccountStep.ACCOUNT_CREATED -> stringResource(id = R.string.create_action_find_people_to_follow)
+        CreateAccountStep.FOLLOW_RECOMMENDED_ACCOUNTS -> stringResource(id = R.string.create_action_finish)
+    }
+}
+
+@Composable
+private fun stepColor(step: CreateAccountStep, position: Int): Color {
+    return if (position <= step.step) AppTheme.extraColorScheme.onSurfaceVariantAlt1 else AppTheme.colorScheme.outline
 }
 
 @Composable
