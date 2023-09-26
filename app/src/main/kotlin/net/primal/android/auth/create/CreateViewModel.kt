@@ -61,14 +61,8 @@ class CreateViewModel @Inject constructor(
         _event.collect { event ->
             when (event) {
                 is UiEvent.GoToProfilePreviewStepEvent -> setState { copy(currentStep = UiState.CreateAccountStep.PROFILE_PREVIEW) }
-                is UiEvent.GoToNostrCreatedStepEvent -> {
-                    createNostrAccount()
-                }
-
-                is UiEvent.GoToFollowContactsStepEvent -> {
-                    fetchRecommendedFollows()
-                }
-
+                is UiEvent.GoToNostrCreatedStepEvent -> createNostrAccount()
+                is UiEvent.GoToFollowContactsStepEvent -> fetchRecommendedFollows()
                 is UiEvent.GoBack -> goBack()
                 is UiEvent.FinishEvent -> finish()
                 is UiEvent.AvatarUriChangedEvent -> setState { copy(avatarUri = event.avatarUri) }

@@ -15,8 +15,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -88,22 +88,66 @@ fun CreateScreen(
     onClose: () -> Unit,
 ) {
     Scaffold(topBar = {
-        PrimalTopAppBar(
-            title = stepTitle(step = state.currentStep),
-            navigationIcon = if (state.currentStep == CreateAccountStep.FOLLOW_RECOMMENDED_ACCOUNTS) null else PrimalIcons.ArrowBack,
-            onNavigationIconClick = {
-                if (state.currentStep == CreateAccountStep.NEW_ACCOUNT) {
-                    onClose()
-                } else {
-                    eventPublisher(CreateContract.UiEvent.GoBack)
-                }
-            },
-        )
+        Column {
+            PrimalTopAppBar(
+                title = stepTitle(step = state.currentStep),
+                navigationIcon = if (state.currentStep == CreateAccountStep.FOLLOW_RECOMMENDED_ACCOUNTS) null else PrimalIcons.ArrowBack,
+                onNavigationIconClick = {
+                    if (state.currentStep == CreateAccountStep.NEW_ACCOUNT) {
+                        onClose()
+                    } else {
+                        eventPublisher(CreateContract.UiEvent.GoBack)
+                    }
+                },
+            )
+
+            if (state.currentStep != CreateAccountStep.FOLLOW_RECOMMENDED_ACCOUNTS) {
+                StepsIndicator(currentStep = state.currentStep)
+            }
+        }
     }, content = { paddingValues ->
         CreateContent(
             state = state, eventPublisher = eventPublisher, paddingValues = paddingValues
         )
     })
+}
+
+@Composable
+private fun StepsIndicator(
+    currentStep: CreateAccountStep,
+) {
+    Row(
+        modifier = Modifier
+            .wrapContentHeight()
+            .padding(bottom = 16.dp)
+            .fillMaxWidth(),
+        horizontalArrangement = Arrangement.Center
+    ) {
+        Row(
+            modifier = Modifier.clip(shape = RoundedCornerShape(2.dp))
+        ) {
+            Box(
+                modifier = Modifier
+                    .width(32.dp)
+                    .height(4.dp)
+                    .background(stepColor(step = currentStep, position = 1))
+            )
+            Spacer(modifier = Modifier.width(2.dp))
+            Box(
+                modifier = Modifier
+                    .width(32.dp)
+                    .height(4.dp)
+                    .background(stepColor(step = currentStep, position = 2))
+            )
+            Spacer(modifier = Modifier.width(2.dp))
+            Box(
+                modifier = Modifier
+                    .width(32.dp)
+                    .height(4.dp)
+                    .background(stepColor(step = currentStep, position = 3))
+            )
+        }
+    }
 }
 
 @Composable
@@ -116,45 +160,11 @@ fun CreateContent(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .systemBarsPadding()
             .navigationBarsPadding()
             .imePadding()
             .padding(paddingValues = paddingValues),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        if (state.currentStep != CreateAccountStep.FOLLOW_RECOMMENDED_ACCOUNTS) {
-            Row(
-                modifier = Modifier
-                    .height(18.dp)
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Row(
-                    modifier = Modifier.clip(shape = RoundedCornerShape(2.dp))
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .width(32.dp)
-                            .height(4.dp)
-                            .background(stepColor(step = state.currentStep, position = 1))
-                    )
-                    Spacer(modifier = Modifier.width(2.dp))
-                    Box(
-                        modifier = Modifier
-                            .width(32.dp)
-                            .height(4.dp)
-                            .background(stepColor(step = state.currentStep, position = 2))
-                    )
-                    Spacer(modifier = Modifier.width(2.dp))
-                    Box(
-                        modifier = Modifier
-                            .width(32.dp)
-                            .height(4.dp)
-                            .background(stepColor(step = state.currentStep, position = 3))
-                    )
-                }
-            }
-        }
         val columnModifier =
             if (state.currentStep != CreateAccountStep.FOLLOW_RECOMMENDED_ACCOUNTS) Modifier
                 .verticalScroll(
