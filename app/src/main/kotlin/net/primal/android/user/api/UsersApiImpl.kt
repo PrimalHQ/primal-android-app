@@ -6,9 +6,10 @@ import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.primal.PrimalCacheFilter
 import net.primal.android.networking.primal.PrimalVerb.CONTACT_LIST
 import net.primal.android.networking.primal.PrimalVerb.USER_PROFILE
-import net.primal.android.networking.relays.RelayPool
+import net.primal.android.networking.relays.RelaysManager
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.NostrEventKind
+import net.primal.android.nostr.model.content.ContentMetadata
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.serialization.NostrJson
 import net.primal.android.user.api.model.ContactsRequestBody
@@ -20,7 +21,7 @@ import javax.inject.Inject
 
 class UsersApiImpl @Inject constructor(
     @PrimalCacheApiClient private val primalApiClient: PrimalApiClient,
-    private val relayPool: RelayPool,
+    private val relaysManager: RelaysManager,
     private val nostrNotary: NostrNotary,
 ) : UsersApi {
 
@@ -69,7 +70,19 @@ class UsersApiImpl @Inject constructor(
             contacts = contacts,
             relays = relays,
         )
-        relayPool.publishEvent(nostrEvent = signedNostrEvent)
+        relaysManager.publishEvent(nostrEvent = signedNostrEvent)
+        return signedNostrEvent
+    }
+
+    override suspend fun setUserProfileMetadata(
+        ownerId: String,
+        contentMetadata: ContentMetadata
+    ): NostrEvent {
+        val signedNostrEvent = nostrNotary.signMetadataNostrEvent(
+            userId = ownerId,
+            metadata = contentMetadata,
+        )
+        relaysManager.publishEvent(nostrEvent = signedNostrEvent)
         return signedNostrEvent
     }
 }

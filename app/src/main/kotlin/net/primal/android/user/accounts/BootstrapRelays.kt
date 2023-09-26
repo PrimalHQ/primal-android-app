@@ -1,5 +1,7 @@
 package net.primal.android.user.accounts
 
+import net.primal.android.user.domain.toRelay
+
 val BOOTSTRAP_RELAYS = listOf(
     "wss://relay.damus.io",
     "wss://eden.nostr.land",
@@ -12,4 +14,4 @@ val BOOTSTRAP_RELAYS = listOf(
     "wss://nostr.wine",
     "wss://nostr.bitcoiner.social",
     "wss://relay.primal.net",
-)
+).map { it.toRelay() }

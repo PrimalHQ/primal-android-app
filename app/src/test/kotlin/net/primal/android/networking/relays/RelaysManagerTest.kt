@@ -14,7 +14,23 @@ import okhttp3.OkHttpClient
 import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class RelayPoolTest {
+class RelaysManagerTest {
+
+    private val invalidRelays = listOf(
+        Relay(url = "abcdefghijkl", true, true),
+        Relay(url = "wss://nostr-relay.untethr.me\t", true, true),
+        Relay(url = "⬤ wss://nostr-pub.wellorder.net", true, true),
+        Relay(url = "wss://filter.nostr.wine/npubxyz\n", true, true),
+    )
+
+    private fun buildRelayPoolFactory(
+        relays: List<Relay> = emptyList()
+    ) = mockk<RelayPoolFactory>() {
+        every { create(any()) } returns RelayPool(
+            relays = relays,
+            okHttpClient = OkHttpClient()
+        )
+    }
 
     private fun buildActiveAccountStore(
         relays: List<Relay> = emptyList()
@@ -30,18 +46,10 @@ class RelayPoolTest {
 
     @Test
     fun `invalid relays does not cause the crash`() = runTest {
-        RelayPool(
-            okHttpClient = OkHttpClient(),
-            activeAccountStore = buildActiveAccountStore(
-                relays = listOf(
-                    Relay(url = "abcdefghijkl", true, true),
-                    Relay(url = "wss://nostr-relay.untethr.me\t", true, true),
-                    Relay(url = "⬤ wss://nostr-pub.wellorder.net", true, true),
-                    Relay(url = "wss://filter.nostr.wine/npubxyz\n", true, true),
-                )
-            )
+        RelaysManager(
+            relayPoolFactory = buildRelayPoolFactory(relays = invalidRelays),
+            activeAccountStore = buildActiveAccountStore(relays = invalidRelays),
         )
         advanceUntilIdleAndDelay()
     }
-
 }

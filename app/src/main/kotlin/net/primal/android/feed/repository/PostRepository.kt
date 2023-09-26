@@ -4,7 +4,7 @@ import kotlinx.serialization.json.JsonArray
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.networking.primal.api.PrimalImportApi
 import net.primal.android.networking.primal.api.model.ImportRequestBody
-import net.primal.android.networking.relays.RelayPool
+import net.primal.android.networking.relays.RelaysManager
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.notary.NostrNotary
@@ -14,7 +14,7 @@ import javax.inject.Inject
 class PostRepository @Inject constructor(
     private val database: PrimalDatabase,
     private val activeAccountStore: ActiveAccountStore,
-    private val relayPool: RelayPool,
+    private val relaysManager: RelaysManager,
     private val nostrNotary: NostrNotary,
     private val primalImportApi: PrimalImportApi,
 ) {
@@ -28,7 +28,7 @@ class PostRepository @Inject constructor(
 
         try {
             statsUpdater.increaseLikeStats()
-            relayPool.publishEvent(
+            relaysManager.publishEvent(
                 nostrEvent = nostrNotary.signLikeReactionNostrEvent(
                     userId = userId,
                     postId = postId,
@@ -48,7 +48,7 @@ class PostRepository @Inject constructor(
 
         try {
             statsUpdater.increaseRepostStats()
-            relayPool.publishEvent(
+            relaysManager.publishEvent(
                 nostrEvent = nostrNotary.signRepostNostrEvent(
                     userId = userId,
                     postId = postId,
@@ -72,7 +72,7 @@ class PostRepository @Inject constructor(
             tags = tags.toList(),
             noteContent = content,
         )
-        relayPool.publishEvent(nostrEvent = noteEvent)
+        relaysManager.publishEvent(nostrEvent = noteEvent)
         return try {
             primalImportApi.importEvents(body = ImportRequestBody(events = listOf(noteEvent)))
         } catch (error: WssException) {

@@ -1,5 +1,6 @@
 package net.primal.android.user.domain
 
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.add
@@ -14,6 +15,8 @@ data class Relay(
 )
 
 fun String.toRelay(): Relay = Relay(url = this, read = true, write = true)
+
+@OptIn(ExperimentalSerializationApi::class)
 fun List<Relay>.toZapTag(): JsonArray = buildJsonArray {
     add("relays")
     addAll(this@toZapTag.map { it.url })

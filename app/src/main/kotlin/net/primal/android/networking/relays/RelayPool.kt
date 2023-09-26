@@ -1,5 +1,7 @@
 package net.primal.android.networking.relays
 
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
@@ -10,135 +12,30 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.timeout
 import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import net.primal.android.networking.UserAgentProvider
-import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.NostrIncomingMessage
 import net.primal.android.networking.sockets.NostrSocketClient
 import net.primal.android.networking.sockets.errors.NostrNoticeException
 import net.primal.android.networking.sockets.filterByEventId
 import net.primal.android.nostr.model.NostrEvent
-import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.serialization.toJsonObject
-import net.primal.android.user.accounts.BOOTSTRAP_RELAYS
-import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.android.user.accounts.active.ActiveUserAccountState
 import net.primal.android.user.domain.Relay
-import net.primal.android.user.domain.UserAccount
-import net.primal.android.user.domain.toRelay
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlin.time.Duration.Companion.seconds
 
-@Singleton
-class RelayPool @Inject constructor(
+class RelayPool @AssistedInject constructor(
+    @Assisted val relays: List<Relay>,
     private val okHttpClient: OkHttpClient,
-    private val activeAccountStore: ActiveAccountStore,
 ) {
-    private val scope = CoroutineScope(Dispatchers.IO)
-    private val poolMutex = Mutex()
 
-    private var regularRelays = listOf<NostrSocketClient>()
-    private var walletRelays = listOf<NostrSocketClient>()
-    private var bootstrapRelays = listOf<NostrSocketClient>()
+    private val scope = CoroutineScope(Dispatchers.IO)
+
+    private var socketClients = listOf<NostrSocketClient>()
 
     init {
-        observeActiveAccount()
-    }
-
-    private fun observeActiveAccount() = scope.launch {
-        activeAccountStore.activeAccountState.collect { activeAccountState ->
-            when (activeAccountState) {
-                is ActiveUserAccountState.ActiveUserAccount -> {
-                    val data = activeAccountState.data
-                    val regularRelays = data.relays
-                    val walletRelays = data.nostrWallet?.relays?.map { it.toRelay() } ?: emptyList()
-                    createSocketsPool(
-                        regularRelays = regularRelays,
-                        walletRelays = walletRelays,
-                        bootstrapRelays = emptyList()
-                    )
-                }
-
-                ActiveUserAccountState.NoUserAccount -> {
-                    createSocketsPool(
-                        regularRelays = emptyList(),
-                        walletRelays = emptyList(),
-                        bootstrapRelays = BOOTSTRAP_RELAYS.map { it.toRelay() }
-                    )
-                }
-            }
-        }
-    }
-
-    @Throws(NostrPublishException::class)
-    suspend fun publishEvent(nostrEvent: NostrEvent) {
-        when (NostrEventKind.valueOf(nostrEvent.kind)) {
-            NostrEventKind.ZapRequest,
-            NostrEventKind.WalletRequest -> {
-                if (walletRelays.isEmpty()) {
-                    throw MissingRelaysException()
-                } else {
-                    handlePublishEvent(walletRelays, nostrEvent)
-                }
-            }
-            NostrEventKind.Metadata -> {
-                if (bootstrapRelays.isEmpty()) {
-                    throw MissingRelaysException()
-                } else {
-                    handlePublishEvent(bootstrapRelays, nostrEvent)
-                }
-            }
-            NostrEventKind.Contacts -> {
-                val activeUserAccount = activeAccountStore.activeUserAccount()
-                if (activeUserAccount == UserAccount.EMPTY) {
-                    if (bootstrapRelays.isEmpty()) {
-                        throw MissingRelaysException()
-                    } else {
-                        handlePublishEvent(bootstrapRelays, nostrEvent)
-                    }
-                } else {
-                    if (regularRelays.isEmpty()) {
-                        throw MissingRelaysException()
-                    } else {
-                        handlePublishEvent(regularRelays, nostrEvent)
-                    }
-                }
-            }
-            else -> {
-                if (regularRelays.isEmpty()) {
-                    throw MissingRelaysException()
-                } else {
-                    handlePublishEvent(regularRelays, nostrEvent)
-                }
-            }
-        }
-    }
-
-    private fun Relay.toWssRequestOrNull() = try {
-        Request.Builder()
-            .url(url)
-            .addHeader("User-Agent", UserAgentProvider.USER_AGENT)
-            .build()
-    } catch (error: IllegalArgumentException) {
-        null
-    }
-
-    private suspend fun createSocketsPool(
-        regularRelays: List<Relay>,
-        walletRelays: List<Relay>,
-        bootstrapRelays: List<Relay>
-    ) {
-        clearSocketsPool()
-        poolMutex.withLock {
-            this.regularRelays = regularRelays.mapAsNostrSocketClient()
-            this.walletRelays = walletRelays.mapAsNostrSocketClient()
-            this.bootstrapRelays = bootstrapRelays.mapAsNostrSocketClient()
-        }
+        initPool()
     }
 
     private fun List<Relay>.mapAsNostrSocketClient() = this
@@ -150,13 +47,27 @@ class RelayPool @Inject constructor(
             )
         }
 
-    private suspend fun clearSocketsPool() = poolMutex.withLock {
-        regularRelays.forEach { it.close() }
-        regularRelays = emptyList()
-        walletRelays.forEach { it.close() }
-        walletRelays = emptyList()
-        bootstrapRelays.forEach { it.close() }
-        bootstrapRelays = emptyList()
+    private fun Relay.toWssRequestOrNull() = try {
+        Request.Builder()
+            .url(url)
+            .addHeader("User-Agent", UserAgentProvider.USER_AGENT)
+            .build()
+    } catch (error: IllegalArgumentException) {
+        null
+    }
+
+    @Throws(NostrPublishException::class)
+    suspend fun publishEvent(nostrEvent: NostrEvent) {
+        handlePublishEvent(socketClients, nostrEvent)
+    }
+
+    fun initPool() {
+        socketClients = relays.mapAsNostrSocketClient()
+    }
+
+    fun closePool() {
+        socketClients.forEach { it.close() }
+        socketClients = emptyList()
     }
 
     private fun NostrPublishResult.isSuccessful(): Boolean {

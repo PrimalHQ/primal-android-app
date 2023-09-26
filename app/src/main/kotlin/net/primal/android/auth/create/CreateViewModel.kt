@@ -28,17 +28,16 @@ import net.primal.android.networking.di.PrimalUploadApiClient
 import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.primal.PrimalCacheFilter
 import net.primal.android.networking.primal.PrimalVerb
-import net.primal.android.networking.relays.RelayPool
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.model.content.ContentMetadata
 import net.primal.android.nostr.notary.NostrNotary
+import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.serialization.NostrJson
 import net.primal.android.serialization.nostrJsonSerializer
 import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.user.accounts.BOOTSTRAP_RELAYS
-import net.primal.android.user.domain.toRelay
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import javax.inject.Inject
@@ -48,8 +47,8 @@ class CreateViewModel @Inject constructor(
     private val contentResolver: ContentResolver,
     private val authRepository: AuthRepository,
     private val settingsRepository: SettingsRepository,
+    private val profileRepository: ProfileRepository,
     private val nostrNotary: NostrNotary,
-    private val relayPool: RelayPool,
     @PrimalUploadApiClient private val primalUploadClient: PrimalApiClient,
     private val recommendedFollowsApi: RecommendedFollowsApi,
 ) : ViewModel() {
@@ -81,14 +80,11 @@ class CreateViewModel @Inject constructor(
             when (event) {
                 is UiEvent.GoToProfilePreviewStepEvent -> setState { copy(currentStep = UiState.CreateAccountStep.PROFILE_PREVIEW) }
                 is UiEvent.GoToNostrCreatedStepEvent -> {
-                    val keypair = CryptoUtils.generateHexEncodedKeypair()
-                    setState { copy(keypair = keypair) }
                     createNostrAccount()
                 }
 
                 is UiEvent.GoToFollowContactsStepEvent -> {
                     fetchRecommendedFollows()
-                    setState { copy(currentStep = UiState.CreateAccountStep.FOLLOW_RECOMMENDED_ACCOUNTS) }
                 }
 
                 is UiEvent.GoBack -> goBack()
@@ -114,31 +110,38 @@ class CreateViewModel @Inject constructor(
 
             setState { copy(loading = true) }
 
+            // Step 1: Generate key pairs
+            val keypair = CryptoUtils.generateHexEncodedKeypair()
+            authRepository.login(nostrKey = keypair.privkey)
+
+            // Step 1: Uploads avatar
             if (state.value.avatarUri != null) {
                 avatarUrl = uploadImage(state.value.avatarUri!!)
             }
 
+            // Step 2: Uploads banner
             if (state.value.bannerUri != null) {
                 bannerUrl = uploadImage(state.value.bannerUri!!)
             }
 
-            val metadata = state.value.toCreateNostrProfileMetadata(
-                resolvedAvatarUrl = avatarUrl, resolvedBannerUrl = bannerUrl
-            )
-            val metadataNostrEvent = nostrNotary.signMetadataNostrEvent(
-                pubkey = state.value.keypair!!.pubkey,
-                privkey = state.value.keypair!!.privkey,
-                metadata = metadata
-            )
-            val firstContactEvent =
-                nostrNotary.signFirstContactNostrEvent(pubkey = state.value.keypair!!.pubkey,
-                    privkey = state.value.keypair!!.privkey,
-                    relays = BOOTSTRAP_RELAYS.map { it.toRelay() })
+            // Step 3: Set bootstrap relays
+            profileRepository.boostrapRelays(userId = keypair.pubkey)
 
-            relayPool.publishEvent(metadataNostrEvent)
-            relayPool.publishEvent(firstContactEvent)
+            // Step 4: Update profile metadata
+            profileRepository.updateProfileMetadata(
+                userId = keypair.pubkey,
+                metadata = state.value.toCreateNostrProfileMetadata(
+                    resolvedAvatarUrl = avatarUrl,
+                    resolvedBannerUrl = bannerUrl
+                ),
+            )
 
-            setState { copy(currentStep = UiState.CreateAccountStep.ACCOUNT_CREATED) }
+            setState {
+                copy(
+                    keypair = keypair,
+                    currentStep = UiState.CreateAccountStep.ACCOUNT_CREATED,
+                )
+            }
         } catch (e: IOException) {
             setState { copy(error = UiState.CreateError.FailedToUploadImage(e)) }
         } catch (e: NostrPublishException) {
@@ -166,7 +169,12 @@ class CreateViewModel @Inject constructor(
                 )
             }
 
-            setState { copy(recommendedFollows = result) }
+            setState {
+                copy(
+                    recommendedFollows = result,
+                    currentStep = UiState.CreateAccountStep.FOLLOW_RECOMMENDED_ACCOUNTS
+                )
+            }
         } catch (e: IOException) {
             setState { copy(error = UiState.CreateError.FailedToFetchRecommendedFollows(e)) }
         } finally {
@@ -177,10 +185,15 @@ class CreateViewModel @Inject constructor(
     private suspend fun finish() {
         try {
             setState { copy(loading = true) }
+            val pubkey = state.value.keypair!!.pubkey
+            profileRepository.setContactsAndRelays(
+                userId = pubkey,
+                contacts = state.value.recommendedFollows
+                    .filter { it.isCurrentUserFollowing }
+                    .map { it.pubkey }.toSet(),
+                relays = BOOTSTRAP_RELAYS,
+            )
 
-            followSelectedAccounts()
-
-            val pubkey = authRepository.login(state.value.keypair!!.privkey)
             settingsRepository.fetchAndPersistAppSettings(userId = pubkey)
             setEffect(SideEffect.AccountCreatedAndPersisted(pubkey = pubkey))
         } catch (e: NostrPublishException) {
@@ -188,17 +201,6 @@ class CreateViewModel @Inject constructor(
         } finally {
             setState { copy(loading = false) }
         }
-    }
-
-    private suspend fun followSelectedAccounts() {
-        val contactsEvent =
-            nostrNotary.signInitialContactsNostrEvent(privkey = state.value.keypair!!.privkey,
-                pubkey = state.value.keypair!!.pubkey,
-                contacts = state.value.recommendedFollows.filter { it.isCurrentUserFollowing }
-                    .map { it.pubkey }.toSet(),
-                relays = BOOTSTRAP_RELAYS.map { it.toRelay() })
-
-        relayPool.publishEvent(contactsEvent)
     }
 
     private fun goBack() {
@@ -286,12 +288,12 @@ class CreateViewModel @Inject constructor(
     ): ContentMetadata = ContentMetadata(
         name = this.handle,
         displayName = this.name,
-        website = this.website,
-        about = this.aboutMe,
-        picture = resolvedAvatarUrl ?: "",
-        banner = resolvedBannerUrl ?: "",
-        lud16 = this.lightningAddress,
-        nip05 = this.nip05Identifier
+        website = this.website.ifEmpty { null },
+        about = this.aboutMe.ifEmpty { null },
+        picture = resolvedAvatarUrl,
+        banner = resolvedBannerUrl,
+        lud16 = this.lightningAddress.ifEmpty { null },
+        nip05 = this.nip05Identifier.ifEmpty { null },
     )
 
 }

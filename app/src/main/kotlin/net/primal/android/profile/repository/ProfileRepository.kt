@@ -5,12 +5,15 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.withContext
 import net.primal.android.db.PrimalDatabase
+import net.primal.android.networking.relays.RelaysBootstrapper
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.nostr.ext.asProfileMetadataPO
 import net.primal.android.nostr.ext.asProfileStats
 import net.primal.android.nostr.ext.takeContentAsUserProfileStatsOrNull
+import net.primal.android.nostr.model.content.ContentMetadata
 import net.primal.android.user.accounts.UserAccountFetcher
 import net.primal.android.user.api.UsersApi
+import net.primal.android.user.domain.Relay
 import net.primal.android.user.domain.asUserAccount
 import net.primal.android.user.repository.UserRepository
 import javax.inject.Inject
@@ -20,6 +23,7 @@ class ProfileRepository @Inject constructor(
     private val usersApi: UsersApi,
     private val userRepository: UserRepository,
     private val userAccountFetcher: UserAccountFetcher,
+    private val relaysBootstrapper: RelaysBootstrapper,
 ) {
     fun observeProfile(profileId: String) =
         database.profiles().observeProfile(profileId = profileId).filterNotNull()
@@ -44,6 +48,13 @@ class ProfileRepository @Inject constructor(
         }
     }
 
+    suspend fun updateProfileMetadata(userId: String, metadata: ContentMetadata) {
+        usersApi.setUserProfileMetadata(
+            ownerId = userId,
+            contentMetadata = metadata,
+        )
+    }
+
     suspend fun follow(userId: String, followedUserId: String) {
         updateFollowing(userId = userId) {
             toMutableSet().apply { add(followedUserId) }
@@ -65,11 +76,30 @@ class ProfileRepository @Inject constructor(
 
         userRepository.updateContacts(userId, userContacts)
 
-        val newContactsNostrEvent = usersApi.setUserContacts(
-            ownerId = userId,
+        setContactsAndRelays(
+            userId = userId,
             contacts = userContacts.following.reducer(),
             relays = userContacts.relays,
         )
-        userRepository.updateContacts(userId, newContactsNostrEvent.asUserAccount())
+    }
+
+    suspend fun setContactsAndRelays(
+        userId: String,
+        contacts: Set<String>,
+        relays: List<Relay>,
+    ) {
+        val nostrEventResponse = usersApi.setUserContacts(
+            ownerId = userId,
+            contacts = contacts,
+            relays = relays,
+        )
+        userRepository.updateContacts(
+            userId = userId,
+            contactsUserAccount = nostrEventResponse.asUserAccount(),
+        )
+    }
+
+    suspend fun boostrapRelays(userId: String) {
+        relaysBootstrapper.bootstrap(userId = userId)
     }
 }

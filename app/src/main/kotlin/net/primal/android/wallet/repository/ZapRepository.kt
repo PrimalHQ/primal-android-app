@@ -2,7 +2,7 @@ package net.primal.android.wallet.repository
 
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.feed.repository.PostStatsUpdater
-import net.primal.android.networking.relays.RelayPool
+import net.primal.android.networking.relays.RelaysManager
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.notary.NostrNotary
@@ -17,7 +17,7 @@ import javax.inject.Inject
 class ZapRepository @Inject constructor(
     private val zapsApi: ZapsApi,
     private val notary: NostrNotary,
-    private val relayPool: RelayPool,
+    private val relaysManager: RelaysManager,
     private val accountsStore: UserAccountsStore,
     private val database: PrimalDatabase,
 ) {
@@ -73,7 +73,7 @@ class ZapRepository @Inject constructor(
                 request = invoice.toWalletPayRequest(),
                 nwc = nostrWallet,
             )
-            relayPool.publishEvent(nostrEvent = walletPayNostrEvent)
+            relaysManager.publishWalletEvent(nostrEvent = walletPayNostrEvent)
         } catch (error: ZapFailureException) {
             statsUpdater?.revertStats()
             throw error

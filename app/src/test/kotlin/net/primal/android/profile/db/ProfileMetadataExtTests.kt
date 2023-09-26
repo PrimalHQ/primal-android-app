@@ -2,6 +2,7 @@ package net.primal.android.profile.db
 
 import io.kotest.matchers.shouldBe
 import net.primal.android.core.utils.asEllipsizedNpub
+import net.primal.android.core.utils.userNameUiFriendly
 import org.junit.Test
 
 class ProfileMetadataExtTests {

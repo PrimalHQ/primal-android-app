@@ -11,7 +11,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.android.networking.primal.PrimalApiClient
-import net.primal.android.networking.relays.RelayPool
+import net.primal.android.networking.relays.RelaysManager
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.security.Encryption
 import net.primal.android.serialization.CredentialsSerialization
@@ -60,11 +60,11 @@ object UserModule {
     @Provides
     fun provideUsersApi(
         @PrimalCacheApiClient primalApiClient: PrimalApiClient,
-        relayPool: RelayPool,
+        relaysManager: RelaysManager,
         nostrNotary: NostrNotary,
     ): UsersApi = UsersApiImpl(
         primalApiClient = primalApiClient,
-        relayPool = relayPool,
+        relaysManager = relaysManager,
         nostrNotary = nostrNotary,
     )
 }

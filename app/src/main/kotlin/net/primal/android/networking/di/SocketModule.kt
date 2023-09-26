@@ -6,7 +6,8 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import net.primal.android.networking.UserAgentProvider
 import net.primal.android.networking.primal.PrimalApiClient
-import net.primal.android.networking.relays.RelayPool
+import net.primal.android.networking.relays.RelayPoolFactory
+import net.primal.android.networking.relays.RelaysManager
 import net.primal.android.networking.sockets.NostrSocketClient
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import okhttp3.OkHttpClient
@@ -59,11 +60,11 @@ object SocketModule {
 
     @Provides
     @Singleton
-    fun providesRelayPool(
-        okHttpClient: OkHttpClient,
+    fun providesRelaysManager(
+        relayPoolFactory: RelayPoolFactory,
         activeAccountStore: ActiveAccountStore,
-    ) = RelayPool(
-        okHttpClient = okHttpClient,
+    ) = RelaysManager(
+        relayPoolFactory = relayPoolFactory,
         activeAccountStore = activeAccountStore,
     )
 }
