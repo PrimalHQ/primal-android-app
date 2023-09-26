@@ -114,7 +114,7 @@ class CreateViewModel @Inject constructor(
                     pubkey = it.second.pubkey,
                     groupName = it.first,
                     content = NostrJson.decodeFromString(response.metadata[it.second.pubkey]!!.content),
-                    isCurrentUserFollowing = false
+                    isCurrentUserFollowing = true
                 )
             }
 
