@@ -9,6 +9,8 @@ data class ProfileMetadata(
     val about: String? = null,
     val lightningAddress: String? = null,
     val nostrVerification: String? = null,
-    val picture: Uri? = null,
-    val banner: Uri? = null,
+    val localPictureUri: Uri? = null,
+    val localBannerUri: Uri? = null,
+    val remotePictureUrl: String? = null,
+    val remoteBannerUrl: String? = null
 )

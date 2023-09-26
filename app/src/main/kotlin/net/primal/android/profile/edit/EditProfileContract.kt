@@ -1,7 +1,7 @@
 package net.primal.android.profile.edit
 
 import android.net.Uri
-import net.primal.android.profile.domain.ProfileMetadata
+import net.primal.android.auth.create.CreateContract
 
 interface EditProfileContract {
     data class UiState(
@@ -13,8 +13,10 @@ interface EditProfileContract {
         val aboutMe: String = "",
         val lightningAddress: String = "",
         val nip05Identifier: String = "",
-        val avatarUri: Uri? = null,
-        val bannerUri: Uri? = null,
+        val localAvatarUri: Uri? = null,
+        val localBannerUri: Uri? = null,
+        val remoteAvatarUrl: String? = null,
+        val remoteBannerUrl: String? = null
     ) {
         sealed class EditProfileError {
             data class MissingRelaysConfiguration(val cause: Throwable) : EditProfileError()
@@ -34,17 +36,8 @@ interface EditProfileContract {
         data class BannerUriChangedEvent(val bannerUri: Uri?) : UiEvent()
         data object SaveProfileEvent : UiEvent()
     }
-}
 
-fun EditProfileContract.UiState.toProfileMetadata(): ProfileMetadata {
-    return ProfileMetadata(
-        displayName = this.displayName,
-        handle = this.name,
-        website = this.website,
-        about = this.aboutMe,
-        lightningAddress = this.lightningAddress,
-        nostrVerification = this.nip05Identifier,
-        picture = this.avatarUri,
-        banner = this.bannerUri
-    )
+    sealed class SideEffect {
+        data object AccountSuccessfulyEdited : SideEffect()
+    }
 }

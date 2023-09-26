@@ -110,7 +110,7 @@ private fun NavController.navigateToProfile(profileId: String? = null) = when {
     else -> navigate(route = "profile")
 }
 
-private fun NavController.navigateToEditProfile() = navigate(route = "edit-profile")
+private fun NavController.navigateToEditProfile() = navigate(route = "edit_profile")
 
 private fun NavController.navigateToSettings() = navigate(route = "settings")
 
@@ -278,7 +278,7 @@ fun PrimalAppNavigation() {
                 navController = navController,
             )
 
-            editProfile(route = "edit-profile", navController = navController)
+            editProfile(route = "edit_profile", navController = navController)
 
             settingsNavigation(route = "settings", navController = navController)
         }

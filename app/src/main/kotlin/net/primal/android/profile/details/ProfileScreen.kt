@@ -309,7 +309,7 @@ fun ProfileScreen(
                     UserProfileDetails(
                         profileId = state.profileId,
                         isFollowed = state.isProfileFollowed,
-                        isCurrentUser = state.isCurrentUser,
+                        isCurrentUser = state.isActiveUser,
                         profileDetails = state.profileDetails,
                         profileStats = state.profileStats,
                         onEditProfileClick = onEditProfileClick,
@@ -618,9 +618,8 @@ private fun ProfileActions(
                 true -> UnfollowButton(onClick = onUnfollow)
                 false -> FollowButton(onClick = onFollow)
             }
-        }
-        Spacer(modifier = Modifier.width(8.dp))
-        if (isCurrentUser) {
+        } else {
+            Spacer(modifier = Modifier.width(8.dp))
             EditProfileButton(onClick = {
                 onEditProfileClick()
             })
@@ -801,7 +800,7 @@ fun PreviewProfileScreen() {
             state = ProfileContract.UiState(
                 profileId = "profileId",
                 isProfileFollowed = false,
-                isCurrentUser = true,
+                isActiveUser = true,
                 authoredPosts = emptyFlow(),
             ),
             onClose = {},

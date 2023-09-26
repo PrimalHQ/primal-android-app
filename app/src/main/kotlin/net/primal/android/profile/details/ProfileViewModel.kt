@@ -51,7 +51,7 @@ class ProfileViewModel @Inject constructor(
         UiState(
             profileId = profileId,
             isProfileFollowed = false,
-            isCurrentUser = false,
+            isActiveUser = false,
             authoredPosts = feedRepository.feedByDirective(feedDirective = "authored;$profileId")
                 .map { it.map { feed -> feed.asFeedPostUi() } }
                 .cachedIn(viewModelScope),
@@ -91,7 +91,7 @@ class ProfileViewModel @Inject constructor(
             setState {
                 copy(
                     isProfileFollowed = it.following.contains(profileId),
-                    isCurrentUser = it.pubkey == profileId,
+                    isActiveUser = it.pubkey == profileId,
                     walletConnected = it.nostrWallet != null,
                     defaultZapAmount = it.appSettings?.defaultZapAmount,
                     zapOptions = it.appSettings?.zapOptions ?: emptyList(),

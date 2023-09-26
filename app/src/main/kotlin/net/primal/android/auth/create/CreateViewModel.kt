@@ -195,8 +195,8 @@ class CreateViewModel @Inject constructor(
         handle = this.handle,
         website = this.website.ifEmpty { null },
         about = this.aboutMe.ifEmpty { null },
-        picture = this.avatarUri,
-        banner = this.bannerUri,
+        localPictureUri = this.avatarUri,
+        localBannerUri = this.bannerUri,
         lightningAddress = this.lightningAddress.ifEmpty { null },
         nostrVerification = this.nip05Identifier.ifEmpty { null },
     )

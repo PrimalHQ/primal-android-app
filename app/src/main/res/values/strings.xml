@@ -210,6 +210,7 @@
     <string name="profile_error_unable_to_unfollow">Unable to unfollow profile. Please try again.</string>
     <string name="profile_failed_to_publish_metadata">Unable to post edited metadata. Please try again.</string>
     <string name="profile_save_profile_button">Save profile</string>
+    <string name="profile_edit_profile_title">Edit Profile</string>
 
     <string name="zap_bottom_sheet_comment_placeholder">Add a comment…</string>
     <string name="zap_bottom_sheet_zap_button">Zap</string>

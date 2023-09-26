@@ -52,13 +52,13 @@ class ProfileRepository @Inject constructor(
 
     @Throws(UnsuccessfulFileUpload::class)
     suspend fun setProfileMetadata(userId: String, profileMetadata: ProfileMetadata) {
-        val pictureUrl = if (profileMetadata.picture != null) {
-            fileUploader.uploadFile(userId = userId, uri = profileMetadata.picture)
-        } else null
+        val pictureUrl = if (profileMetadata.localPictureUri != null) {
+            fileUploader.uploadFile(userId = userId, uri = profileMetadata.localPictureUri)
+        } else profileMetadata.remotePictureUrl
 
-        val bannerUrl = if (profileMetadata.banner != null) {
-            fileUploader.uploadFile(userId = userId, uri = profileMetadata.banner)
-        } else null
+        val bannerUrl = if (profileMetadata.localBannerUri != null) {
+            fileUploader.uploadFile(userId = userId, uri = profileMetadata.localBannerUri)
+        } else profileMetadata.remoteBannerUrl
 
         usersApi.setUserProfile(
             ownerId = userId,

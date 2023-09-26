@@ -10,9 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -29,6 +27,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import net.primal.android.R
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.button.PrimalLoadingButton
@@ -43,6 +42,13 @@ fun EditProfileScreen(
     viewModel: EditProfileViewModel,
     onClose: () -> Unit
 ) {
+    LaunchedEffect(viewModel, onClose) {
+        viewModel.effect.collect {
+            when (it) {
+                is EditProfileContract.SideEffect.AccountSuccessfulyEdited -> onClose()
+            }
+        }
+    }
     val state = viewModel.state.collectAsState()
 
     EditProfileScreen(
@@ -65,7 +71,7 @@ fun EditProfileScreen(
     Scaffold(
         topBar = {
             PrimalTopAppBar(
-                title = "Edit Profile",
+                title = stringResource(id = R.string.profile_edit_profile_title),
                 navigationIcon = PrimalIcons.ArrowBack,
                 onNavigationIconClick = {
                     onClose()
@@ -92,8 +98,6 @@ fun EditProfileContent(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .systemBarsPadding()
-            .navigationBarsPadding()
             .imePadding()
             .padding(paddingValues = paddingValues),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -109,8 +113,8 @@ fun EditProfileContent(
             verticalArrangement = Arrangement.Top
         ) {
             ProfileHero(
-                avatarUri = state.avatarUri,
-                bannerUri = state.bannerUri,
+                avatarUri = state.remoteAvatarUrl?.toUri() ?: state.localAvatarUri,
+                bannerUri = state.remoteBannerUrl?.toUri() ?: state.localBannerUri,
                 onBannerUriChange = {
                     eventPublisher(EditProfileContract.UiEvent.BannerUriChangedEvent(bannerUri = it))
                 }, onAvatarUriChange = {

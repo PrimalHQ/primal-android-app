@@ -4,15 +4,18 @@ import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import net.primal.android.core.files.error.UnsuccessfulFileUpload
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.profile.domain.ProfileMetadata
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import javax.inject.Inject
@@ -29,6 +32,12 @@ class EditProfileViewModel @Inject constructor(
     val state = _state.asStateFlow()
     private fun setState(reducer: EditProfileContract.UiState.() -> EditProfileContract.UiState) {
         _state.getAndUpdate(reducer)
+    }
+
+    private val _effect: Channel<EditProfileContract.SideEffect> = Channel()
+    val effect = _effect.receiveAsFlow()
+    private fun setEffect(effect: EditProfileContract.SideEffect) = viewModelScope.launch {
+        _effect.send(effect)
     }
 
     private val _event: MutableSharedFlow<EditProfileContract.UiEvent> = MutableSharedFlow()
@@ -68,8 +77,8 @@ class EditProfileViewModel @Inject constructor(
                     )
                 }
 
-                is EditProfileContract.UiEvent.AvatarUriChangedEvent -> setState { copy(avatarUri = it.avatarUri) }
-                is EditProfileContract.UiEvent.BannerUriChangedEvent -> setState { copy(bannerUri = it.bannerUri) }
+                is EditProfileContract.UiEvent.AvatarUriChangedEvent -> setState { copy(localAvatarUri = it.avatarUri, remoteAvatarUrl = null) }
+                is EditProfileContract.UiEvent.BannerUriChangedEvent -> setState { copy(localBannerUri = it.bannerUri, remoteBannerUrl = null) }
                 is EditProfileContract.UiEvent.SaveProfileEvent -> saveProfile()
             }
         }
@@ -85,8 +94,8 @@ class EditProfileViewModel @Inject constructor(
                     website = it.metadata?.website ?: "",
                     lightningAddress = it.metadata?.lightningAddress ?: "",
                     nip05Identifier = it.metadata?.internetIdentifier ?: "",
-                    bannerUri = it.metadata?.banner?.toUri(),
-                    avatarUri = it.metadata?.picture?.toUri()
+                    remoteBannerUrl = it.metadata?.banner,
+                    remoteAvatarUrl = it.metadata?.picture
                 )
             }
         }
@@ -109,6 +118,8 @@ class EditProfileViewModel @Inject constructor(
                 userId = profileId,
                 profileMetadata = profileMetadata
             )
+            profileRepository.requestProfileUpdate(profileId = profileId)
+            setEffect(effect = EditProfileContract.SideEffect.AccountSuccessfulyEdited)
         } catch (error: NostrPublishException) {
             setErrorState(
                 error = EditProfileContract.UiState.EditProfileError.FailedToPublishMetadata(
@@ -135,4 +146,19 @@ class EditProfileViewModel @Inject constructor(
             }
         }
     }
+}
+
+fun EditProfileContract.UiState.toProfileMetadata(): ProfileMetadata {
+    return ProfileMetadata(
+        displayName = this.displayName,
+        handle = this.name,
+        website = this.website,
+        about = this.aboutMe,
+        lightningAddress = this.lightningAddress,
+        nostrVerification = this.nip05Identifier,
+        localPictureUri = this.localAvatarUri,
+        localBannerUri = this.localBannerUri,
+        remotePictureUrl = this.remoteAvatarUrl,
+        remoteBannerUrl = this.remoteBannerUrl
+    )
 }

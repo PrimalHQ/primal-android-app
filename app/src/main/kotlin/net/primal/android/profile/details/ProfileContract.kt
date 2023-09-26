@@ -11,7 +11,7 @@ interface ProfileContract {
     data class UiState(
         val profileId: String,
         val isProfileFollowed: Boolean,
-        val isCurrentUser: Boolean,
+        val isActiveUser: Boolean,
         val profileDetails: ProfileDetailsUi? = null,
         val profileStats: ProfileStatsUi? = null,
         val walletConnected: Boolean = false,
