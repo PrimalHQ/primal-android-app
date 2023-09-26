@@ -2,7 +2,6 @@ package net.primal.android.auth.create
 
 import android.net.Uri
 import net.primal.android.auth.create.ui.RecommendedFollow
-import net.primal.android.crypto.CryptoUtils
 
 interface CreateContract {
     data class UiState(
@@ -17,7 +16,7 @@ interface CreateContract {
         val nip05Identifier: String = "",
         val avatarUri: Uri? = null,
         val bannerUri: Uri? = null,
-        val keypair: CryptoUtils.Keypair? = null,
+        val userId: String? = null,
         val recommendedFollows: List<RecommendedFollow> = listOf()
     ) {
         sealed class CreateError {

@@ -1,5 +1,7 @@
 package net.primal.android.auth
 
+import net.primal.android.crypto.CryptoUtils
+import net.primal.android.networking.relays.RelaysBootstrapper
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.repository.UserRepository
@@ -11,13 +13,21 @@ class AuthRepository @Inject constructor(
     private val credentialsStore: CredentialsStore,
     private val activeAccountStore: ActiveAccountStore,
     private val userRepository: UserRepository,
+    private val relaysBootstrapper: RelaysBootstrapper,
 ) {
 
+    suspend fun createAccountAndLogin(): String {
+        val keypair = CryptoUtils.generateHexEncodedKeypair()
+        val userId = login(nostrKey = keypair.privkey)
+        relaysBootstrapper.bootstrap(userId = userId)
+        return userId
+    }
+
     suspend fun login(nostrKey: String): String {
-        val pubkey = credentialsStore.save(nostrKey)
-        userRepository.createNewUserAccount(userId = pubkey)
-        activeAccountStore.setActiveUserId(pubkey)
-        return pubkey
+        val userId = credentialsStore.save(nostrKey)
+        userRepository.createNewUserAccount(userId = userId)
+        activeAccountStore.setActiveUserId(userId)
+        return userId
     }
 
     suspend fun logout() {

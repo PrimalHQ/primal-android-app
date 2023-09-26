@@ -1,4 +1,4 @@
-package net.primal.android.core.api.model
+package net.primal.android.core.files.model
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

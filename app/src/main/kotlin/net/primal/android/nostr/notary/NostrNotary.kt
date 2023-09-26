@@ -173,15 +173,14 @@ class NostrNotary @Inject constructor(
     }
 
     fun signImageUploadNostrEvent(
-        privkey: String,
-        pubkey: String,
-        base64Image: String
+        userId: String,
+        base64Content: String
     ): NostrEvent {
         return NostrUnsignedEvent(
-            pubKey = pubkey,
+            pubKey = userId,
             kind = NostrEventKind.PrimalImageUploadRequest.value,
-            content = base64Image,
+            content = base64Content,
             tags = emptyList()
-        ).signOrThrow(hexPrivateKey = Hex.decode(privkey))
+        ).signOrThrow(nsec = findNsecOrThrow(userId))
     }
 }

@@ -13,11 +13,6 @@ val NostrJson = Json {
     ignoreUnknownKeys = true
 }
 
-fun nostrJsonSerializer(shouldEncodeDefaults: Boolean) = Json {
-    ignoreUnknownKeys = true
-    encodeDefaults = shouldEncodeDefaults
-}
-
 inline fun <reified T> Json.decodeFromStringOrNull(string: String?): T? {
     if (string.isNullOrEmpty()) return null
 
