@@ -1,7 +1,7 @@
 ## Changes
 
-- BadgesManager changes
-- Implement marking notifications as seen on notifications screen exit
-- Implement new notifications button
-- Fix notifications pagination infinite recursion
-- Fix zap amount in description for YOUR_POST_WAS_ZAPPED type
+- Implemented notifications.
+- Implemented notifications settings.
+- Implemented create account onboarding flow.
+- Fixed issue where sometimes post were missing post stats.
+- Fixed copy npub on profile screen.
