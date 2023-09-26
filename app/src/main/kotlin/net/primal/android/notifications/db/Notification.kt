@@ -7,7 +7,7 @@ import net.primal.android.feed.db.NostrResource
 import net.primal.android.feed.db.PostData
 import net.primal.android.feed.db.PostStats
 import net.primal.android.profile.db.PostUserStats
-import net.primal.android.profile.db.ProfileMetadata
+import net.primal.android.profile.db.ProfileData
 
 data class Notification(
 
@@ -15,7 +15,7 @@ data class Notification(
     val data: NotificationData,
 
     @Relation(entityColumn = "ownerId", parentColumn = "actionUserId")
-    val actionByUser: ProfileMetadata?,
+    val actionByUser: ProfileData?,
 
     @Relation(entityColumn = "eventId", parentColumn = "actionUserId")
     val actionByUserResources: List<MediaResource> = emptyList(),
@@ -35,4 +35,4 @@ data class Notification(
     @Relation(entityColumn = "postId", parentColumn = "actionPostId")
     val actionPostNostrUris: List<NostrResource> = emptyList(),
 
-)
+    )

@@ -74,7 +74,7 @@ class UsersApiImpl @Inject constructor(
         return signedNostrEvent
     }
 
-    override suspend fun setUserProfileMetadata(
+    override suspend fun setUserProfile(
         ownerId: String,
         contentMetadata: ContentMetadata
     ): NostrEvent {

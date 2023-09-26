@@ -1,8 +1,8 @@
 package net.primal.android.explore.repository
 
-import net.primal.android.profile.db.ProfileMetadata
+import net.primal.android.profile.db.ProfileData
 
 data class UserProfileSearchItem(
-    val metadata: ProfileMetadata,
+    val metadata: ProfileData,
     val score: Float?,
 )

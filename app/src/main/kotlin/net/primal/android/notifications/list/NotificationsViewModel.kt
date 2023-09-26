@@ -17,6 +17,7 @@ import net.primal.android.core.compose.feed.asNostrResourceUi
 import net.primal.android.core.compose.feed.model.FeedPostStatsUi
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.utils.asEllipsizedNpub
+import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.core.utils.userNameUiFriendly
 import net.primal.android.feed.repository.PostRepository
 import net.primal.android.networking.relays.errors.MissingRelaysException
@@ -35,7 +36,6 @@ import net.primal.android.notifications.list.NotificationsContract.UiState.Notif
 import net.primal.android.notifications.list.NotificationsContract.UiState.NotificationsError.MissingRelaysConfiguration
 import net.primal.android.notifications.list.ui.NotificationUi
 import net.primal.android.notifications.repository.NotificationRepository
-import net.primal.android.profile.db.authorNameUiFriendly
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.badges.BadgesManager
 import net.primal.android.wallet.model.ZapTarget

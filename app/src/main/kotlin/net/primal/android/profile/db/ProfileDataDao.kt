@@ -7,13 +7,13 @@ import androidx.room.Upsert
 import kotlinx.coroutines.flow.Flow
 
 @Dao
-interface ProfileMetadataDao {
+interface ProfileDataDao {
 
     @Upsert
-    fun upsertAll(profiles: List<ProfileMetadata>)
+    fun upsertAll(data: List<ProfileData>)
 
     @Transaction
-    @Query("SELECT * FROM ProfileMetadata WHERE ownerId = :profileId")
+    @Query("SELECT * FROM ProfileData WHERE ownerId = :profileId")
     fun observeProfile(profileId: String): Flow<Profile>
 
 }

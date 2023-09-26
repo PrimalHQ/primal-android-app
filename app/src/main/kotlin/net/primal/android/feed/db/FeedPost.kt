@@ -2,7 +2,7 @@ package net.primal.android.feed.db
 
 import androidx.room.Embedded
 import androidx.room.Relation
-import net.primal.android.profile.db.ProfileMetadata
+import net.primal.android.profile.db.ProfileData
 
 data class FeedPost(
 
@@ -25,7 +25,7 @@ data class FeedPost(
         entityColumn = "ownerId",
         parentColumn = "authorId",
     )
-    val author: ProfileMetadata? = null,
+    val author: ProfileData? = null,
 
     @Relation(
         entityColumn = "eventId",
@@ -46,5 +46,5 @@ data class FeedPost(
         entityColumn = "ownerId",
         parentColumn = "repostAuthorId",
     )
-    val repostAuthor: ProfileMetadata? = null,
+    val repostAuthor: ProfileData? = null,
 )

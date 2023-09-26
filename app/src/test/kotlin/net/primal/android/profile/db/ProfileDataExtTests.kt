@@ -2,16 +2,17 @@ package net.primal.android.profile.db
 
 import io.kotest.matchers.shouldBe
 import net.primal.android.core.utils.asEllipsizedNpub
+import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.core.utils.userNameUiFriendly
 import org.junit.Test
 
-class ProfileMetadataExtTests {
+class ProfileDataExtTests {
 
-    private fun buildProfileMetadata(
+    private fun buildProfileData(
         displayName: String? = null,
         name: String? = null,
         ownerId: String = "b10b0d5e5fae9c6c48a8c77f7e5abd42a79e9480e25a4094051d4ba4ce14456b"
-    ): ProfileMetadata = ProfileMetadata(
+    ): ProfileData = ProfileData(
         createdAt = 0,
         eventId = "eventId",
         raw = "raw",
@@ -23,48 +24,48 @@ class ProfileMetadataExtTests {
     @Test
     fun `authorNameUiFriendly returns first displayName if it is not empty`() {
         val expected = "bob"
-        val profileMetadata = buildProfileMetadata(displayName = expected)
-        val actual = profileMetadata.authorNameUiFriendly()
+        val profileData = buildProfileData(displayName = expected)
+        val actual = profileData.authorNameUiFriendly()
         actual shouldBe expected
     }
 
     @Test
     fun `authorNameUiFriendly returns name if displayName is empty`() {
         val expected = "Uncle Bob"
-        val profileMetadata = buildProfileMetadata(name = expected)
-        val actual = profileMetadata.authorNameUiFriendly()
+        val profileData = buildProfileData(name = expected)
+        val actual = profileData.authorNameUiFriendly()
         actual shouldBe expected
     }
 
     @Test
     fun `authorNameUiFriendly returns ellipsized npub if displayName an name are empty`() {
         val ownerId = "b10b0d5e5fae9c6c48a8c77f7e5abd42a79e9480e25a4094051d4ba4ce14456b"
-        val profileMetadata = buildProfileMetadata(ownerId = ownerId)
-        val actual = profileMetadata.authorNameUiFriendly()
+        val profileData = buildProfileData(ownerId = ownerId)
+        val actual = profileData.authorNameUiFriendly()
         actual shouldBe ownerId.asEllipsizedNpub()
     }
 
     @Test
     fun `userNameUiFriendly returns first name if it is not empty`() {
         val expected = "bob"
-        val profileMetadata = buildProfileMetadata(name = expected)
-        val actual = profileMetadata.userNameUiFriendly()
+        val profileData = buildProfileData(name = expected)
+        val actual = profileData.userNameUiFriendly()
         actual shouldBe expected
     }
 
     @Test
     fun `userNameUiFriendly returns displayName if name is empty`() {
         val expected = "Uncle Bob"
-        val profileMetadata = buildProfileMetadata(displayName = expected)
-        val actual = profileMetadata.userNameUiFriendly()
+        val profileData = buildProfileData(displayName = expected)
+        val actual = profileData.userNameUiFriendly()
         actual shouldBe expected
     }
 
     @Test
     fun `userNameUiFriendly returns ellipsized npub if displayName an name are empty`() {
         val ownerId = "b10b0d5e5fae9c6c48a8c77f7e5abd42a79e9480e25a4094051d4ba4ce14456b"
-        val profileMetadata = buildProfileMetadata(ownerId = ownerId)
-        val actual = profileMetadata.userNameUiFriendly()
+        val profileData = buildProfileData(ownerId = ownerId)
+        val actual = profileData.userNameUiFriendly()
         actual shouldBe ownerId.asEllipsizedNpub()
     }
 }

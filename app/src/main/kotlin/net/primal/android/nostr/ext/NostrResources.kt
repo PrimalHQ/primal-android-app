@@ -1,6 +1,7 @@
 package net.primal.android.nostr.ext
 
 import net.primal.android.core.utils.asEllipsizedNpub
+import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.crypto.bechToBytes
 import net.primal.android.crypto.toHex
 import net.primal.android.feed.db.NostrResource
@@ -8,8 +9,7 @@ import net.primal.android.feed.db.PostData
 import net.primal.android.feed.db.ReferencedPost
 import net.primal.android.feed.db.ReferencedUser
 import net.primal.android.nostr.utils.Nip19TLV
-import net.primal.android.profile.db.ProfileMetadata
-import net.primal.android.profile.db.authorNameUiFriendly
+import net.primal.android.profile.db.ProfileData
 import java.util.regex.Pattern
 
 private const val NOSTR = "nostr:"
@@ -78,7 +78,7 @@ fun String.nostrUriToPubkeyAndRelay() = nostrUriToIdAndRelay()
 
 fun List<PostData>.flatMapAsPostNostrResourcePO(
     postIdToPostDataMap: Map<String, PostData>,
-    profileIdToProfileMetadataMap: Map<String, ProfileMetadata>,
+    profileIdToProfileDataMap: Map<String, ProfileData>,
 ): List<NostrResource> = flatMap { postData ->
     postData.uris
         .filter { it.isNostrUri() }
@@ -121,14 +121,14 @@ fun List<PostData>.flatMapAsPostNostrResourcePO(
             }
 
             val refPost = postIdToPostDataMap[refPostId]
-            val refPostAuthor = profileIdToProfileMetadataMap[refPost?.authorId]
+            val refPostAuthor = profileIdToProfileDataMap[refPost?.authorId]
 
             NostrResource(
                 postId = postData.postId,
                 uri = link,
                 referencedUser = if (refUserProfileId != null) ReferencedUser(
                     userId = refUserProfileId,
-                    handle = profileIdToProfileMetadataMap[refUserProfileId]?.handle
+                    handle = profileIdToProfileDataMap[refUserProfileId]?.handle
                         ?: refUserProfileId.asEllipsizedNpub(),
                 ) else null,
                 referencedPost = if (refPost != null && refPostAuthor != null) ReferencedPost(
@@ -143,7 +143,7 @@ fun List<PostData>.flatMapAsPostNostrResourcePO(
                     mediaResources = listOf(refPost).flatMapAsPostMediaResourcePO(),
                     nostrResources = listOf(refPost).flatMapAsPostNostrResourcePO(
                         postIdToPostDataMap = postIdToPostDataMap,
-                        profileIdToProfileMetadataMap = profileIdToProfileMetadataMap,
+                        profileIdToProfileDataMap = profileIdToProfileDataMap,
                     ),
                 ) else null,
             )

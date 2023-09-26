@@ -8,7 +8,7 @@ import net.primal.android.core.files.FileUploader
 import net.primal.android.core.files.error.UnsuccessfulFileUpload
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.networking.relays.errors.MissingRelaysException
-import net.primal.android.nostr.ext.asProfileMetadataPO
+import net.primal.android.nostr.ext.asProfileDataPO
 import net.primal.android.nostr.ext.asProfileStats
 import net.primal.android.nostr.ext.takeContentAsUserProfileStatsOrNull
 import net.primal.android.nostr.model.content.ContentMetadata
@@ -32,13 +32,13 @@ class ProfileRepository @Inject constructor(
 
     suspend fun requestProfileUpdate(profileId: String) {
         val response = withContext(Dispatchers.IO) { usersApi.getUserProfile(pubkey = profileId) }
-        val profileMetadata = response.metadata?.asProfileMetadataPO()
+        val profileMetadata = response.metadata?.asProfileDataPO()
         val userProfileStats = response.profileStats?.takeContentAsUserProfileStatsOrNull()
 
         withContext(Dispatchers.IO) {
             database.withTransaction {
                 if (profileMetadata != null) {
-                    database.profiles().upsertAll(profiles = listOf(profileMetadata))
+                    database.profiles().upsertAll(data = listOf(profileMetadata))
                 }
 
                 if (userProfileStats != null) {
@@ -60,7 +60,7 @@ class ProfileRepository @Inject constructor(
             fileUploader.uploadFile(userId = userId, uri = profileMetadata.banner)
         } else null
 
-        usersApi.setUserProfileMetadata(
+        usersApi.setUserProfile(
             ownerId = userId,
             contentMetadata = ContentMetadata(
                 displayName = profileMetadata.displayName,

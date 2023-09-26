@@ -23,7 +23,7 @@ interface UsersApi {
         relays: List<Relay>,
     ): NostrEvent
 
-    suspend fun setUserProfileMetadata(
+    suspend fun setUserProfile(
         ownerId: String,
         contentMetadata: ContentMetadata,
     ): NostrEvent

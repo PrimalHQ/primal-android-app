@@ -9,7 +9,7 @@ import net.primal.android.explore.api.model.HashtagScore
 import net.primal.android.explore.api.model.SearchUsersRequestBody
 import net.primal.android.explore.api.model.UsersResponse
 import net.primal.android.explore.db.TrendingHashtag
-import net.primal.android.nostr.ext.mapAsProfileMetadataPO
+import net.primal.android.nostr.ext.mapAsProfileDataPO
 import net.primal.android.nostr.ext.takeContentAsPrimalUserScoresOrNull
 import javax.inject.Inject
 
@@ -34,11 +34,11 @@ class ExploreRepository @Inject constructor(
 
     private suspend fun queryRemoteUsers(apiBlock: suspend () -> UsersResponse): List<UserProfileSearchItem> {
         val response = apiBlock()
-        val profiles = response.contactsMetadata.mapAsProfileMetadataPO()
+        val profiles = response.contactsMetadata.mapAsProfileDataPO()
         val userScoresMap = response.userScores?.takeContentAsPrimalUserScoresOrNull()
 
         withContext(Dispatchers.IO) {
-            database.profiles().upsertAll(profiles = profiles)
+            database.profiles().upsertAll(data = profiles)
         }
 
         return profiles.map {

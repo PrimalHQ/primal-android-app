@@ -7,7 +7,7 @@ import net.primal.android.feed.db.MediaResource
 data class Profile(
 
     @Embedded
-    val metadata: ProfileMetadata? = null,
+    val metadata: ProfileData? = null,
 
     @Relation(
         entityColumn = "profileId",

@@ -28,8 +28,8 @@ import net.primal.android.notifications.db.NotificationData
 import net.primal.android.notifications.db.NotificationDao
 import net.primal.android.profile.db.PostUserStats
 import net.primal.android.profile.db.PostUserStatsDao
-import net.primal.android.profile.db.ProfileMetadata
-import net.primal.android.profile.db.ProfileMetadataDao
+import net.primal.android.profile.db.ProfileData
+import net.primal.android.profile.db.ProfileDataDao
 import net.primal.android.profile.db.ProfileStats
 import net.primal.android.profile.db.ProfileStatsDao
 import net.primal.android.serialization.RoomCustomTypeConverters
@@ -40,7 +40,7 @@ import net.primal.android.thread.db.ConversationDao
 @Database(
     entities = [
         PostData::class,
-        ProfileMetadata::class,
+        ProfileData::class,
         RepostData::class,
         PostStats::class,
         MediaResource::class,
@@ -55,13 +55,13 @@ import net.primal.android.thread.db.ConversationDao
         NostrResource::class,
         NotificationData::class,
     ],
-    version = 7,
+    version = 8,
     exportSchema = true,
 )
 @TypeConverters(RoomCustomTypeConverters::class)
 abstract class PrimalDatabase : RoomDatabase() {
 
-    abstract fun profiles(): ProfileMetadataDao
+    abstract fun profiles(): ProfileDataDao
 
     abstract fun posts(): PostDao
 

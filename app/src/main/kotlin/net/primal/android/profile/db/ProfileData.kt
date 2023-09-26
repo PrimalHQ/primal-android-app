@@ -4,7 +4,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity
-data class ProfileMetadata(
+data class ProfileData(
     @PrimaryKey
     val ownerId: String,
     val eventId: String,
