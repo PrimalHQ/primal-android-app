@@ -25,6 +25,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -173,7 +174,7 @@ fun EditProfileContent(
                 .padding(horizontal = 32.dp)
         ) {
             PrimalLoadingButton(
-                text = "Save profile",
+                text = stringResource(id = R.string.profile_save_profile_button),
                 enabled = !state.loading,
                 loading = state.loading,
                 onClick = {
@@ -193,11 +194,12 @@ private fun ErrorHandler(
     error: EditProfileContract.UiState.EditProfileError?,
     snackbarHostState: SnackbarHostState
 ) {
+    val context = LocalContext.current
     LaunchedEffect(key1 = error ?: true) {
         val errorMessage = when (error) {
-            is EditProfileContract.UiState.EditProfileError.FailedToPublishMetadata -> "Unable to post edited metadata. Please try again."
-            is EditProfileContract.UiState.EditProfileError.MissingRelaysConfiguration -> "No relays found. Please configure your relays."
-            is EditProfileContract.UiState.EditProfileError.FailedToUploadImage -> "Failed to upload avatar and/or banner. Please try again."
+            is EditProfileContract.UiState.EditProfileError.FailedToPublishMetadata -> context.getString(R.string.profile_failed_to_publish_metadata)
+            is EditProfileContract.UiState.EditProfileError.MissingRelaysConfiguration -> context.getString(R.string.app_missing_relays_config)
+            is EditProfileContract.UiState.EditProfileError.FailedToUploadImage -> context.getString(R.string.app_failed_to_upload_image)
             null -> return@LaunchedEffect
         }
 
