@@ -40,7 +40,8 @@ import net.primal.android.theme.AppTheme
 
 @Composable
 fun ProfilePreviewStep(
-    state: CreateContract.UiState, isFinalized: Boolean
+    state: CreateContract.UiState,
+    isFinalized: Boolean,
 ) {
     Column(
         modifier = Modifier.fillMaxSize(),

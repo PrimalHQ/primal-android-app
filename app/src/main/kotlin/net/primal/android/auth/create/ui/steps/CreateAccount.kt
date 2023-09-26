@@ -13,7 +13,8 @@ import net.primal.android.core.compose.profile.ProfileHero
 
 @Composable
 fun CreateAccountStep(
-    state: CreateContract.UiState, eventPublisher: (CreateContract.UiEvent) -> Unit
+    state: CreateContract.UiState,
+    eventPublisher: (CreateContract.UiEvent) -> Unit,
 ) {
     ProfileHero(onBannerUriChange = {
         eventPublisher(CreateContract.UiEvent.BannerUriChangedEvent(bannerUri = it))
