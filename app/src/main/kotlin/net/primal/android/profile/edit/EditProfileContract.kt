@@ -1,6 +1,7 @@
 package net.primal.android.profile.edit
 
 import android.net.Uri
+import net.primal.android.profile.domain.ProfileMetadata
 
 interface EditProfileContract {
     data class UiState(
@@ -18,6 +19,7 @@ interface EditProfileContract {
         sealed class EditProfileError {
             data class MissingRelaysConfiguration(val cause: Throwable) : EditProfileError()
             data class FailedToPublishMetadata(val cause: Throwable) : EditProfileError()
+            data class FailedToUploadImage(val cause: Throwable) : EditProfileError()
         }
     }
 
@@ -30,5 +32,19 @@ interface EditProfileContract {
         data class Nip05IdentifierChangedEvent(val nip05Identifier: String) : UiEvent()
         data class AvatarUriChangedEvent(val avatarUri: Uri?) : UiEvent()
         data class BannerUriChangedEvent(val bannerUri: Uri?) : UiEvent()
+        data object SaveProfileEvent : UiEvent()
     }
+}
+
+fun EditProfileContract.UiState.toProfileMetadata(): ProfileMetadata {
+    return ProfileMetadata(
+        displayName = this.displayName,
+        handle = this.name,
+        website = this.website,
+        about = this.aboutMe,
+        lightningAddress = this.lightningAddress,
+        nostrVerification = this.nip05Identifier,
+        picture = this.avatarUri,
+        banner = this.bannerUri
+    )
 }

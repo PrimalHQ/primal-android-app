@@ -3,8 +3,11 @@ package net.primal.android.profile.edit
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -27,6 +30,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import net.primal.android.R
 import net.primal.android.core.compose.PrimalTopAppBar
+import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.profile.InputField
@@ -90,72 +94,97 @@ fun EditProfileContent(
             .systemBarsPadding()
             .navigationBarsPadding()
             .imePadding()
-            .padding(paddingValues = paddingValues)
-            .verticalScroll(
-                rememberScrollState()
-            ),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Top
+            .padding(paddingValues = paddingValues),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        ProfileHero(
-            avatarUri = state.avatarUri,
-            bannerUri = state.bannerUri,
-            onBannerUriChange = {
-                eventPublisher(EditProfileContract.UiEvent.BannerUriChangedEvent(bannerUri = it))
-            }, onAvatarUriChange = {
-                eventPublisher(EditProfileContract.UiEvent.AvatarUriChangedEvent(avatarUri = it))
-            })
-        Spacer(modifier = Modifier.height(32.dp))
-        InputField(
-            header = stringResource(id = R.string.create_input_header_display_name),
-            value = state.displayName,
-            onValueChange = {
-                eventPublisher(
-                    EditProfileContract.UiEvent.DisplayNameChangedEvent(
-                        it.trim()
-                    )
+        Column(
+            modifier = Modifier
+                .verticalScroll(
+                    rememberScrollState()
                 )
-            },
-            isRequired = true
-        )
-        Spacer(modifier = Modifier.height(12.dp))
-        InputField(
-            header = stringResource(id = R.string.create_input_header_handle),
-            value = state.name,
-            onValueChange = { eventPublisher(EditProfileContract.UiEvent.NameChangedEvent(it.trim())) },
-            isRequired = true,
-            prefix = "@"
-        )
-        Spacer(modifier = Modifier.height(12.dp))
-        InputField(header = stringResource(id = R.string.create_input_header_website),
-            value = state.website,
-            onValueChange = { eventPublisher(EditProfileContract.UiEvent.WebsiteChangedEvent(it.trim())) })
-        Spacer(modifier = Modifier.height(12.dp))
-        InputField(header = stringResource(id = R.string.create_input_header_about_me),
-            value = state.aboutMe,
-            isMultiline = true,
-            onValueChange = { eventPublisher(EditProfileContract.UiEvent.AboutMeChangedEvent(it)) })
-        Spacer(modifier = Modifier.height(12.dp))
-        InputField(header = stringResource(id = R.string.create_input_header_bitcoin_lightning_address),
-            value = state.lightningAddress,
-            onValueChange = {
-                eventPublisher(
-                    EditProfileContract.UiEvent.LightningAddressChangedEvent(
-                        it
+                .fillMaxHeight()
+                .weight(weight = 1f, fill = true),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Top
+        ) {
+            ProfileHero(
+                avatarUri = state.avatarUri,
+                bannerUri = state.bannerUri,
+                onBannerUriChange = {
+                    eventPublisher(EditProfileContract.UiEvent.BannerUriChangedEvent(bannerUri = it))
+                }, onAvatarUriChange = {
+                    eventPublisher(EditProfileContract.UiEvent.AvatarUriChangedEvent(avatarUri = it))
+                })
+            Spacer(modifier = Modifier.height(32.dp))
+            InputField(
+                header = stringResource(id = R.string.create_input_header_display_name),
+                value = state.displayName,
+                onValueChange = {
+                    eventPublisher(
+                        EditProfileContract.UiEvent.DisplayNameChangedEvent(
+                            it.trim()
+                        )
                     )
-                )
-            })
-        Spacer(modifier = Modifier.height(12.dp))
-        InputField(header = stringResource(id = R.string.create_input_header_nip_05),
-            value = state.nip05Identifier,
-            onValueChange = {
-                eventPublisher(
-                    EditProfileContract.UiEvent.Nip05IdentifierChangedEvent(
-                        it
+                },
+                isRequired = true
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            InputField(
+                header = stringResource(id = R.string.create_input_header_handle),
+                value = state.name,
+                onValueChange = { eventPublisher(EditProfileContract.UiEvent.NameChangedEvent(it.trim())) },
+                isRequired = true,
+                prefix = "@"
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            InputField(header = stringResource(id = R.string.create_input_header_website),
+                value = state.website,
+                onValueChange = { eventPublisher(EditProfileContract.UiEvent.WebsiteChangedEvent(it.trim())) })
+            Spacer(modifier = Modifier.height(12.dp))
+            InputField(header = stringResource(id = R.string.create_input_header_about_me),
+                value = state.aboutMe,
+                isMultiline = true,
+                onValueChange = { eventPublisher(EditProfileContract.UiEvent.AboutMeChangedEvent(it)) })
+            Spacer(modifier = Modifier.height(12.dp))
+            InputField(header = stringResource(id = R.string.create_input_header_bitcoin_lightning_address),
+                value = state.lightningAddress,
+                onValueChange = {
+                    eventPublisher(
+                        EditProfileContract.UiEvent.LightningAddressChangedEvent(
+                            it
+                        )
                     )
-                )
-            })
-
+                })
+            Spacer(modifier = Modifier.height(12.dp))
+            InputField(header = stringResource(id = R.string.create_input_header_nip_05),
+                value = state.nip05Identifier,
+                onValueChange = {
+                    eventPublisher(
+                        EditProfileContract.UiEvent.Nip05IdentifierChangedEvent(
+                            it
+                        )
+                    )
+                })
+        }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(86.dp)
+                .padding(horizontal = 32.dp)
+        ) {
+            PrimalLoadingButton(
+                text = "Save profile",
+                enabled = !state.loading,
+                loading = state.loading,
+                onClick = {
+                    eventPublisher(EditProfileContract.UiEvent.SaveProfileEvent)
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 16.dp)
+                    .height(56.dp),
+            )
+        }
     }
 }
 
@@ -168,6 +197,7 @@ private fun ErrorHandler(
         val errorMessage = when (error) {
             is EditProfileContract.UiState.EditProfileError.FailedToPublishMetadata -> "Unable to post edited metadata. Please try again."
             is EditProfileContract.UiState.EditProfileError.MissingRelaysConfiguration -> "No relays found. Please configure your relays."
+            is EditProfileContract.UiState.EditProfileError.FailedToUploadImage -> "Failed to upload avatar and/or banner. Please try again."
             null -> return@LaunchedEffect
         }
 

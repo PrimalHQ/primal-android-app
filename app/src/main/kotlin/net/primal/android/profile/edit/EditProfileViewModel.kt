@@ -1,21 +1,22 @@
 package net.primal.android.profile.edit
 
 import androidx.core.net.toUri
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
-import net.primal.android.core.utils.userNameUiFriendly
+import net.primal.android.core.files.error.UnsuccessfulFileUpload
+import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
-import net.primal.android.profile.db.authorNameUiFriendly
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.seconds
 
 @HiltViewModel
 class EditProfileViewModel @Inject constructor(
@@ -46,7 +47,12 @@ class EditProfileViewModel @Inject constructor(
     private fun observeEvents() = viewModelScope.launch {
         _event.collect {
             when (it) {
-                is EditProfileContract.UiEvent.DisplayNameChangedEvent -> setState { copy(displayName = it.displayName) }
+                is EditProfileContract.UiEvent.DisplayNameChangedEvent -> setState {
+                    copy(
+                        displayName = it.displayName
+                    )
+                }
+
                 is EditProfileContract.UiEvent.NameChangedEvent -> setState { copy(name = it.name) }
                 is EditProfileContract.UiEvent.AboutMeChangedEvent -> setState { copy(aboutMe = it.aboutMe) }
                 is EditProfileContract.UiEvent.WebsiteChangedEvent -> setState { copy(website = it.website) }
@@ -64,6 +70,7 @@ class EditProfileViewModel @Inject constructor(
 
                 is EditProfileContract.UiEvent.AvatarUriChangedEvent -> setState { copy(avatarUri = it.avatarUri) }
                 is EditProfileContract.UiEvent.BannerUriChangedEvent -> setState { copy(bannerUri = it.bannerUri) }
+                is EditProfileContract.UiEvent.SaveProfileEvent -> saveProfile()
             }
         }
     }
@@ -90,6 +97,42 @@ class EditProfileViewModel @Inject constructor(
             profileRepository.requestProfileUpdate(profileId = profileId)
         } catch (error: WssException) {
             // Ignore
+        }
+    }
+
+    private suspend fun saveProfile() {
+        setState { copy(loading = true) }
+        try {
+            val profileMetadata = state.value.toProfileMetadata()
+
+            profileRepository.setProfileMetadata(
+                userId = profileId,
+                profileMetadata = profileMetadata
+            )
+        } catch (error: NostrPublishException) {
+            setErrorState(
+                error = EditProfileContract.UiState.EditProfileError.FailedToPublishMetadata(
+                    error
+                )
+            )
+        } catch (error: UnsuccessfulFileUpload) {
+            setErrorState(
+                error = EditProfileContract.UiState.EditProfileError.FailedToUploadImage(
+                    error
+                )
+            )
+        } finally {
+            setState { copy(loading = false) }
+        }
+    }
+
+    private fun setErrorState(error: EditProfileContract.UiState.EditProfileError) {
+        setState { copy(error = error) }
+        viewModelScope.launch {
+            delay(2.seconds)
+            if (state.value.error == error) {
+                setState { copy(error = null) }
+            }
         }
     }
 }
