@@ -17,6 +17,7 @@ import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.profile.domain.ProfileMetadata
 import net.primal.android.profile.repository.ProfileRepository
+import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
@@ -24,7 +25,8 @@ import kotlin.time.Duration.Companion.seconds
 @HiltViewModel
 class EditProfileViewModel @Inject constructor(
     activeAccountStore: ActiveAccountStore,
-    private val profileRepository: ProfileRepository
+    private val profileRepository: ProfileRepository,
+    private val userAccountStore: UserAccountsStore
 ) : ViewModel() {
     private val profileId: String = activeAccountStore.activeUserId()
 
@@ -114,11 +116,14 @@ class EditProfileViewModel @Inject constructor(
         try {
             val profileMetadata = state.value.toProfileMetadata()
 
-            profileRepository.setProfileMetadata(
+            val updatedProfileMetadata = profileRepository.setProfileMetadata(
                 userId = profileId,
                 profileMetadata = profileMetadata
             )
             profileRepository.requestProfileUpdate(profileId = profileId)
+            userAccountStore.getAndUpdateAccount(userId = profileId) {
+                copy(pictureUrl = updatedProfileMetadata.remotePictureUrl)
+            }
             setEffect(effect = EditProfileContract.SideEffect.AccountSuccessfulyEdited)
         } catch (error: NostrPublishException) {
             setErrorState(

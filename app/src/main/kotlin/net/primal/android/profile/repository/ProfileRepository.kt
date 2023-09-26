@@ -51,7 +51,7 @@ class ProfileRepository @Inject constructor(
     }
 
     @Throws(UnsuccessfulFileUpload::class)
-    suspend fun setProfileMetadata(userId: String, profileMetadata: ProfileMetadata) {
+    suspend fun setProfileMetadata(userId: String, profileMetadata: ProfileMetadata): ProfileMetadata {
         val pictureUrl = if (profileMetadata.localPictureUri != null) {
             fileUploader.uploadFile(userId = userId, uri = profileMetadata.localPictureUri)
         } else profileMetadata.remotePictureUrl
@@ -73,6 +73,8 @@ class ProfileRepository @Inject constructor(
                 banner = bannerUrl,
             ),
         )
+
+        return profileMetadata
     }
 
     suspend fun follow(userId: String, followedUserId: String) {
