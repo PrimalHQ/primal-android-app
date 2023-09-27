@@ -24,6 +24,7 @@ import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.serialization.NostrJson
 import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.user.accounts.BOOTSTRAP_RELAYS
+import net.primal.android.user.repository.UserRepository
 import java.io.IOException
 import javax.inject.Inject
 
@@ -32,6 +33,7 @@ class CreateAccountViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val settingsRepository: SettingsRepository,
     private val profileRepository: ProfileRepository,
+    private val userRepository: UserRepository,
     private val recommendedFollowsApi: RecommendedFollowsApi,
 ) : ViewModel() {
 
@@ -84,7 +86,7 @@ class CreateAccountViewModel @Inject constructor(
             setState { copy(loading = true) }
             val userId = authRepository.createAccountAndLogin()
             val profile = state.value.asProfileMetadata()
-            profileRepository.setProfileMetadata(userId = userId, profileMetadata = profile)
+            userRepository.setProfileMetadata(userId = userId, profileMetadata = profile)
             setState {
                 copy(
                     userId = userId,
@@ -142,7 +144,6 @@ class CreateAccountViewModel @Inject constructor(
                     .map { it.pubkey }.toSet(),
                 relays = BOOTSTRAP_RELAYS,
             )
-
             settingsRepository.fetchAndPersistAppSettings(userId = userId)
             setEffect(SideEffect.AccountCreatedAndPersisted(pubkey = userId))
         } catch (e: NostrPublishException) {

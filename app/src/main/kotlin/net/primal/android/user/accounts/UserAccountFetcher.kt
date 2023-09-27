@@ -9,7 +9,7 @@ import net.primal.android.nostr.ext.asProfileDataPO
 import net.primal.android.nostr.ext.takeContentAsUserProfileStatsOrNull
 import net.primal.android.user.api.UsersApi
 import net.primal.android.user.domain.UserAccount
-import net.primal.android.user.domain.asUserAccount
+import net.primal.android.user.domain.asUserAccountFromContactsEvent
 import javax.inject.Inject
 
 class UserAccountFetcher @Inject constructor(
@@ -41,6 +41,6 @@ class UserAccountFetcher @Inject constructor(
             usersApi.getUserContacts(pubkey = pubkey, extendedResponse = false)
         }
 
-        return contactsResponse.contactsEvent?.asUserAccount()
+        return contactsResponse.contactsEvent?.asUserAccountFromContactsEvent()
     }
 }

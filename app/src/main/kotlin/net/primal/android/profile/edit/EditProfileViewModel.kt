@@ -18,8 +18,8 @@ import net.primal.android.profile.domain.ProfileMetadata
 import net.primal.android.profile.edit.EditProfileContract.UiEvent
 import net.primal.android.profile.edit.EditProfileContract.UiState.EditProfileError
 import net.primal.android.profile.repository.ProfileRepository
-import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.android.user.repository.UserRepository
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
 
@@ -27,7 +27,7 @@ import kotlin.time.Duration.Companion.seconds
 class EditProfileViewModel @Inject constructor(
     activeAccountStore: ActiveAccountStore,
     private val profileRepository: ProfileRepository,
-    private val userAccountStore: UserAccountsStore
+    private val userRepository: UserRepository,
 ) : ViewModel() {
 
     private val profileId: String = activeAccountStore.activeUserId()
@@ -113,16 +113,8 @@ class EditProfileViewModel @Inject constructor(
     private suspend fun saveProfile() = viewModelScope.launch {
         setState { copy(loading = true) }
         try {
-            val profileMetadata = state.value.toProfileMetadata()
-
-            val updatedProfileMetadata = profileRepository.setProfileMetadata(
-                userId = profileId,
-                profileMetadata = profileMetadata
-            )
-            profileRepository.requestProfileUpdate(profileId = profileId)
-            userAccountStore.getAndUpdateAccount(userId = profileId) {
-                copy(pictureUrl = updatedProfileMetadata.remotePictureUrl)
-            }
+            val profile = state.value.toProfileMetadata()
+            userRepository.setProfileMetadata(userId = profileId, profileMetadata = profile)
             setEffect(effect = EditProfileContract.SideEffect.AccountSuccessfulyEdited)
         } catch (error: NostrPublishException) {
             setErrorState(error = EditProfileError.FailedToPublishMetadata(error))
