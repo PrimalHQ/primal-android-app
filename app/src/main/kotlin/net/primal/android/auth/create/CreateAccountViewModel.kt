@@ -11,9 +11,9 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import net.primal.android.auth.AuthRepository
-import net.primal.android.auth.create.CreateContract.SideEffect
-import net.primal.android.auth.create.CreateContract.UiEvent
-import net.primal.android.auth.create.CreateContract.UiState
+import net.primal.android.auth.create.CreateAccountContract.SideEffect
+import net.primal.android.auth.create.CreateAccountContract.UiEvent
+import net.primal.android.auth.create.CreateAccountContract.UiState
 import net.primal.android.auth.create.api.RecommendedFollowsApi
 import net.primal.android.auth.create.ui.RecommendedFollow
 import net.primal.android.core.files.error.UnsuccessfulFileUpload
@@ -28,7 +28,7 @@ import java.io.IOException
 import javax.inject.Inject
 
 @HiltViewModel
-class CreateViewModel @Inject constructor(
+class CreateAccountViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val settingsRepository: SettingsRepository,
     private val profileRepository: ProfileRepository,
@@ -67,8 +67,8 @@ class CreateViewModel @Inject constructor(
                 is UiEvent.FinishEvent -> finish()
                 is UiEvent.AvatarUriChangedEvent -> setState { copy(avatarUri = event.avatarUri) }
                 is UiEvent.BannerUriChangedEvent -> setState { copy(bannerUri = event.bannerUri) }
-                is UiEvent.NameChangedEvent -> setState { copy(name = event.name) }
-                is UiEvent.HandleChangedEvent -> setState { copy(handle = event.handle) }
+                is UiEvent.DisplayNameChangedEvent -> setState { copy(displayName = event.name) }
+                is UiEvent.UsernameChangedEvent -> setState { copy(username = event.handle) }
                 is UiEvent.LightningAddressChangedEvent -> setState { copy(lightningAddress = event.lightningAddress) }
                 is UiEvent.Nip05IdentifierChangedEvent -> setState { copy(nip05Identifier = event.nip05Identifier) }
                 is UiEvent.WebsiteChangedEvent -> setState { copy(website = event.website) }
@@ -105,7 +105,7 @@ class CreateViewModel @Inject constructor(
     private suspend fun fetchRecommendedFollows() {
         try {
             setState { copy(loading = true) }
-            val response = recommendedFollowsApi.fetch(state.value.name)
+            val response = recommendedFollowsApi.fetch(state.value.displayName)
 
             val result = response.suggestions.map { sg ->
                 return@map sg.members.map { Pair(sg.group, it) }
@@ -191,8 +191,8 @@ class CreateViewModel @Inject constructor(
     }
 
     private fun UiState.asProfileMetadata(): ProfileMetadata = ProfileMetadata(
-        displayName = this.name,
-        handle = this.handle,
+        displayName = this.displayName,
+        username = this.username,
         website = this.website.ifEmpty { null },
         about = this.aboutMe.ifEmpty { null },
         localPictureUri = this.avatarUri,

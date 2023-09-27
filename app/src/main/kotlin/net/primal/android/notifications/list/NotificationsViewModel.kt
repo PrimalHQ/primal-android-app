@@ -18,7 +18,7 @@ import net.primal.android.core.compose.feed.model.FeedPostStatsUi
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.authorNameUiFriendly
-import net.primal.android.core.utils.userNameUiFriendly
+import net.primal.android.core.utils.usernameUiFriendly
 import net.primal.android.feed.repository.PostRepository
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
@@ -227,7 +227,7 @@ class NotificationsViewModel @Inject constructor(
             authorId = this.actionPost.authorId,
             authorName = this.actionByUser?.authorNameUiFriendly()
                 ?: this.actionPost.authorId.asEllipsizedNpub(),
-            authorHandle = this.actionByUser?.userNameUiFriendly()
+            authorHandle = this.actionByUser?.usernameUiFriendly()
                 ?: this.actionPost.authorId.asEllipsizedNpub(),
             authorInternetIdentifier = this.actionByUser?.internetIdentifier,
             authorLightningAddress = this.actionByUser?.lightningAddress,

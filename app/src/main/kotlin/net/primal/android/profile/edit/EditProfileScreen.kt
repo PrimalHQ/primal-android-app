@@ -35,6 +35,7 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.profile.InputField
 import net.primal.android.core.compose.profile.ProfileHero
+import net.primal.android.core.utils.isValidUsername
 import net.primal.android.theme.PrimalTheme
 
 @Composable
@@ -125,33 +126,35 @@ fun EditProfileContent(
                 header = stringResource(id = R.string.create_input_header_display_name),
                 value = state.displayName,
                 onValueChange = {
-                    eventPublisher(
-                        EditProfileContract.UiEvent.DisplayNameChangedEvent(
-                            it.trim()
-                        )
-                    )
+                    eventPublisher(EditProfileContract.UiEvent.DisplayNameChangedEvent(it))
                 },
-                isRequired = true
             )
             Spacer(modifier = Modifier.height(12.dp))
             InputField(
-                header = stringResource(id = R.string.create_input_header_handle),
-                value = state.name,
-                onValueChange = { eventPublisher(EditProfileContract.UiEvent.NameChangedEvent(it.trim())) },
+                header = stringResource(id = R.string.create_input_header_handle).uppercase(),
+                value = state.username,
+                onValueChange = {
+                    if (it.isValidUsername()) {
+                        eventPublisher(EditProfileContract.UiEvent.UsernameChangedEvent(it))
+                    }
+                },
                 isRequired = true,
                 prefix = "@"
             )
             Spacer(modifier = Modifier.height(12.dp))
-            InputField(header = stringResource(id = R.string.create_input_header_website),
+            InputField(
+                header = stringResource(id = R.string.create_input_header_website).uppercase(),
                 value = state.website,
                 onValueChange = { eventPublisher(EditProfileContract.UiEvent.WebsiteChangedEvent(it.trim())) })
             Spacer(modifier = Modifier.height(12.dp))
-            InputField(header = stringResource(id = R.string.create_input_header_about_me),
+            InputField(
+                header = stringResource(id = R.string.create_input_header_about_me).uppercase(),
                 value = state.aboutMe,
                 isMultiline = true,
                 onValueChange = { eventPublisher(EditProfileContract.UiEvent.AboutMeChangedEvent(it)) })
             Spacer(modifier = Modifier.height(12.dp))
-            InputField(header = stringResource(id = R.string.create_input_header_bitcoin_lightning_address),
+            InputField(
+                header = stringResource(id = R.string.create_input_header_bitcoin_lightning_address).uppercase(),
                 value = state.lightningAddress,
                 onValueChange = {
                     eventPublisher(
@@ -161,7 +164,8 @@ fun EditProfileContent(
                     )
                 })
             Spacer(modifier = Modifier.height(12.dp))
-            InputField(header = stringResource(id = R.string.create_input_header_nip_05),
+            InputField(
+                header = stringResource(id = R.string.create_input_header_nip_05).uppercase(),
                 value = state.nip05Identifier,
                 onValueChange = {
                     eventPublisher(
@@ -179,7 +183,7 @@ fun EditProfileContent(
         ) {
             PrimalLoadingButton(
                 text = stringResource(id = R.string.profile_save_profile_button),
-                enabled = !state.loading,
+                enabled = !state.loading && state.username.isNotEmpty(),
                 loading = state.loading,
                 onClick = {
                     eventPublisher(EditProfileContract.UiEvent.SaveProfileEvent)
@@ -219,7 +223,7 @@ private fun ErrorHandler(
 fun PreviewEditProfileScreen() {
     PrimalTheme(primalTheme = PrimalTheme.Sunset) {
         EditProfileScreen(state = EditProfileContract.UiState(
-            name = "Tralala Handle",
+            username = "Tralala Handle",
             displayName = "Tralala Display Name",
             aboutMe = "About me",
             website = "http://www.example.com",

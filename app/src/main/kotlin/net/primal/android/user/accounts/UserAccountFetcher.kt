@@ -4,7 +4,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.authorNameUiFriendly
-import net.primal.android.core.utils.userNameUiFriendly
+import net.primal.android.core.utils.usernameUiFriendly
 import net.primal.android.nostr.ext.asProfileDataPO
 import net.primal.android.nostr.ext.takeContentAsUserProfileStatsOrNull
 import net.primal.android.user.api.UsersApi
@@ -26,7 +26,7 @@ class UserAccountFetcher @Inject constructor(
         return UserAccount(
             pubkey = pubkey,
             authorDisplayName = profileData?.authorNameUiFriendly() ?: pubkey.asEllipsizedNpub(),
-            userDisplayName = profileData?.userNameUiFriendly() ?: pubkey.asEllipsizedNpub(),
+            userDisplayName = profileData?.usernameUiFriendly() ?: pubkey.asEllipsizedNpub(),
             pictureUrl = profileData?.picture,
             internetIdentifier = profileData?.internetIdentifier,
             lightningAddress = profileData?.lightningAddress,

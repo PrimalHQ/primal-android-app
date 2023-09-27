@@ -64,7 +64,7 @@ class ProfileRepository @Inject constructor(
             ownerId = userId,
             contentMetadata = ContentMetadata(
                 displayName = profileMetadata.displayName,
-                name = profileMetadata.handle,
+                name = profileMetadata.username,
                 website = profileMetadata.website,
                 about = profileMetadata.about,
                 lud16 = profileMetadata.lightningAddress,

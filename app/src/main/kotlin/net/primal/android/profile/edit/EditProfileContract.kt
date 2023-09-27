@@ -1,14 +1,13 @@
 package net.primal.android.profile.edit
 
 import android.net.Uri
-import net.primal.android.auth.create.CreateContract
 
 interface EditProfileContract {
     data class UiState(
         val loading: Boolean = false,
         val error: EditProfileError? = null,
-        val displayName: String = "", // name
-        val name: String = "", // handle
+        val displayName: String = "",
+        val username: String = "",
         val website: String = "",
         val aboutMe: String = "",
         val lightningAddress: String = "",
@@ -27,7 +26,7 @@ interface EditProfileContract {
 
     sealed class UiEvent {
         data class DisplayNameChangedEvent(val displayName: String) : UiEvent()
-        data class NameChangedEvent(val name: String) : UiEvent()
+        data class UsernameChangedEvent(val name: String) : UiEvent()
         data class WebsiteChangedEvent(val website: String) : UiEvent()
         data class AboutMeChangedEvent(val aboutMe: String) : UiEvent()
         data class LightningAddressChangedEvent(val lightningAddress: String) : UiEvent()

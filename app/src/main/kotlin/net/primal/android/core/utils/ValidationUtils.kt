@@ -53,3 +53,5 @@ private fun String.isValidNpub(): Boolean {
         false
     }
 }
+
+fun String.isValidUsername(): Boolean = all { it.isLetterOrDigit() }

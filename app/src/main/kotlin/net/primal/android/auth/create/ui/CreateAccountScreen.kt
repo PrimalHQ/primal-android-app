@@ -41,9 +41,9 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import net.primal.android.R
-import net.primal.android.auth.create.CreateContract
-import net.primal.android.auth.create.CreateContract.UiState.CreateAccountStep
-import net.primal.android.auth.create.CreateViewModel
+import net.primal.android.auth.create.CreateAccountContract
+import net.primal.android.auth.create.CreateAccountContract.UiState.CreateAccountStep
+import net.primal.android.auth.create.CreateAccountViewModel
 import net.primal.android.auth.create.ui.steps.CreateAccountStep
 import net.primal.android.auth.create.ui.steps.FollowRecommendedAccountsStep
 import net.primal.android.auth.create.ui.steps.ProfilePreviewStep
@@ -56,15 +56,15 @@ import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 
 @Composable
-fun CreateScreen(
-    viewModel: CreateViewModel,
+fun CreateAccountScreen(
+    viewModel: CreateAccountViewModel,
     onClose: () -> Unit,
     onCreateSuccess: (String) -> Unit,
 ) {
     LaunchedEffect(viewModel, onCreateSuccess) {
         viewModel.effect.collect {
             when (it) {
-                is CreateContract.SideEffect.AccountCreatedAndPersisted -> onCreateSuccess(it.pubkey)
+                is CreateAccountContract.SideEffect.AccountCreatedAndPersisted -> onCreateSuccess(it.pubkey)
             }
         }
     }
@@ -72,7 +72,7 @@ fun CreateScreen(
     LaunchedErrorHandler(viewModel = viewModel)
 
     val uiState = viewModel.state.collectAsState()
-    CreateScreen(
+    CreateAccountScreen(
         state = uiState.value,
         eventPublisher = { viewModel.setEvent(it) },
         onClose = onClose,
@@ -81,9 +81,9 @@ fun CreateScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreateScreen(
-    state: CreateContract.UiState,
-    eventPublisher: (CreateContract.UiEvent) -> Unit,
+fun CreateAccountScreen(
+    state: CreateAccountContract.UiState,
+    eventPublisher: (CreateAccountContract.UiEvent) -> Unit,
     onClose: () -> Unit,
 ) {
     Scaffold(topBar = {
@@ -95,7 +95,7 @@ fun CreateScreen(
                     if (state.currentStep == CreateAccountStep.NEW_ACCOUNT) {
                         onClose()
                     } else {
-                        eventPublisher(CreateContract.UiEvent.GoBack)
+                        eventPublisher(CreateAccountContract.UiEvent.GoBack)
                     }
                 },
             )
@@ -105,7 +105,7 @@ fun CreateScreen(
             }
         }
     }, content = { paddingValues ->
-        CreateContent(
+        CreateAccountContent(
             state = state, eventPublisher = eventPublisher, paddingValues = paddingValues
         )
     })
@@ -150,9 +150,9 @@ private fun StepsIndicator(
 }
 
 @Composable
-fun CreateContent(
-    state: CreateContract.UiState,
-    eventPublisher: (CreateContract.UiEvent) -> Unit,
+fun CreateAccountContent(
+    state: CreateAccountContract.UiState,
+    eventPublisher: (CreateAccountContract.UiEvent) -> Unit,
     paddingValues: PaddingValues,
     modifier: Modifier = Modifier
 ) {
@@ -203,15 +203,15 @@ fun CreateContent(
         ) {
             PrimalLoadingButton(
                 text = stepActionText(state.currentStep),
-                enabled = state.name != "" && state.handle != "",
+                enabled = !state.loading && state.username.isNotEmpty(),
                 loading = state.loading,
                 onClick = {
                     when (state.currentStep) {
-                        CreateAccountStep.NEW_ACCOUNT -> eventPublisher(CreateContract.UiEvent.GoToProfilePreviewStepEvent)
-                        CreateAccountStep.PROFILE_PREVIEW -> eventPublisher(CreateContract.UiEvent.GoToNostrCreatedStepEvent)
-                        CreateAccountStep.ACCOUNT_CREATED -> eventPublisher(CreateContract.UiEvent.GoToFollowContactsStepEvent)
+                        CreateAccountStep.NEW_ACCOUNT -> eventPublisher(CreateAccountContract.UiEvent.GoToProfilePreviewStepEvent)
+                        CreateAccountStep.PROFILE_PREVIEW -> eventPublisher(CreateAccountContract.UiEvent.GoToNostrCreatedStepEvent)
+                        CreateAccountStep.ACCOUNT_CREATED -> eventPublisher(CreateAccountContract.UiEvent.GoToFollowContactsStepEvent)
                         CreateAccountStep.FOLLOW_RECOMMENDED_ACCOUNTS -> eventPublisher(
-                            CreateContract.UiEvent.FinishEvent
+                            CreateAccountContract.UiEvent.FinishEvent
                         )
                     }
                 },
@@ -251,7 +251,7 @@ private fun stepColor(step: CreateAccountStep, position: Int): Color {
 
 @Composable
 fun LaunchedErrorHandler(
-    viewModel: CreateViewModel
+    viewModel: CreateAccountViewModel
 ) {
     val genericMessage = stringResource(id = R.string.app_generic_error)
     val context = LocalContext.current
@@ -334,10 +334,10 @@ fun PreviewCreateScreen(
     @PreviewParameter(CreateScreenPreviewProvider::class) state: CreateScreenPreviewState
 ) {
     PrimalTheme(primalTheme = PrimalTheme.Sunset) {
-        CreateScreen(state = CreateContract.UiState(
+        CreateAccountScreen(state = CreateAccountContract.UiState(
             currentStep = state.currentStep,
-            name = state.name,
-            handle = state.handle,
+            displayName = state.name,
+            username = state.handle,
             website = state.website,
             aboutMe = state.aboutMe
         ), eventPublisher = {}, onClose = {})

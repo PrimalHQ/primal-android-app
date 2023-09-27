@@ -21,8 +21,8 @@ import com.google.accompanist.navigation.material.bottomSheet
 import com.google.accompanist.navigation.material.rememberBottomSheetNavigator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import net.primal.android.auth.create.ui.CreateScreen
-import net.primal.android.auth.create.CreateViewModel
+import net.primal.android.auth.create.ui.CreateAccountScreen
+import net.primal.android.auth.create.CreateAccountViewModel
 import net.primal.android.auth.login.LoginScreen
 import net.primal.android.auth.login.LoginViewModel
 import net.primal.android.auth.logout.LogoutScreen
@@ -70,7 +70,7 @@ private fun NavController.navigateToWelcome() = navigate(
 
 private fun NavController.navigateToLogin() = navigate(route = "login")
 
-private fun NavController.navigateToCreate() = navigate(route = "create")
+private fun NavController.navigateToCreate() = navigate(route = "create_account")
 
 private fun NavController.navigateToLogout() = navigate(route = "logout")
 
@@ -188,7 +188,7 @@ fun PrimalAppNavigation() {
 
             login(route = "login", navController = navController)
 
-            create(route = "create", navController = navController)
+            createAccount(route = "create_account", navController = navController)
 
             logout(route = "logout", navController = navController)
 
@@ -318,13 +318,13 @@ private fun NavGraphBuilder.login(
     }
 }
 
-private fun NavGraphBuilder.create(
+private fun NavGraphBuilder.createAccount(
     route: String,
     navController: NavController
 ) = composable(route = route) {
-    val viewModel: CreateViewModel = hiltViewModel(it)
+    val viewModel: CreateAccountViewModel = hiltViewModel(it)
     PrimalTheme(PrimalTheme.Sunset) {
-        CreateScreen(
+        CreateAccountScreen(
             viewModel = viewModel,
             onCreateSuccess = { pubkey -> navController.navigateToFeed(pubkey) },
             onClose = { navController.popBackStack() }

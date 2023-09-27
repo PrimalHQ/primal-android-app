@@ -34,12 +34,12 @@
     <string name="create_recommended_follow_all">Follow all</string>
     <string name="create_recommended_unfollow_all">Unfollow all</string>
     <string name="create_subtitle_profile_preview">We will use this info to create your Nostr account. If you wish to make any changes, you can always do so in your profile settings.</string>
-    <string name="create_input_header_display_name">DISPLAY NAME</string>
-    <string name="create_input_header_handle">HANDLE</string>
-    <string name="create_input_header_website">WEBSITE</string>
-    <string name="create_input_header_about_me">ABOUT ME</string>
-    <string name="create_input_header_bitcoin_lightning_address">BITCOIN LIGHTNING ADDRESS</string>
-    <string name="create_input_header_nip_05">NOSTR VERIFICATION (NIP 05)</string>
+    <string name="create_input_header_display_name">Display name</string>
+    <string name="create_input_header_handle">Username</string>
+    <string name="create_input_header_website">Website</string>
+    <string name="create_input_header_about_me">About me</string>
+    <string name="create_input_header_bitcoin_lightning_address">Bitcoin lighting address</string>
+    <string name="create_input_header_nip_05">Nostr verification (NIP 05)</string>
 
     <string name="login_title">Sign in</string>
     <string name="login_description">Paste your Nostr key to sign in:</string>

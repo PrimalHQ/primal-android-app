@@ -3,13 +3,13 @@ package net.primal.android.auth.create
 import android.net.Uri
 import net.primal.android.auth.create.ui.RecommendedFollow
 
-interface CreateContract {
+interface CreateAccountContract {
     data class UiState(
         val currentStep: CreateAccountStep = CreateAccountStep.NEW_ACCOUNT,
         val loading: Boolean = false,
         val error: CreateError? = null,
-        val name: String = "",
-        val handle: String = "",
+        val displayName: String = "",
+        val username: String = "",
         val website: String = "",
         val aboutMe: String = "",
         val lightningAddress: String = "",
@@ -47,8 +47,8 @@ interface CreateContract {
         data object FinishEvent : UiEvent()
         data class AvatarUriChangedEvent(val avatarUri: Uri?) : UiEvent()
         data class BannerUriChangedEvent(val bannerUri: Uri?) : UiEvent()
-        data class NameChangedEvent(val name: String) : UiEvent()
-        data class HandleChangedEvent(val handle: String) : UiEvent()
+        data class DisplayNameChangedEvent(val name: String) : UiEvent()
+        data class UsernameChangedEvent(val handle: String) : UiEvent()
         data class LightningAddressChangedEvent(val lightningAddress: String) : UiEvent()
         data class Nip05IdentifierChangedEvent(val nip05Identifier: String) : UiEvent()
         data class WebsiteChangedEvent(val website: String) : UiEvent()
