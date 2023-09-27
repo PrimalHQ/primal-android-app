@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -33,7 +34,7 @@ fun IconText(
     modifier: Modifier = Modifier,
     leadingIcon: ImageVector? = null,
     leadingIconSize: TextUnit = 24.sp,
-    color: Color = Color.Unspecified,
+    color: Color = LocalContentColor.current,
     leadingIconTintColor: Color? = color,
     fontSize: TextUnit = TextUnit.Unspecified,
     fontStyle: FontStyle? = null,

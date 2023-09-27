@@ -6,7 +6,7 @@ import net.primal.android.core.compose.feed.model.NostrResourceUi
 import net.primal.android.core.compose.media.model.MediaResourceUi
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.authorNameUiFriendly
-import net.primal.android.core.utils.userNameUiFriendly
+import net.primal.android.core.utils.usernameUiFriendly
 import net.primal.android.feed.db.FeedPost
 import net.primal.android.feed.db.MediaResource
 import net.primal.android.feed.db.NostrResource
@@ -19,7 +19,7 @@ fun FeedPost.asFeedPostUi() = FeedPostUi(
     repostAuthorName = this.repostAuthor?.authorNameUiFriendly() ?: this.data.repostAuthorId?.asEllipsizedNpub(),
     authorId = this.author?.ownerId ?: this.data.authorId,
     authorName = this.author?.authorNameUiFriendly() ?: this.data.authorId.asEllipsizedNpub(),
-    authorHandle = this.author?.userNameUiFriendly() ?: this.data.authorId.asEllipsizedNpub(),
+    authorHandle = this.author?.usernameUiFriendly() ?: this.data.authorId.asEllipsizedNpub(),
     authorInternetIdentifier = this.author?.internetIdentifier,
     authorLightningAddress = this.author?.lightningAddress,
     authorAvatarUrl = this.author?.picture,

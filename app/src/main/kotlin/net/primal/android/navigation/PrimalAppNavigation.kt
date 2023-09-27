@@ -21,8 +21,8 @@ import com.google.accompanist.navigation.material.bottomSheet
 import com.google.accompanist.navigation.material.rememberBottomSheetNavigator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import net.primal.android.auth.create.ui.CreateScreen
-import net.primal.android.auth.create.CreateViewModel
+import net.primal.android.auth.create.ui.CreateAccountScreen
+import net.primal.android.auth.create.CreateAccountViewModel
 import net.primal.android.auth.login.LoginScreen
 import net.primal.android.auth.login.LoginViewModel
 import net.primal.android.auth.logout.LogoutScreen
@@ -55,6 +55,8 @@ import net.primal.android.notifications.list.NotificationsScreen
 import net.primal.android.notifications.list.NotificationsViewModel
 import net.primal.android.profile.details.ProfileScreen
 import net.primal.android.profile.details.ProfileViewModel
+import net.primal.android.profile.edit.EditProfileScreen
+import net.primal.android.profile.edit.EditProfileViewModel
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.thread.ThreadScreen
@@ -68,7 +70,7 @@ private fun NavController.navigateToWelcome() = navigate(
 
 private fun NavController.navigateToLogin() = navigate(route = "login")
 
-private fun NavController.navigateToCreate() = navigate(route = "create")
+private fun NavController.navigateToCreate() = navigate(route = "create_account")
 
 private fun NavController.navigateToLogout() = navigate(route = "logout")
 
@@ -107,6 +109,8 @@ private fun NavController.navigateToProfile(profileId: String? = null) = when {
     profileId != null -> navigate(route = "profile?$ProfileId=$profileId")
     else -> navigate(route = "profile")
 }
+
+private fun NavController.navigateToEditProfile() = navigate(route = "edit_profile")
 
 private fun NavController.navigateToSettings() = navigate(route = "settings")
 
@@ -184,7 +188,7 @@ fun PrimalAppNavigation() {
 
             login(route = "login", navController = navController)
 
-            create(route = "create", navController = navController)
+            createAccount(route = "create_account", navController = navController)
 
             logout(route = "logout", navController = navController)
 
@@ -274,6 +278,8 @@ fun PrimalAppNavigation() {
                 navController = navController,
             )
 
+            editProfile(route = "edit_profile", navController = navController)
+
             settingsNavigation(route = "settings", navController = navController)
         }
     }
@@ -312,13 +318,13 @@ private fun NavGraphBuilder.login(
     }
 }
 
-private fun NavGraphBuilder.create(
+private fun NavGraphBuilder.createAccount(
     route: String,
     navController: NavController
 ) = composable(route = route) {
-    val viewModel: CreateViewModel = hiltViewModel(it)
+    val viewModel: CreateAccountViewModel = hiltViewModel(it)
     PrimalTheme(PrimalTheme.Sunset) {
-        CreateScreen(
+        CreateAccountScreen(
             viewModel = viewModel,
             onCreateSuccess = { pubkey -> navController.navigateToFeed(pubkey) },
             onClose = { navController.popBackStack() }
@@ -516,9 +522,22 @@ private fun NavGraphBuilder.profile(
         onPostClick = { postId -> navController.navigateToThread(postId = postId) },
         onPostQuoteClick = { preFillContent -> navController.navigateToNewPost(preFillContent) },
         onProfileClick = { profileId -> navController.navigateToProfile(profileId = profileId) },
+        onEditProfileClick = { navController.navigateToEditProfile() },
         onHashtagClick = { hashtag -> navController.navigateToExploreFeed(query = hashtag) },
         onWalletUnavailable = { navController.navigateToWallet() },
     )
+}
+
+private fun NavGraphBuilder.editProfile(
+    route: String,
+    navController: NavController,
+) = composable(
+    route = route
+) {
+    val viewModel = hiltViewModel<EditProfileViewModel>()
+
+    LockToOrientationPortrait()
+    EditProfileScreen(viewModel = viewModel, onClose = { navController.navigateUp() })
 }
 
 private fun NavGraphBuilder.logout(

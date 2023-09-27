@@ -16,7 +16,7 @@ import kotlinx.coroutines.launch
 import net.primal.android.core.compose.feed.asFeedPostUi
 import net.primal.android.core.compose.media.model.MediaResourceUi
 import net.primal.android.core.utils.authorNameUiFriendly
-import net.primal.android.core.utils.userNameUiFriendly
+import net.primal.android.core.utils.usernameUiFriendly
 import net.primal.android.feed.repository.FeedRepository
 import net.primal.android.feed.repository.PostRepository
 import net.primal.android.navigation.profileId
@@ -51,6 +51,7 @@ class ProfileViewModel @Inject constructor(
         UiState(
             profileId = profileId,
             isProfileFollowed = false,
+            isActiveUser = false,
             authoredPosts = feedRepository.feedByDirective(feedDirective = "authored;$profileId")
                 .map { it.map { feed -> feed.asFeedPostUi() } }
                 .cachedIn(viewModelScope),
@@ -90,6 +91,7 @@ class ProfileViewModel @Inject constructor(
             setState {
                 copy(
                     isProfileFollowed = it.following.contains(profileId),
+                    isActiveUser = it.pubkey == profileId,
                     walletConnected = it.nostrWallet != null,
                     defaultZapAmount = it.appSettings?.defaultZapAmount,
                     zapOptions = it.appSettings?.zapOptions ?: emptyList(),
@@ -106,7 +108,7 @@ class ProfileViewModel @Inject constructor(
                         ProfileDetailsUi(
                             pubkey = it.metadata.ownerId,
                             authorDisplayName = it.metadata.authorNameUiFriendly(),
-                            userDisplayName = it.metadata.userNameUiFriendly(),
+                            userDisplayName = it.metadata.usernameUiFriendly(),
                             coverUrl = it.metadata.banner,
                             avatarUrl = it.metadata.picture,
                             internetIdentifier = it.metadata.internetIdentifier,

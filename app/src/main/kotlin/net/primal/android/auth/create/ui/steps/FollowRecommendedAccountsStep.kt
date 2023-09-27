@@ -22,15 +22,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.R
-import net.primal.android.auth.create.CreateContract
-import net.primal.android.auth.create.ui.CreateContent
+import net.primal.android.auth.create.CreateAccountContract
+import net.primal.android.auth.create.ui.CreateAccountContent
 import net.primal.android.auth.create.ui.RecommendedFollow
 import net.primal.android.core.compose.AvatarThumbnailListItemImage
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.button.PrimalOutlinedButton
 import net.primal.android.core.utils.isPrimalIdentifier
-import net.primal.android.core.utils.userNameUiFriendly
+import net.primal.android.core.utils.usernameUiFriendly
 import net.primal.android.nostr.model.content.ContentMetadata
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
@@ -38,8 +38,8 @@ import net.primal.android.theme.PrimalTheme
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun FollowRecommendedAccountsStep(
-    state: CreateContract.UiState,
-    eventPublisher: (CreateContract.UiEvent) -> Unit,
+    state: CreateAccountContract.UiState,
+    eventPublisher: (CreateAccountContract.UiEvent) -> Unit,
 ) {
     LazyColumn(
         modifier = Modifier
@@ -98,7 +98,7 @@ fun FollowRecommendedAccountsStep(
                                 },
                                 onClick = {
                                     eventPublisher(
-                                        CreateContract.UiEvent.ToggleGroupFollowEvent(
+                                        CreateAccountContract.UiEvent.ToggleGroupFollowEvent(
                                             groupName = group.key
                                         )
                                     )
@@ -131,7 +131,7 @@ fun FollowRecommendedAccountsStep(
                         },
                         headlineContent = {
                             NostrUserText(
-                                displayName = suggestion.content.userNameUiFriendly(
+                                displayName = suggestion.content.usernameUiFriendly(
                                     pubkey = suggestion.pubkey
                                 ),
                                 fontSize = 14.sp,
@@ -173,7 +173,7 @@ fun FollowRecommendedAccountsStep(
                                 },
                                 onClick = {
                                     eventPublisher(
-                                        CreateContract.UiEvent.ToggleFollowEvent(
+                                        CreateAccountContract.UiEvent.ToggleFollowEvent(
                                             groupName = group.key, pubkey = suggestion.pubkey
                                         )
                                     )
@@ -212,8 +212,8 @@ private fun isGroupFollowed(
 @Composable
 fun PreviewFollowRecommendedAccountsStep() {
     PrimalTheme(primalTheme = PrimalTheme.Sunset) {
-        val state = CreateContract.UiState(
-            currentStep = CreateContract.UiState.CreateAccountStep.FOLLOW_RECOMMENDED_ACCOUNTS,
+        val state = CreateAccountContract.UiState(
+            currentStep = CreateAccountContract.UiState.CreateAccountStep.FOLLOW_RECOMMENDED_ACCOUNTS,
             recommendedFollows = listOf(
                 RecommendedFollow(
                     pubkey = "88c124151safasf",
@@ -247,7 +247,7 @@ fun PreviewFollowRecommendedAccountsStep() {
                 ),
             ),
         )
-        CreateContent(
+        CreateAccountContent(
             state = state,
             eventPublisher = {},
             paddingValues = PaddingValues(),

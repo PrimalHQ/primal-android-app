@@ -3,7 +3,6 @@ package net.primal.android.feed.repository
 import kotlinx.serialization.json.JsonArray
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.networking.primal.api.PrimalImportApi
-import net.primal.android.networking.primal.api.model.ImportRequestBody
 import net.primal.android.networking.relays.RelaysManager
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
@@ -74,7 +73,7 @@ class PostRepository @Inject constructor(
         )
         relaysManager.publishEvent(nostrEvent = noteEvent)
         return try {
-            primalImportApi.importEvents(body = ImportRequestBody(events = listOf(noteEvent)))
+            primalImportApi.importEvents(events = listOf(noteEvent))
         } catch (error: WssException) {
             false
         }

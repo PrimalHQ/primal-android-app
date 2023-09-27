@@ -35,12 +35,12 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import net.primal.android.R
-import net.primal.android.auth.create.CreateContract
+import net.primal.android.auth.create.CreateAccountContract
 import net.primal.android.theme.AppTheme
 
 @Composable
 fun ProfilePreviewStep(
-    state: CreateContract.UiState,
+    state: CreateAccountContract.UiState,
     isFinalized: Boolean,
 ) {
     Column(
@@ -119,7 +119,7 @@ fun ProfilePreviewStep(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = state.name,
+                        text = state.displayName,
                         fontWeight = FontWeight.W700,
                         fontSize = 20.sp,
                         lineHeight = 20.sp,
@@ -127,7 +127,7 @@ fun ProfilePreviewStep(
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
-                        text = "@${state.handle}",
+                        text = "@${state.username}",
                         fontWeight = FontWeight.W400,
                         fontSize = 14.sp,
                         lineHeight = 16.sp,

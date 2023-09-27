@@ -6,7 +6,7 @@ import net.primal.android.user.accounts.parseFollowings
 import net.primal.android.user.accounts.parseInterests
 import net.primal.android.user.accounts.parseRelays
 
-fun NostrEvent.asUserAccount() = UserAccount(
+fun NostrEvent.asUserAccountFromContactsEvent() = UserAccount(
     pubkey = pubKey,
     authorDisplayName = pubKey.asEllipsizedNpub(),
     userDisplayName = pubKey.asEllipsizedNpub(),

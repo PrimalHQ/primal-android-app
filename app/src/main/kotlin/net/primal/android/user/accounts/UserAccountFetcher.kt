@@ -4,12 +4,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.authorNameUiFriendly
-import net.primal.android.core.utils.userNameUiFriendly
+import net.primal.android.core.utils.usernameUiFriendly
 import net.primal.android.nostr.ext.asProfileDataPO
 import net.primal.android.nostr.ext.takeContentAsUserProfileStatsOrNull
 import net.primal.android.user.api.UsersApi
 import net.primal.android.user.domain.UserAccount
-import net.primal.android.user.domain.asUserAccount
+import net.primal.android.user.domain.asUserAccountFromContactsEvent
 import javax.inject.Inject
 
 class UserAccountFetcher @Inject constructor(
@@ -26,7 +26,7 @@ class UserAccountFetcher @Inject constructor(
         return UserAccount(
             pubkey = pubkey,
             authorDisplayName = profileData?.authorNameUiFriendly() ?: pubkey.asEllipsizedNpub(),
-            userDisplayName = profileData?.userNameUiFriendly() ?: pubkey.asEllipsizedNpub(),
+            userDisplayName = profileData?.usernameUiFriendly() ?: pubkey.asEllipsizedNpub(),
             pictureUrl = profileData?.picture,
             internetIdentifier = profileData?.internetIdentifier,
             lightningAddress = profileData?.lightningAddress,
@@ -41,6 +41,6 @@ class UserAccountFetcher @Inject constructor(
             usersApi.getUserContacts(pubkey = pubkey, extendedResponse = false)
         }
 
-        return contactsResponse.contactsEvent?.asUserAccount()
+        return contactsResponse.contactsEvent?.asUserAccountFromContactsEvent()
     }
 }

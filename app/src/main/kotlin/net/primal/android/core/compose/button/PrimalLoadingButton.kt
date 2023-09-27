@@ -52,7 +52,6 @@ fun PrimalLoadingButton(
                     fontSize = fontSize,
                     leadingIcon = leadingIcon,
                     fontWeight = FontWeight.Bold,
-                    color = Color.White,
                 )
             }
         }

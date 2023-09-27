@@ -11,9 +11,9 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import net.primal.android.auth.AuthRepository
-import net.primal.android.auth.create.CreateContract.SideEffect
-import net.primal.android.auth.create.CreateContract.UiEvent
-import net.primal.android.auth.create.CreateContract.UiState
+import net.primal.android.auth.create.CreateAccountContract.SideEffect
+import net.primal.android.auth.create.CreateAccountContract.UiEvent
+import net.primal.android.auth.create.CreateAccountContract.UiState
 import net.primal.android.auth.create.api.RecommendedFollowsApi
 import net.primal.android.auth.create.ui.RecommendedFollow
 import net.primal.android.core.files.error.UnsuccessfulFileUpload
@@ -24,14 +24,16 @@ import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.serialization.NostrJson
 import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.user.accounts.BOOTSTRAP_RELAYS
+import net.primal.android.user.repository.UserRepository
 import java.io.IOException
 import javax.inject.Inject
 
 @HiltViewModel
-class CreateViewModel @Inject constructor(
+class CreateAccountViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val settingsRepository: SettingsRepository,
     private val profileRepository: ProfileRepository,
+    private val userRepository: UserRepository,
     private val recommendedFollowsApi: RecommendedFollowsApi,
 ) : ViewModel() {
 
@@ -67,8 +69,8 @@ class CreateViewModel @Inject constructor(
                 is UiEvent.FinishEvent -> finish()
                 is UiEvent.AvatarUriChangedEvent -> setState { copy(avatarUri = event.avatarUri) }
                 is UiEvent.BannerUriChangedEvent -> setState { copy(bannerUri = event.bannerUri) }
-                is UiEvent.NameChangedEvent -> setState { copy(name = event.name) }
-                is UiEvent.HandleChangedEvent -> setState { copy(handle = event.handle) }
+                is UiEvent.DisplayNameChangedEvent -> setState { copy(displayName = event.name) }
+                is UiEvent.UsernameChangedEvent -> setState { copy(username = event.handle) }
                 is UiEvent.LightningAddressChangedEvent -> setState { copy(lightningAddress = event.lightningAddress) }
                 is UiEvent.Nip05IdentifierChangedEvent -> setState { copy(nip05Identifier = event.nip05Identifier) }
                 is UiEvent.WebsiteChangedEvent -> setState { copy(website = event.website) }
@@ -84,7 +86,7 @@ class CreateViewModel @Inject constructor(
             setState { copy(loading = true) }
             val userId = authRepository.createAccountAndLogin()
             val profile = state.value.asProfileMetadata()
-            profileRepository.setProfileMetadata(userId = userId, profileMetadata = profile)
+            userRepository.setProfileMetadata(userId = userId, profileMetadata = profile)
             setState {
                 copy(
                     userId = userId,
@@ -105,7 +107,7 @@ class CreateViewModel @Inject constructor(
     private suspend fun fetchRecommendedFollows() {
         try {
             setState { copy(loading = true) }
-            val response = recommendedFollowsApi.fetch(state.value.name)
+            val response = recommendedFollowsApi.fetch(state.value.displayName)
 
             val result = response.suggestions.map { sg ->
                 return@map sg.members.map { Pair(sg.group, it) }
@@ -142,7 +144,6 @@ class CreateViewModel @Inject constructor(
                     .map { it.pubkey }.toSet(),
                 relays = BOOTSTRAP_RELAYS,
             )
-
             settingsRepository.fetchAndPersistAppSettings(userId = userId)
             setEffect(SideEffect.AccountCreatedAndPersisted(pubkey = userId))
         } catch (e: NostrPublishException) {
@@ -191,12 +192,12 @@ class CreateViewModel @Inject constructor(
     }
 
     private fun UiState.asProfileMetadata(): ProfileMetadata = ProfileMetadata(
-        displayName = this.name,
-        handle = this.handle,
+        displayName = this.displayName,
+        username = this.username,
         website = this.website.ifEmpty { null },
         about = this.aboutMe.ifEmpty { null },
-        picture = this.avatarUri,
-        banner = this.bannerUri,
+        localPictureUri = this.avatarUri,
+        localBannerUri = this.bannerUri,
         lightningAddress = this.lightningAddress.ifEmpty { null },
         nostrVerification = this.nip05Identifier.ifEmpty { null },
     )

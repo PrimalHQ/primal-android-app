@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -112,6 +113,7 @@ fun ProfileScreen(
     onPostClick: (String) -> Unit,
     onPostQuoteClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
+    onEditProfileClick: () -> Unit,
     onHashtagClick: (String) -> Unit,
     onWalletUnavailable: () -> Unit,
 ) {
@@ -125,6 +127,7 @@ fun ProfileScreen(
         onPostClick = onPostClick,
         onPostQuoteClick = onPostQuoteClick,
         onProfileClick = onProfileClick,
+        onEditProfileClick = onEditProfileClick,
         onHashtagClick = onHashtagClick,
         onWalletUnavailable = onWalletUnavailable,
         eventPublisher = { viewModel.setEvent(it) },
@@ -152,6 +155,7 @@ fun ProfileScreen(
     onPostClick: (String) -> Unit,
     onPostQuoteClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
+    onEditProfileClick: () -> Unit,
     onHashtagClick: (String) -> Unit,
     onWalletUnavailable: () -> Unit,
     eventPublisher: (ProfileContract.UiEvent) -> Unit,
@@ -305,8 +309,10 @@ fun ProfileScreen(
                     UserProfileDetails(
                         profileId = state.profileId,
                         isFollowed = state.isProfileFollowed,
+                        isActiveUser = state.isActiveUser,
                         profileDetails = state.profileDetails,
                         profileStats = state.profileStats,
+                        onEditProfileClick = onEditProfileClick,
                         onFollow = {
                             eventPublisher(ProfileContract.UiEvent.FollowAction(state.profileId))
                         },
@@ -445,8 +451,10 @@ private fun CoverUnavailable() {
 private fun UserProfileDetails(
     profileId: String,
     isFollowed: Boolean,
+    isActiveUser: Boolean,
     profileDetails: ProfileDetailsUi? = null,
     profileStats: ProfileStatsUi? = null,
+    onEditProfileClick: () -> Unit,
     onFollow: () -> Unit,
     onUnfollow: () -> Unit,
 ) {
@@ -462,6 +470,8 @@ private fun UserProfileDetails(
     ) {
         ProfileActions(
             isFollowed = isFollowed,
+            isActiveUser = isActiveUser,
+            onEditProfileClick = onEditProfileClick,
             onFollow = onFollow,
             onUnfollow = onUnfollow,
         )
@@ -589,6 +599,8 @@ private fun UserInternetIdentifier(
 @Composable
 private fun ProfileActions(
     isFollowed: Boolean,
+    isActiveUser: Boolean,
+    onEditProfileClick: () -> Unit,
     onFollow: () -> Unit,
     onUnfollow: () -> Unit,
 ) {
@@ -601,9 +613,16 @@ private fun ProfileActions(
             .background(AppTheme.colorScheme.surfaceVariant),
         horizontalArrangement = Arrangement.End,
     ) {
-        when (isFollowed) {
-            true -> UnfollowButton(onClick = onUnfollow)
-            false -> FollowButton(onClick = onFollow)
+        if (!isActiveUser) {
+            when (isFollowed) {
+                true -> UnfollowButton(onClick = onUnfollow)
+                false -> FollowButton(onClick = onFollow)
+            }
+        } else {
+            Spacer(modifier = Modifier.width(8.dp))
+            EditProfileButton(onClick = {
+                onEditProfileClick()
+            })
         }
     }
 }
@@ -649,6 +668,29 @@ private fun UnfollowButton(
     ) {
         Text(
             text = stringResource(id = R.string.profile_unfollow_button),
+            fontWeight = FontWeight.Bold,
+        )
+    }
+}
+
+@Composable
+private fun EditProfileButton(
+    onClick: () -> Unit
+) {
+    PrimalOutlinedButton(
+        modifier = Modifier
+            .height(36.dp)
+            .width(100.dp),
+        shape = AppTheme.shapes.medium,
+        contentPadding = PaddingValues(
+            horizontal = 16.dp,
+            vertical = 0.dp,
+        ),
+        textStyle = AppTheme.typography.bodySmall,
+        onClick = onClick,
+    ) {
+        Text(
+            text = stringResource(id = R.string.profile_edit_profile_button),
             fontWeight = FontWeight.Bold,
         )
     }
@@ -758,12 +800,14 @@ fun PreviewProfileScreen() {
             state = ProfileContract.UiState(
                 profileId = "profileId",
                 isProfileFollowed = false,
+                isActiveUser = true,
                 authoredPosts = emptyFlow(),
             ),
             onClose = {},
             onPostClick = {},
             onPostQuoteClick = {},
             onProfileClick = {},
+            onEditProfileClick = {},
             onHashtagClick = {},
             onWalletUnavailable = {},
             eventPublisher = {},

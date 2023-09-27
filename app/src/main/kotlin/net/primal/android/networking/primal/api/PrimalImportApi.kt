@@ -1,9 +1,9 @@
 package net.primal.android.networking.primal.api
 
-import net.primal.android.networking.primal.api.model.ImportRequestBody
+import net.primal.android.nostr.model.NostrEvent
 
 interface PrimalImportApi {
 
-    suspend fun importEvents(body: ImportRequestBody): Boolean
+    suspend fun importEvents(events: List<NostrEvent>): Boolean
 
 }
