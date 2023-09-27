@@ -14,6 +14,8 @@
     <string name="welcome_sign_in_button_subtitle">Already have a Nostr account? Sign with your Nostr key.</string>
     <string name="welcome_create_account_button_title">Create account</string>
     <string name="welcome_create_account_button_subtitle">Your new Nostr account will be up and running in a minute.</string>
+    <string name="welcome_tos_hint">By proceeding you confirm that you accept our terms of service</string>
+    <string name="welcome_tos_hint_highlighted_word">terms of service</string>
 
     <string name="create_title_new_account">New Account</string>
     <string name="create_title_profile_preview">Profile Preview</string>

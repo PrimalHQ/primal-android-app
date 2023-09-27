@@ -3,9 +3,9 @@ package net.primal.android.core.compose.button
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.Button
@@ -26,7 +26,7 @@ import net.primal.android.theme.PrimalTheme
 @Composable
 fun PrimalCallToActionButton(
     title: String,
-    subtitle: String,
+    subtitle: String?,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -61,7 +61,7 @@ fun PrimalCallToActionButton(
             modifier = Modifier
                 .weight(1f)
                 .padding(vertical = 8.dp)
-                .wrapContentWidth()
+                .fillMaxWidth()
         ) {
             Text(
                 text = title,
@@ -70,11 +70,13 @@ fun PrimalCallToActionButton(
                 color = AppTheme.colorScheme.onSurface,
             )
 
-            Text(
-                text = subtitle,
-                style = AppTheme.typography.bodySmall,
-                color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
-            )
+            if (!subtitle.isNullOrEmpty()) {
+                Text(
+                    text = subtitle,
+                    style = AppTheme.typography.bodySmall,
+                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
+                )
+            }
         }
 
         Image(
@@ -96,6 +98,18 @@ fun PreviewButton() {
         PrimalCallToActionButton(
             title = "Sign in",
             subtitle = "Already have a Nostr account? Sign in with your Nostr key.",
+            onClick = {},
+        )
+    }
+}
+
+@Preview
+@Composable
+fun PreviewButtonWithoutDescription() {
+    PrimalTheme(primalTheme = PrimalTheme.Sunset) {
+        PrimalCallToActionButton(
+            title = "Sign in",
+            subtitle = null,
             onClick = {},
         )
     }
