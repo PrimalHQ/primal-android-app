@@ -1,3 +1,5 @@
 ## Changes
 
-- Follow all recommended users by default when onboarding a new created account
+- Implemented edit profile screen;
+- Implemented TOS notice on welcome screen;
+- Fixed welcome screen for small screen devices;
