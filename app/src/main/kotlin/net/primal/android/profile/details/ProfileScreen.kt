@@ -309,7 +309,7 @@ fun ProfileScreen(
                     UserProfileDetails(
                         profileId = state.profileId,
                         isFollowed = state.isProfileFollowed,
-                        isCurrentUser = state.isActiveUser,
+                        isActiveUser = state.isActiveUser,
                         profileDetails = state.profileDetails,
                         profileStats = state.profileStats,
                         onEditProfileClick = onEditProfileClick,
@@ -451,7 +451,7 @@ private fun CoverUnavailable() {
 private fun UserProfileDetails(
     profileId: String,
     isFollowed: Boolean,
-    isCurrentUser: Boolean,
+    isActiveUser: Boolean,
     profileDetails: ProfileDetailsUi? = null,
     profileStats: ProfileStatsUi? = null,
     onEditProfileClick: () -> Unit,
@@ -470,7 +470,7 @@ private fun UserProfileDetails(
     ) {
         ProfileActions(
             isFollowed = isFollowed,
-            isCurrentUser = isCurrentUser,
+            isActiveUser = isActiveUser,
             onEditProfileClick = onEditProfileClick,
             onFollow = onFollow,
             onUnfollow = onUnfollow,
@@ -599,7 +599,7 @@ private fun UserInternetIdentifier(
 @Composable
 private fun ProfileActions(
     isFollowed: Boolean,
-    isCurrentUser: Boolean,
+    isActiveUser: Boolean,
     onEditProfileClick: () -> Unit,
     onFollow: () -> Unit,
     onUnfollow: () -> Unit,
@@ -613,7 +613,7 @@ private fun ProfileActions(
             .background(AppTheme.colorScheme.surfaceVariant),
         horizontalArrangement = Arrangement.End,
     ) {
-        if (!isCurrentUser) {
+        if (!isActiveUser) {
             when (isFollowed) {
                 true -> UnfollowButton(onClick = onUnfollow)
                 false -> FollowButton(onClick = onFollow)
