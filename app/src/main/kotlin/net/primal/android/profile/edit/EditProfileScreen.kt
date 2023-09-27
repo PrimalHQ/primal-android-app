@@ -22,8 +22,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -89,6 +91,7 @@ fun EditProfileScreen(
     )
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun EditProfileContent(
     state: EditProfileContract.UiState,
@@ -96,6 +99,8 @@ fun EditProfileContent(
     paddingValues: PaddingValues,
     modifier: Modifier = Modifier
 ) {
+    val keyboardController = LocalSoftwareKeyboardController.current
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -145,35 +150,35 @@ fun EditProfileContent(
             InputField(
                 header = stringResource(id = R.string.create_input_header_website).uppercase(),
                 value = state.website,
-                onValueChange = { eventPublisher(EditProfileContract.UiEvent.WebsiteChangedEvent(it.trim())) })
+                onValueChange = {
+                    eventPublisher(EditProfileContract.UiEvent.WebsiteChangedEvent(it.trim()))
+                }
+            )
             Spacer(modifier = Modifier.height(12.dp))
             InputField(
                 header = stringResource(id = R.string.create_input_header_about_me).uppercase(),
                 value = state.aboutMe,
                 isMultiline = true,
-                onValueChange = { eventPublisher(EditProfileContract.UiEvent.AboutMeChangedEvent(it)) })
+                onValueChange = {
+                    eventPublisher(EditProfileContract.UiEvent.AboutMeChangedEvent(it))
+                }
+            )
             Spacer(modifier = Modifier.height(12.dp))
             InputField(
                 header = stringResource(id = R.string.create_input_header_bitcoin_lightning_address).uppercase(),
                 value = state.lightningAddress,
                 onValueChange = {
-                    eventPublisher(
-                        EditProfileContract.UiEvent.LightningAddressChangedEvent(
-                            it
-                        )
-                    )
-                })
+                    eventPublisher(EditProfileContract.UiEvent.LightningAddressChangedEvent(it))
+                }
+            )
             Spacer(modifier = Modifier.height(12.dp))
             InputField(
                 header = stringResource(id = R.string.create_input_header_nip_05).uppercase(),
                 value = state.nip05Identifier,
                 onValueChange = {
-                    eventPublisher(
-                        EditProfileContract.UiEvent.Nip05IdentifierChangedEvent(
-                            it
-                        )
-                    )
-                })
+                    eventPublisher(EditProfileContract.UiEvent.Nip05IdentifierChangedEvent(it))
+                }
+            )
         }
         Row(
             modifier = Modifier
@@ -186,6 +191,7 @@ fun EditProfileContent(
                 enabled = !state.loading && state.username.isNotEmpty(),
                 loading = state.loading,
                 onClick = {
+                    keyboardController?.hide()
                     eventPublisher(EditProfileContract.UiEvent.SaveProfileEvent)
                 },
                 modifier = Modifier
