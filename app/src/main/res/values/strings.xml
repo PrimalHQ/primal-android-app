@@ -89,6 +89,16 @@
         <item quantity="other">%1$s new notes</item>
     </plurals>
 
+    <string name="feed_context_share_note">Share note</string>
+    <string name="feed_context_copy_note_link">Copy note link</string>
+    <string name="feed_context_copy_note_text">Copy note text</string>
+    <string name="feed_context_copy_note_id">Copy note id</string>
+    <string name="feed_context_copy_raw_data">Copy raw data</string>
+    <string name="feed_context_copy_user_id">Copy user id</string>
+    <string name="feed_context_report_user">Report user</string>
+    <string name="feed_context_mute_user">Mute user</string>
+    <string name="feed_context_copied_toast">Copied!</string>
+
     <string name="post_repost_button_confirmation">Repost</string>
     <string name="post_quote_button_confirmation">Quote</string>
 

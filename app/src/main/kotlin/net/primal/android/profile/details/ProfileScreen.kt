@@ -2,8 +2,6 @@ package net.primal.android.profile.details
 
 import android.app.Activity
 import android.content.ActivityNotFoundException
-import android.content.ClipData
-import android.content.ClipboardManager
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -47,6 +45,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -96,6 +95,7 @@ import net.primal.android.core.compose.isEmpty
 import net.primal.android.core.ext.findByUrl
 import net.primal.android.core.ext.findNearestOrNull
 import net.primal.android.core.utils.asEllipsizedNpub
+import net.primal.android.core.utils.copyText
 import net.primal.android.core.utils.isPrimalIdentifier
 import net.primal.android.crypto.hexToNoteHrp
 import net.primal.android.crypto.hexToNpubHrp
@@ -164,7 +164,7 @@ fun ProfileScreen(
 
     val maxAvatarSizeDp = 80.dp
     val maxAvatarSizePx = with(density) { maxAvatarSizeDp.roundToPx().toFloat() }
-    val avatarSizePx = rememberSaveable { mutableStateOf(maxAvatarSizePx) }
+    val avatarSizePx = rememberSaveable { mutableFloatStateOf(maxAvatarSizePx) }
 
     val maxCoverHeightDp = 112.dp
     val minCoverHeightDp = 64.dp
@@ -177,10 +177,10 @@ fun ProfileScreen(
     val minCoverHeightPx = with(density) {
         (minCoverHeightDp + statusBarHeightDp).roundToPx().toFloat()
     }
-    val coverHeightPx = rememberSaveable { mutableStateOf(maxCoverHeightPx) }
+    val coverHeightPx = rememberSaveable { mutableFloatStateOf(maxCoverHeightPx) }
 
     val topBarTitleVisible = rememberSaveable { mutableStateOf(false) }
-    val coverTransparency = rememberSaveable { mutableStateOf(0f) }
+    val coverTransparency = rememberSaveable { mutableFloatStateOf(0f) }
     val listState = rememberLazyListState()
 
     val snackbarHostState = remember { SnackbarHostState() }
@@ -195,15 +195,15 @@ fun ProfileScreen(
             .map { it.second }
             .collect { scrollOffset ->
                 val newCoverHeight = maxCoverHeightPx - scrollOffset
-                coverHeightPx.value = newCoverHeight.coerceIn(minCoverHeightPx, maxCoverHeightPx)
+                coverHeightPx.floatValue = newCoverHeight.coerceIn(minCoverHeightPx, maxCoverHeightPx)
 
                 val newAvatarSize = maxAvatarSizePx - (scrollOffset * 1f)
-                avatarSizePx.value = newAvatarSize.coerceIn(0f, maxAvatarSizePx)
+                avatarSizePx.floatValue = newAvatarSize.coerceIn(0f, maxAvatarSizePx)
 
                 topBarTitleVisible.value = scrollOffset > maxAvatarSizePx
 
                 val newCoverAlpha = 0f + scrollOffset / (maxCoverHeightPx - minCoverHeightPx)
-                coverTransparency.value = newCoverAlpha.coerceIn(0.0f, 0.7f)
+                coverTransparency.floatValue = newCoverAlpha.coerceIn(0.0f, 0.7f)
             }
     }
 
@@ -212,9 +212,9 @@ fun ProfileScreen(
             .collect { visiblePage ->
                 if (visiblePage >= 1) {
                     topBarTitleVisible.value = true
-                    coverHeightPx.value = minCoverHeightPx
-                    avatarSizePx.value = 0f
-                    coverTransparency.value = 0.7f
+                    coverHeightPx.floatValue = minCoverHeightPx
+                    avatarSizePx.floatValue = 0f
+                    coverTransparency.floatValue = 0.7f
                 }
             }
     }
@@ -276,10 +276,10 @@ fun ProfileScreen(
                 stickyHeader = {
                     ProfileTopCoverBar(
                         state = state,
-                        coverHeight = with(density) { coverHeightPx.value.toDp() },
-                        coverAlpha = coverTransparency.value,
-                        avatarSize = with(density) { avatarSizePx.value.toDp() },
-                        avatarPadding = with(density) { (maxAvatarSizePx - avatarSizePx.value).toDp() },
+                        coverHeight = with(density) { coverHeightPx.floatValue.toDp() },
+                        coverAlpha = coverTransparency.floatValue,
+                        avatarSize = with(density) { avatarSizePx.floatValue.toDp() },
+                        avatarPadding = with(density) { (maxAvatarSizePx - avatarSizePx.floatValue).toDp() },
                         avatarOffsetY = with(density) { (maxAvatarSizePx * 0.65f).toDp() },
                         navigationIcon = {
                             AppBarIcon(
@@ -490,9 +490,7 @@ private fun UserProfileDetails(
         UserPublicKey(
             pubkey = profileId,
             onCopyClick = {
-                val clipboard = context.getSystemService(ClipboardManager::class.java)
-                val clip = ClipData.newPlainText("", it)
-                clipboard.setPrimaryClip(clip)
+                copyText(context = context, text = it)
                 uiScope.launch { Toast.makeText(context, keyCopiedText, Toast.LENGTH_SHORT).show() }
             }
         )

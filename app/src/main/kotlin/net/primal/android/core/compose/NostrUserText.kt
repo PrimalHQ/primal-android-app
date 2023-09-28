@@ -39,8 +39,8 @@ fun NostrUserText(
     displayNameColor: Color = AppTheme.colorScheme.onSurface,
     fontSize: TextUnit = TextUnit.Unspecified,
     style: TextStyle = LocalTextStyle.current,
-    overflow: TextOverflow = TextOverflow.Clip,
-    maxLines: Int = 2,
+    overflow: TextOverflow = TextOverflow.Ellipsis,
+    maxLines: Int = 1,
     annotatedStringPrefixBuilder: (AnnotatedString.Builder.() -> Unit)? = null,
     annotatedStringSuffixBuilder: (AnnotatedString.Builder.() -> Unit)? = null,
 ) {
@@ -54,7 +54,7 @@ fun NostrUserText(
                 text = displayName,
                 spanStyle = SpanStyle(
                     color = displayNameColor,
-                    fontStyle = AppTheme.typography.titleMedium.fontStyle,
+                    fontStyle = AppTheme.typography.bodyMedium.fontStyle,
                     fontWeight = FontWeight.Bold
                 )
             )

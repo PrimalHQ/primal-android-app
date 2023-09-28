@@ -3,7 +3,6 @@ package net.primal.android.core.compose.feed
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -30,6 +29,7 @@ import kotlin.time.Duration.Companion.seconds
 
 @Composable
 fun FeedPostAuthorRow(
+    modifier: Modifier = Modifier,
     authorDisplayName: String,
     postTimestamp: Instant,
     authorAvatarUrl: String? = null,
@@ -40,9 +40,7 @@ fun FeedPostAuthorRow(
     val hasVerifiedBadge = !authorInternetIdentifier.isNullOrEmpty()
 
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(all = 16.dp),
+        modifier = modifier,
         horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -70,7 +68,7 @@ fun FeedPostAuthorRow(
                         text = "| $timestamp",
                         spanStyle = SpanStyle(
                             color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-                            fontStyle = AppTheme.typography.bodyMedium.fontStyle,
+                            fontStyle = AppTheme.typography.bodySmall.fontStyle,
                         )
                     )
                 )
@@ -80,7 +78,8 @@ fun FeedPostAuthorRow(
                 internetIdentifier = authorInternetIdentifier,
                 annotatedStringSuffixBuilder = {
                     append(suffixText)
-                }
+                },
+                style = AppTheme.typography.bodyMedium,
             )
 
             if (!authorInternetIdentifier.isNullOrEmpty()) {
@@ -88,7 +87,7 @@ fun FeedPostAuthorRow(
                     text = authorInternetIdentifier,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    style = AppTheme.typography.bodyMedium,
+                    style = AppTheme.typography.bodySmall,
                     color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
                 )
             }
