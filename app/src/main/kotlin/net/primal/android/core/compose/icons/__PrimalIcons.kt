@@ -4,6 +4,17 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 import net.primal.android.core.compose.icons.primaliconpack.AvatarNostrich
+import net.primal.android.core.compose.icons.primaliconpack.ContextAddBookmark
+import net.primal.android.core.compose.icons.primaliconpack.ContextBroadcast
+import net.primal.android.core.compose.icons.primaliconpack.ContextCopyNoteId
+import net.primal.android.core.compose.icons.primaliconpack.ContextCopyNoteLink
+import net.primal.android.core.compose.icons.primaliconpack.ContextCopyNoteText
+import net.primal.android.core.compose.icons.primaliconpack.ContextCopyPublicKey
+import net.primal.android.core.compose.icons.primaliconpack.ContextCopyRawData
+import net.primal.android.core.compose.icons.primaliconpack.ContextMuteConversation
+import net.primal.android.core.compose.icons.primaliconpack.ContextMuteUser
+import net.primal.android.core.compose.icons.primaliconpack.ContextReportUser
+import net.primal.android.core.compose.icons.primaliconpack.ContextShare
 import net.primal.android.core.compose.icons.primaliconpack.Copy
 import net.primal.android.core.compose.icons.primaliconpack.DarkMode
 import net.primal.android.core.compose.icons.primaliconpack.Delete
@@ -97,6 +108,17 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             Zap,
             Repost,
             Quote,
+            ContextCopyNoteLink,
+            ContextCopyNoteId,
+            ContextCopyPublicKey,
+            ContextReportUser,
+            ContextCopyRawData,
+            ContextMuteConversation,
+            ContextBroadcast,
+            ContextCopyNoteText,
+            ContextAddBookmark,
+            ContextMuteUser,
+            ContextShare,
         )
         return __PrimalIcons!!
     }
