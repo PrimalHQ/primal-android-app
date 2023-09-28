@@ -8,15 +8,15 @@ core-testing = "2.2.0"
 datastore = "1.0.0"
 kotest = "5.6.2"
 kotlinx-serialization-json = "1.5.1"
-material-icons = "1.5.1"
+material-icons = "1.5.2"
 mockk = "1.13.5"
 okhttp = "4.11.0"
-org-jetbrains-kotlin-android = "1.9.0"
-kotlinx-coroutines="1.7.2"
-compose-bom = "2023.09.00"
+kotlin = "1.9.10"
+kotlinx-coroutines="1.7.3"
+compose-bom = "2023.09.02"
 core-ktx = "1.12.0"
 core-splashscreen = "1.0.1"
-lifecycle = "2.6.2"
+lifecycle = "2.7.0-alpha02"
 activity-compose = "1.7.2"
 junit = "4.13.2"
 junit-android-runner = "1.1.5"
@@ -66,7 +66,7 @@ constraintlayout = { module = "androidx.constraintlayout:constraintlayout", vers
 compose-constraintlayout = { module = "androidx.constraintlayout:constraintlayout-compose", version.ref = "constraintlayout-compose" }
 
 lottie-compose = { module = "com.airbnb.android:lottie-compose", version = "5.2.0" }
-navigation-compose = { module = "androidx.navigation:navigation-compose", version = "2.7.2" }
+navigation-compose = { module = "androidx.navigation:navigation-compose", version = "2.7.3" }
 navigation-hilt = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hilt" }
 navigation-material = { module = "com.google.accompanist:accompanist-navigation-material", version.ref = "accompanist" }
 
@@ -139,7 +139,7 @@ hilt-kapt = ["hilt-compiler", "hilt-compiler-dagger", "hilt-compiler-android"]
 
 [plugins]
 com-android-application = { id = "com.android.application", version.ref = "agp" }
-org-jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "org-jetbrains-kotlin-android" }
-org-jetbrains-kotlin-plugin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "org-jetbrains-kotlin-android" }
+org-jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+org-jetbrains-kotlin-plugin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "dagger" }
 ksp = { id ="com.google.devtools.ksp", version.ref = "ksp" }
