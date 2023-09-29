@@ -33,7 +33,10 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -45,11 +48,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
@@ -89,14 +94,18 @@ import net.primal.android.core.compose.button.PrimalOutlinedButton
 import net.primal.android.core.compose.feed.FeedLazyColumn
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
+import net.primal.android.core.compose.icons.primaliconpack.ContextShare
 import net.primal.android.core.compose.icons.primaliconpack.Key
 import net.primal.android.core.compose.icons.primaliconpack.Link
+import net.primal.android.core.compose.icons.primaliconpack.More
 import net.primal.android.core.compose.isEmpty
 import net.primal.android.core.ext.findByUrl
 import net.primal.android.core.ext.findNearestOrNull
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.copyText
 import net.primal.android.core.utils.isPrimalIdentifier
+import net.primal.android.core.utils.resolvePrimalProfileLink
+import net.primal.android.core.utils.systemShareText
 import net.primal.android.crypto.hexToNoteHrp
 import net.primal.android.crypto.hexToNpubHrp
 import net.primal.android.profile.details.ProfileContract.UiState.ProfileError
@@ -401,6 +410,11 @@ private fun ProfileTopCoverBar(
             ),
             navigationIcon = navigationIcon,
             title = title,
+            actions = {
+                ProfileDropdownMenu(
+                    profileId = state.profileId,
+                )
+            }
         )
 
         Box(
@@ -422,6 +436,57 @@ private fun ProfileTopCoverBar(
                 hasBorder = state.profileDetails?.internetIdentifier.isPrimalIdentifier(),
             )
         }
+    }
+}
+
+@Composable
+private fun ProfileDropdownMenu(
+    profileId: String,
+) {
+    var menuVisible by remember { mutableStateOf(false) }
+
+    val context = LocalContext.current
+
+    AppBarIcon(
+        icon = PrimalIcons.More,
+        onClick = { menuVisible = true },
+    )
+
+    DropdownMenu(
+        modifier = Modifier.background(color = AppTheme.extraColorScheme.surfaceVariantAlt),
+        expanded = menuVisible,
+        onDismissRequest = { menuVisible = false },
+    ) {
+        // TODO Uncomment when working on add user feed
+//        DropdownMenuItem(
+//            trailingIcon = {
+//                Icon(
+//                    imageVector = PrimalIcons.UserFeedAdd,
+//                    contentDescription = null
+//                )
+//            },
+//            text = { Text(text = stringResource(id = R.string.profile_context_add_user_feed)) },
+//            onClick = {
+//
+//            }
+//        )
+
+        DropdownMenuItem(
+            trailingIcon = {
+                Icon(
+                    imageVector = PrimalIcons.ContextShare,
+                    contentDescription = null
+                )
+            },
+            text = { Text(text = stringResource(id = R.string.profile_context_share_profile)) },
+            onClick = {
+                systemShareText(
+                    context = context,
+                    text = resolvePrimalProfileLink(profileId = profileId)
+                )
+                menuVisible = false
+            }
+        )
     }
 }
 
