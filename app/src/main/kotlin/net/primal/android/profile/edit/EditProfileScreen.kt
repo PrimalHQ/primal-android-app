@@ -128,14 +128,6 @@ fun EditProfileContent(
                 })
             Spacer(modifier = Modifier.height(32.dp))
             InputField(
-                header = stringResource(id = R.string.create_input_header_display_name),
-                value = state.displayName,
-                onValueChange = {
-                    eventPublisher(EditProfileContract.UiEvent.DisplayNameChangedEvent(it))
-                },
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            InputField(
                 header = stringResource(id = R.string.create_input_header_handle).uppercase(),
                 value = state.username,
                 onValueChange = {
@@ -145,6 +137,14 @@ fun EditProfileContent(
                 },
                 isRequired = true,
                 prefix = "@"
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            InputField(
+                header = stringResource(id = R.string.create_input_header_display_name),
+                value = state.displayName,
+                onValueChange = {
+                    eventPublisher(EditProfileContract.UiEvent.DisplayNameChangedEvent(it))
+                },
             )
             Spacer(modifier = Modifier.height(12.dp))
             InputField(

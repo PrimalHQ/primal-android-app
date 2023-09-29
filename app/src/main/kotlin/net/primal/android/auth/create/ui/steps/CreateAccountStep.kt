@@ -28,12 +28,6 @@ fun CreateAccountStep(
     )
     Spacer(modifier = Modifier.height(32.dp))
     InputField(
-        header = stringResource(id = R.string.create_input_header_display_name).uppercase(),
-        value = state.displayName,
-        onValueChange = { eventPublisher(CreateAccountContract.UiEvent.DisplayNameChangedEvent(it.trim())) },
-    )
-    Spacer(modifier = Modifier.height(12.dp))
-    InputField(
         header = stringResource(id = R.string.create_input_header_handle).uppercase(),
         value = state.username,
         onValueChange = {
@@ -43,6 +37,12 @@ fun CreateAccountStep(
         },
         isRequired = true,
         prefix = "@"
+    )
+    Spacer(modifier = Modifier.height(12.dp))
+    InputField(
+        header = stringResource(id = R.string.create_input_header_display_name).uppercase(),
+        value = state.displayName,
+        onValueChange = { eventPublisher(CreateAccountContract.UiEvent.DisplayNameChangedEvent(it.trim())) },
     )
     Spacer(modifier = Modifier.height(12.dp))
     InputField(
