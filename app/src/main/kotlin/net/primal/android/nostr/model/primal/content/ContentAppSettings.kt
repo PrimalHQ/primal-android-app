@@ -6,7 +6,6 @@ import kotlinx.serialization.json.JsonObject
 @Serializable
 data class ContentAppSettings(
     val description: String? = null,
-    val theme: String? = null,
     val feeds: List<ContentFeedData> = emptyList(),
     val notifications: JsonObject,
     val defaultZapAmount: ULong? = null,

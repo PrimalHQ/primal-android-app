@@ -11,7 +11,6 @@ import net.primal.android.nostr.model.primal.content.ContentFeedData
 import net.primal.android.serialization.NostrJson
 import net.primal.android.serialization.decodeFromStringOrNull
 import net.primal.android.settings.api.SettingsApi
-import net.primal.android.theme.active.ActiveThemeStore
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.domain.UserAccount
 import javax.inject.Inject
@@ -19,7 +18,6 @@ import javax.inject.Inject
 class SettingsRepository @Inject constructor(
     private val settingsApi: SettingsApi,
     private val database: PrimalDatabase,
-    private val activeThemeStore: ActiveThemeStore,
     private val accountsStore: UserAccountsStore,
 ) {
 
@@ -83,10 +81,6 @@ class SettingsRepository @Inject constructor(
             }
             database.feeds().deleteAll()
             database.feeds().upsertAll(data = finalFeeds)
-        }
-
-        if (appSettings.theme != null) {
-            activeThemeStore.setUserTheme(appSettings.theme)
         }
     }
 
