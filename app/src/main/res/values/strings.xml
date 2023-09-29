@@ -223,6 +223,8 @@
     <string name="profile_failed_to_publish_metadata">Unable to post edited metadata. Please try again.</string>
     <string name="profile_save_profile_button">Save profile</string>
     <string name="profile_edit_profile_title">Edit Profile</string>
+    <string name="profile_context_add_user_feed">Add user feed</string>
+    <string name="profile_context_share_profile">Share user profile</string>
 
     <string name="zap_bottom_sheet_comment_placeholder">Add a comment…</string>
     <string name="zap_bottom_sheet_zap_button">Zap</string>
