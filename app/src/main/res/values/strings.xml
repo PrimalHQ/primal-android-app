@@ -9,6 +9,8 @@
     <string name="app_error_loading_prev_page">Unable to load newer content. Please try again.</string>
     <string name="app_error_loading_next_page">Unable to load older content. Please try again.</string>
     <string name="app_failed_to_upload_image">Failed to upload image. Please try again.</string>
+    <string name="app_error_adding_to_feed">Unable to add selected feed to your feeds. Please try again.</string>
+    <string name="app_error_removing_feed">Unable to remove selected feed from your feeds. Please try again.</string>
 
     <string name="welcome_sign_in_button_title">Sign in</string>
     <string name="welcome_sign_in_button_subtitle">Already have a Nostr account? Sign with your Nostr key.</string>
@@ -225,6 +227,7 @@
     <string name="profile_edit_profile_title">Edit Profile</string>
     <string name="profile_context_add_user_feed">Add user feed</string>
     <string name="profile_context_share_profile">Share user profile</string>
+    <string name="profile_context_remove_user_feed">Remove user feed</string>
     <string name="profile_user_feed_title">%1$s\'s feed</string>
 
     <string name="zap_bottom_sheet_comment_placeholder">Add a comment…</string>

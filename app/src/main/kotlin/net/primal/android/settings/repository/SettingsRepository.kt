@@ -52,8 +52,12 @@ class SettingsRepository @Inject constructor(
         }
     }
 
-    suspend fun removeAndPersistUserFeed(userId: String) {
-
+    suspend fun removeAndPersistUserFeed(userId: String, directive: String) {
+        updateAndPersistAppSettings(userId = userId) {
+            copy(feeds = feeds.toMutableList().apply {
+                removeAll { it.directive == directive }
+            })
+        }
     }
 
     private suspend fun updateAndPersistAppSettings(

@@ -12,6 +12,7 @@ interface ProfileContract {
         val profileId: String,
         val isProfileFollowed: Boolean,
         val isActiveUser: Boolean,
+        val isProfileFeedInActiveUserFeeds: Boolean,
         val profileDetails: ProfileDetailsUi? = null,
         val profileStats: ProfileStatsUi? = null,
         val walletConnected: Boolean = false,
@@ -31,6 +32,7 @@ interface ProfileContract {
             data class FailedToFollowProfile(val cause: Throwable) : ProfileError()
             data class FailedToUnfollowProfile(val cause: Throwable) : ProfileError()
             data class FailedToAddToFeed(val cause: Throwable) : ProfileError()
+            data class FailedToRemoveFeed(val cause: Throwable) : ProfileError()
         }
     }
 
@@ -53,6 +55,7 @@ interface ProfileContract {
         data class FollowAction(val profileId: String) : UiEvent()
         data class UnfollowAction(val profileId: String) : UiEvent()
         data class AddUserFeedAction(val name: String, val directive: String) : UiEvent()
+        data class RemoveUserFeedAction(val directive: String) : UiEvent()
     }
 
 }
