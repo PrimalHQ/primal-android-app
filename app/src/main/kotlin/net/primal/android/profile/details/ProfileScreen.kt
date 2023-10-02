@@ -29,7 +29,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.ripple.rememberRipple
@@ -92,6 +91,7 @@ import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.button.PrimalOutlinedButton
 import net.primal.android.core.compose.feed.FeedLazyColumn
+import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.ContextShare
@@ -190,7 +190,9 @@ fun ProfileScreen(
 
     val topBarTitleVisible = rememberSaveable { mutableStateOf(false) }
     val coverTransparency = rememberSaveable { mutableFloatStateOf(0f) }
-    val listState = rememberLazyListState()
+
+    val pagingItems = state.authoredPosts.collectAsLazyPagingItems()
+    val listState = pagingItems.rememberLazyListStatePagingWorkaround()
 
     val snackbarHostState = remember { SnackbarHostState() }
     ErrorHandler(
@@ -230,7 +232,6 @@ fun ProfileScreen(
 
     Surface {
         Box {
-            val pagingItems = state.authoredPosts.collectAsLazyPagingItems()
             FeedLazyColumn(
                 contentPadding = PaddingValues(0.dp),
                 pagingItems = pagingItems,

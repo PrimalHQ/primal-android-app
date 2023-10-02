@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,10 +28,8 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.paging.PagingData
-import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.LazyPagingItems
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.mapNotNull
@@ -50,7 +47,8 @@ import kotlin.time.Duration.Companion.seconds
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun FeedPostList(
-    posts: Flow<PagingData<FeedPostUi>>,
+    feedListState: LazyListState,
+    pagingItems: LazyPagingItems<FeedPostUi>,
     walletConnected: Boolean,
     onPostClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
@@ -65,13 +63,11 @@ fun FeedPostList(
     zapOptions: List<ULong>? = null,
     syncStats: FeedPostsSyncStats = FeedPostsSyncStats(),
     paddingValues: PaddingValues = PaddingValues(0.dp),
-    feedListState: LazyListState = rememberLazyListState(),
     bottomBarHeightPx: Float = 0F,
     bottomBarOffsetHeightPx: Float = 0F,
     onScrolledToTop: (() -> Unit)? = null,
 ) {
     val uiScope = rememberCoroutineScope()
-    val pagingItems = posts.collectAsLazyPagingItems()
 
     val seenPostIds = remember { mutableSetOf<String>() }
     LaunchedEffect(feedListState) {

@@ -4,7 +4,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
@@ -34,6 +33,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.paging.compose.collectAsLazyPagingItems
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import net.primal.android.R
@@ -42,6 +42,7 @@ import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.compose.feed.FeedPostList
 import net.primal.android.core.compose.foundation.brandBackground
+import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 import net.primal.android.core.compose.icons.primaliconpack.FeedPicker
@@ -100,7 +101,9 @@ fun FeedScreen(
 ) {
     val uiScope = rememberCoroutineScope()
     val drawerState: DrawerState = rememberDrawerState(DrawerValue.Closed)
-    val feedListState = rememberLazyListState()
+
+    val feedPagingItems = state.posts.collectAsLazyPagingItems()
+    val feedListState = feedPagingItems.rememberLazyListStatePagingWorkaround()
 
     val bottomBarHeight = PrimalBottomBarHeightDp
     var bottomBarOffsetHeightPx by remember { mutableFloatStateOf(0f) }
@@ -142,7 +145,8 @@ fun FeedScreen(
         },
         content = { paddingValues ->
             FeedPostList(
-                posts = state.posts,
+                pagingItems = feedPagingItems,
+                feedListState = feedListState,
                 walletConnected = state.walletConnected,
                 onPostClick = onPostClick,
                 onProfileClick = onProfileClick,
@@ -184,7 +188,6 @@ fun FeedScreen(
                 zapOptions = state.zapOptions,
                 syncStats = state.syncStats,
                 paddingValues = paddingValues,
-                feedListState = feedListState,
                 bottomBarHeightPx = with(LocalDensity.current) {
                     bottomBarHeight.roundToPx().toFloat()
                 },

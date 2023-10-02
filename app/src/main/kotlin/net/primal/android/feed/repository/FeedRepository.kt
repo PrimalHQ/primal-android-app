@@ -100,7 +100,7 @@ class FeedRepository @Inject constructor(
         Pager(
             config = PagingConfig(
                 pageSize = 25,
-                enablePlaceholders = false
+                enablePlaceholders = true,
             ),
             remoteMediator = FeedRemoteMediator(
                 feedDirective = feedDirective,
