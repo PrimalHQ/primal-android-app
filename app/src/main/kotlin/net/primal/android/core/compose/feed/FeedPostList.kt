@@ -19,7 +19,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -32,14 +31,12 @@ import androidx.paging.compose.LazyPagingItems
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.AvatarThumbnailsRow
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.feed.model.FeedPostsSyncStats
 import net.primal.android.core.compose.foundation.brandBackground
-import net.primal.android.core.compose.isEmpty
 import net.primal.android.theme.AppTheme
 import kotlin.random.Random
 import kotlin.time.Duration.Companion.seconds
@@ -69,35 +66,16 @@ fun FeedPostList(
 ) {
     val uiScope = rememberCoroutineScope()
 
-    val seenPostIds = remember { mutableSetOf<String>() }
-    LaunchedEffect(feedListState) {
-        snapshotFlow { feedListState.layoutInfo.visibleItemsInfo }
-            .mapNotNull { visibleItems ->
-                visibleItems.mapNotNull {
-                    if (!pagingItems.isEmpty() && it.index < pagingItems.itemCount) {
-                        pagingItems.peek(it.index)?.postId
-                    } else {
-                        null
-                    }
-                }
-            }
-            .distinctUntilChanged()
-            .collect {
-                seenPostIds.addAll(it)
-            }
-    }
-
-    val newPostsCount = syncStats.postsCount
-
     LaunchedEffect(feedListState) {
         snapshotFlow { feedListState.firstVisibleItemIndex == 0 }
             .distinctUntilChanged()
             .filter { it }
             .collect {
-                seenPostIds.clear()
                 onScrolledToTop?.invoke()
             }
     }
+
+    val newPostsCount = syncStats.postsCount
 
     LaunchedEffect(pagingItems) {
         while (true) {
