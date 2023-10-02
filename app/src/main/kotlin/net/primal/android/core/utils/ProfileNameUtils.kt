@@ -25,16 +25,16 @@ fun ProfileMetadata.authorNameUiFriendly(userId: String): String =
 
 private fun authorNameUiFriendly(displayName: String?, name: String?, pubkey: String): String {
     return when {
-        displayName?.isNotEmpty() == true -> displayName
-        name?.isNotEmpty() == true -> name
+        displayName?.isNotBlank() == true -> displayName
+        name?.isNotBlank() == true -> name
         else -> pubkey.asEllipsizedNpub()
     }
 }
 
 private fun usernameUiFriendly(displayName: String?, name: String?, pubkey: String): String {
     return when {
-        name?.isNotEmpty() == true -> name
-        displayName?.isNotEmpty() == true -> displayName
+        name?.isNotBlank() == true -> name
+        displayName?.isNotBlank() == true -> displayName
         else -> pubkey.asEllipsizedNpub()
     }
 }

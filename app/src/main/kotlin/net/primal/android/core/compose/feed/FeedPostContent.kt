@@ -85,7 +85,7 @@ private fun String.replaceNostrProfileUrisWithHandles(
         checkNotNull(it.referencedUser)
         newContent = newContent.replace(
             oldValue = it.uri,
-            newValue = it.referencedUser.displayHandle,
+            newValue = it.referencedUser.displayUsername,
             ignoreCase = true
         )
     }
@@ -165,7 +165,7 @@ fun FeedPostContent(
 
             referencedUserResources.forEach {
                 checkNotNull(it.referencedUser)
-                val displayHandle = it.referencedUser.displayHandle
+                val displayHandle = it.referencedUser.displayUsername
                 val startIndex = refinedContent.indexOf(displayHandle)
                 if (startIndex >= 0) {
                     val endIndex = startIndex + displayHandle.length

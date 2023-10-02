@@ -2,6 +2,7 @@ package net.primal.android.nostr.ext
 
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.authorNameUiFriendly
+import net.primal.android.core.utils.usernameUiFriendly
 import net.primal.android.crypto.bechToBytes
 import net.primal.android.crypto.toHex
 import net.primal.android.feed.db.NostrResource
@@ -128,7 +129,8 @@ fun List<PostData>.flatMapAsPostNostrResourcePO(
                 uri = link,
                 referencedUser = if (refUserProfileId != null) ReferencedUser(
                     userId = refUserProfileId,
-                    handle = profileIdToProfileDataMap[refUserProfileId]?.handle
+                    handle = profileIdToProfileDataMap[refUserProfileId]
+                        ?.usernameUiFriendly()
                         ?: refUserProfileId.asEllipsizedNpub(),
                 ) else null,
                 referencedPost = if (refPost != null && refPostAuthor != null) ReferencedPost(

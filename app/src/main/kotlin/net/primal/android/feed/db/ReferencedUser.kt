@@ -7,5 +7,5 @@ data class ReferencedUser(
     val userId: String,
     val handle: String,
 ) {
-    val displayHandle get() = "@$handle"
+    val displayUsername get() = "@$handle"
 }
