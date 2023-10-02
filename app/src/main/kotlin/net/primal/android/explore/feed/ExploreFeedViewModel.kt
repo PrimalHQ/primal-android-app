@@ -24,6 +24,8 @@ import net.primal.android.feed.repository.PostRepository
 import net.primal.android.navigation.searchQuery
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
+import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
 import net.primal.android.wallet.model.ZapTarget
@@ -37,7 +39,8 @@ class ExploreFeedViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val feedRepository: FeedRepository,
     private val postRepository: PostRepository,
-    private val zapRepository: ZapRepository
+    private val zapRepository: ZapRepository,
+    private val settingsRepository: SettingsRepository
 ) : ViewModel() {
 
     private val exploreQuery = "search;\"${savedStateHandle.searchQuery}\""
@@ -101,11 +104,26 @@ class ExploreFeedViewModel @Inject constructor(
     }
 
     private suspend fun addToMyFeeds() {
-        feedRepository.addToUserFeeds(title = state.value.title, directive = exploreQuery)
+        try {
+            settingsRepository.addAndPersistUserFeed(
+                userId = activeAccountStore.activeUserId(),
+                name = state.value.title,
+                directive = exploreQuery
+            )
+        } catch (error: WssException) {
+            setErrorState(error = ExploreFeedError.FailedToAddToFeed(error))
+        }
     }
 
     private suspend fun removeFromMyFeeds() {
-        feedRepository.removeFromUserFeeds(directive = exploreQuery)
+        try {
+            settingsRepository.removeAndPersistUserFeed(
+                userId = activeAccountStore.activeUserId(),
+                directive = exploreQuery
+            )
+        } catch (error: WssException) {
+            setErrorState(error = ExploreFeedError.FailedToRemoveFeed(error))
+        }
     }
 
     private fun likePost(postLikeAction: UiEvent.PostLikeAction) = viewModelScope.launch {
