@@ -187,6 +187,8 @@ private fun ErrorHandler(
             is ExploreFeedError.FailedToPublishLikeEvent -> context.getString(R.string.post_action_like_failed)
             is ExploreFeedError.FailedToPublishRepostEvent -> context.getString(R.string.post_action_repost_failed)
             is ExploreFeedError.MissingRelaysConfiguration -> context.getString(R.string.app_missing_relays_config)
+            is ExploreFeedError.FailedToAddToFeed -> context.getString(R.string.app_error_adding_to_feed)
+            is ExploreFeedError.FailedToRemoveFeed -> context.getString(R.string.app_error_removing_feed)
             null -> return@LaunchedEffect
         }
 
