@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
@@ -63,6 +62,7 @@ import net.primal.android.core.compose.feed.RepostOrQuoteBottomSheet
 import net.primal.android.core.compose.feed.ZapBottomSheet
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.foundation.brandBackground
+import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 import net.primal.android.core.compose.icons.primaliconpack.Settings
@@ -128,8 +128,10 @@ fun NotificationsScreen(
 ) {
     val uiScope = rememberCoroutineScope()
     val drawerState: DrawerState = rememberDrawerState(DrawerValue.Closed)
-    val listState = rememberLazyListState()
     val snackbarHostState = remember { SnackbarHostState() }
+
+    val seenNotificationsPagingItems = state.seenNotifications.collectAsLazyPagingItems()
+    val notificationsListState = seenNotificationsPagingItems.rememberLazyListStatePagingWorkaround()
 
     val bottomBarHeight = PrimalBottomBarHeightDp
     var bottomBarOffsetHeightPx by remember { mutableFloatStateOf(0f) }
@@ -142,7 +144,7 @@ fun NotificationsScreen(
     PrimalDrawerScaffold(
         drawerState = drawerState,
         activeDestination = PrimalTopLevelDestination.Notifications,
-        onActiveDestinationClick = { uiScope.launch { listState.animateScrollToItem(0) } },
+        onActiveDestinationClick = { uiScope.launch { notificationsListState.animateScrollToItem(0) } },
         onPrimaryDestinationChanged = onPrimaryDestinationChanged,
         onDrawerDestinationClick = onDrawerDestinationClick,
         bottomBarHeight = bottomBarHeight,
@@ -169,19 +171,17 @@ fun NotificationsScreen(
             SnackbarHost(hostState = snackbarHostState)
         },
         content = { paddingValues ->
-            val seenPagingItems = state.seenNotifications.collectAsLazyPagingItems()
-
             LaunchedEffect(state.badges) {
                 if (state.badges.notifications > 0) {
-                    seenPagingItems.refresh()
+                    seenNotificationsPagingItems.refresh()
                 }
             }
 
             NotificationsList(
                 state = state,
-                seenPagingItems = seenPagingItems,
+                seenPagingItems = seenNotificationsPagingItems,
                 paddingValues = paddingValues,
-                listState = listState,
+                listState = notificationsListState,
                 onProfileClick = onProfileClick,
                 onNoteClick = onNoteClick,
                 onHashtagClick = onHashtagClick,
@@ -230,9 +230,9 @@ fun NotificationsScreen(
 @Composable
 private fun NotificationsList(
     state: NotificationsContract.UiState,
+    listState: LazyListState,
     seenPagingItems: LazyPagingItems<NotificationUi>,
     paddingValues: PaddingValues,
-    listState: LazyListState,
     onProfileClick: (String) -> Unit,
     onNoteClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
