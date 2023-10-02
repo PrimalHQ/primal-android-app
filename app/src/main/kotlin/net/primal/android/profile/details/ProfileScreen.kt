@@ -418,6 +418,7 @@ private fun ProfileTopCoverBar(
                 ProfileDropdownMenu(
                     profileId = state.profileId,
                     isActiveUser = state.isActiveUser,
+                    isProfileFeedInActiveUserFeeds = state.isProfileFeedInActiveUserFeeds,
                     name = state.profileDetails?.authorDisplayName ?: "",
                     eventPublisher = eventPublisher
                 )
@@ -450,6 +451,7 @@ private fun ProfileTopCoverBar(
 private fun ProfileDropdownMenu(
     profileId: String,
     isActiveUser: Boolean,
+    isProfileFeedInActiveUserFeeds: Boolean,
     name: String,
     eventPublisher: (ProfileContract.UiEvent) -> Unit
 ) {
@@ -470,6 +472,10 @@ private fun ProfileDropdownMenu(
 
         if (!isActiveUser) {
             val title = stringResource(id = R.string.profile_user_feed_title, name)
+            val text =
+                if (isProfileFeedInActiveUserFeeds) stringResource(id = R.string.profile_context_remove_user_feed) else stringResource(
+                    id = R.string.profile_context_add_user_feed
+                )
 
             DropdownMenuItem(
                 trailingIcon = {
@@ -478,12 +484,18 @@ private fun ProfileDropdownMenu(
                         contentDescription = null
                     )
                 },
-                text = { Text(text = stringResource(id = R.string.profile_context_add_user_feed)) },
+                text = { Text(text = text) },
                 onClick = {
-                    eventPublisher(ProfileContract.UiEvent.AddUserFeedAction(
-                        name = title,
-                        directive = profileId,
-                    ))
+                    val event =
+                        if (isProfileFeedInActiveUserFeeds)
+                            ProfileContract.UiEvent.RemoveUserFeedAction(
+                                directive = profileId
+                            )
+                        else ProfileContract.UiEvent.AddUserFeedAction(
+                            name = title,
+                            directive = profileId,
+                        )
+                    eventPublisher(event)
                     menuVisible = false
                 }
             )
@@ -842,7 +854,6 @@ private fun UserPublicKey(
                 colorFilter = ColorFilter.tint(color = AppTheme.colorScheme.primary),
                 contentDescription = null
             )
-
         }
     }
 }
@@ -863,6 +874,8 @@ private fun ErrorHandler(
             is ProfileError.FailedToFollowProfile -> context.getString(R.string.profile_error_unable_to_follow)
             is ProfileError.FailedToUnfollowProfile -> context.getString(R.string.profile_error_unable_to_unfollow)
             is ProfileError.MissingRelaysConfiguration -> context.getString(R.string.app_missing_relays_config)
+            is ProfileError.FailedToAddToFeed -> context.getString(R.string.app_error_adding_to_feed)
+            is ProfileError.FailedToRemoveFeed -> context.getString(R.string.app_error_removing_feed)
             else -> return@LaunchedEffect
         }
 
@@ -882,6 +895,7 @@ fun PreviewProfileScreen() {
                 profileId = "profileId",
                 isProfileFollowed = false,
                 isActiveUser = true,
+                isProfileFeedInActiveUserFeeds = false,
                 authoredPosts = emptyFlow(),
             ),
             onClose = {},

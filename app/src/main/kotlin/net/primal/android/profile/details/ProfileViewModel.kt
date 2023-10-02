@@ -54,6 +54,7 @@ class ProfileViewModel @Inject constructor(
             profileId = profileId,
             isProfileFollowed = false,
             isActiveUser = false,
+            isProfileFeedInActiveUserFeeds = false,
             authoredPosts = feedRepository.feedByDirective(feedDirective = "authored;$profileId")
                 .map { it.map { feed -> feed.asFeedPostUi() } }
                 .cachedIn(viewModelScope),
@@ -85,6 +86,7 @@ class ProfileViewModel @Inject constructor(
                 is UiEvent.UnfollowAction -> unfollow(it)
                 is UiEvent.ZapAction -> zapPost(it)
                 is UiEvent.AddUserFeedAction -> addUserFeed(it)
+                is UiEvent.RemoveUserFeedAction -> removeUserFeed(it)
             }
         }
     }
@@ -95,6 +97,8 @@ class ProfileViewModel @Inject constructor(
                 copy(
                     isProfileFollowed = it.following.contains(profileId),
                     isActiveUser = it.pubkey == profileId,
+                    isProfileFeedInActiveUserFeeds = it.appSettings?.feeds?.any { it.directive == profileId }
+                        ?: false,
                     walletConnected = it.nostrWallet != null,
                     defaultZapAmount = it.appSettings?.defaultZapAmount,
                     zapOptions = it.appSettings?.zapOptions ?: emptyList(),
@@ -244,6 +248,17 @@ class ProfileViewModel @Inject constructor(
             )
         } catch (error: WssException) {
             setErrorState(error = ProfileError.FailedToAddToFeed(error))
+        }
+    }
+
+    private fun removeUserFeed(action: UiEvent.RemoveUserFeedAction) = viewModelScope.launch {
+        try {
+            settingsRepository.removeAndPersistUserFeed(
+                userId = activeAccountStore.activeUserId(),
+                directive = action.directive
+            )
+        } catch (error: WssException) {
+            setErrorState(error = ProfileError.FailedToRemoveFeed(error))
         }
     }
 
