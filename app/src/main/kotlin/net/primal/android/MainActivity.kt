@@ -4,6 +4,7 @@ import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.compositionLocalOf
@@ -15,9 +16,10 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 import net.primal.android.navigation.PrimalAppNavigation
-import net.primal.android.theme.defaultPrimalTheme
+import net.primal.android.theme.PrimalRippleTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.active.ActiveThemeStore
+import net.primal.android.theme.defaultPrimalTheme
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -41,6 +43,7 @@ class MainActivity : ComponentActivity() {
             ) {
                 CompositionLocalProvider(
                     LocalPrimalTheme provides primalTheme,
+                    LocalRippleTheme provides PrimalRippleTheme,
                 ) {
                     PrimalAppNavigation()
                 }

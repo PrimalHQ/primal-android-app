@@ -24,7 +24,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalContext
@@ -57,7 +56,6 @@ import net.primal.android.theme.PrimalTheme
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun FeedPostListItem(
     data: FeedPostUi,
