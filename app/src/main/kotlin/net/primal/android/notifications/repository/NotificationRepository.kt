@@ -50,7 +50,12 @@ class NotificationRepository @Inject constructor(
     private fun createPager(
         pagingSourceFactory: () -> PagingSource<Int, Notification>,
     ) = Pager(
-        config = PagingConfig(pageSize = 50, enablePlaceholders = true),
+        config = PagingConfig(
+            pageSize = 50,
+            prefetchDistance = 100,
+            initialLoadSize = 200,
+            enablePlaceholders = true,
+        ),
         remoteMediator = remoteMediator,
         pagingSourceFactory = pagingSourceFactory,
     )
