@@ -98,6 +98,7 @@ import net.primal.android.core.compose.icons.primaliconpack.ContextShare
 import net.primal.android.core.compose.icons.primaliconpack.Key
 import net.primal.android.core.compose.icons.primaliconpack.Link
 import net.primal.android.core.compose.icons.primaliconpack.More
+import net.primal.android.core.compose.icons.primaliconpack.UserFeedAdd
 import net.primal.android.core.compose.isEmpty
 import net.primal.android.core.ext.findByUrl
 import net.primal.android.core.ext.findNearestOrNull
@@ -204,7 +205,8 @@ fun ProfileScreen(
             .map { it.second }
             .collect { scrollOffset ->
                 val newCoverHeight = maxCoverHeightPx - scrollOffset
-                coverHeightPx.floatValue = newCoverHeight.coerceIn(minCoverHeightPx, maxCoverHeightPx)
+                coverHeightPx.floatValue =
+                    newCoverHeight.coerceIn(minCoverHeightPx, maxCoverHeightPx)
 
                 val newAvatarSize = maxAvatarSizePx - (scrollOffset * 1f)
                 avatarSizePx.floatValue = newAvatarSize.coerceIn(0f, maxAvatarSizePx)
@@ -285,6 +287,7 @@ fun ProfileScreen(
                 stickyHeader = {
                     ProfileTopCoverBar(
                         state = state,
+                        eventPublisher = eventPublisher,
                         coverHeight = with(density) { coverHeightPx.floatValue.toDp() },
                         coverAlpha = coverTransparency.floatValue,
                         avatarSize = with(density) { avatarSizePx.floatValue.toDp() },
@@ -366,6 +369,7 @@ fun ProfileScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 private fun ProfileTopCoverBar(
     state: ProfileContract.UiState,
+    eventPublisher: (ProfileContract.UiEvent) -> Unit,
     navigationIcon: @Composable () -> Unit,
     title: @Composable () -> Unit,
     avatarSize: Dp,
@@ -413,6 +417,9 @@ private fun ProfileTopCoverBar(
             actions = {
                 ProfileDropdownMenu(
                     profileId = state.profileId,
+                    isActiveUser = state.isActiveUser,
+                    name = state.profileDetails?.authorDisplayName ?: "",
+                    eventPublisher = eventPublisher
                 )
             }
         )
@@ -442,6 +449,9 @@ private fun ProfileTopCoverBar(
 @Composable
 private fun ProfileDropdownMenu(
     profileId: String,
+    isActiveUser: Boolean,
+    name: String,
+    eventPublisher: (ProfileContract.UiEvent) -> Unit
 ) {
     var menuVisible by remember { mutableStateOf(false) }
 
@@ -457,19 +467,27 @@ private fun ProfileDropdownMenu(
         expanded = menuVisible,
         onDismissRequest = { menuVisible = false },
     ) {
-        // TODO Uncomment when working on add user feed
-//        DropdownMenuItem(
-//            trailingIcon = {
-//                Icon(
-//                    imageVector = PrimalIcons.UserFeedAdd,
-//                    contentDescription = null
-//                )
-//            },
-//            text = { Text(text = stringResource(id = R.string.profile_context_add_user_feed)) },
-//            onClick = {
-//
-//            }
-//        )
+
+        if (!isActiveUser) {
+            val title = stringResource(id = R.string.profile_user_feed_title, name)
+
+            DropdownMenuItem(
+                trailingIcon = {
+                    Icon(
+                        imageVector = PrimalIcons.UserFeedAdd,
+                        contentDescription = null
+                    )
+                },
+                text = { Text(text = stringResource(id = R.string.profile_context_add_user_feed)) },
+                onClick = {
+                    eventPublisher(ProfileContract.UiEvent.AddUserFeedAction(
+                        name = title,
+                        directive = profileId,
+                    ))
+                    menuVisible = false
+                }
+            )
+        }
 
         DropdownMenuItem(
             trailingIcon = {
