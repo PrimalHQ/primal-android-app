@@ -44,6 +44,18 @@ class SettingsRepository @Inject constructor(
         }
     }
 
+    suspend fun addAndPersistUserFeed(userId: String, name: String, directive: String) {
+        updateAndPersistAppSettings(userId = userId) {
+            copy(feeds = feeds.toMutableList().apply {
+                add(ContentFeedData(name = name, directive = directive))
+            })
+        }
+    }
+
+    suspend fun removeAndPersistUserFeed(userId: String) {
+
+    }
+
     private suspend fun updateAndPersistAppSettings(
         userId: String,
         reducer: ContentAppSettings.() -> ContentAppSettings,

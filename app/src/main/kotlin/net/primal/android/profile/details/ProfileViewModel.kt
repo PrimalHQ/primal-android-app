@@ -29,6 +29,7 @@ import net.primal.android.profile.details.ProfileContract.UiState.ProfileError
 import net.primal.android.profile.details.model.ProfileDetailsUi
 import net.primal.android.profile.details.model.ProfileStatsUi
 import net.primal.android.profile.repository.ProfileRepository
+import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.model.ZapTarget
 import net.primal.android.wallet.repository.ZapRepository
@@ -42,7 +43,8 @@ class ProfileViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val profileRepository: ProfileRepository,
     private val postRepository: PostRepository,
-    private val zapRepository: ZapRepository
+    private val zapRepository: ZapRepository,
+    private val settingsRepository: SettingsRepository
 ) : ViewModel() {
 
     private val profileId: String = savedStateHandle.profileId ?: activeAccountStore.activeUserId()
@@ -82,6 +84,7 @@ class ProfileViewModel @Inject constructor(
                 is UiEvent.FollowAction -> follow(it)
                 is UiEvent.UnfollowAction -> unfollow(it)
                 is UiEvent.ZapAction -> zapPost(it)
+                is UiEvent.AddUserFeedAction -> addUserFeed(it)
             }
         }
     }
@@ -229,6 +232,18 @@ class ProfileViewModel @Inject constructor(
             setErrorState(error = ProfileError.FailedToUnfollowProfile(error))
         } catch (error: MissingRelaysException) {
             setErrorState(error = ProfileError.MissingRelaysConfiguration(error))
+        }
+    }
+
+    private fun addUserFeed(action: UiEvent.AddUserFeedAction) = viewModelScope.launch {
+        try {
+            settingsRepository.addAndPersistUserFeed(
+                userId = activeAccountStore.activeUserId(),
+                name = action.name,
+                directive = action.directive
+            )
+        } catch (error: WssException) {
+            setErrorState(error = ProfileError.FailedToAddToFeed(error))
         }
     }
 
