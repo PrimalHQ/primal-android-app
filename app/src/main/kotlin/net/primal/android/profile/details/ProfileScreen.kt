@@ -468,8 +468,8 @@ private fun ProfileDropdownMenu(
     eventPublisher: (ProfileContract.UiEvent) -> Unit
 ) {
     var menuVisible by remember { mutableStateOf(false) }
-    val addedToUserFeedsMessage = stringResource(id = R.string.explore_feed_added_to_user_feeds)
-    val removedFromUserFeedsMessage = stringResource(id = R.string.explore_feed_removed_from_user_feeds)
+    val addedToUserFeedsMessage = stringResource(id = R.string.app_added_to_user_feeds)
+    val removedFromUserFeedsMessage = stringResource(id = R.string.app_removed_from_user_feeds)
 
     val context = LocalContext.current
 
