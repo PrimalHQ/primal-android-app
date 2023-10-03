@@ -1,9 +1,7 @@
 ## Changes
 
-- Implemented edit profile screen;
-- Implemented TOS notice on welcome screen;
-- Fixed welcome screen for small screen devices;
-- Persist theme locally;
-- Fix displayName and username input fields positions on edit/create profile
-- Implement profile context menu;
-- Implement note context menu;
+- Implemented workaround for scroll positions;
+- Implemented add/remove user feeds;
+- Fixed user mentions in feed when 'name' field is missing;
+- Implemented ripple theme to use subtle highlight color from primal theme;
+- Removed unused code and minor other fixes;
