@@ -77,6 +77,7 @@ import androidx.compose.ui.unit.sp
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.SubcomposeAsyncImage
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
@@ -196,6 +197,8 @@ fun ProfileScreen(
     val listState = pagingItems.rememberLazyListStatePagingWorkaround()
 
     val snackbarHostState = remember { SnackbarHostState() }
+    val uiScope = rememberCoroutineScope()
+
     ErrorHandler(
         error = state.error,
         snackbarHostState = snackbarHostState,
@@ -288,6 +291,8 @@ fun ProfileScreen(
                 stickyHeader = {
                     ProfileTopCoverBar(
                         state = state,
+                        snackbarHostState = snackbarHostState,
+                        uiScope = uiScope,
                         eventPublisher = eventPublisher,
                         coverHeight = with(density) { coverHeightPx.floatValue.toDp() },
                         coverAlpha = coverTransparency.floatValue,
@@ -370,6 +375,8 @@ fun ProfileScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 private fun ProfileTopCoverBar(
     state: ProfileContract.UiState,
+    snackbarHostState: SnackbarHostState,
+    uiScope: CoroutineScope,
     eventPublisher: (ProfileContract.UiEvent) -> Unit,
     navigationIcon: @Composable () -> Unit,
     title: @Composable () -> Unit,
@@ -420,6 +427,8 @@ private fun ProfileTopCoverBar(
                     profileId = state.profileId,
                     isActiveUser = state.isActiveUser,
                     isProfileFeedInActiveUserFeeds = state.isProfileFeedInActiveUserFeeds,
+                    snackbarHostState = snackbarHostState,
+                    uiScope = uiScope,
                     name = state.profileDetails?.authorDisplayName ?: "",
                     eventPublisher = eventPublisher
                 )
@@ -453,10 +462,14 @@ private fun ProfileDropdownMenu(
     profileId: String,
     isActiveUser: Boolean,
     isProfileFeedInActiveUserFeeds: Boolean,
+    snackbarHostState: SnackbarHostState,
+    uiScope: CoroutineScope,
     name: String,
     eventPublisher: (ProfileContract.UiEvent) -> Unit
 ) {
     var menuVisible by remember { mutableStateOf(false) }
+    val addedToUserFeedsMessage = stringResource(id = R.string.app_added_to_user_feeds)
+    val removedFromUserFeedsMessage = stringResource(id = R.string.app_removed_from_user_feeds)
 
     val context = LocalContext.current
 
@@ -487,16 +500,28 @@ private fun ProfileDropdownMenu(
                 },
                 text = { Text(text = text) },
                 onClick = {
-                    val event =
-                        if (isProfileFeedInActiveUserFeeds)
-                            ProfileContract.UiEvent.RemoveUserFeedAction(
-                                directive = profileId
+                    if (isProfileFeedInActiveUserFeeds) {
+                        eventPublisher(ProfileContract.UiEvent.RemoveUserFeedAction(
+                            directive = profileId
+                        ))
+                        uiScope.launch {
+                            snackbarHostState.showSnackbar(
+                                message = removedFromUserFeedsMessage,
+                                duration = SnackbarDuration.Short,
                             )
-                        else ProfileContract.UiEvent.AddUserFeedAction(
+                        }
+                    } else {
+                        eventPublisher(ProfileContract.UiEvent.AddUserFeedAction(
                             name = title,
                             directive = profileId,
-                        )
-                    eventPublisher(event)
+                        ))
+                        uiScope.launch {
+                            snackbarHostState.showSnackbar(
+                                message = addedToUserFeedsMessage,
+                                duration = SnackbarDuration.Short,
+                            )
+                        }
+                    }
                     menuVisible = false
                 }
             )

@@ -76,8 +76,8 @@ fun ExploreFeedScreen(
 
     val uiScope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
-    val addedToUserFeedsMessage = stringResource(id = R.string.explore_feed_added_to_user_feeds)
-    val removedFromUserFeedsMessage = stringResource(id = R.string.explore_feed_removed_from_user_feeds)
+    val addedToUserFeedsMessage = stringResource(id = R.string.app_added_to_user_feeds)
+    val removedFromUserFeedsMessage = stringResource(id = R.string.app_removed_from_user_feeds)
 
     ErrorHandler(
         error = state.error,
