@@ -7,6 +7,7 @@ plugins {
     kotlin("plugin.serialization")
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.play.publishing)
 }
 
 val configProperties by lazy {

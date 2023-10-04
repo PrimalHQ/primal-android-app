@@ -7,7 +7,7 @@ constraintlayout-compose = "1.0.1"
 core-testing = "2.2.0"
 datastore = "1.0.0"
 kotest = "5.6.2"
-kotlinx-serialization-json = "1.5.1"
+kotlinx-serialization-json = "1.6.0"
 material-icons = "1.5.2"
 mockk = "1.13.5"
 okhttp = "4.11.0"
@@ -143,3 +143,4 @@ org-jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.re
 org-jetbrains-kotlin-plugin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "dagger" }
 ksp = { id ="com.google.devtools.ksp", version.ref = "ksp" }
+play-publishing = { id = "com.github.triplet.play", version = "3.8.4" }

@@ -29,8 +29,11 @@ jobs:
         openssl base64 -d -out app/primal_alternative_android.jks <<< "${{ secrets.CERT_ALTERNATIVE }}"
         openssl base64 -d -out app/primal_googlePlay_android.jks <<< "${{ secrets.CERT_PLAYSTORE }}"
 
-    - name: Build APK
+    - name: Build Github APK
       run: ./gradlew assembleReleaseAlternative --no-daemon
+
+    - name: Build PlayStore bundle
+      run: ./gradlew bundleReleasePlayStore --no-daemon
 
     - name: Prepare APK
       run: mv app/build/outputs/apk/releaseAlternative/*apk primal-${{ github.ref_name }}.apk
