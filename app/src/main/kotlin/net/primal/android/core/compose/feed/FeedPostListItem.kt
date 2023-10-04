@@ -16,7 +16,6 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -34,6 +33,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import net.primal.android.R
+import net.primal.android.core.compose.DropdownMenuItemText
 import net.primal.android.core.compose.feed.model.FeedPostAction
 import net.primal.android.core.compose.feed.model.FeedPostStatsUi
 import net.primal.android.core.compose.feed.model.FeedPostUi
@@ -192,7 +192,7 @@ private fun NoteDropdownMenu(
         ) {
             DropdownMenuItem(
                 trailingIcon = { Icon(imageVector = PrimalIcons.ContextShare, contentDescription = null)},
-                text = { Text(text = stringResource(id = R.string.feed_context_share_note)) },
+                text = { DropdownMenuItemText(text = stringResource(id = R.string.feed_context_share_note)) },
                 onClick = {
                     systemShareText(context = context, text = resolvePrimalNoteLink(noteId = noteId))
                     menuVisible = false
@@ -200,7 +200,7 @@ private fun NoteDropdownMenu(
             )
             DropdownMenuItem(
                 trailingIcon = { Icon(imageVector = PrimalIcons.ContextCopyNoteLink, contentDescription = null)},
-                text = { Text(text = stringResource(id = R.string.feed_context_copy_note_link)) },
+                text = { DropdownMenuItemText(text = stringResource(id = R.string.feed_context_copy_note_link)) },
                 onClick = {
                     copyText(context = context, text = resolvePrimalNoteLink(noteId = noteId))
                     menuVisible = false
@@ -209,7 +209,7 @@ private fun NoteDropdownMenu(
             )
             DropdownMenuItem(
                 trailingIcon = { Icon(imageVector = PrimalIcons.ContextCopyNoteText, contentDescription = null)},
-                text = { Text(text = stringResource(id = R.string.feed_context_copy_note_text)) },
+                text = { DropdownMenuItemText(text = stringResource(id = R.string.feed_context_copy_note_text)) },
                 onClick = {
                     copyText(context = context, text = noteContent)
                     menuVisible = false
@@ -218,7 +218,7 @@ private fun NoteDropdownMenu(
             )
             DropdownMenuItem(
                 trailingIcon = { Icon(imageVector = PrimalIcons.ContextCopyNoteId, contentDescription = null)},
-                text = { Text(text = stringResource(id = R.string.feed_context_copy_note_id)) },
+                text = { DropdownMenuItemText(text = stringResource(id = R.string.feed_context_copy_note_id)) },
                 onClick = {
                     copyText(context = context, text = noteId.hexToNoteHrp())
                     menuVisible = false
@@ -227,7 +227,7 @@ private fun NoteDropdownMenu(
             )
             DropdownMenuItem(
                 trailingIcon = { Icon(imageVector = PrimalIcons.ContextCopyRawData, contentDescription = null)},
-                text = { Text(text = stringResource(id = R.string.feed_context_copy_raw_data)) },
+                text = { DropdownMenuItemText(text = stringResource(id = R.string.feed_context_copy_raw_data)) },
                 onClick = {
                     copyText(context = context, text = noteRawData)
                     menuVisible = false
@@ -236,7 +236,7 @@ private fun NoteDropdownMenu(
             )
             DropdownMenuItem(
                 trailingIcon = { Icon(imageVector = PrimalIcons.ContextCopyPublicKey, contentDescription = null)},
-                text = { Text(text = stringResource(id = R.string.feed_context_copy_user_id)) },
+                text = { DropdownMenuItemText(text = stringResource(id = R.string.feed_context_copy_user_id)) },
                 onClick = {
                     copyText(context = context, text = authorId.hexToNpubHrp())
                     menuVisible = false

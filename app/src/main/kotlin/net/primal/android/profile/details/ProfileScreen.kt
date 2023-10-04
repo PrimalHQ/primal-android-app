@@ -85,6 +85,7 @@ import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.AvatarThumbnailListItemImage
+import net.primal.android.core.compose.DropdownMenuItemText
 import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.ListLoading
 import net.primal.android.core.compose.ListNoContent
@@ -498,7 +499,7 @@ private fun ProfileDropdownMenu(
                         contentDescription = null
                     )
                 },
-                text = { Text(text = text) },
+                text = { DropdownMenuItemText(text = text) },
                 onClick = {
                     if (isProfileFeedInActiveUserFeeds) {
                         eventPublisher(ProfileContract.UiEvent.RemoveUserFeedAction(
@@ -534,7 +535,7 @@ private fun ProfileDropdownMenu(
                     contentDescription = null
                 )
             },
-            text = { Text(text = stringResource(id = R.string.profile_context_share_profile)) },
+            text = { DropdownMenuItemText(text = stringResource(id = R.string.profile_context_share_profile)) },
             onClick = {
                 systemShareText(
                     context = context,
