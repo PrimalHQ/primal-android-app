@@ -799,7 +799,7 @@ private fun EditProfileButton(
     PrimalOutlinedButton(
         modifier = Modifier
             .height(36.dp)
-            .width(100.dp),
+            .wrapContentWidth(),
         shape = AppTheme.shapes.medium,
         contentPadding = PaddingValues(
             horizontal = 16.dp,
