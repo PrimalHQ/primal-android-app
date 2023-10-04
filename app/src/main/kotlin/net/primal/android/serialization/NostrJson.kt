@@ -11,6 +11,7 @@ import net.primal.android.user.domain.RelayPermission
 
 val NostrJson = Json {
     ignoreUnknownKeys = true
+    coerceInputValues = true
 }
 
 inline fun <reified T> Json.decodeFromStringOrNull(string: String?): T? {
@@ -31,7 +32,7 @@ fun NostrEvent.toJsonObject(): JsonObject {
         put("created_at", nostrEvent.createdAt)
         put("kind", nostrEvent.kind)
         putJsonArray("tags") {
-            nostrEvent.tags?.forEach { add(it) }
+            nostrEvent.tags.forEach { add(it) }
         }
         put("content", nostrEvent.content)
         put("sig", nostrEvent.sig)

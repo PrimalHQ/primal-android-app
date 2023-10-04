@@ -10,7 +10,7 @@ data class NostrEvent(
     @SerialName("pubkey") val pubKey: String,
     @SerialName("created_at") val createdAt: Long,
     val kind: Int,
-    val tags: List<JsonArray>? = emptyList(),
+    val tags: List<JsonArray> = emptyList(),
     val content: String,
     val sig: String,
 )

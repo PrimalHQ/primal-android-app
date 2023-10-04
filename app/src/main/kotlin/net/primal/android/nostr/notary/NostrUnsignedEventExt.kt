@@ -38,7 +38,7 @@ fun NostrUnsignedEvent.calculateEventId(): ByteArray {
         add(pubKey)
         add(createdAt)
         add(kind)
-        addJsonArray { tags?.forEach { add(it) } }
+        addJsonArray { tags.forEach { add(it) } }
         add(content)
     }
     val rawEventJson = NostrJson.encodeToString(json)

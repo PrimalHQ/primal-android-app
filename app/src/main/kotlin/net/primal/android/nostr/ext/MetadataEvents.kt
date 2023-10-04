@@ -6,6 +6,7 @@ import net.primal.android.nostr.model.content.ContentMetadata
 import net.primal.android.profile.db.ProfileData
 import net.primal.android.serialization.NostrJson
 import net.primal.android.serialization.decodeFromStringOrNull
+import net.primal.android.serialization.toJsonObject
 
 
 fun List<NostrEvent>.mapAsProfileDataPO() = map { it.asProfileDataPO() }
@@ -17,7 +18,7 @@ fun NostrEvent.asProfileDataPO(): ProfileData {
         eventId = this.id,
         ownerId = this.pubKey,
         createdAt = this.createdAt,
-        raw = NostrJson.encodeToString(this),
+        raw = NostrJson.encodeToString(this.toJsonObject()),
         handle = metadata?.name,
         internetIdentifier = metadata?.nip05,
         lightningAddress = metadata?.lud16,

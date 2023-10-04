@@ -9,7 +9,7 @@ import java.time.Instant
 data class NostrUnsignedEvent(
     @SerialName("pubkey") val pubKey: String,
     @SerialName("created_at") val createdAt: Long = Instant.now().epochSecond,
+    val tags: List<JsonArray> = emptyList(),
     val kind: Int,
-    val tags: List<JsonArray>? = null,
     val content: String,
 )
