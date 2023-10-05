@@ -33,6 +33,8 @@ import net.primal.android.core.compose.icons.primaliconpack.FeedZaps
 import net.primal.android.core.compose.icons.primaliconpack.FeedZapsFilled
 import net.primal.android.core.compose.icons.primaliconpack.Help
 import net.primal.android.core.compose.icons.primaliconpack.Home
+import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromCamera
+import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromGallery
 import net.primal.android.core.compose.icons.primaliconpack.Key
 import net.primal.android.core.compose.icons.primaliconpack.LightMode
 import net.primal.android.core.compose.icons.primaliconpack.Link
@@ -40,6 +42,16 @@ import net.primal.android.core.compose.icons.primaliconpack.Message
 import net.primal.android.core.compose.icons.primaliconpack.Messages
 import net.primal.android.core.compose.icons.primaliconpack.More
 import net.primal.android.core.compose.icons.primaliconpack.MuteUser
+import net.primal.android.core.compose.icons.primaliconpack.NavHome
+import net.primal.android.core.compose.icons.primaliconpack.NavHomeFilled
+import net.primal.android.core.compose.icons.primaliconpack.NavMessages
+import net.primal.android.core.compose.icons.primaliconpack.NavMessagesFilled
+import net.primal.android.core.compose.icons.primaliconpack.NavNotifications
+import net.primal.android.core.compose.icons.primaliconpack.NavNotificationsFilled
+import net.primal.android.core.compose.icons.primaliconpack.NavSearch
+import net.primal.android.core.compose.icons.primaliconpack.NavSearchFilled
+import net.primal.android.core.compose.icons.primaliconpack.NavWallet
+import net.primal.android.core.compose.icons.primaliconpack.NavWalletFilled
 import net.primal.android.core.compose.icons.primaliconpack.Notifications
 import net.primal.android.core.compose.icons.primaliconpack.Notrich
 import net.primal.android.core.compose.icons.primaliconpack.QrCode
@@ -119,6 +131,18 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             ContextAddBookmark,
             ContextMuteUser,
             ContextShare,
+            ImportPhotoFromCamera,
+            ImportPhotoFromGallery,
+            NavHomeFilled,
+            NavHome,
+            NavMessagesFilled,
+            NavMessages,
+            NavNotificationsFilled,
+            NavNotifications,
+            NavSearchFilled,
+            NavSearch,
+            NavWalletFilled,
+            NavWallet,
         )
         return __PrimalIcons!!
     }

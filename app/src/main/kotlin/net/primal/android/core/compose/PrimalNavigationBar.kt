@@ -15,10 +15,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import net.primal.android.R
 import net.primal.android.core.compose.icons.PrimalIcons
-import net.primal.android.core.compose.icons.primaliconpack.Discuss
-import net.primal.android.core.compose.icons.primaliconpack.Messages
-import net.primal.android.core.compose.icons.primaliconpack.Notifications
-import net.primal.android.core.compose.icons.primaliconpack.Search
+import net.primal.android.core.compose.icons.primaliconpack.NavHome
+import net.primal.android.core.compose.icons.primaliconpack.NavHomeFilled
+import net.primal.android.core.compose.icons.primaliconpack.NavMessages
+import net.primal.android.core.compose.icons.primaliconpack.NavMessagesFilled
+import net.primal.android.core.compose.icons.primaliconpack.NavNotifications
+import net.primal.android.core.compose.icons.primaliconpack.NavNotificationsFilled
+import net.primal.android.core.compose.icons.primaliconpack.NavSearch
+import net.primal.android.core.compose.icons.primaliconpack.NavSearchFilled
 import net.primal.android.theme.AppTheme
 import net.primal.android.user.domain.Badges
 
@@ -63,13 +67,18 @@ private fun RowScope.PrimalNavigationBarItem(
     onClick: () -> Unit,
     badge: Int = 0,
 ) {
+    val selected = primaryDestination == activeDestination
     NavigationBarItem(
-        selected = primaryDestination == activeDestination,
+        selected = selected,
         onClick = onClick,
         icon = {
             BadgedBox(badge = { if (badge > 0) Badge() }) {
                 Icon(
-                    imageVector = primaryDestination.imageVector(),
+                    imageVector = if (selected) {
+                        primaryDestination.imageVectorSelected()
+                    } else {
+                        primaryDestination.imageVector()
+                    },
                     contentDescription = primaryDestination.label(),
                 )
             }
@@ -89,10 +98,19 @@ enum class PrimalTopLevelDestination {
 
 private fun PrimalTopLevelDestination.imageVector(): ImageVector {
     return when (this) {
-        PrimalTopLevelDestination.Feed -> PrimalIcons.Discuss
-        PrimalTopLevelDestination.Explore -> PrimalIcons.Search
-        PrimalTopLevelDestination.Messages -> PrimalIcons.Messages
-        PrimalTopLevelDestination.Notifications -> PrimalIcons.Notifications
+        PrimalTopLevelDestination.Feed -> PrimalIcons.NavHome
+        PrimalTopLevelDestination.Explore -> PrimalIcons.NavSearch
+        PrimalTopLevelDestination.Messages -> PrimalIcons.NavMessages
+        PrimalTopLevelDestination.Notifications -> PrimalIcons.NavNotifications
+    }
+}
+
+private fun PrimalTopLevelDestination.imageVectorSelected(): ImageVector {
+    return when (this) {
+        PrimalTopLevelDestination.Feed -> PrimalIcons.NavHomeFilled
+        PrimalTopLevelDestination.Explore -> PrimalIcons.NavSearchFilled
+        PrimalTopLevelDestination.Messages -> PrimalIcons.NavMessagesFilled
+        PrimalTopLevelDestination.Notifications -> PrimalIcons.NavNotificationsFilled
     }
 }
 
