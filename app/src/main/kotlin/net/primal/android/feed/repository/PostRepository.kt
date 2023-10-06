@@ -1,7 +1,9 @@
 package net.primal.android.feed.repository
 
 import kotlinx.serialization.json.JsonArray
+import net.primal.android.core.files.FileUploader
 import net.primal.android.db.PrimalDatabase
+import net.primal.android.feed.domain.NoteAttachment
 import net.primal.android.networking.primal.api.PrimalImportApi
 import net.primal.android.networking.relays.RelaysManager
 import net.primal.android.networking.relays.errors.NostrPublishException
@@ -16,6 +18,7 @@ class PostRepository @Inject constructor(
     private val relaysManager: RelaysManager,
     private val nostrNotary: NostrNotary,
     private val primalImportApi: PrimalImportApi,
+    private val fileUploader: FileUploader,
 ) {
 
     fun findPostDataById(postId: String) = database.posts().findByPostId(postId = postId)
@@ -77,5 +80,10 @@ class PostRepository @Inject constructor(
         } catch (error: WssException) {
             false
         }
+    }
+
+    suspend fun uploadPostAttachment(attachment: NoteAttachment): String {
+        val userId = activeAccountStore.activeUserId()
+        return fileUploader.uploadFile(userId = userId, attachment.localUri)
     }
 }

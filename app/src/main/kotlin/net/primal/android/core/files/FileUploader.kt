@@ -33,6 +33,7 @@ class FileUploader @Inject constructor(
         encodeDefaults = true
     }
 
+    @Throws(UnsuccessfulFileUpload::class)
     suspend fun uploadFile(userId: String, uri: Uri): String {
         val imageBytes = uri.readBytesSafely()
         val imageAsBase64 = Base64.encodeToString(imageBytes, Base64.DEFAULT)

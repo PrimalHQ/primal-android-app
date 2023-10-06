@@ -1,5 +1,6 @@
 package net.primal.android.discuss.post
 
+import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -13,9 +14,11 @@ import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import net.primal.android.core.files.error.UnsuccessfulFileUpload
 import net.primal.android.discuss.post.NewPostContract.SideEffect
 import net.primal.android.discuss.post.NewPostContract.UiEvent
 import net.primal.android.discuss.post.NewPostContract.UiState
+import net.primal.android.feed.domain.NoteAttachment
 import net.primal.android.feed.repository.PostRepository
 import net.primal.android.navigation.newPostPreFillContent
 import net.primal.android.networking.relays.errors.MissingRelaysException
@@ -25,6 +28,7 @@ import net.primal.android.nostr.ext.parseHashtagTags
 import net.primal.android.nostr.ext.parsePubkeyTags
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
+import java.util.UUID
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
 
@@ -32,10 +36,11 @@ import kotlin.time.Duration.Companion.seconds
 class NewPostViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val activeAccountStore: ActiveAccountStore,
-    private val postRepository: PostRepository
+    private val postRepository: PostRepository,
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(UiState(preFillContent = savedStateHandle.newPostPreFillContent))
+    private val _state =
+        MutableStateFlow(UiState(preFillContent = savedStateHandle.newPostPreFillContent))
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
 
@@ -55,6 +60,9 @@ class NewPostViewModel @Inject constructor(
         _event.collect {
             when (it) {
                 is UiEvent.PublishPost -> publishPost(it)
+                is UiEvent.ImportLocalFiles -> importPhotos(it.uris)
+                is UiEvent.DiscardNoteAttachment -> discardAttachment(it.attachmentId)
+                is UiEvent.RetryUpload -> retryAttachmentUpload(it.attachmentId)
             }
         }
     }
@@ -76,8 +84,23 @@ class NewPostViewModel @Inject constructor(
             val mentionPubkeyTags = event.content.parsePubkeyTags(marker = "mention").toSet()
             val hashtagTags = event.content.parseHashtagTags().toSet()
 
+            val attachments = _state.value.attachments.mapNotNull { it.remoteUrl }
+            val refinedContent = if (attachments.isEmpty()) {
+                event.content
+            } else {
+                StringBuilder().apply {
+                    append(event.content)
+                    appendLine()
+                    appendLine()
+                    attachments.forEach {
+                        append(it)
+                        appendLine()
+                    }
+                }.toString()
+            }
+
             postRepository.publishShortTextNote(
-                content = event.content,
+                content = refinedContent,
                 tags = mentionEventTags + mentionPubkeyTags + hashtagTags,
             )
             sendEffect(SideEffect.PostPublished)
@@ -88,6 +111,63 @@ class NewPostViewModel @Inject constructor(
         } finally {
             setState { copy(publishing = false) }
         }
+    }
+
+    private fun importPhotos(uris: List<Uri>) = viewModelScope.launch {
+        val newAttachments = uris.map { NoteAttachment(localUri = it) }
+        setState { copy(attachments = attachments + newAttachments) }
+        uploadAttachments(attachments = newAttachments)
+    }
+
+    private fun uploadAttachments(attachments: List<NoteAttachment>) = viewModelScope.launch {
+        attachments.forEach { uploadAttachment(attachment = it) }
+        checkUploadQueueAndDisableFlagIfCompleted()
+    }
+
+    private suspend fun uploadAttachment(attachment: NoteAttachment) {
+        try {
+            setState { copy(uploadingAttachments = true) }
+            updateNoteAttachmentState(attachment = attachment.copy(uploadError = null))
+            val remoteUrl = postRepository.uploadPostAttachment(attachment)
+            updateNoteAttachmentState(attachment = attachment.copy(remoteUrl = remoteUrl))
+        } catch (error: UnsuccessfulFileUpload) {
+            updateNoteAttachmentState(attachment = attachment.copy(uploadError = error))
+        }
+    }
+
+    private fun updateNoteAttachmentState(attachment: NoteAttachment) {
+        setState {
+            val attachments = this.attachments.toMutableList()
+            val index = attachments.indexOfFirst { attachment.id == it.id }
+            if (index != -1) attachments.set(index = index, element = attachment)
+            this.copy(attachments = attachments)
+        }
+    }
+
+    private fun discardAttachment(attachmentId: UUID) = viewModelScope.launch {
+        setState {
+            val attachments = this.attachments.toMutableList()
+            attachments.removeIf { it.id == attachmentId }
+            this.copy(
+                attachments = attachments,
+                uploadingAttachments = if (attachments.isEmpty()) false else this.uploadingAttachments
+            )
+        }
+    }
+
+    private fun retryAttachmentUpload(attachmentId: UUID) = viewModelScope.launch {
+        _state.value.attachments.firstOrNull { it.id == attachmentId }?.let {
+            uploadAttachment(it)
+            checkUploadQueueAndDisableFlagIfCompleted()
+        }
+    }
+
+    private fun checkUploadQueueAndDisableFlagIfCompleted() {
+        val attachments = _state.value.attachments
+        val attachmentsInUpload = attachments.count {
+            it.uploadError == null && it.remoteUrl == null
+        }
+        setState { copy(uploadingAttachments = attachmentsInUpload > 0) }
     }
 
     private fun setErrorState(error: UiState.NewPostError) {
