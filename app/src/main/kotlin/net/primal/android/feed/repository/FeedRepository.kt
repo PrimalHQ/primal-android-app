@@ -14,7 +14,6 @@ import net.primal.android.db.PrimalDatabase
 import net.primal.android.feed.api.FeedApi
 import net.primal.android.feed.api.mediator.FeedRemoteMediator
 import net.primal.android.feed.api.model.ThreadRequestBody
-import net.primal.android.feed.db.Feed
 import net.primal.android.feed.db.FeedPost
 import net.primal.android.feed.db.sql.ExploreFeedQueryBuilder
 import net.primal.android.feed.db.sql.FeedQueryBuilder
@@ -32,19 +31,6 @@ class FeedRepository @Inject constructor(
     fun observeFeeds() = database.feeds().observeAllFeeds()
 
     fun observeContainsFeed(directive: String) = database.feeds().observeContainsFeed(directive)
-
-    suspend fun addToUserFeeds(title: String, directive: String) {
-        val newFeed = Feed(name = title, directive = directive)
-        withContext(Dispatchers.IO) {
-            database.feeds().upsertAll(listOf(newFeed))
-        }
-    }
-
-    suspend fun removeFromUserFeeds(directive: String) {
-        withContext(Dispatchers.IO) {
-            database.feeds().delete(directive = directive)
-        }
-    }
 
     fun observeFeedByDirective(feedDirective: String) =
         database.feeds().observeFeedByDirective(feedDirective = feedDirective)
