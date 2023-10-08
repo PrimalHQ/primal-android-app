@@ -60,6 +60,12 @@ class SettingsRepository @Inject constructor(
         }
     }
 
+    suspend fun updateAndPersistFeeds(userId: String, feeds: List<ContentFeedData>) {
+        updateAndPersistAppSettings(userId = userId) {
+            copy(feeds = feeds)
+        }
+    }
+
     private suspend fun updateAndPersistAppSettings(
         userId: String,
         reducer: ContentAppSettings.() -> ContentAppSettings,

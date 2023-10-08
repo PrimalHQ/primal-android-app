@@ -14,6 +14,8 @@ import net.primal.android.core.compose.DemoSecondaryScreen
 import net.primal.android.core.compose.LockToOrientationPortrait
 import net.primal.android.settings.appearance.AppearanceSettingsScreen
 import net.primal.android.settings.appearance.AppearanceSettingsViewModel
+import net.primal.android.settings.feeds.FeedsSettingsScreen
+import net.primal.android.settings.feeds.FeedsSettingsViewModel
 import net.primal.android.settings.home.PrimalSettingsSection
 import net.primal.android.settings.home.SettingsHomeScreen
 import net.primal.android.settings.home.SettingsHomeViewModel
@@ -158,12 +160,9 @@ private fun NavGraphBuilder.network(route: String, navController: NavController)
 private fun NavGraphBuilder.feeds(route: String, navController: NavController) = composable(
     route = route,
 ) {
+    val viewModel = hiltViewModel<FeedsSettingsViewModel>()
     LockToOrientationPortrait()
-    DemoSecondaryScreen(
-        title = stringResource(id = R.string.settings_feeds_title),
-        description = "Feeds settings will appear here. Stay tuned.",
-        onClose = { navController.navigateUp() },
-    )
+    FeedsSettingsScreen(viewModel = viewModel, onClose = { navController.navigateUp() })
 }
 
 private fun NavGraphBuilder.zaps(route: String, navController: NavController) = composable(
