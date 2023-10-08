@@ -173,6 +173,7 @@ fun PrimalAppNavigation() {
                         is DeepLink.Profile, is DeepLink.Note, null -> {
                             navController.navigateToFeed(directive = it.userPubkey)
                         }
+
                         is DeepLink.NostrWalletConnect -> {
                             navController.popBackStack()
                             navController.navigateToWallet(nwcUrl = withContext(Dispatchers.IO) {

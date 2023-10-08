@@ -208,6 +208,7 @@
     <string name="settings_notifications_post_your_post_was_mentioned_in_was_replied_to_text">replied to</string>
 
     <string name="settings_appearance_title">Appearance</string>
+    <string name="settings_appearance_theme_section_title">THEME</string>
     <string name="settings_network_title">Network</string>
     <string name="settings_feeds_title">Feeds</string>
 
