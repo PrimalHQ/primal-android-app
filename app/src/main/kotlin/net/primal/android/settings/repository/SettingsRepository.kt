@@ -66,6 +66,14 @@ class SettingsRepository @Inject constructor(
         }
     }
 
+    suspend fun restoreDefaultFeeds(userId: String) {
+        val remoteAppSettings = fetchAppSettings(userId = userId) ?: return
+        val remoteDefaultAppSettings = fetchDefaultAppSettings(userId = userId) ?: return
+        val newAppSettings = remoteAppSettings.copy(feeds = remoteDefaultAppSettings.feeds)
+        settingsApi.setAppSettings(userId = userId, appSettings = newAppSettings)
+        persistAppSettings(userId = userId, appSettings = newAppSettings)
+    }
+
     private suspend fun updateAndPersistAppSettings(
         userId: String,
         reducer: ContentAppSettings.() -> ContentAppSettings,
@@ -80,6 +88,13 @@ class SettingsRepository @Inject constructor(
         val response = settingsApi.getAppSettings(pubkey = userId)
         return NostrJson.decodeFromStringOrNull<ContentAppSettings>(
             string = response.userSettings?.content ?: response.defaultSettings?.content
+        )
+    }
+
+    private suspend fun fetchDefaultAppSettings(userId: String): ContentAppSettings? {
+        val response = settingsApi.getDefaultAppSettings(pubkey = userId)
+        return NostrJson.decodeFromStringOrNull<ContentAppSettings>(
+            string = response.defaultSettings?.content
         )
     }
 

@@ -8,6 +8,7 @@ interface FeedsSettingsContract {
         sealed class SettingsFeedsError {
             data class FailedToRemoveFeed(val throwable: Throwable) : SettingsFeedsError()
             data class FailedToReorderFeeds(val throwable: Throwable) : SettingsFeedsError()
+            data class FailedToRestoreDefaultFeeds(val throwable: Throwable) : SettingsFeedsError()
         }
     }
 

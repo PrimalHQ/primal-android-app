@@ -98,8 +98,14 @@ class FeedsSettingsViewModel @Inject constructor(
         }
     }
 
-    private fun restoreDefaultFeedsHandler() {
-        throw NotImplementedError()
+    private suspend fun restoreDefaultFeedsHandler() {
+       try {
+           settingsRepository.restoreDefaultFeeds(userId = activeAccountStore.activeUserId())
+       } catch (error: WssException) {
+           setState {
+               copy(error = FeedsSettingsContract.UiState.SettingsFeedsError.FailedToRestoreDefaultFeeds(error))
+           }
+       }
     }
 }
 
