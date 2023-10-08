@@ -43,17 +43,7 @@ class SettingsApiImpl @Inject constructor(
 
     override suspend fun getDefaultAppSettings(pubkey: String): GetAppSettingsResponse {
         val queryResult = primalApiClient.query(
-            message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.GET_DEFAULT_APP_SETTINGS,
-                optionsJson = NostrJson.encodeToString(
-                    AppSpecificDataRequest(
-                        eventFromUser = nostrNotary.signAppSettingsSyncNostrEvent(
-                            userId = pubkey,
-                            description = "Get default app settings",
-                        ),
-                    )
-                ),
-            )
+            message = PrimalCacheFilter(primalVerb = PrimalVerb.GET_DEFAULT_APP_SETTINGS)
         )
 
         return GetAppSettingsResponse(

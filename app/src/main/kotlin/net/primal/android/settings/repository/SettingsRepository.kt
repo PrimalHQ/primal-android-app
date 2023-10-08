@@ -102,25 +102,27 @@ class SettingsRepository @Inject constructor(
         val currentUserAccount = accountsStore.findByIdOrNull(userId = userId)
             ?: UserAccount.buildLocal(pubkey = userId)
 
+        val userFeeds = appSettings.feeds.map { it.asFeedPO() }
+        val hasLatestFeed = userFeeds.find { it.directive == userId } != null
+        val finalFeeds = if (hasLatestFeed) userFeeds else {
+            userFeeds.toMutableList().apply {
+                add(0, Feed(directive = userId, name = "Latest"))
+            }
+        }
+
         accountsStore.upsertAccount(
             userAccount = currentUserAccount.copy(
-                appSettings = appSettings,
+                appSettings = appSettings.copy(feeds = finalFeeds.map { it.asContentFeedData() }),
             )
         )
 
         database.withTransaction {
-            val userFeeds = appSettings.feeds.distinctBy { it.directive }.map { it.asFeedPO() }
-            val hasLatestFeed = userFeeds.find { it.directive == userId } != null
-            val finalFeeds = if (hasLatestFeed) userFeeds else {
-                userFeeds.toMutableList().apply {
-                    add(0, Feed(directive = userId, name = "Latest"))
-                }
-            }
             database.feeds().deleteAll()
             database.feeds().upsertAll(data = finalFeeds)
         }
     }
 
     private fun ContentFeedData.asFeedPO(): Feed = Feed(name = name, directive = directive)
-
+    private fun Feed.asContentFeedData(): ContentFeedData =
+        ContentFeedData(name = name, directive = directive)
 }

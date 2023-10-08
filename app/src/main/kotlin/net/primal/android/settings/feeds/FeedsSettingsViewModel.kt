@@ -51,7 +51,7 @@ class FeedsSettingsViewModel @Inject constructor(
                     Feed(
                         name = it.name,
                         directive = it.directive,
-                        isRemovable = it.directive != activeAccountStore.activeUserId()
+                        isRemovable = !it.directive.contains(activeAccountStore.activeUserId())
                     )
                 } ?: emptyList())
             }
