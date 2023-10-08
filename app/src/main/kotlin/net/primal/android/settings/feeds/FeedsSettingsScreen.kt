@@ -1,6 +1,7 @@
 package net.primal.android.settings.feeds
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.RemoveCircle
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -24,10 +26,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import net.primal.android.R
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
@@ -60,7 +64,7 @@ fun FeedsSettingsScreen(
         modifier = Modifier,
         topBar = {
             PrimalTopAppBar(
-                title = "Feeds",
+                title = stringResource(id = R.string.settings_feeds_title),
                 navigationIcon = PrimalIcons.ArrowBack,
                 onNavigationIconClick = onClose
             )
@@ -80,14 +84,15 @@ fun FeedsSettingsScreen(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        text = "YOUR NOSTR FEEDS",
+                        text = stringResource(R.string.settings_feeds_list_title),
                         fontWeight = FontWeight.W500,
                         fontSize = 14.sp,
                         lineHeight = 16.sp
                     )
 
                     Text(
-                        text = "restore defaults",
+                        modifier = Modifier.clickable { eventPublisher(FeedsSettingsContract.UiEvent.RestoreDefaultFeeds) },
+                        text = stringResource(R.string.settings_feeds_restore_default_title),
                         fontWeight = FontWeight.W500,
                         fontSize = 14.sp,
                         lineHeight = 16.sp,
@@ -106,50 +111,62 @@ fun FeedsSettingsScreen(
                             )
                         )
                     }
-                ) { item ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(44.dp),
-                        horizontalArrangement = Arrangement.Start,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        if (item.isRemovable) {
-                            IconButton(
-                                onClick = {
-                                    eventPublisher(
-                                        FeedsSettingsContract.UiEvent.FeedRemoved(
-                                            directive = item.directive
-                                        )
-                                    )
-                                }) {
-                                Image(
-                                    imageVector = Icons.Filled.RemoveCircle,
-                                    contentDescription = null,
-                                    colorFilter = ColorFilter.tint(color = Color.Red)
-                                )
-                            }
-                        } else {
-                            Spacer(modifier = Modifier.width(width = 48.dp))
-                        }
-                        Text(
-                            text = item.name,
-                            fontWeight = FontWeight.W400,
-                            fontSize = 16.sp,
-                            lineHeight = 16.sp
-                        )
-                        Spacer(modifier = Modifier.weight(1.0f))
-                        Image(
-                            imageVector = Icons.Default.Menu,
-                            contentDescription = null,
-                            colorFilter = ColorFilter.tint(color = Color.Gray)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                    }
+                ) { _, item ->
+                    FeedItem(
+                        item = item,
+                        eventPublisher = eventPublisher
+                    )
+                    Divider(color = AppTheme.colorScheme.outline, thickness = 1.dp)
                 }
             }
         }
     )
+}
+
+@Composable
+fun FeedItem(
+    item: Feed,
+    eventPublisher: (FeedsSettingsContract.UiEvent) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(44.dp),
+        horizontalArrangement = Arrangement.Start,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        if (item.isRemovable) {
+            IconButton(
+                onClick = {
+                    eventPublisher(
+                        FeedsSettingsContract.UiEvent.FeedRemoved(
+                            directive = item.directive
+                        )
+                    )
+                }) {
+                Image(
+                    imageVector = Icons.Filled.RemoveCircle,
+                    contentDescription = null,
+                    colorFilter = ColorFilter.tint(color = Color.Red)
+                )
+            }
+        } else {
+            Spacer(modifier = Modifier.width(width = 48.dp))
+        }
+        Text(
+            text = item.name,
+            fontWeight = FontWeight.W400,
+            fontSize = 16.sp,
+            lineHeight = 16.sp
+        )
+        Spacer(modifier = Modifier.weight(1.0f))
+        Image(
+            imageVector = Icons.Default.Menu,
+            contentDescription = null,
+            colorFilter = ColorFilter.tint(color = Color.Gray)
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+    }
 }
 
 @Preview

@@ -14,6 +14,7 @@ interface FeedsSettingsContract {
     sealed class UiEvent {
         data class FeedRemoved(val directive: String) : UiEvent()
         data class FeedReordered(val from: Int, val to: Int) : UiEvent()
+        data object RestoreDefaultFeeds : UiEvent()
     }
 }
 

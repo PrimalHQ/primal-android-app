@@ -39,6 +39,7 @@ class FeedsSettingsViewModel @Inject constructor(
             when (it) {
                 is FeedsSettingsContract.UiEvent.FeedRemoved -> feedRemovedHandler(event = it)
                 is FeedsSettingsContract.UiEvent.FeedReordered -> feedReorderedHandler(event = it)
+                is FeedsSettingsContract.UiEvent.RestoreDefaultFeeds -> restoreDefaultFeedsHandler()
             }
         }
     }
@@ -95,6 +96,10 @@ class FeedsSettingsViewModel @Inject constructor(
                 )
             }
         }
+    }
+
+    private fun restoreDefaultFeedsHandler() {
+        throw NotImplementedError()
     }
 }
 

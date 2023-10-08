@@ -211,6 +211,8 @@
     <string name="settings_appearance_theme_section_title">Theme</string>
     <string name="settings_network_title">Network</string>
     <string name="settings_feeds_title">Feeds</string>
+    <string name="settings_feeds_list_title">YOUR NOSTR FEEDS</string>
+    <string name="settings_feeds_restore_default_title">restore defaults</string>
 
     <string name="settings_zaps_title">Zaps</string>
     <string name="settings_zaps_default_zap_amount_header">Set default zap amount</string>
