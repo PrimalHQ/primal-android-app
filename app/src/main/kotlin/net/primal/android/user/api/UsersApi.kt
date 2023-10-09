@@ -27,4 +27,6 @@ interface UsersApi {
         ownerId: String,
         contentMetadata: ContentMetadata,
     ): NostrEvent
+
+    suspend fun getUserProfiles(pubkeys: Set<String>): List<NostrEvent>
 }

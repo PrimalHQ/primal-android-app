@@ -21,6 +21,7 @@ data class PrimalCacheFilter(
 
 enum class PrimalVerb(val identifier: String) {
     CONTACT_LIST("contact_list"),
+    USER_INFOS("user_infos"),
     USER_PROFILE("user_profile"),
     FEED_DIRECTIVE("feed_directive"),
     TRENDING_HASHTAGS_7D("trending_hashtags_7d"),

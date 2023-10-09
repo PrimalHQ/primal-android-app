@@ -5,14 +5,17 @@ import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.primal.PrimalCacheFilter
 import net.primal.android.networking.primal.PrimalVerb.CONTACT_LIST
+import net.primal.android.networking.primal.PrimalVerb.USER_INFOS
 import net.primal.android.networking.primal.PrimalVerb.USER_PROFILE
 import net.primal.android.networking.relays.RelaysManager
+import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.model.content.ContentMetadata
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.serialization.NostrJson
 import net.primal.android.user.api.model.ContactsRequestBody
+import net.primal.android.user.api.model.GetUserProfilesRequest
 import net.primal.android.user.api.model.UserContactsResponse
 import net.primal.android.user.api.model.UserProfileResponse
 import net.primal.android.user.api.model.UserRequestBody
@@ -84,5 +87,22 @@ class UsersApiImpl @Inject constructor(
         )
         relaysManager.publishEvent(nostrEvent = signedNostrEvent)
         return signedNostrEvent
+    }
+
+    override suspend fun getUserProfiles(pubkeys: Set<String>): List<NostrEvent> {
+        return try {
+            val queryResult = primalApiClient.query(
+                message = PrimalCacheFilter(
+                    primalVerb = USER_INFOS,
+                    optionsJson = NostrJson.encodeToString(
+                        GetUserProfilesRequest(pubkeys = pubkeys)
+                    )
+                )
+            )
+
+            queryResult.filterNostrEvents(NostrEventKind.Metadata)
+        } catch (error: WssException) {
+            emptyList()
+        }
     }
 }
