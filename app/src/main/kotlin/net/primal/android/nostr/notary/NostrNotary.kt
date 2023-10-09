@@ -183,4 +183,17 @@ class NostrNotary @Inject constructor(
             tags = emptyList()
         ).signOrThrow(nsec = findNsecOrThrow(userId))
     }
+
+    fun signMutelistNostrEvent(
+        userId: String,
+        pubkeys: Set<String>
+    ): NostrEvent {
+        val tags = pubkeys.map { it.asPubkeyTag() }
+        return NostrUnsignedEvent(
+            content = "",
+            pubKey = userId,
+            kind = NostrEventKind.MuteList.value,
+            tags = tags
+        ).signOrThrow(nsec = findNsecOrThrow(pubkey = userId))
+    }
 }

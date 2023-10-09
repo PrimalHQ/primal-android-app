@@ -11,6 +11,7 @@ import net.primal.android.nostr.model.primal.content.ContentFeedData
 import net.primal.android.serialization.NostrJson
 import net.primal.android.serialization.decodeFromStringOrNull
 import net.primal.android.settings.api.SettingsApi
+import net.primal.android.settings.muted.db.Muted
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.domain.UserAccount
 import javax.inject.Inject
@@ -60,6 +61,22 @@ class SettingsRepository @Inject constructor(
         }
     }
 
+    suspend fun muteUserAndPersistMutelist(userId: String, mutedUserPubkey: String) {
+        updateAndPersistMutelist(userId = userId) {
+            toMutableSet().apply {
+                add(mutedUserPubkey)
+            }
+        }
+    }
+
+    suspend fun unmuteUserAndPersistMutelist(userId: String, unmutedUserPubkey: String) {
+        updateAndPersistMutelist(userId = userId) {
+            toMutableSet().apply {
+                remove(unmutedUserPubkey)
+            }
+        }
+    }
+
     private suspend fun updateAndPersistAppSettings(
         userId: String,
         reducer: ContentAppSettings.() -> ContentAppSettings,
@@ -70,6 +87,16 @@ class SettingsRepository @Inject constructor(
         persistAppSettings(userId = userId, appSettings = newAppSettings)
     }
 
+    private suspend fun updateAndPersistMutelist(
+        userId: String,
+        reducer: Set<String>.() -> Set<String>,
+    ) {
+        val remoteMutelist = fetchMutelist(userId = userId)
+        val newMutelist = remoteMutelist.reducer()
+        settingsApi.setMutelist(userId = userId, mutelist = newMutelist)
+        persistMutelist(mutelist = newMutelist)
+    }
+
     private suspend fun fetchAppSettings(userId: String): ContentAppSettings? {
         val response = settingsApi.getAppSettings(pubkey = userId)
         return NostrJson.decodeFromStringOrNull<ContentAppSettings>(
@@ -77,9 +104,16 @@ class SettingsRepository @Inject constructor(
         )
     }
 
+    private suspend fun fetchMutelist(userId: String): Set<String> {
+        val response = settingsApi.getMutelist(userId = userId)
+
+        return response.mutelist?.tags?.filter { it.size == 2 }?.map { it[1].toString() }?.toSet()
+            ?: emptySet()
+    }
+
     private suspend fun persistAppSettings(userId: String, appSettings: ContentAppSettings) {
-        val currentUserAccount = accountsStore.findByIdOrNull(userId = userId)
-            ?: UserAccount.buildLocal(pubkey = userId)
+        val currentUserAccount =
+            accountsStore.findByIdOrNull(userId = userId) ?: UserAccount.buildLocal(pubkey = userId)
 
         accountsStore.upsertAccount(
             userAccount = currentUserAccount.copy(
@@ -100,6 +134,15 @@ class SettingsRepository @Inject constructor(
         }
     }
 
-    private fun ContentFeedData.asFeedPO(): Feed = Feed(name = name, directive = directive)
+    private suspend fun persistMutelist(mutelist: Set<String>) {
+        database.withTransaction {
+            val muted = mutelist.map { it.asMutedPO() }.toSet()
 
+            database.muted().deleteAll()
+            database.muted().upsertAll(data = muted)
+        }
+    }
+
+    private fun ContentFeedData.asFeedPO(): Feed = Feed(name = name, directive = directive)
+    private fun String.asMutedPO(): Muted = Muted(pubkey = this)
 }
