@@ -88,7 +88,7 @@ class SettingsRepository @Inject constructor(
         )
 
         database.withTransaction {
-            val userFeeds = appSettings.feeds.map { it.asFeedPO() }
+            val userFeeds = appSettings.feeds.distinctBy { it.directive }.map { it.asFeedPO() }
             val hasLatestFeed = userFeeds.find { it.directive == userId } != null
             val finalFeeds = if (hasLatestFeed) userFeeds else {
                 userFeeds.toMutableList().apply {
