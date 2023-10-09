@@ -9,7 +9,9 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -39,6 +41,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -46,16 +49,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import net.primal.android.R
 import net.primal.android.core.compose.AppBarIcon
+import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.feed.FeedPostListItem
@@ -176,6 +184,8 @@ fun ThreadScreen(
         snackbarHostState = snackbarHostState,
     )
 
+    var topBarMaxHeightPx by remember { mutableIntStateOf(0) }
+    var bottomBarMaxHeightPx by remember { mutableIntStateOf(0) }
     Scaffold(
         modifier = Modifier
             .nestedScroll(scrollBehavior.nestedScrollConnection)
@@ -183,17 +193,31 @@ fun ThreadScreen(
             .imePadding(),
         topBar = {
             PrimalTopAppBar(
+                modifier = Modifier.onSizeChanged { topBarMaxHeightPx = it.height },
                 title = stringResource(id = R.string.thread_title),
                 navigationIcon = PrimalIcons.ArrowBack,
                 onNavigationIconClick = onClose,
+                showDivider = true,
                 scrollBehavior = scrollBehavior,
             )
         },
         content = { paddingValues ->
+            var threadListMaxHeightPx by remember { mutableIntStateOf(0) }
+            var highlightPostHeightPx by remember { mutableIntStateOf(0) }
+            var repliesHeightPx by remember { mutableStateOf(mapOf<Int, Int>()) }
+
+            var extraSpacing by remember { mutableStateOf(0.dp) }
+            extraSpacing = with(LocalDensity.current) {
+                threadListMaxHeightPx.toDp() - highlightPostHeightPx.toDp() -
+                        bottomBarMaxHeightPx.toDp() - topBarMaxHeightPx.toDp() -
+                        repliesHeightPx.values.sum().toDp()
+            }
+
             LazyColumn(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .onSizeChanged { threadListMaxHeightPx = it.height },
                 contentPadding = paddingValues,
-                verticalArrangement = Arrangement.spacedBy(4.dp),
                 state = listState,
             ) {
                 itemsIndexed(
@@ -203,14 +227,32 @@ fun ThreadScreen(
                         if (index == state.highlightPostIndex) "root" else "reply"
                     },
                 ) { index, item ->
-                    Column {
-                        val shouldIndentContent = index != state.highlightPostIndex
-                        val highlighted = index == state.highlightPostIndex
-                        val connected = index in 0 until state.highlightPostIndex
+                    val shouldIndentContent = index != state.highlightPostIndex
+                    val highlighted = index == state.highlightPostIndex
+                    val connectedToPreviousNote = state.highlightPostIndex > 0
+                            && index in 1 until state.highlightPostIndex + 1
+                    val connectedToNextNote = index in 0 until state.highlightPostIndex
+                    val isReply = index > state.highlightPostIndex
 
+                    Column(
+                        modifier = Modifier.onSizeChanged {
+                            if (highlighted) {
+                                highlightPostHeightPx = it.height
+                            } else if (isReply) {
+                                repliesHeightPx = repliesHeightPx.toMutableMap().apply {
+                                    this[index] = it.height
+                                }
+                            }
+                        }
+                    ) {
                         FeedPostListItem(
                             data = item,
+                            shape = RectangleShape,
+                            cardPadding = PaddingValues(all = 0.dp),
                             expanded = true,
+                            shouldIndentContent = shouldIndentContent,
+                            connectedToPreviousNote = connectedToPreviousNote,
+                            connectedToNextNote = connectedToNextNote,
                             onPostClick = { postId ->
                                 if (state.highlightPostId != postId) {
                                     onPostClick(postId)
@@ -265,12 +307,18 @@ fun ThreadScreen(
                                 }
                             },
                             onHashtagClick = onHashtagClick,
-                            shouldIndentContent = shouldIndentContent,
-                            highlighted = highlighted,
-                            connected = connected,
                         )
 
+                        if (!connectedToNextNote) {
+                            PrimalDivider()
+                        }
                     }
+                }
+
+                item(key = "extraSpacing") {
+                    Spacer(modifier = Modifier.height(
+                        height = extraSpacing.coerceAtLeast(50.dp))
+                    )
                 }
             }
         },
@@ -282,6 +330,10 @@ fun ThreadScreen(
             val replyToPost = state.conversation.getOrNull(state.highlightPostIndex)
             if (rootPost != null && replyToPost != null) {
                 ReplyToBottomBar(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 4.dp)
+                        .onSizeChanged { bottomBarMaxHeightPx = it.height },
                     publishingReply = state.publishingReply,
                     replyToAuthorName = replyToPost.authorName,
                     replyToAuthorHandle = replyToPost.authorHandle,
@@ -313,6 +365,7 @@ fun ThreadScreen(
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun ReplyToBottomBar(
+    modifier: Modifier,
     publishingReply: Boolean,
     replyToAuthorName: String,
     replyToAuthorHandle: String,
@@ -328,19 +381,19 @@ fun ReplyToBottomBar(
     val unfocusedColor = AppTheme.extraColorScheme.surfaceVariantAlt
     val focusedColor = AppTheme.colorScheme.surface
     Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 4.dp),
+        modifier = modifier,
         color = if (isKeyboardVisible) unfocusedColor else focusedColor,
     ) {
         Column(
             modifier = Modifier.fillMaxWidth(),
         ) {
+            PrimalDivider()
+
             AnimatedVisibility(visible = isKeyboardVisible) {
                 ReplyingToText(
                     modifier = Modifier
                         .padding(horizontal = 16.dp)
-                        .padding(vertical = 8.dp),
+                        .padding(top = 8.dp),
                     replyToUsername = replyToAuthorHandle,
                 )
             }
@@ -349,6 +402,7 @@ fun ReplyToBottomBar(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp)
+                    .padding(top = 8.dp)
                     .imePadding(),
                 value = replyTextProvider(),
                 onValueChange = { onReplyUpdated(it) },

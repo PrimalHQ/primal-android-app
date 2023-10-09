@@ -15,6 +15,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -25,9 +26,11 @@ import net.primal.android.theme.PrimalTheme
 @Composable
 fun CardWithHighlight(
     modifier: Modifier = Modifier,
+    shape: Shape = CardDefaults.shape,
     highlighted: Boolean = false,
     highlightWidth: Dp = 8.dp,
-    connected: Boolean = false,
+    connectedToPreviousNote: Boolean = false,
+    connectedToNextNote: Boolean = false,
     connectionWidth: Dp = 2.dp,
     content: @Composable ColumnScope.() -> Unit,
 ) {
@@ -39,9 +42,10 @@ fun CardWithHighlight(
     )
 
     Card(
-        modifier = modifier.clip(CardDefaults.shape),
+        shape = shape,
+        modifier = modifier.clip(shape),
     ) {
-        if (highlighted || connected) {
+        if (highlighted || connectedToPreviousNote || connectedToNextNote) {
             Column(
                 modifier = Modifier.drawWithCache {
                     onDrawBehind {
@@ -57,11 +61,21 @@ fun CardWithHighlight(
 
                         val connectionX = 40.dp.toPx()
 
-                        if (connected) {
+                        if (connectedToNextNote) {
                             drawLine(
                                 color = outlineColor,
-                                start = Offset(x = connectionX, y = 80.dp.toPx()),
-                                end = Offset(x = connectionX, y = size.height - 16.dp.toPx()),
+                                start = Offset(x = connectionX, y = 16.dp.toPx()),
+                                end = Offset(x = connectionX, y = size.height),
+                                strokeWidth = connectionWidth.toPx(),
+                                cap = StrokeCap.Square
+                            )
+                        }
+
+                        if (connectedToPreviousNote) {
+                            drawLine(
+                                color = outlineColor,
+                                start = Offset(x = connectionX, y = 0f),
+                                end = Offset(x = connectionX, y = 16.dp.toPx()),
                                 strokeWidth = connectionWidth.toPx(),
                                 cap = StrokeCap.Square
                             )

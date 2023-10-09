@@ -1,6 +1,7 @@
 package net.primal.android.core.compose
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -22,40 +23,49 @@ import net.primal.android.theme.AppTheme
 fun PrimalTopAppBar(
     title: String,
     onNavigationIconClick: () -> Unit,
+    modifier: Modifier = Modifier,
     navigationIcon: ImageVector? = null,
     avatarUrl: String? = null,
     actions: @Composable RowScope.() -> Unit = {},
+    showDivider: Boolean = false,
     scrollBehavior: TopAppBarScrollBehavior? = null,
 ) {
-    CenterAlignedTopAppBar(
-        navigationIcon = {
-            if (avatarUrl != null) {
-                Box(
-                    modifier = Modifier
-                        .padding(horizontal = 8.dp)
-                        .clip(CircleShape)
-                ) {
-                    AvatarThumbnailListItemImage(
-                        source = avatarUrl,
-                        modifier = Modifier.size(32.dp),
+    Column {
+        CenterAlignedTopAppBar(
+            modifier = modifier,
+            navigationIcon = {
+                if (avatarUrl != null) {
+                    Box(
+                        modifier = Modifier
+                            .padding(horizontal = 8.dp)
+                            .clip(CircleShape)
+                    ) {
+                        AvatarThumbnailListItemImage(
+                            source = avatarUrl,
+                            modifier = Modifier.size(32.dp),
+                            onClick = onNavigationIconClick,
+                        )
+                    }
+                } else if (navigationIcon != null) {
+                    AppBarIcon(
+                        icon = navigationIcon,
                         onClick = onNavigationIconClick,
                     )
                 }
-            } else if (navigationIcon != null) {
-                AppBarIcon(
-                    icon = navigationIcon,
-                    onClick = onNavigationIconClick,
-                )
-            }
-        },
-        title = {
-            Text(text = title)
-        },
-        actions = actions,
-        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-            containerColor = AppTheme.colorScheme.surface,
-            scrolledContainerColor = AppTheme.colorScheme.surface,
-        ),
-        scrollBehavior = scrollBehavior,
-    )
+            },
+            title = {
+                Text(text = title)
+            },
+            actions = actions,
+            colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                containerColor = AppTheme.colorScheme.surface,
+                scrolledContainerColor = AppTheme.colorScheme.surface,
+            ),
+            scrollBehavior = scrollBehavior,
+        )
+
+        if (showDivider) {
+            PrimalDivider()
+        }
+    }
 }

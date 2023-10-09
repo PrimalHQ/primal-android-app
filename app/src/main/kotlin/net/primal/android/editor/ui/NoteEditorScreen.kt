@@ -141,6 +141,7 @@ fun NoteEditorScreen(
                 title = "",
                 navigationIcon = Icons.Outlined.Close,
                 onNavigationIconClick = onClose,
+                showDivider = true,
                 actions = {
                     val text = when {
                         state.publishing -> if (state.isReply) {
