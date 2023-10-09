@@ -82,6 +82,7 @@ fun NotificationsScreen(
     viewModel: NotificationsViewModel,
     onProfileClick: (String) -> Unit,
     onNoteClick: (String) -> Unit,
+    onNoteReplyClick: (String) -> Unit,
     onPostQuoteClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
     onNotificationSettings: () -> Unit,
@@ -102,6 +103,7 @@ fun NotificationsScreen(
         state = uiState.value,
         onProfileClick = onProfileClick,
         onNoteClick = onNoteClick,
+        onNoteReplyClick = onNoteReplyClick,
         onHashtagClick = onHashtagClick,
         onNotificationSettings = onNotificationSettings,
         onPrimaryDestinationChanged = onTopLevelDestinationChanged,
@@ -118,6 +120,7 @@ fun NotificationsScreen(
     state: NotificationsContract.UiState,
     onProfileClick: (String) -> Unit,
     onNoteClick: (String) -> Unit,
+    onNoteReplyClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
     onWalletUnavailable: () -> Unit,
     onPostQuoteClick: (String) -> Unit,
@@ -186,6 +189,7 @@ fun NotificationsScreen(
                 onNoteClick = onNoteClick,
                 onHashtagClick = onHashtagClick,
                 onWalletUnavailable = onWalletUnavailable,
+                onNoteReplyClick = onNoteReplyClick,
                 onPostLikeClick = {
                     eventPublisher(
                         NotificationsContract.UiEvent.PostLikeAction(
@@ -235,6 +239,7 @@ private fun NotificationsList(
     paddingValues: PaddingValues,
     onProfileClick: (String) -> Unit,
     onNoteClick: (String) -> Unit,
+    onNoteReplyClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
     onWalletUnavailable: () -> Unit,
     onPostLikeClick: (FeedPostUi) -> Unit,
@@ -316,7 +321,7 @@ private fun NotificationsList(
                             walletConnected = state.walletConnected,
                             onProfileClick = onProfileClick,
                             onNoteClick = onNoteClick,
-                            onReplyClick = onNoteClick,
+                            onReplyClick = onNoteReplyClick,
                             onHashtagClick = onHashtagClick,
                             onPostLikeClick = onPostLikeClick,
                             onDefaultZapClick = { postData -> onZapClick(postData, null, null) },

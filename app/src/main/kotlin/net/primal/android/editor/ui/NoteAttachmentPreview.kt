@@ -1,4 +1,4 @@
-package net.primal.android.core.compose.editor
+package net.primal.android.editor.ui
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -13,7 +13,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import coil.compose.SubcomposeAsyncImage
 import net.primal.android.core.compose.PrimalLoadingSpinner
-import net.primal.android.feed.domain.NoteAttachment
+import net.primal.android.editor.domain.NoteAttachment
 import net.primal.android.theme.AppTheme
 import java.util.UUID
 

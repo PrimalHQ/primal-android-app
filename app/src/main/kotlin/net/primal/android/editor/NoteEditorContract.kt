@@ -1,19 +1,24 @@
-package net.primal.android.discuss.post
+package net.primal.android.editor
 
 import android.net.Uri
-import net.primal.android.feed.domain.NoteAttachment
+import net.primal.android.core.compose.feed.model.FeedPostUi
+import net.primal.android.editor.domain.NoteAttachment
 import java.util.UUID
 
-interface NewPostContract {
+interface NoteEditorContract {
 
     data class UiState(
+        val conversation: List<FeedPostUi> = emptyList(),
         val preFillContent: String? = null,
         val publishing: Boolean = false,
-        val uploadingAttachments: Boolean = false,
         val error: NewPostError? = null,
         val activeAccountAvatarUrl: String? = null,
+        val uploadingAttachments: Boolean = false,
         val attachments: List<NoteAttachment> = emptyList(),
     ) {
+        val isReply: Boolean get() = conversation.isNotEmpty()
+        val replyToNote: FeedPostUi? = conversation.lastOrNull()
+
         sealed class NewPostError {
             data class PublishError(val cause: Throwable?) : NewPostError()
             data class MissingRelaysConfiguration(val cause: Throwable) : NewPostError()

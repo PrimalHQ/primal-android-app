@@ -22,12 +22,6 @@ import net.primal.android.navigation.postId
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
-import net.primal.android.nostr.ext.asEventIdTag
-import net.primal.android.nostr.ext.asPubkeyTag
-import net.primal.android.nostr.ext.isPubKeyTag
-import net.primal.android.nostr.ext.parseEventTags
-import net.primal.android.nostr.ext.parseHashtagTags
-import net.primal.android.nostr.ext.parsePubkeyTags
 import net.primal.android.thread.ThreadContract.UiEvent
 import net.primal.android.thread.ThreadContract.UiState.ThreadError
 import net.primal.android.user.accounts.active.ActiveAccountStore
@@ -49,7 +43,7 @@ class ThreadViewModel @Inject constructor(
 
     private val postId = savedStateHandle.postId
 
-    private val _state = MutableStateFlow(ThreadContract.UiState())
+    private val _state = MutableStateFlow(ThreadContract.UiState(highlightPostId = postId))
     val state = _state.asStateFlow()
     private fun setState(reducer: ThreadContract.UiState.() -> ThreadContract.UiState) {
         _state.getAndUpdate { it.reducer() }
@@ -64,7 +58,6 @@ class ThreadViewModel @Inject constructor(
         observeEvents()
         observeConversation()
         observeActiveAccount()
-        fetchRepliesFromNetwork()
     }
 
     private fun observeEvents() = viewModelScope.launch {
@@ -75,6 +68,7 @@ class ThreadViewModel @Inject constructor(
                 is UiEvent.ReplyToAction -> publishReply(it)
                 is UiEvent.UpdateReply -> updateReply(it)
                 is UiEvent.ZapAction -> zapPost(it)
+                UiEvent.UpdateConversation -> fetchRepliesFromNetwork()
             }
         }
     }
@@ -201,31 +195,15 @@ class ThreadViewModel @Inject constructor(
     private fun publishReply(replyToAction: UiEvent.ReplyToAction) = viewModelScope.launch {
         setState { copy(publishingReply = true) }
         try {
-            val content = state.value.replyText
-
-            val replyPostData = withContext(Dispatchers.IO) {
-                postRepository.findPostDataById(postId = replyToAction.replyToPostId)
-            }
-            val existingPubkeyTags =
-                replyPostData?.tags?.filter { it.isPubKeyTag() }?.toSet() ?: setOf()
-            val replyAuthorPubkeyTag = replyToAction.replyToAuthorId.asPubkeyTag()
-            val mentionedPubkeyTags = content.parsePubkeyTags(marker = "mention").toSet()
-            val pubkeyTags = existingPubkeyTags + setOf(replyAuthorPubkeyTag) + mentionedPubkeyTags
-
-            val rootEventTag = replyToAction.rootPostId.asEventIdTag(marker = "root")
-            val replyEventTag = if (replyToAction.rootPostId != replyToAction.replyToPostId) {
-                replyToAction.replyToPostId.asEventIdTag(marker = "reply")
-            } else null
-            val mentionEventTags = content.parseEventTags(marker = "mention")
-            val eventTags = setOfNotNull(rootEventTag, replyEventTag) + mentionEventTags
-
-            val hashtagTags = content.parseHashtagTags().toSet()
-
-            val imported = postRepository.publishShortTextNote(
-                content = content,
-                tags = pubkeyTags + eventTags + hashtagTags,
+            val publishedAndImported = postRepository.publishShortTextNote(
+                content = state.value.replyText,
+                attachments = emptyList(),
+                rootPostId = replyToAction.rootPostId,
+                replyToPostId = replyToAction.replyToPostId,
+                replyToAuthorId = replyToAction.replyToAuthorId,
             )
-            if (imported) {
+
+            if (publishedAndImported) {
                 fetchRepliesFromNetwork()
             } else {
                 scheduleFetchReplies()

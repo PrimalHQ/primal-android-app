@@ -1,4 +1,4 @@
-package net.primal.android.discuss.post
+package net.primal.android.editor
 
 import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
@@ -10,22 +10,27 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.getAndUpdate
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import net.primal.android.core.compose.feed.asFeedPostUi
+import net.primal.android.core.files.FileAnalyser
 import net.primal.android.core.files.error.UnsuccessfulFileUpload
-import net.primal.android.discuss.post.NewPostContract.SideEffect
-import net.primal.android.discuss.post.NewPostContract.UiEvent
-import net.primal.android.discuss.post.NewPostContract.UiState
-import net.primal.android.feed.domain.NoteAttachment
+import net.primal.android.editor.NoteEditorContract.SideEffect
+import net.primal.android.editor.NoteEditorContract.UiEvent
+import net.primal.android.editor.NoteEditorContract.UiState
+import net.primal.android.editor.domain.NoteAttachment
+import net.primal.android.feed.repository.FeedRepository
 import net.primal.android.feed.repository.PostRepository
 import net.primal.android.navigation.newPostPreFillContent
+import net.primal.android.navigation.newPostPreFillFileUri
+import net.primal.android.navigation.replyToNoteId
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
-import net.primal.android.nostr.ext.parseEventTags
-import net.primal.android.nostr.ext.parseHashtagTags
-import net.primal.android.nostr.ext.parsePubkeyTags
+import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
 import java.util.UUID
@@ -33,14 +38,19 @@ import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
 
 @HiltViewModel
-class NewPostViewModel @Inject constructor(
+class NoteEditorViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
+    private val fileAnalyser: FileAnalyser,
     private val activeAccountStore: ActiveAccountStore,
+    private val feedRepository: FeedRepository,
     private val postRepository: PostRepository,
 ) : ViewModel() {
 
-    private val _state =
-        MutableStateFlow(UiState(preFillContent = savedStateHandle.newPostPreFillContent))
+    private val argReplyToNoteId = savedStateHandle.replyToNoteId
+    private val argPreFillFileUri = savedStateHandle.newPostPreFillFileUri?.let { Uri.parse(it) }
+    private val argPreFillContent = savedStateHandle.newPostPreFillContent
+
+    private val _state = MutableStateFlow(UiState(preFillContent = argPreFillContent))
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
 
@@ -54,6 +64,15 @@ class NewPostViewModel @Inject constructor(
     init {
         subscribeToEvents()
         subscribeToActiveAccount()
+
+        if (argReplyToNoteId != null) {
+            fetchRepliesFromNetwork(argReplyToNoteId)
+            observeConversation(argReplyToNoteId)
+        }
+
+        if (argPreFillFileUri != null) {
+            importPhotos(listOf(argPreFillFileUri))
+        }
     }
 
     private fun subscribeToEvents() = viewModelScope.launch {
@@ -77,31 +96,40 @@ class NewPostViewModel @Inject constructor(
             }
     }
 
+    private fun observeConversation(replyToNoteId: String) = viewModelScope.launch {
+        feedRepository.observeConversation(postId = replyToNoteId)
+            .filter { it.isNotEmpty() }
+            .map { posts -> posts.map { it.asFeedPostUi() } }
+            .collect { conversation ->
+                val replyToNoteIndex = conversation.indexOfFirst { it.postId == replyToNoteId }
+                val thread = conversation.subList(0, replyToNoteIndex + 1)
+                setState {
+                    copy(
+                        conversation = thread,
+                    )
+                }
+            }
+    }
+
+    private fun fetchRepliesFromNetwork(replyToNoteId: String) = viewModelScope.launch {
+        try {
+            feedRepository.fetchReplies(postId = replyToNoteId)
+        } catch (error: WssException) {
+            // Ignore
+        }
+    }
+
     private fun publishPost(event: UiEvent.PublishPost) = viewModelScope.launch {
         setState { copy(publishing = true) }
         try {
-            val mentionEventTags = event.content.parseEventTags(marker = "mention").toSet()
-            val mentionPubkeyTags = event.content.parsePubkeyTags(marker = "mention").toSet()
-            val hashtagTags = event.content.parseHashtagTags().toSet()
-
-            val attachments = _state.value.attachments.mapNotNull { it.remoteUrl }
-            val refinedContent = if (attachments.isEmpty()) {
-                event.content
-            } else {
-                StringBuilder().apply {
-                    append(event.content)
-                    appendLine()
-                    appendLine()
-                    attachments.forEach {
-                        append(it)
-                        appendLine()
-                    }
-                }.toString()
-            }
-
+            val rootPost = _state.value.conversation.firstOrNull()
+            val replyToPost = _state.value.conversation.lastOrNull()
             postRepository.publishShortTextNote(
-                content = refinedContent,
-                tags = mentionEventTags + mentionPubkeyTags + hashtagTags,
+                content =  event.content,
+                attachments = _state.value.attachments,
+                rootPostId = rootPost?.postId,
+                replyToPostId = replyToPost?.postId,
+                replyToAuthorId = replyToPost?.authorId,
             )
             sendEffect(SideEffect.PostPublished)
         } catch (error: NostrPublishException) {
@@ -128,8 +156,19 @@ class NewPostViewModel @Inject constructor(
         try {
             setState { copy(uploadingAttachments = true) }
             updateNoteAttachmentState(attachment = attachment.copy(uploadError = null))
+
             val remoteUrl = postRepository.uploadPostAttachment(attachment)
             updateNoteAttachmentState(attachment = attachment.copy(remoteUrl = remoteUrl))
+
+            if (attachment.isImageAttachment) {
+                val (mimeType, dimensions) = fileAnalyser.extractImageTypeAndDimensions(attachment.localUri)
+                updateNoteAttachmentState(
+                    attachment = attachment.copy(
+                        mimeType = mimeType,
+                        otherRelevantInfo = dimensions,
+                    )
+                )
+            }
         } catch (error: UnsuccessfulFileUpload) {
             updateNoteAttachmentState(attachment = attachment.copy(uploadError = error))
         }

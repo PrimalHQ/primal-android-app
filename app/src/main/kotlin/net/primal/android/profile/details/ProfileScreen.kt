@@ -123,6 +123,7 @@ fun ProfileScreen(
     viewModel: ProfileViewModel,
     onClose: () -> Unit,
     onPostClick: (String) -> Unit,
+    onPostReplyClick: (String) -> Unit,
     onPostQuoteClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
     onEditProfileClick: () -> Unit,
@@ -137,6 +138,7 @@ fun ProfileScreen(
         state = uiState.value,
         onClose = onClose,
         onPostClick = onPostClick,
+        onPostReplyClick = onPostReplyClick,
         onPostQuoteClick = onPostQuoteClick,
         onProfileClick = onProfileClick,
         onEditProfileClick = onEditProfileClick,
@@ -165,6 +167,7 @@ fun ProfileScreen(
     state: ProfileContract.UiState,
     onClose: () -> Unit,
     onPostClick: (String) -> Unit,
+    onPostReplyClick: (String) -> Unit,
     onPostQuoteClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
     onEditProfileClick: () -> Unit,
@@ -249,9 +252,7 @@ fun ProfileScreen(
                         onProfileClick(it)
                     }
                 },
-                onPostReplyClick = {
-                    onPostClick(it)
-                },
+                onPostReplyClick = onPostReplyClick,
                 onZapClick = { post, zapAmount, zapDescription ->
                     eventPublisher(
                         ProfileContract.UiEvent.ZapAction(
@@ -927,6 +928,7 @@ fun PreviewProfileScreen() {
             ),
             onClose = {},
             onPostClick = {},
+            onPostReplyClick = {},
             onPostQuoteClick = {},
             onProfileClick = {},
             onEditProfileClick = {},

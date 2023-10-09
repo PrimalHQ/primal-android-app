@@ -106,11 +106,13 @@
     <string name="post_repost_button_confirmation">Repost</string>
     <string name="post_quote_button_confirmation">Quote</string>
 
-    <string name="new_post_publish_button">Post</string>
-    <string name="new_post_publishing_button">Posting…</string>
-    <string name="new_post_uploading_attachments">Uploading…</string>
-    <string name="new_post_content_placeholder">Type your post here…</string>
-    <string name="new_post_nostr_publish_error">Unable to publish your note to Nostr. Please try again soon.</string>
+    <string name="note_editor_post_publish_button">Post</string>
+    <string name="note_editor_reply_publish_button">Reply</string>
+    <string name="note_editor_post_publishing_button">Posting…</string>
+    <string name="note_editor_reply_publishing_button">Replying…</string>
+    <string name="note_editor_uploading_attachments">Uploading…</string>
+    <string name="note_editor_content_placeholder">Type your post here…</string>
+    <string name="note_editor_nostr_publish_error">Unable to publish your note to Nostr. Please try again soon.</string>
 
     <string name="post_action_missing_lightning_address">Unable to zap this user since they don\'t have a lightning address set up.</string>
     <string name="post_action_invalid_zap_request">Unable to zap. Check your wallet connection and try again.</string>

@@ -6,6 +6,7 @@ import kotlinx.serialization.json.add
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.jsonPrimitive
 import net.primal.android.core.utils.parseHashtags
+import net.primal.android.editor.domain.NoteAttachment
 import net.primal.android.wallet.model.ZapTarget
 
 fun List<JsonArray>.findPostId(): String? {
@@ -55,6 +56,12 @@ fun String.asPubkeyTag(recommendedRelay: String? = null): JsonArray =
 fun String.asIdentifierTag(): JsonArray = buildJsonArray {
     add("d")
     add(this@asIdentifierTag)
+}
+
+fun NoteAttachment.asImageTag(): JsonArray = buildJsonArray {
+    add("image")
+    add(this@asImageTag.remoteUrl)
+    if (this@asImageTag.otherRelevantInfo != null) add(this@asImageTag.otherRelevantInfo)
 }
 
 fun String.parseEventTags(marker: String? = null): List<JsonArray> {

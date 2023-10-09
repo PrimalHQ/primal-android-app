@@ -1,16 +1,18 @@
 package net.primal.android.thread
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -18,7 +20,11 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.OpenInFull
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
@@ -31,27 +37,25 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
 import net.primal.android.R
+import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.feed.FeedPostListItem
@@ -60,9 +64,13 @@ import net.primal.android.core.compose.feed.ZapBottomSheet
 import net.primal.android.core.compose.feed.model.FeedPostAction
 import net.primal.android.core.compose.feed.model.FeedPostStatsUi
 import net.primal.android.core.compose.feed.model.FeedPostUi
+import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
+import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromGallery
+import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.crypto.hexToNoteHrp
+import net.primal.android.editor.ui.ReplyingToText
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.thread.ThreadContract.UiState.ThreadError
@@ -73,22 +81,33 @@ fun ThreadScreen(
     viewModel: ThreadViewModel,
     onClose: () -> Unit,
     onPostClick: (String) -> Unit,
+    onPostReplyClick: (String) -> Unit,
     onPostQuoteClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
     onWalletUnavailable: () -> Unit,
+    onReplyInNoteEditor: (String, Uri?, String) -> Unit,
 ) {
 
     val uiState = viewModel.state.collectAsState()
+
+    DisposableLifecycleObserverEffect {
+        when (it) {
+            Lifecycle.Event.ON_START -> viewModel.setEvent(ThreadContract.UiEvent.UpdateConversation)
+            else -> Unit
+        }
+    }
 
     ThreadScreen(
         state = uiState.value,
         onClose = onClose,
         onPostClick = onPostClick,
+        onPostReplyClick = onPostReplyClick,
         onPostQuoteClick = onPostQuoteClick,
         onProfileClick = onProfileClick,
         onHashtagClick = onHashtagClick,
         onWalletUnavailable = onWalletUnavailable,
+        onReplyInNoteEditor = onReplyInNoteEditor,
         eventPublisher = { viewModel.setEvent(it) }
     )
 }
@@ -99,10 +118,12 @@ fun ThreadScreen(
     state: ThreadContract.UiState,
     onClose: () -> Unit,
     onPostClick: (String) -> Unit,
+    onPostReplyClick: (String) -> Unit,
     onPostQuoteClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
     onWalletUnavailable: () -> Unit,
+    onReplyInNoteEditor: (String, Uri?, String) -> Unit,
     eventPublisher: (ThreadContract.UiEvent) -> Unit,
 ) {
     val topAppBarState = rememberTopAppBarState()
@@ -198,11 +219,8 @@ fun ThreadScreen(
                             onProfileClick = { profileId -> onProfileClick(profileId) },
                             onPostAction = {
                                 when (it) {
-                                    FeedPostAction.Reply -> {
-                                        if (state.highlightPostId != item.postId) {
-                                            onPostClick(item.postId)
-                                        }
-                                    }
+                                    FeedPostAction.Reply -> onPostReplyClick(item.postId)
+
                                     FeedPostAction.Zap -> {
                                         if (state.walletConnected) {
                                             eventPublisher(
@@ -218,6 +236,7 @@ fun ThreadScreen(
                                             onWalletUnavailable()
                                         }
                                     }
+
                                     FeedPostAction.Like -> {
                                         eventPublisher(
                                             ThreadContract.UiEvent.PostLikeAction(
@@ -226,6 +245,7 @@ fun ThreadScreen(
                                             )
                                         )
                                     }
+
                                     FeedPostAction.Repost -> {
                                         repostQuotePostConfirmation = item
                                     }
@@ -240,6 +260,7 @@ fun ThreadScreen(
                                             onWalletUnavailable()
                                         }
                                     }
+
                                     else -> Unit
                                 }
                             },
@@ -265,7 +286,7 @@ fun ThreadScreen(
                     replyToAuthorName = replyToPost.authorName,
                     replyToAuthorHandle = replyToPost.authorHandle,
                     replyTextProvider = { state.replyText },
-                    onReplyClick = {
+                    onPublishReplyClick = {
                         eventPublisher(
                             ThreadContract.UiEvent.ReplyToAction(
                                 rootPostId = rootPost.postId,
@@ -276,6 +297,12 @@ fun ThreadScreen(
                     },
                     onReplyUpdated = { content ->
                         eventPublisher(ThreadContract.UiEvent.UpdateReply(newReply = content))
+                    },
+                    onPhotoImported = { photoUri ->
+                        onReplyInNoteEditor(state.highlightPostId, photoUri, state.replyText)
+                    },
+                    onExpand = {
+                        onReplyInNoteEditor(state.highlightPostId, null, state.replyText)
                     }
                 )
             }
@@ -290,8 +317,10 @@ fun ReplyToBottomBar(
     replyToAuthorName: String,
     replyToAuthorHandle: String,
     replyTextProvider: () -> String,
-    onReplyClick: () -> Unit,
+    onPublishReplyClick: () -> Unit,
     onReplyUpdated: (String) -> Unit,
+    onPhotoImported: (Uri) -> Unit,
+    onExpand: () -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val isKeyboardVisible by keyboardVisibilityAsState()
@@ -308,32 +337,18 @@ fun ReplyToBottomBar(
             modifier = Modifier.fillMaxWidth(),
         ) {
             AnimatedVisibility(visible = isKeyboardVisible) {
-                val mention = "@$replyToAuthorHandle"
-                val text = stringResource(id = R.string.thread_replying_to, mention)
-                val contentText = buildAnnotatedString {
-                    append(text)
-                    addStyle(
-                        style = SpanStyle(
-                            color = AppTheme.colorScheme.primary,
-                        ),
-                        start = text.indexOf(mention),
-                        end = text.length,
-                    )
-                }
-
-                Text(
+                ReplyingToText(
                     modifier = Modifier
                         .padding(horizontal = 16.dp)
-                        .padding(top = 8.dp),
-                    text = contentText,
-                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
+                        .padding(vertical = 8.dp),
+                    replyToUsername = replyToAuthorHandle,
                 )
             }
 
             OutlinedTextField(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .padding(horizontal = 16.dp)
                     .imePadding(),
                 value = replyTextProvider(),
                 onValueChange = { onReplyUpdated(it) },
@@ -350,10 +365,24 @@ fun ReplyToBottomBar(
                                 id = R.string.thread_reply_to,
                                 replyToAuthorName
                             ),
+                            maxLines = 1,
                             color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
                         )
                     }
                 },
+                trailingIcon = {
+                    AnimatedVisibility(visible = isKeyboardVisible) {
+                        AppBarIcon(
+                            icon = Icons.Outlined.OpenInFull,
+                            onClick = {
+                                onExpand()
+                                keyboardController?.hide()
+                            },
+                            tint = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                        )
+                    }
+                },
+                textStyle = AppTheme.typography.bodyMedium,
                 colors = OutlinedTextFieldDefaults.colors(
                     unfocusedContainerColor = unfocusedColor,
                     focusedContainerColor = if (isKeyboardVisible) focusedColor else unfocusedColor,
@@ -364,14 +393,39 @@ fun ReplyToBottomBar(
                 ),
             )
 
+            val photoImportLauncher = rememberLauncherForActivityResult(
+                ActivityResultContracts.PickVisualMedia()
+            ) { uri -> if (uri != null) onPhotoImported.invoke(uri) }
+
             AnimatedVisibility(visible = isKeyboardVisible) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
-                        .padding(top = 8.dp, bottom = 16.dp),
-                    horizontalArrangement = Arrangement.End,
+                        .padding(start = 0.dp, end = 16.dp)
+                        .padding(top = 0.dp, bottom = 4.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                    ) {
+                        IconButton(
+                            onClick = {
+                                photoImportLauncher.launch(
+                                    PickVisualMediaRequest(
+                                        ActivityResultContracts.PickVisualMedia.ImageOnly
+                                    )
+                                )
+                            },
+                        ) {
+                            Icon(
+                                imageVector = PrimalIcons.ImportPhotoFromGallery,
+                                contentDescription = null,
+                                tint = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                            )
+                        }
+                    }
+
                     PrimalLoadingButton(
                         modifier = Modifier
                             .wrapContentWidth()
@@ -384,7 +438,7 @@ fun ReplyToBottomBar(
                         enabled = !publishingReply,
                         fontSize = 16.sp,
                         onClick = {
-                            onReplyClick()
+                            onPublishReplyClick()
                             keyboardController?.hide()
                         },
                     )
@@ -392,15 +446,6 @@ fun ReplyToBottomBar(
             }
         }
     }
-}
-
-@Composable
-fun keyboardVisibilityAsState(): State<Boolean> {
-    val density = LocalDensity.current
-    val imeBottom = WindowInsets.ime.getBottom(density)
-    val minKeyboardVisibility = with(density) { 128.dp.toPx() }
-    val isImeVisible = imeBottom > minKeyboardVisibility
-    return rememberUpdatedState(isImeVisible)
 }
 
 @Composable
@@ -435,6 +480,7 @@ fun ThreadScreenPreview() {
     PrimalTheme(primalTheme = PrimalTheme.Sunset) {
         ThreadScreen(
             state = ThreadContract.UiState(
+                highlightPostId = "",
                 conversation = listOf(
                     FeedPostUi(
                         postId = "random",
@@ -472,10 +518,12 @@ fun ThreadScreenPreview() {
             ),
             onClose = {},
             onPostClick = {},
+            onPostReplyClick = {},
             onPostQuoteClick = {},
             onProfileClick = {},
             onHashtagClick = {},
             onWalletUnavailable = {},
+            onReplyInNoteEditor = { _, _, _ -> },
             eventPublisher = {},
         )
     }

@@ -37,6 +37,7 @@ fun ExploreFeedScreen(
     viewModel: ExploreFeedViewModel,
     onClose: () -> Unit,
     onPostClick: (String) -> Unit,
+    onPostReplyClick: (String) -> Unit,
     onPostQuoteClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
@@ -48,6 +49,7 @@ fun ExploreFeedScreen(
         state = uiState.value,
         onClose = onClose,
         onPostClick = onPostClick,
+        onPostReplyClick = onPostReplyClick,
         onProfileClick = onProfileClick,
         onPostQuoteClick = onPostQuoteClick,
         onHashtagClick = onHashtagClick,
@@ -62,6 +64,7 @@ fun ExploreFeedScreen(
     state: ExploreFeedContract.UiState,
     onClose: () -> Unit,
     onPostClick: (String) -> Unit,
+    onPostReplyClick: (String) -> Unit,
     onPostQuoteClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
@@ -130,9 +133,7 @@ fun ExploreFeedScreen(
                 paddingValues = paddingValues,
                 onPostClick = onPostClick,
                 onProfileClick = onProfileClick,
-                onPostReplyClick = {
-                    onPostClick(it)
-                },
+                onPostReplyClick = onPostReplyClick,
                 onZapClick = { post, zapAmount, zapDescription ->
                     eventPublisher(
                         ExploreFeedContract.UiEvent.ZapAction(

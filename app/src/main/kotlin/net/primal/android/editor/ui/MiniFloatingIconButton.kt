@@ -1,4 +1,4 @@
-package net.primal.android.core.compose.editor
+package net.primal.android.editor.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable

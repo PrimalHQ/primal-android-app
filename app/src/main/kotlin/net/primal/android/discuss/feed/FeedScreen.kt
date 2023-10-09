@@ -59,6 +59,7 @@ fun FeedScreen(
     onFeedsClick: () -> Unit,
     onNewPostClick: (String?) -> Unit,
     onPostClick: (String) -> Unit,
+    onPostReplyClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
     onWalletUnavailable: () -> Unit,
@@ -77,6 +78,7 @@ fun FeedScreen(
         onFeedsClick = onFeedsClick,
         onNewPostClick = onNewPostClick,
         onPostClick = onPostClick,
+        onPostReplyClick = onPostReplyClick,
         onProfileClick = onProfileClick,
         onHashtagClick = onHashtagClick,
         onWalletUnavailable = onWalletUnavailable,
@@ -93,6 +95,7 @@ fun FeedScreen(
     onFeedsClick: () -> Unit,
     onNewPostClick: (String?) -> Unit,
     onPostClick: (String) -> Unit,
+    onPostReplyClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
     onWalletUnavailable: () -> Unit,
@@ -150,9 +153,7 @@ fun FeedScreen(
                 walletConnected = state.walletConnected,
                 onPostClick = onPostClick,
                 onProfileClick = onProfileClick,
-                onPostReplyClick = {
-                    onPostClick(it)
-                },
+                onPostReplyClick = onPostReplyClick,
                 onZapClick = { post, zapAmount, zapDescription ->
                     eventPublisher(FeedContract.UiEvent.ZapAction(
                         postId = post.postId,
@@ -263,6 +264,7 @@ fun FeedScreenPreview() {
             onFeedsClick = {},
             onNewPostClick = {},
             onPostClick = {},
+            onPostReplyClick = {},
             onProfileClick = {},
             onHashtagClick = {},
             onWalletUnavailable = {},
