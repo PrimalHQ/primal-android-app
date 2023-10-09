@@ -1,5 +1,6 @@
 package net.primal.android.messages.list
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -25,6 +26,7 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.PrimalDrawerScaffold
+import net.primal.android.theme.AppTheme
 
 @Composable
 fun MessageListScreen(
@@ -74,6 +76,7 @@ fun MessageListScreen(
         content = { paddingValues ->
             Box(
                 modifier = Modifier
+                    .background(color = AppTheme.colorScheme.surfaceVariant)
                     .padding(paddingValues)
                     .fillMaxSize(),
                 contentAlignment = Alignment.Center,

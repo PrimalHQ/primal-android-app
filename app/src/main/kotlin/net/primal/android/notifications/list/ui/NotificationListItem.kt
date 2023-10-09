@@ -1,6 +1,7 @@
 package net.primal.android.notifications.list.ui
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -82,6 +83,7 @@ fun NotificationListItem(
                     NotificationType.YOUR_POST_WAS_ZAPPED -> postTotalSatsZapped?.shortened()
                     else -> activeUsersTotalSatsZapped?.shortened()
                 }
+
                 else -> postTotalSatsZapped?.shortened()
             }
         ),
@@ -143,20 +145,24 @@ private fun NotificationListItem(
     val firstNotification = notifications.first()
 
     Row(
-        modifier = Modifier.clickable(
-            enabled = notifications.size == 1 || firstNotification.actionPost != null,
-            onClick = {
-                when (notifications.size) {
-                    1 -> when (firstNotification.notificationType) {
-                        NotificationType.NEW_USER_FOLLOWED_YOU -> {
-                            firstNotification.actionUserId?.let(onProfileClick)
+        modifier = Modifier
+            .background(color = AppTheme.colorScheme.surfaceVariant)
+            .clickable(
+                enabled = notifications.size == 1 || firstNotification.actionPost != null,
+                onClick = {
+                    when (notifications.size) {
+                        1 -> when (firstNotification.notificationType) {
+                            NotificationType.NEW_USER_FOLLOWED_YOU -> {
+                                firstNotification.actionUserId?.let(onProfileClick)
+                            }
+
+                            else -> firstNotification.actionPost?.postId?.let(onPostClick)
                         }
+
                         else -> firstNotification.actionPost?.postId?.let(onPostClick)
                     }
-                    else -> firstNotification.actionPost?.postId?.let(onPostClick)
-                }
-            },
-        ),
+                },
+            ),
     ) {
         Box(
             modifier = Modifier.padding(all = 16.dp),
@@ -165,13 +171,17 @@ private fun NotificationListItem(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Image(
-                    modifier = Modifier.padding(top = 2.dp).size(28.dp),
+                    modifier = Modifier
+                        .padding(top = 2.dp)
+                        .size(28.dp),
                     painter = imagePainter,
                     contentDescription = null,
                 )
 
                 val extraStat = when (firstNotification.notificationType) {
-                    NotificationType.YOUR_POST_WAS_ZAPPED -> notifications.mapNotNull { it.actionUserSatsZapped }.sum()
+                    NotificationType.YOUR_POST_WAS_ZAPPED -> notifications.mapNotNull { it.actionUserSatsZapped }
+                        .sum()
+
                     NotificationType.YOUR_POST_WAS_LIKED -> firstNotification.actionPost?.stats?.likesCount
                     NotificationType.YOUR_POST_WAS_REPOSTED -> firstNotification.actionPost?.stats?.repostsCount
                     NotificationType.YOUR_POST_WAS_REPLIED_TO -> firstNotification.actionPost?.stats?.repliesCount

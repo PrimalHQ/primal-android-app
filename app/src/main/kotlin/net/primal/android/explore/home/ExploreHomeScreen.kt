@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.RowScope
@@ -44,6 +45,7 @@ import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.AvatarThumbnailListItemImage
 import net.primal.android.core.compose.IconText
+import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.PrimalDrawerScaffold
@@ -113,6 +115,7 @@ fun ExploreHomeScreen(
                 ) {
                     FlowRow(
                         modifier = Modifier
+                            .background(color = AppTheme.colorScheme.surfaceVariant)
                             .wrapContentWidth()
                             .fillMaxWidth(),
                         horizontalArrangement = Arrangement.Center,
@@ -158,28 +161,32 @@ fun ExploreTopAppBar(
     actions: @Composable RowScope.() -> Unit = {},
     scrollBehavior: TopAppBarScrollBehavior? = null,
 ) {
-    CenterAlignedTopAppBar(
-        navigationIcon = {
-            Box(
-                modifier = Modifier
-                    .padding(horizontal = 8.dp)
-                    .clip(CircleShape)
-            ) {
-                AvatarThumbnailListItemImage(
-                    source = avatarUrl,
-                    modifier = Modifier.size(32.dp),
-                    onClick = onNavigationIconClick,
-                )
-            }
-        },
-        title = title,
-        actions = actions,
-        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-            containerColor = AppTheme.colorScheme.surface,
-            scrolledContainerColor = AppTheme.colorScheme.surface,
-        ),
-        scrollBehavior = scrollBehavior,
-    )
+    Column {
+        CenterAlignedTopAppBar(
+            navigationIcon = {
+                Box(
+                    modifier = Modifier
+                        .padding(horizontal = 8.dp)
+                        .clip(CircleShape)
+                ) {
+                    AvatarThumbnailListItemImage(
+                        source = avatarUrl,
+                        modifier = Modifier.size(32.dp),
+                        onClick = onNavigationIconClick,
+                    )
+                }
+            },
+            title = title,
+            actions = actions,
+            colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                containerColor = AppTheme.colorScheme.surface,
+                scrolledContainerColor = AppTheme.colorScheme.surface,
+            ),
+            scrollBehavior = scrollBehavior,
+        )
+
+        PrimalDivider()
+    }
 }
 
 @Composable
