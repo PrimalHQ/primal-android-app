@@ -90,6 +90,7 @@ import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.ListLoading
 import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.NostrUserText
+import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.button.PrimalOutlinedButton
 import net.primal.android.core.compose.feed.FeedLazyColumn
@@ -646,6 +647,8 @@ private fun UserProfileDetails(
             followersCount = profileStats?.followersCount,
             notesCount = profileStats?.notesCount,
         )
+
+        PrimalDivider()
     }
 }
 
