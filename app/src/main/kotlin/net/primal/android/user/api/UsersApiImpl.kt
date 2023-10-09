@@ -20,6 +20,7 @@ import net.primal.android.user.api.model.UserContactsResponse
 import net.primal.android.user.api.model.UserProfileResponse
 import net.primal.android.user.api.model.UserRequestBody
 import net.primal.android.user.domain.Relay
+import timber.log.Timber
 import javax.inject.Inject
 
 class UsersApiImpl @Inject constructor(
@@ -102,6 +103,7 @@ class UsersApiImpl @Inject constructor(
 
             queryResult.filterNostrEvents(NostrEventKind.Metadata)
         } catch (error: WssException) {
+            Timber.e(error)
             emptyList()
         }
     }
