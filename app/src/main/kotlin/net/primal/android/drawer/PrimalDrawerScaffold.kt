@@ -1,5 +1,6 @@
 package net.primal.android.drawer
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -23,6 +24,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalNavigationBar
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.user.domain.Badges
@@ -38,6 +40,7 @@ fun PrimalDrawerScaffold(
     onPrimaryDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
     badges: Badges = Badges(),
+    showBottomBarDivider: Boolean = true,
     onActiveDestinationClick: () -> Unit = {},
     topBar: @Composable (TopAppBarScrollBehavior?) -> Unit = {},
     content: @Composable (PaddingValues) -> Unit = {},
@@ -85,7 +88,7 @@ fun PrimalDrawerScaffold(
                 topBar = { topBar(scrollBehavior) },
                 content = { paddingValues -> content(paddingValues) },
                 bottomBar = {
-                    PrimalNavigationBar(
+                    Column(
                         modifier = Modifier
                             .navigationBarsPadding()
                             .height(bottomBarHeight)
@@ -95,11 +98,18 @@ fun PrimalDrawerScaffold(
                                     y = -bottomBarOffsetHeightPx.floatValue.roundToInt()
                                 )
                             },
-                        activeDestination = activeDestination,
-                        onTopLevelDestinationChanged = onPrimaryDestinationChanged,
-                        onActiveDestinationClick = onActiveDestinationClick,
-                        badges = badges,
-                    )
+                    ) {
+                        if (showBottomBarDivider) {
+                            PrimalDivider()
+                        }
+
+                        PrimalNavigationBar(
+                            activeDestination = activeDestination,
+                            onTopLevelDestinationChanged = onPrimaryDestinationChanged,
+                            onActiveDestinationClick = onActiveDestinationClick,
+                            badges = badges,
+                        )
+                    }
                 },
                 floatingActionButton = floatingActionButton,
                 snackbarHost = snackbarHost,

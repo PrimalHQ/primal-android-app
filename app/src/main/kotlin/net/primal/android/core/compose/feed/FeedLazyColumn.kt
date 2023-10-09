@@ -1,7 +1,7 @@
 package net.primal.android.core.compose.feed
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,6 +16,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
@@ -26,6 +27,7 @@ import net.primal.android.R
 import net.primal.android.core.compose.ListLoading
 import net.primal.android.core.compose.ListLoadingError
 import net.primal.android.core.compose.ListNoContent
+import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.feed.model.FeedPostAction
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.isEmpty
@@ -80,7 +82,6 @@ fun FeedLazyColumn(
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = contentPadding,
-        verticalArrangement = Arrangement.spacedBy(4.dp),
         state = listState,
     ) {
         if (stickyHeader != null) {
@@ -113,38 +114,46 @@ fun FeedLazyColumn(
             val item = pagingItems[index]
 
             when {
-                item != null -> FeedPostListItem(
-                    data = item,
-                    onPostClick = { postId -> onPostClick(postId) },
-                    onProfileClick = { profileId -> onProfileClick(profileId) },
-                    onPostAction = { postAction ->
-                        when (postAction) {
-                            FeedPostAction.Reply -> onPostReplyClick(item.postId)
-                            FeedPostAction.Zap -> {
-                                if (walletConnected) {
-                                    onZapClick(item, null, null)
-                                } else {
-                                    onWalletUnavailable()
+                item != null -> Column {
+                    FeedPostListItem(
+                        data = item,
+                        shape = RectangleShape,
+                        cardPadding = PaddingValues(all = 0.dp),
+                        onPostClick = { postId -> onPostClick(postId) },
+                        onProfileClick = { profileId -> onProfileClick(profileId) },
+                        onPostAction = { postAction ->
+                            when (postAction) {
+                                FeedPostAction.Reply -> onPostReplyClick(item.postId)
+                                FeedPostAction.Zap -> {
+                                    if (walletConnected) {
+                                        onZapClick(item, null, null)
+                                    } else {
+                                        onWalletUnavailable()
+                                    }
                                 }
+
+                                FeedPostAction.Like -> onPostLikeClick(item)
+                                FeedPostAction.Repost -> repostQuotePostConfirmation = item
                             }
-                            FeedPostAction.Like -> onPostLikeClick(item)
-                            FeedPostAction.Repost -> repostQuotePostConfirmation = item
-                        }
-                    },
-                    onPostLongClickAction = { postAction ->
-                        when (postAction) {
-                            FeedPostAction.Zap -> {
-                                if (walletConnected) {
-                                    zapOptionsPostConfirmation = item
-                                } else {
-                                    onWalletUnavailable()
+                        },
+                        onPostLongClickAction = { postAction ->
+                            when (postAction) {
+                                FeedPostAction.Zap -> {
+                                    if (walletConnected) {
+                                        zapOptionsPostConfirmation = item
+                                    } else {
+                                        onWalletUnavailable()
+                                    }
                                 }
+
+                                else -> Unit
                             }
-                            else -> Unit
-                        }
-                    },
-                    onHashtagClick = onHashtagClick,
-                )
+                        },
+                        onHashtagClick = onHashtagClick,
+                    )
+
+                    PrimalDivider()
+                }
 
                 else -> {}
             }

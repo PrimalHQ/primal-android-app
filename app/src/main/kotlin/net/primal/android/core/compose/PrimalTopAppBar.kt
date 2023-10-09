@@ -27,7 +27,7 @@ fun PrimalTopAppBar(
     navigationIcon: ImageVector? = null,
     avatarUrl: String? = null,
     actions: @Composable RowScope.() -> Unit = {},
-    showDivider: Boolean = false,
+    showDivider: Boolean = true,
     scrollBehavior: TopAppBarScrollBehavior? = null,
 ) {
     Column {
