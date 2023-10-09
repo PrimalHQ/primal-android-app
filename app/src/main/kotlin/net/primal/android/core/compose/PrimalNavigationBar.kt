@@ -9,11 +9,15 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import net.primal.android.R
+import net.primal.android.core.compose.foundation.ClickDebounce
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.NavHome
 import net.primal.android.core.compose.icons.primaliconpack.NavHomeFilled
@@ -68,9 +72,10 @@ private fun RowScope.PrimalNavigationBarItem(
     badge: Int = 0,
 ) {
     val selected = primaryDestination == activeDestination
+    val clickDebounce by remember { mutableStateOf(ClickDebounce(timeoutMillis = 750L)) }
     NavigationBarItem(
         selected = selected,
-        onClick = onClick,
+        onClick = { clickDebounce.processEvent(onClick) },
         icon = {
             BadgedBox(badge = { if (badge > 0) Badge() }) {
                 Icon(
