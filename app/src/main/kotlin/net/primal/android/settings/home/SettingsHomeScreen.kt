@@ -148,7 +148,7 @@ private fun VersionListItem(
 }
 
 enum class PrimalSettingsSection {
-    Keys, Wallet, Appearance, Notifications, Network, Feeds, Zaps
+    Keys, Wallet, Appearance, Notifications, Network, Feeds, Zaps, MutedAccounts
 }
 
 
@@ -161,6 +161,7 @@ private fun PrimalSettingsSection.leadingIcon(): ImageVector? {
         PrimalSettingsSection.Network -> null
         PrimalSettingsSection.Feeds -> null
         PrimalSettingsSection.Zaps -> null
+        PrimalSettingsSection.MutedAccounts -> null
     }
 }
 
@@ -174,6 +175,7 @@ private fun PrimalSettingsSection.title(): String {
         PrimalSettingsSection.Network -> stringResource(id = R.string.settings_network_title)
         PrimalSettingsSection.Feeds -> stringResource(id = R.string.settings_feeds_title)
         PrimalSettingsSection.Zaps -> stringResource(id = R.string.settings_zaps_title)
+        PrimalSettingsSection.MutedAccounts -> stringResource(id = R.string.settings_muted_accounts_title)
     }
 }
 
