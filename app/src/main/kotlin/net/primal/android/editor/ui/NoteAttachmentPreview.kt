@@ -11,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.unit.dp
 import coil.compose.SubcomposeAsyncImage
 import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.editor.domain.NoteAttachment
@@ -44,7 +45,7 @@ fun NoteAttachmentPreview(
 
         if (attachment.remoteUrl == null) {
             if (attachment.uploadError == null) {
-                PrimalLoadingSpinner()
+                PrimalLoadingSpinner(size = 48.dp)
             } else {
                 MiniFloatingIconButton(
                     modifier = Modifier.align(Alignment.Center),
