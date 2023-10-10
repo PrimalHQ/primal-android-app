@@ -8,7 +8,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import net.primal.android.R
 import net.primal.android.auth.create.CreateAccountContract
-import net.primal.android.core.compose.profile.InputField
+import net.primal.android.core.compose.profile.PrimalOutlinedTextField
 import net.primal.android.core.compose.profile.ProfileHero
 import net.primal.android.core.utils.isValidUsername
 
@@ -27,7 +27,7 @@ fun CreateAccountStep(
         },
     )
     Spacer(modifier = Modifier.height(32.dp))
-    InputField(
+    PrimalOutlinedTextField(
         header = stringResource(id = R.string.create_input_header_handle).uppercase(),
         value = state.username,
         onValueChange = {
@@ -39,29 +39,29 @@ fun CreateAccountStep(
         prefix = "@"
     )
     Spacer(modifier = Modifier.height(12.dp))
-    InputField(
+    PrimalOutlinedTextField(
         header = stringResource(id = R.string.create_input_header_display_name).uppercase(),
         value = state.displayName,
         onValueChange = { eventPublisher(CreateAccountContract.UiEvent.DisplayNameChangedEvent(it.trim())) },
     )
     Spacer(modifier = Modifier.height(12.dp))
-    InputField(
+    PrimalOutlinedTextField(
         header = stringResource(id = R.string.create_input_header_website).uppercase(),
         value = state.website,
         onValueChange = { eventPublisher(CreateAccountContract.UiEvent.WebsiteChangedEvent(it.trim())) })
     Spacer(modifier = Modifier.height(12.dp))
-    InputField(
+    PrimalOutlinedTextField(
         header = stringResource(id = R.string.create_input_header_about_me).uppercase(),
         value = state.aboutMe,
         isMultiline = true,
         onValueChange = { eventPublisher(CreateAccountContract.UiEvent.AboutMeChangedEvent(it)) })
     Spacer(modifier = Modifier.height(12.dp))
-    InputField(
+    PrimalOutlinedTextField(
         header = stringResource(id = R.string.create_input_header_bitcoin_lightning_address).uppercase(),
         value = state.lightningAddress,
         onValueChange = { eventPublisher(CreateAccountContract.UiEvent.LightningAddressChangedEvent(it)) })
     Spacer(modifier = Modifier.height(12.dp))
-    InputField(
+    PrimalOutlinedTextField(
         header = stringResource(id = R.string.create_input_header_nip_05).uppercase(),
         value = state.nip05Identifier,
         onValueChange = { eventPublisher(CreateAccountContract.UiEvent.Nip05IdentifierChangedEvent(it)) })

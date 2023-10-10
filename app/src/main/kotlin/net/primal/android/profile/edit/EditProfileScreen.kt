@@ -35,7 +35,7 @@ import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
-import net.primal.android.core.compose.profile.InputField
+import net.primal.android.core.compose.profile.PrimalOutlinedTextField
 import net.primal.android.core.compose.profile.ProfileHero
 import net.primal.android.core.utils.isValidUsername
 import net.primal.android.theme.PrimalTheme
@@ -127,7 +127,7 @@ fun EditProfileContent(
                     eventPublisher(EditProfileContract.UiEvent.AvatarUriChangedEvent(avatarUri = it))
                 })
             Spacer(modifier = Modifier.height(32.dp))
-            InputField(
+            PrimalOutlinedTextField(
                 header = stringResource(id = R.string.create_input_header_handle).uppercase(),
                 value = state.username,
                 onValueChange = {
@@ -139,7 +139,7 @@ fun EditProfileContent(
                 prefix = "@"
             )
             Spacer(modifier = Modifier.height(12.dp))
-            InputField(
+            PrimalOutlinedTextField(
                 header = stringResource(id = R.string.create_input_header_display_name),
                 value = state.displayName,
                 onValueChange = {
@@ -147,7 +147,7 @@ fun EditProfileContent(
                 },
             )
             Spacer(modifier = Modifier.height(12.dp))
-            InputField(
+            PrimalOutlinedTextField(
                 header = stringResource(id = R.string.create_input_header_website).uppercase(),
                 value = state.website,
                 onValueChange = {
@@ -155,7 +155,7 @@ fun EditProfileContent(
                 }
             )
             Spacer(modifier = Modifier.height(12.dp))
-            InputField(
+            PrimalOutlinedTextField(
                 header = stringResource(id = R.string.create_input_header_about_me).uppercase(),
                 value = state.aboutMe,
                 isMultiline = true,
@@ -164,7 +164,7 @@ fun EditProfileContent(
                 }
             )
             Spacer(modifier = Modifier.height(12.dp))
-            InputField(
+            PrimalOutlinedTextField(
                 header = stringResource(id = R.string.create_input_header_bitcoin_lightning_address).uppercase(),
                 value = state.lightningAddress,
                 onValueChange = {
@@ -172,7 +172,7 @@ fun EditProfileContent(
                 }
             )
             Spacer(modifier = Modifier.height(12.dp))
-            InputField(
+            PrimalOutlinedTextField(
                 header = stringResource(id = R.string.create_input_header_nip_05).uppercase(),
                 value = state.nip05Identifier,
                 onValueChange = {

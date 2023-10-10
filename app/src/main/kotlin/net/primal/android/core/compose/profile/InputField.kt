@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -26,7 +25,7 @@ import androidx.compose.ui.unit.sp
 import net.primal.android.theme.AppTheme
 
 @Composable
-fun InputField(
+fun PrimalOutlinedTextField(
     header: String,
     value: String,
     onValueChange: (String) -> Unit,
@@ -37,10 +36,11 @@ fun InputField(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 32.dp)
+            .padding(horizontal = 32.dp),
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             Text(
                 text = header,
@@ -52,7 +52,9 @@ fun InputField(
                 Text(buildAnnotatedString {
                     withStyle(
                         style = SpanStyle(
-                            color = Color.Red, fontWeight = FontWeight.W400, fontSize = 16.sp
+                            color = Color.Red,
+                            fontWeight = FontWeight.W400,
+                            fontSize = 16.sp
                         )
                     ) {
                         append("*")
@@ -73,11 +75,12 @@ fun InputField(
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
             colors = OutlinedTextFieldDefaults.colors(
-                unfocusedContainerColor = Color(0xFF181818),
+                unfocusedContainerColor = AppTheme.extraColorScheme.surfaceVariantAlt,
+                focusedContainerColor = AppTheme.extraColorScheme.surfaceVariantAlt,
                 unfocusedBorderColor = Color.Transparent,
                 focusedBorderColor = Color.Transparent,
             ),
-            shape = RoundedCornerShape(size = 12.dp),
+            shape = AppTheme.shapes.medium,
             singleLine = !isMultiline,
             minLines = if (isMultiline) 6 else 0,
             value = value,
@@ -89,11 +92,11 @@ fun InputField(
                     Text(
                         modifier = Modifier
                             .align(alignment = Alignment.CenterHorizontally)
-                            .padding(bottom = 6.dp), // this is stupid
+                            .padding(bottom = 6.dp),
                         text = prefix,
                         fontWeight = FontWeight.W500,
                         fontSize = 18.sp,
-                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt4
+                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
                     )
                 }
             } else null,
