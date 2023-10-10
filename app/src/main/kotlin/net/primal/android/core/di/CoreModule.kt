@@ -8,6 +8,8 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import dagger.multibindings.ElementsIntoSet
+import net.primal.android.core.crash.PrimalCrashReporter
+import okhttp3.OkHttpClient
 import timber.log.Timber
 
 @Module
@@ -21,4 +23,10 @@ object CoreModule {
 
     @Provides
     fun provideContentResolver(@ApplicationContext context: Context): ContentResolver = context.contentResolver
+
+    @Provides
+    fun provideCrashReporter(okHttpClient: OkHttpClient) =
+        PrimalCrashReporter(
+            okHttpClient = okHttpClient,
+        )
 }
