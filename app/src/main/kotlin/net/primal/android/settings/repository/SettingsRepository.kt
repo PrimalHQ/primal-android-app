@@ -67,11 +67,8 @@ class SettingsRepository @Inject constructor(
     }
 
     suspend fun restoreDefaultFeeds(userId: String) {
-        val remoteAppSettings = fetchAppSettings(userId = userId) ?: return
         val remoteDefaultAppSettings = fetchDefaultAppSettings(userId = userId) ?: return
-        val newAppSettings = remoteAppSettings.copy(feeds = remoteDefaultAppSettings.feeds)
-        settingsApi.setAppSettings(userId = userId, appSettings = newAppSettings)
-        persistAppSettings(userId = userId, appSettings = newAppSettings)
+        updateAndPersistFeeds(userId = userId, feeds = remoteDefaultAppSettings.feeds)
     }
 
     private suspend fun updateAndPersistAppSettings(
@@ -102,7 +99,7 @@ class SettingsRepository @Inject constructor(
         val currentUserAccount = accountsStore.findByIdOrNull(userId = userId)
             ?: UserAccount.buildLocal(pubkey = userId)
 
-        val userFeeds = appSettings.feeds.map { it.asFeedPO() }
+        val userFeeds = appSettings.feeds.distinctBy { it.directive }.map { it.asFeedPO() }
         val hasLatestFeed = userFeeds.find { it.directive == userId } != null
         val finalFeeds = if (hasLatestFeed) userFeeds else {
             userFeeds.toMutableList().apply {

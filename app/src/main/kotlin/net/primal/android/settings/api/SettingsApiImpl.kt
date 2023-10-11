@@ -47,7 +47,7 @@ class SettingsApiImpl @Inject constructor(
         )
 
         return GetAppSettingsResponse(
-            userSettings = queryResult.findNostrEvent(NostrEventKind.ApplicationSpecificData),
+            userSettings = null,
             defaultSettings = queryResult.findPrimalEvent(NostrEventKind.PrimalDefaultSettings),
         )
     }

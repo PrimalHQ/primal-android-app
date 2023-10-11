@@ -84,7 +84,7 @@ fun FeedsSettingsScreen(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        text = stringResource(R.string.settings_feeds_list_title),
+                        text = stringResource(R.string.settings_feeds_list_title).uppercase(),
                         fontWeight = FontWeight.W500,
                         fontSize = 14.sp,
                         lineHeight = 16.sp
