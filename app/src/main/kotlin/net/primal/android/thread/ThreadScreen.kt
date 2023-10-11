@@ -315,10 +315,14 @@ fun ThreadScreen(
                     }
                 }
 
-                item(key = "extraSpacing") {
-                    Spacer(modifier = Modifier.height(
-                        height = extraSpacing.coerceAtLeast(50.dp))
-                    )
+                if (state.conversation.isNotEmpty()) {
+                    item(key = "extraSpacing") {
+                        Spacer(
+                            modifier = Modifier.height(
+                                height = extraSpacing.coerceAtLeast(50.dp)
+                            )
+                        )
+                    }
                 }
             }
         },
