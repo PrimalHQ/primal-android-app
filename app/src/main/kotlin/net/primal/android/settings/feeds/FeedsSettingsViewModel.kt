@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.networking.sockets.errors.WssException
-import net.primal.android.nostr.model.primal.content.ContentFeedData
 import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import javax.inject.Inject
@@ -38,7 +37,6 @@ class FeedsSettingsViewModel @Inject constructor(
         _event.collect {
             when (it) {
                 is FeedsSettingsContract.UiEvent.FeedRemoved -> feedRemovedHandler(event = it)
-                is FeedsSettingsContract.UiEvent.FeedReordered -> feedReorderedHandler(event = it)
                 is FeedsSettingsContract.UiEvent.RestoreDefaultFeeds -> restoreDefaultFeedsHandler()
             }
         }
@@ -75,37 +73,18 @@ class FeedsSettingsViewModel @Inject constructor(
         }
     }
 
-    private suspend fun feedReorderedHandler(event: FeedsSettingsContract.UiEvent.FeedReordered) {
-        val fromItem = state.value.feeds[event.from]
-        val toItem = state.value.feeds[event.to]
-
-        val newFeeds = state.value.feeds.toMutableList()
-        newFeeds[event.from] = toItem
-        newFeeds[event.to] = fromItem
-
+    private suspend fun restoreDefaultFeedsHandler() {
         try {
-            settingsRepository.updateAndPersistFeeds(
-                userId = activeAccountStore.activeUserId(),
-                feeds = newFeeds.map { ContentFeedData(name = it.name, directive = it.directive) })
+            settingsRepository.restoreDefaultFeeds(userId = activeAccountStore.activeUserId())
         } catch (error: WssException) {
             setState {
                 copy(
-                    error = FeedsSettingsContract.UiState.SettingsFeedsError.FailedToReorderFeeds(
+                    error = FeedsSettingsContract.UiState.SettingsFeedsError.FailedToRestoreDefaultFeeds(
                         error
                     )
                 )
             }
         }
-    }
-
-    private suspend fun restoreDefaultFeedsHandler() {
-       try {
-           settingsRepository.restoreDefaultFeeds(userId = activeAccountStore.activeUserId())
-       } catch (error: WssException) {
-           setState {
-               copy(error = FeedsSettingsContract.UiState.SettingsFeedsError.FailedToRestoreDefaultFeeds(error))
-           }
-       }
     }
 }
 

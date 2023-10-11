@@ -12,8 +12,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.RemoveCircle
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -35,7 +36,6 @@ import net.primal.android.R
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
-import net.primal.android.settings.feeds.compose.DragDropColumn
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 
@@ -81,7 +81,7 @@ fun FeedsSettingsScreen(
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    horizontalArrangement = Arrangement.Start
                 ) {
                     Text(
                         text = stringResource(R.string.settings_feeds_list_title).uppercase(),
@@ -89,34 +89,32 @@ fun FeedsSettingsScreen(
                         fontSize = 14.sp,
                         lineHeight = 16.sp
                     )
-
-                    Text(
-                        modifier = Modifier.clickable { eventPublisher(FeedsSettingsContract.UiEvent.RestoreDefaultFeeds) },
-                        text = stringResource(R.string.settings_feeds_restore_default_title),
-                        fontWeight = FontWeight.W500,
-                        fontSize = 14.sp,
-                        lineHeight = 16.sp,
-                        color = AppTheme.colorScheme.primary
-                    )
                 }
                 Spacer(modifier = Modifier.height(12.dp))
-                DragDropColumn(
+                LazyColumn(
                     modifier = Modifier.fillMaxWidth(),
-                    items = state.feeds,
-                    onSwap = { from, to ->
-                        eventPublisher(
-                            FeedsSettingsContract.UiEvent.FeedReordered(
-                                from = from,
-                                to = to
-                            )
+                ) {
+                    items(state.feeds) { item ->
+                        FeedItem(
+                            item = item,
+                            eventPublisher = eventPublisher
                         )
+                        Divider(color = AppTheme.colorScheme.outline, thickness = 1.dp)
                     }
-                ) { _, item ->
-                    FeedItem(
-                        item = item,
-                        eventPublisher = eventPublisher
+                }
+                Spacer(modifier = Modifier.height(24.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Spacer(modifier = Modifier.weight(1.0f))
+                    Text(
+                        modifier = Modifier.clickable { eventPublisher(FeedsSettingsContract.UiEvent.RestoreDefaultFeeds) },
+                        text = stringResource(R.string.settings_feeds_restore_default_title).lowercase(),
+                        fontWeight = FontWeight.W500,
+                        fontSize = 18.sp,
+                        lineHeight = 20.sp,
+                        color = AppTheme.colorScheme.primary
                     )
-                    Divider(color = AppTheme.colorScheme.outline, thickness = 1.dp)
                 }
             }
         }
@@ -160,12 +158,6 @@ fun FeedItem(
             lineHeight = 16.sp
         )
         Spacer(modifier = Modifier.weight(1.0f))
-        Image(
-            imageVector = Icons.Default.Menu,
-            contentDescription = null,
-            colorFilter = ColorFilter.tint(color = Color.Gray)
-        )
-        Spacer(modifier = Modifier.width(8.dp))
     }
 }
 
