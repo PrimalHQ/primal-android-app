@@ -1,6 +1,7 @@
 package net.primal.android.theme
 
 import androidx.compose.material3.ColorScheme
+import net.primal.android.R
 import net.primal.android.theme.colors.ExtraColorScheme
 import net.primal.android.theme.colors.iceColorScheme
 import net.primal.android.theme.colors.iceExtraColorScheme
@@ -17,6 +18,7 @@ enum class PrimalTheme(
     val isDarkTheme: Boolean,
     val colorScheme: ColorScheme,
     val extraColorScheme: ExtraColorScheme,
+    val logoId: Int
 ) {
     Sunset(
         themeName = "sunset",
@@ -24,14 +26,7 @@ enum class PrimalTheme(
         isDarkTheme = true,
         colorScheme = sunsetColorScheme,
         extraColorScheme = sunsetExtraColorScheme,
-    ),
-
-    Sunrise(
-        themeName = "sunrise",
-        inverseThemeName = "sunset",
-        isDarkTheme = false,
-        colorScheme = sunriseColorScheme,
-        extraColorScheme = sunriseExtraColorScheme,
+        logoId = R.drawable.primal_wave_logo_red
     ),
 
     Midnight(
@@ -40,6 +35,16 @@ enum class PrimalTheme(
         isDarkTheme = true,
         colorScheme = midnightColorScheme,
         extraColorScheme = midnightExtraColorScheme,
+        logoId = R.drawable.primal_wave_logo_blue
+    ),
+
+    Sunrise(
+        themeName = "sunrise",
+        inverseThemeName = "sunset",
+        isDarkTheme = false,
+        colorScheme = sunriseColorScheme,
+        extraColorScheme = sunriseExtraColorScheme,
+        logoId = R.drawable.primal_wave_logo_red
     ),
 
     Ice(
@@ -48,6 +53,7 @@ enum class PrimalTheme(
         isDarkTheme = false,
         colorScheme = iceColorScheme,
         extraColorScheme = iceExtraColorScheme,
+        logoId = R.drawable.primal_wave_logo_blue
     );
 
     companion object {

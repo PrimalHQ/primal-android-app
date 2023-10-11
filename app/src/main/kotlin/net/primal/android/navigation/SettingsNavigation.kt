@@ -12,6 +12,8 @@ import androidx.navigation.navigation
 import net.primal.android.R
 import net.primal.android.core.compose.DemoSecondaryScreen
 import net.primal.android.core.compose.LockToOrientationPortrait
+import net.primal.android.settings.appearance.AppearanceSettingsScreen
+import net.primal.android.settings.appearance.AppearanceSettingsViewModel
 import net.primal.android.settings.home.PrimalSettingsSection
 import net.primal.android.settings.home.SettingsHomeScreen
 import net.primal.android.settings.home.SettingsHomeViewModel
@@ -111,7 +113,7 @@ private fun NavGraphBuilder.wallet(
 ) = composable(
     route = route,
     arguments = arguments,
-) {navBackEntry ->
+) { navBackEntry ->
     val viewModel = hiltViewModel<WalletViewModel>(navBackEntry)
     LockToOrientationPortrait()
     WalletScreen(
@@ -125,7 +127,7 @@ private fun NavGraphBuilder.notifications(
     navController: NavController
 ) = composable(
     route = route
-) {navBackEntry ->
+) { navBackEntry ->
     val viewModel = hiltViewModel<NotificationsSettingsViewModel>(navBackEntry)
     LockToOrientationPortrait()
     NotificationsSettingsScreen(
@@ -137,12 +139,9 @@ private fun NavGraphBuilder.notifications(
 private fun NavGraphBuilder.appearance(route: String, navController: NavController) = composable(
     route = route,
 ) {
+    val viewModel = hiltViewModel<AppearanceSettingsViewModel>()
     LockToOrientationPortrait()
-    DemoSecondaryScreen(
-        title = stringResource(id = R.string.settings_appearance_title),
-        description = "Appearance settings will appear here. Stay tuned.",
-        onClose = { navController.navigateUp() },
-    )
+    AppearanceSettingsScreen(viewModel = viewModel, onClose = { navController.navigateUp() })
 }
 
 private fun NavGraphBuilder.network(route: String, navController: NavController) = composable(
