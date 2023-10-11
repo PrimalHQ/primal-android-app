@@ -1,8 +1,8 @@
 ## Changes
 
-- Implement flat design on feed screens;
-- Implement flat design on threads screen;
-- Implement showing opened post always on top on thread screen;
+- Implement Appearance settings;
+- Implement flat design on feed & threads screens;
+- Improve thread screen to show main post always on top of the screen;
 - Fix to handle invalid LWR feed from feed settings;
 - Fix black/white screen caused by double clicks on home tab;
 - Implement NoteEditorScreen for new notes and replies with conversation;
