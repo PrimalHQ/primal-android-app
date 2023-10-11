@@ -12,10 +12,14 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import net.primal.android.core.compose.foundation.ClickDebounce
 import net.primal.android.theme.AppTheme
 
 @ExperimentalMaterial3Api
@@ -47,9 +51,10 @@ fun PrimalTopAppBar(
                         )
                     }
                 } else if (navigationIcon != null) {
+                    val clickDebounce by remember { mutableStateOf(ClickDebounce()) }
                     AppBarIcon(
                         icon = navigationIcon,
-                        onClick = onNavigationIconClick,
+                        onClick = { clickDebounce.processEvent(onNavigationIconClick) },
                     )
                 }
             },

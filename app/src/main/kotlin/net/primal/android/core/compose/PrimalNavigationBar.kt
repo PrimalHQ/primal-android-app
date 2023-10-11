@@ -72,7 +72,7 @@ private fun RowScope.PrimalNavigationBarItem(
     badge: Int = 0,
 ) {
     val selected = primaryDestination == activeDestination
-    val clickDebounce by remember { mutableStateOf(ClickDebounce(timeoutMillis = 750L)) }
+    val clickDebounce by remember { mutableStateOf(ClickDebounce()) }
     NavigationBarItem(
         selected = selected,
         onClick = { clickDebounce.processEvent(onClick) },

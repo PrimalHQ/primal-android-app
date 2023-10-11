@@ -94,6 +94,7 @@ import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.button.PrimalOutlinedButton
 import net.primal.android.core.compose.feed.FeedLazyColumn
+import net.primal.android.core.compose.foundation.ClickDebounce
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
@@ -303,11 +304,12 @@ fun ProfileScreen(
                         avatarPadding = with(density) { (maxAvatarSizePx - avatarSizePx.floatValue).toDp() },
                         avatarOffsetY = with(density) { (maxAvatarSizePx * 0.65f).toDp() },
                         navigationIcon = {
+                            val clickDebounce by remember { mutableStateOf(ClickDebounce()) }
                             AppBarIcon(
                                 icon = PrimalIcons.ArrowBack,
                                 backgroundColor = Color.Black.copy(alpha = 0.5f),
                                 tint = Color.White,
-                                onClick = onClose,
+                                onClick = { clickDebounce.processEvent(onClose) },
                             )
                         },
                         title = {
