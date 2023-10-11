@@ -6,13 +6,13 @@ import androidx.room.Upsert
 import kotlinx.coroutines.flow.Flow
 
 @Dao
-interface MutedDao {
+interface MutedAccountDao {
     @Upsert
-    fun upsertAll(data: Set<Muted>)
+    fun upsertAll(data: Set<MutedAccount>)
 
-    @Query("SELECT * FROM Muted")
-    fun observeAllMuted(): Flow<List<Muted>>
+    @Query("SELECT * FROM MutedAccount")
+    fun observeAllMuted(): Flow<List<MutedAccount>>
 
-    @Query("DELETE FROM Muted")
+    @Query("DELETE FROM MutedAccount")
     fun deleteAll()
 }

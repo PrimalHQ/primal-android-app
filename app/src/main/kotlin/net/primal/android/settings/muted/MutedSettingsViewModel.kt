@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.networking.relays.errors.NostrPublishException
+import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.settings.muted.repository.MutedUserRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import javax.inject.Inject
@@ -30,17 +31,17 @@ class MutedSettingsViewModel @Inject constructor(
     }
 
     init {
-        observeState()
-        observeEvent()
+        observeMutedUsers()
+        observeEvents()
     }
 
-    private fun observeState() = viewModelScope.launch {
+    private fun observeMutedUsers() = viewModelScope.launch {
         mutedUserRepository.mutedUsers.collect {
             setState { copy(mutelist = it) }
         }
     }
 
-    private fun observeEvent() = viewModelScope.launch {
+    private fun observeEvents() = viewModelScope.launch {
         _event.collect {
             when (it) {
                 is MutedSettingsContract.UiEvent.RemovedFromMuteListEvent -> removedFromMutelistEventHandler(
@@ -56,13 +57,17 @@ class MutedSettingsViewModel @Inject constructor(
                 userId = activeAccountStore.activeUserId(),
                 unmutedUserPubkey = event.pubkey
             )
-        } catch (error: NostrPublishException) {
-            setState {
-                copy(
-                    error = MutedSettingsContract.UiState.MutedSettingsError.FailedToUnmuteUserError(
-                        error = error
-                    )
-                )
+        } catch (error: Exception) {
+            when (error) {
+                is NostrPublishException,
+                is WssException ->
+                    setState {
+                        copy(
+                            error = MutedSettingsContract.UiState.MutedSettingsError.FailedToUnmuteUserError(
+                                error = error
+                            )
+                        )
+                    }
             }
         }
     }

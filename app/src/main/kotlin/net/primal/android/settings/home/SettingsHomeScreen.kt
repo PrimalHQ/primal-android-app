@@ -148,7 +148,7 @@ private fun VersionListItem(
 }
 
 enum class PrimalSettingsSection {
-    Keys, Wallet, Appearance, Notifications, Network, Feeds, Zaps, MutedAccounts
+    Keys, Wallet, Appearance, MutedAccounts, Notifications, Network, Feeds, Zaps
 }
 
 

@@ -12,8 +12,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import net.primal.android.R
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
@@ -45,7 +47,7 @@ fun MutedSettingsScreen(
         modifier = Modifier,
         topBar = {
             PrimalTopAppBar(
-                title = "Muted Accounts",
+                title = stringResource(id = R.string.settings_muted_accounts_title),
                 navigationIcon = PrimalIcons.ArrowBack,
                 onNavigationIconClick = onClose
             )
@@ -87,30 +89,30 @@ fun PreviewMutedScreen() {
                         pubkey = "pubkey",
                         name = "username",
                         avatarUrl = "avatarUrl",
-                        nip05 = "nip05"
+                        nip05InternetIdentifier = "nip05"
                     ),
                     MutedUser(
                         pubkey = "pubkey",
                         name = "username",
                         avatarUrl = "avatarUrl",
-                        nip05 = "nip05"
+                        nip05InternetIdentifier = "nip05"
                     ),
                     MutedUser(
                         pubkey = "pubkey",
                         name = "username",
                         avatarUrl = "avatarUrl",
-                        nip05 = "nip05"
+                        nip05InternetIdentifier = "nip05"
                     ),
                     MutedUser(
                         pubkey = "pubkey",
                         name = "username",
                         avatarUrl = "avatarUrl",
-                        nip05 = "nip05"
+                        nip05InternetIdentifier = "nip05"
                     ), MutedUser(
                         pubkey = "pubkey",
                         name = "username",
                         avatarUrl = "avatarUrl",
-                        nip05 = "nip05"
+                        nip05InternetIdentifier = "nip05"
                     )
                 )
             ),

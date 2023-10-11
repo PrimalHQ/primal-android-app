@@ -11,7 +11,6 @@ import net.primal.android.nostr.model.primal.content.ContentFeedData
 import net.primal.android.serialization.NostrJson
 import net.primal.android.serialization.decodeFromStringOrNull
 import net.primal.android.settings.api.SettingsApi
-import net.primal.android.settings.muted.db.Muted
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.domain.UserAccount
 import javax.inject.Inject

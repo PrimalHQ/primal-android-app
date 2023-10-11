@@ -4,7 +4,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity
-data class Muted(
+data class MutedAccount(
     @PrimaryKey
     val pubkey: String
 )

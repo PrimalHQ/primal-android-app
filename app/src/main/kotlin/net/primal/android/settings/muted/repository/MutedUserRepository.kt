@@ -6,7 +6,6 @@ import net.primal.android.core.utils.usernameUiFriendly
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.nostr.ext.asProfileDataPO
 import net.primal.android.settings.api.SettingsApi
-import net.primal.android.settings.muted.db.Muted
 import net.primal.android.settings.muted.model.MutedUser
 import net.primal.android.user.api.UsersApi
 import javax.inject.Inject
@@ -24,7 +23,7 @@ class MutedUserRepository @Inject constructor(
 
             MutedUser(
                 name = profileData.usernameUiFriendly(),
-                nip05 = profileData.internetIdentifier,
+                nip05InternetIdentifier = profileData.internetIdentifier,
                 avatarUrl = profileData.picture,
                 pubkey = profileData.ownerId
             )
@@ -60,8 +59,7 @@ class MutedUserRepository @Inject constructor(
     private suspend fun fetchMutelist(userId: String): Set<String> {
         val response = settingsApi.getMutelist(userId = userId)
 
-        return response.mutelist?.tags?.filter { it.size == 2 }?.map { it[1].toString() }?.toSet()
-            ?: emptySet()
+        return response.mutelist?.tags?.mapToPubkeySet() ?: emptySet()
     }
 
     private suspend fun persistMutelist(mutelist: Set<String>) {
@@ -73,5 +71,3 @@ class MutedUserRepository @Inject constructor(
         }
     }
 }
-
-private fun String.asMutedPO(): Muted = Muted(pubkey = this)
