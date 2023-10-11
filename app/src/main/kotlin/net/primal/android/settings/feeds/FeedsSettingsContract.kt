@@ -24,5 +24,3 @@ sealed class FeedAction {
     data object ConfirmRestoreDefaults : FeedAction()
     data object Inactive : FeedAction()
 }
-
-//data class RemoveFeedPrompt(var directive: String, var name: String, var openDialog: Boolean)
