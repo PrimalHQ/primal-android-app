@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.graphics.toArgb
@@ -36,7 +37,16 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val userTheme = themeStore.userThemeState.collectAsState()
-            val primalTheme = userTheme.value ?: defaultPrimalTheme()
+            val defaultTheme = defaultPrimalTheme()
+            val primalTheme = userTheme.value ?: defaultTheme
+
+            LaunchedEffect(userTheme.value) {
+                if (userTheme.value == null) {
+                    lifecycleScope.launch {
+                        themeStore.setUserTheme(theme = defaultTheme.themeName)
+                    }
+                }
+            }
 
             PrimalTheme(
                 primalTheme = primalTheme

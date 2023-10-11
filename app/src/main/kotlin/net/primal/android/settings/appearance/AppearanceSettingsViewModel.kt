@@ -6,6 +6,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
@@ -40,7 +41,7 @@ class AppearanceSettingsViewModel @Inject constructor(
     }
 
     private fun observeActiveThemeStore() = viewModelScope.launch {
-        activeThemeStore.userThemeState.mapNotNull { it }.collect {
+        activeThemeStore.userThemeState.filterNotNull().collect {
             setState { copy(selectedThemeName = it.themeName) }
         }
     }
