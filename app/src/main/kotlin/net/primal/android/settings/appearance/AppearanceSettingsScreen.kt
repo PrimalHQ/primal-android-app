@@ -46,7 +46,6 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
-import net.primal.android.theme.colors.ExtraColorScheme
 
 @Composable
 fun AppearanceSettingsScreen(
@@ -111,7 +110,7 @@ private fun ThemeSection(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = stringResource(id = R.string.settings_appearance_theme_section_title),
+            text = stringResource(id = R.string.settings_appearance_theme_section_title).uppercase(),
             fontWeight = FontWeight.W500,
             fontSize = 14.sp,
             lineHeight = 16.sp
@@ -123,7 +122,7 @@ private fun ThemeSection(
             verticalAlignment = Alignment.CenterVertically
         ) {
 
-            PrimalTheme.values().forEach { primalTheme ->
+            state.themes.forEach { primalTheme ->
                 ThemeBox(
                     primalTheme = primalTheme,
                     state = state,
@@ -156,15 +155,15 @@ private fun ThemeBox(
             if (primalTheme.isDarkTheme) {
                 Brush.linearGradient(
                     colors = listOf(
-                        Color(0xFF444444),
-                        Color(0xFF444444),
+                        primalTheme.colorScheme.outline,
+                        primalTheme.colorScheme.outline,
                     ),
                 )
             } else {
                 Brush.linearGradient(
                     colors = listOf(
-                        Color(0xFFC8C8C8),
-                        Color(0xFFC8C8C8),
+                        primalTheme.colorScheme.outline,
+                        primalTheme.colorScheme.outline,
                     ),
                 )
             }
@@ -172,9 +171,9 @@ private fun ThemeBox(
 
         Box(
             modifier = Modifier
-                .clip(RoundedCornerShape(8.dp))
+                .clip(AppTheme.shapes.small)
                 .border(
-                    width = 1.dp, brush = borderBrush, shape = RoundedCornerShape(8.dp)
+                    width = 1.dp, brush = borderBrush, shape = AppTheme.shapes.small
                 )
                 .clickable {
                     eventPublisher(
@@ -184,8 +183,7 @@ private fun ThemeBox(
                     )
                 }
                 .background(color = if (primalTheme.isDarkTheme) Color.Black else Color.White)
-                .height(72.dp)
-                .width(72.dp)
+                .size(72.dp)
         ) {
             Image(
                 modifier = Modifier.align(alignment = Alignment.Center),
@@ -198,8 +196,7 @@ private fun ThemeBox(
                     modifier = Modifier
                         .clip(RoundedCornerShape(topStart = 8.dp))
                         .background(color = AppTheme.extraColorScheme.brand2)
-                        .width(16.dp)
-                        .height(16.dp)
+                        .size(16.dp)
                         .align(alignment = Alignment.BottomEnd)
                 ) {
                     Icon(
@@ -231,6 +228,7 @@ class AppearanceSettingsUiStateProvider :
         get() = PrimalTheme.values().map {
             return@map AppearanceSettingsContract.UiState(
                 selectedThemeName = it.themeName,
+                themes = PrimalTheme.values().toList()
             )
         }.asSequence()
 }

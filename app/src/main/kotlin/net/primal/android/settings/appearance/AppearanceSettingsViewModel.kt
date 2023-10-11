@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
+import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.active.ActiveThemeStore
 import javax.inject.Inject
 
@@ -29,8 +30,13 @@ class AppearanceSettingsViewModel @Inject constructor(
     }
 
     init {
+        initThemes()
         observeActiveThemeStore()
         observeEvents()
+    }
+
+    private fun initThemes() = viewModelScope.launch {
+        setState { copy(themes = PrimalTheme.values().toList()) }
     }
 
     private fun observeActiveThemeStore() = viewModelScope.launch {
