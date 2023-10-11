@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material.ripple.LocalRippleTheme
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -37,16 +38,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val userTheme = themeStore.userThemeState.collectAsState()
-            val defaultTheme = defaultPrimalTheme()
-            val primalTheme = userTheme.value ?: defaultTheme
-
-            LaunchedEffect(userTheme.value) {
-                if (userTheme.value == null) {
-                    lifecycleScope.launch {
-                        themeStore.setUserTheme(theme = defaultTheme.themeName)
-                    }
-                }
-            }
+            val primalTheme = userTheme.value ?: initDefaultTheme()
 
             PrimalTheme(
                 primalTheme = primalTheme
@@ -59,6 +51,15 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    @Composable
+    private fun initDefaultTheme(): PrimalTheme {
+        val defaultTheme = defaultPrimalTheme()
+        LaunchedEffect(Unit) {
+            themeStore.setUserTheme(theme = defaultTheme.themeName)
+        }
+        return defaultTheme
     }
 
     private fun observeThemeChanges() = lifecycleScope.launch {
