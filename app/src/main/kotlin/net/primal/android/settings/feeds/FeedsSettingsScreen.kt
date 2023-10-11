@@ -16,17 +16,24 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.RemoveCircle
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -70,6 +77,43 @@ fun FeedsSettingsScreen(
             )
         },
         content = { paddingValues ->
+            val openRemoveFeedDialog =
+                remember { mutableStateOf<FeedAction>(FeedAction.Inactive) }
+            when (val prompt = openRemoveFeedDialog.value) {
+                is FeedAction.ConfirmRemove -> {
+                    ConfirmActionAlertDialog(
+                        onDismissRequest = {
+                            openRemoveFeedDialog.value = FeedAction.Inactive
+                        },
+                        onConfirmation = {
+                            eventPublisher(FeedsSettingsContract.UiEvent.FeedRemoved(directive = prompt.directive))
+
+                            openRemoveFeedDialog.value = FeedAction.Inactive
+                        },
+                        dialogTitle = stringResource(id = R.string.settings_feeds_remove_feed_prompt_title),
+                        dialogText = stringResource(id = R.string.settings_feeds_remove_feed_prompt_text, prompt.name),
+                        icon = Icons.Default.Warning
+                    )
+                }
+
+                is FeedAction.ConfirmRestoreDefaults -> {
+                    ConfirmActionAlertDialog(
+                        onDismissRequest = {
+                            openRemoveFeedDialog.value = FeedAction.Inactive
+                        },
+                        onConfirmation = {
+                            eventPublisher(FeedsSettingsContract.UiEvent.RestoreDefaultFeeds)
+
+                            openRemoveFeedDialog.value = FeedAction.Inactive
+                        },
+                        dialogTitle = stringResource(R.string.settings_feeds_restore_default_title),
+                        dialogText = stringResource(id = R.string.settings_feeds_restore_defaults_prompt_text),
+                        icon = Icons.Default.Warning
+                    )
+                }
+
+                is FeedAction.Inactive -> Unit
+            }
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -97,7 +141,13 @@ fun FeedsSettingsScreen(
                     items(state.feeds) { item ->
                         FeedItem(
                             item = item,
-                            eventPublisher = eventPublisher
+                            onRemoveFeed = {
+                                openRemoveFeedDialog.value = FeedAction.ConfirmRemove(
+                                    directive = item.directive,
+                                    name = item.name,
+                                    openDialog = true
+                                )
+                            }
                         )
                         Divider(color = AppTheme.colorScheme.outline, thickness = 1.dp)
                     }
@@ -108,7 +158,9 @@ fun FeedsSettingsScreen(
                 ) {
                     Spacer(modifier = Modifier.weight(1.0f))
                     Text(
-                        modifier = Modifier.clickable { eventPublisher(FeedsSettingsContract.UiEvent.RestoreDefaultFeeds) },
+                        modifier = Modifier.clickable {
+                            openRemoveFeedDialog.value = FeedAction.ConfirmRestoreDefaults
+                        },
                         text = stringResource(R.string.settings_feeds_restore_default_title).lowercase(),
                         fontWeight = FontWeight.W500,
                         fontSize = 18.sp,
@@ -124,7 +176,7 @@ fun FeedsSettingsScreen(
 @Composable
 fun FeedItem(
     item: Feed,
-    eventPublisher: (FeedsSettingsContract.UiEvent) -> Unit
+    onRemoveFeed: () -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -134,14 +186,7 @@ fun FeedItem(
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (item.isRemovable) {
-            IconButton(
-                onClick = {
-                    eventPublisher(
-                        FeedsSettingsContract.UiEvent.FeedRemoved(
-                            directive = item.directive
-                        )
-                    )
-                }) {
+            IconButton(onClick = onRemoveFeed) {
                 Image(
                     imageVector = Icons.Filled.RemoveCircle,
                     contentDescription = null,
@@ -159,6 +204,48 @@ fun FeedItem(
         )
         Spacer(modifier = Modifier.weight(1.0f))
     }
+}
+
+@Composable
+fun ConfirmActionAlertDialog(
+    onDismissRequest: () -> Unit,
+    onConfirmation: () -> Unit,
+    dialogTitle: String,
+    dialogText: String,
+    icon: ImageVector,
+) {
+    AlertDialog(
+        icon = {
+            Icon(icon, contentDescription = null)
+        },
+        title = {
+            Text(text = dialogTitle)
+        },
+        text = {
+            Text(text = dialogText)
+        },
+        onDismissRequest = {
+            onDismissRequest()
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    onConfirmation()
+                }
+            ) {
+                Text("Confirm")
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = {
+                    onDismissRequest()
+                }
+            ) {
+                Text("Dismiss")
+            }
+        }
+    )
 }
 
 @Preview
