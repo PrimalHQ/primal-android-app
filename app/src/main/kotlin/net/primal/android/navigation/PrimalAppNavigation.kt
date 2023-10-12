@@ -45,8 +45,11 @@ import net.primal.android.explore.home.ExploreHomeScreen
 import net.primal.android.explore.home.ExploreHomeViewModel
 import net.primal.android.explore.search.SearchViewModel
 import net.primal.android.explore.search.ui.SearchScreen
+import net.primal.android.messages.chat.ChatScreen
+import net.primal.android.messages.chat.ChatViewModel
 import net.primal.android.messages.list.MessageListScreen
 import net.primal.android.messages.list.MessageListViewModel
+import net.primal.android.messages.list.NewMessageScreen
 import net.primal.android.navigation.deeplinking.DeepLink
 import net.primal.android.navigation.deeplinking.ext.handleDeeplink
 import net.primal.android.navigation.splash.SplashContract
@@ -112,6 +115,12 @@ private fun NavController.navigateToExplore() =
 
 private fun NavController.navigateToMessages() =
     navigate(route = "messages", navOptions = topLevelNavOptions)
+
+private fun NavController.navigateToChat(profileId: String) =
+    navigate(route = "messages/$profileId")
+
+private fun NavController.navigateToNewMessage() =
+    navigate(route = "messages/new")
 
 private fun NavController.navigateToNotifications() =
     navigate(route = "notifications", navOptions = topLevelNavOptions)
@@ -244,6 +253,21 @@ fun PrimalAppNavigation() {
                 navController = navController,
                 onTopLevelDestinationChanged = topLevelDestinationHandler,
                 onDrawerScreenClick = drawerDestinationHandler,
+            )
+
+            chat(
+                route = "messages/{$ProfileId}",
+                arguments = listOf(
+                    navArgument(ProfileId) {
+                        type = NavType.StringType
+                    }
+                ),
+                navController = navController,
+            )
+
+            newMessage(
+                route = "messages/new",
+                navController = navController,
             )
 
             notifications(
@@ -486,6 +510,43 @@ private fun NavGraphBuilder.messages(
         viewModel = viewModel,
         onTopLevelDestinationChanged = onTopLevelDestinationChanged,
         onDrawerScreenClick = onDrawerScreenClick,
+        onChatClick = { profileId -> navController.navigateToChat(profileId) },
+        onNewMessageClick = { navController.navigateToNewMessage() },
+    )
+}
+
+private fun NavGraphBuilder.chat(
+    route: String,
+    arguments: List<NamedNavArgument>,
+    navController: NavController,
+) = composable(
+    route = route,
+    arguments = arguments,
+) { navBackEntry ->
+    val viewModel = hiltViewModel<ChatViewModel>(navBackEntry)
+    LockToOrientationPortrait()
+    ChatScreen(
+        viewModel = viewModel,
+        onClose = { navController.navigateUp() },
+        onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
+    )
+}
+
+private fun NavGraphBuilder.newMessage(
+    route: String,
+    navController: NavController,
+) = composable(
+    route = route,
+) { navBackEntry ->
+    val viewModel = hiltViewModel<SearchViewModel>(navBackEntry)
+    LockToOrientationPortrait()
+    NewMessageScreen(
+        viewModel = viewModel,
+        onClose = { navController.navigateUp() },
+        onProfileClick = { profileId ->
+            navController.popBackStack()
+            navController.navigateToChat(profileId)
+        },
     )
 }
 

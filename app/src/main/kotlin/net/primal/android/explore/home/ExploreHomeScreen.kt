@@ -208,7 +208,7 @@ fun SearchBar(
         IconText(
             leadingIcon = Icons.Default.Search,
             leadingIconTintColor = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
-            text = stringResource(id = R.string.explore_search_nostr),
+            text = stringResource(id = R.string.explore_search_nostr).lowercase(),
             color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
             style = AppTheme.typography.bodyMedium,
             fontWeight = FontWeight.Medium,

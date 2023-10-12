@@ -130,8 +130,10 @@
     <string name="thread_publishing_button">Replying…</string>
     <string name="thread_reply_nostr_publish_error">Unable to publish your note to Nostr. Please try again soon.</string>
 
-    <string name="explore_search_nostr">search nostr</string>
+    <string name="explore_search_nostr">Search Nostr</string>
     <string name="explore_enter_query">Enter text to search</string>
+
+    <string name="search_followers_text">Followers</string>
 
     <string name="notifications_title">Notifications</string>
     <string name="notifications_no_content">No notifications.</string>
@@ -164,6 +166,14 @@
     <string name="notification_list_button_jump_to_start">New notifications</string>
 
     <string name="messages_title">Messages</string>
+    <string name="messages_follows_tab_title">Follows</string>
+    <string name="messages_other_tab_title">Other</string>
+    <string name="messages_mark_all_read_button">Mark All Read</string>
+
+    <string name="chat_message_hint">Message %1$s</string>
+
+    <string name="new_message_title">New message</string>
+    <string name="new_message_search_hint">Search users</string>
 
     <string name="settings_title">Settings</string>
 

@@ -42,7 +42,9 @@ class SearchViewModel @Inject constructor(
     private fun observeEvents() = viewModelScope.launch {
         _event.collect {
             when (it) {
-                is UiEvent.SearchQueryUpdated -> setState { copy(searchQuery = it.query) }
+                is UiEvent.SearchQueryUpdated -> setState {
+                    copy(searching = true, searchQuery = it.query)
+                }
             }
         }
     }

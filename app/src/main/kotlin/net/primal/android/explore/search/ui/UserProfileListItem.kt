@@ -3,13 +3,16 @@ package net.primal.android.explore.search.ui
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import net.primal.android.R
 import net.primal.android.core.compose.AvatarThumbnailListItemImage
 import net.primal.android.core.utils.shortened
 import net.primal.android.theme.AppTheme
@@ -21,6 +24,9 @@ fun UserProfileListItem(
 ) {
     ListItem(
         modifier = Modifier.clickable { onClick(data.profileId) },
+        colors = ListItemDefaults.colors(
+            containerColor = AppTheme.colorScheme.surfaceVariant,
+        ),
         leadingContent = {
             AvatarThumbnailListItemImage(source = data.avatarUrl)
         },
@@ -53,7 +59,7 @@ fun UserProfileListItem(
                         style = AppTheme.typography.bodyMedium,
                     )
                     Text(
-                        text = "followers",
+                        text = stringResource(id = R.string.search_followers_text).lowercase(),
                         color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
                     )
                 }
