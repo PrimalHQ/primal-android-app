@@ -45,14 +45,14 @@ class MutedSettingsViewModel @Inject constructor(
     private fun observeEvents() = viewModelScope.launch {
         _event.collect {
             when (it) {
-                is MutedSettingsContract.UiEvent.RemovedFromMuteListEvent -> removedFromMutelistEventHandler(
+                is MutedSettingsContract.UiEvent.UnmuteEvent -> unmuteEventHandler(
                     it
                 )
             }
         }
     }
 
-    private suspend fun removedFromMutelistEventHandler(event: MutedSettingsContract.UiEvent.RemovedFromMuteListEvent) {
+    private suspend fun unmuteEventHandler(event: MutedSettingsContract.UiEvent.UnmuteEvent) {
         try {
             mutedUserRepository.unmuteUserAndPersistMutelist(
                 userId = activeAccountStore.activeUserId(),

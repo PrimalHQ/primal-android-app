@@ -93,14 +93,13 @@ class UsersApiImpl @Inject constructor(
         return signedNostrEvent
     }
 
-    @OptIn(ExperimentalSerializationApi::class)
     override suspend fun getUserProfiles(pubkeys: Set<String>): List<NostrEvent> {
         return try {
             val queryResult = primalApiClient.query(
                 message = PrimalCacheFilter(
                     primalVerb = USER_INFOS,
                     optionsJson = NostrJson.encodeToString(
-                        GetUserProfilesRequest(pubkeys = pubkeys.map { JsonUnquotedLiteral(value = it) }.toList())
+                        GetUserProfilesRequest(pubkeys = pubkeys)
                     )
                 )
             )

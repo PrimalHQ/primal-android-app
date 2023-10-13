@@ -150,7 +150,7 @@ fun MutedUserItem(
         PrimalOutlinedButton(
             modifier = Modifier.height(32.dp),
             onClick = {
-
+            eventPublisher(MutedSettingsContract.UiEvent.UnmuteEvent(pubkey = item.pubkey))
         }) {
             Text(
                 text = "Unmute",

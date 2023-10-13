@@ -13,6 +13,6 @@ interface MutedSettingsContract {
     }
 
     sealed class UiEvent {
-        data class RemovedFromMuteListEvent(val pubkey: String) : UiEvent()
+        data class UnmuteEvent(val pubkey: String) : UiEvent()
     }
 }
