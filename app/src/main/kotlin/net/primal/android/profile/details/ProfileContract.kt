@@ -11,6 +11,7 @@ interface ProfileContract {
     data class UiState(
         val profileId: String,
         val isProfileFollowed: Boolean,
+        val isProfileMuted: Boolean,
         val isActiveUser: Boolean,
         val isProfileFeedInActiveUserFeeds: Boolean,
         val profileDetails: ProfileDetailsUi? = null,
@@ -33,6 +34,8 @@ interface ProfileContract {
             data class FailedToUnfollowProfile(val cause: Throwable) : ProfileError()
             data class FailedToAddToFeed(val cause: Throwable) : ProfileError()
             data class FailedToRemoveFeed(val cause: Throwable) : ProfileError()
+            data class FailedToMuteProfile(val cause: Throwable) : ProfileError()
+            data class FailedToUnmuteProfile(val cause: Throwable) : ProfileError()
         }
     }
 
@@ -56,6 +59,8 @@ interface ProfileContract {
         data class UnfollowAction(val profileId: String) : UiEvent()
         data class AddUserFeedAction(val name: String, val directive: String) : UiEvent()
         data class RemoveUserFeedAction(val directive: String) : UiEvent()
+        data class MuteAction(val profileId: String) : UiEvent()
+        data class UnmuteAction(val profileId: String) : UiEvent()
     }
 
 }

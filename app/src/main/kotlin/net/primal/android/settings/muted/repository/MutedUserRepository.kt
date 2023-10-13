@@ -1,9 +1,12 @@
 package net.primal.android.settings.muted.repository
 
 import androidx.room.withTransaction
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.core.utils.usernameUiFriendly
 import net.primal.android.db.PrimalDatabase
@@ -38,6 +41,10 @@ class MutedUserRepository @Inject constructor(
                 pubkey = profileData.ownerId
             )
         }
+    }
+
+    fun isMuted(pubkey: String): Flow<Boolean> {
+        return database.muted().isMuted(pubkey = pubkey)
     }
 
     suspend fun muteUserAndPersistMutelist(userId: String, mutedUserPubkey: String) {

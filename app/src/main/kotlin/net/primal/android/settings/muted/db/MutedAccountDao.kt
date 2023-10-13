@@ -13,6 +13,9 @@ interface MutedAccountDao {
     @Query("SELECT * FROM MutedAccount")
     fun observeAllMuted(): Flow<List<MutedAccount>>
 
+    @Query("SELECT EXISTS(SELECT * FROM MutedAccount WHERE pubkey = :pubkey)")
+    fun isMuted(pubkey: String): Flow<Boolean>
+
     @Query("DELETE FROM MutedAccount")
     fun deleteAll()
 }

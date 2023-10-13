@@ -29,6 +29,7 @@ import net.primal.android.profile.details.ProfileContract.UiState.ProfileError
 import net.primal.android.profile.details.model.ProfileDetailsUi
 import net.primal.android.profile.details.model.ProfileStatsUi
 import net.primal.android.profile.repository.ProfileRepository
+import net.primal.android.settings.muted.repository.MutedUserRepository
 import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.model.ZapTarget
@@ -44,7 +45,8 @@ class ProfileViewModel @Inject constructor(
     private val profileRepository: ProfileRepository,
     private val postRepository: PostRepository,
     private val zapRepository: ZapRepository,
-    private val settingsRepository: SettingsRepository
+    private val settingsRepository: SettingsRepository,
+    private val mutedUserRepository: MutedUserRepository
 ) : ViewModel() {
 
     private val profileId: String = savedStateHandle.profileId ?: activeAccountStore.activeUserId()
@@ -53,6 +55,7 @@ class ProfileViewModel @Inject constructor(
         UiState(
             profileId = profileId,
             isProfileFollowed = false,
+            isProfileMuted = false,
             isActiveUser = false,
             isProfileFeedInActiveUserFeeds = false,
             authoredPosts = feedRepository.feedByDirective(feedDirective = "authored;$profileId")
@@ -71,10 +74,12 @@ class ProfileViewModel @Inject constructor(
     }
 
     init {
+        fetchLatestProfile()
+        fetchLatestMutelist()
         observeEvents()
         observeProfile()
         observeActiveAccount()
-        fetchLatestProfile()
+        observeMutedAccount()
     }
 
     private fun observeEvents() = viewModelScope.launch {
@@ -87,6 +92,8 @@ class ProfileViewModel @Inject constructor(
                 is UiEvent.ZapAction -> zapPost(it)
                 is UiEvent.AddUserFeedAction -> addUserFeed(it)
                 is UiEvent.RemoveUserFeedAction -> removeUserFeed(it)
+                is UiEvent.MuteAction -> mute(it)
+                is UiEvent.UnmuteAction -> unmute(it)
             }
         }
     }
@@ -104,6 +111,12 @@ class ProfileViewModel @Inject constructor(
                     zapOptions = it.appSettings?.zapOptions ?: emptyList(),
                 )
             }
+        }
+    }
+
+    private fun observeMutedAccount() = viewModelScope.launch {
+        mutedUserRepository.isMuted(pubkey = profileId).collect {
+            setState { copy(isProfileMuted = it) }
         }
     }
 
@@ -143,6 +156,14 @@ class ProfileViewModel @Inject constructor(
                     },
                 )
             }
+        }
+    }
+
+    private fun fetchLatestMutelist() = viewModelScope.launch {
+        try {
+            mutedUserRepository.fetchAndPersistMutelist(userId = activeAccountStore.activeUserId())
+        } catch (error: WssException) {
+            // Ignore
         }
     }
 
@@ -259,6 +280,28 @@ class ProfileViewModel @Inject constructor(
             )
         } catch (error: WssException) {
             setErrorState(error = ProfileError.FailedToRemoveFeed(error))
+        }
+    }
+
+    private fun mute(action: UiEvent.MuteAction) = viewModelScope.launch {
+        try {
+            mutedUserRepository.muteUserAndPersistMutelist(
+                userId = activeAccountStore.activeUserId(),
+                mutedUserPubkey = action.profileId
+            )
+        } catch (error: NostrPublishException) {
+            setErrorState(error = ProfileError.FailedToMuteProfile(error))
+        }
+    }
+
+    private fun unmute(action: UiEvent.UnmuteAction) = viewModelScope.launch {
+        try {
+            mutedUserRepository.unmuteUserAndPersistMutelist(
+                userId = activeAccountStore.activeUserId(),
+                unmutedUserPubkey = action.profileId
+            )
+        } catch (error: NostrPublishException) {
+            setErrorState(error = ProfileError.FailedToUnmuteProfile(error))
         }
     }
 

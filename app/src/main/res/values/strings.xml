@@ -13,6 +13,8 @@
     <string name="app_error_removing_feed">Unable to remove selected feed from your feeds. Please try again.</string>
     <string name="app_added_to_user_feeds">Added to your home feeds</string>
     <string name="app_removed_from_user_feeds">Removed from your home feeds</string>
+    <string name="app_error_muting_user">Unable to mute user. Please try again.</string>
+    <string name="app_error_unmuting_user">Unable to unmute user. Please try again.</string>
 
     <string name="welcome_sign_in_button_title">Sign in</string>
     <string name="welcome_sign_in_button_subtitle">Already have a Nostr account? Sign with your Nostr key.</string>
