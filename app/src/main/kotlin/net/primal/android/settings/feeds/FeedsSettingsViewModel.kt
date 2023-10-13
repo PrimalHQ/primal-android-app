@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.settings.feeds.model.Feed
 import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import javax.inject.Inject
@@ -56,7 +57,7 @@ class FeedsSettingsViewModel @Inject constructor(
         }
     }
 
-    private suspend fun feedRemovedHandler(event: FeedsSettingsContract.UiEvent.FeedRemoved) {
+    private fun feedRemovedHandler(event: FeedsSettingsContract.UiEvent.FeedRemoved) = viewModelScope.launch {
         try {
             settingsRepository.removeAndPersistUserFeed(
                 userId = activeAccountStore.activeUserId(),
@@ -73,7 +74,7 @@ class FeedsSettingsViewModel @Inject constructor(
         }
     }
 
-    private suspend fun restoreDefaultFeedsHandler() {
+    private fun restoreDefaultFeedsHandler() = viewModelScope.launch {
         try {
             settingsRepository.restoreDefaultFeeds(userId = activeAccountStore.activeUserId())
         } catch (error: WssException) {

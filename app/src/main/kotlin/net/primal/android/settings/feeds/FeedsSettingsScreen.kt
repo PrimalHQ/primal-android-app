@@ -1,6 +1,7 @@
 package net.primal.android.settings.feeds
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -43,6 +44,8 @@ import net.primal.android.R
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
+import net.primal.android.settings.feeds.model.Feed
+import net.primal.android.settings.feeds.model.FeedAction
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 
@@ -123,18 +126,6 @@ fun FeedsSettingsScreen(
                 verticalArrangement = Arrangement.Top,
                 horizontalAlignment = Alignment.Start
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Start
-                ) {
-                    Text(
-                        text = stringResource(R.string.settings_feeds_list_title).uppercase(),
-                        fontWeight = FontWeight.W500,
-                        fontSize = 14.sp,
-                        lineHeight = 16.sp
-                    )
-                }
-                Spacer(modifier = Modifier.height(12.dp))
                 LazyColumn(
                     modifier = Modifier.fillMaxWidth(),
                 ) {
@@ -151,22 +142,24 @@ fun FeedsSettingsScreen(
                         )
                         Divider(color = AppTheme.colorScheme.outline, thickness = 1.dp)
                     }
-                }
-                Spacer(modifier = Modifier.height(24.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Spacer(modifier = Modifier.weight(1.0f))
-                    Text(
-                        modifier = Modifier.clickable {
-                            openRemoveFeedDialog.value = FeedAction.ConfirmRestoreDefaults
-                        },
-                        text = stringResource(R.string.settings_feeds_restore_default_title).lowercase(),
-                        fontWeight = FontWeight.W500,
-                        fontSize = 18.sp,
-                        lineHeight = 20.sp,
-                        color = AppTheme.colorScheme.primary
-                    )
+                    item {
+                        Spacer(modifier = Modifier.height(24.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Spacer(modifier = Modifier.weight(1.0f))
+                            Text(
+                                modifier = Modifier.clickable {
+                                    openRemoveFeedDialog.value = FeedAction.ConfirmRestoreDefaults
+                                },
+                                text = stringResource(R.string.settings_feeds_restore_default_title).lowercase(),
+                                fontWeight = FontWeight.W500,
+                                fontSize = 18.sp,
+                                lineHeight = 20.sp,
+                                color = AppTheme.colorScheme.primary
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -215,6 +208,7 @@ fun ConfirmActionAlertDialog(
     icon: ImageVector,
 ) {
     AlertDialog(
+        containerColor = AppTheme.colorScheme.surface,
         icon = {
             Icon(icon, contentDescription = null)
         },

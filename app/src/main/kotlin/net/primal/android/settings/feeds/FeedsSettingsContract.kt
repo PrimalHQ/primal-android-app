@@ -1,5 +1,7 @@
 package net.primal.android.settings.feeds
 
+import net.primal.android.settings.feeds.model.Feed
+
 interface FeedsSettingsContract {
     data class UiState(
         val feeds: List<Feed> = emptyList(),
@@ -17,10 +19,6 @@ interface FeedsSettingsContract {
     }
 }
 
-data class Feed(val name: String, val directive: String, val isRemovable: Boolean)
 
-sealed class FeedAction {
-    data class ConfirmRemove(var directive: String, var name: String, var openDialog: Boolean) : FeedAction()
-    data object ConfirmRestoreDefaults : FeedAction()
-    data object Inactive : FeedAction()
-}
+
+
