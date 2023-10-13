@@ -1,7 +1,10 @@
 package net.primal.android.settings.muted.repository
 
 import androidx.room.withTransaction
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
 import net.primal.android.core.utils.usernameUiFriendly
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.nostr.ext.asProfileDataPO
@@ -15,7 +18,14 @@ class MutedUserRepository @Inject constructor(
     private val settingsApi: SettingsApi,
     private val usersApi: UsersApi
 ) {
+    suspend fun fetchAndPersistMutelist(userId: String) = withContext(Dispatchers.IO) {
+        val mutelist = fetchMutelist(userId = userId)
+        persistMutelist(mutelist = mutelist)
+    }
+
     val mutedUsers = database.muted().observeAllMuted().map {
+        if (it.isEmpty()) return@map emptyList()
+
         val response = usersApi.getUserProfiles(it.map { muted -> muted.pubkey }.toSet())
 
         return@map response.map { r ->

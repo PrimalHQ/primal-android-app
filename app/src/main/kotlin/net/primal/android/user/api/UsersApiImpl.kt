@@ -1,6 +1,9 @@
 package net.primal.android.user.api
 
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.JsonUnquotedLiteral
 import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.primal.PrimalCacheFilter
@@ -90,13 +93,14 @@ class UsersApiImpl @Inject constructor(
         return signedNostrEvent
     }
 
+    @OptIn(ExperimentalSerializationApi::class)
     override suspend fun getUserProfiles(pubkeys: Set<String>): List<NostrEvent> {
         return try {
             val queryResult = primalApiClient.query(
                 message = PrimalCacheFilter(
                     primalVerb = USER_INFOS,
                     optionsJson = NostrJson.encodeToString(
-                        GetUserProfilesRequest(pubkeys = pubkeys)
+                        GetUserProfilesRequest(pubkeys = pubkeys.map { JsonUnquotedLiteral(value = it) }.toList())
                     )
                 )
             )

@@ -31,6 +31,7 @@ class MutedSettingsViewModel @Inject constructor(
     }
 
     init {
+        fetchLatestMutelist()
         observeMutedUsers()
         observeEvents()
     }
@@ -70,5 +71,11 @@ class MutedSettingsViewModel @Inject constructor(
                     }
             }
         }
+    }
+
+    private fun fetchLatestMutelist() = viewModelScope.launch {
+        mutedUserRepository.fetchAndPersistMutelist(
+            userId = activeAccountStore.activeUserId()
+        )
     }
 }

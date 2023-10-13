@@ -16,6 +16,7 @@ import net.primal.android.auth.login.LoginContract.SideEffect
 import net.primal.android.auth.login.LoginContract.UiEvent
 import net.primal.android.auth.login.LoginContract.UiState
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.settings.muted.repository.MutedUserRepository
 import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.user.repository.UserRepository
 import javax.inject.Inject
@@ -26,6 +27,7 @@ class LoginViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
     private val authRepository: AuthRepository,
     private val userRepository: UserRepository,
+    private val mutedUserRepository: MutedUserRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(UiState(loading = false))
@@ -63,6 +65,7 @@ class LoginViewModel @Inject constructor(
             val pubkey = authRepository.login(nostrKey = nostrKey)
             userRepository.fetchAndUpdateUserAccount(userId = pubkey)
             settingsRepository.fetchAndPersistAppSettings(userId = pubkey)
+            mutedUserRepository.fetchAndPersistMutelist(userId = pubkey)
             setEffect(SideEffect.LoginSuccess(pubkey = pubkey))
         } catch (error: WssException) {
             setErrorState(error = UiState.LoginError.GenericError(error))
