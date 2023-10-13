@@ -40,7 +40,6 @@ import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.feed.model.FeedPostAction
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.isEmpty
-import net.primal.android.profile.details.ProfileContract
 import net.primal.android.theme.AppTheme
 
 @ExperimentalMaterial3Api
@@ -51,6 +50,7 @@ fun FeedLazyColumn(
     contentPadding: PaddingValues,
     listState: LazyListState,
     onUnmuteClick: (() -> Unit)? = null,
+    onMuteClick: ((String) -> Unit)? = null,
     onPostClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
     onPostLikeClick: (FeedPostUi) -> Unit,
@@ -110,14 +110,12 @@ fun FeedLazyColumn(
             }
         }
 
-        when (pagingItems.loadState.mediator?.prepend) {
-            is LoadState.Error -> item(contentType = "Error") {
+        if (pagingItems.loadState.mediator?.prepend is LoadState.Error && !isProfileMuted) {
+            item(contentType = "Error") {
                 ListLoadingError(
                     text = stringResource(R.string.app_error_loading_prev_page)
                 )
             }
-
-            else -> Unit
         }
 
         if (isProfileMuted) {
@@ -172,6 +170,7 @@ fun FeedLazyColumn(
                                 }
                             },
                             onHashtagClick = onHashtagClick,
+                            onMuteUserClick = { onMuteClick?.invoke(item.authorId) }
                         )
 
                         PrimalDivider()

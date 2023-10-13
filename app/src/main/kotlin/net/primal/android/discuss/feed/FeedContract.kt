@@ -26,6 +26,7 @@ interface FeedContract {
             data class FailedToPublishRepostEvent(val cause: Throwable) : FeedError()
             data class FailedToPublishLikeEvent(val cause: Throwable) : FeedError()
             data class MissingRelaysConfiguration(val cause: Throwable) : FeedError()
+            data class FailedToMuteUser(val cause: Throwable) : FeedError()
         }
     }
 
@@ -46,6 +47,8 @@ interface FeedContract {
             val zapAmount: ULong?,
             val zapDescription: String?,
         ) : UiEvent()
+
+        data class MuteAction(val userId: String) : UiEvent()
     }
 
 }

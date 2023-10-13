@@ -307,6 +307,9 @@ fun ThreadScreen(
                                 }
                             },
                             onHashtagClick = onHashtagClick,
+                            onMuteUserClick = {
+                                eventPublisher(ThreadContract.UiEvent.MuteAction(item.authorId))
+                            }
                         )
 
                         if (!connectedToNextNote) {
@@ -521,6 +524,7 @@ private fun ErrorHandler(
             is ThreadError.FailedToPublishRepostEvent -> context.getString(R.string.post_action_repost_failed)
             is ThreadError.FailedToPublishReplyEvent -> context.getString(R.string.post_action_reply_failed)
             is ThreadError.MissingRelaysConfiguration -> context.getString(R.string.app_missing_relays_config)
+            is ThreadError.FailedToMuteUser -> context.getString(R.string.app_error_muting_user)
             null -> return@LaunchedEffect
         }
 

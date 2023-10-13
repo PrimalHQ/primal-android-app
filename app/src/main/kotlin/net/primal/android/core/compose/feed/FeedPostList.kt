@@ -63,6 +63,7 @@ fun FeedPostList(
     bottomBarHeightPx: Float = 0F,
     bottomBarOffsetHeightPx: Float = 0F,
     onScrolledToTop: (() -> Unit)? = null,
+    onMuteClick: ((String) -> Unit)? = null
 ) {
     val uiScope = rememberCoroutineScope()
 
@@ -104,7 +105,8 @@ fun FeedPostList(
             onWalletUnavailable = onWalletUnavailable,
             defaultZapAmount = defaultZapAmount,
             zapOptions = zapOptions,
-            onUnmuteClick = null
+            onUnmuteClick = null,
+            onMuteClick = onMuteClick
         )
 
         AnimatedVisibility(

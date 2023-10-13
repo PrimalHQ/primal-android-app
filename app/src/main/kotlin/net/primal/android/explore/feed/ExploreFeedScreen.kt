@@ -169,6 +169,9 @@ fun ExploreFeedScreen(
                 onWalletUnavailable = onWalletUnavailable,
                 defaultZapAmount = state.defaultZapAmount,
                 zapOptions = state.zapOptions,
+                onMuteClick = {
+                    eventPublisher(ExploreFeedContract.UiEvent.MuteAction(profileId = it))
+                }
             )
         },
         snackbarHost = {
@@ -193,6 +196,7 @@ private fun ErrorHandler(
             is ExploreFeedError.MissingRelaysConfiguration -> context.getString(R.string.app_missing_relays_config)
             is ExploreFeedError.FailedToAddToFeed -> context.getString(R.string.app_error_adding_to_feed)
             is ExploreFeedError.FailedToRemoveFeed -> context.getString(R.string.app_error_removing_feed)
+            is ExploreFeedError.FailedToMuteUser -> context.getString(R.string.app_error_muting_user)
             null -> return@LaunchedEffect
         }
 

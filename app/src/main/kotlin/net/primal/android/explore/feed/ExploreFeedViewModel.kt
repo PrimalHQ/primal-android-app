@@ -25,6 +25,7 @@ import net.primal.android.navigation.searchQuery
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.settings.muted.repository.MutedUserRepository
 import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
@@ -40,7 +41,8 @@ class ExploreFeedViewModel @Inject constructor(
     private val feedRepository: FeedRepository,
     private val postRepository: PostRepository,
     private val zapRepository: ZapRepository,
-    private val settingsRepository: SettingsRepository
+    private val settingsRepository: SettingsRepository,
+    private val mutedUserRepository: MutedUserRepository
 ) : ViewModel() {
 
     private val exploreQuery = "search;\"${savedStateHandle.searchQuery}\""
@@ -85,6 +87,7 @@ class ExploreFeedViewModel @Inject constructor(
                 is UiEvent.PostLikeAction -> likePost(it)
                 is UiEvent.RepostAction -> repostPost(it)
                 is UiEvent.ZapAction -> zapPost(it)
+                is UiEvent.MuteAction -> mute(it)
             }
         }
     }
@@ -178,6 +181,22 @@ class ExploreFeedViewModel @Inject constructor(
             setErrorState(error = ExploreFeedError.MissingRelaysConfiguration(error))
         } catch (error: ZapRepository.InvalidZapRequestException) {
             setErrorState(error = ExploreFeedError.InvalidZapRequest(error))
+        }
+    }
+
+    private fun mute(action: UiEvent.MuteAction) = viewModelScope.launch {
+        try {
+            mutedUserRepository.muteUserAndPersistMutelist(
+                userId = activeAccountStore.activeUserId(),
+                mutedUserPubkey = action.profileId
+            )
+        } catch (error: Exception) {
+            when (error) {
+                is NostrPublishException,
+                is WssException -> {
+                    setErrorState(error = ExploreFeedError.FailedToMuteUser(error))
+                }
+            }
         }
     }
 

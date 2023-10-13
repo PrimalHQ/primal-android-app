@@ -9,11 +9,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -46,6 +48,7 @@ import net.primal.android.core.compose.icons.primaliconpack.ContextCopyNoteLink
 import net.primal.android.core.compose.icons.primaliconpack.ContextCopyNoteText
 import net.primal.android.core.compose.icons.primaliconpack.ContextCopyPublicKey
 import net.primal.android.core.compose.icons.primaliconpack.ContextCopyRawData
+import net.primal.android.core.compose.icons.primaliconpack.ContextMuteUser
 import net.primal.android.core.compose.icons.primaliconpack.ContextShare
 import net.primal.android.core.compose.icons.primaliconpack.More
 import net.primal.android.core.ext.openUriSafely
@@ -74,6 +77,7 @@ fun FeedPostListItem(
     onPostAction: (FeedPostAction) -> Unit,
     onPostLongClickAction: (FeedPostAction) -> Unit,
     onHashtagClick: (String) -> Unit,
+    onMuteUserClick: () -> Unit
 ) {
     val localUriHandler = LocalUriHandler.current
     val uiScope = rememberCoroutineScope()
@@ -124,6 +128,7 @@ fun FeedPostListItem(
                 noteContent = data.content,
                 noteRawData = data.rawNostrEventJson,
                 authorId = data.authorId,
+                onMuteUserClick = onMuteUserClick
             )
         }
 
@@ -177,6 +182,7 @@ private fun NoteDropdownMenu(
     noteContent: String,
     noteRawData: String,
     authorId: String,
+    onMuteUserClick: () -> Unit,
 ) {
     var menuVisible by remember { mutableStateOf(false) }
 
@@ -251,6 +257,16 @@ private fun NoteDropdownMenu(
                     uiScope.launch { Toast.makeText(context, copyConfirmationText, Toast.LENGTH_SHORT).show() }
                 }
             )
+            Divider(modifier = Modifier.fillMaxWidth().height(1.dp))
+            DropdownMenuItem(
+                trailingIcon = { Icon(imageVector = PrimalIcons.ContextMuteUser, contentDescription = null) },
+                text = { DropdownMenuItemText(text = "Mute user") },
+                onClick = {
+                    onMuteUserClick()
+                    menuVisible = false
+                    uiScope.launch { Toast.makeText(context, "Muted!", Toast.LENGTH_SHORT).show() }
+                }
+            )
         }
     }
 }
@@ -296,6 +312,7 @@ fun PreviewFeedPostListItemLight() {
             onPostAction = {},
             onPostLongClickAction = {},
             onHashtagClick = {},
+            onMuteUserClick = {}
         )
     }
 }
@@ -341,6 +358,7 @@ fun PreviewFeedPostListItemDark() {
             onPostAction = {},
             onPostLongClickAction = {},
             onHashtagClick = {},
+            onMuteUserClick = {}
         )
     }
 
