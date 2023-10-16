@@ -23,6 +23,7 @@ interface ThreadContract {
             data class FailedToPublishReplyEvent(val cause: Throwable) : ThreadError()
             data class FailedToPublishLikeEvent(val cause: Throwable) : ThreadError()
             data class MissingRelaysConfiguration(val cause: Throwable) : ThreadError()
+            data class FailedToMuteUser(val cause: Throwable) : ThreadError()
         }
     }
 
@@ -48,5 +49,6 @@ interface ThreadContract {
             val replyToPostId: String,
             val replyToAuthorId: String,
         ) : UiEvent()
+        data class MuteAction(val postAuthorId: String) : UiEvent()
     }
 }

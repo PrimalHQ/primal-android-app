@@ -24,8 +24,8 @@ import net.primal.android.feed.db.PostStats
 import net.primal.android.feed.db.PostStatsDao
 import net.primal.android.feed.db.RepostDao
 import net.primal.android.feed.db.RepostData
-import net.primal.android.notifications.db.NotificationData
 import net.primal.android.notifications.db.NotificationDao
+import net.primal.android.notifications.db.NotificationData
 import net.primal.android.profile.db.PostUserStats
 import net.primal.android.profile.db.PostUserStatsDao
 import net.primal.android.profile.db.ProfileData
@@ -33,6 +33,8 @@ import net.primal.android.profile.db.ProfileDataDao
 import net.primal.android.profile.db.ProfileStats
 import net.primal.android.profile.db.ProfileStatsDao
 import net.primal.android.serialization.RoomCustomTypeConverters
+import net.primal.android.settings.muted.db.MutedAccount
+import net.primal.android.settings.muted.db.MutedAccountDao
 import net.primal.android.thread.db.ConversationCrossRef
 import net.primal.android.thread.db.ConversationCrossRefDao
 import net.primal.android.thread.db.ConversationDao
@@ -54,8 +56,9 @@ import net.primal.android.thread.db.ConversationDao
         ProfileStats::class,
         NostrResource::class,
         NotificationData::class,
+        MutedAccount::class
     ],
-    version = 8,
+    version = 9,
     exportSchema = true,
 )
 @TypeConverters(RoomCustomTypeConverters::class)
@@ -94,4 +97,6 @@ abstract class PrimalDatabase : RoomDatabase() {
     abstract fun profileStats(): ProfileStatsDao
 
     abstract fun notifications(): NotificationDao
+
+    abstract fun muted(): MutedAccountDao
 }

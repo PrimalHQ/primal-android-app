@@ -13,6 +13,8 @@
     <string name="app_error_removing_feed">Unable to remove selected feed from your feeds. Please try again.</string>
     <string name="app_added_to_user_feeds">Added to your home feeds</string>
     <string name="app_removed_from_user_feeds">Removed from your home feeds</string>
+    <string name="app_error_muting_user">Unable to mute user. Please try again.</string>
+    <string name="app_error_unmuting_user">Unable to unmute user. Please try again.</string>
 
     <string name="welcome_sign_in_button_title">Sign in</string>
     <string name="welcome_sign_in_button_subtitle">Already have a Nostr account? Sign with your Nostr key.</string>
@@ -222,6 +224,8 @@
     <string name="settings_zaps_title">Zaps</string>
     <string name="settings_zaps_default_zap_amount_header">Set default zap amount</string>
     <string name="settings_zaps_custom_zaps_header">Set custom zap amounts</string>
+
+    <string name="settings_muted_accounts_title">Muted Accounts</string>
 
     <string name="settings_version_title">Version</string>
 

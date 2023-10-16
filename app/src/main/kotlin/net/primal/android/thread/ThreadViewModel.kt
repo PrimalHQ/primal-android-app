@@ -16,12 +16,14 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.core.compose.feed.asFeedPostUi
+import net.primal.android.explore.feed.ExploreFeedContract
 import net.primal.android.feed.repository.FeedRepository
 import net.primal.android.feed.repository.PostRepository
 import net.primal.android.navigation.postId
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.settings.muted.repository.MutedUserRepository
 import net.primal.android.thread.ThreadContract.UiEvent
 import net.primal.android.thread.ThreadContract.UiState.ThreadError
 import net.primal.android.user.accounts.active.ActiveAccountStore
@@ -38,7 +40,8 @@ class ThreadViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val feedRepository: FeedRepository,
     private val postRepository: PostRepository,
-    private val zapRepository: ZapRepository
+    private val zapRepository: ZapRepository,
+    private val mutedUserRepository: MutedUserRepository
 ) : ViewModel() {
 
     private val postId = savedStateHandle.postId
@@ -68,6 +71,7 @@ class ThreadViewModel @Inject constructor(
                 is UiEvent.ReplyToAction -> publishReply(it)
                 is UiEvent.UpdateReply -> updateReply(it)
                 is UiEvent.ZapAction -> zapPost(it)
+                is UiEvent.MuteAction -> mute(it)
                 UiEvent.UpdateConversation -> fetchRepliesFromNetwork()
             }
         }
@@ -216,6 +220,22 @@ class ThreadViewModel @Inject constructor(
             setErrorState(error = ThreadError.MissingRelaysConfiguration(error))
         } finally {
             setState { copy(publishingReply = false) }
+        }
+    }
+
+    private fun mute(action: UiEvent.MuteAction) = viewModelScope.launch {
+        try {
+            mutedUserRepository.muteUserAndPersistMutelist(
+                userId = activeAccountStore.activeUserId(),
+                mutedUserPubkey = action.postAuthorId
+            )
+        } catch (error: Exception) {
+            when (error) {
+                is NostrPublishException,
+                is WssException -> {
+                    setErrorState(error = ThreadError.FailedToMuteUser(error))
+                }
+            }
         }
     }
 

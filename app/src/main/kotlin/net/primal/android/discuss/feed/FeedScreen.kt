@@ -196,6 +196,9 @@ fun FeedScreen(
                 onScrolledToTop = {
                     eventPublisher(FeedContract.UiEvent.FeedScrolledToTop)
                 },
+                onMuteClick = {
+                    eventPublisher(FeedContract.UiEvent.MuteAction(it))
+                }
             )
         },
         floatingActionButton = {

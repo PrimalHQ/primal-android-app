@@ -20,7 +20,6 @@ class SettingsRepository @Inject constructor(
     private val database: PrimalDatabase,
     private val accountsStore: UserAccountsStore,
 ) {
-
     suspend fun fetchAndPersistAppSettings(userId: String) = withContext(Dispatchers.IO) {
         val appSettings = fetchAppSettings(userId = userId) ?: return@withContext
         persistAppSettings(userId = userId, appSettings = appSettings)
@@ -96,8 +95,8 @@ class SettingsRepository @Inject constructor(
     }
 
     private suspend fun persistAppSettings(userId: String, appSettings: ContentAppSettings) {
-        val currentUserAccount = accountsStore.findByIdOrNull(userId = userId)
-            ?: UserAccount.buildLocal(pubkey = userId)
+        val currentUserAccount =
+            accountsStore.findByIdOrNull(userId = userId) ?: UserAccount.buildLocal(pubkey = userId)
 
         val userFeeds = appSettings.feeds.distinctBy { it.directive }.map { it.asFeedPO() }
         val hasLatestFeed = userFeeds.find { it.directive == userId } != null

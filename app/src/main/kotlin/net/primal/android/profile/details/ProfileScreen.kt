@@ -32,6 +32,7 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -98,6 +99,7 @@ import net.primal.android.core.compose.foundation.ClickDebounce
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
+import net.primal.android.core.compose.icons.primaliconpack.ContextMuteUser
 import net.primal.android.core.compose.icons.primaliconpack.ContextShare
 import net.primal.android.core.compose.icons.primaliconpack.Key
 import net.primal.android.core.compose.icons.primaliconpack.Link
@@ -246,9 +248,14 @@ fun ProfileScreen(
             FeedLazyColumn(
                 contentPadding = PaddingValues(0.dp),
                 pagingItems = pagingItems,
+                isProfileMuted = state.isProfileMuted,
+                profileName = state.profileDetails?.authorDisplayName ?: "",
                 walletConnected = state.walletConnected,
                 listState = listState,
                 onPostClick = onPostClick,
+                onUnmuteClick = {
+                    eventPublisher(ProfileContract.UiEvent.UnmuteAction(state.profileId))
+                },
                 onProfileClick = {
                     if (state.profileId != it) {
                         onProfileClick(it)
@@ -431,6 +438,7 @@ private fun ProfileTopCoverBar(
                 ProfileDropdownMenu(
                     profileId = state.profileId,
                     isActiveUser = state.isActiveUser,
+                    isProfileMuted = state.isProfileMuted,
                     isProfileFeedInActiveUserFeeds = state.isProfileFeedInActiveUserFeeds,
                     snackbarHostState = snackbarHostState,
                     uiScope = uiScope,
@@ -466,6 +474,7 @@ private fun ProfileTopCoverBar(
 private fun ProfileDropdownMenu(
     profileId: String,
     isActiveUser: Boolean,
+    isProfileMuted: Boolean,
     isProfileFeedInActiveUserFeeds: Boolean,
     snackbarHostState: SnackbarHostState,
     uiScope: CoroutineScope,
@@ -506,9 +515,11 @@ private fun ProfileDropdownMenu(
                 text = { DropdownMenuItemText(text = text) },
                 onClick = {
                     if (isProfileFeedInActiveUserFeeds) {
-                        eventPublisher(ProfileContract.UiEvent.RemoveUserFeedAction(
-                            directive = profileId
-                        ))
+                        eventPublisher(
+                            ProfileContract.UiEvent.RemoveUserFeedAction(
+                                directive = profileId
+                            )
+                        )
                         uiScope.launch {
                             snackbarHostState.showSnackbar(
                                 message = removedFromUserFeedsMessage,
@@ -516,10 +527,12 @@ private fun ProfileDropdownMenu(
                             )
                         }
                     } else {
-                        eventPublisher(ProfileContract.UiEvent.AddUserFeedAction(
-                            name = title,
-                            directive = profileId,
-                        ))
+                        eventPublisher(
+                            ProfileContract.UiEvent.AddUserFeedAction(
+                                name = title,
+                                directive = profileId,
+                            )
+                        )
                         uiScope.launch {
                             snackbarHostState.showSnackbar(
                                 message = addedToUserFeedsMessage,
@@ -548,6 +561,34 @@ private fun ProfileDropdownMenu(
                 menuVisible = false
             }
         )
+
+        if (!isActiveUser) {
+            Divider(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(1.dp)
+            )
+
+            val text = if (isProfileMuted) "Unmute user" else "Mute user"
+            val action =
+                if (isProfileMuted) ProfileContract.UiEvent.UnmuteAction(profileId = profileId) else ProfileContract.UiEvent.MuteAction(
+                    profileId = profileId
+                )
+
+            DropdownMenuItem(
+                trailingIcon = {
+                    Icon(
+                        imageVector = PrimalIcons.ContextMuteUser,
+                        contentDescription = null
+                    )
+                },
+                text = {
+                    DropdownMenuItemText(text = text)
+                }, onClick = {
+                    eventPublisher(action)
+                    menuVisible = false
+                })
+        }
     }
 }
 
@@ -909,6 +950,8 @@ private fun ErrorHandler(
             is ProfileError.MissingRelaysConfiguration -> context.getString(R.string.app_missing_relays_config)
             is ProfileError.FailedToAddToFeed -> context.getString(R.string.app_error_adding_to_feed)
             is ProfileError.FailedToRemoveFeed -> context.getString(R.string.app_error_removing_feed)
+            is ProfileError.FailedToMuteProfile -> context.getString(R.string.app_error_muting_user)
+            is ProfileError.FailedToUnmuteProfile -> context.getString(R.string.app_error_unmuting_user)
             else -> return@LaunchedEffect
         }
 
@@ -927,6 +970,7 @@ fun PreviewProfileScreen() {
             state = ProfileContract.UiState(
                 profileId = "profileId",
                 isProfileFollowed = false,
+                isProfileMuted = false,
                 isActiveUser = true,
                 isProfileFeedInActiveUserFeeds = false,
                 authoredPosts = emptyFlow(),

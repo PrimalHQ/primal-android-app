@@ -1,24 +1,33 @@
 package net.primal.android.core.compose.feed
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.itemContentType
@@ -31,6 +40,7 @@ import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.feed.model.FeedPostAction
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.isEmpty
+import net.primal.android.theme.AppTheme
 
 @ExperimentalMaterial3Api
 @ExperimentalFoundationApi
@@ -39,6 +49,8 @@ fun FeedLazyColumn(
     pagingItems: LazyPagingItems<FeedPostUi>,
     contentPadding: PaddingValues,
     listState: LazyListState,
+    onUnmuteClick: (() -> Unit)? = null,
+    onMuteClick: ((String) -> Unit)? = null,
     onPostClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
     onPostLikeClick: (FeedPostUi) -> Unit,
@@ -55,6 +67,8 @@ fun FeedLazyColumn(
     shouldShowNoContentState: Boolean = true,
     header: @Composable (LazyItemScope.() -> Unit)? = null,
     stickyHeader: @Composable (LazyItemScope.() -> Unit)? = null,
+    isProfileMuted: Boolean = false,
+    profileName: String = ""
 ) {
 
     var repostQuotePostConfirmation by remember { mutableStateOf<FeedPostUi?>(null) }
@@ -96,66 +110,74 @@ fun FeedLazyColumn(
             }
         }
 
-        when (pagingItems.loadState.mediator?.prepend) {
-            is LoadState.Error -> item(contentType = "Error") {
+        if (pagingItems.loadState.mediator?.prepend is LoadState.Error && !isProfileMuted) {
+            item(contentType = "Error") {
                 ListLoadingError(
                     text = stringResource(R.string.app_error_loading_prev_page)
                 )
             }
-
-            else -> Unit
         }
 
-        items(
-            count = pagingItems.itemCount,
-            key = pagingItems.itemKey(key = { "${it.postId}${it.repostId}" }),
-            contentType = pagingItems.itemContentType()
-        ) { index ->
-            val item = pagingItems[index]
+        if (isProfileMuted) {
+            item {
+                ProfileMuted(
+                    profileName = profileName,
+                    onUnmuteClick = { onUnmuteClick?.invoke() }
+                )
+            }
+        } else {
+            items(
+                count = pagingItems.itemCount,
+                key = pagingItems.itemKey(key = { "${it.postId}${it.repostId}" }),
+                contentType = pagingItems.itemContentType()
+            ) { index ->
+                val item = pagingItems[index]
 
-            when {
-                item != null -> Column {
-                    FeedPostListItem(
-                        data = item,
-                        shape = RectangleShape,
-                        cardPadding = PaddingValues(all = 0.dp),
-                        onPostClick = { postId -> onPostClick(postId) },
-                        onProfileClick = { profileId -> onProfileClick(profileId) },
-                        onPostAction = { postAction ->
-                            when (postAction) {
-                                FeedPostAction.Reply -> onPostReplyClick(item.postId)
-                                FeedPostAction.Zap -> {
-                                    if (walletConnected) {
-                                        onZapClick(item, null, null)
-                                    } else {
-                                        onWalletUnavailable()
+                when {
+                    item != null -> Column {
+                        FeedPostListItem(
+                            data = item,
+                            shape = RectangleShape,
+                            cardPadding = PaddingValues(all = 0.dp),
+                            onPostClick = { postId -> onPostClick(postId) },
+                            onProfileClick = { profileId -> onProfileClick(profileId) },
+                            onPostAction = { postAction ->
+                                when (postAction) {
+                                    FeedPostAction.Reply -> onPostReplyClick(item.postId)
+                                    FeedPostAction.Zap -> {
+                                        if (walletConnected) {
+                                            onZapClick(item, null, null)
+                                        } else {
+                                            onWalletUnavailable()
+                                        }
                                     }
-                                }
 
-                                FeedPostAction.Like -> onPostLikeClick(item)
-                                FeedPostAction.Repost -> repostQuotePostConfirmation = item
-                            }
-                        },
-                        onPostLongClickAction = { postAction ->
-                            when (postAction) {
-                                FeedPostAction.Zap -> {
-                                    if (walletConnected) {
-                                        zapOptionsPostConfirmation = item
-                                    } else {
-                                        onWalletUnavailable()
+                                    FeedPostAction.Like -> onPostLikeClick(item)
+                                    FeedPostAction.Repost -> repostQuotePostConfirmation = item
+                                }
+                            },
+                            onPostLongClickAction = { postAction ->
+                                when (postAction) {
+                                    FeedPostAction.Zap -> {
+                                        if (walletConnected) {
+                                            zapOptionsPostConfirmation = item
+                                        } else {
+                                            onWalletUnavailable()
+                                        }
                                     }
+
+                                    else -> Unit
                                 }
+                            },
+                            onHashtagClick = onHashtagClick,
+                            onMuteUserClick = { onMuteClick?.invoke(item.authorId) }
+                        )
 
-                                else -> Unit
-                            }
-                        },
-                        onHashtagClick = onHashtagClick,
-                    )
+                        PrimalDivider()
+                    }
 
-                    PrimalDivider()
+                    else -> {}
                 }
-
-                else -> {}
             }
         }
 
@@ -204,5 +226,36 @@ fun FeedLazyColumn(
 
             else -> Unit
         }
+    }
+}
+
+@Composable
+private fun ProfileMuted(
+    profileName: String,
+    onUnmuteClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = "$profileName is muted",
+            fontWeight = FontWeight.W400,
+            fontSize = 20.sp,
+            lineHeight = 20.sp,
+            color = AppTheme.extraColorScheme.onSurfaceVariantAlt1
+        )
+        Spacer(modifier = Modifier.width(12.dp))
+        Text(
+            modifier = Modifier.clickable {
+                onUnmuteClick()
+            },
+            text = "unmute",
+            fontWeight = FontWeight.W400,
+            fontSize = 20.sp,
+            lineHeight = 20.sp,
+            color = AppTheme.colorScheme.primary
+        )
     }
 }

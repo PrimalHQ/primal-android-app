@@ -21,6 +21,8 @@ import net.primal.android.settings.home.SettingsHomeScreen
 import net.primal.android.settings.home.SettingsHomeViewModel
 import net.primal.android.settings.keys.KeysScreen
 import net.primal.android.settings.keys.KeysViewModel
+import net.primal.android.settings.muted.MutedSettingsScreen
+import net.primal.android.settings.muted.MutedSettingsViewModel
 import net.primal.android.settings.notifications.NotificationsSettingsScreen
 import net.primal.android.settings.notifications.NotificationsSettingsViewModel
 import net.primal.android.settings.wallet.WalletScreen
@@ -36,6 +38,7 @@ fun NavController.navigateToNotificationsSettings() = navigate(route = "notifica
 private fun NavController.navigateToNetwork() = navigate(route = "network_settings")
 private fun NavController.navigateToFeeds() = navigate(route = "feeds_settings")
 private fun NavController.navigateToZaps() = navigate(route = "zaps_settings")
+private fun NavController.navigateToMutedAccounts() = navigate(route = "muted_accounts_settings")
 
 fun NavGraphBuilder.settingsNavigation(
     route: String,
@@ -56,6 +59,7 @@ fun NavGraphBuilder.settingsNavigation(
                 PrimalSettingsSection.Network -> navController.navigateToNetwork()
                 PrimalSettingsSection.Feeds -> navController.navigateToFeeds()
                 PrimalSettingsSection.Zaps -> navController.navigateToZaps()
+                PrimalSettingsSection.MutedAccounts -> navController.navigateToMutedAccounts()
             }
         }
     )
@@ -72,6 +76,7 @@ fun NavGraphBuilder.settingsNavigation(
         navController = navController
     )
     appearance(route = "appearance_settings", navController = navController)
+    mutedAccounts(route = "muted_accounts_settings", navController = navController)
     notifications(route = "notifications_settings", navController = navController)
     network(route = "network_settings", navController = navController)
     feeds(route = "feeds_settings", navController = navController)
@@ -174,4 +179,12 @@ private fun NavGraphBuilder.zaps(route: String, navController: NavController) = 
         viewModel = viewModel,
         onClose = { navController.navigateUp() },
     )
+}
+
+private fun NavGraphBuilder.mutedAccounts(route: String, navController: NavController) = composable(
+    route = route
+) {
+    val viewModel = hiltViewModel<MutedSettingsViewModel>(it)
+    LockToOrientationPortrait()
+    MutedSettingsScreen(viewModel = viewModel, onClose = { navController.navigateUp() })
 }
