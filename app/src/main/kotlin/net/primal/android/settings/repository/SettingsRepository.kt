@@ -60,6 +60,17 @@ class SettingsRepository @Inject constructor(
         }
     }
 
+    suspend fun updateAndPersistFeeds(userId: String, feeds: List<ContentFeedData>) {
+        updateAndPersistAppSettings(userId = userId) {
+            copy(feeds = feeds)
+        }
+    }
+
+    suspend fun restoreDefaultFeeds(userId: String) {
+        val remoteDefaultAppSettings = fetchDefaultAppSettings(userId = userId) ?: return
+        updateAndPersistFeeds(userId = userId, feeds = remoteDefaultAppSettings.feeds)
+    }
+
     private suspend fun updateAndPersistAppSettings(
         userId: String,
         reducer: ContentAppSettings.() -> ContentAppSettings,
@@ -77,29 +88,38 @@ class SettingsRepository @Inject constructor(
         )
     }
 
+    private suspend fun fetchDefaultAppSettings(userId: String): ContentAppSettings? {
+        val response = settingsApi.getDefaultAppSettings(pubkey = userId)
+        return NostrJson.decodeFromStringOrNull<ContentAppSettings>(
+            string = response.defaultSettings?.content
+        )
+    }
+
     private suspend fun persistAppSettings(userId: String, appSettings: ContentAppSettings) {
         val currentUserAccount = accountsStore.findByIdOrNull(userId = userId)
             ?: UserAccount.buildLocal(pubkey = userId)
 
+        val userFeeds = appSettings.feeds.distinctBy { it.directive }.map { it.asFeedPO() }
+        val hasLatestFeed = userFeeds.find { it.directive == userId } != null
+        val finalFeeds = if (hasLatestFeed) userFeeds else {
+            userFeeds.toMutableList().apply {
+                add(0, Feed(directive = userId, name = "Latest"))
+            }
+        }
+
         accountsStore.upsertAccount(
             userAccount = currentUserAccount.copy(
-                appSettings = appSettings,
+                appSettings = appSettings.copy(feeds = finalFeeds.map { it.asContentFeedData() }),
             )
         )
 
         database.withTransaction {
-            val userFeeds = appSettings.feeds.distinctBy { it.directive }.map { it.asFeedPO() }
-            val hasLatestFeed = userFeeds.find { it.directive == userId } != null
-            val finalFeeds = if (hasLatestFeed) userFeeds else {
-                userFeeds.toMutableList().apply {
-                    add(0, Feed(directive = userId, name = "Latest"))
-                }
-            }
             database.feeds().deleteAll()
             database.feeds().upsertAll(data = finalFeeds)
         }
     }
 
     private fun ContentFeedData.asFeedPO(): Feed = Feed(name = name, directive = directive)
-
+    private fun Feed.asContentFeedData(): ContentFeedData =
+        ContentFeedData(name = name, directive = directive)
 }
