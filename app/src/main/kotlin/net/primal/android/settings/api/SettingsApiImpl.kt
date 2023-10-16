@@ -13,8 +13,8 @@ import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.serialization.NostrJson
 import net.primal.android.settings.api.model.AppSpecificDataRequest
 import net.primal.android.settings.api.model.GetAppSettingsResponse
+import net.primal.android.settings.api.model.GetMuteListResponse
 import net.primal.android.settings.api.model.GetMutelistRequest
-import net.primal.android.settings.api.model.GetMutelistResponse
 import net.primal.android.settings.api.model.SetAppSettingsRequest
 import javax.inject.Inject
 
@@ -77,23 +77,27 @@ class SettingsApiImpl @Inject constructor(
         return signedNostrEvent
     }
 
-    override suspend fun getMutelist(userId: String): GetMutelistResponse {
+    override suspend fun getMuteList(userId: String): GetMuteListResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.MUTELIST,
+                primalVerb = PrimalVerb.MUTE_LIST,
                 optionsJson = NostrJson.encodeToString(
                     GetMutelistRequest(pubkey = userId)
                 ),
             )
         )
 
-        return GetMutelistResponse(mutelist = queryResult.findNostrEvent(NostrEventKind.MuteList))
+        return GetMuteListResponse(
+            muteList = queryResult.findNostrEvent(NostrEventKind.MuteList),
+            metadataEvents = queryResult.filterNostrEvents(NostrEventKind.Metadata),
+            eventResources = queryResult.filterPrimalEvents(NostrEventKind.PrimalEventResources),
+        )
     }
 
-    override suspend fun setMutelist(userId: String, mutelist: Set<String>): NostrEvent {
+    override suspend fun setMuteList(userId: String, muteList: Set<String>): NostrEvent {
         val signedNostrEvent = nostrNotary.signMutelistNostrEvent(
             userId = userId,
-            pubkeys = mutelist,
+            pubkeys = muteList,
         )
 
         relaysManager.publishEvent(signedNostrEvent)

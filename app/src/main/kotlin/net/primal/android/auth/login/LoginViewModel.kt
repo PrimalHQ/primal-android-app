@@ -65,7 +65,7 @@ class LoginViewModel @Inject constructor(
             val pubkey = authRepository.login(nostrKey = nostrKey)
             userRepository.fetchAndUpdateUserAccount(userId = pubkey)
             settingsRepository.fetchAndPersistAppSettings(userId = pubkey)
-            mutedUserRepository.fetchAndPersistMutelist(userId = pubkey)
+            mutedUserRepository.fetchAndPersistMuteList(userId = pubkey)
             setEffect(SideEffect.LoginSuccess(pubkey = pubkey))
         } catch (error: WssException) {
             setErrorState(error = UiState.LoginError.GenericError(error))

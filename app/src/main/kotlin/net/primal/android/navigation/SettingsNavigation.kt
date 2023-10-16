@@ -21,8 +21,8 @@ import net.primal.android.settings.home.SettingsHomeScreen
 import net.primal.android.settings.home.SettingsHomeViewModel
 import net.primal.android.settings.keys.KeysScreen
 import net.primal.android.settings.keys.KeysViewModel
-import net.primal.android.settings.muted.MutedSettingsScreen
-import net.primal.android.settings.muted.MutedSettingsViewModel
+import net.primal.android.settings.muted.list.MutedSettingsScreen
+import net.primal.android.settings.muted.list.MutedSettingsViewModel
 import net.primal.android.settings.notifications.NotificationsSettingsScreen
 import net.primal.android.settings.notifications.NotificationsSettingsViewModel
 import net.primal.android.settings.wallet.WalletScreen
@@ -186,5 +186,9 @@ private fun NavGraphBuilder.mutedAccounts(route: String, navController: NavContr
 ) {
     val viewModel = hiltViewModel<MutedSettingsViewModel>(it)
     LockToOrientationPortrait()
-    MutedSettingsScreen(viewModel = viewModel, onClose = { navController.navigateUp() })
+    MutedSettingsScreen(
+        viewModel = viewModel,
+        onClose = { navController.navigateUp() },
+        onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
+    )
 }

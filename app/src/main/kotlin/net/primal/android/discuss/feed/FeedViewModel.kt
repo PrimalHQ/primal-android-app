@@ -4,7 +4,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
-import androidx.paging.filter
 import androidx.paging.map
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -12,7 +11,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -30,7 +28,6 @@ import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.settings.muted.repository.MutedUserRepository
-import net.primal.android.thread.ThreadContract
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.badges.BadgesManager
 import net.primal.android.user.updater.UserDataUpdater
@@ -229,17 +226,14 @@ class FeedViewModel @Inject constructor(
 
     private fun mute(action: UiEvent.MuteAction) = viewModelScope.launch {
         try {
-            mutedUserRepository.muteUserAndPersistMutelist(
+            mutedUserRepository.muteUserAndPersistMuteList(
                 userId = activeAccountStore.activeUserId(),
-                mutedUserPubkey = action.userId
+                mutedUserId = action.userId
             )
-        } catch (error: Exception) {
-            when (error) {
-                is NostrPublishException,
-                is WssException -> {
-                    setErrorState(error = FeedError.FailedToMuteUser(error))
-                }
-            }
+        } catch (error: WssException) {
+            setErrorState(error = FeedError.FailedToMuteUser(error))
+        } catch (error: NostrPublishException) {
+            setErrorState(error = FeedError.FailedToMuteUser(error))
         }
     }
 

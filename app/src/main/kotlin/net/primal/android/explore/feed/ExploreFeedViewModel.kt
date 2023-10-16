@@ -186,17 +186,14 @@ class ExploreFeedViewModel @Inject constructor(
 
     private fun mute(action: UiEvent.MuteAction) = viewModelScope.launch {
         try {
-            mutedUserRepository.muteUserAndPersistMutelist(
+            mutedUserRepository.muteUserAndPersistMuteList(
                 userId = activeAccountStore.activeUserId(),
-                mutedUserPubkey = action.profileId
+                mutedUserId = action.profileId
             )
-        } catch (error: Exception) {
-            when (error) {
-                is NostrPublishException,
-                is WssException -> {
-                    setErrorState(error = ExploreFeedError.FailedToMuteUser(error))
-                }
-            }
+        } catch (error: WssException) {
+            setErrorState(error = ExploreFeedError.FailedToMuteUser(error))
+        } catch (error: NostrPublishException) {
+            setErrorState(error = ExploreFeedError.FailedToMuteUser(error))
         }
     }
 

@@ -16,4 +16,7 @@ interface ProfileDataDao {
     @Query("SELECT * FROM ProfileData WHERE ownerId = :profileId")
     fun observeProfile(profileId: String): Flow<Profile>
 
+    @Query("SELECT eventId FROM ProfileData WHERE ownerId = :profileId")
+    fun findMetadataEventId(profileId: String): String
+
 }

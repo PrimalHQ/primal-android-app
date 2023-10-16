@@ -1,90 +1,102 @@
 package net.primal.android.settings.muted.repository
 
 import androidx.room.withTransaction
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import net.primal.android.core.utils.usernameUiFriendly
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.jsonPrimitive
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.nostr.ext.asProfileDataPO
+import net.primal.android.nostr.ext.flatMapNotNullAsMediaResourcePO
 import net.primal.android.settings.api.SettingsApi
-import net.primal.android.settings.muted.model.MutedUser
-import net.primal.android.user.api.UsersApi
+import net.primal.android.settings.muted.db.MutedUserData
 import javax.inject.Inject
 
 class MutedUserRepository @Inject constructor(
     private val database: PrimalDatabase,
     private val settingsApi: SettingsApi,
-    private val usersApi: UsersApi
 ) {
-    suspend fun fetchAndPersistMutelist(userId: String) = withContext(Dispatchers.IO) {
-        val mutelist = fetchMutelist(userId = userId)
-        persistMutelist(mutelist = mutelist)
+
+    fun observeMutedUsers() = database.muted().observeMutedUsers()
+
+    fun observeIsUserMuted(pubkey: String) = database.muted().observeIsUserMuted(pubkey = pubkey)
+
+    suspend fun fetchAndPersistMuteList(userId: String) {
+        val muteList = fetchMuteListAndPersistProfiles(userId = userId)
+        persistMuteList(muteList = muteList)
     }
 
-    val mutedUsers = database.muted().observeAllMuted().map {
-        if (it.isEmpty()) return@map emptyList()
-
-        val response = usersApi.getUserProfiles(it.map { muted -> muted.pubkey }.toSet())
-
-        return@map response.map { r ->
-            val profileData = r.asProfileDataPO()
-
-            MutedUser(
-                name = profileData.usernameUiFriendly(),
-                nip05InternetIdentifier = profileData.internetIdentifier,
-                avatarUrl = profileData.picture,
-                pubkey = profileData.ownerId
-            )
-        }
-    }
-
-    fun isMuted(pubkey: String): Flow<Boolean> {
-        return database.muted().isMuted(pubkey = pubkey)
-    }
-
-    suspend fun muteUserAndPersistMutelist(userId: String, mutedUserPubkey: String) {
-        updateAndPersistMutelist(userId = userId) {
-            toMutableSet().apply {
-                add(mutedUserPubkey)
-            }
-        }
-    }
-
-    suspend fun unmuteUserAndPersistMutelist(userId: String, unmutedUserPubkey: String) {
-        updateAndPersistMutelist(userId = userId) {
-            toMutableSet().apply {
-                remove(unmutedUserPubkey)
-            }
-        }
-    }
-
-    private suspend fun updateAndPersistMutelist(
+    suspend fun muteUserAndPersistMuteList(
         userId: String,
-        reducer: Set<String>.() -> Set<String>,
+        mutedUserId: String,
     ) {
-        val remoteMutelist = fetchMutelist(userId = userId)
-        val newMutelist = remoteMutelist.reducer()
-        settingsApi.setMutelist(userId = userId, mutelist = newMutelist)
-        persistMutelist(mutelist = newMutelist)
-    }
-
-    private suspend fun fetchMutelist(userId: String): Set<String> {
-        val response = settingsApi.getMutelist(userId = userId)
-
-        return response.mutelist?.tags?.mapToPubkeySet() ?: emptySet()
-    }
-
-    private suspend fun persistMutelist(mutelist: Set<String>) {
-        database.withTransaction {
-            val muted = mutelist.map { it.asMutedPO() }.toSet()
-
-            database.muted().deleteAll()
-            database.muted().upsertAll(data = muted)
+        updateAndPersistMuteList(userId = userId) {
+            toMutableSet().apply {
+                add(
+                    MutedUserData(
+                        userId = mutedUserId,
+                        userMetadataEventId = database.profiles().findMetadataEventId(mutedUserId),
+                    )
+                )
+            }
         }
     }
+
+    suspend fun unmuteUserAndPersistMuteList(
+        userId: String,
+        unmutedUserId: String,
+    ) {
+        updateAndPersistMuteList(userId = userId) {
+            toMutableSet().apply {
+                removeIf { it.userId == unmutedUserId }
+            }
+        }
+    }
+
+    private suspend fun updateAndPersistMuteList(
+        userId: String,
+        reducer: Set<MutedUserData>.() -> Set<MutedUserData>,
+    ) {
+        val remoteMuteList = fetchMuteListAndPersistProfiles(userId = userId)
+        val newMuteList = remoteMuteList.reducer()
+        settingsApi.setMuteList(userId = userId, muteList = newMuteList.map { it.userId }.toSet())
+        persistMuteList(muteList = newMuteList)
+    }
+
+    private suspend fun fetchMuteListAndPersistProfiles(userId: String): Set<MutedUserData> {
+        val response = withContext(Dispatchers.IO) { settingsApi.getMuteList(userId = userId) }
+        val muteList = response.muteList?.tags?.mapToPubkeySet() ?: emptySet()
+        val profileData = response.metadataEvents.map { it.asProfileDataPO() }
+        val mediaResources = response.eventResources.flatMapNotNullAsMediaResourcePO()
+        withContext(Dispatchers.IO) {
+            database.withTransaction {
+                database.profiles().upsertAll(data = profileData)
+                database.mediaResources().upsertAll(data = mediaResources)
+            }
+        }
+        return muteList
+            .map { mutedUserId ->
+                mutedUserId.asMutedAccountPO(
+                    metadataEventId = profileData.find { mutedUserId == it.ownerId }?.eventId
+                )
+            }
+            .toSet()
+    }
+
+    private suspend fun persistMuteList(muteList: Set<MutedUserData>) {
+        withContext(Dispatchers.IO) {
+            database.withTransaction {
+                database.muted().deleteAll()
+                database.muted().upsertAll(data = muteList)
+            }
+        }
+    }
+
+    private fun String.asMutedAccountPO(metadataEventId: String? = null): MutedUserData =
+        MutedUserData(userId = this, userMetadataEventId = metadataEventId)
+
+    private fun List<JsonArray>?.mapToPubkeySet(): Set<String>? {
+        return this?.filter { it.size == 2 }?.map { it[1].jsonPrimitive.content }?.toSet()
+    }
+
 }

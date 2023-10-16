@@ -31,7 +31,7 @@ import kotlin.time.Duration.Companion.seconds
 fun FeedPostAuthorRow(
     modifier: Modifier = Modifier,
     authorDisplayName: String,
-    postTimestamp: Instant,
+    postTimestamp: Instant? = null,
     authorAvatarUrl: String? = null,
     authorResources: List<MediaResourceUi> = emptyList(),
     authorInternetIdentifier: String? = null,
@@ -57,27 +57,32 @@ fun FeedPostAuthorRow(
             modifier = Modifier.padding(horizontal = 16.dp)
         ) {
 
-            val timestamp = postTimestamp.asBeforeNowFormat(
-                res = LocalContext.current.resources
-            )
+            val suffixText = if (postTimestamp != null) {
+                val timestamp = postTimestamp.asBeforeNowFormat(
+                    res = LocalContext.current.resources
+                )
 
-            val suffixText = buildAnnotatedString {
-                if (!hasVerifiedBadge) append(' ')
-                append(
-                    AnnotatedString(
-                        text = "| $timestamp",
-                        spanStyle = SpanStyle(
-                            color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-                            fontStyle = AppTheme.typography.bodySmall.fontStyle,
+                buildAnnotatedString {
+                    if (!hasVerifiedBadge) append(' ')
+                    append(
+                        AnnotatedString(
+                            text = "| $timestamp",
+                            spanStyle = SpanStyle(
+                                color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                                fontStyle = AppTheme.typography.bodySmall.fontStyle,
+                            )
                         )
                     )
-                )
-            }
+                }
+            } else null
+
             NostrUserText(
                 displayName = authorDisplayName,
                 internetIdentifier = authorInternetIdentifier,
                 annotatedStringSuffixBuilder = {
-                    append(suffixText)
+                    if (suffixText != null) {
+                        append(suffixText)
+                    }
                 },
                 style = AppTheme.typography.bodyMedium,
             )

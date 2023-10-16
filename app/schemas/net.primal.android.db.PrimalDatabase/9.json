@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 9,
-    "identityHash": "e19a267e4e1c9bf40f7f5ed1e187c2c6",
+    "identityHash": "0c5bac6dbb6cd64312ba095c51dacd87",
     "entities": [
       {
         "tableName": "PostData",
@@ -831,20 +831,26 @@
         "foreignKeys": []
       },
       {
-        "tableName": "MutedAccount",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pubkey` TEXT NOT NULL, PRIMARY KEY(`pubkey`))",
+        "tableName": "MutedUserData",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`userId` TEXT NOT NULL, `userMetadataEventId` TEXT, PRIMARY KEY(`userId`))",
         "fields": [
           {
-            "fieldPath": "pubkey",
-            "columnName": "pubkey",
+            "fieldPath": "userId",
+            "columnName": "userId",
             "affinity": "TEXT",
             "notNull": true
+          },
+          {
+            "fieldPath": "userMetadataEventId",
+            "columnName": "userMetadataEventId",
+            "affinity": "TEXT",
+            "notNull": false
           }
         ],
         "primaryKey": {
           "autoGenerate": false,
           "columnNames": [
-            "pubkey"
+            "userId"
           ]
         },
         "indices": [],
@@ -854,7 +860,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e19a267e4e1c9bf40f7f5ed1e187c2c6')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '0c5bac6dbb6cd64312ba095c51dacd87')"
     ]
   }
 }

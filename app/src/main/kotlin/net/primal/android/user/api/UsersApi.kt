@@ -4,6 +4,7 @@ import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.content.ContentMetadata
 import net.primal.android.user.api.model.UserContactsResponse
 import net.primal.android.user.api.model.UserProfileResponse
+import net.primal.android.user.api.model.UserProfilesResponse
 import net.primal.android.user.domain.Relay
 
 interface UsersApi {
@@ -28,5 +29,7 @@ interface UsersApi {
         contentMetadata: ContentMetadata,
     ): NostrEvent
 
-    suspend fun getUserProfiles(pubkeys: Set<String>): List<NostrEvent>
+    suspend fun getUserProfilesMetadata(
+        userIds: Set<String>
+    ): UserProfilesResponse
 }

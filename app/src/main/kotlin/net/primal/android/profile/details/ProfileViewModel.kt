@@ -75,7 +75,7 @@ class ProfileViewModel @Inject constructor(
 
     init {
         fetchLatestProfile()
-        fetchLatestMutelist()
+        fetchLatestMuteList()
         observeEvents()
         observeProfile()
         observeActiveAccount()
@@ -115,7 +115,7 @@ class ProfileViewModel @Inject constructor(
     }
 
     private fun observeMutedAccount() = viewModelScope.launch {
-        mutedUserRepository.isMuted(pubkey = profileId).collect {
+        mutedUserRepository.observeIsUserMuted(pubkey = profileId).collect {
             setState { copy(isProfileMuted = it) }
         }
     }
@@ -159,9 +159,9 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-    private fun fetchLatestMutelist() = viewModelScope.launch {
+    private fun fetchLatestMuteList() = viewModelScope.launch {
         try {
-            mutedUserRepository.fetchAndPersistMutelist(userId = activeAccountStore.activeUserId())
+            mutedUserRepository.fetchAndPersistMuteList(userId = activeAccountStore.activeUserId())
         } catch (error: WssException) {
             // Ignore
         }
@@ -285,20 +285,22 @@ class ProfileViewModel @Inject constructor(
 
     private fun mute(action: UiEvent.MuteAction) = viewModelScope.launch {
         try {
-            mutedUserRepository.muteUserAndPersistMutelist(
+            mutedUserRepository.muteUserAndPersistMuteList(
                 userId = activeAccountStore.activeUserId(),
-                mutedUserPubkey = action.profileId
+                mutedUserId = action.profileId
             )
         } catch (error: NostrPublishException) {
+            setErrorState(error = ProfileError.FailedToMuteProfile(error))
+        } catch (error: WssException) {
             setErrorState(error = ProfileError.FailedToMuteProfile(error))
         }
     }
 
     private fun unmute(action: UiEvent.UnmuteAction) = viewModelScope.launch {
         try {
-            mutedUserRepository.unmuteUserAndPersistMutelist(
+            mutedUserRepository.unmuteUserAndPersistMuteList(
                 userId = activeAccountStore.activeUserId(),
-                unmutedUserPubkey = action.profileId
+                unmutedUserId = action.profileId
             )
         } catch (error: NostrPublishException) {
             setErrorState(error = ProfileError.FailedToUnmuteProfile(error))

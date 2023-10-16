@@ -16,7 +16,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.core.compose.feed.asFeedPostUi
-import net.primal.android.explore.feed.ExploreFeedContract
 import net.primal.android.feed.repository.FeedRepository
 import net.primal.android.feed.repository.PostRepository
 import net.primal.android.navigation.postId
@@ -225,17 +224,14 @@ class ThreadViewModel @Inject constructor(
 
     private fun mute(action: UiEvent.MuteAction) = viewModelScope.launch {
         try {
-            mutedUserRepository.muteUserAndPersistMutelist(
+            mutedUserRepository.muteUserAndPersistMuteList(
                 userId = activeAccountStore.activeUserId(),
-                mutedUserPubkey = action.postAuthorId
+                mutedUserId = action.postAuthorId
             )
-        } catch (error: Exception) {
-            when (error) {
-                is NostrPublishException,
-                is WssException -> {
-                    setErrorState(error = ThreadError.FailedToMuteUser(error))
-                }
-            }
+        } catch (error: WssException) {
+            setErrorState(error = ThreadError.FailedToMuteUser(error))
+        } catch (error: NostrPublishException) {
+            setErrorState(error = ThreadError.FailedToMuteUser(error))
         }
     }
 

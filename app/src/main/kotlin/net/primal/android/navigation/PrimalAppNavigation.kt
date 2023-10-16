@@ -37,8 +37,8 @@ import net.primal.android.discuss.feed.FeedViewModel
 import net.primal.android.discuss.list.FeedListScreen
 import net.primal.android.discuss.list.FeedListViewModel
 import net.primal.android.drawer.DrawerScreenDestination
-import net.primal.android.editor.ui.NoteEditorScreen
 import net.primal.android.editor.NoteEditorViewModel
+import net.primal.android.editor.ui.NoteEditorScreen
 import net.primal.android.explore.feed.ExploreFeedScreen
 import net.primal.android.explore.feed.ExploreFeedViewModel
 import net.primal.android.explore.home.ExploreHomeScreen
@@ -115,7 +115,7 @@ private fun NavController.navigateToMessages() =
 private fun NavController.navigateToNotifications() =
     navigate(route = "notifications", navOptions = topLevelNavOptions)
 
-private fun NavController.navigateToProfile(profileId: String? = null) = when {
+fun NavController.navigateToProfile(profileId: String? = null) = when {
     profileId != null -> navigate(route = "profile?$ProfileId=$profileId")
     else -> navigate(route = "profile")
 }
