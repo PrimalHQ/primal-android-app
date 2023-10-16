@@ -208,7 +208,7 @@ fun ConfirmActionAlertDialog(
     icon: ImageVector,
 ) {
     AlertDialog(
-        containerColor = AppTheme.colorScheme.surface,
+        containerColor = AppTheme.colorScheme.surfaceVariant,
         icon = {
             Icon(icon, contentDescription = null)
         },
