@@ -14,7 +14,7 @@ import net.primal.android.serialization.NostrJson
 import net.primal.android.settings.api.model.AppSpecificDataRequest
 import net.primal.android.settings.api.model.GetAppSettingsResponse
 import net.primal.android.settings.api.model.GetMuteListResponse
-import net.primal.android.settings.api.model.GetMutelistRequest
+import net.primal.android.settings.api.model.GetMuteListRequest
 import net.primal.android.settings.api.model.SetAppSettingsRequest
 import javax.inject.Inject
 
@@ -82,7 +82,7 @@ class SettingsApiImpl @Inject constructor(
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.MUTE_LIST,
                 optionsJson = NostrJson.encodeToString(
-                    GetMutelistRequest(pubkey = userId)
+                    GetMuteListRequest(pubkey = userId)
                 ),
             )
         )
@@ -95,9 +95,9 @@ class SettingsApiImpl @Inject constructor(
     }
 
     override suspend fun setMuteList(userId: String, muteList: Set<String>): NostrEvent {
-        val signedNostrEvent = nostrNotary.signMutelistNostrEvent(
+        val signedNostrEvent = nostrNotary.signMuteListNostrEvent(
             userId = userId,
-            pubkeys = muteList,
+            mutedUserIds = muteList,
         )
 
         relaysManager.publishEvent(signedNostrEvent)

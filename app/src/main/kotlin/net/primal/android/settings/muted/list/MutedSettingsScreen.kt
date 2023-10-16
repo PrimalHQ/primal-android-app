@@ -126,13 +126,14 @@ fun MutedUserListItem(
         },
         trailingContent = {
             PrimalOutlinedButton(
-                modifier = Modifier.wrapContentWidth()
+                modifier = Modifier
+                    .wrapContentWidth()
                     .height(36.dp)
                     .padding(end = 8.dp),
                 onClick = { onUnmuteClick(item.userId) },
             ) {
                 Text(
-                    text = "Unmute",
+                    text = stringResource(id = R.string.settings_muted_accounts_unmute_button),
                     fontWeight = FontWeight.W500,
                     fontSize = 12.sp
                 )

@@ -1,7 +1,6 @@
 package net.primal.android.settings.feeds
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -17,11 +16,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.RemoveCircle
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -34,7 +31,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -95,7 +91,6 @@ fun FeedsSettingsScreen(
                         },
                         dialogTitle = stringResource(id = R.string.settings_feeds_remove_feed_prompt_title),
                         dialogText = stringResource(id = R.string.settings_feeds_remove_feed_prompt_text, prompt.name),
-                        icon = Icons.Default.Warning
                     )
                 }
 
@@ -111,7 +106,6 @@ fun FeedsSettingsScreen(
                         },
                         dialogTitle = stringResource(R.string.settings_feeds_restore_default_title),
                         dialogText = stringResource(id = R.string.settings_feeds_restore_defaults_prompt_text),
-                        icon = Icons.Default.Warning
                     )
                 }
 
@@ -205,13 +199,9 @@ fun ConfirmActionAlertDialog(
     onConfirmation: () -> Unit,
     dialogTitle: String,
     dialogText: String,
-    icon: ImageVector,
 ) {
     AlertDialog(
         containerColor = AppTheme.colorScheme.surfaceVariant,
-        icon = {
-            Icon(icon, contentDescription = null)
-        },
         title = {
             Text(text = dialogTitle)
         },
@@ -227,7 +217,9 @@ fun ConfirmActionAlertDialog(
                     onConfirmation()
                 }
             ) {
-                Text("Confirm")
+                Text(
+                    text = stringResource(id = R.string.settings_feeds_dialog_confirm),
+                )
             }
         },
         dismissButton = {
@@ -236,7 +228,9 @@ fun ConfirmActionAlertDialog(
                     onDismissRequest()
                 }
             ) {
-                Text("Dismiss")
+                Text(
+                    text = stringResource(id = R.string.settings_feeds_dialog_dismiss),
+                )
             }
         }
     )

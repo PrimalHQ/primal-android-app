@@ -221,12 +221,15 @@
     <string name="settings_feeds_remove_feed_prompt_text">Are you sure you want to remove %1$s\?</string>
     <string name="settings_feeds_restore_defaults_prompt_title">Remove defaults?</string>
     <string name="settings_feeds_restore_defaults_prompt_text">Are you sure you want to restore your feeds to default values?</string>
+    <string name="settings_feeds_dialog_confirm">Confirm</string>
+    <string name="settings_feeds_dialog_dismiss">Dismiss</string>
 
     <string name="settings_zaps_title">Zaps</string>
     <string name="settings_zaps_default_zap_amount_header">Set default zap amount</string>
     <string name="settings_zaps_custom_zaps_header">Set custom zap amounts</string>
 
     <string name="settings_muted_accounts_title">Muted Accounts</string>
+    <string name="settings_muted_accounts_unmute_button">Unmute</string>
 
     <string name="settings_version_title">Version</string>
 

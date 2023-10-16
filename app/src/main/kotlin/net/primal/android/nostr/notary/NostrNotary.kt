@@ -184,11 +184,11 @@ class NostrNotary @Inject constructor(
         ).signOrThrow(nsec = findNsecOrThrow(userId))
     }
 
-    fun signMutelistNostrEvent(
+    fun signMuteListNostrEvent(
         userId: String,
-        pubkeys: Set<String>
+        mutedUserIds: Set<String>
     ): NostrEvent {
-        val tags = pubkeys.map { it.asPubkeyTag() }
+        val tags = mutedUserIds.map { it.asPubkeyTag() }
         return NostrUnsignedEvent(
             content = "",
             pubKey = userId,
