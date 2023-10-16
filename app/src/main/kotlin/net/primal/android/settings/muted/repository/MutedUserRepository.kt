@@ -30,12 +30,15 @@ class MutedUserRepository @Inject constructor(
         userId: String,
         mutedUserId: String,
     ) {
+        val userMetadataEventId = withContext(Dispatchers.IO) {
+            database.profiles().findMetadataEventId(mutedUserId)
+        }
         updateAndPersistMuteList(userId = userId) {
             toMutableSet().apply {
                 add(
                     MutedUserData(
                         userId = mutedUserId,
-                        userMetadataEventId = database.profiles().findMetadataEventId(mutedUserId),
+                        userMetadataEventId = userMetadataEventId,
                     )
                 )
             }
