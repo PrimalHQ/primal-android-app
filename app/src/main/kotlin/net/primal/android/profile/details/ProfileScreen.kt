@@ -32,7 +32,6 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.ripple.rememberRipple
-import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -563,27 +562,31 @@ private fun ProfileDropdownMenu(
         )
 
         if (!isActiveUser) {
-            Divider(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(1.dp)
-            )
+            val text = if (isProfileMuted) {
+                stringResource(id = R.string.context_menu_unmute_user)
+            } else {
+                stringResource(id = R.string.context_menu_mute_user)
+            }
 
-            val text = if (isProfileMuted) "Unmute user" else "Mute user"
-            val action =
-                if (isProfileMuted) ProfileContract.UiEvent.UnmuteAction(profileId = profileId) else ProfileContract.UiEvent.MuteAction(
-                    profileId = profileId
-                )
+            val action = if (isProfileMuted) {
+                ProfileContract.UiEvent.UnmuteAction(profileId = profileId)
+            } else {
+                ProfileContract.UiEvent.MuteAction(profileId = profileId)
+            }
 
             DropdownMenuItem(
                 trailingIcon = {
                     Icon(
                         imageVector = PrimalIcons.ContextMuteUser,
-                        contentDescription = null
+                        contentDescription = null,
+                        tint = AppTheme.colorScheme.error,
                     )
                 },
                 text = {
-                    DropdownMenuItemText(text = text)
+                    DropdownMenuItemText(
+                        text = text,
+                        color = AppTheme.colorScheme.error,
+                    )
                 }, onClick = {
                     eventPublisher(action)
                     menuVisible = false
