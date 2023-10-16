@@ -1,6 +1,5 @@
 package net.primal.android.navigation
 
-import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavController
@@ -9,8 +8,6 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
-import net.primal.android.R
-import net.primal.android.core.compose.DemoSecondaryScreen
 import net.primal.android.core.compose.LockToOrientationPortrait
 import net.primal.android.settings.appearance.AppearanceSettingsScreen
 import net.primal.android.settings.appearance.AppearanceSettingsViewModel
@@ -35,7 +32,6 @@ private fun NavController.navigateToKeys() = navigate(route = "keys_settings")
 private fun NavController.navigateToWallet() = navigate(route = "wallet_settings")
 private fun NavController.navigateToAppearance() = navigate(route = "appearance_settings")
 fun NavController.navigateToNotificationsSettings() = navigate(route = "notifications_settings")
-private fun NavController.navigateToNetwork() = navigate(route = "network_settings")
 private fun NavController.navigateToFeeds() = navigate(route = "feeds_settings")
 private fun NavController.navigateToZaps() = navigate(route = "zaps_settings")
 private fun NavController.navigateToMutedAccounts() = navigate(route = "muted_accounts_settings")
@@ -52,11 +48,10 @@ fun NavGraphBuilder.settingsNavigation(
         onClose = { navController.navigateUp() },
         onSettingsSectionClick = {
             when (it) {
-                PrimalSettingsSection.Keys -> navController.navigateToKeys()
+                PrimalSettingsSection.Account -> navController.navigateToKeys()
                 PrimalSettingsSection.Wallet -> navController.navigateToWallet()
                 PrimalSettingsSection.Appearance -> navController.navigateToAppearance()
                 PrimalSettingsSection.Notifications -> navController.navigateToNotificationsSettings()
-                PrimalSettingsSection.Network -> navController.navigateToNetwork()
                 PrimalSettingsSection.Feeds -> navController.navigateToFeeds()
                 PrimalSettingsSection.Zaps -> navController.navigateToZaps()
                 PrimalSettingsSection.MutedAccounts -> navController.navigateToMutedAccounts()
@@ -78,7 +73,6 @@ fun NavGraphBuilder.settingsNavigation(
     appearance(route = "appearance_settings", navController = navController)
     mutedAccounts(route = "muted_accounts_settings", navController = navController)
     notifications(route = "notifications_settings", navController = navController)
-    network(route = "network_settings", navController = navController)
     feeds(route = "feeds_settings", navController = navController)
     zaps(route = "zaps_settings", navController = navController)
 }
@@ -149,17 +143,6 @@ private fun NavGraphBuilder.appearance(route: String, navController: NavControll
     val viewModel = hiltViewModel<AppearanceSettingsViewModel>()
     LockToOrientationPortrait()
     AppearanceSettingsScreen(viewModel = viewModel, onClose = { navController.navigateUp() })
-}
-
-private fun NavGraphBuilder.network(route: String, navController: NavController) = composable(
-    route = route,
-) {
-    LockToOrientationPortrait()
-    DemoSecondaryScreen(
-        title = stringResource(id = R.string.settings_network_title),
-        description = "Network settings will appear here. Stay tuned.",
-        onClose = { navController.navigateUp() },
-    )
 }
 
 private fun NavGraphBuilder.feeds(route: String, navController: NavController) = composable(

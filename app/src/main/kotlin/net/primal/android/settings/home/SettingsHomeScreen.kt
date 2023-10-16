@@ -147,18 +147,12 @@ private fun VersionListItem(
     )
 }
 
-enum class PrimalSettingsSection {
-    Keys, Wallet, Appearance, MutedAccounts, Notifications, Network, Feeds, Zaps
-}
-
-
 private fun PrimalSettingsSection.leadingIcon(): ImageVector? {
     return when (this) {
-        PrimalSettingsSection.Keys -> null
+        PrimalSettingsSection.Account -> null
         PrimalSettingsSection.Wallet -> null
         PrimalSettingsSection.Appearance -> null
         PrimalSettingsSection.Notifications -> null
-        PrimalSettingsSection.Network -> null
         PrimalSettingsSection.Feeds -> null
         PrimalSettingsSection.Zaps -> null
         PrimalSettingsSection.MutedAccounts -> null
@@ -168,11 +162,10 @@ private fun PrimalSettingsSection.leadingIcon(): ImageVector? {
 @Composable
 private fun PrimalSettingsSection.title(): String {
     return when (this) {
-        PrimalSettingsSection.Keys -> stringResource(id = R.string.settings_keys_title)
+        PrimalSettingsSection.Account -> stringResource(id = R.string.settings_keys_title)
         PrimalSettingsSection.Wallet -> stringResource(id = R.string.settings_wallet_title)
         PrimalSettingsSection.Appearance -> stringResource(id = R.string.settings_appearance_title)
         PrimalSettingsSection.Notifications -> stringResource(id = R.string.settings_notifications_title)
-        PrimalSettingsSection.Network -> stringResource(id = R.string.settings_network_title)
         PrimalSettingsSection.Feeds -> stringResource(id = R.string.settings_feeds_title)
         PrimalSettingsSection.Zaps -> stringResource(id = R.string.settings_zaps_title)
         PrimalSettingsSection.MutedAccounts -> stringResource(id = R.string.settings_muted_accounts_title)
