@@ -6,6 +6,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.jsonPrimitive
 import net.primal.android.db.PrimalDatabase
+import net.primal.android.networking.primal.api.PrimalImportApi
 import net.primal.android.nostr.ext.asProfileDataPO
 import net.primal.android.nostr.ext.flatMapNotNullAsMediaResourcePO
 import net.primal.android.settings.api.SettingsApi
@@ -15,6 +16,7 @@ import javax.inject.Inject
 class MutedUserRepository @Inject constructor(
     private val database: PrimalDatabase,
     private val settingsApi: SettingsApi,
+    private val primalImportApi: PrimalImportApi,
 ) {
 
     fun observeMutedUsers() = database.muted().observeMutedUsers()
@@ -62,7 +64,11 @@ class MutedUserRepository @Inject constructor(
     ) {
         val remoteMuteList = fetchMuteListAndPersistProfiles(userId = userId)
         val newMuteList = remoteMuteList.reducer()
-        settingsApi.setMuteList(userId = userId, muteList = newMuteList.map { it.userId }.toSet())
+        val muteListNostrEvent = settingsApi.setMuteList(
+            userId = userId,
+            muteList = newMuteList.map { it.userId }.toSet(),
+        )
+        primalImportApi.importEvents(listOf(muteListNostrEvent))
         persistMuteList(muteList = newMuteList)
     }
 
