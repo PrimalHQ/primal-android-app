@@ -43,7 +43,9 @@ fun NostrEvent.toJsonObject(): JsonObject {
 
 fun List<NostrEvent>.toJsonArray(): JsonArray {
     return buildJsonArray {
-        forEach { it.toJsonObject() }
+        forEach {
+            add(it.toJsonObject())
+        }
     }
 }
 
