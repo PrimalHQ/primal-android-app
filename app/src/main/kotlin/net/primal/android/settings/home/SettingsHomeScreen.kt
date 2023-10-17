@@ -1,8 +1,6 @@
 package net.primal.android.settings.home
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -11,6 +9,7 @@ import androidx.compose.material.icons.outlined.KeyboardArrowRight
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -19,8 +18,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import net.primal.android.R
+import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
@@ -74,10 +73,7 @@ fun SettingsHomeScreen(
                         leadingIcon = it.leadingIcon(),
                         trailingIcon = Icons.Outlined.KeyboardArrowRight,
                     )
-                }
-
-                item {
-                    Spacer(modifier = Modifier.height(16.dp))
+                    PrimalDivider()
                 }
 
                 item {
@@ -100,6 +96,9 @@ private fun SettingsListItem(
 ) {
     ListItem(
         modifier = Modifier.clickable { onClick() },
+        colors = ListItemDefaults.colors(
+            containerColor = AppTheme.colorScheme.surfaceVariant,
+        ),
         leadingContent = {
             if (leadingIcon != null) {
                 Icon(imageVector = leadingIcon, contentDescription = null)

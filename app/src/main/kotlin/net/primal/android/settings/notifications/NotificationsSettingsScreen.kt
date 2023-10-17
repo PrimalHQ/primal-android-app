@@ -14,10 +14,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -37,6 +35,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import net.primal.android.R
+import net.primal.android.core.compose.PrimalDivider
+import net.primal.android.core.compose.PrimalSwitch
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
@@ -119,21 +119,19 @@ fun NotificationsSettingsBlock(
         horizontalAlignment = Alignment.Start
     ) {
         Text(
+            modifier = Modifier.padding(vertical = 8.dp, horizontal = 4.dp),
             text = section.toTitle().uppercase(),
             fontWeight = FontWeight.Medium,
             style = AppTheme.typography.bodySmall,
         )
-        Spacer(modifier = Modifier.height(8.dp))
         Column(
             modifier = Modifier
                 .background(
-                    AppTheme.extraColorScheme.surfaceVariantAlt,
+                    color = AppTheme.colorScheme.surfaceVariant,
                     shape = RoundedCornerShape(12.dp)
                 )
                 .fillMaxWidth()
-                .clip(
-                    RoundedCornerShape(size = 12.dp)
-                ),
+                .clip(RoundedCornerShape(size = 12.dp)),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.Start
         ) {
@@ -162,7 +160,7 @@ fun NotificationsSettingsBlock(
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
-                    Switch(
+                    PrimalSwitch(
                         checked = notificationSwitchUi.enabled,
                         onCheckedChange = {
                             eventPublisher(
@@ -176,7 +174,7 @@ fun NotificationsSettingsBlock(
                 }
 
                 if (index < notifications.size - 1) {
-                    Divider(color = AppTheme.colorScheme.outline, thickness = 1.dp)
+                    PrimalDivider()
                 }
             }
         }

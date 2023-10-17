@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -30,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.text.isDigitsOnly
 import net.primal.android.R
+import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
@@ -106,7 +106,7 @@ fun ZapSettingsScreen(
                         colors = zapTextFieldColors(),
                     )
 
-                    Divider(
+                    PrimalDivider(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 16.dp)
@@ -258,7 +258,7 @@ fun ZapOption(
                 )
                 .border(
                     width = 1.dp,
-                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
+                    color = AppTheme.colorScheme.outline,
                     shape = AppTheme.shapes.small.copy(
                         bottomStart = CornerSize(0.dp),
                         bottomEnd = CornerSize(0.dp),
@@ -302,9 +302,9 @@ private fun zapTextFieldColors() = OutlinedTextFieldDefaults.colors(
     unfocusedContainerColor = AppTheme.extraColorScheme.surfaceVariantAlt,
     focusedContainerColor = AppTheme.extraColorScheme.surfaceVariantAlt,
     disabledContainerColor = AppTheme.extraColorScheme.surfaceVariantAlt,
-    unfocusedBorderColor = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
+    unfocusedBorderColor = AppTheme.colorScheme.outline,
     focusedBorderColor = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
-    disabledBorderColor = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
+    disabledBorderColor = AppTheme.colorScheme.outline,
     disabledTextColor = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
     focusedTextColor = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
     unfocusedTextColor = AppTheme.extraColorScheme.onSurfaceVariantAlt2,

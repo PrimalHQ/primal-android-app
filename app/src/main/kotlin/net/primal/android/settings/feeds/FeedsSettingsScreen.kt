@@ -5,21 +5,19 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.RemoveCircle
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -27,7 +25,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
@@ -37,6 +34,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.R
+import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
@@ -90,7 +88,10 @@ fun FeedsSettingsScreen(
                             openRemoveFeedDialog.value = FeedAction.Inactive
                         },
                         dialogTitle = stringResource(id = R.string.settings_feeds_remove_feed_prompt_title),
-                        dialogText = stringResource(id = R.string.settings_feeds_remove_feed_prompt_text, prompt.name),
+                        dialogText = stringResource(
+                            id = R.string.settings_feeds_remove_feed_prompt_text,
+                            prompt.name
+                        ),
                     )
                 }
 
@@ -115,10 +116,7 @@ fun FeedsSettingsScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
-                    .padding(horizontal = 16.dp, vertical = 16.dp)
                     .imePadding(),
-                verticalArrangement = Arrangement.Top,
-                horizontalAlignment = Alignment.Start
             ) {
                 LazyColumn(
                     modifier = Modifier.fillMaxWidth(),
@@ -134,22 +132,21 @@ fun FeedsSettingsScreen(
                                 )
                             }
                         )
-                        Divider(color = AppTheme.colorScheme.outline, thickness = 1.dp)
+                        PrimalDivider()
                     }
                     item {
-                        Spacer(modifier = Modifier.height(24.dp))
                         Row(
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 16.dp),
+                            horizontalArrangement = Arrangement.End,
                         ) {
-                            Spacer(modifier = Modifier.weight(1.0f))
                             Text(
                                 modifier = Modifier.clickable {
                                     openRemoveFeedDialog.value = FeedAction.ConfirmRestoreDefaults
                                 },
                                 text = stringResource(R.string.settings_feeds_restore_default_title).lowercase(),
-                                fontWeight = FontWeight.W500,
-                                fontSize = 18.sp,
-                                lineHeight = 20.sp,
+                                style = AppTheme.typography.bodyMedium,
                                 color = AppTheme.colorScheme.primary
                             )
                         }
@@ -165,32 +162,35 @@ fun FeedItem(
     item: Feed,
     onRemoveFeed: () -> Unit
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(44.dp),
-        horizontalArrangement = Arrangement.Start,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        if (item.isRemovable) {
-            IconButton(onClick = onRemoveFeed) {
+    ListItem(
+        colors = ListItemDefaults.colors(
+            containerColor = AppTheme.colorScheme.surfaceVariant,
+        ),
+        headlineContent = {
+            Text(
+                text = item.name,
+                fontWeight = FontWeight.W400,
+                fontSize = 16.sp,
+                lineHeight = 16.sp
+            )
+        },
+
+        leadingContent = {
+            IconButton(onClick = onRemoveFeed, enabled = item.isRemovable) {
                 Image(
                     imageVector = Icons.Filled.RemoveCircle,
                     contentDescription = null,
-                    colorFilter = ColorFilter.tint(color = Color.Red)
+                    colorFilter = ColorFilter.tint(
+                        color = if (item.isRemovable) {
+                            Color.Red
+                        } else {
+                            AppTheme.colorScheme.outline
+                        }
+                    )
                 )
             }
-        } else {
-            Spacer(modifier = Modifier.width(width = 48.dp))
-        }
-        Text(
-            text = item.name,
-            fontWeight = FontWeight.W400,
-            fontSize = 16.sp,
-            lineHeight = 16.sp
-        )
-        Spacer(modifier = Modifier.weight(1.0f))
-    }
+        },
+    )
 }
 
 @Composable

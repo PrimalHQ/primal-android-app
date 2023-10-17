@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -95,6 +96,9 @@ fun MutedUserListItem(
     onProfileClick: (String) -> Unit,
 ) {
     ListItem(
+        colors = ListItemDefaults.colors(
+            containerColor = AppTheme.colorScheme.surfaceVariant,
+        ),
         leadingContent = {
             val resource = item.profileResources.findByUrl(url = item.avatarUrl)
             val variant = resource?.variants?.minByOrNull { it.width }
@@ -128,8 +132,7 @@ fun MutedUserListItem(
             PrimalOutlinedButton(
                 modifier = Modifier
                     .wrapContentWidth()
-                    .height(36.dp)
-                    .padding(end = 8.dp),
+                    .height(36.dp),
                 onClick = { onUnmuteClick(item.userId) },
             ) {
                 Text(
