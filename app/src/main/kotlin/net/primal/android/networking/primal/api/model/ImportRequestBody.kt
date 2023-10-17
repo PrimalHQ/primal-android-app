@@ -1,9 +1,10 @@
 package net.primal.android.networking.primal.api.model
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import net.primal.android.nostr.model.NostrEvent
+import kotlinx.serialization.json.JsonArray
 
 @Serializable
 data class ImportRequestBody(
-    val events: List<NostrEvent>
+    @SerialName("events") val nostrEvents: JsonArray,
 )

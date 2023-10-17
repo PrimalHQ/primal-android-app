@@ -1,7 +1,9 @@
 package net.primal.android.serialization
 
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonArray
@@ -36,6 +38,12 @@ fun NostrEvent.toJsonObject(): JsonObject {
         }
         put("content", nostrEvent.content)
         put("sig", nostrEvent.sig)
+    }
+}
+
+fun List<NostrEvent>.toJsonArray(): JsonArray {
+    return buildJsonArray {
+        forEach { it.toJsonObject() }
     }
 }
 
