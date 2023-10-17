@@ -11,4 +11,5 @@ data class FeedPostData(
     val authorMetadataId: String? = null,
     val repostId: String? = null,
     val repostAuthorId: String? = null,
+    val isMuted: Boolean? = false,
 )

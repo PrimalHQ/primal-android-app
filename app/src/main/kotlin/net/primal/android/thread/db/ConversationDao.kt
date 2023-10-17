@@ -28,12 +28,14 @@ interface ConversationDao {
                 PostUserStats.replied AS userReplied,
                 PostUserStats.reposted AS userReposted,
                 PostUserStats.zapped AS userZapped,
-                NULL AS feedCreatedAt
+                NULL AS feedCreatedAt,
+                CASE WHEN MutedUserData.userId IS NOT NULL THEN 1 ELSE 0 END AS isMuted
             FROM PostData AS FPD1
             INNER JOIN ConversationCrossRef ON FPD1.postId = ConversationCrossRef.postId
             INNER JOIN PostData AS FPD2 ON ConversationCrossRef.replyPostId = FPD2.postId
             LEFT JOIN PostUserStats ON PostUserStats.postId = FPD2.postId AND PostUserStats.userId = :userId
-            WHERE FPD1.postId = :postId
+            LEFT JOIN MutedUserData ON MutedUserData.userId = FPD2.authorId
+            WHERE FPD1.postId = :postId AND isMuted = 0
             ORDER BY FPD2.createdAt ASC
         """
     )

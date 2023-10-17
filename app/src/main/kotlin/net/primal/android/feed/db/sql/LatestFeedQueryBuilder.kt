@@ -23,11 +23,13 @@ class LatestFeedQueryBuilder(
                 PostUserStats.replied AS userReplied,
                 PostUserStats.reposted AS userReposted,
                 PostUserStats.zapped AS userZapped,
-                PostData.createdAt AS feedCreatedAt 
+                PostData.createdAt AS feedCreatedAt,
+                CASE WHEN MutedUserData.userId IS NOT NULL THEN 1 ELSE 0 END AS isMuted
             FROM PostData
             JOIN FeedPostDataCrossRef ON FeedPostDataCrossRef.eventId = PostData.postId
-            LEFT JOIN PostUserStats ON PostUserStats.postId = PostData.postId AND PostUserStats.userId = ? 
-            WHERE FeedPostDataCrossRef.feedDirective = ?
+            LEFT JOIN PostUserStats ON PostUserStats.postId = PostData.postId AND PostUserStats.userId = ?
+            LEFT JOIN MutedUserData ON MutedUserData.userId = PostData.authorId
+            WHERE FeedPostDataCrossRef.feedDirective = ? AND isMuted = 0
 
             UNION ALL
 
@@ -45,12 +47,14 @@ class LatestFeedQueryBuilder(
                 PostUserStats.replied AS userReplied,
                 PostUserStats.reposted AS userReposted,
                 PostUserStats.zapped AS userZapped,
-                RepostData.createdAt AS feedCreatedAt
+                RepostData.createdAt AS feedCreatedAt,
+                CASE WHEN MutedUserData.userId IS NOT NULL THEN 1 ELSE 0 END AS isMuted
             FROM RepostData
             JOIN PostData ON RepostData.postId = PostData.postId
             JOIN FeedPostDataCrossRef ON FeedPostDataCrossRef.eventId = RepostData.repostId
             LEFT JOIN PostUserStats ON PostUserStats.postId = PostData.postId AND PostUserStats.userId = ?
-            WHERE FeedPostDataCrossRef.feedDirective = ?
+            LEFT JOIN MutedUserData ON MutedUserData.userId = PostData.authorId
+            WHERE FeedPostDataCrossRef.feedDirective = ? AND isMuted = 0
         """
     }
 
