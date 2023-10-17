@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.R
 import net.primal.android.core.compose.AvatarThumbnailListItemImage
+import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
@@ -74,15 +75,29 @@ fun MutedSettingsScreen(
                     .padding(paddingValues)
                     .imePadding(),
             ) {
-                itemsIndexed(state.mutedUsers) { _, item ->
+                items(
+                    items = state.mutedUsers,
+                    key = { it.userId },
+                    contentType = { "MutedUser" },
+                ) { mutedUser ->
                     MutedUserListItem(
-                        item = item,
+                        item = mutedUser,
                         onUnmuteClick = {
-                            eventPublisher(MutedSettingsContract.UiEvent.UnmuteEvent(pubkey = item.userId))
+                            eventPublisher(MutedSettingsContract.UiEvent.UnmuteEvent(mutedUser.userId))
                         },
                         onProfileClick = onProfileClick,
                     )
                     PrimalDivider()
+                }
+
+                if (state.mutedUsers.isEmpty()) {
+                    item(contentType = "NoContent") {
+                        ListNoContent(
+                            modifier = Modifier.fillParentMaxSize(),
+                            noContentText = stringResource(id = R.string.settings_muted_accounts_no_content),
+                            refreshButtonVisible = false,
+                        )
+                    }
                 }
             }
         }
