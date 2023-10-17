@@ -352,30 +352,31 @@ fun ProfileScreen(
 
                     if (state.isProfileMuted) {
                         ProfileMutedNotice(
-                            profileName = state.profileDetails?.authorDisplayName ?: "",
+                            profileName = state.profileDetails?.authorDisplayName
+                                ?: state.profileId.asEllipsizedNpub(),
                             onUnmuteClick = {
                                 eventPublisher(ProfileContract.UiEvent.UnmuteAction(state.profileId))
                             },
                         )
-                    }
+                    } else {
+                        if (pagingItems.isEmpty()) {
+                            when (pagingItems.loadState.refresh) {
+                                LoadState.Loading -> ListLoading(
+                                    modifier = Modifier
+                                        .padding(vertical = 64.dp)
+                                        .fillMaxWidth(),
+                                )
 
-                    if (pagingItems.isEmpty()) {
-                        when (pagingItems.loadState.refresh) {
-                            LoadState.Loading -> ListLoading(
-                                modifier = Modifier
-                                    .padding(vertical = 64.dp)
-                                    .fillMaxWidth(),
-                            )
+                                is LoadState.NotLoading -> ListNoContent(
+                                    modifier = Modifier
+                                        .padding(vertical = 64.dp)
+                                        .fillMaxWidth(),
+                                    noContentText = stringResource(id = R.string.feed_no_content),
+                                    onRefresh = { pagingItems.refresh() }
+                                )
 
-                            is LoadState.NotLoading -> ListNoContent(
-                                modifier = Modifier
-                                    .padding(vertical = 64.dp)
-                                    .fillMaxWidth(),
-                                noContentText = stringResource(id = R.string.feed_no_content),
-                                onRefresh = { pagingItems.refresh() }
-                            )
-
-                            is LoadState.Error -> Unit
+                                is LoadState.Error -> Unit
+                            }
                         }
                     }
                 },

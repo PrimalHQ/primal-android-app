@@ -289,6 +289,7 @@ class ProfileViewModel @Inject constructor(
                 userId = activeAccountStore.activeUserId(),
                 mutedUserId = action.profileId
             )
+            setState { copy(isProfileMuted = true) }
         } catch (error: NostrPublishException) {
             setErrorState(error = ProfileError.FailedToMuteProfile(error))
         } catch (error: WssException) {
@@ -302,6 +303,7 @@ class ProfileViewModel @Inject constructor(
                 userId = activeAccountStore.activeUserId(),
                 unmutedUserId = action.profileId
             )
+            setState { copy(isProfileMuted = false) }
         } catch (error: NostrPublishException) {
             setErrorState(error = ProfileError.FailedToUnmuteProfile(error))
         }
