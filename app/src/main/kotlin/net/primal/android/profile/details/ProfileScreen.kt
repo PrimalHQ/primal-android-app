@@ -41,6 +41,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -75,11 +76,13 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.paging.LoadState
+import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.SubcomposeAsyncImage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import net.primal.android.R
@@ -94,6 +97,7 @@ import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.button.PrimalOutlinedButton
 import net.primal.android.core.compose.feed.FeedLazyColumn
+import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.foundation.ClickDebounce
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -200,6 +204,7 @@ fun ProfileScreen(
     val topBarTitleVisible = rememberSaveable { mutableStateOf(false) }
     val coverTransparency = rememberSaveable { mutableFloatStateOf(0f) }
 
+    val noPagingItems = flowOf<PagingData<FeedPostUi>>().collectAsLazyPagingItems()
     val pagingItems = state.authoredPosts.collectAsLazyPagingItems()
     val listState = pagingItems.rememberLazyListStatePagingWorkaround()
 
@@ -246,15 +251,10 @@ fun ProfileScreen(
         Box {
             FeedLazyColumn(
                 contentPadding = PaddingValues(0.dp),
-                pagingItems = pagingItems,
-                isProfileMuted = state.isProfileMuted,
-                profileName = state.profileDetails?.authorDisplayName ?: "",
+                pagingItems = if (!state.isProfileMuted) pagingItems else noPagingItems,
                 walletConnected = state.walletConnected,
                 listState = listState,
                 onPostClick = onPostClick,
-                onUnmuteClick = {
-                    eventPublisher(ProfileContract.UiEvent.UnmuteAction(state.profileId))
-                },
                 onProfileClick = {
                     if (state.profileId != it) {
                         onProfileClick(it)
@@ -349,6 +349,15 @@ fun ProfileScreen(
                             eventPublisher(ProfileContract.UiEvent.UnfollowAction(state.profileId))
                         }
                     )
+
+                    if (state.isProfileMuted) {
+                        ProfileMutedNotice(
+                            profileName = state.profileDetails?.authorDisplayName ?: "",
+                            onUnmuteClick = {
+                                eventPublisher(ProfileContract.UiEvent.UnmuteAction(state.profileId))
+                            },
+                        )
+                    }
 
                     if (pagingItems.isEmpty()) {
                         when (pagingItems.loadState.refresh) {
@@ -934,6 +943,33 @@ private fun UserPublicKey(
         }
     }
 }
+
+@Composable
+private fun ProfileMutedNotice(
+    profileName: String,
+    onUnmuteClick: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 32.dp)
+            .padding(top = 32.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(
+            text = stringResource(id = R.string.profile_user_is_muted, profileName),
+            style = AppTheme.typography.bodyLarge,
+            color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+        )
+        TextButton(onClick = onUnmuteClick) {
+            Text(
+                text = stringResource(id = R.string.context_menu_unmute_user).uppercase(),
+            )
+        }
+    }
+}
+
 
 @Composable
 private fun ErrorHandler(

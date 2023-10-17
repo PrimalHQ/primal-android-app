@@ -105,7 +105,6 @@ fun FeedPostList(
             onWalletUnavailable = onWalletUnavailable,
             defaultZapAmount = defaultZapAmount,
             zapOptions = zapOptions,
-            onUnmuteClick = null,
             onMuteClick = onMuteClick
         )
 

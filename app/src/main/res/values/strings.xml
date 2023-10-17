@@ -248,6 +248,8 @@
     <string name="profile_context_share_profile">Share user profile</string>
     <string name="profile_context_remove_user_feed">Remove user feed</string>
     <string name="profile_user_feed_title">%1$s\'s feed</string>
+    <string name="profile_user_is_muted">%1$s is muted.</string>
+
 
     <string name="context_menu_mute_user">Mute user</string>
     <string name="context_menu_unmute_user">Unmute user</string>
