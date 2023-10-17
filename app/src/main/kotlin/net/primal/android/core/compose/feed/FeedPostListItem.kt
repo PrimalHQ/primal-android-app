@@ -272,7 +272,6 @@ private fun NoteDropdownMenu(
                 onClick = {
                     onMuteUserClick()
                     menuVisible = false
-                    uiScope.launch { Toast.makeText(context, "Muted!", Toast.LENGTH_SHORT).show() }
                 }
             )
         }
