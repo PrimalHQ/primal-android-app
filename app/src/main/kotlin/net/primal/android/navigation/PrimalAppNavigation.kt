@@ -92,6 +92,7 @@ private fun NavController.navigateToNoteEditor(
 }
 
 private val NavController.topLevelNavOptions: NavOptions
+    @SuppressWarnings("RestrictedApi")
     get() {
         val feedDestination = currentBackStack.value.find {
             it.destination.route?.contains("feed") == true
