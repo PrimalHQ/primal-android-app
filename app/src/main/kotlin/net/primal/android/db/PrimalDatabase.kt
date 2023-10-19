@@ -24,6 +24,10 @@ import net.primal.android.feed.db.PostStats
 import net.primal.android.feed.db.PostStatsDao
 import net.primal.android.feed.db.RepostDao
 import net.primal.android.feed.db.RepostData
+import net.primal.android.messages.db.MessageConversationData
+import net.primal.android.messages.db.MessageConversationDao
+import net.primal.android.messages.db.MessageDao
+import net.primal.android.messages.db.MessageData
 import net.primal.android.notifications.db.NotificationDao
 import net.primal.android.notifications.db.NotificationData
 import net.primal.android.profile.db.PostUserStats
@@ -33,11 +37,11 @@ import net.primal.android.profile.db.ProfileDataDao
 import net.primal.android.profile.db.ProfileStats
 import net.primal.android.profile.db.ProfileStatsDao
 import net.primal.android.serialization.RoomCustomTypeConverters
-import net.primal.android.settings.muted.db.MutedUserData
 import net.primal.android.settings.muted.db.MutedUserDao
-import net.primal.android.thread.db.ConversationCrossRef
-import net.primal.android.thread.db.ConversationCrossRefDao
-import net.primal.android.thread.db.ConversationDao
+import net.primal.android.settings.muted.db.MutedUserData
+import net.primal.android.thread.db.ThreadConversationCrossRef
+import net.primal.android.thread.db.ThreadConversationCrossRefDao
+import net.primal.android.thread.db.ThreadConversationDao
 
 @Database(
     entities = [
@@ -50,15 +54,17 @@ import net.primal.android.thread.db.ConversationDao
         FeedPostDataCrossRef::class,
         FeedPostRemoteKey::class,
         FeedPostSync::class,
-        ConversationCrossRef::class,
+        ThreadConversationCrossRef::class,
         PostUserStats::class,
         TrendingHashtag::class,
         ProfileStats::class,
         NostrResource::class,
         NotificationData::class,
-        MutedUserData::class
+        MutedUserData::class,
+        MessageData::class,
+        MessageConversationData::class,
     ],
-    version = 9,
+    version = 10,
     exportSchema = true,
 )
 @TypeConverters(RoomCustomTypeConverters::class)
@@ -86,9 +92,9 @@ abstract class PrimalDatabase : RoomDatabase() {
 
     abstract fun feedPostsSync(): FeedPostSyncDao
 
-    abstract fun conversationConnections(): ConversationCrossRefDao
+    abstract fun conversationConnections(): ThreadConversationCrossRefDao
 
-    abstract fun conversations(): ConversationDao
+    abstract fun threadConversations(): ThreadConversationDao
 
     abstract fun postUserStats(): PostUserStatsDao
 
@@ -98,5 +104,9 @@ abstract class PrimalDatabase : RoomDatabase() {
 
     abstract fun notifications(): NotificationDao
 
-    abstract fun muted(): MutedUserDao
+    abstract fun mutedUsers(): MutedUserDao
+
+    abstract fun messages(): MessageDao
+
+    abstract fun messageConversations(): MessageConversationDao
 }

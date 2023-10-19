@@ -30,7 +30,7 @@ class SettingsApiImpl @Inject constructor(
                 primalVerb = PrimalVerb.GET_APP_SETTINGS,
                 optionsJson = NostrJson.encodeToString(
                     AppSpecificDataRequest(
-                        eventFromUser = nostrNotary.signAppSettingsSyncNostrEvent(
+                        eventFromUser = nostrNotary.signAuthorizationNostrEvent(
                             userId = pubkey,
                             description = "Sync app settings",
                         ),

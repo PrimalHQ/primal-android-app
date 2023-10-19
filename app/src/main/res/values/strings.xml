@@ -136,7 +136,7 @@
     <string name="search_followers_text">Followers</string>
 
     <string name="notifications_title">Notifications</string>
-    <string name="notifications_no_content">No notifications.</string>
+    <string name="notifications_no_content">Your notifications will appear here.</string>
     <string name="notifications_initial_loading_error">Unable to load notifications. Please try again.</string>
     <plurals name="notification_list_item_and_others">
         <item quantity="one">and %1$s other</item>
@@ -169,6 +169,10 @@
     <string name="messages_follows_tab_title">Follows</string>
     <string name="messages_other_tab_title">Other</string>
     <string name="messages_mark_all_read_button">Mark All Read</string>
+    <string name="messages_no_conversations">Your conversations will appear here.</string>
+    <string name="messages_no_chat">Your messages will appear here.</string>
+    <string name="messages_conversations_initial_loading_error">Unable to load conversations. Please try again.</string>
+    <string name="messages_chat_initial_loading_error">Unable to load messages. Please try again.</string>
 
     <string name="chat_message_hint">Message %1$s</string>
 

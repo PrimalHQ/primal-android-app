@@ -8,8 +8,8 @@ import net.primal.android.serialization.decodeFromStringOrNull
 fun List<NostrEvent>.mapNotNullAsRepostDataPO() = mapNotNull {
     val repostedPost = NostrJson.decodeFromStringOrNull<NostrEvent>(it.content)
 
-    val repostedPostId = repostedPost?.id ?: it.tags?.findPostId()
-    val repostedPostAuthorId = repostedPost?.pubKey ?: it.tags?.findPostAuthorId()
+    val repostedPostId = repostedPost?.id ?: it.tags.findFirstEventId()
+    val repostedPostAuthorId = repostedPost?.pubKey ?: it.tags.findFirstProfileId()
 
     if (repostedPostId != null && repostedPostAuthorId != null) {
         it.asRepostDataPO(
@@ -23,7 +23,7 @@ fun NostrEvent.asRepostDataPO(postId: String, postAuthorId: String) = RepostData
     repostId = this.id,
     authorId = this.pubKey,
     createdAt = this.createdAt,
-    tags = this.tags ?: emptyList(),
+    tags = this.tags,
     sig = this.sig,
     postId = postId,
     postAuthorId = postAuthorId

@@ -8,15 +8,15 @@ core-testing = "2.2.0"
 datastore = "1.0.0"
 kotest = "5.6.2"
 kotlinx-serialization-json = "1.6.0"
-material-icons = "1.5.3"
+material-icons = "1.5.4"
 mockk = "1.13.5"
 okhttp = "4.11.0"
 kotlin = "1.9.10"
 kotlinx-coroutines="1.7.3"
-compose-bom = "2023.10.00"
+compose-bom = "2023.10.01"
 core-ktx = "1.12.0"
 core-splashscreen = "1.0.1"
-lifecycle = "2.7.0-alpha02"
+lifecycle = "2.7.0-alpha03"
 activity-compose = "1.8.0"
 junit = "4.13.2"
 junit-android-runner = "1.1.5"
@@ -66,7 +66,7 @@ constraintlayout = { module = "androidx.constraintlayout:constraintlayout", vers
 compose-constraintlayout = { module = "androidx.constraintlayout:constraintlayout-compose", version.ref = "constraintlayout-compose" }
 
 lottie-compose = { module = "com.airbnb.android:lottie-compose", version = "5.2.0" }
-navigation-compose = { module = "androidx.navigation:navigation-compose", version = "2.7.3" }
+navigation-compose = { module = "androidx.navigation:navigation-compose", version = "2.7.4" }
 navigation-hilt = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hilt" }
 navigation-material = { module = "com.google.accompanist:accompanist-navigation-material", version.ref = "accompanist" }
 

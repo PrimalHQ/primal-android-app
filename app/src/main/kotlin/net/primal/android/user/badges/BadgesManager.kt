@@ -21,6 +21,7 @@ import net.primal.android.networking.primal.PrimalCacheFilter
 import net.primal.android.networking.primal.PrimalVerb
 import net.primal.android.networking.sockets.NostrIncomingMessage
 import net.primal.android.networking.sockets.errors.NostrNoticeException
+import net.primal.android.nostr.ext.asMessagesTotalCount
 import net.primal.android.nostr.ext.asNotificationSummary
 import net.primal.android.notifications.api.model.PubkeyRequestBody
 import net.primal.android.serialization.NostrJson
@@ -43,6 +44,9 @@ class BadgesManager @Inject constructor(
 
     private var notificationsSummarySubscriptionId: UUID? = null
     private var notificationsSummarySubscriptionJob: Job? = null
+
+    private var messagesSummarySubscriptionId: UUID? = null
+    private var messagesSummarySubscriptionJob: Job? = null
 
     private var latestBadge: Badges = Badges()
     private val mutableBadges = MutableSharedFlow<Badges>(
@@ -109,12 +113,16 @@ class BadgesManager @Inject constructor(
         notificationsSummarySubscriptionJob = scope.launch {
             subscribeNotifications(userId = userId)
         }
+        messagesSummarySubscriptionJob = scope.launch {
+            subscribeMessages(userId = userId)
+        }
     }
 
     private fun unsubscribeAll() {
         subscriptionsActive = false
         scope.launch {
             unsubscribeNotifications()
+            unsubscribeMessages()
         }
     }
 
@@ -152,6 +160,44 @@ class BadgesManager @Inject constructor(
             notificationsSummarySubscriptionId = null
             notificationsSummarySubscriptionJob?.cancel()
             notificationsSummarySubscriptionJob = null
+
+        }
+    }
+
+    private suspend fun subscribeMessages(userId: String) {
+        val newSubscriptionId = UUID.randomUUID()
+        messagesSummarySubscriptionId = newSubscriptionId
+        primalApiClient.subscribe(
+            subscriptionId = newSubscriptionId,
+            message = PrimalCacheFilter(
+                primalVerb = PrimalVerb.NEW_DMS_COUNT,
+                optionsJson = NostrJson.encodeToString(PubkeyRequestBody(pubkey = userId))
+            )
+        ).transform { it ->
+            when (it) {
+                is NostrIncomingMessage.EventMessage -> {
+                    it.primalEvent?.asMessagesTotalCount()?.let { summary -> emit(summary) }
+                }
+
+                is NostrIncomingMessage.NoticeMessage -> {
+                    throw NostrNoticeException(reason = it.message)
+                }
+
+                else -> Unit
+            }
+        }.collect {
+            emitBadgesUpdate { currentState ->
+                currentState.copy(messages = it.count)
+            }
+        }
+    }
+
+    private suspend fun unsubscribeMessages() {
+        messagesSummarySubscriptionId?.let {
+            primalApiClient.closeSubscription(it)
+            messagesSummarySubscriptionId = null
+            messagesSummarySubscriptionJob?.cancel()
+            messagesSummarySubscriptionJob = null
         }
     }
 }

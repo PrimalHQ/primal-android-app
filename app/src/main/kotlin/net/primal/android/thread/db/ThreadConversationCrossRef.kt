@@ -13,7 +13,7 @@ import androidx.room.Index
         Index(value = ["replyPostId"])
     ]
 )
-data class ConversationCrossRef(
+data class ThreadConversationCrossRef(
     val postId: String,
     val replyPostId: String,
 )

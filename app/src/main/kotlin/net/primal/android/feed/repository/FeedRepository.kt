@@ -18,7 +18,7 @@ import net.primal.android.feed.db.FeedPost
 import net.primal.android.feed.db.sql.ExploreFeedQueryBuilder
 import net.primal.android.feed.db.sql.FeedQueryBuilder
 import net.primal.android.feed.db.sql.LatestFeedQueryBuilder
-import net.primal.android.thread.db.ConversationCrossRef
+import net.primal.android.thread.db.ThreadConversationCrossRef
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import javax.inject.Inject
 
@@ -56,7 +56,7 @@ class FeedRepository @Inject constructor(
     fun findPostById(postId: String): FeedPost? = database.feedPosts().findPostById(postId = postId)
 
     fun observeConversation(postId: String) =
-        database.conversations().observeConversation(
+        database.threadConversations().observeConversation(
             postId = postId,
             userId = activeAccountStore.activeUserId()
         )
@@ -70,7 +70,7 @@ class FeedRepository @Inject constructor(
         response.persistToDatabaseAsTransaction(userId = userId, database = database)
         database.conversationConnections().connect(
             data = response.posts.map {
-                ConversationCrossRef(
+                ThreadConversationCrossRef(
                     postId = postId,
                     replyPostId = it.id,
                 )

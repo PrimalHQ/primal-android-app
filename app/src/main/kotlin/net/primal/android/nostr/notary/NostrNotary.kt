@@ -69,7 +69,7 @@ class NostrNotary @Inject constructor(
         ).signOrThrow(nsec = findNsecOrThrow(userId))
     }
 
-    fun signAppSettingsSyncNostrEvent(
+    fun signAuthorizationNostrEvent(
         userId: String,
         description: String,
     ): NostrEvent {

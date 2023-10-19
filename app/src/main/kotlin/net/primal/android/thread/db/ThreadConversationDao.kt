@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.Flow
 import net.primal.android.feed.db.FeedPost
 
 @Dao
-interface ConversationDao {
+interface ThreadConversationDao {
 
     @Transaction
     @RewriteQueriesToDropUnusedColumns
@@ -31,8 +31,8 @@ interface ConversationDao {
                 NULL AS feedCreatedAt,
                 CASE WHEN MutedUserData.userId IS NOT NULL THEN 1 ELSE 0 END AS isMuted
             FROM PostData AS FPD1
-            INNER JOIN ConversationCrossRef ON FPD1.postId = ConversationCrossRef.postId
-            INNER JOIN PostData AS FPD2 ON ConversationCrossRef.replyPostId = FPD2.postId
+            INNER JOIN ThreadConversationCrossRef ON FPD1.postId = ThreadConversationCrossRef.postId
+            INNER JOIN PostData AS FPD2 ON ThreadConversationCrossRef.replyPostId = FPD2.postId
             LEFT JOIN PostUserStats ON PostUserStats.postId = FPD2.postId AND PostUserStats.userId = :userId
             LEFT JOIN MutedUserData ON MutedUserData.userId = FPD2.authorId
             WHERE FPD1.postId = :postId AND isMuted = 0

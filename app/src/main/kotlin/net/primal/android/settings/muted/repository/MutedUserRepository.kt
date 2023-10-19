@@ -19,9 +19,9 @@ class MutedUserRepository @Inject constructor(
     private val primalImportApi: PrimalImportApi,
 ) {
 
-    fun observeMutedUsers() = database.muted().observeMutedUsers()
+    fun observeMutedUsers() = database.mutedUsers().observeMutedUsers()
 
-    fun observeIsUserMuted(pubkey: String) = database.muted().observeIsUserMuted(pubkey = pubkey)
+    fun observeIsUserMuted(pubkey: String) = database.mutedUsers().observeIsUserMuted(pubkey = pubkey)
 
     suspend fun fetchAndPersistMuteList(userId: String) {
         val muteList = fetchMuteListAndPersistProfiles(userId = userId)
@@ -95,8 +95,8 @@ class MutedUserRepository @Inject constructor(
     private suspend fun persistMuteList(muteList: Set<MutedUserData>) {
         withContext(Dispatchers.IO) {
             database.withTransaction {
-                database.muted().deleteAll()
-                database.muted().upsertAll(data = muteList)
+                database.mutedUsers().deleteAll()
+                database.mutedUsers().upsertAll(data = muteList)
             }
         }
     }

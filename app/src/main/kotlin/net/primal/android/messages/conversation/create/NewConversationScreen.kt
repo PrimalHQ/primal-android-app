@@ -1,4 +1,4 @@
-package net.primal.android.messages.list
+package net.primal.android.messages.conversation.create
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
@@ -40,13 +40,13 @@ import net.primal.android.explore.search.ui.UserProfileListItem
 import net.primal.android.theme.AppTheme
 
 @Composable
-fun NewMessageScreen(
+fun NewConversationScreen(
     viewModel: SearchViewModel,
     onClose: () -> Unit,
     onProfileClick: (String) -> Unit,
 ) {
     val state = viewModel.state.collectAsState()
-    NewMessageScreen(
+    NewConversationScreen(
         state = state.value,
         onClose = onClose,
         onProfileClick = onProfileClick,
@@ -56,7 +56,7 @@ fun NewMessageScreen(
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
-fun NewMessageScreen(
+fun NewConversationScreen(
     state: SearchContract.UiState,
     onClose: () -> Unit,
     onProfileClick: (String) -> Unit,

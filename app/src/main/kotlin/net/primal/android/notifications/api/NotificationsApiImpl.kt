@@ -46,7 +46,7 @@ class NotificationsApiImpl @Inject constructor(
                 primalVerb = PrimalVerb.SET_LAST_SEEN_NOTIFICATIONS,
                 optionsJson = NostrJson.encodeToString(
                     AppSpecificDataRequest(
-                        eventFromUser = nostrNotary.signAppSettingsSyncNostrEvent(
+                        eventFromUser = nostrNotary.signAuthorizationNostrEvent(
                             userId = userId,
                             description = "Update notifications last seen timestamp.",
                         ),

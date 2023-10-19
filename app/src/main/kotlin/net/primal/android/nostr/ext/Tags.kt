@@ -1,9 +1,7 @@
 package net.primal.android.nostr.ext
 
-import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.JsonUnquotedLiteral
 import kotlinx.serialization.json.add
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.jsonPrimitive
@@ -11,12 +9,12 @@ import net.primal.android.core.utils.parseHashtags
 import net.primal.android.editor.domain.NoteAttachment
 import net.primal.android.wallet.model.ZapTarget
 
-fun List<JsonArray>.findPostId(): String? {
+fun List<JsonArray>.findFirstEventId(): String? {
     val postTag = firstOrNull { it.isEventIdTag() }
     return postTag?.getTagValueOrNull()
 }
 
-fun List<JsonArray>.findPostAuthorId(): String? {
+fun List<JsonArray>.findFirstProfileId(): String? {
     val postAuthorTag = firstOrNull { it.isPubKeyTag() }
     return postAuthorTag?.getTagValueOrNull()
 }

@@ -4,9 +4,9 @@ import androidx.room.Dao
 import androidx.room.Upsert
 
 @Dao
-interface ConversationCrossRefDao {
+interface ThreadConversationCrossRefDao {
 
     @Upsert
-    fun connect(data: List<ConversationCrossRef>)
+    fun connect(data: List<ThreadConversationCrossRef>)
 
 }

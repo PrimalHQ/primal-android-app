@@ -48,14 +48,16 @@ enum class NostrEventKind(val value: Int) {
     PrimalNotificationsSeenUntil(value = 10_000_111),
     @Deprecated("Use PrimalNotificationsSummary2.")
     PrimalNotificationsSummary(value = 10_000_112),
-    PrimalNotificationsSummary2(value = 10_000_132),
     PrimalPaging(value = 10_000_113),
     PrimalMediaMapping(value = 10_000_114),
     PrimalEventUserStats(value = 10_000_115),
     PrimalTrendingHashtags(value = 10_000_116),
+    PrimalDirectMessagesUnreadCount(value = 10_000_117),
+    PrimalDirectMessagesConversationsSummary(value = 10_000_118),
     PrimalEventResources(value = 10_000_119),
     PrimalImageUploadRequest(value = 10_000_120),
     PrimalImageUploadResponse(value = 10_000_121),
+    PrimalNotificationsSummary2(value = 10_000_132),
     PrimalAppState(value = 10_000_999),
     Unknown(value = -1);
 

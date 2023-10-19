@@ -1,4 +1,4 @@
-package net.primal.android.messages.list
+package net.primal.android.messages.conversation
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateIntAsState
@@ -10,6 +10,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
@@ -22,6 +23,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.DrawerState
@@ -30,6 +32,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
@@ -46,31 +50,53 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import androidx.paging.LoadState
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemKey
 import kotlinx.coroutines.launch
 import net.primal.android.R
+import net.primal.android.core.compose.AvatarThumbnailListItemImage
+import net.primal.android.core.compose.ListLoading
+import net.primal.android.core.compose.ListNoContent
+import net.primal.android.core.compose.NostrUserText
+import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.compose.foundation.brandBackground
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 import net.primal.android.core.compose.icons.primaliconpack.Message
+import net.primal.android.core.compose.isEmpty
+import net.primal.android.core.ext.findByUrl
+import net.primal.android.core.utils.asBeforeNowFormat
+import net.primal.android.core.utils.isPrimalIdentifier
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.PrimalBottomBarHeightDp
 import net.primal.android.drawer.PrimalDrawerScaffold
+import net.primal.android.messages.conversation.MessageConversationListContract.UiEvent.ChangeRelation
+import net.primal.android.messages.conversation.MessageConversationListContract.UiEvent.MarkAllConversationsAsRead
+import net.primal.android.messages.conversation.model.MessageConversationUi
+import net.primal.android.messages.domain.ConversationRelation
 import net.primal.android.theme.AppTheme
 
 @Composable
 fun MessageListScreen(
-    viewModel: MessageListViewModel,
+    viewModel: MessageConversationListViewModel,
     onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
-    onChatClick: (String) -> Unit,
+    onConversationClick: (String) -> Unit,
     onNewMessageClick: () -> Unit,
 ) {
 
@@ -80,7 +106,8 @@ fun MessageListScreen(
         state = uiState.value,
         onPrimaryDestinationChanged = onTopLevelDestinationChanged,
         onDrawerDestinationClick = onDrawerScreenClick,
-        onChatClick = onChatClick,
+        eventPublisher = { viewModel.setEvent(it) },
+        onConversationClick = onConversationClick,
         onNewMessageClick = onNewMessageClick,
     )
 }
@@ -88,10 +115,11 @@ fun MessageListScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MessageListScreen(
-    state: MessageListContract.UiState,
+    state: MessageConversationListContract.UiState,
     onPrimaryDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
-    onChatClick: (String) -> Unit,
+    eventPublisher: (MessageConversationListContract.UiEvent) -> Unit,
+    onConversationClick: (String) -> Unit,
     onNewMessageClick: () -> Unit,
 ) {
     val uiScope = rememberCoroutineScope()
@@ -101,6 +129,8 @@ fun MessageListScreen(
     val bottomBarHeight = PrimalBottomBarHeightDp
     var bottomBarOffsetHeightPx by remember { mutableFloatStateOf(0f) }
     val focusMode by remember { derivedStateOf { bottomBarOffsetHeightPx < 0f } }
+
+    val conversations = state.conversations.collectAsLazyPagingItems()
 
     PrimalDrawerScaffold(
         drawerState = drawerState,
@@ -122,39 +152,30 @@ fun MessageListScreen(
                 scrollBehavior = it,
                 footer = {
                     MessagesTabs(
+                        relation = state.activeRelation,
                         onFollowsTabClick = {
-
+                            eventPublisher(ChangeRelation(relation = ConversationRelation.Follows))
                         },
                         onOtherTabClick = {
-
+                            eventPublisher(ChangeRelation(relation = ConversationRelation.Other))
                         },
                         onMarkAllRead = {
-
+                            eventPublisher(MarkAllConversationsAsRead)
                         },
                     )
                 }
             )
         },
         content = { paddingValues ->
-            LazyColumn(
+            ConversationsList(
+                conversations = conversations,
                 modifier = Modifier
                     .background(color = AppTheme.colorScheme.surfaceVariant)
                     .fillMaxSize(),
-                contentPadding = paddingValues,
                 state = listState,
-            ) {
-                items(count = 50) {
-                    Text(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(48.dp)
-                            .padding(horizontal = 32.dp),
-                        textAlign = TextAlign.Start,
-                        text = "Coming soon... (${it + 1})",
-                    )
-                }
-
-            }
+                contentPadding = paddingValues,
+                onConversationClick = onConversationClick,
+            )
         },
         floatingActionButton = {
             AnimatedVisibility(
@@ -184,7 +205,146 @@ fun MessageListScreen(
 }
 
 @Composable
+private fun ConversationsList(
+    conversations: LazyPagingItems<MessageConversationUi>,
+    modifier: Modifier = Modifier,
+    state: LazyListState = rememberLazyListState(),
+    contentPadding: PaddingValues = PaddingValues(0.dp),
+    onConversationClick: (String) -> Unit,
+) {
+    LazyColumn(
+        modifier = modifier,
+        contentPadding = contentPadding,
+        state = state,
+    ) {
+        items(
+            count = conversations.itemCount,
+            key = conversations.itemKey { it.participantId },
+        ) {
+            val conversation = conversations[it]
+
+            when {
+                conversation != null -> {
+                    ConversationListItem(
+                        conversation = conversation,
+                        onConversationClick = onConversationClick,
+                    )
+                    PrimalDivider()
+                }
+
+                else -> {}
+            }
+        }
+
+        if (conversations.isEmpty()) {
+            when (conversations.loadState.refresh) {
+                LoadState.Loading -> {
+                    item(contentType = "LoadingRefresh") {
+                        ListLoading(
+                            modifier = Modifier.fillParentMaxSize(),
+                        )
+                    }
+                }
+
+                is LoadState.NotLoading -> {
+                    item(contentType = "NoContent") {
+                        ListNoContent(
+                            modifier = Modifier.fillParentMaxSize(),
+                            noContentText = stringResource(id = R.string.messages_no_conversations),
+                            refreshButtonVisible = false,
+                        )
+                    }
+                }
+
+                is LoadState.Error -> {
+                    item(contentType = "RefreshError") {
+                        ListNoContent(
+                            modifier = Modifier.fillParentMaxSize(),
+                            noContentText = stringResource(id = R.string.messages_conversations_initial_loading_error),
+                            onRefresh = { conversations.refresh() }
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ConversationListItem(
+    conversation: MessageConversationUi,
+    onConversationClick: (String) -> Unit,
+) {
+    ListItem(
+        modifier = Modifier.clickable {
+            onConversationClick(conversation.participantId)
+        },
+        colors = ListItemDefaults.colors(
+            containerColor = AppTheme.colorScheme.surfaceVariant,
+        ),
+        leadingContent = {
+            val resource = conversation.participantMediaResources.findByUrl(url = conversation.participantAvatarUrl)
+            val variant = resource?.variants?.minByOrNull { it.width }
+            val imageSource = variant?.mediaUrl ?: conversation.participantAvatarUrl
+            AvatarThumbnailListItemImage(
+                source = imageSource,
+                hasBorder = conversation.participantInternetIdentifier.isPrimalIdentifier(),
+            )
+        },
+        headlineContent = {
+            Row {
+                Box(
+                    modifier = Modifier.weight(1f),
+                ) {
+                    val timestamp = conversation.lastMessageAt.asBeforeNowFormat(
+                        res = LocalContext.current.resources
+                    )
+                    val suffixText = buildAnnotatedString {
+                        val hasVerifiedBadge = !conversation.participantInternetIdentifier.isNullOrEmpty()
+                        if (!hasVerifiedBadge) append(' ')
+                        append(
+                            AnnotatedString(
+                                text = "| $timestamp",
+                                spanStyle = SpanStyle(
+                                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                                    fontStyle = AppTheme.typography.bodySmall.fontStyle,
+                                )
+                            )
+                        )
+                    }
+
+                    NostrUserText(
+                        displayName = conversation.participantUsername,
+                        internetIdentifier = conversation.participantInternetIdentifier,
+                        annotatedStringSuffixBuilder = { append(suffixText) },
+                        style = AppTheme.typography.bodyMedium,
+                    )
+                }
+
+                if (conversation.unreadMessagesCount > 0) {
+                    Box(
+                        modifier = Modifier
+                            .size(12.dp)
+                            .brandBackground(shape = CircleShape)
+                    )
+                }
+            }
+        },
+        supportingContent = {
+            Text(
+                text = conversation.lastMessageSnippet,
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 2,
+                style = AppTheme.typography.bodySmall,
+                color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+            )
+        }
+    )
+}
+
+@Composable
 private fun MessagesTabs(
+    relation: ConversationRelation,
     onFollowsTabClick: () -> Unit,
     onOtherTabClick: () -> Unit,
     onMarkAllRead: () -> Unit,
@@ -197,18 +357,14 @@ private fun MessagesTabs(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        var tabIndex by remember { mutableIntStateOf(0) }
-
         var followsTabWidth by remember { mutableIntStateOf(0) }
         var otherTabWidth by remember { mutableIntStateOf(0) }
         val tabsSpaceWidth = 16.dp
 
         val onFollowsClick = {
-            tabIndex = 0
             onFollowsTabClick()
         }
         val onOtherClick = {
-            tabIndex = 1
             onOtherTabClick()
         }
 
@@ -240,10 +396,9 @@ private fun MessagesTabs(
                         .height(4.dp)
                         .width(
                             animateIntAsState(
-                                targetValue = when (tabIndex) {
-                                    0 -> followsTabWidth
-                                    1 -> otherTabWidth
-                                    else -> 0
+                                targetValue = when (relation) {
+                                    ConversationRelation.Follows -> followsTabWidth
+                                    ConversationRelation.Other -> otherTabWidth
                                 },
                                 label = "indicatorWidth"
                             ).value.toDp()
@@ -251,12 +406,13 @@ private fun MessagesTabs(
                         .offset(
                             y = (-4).dp,
                             x = animateIntAsState(
-                                targetValue = when (tabIndex) {
-                                    1 -> followsTabWidth + tabsSpaceWidth
-                                        .toPx()
-                                        .toInt()
-
-                                    else -> 0
+                                targetValue = when (relation) {
+                                    ConversationRelation.Follows -> 0
+                                    ConversationRelation.Other -> {
+                                        followsTabWidth + tabsSpaceWidth
+                                            .toPx()
+                                            .toInt()
+                                    }
                                 },
                                 label = "indicatorOffsetX"
                             ).value.toDp()

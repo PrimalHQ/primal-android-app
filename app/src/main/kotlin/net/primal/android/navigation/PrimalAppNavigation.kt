@@ -47,9 +47,9 @@ import net.primal.android.explore.search.SearchViewModel
 import net.primal.android.explore.search.ui.SearchScreen
 import net.primal.android.messages.chat.ChatScreen
 import net.primal.android.messages.chat.ChatViewModel
-import net.primal.android.messages.list.MessageListScreen
-import net.primal.android.messages.list.MessageListViewModel
-import net.primal.android.messages.list.NewMessageScreen
+import net.primal.android.messages.conversation.MessageConversationListViewModel
+import net.primal.android.messages.conversation.MessageListScreen
+import net.primal.android.messages.conversation.create.NewConversationScreen
 import net.primal.android.navigation.deeplinking.DeepLink
 import net.primal.android.navigation.deeplinking.ext.handleDeeplink
 import net.primal.android.navigation.splash.SplashContract
@@ -504,13 +504,13 @@ private fun NavGraphBuilder.messages(
 ) = composable(
     route = route,
 ) { navBackEntry ->
-    val viewModel = hiltViewModel<MessageListViewModel>(navBackEntry)
+    val viewModel = hiltViewModel<MessageConversationListViewModel>(navBackEntry)
     LockToOrientationPortrait()
     MessageListScreen(
         viewModel = viewModel,
         onTopLevelDestinationChanged = onTopLevelDestinationChanged,
         onDrawerScreenClick = onDrawerScreenClick,
-        onChatClick = { profileId -> navController.navigateToChat(profileId) },
+        onConversationClick = { profileId -> navController.navigateToChat(profileId) },
         onNewMessageClick = { navController.navigateToNewMessage() },
     )
 }
@@ -540,7 +540,7 @@ private fun NavGraphBuilder.newMessage(
 ) { navBackEntry ->
     val viewModel = hiltViewModel<SearchViewModel>(navBackEntry)
     LockToOrientationPortrait()
-    NewMessageScreen(
+    NewConversationScreen(
         viewModel = viewModel,
         onClose = { navController.navigateUp() },
         onProfileClick = { profileId ->

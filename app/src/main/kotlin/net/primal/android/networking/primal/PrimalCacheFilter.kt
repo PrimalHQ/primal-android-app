@@ -38,4 +38,8 @@ enum class PrimalVerb(val identifier: String) {
     NEW_NOTIFICATIONS_COUNT("notification_counts_2"),
     UPLOAD("upload"),
     MUTE_LIST("mutelist"),
+    GET_DM_CONTACTS("get_directmsg_contacts"),
+    GET_DMS("get_directmsgs"),
+    MARK_DMS_AS_READ("reset_directmsg_count"),
+    NEW_DMS_COUNT("directmsg_count"),
 }
