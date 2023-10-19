@@ -334,6 +334,7 @@ private fun ConversationListItem(
             Text(
                 text = conversation.lastMessageSnippet,
                 overflow = TextOverflow.Ellipsis,
+                minLines = 2,
                 maxLines = 2,
                 style = AppTheme.typography.bodySmall,
                 color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
