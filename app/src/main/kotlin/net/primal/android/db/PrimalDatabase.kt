@@ -26,8 +26,8 @@ import net.primal.android.feed.db.RepostDao
 import net.primal.android.feed.db.RepostData
 import net.primal.android.messages.db.MessageConversationData
 import net.primal.android.messages.db.MessageConversationDao
-import net.primal.android.messages.db.MessageDao
-import net.primal.android.messages.db.MessageData
+import net.primal.android.messages.db.DirectMessageDao
+import net.primal.android.messages.db.DirectMessageData
 import net.primal.android.notifications.db.NotificationDao
 import net.primal.android.notifications.db.NotificationData
 import net.primal.android.profile.db.PostUserStats
@@ -61,7 +61,7 @@ import net.primal.android.thread.db.ThreadConversationDao
         NostrResource::class,
         NotificationData::class,
         MutedUserData::class,
-        MessageData::class,
+        DirectMessageData::class,
         MessageConversationData::class,
     ],
     version = 10,
@@ -106,7 +106,7 @@ abstract class PrimalDatabase : RoomDatabase() {
 
     abstract fun mutedUsers(): MutedUserDao
 
-    abstract fun messages(): MessageDao
+    abstract fun messages(): DirectMessageDao
 
     abstract fun messageConversations(): MessageConversationDao
 }

@@ -8,16 +8,18 @@ inline val SavedStateHandle.feedDirective: String? get() = get<String>(FeedDirec
 
 
 const val PostId = "postId"
-inline val SavedStateHandle.postId: String
+inline val SavedStateHandle.postIdOrThrow: String
     get() = get(PostId) ?: throw IllegalArgumentException("Missing required postId argument.")
 
 
 const val ProfileId = "profileId"
 inline val SavedStateHandle.profileId: String? get() = get(ProfileId)
+inline val SavedStateHandle.profileIdOrThrow: String
+    get() = get(ProfileId) ?: throw IllegalArgumentException("Missing required profileId argument")
 
 
 const val SearchQuery = "searchQuery"
-inline val SavedStateHandle.searchQuery: String
+inline val SavedStateHandle.searchQueryOrThrow: String
     get() = get(SearchQuery) ?: throw IllegalArgumentException("Missing required searchQuery argument.")
 
 

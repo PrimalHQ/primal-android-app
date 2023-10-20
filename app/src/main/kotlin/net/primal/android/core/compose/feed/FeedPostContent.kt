@@ -37,7 +37,9 @@ import net.primal.android.core.compose.PrimalClickableText
 import net.primal.android.core.compose.feed.model.FeedPostStatsUi
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.feed.model.NostrResourceUi
+import net.primal.android.core.compose.feed.model.asNostrResourceUi
 import net.primal.android.core.compose.media.model.MediaResourceUi
+import net.primal.android.core.compose.media.model.asMediaResourceUi
 import net.primal.android.core.ext.calculateImageSize
 import net.primal.android.core.ext.findNearestOrNull
 import net.primal.android.core.utils.HashtagMatcher

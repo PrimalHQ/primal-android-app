@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
-import net.primal.android.core.compose.feed.asFeedPostUi
+import net.primal.android.core.compose.feed.model.asFeedPostUi
 import net.primal.android.core.files.FileAnalyser
 import net.primal.android.core.files.error.UnsuccessfulFileUpload
 import net.primal.android.editor.NoteEditorContract.SideEffect

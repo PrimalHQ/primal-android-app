@@ -13,10 +13,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import net.primal.android.core.compose.feed.asFeedPostUi
-import net.primal.android.core.compose.media.model.MediaResourceUi
-import net.primal.android.core.utils.authorNameUiFriendly
-import net.primal.android.core.utils.usernameUiFriendly
+import net.primal.android.core.compose.feed.model.asFeedPostUi
+import net.primal.android.core.compose.media.model.asMediaResourceUi
+import net.primal.android.core.compose.profile.model.asProfileDetailsUi
+import net.primal.android.core.compose.profile.model.asProfileStatsUi
 import net.primal.android.feed.repository.FeedRepository
 import net.primal.android.feed.repository.PostRepository
 import net.primal.android.navigation.profileId
@@ -26,8 +26,6 @@ import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.profile.details.ProfileContract.UiEvent
 import net.primal.android.profile.details.ProfileContract.UiState
 import net.primal.android.profile.details.ProfileContract.UiState.ProfileError
-import net.primal.android.profile.details.model.ProfileDetailsUi
-import net.primal.android.profile.details.model.ProfileStatsUi
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.settings.muted.repository.MutedUserRepository
 import net.primal.android.settings.repository.SettingsRepository
@@ -124,36 +122,9 @@ class ProfileViewModel @Inject constructor(
         profileRepository.observeProfile(profileId = profileId).collect {
             setState {
                 copy(
-                    profileDetails = if (it.metadata != null) {
-                        ProfileDetailsUi(
-                            pubkey = it.metadata.ownerId,
-                            authorDisplayName = it.metadata.authorNameUiFriendly(),
-                            userDisplayName = it.metadata.usernameUiFriendly(),
-                            coverUrl = it.metadata.banner,
-                            avatarUrl = it.metadata.picture,
-                            internetIdentifier = it.metadata.internetIdentifier,
-                            about = it.metadata.about,
-                            website = it.metadata.website,
-                        )
-                    } else {
-                        this.profileDetails
-                    },
-                    profileStats = if (it.stats != null) {
-                        ProfileStatsUi(
-                            followingCount = it.stats.following,
-                            followersCount = it.stats.followers,
-                            notesCount = it.stats.notes,
-                        )
-                    } else {
-                        this.profileStats
-                    },
-                    resources = it.resources.map {
-                        MediaResourceUi(
-                            url = it.url,
-                            mimeType = it.contentType,
-                            variants = it.variants ?: emptyList(),
-                        )
-                    },
+                    profileDetails = it.metadata?.asProfileDetailsUi() ?: this.profileDetails,
+                    profileStats = it.stats?.asProfileStatsUi() ?: this.profileStats,
+                    resources = it.resources.map { it.asMediaResourceUi() },
                 )
             }
         }

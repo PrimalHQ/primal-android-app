@@ -75,6 +75,7 @@ import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.compose.foundation.brandBackground
+import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 import net.primal.android.core.compose.icons.primaliconpack.Message
@@ -124,13 +125,13 @@ fun MessageListScreen(
 ) {
     val uiScope = rememberCoroutineScope()
     val drawerState: DrawerState = rememberDrawerState(DrawerValue.Closed)
-    val listState = rememberLazyListState()
 
     val bottomBarHeight = PrimalBottomBarHeightDp
     var bottomBarOffsetHeightPx by remember { mutableFloatStateOf(0f) }
     val focusMode by remember { derivedStateOf { bottomBarOffsetHeightPx < 0f } }
 
     val conversations = state.conversations.collectAsLazyPagingItems()
+    val listState = conversations.rememberLazyListStatePagingWorkaround()
 
     PrimalDrawerScaffold(
         drawerState = drawerState,

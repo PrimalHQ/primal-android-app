@@ -26,6 +26,6 @@ data class MessageConversation(
         entityColumn = "messageId",
         parentColumn = "lastMessageId",
     )
-    val lastMessage: MessageData,
+    val lastMessage: DirectMessageData,
 
 )

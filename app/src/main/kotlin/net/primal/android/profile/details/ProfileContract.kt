@@ -4,8 +4,8 @@ import androidx.paging.PagingData
 import kotlinx.coroutines.flow.Flow
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.media.model.MediaResourceUi
-import net.primal.android.profile.details.model.ProfileDetailsUi
-import net.primal.android.profile.details.model.ProfileStatsUi
+import net.primal.android.core.compose.profile.model.ProfileDetailsUi
+import net.primal.android.core.compose.profile.model.ProfileStatsUi
 
 interface ProfileContract {
     data class UiState(

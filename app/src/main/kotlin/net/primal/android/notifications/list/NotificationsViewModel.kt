@@ -12,10 +12,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import net.primal.android.core.compose.feed.asMediaResourceUi
-import net.primal.android.core.compose.feed.asNostrResourceUi
 import net.primal.android.core.compose.feed.model.FeedPostStatsUi
 import net.primal.android.core.compose.feed.model.FeedPostUi
+import net.primal.android.core.compose.feed.model.asNostrResourceUi
+import net.primal.android.core.compose.media.model.asMediaResourceUi
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.core.utils.usernameUiFriendly
@@ -237,16 +237,9 @@ class NotificationsViewModel @Inject constructor(
             authorMediaResources = this.actionByUserResources.map { it.asMediaResourceUi() },
             mediaResources = this.actionPostMediaResources.map { it.asMediaResourceUi() },
             nostrResources = this.actionPostNostrUris.map { it.asNostrResourceUi() },
-            stats = FeedPostStatsUi(
-                repliesCount = this.actionPostStats?.replies ?: 0,
-                userReplied = this.actionPostUserStats?.replied ?: false,
-                zapsCount = this.actionPostStats?.zaps ?: 0,
-                satsZapped = this.actionPostStats?.satsZapped ?: 0,
-                userZapped = this.actionPostUserStats?.zapped ?: false,
-                likesCount = this.actionPostStats?.likes ?: 0,
-                userLiked = this.actionPostUserStats?.liked ?: false,
-                repostsCount = this.actionPostStats?.reposts ?: 0,
-                userReposted = this.actionPostUserStats?.reposted ?: false,
+            stats = FeedPostStatsUi.from(
+                postStats = this.actionPostStats,
+                userStats = this.actionPostUserStats
             ),
             hashtags = this.actionPost.hashtags,
             rawNostrEventJson = this.actionPost.raw,

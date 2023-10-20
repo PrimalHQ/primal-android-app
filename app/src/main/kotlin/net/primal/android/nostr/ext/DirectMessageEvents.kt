@@ -8,7 +8,7 @@ import net.primal.android.core.utils.parseUris
 import net.primal.android.crypto.CryptoUtils
 import net.primal.android.crypto.bechToBytes
 import net.primal.android.crypto.hexToNpubHrp
-import net.primal.android.messages.db.MessageData
+import net.primal.android.messages.db.DirectMessageData
 import net.primal.android.messages.domain.ConversationSummary
 import net.primal.android.messages.domain.ConversationsSummary
 import net.primal.android.messages.domain.MessagesUnreadCount
@@ -42,7 +42,7 @@ fun List<NostrEvent>.mapAsMessageDataPO(userId: String, nsec: String) =
 fun NostrEvent.mapAsMessageDataPO(
     userId: String,
     nsec: String,
-): MessageData? {
+): DirectMessageData? {
     val senderId = this.pubKey
     val receiverId = this.tags.findFirstProfileId() ?: throw RuntimeException("no receiver id")
     val participantId = if (senderId != userId) senderId else receiverId
@@ -58,15 +58,14 @@ fun NostrEvent.mapAsMessageDataPO(
         return null
     }
 
-    return MessageData(
+    return DirectMessageData(
         messageId = this.id,
         senderId = senderId,
         receiverId = receiverId,
         participantId = participantId,
         createdAt = this.createdAt,
-        tags = this.tags,
         content = decryptedMessage,
         uris = this.content.parseUris(),
-        hashtags = this.parseHashtags(),
+        hashtags = this.content.parseHashtags(),
     )
 }

@@ -15,10 +15,10 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import net.primal.android.core.compose.feed.asFeedPostUi
+import net.primal.android.core.compose.feed.model.asFeedPostUi
 import net.primal.android.feed.repository.FeedRepository
 import net.primal.android.feed.repository.PostRepository
-import net.primal.android.navigation.postId
+import net.primal.android.navigation.postIdOrThrow
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
@@ -43,7 +43,7 @@ class ThreadViewModel @Inject constructor(
     private val mutedUserRepository: MutedUserRepository
 ) : ViewModel() {
 
-    private val postId = savedStateHandle.postId
+    private val postId = savedStateHandle.postIdOrThrow
 
     private val _state = MutableStateFlow(ThreadContract.UiState(highlightPostId = postId))
     val state = _state.asStateFlow()

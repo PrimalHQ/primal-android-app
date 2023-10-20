@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import net.primal.android.core.compose.feed.asMediaResourceUi
+import net.primal.android.core.compose.media.model.asMediaResourceUi
 import net.primal.android.core.utils.usernameUiFriendly
 import net.primal.android.messages.conversation.MessageConversationListContract.UiEvent
 import net.primal.android.messages.conversation.MessageConversationListContract.UiState
@@ -37,7 +37,7 @@ class MessageConversationListViewModel @Inject constructor(
             activeRelation = ConversationRelation.Follows,
             conversations = messageRepository
                 .newestConversations(ConversationRelation.Follows)
-                .mapAsPagingDataOfMessageConversationUI(),
+                .mapAsPagingDataOfMessageConversationUi(),
         )
     )
     val state = _state.asStateFlow()
@@ -89,12 +89,12 @@ class MessageConversationListViewModel @Inject constructor(
                 activeRelation = relation,
                 conversations = messageRepository
                     .newestConversations(relation = relation)
-                    .mapAsPagingDataOfMessageConversationUI(),
+                    .mapAsPagingDataOfMessageConversationUi(),
             )
         }
     }
 
-    private fun Flow<PagingData<MessageConversation>>.mapAsPagingDataOfMessageConversationUI() =
+    private fun Flow<PagingData<MessageConversation>>.mapAsPagingDataOfMessageConversationUi() =
         map { pagingData -> pagingData.map { it.mapAsMessageConversationUi() } }
 
     private fun MessageConversation.mapAsMessageConversationUi() =

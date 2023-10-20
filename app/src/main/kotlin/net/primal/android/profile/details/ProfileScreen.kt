@@ -119,8 +119,8 @@ import net.primal.android.core.utils.systemShareText
 import net.primal.android.crypto.hexToNoteHrp
 import net.primal.android.crypto.hexToNpubHrp
 import net.primal.android.profile.details.ProfileContract.UiState.ProfileError
-import net.primal.android.profile.details.model.ProfileDetailsUi
-import net.primal.android.profile.details.model.ProfileStatsUi
+import net.primal.android.core.compose.profile.model.ProfileDetailsUi
+import net.primal.android.core.compose.profile.model.ProfileStatsUi
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import java.text.NumberFormat

@@ -14,14 +14,14 @@ import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import net.primal.android.core.compose.feed.asFeedPostUi
+import net.primal.android.core.compose.feed.model.asFeedPostUi
 import net.primal.android.core.ext.removeSearchPrefix
 import net.primal.android.explore.feed.ExploreFeedContract.UiEvent
 import net.primal.android.explore.feed.ExploreFeedContract.UiState
 import net.primal.android.explore.feed.ExploreFeedContract.UiState.ExploreFeedError
 import net.primal.android.feed.repository.FeedRepository
 import net.primal.android.feed.repository.PostRepository
-import net.primal.android.navigation.searchQuery
+import net.primal.android.navigation.searchQueryOrThrow
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
@@ -45,7 +45,7 @@ class ExploreFeedViewModel @Inject constructor(
     private val mutedUserRepository: MutedUserRepository
 ) : ViewModel() {
 
-    private val exploreQuery = "search;\"${savedStateHandle.searchQuery}\""
+    private val exploreQuery = "search;\"${savedStateHandle.searchQueryOrThrow}\""
 
     private val _state = MutableStateFlow(
         UiState(
