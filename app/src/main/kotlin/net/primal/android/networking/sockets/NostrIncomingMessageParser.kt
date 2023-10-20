@@ -15,19 +15,25 @@ import net.primal.android.nostr.ext.isPrimalEventKind
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.serialization.NostrJson
 import net.primal.android.serialization.decodeFromStringOrNull
+import timber.log.Timber
 import java.util.UUID
 
 fun String.parseIncomingMessage(): NostrIncomingMessage? {
     val jsonArray = NostrJson.decodeFromStringOrNull<JsonArray>(this)
     val verbElement = jsonArray?.elementAtOrNull(0) ?: return null
 
-    return when (verbElement.toIncomingMessageType()) {
-        NostrVerb.Incoming.EVENT -> jsonArray.takeAsEventIncomingMessage()
-        NostrVerb.Incoming.EOSE -> jsonArray.takeAsEoseIncomingMessage()
-        NostrVerb.Incoming.OK -> jsonArray.takeAsOkIncomingMessage()
-        NostrVerb.Incoming.NOTICE -> jsonArray.takeAsNoticeIncomingMessage()
-        NostrVerb.Incoming.AUTH -> jsonArray.takeAsAuthIncomingMessage()
-        NostrVerb.Incoming.COUNT -> jsonArray.takeAsCountIncomingMessage()
+    return try {
+      when (verbElement.toIncomingMessageType()) {
+            NostrVerb.Incoming.EVENT -> jsonArray.takeAsEventIncomingMessage()
+            NostrVerb.Incoming.EOSE -> jsonArray.takeAsEoseIncomingMessage()
+            NostrVerb.Incoming.OK -> jsonArray.takeAsOkIncomingMessage()
+            NostrVerb.Incoming.NOTICE -> jsonArray.takeAsNoticeIncomingMessage()
+            NostrVerb.Incoming.AUTH -> jsonArray.takeAsAuthIncomingMessage()
+            NostrVerb.Incoming.COUNT -> jsonArray.takeAsCountIncomingMessage()
+        }
+    } catch (error: Exception) {
+        Timber.e(error)
+        null
     }
 }
 

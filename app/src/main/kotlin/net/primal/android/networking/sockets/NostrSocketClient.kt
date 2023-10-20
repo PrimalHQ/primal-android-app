@@ -15,7 +15,6 @@ import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 import timber.log.Timber
 import java.util.UUID
-import javax.inject.Inject
 
 class NostrSocketClient constructor(
     private val okHttpClient: OkHttpClient,
@@ -38,7 +37,8 @@ class NostrSocketClient constructor(
         }
 
         override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
-            Timber.w("WS connection failure.", t, response)
+            Timber.w("WS connection failure.")
+            Timber.w(t)
             this@NostrSocketClient.webSocket = null
         }
 
