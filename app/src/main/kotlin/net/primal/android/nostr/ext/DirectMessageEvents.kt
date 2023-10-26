@@ -15,13 +15,14 @@ import net.primal.android.messages.domain.MessagesUnreadCount
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.primal.PrimalEvent
 import net.primal.android.serialization.NostrJson
-import net.primal.android.serialization.decodeFromStringOrNull
 import net.primal.android.serialization.toJsonObject
 import timber.log.Timber
 import java.security.GeneralSecurityException
 
 fun PrimalEvent.asMessagesTotalCount(): MessagesUnreadCount? {
-    return NostrJson.decodeFromStringOrNull(this.content)
+    return this.content.toIntOrNull()?.let {
+        MessagesUnreadCount(count = it)
+    }
 }
 
 fun PrimalEvent.asMessageConversationsSummary(): ConversationsSummary {

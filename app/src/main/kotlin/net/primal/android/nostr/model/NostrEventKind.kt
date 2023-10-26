@@ -52,12 +52,14 @@ enum class NostrEventKind(val value: Int) {
     PrimalMediaMapping(value = 10_000_114),
     PrimalEventUserStats(value = 10_000_115),
     PrimalTrendingHashtags(value = 10_000_116),
+    @Deprecated("Use PrimalDirectMessagesUnreadCount2")
     PrimalDirectMessagesUnreadCount(value = 10_000_117),
     PrimalDirectMessagesConversationsSummary(value = 10_000_118),
     PrimalEventResources(value = 10_000_119),
     PrimalImageUploadRequest(value = 10_000_120),
     PrimalImageUploadResponse(value = 10_000_121),
     PrimalNotificationsSummary2(value = 10_000_132),
+    PrimalDirectMessagesUnreadCount2(value = 10_000_134),
     PrimalAppState(value = 10_000_999),
     Unknown(value = -1);
 

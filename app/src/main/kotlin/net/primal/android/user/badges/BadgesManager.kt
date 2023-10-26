@@ -61,6 +61,7 @@ class BadgesManager @Inject constructor(
 
     private suspend fun emitBadgesUpdate(updateReducer: (Badges) -> Badges) {
         val updatedBadges = updateReducer(latestBadge)
+        latestBadge = updatedBadges
         mutableBadges.emit(updatedBadges)
     }
 

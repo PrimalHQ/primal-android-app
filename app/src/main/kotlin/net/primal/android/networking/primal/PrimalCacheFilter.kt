@@ -41,5 +41,5 @@ enum class PrimalVerb(val identifier: String) {
     GET_DM_CONTACTS("get_directmsg_contacts"),
     GET_DMS("get_directmsgs"),
     MARK_DMS_AS_READ("reset_directmsg_count"),
-    NEW_DMS_COUNT("directmsg_count"),
+    NEW_DMS_COUNT("directmsg_count_2"),
 }
