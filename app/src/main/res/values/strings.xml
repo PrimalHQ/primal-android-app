@@ -83,6 +83,30 @@
     <string name="timestamp_since_weeks">%1$s wk. ago</string>
     <string name="timestamp_since_months">%1$s m. ago</string>
     <string name="timestamp_since_years">%1$s y. ago</string>
+    <plurals name="timestamp_since_minutes">
+        <item quantity="one">%1$s minute ago</item>
+        <item quantity="other">%1$s minutes ago</item>
+    </plurals>
+    <plurals name="timestamp_since_hours">
+        <item quantity="one">%1$s hour ago</item>
+        <item quantity="other">%1$s hours ago</item>
+    </plurals>
+    <plurals name="timestamp_since_days">
+        <item quantity="one">%1$s day ago</item>
+        <item quantity="other">%1$s days ago</item>
+    </plurals>
+    <plurals name="timestamp_since_weeks">
+        <item quantity="one">%1$s week ago</item>
+        <item quantity="other">%1$s weeks ago</item>
+    </plurals>
+    <plurals name="timestamp_since_months">
+        <item quantity="one">%1$s month ago</item>
+        <item quantity="other">%1$s months ago</item>
+    </plurals>
+    <plurals name="timestamp_since_years">
+        <item quantity="one">%1$s year ago</item>
+        <item quantity="other">%1$s years ago</item>
+    </plurals>
 
     <string name="feed_list_title">My Nostr Feeds</string>
     <string name="feed_no_content">Unable to load content for this feed. Please try again.</string>

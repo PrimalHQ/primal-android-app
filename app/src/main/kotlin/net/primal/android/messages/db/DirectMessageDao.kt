@@ -17,7 +17,7 @@ interface DirectMessageDao {
     @Query("SELECT * FROM DirectMessageData ORDER BY createdAt ASC LIMIT 1")
     fun last(): DirectMessageData?
 
-    @Query("SELECT * FROM DirectMessageData WHERE participantId = :participantId")
+    @Query("SELECT * FROM DirectMessageData WHERE participantId = :participantId ORDER BY createdAt DESC")
     fun newestMessagesPaged(participantId: String): PagingSource<Int, DirectMessage>
 
 }

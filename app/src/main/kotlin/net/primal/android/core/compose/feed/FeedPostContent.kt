@@ -23,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
@@ -119,6 +120,7 @@ fun FeedPostContent(
     onClick: (Offset) -> Unit,
     onUrlClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
+    contentColor: Color = AppTheme.colorScheme.onSurface,
 ) {
     val seeMoreText = stringResource(id = R.string.feed_see_more)
     val primaryColor = AppTheme.colorScheme.primary
@@ -209,7 +211,7 @@ fun FeedPostContent(
         if (contentText.isNotEmpty()) {
             PrimalClickableText(
                 style = AppTheme.typography.bodyMedium.copy(
-                    color = AppTheme.colorScheme.onSurface
+                    color = contentColor,
                 ),
                 text = contentText,
                 onClick = { position, offset ->

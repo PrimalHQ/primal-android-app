@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 10,
-    "identityHash": "3871c9dd4b23da5513c2091b99764f33",
+    "identityHash": "37ee7b0b4279f69a48874755dfd73bac",
     "entities": [
       {
         "tableName": "PostData",
@@ -857,7 +857,7 @@
         "foreignKeys": []
       },
       {
-        "tableName": "MessageData",
+        "tableName": "DirectMessageData",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`messageId` TEXT NOT NULL, `senderId` TEXT NOT NULL, `receiverId` TEXT NOT NULL, `participantId` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `content` TEXT NOT NULL, `uris` TEXT NOT NULL, `hashtags` TEXT NOT NULL, PRIMARY KEY(`messageId`))",
         "fields": [
           {
@@ -972,7 +972,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '3871c9dd4b23da5513c2091b99764f33')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '37ee7b0b4279f69a48874755dfd73bac')"
     ]
   }
 }

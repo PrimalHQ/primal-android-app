@@ -1,11 +1,14 @@
 package net.primal.android.messages.chat
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -15,6 +18,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowUpward
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -30,6 +34,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -41,6 +46,7 @@ import net.primal.android.core.compose.ListLoading
 import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
+import net.primal.android.core.compose.asBeforeNowFormat
 import net.primal.android.core.compose.feed.FeedPostContent
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -50,6 +56,8 @@ import net.primal.android.core.ext.findByUrl
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.messages.chat.model.ChatMessageUi
 import net.primal.android.theme.AppTheme
+import java.time.Instant
+import kotlin.time.Duration.Companion.minutes
 
 @Composable
 fun ChatScreen(
@@ -149,16 +157,34 @@ private fun ChatList(
         contentPadding = contentPadding,
         reverseLayout = true,
     ) {
-        items(
-            count = messages.itemCount,
-            key = messages.itemKey { it.messageId },
-        ) {
-            val chatMessage = messages[it]
+        item {
+            Spacer(modifier = Modifier
+                .height(8.dp)
+                .fillMaxWidth())
+        }
 
+        val messagesCount = messages.itemCount
+        items(
+            count = messagesCount,
+            key = messages.itemKey { it.messageId },
+        ) { index ->
+            val currentMessage = messages[index]
             when {
-                chatMessage != null -> {
+                currentMessage != null -> {
+                    val previousMessageIndex = index + 1
+                    val previousMessage = if (previousMessageIndex in 0..<messagesCount) {
+                        messages[previousMessageIndex]
+                    } else null
+
+                    val nextMessageIndex = index - 1
+                    val nextMessage = if (nextMessageIndex in 0..<messagesCount) {
+                        messages[nextMessageIndex]
+                    } else null
+
                     ChatMessageListItem(
-                        chatMessage = chatMessage,
+                        chatMessage = currentMessage,
+                        previousMessage = previousMessage,
+                        nextMessage = nextMessage,
                     )
                 }
 
@@ -197,32 +223,83 @@ private fun ChatList(
                 }
             }
         }
+
+        item {
+            Spacer(modifier = Modifier
+                .height(8.dp)
+                .fillMaxWidth())
+        }
     }
 }
 
 @Composable
 private fun ChatMessageListItem(
     chatMessage: ChatMessageUi,
+    previousMessage: ChatMessageUi? = null,
+    nextMessage: ChatMessageUi? = null,
 ) {
-    Box(
+    val timeDiffBetweenThisAndNextMessage = (nextMessage?.timestamp ?: Instant.MAX).epochSecond -
+            chatMessage.timestamp.epochSecond
+
+    val showTimestamp = timeDiffBetweenThisAndNextMessage > 15.minutes.inWholeSeconds
+            || chatMessage.senderId != nextMessage?.senderId
+
+    val isFirstMessageInGroup = chatMessage.senderId != previousMessage?.senderId
+
+    Column(
         modifier = Modifier.fillMaxWidth(),
-        contentAlignment = if (chatMessage.isUserMessage) {
-            Alignment.TopEnd
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = if (chatMessage.isUserMessage) {
+            Alignment.End
         } else {
-            Alignment.TopStart
-        }
+            Alignment.Start
+        },
     ) {
+        val backgroundColor = if (chatMessage.isUserMessage) {
+            AppTheme.colorScheme.primary
+        } else {
+            AppTheme.extraColorScheme.surfaceVariantAlt
+        }
+
+        val backgroundShape = if (isFirstMessageInGroup) {
+            if (chatMessage.isUserMessage) {
+                RoundedCornerShape(
+                    topStart = 8.dp,
+                    bottomStart = 8.dp,
+                    topEnd = 8.dp,
+                    bottomEnd = 2.dp,
+                )
+            } else {
+                RoundedCornerShape(
+                    topStart = 8.dp,
+                    bottomStart = 2.dp,
+                    topEnd = 8.dp,
+                    bottomEnd = 8.dp,
+                )
+            }
+        } else {
+            if (chatMessage.isUserMessage) {
+                RoundedCornerShape(
+                    topStart = 8.dp,
+                    bottomStart = 8.dp,
+                    topEnd = 2.dp,
+                    bottomEnd = 2.dp,
+                )
+            } else {
+                RoundedCornerShape(
+                    topStart = 2.dp,
+                    bottomStart = 2.dp,
+                    topEnd = 8.dp,
+                    bottomEnd = 8.dp,
+                )
+            }
+        }
+
         FeedPostContent(
             modifier = Modifier
-                .padding(horizontal = 8.dp, vertical = 4.dp)
-                .background(
-                    color = if (chatMessage.isUserMessage) {
-                        AppTheme.colorScheme.primary
-                    } else {
-                        AppTheme.extraColorScheme.surfaceVariantAlt
-                    },
-                    shape = AppTheme.shapes.small,
-                )
+                .padding(horizontal = 8.dp)
+                .padding(bottom = if (showTimestamp) 2.dp else 4.dp)
+                .background(color = backgroundColor, shape = backgroundShape)
                 .fillMaxWidth(fraction = 0.7f)
                 .wrapContentHeight()
                 .padding(horizontal = 16.dp, vertical = 8.dp),
@@ -244,7 +321,25 @@ private fun ChatMessageListItem(
             onHashtagClick = {
 
             },
+            contentColor = if (chatMessage.isUserMessage) {
+                Color.White
+            } else {
+                AppTheme.colorScheme.onSurface
+            },
         )
+
+        if (showTimestamp) {
+            Text(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .padding(bottom = 8.dp),
+                text = chatMessage.timestamp.asBeforeNowFormat(shortFormat = false),
+                style = AppTheme.typography.bodySmall.copy(
+                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
+                    fontSize = 12.sp,
+                ),
+            )
+        }
     }
 }
 

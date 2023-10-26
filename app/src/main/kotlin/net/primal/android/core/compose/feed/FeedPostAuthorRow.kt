@@ -9,7 +9,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -18,9 +17,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import net.primal.android.core.compose.AvatarThumbnailListItemImage
 import net.primal.android.core.compose.NostrUserText
+import net.primal.android.core.compose.asBeforeNowFormat
 import net.primal.android.core.compose.media.model.MediaResourceUi
 import net.primal.android.core.ext.findByUrl
-import net.primal.android.core.utils.asBeforeNowFormat
 import net.primal.android.core.utils.isPrimalIdentifier
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
@@ -58,9 +57,7 @@ fun FeedPostAuthorRow(
         ) {
 
             val suffixText = if (postTimestamp != null) {
-                val timestamp = postTimestamp.asBeforeNowFormat(
-                    res = LocalContext.current.resources
-                )
+                val timestamp = postTimestamp.asBeforeNowFormat()
 
                 buildAnnotatedString {
                     if (!hasVerifiedBadge) append(' ')

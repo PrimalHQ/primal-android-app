@@ -50,7 +50,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -74,6 +73,7 @@ import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.PrimalTopLevelDestination
+import net.primal.android.core.compose.asBeforeNowFormat
 import net.primal.android.core.compose.foundation.brandBackground
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -81,7 +81,6 @@ import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 import net.primal.android.core.compose.icons.primaliconpack.Message
 import net.primal.android.core.compose.isEmpty
 import net.primal.android.core.ext.findByUrl
-import net.primal.android.core.utils.asBeforeNowFormat
 import net.primal.android.core.utils.isPrimalIdentifier
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.PrimalBottomBarHeightDp
@@ -297,9 +296,7 @@ private fun ConversationListItem(
                 Box(
                     modifier = Modifier.weight(1f),
                 ) {
-                    val timestamp = conversation.lastMessageAt.asBeforeNowFormat(
-                        res = LocalContext.current.resources
-                    )
+                    val timestamp = conversation.lastMessageAt.asBeforeNowFormat()
                     val suffixText = buildAnnotatedString {
                         val hasVerifiedBadge = !conversation.participantInternetIdentifier.isNullOrEmpty()
                         if (!hasVerifiedBadge) append(' ')
