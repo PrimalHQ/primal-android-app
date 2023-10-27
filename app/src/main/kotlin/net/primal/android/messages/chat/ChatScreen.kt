@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -29,6 +30,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -144,15 +149,19 @@ fun ChatScreen(
             Column(
                 modifier = Modifier.background(color = AppTheme.colorScheme.surface),
             ) {
+                var newMessageText by rememberSaveable { mutableStateOf("") }
+
                 PrimalDivider()
                 MessageOutlinedTextField(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
+                        .padding(horizontal = 8.dp)
                         .padding(vertical = 8.dp)
                         .imePadding(),
-                    value = "",
-                    onValueChange = { },
+                    value = newMessageText,
+                    onValueChange = {
+                        newMessageText = it
+                    },
                 )
             }
         },
@@ -364,38 +373,45 @@ private fun MessageOutlinedTextField(
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    OutlinedTextField(
+    Row(
         modifier = modifier,
-        value = value,
-        onValueChange = onValueChange,
-        maxLines = 10,
-        enabled = true,
-        placeholder = {
-            Text(
-                text = stringResource(
-                    id = R.string.chat_message_hint,
-                    "qauser"
-                ),
-                maxLines = 1,
-                color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
-                style = AppTheme.typography.bodyMedium,
-            )
-        },
-        trailingIcon = {
-            AppBarIcon(
-                icon = Icons.Outlined.ArrowUpward,
-                onClick = {},
-                tint = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-            )
-        },
-        textStyle = AppTheme.typography.bodyMedium,
-        colors = OutlinedTextFieldDefaults.colors(
-            unfocusedContainerColor = AppTheme.extraColorScheme.surfaceVariantAlt,
-            focusedContainerColor = AppTheme.extraColorScheme.surfaceVariantAlt,
-            focusedBorderColor = Color.Unspecified,
-            unfocusedBorderColor = Color.Unspecified,
-            errorBorderColor = Color.Unspecified,
-            disabledBorderColor = Color.Unspecified
-        ),
-    )
+        verticalAlignment = Alignment.Bottom,
+    ){
+        OutlinedTextField(
+            modifier = Modifier.weight(1.0f),
+            value = value,
+            onValueChange = onValueChange,
+            maxLines = 10,
+            enabled = true,
+            placeholder = {
+                Text(
+                    text = stringResource(
+                        id = R.string.chat_message_hint,
+                        "qauser"
+                    ),
+                    maxLines = 1,
+                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
+                    style = AppTheme.typography.bodyMedium,
+                )
+            },
+            textStyle = AppTheme.typography.bodyMedium,
+            colors = OutlinedTextFieldDefaults.colors(
+                unfocusedContainerColor = AppTheme.extraColorScheme.surfaceVariantAlt,
+                focusedContainerColor = AppTheme.extraColorScheme.surfaceVariantAlt,
+                focusedBorderColor = Color.Unspecified,
+                unfocusedBorderColor = Color.Unspecified,
+                errorBorderColor = Color.Unspecified,
+                disabledBorderColor = Color.Unspecified
+            ),
+            shape = AppTheme.shapes.medium,
+        )
+
+        AppBarIcon(
+            modifier = Modifier.padding(bottom = 4.dp, start = 8.dp),
+            icon = Icons.Outlined.ArrowUpward,
+            backgroundColor = AppTheme.colorScheme.primary,
+            tint = Color.White,
+            onClick = {},
+        )
+    }
 }

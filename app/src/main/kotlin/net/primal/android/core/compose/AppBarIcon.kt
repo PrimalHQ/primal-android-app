@@ -27,12 +27,13 @@ import net.primal.android.theme.PrimalTheme
 fun AppBarIcon(
     icon: ImageVector,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier,
     enabled: Boolean = true,
     tint: Color = LocalContentColor.current,
     backgroundColor: Color = Color.Unspecified,
 ) {
     IconButton(
-        modifier = Modifier
+        modifier = modifier
             .clip(CircleShape)
             .background(color = backgroundColor),
         enabled = enabled,

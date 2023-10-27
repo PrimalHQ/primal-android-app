@@ -52,6 +52,7 @@ import net.primal.android.core.compose.icons.primaliconpack.NavSearch
 import net.primal.android.core.compose.icons.primaliconpack.NavSearchFilled
 import net.primal.android.core.compose.icons.primaliconpack.NavWallet
 import net.primal.android.core.compose.icons.primaliconpack.NavWalletFilled
+import net.primal.android.core.compose.icons.primaliconpack.NewDM
 import net.primal.android.core.compose.icons.primaliconpack.Notifications
 import net.primal.android.core.compose.icons.primaliconpack.Notrich
 import net.primal.android.core.compose.icons.primaliconpack.QrCode
@@ -60,6 +61,7 @@ import net.primal.android.core.compose.icons.primaliconpack.Read
 import net.primal.android.core.compose.icons.primaliconpack.Report
 import net.primal.android.core.compose.icons.primaliconpack.Repost
 import net.primal.android.core.compose.icons.primaliconpack.Search
+import net.primal.android.core.compose.icons.primaliconpack.Send
 import net.primal.android.core.compose.icons.primaliconpack.Settings
 import net.primal.android.core.compose.icons.primaliconpack.Share
 import net.primal.android.core.compose.icons.primaliconpack.UserFeedAdd
@@ -143,6 +145,8 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             NavSearch,
             NavWalletFilled,
             NavWallet,
+            Send,
+            NewDM,
         )
         return __PrimalIcons!!
     }

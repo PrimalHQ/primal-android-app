@@ -78,7 +78,7 @@ import net.primal.android.core.compose.foundation.brandBackground
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
-import net.primal.android.core.compose.icons.primaliconpack.Message
+import net.primal.android.core.compose.icons.primaliconpack.NewDM
 import net.primal.android.core.compose.isEmpty
 import net.primal.android.core.ext.findByUrl
 import net.primal.android.core.utils.isPrimalIdentifier
@@ -193,7 +193,7 @@ fun MessageListScreen(
                     containerColor = Color.Unspecified,
                     content = {
                         Icon(
-                            imageVector = PrimalIcons.Message,
+                            imageVector = PrimalIcons.NewDM,
                             contentDescription = null,
                             tint = Color.White,
                         )
