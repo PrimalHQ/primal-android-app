@@ -20,8 +20,10 @@ import net.primal.android.messages.conversation.model.MessageConversationUi
 import net.primal.android.messages.db.MessageConversation
 import net.primal.android.messages.domain.ConversationRelation
 import net.primal.android.messages.repository.MessageRepository
+import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.badges.BadgesManager
+import timber.log.Timber
 import java.time.Instant
 import javax.inject.Inject
 
@@ -57,7 +59,7 @@ class MessageConversationListViewModel @Inject constructor(
         _event.collect {
             when (it) {
                 is UiEvent.ChangeRelation -> changeRelation(relation = it.relation)
-                UiEvent.MarkAllConversationsAsRead -> Unit
+                UiEvent.MarkAllConversationsAsRead -> markAllConversationAsRead()
             }
         }
     }
@@ -91,6 +93,14 @@ class MessageConversationListViewModel @Inject constructor(
                     .newestConversations(relation = relation)
                     .mapAsPagingDataOfMessageConversationUi(),
             )
+        }
+    }
+
+    private fun markAllConversationAsRead() = viewModelScope.launch {
+        try {
+            messageRepository.markAllMessagesAsRead(userId = activeAccountStore.activeUserId())
+        } catch (error: WssException) {
+            Timber.w(error)
         }
     }
 

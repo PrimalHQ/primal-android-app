@@ -1,12 +1,12 @@
 package net.primal.android.messages.api
 
 import kotlinx.serialization.encodeToString
-import net.primal.android.messages.domain.ConversationRelation
 import net.primal.android.messages.api.model.ConversationRequestBody
 import net.primal.android.messages.api.model.ConversationsResponse
 import net.primal.android.messages.api.model.MarkMessagesReadRequestBody
 import net.primal.android.messages.api.model.MessagesRequestBody
 import net.primal.android.messages.api.model.MessagesResponse
+import net.primal.android.messages.domain.ConversationRelation
 import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.primal.PrimalCacheFilter
@@ -67,21 +67,33 @@ class MessagesApiImpl @Inject constructor(
         )
     }
 
-    override suspend fun markMessagesAsRead(userId: String, conversationUserId: String?) {
+    override suspend fun markConversationAsRead(userId: String, conversationUserId: String) {
         primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.MARK_DMS_AS_READ,
+                primalVerb = PrimalVerb.MARK_DM_CONVERSATION_AS_READ,
                 optionsJson = NostrJson.encodeToString(
                     MarkMessagesReadRequestBody(
                         authorization = nostrNotary.signAuthorizationNostrEvent(
                             userId = userId,
-                            description = if (conversationUserId != null) {
-                                "Mark messages read for user $conversationUserId."
-                            } else {
-                                "Mark all messages as read."
-                            },
+                            description = "Mark conversation with $conversationUserId as read.",
                         ),
                         conversationUserId = conversationUserId,
+                    )
+                )
+            )
+        )
+    }
+
+    override suspend fun markAllMessagesAsRead(userId: String) {
+        primalApiClient.query(
+            message = PrimalCacheFilter(
+                primalVerb = PrimalVerb.MARK_ALL_DMS_AS_READ,
+                optionsJson = NostrJson.encodeToString(
+                    MarkMessagesReadRequestBody(
+                        authorization = nostrNotary.signAuthorizationNostrEvent(
+                            userId = userId,
+                            description = "Mark all messages as read.",
+                        ),
                     )
                 )
             )

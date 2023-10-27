@@ -22,8 +22,10 @@ import net.primal.android.messages.chat.model.ChatMessageUi
 import net.primal.android.messages.db.DirectMessage
 import net.primal.android.messages.repository.MessageRepository
 import net.primal.android.navigation.profileIdOrThrow
+import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
+import timber.log.Timber
 import java.time.Instant
 import javax.inject.Inject
 
@@ -60,6 +62,7 @@ class ChatViewModel @Inject constructor(
     private fun observeEvents() = viewModelScope.launch {
         _event.collect {
             when (it) {
+                UiEvent.MessagesSeen -> markConversationAsRead()
                 is UiEvent.MessageSend -> Unit
             }
         }
@@ -73,6 +76,17 @@ class ChatViewModel @Inject constructor(
                     participantMediaResources = it.resources.map { it.asMediaResourceUi() },
                 )
             }
+        }
+    }
+
+    private fun markConversationAsRead() = viewModelScope.launch {
+        try {
+            messageRepository.markConversationAsRead(
+                userId = userId,
+                conversationUserId = participantId,
+            )
+        } catch (error: WssException) {
+            Timber.w(error)
         }
     }
 

@@ -91,6 +91,25 @@ class MessageRepository @Inject constructor(
     suspend fun fetchNonFollowsConversations() =
         fetchConversations(relation = ConversationRelation.Other)
 
+    suspend fun markConversationAsRead(userId: String, conversationUserId: String) {
+        withContext(Dispatchers.IO) {
+            messagesApi.markConversationAsRead(
+                userId = userId,
+                conversationUserId = conversationUserId
+            )
+            database.messageConversations().markConversationAsRead(
+                participantId = conversationUserId
+            )
+        }
+    }
+
+    suspend fun markAllMessagesAsRead(userId: String) {
+        withContext(Dispatchers.IO) {
+            messagesApi.markAllMessagesAsRead(userId = userId)
+            database.messageConversations().markAllConversationAsRead()
+        }
+    }
+
     private fun createConversationsPager(
         pagingSourceFactory: () -> PagingSource<Int, MessageConversation>
     ) = Pager(

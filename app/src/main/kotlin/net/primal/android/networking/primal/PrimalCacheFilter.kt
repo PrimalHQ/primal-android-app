@@ -40,6 +40,7 @@ enum class PrimalVerb(val identifier: String) {
     MUTE_LIST("mutelist"),
     GET_DM_CONTACTS("get_directmsg_contacts"),
     GET_DMS("get_directmsgs"),
-    MARK_DMS_AS_READ("reset_directmsg_count"),
+    MARK_DM_CONVERSATION_AS_READ("reset_directmsg_count"),
+    MARK_ALL_DMS_AS_READ("reset_directmsg_counts"),
     NEW_DMS_COUNT("directmsg_count_2"),
 }

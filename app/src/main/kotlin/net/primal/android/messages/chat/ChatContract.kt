@@ -15,6 +15,7 @@ interface ChatContract {
     )
 
     sealed class UiEvent {
+        data object MessagesSeen : UiEvent()
         data class MessageSend(val text: String) : UiEvent()
     }
 }

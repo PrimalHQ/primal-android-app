@@ -35,6 +35,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -52,6 +53,7 @@ import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWor
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.isEmpty
+import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.core.ext.findByUrl
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.messages.chat.model.ChatMessageUi
@@ -66,6 +68,13 @@ fun ChatScreen(
     onProfileClick: (String) -> Unit,
 ) {
     val state = viewModel.state.collectAsState()
+
+    DisposableLifecycleObserverEffect {
+        when (it) {
+            Lifecycle.Event.ON_START -> viewModel.setEvent(ChatContract.UiEvent.MessagesSeen)
+            else -> Unit
+        }
+    }
 
     ChatScreen(
         state = state.value,

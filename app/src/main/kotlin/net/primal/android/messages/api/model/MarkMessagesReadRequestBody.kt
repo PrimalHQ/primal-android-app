@@ -7,5 +7,5 @@ import net.primal.android.nostr.model.NostrEvent
 @Serializable
 data class MarkMessagesReadRequestBody(
     @SerialName("event_from_user") val authorization: NostrEvent,
-    @SerialName("sender") val conversationUserId: String?,
+    @SerialName("sender") val conversationUserId: String? = null,
 )

@@ -1,9 +1,9 @@
 package net.primal.android.messages.api
 
-import net.primal.android.messages.domain.ConversationRelation
 import net.primal.android.messages.api.model.ConversationsResponse
 import net.primal.android.messages.api.model.MessagesRequestBody
 import net.primal.android.messages.api.model.MessagesResponse
+import net.primal.android.messages.domain.ConversationRelation
 
 interface MessagesApi {
 
@@ -11,6 +11,8 @@ interface MessagesApi {
 
     suspend fun getMessages(body: MessagesRequestBody): MessagesResponse
 
-    suspend fun markMessagesAsRead(userId: String, conversationUserId: String?)
+    suspend fun markConversationAsRead(userId: String, conversationUserId: String)
+
+    suspend fun markAllMessagesAsRead(userId: String)
 
 }
