@@ -27,6 +27,7 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -94,9 +95,12 @@ fun ChatScreen(
     onProfileClick: (String) -> Unit,
     eventPublisher: (ChatContract.UiEvent) -> Unit,
 ) {
-
     val messagesPagingItems = state.messages.collectAsLazyPagingItems()
     val listState = messagesPagingItems.rememberLazyListStatePagingWorkaround()
+
+    LaunchedEffect(messagesPagingItems.itemCount) {
+        eventPublisher(ChatContract.UiEvent.MessagesSeen)
+    }
 
     Scaffold(
         modifier = Modifier.navigationBarsPadding(),

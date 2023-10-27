@@ -6,11 +6,14 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.map
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -30,6 +33,7 @@ import net.primal.android.user.badges.BadgesManager
 import timber.log.Timber
 import java.time.Instant
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.seconds
 
 @HiltViewModel
 class ChatViewModel @Inject constructor(
@@ -59,6 +63,7 @@ class ChatViewModel @Inject constructor(
 
     init {
         observeEvents()
+        observeMessagesSeenEvents()
         observeParticipant()
         subscribeToTotalUnreadCountChanges()
     }
@@ -66,10 +71,21 @@ class ChatViewModel @Inject constructor(
     private fun observeEvents() = viewModelScope.launch {
         _event.collect {
             when (it) {
-                UiEvent.MessagesSeen -> markConversationAsRead()
                 is UiEvent.MessageSend -> Unit
+                UiEvent.MessagesSeen -> Unit
+
             }
         }
+    }
+
+    @OptIn(FlowPreview::class)
+    private fun observeMessagesSeenEvents() = viewModelScope.launch {
+        _event
+            .filterIsInstance(UiEvent.MessagesSeen::class)
+            .debounce(1.seconds)
+            .collect {
+                markConversationAsRead()
+            }
     }
 
     private fun observeParticipant() = viewModelScope.launch {
@@ -90,7 +106,6 @@ class ChatViewModel @Inject constructor(
             .collect {
                 try {
                     messageRepository.fetchNewConversationMessages(userId, participantId)
-                    messageRepository.markConversationAsRead(userId, participantId)
                 } catch (error: WssException) {
                     Timber.w(error)
                 }
