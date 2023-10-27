@@ -196,4 +196,17 @@ class NostrNotary @Inject constructor(
             tags = tags
         ).signOrThrow(nsec = findNsecOrThrow(pubkey = userId))
     }
+
+    fun signEncryptedDirectMessage(
+        userId: String,
+        receiverId: String,
+        encryptedContent: String,
+    ): NostrEvent {
+        return NostrUnsignedEvent(
+            pubKey = userId,
+            content = encryptedContent,
+            kind = NostrEventKind.EncryptedDirectMessages.value,
+            tags = listOf(receiverId.asPubkeyTag()),
+        ).signOrThrow(nsec = findNsecOrThrow(pubkey = userId))
+    }
 }

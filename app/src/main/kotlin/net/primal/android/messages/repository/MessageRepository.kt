@@ -7,19 +7,24 @@ import androidx.paging.PagingSource
 import androidx.room.withTransaction
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import net.primal.android.crypto.CryptoUtils
+import net.primal.android.crypto.bechToBytes
 import net.primal.android.crypto.hexToNpubHrp
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.messages.api.MessagesApi
 import net.primal.android.messages.api.mediator.MessagesRemoteMediator
 import net.primal.android.messages.api.mediator.processAndSave
 import net.primal.android.messages.api.model.MessagesRequestBody
+import net.primal.android.messages.api.model.MessagesResponse
 import net.primal.android.messages.db.DirectMessage
 import net.primal.android.messages.db.MessageConversation
 import net.primal.android.messages.db.MessageConversationData
 import net.primal.android.messages.domain.ConversationRelation
+import net.primal.android.networking.relays.RelaysManager
 import net.primal.android.nostr.ext.flatMapNotNullAsMediaResourcePO
 import net.primal.android.nostr.ext.mapAsMessageDataPO
 import net.primal.android.nostr.ext.mapAsProfileDataPO
+import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.credentials.CredentialsStore
 import javax.inject.Inject
@@ -30,6 +35,8 @@ class MessageRepository @Inject constructor(
     private val database: PrimalDatabase,
     private val activeAccountStore: ActiveAccountStore,
     private val credentialsStore: CredentialsStore,
+    private val relaysManager: RelaysManager,
+    private val nostrNotary: NostrNotary,
 ) {
 
     fun newestConversations(relation: ConversationRelation) = createConversationsPager {
@@ -129,6 +136,34 @@ class MessageRepository @Inject constructor(
             messagesApi.markAllMessagesAsRead(userId = userId)
             database.messageConversations().markAllConversationAsRead()
         }
+    }
+
+    suspend fun sendMessage(
+        userId: String,
+        receiverId: String,
+        text: String,
+    ) {
+        val encryptedContent = CryptoUtils.encrypt(
+            msg = text,
+            privateKey = credentialsStore
+                .findOrThrow(npub = userId.hexToNpubHrp())
+                .nsec.bechToBytes(hrp = "nsec"),
+            pubKey = receiverId.hexToNpubHrp().bechToBytes(hrp = "npub"),
+        )
+
+        val nostrEvent = nostrNotary.signEncryptedDirectMessage(
+            userId = userId,
+            receiverId = receiverId,
+            encryptedContent = encryptedContent,
+        )
+        relaysManager.publishEvent(nostrEvent)
+
+        MessagesResponse(messages = listOf(nostrEvent))
+            .processAndSave(
+                userId = userId,
+                credentialsStore = credentialsStore,
+                database = database,
+            )
     }
 
     private fun createConversationsPager(

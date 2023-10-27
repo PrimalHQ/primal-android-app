@@ -26,18 +26,19 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -102,10 +103,16 @@ fun ChatScreen(
 ) {
     val messagesPagingItems = state.messages.collectAsLazyPagingItems()
     val listState = messagesPagingItems.rememberLazyListStatePagingWorkaround()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(messagesPagingItems.itemCount) {
         eventPublisher(ChatContract.UiEvent.MessagesSeen)
     }
+
+    ChatErrorHandler(
+        error = state.error,
+        snackbarHostState = snackbarHostState,
+    )
 
     Scaffold(
         modifier = Modifier.navigationBarsPadding(),
@@ -149,8 +156,6 @@ fun ChatScreen(
             Column(
                 modifier = Modifier.background(color = AppTheme.colorScheme.surface),
             ) {
-                var newMessageText by rememberSaveable { mutableStateOf("") }
-
                 PrimalDivider()
                 MessageOutlinedTextField(
                     modifier = Modifier
@@ -158,13 +163,20 @@ fun ChatScreen(
                         .padding(horizontal = 8.dp)
                         .padding(vertical = 8.dp)
                         .imePadding(),
-                    value = newMessageText,
+                    value = state.newMessageText,
+                    enabled = state.newMessageText.isNotBlank() && !state.sending,
+                    onSend = {
+                        eventPublisher(ChatContract.UiEvent.SendMessage)
+                    },
                     onValueChange = {
-                        newMessageText = it
+                        eventPublisher(ChatContract.UiEvent.UpdateNewMessage(text = it))
                     },
                 )
             }
         },
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
+        }
     )
 }
 
@@ -182,9 +194,11 @@ private fun ChatList(
         reverseLayout = true,
     ) {
         item {
-            Spacer(modifier = Modifier
-                .height(8.dp)
-                .fillMaxWidth())
+            Spacer(
+                modifier = Modifier
+                    .height(8.dp)
+                    .fillMaxWidth()
+            )
         }
 
         val messagesCount = messages.itemCount
@@ -249,9 +263,11 @@ private fun ChatList(
         }
 
         item {
-            Spacer(modifier = Modifier
-                .height(8.dp)
-                .fillMaxWidth())
+            Spacer(
+                modifier = Modifier
+                    .height(8.dp)
+                    .fillMaxWidth()
+            )
         }
     }
 }
@@ -371,12 +387,14 @@ private fun ChatMessageListItem(
 private fun MessageOutlinedTextField(
     value: String,
     onValueChange: (String) -> Unit,
+    onSend: () -> Unit,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
 ) {
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.Bottom,
-    ){
+    ) {
         OutlinedTextField(
             modifier = Modifier.weight(1.0f),
             value = value,
@@ -409,9 +427,32 @@ private fun MessageOutlinedTextField(
         AppBarIcon(
             modifier = Modifier.padding(bottom = 4.dp, start = 8.dp),
             icon = Icons.Outlined.ArrowUpward,
-            backgroundColor = AppTheme.colorScheme.primary,
+            enabledBackgroundColor = AppTheme.colorScheme.primary,
             tint = Color.White,
-            onClick = {},
+            enabled = enabled,
+            onClick = onSend,
         )
+    }
+}
+
+@Composable
+private fun ChatErrorHandler(
+    error: ChatContract.UiState.ChatError?,
+    snackbarHostState: SnackbarHostState,
+) {
+    val context = LocalContext.current
+    LaunchedEffect(error ?: true) {
+        val errorMessage = when (error) {
+            is ChatContract.UiState.ChatError.MissingRelaysConfiguration -> context.getString(R.string.app_missing_relays_config)
+            is ChatContract.UiState.ChatError.PublishError -> context.getString(R.string.chat_nostr_publish_error)
+            else -> null
+        }
+
+        if (errorMessage != null) {
+            snackbarHostState.showSnackbar(
+                message = errorMessage,
+                duration = SnackbarDuration.Short,
+            )
+        }
     }
 }

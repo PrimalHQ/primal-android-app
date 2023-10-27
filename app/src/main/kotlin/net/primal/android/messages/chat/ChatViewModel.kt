@@ -7,6 +7,7 @@ import androidx.paging.PagingData
 import androidx.paging.map
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,6 +27,8 @@ import net.primal.android.messages.chat.model.ChatMessageUi
 import net.primal.android.messages.db.DirectMessage
 import net.primal.android.messages.repository.MessageRepository
 import net.primal.android.navigation.profileIdOrThrow
+import net.primal.android.networking.relays.errors.MissingRelaysException
+import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
@@ -71,9 +74,11 @@ class ChatViewModel @Inject constructor(
     private fun observeEvents() = viewModelScope.launch {
         _event.collect {
             when (it) {
-                is UiEvent.MessageSend -> Unit
-                UiEvent.MessagesSeen -> Unit
-
+                UiEvent.MessagesSeen -> {}
+                UiEvent.SendMessage -> sendMessage()
+                is UiEvent.UpdateNewMessage -> {
+                    setState { copy(newMessageText = it.text) }
+                }
             }
         }
     }
@@ -92,7 +97,8 @@ class ChatViewModel @Inject constructor(
         profileRepository.observeProfile(profileId = participantId).collect {
             setState {
                 copy(
-                    participantProfile = it.metadata?.asProfileDetailsUi() ?: this.participantProfile,
+                    participantProfile = it.metadata?.asProfileDetailsUi()
+                        ?: this.participantProfile,
                     participantMediaResources = it.resources.map { it.asMediaResourceUi() },
                 )
             }
@@ -120,6 +126,26 @@ class ChatViewModel @Inject constructor(
         }
     }
 
+    private fun sendMessage() = viewModelScope.launch {
+        setState { copy(sending = true) }
+        try {
+            messageRepository.sendMessage(
+                userId = userId,
+                receiverId = participantId,
+                text = state.value.newMessageText,
+            )
+            setState { copy(newMessageText = "") }
+        } catch (error: NostrPublishException) {
+            Timber.w(error)
+            setErrorState(error = UiState.ChatError.PublishError(error))
+        } catch (error: MissingRelaysException) {
+            Timber.w(error)
+            setErrorState(error = UiState.ChatError.MissingRelaysConfiguration(error))
+        } finally {
+            setState { copy(sending = false) }
+        }
+    }
+
     private fun Flow<PagingData<DirectMessage>>.mapAsPagingDataOfChatMessageUi() =
         map { pagingData -> pagingData.map { it.mapAsChatMessageUi() } }
 
@@ -134,4 +160,14 @@ class ChatViewModel @Inject constructor(
             nostrResources = this.nostrUris.map { it.asNostrResourceUi() },
             hashtags = this.data.hashtags,
         )
+
+    private fun setErrorState(error: UiState.ChatError) {
+        setState { copy(error = error) }
+        viewModelScope.launch {
+            delay(2.seconds)
+            if (state.value.error == error) {
+                setState { copy(error = null) }
+            }
+        }
+    }
 }

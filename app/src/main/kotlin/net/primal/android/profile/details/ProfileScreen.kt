@@ -313,7 +313,7 @@ fun ProfileScreen(
                             val clickDebounce by remember { mutableStateOf(ClickDebounce()) }
                             AppBarIcon(
                                 icon = PrimalIcons.ArrowBack,
-                                backgroundColor = Color.Black.copy(alpha = 0.5f),
+                                enabledBackgroundColor = Color.Black.copy(alpha = 0.5f),
                                 tint = Color.White,
                                 onClick = { clickDebounce.processEvent(onClose) },
                             )
