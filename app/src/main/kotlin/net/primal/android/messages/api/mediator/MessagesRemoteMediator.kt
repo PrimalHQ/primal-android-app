@@ -4,18 +4,13 @@ import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
-import androidx.room.withTransaction
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import net.primal.android.crypto.hexToNpubHrp
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.messages.api.MessagesApi
 import net.primal.android.messages.api.model.MessagesRequestBody
 import net.primal.android.messages.db.DirectMessage
 import net.primal.android.networking.sockets.errors.WssException
-import net.primal.android.nostr.ext.flatMapNotNullAsMediaResourcePO
-import net.primal.android.nostr.ext.mapAsMessageDataPO
-import net.primal.android.nostr.ext.mapAsProfileDataPO
 import net.primal.android.user.credentials.CredentialsStore
 import java.time.Instant
 
@@ -88,20 +83,11 @@ class MessagesRemoteMediator(
 
         lastRequests[loadType] = requestBody
 
-        val profiles = response.profileMetadata.mapAsProfileDataPO()
-        val mediaResources = response.mediaResources.flatMapNotNullAsMediaResourcePO()
-        val messages = response.messages.mapAsMessageDataPO(
+        response.processAndSave(
             userId = userId,
-            nsec = credentialsStore.findOrThrow(npub = userId.hexToNpubHrp()).nsec
+            database = database,
+            credentialsStore = credentialsStore,
         )
-
-        withContext(Dispatchers.IO) {
-            database.withTransaction {
-                database.profiles().upsertAll(data = profiles)
-                database.mediaResources().upsertAll(data = mediaResources)
-                database.messages().upsertAll(data = messages)
-            }
-        }
 
         return MediatorResult.Success(endOfPaginationReached = false)
     }

@@ -71,7 +71,9 @@ fun ChatScreen(
 
     DisposableLifecycleObserverEffect {
         when (it) {
-            Lifecycle.Event.ON_START -> viewModel.setEvent(ChatContract.UiEvent.MessagesSeen)
+            Lifecycle.Event.ON_START, Lifecycle.Event.ON_STOP -> {
+                viewModel.setEvent(ChatContract.UiEvent.MessagesSeen)
+            }
             else -> Unit
         }
     }

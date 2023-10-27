@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -52,6 +53,7 @@ class MessageConversationListViewModel @Inject constructor(
         observeEvents()
         subscribeToActiveAccount()
         subscribeToBadgesUpdates()
+        subscribeToTotalUnreadCountChanges()
         fetchConversations()
     }
 
@@ -74,15 +76,34 @@ class MessageConversationListViewModel @Inject constructor(
 
     private fun subscribeToBadgesUpdates() = viewModelScope.launch {
         badgesManager.badges.collect {
+            Timber.d("Badge update: $it")
             setState {
                 copy(badges = it)
             }
         }
     }
 
+    private fun subscribeToTotalUnreadCountChanges() = viewModelScope.launch {
+        badgesManager.badges
+            .map { it.messages }
+            .distinctUntilChanged()
+            .collect {
+                fetchConversations()
+            }
+    }
+
     private fun fetchConversations() = viewModelScope.launch {
-        messageRepository.fetchFollowConversations()
-        messageRepository.fetchNonFollowsConversations()
+        when (state.value.activeRelation) {
+            ConversationRelation.Follows -> {
+                messageRepository.fetchFollowConversations()
+                messageRepository.fetchNonFollowsConversations()
+            }
+
+            ConversationRelation.Other -> {
+                messageRepository.fetchNonFollowsConversations()
+                messageRepository.fetchFollowConversations()
+            }
+        }
     }
 
     private fun changeRelation(relation: ConversationRelation) {

@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -25,6 +26,7 @@ import net.primal.android.navigation.profileIdOrThrow
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.android.user.badges.BadgesManager
 import timber.log.Timber
 import java.time.Instant
 import javax.inject.Inject
@@ -33,6 +35,7 @@ import javax.inject.Inject
 class ChatViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     activeAccountStore: ActiveAccountStore,
+    private val badgesManager: BadgesManager,
     private val messageRepository: MessageRepository,
     private val profileRepository: ProfileRepository,
 ) : ViewModel() {
@@ -57,6 +60,7 @@ class ChatViewModel @Inject constructor(
     init {
         observeEvents()
         observeParticipant()
+        subscribeToTotalUnreadCountChanges()
     }
 
     private fun observeEvents() = viewModelScope.launch {
@@ -79,12 +83,23 @@ class ChatViewModel @Inject constructor(
         }
     }
 
+    private fun subscribeToTotalUnreadCountChanges() = viewModelScope.launch {
+        badgesManager.badges
+            .map { it.messages }
+            .distinctUntilChanged()
+            .collect {
+                try {
+                    messageRepository.fetchNewConversationMessages(userId, participantId)
+                    messageRepository.markConversationAsRead(userId, participantId)
+                } catch (error: WssException) {
+                    Timber.w(error)
+                }
+            }
+    }
+
     private fun markConversationAsRead() = viewModelScope.launch {
         try {
-            messageRepository.markConversationAsRead(
-                userId = userId,
-                conversationUserId = participantId,
-            )
+            messageRepository.markConversationAsRead(userId, participantId)
         } catch (error: WssException) {
             Timber.w(error)
         }

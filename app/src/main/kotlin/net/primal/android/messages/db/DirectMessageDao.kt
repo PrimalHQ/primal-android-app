@@ -14,6 +14,9 @@ interface DirectMessageDao {
     @Query("SELECT * FROM DirectMessageData ORDER BY createdAt DESC LIMIT 1")
     fun first(): DirectMessageData?
 
+    @Query("SELECT * FROM DirectMessageData WHERE participantId = :participantId ORDER BY createdAt DESC LIMIT 1")
+    fun first(participantId: String): DirectMessageData?
+
     @Query("SELECT * FROM DirectMessageData ORDER BY createdAt ASC LIMIT 1")
     fun last(): DirectMessageData?
 

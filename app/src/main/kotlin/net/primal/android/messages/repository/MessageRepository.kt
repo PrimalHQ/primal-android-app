@@ -11,6 +11,8 @@ import net.primal.android.crypto.hexToNpubHrp
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.messages.api.MessagesApi
 import net.primal.android.messages.api.mediator.MessagesRemoteMediator
+import net.primal.android.messages.api.mediator.processAndSave
+import net.primal.android.messages.api.model.MessagesRequestBody
 import net.primal.android.messages.db.DirectMessage
 import net.primal.android.messages.db.MessageConversation
 import net.primal.android.messages.db.MessageConversationData
@@ -90,6 +92,25 @@ class MessageRepository @Inject constructor(
 
     suspend fun fetchNonFollowsConversations() =
         fetchConversations(relation = ConversationRelation.Other)
+
+    suspend fun fetchNewConversationMessages(userId: String, conversationUserId: String) {
+        val response = withContext(Dispatchers.IO) {
+            val latestMessage = database.messages().first(participantId = conversationUserId)
+            messagesApi.getMessages(
+                body = MessagesRequestBody(
+                    userId = userId,
+                    participantId = conversationUserId,
+                    since = latestMessage?.createdAt ?: 0,
+                )
+            )
+        }
+
+        response.processAndSave(
+            userId = userId,
+            database = database,
+            credentialsStore = credentialsStore,
+        )
+    }
 
     suspend fun markConversationAsRead(userId: String, conversationUserId: String) {
         withContext(Dispatchers.IO) {
