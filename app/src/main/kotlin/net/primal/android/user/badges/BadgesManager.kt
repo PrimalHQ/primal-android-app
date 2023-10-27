@@ -92,13 +92,13 @@ class BadgesManager @Inject constructor(
 
     override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
         when (event) {
-            Lifecycle.Event.ON_RESUME -> resumeSubscriptions()
-            Lifecycle.Event.ON_PAUSE -> pauseSubscriptions()
+            Lifecycle.Event.ON_RESUME -> scope.launch { resumeSubscriptions() }
+            Lifecycle.Event.ON_PAUSE -> scope.launch { pauseSubscriptions() }
             else -> Unit
         }
     }
 
-    private fun resumeSubscriptions() {
+    private suspend fun resumeSubscriptions() {
         if (!subscriptionsActive) {
             activeUserId?.let {
                 subscribeAll(userId = it)
@@ -106,9 +106,9 @@ class BadgesManager @Inject constructor(
         }
     }
 
-    private fun pauseSubscriptions() = unsubscribeAll()
+    private suspend fun pauseSubscriptions() = unsubscribeAll()
 
-    private fun subscribeAll(userId: String) {
+    private suspend fun subscribeAll(userId: String) {
         unsubscribeAll()
         subscriptionsActive = true
         notificationsSummarySubscriptionJob = scope.launch {
@@ -119,12 +119,10 @@ class BadgesManager @Inject constructor(
         }
     }
 
-    private fun unsubscribeAll() {
+    private suspend fun unsubscribeAll() {
         subscriptionsActive = false
-        scope.launch {
-            unsubscribeNotifications()
-            unsubscribeMessages()
-        }
+        unsubscribeNotifications()
+        unsubscribeMessages()
     }
 
     private suspend fun subscribeNotifications(userId: String) {
