@@ -8,6 +8,7 @@ data class MessageConversationUi(
     val participantUsername: String,
     val lastMessageSnippet: String,
     val lastMessageAt: Instant,
+    val isLastMessageFromUser: Boolean,
     val participantInternetIdentifier: String? = null,
     val participantAvatarUrl: String? = null,
     val participantMediaResources: List<MediaResourceUi> = emptyList(),

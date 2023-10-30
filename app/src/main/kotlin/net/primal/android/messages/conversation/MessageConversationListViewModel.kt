@@ -35,6 +35,8 @@ class MessageConversationListViewModel @Inject constructor(
     private val messageRepository: MessageRepository,
 ) : ViewModel() {
 
+    private val activeUserId = activeAccountStore.activeUserId()
+
     private val _state = MutableStateFlow(
         value = UiState(
             activeRelation = ConversationRelation.Follows,
@@ -76,7 +78,6 @@ class MessageConversationListViewModel @Inject constructor(
 
     private fun subscribeToBadgesUpdates() = viewModelScope.launch {
         badgesManager.badges.collect {
-            Timber.d("Badge update: $it")
             setState {
                 copy(badges = it)
             }
@@ -119,7 +120,7 @@ class MessageConversationListViewModel @Inject constructor(
 
     private fun markAllConversationAsRead() = viewModelScope.launch {
         try {
-            messageRepository.markAllMessagesAsRead(userId = activeAccountStore.activeUserId())
+            messageRepository.markAllMessagesAsRead(userId = activeUserId)
         } catch (error: WssException) {
             Timber.w(error)
         }
@@ -134,6 +135,7 @@ class MessageConversationListViewModel @Inject constructor(
             participantUsername = this.participant.usernameUiFriendly(),
             lastMessageSnippet = this.lastMessage.content,
             lastMessageAt = Instant.ofEpochSecond(this.lastMessage.createdAt),
+            isLastMessageFromUser = this.lastMessage.senderId == activeUserId,
             participantInternetIdentifier = this.participant.internetIdentifier,
             participantAvatarUrl = this.participant.picture,
             participantMediaResources = this.participantResources.map { it.asMediaResourceUi() },

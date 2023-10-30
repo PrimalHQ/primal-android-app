@@ -330,7 +330,11 @@ private fun ConversationListItem(
         },
         supportingContent = {
             Text(
-                text = conversation.lastMessageSnippet,
+                text = if (conversation.isLastMessageFromUser) {
+                    stringResource(id = R.string.chat_message_user_snippet, conversation.lastMessageSnippet)
+                } else {
+                    conversation.lastMessageSnippet
+                },
                 overflow = TextOverflow.Ellipsis,
                 minLines = 2,
                 maxLines = 2,
