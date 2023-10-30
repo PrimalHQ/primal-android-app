@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import net.primal.android.core.files.error.UnsuccessfulFileUpload
+import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.profile.domain.ProfileMetadata
@@ -118,6 +119,8 @@ class EditProfileViewModel @Inject constructor(
             setEffect(effect = EditProfileContract.SideEffect.AccountSuccessfulyEdited)
         } catch (error: NostrPublishException) {
             setErrorState(error = EditProfileError.FailedToPublishMetadata(error))
+        } catch (error: MissingRelaysException) {
+            setErrorState(error = EditProfileError.MissingRelaysConfiguration(error))
         } catch (error: UnsuccessfulFileUpload) {
             setErrorState(error = EditProfileError.FailedToUploadImage(error))
         } finally {
