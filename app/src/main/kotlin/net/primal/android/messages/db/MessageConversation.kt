@@ -14,7 +14,7 @@ data class MessageConversation(
         entityColumn = "ownerId",
         parentColumn = "participantId",
     )
-    val participant: ProfileData,
+    val participant: ProfileData?,
 
     @Relation(
         entityColumn = "eventId",

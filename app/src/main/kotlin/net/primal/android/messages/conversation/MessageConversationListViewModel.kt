@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import net.primal.android.core.compose.media.model.asMediaResourceUi
+import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.usernameUiFriendly
 import net.primal.android.messages.conversation.MessageConversationListContract.UiEvent
 import net.primal.android.messages.conversation.MessageConversationListContract.UiState
@@ -132,13 +133,14 @@ class MessageConversationListViewModel @Inject constructor(
 
     private fun MessageConversation.mapAsMessageConversationUi() =
         MessageConversationUi(
-            participantId = this.participant.ownerId,
-            participantUsername = this.participant.usernameUiFriendly(),
+            participantId = this.data.participantId,
+            participantUsername = this.participant?.usernameUiFriendly()
+                ?: this.data.participantId.asEllipsizedNpub(),
             lastMessageSnippet = this.lastMessage.content,
             lastMessageAt = Instant.ofEpochSecond(this.lastMessage.createdAt),
             isLastMessageFromUser = this.lastMessage.senderId == activeUserId,
-            participantInternetIdentifier = this.participant.internetIdentifier,
-            participantAvatarUrl = this.participant.picture,
+            participantInternetIdentifier = this.participant?.internetIdentifier,
+            participantAvatarUrl = this.participant?.picture,
             participantMediaResources = this.participantResources.map { it.asMediaResourceUi() },
             unreadMessagesCount = this.data.unreadMessagesCount,
         )
