@@ -3,6 +3,7 @@ package net.primal.android.messages.chat
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -335,38 +337,43 @@ private fun ChatMessageListItem(
             }
         }
 
-        FeedPostContent(
-            modifier = Modifier
-                .padding(horizontal = 8.dp)
-                .padding(bottom = if (showTimestamp) 2.dp else 4.dp)
-                .background(color = backgroundColor, shape = backgroundShape)
-                .fillMaxWidth(fraction = 0.7f)
-                .wrapContentHeight()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            content = chatMessage.content,
-            expanded = true,
-            hashtags = chatMessage.hashtags,
-            mediaResources = chatMessage.mediaResources,
-            nostrResources = chatMessage.nostrResources,
-            onClick = { },
-            onProfileClick = {
+        BoxWithConstraints {
+            FeedPostContent(
+                modifier = Modifier
+                    .padding(
+                        start = if (chatMessage.isUserMessage) maxWidth.times(0.25f) else 16.dp,
+                        end = if (chatMessage.isUserMessage) 16.dp else maxWidth.times(0.25f)
+                    )
+                    .padding(bottom = if (showTimestamp) 2.dp else 4.dp)
+                    .background(color = backgroundColor, shape = backgroundShape)
+                    .wrapContentWidth()
+                    .wrapContentHeight()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                content = chatMessage.content,
+                expanded = true,
+                hashtags = chatMessage.hashtags,
+                mediaResources = chatMessage.mediaResources,
+                nostrResources = chatMessage.nostrResources,
+                onClick = { },
+                onProfileClick = {
 
-            },
-            onPostClick = {
+                },
+                onPostClick = {
 
-            },
-            onUrlClick = {
+                },
+                onUrlClick = {
 
-            },
-            onHashtagClick = {
+                },
+                onHashtagClick = {
 
-            },
-            contentColor = if (chatMessage.isUserMessage) {
-                Color.White
-            } else {
-                AppTheme.colorScheme.onSurface
-            },
-        )
+                },
+                contentColor = if (chatMessage.isUserMessage) {
+                    Color.White
+                } else {
+                    AppTheme.colorScheme.onSurface
+                },
+            )
+        }
 
         if (showTimestamp) {
             Text(
