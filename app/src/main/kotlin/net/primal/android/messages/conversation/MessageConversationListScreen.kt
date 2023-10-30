@@ -37,6 +37,7 @@ import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -81,6 +82,7 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 import net.primal.android.core.compose.icons.primaliconpack.NewDM
 import net.primal.android.core.compose.isEmpty
+import net.primal.android.core.compose.isNotEmpty
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.core.ext.findByUrl
 import net.primal.android.core.utils.isPrimalIdentifier
@@ -143,6 +145,13 @@ fun MessageListScreen(
 
     val conversations = state.conversations.collectAsLazyPagingItems()
     val listState = conversations.rememberLazyListStatePagingWorkaround()
+
+    val firstConversationId = if (conversations.isNotEmpty()) conversations[0]?.participantId else null
+    LaunchedEffect(firstConversationId) {
+        if (listState.firstVisibleItemIndex <= 1) {
+            listState.animateScrollToItem(index = 0)
+        }
+    }
 
     PrimalDrawerScaffold(
         drawerState = drawerState,
