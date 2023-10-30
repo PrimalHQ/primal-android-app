@@ -16,7 +16,7 @@ interface MessageConversationListContract {
 
     sealed class UiEvent {
         data class ChangeRelation(val relation: ConversationRelation) : UiEvent()
-
         data object MarkAllConversationsAsRead : UiEvent()
+        data object ConversationsSeen : UiEvent()
     }
 }

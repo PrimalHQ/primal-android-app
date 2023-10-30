@@ -60,6 +60,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -80,11 +81,13 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 import net.primal.android.core.compose.icons.primaliconpack.NewDM
 import net.primal.android.core.compose.isEmpty
+import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.core.ext.findByUrl
 import net.primal.android.core.utils.isPrimalIdentifier
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.PrimalBottomBarHeightDp
 import net.primal.android.drawer.PrimalDrawerScaffold
+import net.primal.android.messages.conversation.MessageConversationListContract.UiEvent
 import net.primal.android.messages.conversation.MessageConversationListContract.UiEvent.ChangeRelation
 import net.primal.android.messages.conversation.MessageConversationListContract.UiEvent.MarkAllConversationsAsRead
 import net.primal.android.messages.conversation.model.MessageConversationUi
@@ -102,6 +105,15 @@ fun MessageListScreen(
 
     val uiState = viewModel.state.collectAsState()
 
+    DisposableLifecycleObserverEffect {
+        when (it) {
+            Lifecycle.Event.ON_START -> {
+                viewModel.setEvent(UiEvent.ConversationsSeen)
+            }
+            else -> Unit
+        }
+    }
+
     MessageListScreen(
         state = uiState.value,
         onPrimaryDestinationChanged = onTopLevelDestinationChanged,
@@ -118,7 +130,7 @@ fun MessageListScreen(
     state: MessageConversationListContract.UiState,
     onPrimaryDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
-    eventPublisher: (MessageConversationListContract.UiEvent) -> Unit,
+    eventPublisher: (UiEvent) -> Unit,
     onConversationClick: (String) -> Unit,
     onNewMessageClick: () -> Unit,
 ) {

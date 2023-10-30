@@ -64,6 +64,7 @@ class MessageConversationListViewModel @Inject constructor(
             when (it) {
                 is UiEvent.ChangeRelation -> changeRelation(relation = it.relation)
                 UiEvent.MarkAllConversationsAsRead -> markAllConversationAsRead()
+                UiEvent.ConversationsSeen -> fetchConversations()
             }
         }
     }
