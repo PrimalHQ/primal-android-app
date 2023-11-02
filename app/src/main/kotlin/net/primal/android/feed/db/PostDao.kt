@@ -16,4 +16,7 @@ interface PostDao {
     @Query("SELECT * FROM PostData WHERE postId = :postId")
     fun findByPostId(postId: String): PostData?
 
+    @Query("SELECT * FROM PostData WHERE postId IN (:postIds)")
+    fun findPosts(postIds: List<String>): List<PostData>
+
 }

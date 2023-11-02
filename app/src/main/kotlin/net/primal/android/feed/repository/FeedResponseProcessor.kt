@@ -3,9 +3,9 @@ package net.primal.android.feed.repository
 import androidx.room.withTransaction
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.feed.api.model.FeedResponse
-import net.primal.android.nostr.ext.flatMapAsPostMediaResourcePO
-import net.primal.android.nostr.ext.flatMapAsPostNostrResourcePO
 import net.primal.android.nostr.ext.flatMapNotNullAsMediaResourcePO
+import net.primal.android.nostr.ext.flatMapPostsAsMediaResourcePO
+import net.primal.android.nostr.ext.flatMapPostsAsNostrResourcePO
 import net.primal.android.nostr.ext.mapAsPostDataPO
 import net.primal.android.nostr.ext.mapAsProfileDataPO
 import net.primal.android.nostr.ext.mapNotNullAsPostDataPO
@@ -33,18 +33,19 @@ suspend fun FeedResponse.persistToDatabaseAsTransaction(
         val eventIdMap = profileIdToProfileDataMap.mapValues { it.value.eventId }
         postData.copy(authorMetadataId = eventIdMap[postData.authorId])
     }
+    val parsedMediaResources = allPosts.flatMapPostsAsMediaResourcePO()
 
     database.withTransaction {
         database.profiles().upsertAll(data = profiles)
         database.posts().upsertAll(data = allPosts)
-        database.mediaResources().upsertAll(data = allPosts.flatMapAsPostMediaResourcePO())
-        database.nostrResources().upsertAll(data = allPosts.flatMapAsPostNostrResourcePO(
+        database.mediaResources().upsertAll(data = parsedMediaResources)
+        database.mediaResources().upsertAll(data = primalMediaResources)
+        database.nostrResources().upsertAll(data = allPosts.flatMapPostsAsNostrResourcePO(
             postIdToPostDataMap = allPosts.groupBy { it.postId }.mapValues { it.value.first() },
             profileIdToProfileDataMap = profileIdToProfileDataMap
         ))
         database.reposts().upsertAll(data = reposts)
         database.postStats().upsertAll(data = postStats)
         database.postUserStats().upsertAll(data = userPostStats)
-        database.mediaResources().upsertAll(data = primalMediaResources)
     }
 }

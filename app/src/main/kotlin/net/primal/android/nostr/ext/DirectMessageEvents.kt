@@ -66,7 +66,7 @@ fun NostrEvent.mapAsMessageDataPO(
         participantId = participantId,
         createdAt = this.createdAt,
         content = decryptedMessage,
-        uris = this.content.parseUris(),
-        hashtags = this.content.parseHashtags(),
+        uris = decryptedMessage.parseUris(),
+        hashtags = decryptedMessage.parseHashtags(),
     )
 }

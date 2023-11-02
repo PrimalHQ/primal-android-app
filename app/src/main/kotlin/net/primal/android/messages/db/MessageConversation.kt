@@ -3,6 +3,7 @@ package net.primal.android.messages.db
 import androidx.room.Embedded
 import androidx.room.Relation
 import net.primal.android.feed.db.MediaResource
+import net.primal.android.feed.db.NostrResource
 import net.primal.android.profile.db.ProfileData
 
 data class MessageConversation(
@@ -27,5 +28,17 @@ data class MessageConversation(
         parentColumn = "lastMessageId",
     )
     val lastMessage: DirectMessageData,
+
+    @Relation(
+        entityColumn = "eventId",
+        parentColumn = "lastMessageId",
+    )
+    val lastMessageMediaResources: List<MediaResource>,
+
+    @Relation(
+        entityColumn = "postId",
+        parentColumn = "lastMessageId",
+    )
+    val lastMessageNostrUris: List<NostrResource>,
 
 )

@@ -27,6 +27,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.tooling.preview.Preview
@@ -95,6 +96,44 @@ private fun String.replaceNostrProfileUrisWithHandles(
     return newContent
 }
 
+private val noteLinkLeftovers = listOf(
+    "https://primal.net/e/ " to "",
+    "https://www.primal.net/e/ " to "",
+    "http://primal.net/e/ " to "",
+    "http://www.primal.net/e/ " to "",
+    "https://primal.net/e/\n" to "",
+    "https://www.primal.net/e/\n" to "",
+    "http://primal.net/e/\n" to "",
+    "http://www.primal.net/e/\n" to "",
+)
+
+private val profileLinkLeftovers = listOf(
+    "https://primal.net/p/@" to "@",
+    "https://www.primal.net/p/@" to "@",
+    "http://primal.net/p/@" to "@",
+    "http://www.primal.net/p/@" to "@",
+)
+
+private fun String.clearParsedPrimalLinks(): String {
+    var newContent = this
+    (noteLinkLeftovers + profileLinkLeftovers).forEach {
+        newContent = newContent.replace(
+            oldValue = it.first,
+            newValue = it.second,
+            ignoreCase = false,
+        )
+    }
+    noteLinkLeftovers.map { it.first.trim() }.toSet().forEach {
+        if (newContent.endsWith(it)) {
+            newContent = newContent.replace(
+                oldValue = it,
+                newValue = "",
+            )
+        }
+    }
+    return newContent
+}
+
 private fun String.ellipsize(
     expanded: Boolean,
     ellipsizeText: String,
@@ -120,89 +159,20 @@ fun FeedPostContent(
     onClick: (Offset) -> Unit,
     onUrlClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
+    highlightColor: Color = AppTheme.colorScheme.primary,
     contentColor: Color = AppTheme.colorScheme.onSurface,
 ) {
     val seeMoreText = stringResource(id = R.string.feed_see_more)
-    val primaryColor = AppTheme.colorScheme.primary
-
-    val imageResources = remember { mediaResources.filterImages() }
-    val refinedUrlResources = remember { mediaResources.filterNotImages() }
-    val referencedPostResources = remember { nostrResources.filterReferencedPosts() }
-    val referencedUserResources = remember { nostrResources.filterReferencedUsers() }
-
     val contentText = remember {
-        val refinedContent = content
-            .withoutUrls(urls = imageResources.map { it.url })
-            .withoutUrls(urls = referencedPostResources.map { it.uri })
-            .ellipsize(expanded = expanded, ellipsizeText = seeMoreText)
-            .replaceNostrProfileUrisWithHandles(resources = referencedUserResources)
-            .trim()
-
-        buildAnnotatedString {
-            append(refinedContent)
-
-            if (refinedContent.endsWith(seeMoreText)) {
-                addStyle(
-                    style = SpanStyle(color = primaryColor),
-                    start = refinedContent.length - seeMoreText.length,
-                    end = refinedContent.length,
-                )
-            }
-
-            refinedUrlResources.map { it.url }.forEach {
-                val startIndex = refinedContent.indexOf(it)
-                if (startIndex >= 0) {
-                    val endIndex = startIndex + it.length
-                    addStyle(
-                        style = SpanStyle(color = primaryColor),
-                        start = startIndex,
-                        end = endIndex,
-                    )
-                    addStringAnnotation(
-                        tag = URL_ANNOTATION_TAG,
-                        annotation = it,
-                        start = startIndex,
-                        end = endIndex,
-                    )
-                }
-            }
-
-            referencedUserResources.forEach {
-                checkNotNull(it.referencedUser)
-                val displayHandle = it.referencedUser.displayUsername
-                val startIndex = refinedContent.indexOf(displayHandle)
-                if (startIndex >= 0) {
-                    val endIndex = startIndex + displayHandle.length
-                    addStyle(
-                        style = SpanStyle(color = primaryColor),
-                        start = startIndex,
-                        end = endIndex,
-                    )
-                    addStringAnnotation(
-                        tag = PROFILE_ID_ANNOTATION_TAG,
-                        annotation = it.referencedUser.userId,
-                        start = startIndex,
-                        end = endIndex,
-                    )
-                }
-            }
-
-            HashtagMatcher(content = refinedContent, hashtags = hashtags)
-                .matches()
-                .forEach {
-                    addStyle(
-                        style = SpanStyle(color = primaryColor),
-                        start = it.startIndex,
-                        end = it.endIndex,
-                    )
-                    addStringAnnotation(
-                        tag = HASHTAG_ANNOTATION_TAG,
-                        annotation = it.value,
-                        start = it.startIndex,
-                        end = it.endIndex,
-                    )
-                }
-        }
+        renderContentAsAnnotatedString(
+            content = content,
+            expanded = expanded,
+            seeMoreText = seeMoreText,
+            hashtags = hashtags,
+            mediaResources = mediaResources,
+            nostrResources = nostrResources,
+            highlightColor = highlightColor,
+        )
     }
 
     Column(
@@ -230,16 +200,113 @@ fun FeedPostContent(
             )
         }
 
+        val imageResources = remember { mediaResources.filterImages() }
         if (imageResources.isNotEmpty()) {
             FeedPostImages(imageResources = imageResources)
         }
 
+        val referencedPostResources = remember { nostrResources.filterReferencedPosts() }
         if (referencedPostResources.isNotEmpty()) {
             FeedReferencedPosts(
                 postResources = referencedPostResources,
                 onPostClick = onPostClick,
             )
         }
+    }
+}
+
+fun renderContentAsAnnotatedString(
+    content: String,
+    expanded: Boolean,
+    seeMoreText: String,
+    hashtags: List<String>,
+    mediaResources: List<MediaResourceUi>,
+    nostrResources: List<NostrResourceUi>,
+    shouldKeepNostrNoteUris: Boolean = false,
+    highlightColor: Color,
+): AnnotatedString {
+
+    val imageUrlResources = mediaResources.filterImages()
+    val otherUrlResources = mediaResources.filterNotImages()
+    val referencedPostResources = nostrResources.filterReferencedPosts()
+    val referencedUserResources = nostrResources.filterReferencedUsers()
+
+    val refinedContent = content
+        .withoutUrls(urls = imageUrlResources.map { it.url })
+        .withoutUrls(urls = if (!shouldKeepNostrNoteUris) {
+            referencedPostResources.map { it.uri }
+        } else {
+            emptyList()
+        })
+        .ellipsize(expanded = expanded, ellipsizeText = seeMoreText)
+        .replaceNostrProfileUrisWithHandles(resources = referencedUserResources)
+        .clearParsedPrimalLinks()
+        .trim()
+
+    return buildAnnotatedString {
+        append(refinedContent)
+
+        if (refinedContent.endsWith(seeMoreText)) {
+            addStyle(
+                style = SpanStyle(color = highlightColor),
+                start = refinedContent.length - seeMoreText.length,
+                end = refinedContent.length,
+            )
+        }
+
+        otherUrlResources.map { it.url }.forEach {
+            val startIndex = refinedContent.indexOf(it)
+            if (startIndex >= 0) {
+                val endIndex = startIndex + it.length
+                addStyle(
+                    style = SpanStyle(color = highlightColor),
+                    start = startIndex,
+                    end = endIndex,
+                )
+                addStringAnnotation(
+                    tag = URL_ANNOTATION_TAG,
+                    annotation = it,
+                    start = startIndex,
+                    end = endIndex,
+                )
+            }
+        }
+
+        referencedUserResources.forEach {
+            checkNotNull(it.referencedUser)
+            val displayHandle = it.referencedUser.displayUsername
+            val startIndex = refinedContent.indexOf(displayHandle)
+            if (startIndex >= 0) {
+                val endIndex = startIndex + displayHandle.length
+                addStyle(
+                    style = SpanStyle(color = highlightColor),
+                    start = startIndex,
+                    end = endIndex,
+                )
+                addStringAnnotation(
+                    tag = PROFILE_ID_ANNOTATION_TAG,
+                    annotation = it.referencedUser.userId,
+                    start = startIndex,
+                    end = endIndex,
+                )
+            }
+        }
+
+        HashtagMatcher(content = refinedContent, hashtags = hashtags)
+            .matches()
+            .forEach {
+                addStyle(
+                    style = SpanStyle(color = highlightColor),
+                    start = it.startIndex,
+                    end = it.endIndex,
+                )
+                addStringAnnotation(
+                    tag = HASHTAG_ANNOTATION_TAG,
+                    annotation = it.value,
+                    start = it.startIndex,
+                    end = it.endIndex,
+                )
+            }
     }
 }
 

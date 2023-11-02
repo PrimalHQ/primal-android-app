@@ -12,18 +12,14 @@ import net.primal.android.crypto.bechToBytes
 import net.primal.android.crypto.hexToNpubHrp
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.messages.api.MessagesApi
+import net.primal.android.messages.api.mediator.MessagesProcessor
 import net.primal.android.messages.api.mediator.MessagesRemoteMediator
-import net.primal.android.messages.api.mediator.processAndSave
 import net.primal.android.messages.api.model.MessagesRequestBody
-import net.primal.android.messages.api.model.MessagesResponse
 import net.primal.android.messages.db.DirectMessage
 import net.primal.android.messages.db.MessageConversation
 import net.primal.android.messages.db.MessageConversationData
 import net.primal.android.messages.domain.ConversationRelation
 import net.primal.android.networking.relays.RelaysManager
-import net.primal.android.nostr.ext.flatMapNotNullAsMediaResourcePO
-import net.primal.android.nostr.ext.mapAsMessageDataPO
-import net.primal.android.nostr.ext.mapAsProfileDataPO
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.credentials.CredentialsStore
@@ -31,10 +27,11 @@ import javax.inject.Inject
 
 @OptIn(ExperimentalPagingApi::class)
 class MessageRepository @Inject constructor(
-    private val messagesApi: MessagesApi,
-    private val database: PrimalDatabase,
     private val activeAccountStore: ActiveAccountStore,
     private val credentialsStore: CredentialsStore,
+    private val database: PrimalDatabase,
+    private val messagesApi: MessagesApi,
+    private val messagesProcessor: MessagesProcessor,
     private val relaysManager: RelaysManager,
     private val nostrNotary: NostrNotary,
 ) {
@@ -55,13 +52,6 @@ class MessageRepository @Inject constructor(
                 relation = relation,
             )
         }
-
-        val profiles = response.profileMetadata.mapAsProfileDataPO()
-        val primalMediaResources = response.mediaResources.flatMapNotNullAsMediaResourcePO()
-        val messages = response.messages.mapAsMessageDataPO(
-            userId = userId,
-            nsec = credentialsStore.findOrThrow(npub = userId.hexToNpubHrp()).nsec
-        )
 
         val summary = response.conversationsSummary
         val rawConversations = summary?.summaryPerParticipantId?.keys ?: emptyList()
@@ -86,9 +76,12 @@ class MessageRepository @Inject constructor(
 
         withContext(Dispatchers.IO) {
             database.withTransaction {
-                database.profiles().upsertAll(data = profiles)
-                database.mediaResources().upsertAll(data = primalMediaResources)
-                database.messages().upsertAll(data = messages)
+                messagesProcessor.processMessageEventsAndSave(
+                    userId = userId,
+                    messages = response.messages,
+                    profileMetadata = response.profileMetadata,
+                    mediaResources = response.mediaResources,
+                )
                 database.messageConversations().upsertAll(data = messageConversation)
             }
         }
@@ -101,22 +94,22 @@ class MessageRepository @Inject constructor(
         fetchConversations(relation = ConversationRelation.Other)
 
     suspend fun fetchNewConversationMessages(userId: String, conversationUserId: String) {
-        val response = withContext(Dispatchers.IO) {
+        withContext(Dispatchers.IO) {
             val latestMessage = database.messages().first(participantId = conversationUserId)
-            messagesApi.getMessages(
+            val response = messagesApi.getMessages(
                 body = MessagesRequestBody(
                     userId = userId,
                     participantId = conversationUserId,
                     since = latestMessage?.createdAt ?: 0,
                 )
             )
+            messagesProcessor.processMessageEventsAndSave(
+                userId = userId,
+                messages = response.messages,
+                profileMetadata = response.profileMetadata,
+                mediaResources = response.mediaResources,
+            )
         }
-
-        response.processAndSave(
-            userId = userId,
-            database = database,
-            credentialsStore = credentialsStore,
-        )
     }
 
     suspend fun markConversationAsRead(userId: String, conversationUserId: String) {
@@ -156,14 +149,16 @@ class MessageRepository @Inject constructor(
             receiverId = receiverId,
             encryptedContent = encryptedContent,
         )
-        relaysManager.publishEvent(nostrEvent)
 
-        MessagesResponse(messages = listOf(nostrEvent))
-            .processAndSave(
+        withContext(Dispatchers.IO) {
+            relaysManager.publishEvent(nostrEvent)
+            messagesProcessor.processMessageEventsAndSave(
                 userId = userId,
-                credentialsStore = credentialsStore,
-                database = database,
+                messages = listOf(nostrEvent),
+                profileMetadata = emptyList(),
+                mediaResources = emptyList(),
             )
+        }
     }
 
     private fun createConversationsPager(
@@ -191,9 +186,9 @@ class MessageRepository @Inject constructor(
         remoteMediator = MessagesRemoteMediator(
             userId = activeAccountStore.activeUserId(),
             participantId = participantId,
-            messagesApi = messagesApi,
             database = database,
-            credentialsStore = credentialsStore,
+            messagesApi = messagesApi,
+            messagesProcessor = messagesProcessor,
         ),
         pagingSourceFactory = pagingSourceFactory,
     )

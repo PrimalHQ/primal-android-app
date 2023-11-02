@@ -3,6 +3,7 @@ package net.primal.android.nostr.ext
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import net.primal.android.crypto.bech32ToHex
 import org.junit.Test
 
 class NostrResourcesTest {
@@ -49,5 +50,21 @@ class NostrResourcesTest {
         actual.shouldNotBeNull()
         actual.first.shouldBeNull()
         actual.second.shouldBeNull()
+    }
+
+    @Test
+    fun `extractProfileId extracts hex profile id from npub1 uri`() {
+        val npub = "npub1sg6plzptd64u62a878hep2kev88swjh3tw00gjsfl8f237lmu63q0uf63m"
+        val actual = "nostr:$npub".extractProfileId()
+        actual.shouldNotBeNull()
+        actual shouldBe npub.bech32ToHex()
+    }
+
+    @Test
+    fun `extractNoteId extracts hex profile id from note1 uri`() {
+        val note = "note1ksld0gmpnu6fpmnf0nrmm66fdx9jln22s96clup6xz7m232g27cs779y8e"
+        val actual = "nostr:$note".extractNoteId()
+        actual.shouldNotBeNull()
+        actual shouldBe note.bech32ToHex()
     }
 }

@@ -24,6 +24,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowUpward
+import androidx.compose.material.icons.outlined.HourglassBottom
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -41,6 +42,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -64,6 +66,7 @@ import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.isEmpty
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.core.ext.findByUrl
+import net.primal.android.core.ext.openUriSafely
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.messages.chat.model.ChatMessageUi
 import net.primal.android.theme.AppTheme
@@ -75,6 +78,8 @@ fun ChatScreen(
     viewModel: ChatViewModel,
     onClose: () -> Unit,
     onProfileClick: (String) -> Unit,
+    onNoteClick: (String) -> Unit,
+    onHashtagClick: (String) -> Unit,
 ) {
     val state = viewModel.state.collectAsState()
 
@@ -91,6 +96,8 @@ fun ChatScreen(
         state = state.value,
         onClose = onClose,
         onProfileClick = onProfileClick,
+        onNoteClick = onNoteClick,
+        onHashtagClick = onHashtagClick,
         eventPublisher = { viewModel.setEvent(it) },
     )
 }
@@ -101,6 +108,8 @@ fun ChatScreen(
     state: ChatContract.UiState,
     onClose: () -> Unit,
     onProfileClick: (String) -> Unit,
+    onNoteClick: (String) -> Unit,
+    onHashtagClick: (String) -> Unit,
     eventPublisher: (ChatContract.UiEvent) -> Unit,
 ) {
     val messagesPagingItems = state.messages.collectAsLazyPagingItems()
@@ -116,12 +125,14 @@ fun ChatScreen(
         snackbarHostState = snackbarHostState,
     )
 
+    val participantUsername = state.participantProfile?.userDisplayName
+        ?: state.participantId.asEllipsizedNpub()
+
     Scaffold(
         modifier = Modifier.navigationBarsPadding(),
         topBar = {
             PrimalTopAppBar(
-                title = state.participantProfile?.userDisplayName
-                    ?: state.participantId.asEllipsizedNpub(),
+                title = participantUsername,
                 subtitle = state.participantProfile?.internetIdentifier,
                 navigationIcon = PrimalIcons.ArrowBack,
                 onNavigationIconClick = onClose,
@@ -131,8 +142,9 @@ fun ChatScreen(
                             .padding(horizontal = 8.dp)
                             .clip(CircleShape)
                     ) {
-                        val resource =
-                            state.participantMediaResources.findByUrl(url = state.participantProfile?.avatarUrl)
+                        val resource = state.participantMediaResources.findByUrl(
+                            url = state.participantProfile?.avatarUrl
+                        )
                         val variant = resource?.variants?.minByOrNull { it.width }
                         val imageSource = variant?.mediaUrl ?: state.participantProfile?.avatarUrl
                         AvatarThumbnailListItemImage(
@@ -152,6 +164,9 @@ fun ChatScreen(
                 state = listState,
                 contentPadding = contentPadding,
                 messages = messagesPagingItems,
+                onProfileClick = onProfileClick,
+                onNoteClick = onNoteClick,
+                onHashtagClick = onHashtagClick,
             )
         },
         bottomBar = {
@@ -166,7 +181,9 @@ fun ChatScreen(
                         .padding(vertical = 8.dp)
                         .imePadding(),
                     value = state.newMessageText,
-                    enabled = state.newMessageText.isNotBlank() && !state.sending,
+                    sendEnabled = state.newMessageText.isNotBlank() && !state.sending,
+                    sending = state.sending,
+                    participantUsername = participantUsername,
                     onSend = {
                         eventPublisher(ChatContract.UiEvent.SendMessage)
                     },
@@ -188,7 +205,12 @@ private fun ChatList(
     modifier: Modifier = Modifier,
     state: LazyListState = rememberLazyListState(),
     contentPadding: PaddingValues = PaddingValues(0.dp),
+    onProfileClick: (String) -> Unit,
+    onNoteClick: (String) -> Unit,
+    onHashtagClick: (String) -> Unit,
 ) {
+    val localUriHandler = LocalUriHandler.current
+
     LazyColumn(
         modifier = modifier,
         state = state,
@@ -225,6 +247,12 @@ private fun ChatList(
                         chatMessage = currentMessage,
                         previousMessage = previousMessage,
                         nextMessage = nextMessage,
+                        onProfileClick = onProfileClick,
+                        onNoteClick = onNoteClick,
+                        onUrlClick = {
+                            localUriHandler.openUriSafely(it)
+                        },
+                        onHashtagClick = onHashtagClick,
                     )
                 }
 
@@ -279,6 +307,10 @@ private fun ChatMessageListItem(
     chatMessage: ChatMessageUi,
     previousMessage: ChatMessageUi? = null,
     nextMessage: ChatMessageUi? = null,
+    onProfileClick: (String) -> Unit,
+    onNoteClick: (String) -> Unit,
+    onUrlClick: (String) -> Unit,
+    onHashtagClick: (String) -> Unit,
 ) {
     val timeDiffBetweenThisAndNextMessage = (nextMessage?.timestamp ?: Instant.MAX).epochSecond -
             chatMessage.timestamp.epochSecond
@@ -355,22 +387,19 @@ private fun ChatMessageListItem(
                 mediaResources = chatMessage.mediaResources,
                 nostrResources = chatMessage.nostrResources,
                 onClick = { },
-                onProfileClick = {
-
-                },
-                onPostClick = {
-
-                },
-                onUrlClick = {
-
-                },
-                onHashtagClick = {
-
-                },
+                onProfileClick = onProfileClick,
+                onPostClick = onNoteClick,
+                onUrlClick = onUrlClick,
+                onHashtagClick = onHashtagClick,
                 contentColor = if (chatMessage.isUserMessage) {
                     Color.White
                 } else {
                     AppTheme.colorScheme.onSurface
+                },
+                highlightColor = if (chatMessage.isUserMessage) {
+                    Color.White
+                } else {
+                    AppTheme.colorScheme.primary
                 },
             )
         }
@@ -394,9 +423,11 @@ private fun ChatMessageListItem(
 private fun MessageOutlinedTextField(
     value: String,
     onValueChange: (String) -> Unit,
+    sending: Boolean,
+    participantUsername: String,
     onSend: () -> Unit,
     modifier: Modifier = Modifier,
-    enabled: Boolean = true,
+    sendEnabled: Boolean = true,
 ) {
     Row(
         modifier = modifier,
@@ -407,12 +438,12 @@ private fun MessageOutlinedTextField(
             value = value,
             onValueChange = onValueChange,
             maxLines = 10,
-            enabled = true,
+            enabled = !sending,
             placeholder = {
                 Text(
                     text = stringResource(
                         id = R.string.chat_message_hint,
-                        "qauser"
+                        participantUsername,
                     ),
                     maxLines = 1,
                     color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
@@ -433,10 +464,10 @@ private fun MessageOutlinedTextField(
 
         AppBarIcon(
             modifier = Modifier.padding(bottom = 4.dp, start = 8.dp),
-            icon = Icons.Outlined.ArrowUpward,
+            icon = if (sending) Icons.Outlined.HourglassBottom else Icons.Outlined.ArrowUpward,
             enabledBackgroundColor = AppTheme.colorScheme.primary,
             tint = Color.White,
-            enabled = enabled,
+            enabled = sendEnabled,
             onClick = onSend,
         )
     }

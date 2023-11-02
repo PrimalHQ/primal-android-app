@@ -11,16 +11,15 @@ import net.primal.android.messages.api.MessagesApi
 import net.primal.android.messages.api.model.MessagesRequestBody
 import net.primal.android.messages.db.DirectMessage
 import net.primal.android.networking.sockets.errors.WssException
-import net.primal.android.user.credentials.CredentialsStore
 import java.time.Instant
 
 @ExperimentalPagingApi
 class MessagesRemoteMediator(
     private val userId: String,
     private val participantId: String,
-    private val messagesApi: MessagesApi,
     private val database: PrimalDatabase,
-    private val credentialsStore: CredentialsStore,
+    private val messagesApi: MessagesApi,
+    private val messagesProcessor: MessagesProcessor,
 ) : RemoteMediator<Int, DirectMessage>() {
 
     private val lastRequests: MutableMap<LoadType, MessagesRequestBody> = mutableMapOf()
@@ -83,11 +82,14 @@ class MessagesRemoteMediator(
 
         lastRequests[loadType] = requestBody
 
-        response.processAndSave(
-            userId = userId,
-            database = database,
-            credentialsStore = credentialsStore,
-        )
+        withContext(Dispatchers.IO) {
+            messagesProcessor.processMessageEventsAndSave(
+                userId = userId,
+                messages = response.messages,
+                profileMetadata = response.profileMetadata,
+                mediaResources = response.mediaResources,
+            )
+        }
 
         return MediatorResult.Success(endOfPaginationReached = false)
     }

@@ -76,6 +76,7 @@ import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.compose.asBeforeNowFormat
+import net.primal.android.core.compose.feed.renderContentAsAnnotatedString
 import net.primal.android.core.compose.foundation.brandBackground
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -86,6 +87,7 @@ import net.primal.android.core.compose.isNotEmpty
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.core.ext.findByUrl
 import net.primal.android.core.utils.isPrimalIdentifier
+import net.primal.android.core.utils.parseHashtags
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.PrimalBottomBarHeightDp
 import net.primal.android.drawer.PrimalDrawerScaffold
@@ -350,11 +352,25 @@ private fun ConversationListItem(
             }
         },
         supportingContent = {
+            val annotatedContent = renderContentAsAnnotatedString(
+                content = conversation.lastMessageSnippet,
+                expanded = false,
+                seeMoreText = "",
+                hashtags = conversation.lastMessageSnippet.parseHashtags(),
+                mediaResources = conversation.lastMessageMediaResources,
+                nostrResources = conversation.lastMessageNostrResources,
+                shouldKeepNostrNoteUris = true,
+                highlightColor = AppTheme.colorScheme.primary,
+            )
+
             Text(
                 text = if (conversation.isLastMessageFromUser) {
-                    stringResource(id = R.string.chat_message_user_snippet, conversation.lastMessageSnippet)
+                    buildAnnotatedString {
+                        append(stringResource(id = R.string.chat_message_user_snippet_prefix))
+                        append(" ")
+                    }.plus(annotatedContent)
                 } else {
-                    conversation.lastMessageSnippet
+                    annotatedContent
                 },
                 overflow = TextOverflow.Ellipsis,
                 minLines = 2,

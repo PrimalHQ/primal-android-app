@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import net.primal.android.core.compose.feed.model.asNostrResourceUi
 import net.primal.android.core.compose.media.model.asMediaResourceUi
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.usernameUiFriendly
@@ -96,16 +97,20 @@ class MessageConversationListViewModel @Inject constructor(
     }
 
     private fun fetchConversations() = viewModelScope.launch {
-        when (state.value.activeRelation) {
-            ConversationRelation.Follows -> {
-                messageRepository.fetchFollowConversations()
-                messageRepository.fetchNonFollowsConversations()
-            }
+        try {
+            when (state.value.activeRelation) {
+                ConversationRelation.Follows -> {
+                    messageRepository.fetchFollowConversations()
+                    messageRepository.fetchNonFollowsConversations()
+                }
 
-            ConversationRelation.Other -> {
-                messageRepository.fetchNonFollowsConversations()
-                messageRepository.fetchFollowConversations()
+                ConversationRelation.Other -> {
+                    messageRepository.fetchNonFollowsConversations()
+                    messageRepository.fetchFollowConversations()
+                }
             }
+        } catch (error: WssException) {
+            Timber.e(error)
         }
     }
 
@@ -137,6 +142,8 @@ class MessageConversationListViewModel @Inject constructor(
             participantUsername = this.participant?.usernameUiFriendly()
                 ?: this.data.participantId.asEllipsizedNpub(),
             lastMessageSnippet = this.lastMessage.content,
+            lastMessageMediaResources = this.lastMessageMediaResources.map { it.asMediaResourceUi() },
+            lastMessageNostrResources = this.lastMessageNostrUris.map { it.asNostrResourceUi() },
             lastMessageAt = Instant.ofEpochSecond(this.lastMessage.createdAt),
             isLastMessageFromUser = this.lastMessage.senderId == activeUserId,
             participantInternetIdentifier = this.participant?.internetIdentifier,

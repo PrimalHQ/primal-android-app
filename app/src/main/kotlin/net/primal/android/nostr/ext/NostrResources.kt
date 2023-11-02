@@ -9,8 +9,10 @@ import net.primal.android.feed.db.NostrResource
 import net.primal.android.feed.db.PostData
 import net.primal.android.feed.db.ReferencedPost
 import net.primal.android.feed.db.ReferencedUser
+import net.primal.android.messages.db.DirectMessageData
 import net.primal.android.nostr.utils.Nip19TLV
 import net.primal.android.profile.db.ProfileData
+import timber.log.Timber
 import java.util.regex.Pattern
 
 private const val NOSTR = "nostr:"
@@ -77,77 +79,105 @@ fun String.nostrUriToNoteIdAndRelay() = nostrUriToIdAndRelay()
 
 fun String.nostrUriToPubkeyAndRelay() = nostrUriToIdAndRelay()
 
-fun List<PostData>.flatMapAsPostNostrResourcePO(
+fun String.extractProfileId() : String? {
+    val matcher = nostrUriRegexPattern.matcher(this)
+    if (!matcher.find()) return null
+
+    val bechPrefix = matcher.group(2)
+    val key = matcher.group(3)
+
+    return try {
+        when (bechPrefix?.lowercase()) {
+            NPUB -> (bechPrefix + key).bechToBytes().toHex()
+            NPROFILE -> {
+                val tlv = Nip19TLV.parse((bechPrefix + key).bechToBytes())
+                tlv[Nip19TLV.Type.SPECIAL.id]?.first()?.toHex()
+            }
+            else -> null
+        }
+    } catch (error: IllegalArgumentException) {
+        Timber.e(error)
+        null
+    }
+}
+
+fun String.extractNoteId() : String? {
+    val matcher = nostrUriRegexPattern.matcher(this)
+    if (!matcher.find()) return null
+
+    val bechPrefix = matcher.group(2)
+    val key = matcher.group(3)
+
+    return try {
+        when (bechPrefix?.lowercase()) {
+            NOTE -> (bechPrefix + key).bechToBytes().toHex()
+            NEVENT -> {
+                val tlv = Nip19TLV.parse((bechPrefix + key).bechToBytes())
+                tlv[Nip19TLV.Type.SPECIAL.id]?.first()?.toHex()
+            }
+            else -> null
+        }
+    } catch (error: IllegalArgumentException) {
+        Timber.e(error)
+        null
+    }
+}
+
+fun List<PostData>.flatMapPostsAsNostrResourcePO(
     postIdToPostDataMap: Map<String, PostData>,
     profileIdToProfileDataMap: Map<String, ProfileData>,
 ): List<NostrResource> = flatMap { postData ->
-    postData.uris
-        .filter { it.isNostrUri() }
-        .map { link ->
-            var refPostId: String? = null
-            var refUserProfileId: String? = null
+    postData.uris.mapAsNostrResourcePO(
+        eventId = postData.postId,
+        postIdToPostDataMap = postIdToPostDataMap,
+        profileIdToProfileDataMap = profileIdToProfileDataMap,
+    )
+}
 
-            val matcher = nostrUriRegexPattern.matcher(link)
-            if (matcher.find()) {
-                val type = matcher.group(2) // npub1
-                val key = matcher.group(3) // bech32
-                try {
-                    when (type?.lowercase()) {
-                        NPUB -> {
-                            refUserProfileId = (type + key).bechToBytes().toHex()
-                        }
+fun List<DirectMessageData>.flatMapMessagesAsNostrResourcePO(
+    postIdToPostDataMap: Map<String, PostData>,
+    profileIdToProfileDataMap: Map<String, ProfileData>,
+) = flatMap { messageData ->
+    messageData.uris.mapAsNostrResourcePO(
+        eventId = messageData.messageId,
+        postIdToPostDataMap = postIdToPostDataMap,
+        profileIdToProfileDataMap = profileIdToProfileDataMap,
+    )
+}
 
-                        NPROFILE -> {
-                            val tlv = Nip19TLV.parse((type + key).bechToBytes())
-                            refUserProfileId = tlv[Nip19TLV.Type.SPECIAL.id]?.first()?.toHex()
-                        }
+fun List<String>.mapAsNostrResourcePO(
+    eventId: String,
+    postIdToPostDataMap: Map<String, PostData>,
+    profileIdToProfileDataMap: Map<String, ProfileData>,
+) = filter { it.isNostrUri() }.map { link ->
+    val refPostId = link.extractNoteId()
+    val refUserProfileId = link.extractProfileId()
+    val refPost = postIdToPostDataMap[refPostId]
+    val refPostAuthor = profileIdToProfileDataMap[refPost?.authorId]
 
-                        NOTE -> {
-                            refPostId = (type + key).bechToBytes().toHex()
-                        }
-
-                        NEVENT -> {
-                            val tlv = Nip19TLV.parse((type + key).bechToBytes())
-                            refPostId = tlv[Nip19TLV.Type.SPECIAL.id]?.first()?.toHex()
-                        }
-
-                        else -> {
-                            NostrResource(postId = postData.postId, uri = link)
-                        }
-
-                    }
-                } catch (error: IllegalArgumentException) {
-                    // ignore invalid links
-                }
-            }
-
-            val refPost = postIdToPostDataMap[refPostId]
-            val refPostAuthor = profileIdToProfileDataMap[refPost?.authorId]
-
-            NostrResource(
-                postId = postData.postId,
-                uri = link,
-                referencedUser = if (refUserProfileId != null) ReferencedUser(
-                    userId = refUserProfileId,
-                    handle = profileIdToProfileDataMap[refUserProfileId]
-                        ?.usernameUiFriendly()
-                        ?: refUserProfileId.asEllipsizedNpub(),
-                ) else null,
-                referencedPost = if (refPost != null && refPostAuthor != null) ReferencedPost(
-                    postId = refPost.postId,
-                    createdAt = refPost.createdAt,
-                    content = refPost.content,
-                    authorId = refPost.authorId,
-                    authorName = refPostAuthor.authorNameUiFriendly(),
-                    authorAvatarUrl = refPostAuthor.picture,
-                    authorInternetIdentifier = refPostAuthor.internetIdentifier,
-                    authorLightningAddress = refPostAuthor.lightningAddress,
-                    mediaResources = listOf(refPost).flatMapAsPostMediaResourcePO(),
-                    nostrResources = listOf(refPost).flatMapAsPostNostrResourcePO(
-                        postIdToPostDataMap = postIdToPostDataMap,
-                        profileIdToProfileDataMap = profileIdToProfileDataMap,
-                    ),
-                ) else null,
-            )
-        }
+    NostrResource(
+        postId = eventId,
+        uri = link,
+        referencedUser = if (refUserProfileId != null) ReferencedUser(
+            userId = refUserProfileId,
+            handle = profileIdToProfileDataMap[refUserProfileId]
+                ?.usernameUiFriendly()
+                ?: refUserProfileId.asEllipsizedNpub(),
+        ) else null,
+        referencedPost = if (refPost != null && refPostAuthor != null) ReferencedPost(
+            postId = refPost.postId,
+            createdAt = refPost.createdAt,
+            content = refPost.content,
+            authorId = refPost.authorId,
+            authorName = refPostAuthor.authorNameUiFriendly(),
+            authorAvatarUrl = refPostAuthor.picture,
+            authorInternetIdentifier = refPostAuthor.internetIdentifier,
+            authorLightningAddress = refPostAuthor.lightningAddress,
+            mediaResources = listOf(refPost).flatMapPostsAsMediaResourcePO(),
+            nostrResources = listOf(refPost).flatMapPostsAsNostrResourcePO(
+                postIdToPostDataMap = postIdToPostDataMap,
+                profileIdToProfileDataMap = profileIdToProfileDataMap,
+            ),
+        ) else null,
+    )
 }

@@ -529,6 +529,8 @@ private fun NavGraphBuilder.chat(
         viewModel = viewModel,
         onClose = { navController.navigateUp() },
         onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
+        onNoteClick = { noteId -> navController.navigateToThread(noteId)},
+        onHashtagClick = { hashtag -> navController.navigateToExploreFeed(hashtag) },
     )
 }
 

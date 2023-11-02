@@ -200,7 +200,7 @@
 
     <string name="chat_message_hint">Message %1$s</string>
     <string name="chat_nostr_publish_error">Unable to send your message. Please try again soon.</string>
-    <string name="chat_message_user_snippet">You: %1$s</string>
+    <string name="chat_message_user_snippet_prefix">You:</string>
 
     <string name="new_message_title">New message</string>
     <string name="new_message_search_hint">Search users</string>
