@@ -1,3 +1,3 @@
 ## Changes
 
-- Direct messages
+- DM improvements
