@@ -206,6 +206,7 @@ dependencies {
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
     implementation(libs.room.runtime)
+    implementation(libs.sqlcipher.android)
 
     kapt(libs.bundles.hilt.kapt)
     implementation(libs.bundles.hilt)

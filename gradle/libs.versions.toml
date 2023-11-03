@@ -28,6 +28,7 @@ retrofit = "2.9.0"
 paging = "3.2.1"
 room = "2.5.2"
 ksp = "1.9.10-1.0.13"
+sqlcipher-android = "4.5.3"
 url-detector = "0.1.23"
 spongycastle = "1.58.0.0"
 secp256k1-kmp = "0.11.0"
@@ -99,6 +100,7 @@ room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 room-testing = { module = "androidx.room:room-testing", version.ref = "room" }
 paging-room = { module = "androidx.room:room-paging", version.ref = "room" }
+sqlcipher-android = { module = "net.zetetic:sqlcipher-android", version.ref = "sqlcipher-android" }
 
 # Media libs
 coil = { module = "io.coil-kt:coil", version.ref = "coil" }

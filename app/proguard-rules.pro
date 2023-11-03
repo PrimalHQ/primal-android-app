@@ -21,3 +21,5 @@
 #-renamesourcefileattribute SourceFile
 
 -keep class fr.acinq.secp256k1.** { *; }
+
+-keep class net.zetetic.** { *; }
