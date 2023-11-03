@@ -1,3 +1,3 @@
 ## Changes
 
-- DM improvements
+- Database encryption
