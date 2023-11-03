@@ -1,13 +1,14 @@
 package net.primal.android.feed.db
 
 import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import androidx.room.Upsert
 
 @Dao
 interface PostDao {
 
-    @Upsert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun upsertAll(data: List<PostData>)
 
     @Query("DELETE FROM PostData WHERE postId NOT IN (SELECT DISTINCT postId FROM FeedPostDataCrossRef)")

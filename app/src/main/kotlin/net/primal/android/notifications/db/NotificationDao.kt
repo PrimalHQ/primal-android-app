@@ -2,9 +2,10 @@ package net.primal.android.notifications.db
 
 import androidx.paging.PagingSource
 import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
-import androidx.room.Upsert
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -30,7 +31,7 @@ interface NotificationDao {
     @Query("UPDATE NotificationData SET seenGloballyAt = :seenAt WHERE seenGloballyAt IS NULL")
     fun markAllUnseenNotificationsAsSeen(seenAt: Long)
 
-    @Upsert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun upsertAll(data: List<NotificationData>)
 
 }

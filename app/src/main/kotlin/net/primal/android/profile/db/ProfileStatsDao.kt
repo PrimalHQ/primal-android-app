@@ -1,15 +1,16 @@
 package net.primal.android.profile.db
 
 import androidx.room.Dao
-import androidx.room.Upsert
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 
 @Dao
 interface ProfileStatsDao {
 
-    @Upsert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun upsert(data: ProfileStats)
 
-    @Upsert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun upsertAll(data: List<ProfileStats>)
 
 }

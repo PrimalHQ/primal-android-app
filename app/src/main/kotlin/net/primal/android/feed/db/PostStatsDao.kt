@@ -1,15 +1,17 @@
 package net.primal.android.feed.db
 
 import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import androidx.room.Upsert
+
 @Dao
 interface PostStatsDao {
 
-    @Upsert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun upsert(data: PostStats)
 
-    @Upsert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun upsertAll(data: List<PostStats>)
 
     @Query("SELECT * FROM PostStats WHERE postId = :postId")
