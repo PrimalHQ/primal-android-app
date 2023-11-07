@@ -141,8 +141,8 @@ private fun ThemeBox(
         val borderBrush = if (selected) {
             Brush.linearGradient(
                 colors = listOf(
-                    primalTheme.extraColorScheme.brand1,
-                    primalTheme.extraColorScheme.brand2,
+                    primalTheme.colorScheme.primary,
+                    primalTheme.colorScheme.primary,
                 ),
             )
         } else {
@@ -189,7 +189,7 @@ private fun ThemeBox(
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(topStart = 8.dp))
-                        .background(color = AppTheme.extraColorScheme.brand2)
+                        .background(color = AppTheme.colorScheme.primary)
                         .size(16.dp)
                         .align(alignment = Alignment.BottomEnd)
                 ) {

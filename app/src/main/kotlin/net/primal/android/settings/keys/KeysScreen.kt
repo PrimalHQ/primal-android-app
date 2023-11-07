@@ -125,7 +125,7 @@ fun PublicKeySection(
         modifier = Modifier
             .height(72.dp)
             .background(
-                color = AppTheme.extraColorScheme.surfaceVariantAlt,
+                color = AppTheme.extraColorScheme.surfaceVariantAlt1,
                 shape = AppTheme.shapes.medium,
             ),
         verticalAlignment = Alignment.CenterVertically,
@@ -204,7 +204,7 @@ fun PrivateKeySection(
                 stringResource(id = R.string.settings_keys_show_key)
             }.lowercase(),
             style = AppTheme.typography.bodySmall,
-            color = AppTheme.colorScheme.primary,
+            color = AppTheme.colorScheme.secondary,
             fontWeight = FontWeight.Medium,
         )
     }
@@ -214,7 +214,7 @@ fun PrivateKeySection(
             .fillMaxWidth()
             .height(72.dp)
             .background(
-                color = AppTheme.extraColorScheme.surfaceVariantAlt,
+                color = AppTheme.extraColorScheme.surfaceVariantAlt1,
                 shape = AppTheme.shapes.medium,
             ),
         verticalAlignment = Alignment.CenterVertically,

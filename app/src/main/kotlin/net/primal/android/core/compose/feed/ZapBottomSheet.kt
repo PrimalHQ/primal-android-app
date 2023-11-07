@@ -3,6 +3,7 @@ package net.primal.android.core.compose.feed
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -46,6 +47,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import net.primal.android.R
+import net.primal.android.core.compose.AdjustSystemBarColors
 import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.utils.shortened
@@ -86,7 +88,10 @@ fun ZapBottomSheet(
     var selectedZapComment by remember { mutableStateOf("") }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
+    AdjustSystemBarColors(navigationBarColor = AppTheme.extraColorScheme.surfaceVariantAlt2)
     ModalBottomSheet(
+        containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
+        tonalElevation = 0.dp,
         onDismissRequest = onDismissRequest,
         sheetState = sheetState,
     ) {
@@ -181,13 +186,13 @@ private fun ZapOption(
 ) {
     val selectedBorderGradientColors = Brush.linearGradient(
         listOf(
-            AppTheme.extraColorScheme.brand1,
-            AppTheme.extraColorScheme.brand2,
+            AppTheme.colorScheme.primary,
+            AppTheme.colorScheme.primary,
         )
     )
 
     val backgroundColor =
-        if (selected) AppTheme.colorScheme.surface else AppTheme.extraColorScheme.surfaceVariantAlt
+        if (selected) AppTheme.colorScheme.surface else AppTheme.extraColorScheme.surfaceVariantAlt1
     val borderWidth = if (selected) 1.dp else 0.dp
     val borderBrush = if (selected) selectedBorderGradientColors else Brush.linearGradient(
         listOf(
@@ -208,9 +213,11 @@ private fun ZapOption(
             .background(
                 color = backgroundColor
             )
-            .clickable {
-                onClick()
-            }
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+                onClick = onClick,
+            )
             .requiredHeight(88.dp)
             .requiredWidth(88.dp)
             .aspectRatio(1f)

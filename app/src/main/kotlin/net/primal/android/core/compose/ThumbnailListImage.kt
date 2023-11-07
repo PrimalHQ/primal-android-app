@@ -34,8 +34,8 @@ fun AvatarThumbnailListItemImage(
     size: Dp = 48.dp,
     hasBorder: Boolean = false,
     borderGradientColors: List<Color> = listOf(
-        AppTheme.extraColorScheme.brand1,
-        AppTheme.extraColorScheme.brand2,
+        AppTheme.colorScheme.primary,
+        AppTheme.colorScheme.primary,
     ),
     onClick: (() -> Unit)? = null,
 ) {
@@ -93,7 +93,7 @@ fun Modifier.adjustAvatarBackground(
 fun DefaultAvatarThumbnailPlaceholderListItemImage() {
     Box(
         modifier = Modifier
-            .background(color = AppTheme.extraColorScheme.surfaceVariantAlt)
+            .background(color = AppTheme.extraColorScheme.surfaceVariantAlt1)
             .fillMaxSize(),
         contentAlignment = Alignment.Center,
     ) {

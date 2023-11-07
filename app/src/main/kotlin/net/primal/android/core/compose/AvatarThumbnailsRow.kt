@@ -42,8 +42,8 @@ fun AvatarThumbnailsRow(
                     hasBorder = true,
                     borderGradientColors = when (authorInternetIdentifiers[index].isPrimalIdentifier()) {
                         true -> listOf(
-                            AppTheme.extraColorScheme.brand1,
-                            AppTheme.extraColorScheme.brand2,
+                            AppTheme.colorScheme.primary,
+                            AppTheme.colorScheme.primary,
                         )
                         false -> listOf(
                             Color.White,

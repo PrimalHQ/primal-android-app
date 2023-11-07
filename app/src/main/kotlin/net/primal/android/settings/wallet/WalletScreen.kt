@@ -25,7 +25,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -121,6 +120,7 @@ fun WalletConnected(
     Spacer(modifier = Modifier.height(50.dp))
 
     Text(
+        modifier = Modifier.padding(32.dp),
         text = stringResource(id = R.string.settings_wallet_connected_subtitle),
         textAlign = TextAlign.Center
     )
@@ -132,7 +132,7 @@ fun WalletConnected(
             .padding(horizontal = 16.dp)
             .height(88.dp)
             .background(
-                color = AppTheme.extraColorScheme.surfaceVariantAlt,
+                color = AppTheme.extraColorScheme.surfaceVariantAlt1,
                 shape = RoundedCornerShape(size = 12.dp)
             ),
         verticalArrangement = Arrangement.SpaceEvenly,
@@ -169,6 +169,7 @@ fun WalletDisconnected() {
     Spacer(modifier = Modifier.height(50.dp))
 
     Text(
+        modifier = Modifier.padding(32.dp),
         text = stringResource(id = R.string.settings_wallet_not_connected_subtitle),
         textAlign = TextAlign.Center
     )
@@ -207,7 +208,7 @@ fun WalletImage(
             modifier = Modifier
                 .fillMaxSize()
                 .background(
-                    color = AppTheme.extraColorScheme.surfaceVariantAlt,
+                    color = AppTheme.extraColorScheme.surfaceVariantAlt1,
                     shape = CircleShape
                 )
                 .border(
@@ -259,12 +260,7 @@ fun ConnectAlbyWalletButton(
 ) {
     PrimalFilledButton(
         modifier = modifier,
-        containerBrush = Brush.linearGradient(
-            colors = listOf(
-                Color(0xFFFFDF6F),
-                Color(0xFFCF7828),
-            )
-        ),
+        containerColor = Color(0xFFFFDF6F),
         onClick = onClick,
     ) {
         IconText(
@@ -286,12 +282,7 @@ fun ConnectMutinyWalletButton(
 ) {
     PrimalFilledButton(
         modifier = modifier,
-        containerBrush = Brush.linearGradient(
-            colors = listOf(
-                Color(0xFF4F1425),
-                Color(0xFF2E0A11),
-            )
-        ),
+        containerColor = Color(0xFF4F1425),
         onClick = onClick,
     ) {
         IconText(

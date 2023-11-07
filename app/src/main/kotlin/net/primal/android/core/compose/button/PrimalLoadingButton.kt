@@ -28,11 +28,12 @@ fun PrimalLoadingButton(
     text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    shape: Shape = AppTheme.shapes.medium,
+    shape: Shape = AppTheme.shapes.extraLarge,
     enabled: Boolean = true,
     loading: Boolean = false,
     leadingIcon: ImageVector? = null,
     fontSize: TextUnit = TextUnit.Unspecified,
+    fontWeight: FontWeight = FontWeight.SemiBold,
     contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
 ) {
     PrimalFilledButton(
@@ -51,7 +52,7 @@ fun PrimalLoadingButton(
                     text = text,
                     fontSize = fontSize,
                     leadingIcon = leadingIcon,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = fontWeight,
                 )
             }
         }

@@ -31,7 +31,7 @@ fun ReferencedPostListItem(
                 onPostClick(data.postId)
             },
         colors = CardDefaults.cardColors(
-            containerColor = AppTheme.extraColorScheme.surfaceVariantAlt,
+            containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
         ),
     ) {
 

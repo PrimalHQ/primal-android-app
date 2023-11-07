@@ -129,10 +129,10 @@ fun ExploreHomeScreen(
                                 onClick = { onHashtagClick("#${it.name}") },
                                 shape = AppTheme.shapes.extraLarge,
                                 border = SuggestionChipDefaults.suggestionChipBorder(
-                                    borderColor = AppTheme.extraColorScheme.surfaceVariantAlt,
+                                    borderColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
                                 ),
                                 colors = SuggestionChipDefaults.suggestionChipColors(
-                                    containerColor = AppTheme.extraColorScheme.surfaceVariantAlt,
+                                    containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
                                     labelColor = AppTheme.colorScheme.onSurface,
                                 ),
                                 label = {
@@ -200,7 +200,7 @@ fun SearchBar(
             .padding(horizontal = 32.dp)
             .clickable { onClick() }
             .background(
-                color = AppTheme.extraColorScheme.surfaceVariantAlt,
+                color = AppTheme.extraColorScheme.surfaceVariantAlt1,
                 shape = AppTheme.shapes.extraLarge,
             ),
         contentAlignment = Alignment.Center,

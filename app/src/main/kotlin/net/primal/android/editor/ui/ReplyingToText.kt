@@ -21,7 +21,7 @@ fun ReplyingToText(
         append(text)
         addStyle(
             style = SpanStyle(
-                color = AppTheme.colorScheme.primary,
+                color = AppTheme.colorScheme.secondary,
             ),
             start = text.indexOf(mention),
             end = text.length,

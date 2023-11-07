@@ -48,9 +48,10 @@
     <string name="create_input_header_about_me">About me</string>
     <string name="create_input_header_bitcoin_lightning_address">Bitcoin lighting address</string>
     <string name="create_input_header_nip_05">Nostr verification (NIP 05)</string>
+    <string name="create_account_required_hint">required</string>
 
     <string name="login_title">Sign in</string>
-    <string name="login_description">Paste your Nostr key to sign in:</string>
+    <string name="login_description">Enter your Nostr key to sign in:</string>
     <string name="login_button_continue">Continue</string>
     <string name="login_button_paste_key">Paste your key</string>
     <string name="login_invalid_nsec_key">Please enter a valid Nostr key</string>
@@ -277,9 +278,9 @@
     <string name="profile_following_stat">following</string>
     <string name="profile_followers_stat">followers</string>
     <string name="profile_notes_stat">posts</string>
-    <string name="profile_follow_button">follow</string>
-    <string name="profile_unfollow_button">unfollow</string>
-    <string name="profile_edit_profile_button">edit profile</string>
+    <string name="profile_follow_button">Follow</string>
+    <string name="profile_unfollow_button">Unfollow</string>
+    <string name="profile_edit_profile_button">Edit profile</string>
     <string name="profile_error_unable_to_follow">Unable to follow profile. Please try again.</string>
     <string name="profile_error_unable_to_unfollow">Unable to unfollow profile. Please try again.</string>
     <string name="profile_failed_to_publish_metadata">Unable to post edited metadata. Please try again.</string>

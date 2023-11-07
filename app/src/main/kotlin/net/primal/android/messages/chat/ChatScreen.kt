@@ -27,7 +27,6 @@ import androidx.compose.material.icons.outlined.ArrowUpward
 import androidx.compose.material.icons.outlined.HourglassBottom
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
@@ -56,6 +55,7 @@ import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.AvatarThumbnailListItemImage
 import net.primal.android.core.compose.ListLoading
 import net.primal.android.core.compose.ListNoContent
+import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.asBeforeNowFormat
@@ -330,9 +330,9 @@ private fun ChatMessageListItem(
         },
     ) {
         val backgroundColor = if (chatMessage.isUserMessage) {
-            AppTheme.colorScheme.primary
+            AppTheme.colorScheme.tertiary
         } else {
-            AppTheme.extraColorScheme.surfaceVariantAlt
+            AppTheme.extraColorScheme.surfaceVariantAlt1
         }
 
         val backgroundShape = if (isFirstMessageInGroup) {
@@ -451,14 +451,7 @@ private fun MessageOutlinedTextField(
                 )
             },
             textStyle = AppTheme.typography.bodyMedium,
-            colors = OutlinedTextFieldDefaults.colors(
-                unfocusedContainerColor = AppTheme.extraColorScheme.surfaceVariantAlt,
-                focusedContainerColor = AppTheme.extraColorScheme.surfaceVariantAlt,
-                focusedBorderColor = Color.Unspecified,
-                unfocusedBorderColor = Color.Unspecified,
-                errorBorderColor = Color.Unspecified,
-                disabledBorderColor = Color.Unspecified
-            ),
+            colors = PrimalDefaults.outlinedTextFieldColors(),
             shape = AppTheme.shapes.medium,
         )
 

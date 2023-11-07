@@ -5,6 +5,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -61,7 +62,6 @@ import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.compose.feed.RepostOrQuoteBottomSheet
 import net.primal.android.core.compose.feed.ZapBottomSheet
 import net.primal.android.core.compose.feed.model.FeedPostUi
-import net.primal.android.core.compose.foundation.brandBackground
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
@@ -430,7 +430,10 @@ private fun NewNotificationsButton(
 ) {
     Row(
         modifier = Modifier
-            .brandBackground(shape = AppTheme.shapes.extraLarge)
+            .background(
+                color = AppTheme.colorScheme.primary,
+                shape = AppTheme.shapes.extraLarge,
+            )
             .clickable { onClick() },
         verticalAlignment = Alignment.CenterVertically,
     ) {

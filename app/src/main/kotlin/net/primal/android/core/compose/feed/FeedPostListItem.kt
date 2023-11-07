@@ -198,7 +198,7 @@ private fun NoteDropdownMenu(
         )
 
         DropdownMenu(
-            modifier = Modifier.background(color = AppTheme.extraColorScheme.surfaceVariantAlt),
+            modifier = Modifier.background(color = AppTheme.extraColorScheme.surfaceVariantAlt1),
             expanded = menuVisible,
             onDismissRequest = { menuVisible = false },
         ) {

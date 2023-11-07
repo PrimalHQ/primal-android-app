@@ -6,6 +6,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -36,7 +37,6 @@ import net.primal.android.R
 import net.primal.android.core.compose.AvatarThumbnailsRow
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.feed.model.FeedPostsSyncStats
-import net.primal.android.core.compose.foundation.brandBackground
 import net.primal.android.theme.AppTheme
 import kotlin.random.Random
 import kotlin.time.Duration.Companion.seconds
@@ -139,7 +139,10 @@ private fun NewPostsButton(
 ) {
     Row(
         modifier = Modifier
-            .brandBackground(shape = AppTheme.shapes.extraLarge)
+            .background(
+                color = AppTheme.colorScheme.primary,
+                shape = AppTheme.shapes.extraLarge
+            )
             .clickable { onClick() },
         verticalAlignment = Alignment.CenterVertically,
     ) {

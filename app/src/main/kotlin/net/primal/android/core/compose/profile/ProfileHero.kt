@@ -21,20 +21,14 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -79,7 +73,9 @@ fun ProfileHero(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(124.dp)
-                    .background(color = Color(0xFF181818))
+                    .background(
+                        color = AppTheme.extraColorScheme.surfaceVariantAlt3,
+                    )
             )
         }
 
@@ -125,14 +121,7 @@ fun ProfileHero(
                 modifier = Modifier.clickable {
                     avatarPickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
                 },
-                style = TextStyle(
-                    brush = Brush.linearGradient(
-                        colors = listOf(
-                            AppTheme.extraColorScheme.brand1,
-                            AppTheme.extraColorScheme.brand2,
-                        ),
-                    )
-                )
+                color = AppTheme.colorScheme.secondary,
             )
             Spacer(modifier = Modifier.width(6.dp))
             Divider(
@@ -148,14 +137,7 @@ fun ProfileHero(
                 modifier = Modifier.clickable {
                     bannerPickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
                 },
-                style = TextStyle(
-                    brush = Brush.linearGradient(
-                        colors = listOf(
-                            AppTheme.extraColorScheme.brand1,
-                            AppTheme.extraColorScheme.brand2,
-                        ),
-                    )
-                )
+                color = AppTheme.colorScheme.secondary,
             )
         }
     }

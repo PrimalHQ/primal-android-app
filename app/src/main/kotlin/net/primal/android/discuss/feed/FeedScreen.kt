@@ -3,6 +3,7 @@ package net.primal.android.discuss.feed
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -41,7 +42,6 @@ import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.compose.feed.FeedPostList
-import net.primal.android.core.compose.foundation.brandBackground
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
@@ -51,6 +51,7 @@ import net.primal.android.discuss.feed.FeedContract.UiState.FeedError
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.PrimalBottomBarHeightDp
 import net.primal.android.drawer.PrimalDrawerScaffold
+import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 
 @Composable
@@ -212,7 +213,7 @@ fun FeedScreen(
                     modifier = Modifier
                         .size(bottomBarHeight)
                         .clip(CircleShape)
-                        .brandBackground(shape = CircleShape),
+                        .background(color = AppTheme.colorScheme.primary, shape = CircleShape),
                     elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp),
                     containerColor = Color.Unspecified,
                     content = {
