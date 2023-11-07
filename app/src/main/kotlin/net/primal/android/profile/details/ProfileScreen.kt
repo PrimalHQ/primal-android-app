@@ -82,7 +82,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import net.primal.android.R
-import net.primal.android.core.compose.AdjustSystemBarColors
+import net.primal.android.core.compose.AdjustTemporarilySystemBarColors
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.AvatarThumbnailListItemImage
 import net.primal.android.core.compose.DropdownMenuItemText
@@ -135,7 +135,7 @@ fun ProfileScreen(
 ) {
     val uiState = viewModel.state.collectAsState()
 
-    AdjustSystemBarColors(statusBarColor = Color.Transparent)
+    AdjustTemporarilySystemBarColors(statusBarColor = Color.Transparent)
 
     ProfileScreen(
         state = uiState.value,

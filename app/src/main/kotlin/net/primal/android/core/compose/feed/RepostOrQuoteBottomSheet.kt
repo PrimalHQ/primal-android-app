@@ -15,7 +15,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.R
-import net.primal.android.core.compose.AdjustSystemBarColors
+import net.primal.android.core.compose.AdjustTemporarilySystemBarColors
 import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -30,7 +30,7 @@ fun RepostOrQuoteBottomSheet(
     onRepostClick: () -> Unit,
     onPostQuoteClick: () -> Unit,
 ) {
-    AdjustSystemBarColors(navigationBarColor = AppTheme.extraColorScheme.surfaceVariantAlt2)
+    AdjustTemporarilySystemBarColors(navigationBarColor = AppTheme.extraColorScheme.surfaceVariantAlt2)
     ModalBottomSheet(
         containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
         tonalElevation = 0.dp,

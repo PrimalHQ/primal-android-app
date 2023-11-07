@@ -47,7 +47,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import net.primal.android.R
-import net.primal.android.core.compose.AdjustSystemBarColors
+import net.primal.android.core.compose.AdjustTemporarilySystemBarColors
 import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.utils.shortened
@@ -88,7 +88,7 @@ fun ZapBottomSheet(
     var selectedZapComment by remember { mutableStateOf("") }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
-    AdjustSystemBarColors(navigationBarColor = AppTheme.extraColorScheme.surfaceVariantAlt2)
+    AdjustTemporarilySystemBarColors(navigationBarColor = AppTheme.extraColorScheme.surfaceVariantAlt2)
     ModalBottomSheet(
         containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
         tonalElevation = 0.dp,

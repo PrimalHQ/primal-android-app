@@ -22,7 +22,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import net.primal.android.R
-import net.primal.android.core.compose.AdjustSystemBarColors
+import net.primal.android.core.compose.AdjustTemporarilySystemBarColors
 import net.primal.android.discuss.list.model.FeedUi
 import net.primal.android.theme.AppTheme
 
@@ -34,7 +34,7 @@ fun FeedListScreen(
 ) {
     val uiState = viewModel.state.collectAsState()
 
-    AdjustSystemBarColors(navigationBarColor = AppTheme.extraColorScheme.surfaceVariantAlt2)
+    AdjustTemporarilySystemBarColors(navigationBarColor = AppTheme.extraColorScheme.surfaceVariantAlt2)
 
     FeedListScreen(
         state = uiState.value,
