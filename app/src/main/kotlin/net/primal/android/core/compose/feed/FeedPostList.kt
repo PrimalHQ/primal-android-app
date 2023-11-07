@@ -149,7 +149,6 @@ private fun NewPostsButton(
         AvatarThumbnailsRow(
             modifier = Modifier.padding(start = 6.dp),
             avatarUrls = syncStats.avatarUrls,
-            authorInternetIdentifiers = syncStats.avatarUrls.map { null },
             onClick = { onClick() },
         )
 
@@ -164,5 +163,3 @@ private fun NewPostsButton(
         )
     }
 }
-
-

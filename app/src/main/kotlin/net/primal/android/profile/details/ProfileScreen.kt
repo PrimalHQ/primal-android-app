@@ -111,7 +111,6 @@ import net.primal.android.core.ext.findByUrl
 import net.primal.android.core.ext.findNearestOrNull
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.copyText
-import net.primal.android.core.utils.isPrimalIdentifier
 import net.primal.android.core.utils.resolvePrimalProfileLink
 import net.primal.android.core.utils.systemShareText
 import net.primal.android.crypto.hexToNoteHrp
@@ -458,7 +457,6 @@ private fun ProfileTopCoverBar(
                         end = avatarPadding * 7 / 8,
                     ),
                 source = state.profileDetails?.avatarUrl,
-                hasBorder = state.profileDetails?.internetIdentifier.isPrimalIdentifier(),
             )
         }
     }

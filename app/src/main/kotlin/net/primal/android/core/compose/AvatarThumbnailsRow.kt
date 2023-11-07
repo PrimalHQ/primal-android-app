@@ -17,17 +17,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import net.primal.android.core.utils.isPrimalIdentifier
 import net.primal.android.theme.AppTheme
 
 @Composable
 fun AvatarThumbnailsRow(
     modifier: Modifier = Modifier,
     avatarUrls: List<Any?>,
-    authorInternetIdentifiers: List<String?>,
+    overlapAvatars: Boolean = true,
+    hasAvatarBorder: Boolean = true,
+    avatarBorderColor: Color = Color.White,
     onClick: (Int) -> Unit,
 ) {
-    val avatarVisibleWidth = 24.dp
+    val avatarVisibleWidth = if (overlapAvatars) 24.dp else 36.dp
     BoxWithConstraints(modifier = modifier) {
         val maxAvatars = (maxWidth.value / avatarVisibleWidth.value).toInt() - 2
         val avatarsSize = avatarUrls.size
@@ -39,17 +40,8 @@ fun AvatarThumbnailsRow(
                 AvatarThumbnailListItemImage(
                     modifier = Modifier.size(32.dp),
                     source = imageUrl,
-                    hasBorder = true,
-                    borderGradientColors = when (authorInternetIdentifiers[index].isPrimalIdentifier()) {
-                        true -> listOf(
-                            AppTheme.colorScheme.primary,
-                            AppTheme.colorScheme.primary,
-                        )
-                        false -> listOf(
-                            Color.White,
-                            Color.White,
-                        )
-                    },
+                    hasBorder = hasAvatarBorder,
+                    borderColor = avatarBorderColor,
                     onClick = { onClick(index) },
                 )
             }
@@ -62,11 +54,8 @@ fun AvatarThumbnailsRow(
                         .size(32.dp)
                         .adjustAvatarBackground(
                             size = 48.dp,
-                            hasBorder = true,
-                            borderGradientColors = listOf(
-                                Color.White,
-                                Color.White
-                            ),
+                            hasBorder = hasAvatarBorder,
+                            borderColor = avatarBorderColor,
                         )
                         .background(color = Color(0xFFC8C8C8))
                         .fillMaxSize(),

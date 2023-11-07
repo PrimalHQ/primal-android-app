@@ -28,7 +28,6 @@ import net.primal.android.core.compose.AvatarThumbnailListItemImage
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.button.PrimalFilledButton
-import net.primal.android.core.utils.isPrimalIdentifier
 import net.primal.android.core.utils.usernameUiFriendly
 import net.primal.android.nostr.model.content.ContentMetadata
 import net.primal.android.theme.AppTheme
@@ -122,7 +121,6 @@ fun FollowRecommendedAccountsStep(
                         leadingContent = {
                             AvatarThumbnailListItemImage(
                                 modifier = Modifier.padding(start = 8.dp),
-                                hasBorder = authorInternetIdentifier.isPrimalIdentifier(),
                                 source = suggestion.content.picture
                             )
                         },

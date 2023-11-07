@@ -21,7 +21,6 @@ import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.asBeforeNowFormat
 import net.primal.android.core.compose.media.model.MediaResourceUi
 import net.primal.android.core.ext.findByUrl
-import net.primal.android.core.utils.isPrimalIdentifier
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import java.time.Instant
@@ -49,7 +48,6 @@ fun ReferencedPostAuthorRow(
         AvatarThumbnailListItemImage(
             source = imageSource,
             size = 28.dp,
-            hasBorder = authorInternetIdentifier.isPrimalIdentifier(),
         )
 
         val identifierTextColor = AppTheme.extraColorScheme.onSurfaceVariantAlt2

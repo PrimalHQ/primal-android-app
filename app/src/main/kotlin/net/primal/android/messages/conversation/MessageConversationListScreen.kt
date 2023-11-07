@@ -85,7 +85,6 @@ import net.primal.android.core.compose.isEmpty
 import net.primal.android.core.compose.isNotEmpty
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.core.ext.findByUrl
-import net.primal.android.core.utils.isPrimalIdentifier
 import net.primal.android.core.utils.parseHashtags
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.PrimalBottomBarHeightDp
@@ -310,7 +309,6 @@ private fun ConversationListItem(
             val imageSource = variant?.mediaUrl ?: conversation.participantAvatarUrl
             AvatarThumbnailListItemImage(
                 source = imageSource,
-                hasBorder = conversation.participantInternetIdentifier.isPrimalIdentifier(),
             )
         },
         headlineContent = {

@@ -208,7 +208,8 @@ private fun NotificationListItem(
             Column {
                 AvatarThumbnailsRow(
                     avatarUrls = notifications.map { it.actionUserPicture },
-                    authorInternetIdentifiers = notifications.map { null },
+                    overlapAvatars = false,
+                    hasAvatarBorder = false,
                     onClick = { index ->
                         notifications.getOrNull(index)?.actionUserId?.let(onProfileClick)
                     },

@@ -30,7 +30,6 @@ import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.ext.findByUrl
-import net.primal.android.core.utils.isPrimalIdentifier
 import net.primal.android.settings.muted.list.model.MutedUserUi
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
@@ -119,7 +118,6 @@ fun MutedUserListItem(
             val imageSource = variant?.mediaUrl ?: item.avatarUrl
             AvatarThumbnailListItemImage(
                 source = imageSource,
-                hasBorder = item.internetIdentifier.isPrimalIdentifier(),
                 onClick = { onProfileClick(item.userId) },
             )
         },

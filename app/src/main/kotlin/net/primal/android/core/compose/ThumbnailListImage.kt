@@ -13,8 +13,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.Dp
@@ -33,10 +31,7 @@ fun AvatarThumbnailListItemImage(
     modifier: Modifier = Modifier,
     size: Dp = 48.dp,
     hasBorder: Boolean = false,
-    borderGradientColors: List<Color> = listOf(
-        AppTheme.colorScheme.primary,
-        AppTheme.colorScheme.primary,
-    ),
+    borderColor: Color = AppTheme.colorScheme.primary,
     onClick: (() -> Unit)? = null,
 ) {
     SubcomposeAsyncImage(
@@ -45,7 +40,7 @@ fun AvatarThumbnailListItemImage(
             .adjustAvatarBackground(
                 size = size,
                 hasBorder = hasBorder,
-                borderGradientColors = borderGradientColors,
+                borderColor = borderColor,
             )
             .clickable(enabled = onClick != null, onClick = { onClick?.invoke() }),
         contentDescription = null,
@@ -64,21 +59,15 @@ fun AvatarThumbnailListItemImage(
 fun Modifier.adjustAvatarBackground(
     size: Dp = 48.dp,
     hasBorder: Boolean = false,
-    borderGradientColors: List<Color>,
+    borderColor: Color,
 ): Modifier {
     return if (hasBorder) {
         this
             .size(size + 2.dp)
             .border(
                 width = 2.dp,
-                brush = Brush.linearGradient(borderGradientColors),
+                color = borderColor,
                 shape = CircleShape
-            )
-            .shadow(
-                elevation = 4.dp,
-                shape = CircleShape,
-                ambientColor = borderGradientColors.first(),
-                spotColor = borderGradientColors.first(),
             )
             .clip(CircleShape)
     } else {
