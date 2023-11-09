@@ -34,7 +34,7 @@ val PrimalTypography = Typography(
         fontFamily = NacelleFontFamily,
         fontWeight = FontWeight.Light,
         fontSize = 18.sp,
-        lineHeight = 24.sp,
+        lineHeight = 22.sp,
     ),
     bodyMedium = TextStyle(
         fontFamily = NacelleFontFamily,

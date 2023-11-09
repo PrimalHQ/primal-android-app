@@ -92,7 +92,7 @@ import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.button.PrimalFilledButton
-import net.primal.android.core.compose.feed.FeedLazyColumn
+import net.primal.android.core.compose.feed.list.FeedLazyColumn
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.foundation.ClickDebounce
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround

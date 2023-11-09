@@ -59,7 +59,7 @@ import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.asBeforeNowFormat
-import net.primal.android.core.compose.feed.FeedPostContent
+import net.primal.android.core.compose.feed.note.FeedNoteContent
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
@@ -370,7 +370,7 @@ private fun ChatMessageListItem(
         }
 
         BoxWithConstraints {
-            FeedPostContent(
+            FeedNoteContent(
                 modifier = Modifier
                     .padding(
                         start = if (chatMessage.isUserMessage) maxWidth.times(0.25f) else 16.dp,
@@ -381,7 +381,7 @@ private fun ChatMessageListItem(
                     .wrapContentWidth()
                     .wrapContentHeight()
                     .padding(horizontal = 16.dp, vertical = 8.dp),
-                content = chatMessage.content,
+                content = chatMessage.content.trim(),
                 expanded = true,
                 hashtags = chatMessage.hashtags,
                 mediaResources = chatMessage.mediaResources,
@@ -401,6 +401,11 @@ private fun ChatMessageListItem(
                 } else {
                     AppTheme.colorScheme.primary
                 },
+                referencedNoteContainerColor = if (chatMessage.isUserMessage) {
+                    AppTheme.extraColorScheme.surfaceVariantAlt1
+                } else {
+                    AppTheme.extraColorScheme.surfaceVariantAlt2
+                }
             )
         }
 

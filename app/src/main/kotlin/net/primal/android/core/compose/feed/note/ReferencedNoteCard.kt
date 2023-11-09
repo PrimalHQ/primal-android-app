@@ -1,11 +1,11 @@
-package net.primal.android.core.compose.feed
+package net.primal.android.core.compose.feed.note
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -19,32 +19,40 @@ import java.time.Instant
 import java.time.temporal.ChronoUnit
 
 @Composable
-fun ReferencedPostListItem(
+fun ReferencedNoteCard(
+    modifier: Modifier = Modifier,
     data: FeedPostUi,
     onPostClick: (String) -> Unit,
-    modifier: Modifier = Modifier,
+    colors: CardColors = CardDefaults.cardColors(
+        containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
+    )
 ) {
-    Card(
+    NoteSurfaceCard(
         modifier = modifier
             .wrapContentHeight()
             .clickable {
                 onPostClick(data.postId)
             },
-        colors = CardDefaults.cardColors(
-            containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
-        ),
+        colors = colors,
     ) {
 
-        ReferencedPostAuthorRow(
+        FeedNoteHeader(
+            modifier = Modifier
+                .padding(horizontal = 12.dp)
+                .padding(top = 8.dp),
             authorDisplayName = data.authorName,
             postTimestamp = data.timestamp,
+            singleLine = true,
+            authorAvatarSize = 30.dp,
             authorAvatarUrl = data.authorAvatarUrl,
             authorResources = data.authorMediaResources,
             authorInternetIdentifier = data.authorInternetIdentifier,
         )
 
-        FeedPostContent(
-            modifier = Modifier.padding(horizontal = 16.dp),
+        FeedNoteContent(
+            modifier = Modifier
+                .padding(horizontal = 12.dp)
+                .padding(top = 4.dp),
             content = data.content.trim(),
             expanded = false,
             hashtags = data.hashtags,
@@ -57,7 +65,7 @@ fun ReferencedPostListItem(
             onHashtagClick = { onPostClick(data.postId) },
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(12.dp))
     }
 }
 
@@ -65,7 +73,7 @@ fun ReferencedPostListItem(
 @Composable
 fun PreviewReferencedPostListItemLight() {
     PrimalTheme(primalTheme = PrimalTheme.Sunrise) {
-        ReferencedPostListItem(
+        ReferencedNoteCard(
             data = FeedPostUi(
                 postId = "random",
                 repostId = "repostRandom",
@@ -107,7 +115,7 @@ fun PreviewReferencedPostListItemLight() {
 @Composable
 fun PreviewReferencedPostListItemDark() {
     PrimalTheme(primalTheme = PrimalTheme.Sunset) {
-        ReferencedPostListItem(
+        ReferencedNoteCard(
             data = FeedPostUi(
                 postId = "random",
                 repostId = "repostRandom",

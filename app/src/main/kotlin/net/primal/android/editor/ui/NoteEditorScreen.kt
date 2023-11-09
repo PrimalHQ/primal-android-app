@@ -64,8 +64,8 @@ import net.primal.android.core.compose.AvatarThumbnailListItemImage
 import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.button.PrimalLoadingButton
-import net.primal.android.core.compose.feed.FeedPostAuthorRow
-import net.primal.android.core.compose.feed.FeedPostContent
+import net.primal.android.core.compose.feed.note.FeedNoteHeader
+import net.primal.android.core.compose.feed.note.FeedNoteContent
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -367,7 +367,7 @@ private fun ReplyToNote(
             }
         }
     ) {
-        FeedPostAuthorRow(
+        FeedNoteHeader(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(
@@ -384,7 +384,7 @@ private fun ReplyToNote(
             onAuthorAvatarClick = {},
         )
 
-        FeedPostContent(
+        FeedNoteContent(
             modifier = Modifier.padding(
                 start = avatarsRowWidth,
                 end = 16.dp,

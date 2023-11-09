@@ -24,8 +24,8 @@ import androidx.compose.ui.unit.dp
 import net.primal.android.R
 import net.primal.android.core.compose.AvatarThumbnailsRow
 import net.primal.android.core.compose.NostrUserText
-import net.primal.android.core.compose.feed.FeedPostContent
-import net.primal.android.core.compose.feed.FeedPostStatsRow
+import net.primal.android.core.compose.feed.note.FeedNoteContent
+import net.primal.android.core.compose.feed.note.FeedNoteStatsRow
 import net.primal.android.core.compose.feed.model.FeedPostAction
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.notifications.toImagePainter
@@ -224,23 +224,24 @@ private fun NotificationListItem(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 8.dp)
-                        .padding(end = 8.dp),
+                        .padding(end = 16.dp),
                     style = AppTheme.typography.bodyLarge.copy(
                         color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
                     ),
+                    maxLines = 2,
                     displayName = firstNotification.actionUserDisplayName ?: "undefined",
                     displayNameColor = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
                     internetIdentifier = firstNotification.actionUserInternetIdentifier,
                     annotatedStringSuffixBuilder = {
                         if (notifications.size > 1) append(" $andOthersText")
                         append(" $suffixText")
-                    }
+                    },
                 )
 
                 val localUriHandler = LocalUriHandler.current
 
                 if (actionPost != null) {
-                    FeedPostContent(
+                    FeedNoteContent(
                         modifier = Modifier.padding(end = 16.dp),
                         content = actionPost.content,
                         expanded = false,
@@ -254,7 +255,7 @@ private fun NotificationListItem(
                         onHashtagClick = { onHashtagClick(it) },
                     )
 
-                    FeedPostStatsRow(
+                    FeedNoteStatsRow(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 16.dp)

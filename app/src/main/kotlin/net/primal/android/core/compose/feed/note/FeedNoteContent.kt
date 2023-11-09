@@ -1,4 +1,4 @@
-package net.primal.android.core.compose.feed
+package net.primal.android.core.compose.feed.note
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -33,6 +34,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import net.primal.android.R
 import net.primal.android.core.compose.PostImageListItemImage
 import net.primal.android.core.compose.PrimalClickableText
@@ -147,7 +149,7 @@ private fun String.ellipsize(
 }
 
 @Composable
-fun FeedPostContent(
+fun FeedNoteContent(
     modifier: Modifier = Modifier,
     content: String,
     expanded: Boolean,
@@ -161,6 +163,7 @@ fun FeedPostContent(
     onHashtagClick: (String) -> Unit,
     highlightColor: Color = AppTheme.colorScheme.primary,
     contentColor: Color = AppTheme.colorScheme.onSurface,
+    referencedNoteContainerColor: Color = AppTheme.extraColorScheme.surfaceVariantAlt1,
 ) {
     val seeMoreText = stringResource(id = R.string.feed_see_more)
     val contentText = remember {
@@ -182,6 +185,7 @@ fun FeedPostContent(
             PrimalClickableText(
                 style = AppTheme.typography.bodyMedium.copy(
                     color = contentColor,
+                    lineHeight = 18.sp,
                 ),
                 text = contentText,
                 onClick = { position, offset ->
@@ -202,13 +206,14 @@ fun FeedPostContent(
 
         val imageResources = remember { mediaResources.filterImages() }
         if (imageResources.isNotEmpty()) {
-            FeedPostImages(imageResources = imageResources)
+            FeedNoteImages(imageResources = imageResources)
         }
 
         val referencedPostResources = remember { nostrResources.filterReferencedPosts() }
         if (referencedPostResources.isNotEmpty()) {
-            FeedReferencedPosts(
+            FeedReferencedNotes(
                 postResources = referencedPostResources,
+                containerColor = referencedNoteContainerColor,
                 onPostClick = onPostClick,
             )
         }
@@ -312,7 +317,7 @@ fun renderContentAsAnnotatedString(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun FeedPostImages(
+private fun FeedNoteImages(
     imageResources: List<MediaResourceUi>
 ) {
     BoxWithConstraints {
@@ -321,7 +326,7 @@ private fun FeedPostImages(
 
         val pagerState = rememberPagerState { imagesCount }
         HorizontalPager(state = pagerState) {
-            PostImage(
+            NoteImage(
                 resource = imageResources[it],
                 imageSizeDp = imageSizeDp,
             )
@@ -355,13 +360,13 @@ private fun FeedPostImages(
 }
 
 @Composable
-fun PostImage(
+fun NoteImage(
     resource: MediaResourceUi,
     imageSizeDp: DpSize,
 ) {
     BoxWithConstraints(
         modifier = Modifier
-            .padding(top = 16.dp)
+            .padding(vertical = 4.dp)
             .clip(AppTheme.shapes.medium),
     ) {
         val maxWidthPx = with(LocalDensity.current) { maxWidth.roundToPx() }
@@ -391,16 +396,17 @@ private fun BoxWithConstraintsScope.findImageSize(resource: MediaResourceUi): Dp
 }
 
 @Composable
-fun FeedReferencedPosts(
+fun FeedReferencedNotes(
     postResources: List<NostrResourceUi>,
+    containerColor: Color,
     onPostClick: (String) -> Unit,
 ) {
     Column {
         postResources.forEach { nostrResourceUi ->
             val data = nostrResourceUi.referencedPost
             checkNotNull(data)
-            ReferencedPostListItem(
-                modifier = Modifier.padding(top = 8.dp),
+            ReferencedNoteCard(
+                modifier = Modifier.padding(vertical = 4.dp),
                 data = FeedPostUi(
                     postId = data.postId,
                     repostId = null,
@@ -422,6 +428,7 @@ fun FeedReferencedPosts(
                     rawNostrEventJson = "",
                 ),
                 onPostClick = onPostClick,
+                colors = CardDefaults.cardColors(containerColor = containerColor),
             )
         }
     }
@@ -432,7 +439,7 @@ fun FeedReferencedPosts(
 fun PreviewPostContent() {
     PrimalTheme(primalTheme = PrimalTheme.Sunset) {
         Surface {
-            FeedPostContent(
+            FeedNoteContent(
                 content = """
                     Unfortunately the days of using pseudonyms in metaspace are numbered. #nostr 
                     nostr:referencedUser
@@ -465,7 +472,7 @@ fun PreviewPostContent() {
 fun PreviewPostContentWithReferencedPost() {
     PrimalTheme(primalTheme = PrimalTheme.Sunset) {
         Surface {
-            FeedPostContent(
+            FeedNoteContent(
                 content = """
                     Unfortunately the days of using pseudonyms in metaspace are numbered. #nostr
                     

@@ -21,7 +21,7 @@ import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.PrimalTopAppBar
-import net.primal.android.core.compose.feed.FeedPostList
+import net.primal.android.core.compose.feed.list.FeedNoteList
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
@@ -126,7 +126,7 @@ fun ExploreFeedScreen(
             )
         },
         content = { paddingValues ->
-            FeedPostList(
+            FeedNoteList(
                 feedListState = feedListState,
                 pagingItems = feedPagingItems,
                 walletConnected = state.walletConnected,

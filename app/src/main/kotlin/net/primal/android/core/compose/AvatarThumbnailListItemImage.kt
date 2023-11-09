@@ -29,7 +29,7 @@ import net.primal.android.theme.AppTheme
 fun AvatarThumbnailListItemImage(
     source: Any?,
     modifier: Modifier = Modifier,
-    size: Dp = 48.dp,
+    avatarSize: Dp = 48.dp,
     hasBorder: Boolean = false,
     borderColor: Color = AppTheme.colorScheme.primary,
     onClick: (() -> Unit)? = null,
@@ -38,7 +38,7 @@ fun AvatarThumbnailListItemImage(
         model = source,
         modifier = modifier
             .adjustAvatarBackground(
-                size = size,
+                size = avatarSize,
                 hasBorder = hasBorder,
                 borderColor = borderColor,
             )

@@ -1,4 +1,4 @@
-package net.primal.android.core.compose.feed
+package net.primal.android.core.compose.feed.note
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -14,7 +15,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.tooling.preview.Preview
@@ -24,59 +24,44 @@ import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 
 @Composable
-fun CardWithHighlight(
+fun NoteSurfaceCard(
     modifier: Modifier = Modifier,
     shape: Shape = CardDefaults.shape,
-    highlighted: Boolean = false,
-    highlightWidth: Dp = 8.dp,
-    connectedToPreviousNote: Boolean = false,
-    connectedToNextNote: Boolean = false,
-    connectionWidth: Dp = 2.dp,
+    drawLineAboveAvatar: Boolean = false,
+    drawLineBelowAvatar: Boolean = false,
+    lineOffsetX: Dp = 40.dp,
+    lineWidth: Dp = 2.dp,
+    colors: CardColors = CardDefaults.cardColors(),
     content: @Composable ColumnScope.() -> Unit,
 ) {
-
     val outlineColor = AppTheme.colorScheme.outline
-    val gradientColors = listOf(
-        AppTheme.colorScheme.primary,
-        AppTheme.colorScheme.primary,
-    )
-
     Card(
-        shape = shape,
         modifier = modifier.clip(shape),
+        shape = shape,
+        colors = colors,
     ) {
-        if (highlighted || connectedToPreviousNote || connectedToNextNote) {
+        if (drawLineAboveAvatar || drawLineBelowAvatar) {
             Column(
                 modifier = Modifier.drawWithCache {
                     onDrawBehind {
-                        if (highlighted) {
-                            drawLine(
-                                brush = Brush.verticalGradient(gradientColors),
-                                start = Offset(x = 0f, y = 0f),
-                                end = Offset(x = 0f, y = size.height),
-                                strokeWidth = highlightWidth.toPx(),
-                                cap = StrokeCap.Square
-                            )
-                        }
+                        val connectionX = lineOffsetX.toPx()
 
-                        val connectionX = 40.dp.toPx()
-
-                        if (connectedToNextNote) {
+                        if (drawLineBelowAvatar) {
                             drawLine(
                                 color = outlineColor,
                                 start = Offset(x = connectionX, y = 16.dp.toPx()),
                                 end = Offset(x = connectionX, y = size.height),
-                                strokeWidth = connectionWidth.toPx(),
+                                strokeWidth = lineWidth.toPx(),
                                 cap = StrokeCap.Square
                             )
                         }
 
-                        if (connectedToPreviousNote) {
+                        if (drawLineAboveAvatar) {
                             drawLine(
                                 color = outlineColor,
                                 start = Offset(x = connectionX, y = 0f),
                                 end = Offset(x = connectionX, y = 16.dp.toPx()),
-                                strokeWidth = connectionWidth.toPx(),
+                                strokeWidth = lineWidth.toPx(),
                                 cap = StrokeCap.Square
                             )
                         }
@@ -95,10 +80,7 @@ fun CardWithHighlight(
 @Composable
 fun PreviewCardWithHighlight() {
     PrimalTheme(primalTheme = PrimalTheme.Sunset) {
-        CardWithHighlight(
-            highlighted = true,
-            highlightWidth = 16.dp,
-        ) {
+        NoteSurfaceCard {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()

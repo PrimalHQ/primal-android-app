@@ -66,7 +66,7 @@ import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.button.PrimalLoadingButton
-import net.primal.android.core.compose.feed.FeedPostListItem
+import net.primal.android.core.compose.feed.note.FeedNoteCard
 import net.primal.android.core.compose.feed.RepostOrQuoteBottomSheet
 import net.primal.android.core.compose.feed.ZapBottomSheet
 import net.primal.android.core.compose.feed.model.FeedPostAction
@@ -227,6 +227,7 @@ fun ThreadScreen(
                         if (index == state.highlightPostIndex) "root" else "reply"
                     },
                 ) { index, item ->
+                    val highlightPost = index == state.highlightPostIndex
                     val shouldIndentContent = index != state.highlightPostIndex
                     val highlighted = index == state.highlightPostIndex
                     val connectedToPreviousNote = state.highlightPostIndex > 0
@@ -245,14 +246,16 @@ fun ThreadScreen(
                             }
                         }
                     ) {
-                        FeedPostListItem(
+                        FeedNoteCard(
                             data = item,
                             shape = RectangleShape,
                             cardPadding = PaddingValues(all = 0.dp),
                             expanded = true,
-                            shouldIndentContent = shouldIndentContent,
-                            connectedToPreviousNote = connectedToPreviousNote,
-                            connectedToNextNote = connectedToNextNote,
+                            fullWidthContent = highlightPost,
+                            headerSingleLine = !highlightPost,
+                            forceContentIndent = shouldIndentContent,
+                            drawLineAboveAvatar = connectedToPreviousNote,
+                            drawLineBelowAvatar = connectedToNextNote,
                             onPostClick = { postId ->
                                 if (state.highlightPostId != postId) {
                                     onPostClick(postId)

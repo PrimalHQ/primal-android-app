@@ -1,10 +1,8 @@
-package net.primal.android.core.compose.feed
+package net.primal.android.core.compose.feed.note
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
@@ -18,7 +16,6 @@ import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.R
 import net.primal.android.core.compose.PrimalClickableText
@@ -28,17 +25,14 @@ import net.primal.android.theme.AppTheme
 
 @Composable
 fun RepostedNotice(
+    modifier: Modifier,
     repostedBy: String,
     onRepostAuthorClick: () -> Unit,
 ) {
     Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp)
-            .padding(top = 8.dp),
+        modifier = modifier,
         contentAlignment = Alignment.Center,
     ) {
-
         PrimalClickableText(
             modifier = Modifier
                 .wrapContentWidth()
@@ -71,7 +65,7 @@ fun RepostedNotice(
             },
             inlineContent = mapOf(
                 "icon" to InlineTextContent(
-                    placeholder = Placeholder(24.sp, 24.sp, PlaceholderVerticalAlign.TextCenter)
+                    placeholder = Placeholder(18.sp, 18.sp, PlaceholderVerticalAlign.TextCenter)
                 ) {
                     Box(
                         modifier = Modifier.fillMaxSize(),

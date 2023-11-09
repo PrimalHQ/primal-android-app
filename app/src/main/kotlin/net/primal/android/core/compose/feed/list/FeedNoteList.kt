@@ -1,4 +1,4 @@
-package net.primal.android.core.compose.feed
+package net.primal.android.core.compose.feed.list
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -43,7 +43,7 @@ import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun FeedPostList(
+fun FeedNoteList(
     feedListState: LazyListState,
     pagingItems: LazyPagingItems<FeedPostUi>,
     walletConnected: Boolean,

@@ -1,4 +1,4 @@
-package net.primal.android.core.compose.feed
+package net.primal.android.core.compose.feed.note
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -38,7 +38,7 @@ import net.primal.android.core.compose.icons.primaliconpack.FeedZapsFilled
 import net.primal.android.theme.AppTheme
 
 @Composable
-fun FeedPostStatsRow(
+fun FeedNoteStatsRow(
     modifier: Modifier,
     postStats: FeedPostStatsUi,
     onPostAction: (FeedPostAction) -> Unit,
