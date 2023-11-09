@@ -3,6 +3,7 @@ package net.primal.android.core.compose.feed.list
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -28,11 +29,11 @@ import net.primal.android.core.compose.ListLoading
 import net.primal.android.core.compose.ListLoadingError
 import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.PrimalDivider
-import net.primal.android.core.compose.feed.note.FeedNoteCard
 import net.primal.android.core.compose.feed.RepostOrQuoteBottomSheet
 import net.primal.android.core.compose.feed.ZapBottomSheet
 import net.primal.android.core.compose.feed.model.FeedPostAction
 import net.primal.android.core.compose.feed.model.FeedPostUi
+import net.primal.android.core.compose.feed.note.FeedNoteCard
 import net.primal.android.core.compose.isEmpty
 
 @ExperimentalMaterial3Api
@@ -206,6 +207,10 @@ fun FeedLazyColumn(
             }
 
             else -> Unit
+        }
+
+        item(contentType = "Footer") {
+            Spacer(modifier = Modifier.height(64.dp))
         }
     }
 }
