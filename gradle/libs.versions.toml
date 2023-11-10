@@ -1,41 +1,45 @@
 [versions]
-agp = "8.1.2"
+accompanist = "0.31.6-rc"
+activity-compose = "1.8.0"
+agp = "8.1.3"
 appcompat = "1.6.1"
-coil = "2.4.0"
+compose-bom = "2023.10.01"
+compose-lottie = "5.2.0"
+compose-navigation = "2.7.5"
 constraintlayout = "2.1.4"
 constraintlayout-compose = "1.0.1"
+coil = "2.4.0"
+core-ktx = "1.12.0"
+core-splashscreen = "1.0.1"
 core-testing = "2.2.0"
+dagger = "2.48"
 datastore = "1.0.0"
-kotest = "5.6.2"
+espresso-core = "3.5.1"
+hilt = "1.1.0"
+junit = "4.13.2"
+junit-android-runner = "1.1.5"
+kotlin = "1.9.10"
+kotlinx-coroutines = "1.7.3"
 kotlinx-serialization-json = "1.6.0"
+kotest = "5.6.2"
+ksp = "1.9.10-1.0.13"
+lifecycle = "2.7.0-beta01"
 material-icons = "1.5.4"
 mockk = "1.13.5"
 okhttp = "4.11.0"
-kotlin = "1.9.10"
-kotlinx-coroutines="1.7.3"
-compose-bom = "2023.10.01"
-core-ktx = "1.12.0"
-core-splashscreen = "1.0.1"
-lifecycle = "2.7.0-alpha03"
-activity-compose = "1.8.0"
-junit = "4.13.2"
-junit-android-runner = "1.1.5"
-espresso-core = "3.5.1"
-accompanist = "0.31.6-rc"
-dagger = "2.47"
-hilt = "1.0.0"
-retrofit = "2.9.0"
 paging = "3.2.1"
+play-publishing = "3.8.4"
+retrofit = "2.9.0"
+roboelectric = "4.10.3"
 room = "2.6.0"
-ksp = "1.9.10-1.0.13"
-sqlcipher-android = "4.5.3"
-url-detector = "0.1.23"
-spongycastle = "1.58.0.0"
-secp256k1-kmp = "0.11.0"
-security-crypto = "1.1.0-alpha06"
 security-app-authenticator = "1.0.0-alpha02"
+security-crypto = "1.1.0-alpha06"
 security-identity-credential = "1.0.0-alpha03"
-roboelectric="4.10.3"
+secp256k1-kmp = "0.11.0"
+spongycastle = "1.58.0.0"
+sqlcipher-android = "4.5.3"
+timber = "5.0.1"
+url-detector = "0.1.23"
 
 [libraries]
 # Core libs
@@ -66,8 +70,8 @@ compose-pager-indicators = { module = "com.google.accompanist:accompanist-pager-
 constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version.ref = "constraintlayout" }
 compose-constraintlayout = { module = "androidx.constraintlayout:constraintlayout-compose", version.ref = "constraintlayout-compose" }
 
-lottie-compose = { module = "com.airbnb.android:lottie-compose", version = "5.2.0" }
-navigation-compose = { module = "androidx.navigation:navigation-compose", version = "2.7.4" }
+lottie-compose = { module = "com.airbnb.android:lottie-compose", version.ref = "compose-lottie" }
+navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "compose-navigation" }
 navigation-hilt = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hilt" }
 navigation-material = { module = "com.google.accompanist:accompanist-navigation-material", version.ref = "accompanist" }
 
@@ -108,7 +112,7 @@ coil-svg = { module = "io.coil-kt:coil-svg", version.ref = "coil" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
 
 # Other libs
-timber = { module = "com.jakewharton.timber:timber", version = "5.0.1" }
+timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
 
 datastore = { module = "androidx.datastore:datastore", version.ref = "datastore" }
 datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
@@ -137,7 +141,7 @@ kotest-assertions-json = { module = "io.kotest:kotest-assertions-json", version.
 
 [bundles]
 hilt = ["hilt-android", "navigation-hilt"]
-hilt-kapt = ["hilt-compiler", "hilt-compiler-dagger", "hilt-compiler-android"]
+hilt-compiler = ["hilt-compiler", "hilt-compiler-dagger", "hilt-compiler-android"]
 
 [plugins]
 com-android-application = { id = "com.android.application", version.ref = "agp" }
@@ -145,4 +149,4 @@ org-jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.re
 org-jetbrains-kotlin-plugin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "dagger" }
 ksp = { id ="com.google.devtools.ksp", version.ref = "ksp" }
-play-publishing = { id = "com.github.triplet.play", version = "3.8.4" }
+play-publishing = { id = "com.github.triplet.play", version.ref = "play-publishing" }

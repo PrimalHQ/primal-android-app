@@ -3,7 +3,6 @@ import java.util.Properties
 plugins {
     alias(libs.plugins.com.android.application)
     alias(libs.plugins.org.jetbrains.kotlin.android)
-    kotlin("kapt")
     kotlin("plugin.serialization")
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
@@ -208,7 +207,7 @@ dependencies {
     implementation(libs.room.runtime)
     implementation(libs.sqlcipher.android)
 
-    kapt(libs.bundles.hilt.kapt)
+    ksp(libs.bundles.hilt.compiler)
     implementation(libs.bundles.hilt)
 
     implementation(libs.datastore)
