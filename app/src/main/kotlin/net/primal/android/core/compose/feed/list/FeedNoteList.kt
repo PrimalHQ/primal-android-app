@@ -20,6 +20,9 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -88,6 +91,12 @@ fun FeedNoteList(
         }
     }
 
+    val canScrollUp by remember(feedListState) {
+        derivedStateOf {
+            feedListState.firstVisibleItemIndex > 0
+        }
+    }
+
     Box {
         FeedLazyColumn(
             pagingItems = pagingItems,
@@ -109,7 +118,7 @@ fun FeedNoteList(
         )
 
         AnimatedVisibility(
-            visible = newPostsCount > 0,
+            visible = canScrollUp && newPostsCount > 0,
             enter = fadeIn() + slideInVertically(),
             exit = slideOutVertically() + fadeOut(),
             modifier = Modifier

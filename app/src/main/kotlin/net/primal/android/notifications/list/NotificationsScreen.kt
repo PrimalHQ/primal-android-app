@@ -273,6 +273,12 @@ private fun NotificationsList(
         )
     }
 
+    val canScrollUp by remember(listState) {
+        derivedStateOf {
+            listState.firstVisibleItemIndex > 0
+        }
+    }
+
     Box {
         LazyColumn(
             contentPadding = paddingValues,
@@ -392,12 +398,6 @@ private fun NotificationsList(
                 }
 
                 else -> Unit
-            }
-        }
-
-        val canScrollUp by remember {
-            derivedStateOf {
-                listState.firstVisibleItemIndex > 0
             }
         }
 
