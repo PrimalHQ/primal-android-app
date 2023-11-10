@@ -18,7 +18,7 @@ class PrimalDatabaseBuilder @Inject constructor(
         return Room.databaseBuilder(
             context,
             PrimalDatabase::class.java,
-            "${context.dataDir.path}/databases/primal.db",
+            "${context.dataDir.path}/databases/primal_v2.db",
         )
             .openHelperFactory(SupportOpenHelperFactory("testingPurposesOnlyPassword".toByteArray()))
             .enableMultiInstanceInvalidation()
