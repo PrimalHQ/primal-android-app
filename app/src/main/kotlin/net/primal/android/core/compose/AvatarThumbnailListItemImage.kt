@@ -13,8 +13,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.Dp
@@ -31,21 +29,18 @@ import net.primal.android.theme.AppTheme
 fun AvatarThumbnailListItemImage(
     source: Any?,
     modifier: Modifier = Modifier,
-    size: Dp = 48.dp,
+    avatarSize: Dp = 48.dp,
     hasBorder: Boolean = false,
-    borderGradientColors: List<Color> = listOf(
-        AppTheme.extraColorScheme.brand1,
-        AppTheme.extraColorScheme.brand2,
-    ),
+    borderColor: Color = AppTheme.colorScheme.primary,
     onClick: (() -> Unit)? = null,
 ) {
     SubcomposeAsyncImage(
         model = source,
         modifier = modifier
             .adjustAvatarBackground(
-                size = size,
+                size = avatarSize,
                 hasBorder = hasBorder,
-                borderGradientColors = borderGradientColors,
+                borderColor = borderColor,
             )
             .clickable(enabled = onClick != null, onClick = { onClick?.invoke() }),
         contentDescription = null,
@@ -64,21 +59,15 @@ fun AvatarThumbnailListItemImage(
 fun Modifier.adjustAvatarBackground(
     size: Dp = 48.dp,
     hasBorder: Boolean = false,
-    borderGradientColors: List<Color>,
+    borderColor: Color,
 ): Modifier {
     return if (hasBorder) {
         this
             .size(size + 2.dp)
             .border(
                 width = 2.dp,
-                brush = Brush.linearGradient(borderGradientColors),
+                color = borderColor,
                 shape = CircleShape
-            )
-            .shadow(
-                elevation = 4.dp,
-                shape = CircleShape,
-                ambientColor = borderGradientColors.first(),
-                spotColor = borderGradientColors.first(),
             )
             .clip(CircleShape)
     } else {
@@ -93,7 +82,7 @@ fun Modifier.adjustAvatarBackground(
 fun DefaultAvatarThumbnailPlaceholderListItemImage() {
     Box(
         modifier = Modifier
-            .background(color = AppTheme.extraColorScheme.surfaceVariantAlt)
+            .background(color = AppTheme.extraColorScheme.surfaceVariantAlt1)
             .fillMaxSize(),
         contentAlignment = Alignment.Center,
     ) {

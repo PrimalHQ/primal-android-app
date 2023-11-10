@@ -34,6 +34,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -43,9 +44,9 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import net.primal.android.R
-import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.PrimalTopAppBar
+import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.utils.isValidNostrPrivateKey
@@ -184,8 +185,7 @@ fun LoginContent(
                     }
                 },
                 isError = nsecValue.isNotEmpty() && !isValidNsec,
-                minLines = 3,
-                maxLines = 3,
+                singleLine = true,
                 keyboardOptions = KeyboardOptions(
                     imeAction = if (isValidNsec) ImeAction.Go else ImeAction.Default
                 ),
@@ -197,18 +197,23 @@ fun LoginContent(
                         }
                     }
                 ),
+                visualTransformation = PasswordVisualTransformation(),
+                textStyle = AppTheme.typography.titleLarge.copy(
+                    fontSize = 28.sp,
+                ),
                 colors = PrimalDefaults.outlinedTextFieldColors(
                     focusedBorderColor = if (nsecValue.isEmpty()) {
-                        AppTheme.extraColorScheme.surfaceVariantAlt
+                        AppTheme.extraColorScheme.surfaceVariantAlt1
                     } else {
                         AppTheme.extraColorScheme.successBright.copy(alpha = 0.5f)
                     },
                     unfocusedBorderColor = if (nsecValue.isEmpty()) {
-                        AppTheme.extraColorScheme.surfaceVariantAlt
+                        AppTheme.extraColorScheme.surfaceVariantAlt1
                     } else {
                         AppTheme.extraColorScheme.successBright.copy(alpha = 0.5f)
                     },
-                )
+                ),
+                shape = AppTheme.shapes.extraLarge,
             )
         }
 

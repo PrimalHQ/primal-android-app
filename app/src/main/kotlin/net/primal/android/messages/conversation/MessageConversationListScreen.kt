@@ -76,8 +76,7 @@ import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.compose.asBeforeNowFormat
-import net.primal.android.core.compose.feed.renderContentAsAnnotatedString
-import net.primal.android.core.compose.foundation.brandBackground
+import net.primal.android.core.compose.feed.note.renderContentAsAnnotatedString
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
@@ -86,7 +85,6 @@ import net.primal.android.core.compose.isEmpty
 import net.primal.android.core.compose.isNotEmpty
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.core.ext.findByUrl
-import net.primal.android.core.utils.isPrimalIdentifier
 import net.primal.android.core.utils.parseHashtags
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.PrimalBottomBarHeightDp
@@ -211,7 +209,7 @@ fun MessageListScreen(
                     modifier = Modifier
                         .size(bottomBarHeight)
                         .clip(CircleShape)
-                        .brandBackground(shape = CircleShape),
+                        .background(color = AppTheme.colorScheme.primary, shape = CircleShape),
                     elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp),
                     containerColor = Color.Unspecified,
                     content = {
@@ -311,7 +309,6 @@ private fun ConversationListItem(
             val imageSource = variant?.mediaUrl ?: conversation.participantAvatarUrl
             AvatarThumbnailListItemImage(
                 source = imageSource,
-                hasBorder = conversation.participantInternetIdentifier.isPrimalIdentifier(),
             )
         },
         headlineContent = {
@@ -346,7 +343,7 @@ private fun ConversationListItem(
                     Box(
                         modifier = Modifier
                             .size(12.dp)
-                            .brandBackground(shape = CircleShape)
+                            .background(color = AppTheme.colorScheme.primary, shape = CircleShape)
                     )
                 }
             }

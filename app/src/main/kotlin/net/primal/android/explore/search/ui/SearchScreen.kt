@@ -90,7 +90,7 @@ fun SearchScreen(
                 contentPadding = paddingValues,
             ) {
                 item {
-                    Divider(color = AppTheme.extraColorScheme.surfaceVariantAlt)
+                    Divider(color = AppTheme.extraColorScheme.surfaceVariantAlt1)
                     SearchContentListItem(
                         hint = state.searchQuery.ifEmpty {
                             stringResource(id = R.string.explore_enter_query)
@@ -100,7 +100,7 @@ fun SearchScreen(
                             onSearchContent(state.searchQuery)
                         },
                     )
-                    Divider(color = AppTheme.extraColorScheme.surfaceVariantAlt)
+                    Divider(color = AppTheme.extraColorScheme.surfaceVariantAlt1)
                 }
 
                 items(

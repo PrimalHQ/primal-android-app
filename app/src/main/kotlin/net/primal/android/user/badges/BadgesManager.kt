@@ -20,7 +20,6 @@ import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.primal.PrimalCacheFilter
 import net.primal.android.networking.primal.PrimalVerb
 import net.primal.android.networking.sockets.NostrIncomingMessage
-import net.primal.android.networking.sockets.errors.NostrNoticeException
 import net.primal.android.nostr.ext.asMessagesTotalCount
 import net.primal.android.nostr.ext.asNotificationSummary
 import net.primal.android.notifications.api.model.PubkeyRequestBody
@@ -139,11 +138,6 @@ class BadgesManager @Inject constructor(
                 is NostrIncomingMessage.EventMessage -> {
                     it.primalEvent?.asNotificationSummary()?.let { summary -> emit(summary) }
                 }
-
-                is NostrIncomingMessage.NoticeMessage -> {
-                    throw NostrNoticeException(reason = it.message)
-                }
-
                 else -> Unit
             }
         }.collect {
@@ -177,11 +171,6 @@ class BadgesManager @Inject constructor(
                 is NostrIncomingMessage.EventMessage -> {
                     it.primalEvent?.asMessagesTotalCount()?.let { summary -> emit(summary) }
                 }
-
-                is NostrIncomingMessage.NoticeMessage -> {
-                    throw NostrNoticeException(reason = it.message)
-                }
-
                 else -> Unit
             }
         }.collect {

@@ -29,7 +29,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
@@ -56,15 +55,17 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.flow.filter
 import net.primal.android.R
 import net.primal.android.core.compose.AvatarThumbnailListItemImage
+import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.button.PrimalLoadingButton
-import net.primal.android.core.compose.feed.FeedPostAuthorRow
-import net.primal.android.core.compose.feed.FeedPostContent
+import net.primal.android.core.compose.feed.note.FeedNoteHeader
+import net.primal.android.core.compose.feed.note.FeedNoteContent
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -165,12 +166,13 @@ fun NoteEditorScreen(
                             .wrapContentWidth(),
                         text = text,
                         fontSize = 16.sp,
-                        shape = AppTheme.shapes.small,
+                        fontWeight = FontWeight.Normal,
                         contentPadding = PaddingValues(
                             horizontal = 24.dp,
                             vertical = 0.dp,
                         ),
                         enabled = !state.publishing && !state.uploadingAttachments
+                                && content.isNotBlank()
                                 && state.attachments.none { it.uploadError != null },
                         onClick = {
                             eventPublisher(UiEvent.PublishPost(content = content))
@@ -266,11 +268,13 @@ fun NoteEditorScreen(
                                         color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
                                     )
                                 },
-                                colors = OutlinedTextFieldDefaults.colors(
+                                colors = PrimalDefaults.outlinedTextFieldColors(
+                                    focusedContainerColor = Color.Unspecified,
+                                    unfocusedContainerColor = Color.Unspecified,
                                     focusedBorderColor = Color.Unspecified,
                                     unfocusedBorderColor = Color.Unspecified,
                                     errorBorderColor = Color.Unspecified,
-                                    disabledBorderColor = Color.Unspecified
+                                    disabledBorderColor = Color.Unspecified,
                                 )
                             )
                         }
@@ -297,7 +301,7 @@ fun NoteEditorScreen(
         bottomBar = {
             Column {
                 Divider(
-                    color = AppTheme.extraColorScheme.surfaceVariantAlt,
+                    color = AppTheme.extraColorScheme.surfaceVariantAlt1,
                 )
                 NoteActionRow(
                     onPhotosImported = { photoUris ->
@@ -363,7 +367,7 @@ private fun ReplyToNote(
             }
         }
     ) {
-        FeedPostAuthorRow(
+        FeedNoteHeader(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(
@@ -380,7 +384,7 @@ private fun ReplyToNote(
             onAuthorAvatarClick = {},
         )
 
-        FeedPostContent(
+        FeedNoteContent(
             modifier = Modifier.padding(
                 start = avatarsRowWidth,
                 end = 16.dp,

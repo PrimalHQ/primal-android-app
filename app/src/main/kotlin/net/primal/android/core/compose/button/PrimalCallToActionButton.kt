@@ -32,8 +32,8 @@ fun PrimalCallToActionButton(
 ) {
     val buttonShape = AppTheme.shapes.small
     val borderGradientColors = listOf(
-        AppTheme.extraColorScheme.brand1,
-        AppTheme.extraColorScheme.brand2,
+        AppTheme.colorScheme.primary,
+        AppTheme.colorScheme.primary,
     )
     Button(
         modifier = modifier.then(

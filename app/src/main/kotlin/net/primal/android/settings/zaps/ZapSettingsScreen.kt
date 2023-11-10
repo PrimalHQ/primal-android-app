@@ -253,7 +253,7 @@ fun ZapOption(
         Text(
             modifier = Modifier
                 .background(
-                    color = AppTheme.extraColorScheme.surfaceVariantAlt,
+                    color = AppTheme.extraColorScheme.surfaceVariantAlt1,
                     shape = AppTheme.shapes.small,
                 )
                 .border(
@@ -299,9 +299,9 @@ fun ZapOption(
 
 @Composable
 private fun zapTextFieldColors() = OutlinedTextFieldDefaults.colors(
-    unfocusedContainerColor = AppTheme.extraColorScheme.surfaceVariantAlt,
-    focusedContainerColor = AppTheme.extraColorScheme.surfaceVariantAlt,
-    disabledContainerColor = AppTheme.extraColorScheme.surfaceVariantAlt,
+    unfocusedContainerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
+    focusedContainerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
+    disabledContainerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
     unfocusedBorderColor = AppTheme.colorScheme.outline,
     focusedBorderColor = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
     disabledBorderColor = AppTheme.colorScheme.outline,

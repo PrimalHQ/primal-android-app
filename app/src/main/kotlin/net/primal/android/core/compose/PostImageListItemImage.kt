@@ -41,7 +41,7 @@ fun PostImageLoadingPlaceholder() {
                 visible = true,
                 color = AppTheme.colorScheme.surface,
                 highlight = PlaceholderHighlight.fade(
-                    highlightColor = AppTheme.extraColorScheme.surfaceVariantAlt,
+                    highlightColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
                 )
             ),
     )

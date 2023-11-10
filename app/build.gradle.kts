@@ -58,8 +58,8 @@ android {
         applicationId = "net.primal.android"
         minSdk = 26
         targetSdk = 34
-        versionCode = 49
-        versionName = "0.20.2"
+        versionCode = 50
+        versionName = "0.20.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -206,7 +206,6 @@ dependencies {
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
     implementation(libs.room.runtime)
-    implementation(libs.sqlcipher.android)
 
     kapt(libs.bundles.hilt.kapt)
     implementation(libs.bundles.hilt)

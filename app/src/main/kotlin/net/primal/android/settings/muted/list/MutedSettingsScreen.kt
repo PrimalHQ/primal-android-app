@@ -16,7 +16,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -27,11 +26,10 @@ import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
-import net.primal.android.core.compose.button.PrimalOutlinedButton
+import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.ext.findByUrl
-import net.primal.android.core.utils.isPrimalIdentifier
 import net.primal.android.settings.muted.list.model.MutedUserUi
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
@@ -120,7 +118,6 @@ fun MutedUserListItem(
             val imageSource = variant?.mediaUrl ?: item.avatarUrl
             AvatarThumbnailListItemImage(
                 source = imageSource,
-                hasBorder = item.internetIdentifier.isPrimalIdentifier(),
                 onClick = { onProfileClick(item.userId) },
             )
         },
@@ -144,16 +141,19 @@ fun MutedUserListItem(
             }
         },
         trailingContent = {
-            PrimalOutlinedButton(
+            PrimalFilledButton(
                 modifier = Modifier
                     .wrapContentWidth()
                     .height(36.dp),
+                containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
+                contentColor = AppTheme.colorScheme.onSurface,
+                textStyle = AppTheme.typography.titleMedium.copy(
+                    lineHeight = 18.sp
+                ),
                 onClick = { onUnmuteClick(item.userId) },
             ) {
                 Text(
-                    text = stringResource(id = R.string.settings_muted_accounts_unmute_button),
-                    fontWeight = FontWeight.W500,
-                    fontSize = 12.sp
+                    text = stringResource(id = R.string.settings_muted_accounts_unmute_button).lowercase(),
                 )
             }
         },

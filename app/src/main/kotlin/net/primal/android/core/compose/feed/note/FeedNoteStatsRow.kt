@@ -1,4 +1,4 @@
-package net.primal.android.core.compose.feed
+package net.primal.android.core.compose.feed.note
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -38,7 +38,7 @@ import net.primal.android.core.compose.icons.primaliconpack.FeedZapsFilled
 import net.primal.android.theme.AppTheme
 
 @Composable
-fun FeedPostStatsRow(
+fun FeedNoteStatsRow(
     modifier: Modifier,
     postStats: FeedPostStatsUi,
     onPostAction: (FeedPostAction) -> Unit,
@@ -53,7 +53,7 @@ fun FeedPostStatsRow(
             highlighted = postStats.userReplied,
             iconVector = PrimalIcons.FeedReplies,
             iconVectorHighlight = PrimalIcons.FeedRepliesFilled,
-            colorHighlight = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+            colorHighlight = AppTheme.extraColorScheme.replied,
             onClick = { onPostAction(FeedPostAction.Reply) },
             onLongClick = { onPostLongPressAction(FeedPostAction.Reply) },
         )
@@ -63,7 +63,7 @@ fun FeedPostStatsRow(
             highlighted = postStats.userZapped,
             iconVector = PrimalIcons.FeedZaps,
             iconVectorHighlight = PrimalIcons.FeedZapsFilled,
-            colorHighlight = Color(0xFFFFA02F),
+            colorHighlight = AppTheme.extraColorScheme.zapped,
             onClick = { onPostAction(FeedPostAction.Zap) },
             onLongClick = { onPostLongPressAction(FeedPostAction.Zap) },
         )
@@ -73,7 +73,7 @@ fun FeedPostStatsRow(
             highlighted = postStats.userLiked,
             iconVector = PrimalIcons.FeedLikes,
             iconVectorHighlight = PrimalIcons.FeedLikesFilled,
-            colorHighlight = Color(0xFFCA079F),
+            colorHighlight = AppTheme.extraColorScheme.liked,
             onClick = {
                 if (!postStats.userLiked) {
                     onPostAction(FeedPostAction.Like)
@@ -87,7 +87,7 @@ fun FeedPostStatsRow(
             highlighted = postStats.userReposted,
             iconVector = PrimalIcons.FeedReposts,
             iconVectorHighlight = PrimalIcons.FeedRepostsFilled,
-            colorHighlight = Color(0xFF66E205),
+            colorHighlight = AppTheme.extraColorScheme.reposted,
             onClick = { onPostAction(FeedPostAction.Repost) },
             onLongClick = { onPostLongPressAction(FeedPostAction.Repost) },
         )

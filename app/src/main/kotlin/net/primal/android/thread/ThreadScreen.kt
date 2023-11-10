@@ -28,7 +28,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
@@ -48,7 +47,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onSizeChanged
@@ -56,6 +54,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
@@ -63,10 +62,11 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import net.primal.android.R
 import net.primal.android.core.compose.AppBarIcon
+import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.button.PrimalLoadingButton
-import net.primal.android.core.compose.feed.FeedPostListItem
+import net.primal.android.core.compose.feed.note.FeedNoteCard
 import net.primal.android.core.compose.feed.RepostOrQuoteBottomSheet
 import net.primal.android.core.compose.feed.ZapBottomSheet
 import net.primal.android.core.compose.feed.model.FeedPostAction
@@ -227,6 +227,7 @@ fun ThreadScreen(
                         if (index == state.highlightPostIndex) "root" else "reply"
                     },
                 ) { index, item ->
+                    val highlightPost = index == state.highlightPostIndex
                     val shouldIndentContent = index != state.highlightPostIndex
                     val highlighted = index == state.highlightPostIndex
                     val connectedToPreviousNote = state.highlightPostIndex > 0
@@ -245,14 +246,16 @@ fun ThreadScreen(
                             }
                         }
                     ) {
-                        FeedPostListItem(
+                        FeedNoteCard(
                             data = item,
                             shape = RectangleShape,
                             cardPadding = PaddingValues(all = 0.dp),
                             expanded = true,
-                            shouldIndentContent = shouldIndentContent,
-                            connectedToPreviousNote = connectedToPreviousNote,
-                            connectedToNextNote = connectedToNextNote,
+                            fullWidthContent = highlightPost,
+                            headerSingleLine = !highlightPost,
+                            forceContentIndent = shouldIndentContent,
+                            drawLineAboveAvatar = connectedToPreviousNote,
+                            drawLineBelowAvatar = connectedToNextNote,
                             onPostClick = { postId ->
                                 if (state.highlightPostId != postId) {
                                     onPostClick(postId)
@@ -385,11 +388,9 @@ fun ReplyToBottomBar(
     val keyboardController = LocalSoftwareKeyboardController.current
     val isKeyboardVisible by keyboardVisibilityAsState()
 
-    val unfocusedColor = AppTheme.extraColorScheme.surfaceVariantAlt
-    val focusedColor = AppTheme.colorScheme.surface
     Surface(
         modifier = modifier,
-        color = if (isKeyboardVisible) unfocusedColor else focusedColor,
+        color = AppTheme.colorScheme.surface,
     ) {
         Column(
             modifier = Modifier.fillMaxWidth(),
@@ -444,14 +445,8 @@ fun ReplyToBottomBar(
                     }
                 },
                 textStyle = AppTheme.typography.bodyMedium,
-                colors = OutlinedTextFieldDefaults.colors(
-                    unfocusedContainerColor = unfocusedColor,
-                    focusedContainerColor = if (isKeyboardVisible) focusedColor else unfocusedColor,
-                    focusedBorderColor = Color.Unspecified,
-                    unfocusedBorderColor = Color.Unspecified,
-                    errorBorderColor = Color.Unspecified,
-                    disabledBorderColor = Color.Unspecified
-                ),
+                colors = PrimalDefaults.outlinedTextFieldColors(),
+                shape = AppTheme.shapes.extraLarge,
             )
 
             val photoImportLauncher = rememberLauncherForActivityResult(
@@ -496,8 +491,9 @@ fun ReplyToBottomBar(
                         } else {
                             stringResource(id = R.string.thread_publish_button)
                         },
-                        enabled = !publishingReply,
+                        enabled = !publishingReply && replyTextProvider().isNotBlank(),
                         fontSize = 16.sp,
+                        fontWeight = FontWeight.Normal,
                         onClick = {
                             onPublishReplyClick()
                             keyboardController?.hide()

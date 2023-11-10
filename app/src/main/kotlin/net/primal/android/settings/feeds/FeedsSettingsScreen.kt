@@ -147,7 +147,7 @@ fun FeedsSettingsScreen(
                                 },
                                 text = stringResource(R.string.settings_feeds_restore_default_title).lowercase(),
                                 style = AppTheme.typography.bodyMedium,
-                                color = AppTheme.colorScheme.primary
+                                color = AppTheme.colorScheme.secondary,
                             )
                         }
                     }

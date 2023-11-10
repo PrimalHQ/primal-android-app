@@ -9,7 +9,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,12 +23,12 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import net.primal.android.R
+import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
@@ -133,12 +132,7 @@ fun SearchBar(
         value = query,
         onValueChange = onQueryChange,
         shape = AppTheme.shapes.medium,
-        colors = OutlinedTextFieldDefaults.colors(
-            focusedContainerColor = AppTheme.extraColorScheme.surfaceVariantAlt,
-            unfocusedContainerColor = AppTheme.extraColorScheme.surfaceVariantAlt,
-            focusedBorderColor = Color.Unspecified,
-            unfocusedBorderColor = Color.Unspecified,
-        ),
+        colors = PrimalDefaults.outlinedTextFieldColors(),
         keyboardOptions = KeyboardOptions(
             imeAction = ImeAction.Done,
         ),

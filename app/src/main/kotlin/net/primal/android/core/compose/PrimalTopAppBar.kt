@@ -70,11 +70,14 @@ fun PrimalTopAppBar(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Top,
                 ) {
-                    Text(text = title)
+                    Text(
+                        text = title,
+                    )
                     if (subtitle?.isNotBlank() == true) {
                         Text(
                             text = subtitle,
                             style = AppTheme.typography.bodySmall,
+                            color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
                         )
                     }
                 }

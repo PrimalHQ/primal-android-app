@@ -1,3 +1,3 @@
 ## Changes
 
-- Database encryption
+- Theme, Font & Feed revamps

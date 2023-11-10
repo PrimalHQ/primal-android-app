@@ -21,11 +21,10 @@ fun ExtraColorSchemeProvider(
 
 @Stable
 class ExtraColorScheme(
-    brand0: Color,
-    brand1: Color,
-    brand2: Color,
     onBrand: Color,
-    surfaceVariantAlt: Color,
+    surfaceVariantAlt1: Color,
+    surfaceVariantAlt2: Color,
+    surfaceVariantAlt3: Color,
     onSurfaceVariantAlt1: Color,
     onSurfaceVariantAlt2: Color,
     onSurfaceVariantAlt3: Color,
@@ -33,20 +32,21 @@ class ExtraColorScheme(
     warning: Color,
     successBright: Color,
     successDim: Color,
+    replied: Color,
+    zapped: Color,
+    liked: Color,
+    reposted: Color,
 ) {
-    var brand0 by mutableStateOf(brand0, structuralEqualityPolicy())
-        internal set
-
-    var brand1 by mutableStateOf(brand1, structuralEqualityPolicy())
-        internal set
-
-    var brand2 by mutableStateOf(brand2, structuralEqualityPolicy())
-        internal set
-
     var onBrand by mutableStateOf(onBrand, structuralEqualityPolicy())
         internal set
 
-    var surfaceVariantAlt by mutableStateOf(surfaceVariantAlt, structuralEqualityPolicy())
+    var surfaceVariantAlt1 by mutableStateOf(surfaceVariantAlt1, structuralEqualityPolicy())
+        internal set
+
+    var surfaceVariantAlt2 by mutableStateOf(surfaceVariantAlt2, structuralEqualityPolicy())
+        internal set
+
+    var surfaceVariantAlt3 by mutableStateOf(surfaceVariantAlt3, structuralEqualityPolicy())
         internal set
 
     var onSurfaceVariantAlt1 by mutableStateOf(onSurfaceVariantAlt1, structuralEqualityPolicy())
@@ -70,25 +70,39 @@ class ExtraColorScheme(
     var successDim by mutableStateOf(successDim, structuralEqualityPolicy())
         internal set
 
+    var replied by mutableStateOf(replied, structuralEqualityPolicy())
+        internal set
+
+    var zapped by mutableStateOf(zapped, structuralEqualityPolicy())
+        internal set
+
+    var liked by mutableStateOf(liked, structuralEqualityPolicy())
+        internal set
+
+    var reposted by mutableStateOf(reposted, structuralEqualityPolicy())
+        internal set
+
     fun copy(
-        brand0: Color = this.brand0,
-        brand1: Color = this.brand1,
-        brand2: Color = this.brand2,
         onBrand: Color = this.onBrand,
-        surfaceVariantAlt: Color = this.surfaceVariantAlt,
+        surfaceVariantAlt1: Color = this.surfaceVariantAlt1,
+        surfaceVariantAlt2: Color = this.surfaceVariantAlt2,
+        surfaceVariantAlt3: Color = this.surfaceVariantAlt3,
         onSurfaceVariantAlt1: Color = this.onSurfaceVariantAlt1,
         onSurfaceVariantAlt2: Color = this.onSurfaceVariantAlt2,
         onSurfaceVariantAlt3: Color = this.onSurfaceVariantAlt3,
         onSurfaceVariantAlt4: Color = this.onSurfaceVariantAlt4,
         warning: Color = this.warning,
         successBright: Color = this.successBright,
-        successDim: Color = this.successDim
+        successDim: Color = this.successDim,
+        replied: Color = this.replied,
+        zapped: Color = this.zapped,
+        liked: Color = this.liked,
+        reposted: Color = this.reposted,
     ): ExtraColorScheme = ExtraColorScheme(
-        brand0 = brand0,
-        brand1 = brand1,
-        brand2 = brand2,
         onBrand = onBrand,
-        surfaceVariantAlt = surfaceVariantAlt,
+        surfaceVariantAlt1 = surfaceVariantAlt1,
+        surfaceVariantAlt2 = surfaceVariantAlt2,
+        surfaceVariantAlt3 = surfaceVariantAlt3,
         onSurfaceVariantAlt1 = onSurfaceVariantAlt1,
         onSurfaceVariantAlt2 = onSurfaceVariantAlt2,
         onSurfaceVariantAlt3 = onSurfaceVariantAlt3,
@@ -96,15 +110,18 @@ class ExtraColorScheme(
         warning = warning,
         successBright = successBright,
         successDim = successDim,
+        replied = replied,
+        zapped = zapped,
+        liked = liked,
+        reposted = reposted,
     )
 }
 
 fun extraColorScheme(
-    brand0: Color,
-    brand1: Color,
-    brand2: Color,
     onBrand: Color,
-    surfaceVariantAlt: Color,
+    surfaceVariantAlt1: Color,
+    surfaceVariantAlt2: Color,
+    surfaceVariantAlt3: Color,
     onSurfaceVariantAlt1: Color,
     onSurfaceVariantAlt2: Color,
     onSurfaceVariantAlt3: Color,
@@ -112,19 +129,26 @@ fun extraColorScheme(
     warning: Color,
     successBright: Color,
     successDim: Color,
+    replied: Color,
+    zapped: Color,
+    liked: Color,
+    reposted: Color,
 ): ExtraColorScheme = ExtraColorScheme(
-    brand0 = brand0,
-    brand1 = brand1,
-    brand2 = brand2,
     onBrand = onBrand,
-    surfaceVariantAlt = surfaceVariantAlt,
+    surfaceVariantAlt1 = surfaceVariantAlt1,
+    surfaceVariantAlt2 = surfaceVariantAlt2,
+    surfaceVariantAlt3 = surfaceVariantAlt3,
     onSurfaceVariantAlt1 = onSurfaceVariantAlt1,
     onSurfaceVariantAlt2 = onSurfaceVariantAlt2,
     onSurfaceVariantAlt3 = onSurfaceVariantAlt3,
     onSurfaceVariantAlt4 = onSurfaceVariantAlt4,
     warning = warning,
     successBright = successBright,
-    successDim = successDim
+    successDim = successDim,
+    replied = replied,
+    zapped = zapped,
+    liked = liked,
+    reposted = reposted,
 )
 
 internal val LocalExtraColors =

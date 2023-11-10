@@ -113,7 +113,7 @@ fun PreviewNostrUserTextWithPrimalBadge() {
                 displayName = "Nostr Adamus",
                 internetIdentifier = "adam@primal.net",
                 annotatedStringSuffixBuilder = {
-                    append("| 42 y. ago")
+                    append("• 42 y. ago")
                 }
             )
         }
@@ -129,7 +129,7 @@ fun PreviewNostrUserTextWithRandomBadge() {
                 displayName = "Nostr Adamus",
                 internetIdentifier = "adam@nostr.com",
                 annotatedStringSuffixBuilder = {
-                    append("| 42 y. ago")
+                    append("• 42 y. ago")
                 }
             )
         }
@@ -145,7 +145,7 @@ fun PreviewNostrUserTextWithoutBadge() {
                 displayName = "Nostr Adamus",
                 internetIdentifier = null,
                 annotatedStringSuffixBuilder = {
-                    append(" | 42 y. ago")
+                    append(" • 42 y. ago")
                 }
             )
         }

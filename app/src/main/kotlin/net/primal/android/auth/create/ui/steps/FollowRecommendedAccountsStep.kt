@@ -15,7 +15,6 @@ import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -28,8 +27,7 @@ import net.primal.android.auth.create.ui.RecommendedFollow
 import net.primal.android.core.compose.AvatarThumbnailListItemImage
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.PrimalLoadingSpinner
-import net.primal.android.core.compose.button.PrimalOutlinedButton
-import net.primal.android.core.utils.isPrimalIdentifier
+import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.utils.usernameUiFriendly
 import net.primal.android.nostr.model.content.ContentMetadata
 import net.primal.android.theme.AppTheme
@@ -64,7 +62,7 @@ fun FollowRecommendedAccountsStep(
                 stickyHeader {
                     ListItem(
                         colors = ListItemDefaults.colors(
-                            containerColor = AppTheme.extraColorScheme.surfaceVariantAlt,
+                            containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
                         ),
                         modifier = Modifier
                             .fillMaxWidth()
@@ -77,25 +75,23 @@ fun FollowRecommendedAccountsStep(
                             )
                         },
                         trailingContent = {
-                            PrimalOutlinedButton(
+                            PrimalFilledButton(
                                 modifier = Modifier
                                     .wrapContentWidth()
                                     .height(36.dp),
-                                borderBrush = if (isGroupFollowed) {
-                                    Brush.linearGradient(
-                                        listOf(
-                                            AppTheme.colorScheme.outline,
-                                            AppTheme.colorScheme.outline,
-                                        )
-                                    )
+                                containerColor = if (isGroupFollowed) {
+                                    AppTheme.extraColorScheme.surfaceVariantAlt2
                                 } else {
-                                    Brush.linearGradient(
-                                        listOf(
-                                            AppTheme.extraColorScheme.brand1,
-                                            AppTheme.extraColorScheme.brand2,
-                                        )
-                                    )
+                                    AppTheme.colorScheme.onSurface
                                 },
+                                contentColor = if (isGroupFollowed) {
+                                    AppTheme.colorScheme.onSurface
+                                } else {
+                                    AppTheme.colorScheme.surface
+                                },
+                                textStyle = AppTheme.typography.titleMedium.copy(
+                                    lineHeight = 18.sp
+                                ),
                                 onClick = {
                                     eventPublisher(
                                         CreateAccountContract.UiEvent.ToggleGroupFollowEvent(
@@ -109,7 +105,7 @@ fun FollowRecommendedAccountsStep(
                                 } else {
                                     stringResource(id = R.string.create_recommended_follow_all)
                                 }
-                                Text(text)
+                                Text(text = text.lowercase())
                             }
                         }
                     )
@@ -125,7 +121,6 @@ fun FollowRecommendedAccountsStep(
                         leadingContent = {
                             AvatarThumbnailListItemImage(
                                 modifier = Modifier.padding(start = 8.dp),
-                                hasBorder = authorInternetIdentifier.isPrimalIdentifier(),
                                 source = suggestion.content.picture
                             )
                         },
@@ -151,26 +146,24 @@ fun FollowRecommendedAccountsStep(
                             }
                         },
                         trailingContent = {
-                            PrimalOutlinedButton(
+                            PrimalFilledButton(
                                 modifier = Modifier
                                     .wrapContentWidth()
                                     .height(36.dp)
                                     .padding(end = 8.dp),
-                                borderBrush = if (isSuggestionFollowed) {
-                                    Brush.linearGradient(
-                                        listOf(
-                                            AppTheme.colorScheme.outline,
-                                            AppTheme.colorScheme.outline,
-                                        )
-                                    )
+                                containerColor = if (isSuggestionFollowed) {
+                                    AppTheme.extraColorScheme.surfaceVariantAlt1
                                 } else {
-                                    Brush.linearGradient(
-                                        listOf(
-                                            AppTheme.extraColorScheme.brand1,
-                                            AppTheme.extraColorScheme.brand2,
-                                        )
-                                    )
+                                    AppTheme.colorScheme.onSurface
                                 },
+                                contentColor = if (isSuggestionFollowed) {
+                                    AppTheme.colorScheme.onSurface
+                                } else {
+                                    AppTheme.colorScheme.surface
+                                },
+                                textStyle = AppTheme.typography.titleMedium.copy(
+                                    lineHeight = 14.sp
+                                ),
                                 onClick = {
                                     eventPublisher(
                                         CreateAccountContract.UiEvent.ToggleFollowEvent(
@@ -184,7 +177,7 @@ fun FollowRecommendedAccountsStep(
                                 } else {
                                     stringResource(id = R.string.create_recommended_follow)
                                 }
-                                Text(text)
+                                Text(text = text.lowercase())
                             }
                         },
                     )
@@ -243,6 +236,26 @@ fun PreviewFollowRecommendedAccountsStep() {
                         name = "qauser",
                         displayName = "qauser",
                         nip05 = "qa@primal.net",
+                    ),
+                ),
+                RecommendedFollow(
+                    pubkey = "88c124151safasf",
+                    isCurrentUserFollowing = true,
+                    groupName = "Bitcoin",
+                    content = ContentMetadata(
+                        name = "Gigi",
+                        displayName = "Gigi",
+                        nip05 = "_@dergigi.com",
+                    ),
+                ),
+                RecommendedFollow(
+                    pubkey = "88c124151safasf",
+                    isCurrentUserFollowing = true,
+                    groupName = "Bitcoin",
+                    content = ContentMetadata(
+                        name = "satoshi",
+                        displayName = "satoshi",
+                        nip05 = "satoshi@nakamoto.net",
                     ),
                 ),
             ),

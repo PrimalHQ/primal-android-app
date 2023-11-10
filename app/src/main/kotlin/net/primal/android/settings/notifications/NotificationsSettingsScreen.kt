@@ -127,7 +127,7 @@ fun NotificationsSettingsBlock(
         Column(
             modifier = Modifier
                 .background(
-                    color = AppTheme.colorScheme.surfaceVariant,
+                    color = AppTheme.extraColorScheme.surfaceVariantAlt3,
                     shape = RoundedCornerShape(12.dp)
                 )
                 .fillMaxWidth()

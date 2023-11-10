@@ -24,22 +24,15 @@ import androidx.compose.ui.unit.dp
 import net.primal.android.R
 import net.primal.android.core.compose.AvatarThumbnailsRow
 import net.primal.android.core.compose.NostrUserText
-import net.primal.android.core.compose.feed.FeedPostContent
-import net.primal.android.core.compose.feed.FeedPostStatsRow
+import net.primal.android.core.compose.feed.note.FeedNoteContent
+import net.primal.android.core.compose.feed.note.FeedNoteStatsRow
 import net.primal.android.core.compose.feed.model.FeedPostAction
 import net.primal.android.core.compose.feed.model.FeedPostUi
-import net.primal.android.core.compose.foundation.isAppInDarkPrimalTheme
 import net.primal.android.core.compose.notifications.toImagePainter
 import net.primal.android.core.ext.openUriSafely
 import net.primal.android.core.utils.shortened
 import net.primal.android.notifications.domain.NotificationType
 import net.primal.android.theme.AppTheme
-import net.primal.android.theme.colors.LikeColor
-import net.primal.android.theme.colors.ReplyDarkColor
-import net.primal.android.theme.colors.ReplyLightColor
-import net.primal.android.theme.colors.RepostColor
-import net.primal.android.theme.colors.ZapColor
-
 
 @Composable
 fun NotificationListItem(
@@ -194,10 +187,10 @@ private fun NotificationListItem(
                         text = extraStat.shortened(),
                         style = AppTheme.typography.bodySmall,
                         color = when (firstNotification.notificationType) {
-                            NotificationType.YOUR_POST_WAS_ZAPPED -> ZapColor
-                            NotificationType.YOUR_POST_WAS_LIKED -> LikeColor
-                            NotificationType.YOUR_POST_WAS_REPOSTED -> RepostColor
-                            NotificationType.YOUR_POST_WAS_REPLIED_TO -> if (isAppInDarkPrimalTheme()) ReplyDarkColor else ReplyLightColor
+                            NotificationType.YOUR_POST_WAS_ZAPPED -> AppTheme.extraColorScheme.zapped
+                            NotificationType.YOUR_POST_WAS_LIKED -> AppTheme.extraColorScheme.liked
+                            NotificationType.YOUR_POST_WAS_REPOSTED -> AppTheme.extraColorScheme.reposted
+                            NotificationType.YOUR_POST_WAS_REPLIED_TO -> AppTheme.extraColorScheme.replied
                             else -> Color.Unspecified
                         }
                     )
@@ -215,7 +208,8 @@ private fun NotificationListItem(
             Column {
                 AvatarThumbnailsRow(
                     avatarUrls = notifications.map { it.actionUserPicture },
-                    authorInternetIdentifiers = notifications.map { null },
+                    overlapAvatars = false,
+                    hasAvatarBorder = false,
                     onClick = { index ->
                         notifications.getOrNull(index)?.actionUserId?.let(onProfileClick)
                     },
@@ -230,23 +224,24 @@ private fun NotificationListItem(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 8.dp)
-                        .padding(end = 8.dp),
+                        .padding(end = 16.dp),
                     style = AppTheme.typography.bodyLarge.copy(
                         color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
                     ),
+                    maxLines = 2,
                     displayName = firstNotification.actionUserDisplayName ?: "undefined",
                     displayNameColor = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
                     internetIdentifier = firstNotification.actionUserInternetIdentifier,
                     annotatedStringSuffixBuilder = {
                         if (notifications.size > 1) append(" $andOthersText")
                         append(" $suffixText")
-                    }
+                    },
                 )
 
                 val localUriHandler = LocalUriHandler.current
 
                 if (actionPost != null) {
-                    FeedPostContent(
+                    FeedNoteContent(
                         modifier = Modifier.padding(end = 16.dp),
                         content = actionPost.content,
                         expanded = false,
@@ -260,7 +255,7 @@ private fun NotificationListItem(
                         onHashtagClick = { onHashtagClick(it) },
                     )
 
-                    FeedPostStatsRow(
+                    FeedNoteStatsRow(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 16.dp)

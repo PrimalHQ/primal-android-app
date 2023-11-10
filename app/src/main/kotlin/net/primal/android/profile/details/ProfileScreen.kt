@@ -1,6 +1,5 @@
 package net.primal.android.profile.details
 
-import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
@@ -19,6 +18,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -45,7 +45,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -62,15 +61,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -86,6 +82,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import net.primal.android.R
+import net.primal.android.core.compose.AdjustTemporarilySystemBarColors
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.AvatarThumbnailListItemImage
 import net.primal.android.core.compose.DropdownMenuItemText
@@ -95,8 +92,7 @@ import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.button.PrimalFilledButton
-import net.primal.android.core.compose.button.PrimalOutlinedButton
-import net.primal.android.core.compose.feed.FeedLazyColumn
+import net.primal.android.core.compose.feed.list.FeedLazyColumn
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.foundation.ClickDebounce
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
@@ -109,18 +105,17 @@ import net.primal.android.core.compose.icons.primaliconpack.Link
 import net.primal.android.core.compose.icons.primaliconpack.More
 import net.primal.android.core.compose.icons.primaliconpack.UserFeedAdd
 import net.primal.android.core.compose.isEmpty
+import net.primal.android.core.compose.profile.model.ProfileDetailsUi
+import net.primal.android.core.compose.profile.model.ProfileStatsUi
 import net.primal.android.core.ext.findByUrl
 import net.primal.android.core.ext.findNearestOrNull
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.copyText
-import net.primal.android.core.utils.isPrimalIdentifier
 import net.primal.android.core.utils.resolvePrimalProfileLink
 import net.primal.android.core.utils.systemShareText
 import net.primal.android.crypto.hexToNoteHrp
 import net.primal.android.crypto.hexToNpubHrp
 import net.primal.android.profile.details.ProfileContract.UiState.ProfileError
-import net.primal.android.core.compose.profile.model.ProfileDetailsUi
-import net.primal.android.core.compose.profile.model.ProfileStatsUi
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import java.text.NumberFormat
@@ -139,7 +134,7 @@ fun ProfileScreen(
 ) {
     val uiState = viewModel.state.collectAsState()
 
-    AdjustProfileStatusBarColor()
+    AdjustTemporarilySystemBarColors(statusBarColor = Color.Transparent)
 
     ProfileScreen(
         state = uiState.value,
@@ -153,19 +148,6 @@ fun ProfileScreen(
         onWalletUnavailable = onWalletUnavailable,
         eventPublisher = { viewModel.setEvent(it) },
     )
-}
-
-@Composable
-private fun AdjustProfileStatusBarColor() {
-    val view = LocalView.current
-    DisposableEffect(Unit) {
-        val window = (view.context as Activity).window
-        val originalStatusBarColor = window.statusBarColor
-        window.statusBarColor = Color.Transparent.toArgb()
-        onDispose {
-            window.statusBarColor = originalStatusBarColor
-        }
-    }
 }
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
@@ -247,7 +229,9 @@ fun ProfileScreen(
             }
     }
 
-    Surface {
+    Surface(
+        modifier = Modifier.navigationBarsPadding(),
+    ) {
         Box {
             FeedLazyColumn(
                 contentPadding = PaddingValues(0.dp),
@@ -473,7 +457,6 @@ private fun ProfileTopCoverBar(
                         end = avatarPadding * 7 / 8,
                     ),
                 source = state.profileDetails?.avatarUrl,
-                hasBorder = state.profileDetails?.internetIdentifier.isPrimalIdentifier(),
             )
         }
     }
@@ -502,7 +485,7 @@ private fun ProfileDropdownMenu(
     )
 
     DropdownMenu(
-        modifier = Modifier.background(color = AppTheme.extraColorScheme.surfaceVariantAlt),
+        modifier = Modifier.background(color = AppTheme.extraColorScheme.surfaceVariantAlt1),
         expanded = menuVisible,
         onDismissRequest = { menuVisible = false },
     ) {
@@ -789,7 +772,7 @@ private fun ProfileActions(
             .fillMaxWidth()
             .height(56.dp)
             .padding(horizontal = 16.dp)
-            .padding(top = 4.dp)
+            .padding(top = 16.dp)
             .background(AppTheme.colorScheme.surfaceVariant),
         horizontalArrangement = Arrangement.End,
     ) {
@@ -811,68 +794,62 @@ private fun ProfileActions(
 fun FollowButton(
     onClick: () -> Unit,
 ) {
-    PrimalFilledButton(
-        modifier = Modifier
-            .height(36.dp)
-            .width(100.dp),
-        shape = AppTheme.shapes.medium,
-        contentPadding = PaddingValues(
-            horizontal = 16.dp,
-            vertical = 0.dp,
-        ),
-        textStyle = AppTheme.typography.bodySmall,
+    ProfileButton(
+        text = stringResource(id = R.string.profile_follow_button).lowercase(),
+        containerColor = AppTheme.colorScheme.onSurface,
+        contentColor = AppTheme.colorScheme.surface,
         onClick = onClick,
-    ) {
-        Text(
-            text = stringResource(id = R.string.profile_follow_button),
-            fontWeight = FontWeight.Bold,
-        )
-    }
+    )
 }
 
 @Composable
 private fun UnfollowButton(
     onClick: () -> Unit,
 ) {
-    PrimalOutlinedButton(
-        modifier = Modifier
-            .height(36.dp)
-            .width(100.dp),
-        shape = AppTheme.shapes.medium,
-        contentPadding = PaddingValues(
-            horizontal = 16.dp,
-            vertical = 0.dp,
-        ),
-        textStyle = AppTheme.typography.bodySmall,
+    ProfileButton(
+        text = stringResource(id = R.string.profile_unfollow_button).lowercase(),
+        containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
+        contentColor = AppTheme.colorScheme.onSurface,
         onClick = onClick,
-    ) {
-        Text(
-            text = stringResource(id = R.string.profile_unfollow_button),
-            fontWeight = FontWeight.Bold,
-        )
-    }
+    )
 }
 
 @Composable
 private fun EditProfileButton(
     onClick: () -> Unit
 ) {
-    PrimalOutlinedButton(
+    ProfileButton(
+        text = stringResource(id = R.string.profile_edit_profile_button).lowercase(),
+        containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
+        contentColor = AppTheme.colorScheme.onSurface,
+        onClick = onClick,
+    )
+}
+
+@Composable
+private fun ProfileButton(
+    text: String,
+    containerColor: Color,
+    contentColor: Color,
+    onClick: () -> Unit
+) {
+    PrimalFilledButton(
         modifier = Modifier
             .height(36.dp)
-            .wrapContentWidth(),
-        shape = AppTheme.shapes.medium,
+            .wrapContentWidth()
+            .defaultMinSize(minWidth = 100.dp),
         contentPadding = PaddingValues(
             horizontal = 16.dp,
             vertical = 0.dp,
         ),
-        textStyle = AppTheme.typography.bodySmall,
+        containerColor = containerColor,
+        contentColor = contentColor,
+        textStyle = AppTheme.typography.titleMedium.copy(
+            lineHeight = 18.sp
+        ),
         onClick = onClick,
     ) {
-        Text(
-            text = stringResource(id = R.string.profile_edit_profile_button),
-            fontWeight = FontWeight.Bold,
-        )
+        Text(text = text)
     }
 }
 
@@ -897,7 +874,7 @@ private fun UserWebsiteText(
             .clickable { onClick() },
         text = website,
         style = AppTheme.typography.bodySmall,
-        color = AppTheme.colorScheme.primary,
+        color = AppTheme.colorScheme.secondary,
         leadingIcon = PrimalIcons.Link,
         leadingIconSize = 16.sp,
         leadingIconTintColor = AppTheme.extraColorScheme.onSurfaceVariantAlt4,

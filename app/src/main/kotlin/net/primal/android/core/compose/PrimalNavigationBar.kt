@@ -77,7 +77,13 @@ private fun RowScope.PrimalNavigationBarItem(
         selected = selected,
         onClick = { clickDebounce.processEvent(onClick) },
         icon = {
-            BadgedBox(badge = { if (badge > 0) Badge() }) {
+            BadgedBox(
+                badge = {
+                    if (badge > 0) Badge(
+                        containerColor = AppTheme.colorScheme.primary,
+                    )
+                }
+            ) {
                 Icon(
                     imageVector = if (selected) {
                         primaryDestination.imageVectorSelected()
