@@ -12,6 +12,7 @@ class PrimalDatabaseBuilder @Inject constructor(
 
     init {
         System.loadLibrary("sqlcipher")
+        context.deleteDatabase("primal.db")
     }
 
     fun build(): PrimalDatabase {
