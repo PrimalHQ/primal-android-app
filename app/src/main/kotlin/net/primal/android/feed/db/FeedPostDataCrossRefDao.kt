@@ -1,13 +1,14 @@
 package net.primal.android.feed.db
 
 import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import androidx.room.Upsert
 
 @Dao
 interface FeedPostDataCrossRefDao {
 
-    @Upsert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun connect(data: List<FeedPostDataCrossRef>)
 
     @Query("DELETE FROM FeedPostDataCrossRef WHERE feedDirective = :feedDirective")

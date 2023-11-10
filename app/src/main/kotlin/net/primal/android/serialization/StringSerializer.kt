@@ -1,19 +1,22 @@
 package net.primal.android.serialization
 
 import androidx.datastore.core.Serializer
+import net.primal.android.security.Encryption
 import java.io.InputStream
 import java.io.OutputStream
 
-class StringSerializer : Serializer<String> {
+class StringSerializer(
+    private val encryption: Encryption? = null,
+) : Serializer<String> {
 
     override val defaultValue: String = ""
 
     override suspend fun readFrom(input: InputStream): String {
-        return String(input.readBytes())
+        return encryption?.decrypt(input) ?: String(input.readBytes())
     }
 
     override suspend fun writeTo(t: String, output: OutputStream) {
-        output.use {
+        encryption?.encrypt(t, output) ?: output.use {
             it.write(t.toByteArray())
         }
     }

@@ -2,13 +2,14 @@ package net.primal.android.messages.db
 
 import androidx.paging.PagingSource
 import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import androidx.room.Upsert
 
 @Dao
 interface DirectMessageDao {
 
-    @Upsert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun upsertAll(data: List<DirectMessageData>)
 
     @Query("SELECT * FROM DirectMessageData ORDER BY createdAt DESC LIMIT 1")

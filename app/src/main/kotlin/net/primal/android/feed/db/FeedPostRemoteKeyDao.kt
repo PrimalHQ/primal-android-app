@@ -1,13 +1,14 @@
 package net.primal.android.feed.db
 
 import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import androidx.room.Upsert
 
 @Dao
 interface FeedPostRemoteKeyDao {
 
-    @Upsert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun upsert(data: List<FeedPostRemoteKey>)
 
     @Query("SELECT * FROM FeedPostRemoteKey WHERE (eventId = :postId OR eventId = :repostId) AND directive = :directive")

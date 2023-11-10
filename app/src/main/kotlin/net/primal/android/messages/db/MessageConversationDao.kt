@@ -2,14 +2,15 @@ package net.primal.android.messages.db
 
 import androidx.paging.PagingSource
 import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import androidx.room.Upsert
 import net.primal.android.messages.domain.ConversationRelation
 
 @Dao
 interface MessageConversationDao {
 
-    @Upsert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun upsertAll(data: List<MessageConversationData>)
 
     @Query("SELECT * FROM MessageConversationData WHERE relation = :relation ORDER BY lastMessageAt DESC")
