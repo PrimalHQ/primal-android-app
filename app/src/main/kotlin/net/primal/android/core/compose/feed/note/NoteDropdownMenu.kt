@@ -1,12 +1,9 @@
 package net.primal.android.core.compose.feed.note
 
 import android.widget.Toast
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -20,7 +17,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import kotlinx.coroutines.launch
 import net.primal.android.R
-import net.primal.android.core.compose.DropdownMenuItemText
+import net.primal.android.core.compose.dropdown.DropdownPrimalMenu
+import net.primal.android.core.compose.dropdown.DropdownPrimalMenuItem
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ContextCopyNoteId
 import net.primal.android.core.compose.icons.primaliconpack.ContextCopyNoteLink
@@ -63,19 +61,13 @@ fun NoteDropdownMenuIcon(
             contentDescription = null,
         )
 
-        DropdownMenu(
-            modifier = Modifier.background(color = AppTheme.extraColorScheme.surfaceVariantAlt1),
+        DropdownPrimalMenu(
             expanded = menuVisible,
             onDismissRequest = { menuVisible = false },
         ) {
-            DropdownMenuItem(
-                trailingIcon = {
-                    Icon(
-                        imageVector = PrimalIcons.ContextShare,
-                        contentDescription = null
-                    )
-                },
-                text = { DropdownMenuItemText(text = stringResource(id = R.string.feed_context_share_note)) },
+            DropdownPrimalMenuItem(
+                trailingIconVector = PrimalIcons.ContextShare,
+                text = stringResource(id = R.string.feed_context_share_note),
                 onClick = {
                     systemShareText(
                         context = context,
@@ -84,14 +76,9 @@ fun NoteDropdownMenuIcon(
                     menuVisible = false
                 }
             )
-            DropdownMenuItem(
-                trailingIcon = {
-                    Icon(
-                        imageVector = PrimalIcons.ContextCopyNoteLink,
-                        contentDescription = null
-                    )
-                },
-                text = { DropdownMenuItemText(text = stringResource(id = R.string.feed_context_copy_note_link)) },
+            DropdownPrimalMenuItem(
+                trailingIconVector = PrimalIcons.ContextCopyNoteLink,
+                text = stringResource(id = R.string.feed_context_copy_note_link),
                 onClick = {
                     copyText(context = context, text = resolvePrimalNoteLink(noteId = noteId))
                     menuVisible = false
@@ -104,14 +91,9 @@ fun NoteDropdownMenuIcon(
                     }
                 }
             )
-            DropdownMenuItem(
-                trailingIcon = {
-                    Icon(
-                        imageVector = PrimalIcons.ContextCopyNoteText,
-                        contentDescription = null
-                    )
-                },
-                text = { DropdownMenuItemText(text = stringResource(id = R.string.feed_context_copy_note_text)) },
+            DropdownPrimalMenuItem(
+                trailingIconVector = PrimalIcons.ContextCopyNoteText,
+                text = stringResource(id = R.string.feed_context_copy_note_text),
                 onClick = {
                     copyText(context = context, text = noteContent)
                     menuVisible = false
@@ -124,14 +106,9 @@ fun NoteDropdownMenuIcon(
                     }
                 }
             )
-            DropdownMenuItem(
-                trailingIcon = {
-                    Icon(
-                        imageVector = PrimalIcons.ContextCopyNoteId,
-                        contentDescription = null
-                    )
-                },
-                text = { DropdownMenuItemText(text = stringResource(id = R.string.feed_context_copy_note_id)) },
+            DropdownPrimalMenuItem(
+                trailingIconVector = PrimalIcons.ContextCopyNoteId,
+                text = stringResource(id = R.string.feed_context_copy_note_id),
                 onClick = {
                     copyText(context = context, text = noteId.hexToNoteHrp())
                     menuVisible = false
@@ -144,14 +121,9 @@ fun NoteDropdownMenuIcon(
                     }
                 }
             )
-            DropdownMenuItem(
-                trailingIcon = {
-                    Icon(
-                        imageVector = PrimalIcons.ContextCopyRawData,
-                        contentDescription = null
-                    )
-                },
-                text = { DropdownMenuItemText(text = stringResource(id = R.string.feed_context_copy_raw_data)) },
+            DropdownPrimalMenuItem(
+                trailingIconVector = PrimalIcons.ContextCopyRawData,
+                text = stringResource(id = R.string.feed_context_copy_raw_data),
                 onClick = {
                     copyText(context = context, text = noteRawData)
                     menuVisible = false
@@ -164,14 +136,9 @@ fun NoteDropdownMenuIcon(
                     }
                 }
             )
-            DropdownMenuItem(
-                trailingIcon = {
-                    Icon(
-                        imageVector = PrimalIcons.ContextCopyPublicKey,
-                        contentDescription = null
-                    )
-                },
-                text = { DropdownMenuItemText(text = stringResource(id = R.string.feed_context_copy_user_id)) },
+            DropdownPrimalMenuItem(
+                trailingIconVector = PrimalIcons.ContextCopyPublicKey,
+                text = stringResource(id = R.string.feed_context_copy_user_id),
                 onClick = {
                     copyText(context = context, text = authorId.hexToNpubHrp())
                     menuVisible = false
@@ -184,20 +151,10 @@ fun NoteDropdownMenuIcon(
                     }
                 }
             )
-            DropdownMenuItem(
-                trailingIcon = {
-                    Icon(
-                        imageVector = PrimalIcons.ContextMuteUser,
-                        contentDescription = null,
-                        tint = AppTheme.colorScheme.error,
-                    )
-                },
-                text = {
-                    DropdownMenuItemText(
-                        text = stringResource(id = R.string.context_menu_mute_user),
-                        color = AppTheme.colorScheme.error,
-                    )
-                },
+            DropdownPrimalMenuItem(
+                trailingIconVector = PrimalIcons.ContextMuteUser,
+                tint = AppTheme.colorScheme.error,
+                text = stringResource(id = R.string.context_menu_mute_user),
                 onClick = {
                     onMuteUserClick()
                     menuVisible = false

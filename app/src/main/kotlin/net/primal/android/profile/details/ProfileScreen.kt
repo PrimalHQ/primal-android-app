@@ -32,10 +32,7 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.ripple.rememberRipple
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -85,13 +82,14 @@ import net.primal.android.R
 import net.primal.android.core.compose.AdjustTemporarilySystemBarColors
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.AvatarThumbnailListItemImage
-import net.primal.android.core.compose.DropdownMenuItemText
 import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.ListLoading
 import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.button.PrimalFilledButton
+import net.primal.android.core.compose.dropdown.DropdownPrimalMenu
+import net.primal.android.core.compose.dropdown.DropdownPrimalMenuItem
 import net.primal.android.core.compose.feed.list.FeedLazyColumn
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.foundation.ClickDebounce
@@ -484,27 +482,22 @@ private fun ProfileDropdownMenu(
         onClick = { menuVisible = true },
     )
 
-    DropdownMenu(
-        modifier = Modifier.background(color = AppTheme.extraColorScheme.surfaceVariantAlt1),
+    DropdownPrimalMenu(
         expanded = menuVisible,
         onDismissRequest = { menuVisible = false },
     ) {
 
         if (!isActiveUser) {
             val title = stringResource(id = R.string.profile_user_feed_title, name)
-            val text =
-                if (isProfileFeedInActiveUserFeeds) stringResource(id = R.string.profile_context_remove_user_feed) else stringResource(
-                    id = R.string.profile_context_add_user_feed
-                )
+            val itemText = if (isProfileFeedInActiveUserFeeds) {
+                stringResource(id = R.string.profile_context_remove_user_feed)
+            } else {
+                stringResource(id = R.string.profile_context_add_user_feed)
+            }
 
-            DropdownMenuItem(
-                trailingIcon = {
-                    Icon(
-                        imageVector = PrimalIcons.UserFeedAdd,
-                        contentDescription = null
-                    )
-                },
-                text = { DropdownMenuItemText(text = text) },
+            DropdownPrimalMenuItem(
+                trailingIconVector = PrimalIcons.UserFeedAdd,
+                text = itemText,
                 onClick = {
                     if (isProfileFeedInActiveUserFeeds) {
                         eventPublisher(
@@ -537,14 +530,9 @@ private fun ProfileDropdownMenu(
             )
         }
 
-        DropdownMenuItem(
-            trailingIcon = {
-                Icon(
-                    imageVector = PrimalIcons.ContextShare,
-                    contentDescription = null
-                )
-            },
-            text = { DropdownMenuItemText(text = stringResource(id = R.string.profile_context_share_profile)) },
+        DropdownPrimalMenuItem(
+            trailingIconVector = PrimalIcons.ContextShare,
+            text = stringResource(id = R.string.profile_context_share_profile),
             onClick = {
                 systemShareText(
                     context = context,
@@ -567,20 +555,11 @@ private fun ProfileDropdownMenu(
                 ProfileContract.UiEvent.MuteAction(profileId = profileId)
             }
 
-            DropdownMenuItem(
-                trailingIcon = {
-                    Icon(
-                        imageVector = PrimalIcons.ContextMuteUser,
-                        contentDescription = null,
-                        tint = AppTheme.colorScheme.error,
-                    )
-                },
-                text = {
-                    DropdownMenuItemText(
-                        text = text,
-                        color = AppTheme.colorScheme.error,
-                    )
-                }, onClick = {
+            DropdownPrimalMenuItem(
+                trailingIconVector = PrimalIcons.ContextMuteUser,
+                text = text,
+                tint = AppTheme.colorScheme.error,
+                onClick = {
                     eventPublisher(action)
                     menuVisible = false
                 })
