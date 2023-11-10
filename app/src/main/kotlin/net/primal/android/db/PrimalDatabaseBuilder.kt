@@ -2,12 +2,13 @@ package net.primal.android.db
 
 import android.content.Context
 import androidx.room.Room
+import androidx.sqlite.db.SupportSQLiteOpenHelper
 import dagger.hilt.android.qualifiers.ApplicationContext
-import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
 import javax.inject.Inject
 
 class PrimalDatabaseBuilder @Inject constructor(
     @ApplicationContext private val context: Context,
+    private val openHelperFactory: SupportSQLiteOpenHelper.Factory,
 ) {
 
     init {
@@ -21,7 +22,7 @@ class PrimalDatabaseBuilder @Inject constructor(
             PrimalDatabase::class.java,
             "${context.dataDir.path}/databases/primal_v2.db",
         )
-            .openHelperFactory(SupportOpenHelperFactory("testingPurposesOnlyPassword".toByteArray()))
+            .openHelperFactory(openHelperFactory)
             .enableMultiInstanceInvalidation()
             .fallbackToDestructiveMigration()
             .build()

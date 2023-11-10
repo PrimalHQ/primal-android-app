@@ -78,5 +78,5 @@ object CryptoUtils {
 
     private val secp256k1 = Secp256k1.get()
 
-    private val random = SecureRandom()
+    private val random = SecureRandom.getInstanceStrong()
 }
