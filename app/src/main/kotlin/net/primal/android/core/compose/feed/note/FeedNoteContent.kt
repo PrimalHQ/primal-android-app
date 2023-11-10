@@ -185,7 +185,7 @@ fun FeedNoteContent(
             PrimalClickableText(
                 style = AppTheme.typography.bodyMedium.copy(
                     color = contentColor,
-                    lineHeight = 18.sp,
+                    lineHeight = 20.sp,
                 ),
                 text = contentText,
                 onClick = { position, offset ->

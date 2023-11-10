@@ -26,38 +26,26 @@ import net.primal.android.theme.AppTheme
 @Composable
 fun RepostedNotice(
     modifier: Modifier,
-    repostedBy: String,
+    repostedByAuthor: String,
     onRepostAuthorClick: () -> Unit,
 ) {
     Box(
         modifier = modifier,
         contentAlignment = Alignment.Center,
     ) {
+        val contentColor = AppTheme.extraColorScheme.onSurfaceVariantAlt2
         PrimalClickableText(
             modifier = Modifier
                 .wrapContentWidth()
                 .align(Alignment.TopStart),
             text = buildAnnotatedString {
                 appendInlineContent("icon", "[icon]")
-                append(' ')
                 append(
                     AnnotatedString(
-                        text = repostedBy,
-                        spanStyle = SpanStyle(
-                            color = AppTheme.colorScheme.primary,
-                        )
+                        text = "  $repostedByAuthor ${stringResource(id = R.string.feed_reposted_suffix)} ",
+                        spanStyle = SpanStyle(color = contentColor)
                     )
                 )
-                append(' ')
-                append(
-                    AnnotatedString(
-                        text = stringResource(id = R.string.feed_reposted_suffix),
-                        spanStyle = SpanStyle(
-                            color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-                        )
-                    )
-                )
-                append(' ')
             },
             style = AppTheme.typography.bodyMedium,
             onClick = { _, _ ->
@@ -65,7 +53,7 @@ fun RepostedNotice(
             },
             inlineContent = mapOf(
                 "icon" to InlineTextContent(
-                    placeholder = Placeholder(18.sp, 18.sp, PlaceholderVerticalAlign.TextCenter)
+                    placeholder = Placeholder(16.sp, 16.sp, PlaceholderVerticalAlign.TextCenter)
                 ) {
                     Box(
                         modifier = Modifier.fillMaxSize(),
@@ -74,9 +62,7 @@ fun RepostedNotice(
                         Image(
                             imageVector = PrimalIcons.FeedReposts,
                             contentDescription = null,
-                            colorFilter = ColorFilter.tint(
-                                color = AppTheme.extraColorScheme.onSurfaceVariantAlt2
-                            ),
+                            colorFilter = ColorFilter.tint(color = contentColor),
                         )
                     }
                 }

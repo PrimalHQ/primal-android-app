@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -64,9 +65,9 @@ import net.primal.android.core.compose.AvatarThumbnailListItemImage
 import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.button.PrimalLoadingButton
-import net.primal.android.core.compose.feed.note.FeedNoteHeader
-import net.primal.android.core.compose.feed.note.FeedNoteContent
 import net.primal.android.core.compose.feed.model.FeedPostUi
+import net.primal.android.core.compose.feed.note.FeedNoteContent
+import net.primal.android.core.compose.feed.note.FeedNoteHeader
 import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromGallery
@@ -162,10 +163,10 @@ fun NoteEditorScreen(
                     PrimalLoadingButton(
                         modifier = Modifier
                             .padding(end = 8.dp)
-                            .height(36.dp)
+                            .height(34.dp)
                             .wrapContentWidth(),
                         text = text,
-                        fontSize = 16.sp,
+                        fontSize = 14.sp,
                         fontWeight = FontWeight.Normal,
                         contentPadding = PaddingValues(
                             horizontal = 24.dp,
@@ -193,7 +194,7 @@ fun NoteEditorScreen(
                 with(LocalDensity.current) {
                     val replyHeight = replyNoteHeightPx.toDp() + 60.dp
                     val noteEditorMaxHeight = noteEditorMaxHeightPx.toDp()
-                    noteEditorMaxHeight - replyHeight - attachmentsHeight
+                    noteEditorMaxHeight - replyHeight - attachmentsHeightDp
                 }
             } else 0.dp
 
@@ -219,7 +220,7 @@ fun NoteEditorScreen(
                         if (state.isReply && state.replyToNote != null) {
                             ReplyingToText(
                                 modifier = Modifier
-                                    .padding(top = 8.dp, start = avatarsRowWidth, end = 16.dp)
+                                    .padding(top = 8.dp, start = avatarsColumnWidthDp, end = 16.dp)
                                     .fillMaxWidth(),
                                 replyToUsername = state.replyToNote.authorHandle
                             )
@@ -234,11 +235,11 @@ fun NoteEditorScreen(
                                                 drawLine(
                                                     color = outlineColor,
                                                     start = Offset(
-                                                        x = connectionLineOffsetX.toPx(),
+                                                        x = connectionLineOffsetXDp.toPx(),
                                                         y = (-32).dp.toPx()
                                                     ),
                                                     end = Offset(
-                                                        x = connectionLineOffsetX.toPx(),
+                                                        x = connectionLineOffsetXDp.toPx(),
                                                         y = size.height / 2
                                                     ),
                                                     strokeWidth = 2.dp.toPx(),
@@ -249,12 +250,13 @@ fun NoteEditorScreen(
                                     }
                                     .padding(start = 16.dp)
                                     .padding(top = 8.dp),
+                                avatarSize = avatarSizeDp,
                                 source = state.activeAccountAvatarUrl,
                             )
 
                             OutlinedTextField(
                                 modifier = Modifier
-                                    .padding(end = 16.dp)
+                                    .offset(x = (-8).dp)
                                     .fillMaxWidth()
                                     .wrapContentHeight()
                                     .focusRequester(focusRequester)
@@ -266,8 +268,12 @@ fun NoteEditorScreen(
                                     Text(
                                         text = stringResource(id = R.string.note_editor_content_placeholder),
                                         color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
+                                        style = AppTheme.typography.bodyMedium,
                                     )
                                 },
+                                textStyle = AppTheme.typography.bodyMedium.copy(
+                                    lineHeight = 20.sp,
+                                ),
                                 colors = PrimalDefaults.outlinedTextFieldColors(
                                     focusedContainerColor = Color.Unspecified,
                                     unfocusedContainerColor = Color.Unspecified,
@@ -322,12 +328,11 @@ private fun NoteAttachmentsLazyRow(
     LazyRow(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 16.dp)
-            .height(attachmentsHeight),
+            .height(attachmentsHeightDp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         item {
-            Spacer(modifier = Modifier.width(avatarsRowWidth))
+            Spacer(modifier = Modifier.width(avatarsColumnWidthDp - 8.dp))
         }
 
         items(
@@ -354,11 +359,11 @@ private fun ReplyToNote(
                 drawLine(
                     color = connectionLineColor,
                     start = Offset(
-                        x = connectionLineOffsetX.toPx(),
-                        y = connectionLineOffsetX.toPx()
+                        x = connectionLineOffsetXDp.toPx(),
+                        y = connectionLineOffsetXDp.toPx()
                     ),
                     end = Offset(
-                        x = connectionLineOffsetX.toPx(),
+                        x = connectionLineOffsetXDp.toPx(),
                         y = size.height + 16.dp.toPx()
                     ),
                     strokeWidth = 2.dp.toPx(),
@@ -386,7 +391,7 @@ private fun ReplyToNote(
 
         FeedNoteContent(
             modifier = Modifier.padding(
-                start = avatarsRowWidth,
+                start = avatarsColumnWidthDp,
                 end = 16.dp,
             ),
             content = replyToNote.content,
@@ -455,6 +460,7 @@ private fun NewPostPublishErrorHandler(
     }
 }
 
-private val connectionLineOffsetX = 40.dp
-private val attachmentsHeight = 160.dp
-private val avatarsRowWidth = 48.dp + 32.dp
+private val avatarSizeDp = 42.dp
+private val connectionLineOffsetXDp = 36.dp
+private val attachmentsHeightDp = 160.dp
+private val avatarsColumnWidthDp = avatarSizeDp + 24.dp

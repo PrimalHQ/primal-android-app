@@ -429,6 +429,7 @@ fun ReplyToBottomBar(
                             ),
                             maxLines = 1,
                             color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
+                            style = AppTheme.typography.bodyMedium,
                         )
                     }
                 },
@@ -485,14 +486,14 @@ fun ReplyToBottomBar(
                     PrimalLoadingButton(
                         modifier = Modifier
                             .wrapContentWidth()
-                            .height(40.dp),
+                            .height(34.dp),
                         text = if (publishingReply) {
                             stringResource(id = R.string.thread_publishing_button)
                         } else {
                             stringResource(id = R.string.thread_publish_button)
                         },
                         enabled = !publishingReply && replyTextProvider().isNotBlank(),
-                        fontSize = 16.sp,
+                        fontSize = 14.sp,
                         fontWeight = FontWeight.Normal,
                         onClick = {
                             onPublishReplyClick()

@@ -77,13 +77,13 @@
     <string name="feed_reposted_suffix">reposted</string>
     <string name="feed_see_more">See more…</string>
 
-    <string name="timestamp_since_just_now">just now</string>
-    <string name="timestamp_since_minutes">%1$s min. ago</string>
-    <string name="timestamp_since_hours">%1$s hr. ago</string>
-    <string name="timestamp_since_days">%1$s d. ago</string>
-    <string name="timestamp_since_weeks">%1$s wk. ago</string>
-    <string name="timestamp_since_months">%1$s m. ago</string>
-    <string name="timestamp_since_years">%1$s y. ago</string>
+    <string name="timestamp_since_just_now">now</string>
+    <string name="timestamp_since_minutes">%1$sm</string>
+    <string name="timestamp_since_hours">%1$sh</string>
+    <string name="timestamp_since_days">%1$sd</string>
+    <string name="timestamp_since_weeks">%1$sw</string>
+    <string name="timestamp_since_months">%1$sm</string>
+    <string name="timestamp_since_years">%1$sy</string>
     <plurals name="timestamp_since_minutes">
         <item quantity="one">%1$s minute ago</item>
         <item quantity="other">%1$s minutes ago</item>

@@ -101,9 +101,9 @@ fun FeedNoteCard(
                     RepostedNotice(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 12.dp)
+                            .padding(horizontal = avatarPaddingDp)
                             .padding(top = 4.dp),
-                        repostedBy = data.repostAuthorName,
+                        repostedByAuthor = data.repostAuthorName,
                         onRepostAuthorClick = {
                             if (data.repostAuthorId != null) {
                                 onProfileClick(data.repostAuthorId)
