@@ -1,3 +1,9 @@
 ## Changes
+- Implemented Direct Messages;
+- Implemented Feed settings screen;
+- Implemented Mute User feature;
+- Local database encryption;
+- Visual revamp;
 
-- Theme, Font & Feed revamps
+## Fixes
+- Fixed errors not showing up on Edit profile screen;
