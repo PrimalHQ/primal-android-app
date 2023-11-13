@@ -68,6 +68,7 @@ import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.core.ext.findByUrl
 import net.primal.android.core.ext.openUriSafely
 import net.primal.android.core.utils.asEllipsizedNpub
+import net.primal.android.core.utils.formatNip05Identifier
 import net.primal.android.messages.chat.model.ChatMessageUi
 import net.primal.android.theme.AppTheme
 import java.time.Instant
@@ -133,7 +134,7 @@ fun ChatScreen(
         topBar = {
             PrimalTopAppBar(
                 title = participantUsername,
-                subtitle = state.participantProfile?.internetIdentifier,
+                subtitle = state.participantProfile?.internetIdentifier?.formatNip05Identifier(),
                 navigationIcon = PrimalIcons.ArrowBack,
                 onNavigationIconClick = onClose,
                 actions = {

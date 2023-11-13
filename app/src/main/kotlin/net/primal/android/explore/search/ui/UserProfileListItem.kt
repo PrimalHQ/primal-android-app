@@ -14,6 +14,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import net.primal.android.R
 import net.primal.android.core.compose.AvatarThumbnailListItemImage
+import net.primal.android.core.utils.formatNip05Identifier
 import net.primal.android.core.utils.shortened
 import net.primal.android.theme.AppTheme
 
@@ -42,7 +43,7 @@ fun UserProfileListItem(
         supportingContent = {
             if (!data.internetIdentifier.isNullOrEmpty()) {
                 Text(
-                    text = data.internetIdentifier,
+                    text = data.internetIdentifier.formatNip05Identifier(),
                     color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
                 )
             }

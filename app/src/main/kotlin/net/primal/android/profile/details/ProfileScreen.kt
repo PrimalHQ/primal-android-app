@@ -109,6 +109,7 @@ import net.primal.android.core.ext.findByUrl
 import net.primal.android.core.ext.findNearestOrNull
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.copyText
+import net.primal.android.core.utils.formatNip05Identifier
 import net.primal.android.core.utils.resolvePrimalProfileLink
 import net.primal.android.core.utils.systemShareText
 import net.primal.android.crypto.hexToNoteHrp
@@ -739,7 +740,7 @@ private fun UserInternetIdentifier(
 ) {
     Text(
         modifier = modifier,
-        text = internetIdentifier,
+        text = internetIdentifier.formatNip05Identifier(),
         style = AppTheme.typography.bodySmall,
         color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
     )

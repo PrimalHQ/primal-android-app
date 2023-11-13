@@ -28,6 +28,7 @@ import net.primal.android.core.compose.AvatarThumbnailListItemImage
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.button.PrimalFilledButton
+import net.primal.android.core.utils.formatNip05Identifier
 import net.primal.android.core.utils.usernameUiFriendly
 import net.primal.android.nostr.model.content.ContentMetadata
 import net.primal.android.theme.AppTheme
@@ -136,7 +137,7 @@ fun FollowRecommendedAccountsStep(
                         supportingContent = {
                             if (!authorInternetIdentifier.isNullOrEmpty()) {
                                 Text(
-                                    text = suggestion.content.nip05,
+                                    text = suggestion.content.nip05.formatNip05Identifier(),
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis,
                                     style = AppTheme.typography.bodyMedium,

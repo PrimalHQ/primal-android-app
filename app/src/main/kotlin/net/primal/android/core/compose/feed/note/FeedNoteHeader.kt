@@ -25,6 +25,7 @@ import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.asBeforeNowFormat
 import net.primal.android.core.compose.media.model.MediaResourceUi
+import net.primal.android.core.utils.formatNip05Identifier
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import java.time.Instant
@@ -65,7 +66,7 @@ fun FeedNoteHeader(
             )
         ) {
             val identifier = if (!singleLine) "" else {
-                authorInternetIdentifier ?: ""
+                authorInternetIdentifier?.formatNip05Identifier() ?: ""
             }
             val suffixText = buildAnnotatedString {
                     append(

@@ -43,6 +43,7 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.DarkMode
 import net.primal.android.core.compose.icons.primaliconpack.LightMode
 import net.primal.android.core.compose.icons.primaliconpack.QrCode
+import net.primal.android.core.utils.formatNip05Identifier
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.user.domain.UserAccount
@@ -174,7 +175,7 @@ private fun DrawerHeader(
 
 
         Text(
-            text = userAccount?.internetIdentifier ?: "",
+            text = userAccount?.internetIdentifier?.formatNip05Identifier() ?: "",
             style = AppTheme.typography.labelLarge,
             color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
             modifier = Modifier.constrainAs(identifierRef) {

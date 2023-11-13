@@ -37,4 +37,18 @@ class StringUtilsTest {
         actual shouldBe expected
     }
 
+    @Test
+    fun `formatNip05Identifier returns full id`() {
+        "aleksandar@appoll41.com".formatNip05Identifier() shouldBe "aleksandar@appoll41.com"
+    }
+
+    @Test
+    fun `formatNip05Identifier returns domain name for naked ids`() {
+        "_@appollo41.com".formatNip05Identifier() shouldBe "appollo41.com"
+    }
+
+    @Test
+    fun `formatNip05Identifier returns empty string if domain is missing in naked ids`() {
+        "_@".formatNip05Identifier() shouldBe ""
+    }
 }

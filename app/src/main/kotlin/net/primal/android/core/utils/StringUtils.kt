@@ -16,3 +16,9 @@ fun String.ellipsizeMiddle(size: Int): String {
 fun String?.isPrimalIdentifier() = this?.contains("primal.net") == true
 
 fun String.asEllipsizedNpub(): String = Hex.decode(this).toNpub().ellipsizeMiddle(size = 8)
+
+fun String.formatNip05Identifier(): String {
+    return if (startsWith("_@")) {
+        substring(2)
+    } else this
+}
