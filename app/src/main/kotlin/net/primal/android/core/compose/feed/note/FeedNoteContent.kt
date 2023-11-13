@@ -213,6 +213,7 @@ fun FeedNoteContent(
         if (referencedPostResources.isNotEmpty()) {
             FeedReferencedNotes(
                 postResources = referencedPostResources,
+                expanded = expanded,
                 containerColor = referencedNoteContainerColor,
                 onPostClick = onPostClick,
             )
@@ -398,11 +399,18 @@ private fun BoxWithConstraintsScope.findImageSize(resource: MediaResourceUi): Dp
 @Composable
 fun FeedReferencedNotes(
     postResources: List<NostrResourceUi>,
+    expanded: Boolean,
     containerColor: Color,
     onPostClick: (String) -> Unit,
 ) {
+    val displayableNotes = if (postResources.isNotEmpty()) {
+        if (expanded) postResources else postResources.subList(0, 1)
+    } else {
+        emptyList()
+    }
+
     Column {
-        postResources.forEach { nostrResourceUi ->
+        displayableNotes.forEach { nostrResourceUi ->
             val data = nostrResourceUi.referencedPost
             checkNotNull(data)
             ReferencedNoteCard(
