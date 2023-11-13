@@ -625,6 +625,7 @@ private fun NavGraphBuilder.profile(
         onPostQuoteClick = { preFillContent -> navController.navigateToNoteEditor(preFillContent) },
         onProfileClick = { profileId -> navController.navigateToProfile(profileId = profileId) },
         onEditProfileClick = { navController.navigateToEditProfile() },
+        onMessageClick = { profileId -> navController.navigateToChat(profileId = profileId) },
         onHashtagClick = { hashtag -> navController.navigateToExploreFeed(query = hashtag) },
         onWalletUnavailable = { navController.navigateToWallet() },
     )

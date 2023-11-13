@@ -33,6 +33,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -58,6 +61,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -100,6 +104,7 @@ import net.primal.android.core.compose.icons.primaliconpack.ContextMuteUser
 import net.primal.android.core.compose.icons.primaliconpack.ContextShare
 import net.primal.android.core.compose.icons.primaliconpack.Key
 import net.primal.android.core.compose.icons.primaliconpack.Link
+import net.primal.android.core.compose.icons.primaliconpack.Message
 import net.primal.android.core.compose.icons.primaliconpack.More
 import net.primal.android.core.compose.icons.primaliconpack.UserFeedAdd
 import net.primal.android.core.compose.isEmpty
@@ -129,6 +134,7 @@ fun ProfileScreen(
     onPostQuoteClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
     onEditProfileClick: () -> Unit,
+    onMessageClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
     onWalletUnavailable: () -> Unit,
 ) {
@@ -144,6 +150,7 @@ fun ProfileScreen(
         onPostQuoteClick = onPostQuoteClick,
         onProfileClick = onProfileClick,
         onEditProfileClick = onEditProfileClick,
+        onMessageClick = onMessageClick,
         onHashtagClick = onHashtagClick,
         onWalletUnavailable = onWalletUnavailable,
         eventPublisher = { viewModel.setEvent(it) },
@@ -160,6 +167,7 @@ fun ProfileScreen(
     onPostQuoteClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
     onEditProfileClick: () -> Unit,
+    onMessageClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
     onWalletUnavailable: () -> Unit,
     eventPublisher: (ProfileContract.UiEvent) -> Unit,
@@ -326,12 +334,15 @@ fun ProfileScreen(
                         profileDetails = state.profileDetails,
                         profileStats = state.profileStats,
                         onEditProfileClick = onEditProfileClick,
+                        onMessageClick = {
+                            onMessageClick(state.profileId)
+                        },
                         onFollow = {
                             eventPublisher(ProfileContract.UiEvent.FollowAction(state.profileId))
                         },
                         onUnfollow = {
                             eventPublisher(ProfileContract.UiEvent.UnfollowAction(state.profileId))
-                        }
+                        },
                     )
 
                     if (state.isProfileMuted) {
@@ -599,6 +610,7 @@ private fun UserProfileDetails(
     profileDetails: ProfileDetailsUi? = null,
     profileStats: ProfileStatsUi? = null,
     onEditProfileClick: () -> Unit,
+    onMessageClick: () -> Unit,
     onFollow: () -> Unit,
     onUnfollow: () -> Unit,
 ) {
@@ -616,6 +628,7 @@ private fun UserProfileDetails(
             isFollowed = isFollowed,
             isActiveUser = isActiveUser,
             onEditProfileClick = onEditProfileClick,
+            onMessageClick = onMessageClick,
             onFollow = onFollow,
             onUnfollow = onUnfollow,
         )
@@ -752,6 +765,7 @@ private fun ProfileActions(
     isFollowed: Boolean,
     isActiveUser: Boolean,
     onEditProfileClick: () -> Unit,
+    onMessageClick: () -> Unit,
     onFollow: () -> Unit,
     onUnfollow: () -> Unit,
 ) {
@@ -764,6 +778,11 @@ private fun ProfileActions(
             .background(AppTheme.colorScheme.surfaceVariant),
         horizontalArrangement = Arrangement.End,
     ) {
+        ActionButton(
+            onClick = onMessageClick,
+            iconVector = PrimalIcons.Message,
+        )
+
         if (!isActiveUser) {
             when (isFollowed) {
                 true -> UnfollowButton(onClick = onUnfollow)
@@ -775,6 +794,30 @@ private fun ProfileActions(
                 onEditProfileClick()
             })
         }
+    }
+}
+
+@Composable
+fun ActionButton(
+    iconVector: ImageVector,
+    onClick: () -> Unit,
+    contentDescription: String? = null,
+) {
+    IconButton(
+        modifier = Modifier
+            .padding(horizontal = 8.dp)
+            .size(36.dp),
+        onClick = onClick,
+        colors = IconButtonDefaults.iconButtonColors(
+            containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
+            contentColor = AppTheme.colorScheme.onSurface,
+        ),
+    ) {
+        Icon(
+            modifier = Modifier.padding(all = 2.dp),
+            imageVector = iconVector,
+            contentDescription = contentDescription,
+        )
     }
 }
 
@@ -988,6 +1031,7 @@ fun PreviewProfileScreen() {
             onPostQuoteClick = {},
             onProfileClick = {},
             onEditProfileClick = {},
+            onMessageClick = {},
             onHashtagClick = {},
             onWalletUnavailable = {},
             eventPublisher = {},
