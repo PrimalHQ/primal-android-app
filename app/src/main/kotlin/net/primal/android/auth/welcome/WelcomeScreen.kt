@@ -34,6 +34,7 @@ import net.primal.android.core.compose.fadingBottomEdge
 import net.primal.android.core.ext.openUriSafely
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
+import net.primal.android.theme.domain.PrimalTheme
 
 @Composable
 fun WelcomeScreen(

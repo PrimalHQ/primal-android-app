@@ -8,9 +8,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.getAndUpdate
-import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
-import net.primal.android.theme.PrimalTheme
+import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.theme.active.ActiveThemeStore
 import javax.inject.Inject
 

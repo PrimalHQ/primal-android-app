@@ -117,6 +117,7 @@ import net.primal.android.crypto.hexToNpubHrp
 import net.primal.android.profile.details.ProfileContract.UiState.ProfileError
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
+import net.primal.android.theme.domain.PrimalTheme
 import java.text.NumberFormat
 
 @Composable

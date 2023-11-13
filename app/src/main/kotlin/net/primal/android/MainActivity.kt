@@ -22,6 +22,7 @@ import net.primal.android.theme.PrimalRippleTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.active.ActiveThemeStore
 import net.primal.android.theme.defaultPrimalTheme
+import net.primal.android.theme.domain.PrimalTheme
 import javax.inject.Inject
 
 @AndroidEntryPoint

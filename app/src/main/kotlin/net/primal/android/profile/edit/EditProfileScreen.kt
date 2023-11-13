@@ -40,6 +40,7 @@ import net.primal.android.core.compose.profile.PrimalOutlinedTextField
 import net.primal.android.core.compose.profile.ProfileHero
 import net.primal.android.core.utils.isValidUsername
 import net.primal.android.theme.PrimalTheme
+import net.primal.android.theme.domain.PrimalTheme
 
 @Composable
 fun EditProfileScreen(

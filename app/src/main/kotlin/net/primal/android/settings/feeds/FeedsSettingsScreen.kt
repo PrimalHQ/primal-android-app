@@ -47,6 +47,7 @@ import net.primal.android.settings.feeds.model.Feed
 import net.primal.android.settings.feeds.model.FeedAction
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
+import net.primal.android.theme.domain.PrimalTheme
 
 @Composable
 fun FeedsSettingsScreen(

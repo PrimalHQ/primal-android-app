@@ -63,6 +63,7 @@ import net.primal.android.profile.edit.EditProfileScreen
 import net.primal.android.profile.edit.EditProfileViewModel
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
+import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.thread.ThreadScreen
 import net.primal.android.thread.ThreadViewModel
 import java.net.URLEncoder

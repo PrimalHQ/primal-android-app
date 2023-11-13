@@ -48,6 +48,7 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
+import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.user.domain.NostrWallet
 import net.primal.android.user.domain.NostrWalletKeypair
 

@@ -1,7 +1,6 @@
-package net.primal.android.theme
+package net.primal.android.theme.domain
 
 import androidx.compose.material3.ColorScheme
-import net.primal.android.R
 import net.primal.android.theme.colors.ExtraColorScheme
 import net.primal.android.theme.colors.iceColorScheme
 import net.primal.android.theme.colors.iceExtraColorScheme
@@ -14,46 +13,46 @@ import net.primal.android.theme.colors.sunsetExtraColorScheme
 
 enum class PrimalTheme(
     val themeName: String,
-    val inverseThemeName: String,
-    val isDarkTheme: Boolean,
     val colorScheme: ColorScheme,
     val extraColorScheme: ExtraColorScheme,
-    val logoId: Int
+    val inverseThemeName: String,
+    val isDarkTheme: Boolean,
+    val accent: PrimalAccent,
 ) {
     Sunset(
         themeName = "sunset",
-        inverseThemeName = "sunrise",
-        isDarkTheme = true,
         colorScheme = sunsetColorScheme,
         extraColorScheme = sunsetExtraColorScheme,
-        logoId = R.drawable.primal_wave_logo_red
+        inverseThemeName = "sunrise",
+        isDarkTheme = true,
+        accent = PrimalAccent.Summer,
     ),
 
     Midnight(
         themeName = "midnight",
-        inverseThemeName = "ice",
-        isDarkTheme = true,
         colorScheme = midnightColorScheme,
         extraColorScheme = midnightExtraColorScheme,
-        logoId = R.drawable.primal_wave_logo_blue
+        inverseThemeName = "ice",
+        isDarkTheme = true,
+        accent = PrimalAccent.Winter,
     ),
 
     Sunrise(
         themeName = "sunrise",
-        inverseThemeName = "sunset",
-        isDarkTheme = false,
         colorScheme = sunriseColorScheme,
         extraColorScheme = sunriseExtraColorScheme,
-        logoId = R.drawable.primal_wave_logo_red
+        inverseThemeName = "sunset",
+        isDarkTheme = false,
+        accent = PrimalAccent.Summer,
     ),
 
     Ice(
         themeName = "ice",
-        inverseThemeName = "midnight",
-        isDarkTheme = false,
         colorScheme = iceColorScheme,
         extraColorScheme = iceExtraColorScheme,
-        logoId = R.drawable.primal_wave_logo_blue
+        inverseThemeName = "midnight",
+        isDarkTheme = false,
+        accent = PrimalAccent.Winter,
     );
 
     companion object {

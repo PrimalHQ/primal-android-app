@@ -81,6 +81,7 @@ import net.primal.android.crypto.hexToNoteHrp
 import net.primal.android.editor.ui.ReplyingToText
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
+import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.thread.ThreadContract.UiState.ThreadError
 import java.time.Instant
 

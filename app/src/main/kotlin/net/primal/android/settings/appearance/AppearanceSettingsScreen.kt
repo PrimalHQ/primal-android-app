@@ -45,6 +45,7 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
+import net.primal.android.theme.domain.PrimalTheme
 
 @Composable
 fun AppearanceSettingsScreen(
@@ -181,7 +182,7 @@ private fun ThemeBox(
         ) {
             Image(
                 modifier = Modifier.align(alignment = Alignment.Center),
-                painter = painterResource(id = primalTheme.logoId),
+                painter = painterResource(id = primalTheme.accent.logoId),
                 contentDescription = null
             )
 

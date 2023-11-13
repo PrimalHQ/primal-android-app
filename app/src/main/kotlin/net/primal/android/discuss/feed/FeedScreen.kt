@@ -53,6 +53,7 @@ import net.primal.android.drawer.PrimalBottomBarHeightDp
 import net.primal.android.drawer.PrimalDrawerScaffold
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
+import net.primal.android.theme.domain.PrimalTheme
 
 @Composable
 fun FeedScreen(
@@ -261,7 +262,7 @@ private fun ErrorHandler(
 @Preview
 @Composable
 fun FeedScreenPreview() {
-    PrimalTheme(primalTheme = PrimalTheme.Sunset) {
+     PrimalTheme(primalTheme = PrimalTheme.Sunset) {
         FeedScreen(
             state = FeedContract.UiState(posts = flow { }),
             eventPublisher = {},

@@ -30,6 +30,7 @@ import net.primal.android.core.compose.icons.primaliconpack.Verified
 import net.primal.android.core.utils.isPrimalIdentifier
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
+import net.primal.android.theme.domain.PrimalTheme
 
 @Composable
 fun NostrUserText(

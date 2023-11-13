@@ -47,7 +47,7 @@ class ActiveThemeStoreTest {
 
     @Test
     fun `setUserTheme stores the user theme`() = runTest {
-        val expectedTheme = PrimalTheme.Sunset
+        val expectedTheme = net.primal.android.theme.domain.PrimalTheme.Sunset
         val activeThemeStore = ActiveThemeStore(persistence = persistence)
         activeThemeStore.setUserTheme(expectedTheme.themeName)
         advanceUntilIdleAndDelay()
@@ -69,7 +69,7 @@ class ActiveThemeStoreTest {
 
     @Test
     fun `userThemeState corresponds to saved theme`() = runTest {
-        val expectedTheme = PrimalTheme.Sunrise
+        val expectedTheme = net.primal.android.theme.domain.PrimalTheme.Sunrise
         persistence.updateData { expectedTheme.themeName }
         val activeThemeStore = ActiveThemeStore(persistence = persistence)
         advanceUntilIdle()

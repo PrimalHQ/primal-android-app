@@ -33,6 +33,7 @@ import net.primal.android.core.utils.usernameUiFriendly
 import net.primal.android.nostr.model.content.ContentMetadata
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
+import net.primal.android.theme.domain.PrimalTheme
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable

@@ -46,6 +46,7 @@ import net.primal.android.notifications.domain.NotificationType
 import net.primal.android.settings.notifications.NotificationsSettingsContract.UiState.ApiError
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
+import net.primal.android.theme.domain.PrimalTheme
 
 @Composable
 fun NotificationsSettingsScreen(

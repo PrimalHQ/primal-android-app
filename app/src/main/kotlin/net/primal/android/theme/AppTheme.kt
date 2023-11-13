@@ -11,6 +11,7 @@ import net.primal.android.core.compose.AdjustSystemColors
 import net.primal.android.theme.colors.ExtraColorScheme
 import net.primal.android.theme.colors.ExtraColorSchemeProvider
 import net.primal.android.theme.colors.LocalExtraColors
+import net.primal.android.theme.domain.PrimalTheme
 
 
 @ReadOnlyComposable

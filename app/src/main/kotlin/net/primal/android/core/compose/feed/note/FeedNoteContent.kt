@@ -52,6 +52,7 @@ import net.primal.android.feed.db.ReferencedPost
 import net.primal.android.feed.db.ReferencedUser
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
+import net.primal.android.theme.domain.PrimalTheme
 import java.time.Instant
 
 private const val PROFILE_ID_ANNOTATION_TAG = "profileId"

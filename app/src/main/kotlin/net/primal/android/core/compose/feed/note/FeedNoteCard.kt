@@ -35,6 +35,7 @@ import net.primal.android.core.compose.feed.model.FeedPostStatsUi
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.ext.openUriSafely
 import net.primal.android.theme.PrimalTheme
+import net.primal.android.theme.domain.PrimalTheme
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
