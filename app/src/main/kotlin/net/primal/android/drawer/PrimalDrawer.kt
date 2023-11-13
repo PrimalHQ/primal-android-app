@@ -22,6 +22,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.luminance
@@ -45,6 +46,7 @@ import net.primal.android.core.compose.icons.primaliconpack.QrCode
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.user.domain.UserAccount
+import java.text.NumberFormat
 
 
 @Composable
@@ -131,6 +133,7 @@ fun PrimalDrawer(
 private fun DrawerHeader(
     userAccount: UserAccount?,
 ) {
+    val numberFormat = remember { NumberFormat.getNumberInstance() }
     ConstraintLayout(
         modifier = Modifier.fillMaxWidth(),
     ) {
@@ -138,11 +141,12 @@ private fun DrawerHeader(
         val (avatarRef, usernameRef, iconRef, identifierRef, statsRef) = createRefs()
 
         AvatarThumbnailListItemImage(
-            source = userAccount?.pictureUrl,
             modifier = Modifier.constrainAs(avatarRef) {
                 start.linkTo(startGuideline)
                 top.linkTo(parent.top, margin = 16.dp)
-            }
+            },
+            source = userAccount?.pictureUrl,
+            avatarSize = 52.dp,
         )
 
         NostrUserText(
@@ -179,11 +183,10 @@ private fun DrawerHeader(
             }
         )
 
-
         val statsAnnotatedString = buildAnnotatedString {
             append(
                 AnnotatedString(
-                    text = userAccount?.followingCount?.toString() ?: "0",
+                    text = userAccount?.followingCount?.let { numberFormat.format(it) } ?: "-",
                     spanStyle = SpanStyle(
                         color = AppTheme.colorScheme.onSurfaceVariant,
                         fontStyle = AppTheme.typography.labelLarge.fontStyle,
@@ -202,7 +205,7 @@ private fun DrawerHeader(
             append("   ")
             append(
                 AnnotatedString(
-                    text = userAccount?.followersCount?.toString() ?: "0",
+                    text = userAccount?.followersCount?.let { numberFormat.format(it) } ?: "-",
                     spanStyle = SpanStyle(
                         color = AppTheme.colorScheme.onSurfaceVariant,
                         fontStyle = AppTheme.typography.labelLarge.fontStyle,
@@ -224,7 +227,7 @@ private fun DrawerHeader(
             style = AppTheme.typography.labelLarge,
             modifier = Modifier.constrainAs(statsRef) {
                 start.linkTo(startGuideline)
-                top.linkTo(identifierRef.bottom, margin = 8.dp)
+                top.linkTo(identifierRef.bottom, margin = 16.dp)
             }
         )
     }
@@ -252,7 +255,7 @@ private fun DrawerMenu(
                         text = it.label().uppercase(),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 8.dp),
+                            .padding(horizontal = 8.dp, vertical = 8.dp),
                         style = AppTheme.typography.titleLarge,
                         color = AppTheme.colorScheme.onSurfaceVariant,
                     )

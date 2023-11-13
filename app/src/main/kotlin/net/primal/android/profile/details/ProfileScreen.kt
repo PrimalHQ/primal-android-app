@@ -626,10 +626,16 @@ private fun UserProfileDetails(
         )
 
         if (profileDetails?.internetIdentifier?.isNotEmpty() == true) {
-            UserInternetIdentifier(internetIdentifier = profileDetails.internetIdentifier)
+            UserInternetIdentifier(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .padding(top = 4.dp),
+                internetIdentifier = profileDetails.internetIdentifier,
+            )
         }
 
         UserPublicKey(
+            modifier = Modifier.padding(top = 8.dp, bottom = 4.dp),
             pubkey = profileId,
             onCopyClick = {
                 copyText(context = context, text = it)
@@ -728,10 +734,11 @@ private fun TextCounter(
 
 @Composable
 private fun UserInternetIdentifier(
+    modifier: Modifier = Modifier,
     internetIdentifier: String,
 ) {
     Text(
-        modifier = Modifier.padding(horizontal = 16.dp),
+        modifier = modifier,
         text = internetIdentifier,
         style = AppTheme.typography.bodySmall,
         color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
@@ -855,17 +862,19 @@ private fun UserWebsiteText(
         style = AppTheme.typography.bodySmall,
         color = AppTheme.colorScheme.secondary,
         leadingIcon = PrimalIcons.Link,
-        leadingIconSize = 16.sp,
-        leadingIconTintColor = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
+        leadingIconSize = 12.sp,
+        leadingIconTintColor = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
     )
 }
 
 @Composable
 private fun UserPublicKey(
+    modifier: Modifier = Modifier,
     pubkey: String,
     onCopyClick: (String) -> Unit,
 ) {
     Row(
+        modifier = modifier,
         verticalAlignment = CenterVertically,
     ) {
         IconText(
@@ -875,9 +884,9 @@ private fun UserPublicKey(
             text = pubkey.asEllipsizedNpub(),
             style = AppTheme.typography.bodySmall,
             color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
-            leadingIconTintColor = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
+            leadingIconTintColor = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
             leadingIcon = PrimalIcons.Key,
-            leadingIconSize = 16.sp,
+            leadingIconSize = 12.sp,
         )
 
 

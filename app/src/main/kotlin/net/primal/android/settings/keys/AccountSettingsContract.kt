@@ -1,6 +1,6 @@
 package net.primal.android.settings.keys
 
-interface KeysContract {
+interface AccountSettingsContract {
     data class UiState(
         val avatarUrl: String? = null,
         val nsec: String = "",

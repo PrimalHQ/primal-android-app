@@ -8,13 +8,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.crypto.hexToNpubHrp
-import net.primal.android.settings.keys.KeysContract.UiState
+import net.primal.android.settings.keys.AccountSettingsContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.credentials.CredentialsStore
 import javax.inject.Inject
 
 @HiltViewModel
-class KeysViewModel @Inject constructor(
+class AccountSettingsViewModel @Inject constructor(
     private val credentialsStore: CredentialsStore,
     private val activeAccountStore: ActiveAccountStore,
 ) : ViewModel() {

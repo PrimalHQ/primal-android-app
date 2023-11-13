@@ -16,8 +16,8 @@ import net.primal.android.settings.feeds.FeedsSettingsViewModel
 import net.primal.android.settings.home.PrimalSettingsSection
 import net.primal.android.settings.home.SettingsHomeScreen
 import net.primal.android.settings.home.SettingsHomeViewModel
-import net.primal.android.settings.keys.KeysScreen
-import net.primal.android.settings.keys.KeysViewModel
+import net.primal.android.settings.keys.AccountSettingsScreen
+import net.primal.android.settings.keys.AccountSettingsViewModel
 import net.primal.android.settings.muted.list.MutedSettingsScreen
 import net.primal.android.settings.muted.list.MutedSettingsViewModel
 import net.primal.android.settings.notifications.NotificationsSettingsScreen
@@ -28,7 +28,7 @@ import net.primal.android.settings.zaps.ZapSettingsScreen
 import net.primal.android.settings.zaps.ZapSettingsViewModel
 
 
-private fun NavController.navigateToKeys() = navigate(route = "keys_settings")
+private fun NavController.navigateToAccount() = navigate(route = "account_settings")
 private fun NavController.navigateToWallet() = navigate(route = "wallet_settings")
 private fun NavController.navigateToAppearance() = navigate(route = "appearance_settings")
 fun NavController.navigateToNotificationsSettings() = navigate(route = "notifications_settings")
@@ -48,7 +48,7 @@ fun NavGraphBuilder.settingsNavigation(
         onClose = { navController.navigateUp() },
         onSettingsSectionClick = {
             when (it) {
-                PrimalSettingsSection.Account -> navController.navigateToKeys()
+                PrimalSettingsSection.Account -> navController.navigateToAccount()
                 PrimalSettingsSection.Wallet -> navController.navigateToWallet()
                 PrimalSettingsSection.Appearance -> navController.navigateToAppearance()
                 PrimalSettingsSection.Notifications -> navController.navigateToNotificationsSettings()
@@ -59,7 +59,7 @@ fun NavGraphBuilder.settingsNavigation(
         }
     )
 
-    keys(route = "keys_settings", navController = navController)
+    keys(route = "account_settings", navController = navController)
     wallet(
         route = "wallet_settings?nwcUrl={$NWCUrl}",
         arguments = listOf(
@@ -99,9 +99,9 @@ private fun NavGraphBuilder.keys(
 ) = composable(
     route = route,
 ) {
-    val viewModel = hiltViewModel<KeysViewModel>(it)
+    val viewModel = hiltViewModel<AccountSettingsViewModel>(it)
     LockToOrientationPortrait()
-    KeysScreen(
+    AccountSettingsScreen(
         viewModel = viewModel,
         onClose = { navController.navigateUp() }
     )

@@ -49,13 +49,13 @@ import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 
 @Composable
-fun KeysScreen(
-    viewModel: KeysViewModel,
+fun AccountSettingsScreen(
+    viewModel: AccountSettingsViewModel,
     onClose: () -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
 
-    KeysScreen(
+    AccountSettingsScreen(
         state = uiState.value,
         onClose = onClose,
     )
@@ -63,8 +63,8 @@ fun KeysScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun KeysScreen(
-    state: KeysContract.UiState,
+fun AccountSettingsScreen(
+    state: AccountSettingsContract.UiState,
     onClose: () -> Unit,
 ) {
     Scaffold(
@@ -91,7 +91,7 @@ fun KeysScreen(
 
                 item {
                     Divider(
-                        modifier = Modifier.padding(vertical = 24.dp),
+                        modifier = Modifier.padding(vertical = 16.dp),
                         thickness = (0.5).dp,
                     )
                 }
@@ -123,6 +123,7 @@ fun PublicKeySection(
 
     Row(
         modifier = Modifier
+            .padding(vertical = 16.dp)
             .height(72.dp)
             .background(
                 color = AppTheme.extraColorScheme.surfaceVariantAlt1,
@@ -163,7 +164,7 @@ fun PublicKeySection(
     }
 
     Text(
-        modifier = Modifier.padding(horizontal = 4.dp),
+        modifier = Modifier.padding(vertical = 8.dp),
         text = stringResource(id = R.string.settings_keys_public_key_hint),
         style = AppTheme.typography.bodySmall,
         lineHeight = 20.sp,
@@ -211,6 +212,7 @@ fun PrivateKeySection(
 
     Row(
         modifier = Modifier
+            .padding(vertical = 16.dp)
             .fillMaxWidth()
             .height(72.dp)
             .background(
@@ -261,7 +263,7 @@ fun PrivateKeySection(
     }
 
     IconText(
-        modifier = Modifier.padding(horizontal = 4.dp),
+        modifier = Modifier.padding(horizontal = 4.dp, vertical = 8.dp),
         text = stringResource(id = R.string.settings_keys_private_key_hint),
         leadingIcon = Icons.Outlined.Warning,
         leadingIconSize = 16.sp,
@@ -277,8 +279,8 @@ fun PrivateKeySection(
 @Composable
 fun PreviewSettingsHomeScreen() {
     PrimalTheme(primalTheme = PrimalTheme.Sunset) {
-        KeysScreen(
-            state = KeysContract.UiState(
+        AccountSettingsScreen(
+            state = AccountSettingsContract.UiState(
                 avatarUrl = "https://i.imgur.com/Z8dpmvc.png",
                 npub = "npub16c0nh3dnadzqpm76uctf5hqhe2lny344zsmpm6feee9p5rdxaa9q586nvr",
                 nsec = "nsec1w33tr4t0gg3gvrhjh5mxqzvt7xzdrrk64tr0j7mnqdfrrarfj3yqlf8hxp",

@@ -1,43 +1,43 @@
 package net.primal.android.core.compose.icons.primaliconpack
 
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.PathFillType.Companion.EvenOdd
+import androidx.compose.ui.graphics.PathFillType.Companion.NonZero
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.StrokeCap.Companion.Butt
 import androidx.compose.ui.graphics.StrokeJoin.Companion.Miter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.ImageVector.Builder
+import androidx.compose.ui.graphics.vector.group
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 import net.primal.android.core.compose.icons.PrimalIcons
 
 public val PrimalIcons.FeedRepliesFilled: ImageVector
     get() {
-        if (_feedRepliesFilled != null) {
-            return _feedRepliesFilled!!
+        if (_feedrepliesfilled != null) {
+            return _feedrepliesfilled!!
         }
-        _feedRepliesFilled = Builder(name = "Feedrepliesfilled", defaultWidth = 18.0.dp,
+        _feedrepliesfilled = Builder(name = "Feedrepliesfilled", defaultWidth = 18.0.dp,
                 defaultHeight = 18.0.dp, viewportWidth = 18.0f, viewportHeight = 18.0f).apply {
-            path(fill = SolidColor(Color(0xFFCCCCCC)), stroke = null, strokeLineWidth = 0.0f,
-                    strokeLineCap = Butt, strokeLineJoin = Miter, strokeLineMiter = 4.0f,
-                    pathFillType = EvenOdd) {
-                moveTo(4.8828f, 17.8624f)
-                curveTo(4.6309f, 18.1563f, 4.2f, 17.9482f, 4.2f, 17.5326f)
-                lineTo(4.2f, 13.0611f)
-                curveTo(2.4327f, 13.0611f, 1.0f, 11.3904f, 1.0f, 9.3294f)
-                verticalLineTo(4.7318f)
-                curveTo(1.0f, 2.6708f, 2.4327f, 1.0f, 4.2f, 1.0f)
-                horizontalLineTo(14.8f)
-                curveTo(16.5673f, 1.0f, 18.0f, 2.6708f, 18.0f, 4.7318f)
-                verticalLineTo(9.3294f)
-                curveTo(18.0f, 11.3904f, 16.5673f, 13.0611f, 14.8f, 13.0611f)
-                horizontalLineTo(9.0f)
-                lineTo(4.8828f, 17.8624f)
-                close()
+            group {
+                path(fill = SolidColor(Color(0xFFCCCCCC)), stroke = null, strokeLineWidth = 0.0f,
+                        strokeLineCap = Butt, strokeLineJoin = Miter, strokeLineMiter = 4.0f,
+                        pathFillType = NonZero) {
+                    moveTo(9.0f, 14.2373f)
+                    curveTo(13.9706f, 14.2373f, 18.0f, 11.1761f, 18.0f, 7.3999f)
+                    curveTo(18.0f, 3.6237f, 13.9706f, 0.5625f, 9.0f, 0.5625f)
+                    curveTo(4.0294f, 0.5625f, 0.0f, 3.6237f, 0.0f, 7.3999f)
+                    curveTo(0.0f, 9.1652f, 0.8806f, 10.7743f, 2.3262f, 11.9874f)
+                    lineTo(1.9016f, 16.8267f)
+                    curveTo(1.8605f, 17.2951f, 2.3781f, 17.6042f, 2.7709f, 17.3459f)
+                    lineTo(7.6206f, 14.1575f)
+                    curveTo(8.0703f, 14.2101f, 8.531f, 14.2373f, 9.0f, 14.2373f)
+                    close()
+                }
             }
         }
         .build()
-        return _feedRepliesFilled!!
+        return _feedrepliesfilled!!
     }
 
-private var _feedRepliesFilled: ImageVector? = null
+private var _feedrepliesfilled: ImageVector? = null
