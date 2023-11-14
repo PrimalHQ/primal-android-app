@@ -18,9 +18,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.SubcomposeAsyncImage
-import com.google.accompanist.placeholder.PlaceholderHighlight
-import com.google.accompanist.placeholder.material.placeholder
-import com.google.accompanist.placeholder.material.shimmer
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 import net.primal.android.theme.AppTheme
@@ -49,7 +46,7 @@ fun AvatarThumbnailListItemImage(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .placeholder(visible = true, highlight = PlaceholderHighlight.shimmer()),
+                    .background(color = AppTheme.extraColorScheme.surfaceVariantAlt1),
             )
         },
         error = { DefaultAvatarThumbnailPlaceholderListItemImage() },
