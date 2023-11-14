@@ -162,7 +162,7 @@ fun FeedNoteContent(
     onClick: (Offset) -> Unit,
     onUrlClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
-    highlightColor: Color = AppTheme.colorScheme.primary,
+    highlightColor: Color = AppTheme.colorScheme.secondary,
     contentColor: Color = AppTheme.colorScheme.onSurface,
     referencedNoteContainerColor: Color = AppTheme.extraColorScheme.surfaceVariantAlt1,
 ) {
