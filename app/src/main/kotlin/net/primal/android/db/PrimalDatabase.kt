@@ -24,10 +24,10 @@ import net.primal.android.feed.db.PostStats
 import net.primal.android.feed.db.PostStatsDao
 import net.primal.android.feed.db.RepostDao
 import net.primal.android.feed.db.RepostData
-import net.primal.android.messages.db.MessageConversationData
-import net.primal.android.messages.db.MessageConversationDao
 import net.primal.android.messages.db.DirectMessageDao
 import net.primal.android.messages.db.DirectMessageData
+import net.primal.android.messages.db.MessageConversationDao
+import net.primal.android.messages.db.MessageConversationData
 import net.primal.android.notifications.db.NotificationDao
 import net.primal.android.notifications.db.NotificationData
 import net.primal.android.profile.db.PostUserStats
@@ -64,7 +64,7 @@ import net.primal.android.thread.db.ThreadConversationDao
         DirectMessageData::class,
         MessageConversationData::class,
     ],
-    version = 10,
+    version = 11,
     exportSchema = true,
 )
 @TypeConverters(RoomCustomTypeConverters::class)

@@ -27,6 +27,7 @@ import net.primal.android.navigation.feedDirective
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.settings.muted.repository.MutedUserRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.badges.BadgesManager
@@ -46,6 +47,7 @@ class FeedViewModel @Inject constructor(
     private val postRepository: PostRepository,
     private val activeAccountStore: ActiveAccountStore,
     private val userDataSyncerFactory: UserDataUpdaterFactory,
+    private val profileRepository: ProfileRepository,
     private val zapRepository: ZapRepository,
     private val badgesManager: BadgesManager,
     private val mutedUserRepository: MutedUserRepository
@@ -197,7 +199,11 @@ class FeedViewModel @Inject constructor(
     }
 
     private fun zapPost(zapAction: UiEvent.ZapAction) = viewModelScope.launch {
-        if (zapAction.postAuthorLightningAddress == null) {
+        val postAuthorProfileData = withContext(Dispatchers.IO) {
+            profileRepository.findProfileData(profileId = zapAction.postAuthorId)
+        }
+
+        if (postAuthorProfileData.lnUrl == null) {
             setErrorState(error = FeedError.MissingLightningAddress(IllegalStateException()))
             return@launch
         }
@@ -210,7 +216,7 @@ class FeedViewModel @Inject constructor(
                 target = ZapTarget.Note(
                     zapAction.postId,
                     zapAction.postAuthorId,
-                    zapAction.postAuthorLightningAddress
+                    postAuthorProfileData.lnUrl,
                 ),
             )
         } catch (error: ZapRepository.ZapFailureException) {

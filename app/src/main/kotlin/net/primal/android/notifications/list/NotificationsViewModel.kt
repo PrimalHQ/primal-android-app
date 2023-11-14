@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
 import androidx.paging.map
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,6 +13,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import net.primal.android.core.compose.feed.model.FeedPostStatsUi
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.feed.model.asNostrResourceUi
@@ -36,6 +38,7 @@ import net.primal.android.notifications.list.NotificationsContract.UiState.Notif
 import net.primal.android.notifications.list.NotificationsContract.UiState.NotificationsError.MissingRelaysConfiguration
 import net.primal.android.notifications.list.ui.NotificationUi
 import net.primal.android.notifications.repository.NotificationRepository
+import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.badges.BadgesManager
 import net.primal.android.wallet.model.ZapTarget
@@ -49,6 +52,7 @@ class NotificationsViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val notificationsRepository: NotificationRepository,
     private val postRepository: PostRepository,
+    private val profileRepository: ProfileRepository,
     private val zapRepository: ZapRepository,
     private val badgesManager: BadgesManager,
 ) : ViewModel() {
@@ -167,7 +171,11 @@ class NotificationsViewModel @Inject constructor(
     }
 
     private fun zapPost(zapAction: UiEvent.ZapAction) = viewModelScope.launch {
-        if (zapAction.postAuthorLightningAddress == null) {
+        val postAuthorProfileData = withContext(Dispatchers.IO) {
+            profileRepository.findProfileData(profileId = zapAction.postAuthorId)
+        }
+
+        if (postAuthorProfileData.lnUrl == null) {
             setErrorState(error = MissingLightningAddress(IllegalStateException()))
             return@launch
         }
@@ -180,7 +188,7 @@ class NotificationsViewModel @Inject constructor(
                 target = ZapTarget.Note(
                     zapAction.postId,
                     zapAction.postAuthorId,
-                    zapAction.postAuthorLightningAddress
+                    postAuthorProfileData.lnUrl,
                 ),
             )
         } catch (error: ZapRepository.ZapFailureException) {
@@ -230,7 +238,6 @@ class NotificationsViewModel @Inject constructor(
             authorHandle = this.actionByUser?.usernameUiFriendly()
                 ?: this.actionPost.authorId.asEllipsizedNpub(),
             authorInternetIdentifier = this.actionByUser?.internetIdentifier,
-            authorLightningAddress = this.actionByUser?.lightningAddress,
             authorAvatarUrl = this.actionByUser?.picture,
             timestamp = Instant.ofEpochSecond(this.actionPost.createdAt),
             content = this.actionPost.content,

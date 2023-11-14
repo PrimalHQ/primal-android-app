@@ -1,6 +1,8 @@
 package net.primal.android.wallet.api
 
-fun String.toLightningUrlOrNull(): String? {
+import net.primal.android.crypto.bechToBytes
+
+fun String.parseAsLNUrlOrNull(): String? {
     val parts = this.split("@")
     if (parts.count() != 2) return null
 
@@ -8,4 +10,14 @@ fun String.toLightningUrlOrNull(): String? {
     val lnurlp = parts[0]
 
     return  "https://$host/.well-known/lnurlp/$lnurlp"
+}
+
+fun String.decodeLNUrlOrNull(): String? {
+    return try {
+        this.bechToBytes(hrp = "lnurl").let {
+            String(it)
+        }
+    } catch (error: IllegalArgumentException) {
+        null
+    }
 }

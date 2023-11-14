@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
 import androidx.paging.map
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,6 +14,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import net.primal.android.core.compose.feed.model.asFeedPostUi
 import net.primal.android.core.compose.media.model.asMediaResourceUi
 import net.primal.android.core.compose.profile.model.asProfileDetailsUi
@@ -174,7 +176,11 @@ class ProfileViewModel @Inject constructor(
     }
 
     private fun zapPost(zapAction: UiEvent.ZapAction) = viewModelScope.launch {
-        if (zapAction.postAuthorLightningAddress == null) {
+        val postAuthorProfileData = withContext(Dispatchers.IO) {
+            profileRepository.findProfileData(profileId = zapAction.postAuthorId)
+        }
+
+        if (postAuthorProfileData.lnUrl == null) {
             setErrorState(error = ProfileError.MissingLightningAddress(IllegalStateException()))
             return@launch
         }
@@ -187,7 +193,7 @@ class ProfileViewModel @Inject constructor(
                 target = ZapTarget.Note(
                     zapAction.postId,
                     zapAction.postAuthorId,
-                    zapAction.postAuthorLightningAddress
+                    postAuthorProfileData.lnUrl
                 ),
             )
         } catch (error: ZapRepository.ZapFailureException) {

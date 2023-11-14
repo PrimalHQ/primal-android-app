@@ -7,6 +7,8 @@ import net.primal.android.profile.db.ProfileData
 import net.primal.android.serialization.NostrJson
 import net.primal.android.serialization.decodeFromStringOrNull
 import net.primal.android.serialization.toJsonObject
+import net.primal.android.wallet.api.decodeLNUrlOrNull
+import net.primal.android.wallet.api.parseAsLNUrlOrNull
 
 
 fun List<NostrEvent>.mapAsProfileDataPO() = map { it.asProfileDataPO() }
@@ -22,6 +24,8 @@ fun NostrEvent.asProfileDataPO(): ProfileData {
         handle = metadata?.name,
         internetIdentifier = metadata?.nip05,
         lightningAddress = metadata?.lud16,
+        lnUrl = metadata?.lud16?.parseAsLNUrlOrNull()
+            ?: metadata?.lud06?.decodeLNUrlOrNull(),
         about = metadata?.about,
         displayName = metadata?.displayName,
         picture = metadata?.picture,

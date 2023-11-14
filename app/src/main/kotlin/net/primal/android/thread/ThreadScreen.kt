@@ -66,12 +66,12 @@ import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.button.PrimalLoadingButton
-import net.primal.android.core.compose.feed.note.FeedNoteCard
 import net.primal.android.core.compose.feed.RepostOrQuoteBottomSheet
 import net.primal.android.core.compose.feed.ZapBottomSheet
 import net.primal.android.core.compose.feed.model.FeedPostAction
 import net.primal.android.core.compose.feed.model.FeedPostStatsUi
 import net.primal.android.core.compose.feed.model.FeedPostUi
+import net.primal.android.core.compose.feed.note.FeedNoteCard
 import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
@@ -170,7 +170,6 @@ fun ThreadScreen(
                     ThreadContract.UiEvent.ZapAction(
                         postId = post.postId,
                         postAuthorId = post.authorId,
-                        postAuthorLightningAddress = post.authorLightningAddress,
                         zapAmount = zapAmount,
                         zapDescription = zapDescription,
                     )
@@ -273,7 +272,6 @@ fun ThreadScreen(
                                                 ThreadContract.UiEvent.ZapAction(
                                                     postId = item.postId,
                                                     postAuthorId = item.authorId,
-                                                    postAuthorLightningAddress = item.authorLightningAddress,
                                                     zapAmount = null,
                                                     zapDescription = null,
                                                 )

@@ -32,12 +32,12 @@ class ZapRepository @Inject constructor(
         val walletRelays = userAccount?.relays
         val defaultZapAmount = userAccount?.appSettings?.defaultZapAmount
 
-        val lightningAddress = when (target) {
-            is ZapTarget.Note -> target.authorLightningAddress
-            is ZapTarget.Profile -> target.lightningAddress
+        val lnUrl = when (target) {
+            is ZapTarget.Note -> target.authorLnUrl
+            is ZapTarget.Profile -> target.lnUrl
         }
 
-        if (lightningAddress.isEmpty() || nostrWallet == null || walletRelays.isNullOrEmpty()) {
+        if (lnUrl.isEmpty() || nostrWallet == null || walletRelays.isNullOrEmpty()) {
             throw InvalidZapRequestException()
         }
 
@@ -56,7 +56,7 @@ class ZapRepository @Inject constructor(
 
         try {
             statsUpdater?.increaseZapStats(amountInSats = zapAmountInSats.toInt())
-            val zapPayRequest = zapsApi.fetchZapPayRequestOrThrow(lightningAddress)
+            val zapPayRequest = zapsApi.fetchZapPayRequestOrThrow(lnUrl)
             val zapEvent = notary.signZapRequestNostrEvent(
                 userId = userId,
                 comment = zapComment,
@@ -83,9 +83,9 @@ class ZapRepository @Inject constructor(
         }
     }
 
-    private suspend fun ZapsApi.fetchZapPayRequestOrThrow(lightningAddress: String): LightningPayRequest {
+    private suspend fun ZapsApi.fetchZapPayRequestOrThrow(lnUrl: String): LightningPayRequest {
         return try {
-            fetchZapPayRequest(lightningAddress)
+            fetchZapPayRequest(lnUrl)
         } catch (error: IOException) {
             throw ZapFailureException(cause = error)
         } catch (error: IllegalArgumentException) {

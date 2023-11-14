@@ -425,7 +425,6 @@ fun FeedReferencedNotes(
                     authorName = data.authorName,
                     authorHandle = data.authorName,
                     authorInternetIdentifier = data.authorInternetIdentifier,
-                    authorLightningAddress = data.authorLightningAddress,
                     authorAvatarUrl = data.authorAvatarUrl,
                     authorMediaResources = emptyList(),
                     mediaResources = data.mediaResources.map { it.asMediaResourceUi() },

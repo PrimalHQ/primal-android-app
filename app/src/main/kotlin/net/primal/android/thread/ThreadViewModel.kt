@@ -22,6 +22,7 @@ import net.primal.android.navigation.postIdOrThrow
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.settings.muted.repository.MutedUserRepository
 import net.primal.android.thread.ThreadContract.UiEvent
 import net.primal.android.thread.ThreadContract.UiState.ThreadError
@@ -39,6 +40,7 @@ class ThreadViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val feedRepository: FeedRepository,
     private val postRepository: PostRepository,
+    private val profileRepository: ProfileRepository,
     private val zapRepository: ZapRepository,
     private val mutedUserRepository: MutedUserRepository
 ) : ViewModel() {
@@ -164,7 +166,11 @@ class ThreadViewModel @Inject constructor(
     }
 
     private fun zapPost(zapAction: UiEvent.ZapAction) = viewModelScope.launch {
-        if (zapAction.postAuthorLightningAddress == null) {
+        val postAuthorProfileData = withContext(Dispatchers.IO) {
+            profileRepository.findProfileData(profileId = zapAction.postAuthorId)
+        }
+
+        if (postAuthorProfileData.lnUrl == null) {
             setErrorState(error = ThreadError.MissingLightningAddress(IllegalStateException()))
             return@launch
         }
@@ -177,7 +183,7 @@ class ThreadViewModel @Inject constructor(
                 target = ZapTarget.Note(
                     zapAction.postId,
                     zapAction.postAuthorId,
-                    zapAction.postAuthorLightningAddress
+                    postAuthorProfileData.lnUrl,
                 ),
             )
         } catch (error: ZapRepository.ZapFailureException) {

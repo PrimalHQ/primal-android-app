@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
 import androidx.paging.map
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,6 +15,7 @@ import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import net.primal.android.core.compose.feed.model.asFeedPostUi
 import net.primal.android.core.ext.removeSearchPrefix
 import net.primal.android.explore.feed.ExploreFeedContract.UiEvent
@@ -25,6 +27,7 @@ import net.primal.android.navigation.searchQueryOrThrow
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.settings.muted.repository.MutedUserRepository
 import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
@@ -40,6 +43,7 @@ class ExploreFeedViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val feedRepository: FeedRepository,
     private val postRepository: PostRepository,
+    private val profileRepository: ProfileRepository,
     private val zapRepository: ZapRepository,
     private val settingsRepository: SettingsRepository,
     private val mutedUserRepository: MutedUserRepository
@@ -157,7 +161,11 @@ class ExploreFeedViewModel @Inject constructor(
     }
 
     private fun zapPost(zapAction: UiEvent.ZapAction) = viewModelScope.launch {
-        if (zapAction.postAuthorLightningAddress == null) {
+        val postAuthorProfileData = withContext(Dispatchers.IO) {
+            profileRepository.findProfileData(profileId = zapAction.postAuthorId)
+        }
+
+        if (postAuthorProfileData.lnUrl == null) {
             setErrorState(error = ExploreFeedError.MissingLightningAddress(IllegalStateException()))
             return@launch
         }
@@ -170,7 +178,7 @@ class ExploreFeedViewModel @Inject constructor(
                 target = ZapTarget.Note(
                     zapAction.postId,
                     zapAction.postAuthorId,
-                    zapAction.postAuthorLightningAddress
+                    postAuthorProfileData.lnUrl,
                 ),
             )
         } catch (error: ZapRepository.ZapFailureException) {

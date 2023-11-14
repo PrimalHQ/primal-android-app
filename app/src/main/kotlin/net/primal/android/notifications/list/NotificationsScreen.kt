@@ -214,7 +214,6 @@ fun NotificationsScreen(
                             postAuthorId = postData.authorId,
                             zapAmount = amount,
                             zapDescription = description,
-                            postAuthorLightningAddress = postData.authorLightningAddress
                         )
                     )
                 },

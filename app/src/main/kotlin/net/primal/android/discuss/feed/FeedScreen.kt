@@ -162,7 +162,6 @@ fun FeedScreen(
                         postAuthorId = post.authorId,
                         zapAmount = zapAmount,
                         zapDescription = zapDescription,
-                        postAuthorLightningAddress = post.authorLightningAddress
                     ))
                 },
                 onPostLikeClick = {

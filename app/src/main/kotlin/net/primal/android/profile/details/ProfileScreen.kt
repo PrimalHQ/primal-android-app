@@ -260,7 +260,6 @@ fun ProfileScreen(
                             postAuthorId = post.authorId,
                             zapAmount = zapAmount,
                             zapDescription = zapDescription,
-                            postAuthorLightningAddress = post.authorLightningAddress
                         )
                     )
                 },

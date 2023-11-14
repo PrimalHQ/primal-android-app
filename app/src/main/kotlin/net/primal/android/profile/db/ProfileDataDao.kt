@@ -17,6 +17,9 @@ interface ProfileDataDao {
     @Query("SELECT * FROM ProfileData WHERE ownerId = :profileId")
     fun observeProfile(profileId: String): Flow<Profile>
 
+    @Query("SELECT * FROM ProfileData WHERE ownerId = :profileId")
+    fun findProfileData(profileId: String): ProfileData
+
     @Query("SELECT * FROM ProfileData WHERE ownerId IN (:profileIds)")
     fun findProfileData(profileIds: List<String>): List<ProfileData>
 

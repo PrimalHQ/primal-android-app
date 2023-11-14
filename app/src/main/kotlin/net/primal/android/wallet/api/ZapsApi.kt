@@ -22,10 +22,7 @@ import javax.inject.Singleton
 class ZapsApi @Inject constructor(
     private val okHttpClient: OkHttpClient
 ) {
-    suspend fun fetchZapPayRequest(lightningAddress: String): LightningPayRequest {
-        val lnUrl = lightningAddress.toLightningUrlOrNull()
-            ?: throw IllegalArgumentException("Invalid lightningAddress.")
-
+    suspend fun fetchZapPayRequest(lnUrl: String): LightningPayRequest {
         val getRequest = Request.Builder()
             .header("Content-Type", "application/json")
             .url(lnUrl)

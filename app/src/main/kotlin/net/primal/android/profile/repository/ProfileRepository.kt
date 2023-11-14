@@ -22,6 +22,10 @@ class ProfileRepository @Inject constructor(
     private val userRepository: UserRepository,
     private val userAccountFetcher: UserAccountFetcher,
 ) {
+
+    fun findProfileData(profileId: String) =
+        database.profiles().findProfileData(profileId = profileId)
+
     fun observeProfile(profileId: String) =
         database.profiles().observeProfile(profileId = profileId).filterNotNull()
 

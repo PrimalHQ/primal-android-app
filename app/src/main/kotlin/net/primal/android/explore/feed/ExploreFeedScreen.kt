@@ -141,7 +141,6 @@ fun ExploreFeedScreen(
                             postAuthorId = post.authorId,
                             zapAmount = zapAmount,
                             zapDescription = zapDescription,
-                            postAuthorLightningAddress = post.authorLightningAddress
                         )
                     )
                 },
