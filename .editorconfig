@@ -1,0 +1,11 @@
+[*.{kt,kts}]
+ktlint_code_style = android_studio
+end_of_line = lf
+ij_kotlin_allow_trailing_comma = true
+ij_kotlin_allow_trailing_comma_on_call_site = true
+ij_kotlin_imports_layout = *, java.**, javax.**, kotlin.**, ^
+ij_kotlin_packages_to_use_import_on_demand = unset
+indent_size = 4
+indent_style = space
+insert_final_newline = true
+max_line_length = 140

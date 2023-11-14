@@ -14,15 +14,18 @@ core-splashscreen = "1.0.1"
 core-testing = "2.2.0"
 dagger = "2.48"
 datastore = "1.0.0"
+detekt = "1.23.3"
 espresso-core = "3.5.1"
 hilt = "1.1.0"
 junit = "4.13.2"
 junit-android-runner = "1.1.5"
 kotlin = "1.9.10"
+kotlinter = "4.1.0"
 kotlinx-coroutines = "1.7.3"
 kotlinx-serialization-json = "1.6.0"
 kotest = "5.6.2"
 ksp = "1.9.10-1.0.13"
+ktlint_compose_rules = "0.3.3"
 lifecycle = "2.7.0-beta01"
 material-icons = "1.5.4"
 mockk = "1.13.5"
@@ -37,6 +40,7 @@ security-crypto = "1.1.0-alpha06"
 security-identity-credential = "1.0.0-alpha03"
 secp256k1-kmp = "0.11.0"
 spongycastle = "1.58.0.0"
+spotless = "6.22.0"
 sqlcipher-android = "4.5.3"
 timber = "5.0.1"
 url-detector = "0.1.23"
@@ -113,7 +117,9 @@ coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
 
 # Other libs
 timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
+ktlint_compose_rules = { module = "io.nlopez.compose.rules:ktlint", version.ref = "ktlint_compose_rules" }
 
+# Data storage libs
 datastore = { module = "androidx.datastore:datastore", version.ref = "datastore" }
 datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
 
@@ -148,5 +154,7 @@ com-android-application = { id = "com.android.application", version.ref = "agp" 
 org-jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 org-jetbrains-kotlin-plugin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "dagger" }
-ksp = { id ="com.google.devtools.ksp", version.ref = "ksp" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 play-publishing = { id = "com.github.triplet.play", version.ref = "play-publishing" }
+detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
+kotlinter = { id = "org.jmailen.kotlinter", version.ref = "kotlinter" }

@@ -1,0 +1,20 @@
+naming:
+  FunctionNaming:
+    ignoreAnnotated: ['Composable']
+
+style:
+  MagicNumber:
+    ignorePropertyDeclaration: true
+
+  UnusedPrivateMember:
+    ignoreAnnotated: ['Preview']
+
+complexity:
+  LongMethod:
+    threshold: 80
+
+  TooManyFunctions:
+    ignorePrivate: true
+
+  LongParameterList:
+    ignoreAnnotated: ['Composable']
