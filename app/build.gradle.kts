@@ -258,4 +258,6 @@ dependencies {
     androidTestImplementation(libs.kotest.assertions.core)
     androidTestImplementation(libs.kotest.assertions.json)
     androidTestImplementation(libs.mockk.android)
+
+    detektPlugins(libs.ktlint.compose.rules)
 }

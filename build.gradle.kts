@@ -12,7 +12,6 @@ buildscript {
     dependencies {
         //noinspection UseTomlInstead
         classpath("com.squareup:javapoet:1.13.0") // Required for dagger
-        classpath(libs.ktlint.compose.rules)
     }
 }
 
