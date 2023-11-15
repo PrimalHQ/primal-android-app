@@ -14,7 +14,8 @@ class NostrWalletConnectParserTest {
 
     private val expectedPubkey = "69e23cd92e34922a95a5a1eb6893e82cd3af9150ae2ab5e8c2cd882ccd701159"
     private val expectedSecret = "2a181df0a822100be8687de612d616a42febe8d99a2f99fb550f150dc364da6e"
-    private val functioningNostrWalletConnectUrl = "nostr+walletconnect://$expectedPubkey?relay=wss://relay.getalby.com/v1&secret=$expectedSecret&lud16=nikola@getalby.com"
+    private val functioningNostrWalletConnectUrl = "nostr+walletconnect://$expectedPubkey" +
+            "?relay=wss://relay.getalby.com/v1&secret=$expectedSecret&lud16=nikola@getalby.com"
 
     @Test
     fun `parseNWCUrl parses nostr wallet`() {

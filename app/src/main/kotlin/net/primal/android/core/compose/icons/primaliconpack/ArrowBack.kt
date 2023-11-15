@@ -1,3 +1,5 @@
+@file:Suppress("MagicNumber")
+
 package net.primal.android.core.compose.icons.primaliconpack
 
 import androidx.compose.ui.geometry.Offset

@@ -1,4 +1,6 @@
- package net.primal.android.core.compose.icons.primaliconpack
+@file:Suppress("MagicNumber")
+
+package net.primal.android.core.compose.icons.primaliconpack
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathFillType.Companion.EvenOdd

@@ -38,7 +38,9 @@ class NostrResourcesTest {
 
     @Test
     fun `nostrUriToNoteIdAndRelay return correct noteId and relayUrl`() {
-        val input = "nostr:nevent1qqs8t7ahfwqegkrxcexs5l4fdawx000jza3n5kz2wp6ggulapl5maecpzfmhxue69uhk7enxvd5xz6tw9ec82cszyqsd9xqs66jlj2cytt0q96a6mjgrd46pe35xkqzpt3ptggm0ujkj7qcyqqqqgfcdkyzv8"
+        val input = "nostr:nevent1qqs8t7ahfwqegkrxcexs5l4fdawx000jza3n5kz2wp6" +
+                "ggulapl5maecpzfmhxue69uhk7enxvd5xz6tw9ec82cszyqsd9xqs66jlj2c" +
+                "ytt0q96a6mjgrd46pe35xkqzpt3ptggm0ujkj7qcyqqqqgfcdkyzv8"
         val actual = input.nostrUriToNoteIdAndRelay()
         actual.first shouldBe "75fbb74b81945866c64d0a7ea96f5c67bdf217633a584a70748473fd0fe9bee7"
         actual.second shouldBe "wss://offchain.pub"

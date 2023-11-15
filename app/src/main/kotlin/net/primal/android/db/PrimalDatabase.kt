@@ -1,3 +1,5 @@
+@file:Suppress("TooManyFunctions")
+
 package net.primal.android.db
 
 import androidx.room.Database

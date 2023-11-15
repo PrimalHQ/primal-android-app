@@ -194,7 +194,10 @@ fun WalletDisconnected() {
             .height(56.dp)
             .padding(horizontal = 16.dp),
         onClick = {
-            uriHandler.openUri("https://app.mutinywallet.com/settings/connections?callbackUri=primal&name=Primal-Android")
+            uriHandler.openUri(
+                "https://app.mutinywallet.com/settings/connections" +
+                        "?callbackUri=primal&name=Primal-Android"
+            )
         },
     )
 }

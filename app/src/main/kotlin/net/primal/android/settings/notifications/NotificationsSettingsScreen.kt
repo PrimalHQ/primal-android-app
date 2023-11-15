@@ -184,28 +184,62 @@ fun NotificationsSettingsBlock(
 
 @Composable
 private fun NotificationSection.toTitle(): String = when (this) {
-    NotificationSection.CORE_NOTIFICATIONS -> stringResource(id = R.string.settings_notifications_section_core)
-    NotificationSection.NOTE_YOU_WERE_MENTIONED_IN -> stringResource(id = R.string.settings_notifications_section_note_you_were_mentioned_in)
-    NotificationSection.NOTE_YOUR_NOTE_WAS_MENTIONED_IN -> stringResource(id = R.string.settings_notifications_section_note_your_note_was_mentioned_in)
+    NotificationSection.CORE_NOTIFICATIONS ->
+        stringResource(id = R.string.settings_notifications_section_core)
+
+    NotificationSection.NOTE_YOU_WERE_MENTIONED_IN ->
+        stringResource(id = R.string.settings_notifications_section_note_you_were_mentioned_in)
+
+    NotificationSection.NOTE_YOUR_NOTE_WAS_MENTIONED_IN ->
+        stringResource(id = R.string.settings_notifications_section_note_your_note_was_mentioned_in)
 }
 
 @Composable
 private fun NotificationType.toTitle(): String = when (this) {
-    NotificationType.NEW_USER_FOLLOWED_YOU -> stringResource(id = R.string.settings_notifications_new_user_followed_you_text)
-    NotificationType.YOUR_POST_WAS_ZAPPED -> stringResource(id = R.string.settings_notifications_your_post_was_zapped_text)
-    NotificationType.YOUR_POST_WAS_LIKED -> stringResource(id = R.string.settings_notifications_your_post_was_liked_text)
-    NotificationType.YOUR_POST_WAS_REPOSTED -> stringResource(id = R.string.settings_notifications_your_post_was_reposted_text)
-    NotificationType.YOUR_POST_WAS_REPLIED_TO -> stringResource(id = R.string.settings_notifications_your_post_was_replied_to_text)
-    NotificationType.YOU_WERE_MENTIONED_IN_POST -> stringResource(id = R.string.settings_notifications_you_were_mentioned_text)
-    NotificationType.YOUR_POST_WAS_MENTIONED_IN_POST -> stringResource(id = R.string.settings_notifications_your_post_was_mentioned_text)
-    NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_ZAPPED -> stringResource(id = R.string.settings_notifications_post_you_were_mentioned_in_was_zapped_text)
-    NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_LIKED -> stringResource(id = R.string.settings_notifications_post_you_were_mentioned_in_was_liked_text)
-    NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_REPOSTED -> stringResource(id = R.string.settings_notifications_post_you_were_mentioned_in_was_reposted_text)
-    NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_REPLIED_TO -> stringResource(id = R.string.settings_notifications_post_you_were_mentioned_in_was_replied_to_text)
-    NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_ZAPPED -> stringResource(id = R.string.settings_notifications_post_your_post_was_mentioned_in_was_zapped_text)
-    NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_LIKED -> stringResource(id = R.string.settings_notifications_post_your_post_was_mentioned_in_was_liked_text)
-    NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPOSTED -> stringResource(id = R.string.settings_notifications_post_your_post_was_mentioned_in_was_reposted_text)
-    NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO -> stringResource(id = R.string.settings_notifications_post_your_post_was_mentioned_in_was_replied_to_text)
+    NotificationType.NEW_USER_FOLLOWED_YOU ->
+        stringResource(id = R.string.settings_notifications_new_user_followed_you_text)
+
+    NotificationType.YOUR_POST_WAS_ZAPPED ->
+        stringResource(id = R.string.settings_notifications_your_post_was_zapped_text)
+
+    NotificationType.YOUR_POST_WAS_LIKED ->
+        stringResource(id = R.string.settings_notifications_your_post_was_liked_text)
+
+    NotificationType.YOUR_POST_WAS_REPOSTED ->
+        stringResource(id = R.string.settings_notifications_your_post_was_reposted_text)
+
+    NotificationType.YOUR_POST_WAS_REPLIED_TO ->
+        stringResource(id = R.string.settings_notifications_your_post_was_replied_to_text)
+
+    NotificationType.YOU_WERE_MENTIONED_IN_POST ->
+        stringResource(id = R.string.settings_notifications_you_were_mentioned_text)
+
+    NotificationType.YOUR_POST_WAS_MENTIONED_IN_POST ->
+        stringResource(id = R.string.settings_notifications_your_post_was_mentioned_text)
+
+    NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_ZAPPED ->
+        stringResource(id = R.string.settings_notifications_post_you_were_mentioned_in_was_zapped_text)
+
+    NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_LIKED ->
+        stringResource(id = R.string.settings_notifications_post_you_were_mentioned_in_was_liked_text)
+
+    NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_REPOSTED ->
+        stringResource(id = R.string.settings_notifications_post_you_were_mentioned_in_was_reposted_text)
+
+    NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_REPLIED_TO ->
+        stringResource(id = R.string.settings_notifications_post_you_were_mentioned_in_was_replied_to_text)
+
+    NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_ZAPPED ->
+        stringResource(id = R.string.settings_notifications_post_your_post_was_mentioned_in_was_zapped_text)
+
+    NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_LIKED ->
+        stringResource(id = R.string.settings_notifications_post_your_post_was_mentioned_in_was_liked_text)
+
+    NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPOSTED ->
+        stringResource(id = R.string.settings_notifications_post_your_post_was_mentioned_in_was_reposted_text)
+
+    NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO ->
+        stringResource(id = R.string.settings_notifications_post_your_post_was_mentioned_in_was_replied_to_text)
 }
 
 @Composable

@@ -36,12 +36,21 @@ class UserAccountFetcherTest {
                     createdAt = 1683463925,
                     kind = 0,
                     tags = emptyList(),
-                    content = "{\"name\":\"$expectedName\",\"picture\":\"$expectedPictureUrl\",\"nip05\":\"$expectedInternetIdentifier\"}",
+                    content = "{" +
+                            "\"name\":\"$expectedName\"," +
+                            "\"picture\":\"$expectedPictureUrl\"," +
+                            "\"nip05\":\"$expectedInternetIdentifier\"" +
+                            "}",
                     sig = "invalidSig"
                 ),
                 profileStats = PrimalEvent(
                     kind = 10000105,
-                    content = "{\"follows_count\":$expectedFollowingCount,\"followers_count\":$expectedFollowersCount,\"note_count\":$expectedNotesCount,\"time_joined\":null}",
+                    content = "{" +
+                            "\"follows_count\":$expectedFollowingCount," +
+                            "\"followers_count\":$expectedFollowersCount," +
+                            "\"note_count\":$expectedNotesCount," +
+                            "\"time_joined\":null" +
+                            "}",
                 )
             )
         }
