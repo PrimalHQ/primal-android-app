@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
+import java.text.NumberFormat
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.AvatarThumbnailListItemImage
@@ -48,14 +49,9 @@ import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.user.domain.UserAccount
-import java.text.NumberFormat
-
 
 @Composable
-fun PrimalDrawer(
-    drawerState: DrawerState,
-    onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
-) {
+fun PrimalDrawer(drawerState: DrawerState, onDrawerDestinationClick: (DrawerScreenDestination) -> Unit) {
     val uiScope = rememberCoroutineScope()
     val viewModel = hiltViewModel<PrimalDrawerViewModel>()
 
@@ -76,10 +72,7 @@ fun PrimalDrawer(
 }
 
 @Composable
-fun PrimalDrawer(
-    viewModel: PrimalDrawerViewModel,
-    onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
-) {
+fun PrimalDrawer(viewModel: PrimalDrawerViewModel, onDrawerDestinationClick: (DrawerScreenDestination) -> Unit) {
     val uiState = viewModel.state.collectAsState()
 
     PrimalDrawer(
@@ -87,7 +80,7 @@ fun PrimalDrawer(
         onDrawerDestinationClick = onDrawerDestinationClick,
         eventPublisher = {
             viewModel.setEvent(it)
-        }
+        },
     )
 }
 
@@ -108,7 +101,7 @@ fun PrimalDrawer(
             verticalArrangement = Arrangement.Bottom,
         ) {
             DrawerHeader(
-                userAccount = state.activeUserAccount
+                userAccount = state.activeUserAccount,
             )
 
             DrawerMenu(
@@ -122,19 +115,17 @@ fun PrimalDrawer(
                 onThemeSwitch = {
                     eventPublisher(
                         PrimalDrawerContract.UiEvent.ThemeSwitchClick(
-                            isSystemInDarkTheme = isSystemInDarkTheme
-                        )
+                            isSystemInDarkTheme = isSystemInDarkTheme,
+                        ),
                     )
-                }
+                },
             )
         }
     }
 }
 
 @Composable
-private fun DrawerHeader(
-    userAccount: UserAccount?,
-) {
+private fun DrawerHeader(userAccount: UserAccount?) {
     val numberFormat = remember { NumberFormat.getNumberInstance() }
     ConstraintLayout(
         modifier = Modifier.fillMaxWidth(),
@@ -158,7 +149,7 @@ private fun DrawerHeader(
                 start.linkTo(startGuideline)
                 top.linkTo(avatarRef.bottom, margin = 16.dp)
                 width = Dimension.preferredValue(220.dp)
-            }
+            },
         )
 
         IconButton(
@@ -168,12 +159,10 @@ private fun DrawerHeader(
                 width = Dimension.preferredWrapContent
             },
             onClick = {
-
             },
         ) {
             Icon(imageVector = PrimalIcons.QrCode, contentDescription = null)
         }
-
 
         Text(
             text = userAccount?.internetIdentifier?.formatNip05Identifier() ?: "",
@@ -182,7 +171,7 @@ private fun DrawerHeader(
             modifier = Modifier.constrainAs(identifierRef) {
                 start.linkTo(startGuideline)
                 top.linkTo(usernameRef.bottom, margin = 8.dp)
-            }
+            },
         )
 
         val statsAnnotatedString = buildAnnotatedString {
@@ -192,8 +181,8 @@ private fun DrawerHeader(
                     spanStyle = SpanStyle(
                         color = AppTheme.colorScheme.onSurfaceVariant,
                         fontStyle = AppTheme.typography.labelLarge.fontStyle,
-                    )
-                )
+                    ),
+                ),
             )
             append(
                 AnnotatedString(
@@ -201,8 +190,8 @@ private fun DrawerHeader(
                     spanStyle = SpanStyle(
                         color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
                         fontStyle = AppTheme.typography.labelLarge.fontStyle,
-                    )
-                )
+                    ),
+                ),
             )
             append("   ")
             append(
@@ -211,8 +200,8 @@ private fun DrawerHeader(
                     spanStyle = SpanStyle(
                         color = AppTheme.colorScheme.onSurfaceVariant,
                         fontStyle = AppTheme.typography.labelLarge.fontStyle,
-                    )
-                )
+                    ),
+                ),
             )
             append(
                 AnnotatedString(
@@ -220,8 +209,8 @@ private fun DrawerHeader(
                     spanStyle = SpanStyle(
                         color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
                         fontStyle = AppTheme.typography.labelLarge.fontStyle,
-                    )
-                )
+                    ),
+                ),
             )
         }
         Text(
@@ -230,23 +219,20 @@ private fun DrawerHeader(
             modifier = Modifier.constrainAs(statsRef) {
                 start.linkTo(startGuideline)
                 top.linkTo(identifierRef.bottom, margin = 16.dp)
-            }
+            },
         )
     }
 }
 
 @Composable
-private fun DrawerMenu(
-    modifier: Modifier,
-    onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
-) {
+private fun DrawerMenu(modifier: Modifier, onDrawerDestinationClick: (DrawerScreenDestination) -> Unit) {
     LazyColumn(
         modifier = modifier,
         verticalArrangement = Arrangement.Top,
     ) {
         items(
             items = DrawerScreenDestination.values(),
-            key = { it.name }
+            key = { it.name },
         ) {
             ListItem(
                 modifier = Modifier.clickable {
@@ -261,16 +247,14 @@ private fun DrawerMenu(
                         style = AppTheme.typography.titleLarge,
                         color = AppTheme.colorScheme.onSurfaceVariant,
                     )
-                }
+                },
             )
         }
     }
 }
 
 @Composable
-private fun DrawerFooter(
-    onThemeSwitch: () -> Unit,
-) {
+private fun DrawerFooter(onThemeSwitch: () -> Unit) {
     Box(
         modifier = Modifier.padding(vertical = 16.dp, horizontal = 24.dp),
     ) {
@@ -285,15 +269,18 @@ private fun DrawerFooter(
 }
 
 enum class DrawerScreenDestination {
-    Profile, Settings, SignOut
+    Profile,
+    Settings,
+    SignOut,
 }
-
 
 @Composable
 private fun DrawerScreenDestination.label(): String {
     return when (this) {
         DrawerScreenDestination.Profile -> stringResource(id = R.string.drawer_destination_profile)
-        DrawerScreenDestination.Settings -> stringResource(id = R.string.drawer_destination_settings)
+        DrawerScreenDestination.Settings -> stringResource(
+            id = R.string.drawer_destination_settings,
+        )
         DrawerScreenDestination.SignOut -> stringResource(id = R.string.drawer_destination_sign_out)
     }
 }

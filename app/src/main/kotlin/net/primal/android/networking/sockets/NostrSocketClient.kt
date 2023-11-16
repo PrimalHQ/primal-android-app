@@ -1,5 +1,6 @@
 package net.primal.android.networking.sockets
 
+import java.util.UUID
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -14,7 +15,6 @@ import okhttp3.Response
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 import timber.log.Timber
-import java.util.UUID
 
 class NostrSocketClient constructor(
     private val okHttpClient: OkHttpClient,
@@ -36,13 +36,21 @@ class NostrSocketClient constructor(
             }
         }
 
-        override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
+        override fun onFailure(
+            webSocket: WebSocket,
+            t: Throwable,
+            response: Response?,
+        ) {
             Timber.w("WS connection failure.")
             Timber.w(t)
             this@NostrSocketClient.webSocket = null
         }
 
-        override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
+        override fun onClosed(
+            webSocket: WebSocket,
+            code: Int,
+            reason: String,
+        ) {
             Timber.w("WS connection closed with code=$code and reason=$reason")
             this@NostrSocketClient.webSocket = null
         }
@@ -52,14 +60,15 @@ class NostrSocketClient constructor(
 
     val incomingMessages = mutableIncomingMessagesSharedFlow.asSharedFlow()
 
-    suspend fun ensureSocketConnection() = webSocketMutex.withLock {
-        if (webSocket == null) {
-            webSocket = okHttpClient.newWebSocket(
-                request = wssRequest,
-                listener = socketListener
-            )
+    suspend fun ensureSocketConnection() =
+        webSocketMutex.withLock {
+            if (webSocket == null) {
+                webSocket = okHttpClient.newWebSocket(
+                    request = wssRequest,
+                    listener = socketListener,
+                )
+            }
         }
-    }
 
     fun close() {
         webSocket?.close(code = 1000, reason = "Closed by client.")
@@ -99,5 +108,4 @@ class NostrSocketClient constructor(
     fun sendAUTH(signedEvent: JsonObject): Boolean {
         return sendMessage(text = signedEvent.buildNostrAUTHMessage())
     }
-
 }

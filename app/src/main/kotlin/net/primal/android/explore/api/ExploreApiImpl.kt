@@ -1,5 +1,6 @@
 package net.primal.android.explore.api
 
+import javax.inject.Inject
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.float
@@ -17,7 +18,6 @@ import net.primal.android.networking.primal.PrimalVerb.USER_SEARCH
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.serialization.NostrJson
 import net.primal.android.serialization.decodeFromStringOrNull
-import javax.inject.Inject
 
 class ExploreApiImpl @Inject constructor(
     @PrimalCacheApiClient private val primalApiClient: PrimalApiClient,
@@ -25,10 +25,12 @@ class ExploreApiImpl @Inject constructor(
 
     override suspend fun getTrendingHashtags(): List<HashtagScore> {
         val queryResult = primalApiClient.query(
-            message = PrimalCacheFilter(primalVerb = TRENDING_HASHTAGS_7D)
+            message = PrimalCacheFilter(primalVerb = TRENDING_HASHTAGS_7D),
         )
 
-        val trendingHashtagEvent = queryResult.findPrimalEvent(NostrEventKind.PrimalTrendingHashtags)
+        val trendingHashtagEvent = queryResult.findPrimalEvent(
+            NostrEventKind.PrimalTrendingHashtags,
+        )
         val hashtags = NostrJson.decodeFromStringOrNull<JsonArray>(trendingHashtagEvent?.content)
 
         val result = mutableListOf<HashtagScore>()
@@ -43,7 +45,7 @@ class ExploreApiImpl @Inject constructor(
 
     override suspend fun getRecommendedUsers(): UsersResponse {
         val queryResult = primalApiClient.query(
-            message = PrimalCacheFilter(primalVerb = RECOMMENDED_USERS)
+            message = PrimalCacheFilter(primalVerb = RECOMMENDED_USERS),
         )
 
         return UsersResponse(
@@ -52,12 +54,12 @@ class ExploreApiImpl @Inject constructor(
         )
     }
 
-    override suspend fun searchUsers(body: SearchUsersRequestBody): UsersResponse{
+    override suspend fun searchUsers(body: SearchUsersRequestBody): UsersResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = USER_SEARCH,
                 optionsJson = NostrJson.encodeToString(body),
-            )
+            ),
         )
 
         return UsersResponse(

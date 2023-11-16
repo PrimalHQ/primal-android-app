@@ -33,7 +33,7 @@ interface NotificationsContract {
         data class RepostAction(
             val postId: String,
             val postAuthorId: String,
-            val postNostrEvent: String
+            val postNostrEvent: String,
         ) : UiEvent()
         data class ZapAction(
             val postId: String,

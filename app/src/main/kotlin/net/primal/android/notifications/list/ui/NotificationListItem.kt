@@ -24,10 +24,10 @@ import androidx.compose.ui.unit.dp
 import net.primal.android.R
 import net.primal.android.core.compose.AvatarThumbnailsRow
 import net.primal.android.core.compose.NostrUserText
-import net.primal.android.core.compose.feed.note.FeedNoteContent
-import net.primal.android.core.compose.feed.note.FeedNoteStatsRow
 import net.primal.android.core.compose.feed.model.FeedPostAction
 import net.primal.android.core.compose.feed.model.FeedPostUi
+import net.primal.android.core.compose.feed.note.FeedNoteContent
+import net.primal.android.core.compose.feed.note.FeedNoteStatsRow
 import net.primal.android.core.compose.notifications.toImagePainter
 import net.primal.android.core.ext.openUriSafely
 import net.primal.android.core.utils.shortened
@@ -49,7 +49,6 @@ fun NotificationListItem(
     onZapOptionsClick: (FeedPostUi) -> Unit,
     onWalletUnavailable: () -> Unit,
 ) {
-
     notifications.map { it.actionUserSatsZapped }
 
     val activeUsersTotalSatsZapped = notifications
@@ -78,7 +77,7 @@ fun NotificationListItem(
                 }
 
                 else -> postTotalSatsZapped?.shortened()
-            }
+            },
         ),
         onProfileClick = onProfileClick,
         onPostClick = onNoteClick,
@@ -192,7 +191,7 @@ private fun NotificationListItem(
                             NotificationType.YOUR_POST_WAS_REPOSTED -> AppTheme.extraColorScheme.reposted
                             NotificationType.YOUR_POST_WAS_REPLIED_TO -> AppTheme.extraColorScheme.replied
                             else -> Color.Unspecified
-                        }
+                        },
                     )
                 }
             }
@@ -201,7 +200,7 @@ private fun NotificationListItem(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 16.dp)
+                .padding(top = 16.dp),
         ) {
             val actionPost = firstNotification.actionPost
 
@@ -273,66 +272,96 @@ private fun NotificationListItem(
 }
 
 @Composable
-private fun NotificationType.toSuffixText(
-    usersZappedCount: Int = 0,
-    totalSatsZapped: String? = null,
-): String = when (this) {
-    NotificationType.NEW_USER_FOLLOWED_YOU -> stringResource(id = R.string.notification_list_item_followed_you)
+private fun NotificationType.toSuffixText(usersZappedCount: Int = 0, totalSatsZapped: String? = null): String =
+    when (this) {
+        NotificationType.NEW_USER_FOLLOWED_YOU -> stringResource(
+            id = R.string.notification_list_item_followed_you,
+        )
 
-    NotificationType.YOUR_POST_WAS_ZAPPED -> when (totalSatsZapped) {
-        null -> stringResource(id = R.string.notification_list_item_zapped_your_post)
-        else -> stringResource(
-            id = R.string.notification_list_item_zapped_your_post_for_total_amount,
-            totalSatsZapped
+        NotificationType.YOUR_POST_WAS_ZAPPED -> when (totalSatsZapped) {
+            null -> stringResource(id = R.string.notification_list_item_zapped_your_post)
+            else -> stringResource(
+                id = R.string.notification_list_item_zapped_your_post_for_total_amount,
+                totalSatsZapped,
+            )
+        }
+
+        NotificationType.YOUR_POST_WAS_LIKED -> stringResource(
+            id = R.string.notification_list_item_liked_your_post,
+        )
+        NotificationType.YOUR_POST_WAS_REPOSTED -> stringResource(
+            id = R.string.notification_list_item_reposted_your_post,
+        )
+        NotificationType.YOUR_POST_WAS_REPLIED_TO -> stringResource(
+            id = R.string.notification_list_item_replied_to_your_post,
+        )
+
+        NotificationType.YOU_WERE_MENTIONED_IN_POST -> stringResource(
+            id = R.string.notification_list_item_mentioned_you_in_post,
+        )
+        NotificationType.YOUR_POST_WAS_MENTIONED_IN_POST -> stringResource(
+            id = R.string.notification_list_item_mentioned_your_post,
+        )
+
+        NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_ZAPPED -> when (totalSatsZapped) {
+            null -> stringResource(
+                id = R.string.notification_list_item_post_you_were_mentioned_in_was_zapped,
+            )
+            else -> when (usersZappedCount) {
+                1 -> stringResource(
+                    id = R.string.notification_list_item_post_you_were_mentioned_in_was_zapped_for,
+                    totalSatsZapped,
+                )
+
+                in 2..Int.MAX_VALUE -> stringResource(
+                    id = R.string.notification_list_item_post_you_were_mentioned_in_was_zapped_for_total_amount,
+                    totalSatsZapped,
+                )
+
+                else -> stringResource(
+                    id = R.string.notification_list_item_post_you_were_mentioned_in_was_zapped,
+                )
+            }
+        }
+
+        NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_LIKED -> stringResource(
+            id = R.string.notification_list_item_post_you_were_mentioned_in_was_liked,
+        )
+        NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_REPOSTED -> stringResource(
+            id = R.string.notification_list_item_post_you_were_mentioned_in_was_reposted,
+        )
+        NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_REPLIED_TO -> stringResource(
+            id = R.string.notification_list_item_post_you_were_mentioned_in_was_replied_to,
+        )
+
+        NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_ZAPPED -> when (totalSatsZapped) {
+            null -> stringResource(
+                id = R.string.notification_list_item_post_where_you_post_was_mentioned_was_zapped,
+            )
+            else -> when (usersZappedCount) {
+                1 -> stringResource(
+                    id = R.string.notification_list_item_post_where_you_post_was_mentioned_was_zapped_for,
+                    totalSatsZapped,
+                )
+
+                in 2..Int.MAX_VALUE -> stringResource(
+                    id = R.string.notification_list_item_post_where_you_post_was_mentioned_was_zapped_for_total_amount,
+                    totalSatsZapped,
+                )
+
+                else -> stringResource(
+                    id = R.string.notification_list_item_post_where_you_post_was_mentioned_was_zapped,
+                )
+            }
+        }
+
+        NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_LIKED -> stringResource(
+            id = R.string.notification_list_item_post_where_you_post_was_mentioned_was_liked,
+        )
+        NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPOSTED -> stringResource(
+            id = R.string.notification_list_item_post_where_you_post_was_mentioned_was_reposted,
+        )
+        NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO -> stringResource(
+            id = R.string.notification_list_item_post_where_you_post_was_mentioned_was_replied_to,
         )
     }
-
-    NotificationType.YOUR_POST_WAS_LIKED -> stringResource(id = R.string.notification_list_item_liked_your_post)
-    NotificationType.YOUR_POST_WAS_REPOSTED -> stringResource(id = R.string.notification_list_item_reposted_your_post)
-    NotificationType.YOUR_POST_WAS_REPLIED_TO -> stringResource(id = R.string.notification_list_item_replied_to_your_post)
-
-    NotificationType.YOU_WERE_MENTIONED_IN_POST -> stringResource(id = R.string.notification_list_item_mentioned_you_in_post)
-    NotificationType.YOUR_POST_WAS_MENTIONED_IN_POST -> stringResource(id = R.string.notification_list_item_mentioned_your_post)
-
-    NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_ZAPPED -> when (totalSatsZapped) {
-        null -> stringResource(id = R.string.notification_list_item_post_you_were_mentioned_in_was_zapped)
-        else -> when (usersZappedCount) {
-            1 -> stringResource(
-                id = R.string.notification_list_item_post_you_were_mentioned_in_was_zapped_for,
-                totalSatsZapped
-            )
-
-            in 2..Int.MAX_VALUE -> stringResource(
-                id = R.string.notification_list_item_post_you_were_mentioned_in_was_zapped_for_total_amount,
-                totalSatsZapped
-            )
-
-            else -> stringResource(id = R.string.notification_list_item_post_you_were_mentioned_in_was_zapped)
-        }
-    }
-
-    NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_LIKED -> stringResource(id = R.string.notification_list_item_post_you_were_mentioned_in_was_liked)
-    NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_REPOSTED -> stringResource(id = R.string.notification_list_item_post_you_were_mentioned_in_was_reposted)
-    NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_REPLIED_TO -> stringResource(id = R.string.notification_list_item_post_you_were_mentioned_in_was_replied_to)
-
-    NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_ZAPPED -> when (totalSatsZapped) {
-        null -> stringResource(id = R.string.notification_list_item_post_where_you_post_was_mentioned_was_zapped)
-        else -> when (usersZappedCount) {
-            1 -> stringResource(
-                id = R.string.notification_list_item_post_where_you_post_was_mentioned_was_zapped_for,
-                totalSatsZapped
-            )
-
-            in 2..Int.MAX_VALUE -> stringResource(
-                id = R.string.notification_list_item_post_where_you_post_was_mentioned_was_zapped_for_total_amount,
-                totalSatsZapped
-            )
-
-            else -> stringResource(id = R.string.notification_list_item_post_where_you_post_was_mentioned_was_zapped)
-        }
-    }
-
-    NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_LIKED -> stringResource(id = R.string.notification_list_item_post_where_you_post_was_mentioned_was_liked)
-    NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPOSTED -> stringResource(id = R.string.notification_list_item_post_where_you_post_was_mentioned_was_reposted)
-    NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO -> stringResource(id = R.string.notification_list_item_post_where_you_post_was_mentioned_was_replied_to)
-}

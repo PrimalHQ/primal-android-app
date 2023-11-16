@@ -13,7 +13,6 @@ import net.primal.android.theme.colors.ExtraColorSchemeProvider
 import net.primal.android.theme.colors.LocalExtraColors
 import net.primal.android.theme.domain.PrimalTheme
 
-
 @ReadOnlyComposable
 @Composable
 fun defaultPrimalTheme(): PrimalTheme {
@@ -21,17 +20,14 @@ fun defaultPrimalTheme(): PrimalTheme {
 }
 
 @Composable
-fun PrimalTheme(
-    primalTheme: PrimalTheme,
-    content: @Composable () -> Unit
-) {
+fun PrimalTheme(primalTheme: PrimalTheme, content: @Composable () -> Unit) {
     AdjustSystemColors(primalTheme = primalTheme)
     ExtraColorSchemeProvider(extraColorScheme = primalTheme.extraColorScheme) {
         MaterialTheme(
             colorScheme = primalTheme.colorScheme,
             shapes = PrimalShapes,
             typography = PrimalTypography,
-            content = content
+            content = content,
         )
     }
 }
@@ -53,5 +49,4 @@ object AppTheme {
     val shapes: Shapes
         @Composable
         get() = MaterialTheme.shapes
-
 }

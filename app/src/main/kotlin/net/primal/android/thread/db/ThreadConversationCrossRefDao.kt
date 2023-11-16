@@ -9,5 +9,4 @@ interface ThreadConversationCrossRefDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun connect(data: List<ThreadConversationCrossRef>)
-
 }

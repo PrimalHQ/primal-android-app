@@ -13,5 +13,4 @@ interface FeedPostDataCrossRefDao {
 
     @Query("DELETE FROM FeedPostDataCrossRef WHERE feedDirective = :feedDirective")
     fun deleteConnectionsByDirective(feedDirective: String)
-
 }

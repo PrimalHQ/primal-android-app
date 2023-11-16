@@ -17,7 +17,7 @@ interface CreateAccountContract {
         val avatarUri: Uri? = null,
         val bannerUri: Uri? = null,
         val userId: String? = null,
-        val recommendedFollows: List<RecommendedFollow> = listOf()
+        val recommendedFollows: List<RecommendedFollow> = listOf(),
     ) {
         sealed class CreateError {
             data class FailedToUploadImage(val cause: Throwable) : CreateError()
@@ -30,7 +30,8 @@ interface CreateAccountContract {
             NEW_ACCOUNT(1),
             PROFILE_PREVIEW(2),
             ACCOUNT_CREATED(3),
-            FOLLOW_RECOMMENDED_ACCOUNTS(4);
+            FOLLOW_RECOMMENDED_ACCOUNTS(4),
+            ;
 
             companion object {
                 operator fun invoke(step: Int): CreateAccountStep? =

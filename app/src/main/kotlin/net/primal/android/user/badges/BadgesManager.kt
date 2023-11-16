@@ -4,6 +4,9 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
+import java.util.UUID
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -27,9 +30,6 @@ import net.primal.android.serialization.NostrJson
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
 import net.primal.android.user.domain.Badges
-import java.util.UUID
-import javax.inject.Inject
-import javax.inject.Singleton
 
 @Singleton
 class BadgesManager @Inject constructor(
@@ -64,30 +64,33 @@ class BadgesManager @Inject constructor(
         mutableBadges.emit(updatedBadges)
     }
 
-    private fun observeActiveAccount() = scope.launch {
-        activeAccountStore.activeAccountState.collect {
-            when (it) {
-                is ActiveUserAccountState.ActiveUserAccount -> {
-                    val newActiveUserId = it.data.pubkey
-                    if (newActiveUserId != activeUserId) {
-                        activeUserId = newActiveUserId
-                        subscribeAll(userId = newActiveUserId)
-                        withContext(Dispatchers.Main) {
-                            ProcessLifecycleOwner.get().lifecycle.addObserver(this@BadgesManager)
+    private fun observeActiveAccount() =
+        scope.launch {
+            activeAccountStore.activeAccountState.collect {
+                when (it) {
+                    is ActiveUserAccountState.ActiveUserAccount -> {
+                        val newActiveUserId = it.data.pubkey
+                        if (newActiveUserId != activeUserId) {
+                            activeUserId = newActiveUserId
+                            subscribeAll(userId = newActiveUserId)
+                            withContext(Dispatchers.Main) {
+                                ProcessLifecycleOwner.get().lifecycle.addObserver(
+                                    this@BadgesManager,
+                                )
+                            }
                         }
                     }
-                }
 
-                ActiveUserAccountState.NoUserAccount -> {
-                    emitBadgesUpdate { Badges() }
-                    unsubscribeAll()
-                    withContext(Dispatchers.Main) {
-                        ProcessLifecycleOwner.get().lifecycle.removeObserver(this@BadgesManager)
+                    ActiveUserAccountState.NoUserAccount -> {
+                        emitBadgesUpdate { Badges() }
+                        unsubscribeAll()
+                        withContext(Dispatchers.Main) {
+                            ProcessLifecycleOwner.get().lifecycle.removeObserver(this@BadgesManager)
+                        }
                     }
                 }
             }
         }
-    }
 
     override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
         when (event) {
@@ -131,8 +134,8 @@ class BadgesManager @Inject constructor(
             subscriptionId = newSubscriptionId,
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.NEW_NOTIFICATIONS_COUNT,
-                optionsJson = NostrJson.encodeToString(PubkeyRequestBody(pubkey = userId))
-            )
+                optionsJson = NostrJson.encodeToString(PubkeyRequestBody(pubkey = userId)),
+            ),
         ).transform { it ->
             when (it) {
                 is NostrIncomingMessage.EventMessage -> {
@@ -153,7 +156,6 @@ class BadgesManager @Inject constructor(
             notificationsSummarySubscriptionId = null
             notificationsSummarySubscriptionJob?.cancel()
             notificationsSummarySubscriptionJob = null
-
         }
     }
 
@@ -164,8 +166,8 @@ class BadgesManager @Inject constructor(
             subscriptionId = newSubscriptionId,
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.NEW_DMS_COUNT,
-                optionsJson = NostrJson.encodeToString(PubkeyRequestBody(pubkey = userId))
-            )
+                optionsJson = NostrJson.encodeToString(PubkeyRequestBody(pubkey = userId)),
+            ),
         ).transform { it ->
             when (it) {
                 is NostrIncomingMessage.EventMessage -> {

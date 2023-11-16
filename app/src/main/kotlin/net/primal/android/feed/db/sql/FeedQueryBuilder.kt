@@ -9,5 +9,4 @@ interface FeedQueryBuilder {
     fun newestFeedPostsQuery(limit: Int): SimpleSQLiteQuery
 
     fun oldestFeedPostsQuery(limit: Int): SimpleSQLiteQuery
-
 }

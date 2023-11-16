@@ -9,6 +9,8 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import javax.inject.Qualifier
+import javax.inject.Singleton
 import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.relays.RelaysManager
@@ -21,7 +23,6 @@ import net.primal.android.user.api.UsersApi
 import net.primal.android.user.api.UsersApiImpl
 import net.primal.android.user.domain.Credential
 import net.primal.android.user.domain.UserAccount
-import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -32,39 +33,45 @@ object UserModule {
     fun provideCredentialsStore(
         @ApplicationContext context: Context,
         encryption: Encryption,
-    ): DataStore<List<Credential>> = DataStoreFactory.create(
-        produceFile = { context.dataStoreFile("credentials.json") },
-        serializer = CredentialsSerialization(encryption = encryption),
-    )
+    ): DataStore<List<Credential>> =
+        DataStoreFactory.create(
+            produceFile = { context.dataStoreFile("credentials.json") },
+            serializer = CredentialsSerialization(encryption = encryption),
+        )
 
     @Provides
     @Singleton
     fun provideUserAccountsStore(
         @ApplicationContext context: Context,
         encryption: Encryption,
-    ): DataStore<List<UserAccount>> = DataStoreFactory.create(
-        produceFile = { context.dataStoreFile("accounts.json") },
-        serializer = UserAccountsSerialization(encryption = encryption),
-    )
+    ): DataStore<List<UserAccount>> =
+        DataStoreFactory.create(
+            produceFile = { context.dataStoreFile("accounts.json") },
+            serializer = UserAccountsSerialization(encryption = encryption),
+        )
 
     @Provides
     @Singleton
     @ActiveAccountDataStore
-    fun provideActiveAccountDataStore(
-        @ApplicationContext context: Context,
-    ): DataStore<String> = DataStoreFactory.create(
-        produceFile = { context.dataStoreFile("active_account.txt") },
-        serializer = StringSerializer(),
-    )
+    fun provideActiveAccountDataStore(@ApplicationContext context: Context): DataStore<String> =
+        DataStoreFactory.create(
+            produceFile = { context.dataStoreFile("active_account.txt") },
+            serializer = StringSerializer(),
+        )
 
     @Provides
     fun provideUsersApi(
         @PrimalCacheApiClient primalApiClient: PrimalApiClient,
         relaysManager: RelaysManager,
         nostrNotary: NostrNotary,
-    ): UsersApi = UsersApiImpl(
-        primalApiClient = primalApiClient,
-        relaysManager = relaysManager,
-        nostrNotary = nostrNotary,
-    )
+    ): UsersApi =
+        UsersApiImpl(
+            primalApiClient = primalApiClient,
+            relaysManager = relaysManager,
+            nostrNotary = nostrNotary,
+        )
 }
+
+@Qualifier
+@Target(AnnotationTarget.FUNCTION, AnnotationTarget.VALUE_PARAMETER)
+annotation class ActiveAccountDataStore

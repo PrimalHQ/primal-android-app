@@ -55,6 +55,6 @@ fun DropdownPrimalMenuItem(
         enabled = enabled,
         colors = colors,
         contentPadding = contentPadding,
-        interactionSource = interactionSource
+        interactionSource = interactionSource,
     )
 }

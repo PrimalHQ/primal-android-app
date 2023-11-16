@@ -6,6 +6,5 @@ sealed class ActiveUserAccountState {
 
     data object NoUserAccount : ActiveUserAccountState()
 
-    data class ActiveUserAccount(val data: UserAccount): ActiveUserAccountState()
-
+    data class ActiveUserAccount(val data: UserAccount) : ActiveUserAccountState()
 }

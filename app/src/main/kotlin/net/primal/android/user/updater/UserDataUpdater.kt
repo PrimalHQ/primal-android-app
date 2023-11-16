@@ -2,11 +2,11 @@ package net.primal.android.user.updater
 
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import java.time.Instant
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.user.repository.UserRepository
 import timber.log.Timber
-import java.time.Instant
 
 class UserDataUpdater @AssistedInject constructor(
     @Assisted val userId: String,

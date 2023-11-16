@@ -13,7 +13,7 @@ fun AvatarThumbnail(
     authorAvatarUrl: String? = null,
     authorMediaResources: List<MediaResourceUi> = emptyList(),
     avatarSize: Dp = 48.dp,
-    onClick: (() -> Unit)? = null
+    onClick: (() -> Unit)? = null,
 ) {
     val resource = authorMediaResources.findByUrl(url = authorAvatarUrl)
     val variant = resource?.variants?.minByOrNull { it.width }

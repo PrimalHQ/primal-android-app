@@ -10,16 +10,11 @@ data class PrimalQueryResult(
     val nostrEvents: List<NostrEvent> = emptyList(),
     val primalEvents: List<PrimalEvent> = emptyList(),
 ) {
-    fun findNostrEvent(kind: NostrEventKind) =
-        nostrEvents.find { kind.value == it.kind }
+    fun findNostrEvent(kind: NostrEventKind) = nostrEvents.find { kind.value == it.kind }
 
-    fun findPrimalEvent(kind: NostrEventKind) =
-        primalEvents.find { kind.value == it.kind }
+    fun findPrimalEvent(kind: NostrEventKind) = primalEvents.find { kind.value == it.kind }
 
-    fun filterNostrEvents(kind: NostrEventKind) =
-        nostrEvents.filter { kind.value == it.kind }
+    fun filterNostrEvents(kind: NostrEventKind) = nostrEvents.filter { kind.value == it.kind }
 
-    fun filterPrimalEvents(kind: NostrEventKind) =
-        primalEvents.filter { kind.value == it.kind }
-
+    fun filterPrimalEvents(kind: NostrEventKind) = primalEvents.filter { kind.value == it.kind }
 }

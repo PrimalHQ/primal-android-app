@@ -16,7 +16,7 @@ fun DropdownPrimalMenu(
     onDismissRequest: () -> Unit,
     offset: DpOffset = DpOffset(0.dp, 0.dp),
     properties: PopupProperties = PopupProperties(focusable = true),
-    content: @Composable ColumnScope.() -> Unit
+    content: @Composable ColumnScope.() -> Unit,
 ) {
     DropdownMenu(
         modifier = Modifier

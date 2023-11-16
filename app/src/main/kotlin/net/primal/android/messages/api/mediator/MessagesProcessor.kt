@@ -1,6 +1,7 @@
 package net.primal.android.messages.api.mediator
 
 import androidx.room.withTransaction
+import javax.inject.Inject
 import net.primal.android.crypto.hexToNpubHrp
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.feed.api.FeedApi
@@ -21,7 +22,6 @@ import net.primal.android.nostr.model.primal.PrimalEvent
 import net.primal.android.user.api.UsersApi
 import net.primal.android.user.credentials.CredentialsStore
 import timber.log.Timber
-import javax.inject.Inject
 
 class MessagesProcessor @Inject constructor(
     private val database: PrimalDatabase,
@@ -38,7 +38,7 @@ class MessagesProcessor @Inject constructor(
     ) {
         val messageDataList = messages.mapAsMessageDataPO(
             userId = userId,
-            nsec = credentialsStore.findOrThrow(npub = userId.hexToNpubHrp()).nsec
+            nsec = credentialsStore.findOrThrow(npub = userId.hexToNpubHrp()).nsec,
         )
 
         processNostrUrisAndSave(
@@ -48,17 +48,16 @@ class MessagesProcessor @Inject constructor(
 
         database.withTransaction {
             database.profiles().upsertAll(data = profileMetadata.mapAsProfileDataPO())
-            database.mediaResources().upsertAll(data = messageDataList.flatMapMessagesAsMediaResourcePO())
+            database.mediaResources().upsertAll(
+                data = messageDataList.flatMapMessagesAsMediaResourcePO(),
+            )
             database.mediaResources()
                 .upsertAll(data = mediaResources.flatMapNotNullAsMediaResourcePO())
             database.messages().upsertAll(data = messageDataList)
         }
     }
 
-    private suspend fun processNostrUrisAndSave(
-        userId: String,
-        messageDataList: List<DirectMessageData>,
-    ) {
+    private suspend fun processNostrUrisAndSave(userId: String, messageDataList: List<DirectMessageData>) {
         val nostrUris = messageDataList.flatMap { it.uris }.filter { it.isNostrUri() }
 
         val referencedEventIds = nostrUris.mapNotNull { it.extractNoteId() }.toSet()
@@ -85,7 +84,6 @@ class MessagesProcessor @Inject constructor(
             .groupBy { it.postId }
             .mapValues { it.value.first() }
 
-
         val referencedProfileIds = nostrUris.mapNotNull { it.extractProfileId() }.toSet()
         val refNoteAuthorProfileIds = allNotes.map { it.authorId }.toSet()
         val allProfileIds = referencedProfileIds + refNoteAuthorProfileIds
@@ -98,7 +96,7 @@ class MessagesProcessor @Inject constructor(
                 database.withTransaction {
                     database.profiles().upsertAll(data = profiles)
                     database.mediaResources().upsertAll(
-                        data = response.eventResources.flatMapNotNullAsMediaResourcePO()
+                        data = response.eventResources.flatMapNotNullAsMediaResourcePO(),
                     )
                 }
                 profiles
@@ -118,8 +116,7 @@ class MessagesProcessor @Inject constructor(
             data = messageDataList.flatMapMessagesAsNostrResourcePO(
                 postIdToPostDataMap = referencedNotesMap,
                 profileIdToProfileDataMap = referencedProfilesMap,
-            )
+            ),
         )
     }
-
 }

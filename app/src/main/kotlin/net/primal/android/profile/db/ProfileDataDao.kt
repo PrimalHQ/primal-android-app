@@ -25,5 +25,4 @@ interface ProfileDataDao {
 
     @Query("SELECT eventId FROM ProfileData WHERE ownerId = :profileId")
     fun findMetadataEventId(profileId: String): String
-
 }

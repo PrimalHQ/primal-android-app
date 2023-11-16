@@ -26,29 +26,23 @@ import net.primal.android.core.compose.AdjustTemporarilySystemBarColors
 import net.primal.android.discuss.list.model.FeedUi
 import net.primal.android.theme.AppTheme
 
-
 @Composable
-fun FeedListScreen(
-    viewModel: FeedListViewModel,
-    onFeedSelected: (String) -> Unit,
-) {
+fun FeedListScreen(viewModel: FeedListViewModel, onFeedSelected: (String) -> Unit) {
     val uiState = viewModel.state.collectAsState()
 
-    AdjustTemporarilySystemBarColors(navigationBarColor = AppTheme.extraColorScheme.surfaceVariantAlt2)
+    AdjustTemporarilySystemBarColors(
+        navigationBarColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
+    )
 
     FeedListScreen(
         state = uiState.value,
         onFeedClick = { onFeedSelected(it.directive) },
     )
-
 }
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun FeedListScreen(
-    state: FeedListContract.UiState,
-    onFeedClick: (FeedUi) -> Unit,
-) {
+fun FeedListScreen(state: FeedListContract.UiState, onFeedClick: (FeedUi) -> Unit) {
     Surface(
         color = AppTheme.extraColorScheme.surfaceVariantAlt2,
         contentColor = AppTheme.colorScheme.onSurfaceVariant,
@@ -64,7 +58,7 @@ fun FeedListScreen(
                         ),
                         title = {
                             Text(text = stringResource(id = R.string.feed_list_title))
-                        }
+                        },
                     )
                     BottomSheetDefaults.DragHandle(height = 3.dp)
                 }
@@ -77,7 +71,7 @@ fun FeedListScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { onFeedClick(it) }
+                        .clickable { onFeedClick(it) },
                 ) {
                     Text(
                         modifier = Modifier

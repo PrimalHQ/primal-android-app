@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.map
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.time.Instant
+import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,8 +29,6 @@ import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.badges.BadgesManager
 import timber.log.Timber
-import java.time.Instant
-import javax.inject.Inject
 
 @HiltViewModel
 class MessageConversationListViewModel @Inject constructor(
@@ -45,13 +45,13 @@ class MessageConversationListViewModel @Inject constructor(
             conversations = messageRepository
                 .newestConversations(ConversationRelation.Follows)
                 .mapAsPagingDataOfMessageConversationUi(),
-        )
+        ),
     )
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
 
-    private val _event: MutableSharedFlow<UiEvent> = MutableSharedFlow()
-    fun setEvent(event: UiEvent) = viewModelScope.launch { _event.emit(event) }
+    private val events: MutableSharedFlow<UiEvent> = MutableSharedFlow()
+    fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
 
     init {
         observeEvents()
@@ -61,58 +61,63 @@ class MessageConversationListViewModel @Inject constructor(
         fetchConversations()
     }
 
-    private fun observeEvents() = viewModelScope.launch {
-        _event.collect {
-            when (it) {
-                is UiEvent.ChangeRelation -> changeRelation(relation = it.relation)
-                UiEvent.MarkAllConversationsAsRead -> markAllConversationAsRead()
-                UiEvent.ConversationsSeen -> fetchConversations()
-            }
-        }
-    }
-
-    private fun subscribeToActiveAccount() = viewModelScope.launch {
-        activeAccountStore.activeUserAccount.collect {
-            setState {
-                copy(activeAccountAvatarUrl = it.pictureUrl)
-            }
-        }
-    }
-
-    private fun subscribeToBadgesUpdates() = viewModelScope.launch {
-        badgesManager.badges.collect {
-            setState {
-                copy(badges = it)
-            }
-        }
-    }
-
-    private fun subscribeToTotalUnreadCountChanges() = viewModelScope.launch {
-        badgesManager.badges
-            .map { it.messages }
-            .distinctUntilChanged()
-            .collect {
-                fetchConversations()
-            }
-    }
-
-    private fun fetchConversations() = viewModelScope.launch {
-        try {
-            when (state.value.activeRelation) {
-                ConversationRelation.Follows -> {
-                    messageRepository.fetchFollowConversations()
-                    messageRepository.fetchNonFollowsConversations()
-                }
-
-                ConversationRelation.Other -> {
-                    messageRepository.fetchNonFollowsConversations()
-                    messageRepository.fetchFollowConversations()
+    private fun observeEvents() =
+        viewModelScope.launch {
+            events.collect {
+                when (it) {
+                    is UiEvent.ChangeRelation -> changeRelation(relation = it.relation)
+                    UiEvent.MarkAllConversationsAsRead -> markAllConversationAsRead()
+                    UiEvent.ConversationsSeen -> fetchConversations()
                 }
             }
-        } catch (error: WssException) {
-            Timber.e(error)
         }
-    }
+
+    private fun subscribeToActiveAccount() =
+        viewModelScope.launch {
+            activeAccountStore.activeUserAccount.collect {
+                setState {
+                    copy(activeAccountAvatarUrl = it.pictureUrl)
+                }
+            }
+        }
+
+    private fun subscribeToBadgesUpdates() =
+        viewModelScope.launch {
+            badgesManager.badges.collect {
+                setState {
+                    copy(badges = it)
+                }
+            }
+        }
+
+    private fun subscribeToTotalUnreadCountChanges() =
+        viewModelScope.launch {
+            badgesManager.badges
+                .map { it.messages }
+                .distinctUntilChanged()
+                .collect {
+                    fetchConversations()
+                }
+        }
+
+    private fun fetchConversations() =
+        viewModelScope.launch {
+            try {
+                when (state.value.activeRelation) {
+                    ConversationRelation.Follows -> {
+                        messageRepository.fetchFollowConversations()
+                        messageRepository.fetchNonFollowsConversations()
+                    }
+
+                    ConversationRelation.Other -> {
+                        messageRepository.fetchNonFollowsConversations()
+                        messageRepository.fetchFollowConversations()
+                    }
+                }
+            } catch (error: WssException) {
+                Timber.e(error)
+            }
+        }
 
     private fun changeRelation(relation: ConversationRelation) {
         setState {
@@ -125,13 +130,14 @@ class MessageConversationListViewModel @Inject constructor(
         }
     }
 
-    private fun markAllConversationAsRead() = viewModelScope.launch {
-        try {
-            messageRepository.markAllMessagesAsRead(userId = activeUserId)
-        } catch (error: WssException) {
-            Timber.w(error)
+    private fun markAllConversationAsRead() =
+        viewModelScope.launch {
+            try {
+                messageRepository.markAllMessagesAsRead(userId = activeUserId)
+            } catch (error: WssException) {
+                Timber.w(error)
+            }
         }
-    }
 
     private fun Flow<PagingData<MessageConversation>>.mapAsPagingDataOfMessageConversationUi() =
         map { pagingData -> pagingData.map { it.mapAsMessageConversationUi() } }

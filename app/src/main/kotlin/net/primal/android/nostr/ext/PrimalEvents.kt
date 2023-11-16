@@ -8,7 +8,7 @@ import net.primal.android.serialization.NostrJson
 fun PrimalEvent.takeContentAsNostrEventOrNull(): NostrEvent? {
     return try {
         NostrJson.decodeFromJsonElement<NostrEvent>(
-            NostrJson.parseToJsonElement(this.content)
+            NostrJson.parseToJsonElement(this.content),
         )
     } catch (error: IllegalArgumentException) {
         null

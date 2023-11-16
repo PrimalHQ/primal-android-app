@@ -14,5 +14,5 @@ data class ContentPrimalEventResources(
 data class EventResource(
     val url: String,
     @SerialName("mt") val mimeType: String? = null,
-    val variants: List<PrimalResourceVariant>
+    val variants: List<PrimalResourceVariant>,
 )

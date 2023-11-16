@@ -9,5 +9,4 @@ interface MediaResourceDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun upsertAll(data: List<MediaResource>)
-
 }

@@ -1,5 +1,6 @@
 package net.primal.android.feed.repository
 
+import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonArray
@@ -19,7 +20,6 @@ import net.primal.android.nostr.ext.parseHashtagTags
 import net.primal.android.nostr.ext.parsePubkeyTags
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import javax.inject.Inject
 
 class PostRepository @Inject constructor(
     private val database: PrimalDatabase,
@@ -42,7 +42,7 @@ class PostRepository @Inject constructor(
                     userId = userId,
                     postId = postId,
                     postAuthorId = postAuthorId,
-                )
+                ),
             )
         } catch (error: NostrPublishException) {
             statsUpdater.revertStats()
@@ -51,7 +51,11 @@ class PostRepository @Inject constructor(
     }
 
     @Throws(NostrPublishException::class)
-    suspend fun repostPost(postId: String, postAuthorId: String, postRawNostrEvent: String) {
+    suspend fun repostPost(
+        postId: String,
+        postAuthorId: String,
+        postRawNostrEvent: String,
+    ) {
         val userId = activeAccountStore.activeUserId()
         val statsUpdater = PostStatsUpdater(postId = postId, userId = userId, database = database)
 
@@ -63,7 +67,7 @@ class PostRepository @Inject constructor(
                     postId = postId,
                     postAuthorId = postAuthorId,
                     postRawNostrEvent = postRawNostrEvent,
-                )
+                ),
             )
         } catch (error: NostrPublishException) {
             statsUpdater.revertStats()
@@ -93,7 +97,9 @@ class PostRepository @Inject constructor(
         val rootEventTag = rootPostId?.asEventIdTag(marker = "root")
         val replyEventTag = if (rootPostId != replyToPostId) {
             replyToPostId?.asEventIdTag(marker = "reply")
-        } else null
+        } else {
+            null
+        }
         val mentionEventTags = content.parseEventTags(marker = "mention")
         val eventTags = setOfNotNull(rootEventTag, replyEventTag) + mentionEventTags
 
@@ -122,10 +128,7 @@ class PostRepository @Inject constructor(
         )
     }
 
-    private suspend fun publishShortTextNote(
-        content: String,
-        tags: Set<JsonArray> = emptySet(),
-    ): Boolean {
+    private suspend fun publishShortTextNote(content: String, tags: Set<JsonArray> = emptySet()): Boolean {
         val noteEvent = nostrNotary.signShortTextNoteEvent(
             userId = activeAccountStore.activeUserId(),
             tags = tags.toList(),

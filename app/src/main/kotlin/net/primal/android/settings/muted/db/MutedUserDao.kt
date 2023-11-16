@@ -17,7 +17,7 @@ interface MutedUserDao {
         SELECT * FROM MutedUserData 
         INNER JOIN ProfileData ON MutedUserData.userId = ProfileData.ownerId
         ORDER BY ProfileData.displayName ASC
-        """
+        """,
     )
     fun observeMutedUsers(): Flow<List<MutedUser>>
 

@@ -16,7 +16,7 @@ interface NotificationsSettingsContract {
     sealed class UiEvent {
         data class NotificationSettingChanged(
             val type: NotificationType,
-            val value: Boolean
+            val value: Boolean,
         ) : UiEvent()
 
         data object DismissErrors : UiEvent()

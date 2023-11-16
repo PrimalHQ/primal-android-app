@@ -50,6 +50,8 @@ import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
+import java.time.Instant
+import kotlin.time.Duration.Companion.minutes
 import net.primal.android.R
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.AvatarThumbnailListItemImage
@@ -71,8 +73,6 @@ import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.formatNip05Identifier
 import net.primal.android.messages.chat.model.ChatMessageUi
 import net.primal.android.theme.AppTheme
-import java.time.Instant
-import kotlin.time.Duration.Companion.minutes
 
 @Composable
 fun ChatScreen(
@@ -141,10 +141,10 @@ fun ChatScreen(
                     Box(
                         modifier = Modifier
                             .padding(horizontal = 8.dp)
-                            .clip(CircleShape)
+                            .clip(CircleShape),
                     ) {
                         val resource = state.participantMediaResources.findByUrl(
-                            url = state.participantProfile?.avatarUrl
+                            url = state.participantProfile?.avatarUrl,
                         )
                         val variant = resource?.variants?.minByOrNull { it.width }
                         val imageSource = variant?.mediaUrl ?: state.participantProfile?.avatarUrl
@@ -154,7 +154,7 @@ fun ChatScreen(
                             onClick = { onProfileClick(state.participantId) },
                         )
                     }
-                }
+                },
             )
         },
         content = { contentPadding ->
@@ -196,7 +196,7 @@ fun ChatScreen(
         },
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState)
-        }
+        },
     )
 }
 
@@ -222,7 +222,7 @@ private fun ChatList(
             Spacer(
                 modifier = Modifier
                     .height(8.dp)
-                    .fillMaxWidth()
+                    .fillMaxWidth(),
             )
         }
 
@@ -237,12 +237,16 @@ private fun ChatList(
                     val previousMessageIndex = index + 1
                     val previousMessage = if (previousMessageIndex in 0..<messagesCount) {
                         messages[previousMessageIndex]
-                    } else null
+                    } else {
+                        null
+                    }
 
                     val nextMessageIndex = index - 1
                     val nextMessage = if (nextMessageIndex in 0..<messagesCount) {
                         messages[nextMessageIndex]
-                    } else null
+                    } else {
+                        null
+                    }
 
                     ChatMessageListItem(
                         chatMessage = currentMessage,
@@ -285,8 +289,10 @@ private fun ChatList(
                     item(contentType = "RefreshError") {
                         ListNoContent(
                             modifier = Modifier.fillParentMaxSize(),
-                            noContentText = stringResource(id = R.string.messages_chat_initial_loading_error),
-                            onRefresh = { messages.refresh() }
+                            noContentText = stringResource(
+                                id = R.string.messages_chat_initial_loading_error,
+                            ),
+                            onRefresh = { messages.refresh() },
                         )
                     }
                 }
@@ -297,7 +303,7 @@ private fun ChatList(
             Spacer(
                 modifier = Modifier
                     .height(8.dp)
-                    .fillMaxWidth()
+                    .fillMaxWidth(),
             )
         }
     }
@@ -314,10 +320,10 @@ private fun ChatMessageListItem(
     onHashtagClick: (String) -> Unit,
 ) {
     val timeDiffBetweenThisAndNextMessage = (nextMessage?.timestamp ?: Instant.MAX).epochSecond -
-            chatMessage.timestamp.epochSecond
+        chatMessage.timestamp.epochSecond
 
-    val showTimestamp = timeDiffBetweenThisAndNextMessage > 15.minutes.inWholeSeconds
-            || chatMessage.senderId != nextMessage?.senderId
+    val showTimestamp = timeDiffBetweenThisAndNextMessage > 15.minutes.inWholeSeconds ||
+        chatMessage.senderId != nextMessage?.senderId
 
     val isFirstMessageInGroup = chatMessage.senderId != previousMessage?.senderId
 
@@ -375,7 +381,7 @@ private fun ChatMessageListItem(
                 modifier = Modifier
                     .padding(
                         start = if (chatMessage.isUserMessage) maxWidth.times(0.25f) else 16.dp,
-                        end = if (chatMessage.isUserMessage) 16.dp else maxWidth.times(0.25f)
+                        end = if (chatMessage.isUserMessage) 16.dp else maxWidth.times(0.25f),
                     )
                     .padding(bottom = if (showTimestamp) 2.dp else 4.dp)
                     .background(color = backgroundColor, shape = backgroundShape)
@@ -406,7 +412,7 @@ private fun ChatMessageListItem(
                     AppTheme.extraColorScheme.surfaceVariantAlt1
                 } else {
                     AppTheme.extraColorScheme.surfaceVariantAlt2
-                }
+                },
             )
         }
 
@@ -473,15 +479,14 @@ private fun MessageOutlinedTextField(
 }
 
 @Composable
-private fun ChatErrorHandler(
-    error: ChatContract.UiState.ChatError?,
-    snackbarHostState: SnackbarHostState,
-) {
+private fun ChatErrorHandler(error: ChatContract.UiState.ChatError?, snackbarHostState: SnackbarHostState) {
     val context = LocalContext.current
     LaunchedEffect(error ?: true) {
         val errorMessage = when (error) {
-            is ChatContract.UiState.ChatError.MissingRelaysConfiguration -> context.getString(R.string.app_missing_relays_config)
-            is ChatContract.UiState.ChatError.PublishError -> context.getString(R.string.chat_nostr_publish_error)
+            is ChatContract.UiState.ChatError.MissingRelaysConfiguration ->
+                context.getString(R.string.app_missing_relays_config)
+            is ChatContract.UiState.ChatError.PublishError ->
+                context.getString(R.string.chat_nostr_publish_error)
             else -> null
         }
 

@@ -18,7 +18,9 @@ fun UserAccount.copyProfileIfNotNull(profile: UserAccount?): UserAccount {
             followingCount = profile.followingCount,
             notesCount = profile.notesCount,
         )
-    } else this
+    } else {
+        this
+    }
 }
 
 fun UserAccount.copyContactsIfNotNull(contacts: UserAccount?): UserAccount {
@@ -29,5 +31,7 @@ fun UserAccount.copyContactsIfNotNull(contacts: UserAccount?): UserAccount {
             followers = contacts.followers,
             interests = contacts.interests,
         )
-    } else this
+    } else {
+        this
+    }
 }

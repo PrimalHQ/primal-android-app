@@ -94,9 +94,11 @@ fun ExploreHomeScreen(
         badges = state.badges,
         topBar = {
             ExploreTopAppBar(
-                title = { SearchBar(
-                    onClick = onSearchClick,
-                ) },
+                title = {
+                    SearchBar(
+                        onClick = onSearchClick,
+                    )
+                },
                 avatarUrl = state.activeAccountAvatarUrl,
                 onNavigationIconClick = {
                     uiScope.launch { drawerState.open() }
@@ -143,13 +145,13 @@ fun ExploreHomeScreen(
                                         style = AppTheme.typography.bodyLarge,
                                         fontWeight = FontWeight.Medium,
                                     )
-                                }
+                                },
                             )
                         }
                     }
                 }
             }
-        }
+        },
     )
 }
 
@@ -168,7 +170,7 @@ fun ExploreTopAppBar(
                 Box(
                     modifier = Modifier
                         .padding(horizontal = 8.dp)
-                        .clip(CircleShape)
+                        .clip(CircleShape),
                 ) {
                     AvatarThumbnailListItemImage(
                         source = avatarUrl,
@@ -191,9 +193,7 @@ fun ExploreTopAppBar(
 }
 
 @Composable
-fun SearchBar(
-    onClick: () -> Unit,
-) {
+fun SearchBar(onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .height(34.dp)

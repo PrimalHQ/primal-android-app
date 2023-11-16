@@ -21,6 +21,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import java.time.Instant
+import kotlin.time.Duration.Companion.seconds
 import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.asBeforeNowFormat
@@ -29,8 +31,6 @@ import net.primal.android.core.utils.formatNip05Identifier
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
-import java.time.Instant
-import kotlin.time.Duration.Companion.seconds
 
 @Composable
 fun FeedNoteHeader(
@@ -50,7 +50,6 @@ fun FeedNoteHeader(
         horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-
         if (authorAvatarVisible) {
             AvatarThumbnail(
                 modifier = Modifier,
@@ -63,26 +62,28 @@ fun FeedNoteHeader(
 
         Column(
             modifier = Modifier.padding(
-                horizontal = if (authorAvatarVisible) 8.dp else 0.dp
-            )
+                horizontal = if (authorAvatarVisible) 8.dp else 0.dp,
+            ),
         ) {
-            val identifier = if (!singleLine) "" else {
+            val identifier = if (!singleLine) {
+                ""
+            } else {
                 authorInternetIdentifier?.formatNip05Identifier() ?: ""
             }
             val suffixText = buildAnnotatedString {
-                    append(
-                        AnnotatedString(
-                            text = identifier,
-                            spanStyle = SpanStyle(
-                                color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-                                fontStyle = AppTheme.typography.bodySmall.fontStyle,
-                            )
-                        )
-                    )
-                }
+                append(
+                    AnnotatedString(
+                        text = identifier,
+                        spanStyle = SpanStyle(
+                            color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                            fontStyle = AppTheme.typography.bodySmall.fontStyle,
+                        ),
+                    ),
+                )
+            }
 
             ConstraintLayout(
-                modifier = Modifier.wrapContentWidth()
+                modifier = Modifier.wrapContentWidth(),
             ) {
                 val (mainRef, endRef) = createRefs()
 

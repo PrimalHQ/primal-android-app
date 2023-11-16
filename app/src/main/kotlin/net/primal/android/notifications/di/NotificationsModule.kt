@@ -18,8 +18,9 @@ object NotificationsModule {
     fun provideNotificationsApi(
         @PrimalCacheApiClient primalApiClient: PrimalApiClient,
         nostrNotary: NostrNotary,
-    ): NotificationsApi = NotificationsApiImpl(
-        primalApiClient = primalApiClient,
-        nostrNotary = nostrNotary,
-    )
+    ): NotificationsApi =
+        NotificationsApiImpl(
+            primalApiClient = primalApiClient,
+            nostrNotary = nostrNotary,
+        )
 }

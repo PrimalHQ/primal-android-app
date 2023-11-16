@@ -6,14 +6,15 @@ import net.primal.android.profile.db.PostUserStats
 import net.primal.android.serialization.NostrJson
 import net.primal.android.serialization.decodeFromStringOrNull
 
-fun ContentPrimalEventUserStats.asPostUserStatsPO(userId: String) = PostUserStats(
-    postId = this.eventId,
-    userId = userId,
-    liked = this.liked,
-    zapped = this.zapped,
-    reposted = this.reposted,
-    replied = this.replied,
-)
+fun ContentPrimalEventUserStats.asPostUserStatsPO(userId: String) =
+    PostUserStats(
+        postId = this.eventId,
+        userId = userId,
+        liked = this.liked,
+        zapped = this.zapped,
+        reposted = this.reposted,
+        replied = this.replied,
+    )
 
 fun List<PrimalEvent>.mapNotNullAsPostUserStatsPO(userId: String) =
     this.mapNotNull { NostrJson.decodeFromStringOrNull<ContentPrimalEventUserStats>(it.content) }

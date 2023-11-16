@@ -10,8 +10,9 @@ data class NostrResourceUi(
     val referencedPost: ReferencedPost?,
 )
 
-fun NostrResource.asNostrResourceUi() = NostrResourceUi(
-    uri = this.uri,
-    referencedPost = this.referencedPost,
-    referencedUser = this.referencedUser,
-)
+fun NostrResource.asNostrResourceUi() =
+    NostrResourceUi(
+        uri = this.uri,
+        referencedPost = this.referencedPost,
+        referencedUser = this.referencedUser,
+    )

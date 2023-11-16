@@ -35,6 +35,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import java.time.Instant
 import net.primal.android.R
 import net.primal.android.core.compose.PostImageListItemImage
 import net.primal.android.core.compose.PrimalClickableText
@@ -53,28 +54,31 @@ import net.primal.android.feed.db.ReferencedUser
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
-import java.time.Instant
 
 private const val PROFILE_ID_ANNOTATION_TAG = "profileId"
 private const val URL_ANNOTATION_TAG = "url"
 private const val NOTE_ANNOTATION_TAG = "note"
 private const val HASHTAG_ANNOTATION_TAG = "hashtag"
 
-private fun List<MediaResourceUi>.filterImages() = filter {
-    it.mimeType?.startsWith("image") == true
-}
+private fun List<MediaResourceUi>.filterImages() =
+    filter {
+        it.mimeType?.startsWith("image") == true
+    }
 
-private fun List<MediaResourceUi>.filterNotImages() = filterNot {
-    it.mimeType?.startsWith("image") == true
-}
+private fun List<MediaResourceUi>.filterNotImages() =
+    filterNot {
+        it.mimeType?.startsWith("image") == true
+    }
 
-private fun List<NostrResourceUi>.filterReferencedPosts() = filter {
-    it.referencedPost != null
-}
+private fun List<NostrResourceUi>.filterReferencedPosts() =
+    filter {
+        it.referencedPost != null
+    }
 
-private fun List<NostrResourceUi>.filterReferencedUsers() = filter {
-    it.referencedUser != null
-}
+private fun List<NostrResourceUi>.filterReferencedUsers() =
+    filter {
+        it.referencedUser != null
+    }
 
 private fun String.withoutUrls(urls: List<String>): String {
     var newContent = this
@@ -84,16 +88,14 @@ private fun String.withoutUrls(urls: List<String>): String {
     return newContent
 }
 
-private fun String.replaceNostrProfileUrisWithHandles(
-    resources: List<NostrResourceUi>
-): String {
+private fun String.replaceNostrProfileUrisWithHandles(resources: List<NostrResourceUi>): String {
     var newContent = this
     resources.forEach {
         checkNotNull(it.referencedUser)
         newContent = newContent.replace(
             oldValue = it.uri,
             newValue = it.referencedUser.displayUsername,
-            ignoreCase = true
+            ignoreCase = true,
         )
     }
     return newContent
@@ -137,10 +139,7 @@ private fun String.clearParsedPrimalLinks(): String {
     return newContent
 }
 
-private fun String.ellipsize(
-    expanded: Boolean,
-    ellipsizeText: String,
-): String {
+private fun String.ellipsize(expanded: Boolean, ellipsizeText: String): String {
     val shouldEllipsize = length > 500
     return if (expanded || !shouldEllipsize) {
         this
@@ -192,7 +191,7 @@ fun FeedNoteContent(
                 onClick = { position, offset ->
                     contentText.getStringAnnotations(
                         start = position,
-                        end = position
+                        end = position,
                     ).firstOrNull()?.let { annotation ->
                         when (annotation.tag) {
                             PROFILE_ID_ANNOTATION_TAG -> onProfileClick(annotation.item)
@@ -201,7 +200,7 @@ fun FeedNoteContent(
                             HASHTAG_ANNOTATION_TAG -> onHashtagClick(annotation.item)
                         }
                     } ?: onClick(offset)
-                }
+                },
             )
         }
 
@@ -232,7 +231,6 @@ fun renderContentAsAnnotatedString(
     shouldKeepNostrNoteUris: Boolean = false,
     highlightColor: Color,
 ): AnnotatedString {
-
     val imageUrlResources = mediaResources.filterImages()
     val otherUrlResources = mediaResources.filterNotImages()
     val referencedPostResources = nostrResources.filterReferencedPosts()
@@ -240,11 +238,13 @@ fun renderContentAsAnnotatedString(
 
     val refinedContent = content
         .withoutUrls(urls = imageUrlResources.map { it.url })
-        .withoutUrls(urls = if (!shouldKeepNostrNoteUris) {
-            referencedPostResources.map { it.uri }
-        } else {
-            emptyList()
-        })
+        .withoutUrls(
+            urls = if (!shouldKeepNostrNoteUris) {
+                referencedPostResources.map { it.uri }
+            } else {
+                emptyList()
+            },
+        )
         .ellipsize(expanded = expanded, ellipsizeText = seeMoreText)
         .replaceNostrProfileUrisWithHandles(resources = referencedUserResources)
         .clearParsedPrimalLinks()
@@ -319,9 +319,7 @@ fun renderContentAsAnnotatedString(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun FeedNoteImages(
-    imageResources: List<MediaResourceUi>
-) {
+private fun FeedNoteImages(imageResources: List<MediaResourceUi>) {
     BoxWithConstraints {
         val imageSizeDp = findImageSize(resource = imageResources.first())
         val imagesCount = imageResources.size
@@ -340,7 +338,7 @@ private fun FeedNoteImages(
                     .height(32.dp)
                     .fillMaxWidth()
                     .align(Alignment.BottomCenter),
-                horizontalArrangement = Arrangement.Center
+                horizontalArrangement = Arrangement.Center,
             ) {
                 repeat(imagesCount) { iteration ->
                     val color = if (pagerState.currentPage == iteration) {
@@ -353,7 +351,7 @@ private fun FeedNoteImages(
                             .padding(2.dp)
                             .clip(CircleShape)
                             .background(color)
-                            .size(8.dp)
+                            .size(8.dp),
                     )
                 }
             }
@@ -362,10 +360,7 @@ private fun FeedNoteImages(
 }
 
 @Composable
-fun NoteImage(
-    resource: MediaResourceUi,
-    imageSizeDp: DpSize,
-) {
+fun NoteImage(resource: MediaResourceUi, imageSizeDp: DpSize) {
     BoxWithConstraints(
         modifier = Modifier
             .padding(vertical = 4.dp)
@@ -378,7 +373,7 @@ fun NoteImage(
             source = imageSource,
             modifier = Modifier
                 .width(imageSizeDp.width)
-                .height(imageSizeDp.height)
+                .height(imageSizeDp.height),
         )
     }
 }
@@ -393,7 +388,7 @@ private fun BoxWithConstraintsScope.findImageSize(resource: MediaResourceUi): Dp
     return variant.calculateImageSize(
         maxWidth = maxWidth,
         maxHeight = maxHeight,
-        density = density
+        density = density,
     )
 }
 
@@ -463,7 +458,7 @@ fun PreviewPostContent() {
                             userId = "nostr:referencedUser",
                             handle = "alex",
                         ),
-                    )
+                    ),
                 ),
                 onProfileClick = {},
                 onPostClick = {},
@@ -508,7 +503,7 @@ fun PreviewPostContentWithReferencedPost() {
                             mediaResources = emptyList(),
                             nostrResources = emptyList(),
 
-                            ),
+                        ),
                         referencedUser = null,
                     ),
                     NostrResourceUi(
@@ -526,7 +521,7 @@ fun PreviewPostContentWithReferencedPost() {
                             nostrResources = emptyList(),
                         ),
                         referencedUser = null,
-                    )
+                    ),
                 ),
                 onProfileClick = {},
                 onPostClick = {},

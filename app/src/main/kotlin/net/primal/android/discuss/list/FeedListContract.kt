@@ -7,5 +7,4 @@ interface FeedListContract {
     data class UiState(
         val feeds: List<FeedUi> = emptyList(),
     )
-
 }

@@ -13,10 +13,8 @@ import net.primal.android.networking.primal.api.PrimalImportApiImpl
 @InstallIn(SingletonComponent::class)
 object PrimalImportApiModule {
     @Provides
-    fun providePrimalImportApi(
-        @PrimalCacheApiClient primalApiClient: PrimalApiClient,
-    ): PrimalImportApi = PrimalImportApiImpl(
-        primalApiClient = primalApiClient,
-    )
-
+    fun providePrimalImportApi(@PrimalCacheApiClient primalApiClient: PrimalApiClient): PrimalImportApi =
+        PrimalImportApiImpl(
+            primalApiClient = primalApiClient,
+        )
 }

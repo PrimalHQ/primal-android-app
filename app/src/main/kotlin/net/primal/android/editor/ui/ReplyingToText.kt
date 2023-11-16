@@ -11,10 +11,7 @@ import net.primal.android.R
 import net.primal.android.theme.AppTheme
 
 @Composable
-fun ReplyingToText(
-    modifier: Modifier,
-    replyToUsername: String,
-) {
+fun ReplyingToText(modifier: Modifier, replyToUsername: String) {
     val mention = "@$replyToUsername"
     val text = stringResource(id = R.string.thread_replying_to, mention)
     val contentText = buildAnnotatedString {

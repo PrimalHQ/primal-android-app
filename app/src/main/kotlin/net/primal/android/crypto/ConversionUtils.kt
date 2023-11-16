@@ -2,24 +2,26 @@ package net.primal.android.crypto
 
 import org.spongycastle.util.encoders.Hex
 
+fun String.hexToNoteHrp() =
+    Bech32.encodeBytes(
+        hrp = "note",
+        data = Hex.decode(this),
+        encoding = Bech32.Encoding.Bech32,
+    )
 
-fun String.hexToNoteHrp() = Bech32.encodeBytes(
-    hrp = "note",
-    data = Hex.decode(this),
-    encoding = Bech32.Encoding.Bech32
-)
+fun String.hexToNpubHrp() =
+    Bech32.encodeBytes(
+        hrp = "npub",
+        data = Hex.decode(this),
+        encoding = Bech32.Encoding.Bech32,
+    )
 
-fun String.hexToNpubHrp() = Bech32.encodeBytes(
-    hrp = "npub",
-    data = Hex.decode(this),
-    encoding = Bech32.Encoding.Bech32
-)
-
-fun String.hexToNsecHrp() = Bech32.encodeBytes(
-    hrp = "nsec",
-    data = Hex.decode(this),
-    encoding = Bech32.Encoding.Bech32
-)
+fun String.hexToNsecHrp() =
+    Bech32.encodeBytes(
+        hrp = "nsec",
+        data = Hex.decode(this),
+        encoding = Bech32.Encoding.Bech32,
+    )
 
 fun String.bech32ToHex() = Bech32.decodeBytes(bech32 = this).second.toHex()
 
@@ -40,7 +42,6 @@ fun Int.toByteArray(): ByteArray {
 }
 
 fun String.bechToBytes(hrp: String? = null): ByteArray {
-
     val decodedForm = Bech32.decodeBytes(this)
     hrp?.also {
         if (it != decodedForm.first) {

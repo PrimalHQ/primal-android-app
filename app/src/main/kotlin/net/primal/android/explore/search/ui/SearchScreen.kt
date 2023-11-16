@@ -82,7 +82,7 @@ fun SearchScreen(
                             eventPublisher(SearchContract.UiEvent.SearchQueryUpdated(query = it))
                         },
                     )
-                }
+                },
             )
         },
         content = { paddingValues ->
@@ -113,7 +113,7 @@ fun SearchScreen(
                             }
                         }
                     },
-                    key = { it.profileId }
+                    key = { it.profileId },
                 ) {
                     UserProfileListItem(
                         data = it,
@@ -121,7 +121,7 @@ fun SearchScreen(
                     )
                 }
             }
-        }
+        },
     )
 }
 

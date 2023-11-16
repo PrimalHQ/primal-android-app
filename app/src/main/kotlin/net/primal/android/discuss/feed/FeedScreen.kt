@@ -157,19 +157,21 @@ fun FeedScreen(
                 onProfileClick = onProfileClick,
                 onPostReplyClick = onPostReplyClick,
                 onZapClick = { post, zapAmount, zapDescription ->
-                    eventPublisher(FeedContract.UiEvent.ZapAction(
-                        postId = post.postId,
-                        postAuthorId = post.authorId,
-                        zapAmount = zapAmount,
-                        zapDescription = zapDescription,
-                    ))
+                    eventPublisher(
+                        FeedContract.UiEvent.ZapAction(
+                            postId = post.postId,
+                            postAuthorId = post.authorId,
+                            zapAmount = zapAmount,
+                            zapDescription = zapDescription,
+                        ),
+                    )
                 },
                 onPostLikeClick = {
                     eventPublisher(
                         FeedContract.UiEvent.PostLikeAction(
                             postId = it.postId,
                             postAuthorId = it.authorId,
-                        )
+                        ),
                     )
                 },
                 onRepostClick = {
@@ -178,7 +180,7 @@ fun FeedScreen(
                             postId = it.postId,
                             postAuthorId = it.authorId,
                             postNostrEvent = it.rawNostrEventJson,
-                        )
+                        ),
                     )
                 },
                 onPostQuoteClick = {
@@ -199,7 +201,7 @@ fun FeedScreen(
                 },
                 onMuteClick = {
                     eventPublisher(FeedContract.UiEvent.MuteAction(it))
-                }
+                },
             )
         },
         floatingActionButton = {
@@ -233,19 +235,28 @@ fun FeedScreen(
 }
 
 @Composable
-private fun ErrorHandler(
-    error: FeedError?,
-    snackbarHostState: SnackbarHostState,
-) {
+private fun ErrorHandler(error: FeedError?, snackbarHostState: SnackbarHostState) {
     val context = LocalContext.current
     LaunchedEffect(error ?: true) {
         val errorMessage = when (error) {
-            is FeedError.InvalidZapRequest -> context.getString(R.string.post_action_invalid_zap_request)
-            is FeedError.MissingLightningAddress -> context.getString(R.string.post_action_missing_lightning_address)
-            is FeedError.FailedToPublishZapEvent -> context.getString(R.string.post_action_zap_failed)
-            is FeedError.FailedToPublishLikeEvent -> context.getString(R.string.post_action_like_failed)
-            is FeedError.FailedToPublishRepostEvent -> context.getString(R.string.post_action_repost_failed)
-            is FeedError.MissingRelaysConfiguration -> context.getString(R.string.app_missing_relays_config)
+            is FeedError.InvalidZapRequest -> context.getString(
+                R.string.post_action_invalid_zap_request,
+            )
+            is FeedError.MissingLightningAddress -> context.getString(
+                R.string.post_action_missing_lightning_address,
+            )
+            is FeedError.FailedToPublishZapEvent -> context.getString(
+                R.string.post_action_zap_failed,
+            )
+            is FeedError.FailedToPublishLikeEvent -> context.getString(
+                R.string.post_action_like_failed,
+            )
+            is FeedError.FailedToPublishRepostEvent -> context.getString(
+                R.string.post_action_repost_failed,
+            )
+            is FeedError.MissingRelaysConfiguration -> context.getString(
+                R.string.app_missing_relays_config,
+            )
             else -> null
         }
 
@@ -261,7 +272,7 @@ private fun ErrorHandler(
 @Preview
 @Composable
 fun FeedScreenPreview() {
-     PrimalTheme(primalTheme = PrimalTheme.Sunset) {
+    PrimalTheme(primalTheme = PrimalTheme.Sunset) {
         FeedScreen(
             state = FeedContract.UiState(posts = flow { }),
             eventPublisher = {},

@@ -22,26 +22,24 @@ import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
 object ReleaseSecurityModule {
 
     @Provides
-    fun provideEncryption(): Encryption = AESEncryption(
-        keyAlias = BuildConfig.LOCAL_STORAGE_KEY_ALIAS,
-    )
+    fun provideEncryption(): Encryption =
+        AESEncryption(
+            keyAlias = BuildConfig.LOCAL_STORAGE_KEY_ALIAS,
+        )
 
     @Provides
-    fun databasePasswordStore(
-        @ApplicationContext context: Context,
-        encryption: Encryption,
-    ): DataStore<String> = DataStoreFactory.create(
-        produceFile = { context.dataStoreFile("db_key.txt") },
-        serializer = StringSerializer(encryption = encryption),
-    )
+    fun databasePasswordStore(@ApplicationContext context: Context, encryption: Encryption): DataStore<String> =
+        DataStoreFactory.create(
+            produceFile = { context.dataStoreFile("db_key.txt") },
+            serializer = StringSerializer(encryption = encryption),
+        )
 
     @Provides
     fun provideDatabaseOpenHelper(
         databasePasswordProvider: PrimalDatabasePasswordProvider,
     ): SupportSQLiteOpenHelper.Factory {
         return SupportOpenHelperFactory(
-            databasePasswordProvider.providePassword().toByteArray()
+            databasePasswordProvider.providePassword().toByteArray(),
         )
     }
-
 }

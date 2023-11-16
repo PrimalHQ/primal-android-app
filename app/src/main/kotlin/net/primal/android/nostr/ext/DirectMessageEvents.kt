@@ -1,5 +1,6 @@
 package net.primal.android.nostr.ext
 
+import java.security.GeneralSecurityException
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.jsonObject
@@ -17,7 +18,6 @@ import net.primal.android.nostr.model.primal.PrimalEvent
 import net.primal.android.serialization.NostrJson
 import net.primal.android.serialization.toJsonObject
 import timber.log.Timber
-import java.security.GeneralSecurityException
 
 fun PrimalEvent.asMessagesTotalCount(): MessagesUnreadCount? {
     return this.content.toIntOrNull()?.let {
@@ -40,10 +40,7 @@ fun PrimalEvent.asMessageConversationsSummary(): ConversationsSummary {
 fun List<NostrEvent>.mapAsMessageDataPO(userId: String, nsec: String) =
     mapNotNull { it.mapAsMessageDataPO(userId = userId, nsec = nsec) }
 
-fun NostrEvent.mapAsMessageDataPO(
-    userId: String,
-    nsec: String,
-): DirectMessageData? {
+fun NostrEvent.mapAsMessageDataPO(userId: String, nsec: String): DirectMessageData? {
     val senderId = this.pubKey
     val receiverId = this.tags.findFirstProfileId() ?: throw RuntimeException("no receiver id")
     val participantId = if (senderId != userId) senderId else receiverId

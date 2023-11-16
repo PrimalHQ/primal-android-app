@@ -13,10 +13,8 @@ import net.primal.android.networking.primal.PrimalApiClient
 @InstallIn(SingletonComponent::class)
 object FeedApiModule {
     @Provides
-    fun provideFeedApi(
-        @PrimalCacheApiClient primalApiClient: PrimalApiClient,
-    ): FeedApi = FeedApiImpl(
-        primalApiClient = primalApiClient,
-    )
-
+    fun provideFeedApi(@PrimalCacheApiClient primalApiClient: PrimalApiClient): FeedApi =
+        FeedApiImpl(
+            primalApiClient = primalApiClient,
+        )
 }

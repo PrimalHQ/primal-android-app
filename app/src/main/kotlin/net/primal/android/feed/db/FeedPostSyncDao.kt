@@ -18,8 +18,7 @@ interface FeedPostSyncDao {
         WHERE feedDirective = :feedDirective AND timestamp >= :since
         ORDER BY timestamp DESC
         LIMIT 1
-        """
+        """,
     )
     fun observeFeedDirective(feedDirective: String, since: Long): Flow<FeedPostSync>
-
 }

@@ -12,10 +12,7 @@ import androidx.core.view.WindowCompat
 import net.primal.android.theme.domain.PrimalTheme
 
 @Composable
-fun AdjustTemporarilySystemBarColors(
-    statusBarColor: Color? = null,
-    navigationBarColor: Color? = null,
-) {
+fun AdjustTemporarilySystemBarColors(statusBarColor: Color? = null, navigationBarColor: Color? = null) {
     val view = LocalView.current
     DisposableEffect(Unit) {
         val window = (view.context as Activity).window

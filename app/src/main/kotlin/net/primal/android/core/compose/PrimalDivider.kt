@@ -7,9 +7,7 @@ import androidx.compose.ui.unit.dp
 import net.primal.android.theme.AppTheme
 
 @Composable
-fun PrimalDivider(
-    modifier: Modifier = Modifier,
-) {
+fun PrimalDivider(modifier: Modifier = Modifier) {
     Divider(
         modifier = modifier,
         thickness = 0.5.dp,

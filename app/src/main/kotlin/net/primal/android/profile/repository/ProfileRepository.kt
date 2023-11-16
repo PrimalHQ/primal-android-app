@@ -1,6 +1,7 @@
 package net.primal.android.profile.repository
 
 import androidx.room.withTransaction
+import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.withContext
@@ -14,7 +15,6 @@ import net.primal.android.user.api.UsersApi
 import net.primal.android.user.domain.Relay
 import net.primal.android.user.domain.asUserAccountFromContactsEvent
 import net.primal.android.user.repository.UserRepository
-import javax.inject.Inject
 
 class ProfileRepository @Inject constructor(
     private val database: PrimalDatabase,
@@ -24,10 +24,14 @@ class ProfileRepository @Inject constructor(
 ) {
 
     fun findProfileData(profileId: String) =
-        database.profiles().findProfileData(profileId = profileId)
+        database.profiles().findProfileData(
+            profileId = profileId,
+        )
 
     fun observeProfile(profileId: String) =
-        database.profiles().observeProfile(profileId = profileId).filterNotNull()
+        database.profiles().observeProfile(
+            profileId = profileId,
+        ).filterNotNull()
 
     suspend fun requestProfileUpdate(profileId: String) {
         val response = withContext(Dispatchers.IO) { usersApi.getUserProfile(pubkey = profileId) }
@@ -42,7 +46,7 @@ class ProfileRepository @Inject constructor(
 
                 if (userProfileStats != null) {
                     database.profileStats().upsert(
-                        data = userProfileStats.asProfileStats(profileId = profileId)
+                        data = userProfileStats.asProfileStats(profileId = profileId),
                     )
                 }
             }
@@ -61,10 +65,7 @@ class ProfileRepository @Inject constructor(
         }
     }
 
-    private suspend fun updateFollowing(
-        userId: String,
-        reducer: Set<String>.() -> Set<String>
-    ) {
+    private suspend fun updateFollowing(userId: String, reducer: Set<String>.() -> Set<String>) {
         val userContacts = userAccountFetcher.fetchUserContacts(pubkey = userId)
             ?: throw MissingRelaysException()
 

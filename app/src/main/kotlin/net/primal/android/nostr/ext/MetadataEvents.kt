@@ -10,7 +10,6 @@ import net.primal.android.serialization.toJsonObject
 import net.primal.android.wallet.api.decodeLNUrlOrNull
 import net.primal.android.wallet.api.parseAsLNUrlOrNull
 
-
 fun List<NostrEvent>.mapAsProfileDataPO() = map { it.asProfileDataPO() }
 
 fun NostrEvent.asProfileDataPO(): ProfileData {

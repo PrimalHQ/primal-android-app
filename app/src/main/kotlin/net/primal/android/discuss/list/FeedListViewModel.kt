@@ -3,6 +3,7 @@ package net.primal.android.discuss.list
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
@@ -13,7 +14,6 @@ import net.primal.android.feed.db.Feed
 import net.primal.android.feed.repository.FeedRepository
 import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import javax.inject.Inject
 
 @HiltViewModel
 class FeedListViewModel @Inject constructor(
@@ -33,18 +33,21 @@ class FeedListViewModel @Inject constructor(
         fetchLatestFeeds()
     }
 
-    private fun observeFeeds() = viewModelScope.launch {
-        feedRepository.observeFeeds().collect { feeds ->
-            setState {
-                copy(feeds = feeds.map { it.asFeedUi() })
+    private fun observeFeeds() =
+        viewModelScope.launch {
+            feedRepository.observeFeeds().collect { feeds ->
+                setState {
+                    copy(feeds = feeds.map { it.asFeedUi() })
+                }
             }
         }
-    }
 
-    private fun fetchLatestFeeds() = viewModelScope.launch {
-        settingsRepository.fetchAndPersistAppSettings(userId = activeAccountStore.activeUserId())
-    }
+    private fun fetchLatestFeeds() =
+        viewModelScope.launch {
+            settingsRepository.fetchAndPersistAppSettings(
+                userId = activeAccountStore.activeUserId(),
+            )
+        }
 
     private fun Feed.asFeedUi() = FeedUi(directive = this.directive, name = this.name)
-
 }

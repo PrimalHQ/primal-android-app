@@ -24,11 +24,11 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import kotlin.math.roundToInt
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalNavigationBar
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.user.domain.Badges
-import kotlin.math.roundToInt
 
 val PrimalBottomBarHeightDp = 64.dp
 
@@ -49,7 +49,6 @@ fun PrimalDrawerScaffold(
     bottomBarHeight: Dp = PrimalBottomBarHeightDp,
     onBottomBarOffsetChange: (Float) -> Unit = {},
 ) {
-
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
@@ -68,10 +67,7 @@ fun PrimalDrawerScaffold(
             val bottomBarOffsetHeightPx = remember { mutableFloatStateOf(0f) }
             val bottomBarNestedScrollConnection = remember {
                 object : NestedScrollConnection {
-                    override fun onPreScroll(
-                        available: Offset,
-                        source: NestedScrollSource
-                    ): Offset {
+                    override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
                         val delta = available.y
                         val newOffset = bottomBarOffsetHeightPx.floatValue + delta
                         bottomBarOffsetHeightPx.floatValue = newOffset.coerceIn(-bottomBarHeightPx, 0f)
@@ -95,7 +91,7 @@ fun PrimalDrawerScaffold(
                             .offset {
                                 IntOffset(
                                     x = 0,
-                                    y = -bottomBarOffsetHeightPx.floatValue.roundToInt()
+                                    y = -bottomBarOffsetHeightPx.floatValue.roundToInt(),
                                 )
                             },
                     ) {
@@ -114,6 +110,6 @@ fun PrimalDrawerScaffold(
                 floatingActionButton = floatingActionButton,
                 snackbarHost = snackbarHost,
             )
-        }
+        },
     )
 }

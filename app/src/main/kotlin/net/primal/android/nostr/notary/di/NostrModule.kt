@@ -12,9 +12,8 @@ import net.primal.android.user.credentials.CredentialsStore
 object NostrModule {
 
     @Provides
-    fun provideNostrNotary(
-        credentialsStore: CredentialsStore
-    ): NostrNotary = NostrNotary(
-        credentialsStore = credentialsStore,
-    )
+    fun provideNostrNotary(credentialsStore: CredentialsStore): NostrNotary =
+        NostrNotary(
+            credentialsStore = credentialsStore,
+        )
 }

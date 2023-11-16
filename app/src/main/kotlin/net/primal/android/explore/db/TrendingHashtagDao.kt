@@ -17,5 +17,4 @@ interface TrendingHashtagDao {
 
     @Query("SELECT * FROM TrendingHashtag ORDER BY score DESC")
     fun allSortedByScore(): Flow<List<TrendingHashtag>>
-
 }

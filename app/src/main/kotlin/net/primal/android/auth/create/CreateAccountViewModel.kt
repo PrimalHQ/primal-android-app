@@ -3,6 +3,8 @@ package net.primal.android.auth.create
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.io.IOException
+import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,8 +27,6 @@ import net.primal.android.serialization.NostrJson
 import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.user.accounts.BOOTSTRAP_RELAYS
 import net.primal.android.user.repository.UserRepository
-import java.io.IOException
-import javax.inject.Inject
 
 @HiltViewModel
 class CreateAccountViewModel @Inject constructor(
@@ -46,40 +46,66 @@ class CreateAccountViewModel @Inject constructor(
 
     private val _effect: Channel<SideEffect> = Channel()
     val effect = _effect.receiveAsFlow()
-    private fun setEffect(effect: SideEffect) = viewModelScope.launch {
-        _effect.send(effect)
-    }
+    private fun setEffect(effect: SideEffect) =
+        viewModelScope.launch {
+            _effect.send(effect)
+        }
 
-    private val _event: MutableSharedFlow<UiEvent> = MutableSharedFlow()
+    private val events: MutableSharedFlow<UiEvent> = MutableSharedFlow()
     fun setEvent(event: UiEvent) {
-        viewModelScope.launch { _event.emit(event) }
+        viewModelScope.launch { events.emit(event) }
     }
 
     init {
         observeEvents()
     }
 
-    private fun observeEvents() = viewModelScope.launch {
-        _event.collect { event ->
-            when (event) {
-                is UiEvent.GoToProfilePreviewStepEvent -> setState { copy(currentStep = UiState.CreateAccountStep.PROFILE_PREVIEW) }
-                is UiEvent.GoToNostrCreatedStepEvent -> createNostrAccount()
-                is UiEvent.GoToFollowContactsStepEvent -> fetchRecommendedFollows()
-                is UiEvent.GoBack -> goBack()
-                is UiEvent.FinishEvent -> finish()
-                is UiEvent.AvatarUriChangedEvent -> setState { copy(avatarUri = event.avatarUri) }
-                is UiEvent.BannerUriChangedEvent -> setState { copy(bannerUri = event.bannerUri) }
-                is UiEvent.DisplayNameChangedEvent -> setState { copy(displayName = event.name) }
-                is UiEvent.UsernameChangedEvent -> setState { copy(username = event.handle) }
-                is UiEvent.LightningAddressChangedEvent -> setState { copy(lightningAddress = event.lightningAddress) }
-                is UiEvent.Nip05IdentifierChangedEvent -> setState { copy(nip05Identifier = event.nip05Identifier) }
-                is UiEvent.WebsiteChangedEvent -> setState { copy(website = event.website) }
-                is UiEvent.AboutMeChangedEvent -> setState { copy(aboutMe = event.aboutMe) }
-                is UiEvent.ToggleFollowEvent -> toggleFollow(event = event)
-                is UiEvent.ToggleGroupFollowEvent -> toggleGroupFollow(event = event)
+    private fun observeEvents() =
+        viewModelScope.launch {
+            events.collect { event ->
+                when (event) {
+                    is UiEvent.GoToProfilePreviewStepEvent -> setState {
+                        copy(
+                            currentStep = UiState.CreateAccountStep.PROFILE_PREVIEW,
+                        )
+                    }
+                    is UiEvent.GoToNostrCreatedStepEvent -> createNostrAccount()
+                    is UiEvent.GoToFollowContactsStepEvent -> fetchRecommendedFollows()
+                    is UiEvent.GoBack -> goBack()
+                    is UiEvent.FinishEvent -> finish()
+                    is UiEvent.AvatarUriChangedEvent -> setState {
+                        copy(
+                            avatarUri = event.avatarUri,
+                        )
+                    }
+                    is UiEvent.BannerUriChangedEvent -> setState {
+                        copy(
+                            bannerUri = event.bannerUri,
+                        )
+                    }
+                    is UiEvent.DisplayNameChangedEvent -> setState {
+                        copy(
+                            displayName = event.name,
+                        )
+                    }
+                    is UiEvent.UsernameChangedEvent -> setState { copy(username = event.handle) }
+                    is UiEvent.LightningAddressChangedEvent -> setState {
+                        copy(
+                            lightningAddress = event.lightningAddress,
+                        )
+                    }
+                    is UiEvent.Nip05IdentifierChangedEvent -> setState {
+                        copy(
+                            nip05Identifier = event.nip05Identifier,
+                        )
+                    }
+                    is UiEvent.WebsiteChangedEvent -> setState { copy(website = event.website) }
+                    is UiEvent.AboutMeChangedEvent -> setState { copy(aboutMe = event.aboutMe) }
+                    is UiEvent.ToggleFollowEvent -> toggleFollow(event = event)
+                    is UiEvent.ToggleGroupFollowEvent -> toggleGroupFollow(event = event)
+                }
             }
         }
-    }
 
     private suspend fun createNostrAccount() {
         try {
@@ -115,15 +141,17 @@ class CreateAccountViewModel @Inject constructor(
                 RecommendedFollow(
                     pubkey = it.second.pubkey,
                     groupName = it.first,
-                    content = NostrJson.decodeFromString(response.metadata[it.second.pubkey]!!.content),
-                    isCurrentUserFollowing = true
+                    content = NostrJson.decodeFromString(
+                        response.metadata[it.second.pubkey]!!.content,
+                    ),
+                    isCurrentUserFollowing = true,
                 )
             }
 
             setState {
                 copy(
                     recommendedFollows = result,
-                    currentStep = UiState.CreateAccountStep.FOLLOW_RECOMMENDED_ACCOUNTS
+                    currentStep = UiState.CreateAccountStep.FOLLOW_RECOMMENDED_ACCOUNTS,
                 )
             }
         } catch (e: IOException) {
@@ -161,7 +189,9 @@ class CreateAccountViewModel @Inject constructor(
 
     private fun toggleFollow(event: UiEvent.ToggleFollowEvent) {
         val oldFollow =
-            state.value.recommendedFollows.first { it.pubkey == event.pubkey && it.groupName == event.groupName }
+            state.value.recommendedFollows.first {
+                it.pubkey == event.pubkey && it.groupName == event.groupName
+            }
 
         val index = state.value.recommendedFollows.indexOf(oldFollow)
 
@@ -191,14 +221,15 @@ class CreateAccountViewModel @Inject constructor(
         setState { copy(recommendedFollows = newFollows) }
     }
 
-    private fun UiState.asProfileMetadata(): ProfileMetadata = ProfileMetadata(
-        displayName = this.displayName,
-        username = this.username,
-        website = this.website.ifEmpty { null },
-        about = this.aboutMe.ifEmpty { null },
-        localPictureUri = this.avatarUri,
-        localBannerUri = this.bannerUri,
-        lightningAddress = this.lightningAddress.ifEmpty { null },
-        nostrVerification = this.nip05Identifier.ifEmpty { null },
-    )
+    private fun UiState.asProfileMetadata(): ProfileMetadata =
+        ProfileMetadata(
+            displayName = this.displayName,
+            username = this.username,
+            website = this.website.ifEmpty { null },
+            about = this.aboutMe.ifEmpty { null },
+            localPictureUri = this.avatarUri,
+            localBannerUri = this.bannerUri,
+            lightningAddress = this.lightningAddress.ifEmpty { null },
+            nostrVerification = this.nip05Identifier.ifEmpty { null },
+        )
 }

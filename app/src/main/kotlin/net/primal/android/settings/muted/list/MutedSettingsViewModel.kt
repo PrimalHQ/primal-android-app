@@ -3,6 +3,7 @@ package net.primal.android.settings.muted.list
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,20 +20,19 @@ import net.primal.android.settings.muted.list.MutedSettingsContract.UiState
 import net.primal.android.settings.muted.list.model.MutedUserUi
 import net.primal.android.settings.muted.repository.MutedUserRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import javax.inject.Inject
 
 @HiltViewModel
 class MutedSettingsViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
-    private val mutedUserRepository: MutedUserRepository
+    private val mutedUserRepository: MutedUserRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(UiState())
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate(reducer)
 
-    private val _event = MutableSharedFlow<UiEvent>()
-    fun setEvent(event: UiEvent) = viewModelScope.launch { _event.emit(event) }
+    private val events = MutableSharedFlow<UiEvent>()
+    fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
 
     init {
         fetchLatestMuteList()
@@ -40,51 +40,56 @@ class MutedSettingsViewModel @Inject constructor(
         observeEvents()
     }
 
-    private fun observeMutedUsers() = viewModelScope.launch {
-        mutedUserRepository.observeMutedUsers().collect {
-            setState {
-                copy(mutedUsers = it.map { it.asMutedUserUi() })
+    private fun observeMutedUsers() =
+        viewModelScope.launch {
+            mutedUserRepository.observeMutedUsers().collect {
+                setState {
+                    copy(mutedUsers = it.map { it.asMutedUserUi() })
+                }
             }
         }
-    }
 
-    private fun observeEvents() = viewModelScope.launch {
-        _event.collect {
-            when (it) {
-                is UiEvent.UnmuteEvent -> unmuteEventHandler(it)
+    private fun observeEvents() =
+        viewModelScope.launch {
+            events.collect {
+                when (it) {
+                    is UiEvent.UnmuteEvent -> unmuteEventHandler(it)
+                }
             }
         }
-    }
 
-    private fun fetchLatestMuteList() = viewModelScope.launch {
-        mutedUserRepository.fetchAndPersistMuteList(
-            userId = activeAccountStore.activeUserId()
-        )
-    }
-
-    private suspend fun unmuteEventHandler(event: UiEvent.UnmuteEvent) = viewModelScope.launch {
-        try {
-            mutedUserRepository.unmuteUserAndPersistMuteList(
+    private fun fetchLatestMuteList() =
+        viewModelScope.launch {
+            mutedUserRepository.fetchAndPersistMuteList(
                 userId = activeAccountStore.activeUserId(),
-                unmutedUserId = event.pubkey
             )
-        } catch (error: WssException) {
-            setState {
-                copy(error = UiState.MutedSettingsError.FailedToUnmuteUserError(error))
-            }
-        } catch (error: NostrPublishException) {
-            setState {
-                copy(error = UiState.MutedSettingsError.FailedToUnmuteUserError(error))
+        }
+
+    private suspend fun unmuteEventHandler(event: UiEvent.UnmuteEvent) =
+        viewModelScope.launch {
+            try {
+                mutedUserRepository.unmuteUserAndPersistMuteList(
+                    userId = activeAccountStore.activeUserId(),
+                    unmutedUserId = event.pubkey,
+                )
+            } catch (error: WssException) {
+                setState {
+                    copy(error = UiState.MutedSettingsError.FailedToUnmuteUserError(error))
+                }
+            } catch (error: NostrPublishException) {
+                setState {
+                    copy(error = UiState.MutedSettingsError.FailedToUnmuteUserError(error))
+                }
             }
         }
-    }
 
-    private fun MutedUser.asMutedUserUi() = MutedUserUi(
-        displayName = this.profileData?.authorNameUiFriendly()
-            ?: this.mutedAccount.userId.asEllipsizedNpub(),
-        userId = this.mutedAccount.userId,
-        avatarUrl = this.profileData?.picture,
-        internetIdentifier = this.profileData?.internetIdentifier,
-        profileResources = this.profileResources.map { it.asMediaResourceUi() },
-    )
+    private fun MutedUser.asMutedUserUi() =
+        MutedUserUi(
+            displayName = this.profileData?.authorNameUiFriendly()
+                ?: this.mutedAccount.userId.asEllipsizedNpub(),
+            userId = this.mutedAccount.userId,
+            avatarUrl = this.profileData?.picture,
+            internetIdentifier = this.profileData?.internetIdentifier,
+            profileResources = this.profileResources.map { it.asMediaResourceUi() },
+        )
 }

@@ -44,7 +44,7 @@ interface ProfileContract {
         data class RepostAction(
             val postId: String,
             val postAuthorId: String,
-            val postNostrEvent: String
+            val postNostrEvent: String,
         ) : UiEvent()
 
         data class ZapAction(
@@ -61,5 +61,4 @@ interface ProfileContract {
         data class MuteAction(val profileId: String) : UiEvent()
         data class UnmuteAction(val profileId: String) : UiEvent()
     }
-
 }

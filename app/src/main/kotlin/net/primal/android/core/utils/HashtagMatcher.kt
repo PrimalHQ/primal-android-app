@@ -14,7 +14,7 @@ class HashtagMatcher(
         var startIndex = 0
         var foundIndex: Int? = -1
         while (foundIndex == -1) {
-            val indexOf  = this.indexOf(hashtag, startIndex = startIndex)
+            val indexOf = this.indexOf(hashtag, startIndex = startIndex)
             when {
                 indexOf == -1 -> foundIndex = null
                 containsIndex(index = indexOf) -> startIndex = indexOf + 1
@@ -33,7 +33,7 @@ class HashtagMatcher(
                         value = it,
                         startIndex = startIndex,
                         endIndex = startIndex + it.length,
-                    )
+                    ),
                 )
             }
         }

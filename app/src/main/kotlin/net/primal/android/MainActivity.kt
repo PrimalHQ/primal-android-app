@@ -15,6 +15,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 import net.primal.android.navigation.PrimalAppNavigation
@@ -23,7 +24,6 @@ import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.active.ActiveThemeStore
 import net.primal.android.theme.defaultPrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -42,7 +42,7 @@ class MainActivity : ComponentActivity() {
             val primalTheme = userTheme.value ?: initDefaultTheme()
 
             PrimalTheme(
-                primalTheme = primalTheme
+                primalTheme = primalTheme,
             ) {
                 CompositionLocalProvider(
                     LocalPrimalTheme provides primalTheme,
@@ -63,13 +63,14 @@ class MainActivity : ComponentActivity() {
         return defaultTheme
     }
 
-    private fun observeThemeChanges() = lifecycleScope.launch {
-        themeStore.userThemeState
-            .filterNotNull()
-            .collect {
-                applyWindowBackgroundFromTheme(it)
-            }
-    }
+    private fun observeThemeChanges() =
+        lifecycleScope.launch {
+            themeStore.userThemeState
+                .filterNotNull()
+                .collect {
+                    applyWindowBackgroundFromTheme(it)
+                }
+        }
 
     private fun applyWindowBackgroundFromTheme(theme: PrimalTheme) {
         val backgroundDrawable = ColorDrawable(theme.colorScheme.background.toArgb())

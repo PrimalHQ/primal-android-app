@@ -19,10 +19,7 @@ import net.primal.android.core.utils.shortened
 import net.primal.android.theme.AppTheme
 
 @Composable
-fun UserProfileListItem(
-    data: UserProfileUi,
-    onClick: (String) -> Unit,
-) {
+fun UserProfileListItem(data: UserProfileUi, onClick: (String) -> Unit) {
     ListItem(
         modifier = Modifier.clickable { onClick(data.profileId) },
         colors = ListItemDefaults.colors(
@@ -65,6 +62,6 @@ fun UserProfileListItem(
                     )
                 }
             }
-        }
+        },
     )
 }

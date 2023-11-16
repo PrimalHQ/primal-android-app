@@ -24,7 +24,7 @@ fun String?.handleDeeplink(): DeepLink? {
 
 private fun String.canHandleNostrWalletConnectSchema(): Boolean {
     return this.startsWith(NOSTR_WALLET_CONNECT_SCHEMA) or
-            this.startsWith(NOSTR_WALLET_CONNECT_ALT_SCHEMA)
+        this.startsWith(NOSTR_WALLET_CONNECT_ALT_SCHEMA)
 }
 
 private fun String.canHandlePrimalSchema(): Boolean = startsWith(PRIMAL_SCHEMA)
@@ -56,4 +56,6 @@ private fun String.handlePrimalSchema(): DeepLink? {
 }
 
 private fun String.handleNostrWalletConnectSchema(): DeepLink =
-    DeepLink.NostrWalletConnect(this.parseNWCUrl())
+    DeepLink.NostrWalletConnect(
+        this.parseNWCUrl(),
+    )

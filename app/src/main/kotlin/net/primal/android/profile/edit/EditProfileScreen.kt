@@ -43,10 +43,7 @@ import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
 
 @Composable
-fun EditProfileScreen(
-    viewModel: EditProfileViewModel,
-    onClose: () -> Unit
-) {
+fun EditProfileScreen(viewModel: EditProfileViewModel, onClose: () -> Unit) {
     LaunchedEffect(viewModel, onClose) {
         viewModel.effect.collect {
             when (it) {
@@ -59,7 +56,7 @@ fun EditProfileScreen(
     EditProfileScreen(
         state = state.value,
         eventPublisher = { viewModel.setEvent(it) },
-        onClose = onClose
+        onClose = onClose,
     )
 }
 
@@ -68,7 +65,7 @@ fun EditProfileScreen(
 fun EditProfileScreen(
     state: EditProfileContract.UiState,
     eventPublisher: (EditProfileContract.UiEvent) -> Unit,
-    onClose: () -> Unit
+    onClose: () -> Unit,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     ErrorHandler(error = state.error, snackbarHostState = snackbarHostState)
@@ -87,12 +84,12 @@ fun EditProfileScreen(
             EditProfileContent(
                 state = state,
                 eventPublisher = eventPublisher,
-                paddingValues = paddingValues
+                paddingValues = paddingValues,
             )
         },
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState)
-        }
+        },
     )
 }
 
@@ -102,7 +99,7 @@ fun EditProfileContent(
     state: EditProfileContract.UiState,
     eventPublisher: (EditProfileContract.UiEvent) -> Unit,
     paddingValues: PaddingValues,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -111,26 +108,32 @@ fun EditProfileContent(
             .fillMaxSize()
             .imePadding()
             .padding(paddingValues = paddingValues),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Column(
             modifier = Modifier
                 .verticalScroll(
-                    rememberScrollState()
+                    rememberScrollState(),
                 )
                 .fillMaxHeight()
                 .weight(weight = 1f, fill = true),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Top
+            verticalArrangement = Arrangement.Top,
         ) {
             ProfileHero(
                 avatarUri = state.remoteAvatarUrl?.toUri() ?: state.localAvatarUri,
                 bannerUri = state.remoteBannerUrl?.toUri() ?: state.localBannerUri,
                 onBannerUriChange = {
-                    eventPublisher(EditProfileContract.UiEvent.BannerUriChangedEvent(bannerUri = it))
-                }, onAvatarUriChange = {
-                    eventPublisher(EditProfileContract.UiEvent.AvatarUriChangedEvent(avatarUri = it))
-                })
+                    eventPublisher(
+                        EditProfileContract.UiEvent.BannerUriChangedEvent(bannerUri = it),
+                    )
+                },
+                onAvatarUriChange = {
+                    eventPublisher(
+                        EditProfileContract.UiEvent.AvatarUriChangedEvent(avatarUri = it),
+                    )
+                },
+            )
             Spacer(modifier = Modifier.height(32.dp))
             PrimalOutlinedTextField(
                 header = stringResource(id = R.string.create_input_header_handle).uppercase(),
@@ -141,7 +144,7 @@ fun EditProfileContent(
                     }
                 },
                 isRequired = true,
-                prefix = "@"
+                prefix = "@",
             )
             Spacer(modifier = Modifier.height(12.dp))
             PrimalOutlinedTextField(
@@ -157,7 +160,7 @@ fun EditProfileContent(
                 value = state.website,
                 onValueChange = {
                     eventPublisher(EditProfileContract.UiEvent.WebsiteChangedEvent(it.trim()))
-                }
+                },
             )
             Spacer(modifier = Modifier.height(12.dp))
             PrimalOutlinedTextField(
@@ -166,15 +169,17 @@ fun EditProfileContent(
                 isMultiline = true,
                 onValueChange = {
                     eventPublisher(EditProfileContract.UiEvent.AboutMeChangedEvent(it))
-                }
+                },
             )
             Spacer(modifier = Modifier.height(12.dp))
             PrimalOutlinedTextField(
-                header = stringResource(id = R.string.create_input_header_bitcoin_lightning_address).uppercase(),
+                header = stringResource(
+                    id = R.string.create_input_header_bitcoin_lightning_address,
+                ).uppercase(),
                 value = state.lightningAddress,
                 onValueChange = {
                     eventPublisher(EditProfileContract.UiEvent.LightningAddressChangedEvent(it))
-                }
+                },
             )
             Spacer(modifier = Modifier.height(12.dp))
             PrimalOutlinedTextField(
@@ -182,14 +187,14 @@ fun EditProfileContent(
                 value = state.nip05Identifier,
                 onValueChange = {
                     eventPublisher(EditProfileContract.UiEvent.Nip05IdentifierChangedEvent(it))
-                }
+                },
             )
         }
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(86.dp)
-                .padding(horizontal = 32.dp)
+                .padding(horizontal = 32.dp),
         ) {
             PrimalLoadingButton(
                 text = stringResource(id = R.string.profile_save_profile_button),
@@ -209,22 +214,25 @@ fun EditProfileContent(
 }
 
 @Composable
-private fun ErrorHandler(
-    error: EditProfileContract.UiState.EditProfileError?,
-    snackbarHostState: SnackbarHostState
-) {
+private fun ErrorHandler(error: EditProfileContract.UiState.EditProfileError?, snackbarHostState: SnackbarHostState) {
     val context = LocalContext.current
     LaunchedEffect(key1 = error ?: true) {
         val errorMessage = when (error) {
-            is EditProfileContract.UiState.EditProfileError.FailedToPublishMetadata -> context.getString(R.string.profile_failed_to_publish_metadata)
-            is EditProfileContract.UiState.EditProfileError.MissingRelaysConfiguration -> context.getString(R.string.app_missing_relays_config)
-            is EditProfileContract.UiState.EditProfileError.FailedToUploadImage -> context.getString(R.string.app_failed_to_upload_image)
+            is EditProfileContract.UiState.EditProfileError.FailedToPublishMetadata -> context.getString(
+                R.string.profile_failed_to_publish_metadata,
+            )
+            is EditProfileContract.UiState.EditProfileError.MissingRelaysConfiguration -> context.getString(
+                R.string.app_missing_relays_config,
+            )
+            is EditProfileContract.UiState.EditProfileError.FailedToUploadImage -> context.getString(
+                R.string.app_failed_to_upload_image,
+            )
             null -> return@LaunchedEffect
         }
 
         snackbarHostState.showSnackbar(
             message = errorMessage,
-            duration = SnackbarDuration.Short
+            duration = SnackbarDuration.Short,
         )
     }
 }
@@ -233,13 +241,17 @@ private fun ErrorHandler(
 @Composable
 fun PreviewEditProfileScreen() {
     PrimalTheme(primalTheme = PrimalTheme.Sunset) {
-        EditProfileScreen(state = EditProfileContract.UiState(
-            username = "Tralala Handle",
-            displayName = "Tralala Display Name",
-            aboutMe = "About me",
-            website = "http://www.example.com",
-            lightningAddress = "tralala@getalby.com",
-            nip05Identifier = "tralala@getalby.com"
-        ), eventPublisher = {}, onClose = {})
+        EditProfileScreen(
+            state = EditProfileContract.UiState(
+                username = "Tralala Handle",
+                displayName = "Tralala Display Name",
+                aboutMe = "About me",
+                website = "http://www.example.com",
+                lightningAddress = "tralala@getalby.com",
+                nip05Identifier = "tralala@getalby.com",
+            ),
+            eventPublisher = {},
+            onClose = {},
+        )
     }
 }

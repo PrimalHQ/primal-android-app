@@ -12,5 +12,5 @@ data class SuggestionGroup(val group: String, val members: List<Suggestion>)
 @Serializable
 data class RecommendedFollowsResponse(
     val metadata: Map<String, NostrEvent>,
-    val suggestions: List<SuggestionGroup>
+    val suggestions: List<SuggestionGroup>,
 )

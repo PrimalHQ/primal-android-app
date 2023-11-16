@@ -50,10 +50,7 @@ import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
 
 @Composable
-fun AccountSettingsScreen(
-    viewModel: AccountSettingsViewModel,
-    onClose: () -> Unit,
-) {
+fun AccountSettingsScreen(viewModel: AccountSettingsViewModel, onClose: () -> Unit) {
     val uiState = viewModel.state.collectAsState()
 
     AccountSettingsScreen(
@@ -64,10 +61,7 @@ fun AccountSettingsScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AccountSettingsScreen(
-    state: AccountSettingsContract.UiState,
-    onClose: () -> Unit,
-) {
+fun AccountSettingsScreen(state: AccountSettingsContract.UiState, onClose: () -> Unit) {
     Scaffold(
         modifier = Modifier,
         topBar = {
@@ -81,7 +75,7 @@ fun AccountSettingsScreen(
             LazyColumn(
                 modifier = Modifier
                     .padding(paddingValues)
-                    .padding(horizontal = 16.dp)
+                    .padding(horizontal = 16.dp),
             ) {
                 item {
                     PublicKeySection(
@@ -108,10 +102,7 @@ fun AccountSettingsScreen(
 }
 
 @Composable
-fun PublicKeySection(
-    npub: String,
-    avatarUrl: String?
-) {
+fun PublicKeySection(npub: String, avatarUrl: String?) {
     val context = LocalContext.current
 
     Text(
@@ -160,7 +151,7 @@ fun PublicKeySection(
                 val clip = ClipData.newPlainText("", npub)
                 clipboard.setPrimaryClip(clip)
                 keyCopied = true
-            }
+            },
         )
     }
 
@@ -174,9 +165,7 @@ fun PublicKeySection(
 }
 
 @Composable
-fun PrivateKeySection(
-    nsec: String,
-) {
+fun PrivateKeySection(nsec: String) {
     val context = LocalContext.current
     var privateKeyVisible by remember { mutableStateOf(false) }
 
@@ -259,7 +248,7 @@ fun PrivateKeySection(
                 val clip = ClipData.newPlainText("", nsec)
                 clipboard.setPrimaryClip(clip)
                 keyCopied = true
-            }
+            },
         )
     }
 
@@ -274,7 +263,6 @@ fun PrivateKeySection(
         style = AppTheme.typography.bodySmall,
     )
 }
-
 
 @Preview
 @Composable

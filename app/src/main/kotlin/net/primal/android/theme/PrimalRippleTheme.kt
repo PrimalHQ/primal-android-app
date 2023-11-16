@@ -12,8 +12,9 @@ object PrimalRippleTheme : RippleTheme {
     override fun defaultColor(): Color = AppTheme.colorScheme.outline
 
     @Composable
-    override fun rippleAlpha(): RippleAlpha = RippleTheme.defaultRippleAlpha(
-        contentColor = AppTheme.colorScheme.outline,
-        lightTheme = !LocalPrimalTheme.current.isDarkTheme
-    )
+    override fun rippleAlpha(): RippleAlpha =
+        RippleTheme.defaultRippleAlpha(
+            contentColor = AppTheme.colorScheme.outline,
+            lightTheme = !LocalPrimalTheme.current.isDarkTheme,
+        )
 }

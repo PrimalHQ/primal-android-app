@@ -99,9 +99,9 @@ fun LoginScreen(
                 paddingValues = paddingValues,
                 onLogin = {
                     eventPublisher(LoginContract.UiEvent.LoginEvent(nostrKey = it))
-                }
+                },
             )
-        }
+        },
     )
 }
 
@@ -181,14 +181,14 @@ fun LoginContent(
                                 AppTheme.extraColorScheme.successBright
                             } else {
                                 AppTheme.colorScheme.error
-                            }
+                            },
                         )
                     }
                 },
                 isError = nsecValue.isNotEmpty() && !isValidNsec,
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(
-                    imeAction = if (isValidNsec) ImeAction.Go else ImeAction.Default
+                    imeAction = if (isValidNsec) ImeAction.Go else ImeAction.Default,
                 ),
                 keyboardActions = KeyboardActions(
                     onGo = {
@@ -196,7 +196,7 @@ fun LoginContent(
                             keyboardController?.hide()
                             onLogin(nsecValue)
                         }
-                    }
+                    },
                 ),
                 visualTransformation = PasswordVisualTransformation(),
                 textStyle = AppTheme.typography.titleLarge.copy(
@@ -244,9 +244,7 @@ fun LoginContent(
 }
 
 @Composable
-fun LaunchedErrorHandler(
-    viewModel: LoginViewModel
-) {
+fun LaunchedErrorHandler(viewModel: LoginViewModel) {
     val genericMessage = stringResource(id = R.string.app_generic_error)
     val context = LocalContext.current
     val uiScope = rememberCoroutineScope()
@@ -260,7 +258,7 @@ fun LaunchedErrorHandler(
                     Toast.makeText(
                         context,
                         genericMessage,
-                        Toast.LENGTH_SHORT
+                        Toast.LENGTH_SHORT,
                     ).show()
                 }
             }

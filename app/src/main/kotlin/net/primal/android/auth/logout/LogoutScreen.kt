@@ -8,38 +8,31 @@ import androidx.compose.ui.res.stringResource
 import net.primal.android.R
 import net.primal.android.theme.AppTheme
 
-
 @Composable
-fun LogoutScreen(
-    viewModel: LogoutViewModel,
-    onClose: () -> Unit,
-) {
+fun LogoutScreen(viewModel: LogoutViewModel, onClose: () -> Unit) {
     LogoutScreen(
         onClose = onClose,
         onLogoutRequested = {
             viewModel.setEvent(LogoutContract.UiEvent.LogoutConfirmed)
-        }
+        },
     )
 }
 
 @Composable
-fun LogoutScreen(
-    onClose: () -> Unit,
-    onLogoutRequested: () -> Unit,
-) {
+fun LogoutScreen(onClose: () -> Unit, onLogoutRequested: () -> Unit) {
     AlertDialog(
         containerColor = AppTheme.colorScheme.surfaceVariant,
         onDismissRequest = onClose,
         title = {
             Text(
                 text = stringResource(id = R.string.logout_title),
-                style = AppTheme.typography.titleLarge
+                style = AppTheme.typography.titleLarge,
             )
         },
         text = {
             Text(
                 text = stringResource(id = R.string.logout_description),
-                style = AppTheme.typography.bodyLarge
+                style = AppTheme.typography.bodyLarge,
             )
         },
         dismissButton = {
@@ -50,7 +43,7 @@ fun LogoutScreen(
         confirmButton = {
             TextButton(onClick = onLogoutRequested) {
                 Text(
-                    text = stringResource(id = R.string.logout_button)
+                    text = stringResource(id = R.string.logout_button),
                 )
             }
         },

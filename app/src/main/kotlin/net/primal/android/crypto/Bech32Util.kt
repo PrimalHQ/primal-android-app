@@ -18,7 +18,6 @@ package net.primal.android.crypto
  * limitations under the License.
  */
 
-
 /**
  * Bech32 works with 5 bits values, we use this type to make it explicit: whenever you see Int5 it means 5 bits values,
  * and whenever you see Byte it means 8 bits values.
@@ -30,7 +29,7 @@ typealias Int5 = Byte
  * See https://github.com/bitcoin/bips/blob/master/bip-0173.mediawiki and https://github.com/bitcoin/bips/blob/master/bip-0350.mediawiki.
  */
 object Bech32 {
-    private const val alphabet: String = "qpzry9x8gf2tvdw0s3jn54khce6mua7l"
+    private const val ALPHABET: String = "qpzry9x8gf2tvdw0s3jn54khce6mua7l"
 
     enum class Encoding(val constant: Int) {
         Bech32(1),
@@ -42,11 +41,10 @@ object Bech32 {
     private val map = Array<Int5>(255) { -1 }
 
     init {
-        for (i in 0..alphabet.lastIndex) {
-            map[alphabet[i].code] = i.toByte()
+        for (i in 0..ALPHABET.lastIndex) {
+            map[ALPHABET[i].code] = i.toByte()
         }
     }
-
 
     private fun expand(hrp: String): Array<Int5> {
         val result = Array<Int5>(hrp.length + 1 + hrp.length) { 0 }
@@ -59,20 +57,20 @@ object Bech32 {
     }
 
     private fun polymod(values: Array<Int5>, values1: Array<Int5>): Int {
-        val GEN = arrayOf(0x3b6a57b2, 0x26508e6d, 0x1ea119fa, 0x3d4233dd, 0x2a1462b3)
+        val gen = arrayOf(0x3b6a57b2, 0x26508e6d, 0x1ea119fa, 0x3d4233dd, 0x2a1462b3)
         var chk = 1
         values.forEach { v ->
             val b = chk shr 25
             chk = ((chk and 0x1ffffff) shl 5) xor v.toInt()
             for (i in 0..5) {
-                if (((b shr i) and 1) != 0) chk = chk xor GEN[i]
+                if (((b shr i) and 1) != 0) chk = chk xor gen[i]
             }
         }
         values1.forEach { v ->
             val b = chk shr 25
             chk = ((chk and 0x1ffffff) shl 5) xor v.toInt()
             for (i in 0..5) {
-                if (((b shr i) and 1) != 0) chk = chk xor GEN[i]
+                if (((b shr i) and 1) != 0) chk = chk xor gen[i]
             }
         }
         return chk
@@ -85,14 +83,20 @@ object Bech32 {
      * @return hrp + data encoded as a Bech32 string
      */
     @JvmStatic
-    fun encode(hrp: String, int5s: Array<Int5>, encoding: Encoding): String {
-        require(hrp.lowercase() == hrp || hrp.uppercase() == hrp) { "mixed case strings are not valid bech32 prefixes" }
+    fun encode(
+        hrp: String,
+        int5s: Array<Int5>,
+        encoding: Encoding,
+    ): String {
+        require(hrp.lowercase() == hrp || hrp.uppercase() == hrp) {
+            "mixed case strings are not valid bech32 prefixes"
+        }
         val data = int5s.toByteArray().toTypedArray()
         val checksum = when (encoding) {
             Encoding.Beck32WithoutChecksum -> arrayOf()
             else -> checksum(hrp, data, encoding)
         }
-        return hrp + "1" + (data + checksum).map { i -> alphabet[i.toInt()] }.toCharArray().concatToString()
+        return hrp + "1" + (data + checksum).map { i -> ALPHABET[i.toInt()] }.toCharArray().concatToString()
     }
 
     /**
@@ -102,7 +106,11 @@ object Bech32 {
      * @return hrp + data encoded as a Bech32 string
      */
     @JvmStatic
-    fun encodeBytes(hrp: String, data: ByteArray, encoding: Encoding): String = encode(hrp, eight2five(data), encoding)
+    fun encodeBytes(
+        hrp: String,
+        data: ByteArray,
+        encoding: Encoding,
+    ): String = encode(hrp, eight2five(data), encoding)
 
     /**
      * decodes a bech32 string
@@ -112,7 +120,9 @@ object Bech32 {
      */
     @JvmStatic
     fun decode(bech32: String, noChecksum: Boolean = false): Triple<String, Array<Int5>, Encoding> {
-        require(bech32.lowercase() == bech32 || bech32.uppercase() == bech32) { "mixed case strings are not valid bech32" }
+        require(
+            bech32.lowercase() == bech32 || bech32.uppercase() == bech32,
+        ) { "mixed case strings are not valid bech32" }
         bech32.forEach { require(it.code in 33..126) { "invalid character " } }
         val input = bech32.lowercase()
         val pos = input.lastIndexOf('1')
@@ -150,9 +160,16 @@ object Bech32 {
      * @param encoding encoding to use (bech32 or bech32m)
      * @return a checksum computed over hrp and data
      */
-    private fun checksum(hrp: String, data: Array<Int5>, encoding: Encoding): Array<Int5> {
+    private fun checksum(
+        hrp: String,
+        data: Array<Int5>,
+        encoding: Encoding,
+    ): Array<Int5> {
         val values = expand(hrp) + data
-        val poly = polymod(values, arrayOf(0.toByte(), 0.toByte(), 0.toByte(), 0.toByte(), 0.toByte(), 0.toByte())) xor encoding.constant
+        val poly = polymod(
+            values,
+            arrayOf(0.toByte(), 0.toByte(), 0.toByte(), 0.toByte(), 0.toByte(), 0.toByte()),
+        ) xor encoding.constant
         return Array(6) { i -> (poly.shr(5 * (5 - i)) and 31).toByte() }
     }
 
@@ -196,8 +213,9 @@ object Bech32 {
             }
         }
         require(count <= 4) { "Zero-padding of more than 4 bits" }
-        require((buffer and ((1L shl count) - 1L)) == 0L) { "Non-zero padding in 8-to-5 conversion" }
+        require(
+            (buffer and ((1L shl count) - 1L)) == 0L,
+        ) { "Non-zero padding in 8-to-5 conversion" }
         return output.toByteArray()
     }
-
 }

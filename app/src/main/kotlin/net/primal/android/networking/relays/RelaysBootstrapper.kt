@@ -1,9 +1,9 @@
 package net.primal.android.networking.relays
 
+import javax.inject.Inject
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.user.accounts.BOOTSTRAP_RELAYS
 import net.primal.android.user.accounts.UserAccountsStore
-import javax.inject.Inject
 
 class RelaysBootstrapper @Inject constructor(
     private val relaysManager: RelaysManager,
@@ -18,11 +18,10 @@ class RelaysBootstrapper @Inject constructor(
                 userId = userId,
                 contacts = emptySet(),
                 relays = BOOTSTRAP_RELAYS,
-            )
+            ),
         )
         accountsStore.getAndUpdateAccount(userId = userId) {
             copy(relays = BOOTSTRAP_RELAYS)
         }
     }
-
 }

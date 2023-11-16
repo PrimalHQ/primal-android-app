@@ -29,7 +29,7 @@ fun String.parseNWCUrl(): NostrWallet {
         pubkey = pubkey,
         lightningAddress = lud16,
         relays = listOf(relay),
-        keypair = NostrWalletKeypair(privateKey = keypairSecret, pubkey = keypairPubkey)
+        keypair = NostrWalletKeypair(privateKey = keypairSecret, pubkey = keypairPubkey),
     )
 }
 

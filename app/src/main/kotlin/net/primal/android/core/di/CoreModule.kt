@@ -20,7 +20,5 @@ object CoreModule {
     fun emptyLoggersSet(): Set<Timber.Tree> = emptySet()
 
     @Provides
-    fun provideContentResolver(@ApplicationContext context: Context): ContentResolver =
-        context.contentResolver
-
+    fun provideContentResolver(@ApplicationContext context: Context): ContentResolver = context.contentResolver
 }

@@ -5,6 +5,7 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingSource
 import androidx.room.withTransaction
+import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import net.primal.android.crypto.CryptoUtils
@@ -23,7 +24,6 @@ import net.primal.android.networking.relays.RelaysManager
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.credentials.CredentialsStore
-import javax.inject.Inject
 
 @OptIn(ExperimentalPagingApi::class)
 class MessageRepository @Inject constructor(
@@ -36,13 +36,15 @@ class MessageRepository @Inject constructor(
     private val nostrNotary: NostrNotary,
 ) {
 
-    fun newestConversations(relation: ConversationRelation) = createConversationsPager {
-        database.messageConversations().newestConversationsPaged(relation = relation)
-    }.flow
+    fun newestConversations(relation: ConversationRelation) =
+        createConversationsPager {
+            database.messageConversations().newestConversationsPaged(relation = relation)
+        }.flow
 
-    fun newestMessages(participantId: String) = createMessagesPager(participantId = participantId) {
-        database.messages().newestMessagesPaged(participantId = participantId)
-    }.flow
+    fun newestMessages(participantId: String) =
+        createMessagesPager(participantId = participantId) {
+            database.messages().newestMessagesPaged(participantId = participantId)
+        }.flow
 
     private suspend fun fetchConversations(relation: ConversationRelation) {
         val userId = activeAccountStore.activeUserId()
@@ -88,10 +90,14 @@ class MessageRepository @Inject constructor(
     }
 
     suspend fun fetchFollowConversations() =
-        fetchConversations(relation = ConversationRelation.Follows)
+        fetchConversations(
+            relation = ConversationRelation.Follows,
+        )
 
     suspend fun fetchNonFollowsConversations() =
-        fetchConversations(relation = ConversationRelation.Other)
+        fetchConversations(
+            relation = ConversationRelation.Other,
+        )
 
     suspend fun fetchNewConversationMessages(userId: String, conversationUserId: String) {
         withContext(Dispatchers.IO) {
@@ -101,7 +107,7 @@ class MessageRepository @Inject constructor(
                     userId = userId,
                     participantId = conversationUserId,
                     since = latestMessage?.createdAt ?: 0,
-                )
+                ),
             )
             messagesProcessor.processMessageEventsAndSave(
                 userId = userId,
@@ -116,10 +122,10 @@ class MessageRepository @Inject constructor(
         withContext(Dispatchers.IO) {
             messagesApi.markConversationAsRead(
                 userId = userId,
-                conversationUserId = conversationUserId
+                conversationUserId = conversationUserId,
             )
             database.messageConversations().markConversationAsRead(
-                participantId = conversationUserId
+                participantId = conversationUserId,
             )
         }
     }
@@ -161,21 +167,20 @@ class MessageRepository @Inject constructor(
         }
     }
 
-    private fun createConversationsPager(
-        pagingSourceFactory: () -> PagingSource<Int, MessageConversation>
-    ) = Pager(
-        config = PagingConfig(
-            pageSize = 50,
-            prefetchDistance = 100,
-            initialLoadSize = 200,
-            enablePlaceholders = true,
-        ),
-        pagingSourceFactory = pagingSourceFactory,
-    )
+    private fun createConversationsPager(pagingSourceFactory: () -> PagingSource<Int, MessageConversation>) =
+        Pager(
+            config = PagingConfig(
+                pageSize = 50,
+                prefetchDistance = 100,
+                initialLoadSize = 200,
+                enablePlaceholders = true,
+            ),
+            pagingSourceFactory = pagingSourceFactory,
+        )
 
     private fun createMessagesPager(
         participantId: String,
-        pagingSourceFactory: () -> PagingSource<Int, DirectMessage>
+        pagingSourceFactory: () -> PagingSource<Int, DirectMessage>,
     ) = Pager(
         config = PagingConfig(
             pageSize = 50,
@@ -192,5 +197,4 @@ class MessageRepository @Inject constructor(
         ),
         pagingSourceFactory = pagingSourceFactory,
     )
-
 }

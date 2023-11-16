@@ -64,7 +64,7 @@ fun Modifier.adjustAvatarBackground(
             .border(
                 width = 2.dp,
                 color = borderColor,
-                shape = CircleShape
+                shape = CircleShape,
             )
             .clip(CircleShape)
     } else {
@@ -72,7 +72,6 @@ fun Modifier.adjustAvatarBackground(
             .size(size)
             .clip(CircleShape)
     }
-
 }
 
 @Composable

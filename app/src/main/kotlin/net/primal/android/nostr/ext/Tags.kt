@@ -53,16 +53,18 @@ fun String.asPubkeyTag(recommendedRelay: String? = null): JsonArray =
         if (recommendedRelay != null) add(recommendedRelay)
     }
 
-fun String.asIdentifierTag(): JsonArray = buildJsonArray {
-    add("d")
-    add(this@asIdentifierTag)
-}
+fun String.asIdentifierTag(): JsonArray =
+    buildJsonArray {
+        add("d")
+        add(this@asIdentifierTag)
+    }
 
-fun NoteAttachment.asImageTag(): JsonArray = buildJsonArray {
-    add("image")
-    add(this@asImageTag.remoteUrl)
-    if (this@asImageTag.otherRelevantInfo != null) add(this@asImageTag.otherRelevantInfo)
-}
+fun NoteAttachment.asImageTag(): JsonArray =
+    buildJsonArray {
+        add("image")
+        add(this@asImageTag.remoteUrl)
+        if (this@asImageTag.otherRelevantInfo != null) add(this@asImageTag.otherRelevantInfo)
+    }
 
 fun String.parseEventTags(marker: String? = null): List<JsonArray> {
     val nostrUris = parseNostrUris()
@@ -81,7 +83,7 @@ fun String.parseEventTags(marker: String? = null): List<JsonArray> {
                         add(eventId)
                         add(relayUrl)
                         if (marker != null) add(marker)
-                    }
+                    },
                 )
             }
 
@@ -91,7 +93,7 @@ fun String.parseEventTags(marker: String? = null): List<JsonArray> {
                     add(it.nostrUriToNoteId())
                     add("")
                     if (marker != null) add(marker)
-                }
+                },
             )
         }
     }
@@ -115,7 +117,7 @@ fun String.parsePubkeyTags(marker: String? = null): List<JsonArray> {
                         add(pubkey)
                         add(relayUrl)
                         if (marker != null) add(marker)
-                    }
+                    },
                 )
             }
 
@@ -125,7 +127,7 @@ fun String.parsePubkeyTags(marker: String? = null): List<JsonArray> {
                     add(it.nostrUriToPubkey())
                     add("")
                     if (marker != null) add(marker)
-                }
+                },
             )
         }
     }
@@ -140,7 +142,7 @@ fun String.parseHashtagTags(): List<JsonArray> {
             buildJsonArray {
                 add("t")
                 add(it.removePrefix("#"))
-            }
+            },
         )
     }
     return tags.toList()

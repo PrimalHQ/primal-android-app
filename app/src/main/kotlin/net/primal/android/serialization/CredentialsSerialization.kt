@@ -2,14 +2,14 @@ package net.primal.android.serialization
 
 import androidx.datastore.core.CorruptionException
 import androidx.datastore.core.Serializer
+import java.io.InputStream
+import java.io.OutputStream
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import net.primal.android.security.Encryption
 import net.primal.android.user.domain.Credential
 import timber.log.Timber
-import java.io.InputStream
-import java.io.OutputStream
 
 class CredentialsSerialization(
     private val json: Json = NostrJson,
@@ -34,5 +34,4 @@ class CredentialsSerialization(
     override suspend fun writeTo(t: List<Credential>, output: OutputStream) {
         encryption.encrypt(json.encodeToString(t), output)
     }
-
 }

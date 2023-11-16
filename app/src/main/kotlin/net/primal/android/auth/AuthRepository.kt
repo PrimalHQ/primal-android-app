@@ -1,12 +1,12 @@
 package net.primal.android.auth
 
+import javax.inject.Inject
+import javax.inject.Singleton
 import net.primal.android.crypto.CryptoUtils
 import net.primal.android.networking.relays.RelaysBootstrapper
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.repository.UserRepository
-import javax.inject.Inject
-import javax.inject.Singleton
 
 @Singleton
 class AuthRepository @Inject constructor(
@@ -35,5 +35,4 @@ class AuthRepository @Inject constructor(
         userRepository.removeAllUserAccounts()
         activeAccountStore.clearActiveUserAccount()
     }
-
 }

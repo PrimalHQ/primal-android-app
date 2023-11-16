@@ -39,7 +39,7 @@ import net.primal.android.theme.domain.PrimalTheme
 fun MutedSettingsScreen(
     viewModel: MutedSettingsViewModel,
     onProfileClick: (String) -> Unit,
-    onClose: () -> Unit
+    onClose: () -> Unit,
 ) {
     val state = viewModel.state.collectAsState()
     MutedSettingsScreen(
@@ -64,7 +64,7 @@ fun MutedSettingsScreen(
             PrimalTopAppBar(
                 title = stringResource(id = R.string.settings_muted_accounts_title),
                 navigationIcon = PrimalIcons.ArrowBack,
-                onNavigationIconClick = onClose
+                onNavigationIconClick = onClose,
             )
         },
         content = { paddingValues ->
@@ -82,7 +82,9 @@ fun MutedSettingsScreen(
                     MutedUserListItem(
                         item = mutedUser,
                         onUnmuteClick = {
-                            eventPublisher(MutedSettingsContract.UiEvent.UnmuteEvent(mutedUser.userId))
+                            eventPublisher(
+                                MutedSettingsContract.UiEvent.UnmuteEvent(mutedUser.userId),
+                            )
                         },
                         onProfileClick = onProfileClick,
                     )
@@ -93,13 +95,15 @@ fun MutedSettingsScreen(
                     item(contentType = "NoContent") {
                         ListNoContent(
                             modifier = Modifier.fillParentMaxSize(),
-                            noContentText = stringResource(id = R.string.settings_muted_accounts_no_content),
+                            noContentText = stringResource(
+                                id = R.string.settings_muted_accounts_no_content,
+                            ),
                             refreshButtonVisible = false,
                         )
                     }
                 }
             }
-        }
+        },
     )
 }
 
@@ -149,12 +153,14 @@ fun MutedUserListItem(
                 containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
                 contentColor = AppTheme.colorScheme.onSurface,
                 textStyle = AppTheme.typography.titleMedium.copy(
-                    lineHeight = 18.sp
+                    lineHeight = 18.sp,
                 ),
                 onClick = { onUnmuteClick(item.userId) },
             ) {
                 Text(
-                    text = stringResource(id = R.string.settings_muted_accounts_unmute_button).lowercase(),
+                    text = stringResource(
+                        id = R.string.settings_muted_accounts_unmute_button,
+                    ).lowercase(),
                 )
             }
         },
@@ -172,33 +178,33 @@ fun PreviewMutedScreen() {
                         userId = "pubkey",
                         displayName = "username",
                         avatarUrl = null,
-                        internetIdentifier = "nip05"
+                        internetIdentifier = "nip05",
                     ),
                     MutedUserUi(
                         userId = "pubkey",
                         displayName = "username",
                         avatarUrl = "avatarUrl",
-                        internetIdentifier = "nip05"
+                        internetIdentifier = "nip05",
                     ),
                     MutedUserUi(
                         userId = "pubkey",
                         displayName = "username",
                         avatarUrl = null,
-                        internetIdentifier = "nip05"
+                        internetIdentifier = "nip05",
                     ),
                     MutedUserUi(
                         userId = "pubkey",
                         displayName = "username",
                         avatarUrl = null,
-                        internetIdentifier = "nip05"
+                        internetIdentifier = "nip05",
                     ),
                     MutedUserUi(
                         userId = "pubkey",
                         displayName = "username",
                         avatarUrl = "avatarUrl",
-                        internetIdentifier = "nip05"
-                    )
-                )
+                        internetIdentifier = "nip05",
+                    ),
+                ),
             ),
             eventPublisher = {},
             onProfileClick = {},

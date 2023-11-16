@@ -18,5 +18,5 @@ enum class PostLayout(
             PostAppearance.FullWidthLarge,
             PostAppearance.FullWidthExtraLarge,
         ),
-    )
+    ),
 }

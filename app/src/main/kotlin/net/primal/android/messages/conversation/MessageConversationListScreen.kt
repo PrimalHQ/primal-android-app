@@ -104,7 +104,6 @@ fun MessageListScreen(
     onConversationClick: (String) -> Unit,
     onNewMessageClick: () -> Unit,
 ) {
-
     val uiState = viewModel.state.collectAsState()
 
     DisposableLifecycleObserverEffect {
@@ -184,7 +183,7 @@ fun MessageListScreen(
                             eventPublisher(MarkAllConversationsAsRead)
                         },
                     )
-                }
+                },
             )
         },
         content = { paddingValues ->
@@ -221,7 +220,7 @@ fun MessageListScreen(
                     },
                 )
             }
-        }
+        },
     )
 }
 
@@ -281,8 +280,10 @@ private fun ConversationsList(
                     item(contentType = "RefreshError") {
                         ListNoContent(
                             modifier = Modifier.fillParentMaxSize(),
-                            noContentText = stringResource(id = R.string.messages_conversations_initial_loading_error),
-                            onRefresh = { conversations.refresh() }
+                            noContentText = stringResource(
+                                id = R.string.messages_conversations_initial_loading_error,
+                            ),
+                            onRefresh = { conversations.refresh() },
                         )
                     }
                 }
@@ -292,10 +293,7 @@ private fun ConversationsList(
 }
 
 @Composable
-private fun ConversationListItem(
-    conversation: MessageConversationUi,
-    onConversationClick: (String) -> Unit,
-) {
+private fun ConversationListItem(conversation: MessageConversationUi, onConversationClick: (String) -> Unit) {
     ListItem(
         modifier = Modifier.clickable {
             onConversationClick(conversation.participantId)
@@ -304,7 +302,9 @@ private fun ConversationListItem(
             containerColor = AppTheme.colorScheme.surfaceVariant,
         ),
         leadingContent = {
-            val resource = conversation.participantMediaResources.findByUrl(url = conversation.participantAvatarUrl)
+            val resource = conversation.participantMediaResources.findByUrl(
+                url = conversation.participantAvatarUrl,
+            )
             val variant = resource?.variants?.minByOrNull { it.width }
             val imageSource = variant?.mediaUrl ?: conversation.participantAvatarUrl
             AvatarThumbnailListItemImage(
@@ -326,8 +326,8 @@ private fun ConversationListItem(
                                 spanStyle = SpanStyle(
                                     color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
                                     fontStyle = AppTheme.typography.bodySmall.fontStyle,
-                                )
-                            )
+                                ),
+                            ),
                         )
                     }
 
@@ -343,7 +343,7 @@ private fun ConversationListItem(
                     Box(
                         modifier = Modifier
                             .size(12.dp)
-                            .background(color = AppTheme.colorScheme.primary, shape = CircleShape)
+                            .background(color = AppTheme.colorScheme.primary, shape = CircleShape),
                     )
                 }
             }
@@ -375,7 +375,7 @@ private fun ConversationListItem(
                 style = AppTheme.typography.bodySmall,
                 color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
             )
-        }
+        },
     )
 }
 
@@ -437,8 +437,8 @@ private fun MessagesTabs(
                                     ConversationRelation.Follows -> followsTabWidth
                                     ConversationRelation.Other -> otherTabWidth
                                 },
-                                label = "indicatorWidth"
-                            ).value.toDp()
+                                label = "indicatorWidth",
+                            ).value.toDp(),
                         )
                         .offset(
                             y = (-4).dp,
@@ -451,13 +451,13 @@ private fun MessagesTabs(
                                             .toInt()
                                     }
                                 },
-                                label = "indicatorOffsetX"
-                            ).value.toDp()
+                                label = "indicatorOffsetX",
+                            ).value.toDp(),
                         )
                         .background(
                             color = AppTheme.colorScheme.primary,
                             shape = AppTheme.shapes.small,
-                        )
+                        ),
                 )
             }
         }

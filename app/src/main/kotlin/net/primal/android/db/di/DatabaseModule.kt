@@ -4,8 +4,8 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import net.primal.android.db.PrimalDatabaseBuilder
 import javax.inject.Singleton
+import net.primal.android.db.PrimalDatabaseBuilder
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -13,8 +13,5 @@ object DatabaseModule {
 
     @Provides
     @Singleton
-    fun providePrimalDatabase(
-        builder: PrimalDatabaseBuilder
-    ) = builder.build()
-
+    fun providePrimalDatabase(builder: PrimalDatabaseBuilder) = builder.build()
 }

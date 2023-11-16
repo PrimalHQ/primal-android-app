@@ -36,8 +36,10 @@ fun extractSigningConfigProperties(storeName: String): SigningConfigProperties? 
     val storeFile = when {
         absoluteStoreFile.exists() -> absoluteStoreFile
         projectStoreFile.exists() -> projectStoreFile
-        else -> throw IllegalArgumentException("storeFile for $storeName can not be found " +
-                "at $absoluteStoreFile or $projectStoreFile")
+        else -> throw IllegalArgumentException(
+            "storeFile for $storeName can not be found " +
+                "at $absoluteStoreFile or $projectStoreFile",
+        )
     }
 
     return SigningConfigProperties(
@@ -45,7 +47,7 @@ fun extractSigningConfigProperties(storeName: String): SigningConfigProperties? 
         storeFile = storeFile,
         storePassword = properties.getProperty("$storeName.storePassword"),
         keyAlias = properties.getProperty("$storeName.keyAlias"),
-        keyAliasPassword = properties.getProperty("$storeName.keyPassword")
+        keyAliasPassword = properties.getProperty("$storeName.keyPassword"),
     )
 }
 
@@ -69,7 +71,7 @@ android {
         buildConfigField(
             type = "String",
             name = "LOCAL_STORAGE_KEY_ALIAS",
-            value = "\"${configProperties?.getProperty("localStorage.keyAlias", "")}\""
+            value = "\"${configProperties?.getProperty("localStorage.keyAlias", "")}\"",
         )
     }
 
@@ -98,7 +100,7 @@ android {
             isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
         }
 
@@ -262,5 +264,4 @@ dependencies {
     androidTestImplementation(libs.kotest.assertions.core)
     androidTestImplementation(libs.kotest.assertions.json)
     androidTestImplementation(libs.mockk.android)
-
 }

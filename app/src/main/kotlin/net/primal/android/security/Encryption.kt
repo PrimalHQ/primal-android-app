@@ -8,5 +8,4 @@ interface Encryption {
     fun encrypt(raw: String, outputStream: OutputStream)
 
     fun decrypt(inputStream: InputStream): String
-
 }

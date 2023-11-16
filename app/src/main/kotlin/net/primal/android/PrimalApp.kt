@@ -2,8 +2,8 @@ package net.primal.android
 
 import android.app.Application
 import dagger.hilt.android.HiltAndroidApp
-import timber.log.Timber
 import javax.inject.Inject
+import timber.log.Timber
 
 @HiltAndroidApp
 class PrimalApp : Application() {
@@ -17,5 +17,4 @@ class PrimalApp : Application() {
             Timber.plant(it)
         }
     }
-
 }

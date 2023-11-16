@@ -1,5 +1,6 @@
 package net.primal.android.networking.primal.api
 
+import javax.inject.Inject
 import kotlinx.serialization.encodeToString
 import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.android.networking.primal.PrimalApiClient
@@ -10,7 +11,6 @@ import net.primal.android.networking.sockets.NostrIncomingMessage
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.serialization.NostrJson
 import net.primal.android.serialization.toJsonArray
-import javax.inject.Inject
 
 class PrimalImportApiImpl @Inject constructor(
     @PrimalCacheApiClient private val primalApiClient: PrimalApiClient,
@@ -21,9 +21,9 @@ class PrimalImportApiImpl @Inject constructor(
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.IMPORT_EVENTS,
                 optionsJson = NostrJson.encodeToString(
-                    ImportRequestBody(nostrEvents = events.toJsonArray())
-                )
-            )
+                    ImportRequestBody(nostrEvents = events.toJsonArray()),
+                ),
+            ),
         )
 
         return when (result.terminationMessage) {
@@ -31,5 +31,4 @@ class PrimalImportApiImpl @Inject constructor(
             else -> false
         }
     }
-
 }

@@ -9,8 +9,9 @@ data class MediaResourceUi(
     val variants: List<PrimalResourceVariant> = emptyList(),
 )
 
-fun MediaResource.asMediaResourceUi() =  MediaResourceUi(
-    url = this.url,
-    mimeType = this.contentType,
-    variants = this.variants ?: emptyList(),
-)
+fun MediaResource.asMediaResourceUi() =
+    MediaResourceUi(
+        url = this.url,
+        mimeType = this.contentType,
+        variants = this.variants ?: emptyList(),
+    )

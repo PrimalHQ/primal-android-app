@@ -18,10 +18,7 @@ import com.google.accompanist.placeholder.material.placeholder
 import net.primal.android.theme.AppTheme
 
 @Composable
-fun PostImageListItemImage(
-    source: Any?,
-    modifier: Modifier = Modifier,
-) {
+fun PostImageListItemImage(source: Any?, modifier: Modifier = Modifier) {
     SubcomposeAsyncImage(
         model = source,
         modifier = modifier,
@@ -42,7 +39,7 @@ fun PostImageLoadingPlaceholder() {
                 color = AppTheme.colorScheme.surface,
                 highlight = PlaceholderHighlight.fade(
                     highlightColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
-                )
+                ),
             ),
     )
 }

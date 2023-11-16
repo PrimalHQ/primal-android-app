@@ -103,13 +103,12 @@ enum class NotificationType(
         type = 204,
         section = NotificationSection.NOTE_YOUR_NOTE_WAS_MENTIONED_IN,
         collapsable = false,
-    );
+    ),
+    ;
 
     companion object {
-        fun valueOf(type: Int): NotificationType? =
-            enumValues<NotificationType>().find { it.type == type }
+        fun valueOf(type: Int): NotificationType? = enumValues<NotificationType>().find { it.type == type }
 
-        fun valueOf(id: String): NotificationType? =
-            enumValues<NotificationType>().find { it.id == id }
+        fun valueOf(id: String): NotificationType? = enumValues<NotificationType>().find { it.id == id }
     }
 }

@@ -141,7 +141,7 @@ fun ExploreFeedScreen(
                             postAuthorId = post.authorId,
                             zapAmount = zapAmount,
                             zapDescription = zapDescription,
-                        )
+                        ),
                     )
                 },
                 onPostLikeClick = {
@@ -149,7 +149,7 @@ fun ExploreFeedScreen(
                         ExploreFeedContract.UiEvent.PostLikeAction(
                             postId = it.postId,
                             postAuthorId = it.authorId,
-                        )
+                        ),
                     )
                 },
                 onRepostClick = {
@@ -158,7 +158,7 @@ fun ExploreFeedScreen(
                             postId = it.postId,
                             postAuthorId = it.authorId,
                             postNostrEvent = it.rawNostrEventJson,
-                        )
+                        ),
                     )
                 },
                 onPostQuoteClick = {
@@ -170,32 +170,47 @@ fun ExploreFeedScreen(
                 zapOptions = state.zapOptions,
                 onMuteClick = {
                     eventPublisher(ExploreFeedContract.UiEvent.MuteAction(profileId = it))
-                }
+                },
             )
         },
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState)
-        }
+        },
     )
 }
 
 @Composable
-private fun ErrorHandler(
-    error: ExploreFeedError?,
-    snackbarHostState: SnackbarHostState,
-) {
+private fun ErrorHandler(error: ExploreFeedError?, snackbarHostState: SnackbarHostState) {
     val context = LocalContext.current
     LaunchedEffect(error ?: true) {
         val errorMessage = when (error) {
-            is ExploreFeedError.InvalidZapRequest -> context.getString(R.string.post_action_invalid_zap_request)
-            is ExploreFeedError.MissingLightningAddress -> context.getString(R.string.post_action_missing_lightning_address)
-            is ExploreFeedError.FailedToPublishZapEvent -> context.getString(R.string.post_action_zap_failed)
-            is ExploreFeedError.FailedToPublishLikeEvent -> context.getString(R.string.post_action_like_failed)
-            is ExploreFeedError.FailedToPublishRepostEvent -> context.getString(R.string.post_action_repost_failed)
-            is ExploreFeedError.MissingRelaysConfiguration -> context.getString(R.string.app_missing_relays_config)
-            is ExploreFeedError.FailedToAddToFeed -> context.getString(R.string.app_error_adding_to_feed)
-            is ExploreFeedError.FailedToRemoveFeed -> context.getString(R.string.app_error_removing_feed)
-            is ExploreFeedError.FailedToMuteUser -> context.getString(R.string.app_error_muting_user)
+            is ExploreFeedError.InvalidZapRequest -> context.getString(
+                R.string.post_action_invalid_zap_request,
+            )
+            is ExploreFeedError.MissingLightningAddress -> context.getString(
+                R.string.post_action_missing_lightning_address,
+            )
+            is ExploreFeedError.FailedToPublishZapEvent -> context.getString(
+                R.string.post_action_zap_failed,
+            )
+            is ExploreFeedError.FailedToPublishLikeEvent -> context.getString(
+                R.string.post_action_like_failed,
+            )
+            is ExploreFeedError.FailedToPublishRepostEvent -> context.getString(
+                R.string.post_action_repost_failed,
+            )
+            is ExploreFeedError.MissingRelaysConfiguration -> context.getString(
+                R.string.app_missing_relays_config,
+            )
+            is ExploreFeedError.FailedToAddToFeed -> context.getString(
+                R.string.app_error_adding_to_feed,
+            )
+            is ExploreFeedError.FailedToRemoveFeed -> context.getString(
+                R.string.app_error_removing_feed,
+            )
+            is ExploreFeedError.FailedToMuteUser -> context.getString(
+                R.string.app_error_muting_user,
+            )
             null -> return@LaunchedEffect
         }
 

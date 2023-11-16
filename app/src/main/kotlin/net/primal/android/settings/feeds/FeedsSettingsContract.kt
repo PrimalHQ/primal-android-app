@@ -5,7 +5,7 @@ import net.primal.android.settings.feeds.model.Feed
 interface FeedsSettingsContract {
     data class UiState(
         val feeds: List<Feed> = emptyList(),
-        val error: SettingsFeedsError? = null
+        val error: SettingsFeedsError? = null,
     ) {
         sealed class SettingsFeedsError {
             data class FailedToRemoveFeed(val throwable: Throwable) : SettingsFeedsError()
@@ -18,7 +18,3 @@ interface FeedsSettingsContract {
         data object RestoreDefaultFeeds : UiEvent()
     }
 }
-
-
-
-

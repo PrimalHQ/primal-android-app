@@ -5,6 +5,9 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
 import androidx.paging.map
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.time.Instant
+import javax.inject.Inject
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -43,9 +46,6 @@ import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.badges.BadgesManager
 import net.primal.android.wallet.model.ZapTarget
 import net.primal.android.wallet.repository.ZapRepository
-import java.time.Instant
-import javax.inject.Inject
-import kotlin.time.Duration.Companion.seconds
 
 @HiltViewModel
 class NotificationsViewModel @Inject constructor(
@@ -61,14 +61,14 @@ class NotificationsViewModel @Inject constructor(
         UiState(
             seenNotifications = notificationsRepository.observeSeenNotifications()
                 .map { it.map { notification -> notification.asNotificationUi() } }
-                .cachedIn(viewModelScope)
-        )
+                .cachedIn(viewModelScope),
+        ),
     )
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
 
-    private val _event: MutableSharedFlow<UiEvent> = MutableSharedFlow()
-    fun setEvent(event: UiEvent) = viewModelScope.launch { _event.emit(event) }
+    private val events: MutableSharedFlow<UiEvent> = MutableSharedFlow()
+    fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
 
     init {
         subscribeToEvents()
@@ -77,130 +77,138 @@ class NotificationsViewModel @Inject constructor(
         observeUnseenNotifications()
     }
 
-    private fun subscribeToEvents() = viewModelScope.launch {
-        _event.collect {
-            when (it) {
-                NotificationsSeen -> handleNotificationsSeen()
-                is PostLikeAction -> likePost(it)
-                is RepostAction -> repostPost(it)
-                is UiEvent.ZapAction -> zapPost(it)
+    private fun subscribeToEvents() =
+        viewModelScope.launch {
+            events.collect {
+                when (it) {
+                    NotificationsSeen -> handleNotificationsSeen()
+                    is PostLikeAction -> likePost(it)
+                    is RepostAction -> repostPost(it)
+                    is UiEvent.ZapAction -> zapPost(it)
+                }
             }
         }
-    }
 
-    private fun subscribeToActiveAccount() = viewModelScope.launch {
-        activeAccountStore.activeUserAccount.collect {
-            setState {
-                copy(
-                    activeAccountAvatarUrl = it.pictureUrl,
-                    walletConnected = it.nostrWallet != null,
-                    defaultZapAmount = it.appSettings?.defaultZapAmount,
-                    zapOptions = it.appSettings?.zapOptions ?: emptyList(),
-                )
+    private fun subscribeToActiveAccount() =
+        viewModelScope.launch {
+            activeAccountStore.activeUserAccount.collect {
+                setState {
+                    copy(
+                        activeAccountAvatarUrl = it.pictureUrl,
+                        walletConnected = it.nostrWallet != null,
+                        defaultZapAmount = it.appSettings?.defaultZapAmount,
+                        zapOptions = it.appSettings?.zapOptions ?: emptyList(),
+                    )
+                }
             }
         }
-    }
 
-    private fun subscribeToBadgesUpdates() = viewModelScope.launch {
-        badgesManager.badges.collect {
-            setState { copy(badges = it) }
+    private fun subscribeToBadgesUpdates() =
+        viewModelScope.launch {
+            badgesManager.badges.collect {
+                setState { copy(badges = it) }
+            }
         }
-    }
 
-    private fun observeUnseenNotifications() = viewModelScope.launch {
-        notificationsRepository.observeUnseenNotifications().collect { newUnseenNotifications ->
-            setState {
-                val unseenNotifications = mutableListOf<List<Notification>>()
-                val groupByType = newUnseenNotifications.groupBy { it.data.type }
-                groupByType.keys.forEach { notificationType ->
-                    groupByType[notificationType]?.let { notificationsByType ->
-                        when (notificationType.collapsable) {
-                            true -> {
-                                val groupByPostId = notificationsByType.groupBy { it.data.actionPostId }
-                                groupByPostId.keys.forEach { postId ->
-                                    groupByPostId[postId]?.let {
-                                        unseenNotifications.add(it)
+    private fun observeUnseenNotifications() =
+        viewModelScope.launch {
+            notificationsRepository.observeUnseenNotifications().collect { newUnseenNotifications ->
+                setState {
+                    val unseenNotifications = mutableListOf<List<Notification>>()
+                    val groupByType = newUnseenNotifications.groupBy { it.data.type }
+                    groupByType.keys.forEach { notificationType ->
+                        groupByType[notificationType]?.let { notificationsByType ->
+                            when (notificationType.collapsable) {
+                                true -> {
+                                    val groupByPostId = notificationsByType.groupBy { it.data.actionPostId }
+                                    groupByPostId.keys.forEach { postId ->
+                                        groupByPostId[postId]?.let {
+                                            unseenNotifications.add(it)
+                                        }
                                     }
                                 }
-                            }
-                            false -> notificationsByType.forEach {
-                                unseenNotifications.add(listOf(it))
+                                false -> notificationsByType.forEach {
+                                    unseenNotifications.add(listOf(it))
+                                }
                             }
                         }
                     }
-                }
 
-                copy(
-                    unseenNotifications = unseenNotifications.map { byType ->
-                        byType.map { it.asNotificationUi() }
-                    }
-                )
+                    copy(
+                        unseenNotifications = unseenNotifications.map { byType ->
+                            byType.map { it.asNotificationUi() }
+                        },
+                    )
+                }
             }
         }
-    }
 
-    private fun handleNotificationsSeen() = viewModelScope.launch {
-        notificationsRepository.markAllNotificationsAsSeen()
-    }
-
-    private fun likePost(postLikeAction: PostLikeAction) = viewModelScope.launch {
-        try {
-            postRepository.likePost(
-                postId = postLikeAction.postId,
-                postAuthorId = postLikeAction.postAuthorId,
-            )
-        } catch (error: NostrPublishException) {
-            setErrorState(error = FailedToPublishLikeEvent(error))
-        } catch (error: MissingRelaysException) {
-            setErrorState(error = MissingRelaysConfiguration(error))
-        }
-    }
-
-    private fun repostPost(repostAction: RepostAction) = viewModelScope.launch {
-        try {
-            postRepository.repostPost(
-                postId = repostAction.postId,
-                postAuthorId = repostAction.postAuthorId,
-                postRawNostrEvent = repostAction.postNostrEvent,
-            )
-        } catch (error: NostrPublishException) {
-            setErrorState(error = FailedToPublishRepostEvent(error))
-        } catch (error: MissingRelaysException) {
-            setErrorState(error = MissingRelaysConfiguration(error))
-        }
-    }
-
-    private fun zapPost(zapAction: UiEvent.ZapAction) = viewModelScope.launch {
-        val postAuthorProfileData = withContext(Dispatchers.IO) {
-            profileRepository.findProfileData(profileId = zapAction.postAuthorId)
+    private fun handleNotificationsSeen() =
+        viewModelScope.launch {
+            notificationsRepository.markAllNotificationsAsSeen()
         }
 
-        if (postAuthorProfileData.lnUrl == null) {
-            setErrorState(error = MissingLightningAddress(IllegalStateException()))
-            return@launch
+    private fun likePost(postLikeAction: PostLikeAction) =
+        viewModelScope.launch {
+            try {
+                postRepository.likePost(
+                    postId = postLikeAction.postId,
+                    postAuthorId = postLikeAction.postAuthorId,
+                )
+            } catch (error: NostrPublishException) {
+                setErrorState(error = FailedToPublishLikeEvent(error))
+            } catch (error: MissingRelaysException) {
+                setErrorState(error = MissingRelaysConfiguration(error))
+            }
         }
 
-        try {
-            zapRepository.zap(
-                userId = activeAccountStore.activeUserId(),
-                comment = zapAction.zapDescription,
-                amountInSats = zapAction.zapAmount,
-                target = ZapTarget.Note(
-                    zapAction.postId,
-                    zapAction.postAuthorId,
-                    postAuthorProfileData.lnUrl,
-                ),
-            )
-        } catch (error: ZapRepository.ZapFailureException) {
-            setErrorState(error = FailedToPublishZapEvent(error))
-        } catch (error: NostrPublishException) {
-            setErrorState(error = FailedToPublishZapEvent(error))
-        } catch (error: MissingRelaysException) {
-            setErrorState(error = MissingRelaysConfiguration(error))
-        } catch (error: ZapRepository.InvalidZapRequestException) {
-            setErrorState(error = InvalidZapRequest(error))
+    private fun repostPost(repostAction: RepostAction) =
+        viewModelScope.launch {
+            try {
+                postRepository.repostPost(
+                    postId = repostAction.postId,
+                    postAuthorId = repostAction.postAuthorId,
+                    postRawNostrEvent = repostAction.postNostrEvent,
+                )
+            } catch (error: NostrPublishException) {
+                setErrorState(error = FailedToPublishRepostEvent(error))
+            } catch (error: MissingRelaysException) {
+                setErrorState(error = MissingRelaysConfiguration(error))
+            }
         }
-    }
+
+    private fun zapPost(zapAction: UiEvent.ZapAction) =
+        viewModelScope.launch {
+            val postAuthorProfileData = withContext(Dispatchers.IO) {
+                profileRepository.findProfileData(profileId = zapAction.postAuthorId)
+            }
+
+            if (postAuthorProfileData.lnUrl == null) {
+                setErrorState(error = MissingLightningAddress(IllegalStateException()))
+                return@launch
+            }
+
+            try {
+                zapRepository.zap(
+                    userId = activeAccountStore.activeUserId(),
+                    comment = zapAction.zapDescription,
+                    amountInSats = zapAction.zapAmount,
+                    target = ZapTarget.Note(
+                        zapAction.postId,
+                        zapAction.postAuthorId,
+                        postAuthorProfileData.lnUrl,
+                    ),
+                )
+            } catch (error: ZapRepository.ZapFailureException) {
+                setErrorState(error = FailedToPublishZapEvent(error))
+            } catch (error: NostrPublishException) {
+                setErrorState(error = FailedToPublishZapEvent(error))
+            } catch (error: MissingRelaysException) {
+                setErrorState(error = MissingRelaysConfiguration(error))
+            } catch (error: ZapRepository.InvalidZapRequestException) {
+                setErrorState(error = InvalidZapRequest(error))
+            }
+        }
 
     private fun setErrorState(error: UiState.NotificationsError) {
         setState { copy(error = error) }
@@ -246,7 +254,7 @@ class NotificationsViewModel @Inject constructor(
             nostrResources = this.actionPostNostrUris.map { it.asNostrResourceUi() },
             stats = FeedPostStatsUi.from(
                 postStats = this.actionPostStats,
-                userStats = this.actionPostUserStats
+                userStats = this.actionPostUserStats,
             ),
             hashtags = this.actionPost.hashtags,
             rawNostrEventJson = this.actionPost.raw,

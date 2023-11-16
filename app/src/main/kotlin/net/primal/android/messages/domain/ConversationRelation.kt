@@ -5,6 +5,9 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 enum class ConversationRelation {
-    @SerialName("follows") Follows,
-    @SerialName("other") Other,
+    @SerialName("follows")
+    Follows,
+
+    @SerialName("other")
+    Other,
 }

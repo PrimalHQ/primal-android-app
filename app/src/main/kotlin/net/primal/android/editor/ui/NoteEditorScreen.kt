@@ -59,6 +59,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import java.util.UUID
 import kotlinx.coroutines.flow.filter
 import net.primal.android.R
 import net.primal.android.core.compose.AvatarThumbnailListItemImage
@@ -77,13 +78,9 @@ import net.primal.android.editor.NoteEditorContract.UiState.NewPostError
 import net.primal.android.editor.NoteEditorViewModel
 import net.primal.android.editor.domain.NoteAttachment
 import net.primal.android.theme.AppTheme
-import java.util.UUID
 
 @Composable
-fun NoteEditorScreen(
-    viewModel: NoteEditorViewModel,
-    onClose: () -> Unit,
-) {
+fun NoteEditorScreen(viewModel: NoteEditorViewModel, onClose: () -> Unit) {
     val uiState = viewModel.state.collectAsState()
 
     LaunchedEffect(viewModel, onClose) {
@@ -152,7 +149,9 @@ fun NoteEditorScreen(
                             stringResource(id = R.string.note_editor_post_publishing_button)
                         }
 
-                        state.uploadingAttachments -> stringResource(id = R.string.note_editor_uploading_attachments)
+                        state.uploadingAttachments -> stringResource(
+                            id = R.string.note_editor_uploading_attachments,
+                        )
                         else -> if (state.isReply) {
                             stringResource(id = R.string.note_editor_reply_publish_button)
                         } else {
@@ -172,12 +171,12 @@ fun NoteEditorScreen(
                             horizontal = 24.dp,
                             vertical = 0.dp,
                         ),
-                        enabled = !state.publishing && !state.uploadingAttachments
-                                && content.isNotBlank()
-                                && state.attachments.none { it.uploadError != null },
+                        enabled = !state.publishing && !state.uploadingAttachments &&
+                            content.isNotBlank() &&
+                            state.attachments.none { it.uploadError != null },
                         onClick = {
                             eventPublisher(UiEvent.PublishPost(content = content))
-                        }
+                        },
                     )
                 },
             )
@@ -196,7 +195,9 @@ fun NoteEditorScreen(
                     val noteEditorMaxHeight = noteEditorMaxHeightPx.toDp()
                     noteEditorMaxHeight - replyHeight - attachmentsHeightDp
                 }
-            } else 0.dp
+            } else {
+                0.dp
+            }
 
             LazyColumn(
                 modifier = Modifier
@@ -207,7 +208,7 @@ fun NoteEditorScreen(
             ) {
                 items(
                     items = state.conversation,
-                    key = { it.postId }
+                    key = { it.postId },
                 ) {
                     ReplyToNote(
                         replyToNote = it,
@@ -222,7 +223,7 @@ fun NoteEditorScreen(
                                 modifier = Modifier
                                     .padding(top = 8.dp, start = avatarsColumnWidthDp, end = 16.dp)
                                     .fillMaxWidth(),
-                                replyToUsername = state.replyToNote.authorHandle
+                                replyToUsername = state.replyToNote.authorHandle,
                             )
                         }
 
@@ -236,14 +237,14 @@ fun NoteEditorScreen(
                                                     color = outlineColor,
                                                     start = Offset(
                                                         x = connectionLineOffsetXDp.toPx(),
-                                                        y = (-32).dp.toPx()
+                                                        y = (-32).dp.toPx(),
                                                     ),
                                                     end = Offset(
                                                         x = connectionLineOffsetXDp.toPx(),
-                                                        y = size.height / 2
+                                                        y = size.height / 2,
                                                     ),
                                                     strokeWidth = 2.dp.toPx(),
-                                                    cap = StrokeCap.Square
+                                                    cap = StrokeCap.Square,
                                                 )
                                             }
                                         }
@@ -266,7 +267,9 @@ fun NoteEditorScreen(
                                 enabled = !state.publishing,
                                 placeholder = {
                                     Text(
-                                        text = stringResource(id = R.string.note_editor_content_placeholder),
+                                        text = stringResource(
+                                            id = R.string.note_editor_content_placeholder,
+                                        ),
                                         color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
                                         style = AppTheme.typography.bodyMedium,
                                     )
@@ -281,7 +284,7 @@ fun NoteEditorScreen(
                                     unfocusedBorderColor = Color.Unspecified,
                                     errorBorderColor = Color.Unspecified,
                                     disabledBorderColor = Color.Unspecified,
-                                )
+                                ),
                             )
                         }
                     }
@@ -315,7 +318,7 @@ fun NoteEditorScreen(
                     },
                 )
             }
-        }
+        },
     )
 }
 
@@ -349,10 +352,7 @@ private fun NoteAttachmentsLazyRow(
 }
 
 @Composable
-private fun ReplyToNote(
-    replyToNote: FeedPostUi,
-    connectionLineColor: Color,
-) {
+private fun ReplyToNote(replyToNote: FeedPostUi, connectionLineColor: Color) {
     Column(
         modifier = Modifier.drawWithCache {
             onDrawBehind {
@@ -360,17 +360,17 @@ private fun ReplyToNote(
                     color = connectionLineColor,
                     start = Offset(
                         x = connectionLineOffsetXDp.toPx(),
-                        y = connectionLineOffsetXDp.toPx()
+                        y = connectionLineOffsetXDp.toPx(),
                     ),
                     end = Offset(
                         x = connectionLineOffsetXDp.toPx(),
-                        y = size.height + 16.dp.toPx()
+                        y = size.height + 16.dp.toPx(),
                     ),
                     strokeWidth = 2.dp.toPx(),
-                    cap = StrokeCap.Square
+                    cap = StrokeCap.Square,
                 )
             }
-        }
+        },
     ) {
         FeedNoteHeader(
             modifier = Modifier
@@ -379,7 +379,7 @@ private fun ReplyToNote(
                     start = 16.dp,
                     top = 12.dp,
                     bottom = 8.dp,
-                    end = 24.dp
+                    end = 24.dp,
                 ),
             authorDisplayName = replyToNote.authorName,
             postTimestamp = replyToNote.timestamp,
@@ -409,23 +409,20 @@ private fun ReplyToNote(
 }
 
 @Composable
-private fun NoteActionRow(
-    maxItems: Int = 5,
-    onPhotosImported: (List<Uri>) -> Unit,
-) {
+private fun NoteActionRow(maxItems: Int = 5, onPhotosImported: (List<Uri>) -> Unit) {
     val multiplePhotosImportLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.PickMultipleVisualMedia(maxItems = maxItems)
+        ActivityResultContracts.PickMultipleVisualMedia(maxItems = maxItems),
     ) { uris -> onPhotosImported(uris) }
 
     Row(
-        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
     ) {
         IconButton(
             onClick = {
                 multiplePhotosImportLauncher.launch(
                     PickVisualMediaRequest(
-                        ActivityResultContracts.PickVisualMedia.ImageOnly
-                    )
+                        ActivityResultContracts.PickVisualMedia.ImageOnly,
+                    ),
                 )
             },
         ) {
@@ -439,15 +436,16 @@ private fun NoteActionRow(
 }
 
 @Composable
-private fun NewPostPublishErrorHandler(
-    error: NewPostError?,
-    snackbarHostState: SnackbarHostState,
-) {
+private fun NewPostPublishErrorHandler(error: NewPostError?, snackbarHostState: SnackbarHostState) {
     val context = LocalContext.current
     LaunchedEffect(error ?: true) {
         val errorMessage = when (error) {
-            is NewPostError.MissingRelaysConfiguration -> context.getString(R.string.app_missing_relays_config)
-            is NewPostError.PublishError -> context.getString(R.string.note_editor_nostr_publish_error)
+            is NewPostError.MissingRelaysConfiguration -> context.getString(
+                R.string.app_missing_relays_config,
+            )
+            is NewPostError.PublishError -> context.getString(
+                R.string.note_editor_nostr_publish_error,
+            )
             else -> null
         }
 

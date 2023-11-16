@@ -9,5 +9,4 @@ interface RepostDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun upsertAll(data: List<RepostData>)
-
 }

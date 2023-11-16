@@ -7,12 +7,13 @@ import net.primal.android.nostr.model.primal.content.EventResource
 import net.primal.android.serialization.NostrJson
 import net.primal.android.serialization.decodeFromStringOrNull
 
-fun EventResource.asMediaResourcePO(eventId: String) = MediaResource(
-    eventId = eventId,
-    contentType = this.mimeType,
-    url = this.url,
-    variants = this.variants,
-)
+fun EventResource.asMediaResourcePO(eventId: String) =
+    MediaResource(
+        eventId = eventId,
+        contentType = this.mimeType,
+        url = this.url,
+        variants = this.variants,
+    )
 
 fun List<PrimalEvent>.flatMapNotNullAsMediaResourcePO() =
     this.mapNotNull { NostrJson.decodeFromStringOrNull<ContentPrimalEventResources>(it.content) }

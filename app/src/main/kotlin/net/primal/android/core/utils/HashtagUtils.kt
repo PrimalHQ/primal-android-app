@@ -4,7 +4,6 @@ import net.primal.android.nostr.ext.getTagValueOrNull
 import net.primal.android.nostr.ext.isHashtagTag
 import net.primal.android.nostr.model.NostrEvent
 
-
 private val hashtagRegex = Regex("#\\w+")
 
 private val nip08MentionRegex = Regex("\\#\\[([0-9]*)\\]")

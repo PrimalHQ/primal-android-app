@@ -3,7 +3,6 @@ package net.primal.android.messages.domain
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-
 data class ConversationsSummary(
     val summaryPerParticipantId: Map<String, ConversationSummary> = mapOf(),
 )

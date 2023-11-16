@@ -53,10 +53,10 @@ enum class PrimalTheme(
         inverseThemeName = "midnight",
         isDarkTheme = false,
         accent = PrimalAccent.Winter,
-    );
+    ),
+    ;
 
     companion object {
-        fun valueOf(themeName: String): PrimalTheme? =
-            enumValues<PrimalTheme>().find { it.themeName == themeName }
+        fun valueOf(themeName: String): PrimalTheme? = enumValues<PrimalTheme>().find { it.themeName == themeName }
     }
 }

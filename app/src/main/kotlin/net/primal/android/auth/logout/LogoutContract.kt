@@ -5,5 +5,4 @@ interface LogoutContract {
     sealed class UiEvent {
         object LogoutConfirmed : UiEvent()
     }
-
 }

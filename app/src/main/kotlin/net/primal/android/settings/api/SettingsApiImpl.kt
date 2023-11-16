@@ -1,5 +1,6 @@
 package net.primal.android.settings.api
 
+import javax.inject.Inject
 import kotlinx.serialization.encodeToString
 import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.android.networking.primal.PrimalApiClient
@@ -13,10 +14,9 @@ import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.serialization.NostrJson
 import net.primal.android.settings.api.model.AppSpecificDataRequest
 import net.primal.android.settings.api.model.GetAppSettingsResponse
-import net.primal.android.settings.api.model.GetMuteListResponse
 import net.primal.android.settings.api.model.GetMuteListRequest
+import net.primal.android.settings.api.model.GetMuteListResponse
 import net.primal.android.settings.api.model.SetAppSettingsRequest
-import javax.inject.Inject
 
 class SettingsApiImpl @Inject constructor(
     @PrimalCacheApiClient private val primalApiClient: PrimalApiClient,
@@ -34,9 +34,9 @@ class SettingsApiImpl @Inject constructor(
                             userId = pubkey,
                             description = "Sync app settings",
                         ),
-                    )
+                    ),
                 ),
-            )
+            ),
         )
 
         return GetAppSettingsResponse(
@@ -47,7 +47,7 @@ class SettingsApiImpl @Inject constructor(
 
     override suspend fun getDefaultAppSettings(pubkey: String): GetAppSettingsResponse {
         val queryResult = primalApiClient.query(
-            message = PrimalCacheFilter(primalVerb = PrimalVerb.GET_DEFAULT_APP_SETTINGS)
+            message = PrimalCacheFilter(primalVerb = PrimalVerb.GET_DEFAULT_APP_SETTINGS),
         )
 
         return GetAppSettingsResponse(
@@ -56,10 +56,7 @@ class SettingsApiImpl @Inject constructor(
         )
     }
 
-    override suspend fun setAppSettings(
-        userId: String,
-        appSettings: ContentAppSettings
-    ): NostrEvent {
+    override suspend fun setAppSettings(userId: String, appSettings: ContentAppSettings): NostrEvent {
         val signedNostrEvent = nostrNotary.signAppSettingsNostrEvent(
             userId = userId,
             appSettings = appSettings,
@@ -69,9 +66,9 @@ class SettingsApiImpl @Inject constructor(
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.SET_APP_SETTINGS,
                 optionsJson = NostrJson.encodeToString(
-                    SetAppSettingsRequest(settingsEvent = signedNostrEvent)
+                    SetAppSettingsRequest(settingsEvent = signedNostrEvent),
                 ),
-            )
+            ),
         )
 
         return signedNostrEvent
@@ -82,9 +79,9 @@ class SettingsApiImpl @Inject constructor(
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.MUTE_LIST,
                 optionsJson = NostrJson.encodeToString(
-                    GetMuteListRequest(pubkey = userId)
+                    GetMuteListRequest(pubkey = userId),
                 ),
-            )
+            ),
         )
 
         return GetMuteListResponse(

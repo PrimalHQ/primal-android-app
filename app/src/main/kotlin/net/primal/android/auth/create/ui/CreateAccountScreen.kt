@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.*
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -65,7 +64,9 @@ fun CreateAccountScreen(
     LaunchedEffect(viewModel, onCreateSuccess) {
         viewModel.effect.collect {
             when (it) {
-                is CreateAccountContract.SideEffect.AccountCreatedAndPersisted -> onCreateSuccess(it.pubkey)
+                is CreateAccountContract.SideEffect.AccountCreatedAndPersisted -> onCreateSuccess(
+                    it.pubkey,
+                )
             }
         }
     }
@@ -87,64 +88,71 @@ fun CreateAccountScreen(
     eventPublisher: (CreateAccountContract.UiEvent) -> Unit,
     onClose: () -> Unit,
 ) {
-    Scaffold(topBar = {
-        Column {
-            PrimalTopAppBar(
-                title = stepTitle(step = state.currentStep),
-                navigationIcon = if (state.currentStep == CreateAccountStep.FOLLOW_RECOMMENDED_ACCOUNTS) null else PrimalIcons.ArrowBack,
-                onNavigationIconClick = {
-                    if (state.currentStep == CreateAccountStep.NEW_ACCOUNT) {
-                        onClose()
+    Scaffold(
+        topBar = {
+            Column {
+                PrimalTopAppBar(
+                    title = stepTitle(step = state.currentStep),
+                    navigationIcon = if (state.currentStep == CreateAccountStep.FOLLOW_RECOMMENDED_ACCOUNTS) {
+                        null
                     } else {
-                        eventPublisher(CreateAccountContract.UiEvent.GoBack)
-                    }
-                },
-            )
+                        PrimalIcons.ArrowBack
+                    },
+                    onNavigationIconClick = {
+                        if (state.currentStep == CreateAccountStep.NEW_ACCOUNT) {
+                            onClose()
+                        } else {
+                            eventPublisher(CreateAccountContract.UiEvent.GoBack)
+                        }
+                    },
+                )
 
-            if (state.currentStep != CreateAccountStep.FOLLOW_RECOMMENDED_ACCOUNTS) {
-                StepsIndicator(currentStep = state.currentStep)
+                if (state.currentStep != CreateAccountStep.FOLLOW_RECOMMENDED_ACCOUNTS) {
+                    StepsIndicator(currentStep = state.currentStep)
+                }
             }
-        }
-    }, content = { paddingValues ->
-        CreateAccountContent(
-            state = state, eventPublisher = eventPublisher, paddingValues = paddingValues
-        )
-    })
+        },
+        content = { paddingValues ->
+            CreateAccountContent(
+                state = state,
+                eventPublisher = eventPublisher,
+                paddingValues = paddingValues,
+            )
+        },
+    )
 }
 
 @Composable
-private fun StepsIndicator(
-    currentStep: CreateAccountStep,
-) {
+private fun StepsIndicator(currentStep: CreateAccountStep) {
     Row(
         modifier = Modifier
             .wrapContentHeight()
             .padding(bottom = 16.dp)
             .fillMaxWidth(),
-        horizontalArrangement = Arrangement.Center
+        horizontalArrangement = Arrangement.Center,
     ) {
         Row(
-            modifier = Modifier.clip(shape = RoundedCornerShape(2.dp))
+            modifier = Modifier.clip(shape = RoundedCornerShape(2.dp)),
         ) {
             Box(
                 modifier = Modifier
                     .width(32.dp)
                     .height(4.dp)
-                    .background(stepColor(step = currentStep, position = 1))
+                    .background(stepColor(step = currentStep, position = 1)),
             )
             Spacer(modifier = Modifier.width(2.dp))
             Box(
                 modifier = Modifier
                     .width(32.dp)
                     .height(4.dp)
-                    .background(stepColor(step = currentStep, position = 2))
+                    .background(stepColor(step = currentStep, position = 2)),
             )
             Spacer(modifier = Modifier.width(2.dp))
             Box(
                 modifier = Modifier
                     .width(32.dp)
                     .height(4.dp)
-                    .background(stepColor(step = currentStep, position = 3))
+                    .background(stepColor(step = currentStep, position = 3)),
             )
         }
     }
@@ -155,44 +163,52 @@ fun CreateAccountContent(
     state: CreateAccountContract.UiState,
     eventPublisher: (CreateAccountContract.UiEvent) -> Unit,
     paddingValues: PaddingValues,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Column(
         modifier = modifier
             .fillMaxSize()
             .imePadding()
             .padding(paddingValues = paddingValues),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         val columnModifier =
-            if (state.currentStep != CreateAccountStep.FOLLOW_RECOMMENDED_ACCOUNTS) Modifier
-                .verticalScroll(
-                    rememberScrollState()
-                )
-                .fillMaxHeight()
-                .weight(weight = 1f, fill = true) else Modifier
-                .fillMaxHeight()
-                .weight(weight = 1f, fill = true)
+            if (state.currentStep != CreateAccountStep.FOLLOW_RECOMMENDED_ACCOUNTS) {
+                Modifier
+                    .verticalScroll(
+                        rememberScrollState(),
+                    )
+                    .fillMaxHeight()
+                    .weight(weight = 1f, fill = true)
+            } else {
+                Modifier
+                    .fillMaxHeight()
+                    .weight(weight = 1f, fill = true)
+            }
         Column(
             modifier = columnModifier,
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Top
+            verticalArrangement = Arrangement.Top,
         ) {
             when (state.currentStep) {
                 CreateAccountStep.NEW_ACCOUNT -> CreateAccountStep(
-                    state = state, eventPublisher = eventPublisher
+                    state = state,
+                    eventPublisher = eventPublisher,
                 )
 
                 CreateAccountStep.PROFILE_PREVIEW -> ProfilePreviewStep(
-                    state = state, isFinalized = false
+                    state = state,
+                    isFinalized = false,
                 )
 
                 CreateAccountStep.ACCOUNT_CREATED -> ProfilePreviewStep(
-                    state = state, isFinalized = true
+                    state = state,
+                    isFinalized = true,
                 )
 
                 CreateAccountStep.FOLLOW_RECOMMENDED_ACCOUNTS -> FollowRecommendedAccountsStep(
-                    state = state, eventPublisher = eventPublisher
+                    state = state,
+                    eventPublisher = eventPublisher,
                 )
             }
         }
@@ -200,7 +216,7 @@ fun CreateAccountContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(86.dp)
-                .padding(horizontal = 32.dp)
+                .padding(horizontal = 32.dp),
         ) {
             PrimalLoadingButton(
                 text = stepActionText(state.currentStep),
@@ -208,11 +224,20 @@ fun CreateAccountContent(
                 loading = state.loading,
                 onClick = {
                     when (state.currentStep) {
-                        CreateAccountStep.NEW_ACCOUNT -> eventPublisher(CreateAccountContract.UiEvent.GoToProfilePreviewStepEvent)
-                        CreateAccountStep.PROFILE_PREVIEW -> eventPublisher(CreateAccountContract.UiEvent.GoToNostrCreatedStepEvent)
-                        CreateAccountStep.ACCOUNT_CREATED -> eventPublisher(CreateAccountContract.UiEvent.GoToFollowContactsStepEvent)
+                        CreateAccountStep.NEW_ACCOUNT -> eventPublisher(
+                            CreateAccountContract.UiEvent.GoToProfilePreviewStepEvent,
+                        )
+
+                        CreateAccountStep.PROFILE_PREVIEW -> eventPublisher(
+                            CreateAccountContract.UiEvent.GoToNostrCreatedStepEvent,
+                        )
+
+                        CreateAccountStep.ACCOUNT_CREATED -> eventPublisher(
+                            CreateAccountContract.UiEvent.GoToFollowContactsStepEvent,
+                        )
+
                         CreateAccountStep.FOLLOW_RECOMMENDED_ACCOUNTS -> eventPublisher(
-                            CreateAccountContract.UiEvent.FinishEvent
+                            CreateAccountContract.UiEvent.FinishEvent,
                         )
                     }
                 },
@@ -229,31 +254,48 @@ fun CreateAccountContent(
 private fun stepTitle(step: CreateAccountStep): String {
     return when (step) {
         CreateAccountStep.NEW_ACCOUNT -> stringResource(id = R.string.create_title_new_account)
-        CreateAccountStep.PROFILE_PREVIEW -> stringResource(id = R.string.create_title_profile_preview)
-        CreateAccountStep.ACCOUNT_CREATED -> stringResource(id = R.string.create_title_nostr_account_created)
-        CreateAccountStep.FOLLOW_RECOMMENDED_ACCOUNTS -> stringResource(id = R.string.create_title_people_to_follow)
+        CreateAccountStep.PROFILE_PREVIEW -> stringResource(
+            id = R.string.create_title_profile_preview,
+        )
+
+        CreateAccountStep.ACCOUNT_CREATED -> stringResource(
+            id = R.string.create_title_nostr_account_created,
+        )
+
+        CreateAccountStep.FOLLOW_RECOMMENDED_ACCOUNTS -> stringResource(
+            id = R.string.create_title_people_to_follow,
+        )
     }
 }
 
 @Composable
 private fun stepActionText(step: CreateAccountStep): String {
     return when (step) {
-        CreateAccountStep.NEW_ACCOUNT -> stringResource(id = R.string.create_action_next)
-        CreateAccountStep.PROFILE_PREVIEW -> stringResource(id = R.string.create_action_create_nostr_account)
-        CreateAccountStep.ACCOUNT_CREATED -> stringResource(id = R.string.create_action_find_people_to_follow)
-        CreateAccountStep.FOLLOW_RECOMMENDED_ACCOUNTS -> stringResource(id = R.string.create_action_finish)
+        CreateAccountStep.NEW_ACCOUNT ->
+            stringResource(id = R.string.create_action_next)
+
+        CreateAccountStep.PROFILE_PREVIEW ->
+            stringResource(id = R.string.create_action_create_nostr_account)
+
+        CreateAccountStep.ACCOUNT_CREATED ->
+            stringResource(id = R.string.create_action_find_people_to_follow)
+
+        CreateAccountStep.FOLLOW_RECOMMENDED_ACCOUNTS ->
+            stringResource(id = R.string.create_action_finish)
     }
 }
 
 @Composable
 private fun stepColor(step: CreateAccountStep, position: Int): Color {
-    return if (position <= step.step) AppTheme.extraColorScheme.onSurfaceVariantAlt1 else AppTheme.colorScheme.outline
+    return if (position <= step.step) {
+        AppTheme.extraColorScheme.onSurfaceVariantAlt1
+    } else {
+        AppTheme.colorScheme.outline
+    }
 }
 
 @Composable
-fun LaunchedErrorHandler(
-    viewModel: CreateAccountViewModel
-) {
+fun LaunchedErrorHandler(viewModel: CreateAccountViewModel) {
     val genericMessage = stringResource(id = R.string.app_generic_error)
     val context = LocalContext.current
     val uiScope = rememberCoroutineScope()
@@ -261,7 +303,9 @@ fun LaunchedErrorHandler(
         viewModel.state.filter { it.error != null }.map { it.error }.filterNotNull().collect {
             uiScope.launch {
                 Toast.makeText(
-                    context, genericMessage, Toast.LENGTH_SHORT
+                    context,
+                    genericMessage,
+                    Toast.LENGTH_SHORT,
                 ).show()
             }
         }
@@ -275,7 +319,7 @@ data class CreateScreenPreviewState(
     val website: String = "",
     val aboutMe: String = "",
     val fetchingRecommendedFollows: Boolean = false,
-    val recommendedFollows: Map<String, List<ContentMetadata>> = emptyMap()
+    val recommendedFollows: Map<String, List<ContentMetadata>> = emptyMap(),
 )
 
 class CreateScreenPreviewProvider : PreviewParameterProvider<CreateScreenPreviewState> {
@@ -286,29 +330,33 @@ class CreateScreenPreviewProvider : PreviewParameterProvider<CreateScreenPreview
                 currentStep = CreateAccountStep.PROFILE_PREVIEW,
                 name = "Preston Pysh",
                 handle = "PrestonPysh",
-                aboutMe = "Bitcoin & books. My bitcoin can remain in cold storage far longer than the market can remain irrational.",
-                website = "https://theinvestorspodcast.com/"
+                aboutMe = "Bitcoin & books. My bitcoin can remain in cold storage far " +
+                    "longer than the market can remain irrational.",
+                website = "https://theinvestorspodcast.com/",
             ),
             CreateScreenPreviewState(
                 currentStep = CreateAccountStep.ACCOUNT_CREATED,
                 name = "Preston Pysh",
                 handle = "PrestonPysh",
-                aboutMe = "Bitcoin & books. My bitcoin can remain in cold storage far longer than the market can remain irrational.",
-                website = "https://theinvestorspodcast.com/"
-            ),
-            CreateScreenPreviewState(
-                currentStep = CreateAccountStep.FOLLOW_RECOMMENDED_ACCOUNTS,
-                name = "Preston Pysh",
-                handle = "PrestonPysh",
-                aboutMe = "Bitcoin & books. My bitcoin can remain in cold storage far longer than the market can remain irrational.",
+                aboutMe = "Bitcoin & books. My bitcoin can remain in cold storage far " +
+                    "longer than the market can remain irrational.",
                 website = "https://theinvestorspodcast.com/",
-                fetchingRecommendedFollows = true
             ),
             CreateScreenPreviewState(
                 currentStep = CreateAccountStep.FOLLOW_RECOMMENDED_ACCOUNTS,
                 name = "Preston Pysh",
                 handle = "PrestonPysh",
-                aboutMe = "Bitcoin & books. My bitcoin can remain in cold storage far longer than the market can remain irrational.",
+                aboutMe = "Bitcoin & books. My bitcoin can remain in cold storage far " +
+                    "longer than the market can remain irrational.",
+                website = "https://theinvestorspodcast.com/",
+                fetchingRecommendedFollows = true,
+            ),
+            CreateScreenPreviewState(
+                currentStep = CreateAccountStep.FOLLOW_RECOMMENDED_ACCOUNTS,
+                name = "Preston Pysh",
+                handle = "PrestonPysh",
+                aboutMe = "Bitcoin & books. My bitcoin can remain in cold storage far " +
+                    "longer than the market can remain irrational.",
                 website = "https://theinvestorspodcast.com/",
                 fetchingRecommendedFollows = false,
                 recommendedFollows = mapOf(
@@ -317,30 +365,34 @@ class CreateScreenPreviewProvider : PreviewParameterProvider<CreateScreenPreview
                             name = "cameri",
                             displayName = "Camerið\\u009Fª½\\",
                             nip05 = "cameri@elder.nostr.land",
-                            picture = "https://nostr.build/i/8cd2fc3d7e6637dc26c6e80b5e1b6ccb4a1e5ba5f2bec67904fe6912a23a85be.jpg",
-                            banner = "https://nostr.build/i/nostr.build_90a51a2e50c9f42288260d01b3a2a4a1c7a9df085423abad7809e76429da7cdc.gif",
+                            picture = "https://nostr.build/i/8cd2fc3d7e66372be85be.jpg",
+                            banner = "https://nostr.build/i/nostr.build_90a51a2bad7da7cdc.gif",
                             website = "https://primal.net/cameri",
-                            about = "@HodlWithLedn. All opinions are my own.\nBitcoiner class of 2021. Core Nostr Developer. Author of Nostream. Ex Relay Operator.",
-                            lud16 = "cameri@getalby.com"
-                        )
-                    )
-                )
-            )
+                            about = "@HodlWithLedn. All opinions are my own. " +
+                                "Bitcoiner class of 2021. Core Nostr Developer. " +
+                                "Author of Nostream. Ex Relay Operator.",
+                            lud16 = "cameri@getalby.com",
+                        ),
+                    ),
+                ),
+            ),
         )
 }
 
 @Preview
 @Composable
-fun PreviewCreateScreen(
-    @PreviewParameter(CreateScreenPreviewProvider::class) state: CreateScreenPreviewState
-) {
+fun PreviewCreateScreen(@PreviewParameter(CreateScreenPreviewProvider::class) state: CreateScreenPreviewState) {
     PrimalTheme(primalTheme = PrimalTheme.Sunset) {
-        CreateAccountScreen(state = CreateAccountContract.UiState(
-            currentStep = state.currentStep,
-            displayName = state.name,
-            username = state.handle,
-            website = state.website,
-            aboutMe = state.aboutMe
-        ), eventPublisher = {}, onClose = {})
+        CreateAccountScreen(
+            state = CreateAccountContract.UiState(
+                currentStep = state.currentStep,
+                displayName = state.name,
+                username = state.handle,
+                website = state.website,
+                aboutMe = state.aboutMe,
+            ),
+            eventPublisher = {},
+            onClose = {},
+        )
     }
 }

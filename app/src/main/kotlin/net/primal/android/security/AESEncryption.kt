@@ -36,5 +36,4 @@ class AESEncryption(
         }
         return String(decryptedBytes, Charsets.UTF_8)
     }
-
 }

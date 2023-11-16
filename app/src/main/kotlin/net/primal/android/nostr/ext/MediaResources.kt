@@ -5,13 +5,15 @@ import net.primal.android.feed.db.MediaResource
 import net.primal.android.feed.db.PostData
 import net.primal.android.messages.db.DirectMessageData
 
-fun List<PostData>.flatMapPostsAsMediaResourcePO() = flatMap {
-    it.uris.mapAsMediaResourcePO(eventId = it.postId)
-}
+fun List<PostData>.flatMapPostsAsMediaResourcePO() =
+    flatMap {
+        it.uris.mapAsMediaResourcePO(eventId = it.postId)
+    }
 
-fun List<DirectMessageData>.flatMapMessagesAsMediaResourcePO() = flatMap {
-    it.uris.mapAsMediaResourcePO(eventId = it.messageId)
-}
+fun List<DirectMessageData>.flatMapMessagesAsMediaResourcePO() =
+    flatMap {
+        it.uris.mapAsMediaResourcePO(eventId = it.messageId)
+    }
 
 private fun List<String>.mapAsMediaResourcePO(eventId: String) =
     filterNot { it.isNostrUri() }

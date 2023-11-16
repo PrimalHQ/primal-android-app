@@ -1,5 +1,6 @@
 package net.primal.android.networking.sockets
 
+import java.util.UUID
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
@@ -16,14 +17,13 @@ import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.serialization.NostrJson
 import net.primal.android.serialization.decodeFromStringOrNull
 import timber.log.Timber
-import java.util.UUID
 
 fun String.parseIncomingMessage(): NostrIncomingMessage? {
     val jsonArray = NostrJson.decodeFromStringOrNull<JsonArray>(this)
     val verbElement = jsonArray?.elementAtOrNull(0) ?: return null
 
     return try {
-      when (verbElement.toIncomingMessageType()) {
+        when (verbElement.toIncomingMessageType()) {
             NostrVerb.Incoming.EVENT -> jsonArray.takeAsEventIncomingMessage()
             NostrVerb.Incoming.EOSE -> jsonArray.takeAsEoseIncomingMessage()
             NostrVerb.Incoming.OK -> jsonArray.takeAsOkIncomingMessage()
@@ -56,7 +56,9 @@ private fun JsonArray.takeAsCountIncomingMessage(): NostrIncomingMessage? {
             subscriptionId = subscriptionId,
             count = count,
         )
-    } else null
+    } else {
+        null
+    }
 }
 
 private fun JsonArray.takeAsEoseIncomingMessage(): NostrIncomingMessage? {
@@ -75,11 +77,15 @@ private fun JsonArray.takeAsEventIncomingMessage(): NostrIncomingMessage? {
 
     val nostrEvent = if (kind.isNotUnknown() && kind.isNotPrimalEventKind()) {
         event.asNostrEventOrNull()
-    } else null
+    } else {
+        null
+    }
 
     val primalEvent = if (kind.isPrimalEventKind()) {
         event.asPrimalEventOrNull()
-    } else null
+    } else {
+        null
+    }
 
     return NostrIncomingMessage.EventMessage(
         subscriptionId = subscriptionId,
@@ -111,7 +117,9 @@ private fun JsonArray.takeAsOkIncomingMessage(): NostrIncomingMessage? {
             success = success,
             message = message,
         )
-    } else null
+    } else {
+        null
+    }
 }
 
 private fun JsonElement.toIncomingMessageType(): NostrVerb.Incoming {

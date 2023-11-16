@@ -1,5 +1,6 @@
 package net.primal.android.user.accounts
 
+import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import net.primal.android.core.utils.asEllipsizedNpub
@@ -10,10 +11,9 @@ import net.primal.android.nostr.ext.takeContentAsUserProfileStatsOrNull
 import net.primal.android.user.api.UsersApi
 import net.primal.android.user.domain.UserAccount
 import net.primal.android.user.domain.asUserAccountFromContactsEvent
-import javax.inject.Inject
 
 class UserAccountFetcher @Inject constructor(
-    private val usersApi: UsersApi
+    private val usersApi: UsersApi,
 ) {
 
     suspend fun fetchUserProfile(pubkey: String): UserAccount {

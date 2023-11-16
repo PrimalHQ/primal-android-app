@@ -1,8 +1,8 @@
 package net.primal.android.notifications.list.ui
 
+import java.time.Instant
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.notifications.domain.NotificationType
-import java.time.Instant
 
 data class NotificationUi(
     val ownerId: String,
@@ -15,5 +15,5 @@ data class NotificationUi(
     val actionPost: FeedPostUi? = null,
     val actionUserSatsZapped: Long? = null,
 ) {
-    val uniqueKey = "$notificationType;${createdAt};${actionUserId}"
+    val uniqueKey = "$notificationType;$createdAt;$actionUserId"
 }

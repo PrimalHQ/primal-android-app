@@ -39,7 +39,7 @@ fun AppBarIcon(
         modifier = modifier
             .clip(CircleShape)
             .background(
-                color = if (enabled) enabledBackgroundColor else disabledBackgroundColor
+                color = if (enabled) enabledBackgroundColor else disabledBackgroundColor,
             ),
         enabled = enabled,
         onClick = onClick,
@@ -48,7 +48,7 @@ fun AppBarIcon(
             modifier = Modifier.size(24.dp),
             imageVector = icon,
             contentDescription = null,
-            tint = tint
+            tint = tint,
         )
     }
 }
@@ -71,7 +71,7 @@ fun PreviewAppBarIcon() {
                         )
                     },
                 )
-            }
+            },
         ) {
             Surface(modifier = Modifier.padding(it)) { }
         }

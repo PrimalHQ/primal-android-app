@@ -33,5 +33,4 @@ interface NotificationDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun upsertAll(data: List<NotificationData>)
-
 }

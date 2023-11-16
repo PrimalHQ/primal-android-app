@@ -9,14 +9,9 @@ import net.primal.android.user.domain.Relay
 
 interface UsersApi {
 
-    suspend fun getUserProfile(
-        pubkey: String,
-    ): UserProfileResponse
+    suspend fun getUserProfile(pubkey: String): UserProfileResponse
 
-    suspend fun getUserContacts(
-        pubkey: String,
-        extendedResponse: Boolean = true,
-    ): UserContactsResponse
+    suspend fun getUserContacts(pubkey: String, extendedResponse: Boolean = true): UserContactsResponse
 
     suspend fun setUserContacts(
         ownerId: String,
@@ -24,12 +19,7 @@ interface UsersApi {
         relays: List<Relay>,
     ): NostrEvent
 
-    suspend fun setUserProfile(
-        ownerId: String,
-        contentMetadata: ContentMetadata,
-    ): NostrEvent
+    suspend fun setUserProfile(ownerId: String, contentMetadata: ContentMetadata): NostrEvent
 
-    suspend fun getUserProfilesMetadata(
-        userIds: Set<String>
-    ): UserProfilesResponse
+    suspend fun getUserProfilesMetadata(userIds: Set<String>): UserProfilesResponse
 }

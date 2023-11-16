@@ -35,4 +35,4 @@ data class Notification(
     @Relation(entityColumn = "postId", parentColumn = "actionPostId")
     val actionPostNostrUris: List<NostrResource> = emptyList(),
 
-    )
+)

@@ -61,27 +61,30 @@ fun FeedLazyColumn(
     header: @Composable (LazyItemScope.() -> Unit)? = null,
     stickyHeader: @Composable (LazyItemScope.() -> Unit)? = null,
 ) {
-
     var repostQuotePostConfirmation by remember { mutableStateOf<FeedPostUi?>(null) }
-    if (repostQuotePostConfirmation != null) repostQuotePostConfirmation?.let { post ->
-        RepostOrQuoteBottomSheet(
-            onDismiss = { repostQuotePostConfirmation = null },
-            onRepostClick = { onRepostClick(post) },
-            onPostQuoteClick = { onPostQuoteClick(post) },
-        )
+    if (repostQuotePostConfirmation != null) {
+        repostQuotePostConfirmation?.let { post ->
+            RepostOrQuoteBottomSheet(
+                onDismiss = { repostQuotePostConfirmation = null },
+                onRepostClick = { onRepostClick(post) },
+                onPostQuoteClick = { onPostQuoteClick(post) },
+            )
+        }
     }
 
     var zapOptionsPostConfirmation by remember { mutableStateOf<FeedPostUi?>(null) }
-    if (zapOptionsPostConfirmation != null) zapOptionsPostConfirmation?.let { post ->
-        ZapBottomSheet(
-            onDismissRequest = { zapOptionsPostConfirmation = null },
-            receiverName = post.authorName,
-            defaultZapAmount = defaultZapAmount ?: 42.toULong(),
-            userZapOptions = zapOptions,
-            onZap = { zapAmount, zapDescription ->
-                onZapClick(post, zapAmount, zapDescription)
-            }
-        )
+    if (zapOptionsPostConfirmation != null) {
+        zapOptionsPostConfirmation?.let { post ->
+            ZapBottomSheet(
+                onDismissRequest = { zapOptionsPostConfirmation = null },
+                receiverName = post.authorName,
+                defaultZapAmount = defaultZapAmount ?: 42.toULong(),
+                userZapOptions = zapOptions,
+                onZap = { zapAmount, zapDescription ->
+                    onZapClick(post, zapAmount, zapDescription)
+                },
+            )
+        }
     }
 
     LazyColumn(
@@ -104,7 +107,7 @@ fun FeedLazyColumn(
         if (pagingItems.loadState.mediator?.prepend is LoadState.Error) {
             item(contentType = "Error") {
                 ListLoadingError(
-                    text = stringResource(R.string.app_error_loading_prev_page)
+                    text = stringResource(R.string.app_error_loading_prev_page),
                 )
             }
         }
@@ -112,7 +115,7 @@ fun FeedLazyColumn(
         items(
             count = pagingItems.itemCount,
             key = pagingItems.itemKey(key = { "${it.postId}${it.repostId}" }),
-            contentType = pagingItems.itemContentType()
+            contentType = pagingItems.itemContentType(),
         ) { index ->
             val item = pagingItems[index]
 
@@ -153,7 +156,7 @@ fun FeedLazyColumn(
                             }
                         },
                         onHashtagClick = onHashtagClick,
-                        onMuteUserClick = { onMuteClick?.invoke(item.authorId) }
+                        onMuteUserClick = { onMuteClick?.invoke(item.authorId) },
                     )
 
                     PrimalDivider()
@@ -181,7 +184,7 @@ fun FeedLazyColumn(
                             ListNoContent(
                                 modifier = Modifier.fillParentMaxSize(),
                                 noContentText = stringResource(id = R.string.feed_no_content),
-                                onRefresh = { pagingItems.refresh() }
+                                onRefresh = { pagingItems.refresh() },
                             )
                         }
                     }
@@ -196,13 +199,13 @@ fun FeedLazyColumn(
                 ListLoading(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(64.dp)
+                        .height(64.dp),
                 )
             }
 
             is LoadState.Error -> item(contentType = "Error") {
                 ListLoadingError(
-                    text = stringResource(R.string.app_error_loading_next_page)
+                    text = stringResource(R.string.app_error_loading_next_page),
                 )
             }
 

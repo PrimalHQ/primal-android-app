@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 import net.primal.android.nostr.model.primal.PrimalResourceVariant
 
 @Entity(
-    primaryKeys = ["eventId", "url"]
+    primaryKeys = ["eventId", "url"],
 )
 @Serializable
 data class MediaResource(

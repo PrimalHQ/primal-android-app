@@ -9,7 +9,6 @@ import androidx.sqlite.db.SupportSQLiteQuery
 import net.primal.android.profile.db.PostUserStats
 import net.primal.android.settings.muted.db.MutedUserData
 
-
 @Dao
 interface FeedPostDao {
 
@@ -41,8 +40,7 @@ interface FeedPostDao {
             NULL AS feedCreatedAt,
             NULL AS isMuted
         FROM PostData WHERE postId = :postId LIMIT 1
-        """
+        """,
     )
     fun findPostById(postId: String): FeedPost?
-
 }

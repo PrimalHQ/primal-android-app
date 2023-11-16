@@ -1,5 +1,8 @@
 package net.primal.android.auth.create.api
 
+import java.io.IOException
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import net.primal.android.auth.create.api.model.RecommendedFollowsResponse
@@ -7,13 +10,10 @@ import net.primal.android.serialization.NostrJson
 import net.primal.android.serialization.decodeFromStringOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import java.io.IOException
-import javax.inject.Inject
-import javax.inject.Singleton
 
 @Singleton
 class RecommendedFollowsApi @Inject constructor(
-    private val okHttpClient: OkHttpClient
+    private val okHttpClient: OkHttpClient,
 ) {
     suspend fun fetch(username: String): RecommendedFollowsResponse {
         val getRequest = Request.Builder()
@@ -29,7 +29,9 @@ class RecommendedFollowsApi @Inject constructor(
         val responseBody = response.body
 
         if (responseBody != null) {
-            val result = NostrJson.decodeFromStringOrNull<RecommendedFollowsResponse>(string = responseBody.string())
+            val result = NostrJson.decodeFromStringOrNull<RecommendedFollowsResponse>(
+                string = responseBody.string(),
+            )
             return result ?: throw IOException("Invalid body content.")
         } else {
             throw IOException("Empty response body.")

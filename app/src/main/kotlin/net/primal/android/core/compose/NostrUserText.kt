@@ -45,7 +45,6 @@ fun NostrUserText(
     annotatedStringPrefixBuilder: (AnnotatedString.Builder.() -> Unit)? = null,
     annotatedStringSuffixBuilder: (AnnotatedString.Builder.() -> Unit)? = null,
 ) {
-
     val verifiedBadge = !internetIdentifier.isNullOrEmpty()
 
     val titleText = buildAnnotatedString {
@@ -56,9 +55,9 @@ fun NostrUserText(
                 spanStyle = SpanStyle(
                     color = displayNameColor,
                     fontStyle = AppTheme.typography.bodyMedium.fontStyle,
-                    fontWeight = FontWeight.Bold
-                )
-            )
+                    fontWeight = FontWeight.Bold,
+                ),
+            ),
         )
         if (verifiedBadge) {
             appendInlineContent("verifiedBadge", "[badge]")
@@ -69,8 +68,8 @@ fun NostrUserText(
     val inlineContent = mapOf(
         "verifiedBadge" to InlineTextContent(
             placeholder = Placeholder(
-                24.sp, 24.sp, PlaceholderVerticalAlign.TextCenter
-            )
+                24.sp, 24.sp, PlaceholderVerticalAlign.TextCenter,
+            ),
         ) {
             Box(
                 modifier = Modifier.fillMaxSize(),
@@ -84,11 +83,11 @@ fun NostrUserText(
                             AppTheme.colorScheme.secondary
                         } else {
                             AppTheme.extraColorScheme.onSurfaceVariantAlt2
-                        }
-                    )
+                        },
+                    ),
                 )
             }
-        }
+        },
     )
 
     Text(
@@ -101,9 +100,7 @@ fun NostrUserText(
         maxLines = maxLines,
         style = style,
     )
-
 }
-
 
 @Preview
 @Composable
@@ -115,7 +112,7 @@ fun PreviewNostrUserTextWithPrimalBadge() {
                 internetIdentifier = "adam@primal.net",
                 annotatedStringSuffixBuilder = {
                     append("• 42 y. ago")
-                }
+                },
             )
         }
     }
@@ -131,7 +128,7 @@ fun PreviewNostrUserTextWithRandomBadge() {
                 internetIdentifier = "adam@nostr.com",
                 annotatedStringSuffixBuilder = {
                     append("• 42 y. ago")
-                }
+                },
             )
         }
     }
@@ -147,7 +144,7 @@ fun PreviewNostrUserTextWithoutBadge() {
                 internetIdentifier = null,
                 annotatedStringSuffixBuilder = {
                     append(" • 42 y. ago")
-                }
+                },
             )
         }
     }

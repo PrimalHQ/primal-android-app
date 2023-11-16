@@ -12,5 +12,4 @@ interface ProfileStatsDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun upsertAll(data: List<ProfileStats>)
-
 }

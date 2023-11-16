@@ -48,11 +48,10 @@ class EncryptionManager(
             .apply { init(createKeyGenParameterSpec(keyAlias)) }
             .generateKey()
 
-
     private fun createKeyGenParameterSpec(keyAlias: String): KeyGenParameterSpec {
         return KeyGenParameterSpec.Builder(
             keyAlias,
-            KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
+            KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT,
         )
             .setBlockModes(blockMode)
             .setEncryptionPaddings(padding)

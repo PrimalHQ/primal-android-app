@@ -42,9 +42,11 @@ fun RepostedNotice(
                 appendInlineContent("icon", "[icon]")
                 append(
                     AnnotatedString(
-                        text = "  $repostedByAuthor ${stringResource(id = R.string.feed_reposted_suffix)} ",
-                        spanStyle = SpanStyle(color = contentColor)
-                    )
+                        text = "  $repostedByAuthor ${stringResource(
+                            id = R.string.feed_reposted_suffix,
+                        )} ",
+                        spanStyle = SpanStyle(color = contentColor),
+                    ),
                 )
             },
             style = AppTheme.typography.bodyMedium,
@@ -53,7 +55,7 @@ fun RepostedNotice(
             },
             inlineContent = mapOf(
                 "icon" to InlineTextContent(
-                    placeholder = Placeholder(16.sp, 16.sp, PlaceholderVerticalAlign.TextCenter)
+                    placeholder = Placeholder(16.sp, 16.sp, PlaceholderVerticalAlign.TextCenter),
                 ) {
                     Box(
                         modifier = Modifier.fillMaxSize(),
@@ -65,8 +67,8 @@ fun RepostedNotice(
                             colorFilter = ColorFilter.tint(color = contentColor),
                         )
                     }
-                }
-            )
+                },
+            ),
         )
     }
 }

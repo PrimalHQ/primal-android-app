@@ -6,5 +6,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class ContactsRequestBody(
     val pubkey: String,
-    @SerialName("extended_response") val extendedResponse: Boolean = true
+    @SerialName("extended_response") val extendedResponse: Boolean = true,
 )

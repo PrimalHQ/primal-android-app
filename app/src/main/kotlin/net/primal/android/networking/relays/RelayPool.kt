@@ -2,6 +2,7 @@ package net.primal.android.networking.relays
 
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
@@ -23,7 +24,6 @@ import net.primal.android.serialization.toJsonObject
 import net.primal.android.user.domain.Relay
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import kotlin.time.Duration.Companion.seconds
 
 class RelayPool @AssistedInject constructor(
     @Assisted val relays: List<Relay>,
@@ -38,23 +38,25 @@ class RelayPool @AssistedInject constructor(
         initPool()
     }
 
-    private fun List<Relay>.mapAsNostrSocketClient() = this
-        .mapNotNull { it.toWssRequestOrNull() }
-        .map {
-            NostrSocketClient(
-                okHttpClient = okHttpClient,
-                wssRequest = it
-            )
-        }
+    private fun List<Relay>.mapAsNostrSocketClient() =
+        this
+            .mapNotNull { it.toWssRequestOrNull() }
+            .map {
+                NostrSocketClient(
+                    okHttpClient = okHttpClient,
+                    wssRequest = it,
+                )
+            }
 
-    private fun Relay.toWssRequestOrNull() = try {
-        Request.Builder()
-            .url(url)
-            .addHeader("User-Agent", UserAgentProvider.USER_AGENT)
-            .build()
-    } catch (error: IllegalArgumentException) {
-        null
-    }
+    private fun Relay.toWssRequestOrNull() =
+        try {
+            Request.Builder()
+                .url(url)
+                .addHeader("User-Agent", UserAgentProvider.USER_AGENT)
+                .build()
+        } catch (error: IllegalArgumentException) {
+            null
+        }
 
     @Throws(NostrPublishException::class)
     suspend fun publishEvent(nostrEvent: NostrEvent) {
@@ -81,7 +83,9 @@ class RelayPool @AssistedInject constructor(
             .transform {
                 when (it) {
                     is NostrIncomingMessage.OkMessage -> emit(it)
-                    is NostrIncomingMessage.NoticeMessage -> throw NostrNoticeException(reason = it.message)
+                    is NostrIncomingMessage.NoticeMessage -> throw NostrNoticeException(
+                        reason = it.message,
+                    )
                     else -> throw IllegalStateException("$it is not allowed")
                 }
             }
@@ -90,10 +94,7 @@ class RelayPool @AssistedInject constructor(
     }
 
     @OptIn(FlowPreview::class)
-    private suspend fun handlePublishEvent(
-        relayConnections: List<NostrSocketClient>,
-        nostrEvent: NostrEvent
-    ) {
+    private suspend fun handlePublishEvent(relayConnections: List<NostrSocketClient>, nostrEvent: NostrEvent) {
         val responseFlow = MutableSharedFlow<NostrPublishResult>()
         relayConnections.forEach { nostrSocketClient ->
             scope.launch {

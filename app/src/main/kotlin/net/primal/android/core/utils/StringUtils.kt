@@ -20,5 +20,7 @@ fun String.asEllipsizedNpub(): String = Hex.decode(this).toNpub().ellipsizeMiddl
 fun String.formatNip05Identifier(): String {
     return if (startsWith("_@")) {
         substring(2)
-    } else this
+    } else {
+        this
+    }
 }

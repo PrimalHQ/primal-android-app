@@ -6,6 +6,10 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
 import androidx.paging.map
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.time.Instant
+import javax.inject.Inject
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -35,10 +39,6 @@ import net.primal.android.user.updater.UserDataUpdater
 import net.primal.android.user.updater.UserDataUpdaterFactory
 import net.primal.android.wallet.model.ZapTarget
 import net.primal.android.wallet.repository.ZapRepository
-import java.time.Instant
-import javax.inject.Inject
-import kotlin.time.Duration.Companion.minutes
-import kotlin.time.Duration.Companion.seconds
 
 @HiltViewModel
 class FeedViewModel @Inject constructor(
@@ -50,7 +50,7 @@ class FeedViewModel @Inject constructor(
     private val profileRepository: ProfileRepository,
     private val zapRepository: ZapRepository,
     private val badgesManager: BadgesManager,
-    private val mutedUserRepository: MutedUserRepository
+    private val mutedUserRepository: MutedUserRepository,
 ) : ViewModel() {
 
     private val feedDirective: String = savedStateHandle.feedDirective ?: "network;trending"
@@ -62,13 +62,13 @@ class FeedViewModel @Inject constructor(
             posts = feedRepository.feedByDirective(feedDirective = feedDirective)
                 .map { it.map { feed -> feed.asFeedPostUi() } }
                 .cachedIn(viewModelScope),
-        )
+        ),
     )
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
 
-    private val _event: MutableSharedFlow<UiEvent> = MutableSharedFlow()
-    fun setEvent(event: UiEvent) = viewModelScope.launch { _event.emit(event) }
+    private val events: MutableSharedFlow<UiEvent> = MutableSharedFlow()
+    fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
 
     init {
         subscribeToFeedTitle()
@@ -78,170 +78,182 @@ class FeedViewModel @Inject constructor(
         subscribeToBadgesUpdates()
     }
 
-    private fun subscribeToFeedTitle() = viewModelScope.launch {
-        feedRepository.observeFeedByDirective(feedDirective = feedDirective).collect {
-            setState {
-                copy(feedTitle = it?.name ?: feedDirective.ellipsizeMiddle(size = 8))
+    private fun subscribeToFeedTitle() =
+        viewModelScope.launch {
+            feedRepository.observeFeedByDirective(feedDirective = feedDirective).collect {
+                setState {
+                    copy(feedTitle = it?.name ?: feedDirective.ellipsizeMiddle(size = 8))
+                }
             }
         }
-    }
 
-    private fun subscribeToFeedSyncUpdates() = viewModelScope.launch {
-        feedRepository.observeNewFeedPostsSyncUpdates(
-            feedDirective = feedDirective,
-            since = Instant.now().epochSecond
-        ).collect { syncData ->
-            val limit = if (syncData.count <= 3) syncData.count else 3
-            val newPosts = withContext(Dispatchers.IO) {
-                feedRepository.findNewestPosts(
-                    feedDirective = feedDirective,
-                    limit = syncData.count
-                )
-                    .filter { it.author?.picture != null }
-                    .distinctBy { it.author?.ownerId }
-                    .take(limit)
-            }
-            setState {
-                copy(
-                    syncStats = FeedPostsSyncStats(
-                        postsCount = this.syncStats.postsCount + syncData.count,
-                        postIds = this.syncStats.postIds + syncData.postIds,
-                        avatarUrls = newPosts.mapNotNull { feedPost ->
-                            feedPost.author?.picture
-                        }
+    private fun subscribeToFeedSyncUpdates() =
+        viewModelScope.launch {
+            feedRepository.observeNewFeedPostsSyncUpdates(
+                feedDirective = feedDirective,
+                since = Instant.now().epochSecond,
+            ).collect { syncData ->
+                val limit = if (syncData.count <= 3) syncData.count else 3
+                val newPosts = withContext(Dispatchers.IO) {
+                    feedRepository.findNewestPosts(
+                        feedDirective = feedDirective,
+                        limit = syncData.count,
                     )
-                )
+                        .filter { it.author?.picture != null }
+                        .distinctBy { it.author?.ownerId }
+                        .take(limit)
+                }
+                setState {
+                    copy(
+                        syncStats = FeedPostsSyncStats(
+                            postsCount = this.syncStats.postsCount + syncData.count,
+                            postIds = this.syncStats.postIds + syncData.postIds,
+                            avatarUrls = newPosts.mapNotNull { feedPost ->
+                                feedPost.author?.picture
+                            },
+                        ),
+                    )
+                }
             }
         }
-    }
 
-    private fun subscribeToActiveAccount() = viewModelScope.launch {
-        activeAccountStore.activeUserAccount.collect {
-            val activeUserId = it.pubkey
-            userDataUpdater = if (userDataUpdater?.userId != activeUserId) {
-                userDataSyncerFactory.create(userId = activeUserId)
-            } else {
-                userDataUpdater
-            }
+    private fun subscribeToActiveAccount() =
+        viewModelScope.launch {
+            activeAccountStore.activeUserAccount.collect {
+                val activeUserId = it.pubkey
+                userDataUpdater = if (userDataUpdater?.userId != activeUserId) {
+                    userDataSyncerFactory.create(userId = activeUserId)
+                } else {
+                    userDataUpdater
+                }
 
-            setState {
-                copy(
-                    activeAccountAvatarUrl = it.pictureUrl,
-                    walletConnected = it.nostrWallet != null,
-                    defaultZapAmount = it.appSettings?.defaultZapAmount,
-                    zapOptions = it.appSettings?.zapOptions ?: emptyList(),
-                )
-            }
-        }
-    }
-
-    private fun subscribeToEvents() = viewModelScope.launch {
-        _event.collect {
-            when (it) {
-                UiEvent.FeedScrolledToTop -> clearSyncStats()
-                UiEvent.RequestUserDataUpdate -> updateUserData()
-                is UiEvent.PostLikeAction -> likePost(it)
-                is UiEvent.RepostAction -> repostPost(it)
-                is UiEvent.ZapAction -> zapPost(it)
-                is UiEvent.MuteAction -> mute(it)
+                setState {
+                    copy(
+                        activeAccountAvatarUrl = it.pictureUrl,
+                        walletConnected = it.nostrWallet != null,
+                        defaultZapAmount = it.appSettings?.defaultZapAmount,
+                        zapOptions = it.appSettings?.zapOptions ?: emptyList(),
+                    )
+                }
             }
         }
-    }
 
-    private fun subscribeToBadgesUpdates() = viewModelScope.launch {
-        badgesManager.badges.collect {
-            setState {
-                copy(badges = it)
+    private fun subscribeToEvents() =
+        viewModelScope.launch {
+            events.collect {
+                when (it) {
+                    UiEvent.FeedScrolledToTop -> clearSyncStats()
+                    UiEvent.RequestUserDataUpdate -> updateUserData()
+                    is UiEvent.PostLikeAction -> likePost(it)
+                    is UiEvent.RepostAction -> repostPost(it)
+                    is UiEvent.ZapAction -> zapPost(it)
+                    is UiEvent.MuteAction -> mute(it)
+                }
             }
         }
-    }
+
+    private fun subscribeToBadgesUpdates() =
+        viewModelScope.launch {
+            badgesManager.badges.collect {
+                setState {
+                    copy(badges = it)
+                }
+            }
+        }
 
     private fun clearSyncStats() {
         setState {
             copy(
                 syncStats = this.syncStats.copy(
                     postIds = emptyList(),
-                    postsCount = 0
-                )
-            )
-        }
-    }
-
-    private fun updateUserData() = viewModelScope.launch {
-        userDataUpdater?.updateUserDataWithDebounce(timeoutInSeconds = 30.minutes.inWholeSeconds)
-    }
-
-    private fun likePost(postLikeAction: UiEvent.PostLikeAction) = viewModelScope.launch {
-        try {
-            postRepository.likePost(
-                postId = postLikeAction.postId,
-                postAuthorId = postLikeAction.postAuthorId,
-            )
-        } catch (error: NostrPublishException) {
-            setErrorState(error = FeedError.FailedToPublishLikeEvent(error))
-        } catch (error: MissingRelaysException) {
-            setErrorState(error = FeedError.MissingRelaysConfiguration(error))
-        }
-    }
-
-    private fun repostPost(repostAction: UiEvent.RepostAction) = viewModelScope.launch {
-        try {
-            postRepository.repostPost(
-                postId = repostAction.postId,
-                postAuthorId = repostAction.postAuthorId,
-                postRawNostrEvent = repostAction.postNostrEvent,
-            )
-        } catch (error: NostrPublishException) {
-            setErrorState(error = FeedError.FailedToPublishRepostEvent(error))
-        } catch (error: MissingRelaysException) {
-            setErrorState(error = FeedError.MissingRelaysConfiguration(error))
-        }
-    }
-
-    private fun zapPost(zapAction: UiEvent.ZapAction) = viewModelScope.launch {
-        val postAuthorProfileData = withContext(Dispatchers.IO) {
-            profileRepository.findProfileData(profileId = zapAction.postAuthorId)
-        }
-
-        if (postAuthorProfileData.lnUrl == null) {
-            setErrorState(error = FeedError.MissingLightningAddress(IllegalStateException()))
-            return@launch
-        }
-
-        try {
-            zapRepository.zap(
-                userId = activeAccountStore.activeUserId(),
-                comment = zapAction.zapDescription,
-                amountInSats = zapAction.zapAmount,
-                target = ZapTarget.Note(
-                    zapAction.postId,
-                    zapAction.postAuthorId,
-                    postAuthorProfileData.lnUrl,
+                    postsCount = 0,
                 ),
             )
-        } catch (error: ZapRepository.ZapFailureException) {
-            setErrorState(error = FeedError.FailedToPublishZapEvent(error))
-        } catch (error: NostrPublishException) {
-            setErrorState(error = FeedError.FailedToPublishZapEvent(error))
-        } catch (error: MissingRelaysException) {
-            setErrorState(error = FeedError.MissingRelaysConfiguration(error))
-        } catch (error: ZapRepository.InvalidZapRequestException) {
-            setErrorState(error = FeedError.InvalidZapRequest(error))
         }
     }
 
-    private fun mute(action: UiEvent.MuteAction) = viewModelScope.launch {
-        try {
-            mutedUserRepository.muteUserAndPersistMuteList(
-                userId = activeAccountStore.activeUserId(),
-                mutedUserId = action.userId
+    private fun updateUserData() =
+        viewModelScope.launch {
+            userDataUpdater?.updateUserDataWithDebounce(
+                timeoutInSeconds = 30.minutes.inWholeSeconds,
             )
-        } catch (error: WssException) {
-            setErrorState(error = FeedError.FailedToMuteUser(error))
-        } catch (error: NostrPublishException) {
-            setErrorState(error = FeedError.FailedToMuteUser(error))
         }
-    }
+
+    private fun likePost(postLikeAction: UiEvent.PostLikeAction) =
+        viewModelScope.launch {
+            try {
+                postRepository.likePost(
+                    postId = postLikeAction.postId,
+                    postAuthorId = postLikeAction.postAuthorId,
+                )
+            } catch (error: NostrPublishException) {
+                setErrorState(error = FeedError.FailedToPublishLikeEvent(error))
+            } catch (error: MissingRelaysException) {
+                setErrorState(error = FeedError.MissingRelaysConfiguration(error))
+            }
+        }
+
+    private fun repostPost(repostAction: UiEvent.RepostAction) =
+        viewModelScope.launch {
+            try {
+                postRepository.repostPost(
+                    postId = repostAction.postId,
+                    postAuthorId = repostAction.postAuthorId,
+                    postRawNostrEvent = repostAction.postNostrEvent,
+                )
+            } catch (error: NostrPublishException) {
+                setErrorState(error = FeedError.FailedToPublishRepostEvent(error))
+            } catch (error: MissingRelaysException) {
+                setErrorState(error = FeedError.MissingRelaysConfiguration(error))
+            }
+        }
+
+    private fun zapPost(zapAction: UiEvent.ZapAction) =
+        viewModelScope.launch {
+            val postAuthorProfileData = withContext(Dispatchers.IO) {
+                profileRepository.findProfileData(profileId = zapAction.postAuthorId)
+            }
+
+            if (postAuthorProfileData.lnUrl == null) {
+                setErrorState(error = FeedError.MissingLightningAddress(IllegalStateException()))
+                return@launch
+            }
+
+            try {
+                zapRepository.zap(
+                    userId = activeAccountStore.activeUserId(),
+                    comment = zapAction.zapDescription,
+                    amountInSats = zapAction.zapAmount,
+                    target = ZapTarget.Note(
+                        zapAction.postId,
+                        zapAction.postAuthorId,
+                        postAuthorProfileData.lnUrl,
+                    ),
+                )
+            } catch (error: ZapRepository.ZapFailureException) {
+                setErrorState(error = FeedError.FailedToPublishZapEvent(error))
+            } catch (error: NostrPublishException) {
+                setErrorState(error = FeedError.FailedToPublishZapEvent(error))
+            } catch (error: MissingRelaysException) {
+                setErrorState(error = FeedError.MissingRelaysConfiguration(error))
+            } catch (error: ZapRepository.InvalidZapRequestException) {
+                setErrorState(error = FeedError.InvalidZapRequest(error))
+            }
+        }
+
+    private fun mute(action: UiEvent.MuteAction) =
+        viewModelScope.launch {
+            try {
+                mutedUserRepository.muteUserAndPersistMuteList(
+                    userId = activeAccountStore.activeUserId(),
+                    mutedUserId = action.userId,
+                )
+            } catch (error: WssException) {
+                setErrorState(error = FeedError.FailedToMuteUser(error))
+            } catch (error: NostrPublishException) {
+                setErrorState(error = FeedError.FailedToMuteUser(error))
+            }
+        }
 
     private fun setErrorState(error: FeedError) {
         setState { copy(error = error) }

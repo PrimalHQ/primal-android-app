@@ -49,10 +49,7 @@ import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
 
 @Composable
-fun NotificationsSettingsScreen(
-    viewModel: NotificationsSettingsViewModel,
-    onClose: () -> Unit
-) {
+fun NotificationsSettingsScreen(viewModel: NotificationsSettingsViewModel, onClose: () -> Unit) {
     val state = viewModel.state.collectAsState()
 
     LaunchedErrorHandler(viewModel = viewModel)
@@ -60,7 +57,8 @@ fun NotificationsSettingsScreen(
     NotificationsSettingsScreen(
         state = state.value,
         onClose = onClose,
-        eventPublisher = { viewModel.setEvent(it) })
+        eventPublisher = { viewModel.setEvent(it) },
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -68,7 +66,7 @@ fun NotificationsSettingsScreen(
 fun NotificationsSettingsScreen(
     state: NotificationsSettingsContract.UiState,
     onClose: () -> Unit,
-    eventPublisher: (NotificationsSettingsContract.UiEvent) -> Unit
+    eventPublisher: (NotificationsSettingsContract.UiEvent) -> Unit,
 ) {
     Scaffold(
         modifier = Modifier,
@@ -83,7 +81,7 @@ fun NotificationsSettingsScreen(
             LazyColumn(
                 modifier = Modifier.padding(paddingValues),
                 verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 state.notificationSwitches
                     .groupBy { it.notificationType.section }
@@ -92,7 +90,7 @@ fun NotificationsSettingsScreen(
                             NotificationsSettingsBlock(
                                 section = section,
                                 notifications = notifications,
-                                eventPublisher = eventPublisher
+                                eventPublisher = eventPublisher,
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                         }
@@ -102,7 +100,7 @@ fun NotificationsSettingsScreen(
                     Spacer(modifier = Modifier.height(16.dp))
                 }
             }
-        }
+        },
     )
 }
 
@@ -110,14 +108,14 @@ fun NotificationsSettingsScreen(
 fun NotificationsSettingsBlock(
     section: NotificationSection,
     notifications: List<NotificationSwitchUi>,
-    eventPublisher: (NotificationsSettingsContract.UiEvent) -> Unit
+    eventPublisher: (NotificationsSettingsContract.UiEvent) -> Unit,
 ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 12.dp),
         verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.Start
+        horizontalAlignment = Alignment.Start,
     ) {
         Text(
             modifier = Modifier.padding(vertical = 8.dp, horizontal = 4.dp),
@@ -129,12 +127,12 @@ fun NotificationsSettingsBlock(
             modifier = Modifier
                 .background(
                     color = AppTheme.extraColorScheme.surfaceVariantAlt3,
-                    shape = RoundedCornerShape(12.dp)
+                    shape = RoundedCornerShape(12.dp),
                 )
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(size = 12.dp)),
             verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.Start
+            horizontalAlignment = Alignment.Start,
         ) {
             notifications.forEachIndexed { index, notificationSwitchUi ->
                 Row(
@@ -142,12 +140,12 @@ fun NotificationsSettingsBlock(
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Image(
                         modifier = Modifier.size(32.dp),
                         painter = notificationSwitchUi.notificationType.toImagePainter(),
-                        contentDescription = null
+                        contentDescription = null,
                     )
                     Text(
                         modifier = Modifier
@@ -168,9 +166,9 @@ fun NotificationsSettingsBlock(
                                 NotificationsSettingsContract.UiEvent.NotificationSettingChanged(
                                     type = notificationSwitchUi.notificationType,
                                     value = it,
-                                )
+                                ),
                             )
-                        }
+                        },
                     )
                 }
 
@@ -183,69 +181,87 @@ fun NotificationsSettingsBlock(
 }
 
 @Composable
-private fun NotificationSection.toTitle(): String = when (this) {
-    NotificationSection.CORE_NOTIFICATIONS ->
-        stringResource(id = R.string.settings_notifications_section_core)
+private fun NotificationSection.toTitle(): String =
+    when (this) {
+        NotificationSection.CORE_NOTIFICATIONS ->
+            stringResource(id = R.string.settings_notifications_section_core)
 
-    NotificationSection.NOTE_YOU_WERE_MENTIONED_IN ->
-        stringResource(id = R.string.settings_notifications_section_note_you_were_mentioned_in)
+        NotificationSection.NOTE_YOU_WERE_MENTIONED_IN ->
+            stringResource(id = R.string.settings_notifications_section_note_you_were_mentioned_in)
 
-    NotificationSection.NOTE_YOUR_NOTE_WAS_MENTIONED_IN ->
-        stringResource(id = R.string.settings_notifications_section_note_your_note_was_mentioned_in)
-}
-
-@Composable
-private fun NotificationType.toTitle(): String = when (this) {
-    NotificationType.NEW_USER_FOLLOWED_YOU ->
-        stringResource(id = R.string.settings_notifications_new_user_followed_you_text)
-
-    NotificationType.YOUR_POST_WAS_ZAPPED ->
-        stringResource(id = R.string.settings_notifications_your_post_was_zapped_text)
-
-    NotificationType.YOUR_POST_WAS_LIKED ->
-        stringResource(id = R.string.settings_notifications_your_post_was_liked_text)
-
-    NotificationType.YOUR_POST_WAS_REPOSTED ->
-        stringResource(id = R.string.settings_notifications_your_post_was_reposted_text)
-
-    NotificationType.YOUR_POST_WAS_REPLIED_TO ->
-        stringResource(id = R.string.settings_notifications_your_post_was_replied_to_text)
-
-    NotificationType.YOU_WERE_MENTIONED_IN_POST ->
-        stringResource(id = R.string.settings_notifications_you_were_mentioned_text)
-
-    NotificationType.YOUR_POST_WAS_MENTIONED_IN_POST ->
-        stringResource(id = R.string.settings_notifications_your_post_was_mentioned_text)
-
-    NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_ZAPPED ->
-        stringResource(id = R.string.settings_notifications_post_you_were_mentioned_in_was_zapped_text)
-
-    NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_LIKED ->
-        stringResource(id = R.string.settings_notifications_post_you_were_mentioned_in_was_liked_text)
-
-    NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_REPOSTED ->
-        stringResource(id = R.string.settings_notifications_post_you_were_mentioned_in_was_reposted_text)
-
-    NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_REPLIED_TO ->
-        stringResource(id = R.string.settings_notifications_post_you_were_mentioned_in_was_replied_to_text)
-
-    NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_ZAPPED ->
-        stringResource(id = R.string.settings_notifications_post_your_post_was_mentioned_in_was_zapped_text)
-
-    NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_LIKED ->
-        stringResource(id = R.string.settings_notifications_post_your_post_was_mentioned_in_was_liked_text)
-
-    NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPOSTED ->
-        stringResource(id = R.string.settings_notifications_post_your_post_was_mentioned_in_was_reposted_text)
-
-    NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO ->
-        stringResource(id = R.string.settings_notifications_post_your_post_was_mentioned_in_was_replied_to_text)
-}
+        NotificationSection.NOTE_YOUR_NOTE_WAS_MENTIONED_IN ->
+            stringResource(
+                id = R.string.settings_notifications_section_note_your_note_was_mentioned_in,
+            )
+    }
 
 @Composable
-fun LaunchedErrorHandler(
-    viewModel: NotificationsSettingsViewModel
-) {
+private fun NotificationType.toTitle(): String =
+    when (this) {
+        NotificationType.NEW_USER_FOLLOWED_YOU ->
+            stringResource(id = R.string.settings_notifications_new_user_followed_you_text)
+
+        NotificationType.YOUR_POST_WAS_ZAPPED ->
+            stringResource(id = R.string.settings_notifications_your_post_was_zapped_text)
+
+        NotificationType.YOUR_POST_WAS_LIKED ->
+            stringResource(id = R.string.settings_notifications_your_post_was_liked_text)
+
+        NotificationType.YOUR_POST_WAS_REPOSTED ->
+            stringResource(id = R.string.settings_notifications_your_post_was_reposted_text)
+
+        NotificationType.YOUR_POST_WAS_REPLIED_TO ->
+            stringResource(id = R.string.settings_notifications_your_post_was_replied_to_text)
+
+        NotificationType.YOU_WERE_MENTIONED_IN_POST ->
+            stringResource(id = R.string.settings_notifications_you_were_mentioned_text)
+
+        NotificationType.YOUR_POST_WAS_MENTIONED_IN_POST ->
+            stringResource(id = R.string.settings_notifications_your_post_was_mentioned_text)
+
+        NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_ZAPPED ->
+            stringResource(
+                id = R.string.settings_notifications_post_you_were_mentioned_in_was_zapped_text,
+            )
+
+        NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_LIKED ->
+            stringResource(
+                id = R.string.settings_notifications_post_you_were_mentioned_in_was_liked_text,
+            )
+
+        NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_REPOSTED ->
+            stringResource(
+                id = R.string.settings_notifications_post_you_were_mentioned_in_was_reposted_text,
+            )
+
+        NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_REPLIED_TO ->
+            stringResource(
+                id = R.string.settings_notifications_post_you_were_mentioned_in_was_replied_to_text,
+            )
+
+        NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_ZAPPED ->
+            stringResource(
+                id = R.string.settings_notifications_post_your_post_was_mentioned_in_was_zapped_text,
+            )
+
+        NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_LIKED ->
+            stringResource(
+                id = R.string.settings_notifications_post_your_post_was_mentioned_in_was_liked_text,
+            )
+
+        NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPOSTED ->
+            stringResource(
+                id = R.string.settings_notifications_post_your_post_was_mentioned_in_was_reposted_text,
+            )
+
+        NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO ->
+            stringResource(
+                id = R.string.settings_notifications_post_your_post_was_mentioned_in_was_replied_to_text,
+            )
+    }
+
+@Composable
+fun LaunchedErrorHandler(viewModel: NotificationsSettingsViewModel) {
     val context = LocalContext.current
     val uiScope = rememberCoroutineScope()
     LaunchedEffect(viewModel) {
@@ -256,7 +272,7 @@ fun LaunchedErrorHandler(
                     when (it) {
                         is ApiError.FetchAppSettingsError -> R.string.settings_notifications_error_fetch_settings
                         is ApiError.UpdateAppSettingsError -> R.string.settings_notifications_error_update_settings
-                    }
+                    },
                 )
             }
             .collect {
@@ -275,7 +291,7 @@ fun PreviewNotificationsSettingsScreen() {
         NotificationsSettingsScreen(
             state = NotificationsSettingsContract.UiState(),
             onClose = {},
-            eventPublisher = {}
+            eventPublisher = {},
         )
     }
 }

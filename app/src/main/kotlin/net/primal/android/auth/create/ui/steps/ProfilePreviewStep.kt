@@ -39,14 +39,11 @@ import net.primal.android.auth.create.CreateAccountContract
 import net.primal.android.theme.AppTheme
 
 @Composable
-fun ProfilePreviewStep(
-    state: CreateAccountContract.UiState,
-    isFinalized: Boolean,
-) {
+fun ProfilePreviewStep(state: CreateAccountContract.UiState, isFinalized: Boolean) {
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Top
+        verticalArrangement = Arrangement.Top,
     ) {
         Box(
             modifier = Modifier
@@ -57,7 +54,7 @@ fun ProfilePreviewStep(
                 .border(
                     width = 1.dp,
                     color = if (isFinalized) AppTheme.extraColorScheme.successBright else Color.White,
-                    shape = RoundedCornerShape(size = 12.dp)
+                    shape = RoundedCornerShape(size = 12.dp),
                 ),
         ) {
             if (state.bannerUri != null) {
@@ -68,14 +65,14 @@ fun ProfilePreviewStep(
                     contentScale = ContentScale.FillWidth,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(102.dp)
+                        .height(102.dp),
                 )
             } else {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(102.dp)
-                        .background(color = Color(0xFF181818))
+                        .background(color = Color(0xFF181818)),
                 )
             }
 
@@ -86,7 +83,7 @@ fun ProfilePreviewStep(
                     .size(size = 78.dp)
                     .clip(shape = CircleShape)
                     .background(color = Color.Black)
-                    .align(Alignment.CenterStart)
+                    .align(Alignment.CenterStart),
             ) {
                 if (state.avatarUri != null) {
                     val model =
@@ -112,18 +109,18 @@ fun ProfilePreviewStep(
                     .padding(all = 16.dp)
                     .align(alignment = Alignment.BottomCenter),
                 horizontalAlignment = Alignment.Start,
-                verticalArrangement = Arrangement.Top
+                verticalArrangement = Arrangement.Top,
             ) {
                 Row(
                     horizontalArrangement = Arrangement.Start,
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
                         text = state.displayName,
                         fontWeight = FontWeight.W700,
                         fontSize = 20.sp,
                         lineHeight = 20.sp,
-                        color = AppTheme.colorScheme.onPrimary
+                        color = AppTheme.colorScheme.onPrimary,
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
@@ -131,7 +128,7 @@ fun ProfilePreviewStep(
                         fontWeight = FontWeight.W400,
                         fontSize = 14.sp,
                         lineHeight = 16.sp,
-                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt4
+                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
                     )
                 }
                 Text(
@@ -139,14 +136,14 @@ fun ProfilePreviewStep(
                     fontWeight = FontWeight.W400,
                     fontSize = 14.sp,
                     lineHeight = 18.sp,
-                    color = AppTheme.colorScheme.onPrimary
+                    color = AppTheme.colorScheme.onPrimary,
                 )
                 Text(
                     text = state.website,
                     fontWeight = FontWeight.W400,
                     fontSize = 14.sp,
                     lineHeight = 20.sp,
-                    color = AppTheme.colorScheme.primary
+                    color = AppTheme.colorScheme.primary,
                 )
             }
         }
@@ -158,7 +155,7 @@ fun ProfilePreviewStep(
                 lineHeight = 16.41.sp,
                 color = AppTheme.extraColorScheme.successBright,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.offset(y = (-32).dp) // yuck
+                modifier = Modifier.offset(y = (-32).dp),
             )
         }
         if (isFinalized) {
@@ -168,16 +165,19 @@ fun ProfilePreviewStep(
                     .fillMaxWidth()
                     .height(100.dp)
                     .background(
-                        color = Color(0xFF181818), shape = RoundedCornerShape(size = 12.dp)
+                        color = Color(0xFF181818),
+                        shape = RoundedCornerShape(size = 12.dp),
                     ),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceEvenly
+                horizontalArrangement = Arrangement.SpaceEvenly,
             ) {
                 Image(
                     painter = painterResource(id = R.drawable.key),
                     contentDescription = null,
-                    colorFilter = ColorFilter.tint(color = AppTheme.extraColorScheme.onSurfaceVariantAlt1),
-                    modifier = Modifier.padding(horizontal = 24.dp)
+                    colorFilter = ColorFilter.tint(
+                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+                    ),
+                    modifier = Modifier.padding(horizontal = 24.dp),
                 )
                 Text(
                     text = stringResource(id = R.string.create_finish_subtitle),
@@ -185,7 +185,7 @@ fun ProfilePreviewStep(
                     fontSize = 16.sp,
                     lineHeight = 22.sp,
                     color = AppTheme.colorScheme.onPrimary,
-                    modifier = Modifier.padding(end = 24.dp)
+                    modifier = Modifier.padding(end = 24.dp),
                 )
             }
         } else {
@@ -196,7 +196,7 @@ fun ProfilePreviewStep(
                 fontSize = 20.sp,
                 lineHeight = 24.sp,
                 textAlign = TextAlign.Center,
-                color = AppTheme.extraColorScheme.onSurfaceVariantAlt1
+                color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
             )
         }
     }

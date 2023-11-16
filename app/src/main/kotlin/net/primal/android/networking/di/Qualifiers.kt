@@ -17,4 +17,3 @@ annotation class PrimalCacheApiClient
 @Qualifier
 @Target(AnnotationTarget.FUNCTION, AnnotationTarget.VALUE_PARAMETER)
 annotation class PrimalUploadApiClient
-

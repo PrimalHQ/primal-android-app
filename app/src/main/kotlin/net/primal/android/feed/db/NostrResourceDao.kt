@@ -9,5 +9,4 @@ interface NostrResourceDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun upsertAll(data: List<NostrResource>)
-
 }

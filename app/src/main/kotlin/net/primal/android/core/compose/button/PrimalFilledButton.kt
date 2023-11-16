@@ -49,13 +49,13 @@ fun PrimalFilledButton(
     textStyle: TextStyle = AppTheme.typography.bodyLarge,
     border: BorderStroke = BorderStroke(0.dp, Color.Unspecified),
     contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
-    content: @Composable RowScope.() -> Unit
+    content: @Composable RowScope.() -> Unit,
 ) {
     val buttonContainerColor = rememberUpdatedState(
-        if (enabled) containerColor else disabledContainerColor
+        if (enabled) containerColor else disabledContainerColor,
     )
     val buttonContentColor = rememberUpdatedState(
-        if (enabled) contentColor else disabledContentColor
+        if (enabled) contentColor else disabledContentColor,
     )
 
     Box(
@@ -76,7 +76,7 @@ fun PrimalFilledButton(
                         .fillMaxHeight(),
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically,
-                    content = content
+                    content = content,
                 )
             }
         }
@@ -99,7 +99,7 @@ class PrimalStatePreviewProvider : PreviewParameterProvider<PrimalButtonPreviewS
 @Composable
 fun PrimalButtonPreview(
     @PreviewParameter(PrimalStatePreviewProvider::class)
-    state: PrimalButtonPreviewState
+    state: PrimalButtonPreviewState,
 ) {
     PrimalTheme(primalTheme = PrimalTheme.Sunset) {
         PrimalLoadingButton(

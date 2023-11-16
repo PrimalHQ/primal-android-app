@@ -1,5 +1,7 @@
 package net.primal.android.networking.primal
 
+import java.util.UUID
+import javax.inject.Inject
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.toList
@@ -10,8 +12,6 @@ import net.primal.android.networking.sockets.NostrSocketClient
 import net.primal.android.networking.sockets.errors.NostrNoticeException
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.networking.sockets.filterBySubscriptionId
-import java.util.UUID
-import javax.inject.Inject
 
 class PrimalApiClient @Inject constructor(
     private val socketClient: NostrSocketClient,
@@ -94,5 +94,4 @@ class PrimalApiClient @Inject constructor(
         private const val MAX_QUERY_ATTEMPTS = 3
         private const val RETRY_DELAY_MILLIS = 500L
     }
-
 }

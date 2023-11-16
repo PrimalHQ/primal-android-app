@@ -9,12 +9,16 @@ sealed class NostrVerb {
     enum class Outgoing {
         @SerialName("AUTH")
         AUTH,
+
         @SerialName("CLOSE")
         CLOSE,
+
         @SerialName("COUNT")
         COUNT,
+
         @SerialName("EVENT")
         EVENT,
+
         @SerialName("REQ")
         REQ,
     }
@@ -23,16 +27,20 @@ sealed class NostrVerb {
     enum class Incoming {
         @SerialName("AUTH")
         AUTH,
+
         @SerialName("COUNT")
         COUNT,
+
         @SerialName("EOSE")
         EOSE,
+
         @SerialName("EVENT")
         EVENT,
+
         @SerialName("NOTICE")
         NOTICE,
+
         @SerialName("OK")
         OK,
     }
-
 }

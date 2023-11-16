@@ -19,9 +19,7 @@ import net.primal.android.R
 import net.primal.android.theme.domain.PrimalAccent
 
 @Composable
-fun PrimalLoadingSpinner(
-    size: Dp = 96.dp,
-) {
+fun PrimalLoadingSpinner(size: Dp = 96.dp) {
     val primalTheme = LocalPrimalTheme.current
     val animationRawResId = remember(primalTheme) {
         when (primalTheme.accent) {
@@ -30,7 +28,7 @@ fun PrimalLoadingSpinner(
         }
     }
     val composition by rememberLottieComposition(
-        spec = LottieCompositionSpec.RawRes(animationRawResId)
+        spec = LottieCompositionSpec.RawRes(animationRawResId),
     )
     val progress by animateLottieCompositionAsState(
         composition = composition,
@@ -41,7 +39,7 @@ fun PrimalLoadingSpinner(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .wrapContentSize()
+            .wrapContentSize(),
     ) {
         LottieAnimation(
             modifier = Modifier.size(size),

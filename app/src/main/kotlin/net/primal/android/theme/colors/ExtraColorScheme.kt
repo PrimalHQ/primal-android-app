@@ -10,12 +10,8 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.runtime.structuralEqualityPolicy
 import androidx.compose.ui.graphics.Color
 
-
 @Composable
-fun ExtraColorSchemeProvider(
-    extraColorScheme: ExtraColorScheme,
-    content: @Composable () -> Unit
-) {
+fun ExtraColorSchemeProvider(extraColorScheme: ExtraColorScheme, content: @Composable () -> Unit) {
     CompositionLocalProvider(LocalExtraColors provides extraColorScheme, content = content)
 }
 
@@ -98,23 +94,24 @@ class ExtraColorScheme(
         zapped: Color = this.zapped,
         liked: Color = this.liked,
         reposted: Color = this.reposted,
-    ): ExtraColorScheme = ExtraColorScheme(
-        onBrand = onBrand,
-        surfaceVariantAlt1 = surfaceVariantAlt1,
-        surfaceVariantAlt2 = surfaceVariantAlt2,
-        surfaceVariantAlt3 = surfaceVariantAlt3,
-        onSurfaceVariantAlt1 = onSurfaceVariantAlt1,
-        onSurfaceVariantAlt2 = onSurfaceVariantAlt2,
-        onSurfaceVariantAlt3 = onSurfaceVariantAlt3,
-        onSurfaceVariantAlt4 = onSurfaceVariantAlt4,
-        warning = warning,
-        successBright = successBright,
-        successDim = successDim,
-        replied = replied,
-        zapped = zapped,
-        liked = liked,
-        reposted = reposted,
-    )
+    ): ExtraColorScheme =
+        ExtraColorScheme(
+            onBrand = onBrand,
+            surfaceVariantAlt1 = surfaceVariantAlt1,
+            surfaceVariantAlt2 = surfaceVariantAlt2,
+            surfaceVariantAlt3 = surfaceVariantAlt3,
+            onSurfaceVariantAlt1 = onSurfaceVariantAlt1,
+            onSurfaceVariantAlt2 = onSurfaceVariantAlt2,
+            onSurfaceVariantAlt3 = onSurfaceVariantAlt3,
+            onSurfaceVariantAlt4 = onSurfaceVariantAlt4,
+            warning = warning,
+            successBright = successBright,
+            successDim = successDim,
+            replied = replied,
+            zapped = zapped,
+            liked = liked,
+            reposted = reposted,
+        )
 }
 
 fun extraColorScheme(
@@ -133,23 +130,24 @@ fun extraColorScheme(
     zapped: Color,
     liked: Color,
     reposted: Color,
-): ExtraColorScheme = ExtraColorScheme(
-    onBrand = onBrand,
-    surfaceVariantAlt1 = surfaceVariantAlt1,
-    surfaceVariantAlt2 = surfaceVariantAlt2,
-    surfaceVariantAlt3 = surfaceVariantAlt3,
-    onSurfaceVariantAlt1 = onSurfaceVariantAlt1,
-    onSurfaceVariantAlt2 = onSurfaceVariantAlt2,
-    onSurfaceVariantAlt3 = onSurfaceVariantAlt3,
-    onSurfaceVariantAlt4 = onSurfaceVariantAlt4,
-    warning = warning,
-    successBright = successBright,
-    successDim = successDim,
-    replied = replied,
-    zapped = zapped,
-    liked = liked,
-    reposted = reposted,
-)
+): ExtraColorScheme =
+    ExtraColorScheme(
+        onBrand = onBrand,
+        surfaceVariantAlt1 = surfaceVariantAlt1,
+        surfaceVariantAlt2 = surfaceVariantAlt2,
+        surfaceVariantAlt3 = surfaceVariantAlt3,
+        onSurfaceVariantAlt1 = onSurfaceVariantAlt1,
+        onSurfaceVariantAlt2 = onSurfaceVariantAlt2,
+        onSurfaceVariantAlt3 = onSurfaceVariantAlt3,
+        onSurfaceVariantAlt4 = onSurfaceVariantAlt4,
+        warning = warning,
+        successBright = successBright,
+        successDim = successDim,
+        replied = replied,
+        zapped = zapped,
+        liked = liked,
+        reposted = reposted,
+    )
 
 internal val LocalExtraColors =
     staticCompositionLocalOf<ExtraColorScheme> { error("No extra colors provided.") }

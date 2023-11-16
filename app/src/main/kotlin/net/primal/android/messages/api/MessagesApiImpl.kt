@@ -1,5 +1,6 @@
 package net.primal.android.messages.api
 
+import javax.inject.Inject
 import kotlinx.serialization.encodeToString
 import net.primal.android.messages.api.model.ConversationRequestBody
 import net.primal.android.messages.api.model.ConversationsResponse
@@ -16,17 +17,13 @@ import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.serialization.NostrJson
 import net.primal.android.serialization.decodeFromStringOrNull
-import javax.inject.Inject
 
 class MessagesApiImpl @Inject constructor(
     @PrimalCacheApiClient private val primalApiClient: PrimalApiClient,
     private val nostrNotary: NostrNotary,
 ) : MessagesApi {
 
-    override suspend fun getConversations(
-        userId: String,
-        relation: ConversationRelation,
-    ): ConversationsResponse {
+    override suspend fun getConversations(userId: String, relation: ConversationRelation): ConversationsResponse {
         val response = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.GET_DM_CONTACTS,
@@ -34,9 +31,9 @@ class MessagesApiImpl @Inject constructor(
                     ConversationRequestBody(
                         userId = userId,
                         relation = relation,
-                    )
+                    ),
                 ),
-            )
+            ),
         )
 
         return ConversationsResponse(
@@ -54,7 +51,7 @@ class MessagesApiImpl @Inject constructor(
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.GET_DMS,
                 optionsJson = NostrJson.encodeToString(body),
-            )
+            ),
         )
 
         return MessagesResponse(
@@ -78,9 +75,9 @@ class MessagesApiImpl @Inject constructor(
                             description = "Mark conversation with $conversationUserId as read.",
                         ),
                         conversationUserId = conversationUserId,
-                    )
-                )
-            )
+                    ),
+                ),
+            ),
         )
     }
 
@@ -94,9 +91,9 @@ class MessagesApiImpl @Inject constructor(
                             userId = userId,
                             description = "Mark all messages as read.",
                         ),
-                    )
-                )
-            )
+                    ),
+                ),
+            ),
         )
     }
 }

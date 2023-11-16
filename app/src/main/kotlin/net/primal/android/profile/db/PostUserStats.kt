@@ -6,7 +6,7 @@ import androidx.room.Index
 @Entity(
     primaryKeys = [
         "postId",
-        "userId"
+        "userId",
     ],
     indices = [
         Index(value = ["postId"]),

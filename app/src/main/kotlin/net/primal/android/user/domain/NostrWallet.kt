@@ -10,7 +10,10 @@ data class NostrWallet(
     val keypair: NostrWalletKeypair,
 ) {
     fun toStringUrl(): String {
-        return "nostr+walletconnect://${pubkey}?relay=${relays.firstOrNull()}&secret=${keypair.privateKey}&lud16=${lightningAddress ?: ""}"
+        return "nostr+walletconnect://$pubkey" +
+            "?relay=${relays.firstOrNull()}" +
+            "&secret=${keypair.privateKey}" +
+            "&lud16=${lightningAddress ?: ""}"
     }
 }
 

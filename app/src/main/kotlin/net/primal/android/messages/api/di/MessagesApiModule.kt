@@ -18,9 +18,9 @@ object MessagesApiModule {
     fun provideMessagesApi(
         @PrimalCacheApiClient primalApiClient: PrimalApiClient,
         nostrNotary: NostrNotary,
-    ): MessagesApi = MessagesApiImpl(
-        primalApiClient = primalApiClient,
-        nostrNotary = nostrNotary,
-    )
-
+    ): MessagesApi =
+        MessagesApiImpl(
+            primalApiClient = primalApiClient,
+            nostrNotary = nostrNotary,
+        )
 }

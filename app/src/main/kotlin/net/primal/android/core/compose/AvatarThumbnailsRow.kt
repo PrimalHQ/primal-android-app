@@ -74,15 +74,12 @@ fun AvatarThumbnailsRow(
 }
 
 @Composable
-private fun AvatarSpacer(
-    width: Dp,
-    content: @Composable () -> Unit,
-) {
+private fun AvatarSpacer(width: Dp, content: @Composable () -> Unit) {
     Row {
         Spacer(
             modifier = Modifier
                 .height(10.dp)
-                .width(width)
+                .width(width),
         )
 
         content()

@@ -2,7 +2,6 @@ package net.primal.android.feed.db
 
 import kotlinx.serialization.Serializable
 
-
 @Serializable
 data class ReferencedPost(
     val postId: String,

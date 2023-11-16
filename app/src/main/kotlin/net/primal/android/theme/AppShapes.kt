@@ -1,4 +1,4 @@
- package net.primal.android.theme
+package net.primal.android.theme
 
 import androidx.compose.material3.ShapeDefaults
 import androidx.compose.material3.Shapes

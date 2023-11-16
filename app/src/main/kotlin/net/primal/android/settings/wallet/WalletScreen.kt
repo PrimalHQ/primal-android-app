@@ -53,10 +53,7 @@ import net.primal.android.user.domain.NostrWallet
 import net.primal.android.user.domain.NostrWalletKeypair
 
 @Composable
-fun WalletScreen(
-    viewModel: WalletViewModel,
-    onClose: () -> Unit
-) {
+fun WalletScreen(viewModel: WalletViewModel, onClose: () -> Unit) {
     val uiState = viewModel.state.collectAsState()
 
     WalletScreen(
@@ -77,10 +74,11 @@ fun WalletScreen(
         modifier = Modifier,
         topBar = {
             PrimalTopAppBar(
-                title = if (state.wallet != null)
+                title = if (state.wallet != null) {
                     stringResource(id = R.string.settings_wallet_connected_title)
-                else
-                    stringResource(id = R.string.settings_wallet_not_connected_title),
+                } else {
+                    stringResource(id = R.string.settings_wallet_not_connected_title)
+                },
                 navigationIcon = PrimalIcons.ArrowBack,
                 onNavigationIconClick = onClose,
             )
@@ -91,28 +89,25 @@ fun WalletScreen(
                     .padding(paddingValues)
                     .padding(top = 56.dp),
                 verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 if (state.wallet != null) {
                     WalletConnected(
                         state = state,
                         disconnectWallet = {
                             eventPublisher(WalletContract.UiEvent.DisconnectWallet)
-                        }
+                        },
                     )
                 } else {
                     WalletDisconnected()
                 }
             }
-        }
+        },
     )
 }
 
 @Composable
-fun WalletConnected(
-    state: WalletContract.UiState,
-    disconnectWallet: () -> Unit,
-) {
+fun WalletConnected(state: WalletContract.UiState, disconnectWallet: () -> Unit) {
     WalletImage(
         modifier = Modifier.size(200.dp),
         connected = true,
@@ -123,7 +118,7 @@ fun WalletConnected(
     Text(
         modifier = Modifier.padding(32.dp),
         text = stringResource(id = R.string.settings_wallet_connected_subtitle),
-        textAlign = TextAlign.Center
+        textAlign = TextAlign.Center,
     )
 
     Spacer(modifier = Modifier.height(20.dp))
@@ -134,19 +129,19 @@ fun WalletConnected(
             .height(88.dp)
             .background(
                 color = AppTheme.extraColorScheme.surfaceVariantAlt1,
-                shape = RoundedCornerShape(size = 12.dp)
+                shape = RoundedCornerShape(size = 12.dp),
             ),
         verticalArrangement = Arrangement.SpaceEvenly,
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
             text = state.wallet?.relays?.first() ?: "",
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
         )
         Divider()
         Text(
             text = state.wallet?.lightningAddress ?: state.userLightningAddress ?: "",
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
         )
     }
     Spacer(modifier = Modifier.height(20.dp))
@@ -157,14 +152,14 @@ fun WalletConnected(
             .height(56.dp)
             .padding(horizontal = 16.dp),
         text = stringResource(id = R.string.settings_wallet_disconnect_action),
-        onClick = disconnectWallet
+        onClick = disconnectWallet,
     )
 }
 
 @Composable
 fun WalletDisconnected() {
     WalletImage(
-        modifier = Modifier.size(200.dp)
+        modifier = Modifier.size(200.dp),
     )
 
     Spacer(modifier = Modifier.height(50.dp))
@@ -172,7 +167,7 @@ fun WalletDisconnected() {
     Text(
         modifier = Modifier.padding(32.dp),
         text = stringResource(id = R.string.settings_wallet_not_connected_subtitle),
-        textAlign = TextAlign.Center
+        textAlign = TextAlign.Center,
     )
 
     Spacer(modifier = Modifier.height(20.dp))
@@ -196,41 +191,40 @@ fun WalletDisconnected() {
         onClick = {
             uriHandler.openUri(
                 "https://app.mutinywallet.com/settings/connections" +
-                        "?callbackUri=primal&name=Primal-Android"
+                    "?callbackUri=primal&name=Primal-Android",
             )
         },
     )
 }
 
 @Composable
-fun WalletImage(
-    modifier: Modifier = Modifier,
-    connected: Boolean = false,
-) {
+fun WalletImage(modifier: Modifier = Modifier, connected: Boolean = false) {
     Box(modifier = modifier) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(
                     color = AppTheme.extraColorScheme.surfaceVariantAlt1,
-                    shape = CircleShape
+                    shape = CircleShape,
                 )
                 .border(
                     width = if (connected) 8.dp else 0.dp,
                     color = if (connected) {
                         AppTheme.extraColorScheme.successBright
-                    } else Color.Unspecified,
-                    shape = CircleShape
+                    } else {
+                        Color.Unspecified
+                    },
+                    shape = CircleShape,
                 ),
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.Center,
         ) {
             Image(
                 painter = painterResource(id = R.drawable.bitcoin_wallet),
                 contentDescription = null,
                 alignment = Alignment.Center,
                 colorFilter = ColorFilter.tint(
-                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt4
-                )
+                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
+                ),
             )
         }
 
@@ -241,12 +235,12 @@ fun WalletImage(
                 modifier = Modifier
                     .background(
                         color = AppTheme.extraColorScheme.successBright,
-                        shape = CircleShape
+                        shape = CircleShape,
                     )
                     .border(
                         width = 6.dp,
                         color = AppTheme.colorScheme.surfaceVariant,
-                        shape = CircleShape
+                        shape = CircleShape,
                     )
                     .size(56.dp)
                     .padding(all = 8.dp)
@@ -258,10 +252,7 @@ fun WalletImage(
 }
 
 @Composable
-fun ConnectAlbyWalletButton(
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit,
-) {
+fun ConnectAlbyWalletButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
     PrimalFilledButton(
         modifier = modifier,
         containerColor = Color(0xFFFFDF6F),
@@ -280,10 +271,7 @@ fun ConnectAlbyWalletButton(
 }
 
 @Composable
-fun ConnectMutinyWalletButton(
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit
-) {
+fun ConnectMutinyWalletButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
     PrimalFilledButton(
         modifier = modifier,
         containerColor = Color(0xFF4F1425),
@@ -311,9 +299,9 @@ class WalletUiStateProvider : PreviewParameterProvider<WalletContract.UiState> {
                     pubkey = "69effe7b49a6dd5cf525bd0905917a5005ffe480b58eeb8e861418cf3ae760d9",
                     keypair = NostrWalletKeypair(
                         privateKey = "7c0dabd065b2de3299a0d0e1c26b8ac7047dae6b20aba3a62b23650eb601bbfd",
-                        pubkey = "69effe7b49a6dd5cf525bd0905917a5005ffe480b58eeb8e861418cf3ae760d9"
-                    )
-                )
+                        pubkey = "69effe7b49a6dd5cf525bd0905917a5005ffe480b58eeb8e861418cf3ae760d9",
+                    ),
+                ),
             ),
             WalletContract.UiState(
                 wallet = null,
@@ -323,9 +311,9 @@ class WalletUiStateProvider : PreviewParameterProvider<WalletContract.UiState> {
 
 @Preview
 @Composable
-fun PreviewSettingsWalletScreen(
+private fun PreviewSettingsWalletScreen(
     @PreviewParameter(WalletUiStateProvider::class)
-    state: WalletContract.UiState
+    state: WalletContract.UiState,
 ) {
     PrimalTheme(primalTheme = PrimalTheme.Sunset) {
         WalletScreen(

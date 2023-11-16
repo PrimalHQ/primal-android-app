@@ -1,9 +1,9 @@
 package net.primal.android.networking.sockets
 
+import java.util.UUID
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.add
 import kotlinx.serialization.json.buildJsonArray
-import java.util.UUID
 
 fun JsonObject.buildNostrREQMessage(subscriptionId: UUID): String {
     return buildJsonArray {

@@ -60,6 +60,7 @@ import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
+import java.time.Instant
 import net.primal.android.R
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.PrimalDefaults
@@ -83,7 +84,6 @@ import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.thread.ThreadContract.UiState.ThreadError
-import java.time.Instant
 
 @Composable
 fun ThreadScreen(
@@ -97,12 +97,13 @@ fun ThreadScreen(
     onWalletUnavailable: () -> Unit,
     onReplyInNoteEditor: (String, Uri?, String) -> Unit,
 ) {
-
     val uiState = viewModel.state.collectAsState()
 
     DisposableLifecycleObserverEffect {
         when (it) {
-            Lifecycle.Event.ON_START -> viewModel.setEvent(ThreadContract.UiEvent.UpdateConversation)
+            Lifecycle.Event.ON_START -> viewModel.setEvent(
+                ThreadContract.UiEvent.UpdateConversation,
+            )
             else -> Unit
         }
     }
@@ -117,7 +118,7 @@ fun ThreadScreen(
         onHashtagClick = onHashtagClick,
         onWalletUnavailable = onWalletUnavailable,
         onReplyInNoteEditor = onReplyInNoteEditor,
-        eventPublisher = { viewModel.setEvent(it) }
+        eventPublisher = { viewModel.setEvent(it) },
     )
 }
 
@@ -140,42 +141,46 @@ fun ThreadScreen(
     val listState = rememberLazyListState()
 
     var repostQuotePostConfirmation by remember { mutableStateOf<FeedPostUi?>(null) }
-    if (repostQuotePostConfirmation != null) repostQuotePostConfirmation?.let { post ->
-        RepostOrQuoteBottomSheet(
-            onDismiss = { repostQuotePostConfirmation = null },
-            onRepostClick = {
-                eventPublisher(
-                    ThreadContract.UiEvent.RepostAction(
-                        postId = post.postId,
-                        postAuthorId = post.authorId,
-                        postNostrEvent = post.rawNostrEventJson,
+    if (repostQuotePostConfirmation != null) {
+        repostQuotePostConfirmation?.let { post ->
+            RepostOrQuoteBottomSheet(
+                onDismiss = { repostQuotePostConfirmation = null },
+                onRepostClick = {
+                    eventPublisher(
+                        ThreadContract.UiEvent.RepostAction(
+                            postId = post.postId,
+                            postAuthorId = post.authorId,
+                            postNostrEvent = post.rawNostrEventJson,
+                        ),
                     )
-                )
-            },
-            onPostQuoteClick = {
-                onPostQuoteClick("\n\nnostr:${post.postId.hexToNoteHrp()}")
-            },
-        )
+                },
+                onPostQuoteClick = {
+                    onPostQuoteClick("\n\nnostr:${post.postId.hexToNoteHrp()}")
+                },
+            )
+        }
     }
 
     var zapOptionsPostConfirmation by remember { mutableStateOf<FeedPostUi?>(null) }
-    if (zapOptionsPostConfirmation != null) zapOptionsPostConfirmation?.let { post ->
-        ZapBottomSheet(
-            onDismissRequest = { zapOptionsPostConfirmation = null },
-            receiverName = post.authorName,
-            defaultZapAmount = state.defaultZapAmount ?: 42.toULong(),
-            userZapOptions = state.zapOptions,
-            onZap = { zapAmount, zapDescription ->
-                eventPublisher(
-                    ThreadContract.UiEvent.ZapAction(
-                        postId = post.postId,
-                        postAuthorId = post.authorId,
-                        zapAmount = zapAmount,
-                        zapDescription = zapDescription,
+    if (zapOptionsPostConfirmation != null) {
+        zapOptionsPostConfirmation?.let { post ->
+            ZapBottomSheet(
+                onDismissRequest = { zapOptionsPostConfirmation = null },
+                receiverName = post.authorName,
+                defaultZapAmount = state.defaultZapAmount ?: 42.toULong(),
+                userZapOptions = state.zapOptions,
+                onZap = { zapAmount, zapDescription ->
+                    eventPublisher(
+                        ThreadContract.UiEvent.ZapAction(
+                            postId = post.postId,
+                            postAuthorId = post.authorId,
+                            zapAmount = zapAmount,
+                            zapDescription = zapDescription,
+                        ),
                     )
-                )
-            }
-        )
+                },
+            )
+        }
     }
 
     val snackbarHostState = remember { SnackbarHostState() }
@@ -209,8 +214,8 @@ fun ThreadScreen(
             var extraSpacing by remember { mutableStateOf(0.dp) }
             extraSpacing = with(LocalDensity.current) {
                 threadListMaxHeightPx.toDp() - highlightPostHeightPx.toDp() -
-                        bottomBarMaxHeightPx.toDp() - topBarMaxHeightPx.toDp() -
-                        repliesHeightPx.values.sum().toDp()
+                    bottomBarMaxHeightPx.toDp() - topBarMaxHeightPx.toDp() -
+                    repliesHeightPx.values.sum().toDp()
             }
 
             LazyColumn(
@@ -230,8 +235,8 @@ fun ThreadScreen(
                     val highlightPost = index == state.highlightPostIndex
                     val shouldIndentContent = index != state.highlightPostIndex
                     val highlighted = index == state.highlightPostIndex
-                    val connectedToPreviousNote = state.highlightPostIndex > 0
-                            && index in 1 until state.highlightPostIndex + 1
+                    val connectedToPreviousNote = state.highlightPostIndex > 0 &&
+                        index in 1 until state.highlightPostIndex + 1
                     val connectedToNextNote = index in 0 until state.highlightPostIndex
                     val isReply = index > state.highlightPostIndex
 
@@ -244,7 +249,7 @@ fun ThreadScreen(
                                     this[index] = it.height
                                 }
                             }
-                        }
+                        },
                     ) {
                         FeedNoteCard(
                             data = item,
@@ -274,7 +279,7 @@ fun ThreadScreen(
                                                     postAuthorId = item.authorId,
                                                     zapAmount = null,
                                                     zapDescription = null,
-                                                )
+                                                ),
                                             )
                                         } else {
                                             onWalletUnavailable()
@@ -286,7 +291,7 @@ fun ThreadScreen(
                                             ThreadContract.UiEvent.PostLikeAction(
                                                 postId = item.postId,
                                                 postAuthorId = item.authorId,
-                                            )
+                                            ),
                                         )
                                     }
 
@@ -311,7 +316,7 @@ fun ThreadScreen(
                             onHashtagClick = onHashtagClick,
                             onMuteUserClick = {
                                 eventPublisher(ThreadContract.UiEvent.MuteAction(item.authorId))
-                            }
+                            },
                         )
 
                         if (!connectedToNextNote) {
@@ -324,8 +329,8 @@ fun ThreadScreen(
                     item(key = "extraSpacing") {
                         Spacer(
                             modifier = Modifier.height(
-                                height = extraSpacing.coerceAtLeast(50.dp)
-                            )
+                                height = extraSpacing.coerceAtLeast(50.dp),
+                            ),
                         )
                     }
                 }
@@ -353,7 +358,7 @@ fun ThreadScreen(
                                 rootPostId = rootPost.postId,
                                 replyToPostId = replyToPost.postId,
                                 replyToAuthorId = replyToPost.authorId,
-                            )
+                            ),
                         )
                     },
                     onReplyUpdated = { content ->
@@ -364,7 +369,7 @@ fun ThreadScreen(
                     },
                     onExpand = {
                         onReplyInNoteEditor(state.highlightPostId, null, state.replyText)
-                    }
+                    },
                 )
             }
         },
@@ -424,7 +429,7 @@ fun ReplyToBottomBar(
                         Text(
                             text = stringResource(
                                 id = R.string.thread_reply_to,
-                                replyToAuthorName
+                                replyToAuthorName,
                             ),
                             maxLines = 1,
                             color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
@@ -450,7 +455,7 @@ fun ReplyToBottomBar(
             )
 
             val photoImportLauncher = rememberLauncherForActivityResult(
-                ActivityResultContracts.PickVisualMedia()
+                ActivityResultContracts.PickVisualMedia(),
             ) { uri -> if (uri != null) onPhotoImported.invoke(uri) }
 
             AnimatedVisibility(visible = isKeyboardVisible) {
@@ -463,14 +468,14 @@ fun ReplyToBottomBar(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Row(
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
                     ) {
                         IconButton(
                             onClick = {
                                 photoImportLauncher.launch(
                                     PickVisualMediaRequest(
-                                        ActivityResultContracts.PickVisualMedia.ImageOnly
-                                    )
+                                        ActivityResultContracts.PickVisualMedia.ImageOnly,
+                                    ),
                                 )
                             },
                         ) {
@@ -506,20 +511,31 @@ fun ReplyToBottomBar(
 }
 
 @Composable
-private fun ErrorHandler(
-    error: ThreadError?,
-    snackbarHostState: SnackbarHostState,
-) {
+private fun ErrorHandler(error: ThreadError?, snackbarHostState: SnackbarHostState) {
     val context = LocalContext.current
     LaunchedEffect(error ?: true) {
         val errorMessage = when (error) {
-            is ThreadError.InvalidZapRequest -> context.getString(R.string.post_action_invalid_zap_request)
-            is ThreadError.MissingLightningAddress -> context.getString(R.string.post_action_missing_lightning_address)
-            is ThreadError.FailedToPublishZapEvent -> context.getString(R.string.post_action_zap_failed)
-            is ThreadError.FailedToPublishLikeEvent -> context.getString(R.string.post_action_like_failed)
-            is ThreadError.FailedToPublishRepostEvent -> context.getString(R.string.post_action_repost_failed)
-            is ThreadError.FailedToPublishReplyEvent -> context.getString(R.string.post_action_reply_failed)
-            is ThreadError.MissingRelaysConfiguration -> context.getString(R.string.app_missing_relays_config)
+            is ThreadError.InvalidZapRequest -> context.getString(
+                R.string.post_action_invalid_zap_request,
+            )
+            is ThreadError.MissingLightningAddress -> context.getString(
+                R.string.post_action_missing_lightning_address,
+            )
+            is ThreadError.FailedToPublishZapEvent -> context.getString(
+                R.string.post_action_zap_failed,
+            )
+            is ThreadError.FailedToPublishLikeEvent -> context.getString(
+                R.string.post_action_like_failed,
+            )
+            is ThreadError.FailedToPublishRepostEvent -> context.getString(
+                R.string.post_action_repost_failed,
+            )
+            is ThreadError.FailedToPublishReplyEvent -> context.getString(
+                R.string.post_action_reply_failed,
+            )
+            is ThreadError.MissingRelaysConfiguration -> context.getString(
+                R.string.app_missing_relays_config,
+            )
             is ThreadError.FailedToMuteUser -> context.getString(R.string.app_error_muting_user)
             null -> return@LaunchedEffect
         }
@@ -530,7 +546,6 @@ private fun ErrorHandler(
         )
     }
 }
-
 
 @Preview
 @Composable

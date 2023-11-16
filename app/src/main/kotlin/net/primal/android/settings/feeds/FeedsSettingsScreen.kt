@@ -50,16 +50,13 @@ import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
 
 @Composable
-fun FeedsSettingsScreen(
-    viewModel: FeedsSettingsViewModel,
-    onClose: () -> Unit
-) {
+fun FeedsSettingsScreen(viewModel: FeedsSettingsViewModel, onClose: () -> Unit) {
     val uiState = viewModel.state.collectAsState()
 
     FeedsSettingsScreen(
         state = uiState.value,
         eventPublisher = { viewModel.setEvent(it) },
-        onClose = onClose
+        onClose = onClose,
     )
 }
 
@@ -68,7 +65,7 @@ fun FeedsSettingsScreen(
 fun FeedsSettingsScreen(
     state: FeedsSettingsContract.UiState,
     eventPublisher: (FeedsSettingsContract.UiEvent) -> Unit,
-    onClose: () -> Unit
+    onClose: () -> Unit,
 ) {
     Scaffold(
         modifier = Modifier,
@@ -76,7 +73,7 @@ fun FeedsSettingsScreen(
             PrimalTopAppBar(
                 title = stringResource(id = R.string.settings_feeds_title),
                 navigationIcon = PrimalIcons.ArrowBack,
-                onNavigationIconClick = onClose
+                onNavigationIconClick = onClose,
             )
         },
         content = { paddingValues ->
@@ -89,14 +86,20 @@ fun FeedsSettingsScreen(
                             openRemoveFeedDialog.value = FeedAction.Inactive
                         },
                         onConfirmation = {
-                            eventPublisher(FeedsSettingsContract.UiEvent.FeedRemoved(directive = prompt.directive))
+                            eventPublisher(
+                                FeedsSettingsContract.UiEvent.FeedRemoved(
+                                    directive = prompt.directive,
+                                ),
+                            )
 
                             openRemoveFeedDialog.value = FeedAction.Inactive
                         },
-                        dialogTitle = stringResource(id = R.string.settings_feeds_remove_feed_prompt_title),
+                        dialogTitle = stringResource(
+                            id = R.string.settings_feeds_remove_feed_prompt_title,
+                        ),
                         dialogText = stringResource(
                             id = R.string.settings_feeds_remove_feed_prompt_text,
-                            prompt.name
+                            prompt.name,
                         ),
                     )
                 }
@@ -112,7 +115,9 @@ fun FeedsSettingsScreen(
                             openRemoveFeedDialog.value = FeedAction.Inactive
                         },
                         dialogTitle = stringResource(R.string.settings_feeds_restore_default_title),
-                        dialogText = stringResource(id = R.string.settings_feeds_restore_defaults_prompt_text),
+                        dialogText = stringResource(
+                            id = R.string.settings_feeds_restore_defaults_prompt_text,
+                        ),
                     )
                 }
 
@@ -134,9 +139,9 @@ fun FeedsSettingsScreen(
                                 openRemoveFeedDialog.value = FeedAction.ConfirmRemove(
                                     directive = item.directive,
                                     name = item.name,
-                                    openDialog = true
+                                    openDialog = true,
                                 )
-                            }
+                            },
                         )
                         PrimalDivider()
                     }
@@ -151,7 +156,9 @@ fun FeedsSettingsScreen(
                                 modifier = Modifier.clickable {
                                     openRemoveFeedDialog.value = FeedAction.ConfirmRestoreDefaults
                                 },
-                                text = stringResource(R.string.settings_feeds_restore_default_title).lowercase(),
+                                text = stringResource(
+                                    R.string.settings_feeds_restore_default_title,
+                                ).lowercase(),
                                 style = AppTheme.typography.bodyMedium,
                                 color = AppTheme.colorScheme.secondary,
                             )
@@ -159,15 +166,12 @@ fun FeedsSettingsScreen(
                     }
                 }
             }
-        }
+        },
     )
 }
 
 @Composable
-fun FeedItem(
-    item: Feed,
-    onRemoveFeed: () -> Unit
-) {
+fun FeedItem(item: Feed, onRemoveFeed: () -> Unit) {
     ListItem(
         colors = ListItemDefaults.colors(
             containerColor = AppTheme.colorScheme.surfaceVariant,
@@ -177,7 +181,7 @@ fun FeedItem(
                 text = item.name,
                 fontWeight = FontWeight.W400,
                 fontSize = 16.sp,
-                lineHeight = 16.sp
+                lineHeight = 16.sp,
             )
         },
 
@@ -186,14 +190,14 @@ fun FeedItem(
                 modifier = Modifier
                     .clickable(
                         enabled = item.isRemovable,
-                        onClick = onRemoveFeed
+                        onClick = onRemoveFeed,
                     ),
                 contentAlignment = Alignment.Center,
             ) {
                 Spacer(
                     modifier = Modifier
                         .size(16.dp)
-                        .background(color = Color.White, shape = CircleShape)
+                        .background(color = Color.White, shape = CircleShape),
                 )
 
                 Image(
@@ -204,7 +208,7 @@ fun FeedItem(
                             AppTheme.colorScheme.error
                         } else {
                             AppTheme.colorScheme.outline
-                        }
+                        },
                     ),
                 )
             }
@@ -234,7 +238,7 @@ fun ConfirmActionAlertDialog(
             TextButton(
                 onClick = {
                     onConfirmation()
-                }
+                },
             ) {
                 Text(
                     text = stringResource(id = R.string.settings_feeds_dialog_confirm),
@@ -245,13 +249,13 @@ fun ConfirmActionAlertDialog(
             TextButton(
                 onClick = {
                     onDismissRequest()
-                }
+                },
             ) {
                 Text(
                     text = stringResource(id = R.string.settings_feeds_dialog_dismiss),
                 )
             }
-        }
+        },
     )
 }
 
@@ -265,51 +269,52 @@ fun PreviewSettingsScreen() {
                     Feed(
                         name = "Latest",
                         directive = "Latest",
-                        isRemovable = false
+                        isRemovable = false,
                     ),
                     Feed(
                         name = "Latest with Replies",
                         directive = "Latest with Replies",
-                        isRemovable = false
+                        isRemovable = false,
                     ),
                     Feed(
                         name = "Trending 24h",
                         directive = "Trending 24h",
-                        isRemovable = true
+                        isRemovable = true,
                     ),
                     Feed(
                         name = "Most zapped 4h",
                         directive = "Most zapped 4h",
-                        isRemovable = true
+                        isRemovable = true,
                     ),
                     Feed(
                         name = "#photography",
                         directive = "#photography",
-                        isRemovable = true
+                        isRemovable = true,
                     ),
                     Feed(
                         name = "#bitcoin2023",
                         directive = "#bitcoin2023",
-                        isRemovable = true
+                        isRemovable = true,
                     ),
                     Feed(
                         name = "#nostrasia",
                         directive = "#nostrasia",
-                        isRemovable = true
+                        isRemovable = true,
                     ),
                     Feed(
                         name = "#nature",
                         directive = "#nature",
-                        isRemovable = true
+                        isRemovable = true,
                     ),
                     Feed(
                         name = "#food",
                         directive = "#food",
-                        isRemovable = true
-                    )
-                )
+                        isRemovable = true,
+                    ),
+                ),
             ),
             eventPublisher = {},
-            onClose = {})
+            onClose = {},
+        )
     }
 }

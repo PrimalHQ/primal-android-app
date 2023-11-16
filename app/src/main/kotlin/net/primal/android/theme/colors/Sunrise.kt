@@ -3,7 +3,6 @@ package net.primal.android.theme.colors
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 
-
 private val sunriseBrandText = Color(0xFF444444)
 private val sunriseBackground1 = Color(0xFFF5F5F5)
 private val sunriseBackground2 = Color(0xFFFFFFFF)

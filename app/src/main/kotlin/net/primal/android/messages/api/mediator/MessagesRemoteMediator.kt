@@ -4,6 +4,7 @@ import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
+import java.time.Instant
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import net.primal.android.db.PrimalDatabase
@@ -11,7 +12,6 @@ import net.primal.android.messages.api.MessagesApi
 import net.primal.android.messages.api.model.MessagesRequestBody
 import net.primal.android.messages.db.DirectMessage
 import net.primal.android.networking.sockets.errors.WssException
-import java.time.Instant
 
 @ExperimentalPagingApi
 class MessagesRemoteMediator(
@@ -24,11 +24,7 @@ class MessagesRemoteMediator(
 
     private val lastRequests: MutableMap<LoadType, MessagesRequestBody> = mutableMapOf()
 
-    override suspend fun load(
-        loadType: LoadType,
-        state: PagingState<Int, DirectMessage>
-    ): MediatorResult {
-
+    override suspend fun load(loadType: LoadType, state: PagingState<Int, DirectMessage>): MediatorResult {
         val timestamp: Long? = when (loadType) {
             LoadType.REFRESH -> null
             LoadType.PREPEND -> {
@@ -62,7 +58,7 @@ class MessagesRemoteMediator(
             LoadType.REFRESH -> initialRequestBody
             LoadType.PREPEND -> initialRequestBody.copy(
                 since = timestamp,
-                until = Instant.now().epochSecond
+                until = Instant.now().epochSecond,
             )
 
             LoadType.APPEND -> initialRequestBody.copy(until = timestamp)
@@ -93,5 +89,4 @@ class MessagesRemoteMediator(
 
         return MediatorResult.Success(endOfPaginationReached = false)
     }
-
 }

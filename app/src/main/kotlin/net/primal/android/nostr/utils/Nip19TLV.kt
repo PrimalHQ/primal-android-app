@@ -8,7 +8,7 @@ object Nip19TLV {
         SPECIAL(0),
         RELAY(1),
         AUTHOR(2),
-        KIND(3);
+        KIND(3),
     }
 
     fun toInt32(bytes: ByteArray): Int {

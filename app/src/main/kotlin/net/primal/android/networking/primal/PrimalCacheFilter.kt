@@ -9,14 +9,18 @@ data class PrimalCacheFilter(
     val primalVerb: PrimalVerb? = null,
     val optionsJson: String? = null,
 ) {
-    fun toPrimalJsonObject() = buildJsonObject {
-        put("cache", buildJsonArray {
-            add(primalVerb?.identifier)
-            if (optionsJson != null) {
-                add(NostrJson.decodeFromString(optionsJson))
-            }
-        })
-    }
+    fun toPrimalJsonObject() =
+        buildJsonObject {
+            put(
+                "cache",
+                buildJsonArray {
+                    add(primalVerb?.identifier)
+                    if (optionsJson != null) {
+                        add(NostrJson.decodeFromString(optionsJson))
+                    }
+                },
+            )
+        }
 }
 
 enum class PrimalVerb(val identifier: String) {

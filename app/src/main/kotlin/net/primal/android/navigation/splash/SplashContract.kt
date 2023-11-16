@@ -6,5 +6,4 @@ interface SplashContract {
         object NoActiveAccount : SideEffect()
         data class ActiveAccount(val userPubkey: String) : SideEffect()
     }
-
 }

@@ -1,6 +1,7 @@
 package net.primal.android.nostr.notary
 
 import fr.acinq.secp256k1.Hex
+import javax.inject.Inject
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
@@ -25,8 +26,6 @@ import net.primal.android.user.domain.toZapTag
 import net.primal.android.wallet.model.PayInvoiceRequest
 import net.primal.android.wallet.model.WalletRequest
 import net.primal.android.wallet.model.ZapTarget
-import javax.inject.Inject
-
 
 class NostrNotary @Inject constructor(
     private val credentialsStore: CredentialsStore,
@@ -46,7 +45,7 @@ class NostrNotary @Inject constructor(
     fun signMetadataNostrEvent(
         userId: String,
         tags: List<JsonArray> = emptyList(),
-        metadata: ContentMetadata
+        metadata: ContentMetadata,
     ): NostrEvent {
         return NostrUnsignedEvent(
             pubKey = userId,
@@ -69,24 +68,18 @@ class NostrNotary @Inject constructor(
         ).signOrThrow(nsec = findNsecOrThrow(userId))
     }
 
-    fun signAuthorizationNostrEvent(
-        userId: String,
-        description: String,
-    ): NostrEvent {
+    fun signAuthorizationNostrEvent(userId: String, description: String): NostrEvent {
         return NostrUnsignedEvent(
             pubKey = userId,
             kind = NostrEventKind.ApplicationSpecificData.value,
             tags = listOf("${UserAgentProvider.APP_NAME} App".asIdentifierTag()),
             content = NostrJson.encodeToString(
-                AppSettingsDescription(description = description)
+                AppSettingsDescription(description = description),
             ),
         ).signOrThrow(nsec = findNsecOrThrow(userId))
     }
 
-    fun signAppSettingsNostrEvent(
-        userId: String,
-        appSettings: ContentAppSettings,
-    ): NostrEvent {
+    fun signAppSettingsNostrEvent(userId: String, appSettings: ContentAppSettings): NostrEvent {
         return NostrUnsignedEvent(
             pubKey = userId,
             kind = NostrEventKind.ApplicationSpecificData.value,
@@ -125,7 +118,7 @@ class NostrNotary @Inject constructor(
     fun signContactsNostrEvent(
         userId: String,
         contacts: Set<String>,
-        relays: List<Relay>
+        relays: List<Relay>,
     ): NostrEvent {
         val tags = contacts.map { it.asPubkeyTag() }
         val content = NostrJson.encodeToString(relays.toNostrRelayMap())
@@ -134,7 +127,7 @@ class NostrNotary @Inject constructor(
             pubKey = userId,
             kind = NostrEventKind.Contacts.value,
             content = content,
-            tags = tags
+            tags = tags,
         ).signOrThrow(nsec = findNsecOrThrow(userId))
     }
 
@@ -142,7 +135,7 @@ class NostrNotary @Inject constructor(
         userId: String,
         comment: String,
         target: ZapTarget,
-        relays: List<Relay>
+        relays: List<Relay>,
     ): NostrEvent {
         return NostrUnsignedEvent(
             pubKey = userId,
@@ -152,48 +145,39 @@ class NostrNotary @Inject constructor(
         ).signOrThrow(nsec = findNsecOrThrow(userId))
     }
 
-    fun signWalletInvoiceRequestNostrEvent(
-        request: WalletRequest<PayInvoiceRequest>,
-        nwc: NostrWallet
-    ): NostrEvent {
+    fun signWalletInvoiceRequestNostrEvent(request: WalletRequest<PayInvoiceRequest>, nwc: NostrWallet): NostrEvent {
         val tags = listOf(nwc.pubkey.asPubkeyTag())
         val content = json.encodeToString(request)
         val encryptedMessage = CryptoUtils.encrypt(
             msg = content,
             privateKey = Hex.decode(nwc.keypair.privateKey),
-            pubKey = Hex.decode(nwc.pubkey)
+            pubKey = Hex.decode(nwc.pubkey),
         )
 
         return NostrUnsignedEvent(
             pubKey = nwc.keypair.pubkey,
             kind = NostrEventKind.WalletRequest.value,
             content = encryptedMessage,
-            tags = tags
+            tags = tags,
         ).signOrThrow(hexPrivateKey = Hex.decode(nwc.keypair.privateKey))
     }
 
-    fun signImageUploadNostrEvent(
-        userId: String,
-        base64Content: String
-    ): NostrEvent {
+    fun signImageUploadNostrEvent(userId: String, base64Content: String): NostrEvent {
         return NostrUnsignedEvent(
             pubKey = userId,
             kind = NostrEventKind.PrimalImageUploadRequest.value,
             content = base64Content,
-            tags = emptyList()
+            tags = emptyList(),
         ).signOrThrow(nsec = findNsecOrThrow(userId))
     }
 
-    fun signMuteListNostrEvent(
-        userId: String,
-        mutedUserIds: Set<String>
-    ): NostrEvent {
+    fun signMuteListNostrEvent(userId: String, mutedUserIds: Set<String>): NostrEvent {
         val tags = mutedUserIds.map { it.asPubkeyTag() }
         return NostrUnsignedEvent(
             content = "",
             pubKey = userId,
             kind = NostrEventKind.MuteList.value,
-            tags = tags
+            tags = tags,
         ).signOrThrow(nsec = findNsecOrThrow(pubkey = userId))
     }
 

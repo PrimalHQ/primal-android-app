@@ -11,10 +11,7 @@ import androidx.compose.ui.res.painterResource
 import net.primal.android.R
 
 @Composable
-fun PrimalLogo(
-    modifier: Modifier = Modifier,
-    showBackground: Boolean = false,
-) {
+fun PrimalLogo(modifier: Modifier = Modifier, showBackground: Boolean = false) {
     Box(
         modifier = modifier,
         contentAlignment = Alignment.TopCenter,

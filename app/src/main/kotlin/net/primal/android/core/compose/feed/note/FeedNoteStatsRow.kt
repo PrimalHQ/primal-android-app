@@ -46,7 +46,7 @@ fun FeedNoteStatsRow(
 ) {
     Row(
         modifier = modifier,
-        horizontalArrangement = Arrangement.SpaceBetween
+        horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         SinglePostStat(
             textCount = postStats.repliesCount.toPostStatString(),
@@ -94,7 +94,6 @@ fun FeedNoteStatsRow(
     }
 }
 
-
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun SinglePostStat(
@@ -115,8 +114,8 @@ private fun SinglePostStat(
     val inlineContent = mapOf(
         "icon" to InlineTextContent(
             placeholder = Placeholder(
-                24.sp, 24.sp, PlaceholderVerticalAlign.TextCenter
-            )
+                24.sp, 24.sp, PlaceholderVerticalAlign.TextCenter,
+            ),
         ) {
             Box(
                 modifier = Modifier.fillMaxSize(),
@@ -127,10 +126,12 @@ private fun SinglePostStat(
                     contentDescription = null,
                     colorFilter = if (!highlighted) {
                         ColorFilter.tint(color = AppTheme.extraColorScheme.onSurfaceVariantAlt4)
-                    } else null
+                    } else {
+                        null
+                    },
                 )
             }
-        }
+        },
     )
 
     Text(
@@ -151,4 +152,3 @@ private fun SinglePostStat(
 }
 
 private fun Long.toPostStatString(): String = if (this > 0) toString() else ""
-

@@ -1,5 +1,6 @@
 package net.primal.android.feed.api
 
+import javax.inject.Inject
 import kotlinx.serialization.encodeToString
 import net.primal.android.feed.api.model.FeedRequestBody
 import net.primal.android.feed.api.model.FeedResponse
@@ -14,7 +15,6 @@ import net.primal.android.networking.primal.PrimalVerb.THREAD_VIEW
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.serialization.NostrJson
 import net.primal.android.serialization.decodeFromStringOrNull
-import javax.inject.Inject
 
 class FeedApiImpl @Inject constructor(
     @PrimalCacheApiClient private val primalApiClient: PrimalApiClient,
@@ -24,8 +24,8 @@ class FeedApiImpl @Inject constructor(
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = FEED_DIRECTIVE,
-                optionsJson = NostrJson.encodeToString(body)
-            )
+                optionsJson = NostrJson.encodeToString(body),
+            ),
         )
 
         return FeedResponse(
@@ -36,19 +36,22 @@ class FeedApiImpl @Inject constructor(
             posts = queryResult.filterNostrEvents(NostrEventKind.ShortTextNote),
             reposts = queryResult.filterNostrEvents(NostrEventKind.Reposts),
             primalEventStats = queryResult.filterPrimalEvents(NostrEventKind.PrimalEventStats),
-            primalEventUserStats = queryResult.filterPrimalEvents(NostrEventKind.PrimalEventUserStats),
-            primalEventResources = queryResult.filterPrimalEvents(NostrEventKind.PrimalEventResources),
+            primalEventUserStats = queryResult.filterPrimalEvents(
+                NostrEventKind.PrimalEventUserStats,
+            ),
+            primalEventResources = queryResult.filterPrimalEvents(
+                NostrEventKind.PrimalEventResources,
+            ),
             referencedPosts = queryResult.filterPrimalEvents(NostrEventKind.PrimalReferencedEvent),
         )
-
     }
 
     override suspend fun getThread(body: ThreadRequestBody): FeedResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = THREAD_VIEW,
-                optionsJson = NostrJson.encodeToString(body)
-            )
+                optionsJson = NostrJson.encodeToString(body),
+            ),
         )
 
         return FeedResponse(
@@ -59,8 +62,12 @@ class FeedApiImpl @Inject constructor(
             posts = queryResult.filterNostrEvents(NostrEventKind.ShortTextNote),
             reposts = emptyList(),
             primalEventStats = queryResult.filterPrimalEvents(NostrEventKind.PrimalEventStats),
-            primalEventUserStats = queryResult.filterPrimalEvents(NostrEventKind.PrimalEventUserStats),
-            primalEventResources = queryResult.filterPrimalEvents(NostrEventKind.PrimalEventResources),
+            primalEventUserStats = queryResult.filterPrimalEvents(
+                NostrEventKind.PrimalEventUserStats,
+            ),
+            primalEventResources = queryResult.filterPrimalEvents(
+                NostrEventKind.PrimalEventResources,
+            ),
             referencedPosts = queryResult.filterPrimalEvents(NostrEventKind.PrimalReferencedEvent),
         )
     }
@@ -70,9 +77,9 @@ class FeedApiImpl @Inject constructor(
             message = PrimalCacheFilter(
                 primalVerb = NOTES,
                 optionsJson = NostrJson.encodeToString(
-                    NotesRequestBody(noteIds = noteIds.toList(), extendedResponse = true)
-                )
-            )
+                    NotesRequestBody(noteIds = noteIds.toList(), extendedResponse = true),
+                ),
+            ),
         )
 
         return FeedResponse(
@@ -82,9 +89,12 @@ class FeedApiImpl @Inject constructor(
             reposts = emptyList(),
             referencedPosts = queryResult.filterPrimalEvents(NostrEventKind.PrimalReferencedEvent),
             primalEventStats = queryResult.filterPrimalEvents(NostrEventKind.PrimalEventStats),
-            primalEventUserStats = queryResult.filterPrimalEvents(NostrEventKind.PrimalEventUserStats),
-            primalEventResources = queryResult.filterPrimalEvents(NostrEventKind.PrimalEventResources),
+            primalEventUserStats = queryResult.filterPrimalEvents(
+                NostrEventKind.PrimalEventUserStats,
+            ),
+            primalEventResources = queryResult.filterPrimalEvents(
+                NostrEventKind.PrimalEventResources,
+            ),
         )
     }
-
 }

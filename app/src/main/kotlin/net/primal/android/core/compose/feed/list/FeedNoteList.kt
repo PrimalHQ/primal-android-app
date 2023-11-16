@@ -32,6 +32,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.LazyPagingItems
+import kotlin.random.Random
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
@@ -41,8 +43,6 @@ import net.primal.android.core.compose.AvatarThumbnailsRow
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.feed.model.FeedPostsSyncStats
 import net.primal.android.theme.AppTheme
-import kotlin.random.Random
-import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -66,7 +66,7 @@ fun FeedNoteList(
     bottomBarHeightPx: Float = 0F,
     bottomBarOffsetHeightPx: Float = 0F,
     onScrolledToTop: (() -> Unit)? = null,
-    onMuteClick: ((String) -> Unit)? = null
+    onMuteClick: ((String) -> Unit)? = null,
 ) {
     val uiScope = rememberCoroutineScope()
 
@@ -114,7 +114,7 @@ fun FeedNoteList(
             onWalletUnavailable = onWalletUnavailable,
             defaultZapAmount = defaultZapAmount,
             zapOptions = zapOptions,
-            onMuteClick = onMuteClick
+            onMuteClick = onMuteClick,
         )
 
         AnimatedVisibility(
@@ -142,15 +142,12 @@ fun FeedNoteList(
 }
 
 @Composable
-private fun NewPostsButton(
-    syncStats: FeedPostsSyncStats,
-    onClick: () -> Unit,
-) {
+private fun NewPostsButton(syncStats: FeedPostsSyncStats, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .background(
                 color = AppTheme.colorScheme.primary,
-                shape = AppTheme.shapes.extraLarge
+                shape = AppTheme.shapes.extraLarge,
             )
             .clickable { onClick() },
         verticalAlignment = Alignment.CenterVertically,

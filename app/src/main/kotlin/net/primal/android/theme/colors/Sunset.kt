@@ -3,7 +3,6 @@ package net.primal.android.theme.colors
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.ui.graphics.Color
 
-
 private val sunsetBrandText = Color(0xFFD5D5D5)
 private val sunsetBackground1 = Color(0xFF000000)
 private val sunsetBackground2 = Color(0xFF000000)

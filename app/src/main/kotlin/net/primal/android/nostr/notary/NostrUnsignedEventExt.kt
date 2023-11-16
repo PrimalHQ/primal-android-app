@@ -10,7 +10,6 @@ import net.primal.android.crypto.toHex
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.serialization.NostrJson
 
-
 fun NostrUnsignedEvent.signOrThrow(nsec: String): NostrEvent {
     val hexPrivateKey = Bech32.decodeBytes(nsec).second
     return this.signOrThrow(hexPrivateKey)
@@ -28,7 +27,7 @@ fun NostrUnsignedEvent.signOrThrow(hexPrivateKey: ByteArray): NostrEvent {
         sig = CryptoUtils.sign(
             data = eventId,
             privateKey = hexPrivateKey,
-        ).toHex()
+        ).toHex(),
     )
 }
 

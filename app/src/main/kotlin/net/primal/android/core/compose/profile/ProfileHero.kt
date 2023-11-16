@@ -42,7 +42,7 @@ fun ProfileHero(
     bannerUri: Uri?,
     avatarUri: Uri?,
     onBannerUriChange: (Uri?) -> Unit,
-    onAvatarUriChange: (Uri?) -> Unit
+    onAvatarUriChange: (Uri?) -> Unit,
 ) {
     val avatarPickMedia =
         rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
@@ -56,7 +56,7 @@ fun ProfileHero(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .height(179.dp)
+            .height(179.dp),
     ) {
         if (bannerUri != null) {
             val model = ImageRequest.Builder(LocalContext.current).data(bannerUri).build()
@@ -66,7 +66,7 @@ fun ProfileHero(
                 contentScale = ContentScale.FillWidth,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(124.dp)
+                    .height(124.dp),
             )
         } else {
             Box(
@@ -75,7 +75,7 @@ fun ProfileHero(
                     .height(124.dp)
                     .background(
                         color = AppTheme.extraColorScheme.surfaceVariantAlt3,
-                    )
+                    ),
             )
         }
 
@@ -85,7 +85,7 @@ fun ProfileHero(
                 .size(size = 108.dp)
                 .clip(shape = CircleShape)
                 .background(color = Color.Black)
-                .align(Alignment.BottomStart)
+                .align(Alignment.BottomStart),
         ) {
             if (avatarUri != null) {
                 val model = ImageRequest.Builder(LocalContext.current).data(avatarUri).build()
@@ -115,11 +115,15 @@ fun ProfileHero(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = stringResource(id = if (avatarUri != null) R.string.create_change_avatar else R.string.create_set_avatar),
+                text = stringResource(
+                    id = if (avatarUri != null) R.string.create_change_avatar else R.string.create_set_avatar,
+                ),
                 fontSize = 16.sp,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.clickable {
-                    avatarPickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                    avatarPickMedia.launch(
+                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
+                    )
                 },
                 color = AppTheme.colorScheme.secondary,
             )
@@ -127,15 +131,19 @@ fun ProfileHero(
             Divider(
                 modifier = Modifier
                     .height(16.dp)
-                    .width(1.dp)
+                    .width(1.dp),
             )
             Spacer(modifier = Modifier.width(6.dp))
             Text(
-                text = stringResource(id = if (bannerUri != null) R.string.create_change_banner else R.string.create_set_banner),
+                text = stringResource(
+                    id = if (bannerUri != null) R.string.create_change_banner else R.string.create_set_banner,
+                ),
                 fontSize = 16.sp,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.clickable {
-                    bannerPickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                    bannerPickMedia.launch(
+                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
+                    )
                 },
                 color = AppTheme.colorScheme.secondary,
             )

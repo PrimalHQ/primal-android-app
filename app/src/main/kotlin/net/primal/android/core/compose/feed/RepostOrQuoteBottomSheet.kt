@@ -30,13 +30,14 @@ fun RepostOrQuoteBottomSheet(
     onRepostClick: () -> Unit,
     onPostQuoteClick: () -> Unit,
 ) {
-    AdjustTemporarilySystemBarColors(navigationBarColor = AppTheme.extraColorScheme.surfaceVariantAlt2)
+    AdjustTemporarilySystemBarColors(
+        navigationBarColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
+    )
     ModalBottomSheet(
         containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
         tonalElevation = 0.dp,
         onDismissRequest = onDismiss,
     ) {
-
         Column(
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -47,7 +48,7 @@ fun RepostOrQuoteBottomSheet(
                 onClick = {
                     onDismiss()
                     onRepostClick()
-                }
+                },
             )
 
             Spacer(modifier = Modifier.height(16.dp))

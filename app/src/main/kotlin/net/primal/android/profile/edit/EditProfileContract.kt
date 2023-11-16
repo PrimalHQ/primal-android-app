@@ -15,7 +15,7 @@ interface EditProfileContract {
         val localAvatarUri: Uri? = null,
         val localBannerUri: Uri? = null,
         val remoteAvatarUrl: String? = null,
-        val remoteBannerUrl: String? = null
+        val remoteBannerUrl: String? = null,
     ) {
         sealed class EditProfileError {
             data class MissingRelaysConfiguration(val cause: Throwable) : EditProfileError()

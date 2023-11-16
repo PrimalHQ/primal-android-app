@@ -64,5 +64,4 @@ class ExploreFeedQueryBuilder(
             bindArgs = arrayOf(userPubkey, feedDirective, limit),
         )
     }
-
 }

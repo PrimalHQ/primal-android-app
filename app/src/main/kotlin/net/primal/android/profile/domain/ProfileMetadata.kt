@@ -12,5 +12,5 @@ data class ProfileMetadata(
     val localPictureUri: Uri? = null,
     val localBannerUri: Uri? = null,
     val remotePictureUrl: String? = null,
-    val remoteBannerUrl: String? = null
+    val remoteBannerUrl: String? = null,
 )

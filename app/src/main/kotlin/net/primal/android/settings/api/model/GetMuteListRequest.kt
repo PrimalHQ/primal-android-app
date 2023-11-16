@@ -4,5 +4,5 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class GetMuteListRequest(
-    val pubkey: String
+    val pubkey: String,
 )

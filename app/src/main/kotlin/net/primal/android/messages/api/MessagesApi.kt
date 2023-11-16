@@ -14,5 +14,4 @@ interface MessagesApi {
     suspend fun markConversationAsRead(userId: String, conversationUserId: String)
 
     suspend fun markAllMessagesAsRead(userId: String)
-
 }

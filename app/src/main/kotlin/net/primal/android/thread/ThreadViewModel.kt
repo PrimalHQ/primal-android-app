@@ -4,6 +4,9 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -30,9 +33,6 @@ import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
 import net.primal.android.wallet.model.ZapTarget
 import net.primal.android.wallet.repository.ZapRepository
-import javax.inject.Inject
-import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.Duration.Companion.seconds
 
 @HiltViewModel
 class ThreadViewModel @Inject constructor(
@@ -42,7 +42,7 @@ class ThreadViewModel @Inject constructor(
     private val postRepository: PostRepository,
     private val profileRepository: ProfileRepository,
     private val zapRepository: ZapRepository,
-    private val mutedUserRepository: MutedUserRepository
+    private val mutedUserRepository: MutedUserRepository,
 ) : ViewModel() {
 
     private val postId = savedStateHandle.postIdOrThrow
@@ -53,9 +53,9 @@ class ThreadViewModel @Inject constructor(
         _state.getAndUpdate { it.reducer() }
     }
 
-    private val _event: MutableSharedFlow<UiEvent> = MutableSharedFlow()
+    private val events: MutableSharedFlow<UiEvent> = MutableSharedFlow()
     fun setEvent(event: UiEvent) {
-        viewModelScope.launch { _event.emit(event) }
+        viewModelScope.launch { events.emit(event) }
     }
 
     init {
@@ -64,39 +64,42 @@ class ThreadViewModel @Inject constructor(
         observeActiveAccount()
     }
 
-    private fun observeEvents() = viewModelScope.launch {
-        _event.collect {
-            when (it) {
-                is UiEvent.PostLikeAction -> likePost(it)
-                is UiEvent.RepostAction -> repostPost(it)
-                is UiEvent.ReplyToAction -> publishReply(it)
-                is UiEvent.UpdateReply -> updateReply(it)
-                is UiEvent.ZapAction -> zapPost(it)
-                is UiEvent.MuteAction -> mute(it)
-                UiEvent.UpdateConversation -> fetchRepliesFromNetwork()
-            }
-        }
-    }
-
-    private fun observeConversation() = viewModelScope.launch {
-        loadHighlightedPost()
-        delayShortlyToPropagateHighlightedPost()
-        subscribeToConversationChanges()
-    }
-
-    private fun observeActiveAccount() = viewModelScope.launch {
-        activeAccountStore.activeAccountState
-            .filterIsInstance<ActiveUserAccountState.ActiveUserAccount>()
-            .collect {
-                setState {
-                    copy(
-                        walletConnected = it.data.nostrWallet != null,
-                        defaultZapAmount = it.data.appSettings?.defaultZapAmount,
-                        zapOptions = it.data.appSettings?.zapOptions ?: emptyList(),
-                    )
+    private fun observeEvents() =
+        viewModelScope.launch {
+            events.collect {
+                when (it) {
+                    is UiEvent.PostLikeAction -> likePost(it)
+                    is UiEvent.RepostAction -> repostPost(it)
+                    is UiEvent.ReplyToAction -> publishReply(it)
+                    is UiEvent.UpdateReply -> updateReply(it)
+                    is UiEvent.ZapAction -> zapPost(it)
+                    is UiEvent.MuteAction -> mute(it)
+                    UiEvent.UpdateConversation -> fetchRepliesFromNetwork()
                 }
             }
-    }
+        }
+
+    private fun observeConversation() =
+        viewModelScope.launch {
+            loadHighlightedPost()
+            delayShortlyToPropagateHighlightedPost()
+            subscribeToConversationChanges()
+        }
+
+    private fun observeActiveAccount() =
+        viewModelScope.launch {
+            activeAccountStore.activeAccountState
+                .filterIsInstance<ActiveUserAccountState.ActiveUserAccount>()
+                .collect {
+                    setState {
+                        copy(
+                            walletConnected = it.data.nostrWallet != null,
+                            defaultZapAmount = it.data.appSettings?.defaultZapAmount,
+                            zapOptions = it.data.appSettings?.zapOptions ?: emptyList(),
+                        )
+                    }
+                }
+        }
 
     private suspend fun loadHighlightedPost() {
         val rootPost = withContext(Dispatchers.IO) { feedRepository.findPostById(postId = postId) }
@@ -130,121 +133,128 @@ class ThreadViewModel @Inject constructor(
             }
     }
 
-    private fun fetchRepliesFromNetwork() = viewModelScope.launch {
-        try {
-            feedRepository.fetchReplies(postId = postId)
-        } catch (error: WssException) {
-            // Ignore
-        }
-    }
-
-    private fun likePost(postLikeAction: UiEvent.PostLikeAction) = viewModelScope.launch {
-        try {
-            postRepository.likePost(
-                postId = postLikeAction.postId,
-                postAuthorId = postLikeAction.postAuthorId,
-            )
-        } catch (error: NostrPublishException) {
-            setErrorState(error = ThreadError.FailedToPublishLikeEvent(error))
-        } catch (error: MissingRelaysException) {
-            setErrorState(error = ThreadError.MissingRelaysConfiguration(error))
-        }
-    }
-
-    private fun repostPost(repostAction: UiEvent.RepostAction) = viewModelScope.launch {
-        try {
-            postRepository.repostPost(
-                postId = repostAction.postId,
-                postAuthorId = repostAction.postAuthorId,
-                postRawNostrEvent = repostAction.postNostrEvent,
-            )
-        } catch (error: NostrPublishException) {
-            setErrorState(error = ThreadError.FailedToPublishRepostEvent(error))
-        } catch (error: MissingRelaysException) {
-            setErrorState(error = ThreadError.MissingRelaysConfiguration(error))
-        }
-    }
-
-    private fun zapPost(zapAction: UiEvent.ZapAction) = viewModelScope.launch {
-        val postAuthorProfileData = withContext(Dispatchers.IO) {
-            profileRepository.findProfileData(profileId = zapAction.postAuthorId)
+    private fun fetchRepliesFromNetwork() =
+        viewModelScope.launch {
+            try {
+                feedRepository.fetchReplies(postId = postId)
+            } catch (error: WssException) {
+                // Ignore
+            }
         }
 
-        if (postAuthorProfileData.lnUrl == null) {
-            setErrorState(error = ThreadError.MissingLightningAddress(IllegalStateException()))
-            return@launch
+    private fun likePost(postLikeAction: UiEvent.PostLikeAction) =
+        viewModelScope.launch {
+            try {
+                postRepository.likePost(
+                    postId = postLikeAction.postId,
+                    postAuthorId = postLikeAction.postAuthorId,
+                )
+            } catch (error: NostrPublishException) {
+                setErrorState(error = ThreadError.FailedToPublishLikeEvent(error))
+            } catch (error: MissingRelaysException) {
+                setErrorState(error = ThreadError.MissingRelaysConfiguration(error))
+            }
         }
 
-        try {
-            zapRepository.zap(
-                userId = activeAccountStore.activeUserId(),
-                comment = zapAction.zapDescription,
-                amountInSats = zapAction.zapAmount,
-                target = ZapTarget.Note(
-                    zapAction.postId,
-                    zapAction.postAuthorId,
-                    postAuthorProfileData.lnUrl,
-                ),
-            )
-        } catch (error: ZapRepository.ZapFailureException) {
-            setErrorState(error = ThreadError.FailedToPublishZapEvent(error))
-        } catch (error: NostrPublishException) {
-            setErrorState(error = ThreadError.FailedToPublishZapEvent(error))
-        } catch (error: MissingRelaysException) {
-            setErrorState(error = ThreadError.MissingRelaysConfiguration(error))
-        } catch (error: ZapRepository.InvalidZapRequestException) {
-            setErrorState(error = ThreadError.InvalidZapRequest(error))
+    private fun repostPost(repostAction: UiEvent.RepostAction) =
+        viewModelScope.launch {
+            try {
+                postRepository.repostPost(
+                    postId = repostAction.postId,
+                    postAuthorId = repostAction.postAuthorId,
+                    postRawNostrEvent = repostAction.postNostrEvent,
+                )
+            } catch (error: NostrPublishException) {
+                setErrorState(error = ThreadError.FailedToPublishRepostEvent(error))
+            } catch (error: MissingRelaysException) {
+                setErrorState(error = ThreadError.MissingRelaysConfiguration(error))
+            }
         }
-    }
+
+    private fun zapPost(zapAction: UiEvent.ZapAction) =
+        viewModelScope.launch {
+            val postAuthorProfileData = withContext(Dispatchers.IO) {
+                profileRepository.findProfileData(profileId = zapAction.postAuthorId)
+            }
+
+            if (postAuthorProfileData.lnUrl == null) {
+                setErrorState(error = ThreadError.MissingLightningAddress(IllegalStateException()))
+                return@launch
+            }
+
+            try {
+                zapRepository.zap(
+                    userId = activeAccountStore.activeUserId(),
+                    comment = zapAction.zapDescription,
+                    amountInSats = zapAction.zapAmount,
+                    target = ZapTarget.Note(
+                        zapAction.postId,
+                        zapAction.postAuthorId,
+                        postAuthorProfileData.lnUrl,
+                    ),
+                )
+            } catch (error: ZapRepository.ZapFailureException) {
+                setErrorState(error = ThreadError.FailedToPublishZapEvent(error))
+            } catch (error: NostrPublishException) {
+                setErrorState(error = ThreadError.FailedToPublishZapEvent(error))
+            } catch (error: MissingRelaysException) {
+                setErrorState(error = ThreadError.MissingRelaysConfiguration(error))
+            } catch (error: ZapRepository.InvalidZapRequestException) {
+                setErrorState(error = ThreadError.InvalidZapRequest(error))
+            }
+        }
 
     private fun updateReply(updateReplyEvent: UiEvent.UpdateReply) {
         setState { copy(replyText = updateReplyEvent.newReply) }
     }
 
-    private fun publishReply(replyToAction: UiEvent.ReplyToAction) = viewModelScope.launch {
-        setState { copy(publishingReply = true) }
-        try {
-            val publishedAndImported = postRepository.publishShortTextNote(
-                content = state.value.replyText,
-                attachments = emptyList(),
-                rootPostId = replyToAction.rootPostId,
-                replyToPostId = replyToAction.replyToPostId,
-                replyToAuthorId = replyToAction.replyToAuthorId,
-            )
+    private fun publishReply(replyToAction: UiEvent.ReplyToAction) =
+        viewModelScope.launch {
+            setState { copy(publishingReply = true) }
+            try {
+                val publishedAndImported = postRepository.publishShortTextNote(
+                    content = state.value.replyText,
+                    attachments = emptyList(),
+                    rootPostId = replyToAction.rootPostId,
+                    replyToPostId = replyToAction.replyToPostId,
+                    replyToAuthorId = replyToAction.replyToAuthorId,
+                )
 
-            if (publishedAndImported) {
-                fetchRepliesFromNetwork()
-            } else {
-                scheduleFetchReplies()
+                if (publishedAndImported) {
+                    fetchRepliesFromNetwork()
+                } else {
+                    scheduleFetchReplies()
+                }
+
+                setState { copy(replyText = "") }
+            } catch (error: NostrPublishException) {
+                setErrorState(error = ThreadError.FailedToPublishReplyEvent(error))
+            } catch (error: MissingRelaysException) {
+                setErrorState(error = ThreadError.MissingRelaysConfiguration(error))
+            } finally {
+                setState { copy(publishingReply = false) }
             }
-
-            setState { copy(replyText = "") }
-        } catch (error: NostrPublishException) {
-            setErrorState(error = ThreadError.FailedToPublishReplyEvent(error))
-        } catch (error: MissingRelaysException) {
-            setErrorState(error = ThreadError.MissingRelaysConfiguration(error))
-        } finally {
-            setState { copy(publishingReply = false) }
         }
-    }
 
-    private fun mute(action: UiEvent.MuteAction) = viewModelScope.launch {
-        try {
-            mutedUserRepository.muteUserAndPersistMuteList(
-                userId = activeAccountStore.activeUserId(),
-                mutedUserId = action.postAuthorId
-            )
-        } catch (error: WssException) {
-            setErrorState(error = ThreadError.FailedToMuteUser(error))
-        } catch (error: NostrPublishException) {
-            setErrorState(error = ThreadError.FailedToMuteUser(error))
+    private fun mute(action: UiEvent.MuteAction) =
+        viewModelScope.launch {
+            try {
+                mutedUserRepository.muteUserAndPersistMuteList(
+                    userId = activeAccountStore.activeUserId(),
+                    mutedUserId = action.postAuthorId,
+                )
+            } catch (error: WssException) {
+                setErrorState(error = ThreadError.FailedToMuteUser(error))
+            } catch (error: NostrPublishException) {
+                setErrorState(error = ThreadError.FailedToMuteUser(error))
+            }
         }
-    }
 
-    private fun scheduleFetchReplies() = viewModelScope.launch {
-        delay(750.milliseconds)
-        fetchRepliesFromNetwork()
-    }
+    private fun scheduleFetchReplies() =
+        viewModelScope.launch {
+            delay(750.milliseconds)
+            fetchRepliesFromNetwork()
+        }
 
     private fun setErrorState(error: ThreadError) {
         setState { copy(error = error) }

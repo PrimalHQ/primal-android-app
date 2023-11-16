@@ -5,6 +5,9 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.util.*
+import javax.inject.Inject
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -33,9 +36,6 @@ import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
-import java.util.UUID
-import javax.inject.Inject
-import kotlin.time.Duration.Companion.seconds
 
 @HiltViewModel
 class NoteEditorViewModel @Inject constructor(
@@ -54,8 +54,8 @@ class NoteEditorViewModel @Inject constructor(
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
 
-    private val _event: MutableSharedFlow<UiEvent> = MutableSharedFlow()
-    fun setEvent(event: UiEvent) = viewModelScope.launch { _event.emit(event) }
+    private val events: MutableSharedFlow<UiEvent> = MutableSharedFlow()
+    fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
 
     private val _effect: Channel<SideEffect> = Channel()
     val effect = _effect.receiveAsFlow()
@@ -75,82 +75,91 @@ class NoteEditorViewModel @Inject constructor(
         }
     }
 
-    private fun subscribeToEvents() = viewModelScope.launch {
-        _event.collect {
-            when (it) {
-                is UiEvent.PublishPost -> publishPost(it)
-                is UiEvent.ImportLocalFiles -> importPhotos(it.uris)
-                is UiEvent.DiscardNoteAttachment -> discardAttachment(it.attachmentId)
-                is UiEvent.RetryUpload -> retryAttachmentUpload(it.attachmentId)
-            }
-        }
-    }
-
-    private fun subscribeToActiveAccount() = viewModelScope.launch {
-        activeAccountStore.activeAccountState
-            .filterIsInstance<ActiveUserAccountState.ActiveUserAccount>()
-            .collect {
-                setState {
-                    copy(activeAccountAvatarUrl = it.data.pictureUrl)
+    private fun subscribeToEvents() =
+        viewModelScope.launch {
+            events.collect {
+                when (it) {
+                    is UiEvent.PublishPost -> publishPost(it)
+                    is UiEvent.ImportLocalFiles -> importPhotos(it.uris)
+                    is UiEvent.DiscardNoteAttachment -> discardAttachment(it.attachmentId)
+                    is UiEvent.RetryUpload -> retryAttachmentUpload(it.attachmentId)
                 }
             }
-    }
+        }
 
-    private fun observeConversation(replyToNoteId: String) = viewModelScope.launch {
-        feedRepository.observeConversation(postId = replyToNoteId)
-            .filter { it.isNotEmpty() }
-            .map { posts -> posts.map { it.asFeedPostUi() } }
-            .collect { conversation ->
-                val replyToNoteIndex = conversation.indexOfFirst { it.postId == replyToNoteId }
-                val thread = conversation.subList(0, replyToNoteIndex + 1)
-                setState {
-                    copy(
-                        conversation = thread,
-                    )
+    private fun subscribeToActiveAccount() =
+        viewModelScope.launch {
+            activeAccountStore.activeAccountState
+                .filterIsInstance<ActiveUserAccountState.ActiveUserAccount>()
+                .collect {
+                    setState {
+                        copy(activeAccountAvatarUrl = it.data.pictureUrl)
+                    }
                 }
+        }
+
+    private fun observeConversation(replyToNoteId: String) =
+        viewModelScope.launch {
+            feedRepository.observeConversation(postId = replyToNoteId)
+                .filter { it.isNotEmpty() }
+                .map { posts -> posts.map { it.asFeedPostUi() } }
+                .collect { conversation ->
+                    val replyToNoteIndex = conversation.indexOfFirst { it.postId == replyToNoteId }
+                    val thread = conversation.subList(0, replyToNoteIndex + 1)
+                    setState {
+                        copy(
+                            conversation = thread,
+                        )
+                    }
+                }
+        }
+
+    private fun fetchRepliesFromNetwork(replyToNoteId: String) =
+        viewModelScope.launch {
+            try {
+                feedRepository.fetchReplies(postId = replyToNoteId)
+            } catch (error: WssException) {
+                // Ignore
             }
-    }
-
-    private fun fetchRepliesFromNetwork(replyToNoteId: String) = viewModelScope.launch {
-        try {
-            feedRepository.fetchReplies(postId = replyToNoteId)
-        } catch (error: WssException) {
-            // Ignore
         }
-    }
 
-    private fun publishPost(event: UiEvent.PublishPost) = viewModelScope.launch {
-        setState { copy(publishing = true) }
-        try {
-            val rootPost = _state.value.conversation.firstOrNull()
-            val replyToPost = _state.value.conversation.lastOrNull()
-            postRepository.publishShortTextNote(
-                content =  event.content,
-                attachments = _state.value.attachments,
-                rootPostId = rootPost?.postId,
-                replyToPostId = replyToPost?.postId,
-                replyToAuthorId = replyToPost?.authorId,
-            )
-            sendEffect(SideEffect.PostPublished)
-        } catch (error: NostrPublishException) {
-            setErrorState(error = UiState.NewPostError.PublishError(cause = error.cause))
-        } catch (error: MissingRelaysException) {
-            setErrorState(error = UiState.NewPostError.MissingRelaysConfiguration(cause = error))
-        } finally {
-            setState { copy(publishing = false) }
+    private fun publishPost(event: UiEvent.PublishPost) =
+        viewModelScope.launch {
+            setState { copy(publishing = true) }
+            try {
+                val rootPost = _state.value.conversation.firstOrNull()
+                val replyToPost = _state.value.conversation.lastOrNull()
+                postRepository.publishShortTextNote(
+                    content = event.content,
+                    attachments = _state.value.attachments,
+                    rootPostId = rootPost?.postId,
+                    replyToPostId = replyToPost?.postId,
+                    replyToAuthorId = replyToPost?.authorId,
+                )
+                sendEffect(SideEffect.PostPublished)
+            } catch (error: NostrPublishException) {
+                setErrorState(error = UiState.NewPostError.PublishError(cause = error.cause))
+            } catch (error: MissingRelaysException) {
+                setErrorState(
+                    error = UiState.NewPostError.MissingRelaysConfiguration(cause = error),
+                )
+            } finally {
+                setState { copy(publishing = false) }
+            }
         }
-    }
 
-    private fun importPhotos(uris: List<Uri>) = viewModelScope.launch {
-        val newAttachments = uris.map { NoteAttachment(localUri = it) }
-        setState { copy(attachments = attachments + newAttachments) }
-        uploadAttachments(attachments = newAttachments)
-    }
+    private fun importPhotos(uris: List<Uri>) =
+        viewModelScope.launch {
+            val newAttachments = uris.map { NoteAttachment(localUri = it) }
+            setState { copy(attachments = attachments + newAttachments) }
+            uploadAttachments(attachments = newAttachments)
+        }
 
-    private fun uploadAttachments(attachments: List<NoteAttachment>) = viewModelScope.launch {
-        attachments.forEach { uploadAttachment(attachment = it) }
-        checkUploadQueueAndDisableFlagIfCompleted()
-    }
+    private fun uploadAttachments(attachments: List<NoteAttachment>) =
+        viewModelScope.launch {
+            attachments.forEach { uploadAttachment(attachment = it) }
+            checkUploadQueueAndDisableFlagIfCompleted()
+        }
 
     private suspend fun uploadAttachment(attachment: NoteAttachment) {
         try {
@@ -161,12 +170,14 @@ class NoteEditorViewModel @Inject constructor(
             updateNoteAttachmentState(attachment = attachment.copy(remoteUrl = remoteUrl))
 
             if (attachment.isImageAttachment) {
-                val (mimeType, dimensions) = fileAnalyser.extractImageTypeAndDimensions(attachment.localUri)
+                val (mimeType, dimensions) = fileAnalyser.extractImageTypeAndDimensions(
+                    attachment.localUri,
+                )
                 updateNoteAttachmentState(
                     attachment = attachment.copy(
                         mimeType = mimeType,
                         otherRelevantInfo = dimensions,
-                    )
+                    ),
                 )
             }
         } catch (error: UnsuccessfulFileUpload) {
@@ -183,23 +194,25 @@ class NoteEditorViewModel @Inject constructor(
         }
     }
 
-    private fun discardAttachment(attachmentId: UUID) = viewModelScope.launch {
-        setState {
-            val attachments = this.attachments.toMutableList()
-            attachments.removeIf { it.id == attachmentId }
-            this.copy(
-                attachments = attachments,
-                uploadingAttachments = if (attachments.isEmpty()) false else this.uploadingAttachments
-            )
+    private fun discardAttachment(attachmentId: UUID) =
+        viewModelScope.launch {
+            setState {
+                val attachments = this.attachments.toMutableList()
+                attachments.removeIf { it.id == attachmentId }
+                this.copy(
+                    attachments = attachments,
+                    uploadingAttachments = if (attachments.isEmpty()) false else this.uploadingAttachments,
+                )
+            }
         }
-    }
 
-    private fun retryAttachmentUpload(attachmentId: UUID) = viewModelScope.launch {
-        _state.value.attachments.firstOrNull { it.id == attachmentId }?.let {
-            uploadAttachment(it)
-            checkUploadQueueAndDisableFlagIfCompleted()
+    private fun retryAttachmentUpload(attachmentId: UUID) =
+        viewModelScope.launch {
+            _state.value.attachments.firstOrNull { it.id == attachmentId }?.let {
+                uploadAttachment(it)
+                checkUploadQueueAndDisableFlagIfCompleted()
+            }
         }
-    }
 
     private fun checkUploadQueueAndDisableFlagIfCompleted() {
         val attachments = _state.value.attachments

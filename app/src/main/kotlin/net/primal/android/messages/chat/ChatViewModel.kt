@@ -6,6 +6,9 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.map
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.time.Instant
+import javax.inject.Inject
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -34,9 +37,6 @@ import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.badges.BadgesManager
 import timber.log.Timber
-import java.time.Instant
-import javax.inject.Inject
-import kotlin.time.Duration.Companion.seconds
 
 @HiltViewModel
 class ChatViewModel @Inject constructor(
@@ -55,14 +55,14 @@ class ChatViewModel @Inject constructor(
             participantId = participantId,
             messages = messageRepository
                 .newestMessages(participantId = participantId)
-                .mapAsPagingDataOfChatMessageUi()
-        )
+                .mapAsPagingDataOfChatMessageUi(),
+        ),
     )
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
 
-    private val _event: MutableSharedFlow<UiEvent> = MutableSharedFlow()
-    fun setEvent(event: UiEvent) = viewModelScope.launch { _event.emit(event) }
+    private val events: MutableSharedFlow<UiEvent> = MutableSharedFlow()
+    fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
 
     init {
         observeEvents()
@@ -71,80 +71,86 @@ class ChatViewModel @Inject constructor(
         subscribeToTotalUnreadCountChanges()
     }
 
-    private fun observeEvents() = viewModelScope.launch {
-        _event.collect {
-            when (it) {
-                UiEvent.MessagesSeen -> {}
-                UiEvent.SendMessage -> sendMessage()
-                is UiEvent.UpdateNewMessage -> {
-                    setState { copy(newMessageText = it.text) }
+    private fun observeEvents() =
+        viewModelScope.launch {
+            events.collect {
+                when (it) {
+                    UiEvent.MessagesSeen -> {}
+                    UiEvent.SendMessage -> sendMessage()
+                    is UiEvent.UpdateNewMessage -> {
+                        setState { copy(newMessageText = it.text) }
+                    }
                 }
             }
         }
-    }
 
     @OptIn(FlowPreview::class)
-    private fun observeMessagesSeenEvents() = viewModelScope.launch {
-        _event
-            .filterIsInstance(UiEvent.MessagesSeen::class)
-            .debounce(1.seconds)
-            .collect {
-                markConversationAsRead()
-            }
-    }
-
-    private fun observeParticipant() = viewModelScope.launch {
-        profileRepository.observeProfile(profileId = participantId).collect {
-            setState {
-                copy(
-                    participantProfile = it.metadata?.asProfileDetailsUi()
-                        ?: this.participantProfile,
-                    participantMediaResources = it.resources.map { it.asMediaResourceUi() },
-                )
-            }
+    private fun observeMessagesSeenEvents() =
+        viewModelScope.launch {
+            events
+                .filterIsInstance(UiEvent.MessagesSeen::class)
+                .debounce(1.seconds)
+                .collect {
+                    markConversationAsRead()
+                }
         }
-    }
 
-    private fun subscribeToTotalUnreadCountChanges() = viewModelScope.launch {
-        badgesManager.badges
-            .map { it.messages }
-            .distinctUntilChanged()
-            .collect {
-                try {
-                    messageRepository.fetchNewConversationMessages(userId, participantId)
-                } catch (error: WssException) {
-                    Timber.w(error)
+    private fun observeParticipant() =
+        viewModelScope.launch {
+            profileRepository.observeProfile(profileId = participantId).collect {
+                setState {
+                    copy(
+                        participantProfile = it.metadata?.asProfileDetailsUi()
+                            ?: this.participantProfile,
+                        participantMediaResources = it.resources.map { it.asMediaResourceUi() },
+                    )
                 }
             }
-    }
-
-    private fun markConversationAsRead() = viewModelScope.launch {
-        try {
-            messageRepository.markConversationAsRead(userId, participantId)
-        } catch (error: WssException) {
-            Timber.w(error)
         }
-    }
 
-    private fun sendMessage() = viewModelScope.launch {
-        setState { copy(sending = true) }
-        try {
-            messageRepository.sendMessage(
-                userId = userId,
-                receiverId = participantId,
-                text = state.value.newMessageText,
-            )
-            setState { copy(newMessageText = "") }
-        } catch (error: NostrPublishException) {
-            Timber.w(error)
-            setErrorState(error = UiState.ChatError.PublishError(error))
-        } catch (error: MissingRelaysException) {
-            Timber.w(error)
-            setErrorState(error = UiState.ChatError.MissingRelaysConfiguration(error))
-        } finally {
-            setState { copy(sending = false) }
+    private fun subscribeToTotalUnreadCountChanges() =
+        viewModelScope.launch {
+            badgesManager.badges
+                .map { it.messages }
+                .distinctUntilChanged()
+                .collect {
+                    try {
+                        messageRepository.fetchNewConversationMessages(userId, participantId)
+                    } catch (error: WssException) {
+                        Timber.w(error)
+                    }
+                }
         }
-    }
+
+    private fun markConversationAsRead() =
+        viewModelScope.launch {
+            try {
+                messageRepository.markConversationAsRead(userId, participantId)
+            } catch (error: WssException) {
+                Timber.w(error)
+            }
+        }
+
+    private fun sendMessage() =
+        viewModelScope.launch {
+            setState { copy(sending = true) }
+            try {
+                messageRepository.sendMessage(
+                    userId = userId,
+                    receiverId = participantId,
+                    text = state.value.newMessageText,
+                )
+                setState { copy(newMessageText = "") }
+            } catch (error: NostrPublishException) {
+                Timber.w(error)
+                setErrorState(error = UiState.ChatError.PublishError(error))
+            } catch (error: MissingRelaysException) {
+                Timber.w(error)
+                setErrorState(error = UiState.ChatError.MissingRelaysConfiguration(error))
+            } finally {
+                setState { copy(sending = false) }
+            }
+        }
 
     private fun Flow<PagingData<DirectMessage>>.mapAsPagingDataOfChatMessageUi() =
         map { pagingData -> pagingData.map { it.mapAsChatMessageUi() } }

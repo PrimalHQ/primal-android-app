@@ -58,26 +58,32 @@ fun IconText(
         append(text)
     }
 
-    val inlineContent = if (leadingIcon != null) mapOf(
-        "icon" to InlineTextContent(
-            placeholder = Placeholder(
-                leadingIconSize, leadingIconSize, PlaceholderVerticalAlign.TextCenter
-            )
-        ) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center,
+    val inlineContent = if (leadingIcon != null) {
+        mapOf(
+            "icon" to InlineTextContent(
+                placeholder = Placeholder(
+                    leadingIconSize, leadingIconSize, PlaceholderVerticalAlign.TextCenter,
+                ),
             ) {
-                Image(
-                    imageVector = leadingIcon,
-                    contentDescription = null,
-                    colorFilter = if (leadingIconTintColor != null) {
-                        ColorFilter.tint(color = leadingIconTintColor)
-                    } else null,
-                )
-            }
-        }
-    ) else emptyMap()
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Image(
+                        imageVector = leadingIcon,
+                        contentDescription = null,
+                        colorFilter = if (leadingIconTintColor != null) {
+                            ColorFilter.tint(color = leadingIconTintColor)
+                        } else {
+                            null
+                        },
+                    )
+                }
+            },
+        )
+    } else {
+        emptyMap()
+    }
 
     Text(
         modifier = modifier,

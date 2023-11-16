@@ -17,10 +17,11 @@ data class Relay(
 fun String.toRelay(): Relay = Relay(url = this, read = true, write = true)
 
 @OptIn(ExperimentalSerializationApi::class)
-fun List<Relay>.toZapTag(): JsonArray = buildJsonArray {
-    add("relays")
-    addAll(this@toZapTag.map { it.url })
-}
+fun List<Relay>.toZapTag(): JsonArray =
+    buildJsonArray {
+        add("relays")
+        addAll(this@toZapTag.map { it.url })
+    }
 
 @Serializable
 data class RelayPermission(

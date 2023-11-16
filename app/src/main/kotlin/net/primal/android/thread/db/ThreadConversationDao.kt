@@ -37,8 +37,7 @@ interface ThreadConversationDao {
             LEFT JOIN MutedUserData ON MutedUserData.userId = FPD2.authorId
             WHERE FPD1.postId = :postId AND isMuted = 0
             ORDER BY FPD2.createdAt ASC
-        """
+        """,
     )
     fun observeConversation(postId: String, userId: String): Flow<List<FeedPost>>
-
 }

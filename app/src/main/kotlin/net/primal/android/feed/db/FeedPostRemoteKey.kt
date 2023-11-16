@@ -3,7 +3,7 @@ package net.primal.android.feed.db
 import androidx.room.Entity
 
 @Entity(
-    primaryKeys = ["eventId", "directive"]
+    primaryKeys = ["eventId", "directive"],
 )
 data class FeedPostRemoteKey(
     val eventId: String,

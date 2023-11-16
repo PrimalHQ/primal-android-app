@@ -9,7 +9,7 @@ fun String.parseAsLNUrlOrNull(): String? {
     val host = parts[1]
     val lnurlp = parts[0]
 
-    return  "https://$host/.well-known/lnurlp/$lnurlp"
+    return "https://$host/.well-known/lnurlp/$lnurlp"
 }
 
 fun String.decodeLNUrlOrNull(): String? {

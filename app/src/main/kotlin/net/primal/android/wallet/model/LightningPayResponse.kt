@@ -6,8 +6,9 @@ import kotlinx.serialization.Serializable
 data class LightningPayResponse(
     val pr: String,
 ) {
-    fun toWalletPayRequest(): WalletRequest<PayInvoiceRequest> = WalletRequest(
-        method = "pay_invoice",
-        params = PayInvoiceRequest(this.pr)
-    )
+    fun toWalletPayRequest(): WalletRequest<PayInvoiceRequest> =
+        WalletRequest(
+            method = "pay_invoice",
+            params = PayInvoiceRequest(this.pr),
+        )
 }

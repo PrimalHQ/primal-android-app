@@ -1,5 +1,7 @@
 package net.primal.android.notifications.api
 
+import java.time.Instant
+import javax.inject.Inject
 import kotlinx.serialization.encodeToString
 import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.android.networking.primal.PrimalApiClient
@@ -12,8 +14,6 @@ import net.primal.android.notifications.api.model.NotificationsResponse
 import net.primal.android.notifications.api.model.PubkeyRequestBody
 import net.primal.android.serialization.NostrJson
 import net.primal.android.settings.api.model.AppSpecificDataRequest
-import java.time.Instant
-import javax.inject.Inject
 
 class NotificationsApiImpl @Inject constructor(
     @PrimalCacheApiClient private val primalApiClient: PrimalApiClient,
@@ -24,8 +24,8 @@ class NotificationsApiImpl @Inject constructor(
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.GET_LAST_SEEN_NOTIFICATIONS,
-                optionsJson = NostrJson.encodeToString(PubkeyRequestBody(pubkey = userId))
-            )
+                optionsJson = NostrJson.encodeToString(PubkeyRequestBody(pubkey = userId)),
+            ),
         )
 
         val notificationsSeenEvent = queryResult
@@ -50,9 +50,9 @@ class NotificationsApiImpl @Inject constructor(
                             userId = userId,
                             description = "Update notifications last seen timestamp.",
                         ),
-                    )
+                    ),
                 ),
-            )
+            ),
         )
     }
 
@@ -61,16 +61,22 @@ class NotificationsApiImpl @Inject constructor(
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.GET_NOTIFICATIONS,
                 optionsJson = NostrJson.encodeToString(body),
-            )
+            ),
         )
 
         return NotificationsResponse(
             metadata = queryResult.filterNostrEvents(NostrEventKind.Metadata),
             notes = queryResult.filterNostrEvents(NostrEventKind.ShortTextNote),
             primalNoteStats = queryResult.filterPrimalEvents(NostrEventKind.PrimalEventStats),
-            primalMediaResources = queryResult.filterPrimalEvents(NostrEventKind.PrimalEventResources),
-            primalReferencedNotes = queryResult.filterPrimalEvents(NostrEventKind.PrimalReferencedEvent),
-            primalUserProfileStats = queryResult.filterPrimalEvents(NostrEventKind.PrimalUserProfileStats),
+            primalMediaResources = queryResult.filterPrimalEvents(
+                NostrEventKind.PrimalEventResources,
+            ),
+            primalReferencedNotes = queryResult.filterPrimalEvents(
+                NostrEventKind.PrimalReferencedEvent,
+            ),
+            primalUserProfileStats = queryResult.filterPrimalEvents(
+                NostrEventKind.PrimalUserProfileStats,
+            ),
             primalNotifications = queryResult.filterPrimalEvents(NostrEventKind.PrimalNotification),
         )
     }

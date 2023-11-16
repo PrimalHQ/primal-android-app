@@ -48,16 +48,13 @@ import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
 
 @Composable
-fun AppearanceSettingsScreen(
-    viewModel: AppearanceSettingsViewModel,
-    onClose: () -> Unit,
-) {
+fun AppearanceSettingsScreen(viewModel: AppearanceSettingsViewModel, onClose: () -> Unit) {
     val uiState = viewModel.state.collectAsState()
 
     AppearanceSettingsScreen(
         state = uiState.value,
         onClose = onClose,
-        eventPublisher = { viewModel.setEvent(it) }
+        eventPublisher = { viewModel.setEvent(it) },
     )
 }
 
@@ -66,7 +63,7 @@ fun AppearanceSettingsScreen(
 fun AppearanceSettingsScreen(
     state: AppearanceSettingsContract.UiState,
     onClose: () -> Unit,
-    eventPublisher: (AppearanceSettingsContract.UiEvent) -> Unit
+    eventPublisher: (AppearanceSettingsContract.UiEvent) -> Unit,
 ) {
     Scaffold(
         modifier = Modifier,
@@ -74,7 +71,7 @@ fun AppearanceSettingsScreen(
             PrimalTopAppBar(
                 title = "Appearance",
                 navigationIcon = PrimalIcons.ArrowBack,
-                onNavigationIconClick = onClose
+                onNavigationIconClick = onClose,
             )
         },
         content = { paddingValues ->
@@ -85,43 +82,44 @@ fun AppearanceSettingsScreen(
                     .padding(horizontal = 16.dp, vertical = 16.dp)
                     .imePadding(),
                 verticalArrangement = Arrangement.Top,
-                horizontalAlignment = Alignment.Start
+                horizontalAlignment = Alignment.Start,
             ) {
                 ThemeSection(state = state, eventPublisher = eventPublisher)
                 PrimalDivider()
             }
-        }
+        },
     )
 }
 
 @Composable
 private fun ThemeSection(
     state: AppearanceSettingsContract.UiState,
-    eventPublisher: (AppearanceSettingsContract.UiEvent) -> Unit
+    eventPublisher: (AppearanceSettingsContract.UiEvent) -> Unit,
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.Start,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Center,
     ) {
         Text(
-            text = stringResource(id = R.string.settings_appearance_theme_section_title).uppercase(),
+            text = stringResource(
+                id = R.string.settings_appearance_theme_section_title,
+            ).uppercase(),
             fontWeight = FontWeight.W500,
             fontSize = 14.sp,
-            lineHeight = 16.sp
+            lineHeight = 16.sp,
         )
         Spacer(modifier = Modifier.height(12.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-
             state.themes.forEach { primalTheme ->
                 ThemeBox(
                     primalTheme = primalTheme,
                     state = state,
-                    eventPublisher = eventPublisher
+                    eventPublisher = eventPublisher,
                 )
             }
         }
@@ -133,10 +131,10 @@ private fun ThemeSection(
 private fun ThemeBox(
     primalTheme: PrimalTheme,
     state: AppearanceSettingsContract.UiState,
-    eventPublisher: (AppearanceSettingsContract.UiEvent) -> Unit
+    eventPublisher: (AppearanceSettingsContract.UiEvent) -> Unit,
 ) {
     Column(
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         val selected = primalTheme.themeName == state.selectedThemeName
         val borderBrush = if (selected) {
@@ -168,22 +166,24 @@ private fun ThemeBox(
             modifier = Modifier
                 .clip(AppTheme.shapes.small)
                 .border(
-                    width = 1.dp, brush = borderBrush, shape = AppTheme.shapes.small
+                    width = 1.dp,
+                    brush = borderBrush,
+                    shape = AppTheme.shapes.small,
                 )
                 .clickable {
                     eventPublisher(
                         AppearanceSettingsContract.UiEvent.SelectedThemeChanged(
-                            themeName = primalTheme.themeName
-                        )
+                            themeName = primalTheme.themeName,
+                        ),
                     )
                 }
                 .background(color = if (primalTheme.isDarkTheme) Color.Black else Color.White)
-                .size(72.dp)
+                .size(72.dp),
         ) {
             Image(
                 modifier = Modifier.align(alignment = Alignment.Center),
                 painter = painterResource(id = primalTheme.accent.logoId),
-                contentDescription = null
+                contentDescription = null,
             )
 
             if (selected) {
@@ -192,7 +192,7 @@ private fun ThemeBox(
                         .clip(RoundedCornerShape(topStart = 8.dp))
                         .background(color = AppTheme.colorScheme.primary)
                         .size(16.dp)
-                        .align(alignment = Alignment.BottomEnd)
+                        .align(alignment = Alignment.BottomEnd),
                 ) {
                     Icon(
                         modifier = Modifier
@@ -200,7 +200,7 @@ private fun ThemeBox(
                             .align(alignment = Alignment.Center),
                         imageVector = Icons.Default.Check,
                         tint = Color.White,
-                        contentDescription = null
+                        contentDescription = null,
                     )
                 }
             }
@@ -212,7 +212,7 @@ private fun ThemeBox(
             fontSize = 16.sp,
             lineHeight = 16.sp,
             textAlign = TextAlign.Center,
-            color = AppTheme.extraColorScheme.onSurfaceVariantAlt2
+            color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
         )
     }
 }
@@ -223,7 +223,7 @@ class AppearanceSettingsUiStateProvider :
         get() = PrimalTheme.values().map {
             return@map AppearanceSettingsContract.UiState(
                 selectedThemeName = it.themeName,
-                themes = PrimalTheme.values().toList()
+                themes = PrimalTheme.values().toList(),
             )
         }.asSequence()
 }
@@ -232,13 +232,13 @@ class AppearanceSettingsUiStateProvider :
 @Composable
 fun PreviewAppearanceSettingsScreen(
     @PreviewParameter(AppearanceSettingsUiStateProvider::class)
-    state: AppearanceSettingsContract.UiState
+    state: AppearanceSettingsContract.UiState,
 ) {
     PrimalTheme(primalTheme = PrimalTheme.valueOf(themeName = state.selectedThemeName)!!) {
         AppearanceSettingsScreen(
             state = state,
             onClose = {},
-            eventPublisher = {}
+            eventPublisher = {},
         )
     }
 }

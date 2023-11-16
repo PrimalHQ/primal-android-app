@@ -1,9 +1,9 @@
 package net.primal.android.editor
 
 import android.net.Uri
+import java.util.UUID
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.editor.domain.NoteAttachment
-import java.util.UUID
 
 interface NoteEditorContract {
 
@@ -23,7 +23,6 @@ interface NoteEditorContract {
             data class PublishError(val cause: Throwable?) : NewPostError()
             data class MissingRelaysConfiguration(val cause: Throwable) : NewPostError()
         }
-
     }
 
     sealed class UiEvent {
@@ -36,5 +35,4 @@ interface NoteEditorContract {
     sealed class SideEffect {
         data object PostPublished : SideEffect()
     }
-
 }

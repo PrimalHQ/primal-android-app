@@ -8,13 +8,13 @@ package net.primal.android.crypto
  */
 
 import fr.acinq.secp256k1.Secp256k1
-import org.spongycastle.util.encoders.Base64
-import org.spongycastle.util.encoders.Hex
 import java.security.MessageDigest
 import java.security.SecureRandom
 import javax.crypto.Cipher
 import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
+import org.spongycastle.util.encoders.Base64
+import org.spongycastle.util.encoders.Hex
 
 object CryptoUtils {
     data class Keypair(val privkey: String, val pubkey: String)
@@ -41,9 +41,17 @@ object CryptoUtils {
         secp256k1.pubKeyCompress(secp256k1.pubkeyCreate(privateKey)).copyOfRange(1, 33)
 
     fun sign(data: ByteArray, privateKey: ByteArray): ByteArray =
-        secp256k1.signSchnorr(data, privateKey, null)
+        secp256k1.signSchnorr(
+            data,
+            privateKey,
+            null,
+        )
 
-    fun encrypt(msg: String, privateKey: ByteArray, pubKey: ByteArray): String {
+    fun encrypt(
+        msg: String,
+        privateKey: ByteArray,
+        pubKey: ByteArray,
+    ): String {
         val sharedSecret = getSharedSecret(privateKey, pubKey)
         return encrypt(msg, sharedSecret)
     }
@@ -59,7 +67,11 @@ object CryptoUtils {
         return "$encryptedMsgBase64?iv=$ivBase64"
     }
 
-    fun decrypt(msg: String, privateKey: ByteArray, pubKey: ByteArray): String {
+    fun decrypt(
+        msg: String,
+        privateKey: ByteArray,
+        pubKey: ByteArray,
+    ): String {
         val sharedSecret = getSharedSecret(privateKey, pubKey)
         return decrypt(msg, sharedSecret)
     }

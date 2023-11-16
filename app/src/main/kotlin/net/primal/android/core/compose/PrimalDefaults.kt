@@ -6,7 +6,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import net.primal.android.theme.AppTheme
 
-
 object PrimalDefaults {
 
     @Composable
@@ -18,14 +17,14 @@ object PrimalDefaults {
         focusedBorderColor: Color = AppTheme.extraColorScheme.surfaceVariantAlt1,
         unfocusedBorderColor: Color = AppTheme.extraColorScheme.surfaceVariantAlt1,
         disabledBorderColor: Color = AppTheme.colorScheme.outline,
-    ): TextFieldColors = OutlinedTextFieldDefaults.colors(
-        focusedContainerColor = focusedContainerColor,
-        unfocusedContainerColor = unfocusedContainerColor,
-        disabledContainerColor = disabledContainerColor,
-        errorBorderColor = errorBorderColor,
-        focusedBorderColor = focusedBorderColor,
-        unfocusedBorderColor = unfocusedBorderColor,
-        disabledBorderColor = disabledBorderColor,
-    )
-
+    ): TextFieldColors =
+        OutlinedTextFieldDefaults.colors(
+            focusedContainerColor = focusedContainerColor,
+            unfocusedContainerColor = unfocusedContainerColor,
+            disabledContainerColor = disabledContainerColor,
+            errorBorderColor = errorBorderColor,
+            focusedBorderColor = focusedBorderColor,
+            unfocusedBorderColor = unfocusedBorderColor,
+            disabledBorderColor = disabledBorderColor,
+        )
 }

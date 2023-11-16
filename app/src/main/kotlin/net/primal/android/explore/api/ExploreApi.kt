@@ -11,5 +11,4 @@ interface ExploreApi {
     suspend fun getRecommendedUsers(): UsersResponse
 
     suspend fun searchUsers(body: SearchUsersRequestBody): UsersResponse
-
 }

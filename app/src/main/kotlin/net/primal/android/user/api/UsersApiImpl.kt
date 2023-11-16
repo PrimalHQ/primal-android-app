@@ -1,5 +1,6 @@
 package net.primal.android.user.api
 
+import javax.inject.Inject
 import kotlinx.serialization.encodeToString
 import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.android.networking.primal.PrimalApiClient
@@ -20,7 +21,6 @@ import net.primal.android.user.api.model.UserProfilesRequestBody
 import net.primal.android.user.api.model.UserProfilesResponse
 import net.primal.android.user.api.model.UserRequestBody
 import net.primal.android.user.domain.Relay
-import javax.inject.Inject
 
 class UsersApiImpl @Inject constructor(
     @PrimalCacheApiClient private val primalApiClient: PrimalApiClient,
@@ -32,8 +32,8 @@ class UsersApiImpl @Inject constructor(
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = USER_PROFILE,
-                optionsJson = NostrJson.encodeToString(UserRequestBody(pubkey = pubkey))
-            )
+                optionsJson = NostrJson.encodeToString(UserRequestBody(pubkey = pubkey)),
+            ),
         )
 
         return UserProfileResponse(
@@ -42,17 +42,14 @@ class UsersApiImpl @Inject constructor(
         )
     }
 
-    override suspend fun getUserContacts(
-        pubkey: String,
-        extendedResponse: Boolean,
-    ): UserContactsResponse {
+    override suspend fun getUserContacts(pubkey: String, extendedResponse: Boolean): UserContactsResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = CONTACT_LIST,
                 optionsJson = NostrJson.encodeToString(
-                    ContactsRequestBody(pubkey = pubkey, extendedResponse = extendedResponse)
-                )
-            )
+                    ContactsRequestBody(pubkey = pubkey, extendedResponse = extendedResponse),
+                ),
+            ),
         )
 
         return UserContactsResponse(
@@ -66,7 +63,7 @@ class UsersApiImpl @Inject constructor(
     override suspend fun setUserContacts(
         ownerId: String,
         contacts: Set<String>,
-        relays: List<Relay>
+        relays: List<Relay>,
     ): NostrEvent {
         val signedNostrEvent = nostrNotary.signContactsNostrEvent(
             userId = ownerId,
@@ -77,10 +74,7 @@ class UsersApiImpl @Inject constructor(
         return signedNostrEvent
     }
 
-    override suspend fun setUserProfile(
-        ownerId: String,
-        contentMetadata: ContentMetadata
-    ): NostrEvent {
+    override suspend fun setUserProfile(ownerId: String, contentMetadata: ContentMetadata): NostrEvent {
         val signedNostrEvent = nostrNotary.signMetadataNostrEvent(
             userId = ownerId,
             metadata = contentMetadata,
@@ -89,16 +83,14 @@ class UsersApiImpl @Inject constructor(
         return signedNostrEvent
     }
 
-    override suspend fun getUserProfilesMetadata(
-        userIds: Set<String>,
-    ): UserProfilesResponse {
+    override suspend fun getUserProfilesMetadata(userIds: Set<String>): UserProfilesResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = USER_INFOS,
                 optionsJson = NostrJson.encodeToString(
-                    UserProfilesRequestBody(userIds = userIds)
-                )
-            )
+                    UserProfilesRequestBody(userIds = userIds),
+                ),
+            ),
         )
 
         return UserProfilesResponse(

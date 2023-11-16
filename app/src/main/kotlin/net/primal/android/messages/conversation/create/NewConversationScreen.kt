@@ -77,7 +77,7 @@ fun NewConversationScreen(
                             eventPublisher(SearchContract.UiEvent.SearchQueryUpdated(query = it))
                         },
                     )
-                }
+                },
             )
         },
         content = { contentPadding ->
@@ -94,7 +94,7 @@ fun NewConversationScreen(
                             }
                         }
                     },
-                    key = { item -> item.profileId }
+                    key = { item -> item.profileId },
                 ) {
                     UserProfileListItem(
                         data = it,
@@ -105,7 +105,7 @@ fun NewConversationScreen(
                     )
                 }
             }
-        }
+        },
     )
 }
 

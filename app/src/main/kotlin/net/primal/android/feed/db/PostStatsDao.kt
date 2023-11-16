@@ -16,5 +16,4 @@ interface PostStatsDao {
 
     @Query("SELECT * FROM PostStats WHERE postId = :postId")
     fun find(postId: String): PostStats?
-
 }

@@ -11,5 +11,5 @@ enum class PrimalAccent(
 
     Winter(
         logoId = R.drawable.primal_wave_logo_winter,
-    );
+    ),
 }

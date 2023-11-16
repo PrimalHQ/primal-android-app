@@ -13,10 +13,7 @@ import net.primal.android.nostr.ext.mapNotNullAsPostStatsPO
 import net.primal.android.nostr.ext.mapNotNullAsPostUserStatsPO
 import net.primal.android.nostr.ext.mapNotNullAsRepostDataPO
 
-suspend fun FeedResponse.persistToDatabaseAsTransaction(
-    userId: String,
-    database: PrimalDatabase,
-) {
+suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String, database: PrimalDatabase) {
     val profiles = metadata.mapAsProfileDataPO()
     val feedPosts = posts.mapAsPostDataPO()
     val referencedPosts = referencedPosts.mapNotNullAsPostDataPO()
@@ -40,10 +37,12 @@ suspend fun FeedResponse.persistToDatabaseAsTransaction(
         database.posts().upsertAll(data = allPosts)
         database.mediaResources().upsertAll(data = parsedMediaResources)
         database.mediaResources().upsertAll(data = primalMediaResources)
-        database.nostrResources().upsertAll(data = allPosts.flatMapPostsAsNostrResourcePO(
-            postIdToPostDataMap = allPosts.groupBy { it.postId }.mapValues { it.value.first() },
-            profileIdToProfileDataMap = profileIdToProfileDataMap
-        ))
+        database.nostrResources().upsertAll(
+            data = allPosts.flatMapPostsAsNostrResourcePO(
+                postIdToPostDataMap = allPosts.groupBy { it.postId }.mapValues { it.value.first() },
+                profileIdToProfileDataMap = profileIdToProfileDataMap,
+            ),
+        )
         database.reposts().upsertAll(data = reposts)
         database.postStats().upsertAll(data = postStats)
         database.postUserStats().upsertAll(data = userPostStats)

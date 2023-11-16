@@ -1,6 +1,7 @@
 package net.primal.android.settings.muted.repository
 
 import androidx.room.withTransaction
+import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonArray
@@ -11,7 +12,6 @@ import net.primal.android.nostr.ext.asProfileDataPO
 import net.primal.android.nostr.ext.flatMapNotNullAsMediaResourcePO
 import net.primal.android.settings.api.SettingsApi
 import net.primal.android.settings.muted.db.MutedUserData
-import javax.inject.Inject
 
 class MutedUserRepository @Inject constructor(
     private val database: PrimalDatabase,
@@ -21,17 +21,17 @@ class MutedUserRepository @Inject constructor(
 
     fun observeMutedUsers() = database.mutedUsers().observeMutedUsers()
 
-    fun observeIsUserMuted(pubkey: String) = database.mutedUsers().observeIsUserMuted(pubkey = pubkey)
+    fun observeIsUserMuted(pubkey: String) =
+        database.mutedUsers().observeIsUserMuted(
+            pubkey = pubkey,
+        )
 
     suspend fun fetchAndPersistMuteList(userId: String) {
         val muteList = fetchMuteListAndPersistProfiles(userId = userId)
         persistMuteList(muteList = muteList)
     }
 
-    suspend fun muteUserAndPersistMuteList(
-        userId: String,
-        mutedUserId: String,
-    ) {
+    suspend fun muteUserAndPersistMuteList(userId: String, mutedUserId: String) {
         val userMetadataEventId = withContext(Dispatchers.IO) {
             database.profiles().findMetadataEventId(mutedUserId)
         }
@@ -41,16 +41,13 @@ class MutedUserRepository @Inject constructor(
                     MutedUserData(
                         userId = mutedUserId,
                         userMetadataEventId = userMetadataEventId,
-                    )
+                    ),
                 )
             }
         }
     }
 
-    suspend fun unmuteUserAndPersistMuteList(
-        userId: String,
-        unmutedUserId: String,
-    ) {
+    suspend fun unmuteUserAndPersistMuteList(userId: String, unmutedUserId: String) {
         updateAndPersistMuteList(userId = userId) {
             toMutableSet().apply {
                 removeIf { it.userId == unmutedUserId }
@@ -86,7 +83,7 @@ class MutedUserRepository @Inject constructor(
         return muteList
             .map { mutedUserId ->
                 mutedUserId.asMutedAccountPO(
-                    metadataEventId = profileData.find { mutedUserId == it.ownerId }?.eventId
+                    metadataEventId = profileData.find { mutedUserId == it.ownerId }?.eventId,
                 )
             }
             .toSet()
@@ -107,5 +104,4 @@ class MutedUserRepository @Inject constructor(
     private fun List<JsonArray>?.mapToPubkeySet(): Set<String>? {
         return this?.filter { it.size == 2 }?.map { it[1].jsonPrimitive.content }?.toSet()
     }
-
 }

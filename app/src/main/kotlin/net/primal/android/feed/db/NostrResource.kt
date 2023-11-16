@@ -5,7 +5,7 @@ import androidx.room.Entity
 import kotlinx.serialization.Serializable
 
 @Entity(
-    primaryKeys = ["postId", "uri"]
+    primaryKeys = ["postId", "uri"],
 )
 @Serializable
 data class NostrResource(

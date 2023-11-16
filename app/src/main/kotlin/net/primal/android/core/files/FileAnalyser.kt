@@ -17,7 +17,7 @@ class FileAnalyser @Inject constructor(
         val type = options.outMimeType
         return Pair(
             first = type,
-            second = if (width != -1 && height != -1) "${width}x${height}" else null
+            second = if (width != -1 && height != -1) "${width}x$height" else null,
         )
     }
 }

@@ -13,10 +13,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil.compose.SubcomposeAsyncImage
+import java.util.UUID
 import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.editor.domain.NoteAttachment
 import net.primal.android.theme.AppTheme
-import java.util.UUID
 
 @Composable
 fun NoteAttachmentPreview(

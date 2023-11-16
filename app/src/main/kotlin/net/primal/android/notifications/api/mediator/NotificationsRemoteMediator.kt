@@ -5,6 +5,7 @@ import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
+import java.time.Instant
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import net.primal.android.db.PrimalDatabase
@@ -17,7 +18,6 @@ import net.primal.android.notifications.api.NotificationsApi
 import net.primal.android.notifications.api.model.NotificationsRequestBody
 import net.primal.android.notifications.db.Notification
 import net.primal.android.notifications.db.NotificationData
-import java.time.Instant
 
 @ExperimentalPagingApi
 class NotificationsRemoteMediator(
@@ -51,10 +51,7 @@ class NotificationsRemoteMediator(
         }
     }
 
-    override suspend fun load(
-        loadType: LoadType,
-        state: PagingState<Int, Notification>
-    ): MediatorResult {
+    override suspend fun load(loadType: LoadType, state: PagingState<Int, Notification>): MediatorResult {
         val timestamp: Long? = when (loadType) {
             LoadType.REFRESH -> null
             LoadType.PREPEND -> {
@@ -88,7 +85,7 @@ class NotificationsRemoteMediator(
             LoadType.REFRESH -> initialRequestBody
             LoadType.PREPEND -> initialRequestBody.copy(
                 since = timestamp,
-                until = Instant.now().epochSecond
+                until = Instant.now().epochSecond,
             )
 
             LoadType.APPEND -> initialRequestBody.copy(until = timestamp)
@@ -124,7 +121,7 @@ class NotificationsRemoteMediator(
                 primalEventResources = response.primalMediaResources,
             ).persistToDatabaseAsTransaction(
                 userId = userId,
-                database = database
+                database = database,
             )
 
             database.withTransaction {

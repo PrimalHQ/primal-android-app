@@ -20,10 +20,10 @@ object SettingsApiModule {
         @PrimalCacheApiClient primalApiClient: PrimalApiClient,
         relaysManager: RelaysManager,
         nostrNotary: NostrNotary,
-    ): SettingsApi = SettingsApiImpl(
-        primalApiClient = primalApiClient,
-        relaysManager = relaysManager,
-        nostrNotary = nostrNotary,
-    )
-
+    ): SettingsApi =
+        SettingsApiImpl(
+            primalApiClient = primalApiClient,
+            relaysManager = relaysManager,
+            nostrNotary = nostrNotary,
+        )
 }

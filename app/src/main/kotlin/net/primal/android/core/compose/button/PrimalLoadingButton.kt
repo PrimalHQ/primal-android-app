@@ -56,7 +56,7 @@ fun PrimalLoadingButton(
                     fontWeight = fontWeight,
                 )
             }
-        }
+        },
     )
 }
 
@@ -82,11 +82,11 @@ class PrimalButtonStatePreviewProvider : PreviewParameterProvider<PrimalLoadingB
             PrimalLoadingButtonPreviewState(
                 enabled = true,
                 loading = false,
-                leadingIcon = Icons.Outlined.CopyAll
+                leadingIcon = Icons.Outlined.CopyAll,
             ),
             PrimalLoadingButtonPreviewState(enabled = false, loading = true),
             PrimalLoadingButtonPreviewState(enabled = false, loading = false),
-            PrimalLoadingButtonPreviewState(enabled = true, loading = true)
+            PrimalLoadingButtonPreviewState(enabled = true, loading = true),
         )
 }
 
@@ -94,7 +94,7 @@ class PrimalButtonStatePreviewProvider : PreviewParameterProvider<PrimalLoadingB
 @Composable
 fun PrimalLoadingButtonPreview(
     @PreviewParameter(PrimalButtonStatePreviewProvider::class)
-    state: PrimalLoadingButtonPreviewState
+    state: PrimalLoadingButtonPreviewState,
 ) {
     PrimalTheme(primalTheme = PrimalTheme.Sunset) {
         PrimalLoadingButton(

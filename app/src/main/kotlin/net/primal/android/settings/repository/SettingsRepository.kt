@@ -1,6 +1,7 @@
 package net.primal.android.settings.repository
 
 import androidx.room.withTransaction
+import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonObject
@@ -13,17 +14,17 @@ import net.primal.android.serialization.decodeFromStringOrNull
 import net.primal.android.settings.api.SettingsApi
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.domain.UserAccount
-import javax.inject.Inject
 
 class SettingsRepository @Inject constructor(
     private val settingsApi: SettingsApi,
     private val database: PrimalDatabase,
     private val accountsStore: UserAccountsStore,
 ) {
-    suspend fun fetchAndPersistAppSettings(userId: String) = withContext(Dispatchers.IO) {
-        val appSettings = fetchAppSettings(userId = userId) ?: return@withContext
-        persistAppSettings(userId = userId, appSettings = appSettings)
-    }
+    suspend fun fetchAndPersistAppSettings(userId: String) =
+        withContext(Dispatchers.IO) {
+            val appSettings = fetchAppSettings(userId = userId) ?: return@withContext
+            persistAppSettings(userId = userId, appSettings = appSettings)
+        }
 
     suspend fun updateAndPersistDefaultZapAmount(userId: String, defaultAmount: ULong) {
         updateAndPersistAppSettings(userId = userId) {
@@ -43,19 +44,27 @@ class SettingsRepository @Inject constructor(
         }
     }
 
-    suspend fun addAndPersistUserFeed(userId: String, name: String, directive: String) {
+    suspend fun addAndPersistUserFeed(
+        userId: String,
+        name: String,
+        directive: String,
+    ) {
         updateAndPersistAppSettings(userId = userId) {
-            copy(feeds = feeds.toMutableList().apply {
-                add(ContentFeedData(name = name, directive = directive))
-            })
+            copy(
+                feeds = feeds.toMutableList().apply {
+                    add(ContentFeedData(name = name, directive = directive))
+                },
+            )
         }
     }
 
     suspend fun removeAndPersistUserFeed(userId: String, directive: String) {
         updateAndPersistAppSettings(userId = userId) {
-            copy(feeds = feeds.toMutableList().apply {
-                removeAll { it.directive == directive }
-            })
+            copy(
+                feeds = feeds.toMutableList().apply {
+                    removeAll { it.directive == directive }
+                },
+            )
         }
     }
 
@@ -83,14 +92,14 @@ class SettingsRepository @Inject constructor(
     private suspend fun fetchAppSettings(userId: String): ContentAppSettings? {
         val response = settingsApi.getAppSettings(pubkey = userId)
         return NostrJson.decodeFromStringOrNull<ContentAppSettings>(
-            string = response.userSettings?.content ?: response.defaultSettings?.content
+            string = response.userSettings?.content ?: response.defaultSettings?.content,
         )
     }
 
     private suspend fun fetchDefaultAppSettings(userId: String): ContentAppSettings? {
         val response = settingsApi.getDefaultAppSettings(pubkey = userId)
         return NostrJson.decodeFromStringOrNull<ContentAppSettings>(
-            string = response.defaultSettings?.content
+            string = response.defaultSettings?.content,
         )
     }
 
@@ -100,7 +109,9 @@ class SettingsRepository @Inject constructor(
 
         val userFeeds = appSettings.feeds.distinctBy { it.directive }.map { it.asFeedPO() }
         val hasLatestFeed = userFeeds.find { it.directive == userId } != null
-        val finalFeeds = if (hasLatestFeed) userFeeds else {
+        val finalFeeds = if (hasLatestFeed) {
+            userFeeds
+        } else {
             userFeeds.toMutableList().apply {
                 add(0, Feed(directive = userId, name = "Latest"))
             }
@@ -109,7 +120,7 @@ class SettingsRepository @Inject constructor(
         accountsStore.upsertAccount(
             userAccount = currentUserAccount.copy(
                 appSettings = appSettings.copy(feeds = finalFeeds.map { it.asContentFeedData() }),
-            )
+            ),
         )
 
         database.withTransaction {
@@ -120,5 +131,8 @@ class SettingsRepository @Inject constructor(
 
     private fun ContentFeedData.asFeedPO(): Feed = Feed(name = name, directive = directive)
     private fun Feed.asContentFeedData(): ContentFeedData =
-        ContentFeedData(name = name, directive = directive)
+        ContentFeedData(
+            name = name,
+            directive = directive,
+        )
 }

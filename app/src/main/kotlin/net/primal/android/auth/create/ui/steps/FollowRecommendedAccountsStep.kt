@@ -44,12 +44,12 @@ fun FollowRecommendedAccountsStep(
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 8.dp)
+            .padding(horizontal = 8.dp),
     ) {
         if (state.loading && state.recommendedFollows.isEmpty()) {
             item {
                 Column(
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize(),
                 ) {
                     PrimalLoadingSpinner()
                 }
@@ -59,7 +59,7 @@ fun FollowRecommendedAccountsStep(
             follows.forEach { group ->
                 val isGroupFollowed = isGroupFollowed(
                     data = state.recommendedFollows,
-                    groupName = group.key
+                    groupName = group.key,
                 )
                 stickyHeader {
                     ListItem(
@@ -92,15 +92,15 @@ fun FollowRecommendedAccountsStep(
                                     AppTheme.colorScheme.surface
                                 },
                                 textStyle = AppTheme.typography.titleMedium.copy(
-                                    lineHeight = 18.sp
+                                    lineHeight = 18.sp,
                                 ),
                                 onClick = {
                                     eventPublisher(
                                         CreateAccountContract.UiEvent.ToggleGroupFollowEvent(
-                                            groupName = group.key
-                                        )
+                                            groupName = group.key,
+                                        ),
                                     )
-                                }
+                                },
                             ) {
                                 val text = if (isGroupFollowed) {
                                     stringResource(id = R.string.create_recommended_unfollow_all)
@@ -109,7 +109,7 @@ fun FollowRecommendedAccountsStep(
                                 }
                                 Text(text = text.lowercase())
                             }
-                        }
+                        },
                     )
                 }
 
@@ -123,13 +123,13 @@ fun FollowRecommendedAccountsStep(
                         leadingContent = {
                             AvatarThumbnailListItemImage(
                                 modifier = Modifier.padding(start = 8.dp),
-                                source = suggestion.content.picture
+                                source = suggestion.content.picture,
                             )
                         },
                         headlineContent = {
                             NostrUserText(
                                 displayName = suggestion.content.usernameUiFriendly(
-                                    pubkey = suggestion.pubkey
+                                    pubkey = suggestion.pubkey,
                                 ),
                                 fontSize = 14.sp,
                                 internetIdentifier = suggestion.content.nip05,
@@ -164,13 +164,14 @@ fun FollowRecommendedAccountsStep(
                                     AppTheme.colorScheme.surface
                                 },
                                 textStyle = AppTheme.typography.titleMedium.copy(
-                                    lineHeight = 14.sp
+                                    lineHeight = 14.sp,
                                 ),
                                 onClick = {
                                     eventPublisher(
                                         CreateAccountContract.UiEvent.ToggleFollowEvent(
-                                            groupName = group.key, pubkey = suggestion.pubkey
-                                        )
+                                            groupName = group.key,
+                                            pubkey = suggestion.pubkey,
+                                        ),
                                     )
                                 },
                             ) {
@@ -189,19 +190,15 @@ fun FollowRecommendedAccountsStep(
     }
 }
 
-private fun isSuggestionFollowed(
-    data: List<RecommendedFollow>,
-    suggestion: RecommendedFollow
-) = data
-    .first { it.pubkey == suggestion.pubkey && it.groupName == suggestion.groupName }
-    .isCurrentUserFollowing
+private fun isSuggestionFollowed(data: List<RecommendedFollow>, suggestion: RecommendedFollow) =
+    data
+        .first { it.pubkey == suggestion.pubkey && it.groupName == suggestion.groupName }
+        .isCurrentUserFollowing
 
-private fun isGroupFollowed(
-    data: List<RecommendedFollow>,
-    groupName: String,
-) = data
-    .filter { it.groupName == groupName }
-    .all { it.isCurrentUserFollowing }
+private fun isGroupFollowed(data: List<RecommendedFollow>, groupName: String) =
+    data
+        .filter { it.groupName == groupName }
+        .all { it.isCurrentUserFollowing }
 
 @Preview
 @Composable
@@ -268,5 +265,4 @@ fun PreviewFollowRecommendedAccountsStep() {
             paddingValues = PaddingValues(),
         )
     }
-
 }

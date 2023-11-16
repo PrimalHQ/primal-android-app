@@ -7,8 +7,11 @@ import java.util.regex.Pattern
 // Made by Vitor Pamplona
 // https://github.com/vitorpamplona/amethyst/blob/main/quartz/src/main/java/com/vitorpamplona/quartz/encoders/LnInvoiceUtil.kt
 /** based on litecoinj */
-object LnInvoiceUtil {
-    private val invoicePattern = Pattern.compile("lnbc((?<amount>\\d+)(?<multiplier>[munp])?)?1[^1\\s]+", Pattern.CASE_INSENSITIVE)
+object LnInvoiceUtils {
+    private val invoicePattern = Pattern.compile(
+        "lnbc((?<amount>\\d+)(?<multiplier>[munp])?)?1[^1\\s]+",
+        Pattern.CASE_INSENSITIVE,
+    )
 
     /** The Bech32 character set for encoding.  */
     private const val CHARSET = "qpzry9x8gf2tvdw0s3jn54khce6mua7l"
@@ -22,7 +25,7 @@ object LnInvoiceUtil {
         -1, 29, -1, 24, 13, 25, 9, 8, 23, -1, 18, 22, 31, 27, 19, -1,
         1, 0, 3, 16, 11, 28, 12, 14, 6, 4, 2, -1, -1, -1, -1, -1,
         -1, 29, -1, 24, 13, 25, 9, 8, 23, -1, 18, 22, 31, 27, 19, -1,
-        1, 0, 3, 16, 11, 28, 12, 14, 6, 4, 2, -1, -1, -1, -1, -1
+        1, 0, 3, 16, 11, 28, 12, 14, 6, 4, 2, -1, -1, -1, -1, -1,
     )
 
     /** Find the polynomial with value coefficients mod the generator as 30-bit.  */
@@ -69,7 +72,11 @@ object LnInvoiceUtil {
         var upper = false
         for (i in 0 until invoice.length) {
             val c = invoice[i]
-            if (c.code < 33 || c.code > 126) throw AddressFormatException("Invalid character: $c, pos: $i")
+            if (c.code < 33 || c.code > 126) {
+                throw AddressFormatException(
+                    "Invalid character: $c, pos: $i",
+                )
+            }
             if (c in 'a'..'z') {
                 if (upper) throw AddressFormatException("Invalid character: $c, pos: $i")
                 lower = true
@@ -86,7 +93,11 @@ object LnInvoiceUtil {
         val values = ByteArray(dataPartLength)
         for (i in 0 until dataPartLength) {
             val c = invoice[i + pos + 1]
-            if (CHARSET_REV.get(c.code).toInt() == -1) throw AddressFormatException("Invalid character: " + c + ", pos: " + (i + pos + 1))
+            if (CHARSET_REV.get(c.code).toInt() == -1) {
+                throw AddressFormatException(
+                    "Invalid character: " + c + ", pos: " + (i + pos + 1),
+                )
+            }
             values[i] = CHARSET_REV.get(c.code)
         }
         val hrp = invoice.substring(0, pos).lowercase(Locale.ROOT)
@@ -118,7 +129,9 @@ object LnInvoiceUtil {
         if (multiplierGroup == null) {
             return amount
         }
-        require(!(multiplierGroup == "p" && amountGroup[amountGroup.length - 1] != '0')) { "sub-millisatoshi amount" }
+        require(!(multiplierGroup == "p" && amountGroup[amountGroup.length - 1] != '0')) {
+            "sub-millisatoshi amount"
+        }
         return amount.multiply(multiplier(multiplierGroup))
     }
 

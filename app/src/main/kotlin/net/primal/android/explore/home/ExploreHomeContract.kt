@@ -6,6 +6,6 @@ interface ExploreHomeContract {
     data class UiState(
         val activeAccountAvatarUrl: String? = null,
         val badges: Badges = Badges(),
-        val hashtags: List<List<HashtagUi>> = emptyList()
+        val hashtags: List<List<HashtagUi>> = emptyList(),
     )
 }

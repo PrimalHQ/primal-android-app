@@ -71,10 +71,10 @@ fun NoteDropdownMenuIcon(
                 onClick = {
                     systemShareText(
                         context = context,
-                        text = resolvePrimalNoteLink(noteId = noteId)
+                        text = resolvePrimalNoteLink(noteId = noteId),
                     )
                     menuVisible = false
-                }
+                },
             )
             DropdownPrimalMenuItem(
                 trailingIconVector = PrimalIcons.ContextCopyNoteLink,
@@ -86,10 +86,10 @@ fun NoteDropdownMenuIcon(
                         Toast.makeText(
                             context,
                             copyConfirmationText,
-                            Toast.LENGTH_SHORT
+                            Toast.LENGTH_SHORT,
                         ).show()
                     }
-                }
+                },
             )
             DropdownPrimalMenuItem(
                 trailingIconVector = PrimalIcons.ContextCopyNoteText,
@@ -101,10 +101,10 @@ fun NoteDropdownMenuIcon(
                         Toast.makeText(
                             context,
                             copyConfirmationText,
-                            Toast.LENGTH_SHORT
+                            Toast.LENGTH_SHORT,
                         ).show()
                     }
-                }
+                },
             )
             DropdownPrimalMenuItem(
                 trailingIconVector = PrimalIcons.ContextCopyNoteId,
@@ -116,10 +116,10 @@ fun NoteDropdownMenuIcon(
                         Toast.makeText(
                             context,
                             copyConfirmationText,
-                            Toast.LENGTH_SHORT
+                            Toast.LENGTH_SHORT,
                         ).show()
                     }
-                }
+                },
             )
             DropdownPrimalMenuItem(
                 trailingIconVector = PrimalIcons.ContextCopyRawData,
@@ -131,10 +131,10 @@ fun NoteDropdownMenuIcon(
                         Toast.makeText(
                             context,
                             copyConfirmationText,
-                            Toast.LENGTH_SHORT
+                            Toast.LENGTH_SHORT,
                         ).show()
                     }
-                }
+                },
             )
             DropdownPrimalMenuItem(
                 trailingIconVector = PrimalIcons.ContextCopyPublicKey,
@@ -146,10 +146,10 @@ fun NoteDropdownMenuIcon(
                         Toast.makeText(
                             context,
                             copyConfirmationText,
-                            Toast.LENGTH_SHORT
+                            Toast.LENGTH_SHORT,
                         ).show()
                     }
-                }
+                },
             )
             DropdownPrimalMenuItem(
                 trailingIconVector = PrimalIcons.ContextMuteUser,
@@ -158,7 +158,7 @@ fun NoteDropdownMenuIcon(
                 onClick = {
                     onMuteUserClick()
                     menuVisible = false
-                }
+                },
             )
         }
     }

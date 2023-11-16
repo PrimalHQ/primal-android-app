@@ -48,7 +48,7 @@ fun PrimalTopAppBar(
                     Box(
                         modifier = Modifier
                             .padding(horizontal = 8.dp)
-                            .clip(CircleShape)
+                            .clip(CircleShape),
                     ) {
                         AvatarThumbnailListItemImage(
                             source = avatarUrl,
@@ -93,7 +93,7 @@ fun PrimalTopAppBar(
         Box(
             modifier = Modifier
                 .background(color = AppTheme.colorScheme.surface)
-                .fillMaxWidth()
+                .fillMaxWidth(),
         ) {
             footer()
         }

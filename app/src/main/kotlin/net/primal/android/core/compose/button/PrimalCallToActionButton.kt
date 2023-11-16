@@ -49,7 +49,7 @@ fun PrimalCallToActionButton(
                     shape = buttonShape,
                     ambientColor = AppTheme.colorScheme.primary,
                     spotColor = AppTheme.colorScheme.primary,
-                )
+                ),
         ),
         onClick = onClick,
         shape = buttonShape,
@@ -62,7 +62,7 @@ fun PrimalCallToActionButton(
             modifier = Modifier
                 .weight(1f)
                 .padding(vertical = 8.dp)
-                .fillMaxWidth()
+                .fillMaxWidth(),
         ) {
             Text(
                 text = title,
@@ -86,11 +86,10 @@ fun PrimalCallToActionButton(
                 .align(CenterVertically),
             imageVector = Icons.Default.KeyboardArrowRight,
             contentDescription = null,
-            colorFilter = ColorFilter.tint(color = AppTheme.extraColorScheme.onSurfaceVariantAlt1)
+            colorFilter = ColorFilter.tint(color = AppTheme.extraColorScheme.onSurfaceVariantAlt1),
         )
     }
 }
-
 
 @Preview
 @Composable

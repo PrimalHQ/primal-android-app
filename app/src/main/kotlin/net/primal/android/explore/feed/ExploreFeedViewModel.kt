@@ -6,6 +6,8 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
 import androidx.paging.map
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -34,8 +36,6 @@ import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
 import net.primal.android.wallet.model.ZapTarget
 import net.primal.android.wallet.repository.ZapRepository
-import javax.inject.Inject
-import kotlin.time.Duration.Companion.seconds
 
 @HiltViewModel
 class ExploreFeedViewModel @Inject constructor(
@@ -46,7 +46,7 @@ class ExploreFeedViewModel @Inject constructor(
     private val profileRepository: ProfileRepository,
     private val zapRepository: ZapRepository,
     private val settingsRepository: SettingsRepository,
-    private val mutedUserRepository: MutedUserRepository
+    private val mutedUserRepository: MutedUserRepository,
 ) : ViewModel() {
 
     private val exploreQuery = "search;\"${savedStateHandle.searchQueryOrThrow}\""
@@ -57,16 +57,16 @@ class ExploreFeedViewModel @Inject constructor(
             posts = feedRepository.feedByDirective(feedDirective = exploreQuery)
                 .map { it.map { feed -> feed.asFeedPostUi() } }
                 .cachedIn(viewModelScope),
-        )
+        ),
     )
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) {
         _state.getAndUpdate { it.reducer() }
     }
 
-    private val _event: MutableSharedFlow<UiEvent> = MutableSharedFlow()
+    private val events: MutableSharedFlow<UiEvent> = MutableSharedFlow()
     fun setEvent(event: UiEvent) {
-        viewModelScope.launch { _event.emit(event) }
+        viewModelScope.launch { events.emit(event) }
     }
 
     init {
@@ -75,47 +75,50 @@ class ExploreFeedViewModel @Inject constructor(
         observeActiveAccount()
     }
 
-    private fun observeContainsFeed() = viewModelScope.launch {
-        feedRepository.observeContainsFeed(directive = exploreQuery).collect {
-            setState {
-                copy(existsInUserFeeds = it)
-            }
-        }
-    }
-
-    private fun observeEvents() = viewModelScope.launch {
-        _event.collect {
-            when (it) {
-                UiEvent.AddToUserFeeds -> addToMyFeeds()
-                UiEvent.RemoveFromUserFeeds -> removeFromMyFeeds()
-                is UiEvent.PostLikeAction -> likePost(it)
-                is UiEvent.RepostAction -> repostPost(it)
-                is UiEvent.ZapAction -> zapPost(it)
-                is UiEvent.MuteAction -> mute(it)
-            }
-        }
-    }
-
-    private fun observeActiveAccount() = viewModelScope.launch {
-        activeAccountStore.activeAccountState
-            .filterIsInstance<ActiveUserAccountState.ActiveUserAccount>()
-            .collect {
+    private fun observeContainsFeed() =
+        viewModelScope.launch {
+            feedRepository.observeContainsFeed(directive = exploreQuery).collect {
                 setState {
-                    copy(
-                        walletConnected = it.data.nostrWallet != null,
-                        defaultZapAmount = it.data.appSettings?.defaultZapAmount,
-                        zapOptions = it.data.appSettings?.zapOptions ?: emptyList(),
-                    )
+                    copy(existsInUserFeeds = it)
                 }
             }
-    }
+        }
+
+    private fun observeEvents() =
+        viewModelScope.launch {
+            events.collect {
+                when (it) {
+                    UiEvent.AddToUserFeeds -> addToMyFeeds()
+                    UiEvent.RemoveFromUserFeeds -> removeFromMyFeeds()
+                    is UiEvent.PostLikeAction -> likePost(it)
+                    is UiEvent.RepostAction -> repostPost(it)
+                    is UiEvent.ZapAction -> zapPost(it)
+                    is UiEvent.MuteAction -> mute(it)
+                }
+            }
+        }
+
+    private fun observeActiveAccount() =
+        viewModelScope.launch {
+            activeAccountStore.activeAccountState
+                .filterIsInstance<ActiveUserAccountState.ActiveUserAccount>()
+                .collect {
+                    setState {
+                        copy(
+                            walletConnected = it.data.nostrWallet != null,
+                            defaultZapAmount = it.data.appSettings?.defaultZapAmount,
+                            zapOptions = it.data.appSettings?.zapOptions ?: emptyList(),
+                        )
+                    }
+                }
+        }
 
     private suspend fun addToMyFeeds() {
         try {
             settingsRepository.addAndPersistUserFeed(
                 userId = activeAccountStore.activeUserId(),
                 name = state.value.title,
-                directive = exploreQuery
+                directive = exploreQuery,
             )
         } catch (error: WssException) {
             setErrorState(error = ExploreFeedError.FailedToAddToFeed(error))
@@ -126,84 +129,90 @@ class ExploreFeedViewModel @Inject constructor(
         try {
             settingsRepository.removeAndPersistUserFeed(
                 userId = activeAccountStore.activeUserId(),
-                directive = exploreQuery
+                directive = exploreQuery,
             )
         } catch (error: WssException) {
             setErrorState(error = ExploreFeedError.FailedToRemoveFeed(error))
         }
     }
 
-    private fun likePost(postLikeAction: UiEvent.PostLikeAction) = viewModelScope.launch {
-        try {
-            postRepository.likePost(
-                postId = postLikeAction.postId,
-                postAuthorId = postLikeAction.postAuthorId,
-            )
-        } catch (error: NostrPublishException) {
-            setErrorState(error = ExploreFeedError.FailedToPublishLikeEvent(error))
-        } catch (error: MissingRelaysException) {
-            setErrorState(error = ExploreFeedError.MissingRelaysConfiguration(error))
-        }
-    }
-
-    private fun repostPost(repostAction: UiEvent.RepostAction) = viewModelScope.launch {
-        try {
-            postRepository.repostPost(
-                postId = repostAction.postId,
-                postAuthorId = repostAction.postAuthorId,
-                postRawNostrEvent = repostAction.postNostrEvent,
-            )
-        } catch (error: NostrPublishException) {
-            setErrorState(error = ExploreFeedError.FailedToPublishRepostEvent(error))
-        } catch (error: MissingRelaysException) {
-            setErrorState(error = ExploreFeedError.MissingRelaysConfiguration(error))
-        }
-    }
-
-    private fun zapPost(zapAction: UiEvent.ZapAction) = viewModelScope.launch {
-        val postAuthorProfileData = withContext(Dispatchers.IO) {
-            profileRepository.findProfileData(profileId = zapAction.postAuthorId)
+    private fun likePost(postLikeAction: UiEvent.PostLikeAction) =
+        viewModelScope.launch {
+            try {
+                postRepository.likePost(
+                    postId = postLikeAction.postId,
+                    postAuthorId = postLikeAction.postAuthorId,
+                )
+            } catch (error: NostrPublishException) {
+                setErrorState(error = ExploreFeedError.FailedToPublishLikeEvent(error))
+            } catch (error: MissingRelaysException) {
+                setErrorState(error = ExploreFeedError.MissingRelaysConfiguration(error))
+            }
         }
 
-        if (postAuthorProfileData.lnUrl == null) {
-            setErrorState(error = ExploreFeedError.MissingLightningAddress(IllegalStateException()))
-            return@launch
+    private fun repostPost(repostAction: UiEvent.RepostAction) =
+        viewModelScope.launch {
+            try {
+                postRepository.repostPost(
+                    postId = repostAction.postId,
+                    postAuthorId = repostAction.postAuthorId,
+                    postRawNostrEvent = repostAction.postNostrEvent,
+                )
+            } catch (error: NostrPublishException) {
+                setErrorState(error = ExploreFeedError.FailedToPublishRepostEvent(error))
+            } catch (error: MissingRelaysException) {
+                setErrorState(error = ExploreFeedError.MissingRelaysConfiguration(error))
+            }
         }
 
-        try {
-            zapRepository.zap(
-                userId = activeAccountStore.activeUserId(),
-                comment = zapAction.zapDescription,
-                amountInSats = zapAction.zapAmount,
-                target = ZapTarget.Note(
-                    zapAction.postId,
-                    zapAction.postAuthorId,
-                    postAuthorProfileData.lnUrl,
-                ),
-            )
-        } catch (error: ZapRepository.ZapFailureException) {
-            setErrorState(error = ExploreFeedError.FailedToPublishZapEvent(error))
-        } catch (error: NostrPublishException) {
-            setErrorState(error = ExploreFeedError.FailedToPublishZapEvent(error))
-        } catch (error: MissingRelaysException) {
-            setErrorState(error = ExploreFeedError.MissingRelaysConfiguration(error))
-        } catch (error: ZapRepository.InvalidZapRequestException) {
-            setErrorState(error = ExploreFeedError.InvalidZapRequest(error))
-        }
-    }
+    private fun zapPost(zapAction: UiEvent.ZapAction) =
+        viewModelScope.launch {
+            val postAuthorProfileData = withContext(Dispatchers.IO) {
+                profileRepository.findProfileData(profileId = zapAction.postAuthorId)
+            }
 
-    private fun mute(action: UiEvent.MuteAction) = viewModelScope.launch {
-        try {
-            mutedUserRepository.muteUserAndPersistMuteList(
-                userId = activeAccountStore.activeUserId(),
-                mutedUserId = action.profileId
-            )
-        } catch (error: WssException) {
-            setErrorState(error = ExploreFeedError.FailedToMuteUser(error))
-        } catch (error: NostrPublishException) {
-            setErrorState(error = ExploreFeedError.FailedToMuteUser(error))
+            if (postAuthorProfileData.lnUrl == null) {
+                setErrorState(
+                    error = ExploreFeedError.MissingLightningAddress(IllegalStateException()),
+                )
+                return@launch
+            }
+
+            try {
+                zapRepository.zap(
+                    userId = activeAccountStore.activeUserId(),
+                    comment = zapAction.zapDescription,
+                    amountInSats = zapAction.zapAmount,
+                    target = ZapTarget.Note(
+                        zapAction.postId,
+                        zapAction.postAuthorId,
+                        postAuthorProfileData.lnUrl,
+                    ),
+                )
+            } catch (error: ZapRepository.ZapFailureException) {
+                setErrorState(error = ExploreFeedError.FailedToPublishZapEvent(error))
+            } catch (error: NostrPublishException) {
+                setErrorState(error = ExploreFeedError.FailedToPublishZapEvent(error))
+            } catch (error: MissingRelaysException) {
+                setErrorState(error = ExploreFeedError.MissingRelaysConfiguration(error))
+            } catch (error: ZapRepository.InvalidZapRequestException) {
+                setErrorState(error = ExploreFeedError.InvalidZapRequest(error))
+            }
         }
-    }
+
+    private fun mute(action: UiEvent.MuteAction) =
+        viewModelScope.launch {
+            try {
+                mutedUserRepository.muteUserAndPersistMuteList(
+                    userId = activeAccountStore.activeUserId(),
+                    mutedUserId = action.profileId,
+                )
+            } catch (error: WssException) {
+                setErrorState(error = ExploreFeedError.FailedToMuteUser(error))
+            } catch (error: NostrPublishException) {
+                setErrorState(error = ExploreFeedError.FailedToMuteUser(error))
+            }
+        }
 
     private fun setErrorState(error: ExploreFeedError) {
         setState { copy(error = error) }

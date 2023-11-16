@@ -15,7 +15,7 @@ fun List<PrimalEvent>.mapNotNullAsProfileStatsPO() =
 fun PrimalEvent.takeContentAsUserProfileStatsOrNull(): ContentUserProfileStats? {
     return try {
         NostrJson.decodeFromJsonElement<ContentUserProfileStats>(
-            NostrJson.parseToJsonElement(this.content)
+            NostrJson.parseToJsonElement(this.content),
         )
     } catch (error: IllegalArgumentException) {
         null
@@ -23,19 +23,21 @@ fun PrimalEvent.takeContentAsUserProfileStatsOrNull(): ContentUserProfileStats? 
 }
 
 // TODO Update after backend confirmation
-fun ContentUserProfileStats.asProfileStats() = ProfileStats(
-    profileId = this.profileId ?: throw RuntimeException(),
-    following = this.followsCount,
-    followers = this.followersCount,
-    notes = this.noteCount,
-)
+fun ContentUserProfileStats.asProfileStats() =
+    ProfileStats(
+        profileId = this.profileId ?: throw RuntimeException(),
+        following = this.followsCount,
+        followers = this.followersCount,
+        notes = this.noteCount,
+    )
 
-fun ContentUserProfileStats.asProfileStats(profileId: String) = ProfileStats(
-    profileId = profileId,
-    following = this.followsCount,
-    followers = this.followersCount,
-    notes = this.noteCount,
-)
+fun ContentUserProfileStats.asProfileStats(profileId: String) =
+    ProfileStats(
+        profileId = profileId,
+        following = this.followsCount,
+        followers = this.followersCount,
+        notes = this.noteCount,
+    )
 
 fun PrimalEvent.takeContentAsPrimalUserScoresOrNull(): Map<String, Float> {
     return NostrJson.decodeFromString(this.content)

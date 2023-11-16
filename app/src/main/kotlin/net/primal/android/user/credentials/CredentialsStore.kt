@@ -1,6 +1,8 @@
 package net.primal.android.user.credentials
 
 import androidx.datastore.core.DataStore
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
@@ -14,8 +16,6 @@ import net.primal.android.crypto.toHex
 import net.primal.android.crypto.toNpub
 import net.primal.android.user.domain.Credential
 import org.spongycastle.util.encoders.DecoderException
-import javax.inject.Inject
-import javax.inject.Singleton
 
 @Singleton
 class CredentialsStore @Inject constructor(
@@ -41,7 +41,7 @@ class CredentialsStore @Inject constructor(
         persistence.updateData { emptyList() }
     }
 
-    suspend fun save(nostrKey: String) : String {
+    suspend fun save(nostrKey: String): String {
         val (nsec, pubkey) = nostrKey.extractKeysOrThrow()
         addCredential(Credential(nsec = nsec, npub = pubkey.toNpub()))
         return pubkey.toHex()
@@ -60,9 +60,9 @@ class CredentialsStore @Inject constructor(
         }
     }
 
-    fun findOrThrow(npub: String): Credential = credentials.value.find { it.npub == npub }
-        ?: throw IllegalArgumentException("Credential not found for $npub.")
-
+    fun findOrThrow(npub: String): Credential =
+        credentials.value.find { it.npub == npub }
+            ?: throw IllegalArgumentException("Credential not found for $npub.")
 
     inner class InvalidNostrKeyException : RuntimeException()
 }

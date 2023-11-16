@@ -20,6 +20,7 @@ import com.google.accompanist.navigation.material.ExperimentalMaterialNavigation
 import com.google.accompanist.navigation.material.ModalBottomSheetLayout
 import com.google.accompanist.navigation.material.bottomSheet
 import com.google.accompanist.navigation.material.rememberBottomSheetNavigator
+import java.net.URLEncoder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import net.primal.android.auth.create.CreateAccountViewModel
@@ -66,12 +67,12 @@ import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.thread.ThreadScreen
 import net.primal.android.thread.ThreadViewModel
-import java.net.URLEncoder
 
-private fun NavController.navigateToWelcome() = navigate(
-    route = "welcome",
-    navOptions = navOptions { clearBackStack() }
-)
+private fun NavController.navigateToWelcome() =
+    navigate(
+        route = "welcome",
+        navOptions = navOptions { clearBackStack() },
+    )
 
 private fun NavController.navigateToLogin() = navigate(route = "login")
 
@@ -89,9 +90,9 @@ private fun NavController.navigateToNoteEditor(
     replyToNoteId: String? = null,
 ) {
     val route = "editor" +
-            "?$NewPostReplyToNoteId=${replyToNoteId.orEmpty()}" +
-            "&$NewPostPreFillFileUri=${preFillFileUri?.toString().orEmpty().asUrlEncoded()}" +
-            "&$NewPostPreFillContent=${preFillContent.orEmpty().asUrlEncoded()}"
+        "?$NEW_POST_REPLY_TO_NOTE_ID=${replyToNoteId.orEmpty()}" +
+        "&$NEW_POST_PRE_FILL_FILE_URI=${preFillFileUri?.toString().orEmpty().asUrlEncoded()}" +
+        "&$NEW_POST_PRE_FILL_CONTENT=${preFillContent.orEmpty().asUrlEncoded()}"
     navigate(route = route)
 }
 
@@ -106,49 +107,60 @@ private val NavController.topLevelNavOptions: NavOptions
         }
     }
 
-private fun NavController.navigateToFeed(directive: String) = navigate(
-    route = "feed?directive=${directive.asUrlEncoded()}",
-    navOptions = navOptions { clearBackStack() },
-)
+private fun NavController.navigateToFeed(directive: String) =
+    navigate(
+        route = "feed?directive=${directive.asUrlEncoded()}",
+        navOptions = navOptions { clearBackStack() },
+    )
 
 private fun NavController.navigateToExplore() =
-    navigate(route = "explore", navOptions = topLevelNavOptions)
+    navigate(
+        route = "explore",
+        navOptions = topLevelNavOptions,
+    )
 
 private fun NavController.navigateToMessages() =
-    navigate(route = "messages", navOptions = topLevelNavOptions)
+    navigate(
+        route = "messages",
+        navOptions = topLevelNavOptions,
+    )
 
 private fun NavController.navigateToChat(profileId: String) =
-    navigate(route = "messages/$profileId")
+    navigate(
+        route = "messages/$profileId",
+    )
 
-private fun NavController.navigateToNewMessage() =
-    navigate(route = "messages/new")
+private fun NavController.navigateToNewMessage() = navigate(route = "messages/new")
 
 private fun NavController.navigateToNotifications() =
-    navigate(route = "notifications", navOptions = topLevelNavOptions)
+    navigate(
+        route = "notifications",
+        navOptions = topLevelNavOptions,
+    )
 
-fun NavController.navigateToProfile(profileId: String? = null) = when {
-    profileId != null -> navigate(route = "profile?$ProfileId=$profileId")
-    else -> navigate(route = "profile")
-}
+fun NavController.navigateToProfile(profileId: String? = null) =
+    when {
+        profileId != null -> navigate(route = "profile?$PROFILE_ID=$profileId")
+        else -> navigate(route = "profile")
+    }
 
 private fun NavController.navigateToEditProfile() = navigate(route = "edit_profile")
 
 private fun NavController.navigateToSettings() = navigate(route = "settings")
 
-private fun NavController.navigateToWallet(nwcUrl: String? = null) = when {
-    nwcUrl != null -> navigate(route = "wallet_settings?nwcUrl=$nwcUrl")
-    else -> navigate(route = "wallet_settings")
-}
+private fun NavController.navigateToWallet(nwcUrl: String? = null) =
+    when {
+        nwcUrl != null -> navigate(route = "wallet_settings?nwcUrl=$nwcUrl")
+        else -> navigate(route = "wallet_settings")
+    }
 
 private fun NavController.navigateToThread(postId: String) = navigate(route = "thread/$postId")
 
-private fun NavController.navigateToExploreFeed(query: String) =
-    navigate(route = "explore/$query")
+private fun NavController.navigateToExploreFeed(query: String) = navigate(route = "explore/$query")
 
 @OptIn(ExperimentalMaterialNavigationApi::class)
 @Composable
 fun PrimalAppNavigation() {
-
     val bottomSheetNavigator = rememberBottomSheetNavigator()
     val navController = rememberNavController(bottomSheetNavigator)
 
@@ -187,9 +199,11 @@ fun PrimalAppNavigation() {
 
                         is DeepLink.NostrWalletConnect -> {
                             navController.popBackStack()
-                            navController.navigateToWallet(nwcUrl = withContext(Dispatchers.IO) {
-                                URLEncoder.encode(url, Charsets.UTF_8.name())
-                            })
+                            navController.navigateToWallet(
+                                nwcUrl = withContext(Dispatchers.IO) {
+                                    URLEncoder.encode(url, Charsets.UTF_8.name())
+                                },
+                            )
                         }
                     }
                 }
@@ -202,7 +216,8 @@ fun PrimalAppNavigation() {
         sheetShape = AppTheme.shapes.medium,
     ) {
         NavHost(
-            navController = navController, startDestination = "splash"
+            navController = navController,
+            startDestination = "splash",
         ) {
             splash(route = "splash")
 
@@ -215,12 +230,12 @@ fun PrimalAppNavigation() {
             logout(route = "logout", navController = navController)
 
             feed(
-                route = "feed?$FeedDirective={$FeedDirective}",
+                route = "feed?$FEED_DIRECTIVE={$FEED_DIRECTIVE}",
                 arguments = listOf(
-                    navArgument(FeedDirective) {
+                    navArgument(FEED_DIRECTIVE) {
                         type = NavType.StringType
                         nullable = true
-                    }
+                    },
                 ),
                 navController = navController,
                 onTopLevelDestinationChanged = topLevelDestinationHandler,
@@ -235,11 +250,11 @@ fun PrimalAppNavigation() {
             )
 
             exploreFeed(
-                route = "explore/{$SearchQuery}",
+                route = "explore/{$SEARCH_QUERY}",
                 arguments = listOf(
-                    navArgument(SearchQuery) {
+                    navArgument(SEARCH_QUERY) {
                         type = NavType.StringType
-                    }
+                    },
                 ),
                 navController = navController,
             )
@@ -257,11 +272,11 @@ fun PrimalAppNavigation() {
             )
 
             chat(
-                route = "messages/{$ProfileId}",
+                route = "messages/{$PROFILE_ID}",
                 arguments = listOf(
-                    navArgument(ProfileId) {
+                    navArgument(PROFILE_ID) {
                         type = NavType.StringType
-                    }
+                    },
                 ),
                 navController = navController,
             )
@@ -285,21 +300,21 @@ fun PrimalAppNavigation() {
 
             noteEditor(
                 route = "editor" +
-                        "?$NewPostReplyToNoteId={$NewPostReplyToNoteId}" +
-                        "&$NewPostPreFillFileUri={$NewPostPreFillFileUri}" +
-                        "&$NewPostPreFillContent={$NewPostPreFillContent}",
+                    "?$NEW_POST_REPLY_TO_NOTE_ID={$NEW_POST_REPLY_TO_NOTE_ID}" +
+                    "&$NEW_POST_PRE_FILL_FILE_URI={$NEW_POST_PRE_FILL_FILE_URI}" +
+                    "&$NEW_POST_PRE_FILL_CONTENT={$NEW_POST_PRE_FILL_CONTENT}",
                 arguments = listOf(
-                    navArgument(NewPostReplyToNoteId) {
+                    navArgument(NEW_POST_REPLY_TO_NOTE_ID) {
                         type = NavType.StringType
                         nullable = true
                         defaultValue = null
                     },
-                    navArgument(NewPostPreFillFileUri) {
+                    navArgument(NEW_POST_PRE_FILL_FILE_URI) {
                         type = NavType.StringType
                         nullable = true
                         defaultValue = null
                     },
-                    navArgument(NewPostPreFillContent) {
+                    navArgument(NEW_POST_PRE_FILL_CONTENT) {
                         type = NavType.StringType
                         nullable = true
                         defaultValue = null
@@ -309,22 +324,22 @@ fun PrimalAppNavigation() {
             )
 
             thread(
-                route = "thread/{$PostId}",
+                route = "thread/{$POST_ID}",
                 arguments = listOf(
-                    navArgument(PostId) {
+                    navArgument(POST_ID) {
                         type = NavType.StringType
-                    }
+                    },
                 ),
                 navController = navController,
             )
 
             profile(
-                route = "profile?$ProfileId={$ProfileId}",
+                route = "profile?$PROFILE_ID={$PROFILE_ID}",
                 arguments = listOf(
-                    navArgument(ProfileId) {
+                    navArgument(PROFILE_ID) {
                         type = NavType.StringType
                         nullable = true
-                    }
+                    },
                 ),
                 navController = navController,
             )
@@ -336,52 +351,45 @@ fun PrimalAppNavigation() {
     }
 }
 
-private fun NavGraphBuilder.splash(
-    route: String
-) = composable(route = route) {
-    SplashScreen()
-}
-
-private fun NavGraphBuilder.welcome(
-    route: String,
-    navController: NavController,
-) = composable(route = route) {
-    LockToOrientationPortrait()
-    PrimalTheme(PrimalTheme.Sunset) {
-        WelcomeScreen(
-            onSignInClick = { navController.navigateToLogin() },
-            onCreateAccountClick = { navController.navigateToCreate() },
-        )
+private fun NavGraphBuilder.splash(route: String) =
+    composable(route = route) {
+        SplashScreen()
     }
-}
 
-private fun NavGraphBuilder.login(
-    route: String,
-    navController: NavController,
-) = composable(route = route) {
-    val viewModel: LoginViewModel = hiltViewModel(it)
-    PrimalTheme(PrimalTheme.Sunset) {
-        LoginScreen(
-            viewModel = viewModel,
-            onLoginSuccess = { pubkey -> navController.navigateToFeed(pubkey) },
-            onClose = { navController.popBackStack() },
-        )
+private fun NavGraphBuilder.welcome(route: String, navController: NavController) =
+    composable(route = route) {
+        LockToOrientationPortrait()
+        PrimalTheme(PrimalTheme.Sunset) {
+            WelcomeScreen(
+                onSignInClick = { navController.navigateToLogin() },
+                onCreateAccountClick = { navController.navigateToCreate() },
+            )
+        }
     }
-}
 
-private fun NavGraphBuilder.createAccount(
-    route: String,
-    navController: NavController
-) = composable(route = route) {
-    val viewModel: CreateAccountViewModel = hiltViewModel(it)
-    PrimalTheme(PrimalTheme.Sunset) {
-        CreateAccountScreen(
-            viewModel = viewModel,
-            onCreateSuccess = { pubkey -> navController.navigateToFeed(pubkey) },
-            onClose = { navController.popBackStack() }
-        )
+private fun NavGraphBuilder.login(route: String, navController: NavController) =
+    composable(route = route) {
+        val viewModel: LoginViewModel = hiltViewModel(it)
+        PrimalTheme(PrimalTheme.Sunset) {
+            LoginScreen(
+                viewModel = viewModel,
+                onLoginSuccess = { pubkey -> navController.navigateToFeed(pubkey) },
+                onClose = { navController.popBackStack() },
+            )
+        }
     }
-}
+
+private fun NavGraphBuilder.createAccount(route: String, navController: NavController) =
+    composable(route = route) {
+        val viewModel: CreateAccountViewModel = hiltViewModel(it)
+        PrimalTheme(PrimalTheme.Sunset) {
+            CreateAccountScreen(
+                viewModel = viewModel,
+                onCreateSuccess = { pubkey -> navController.navigateToFeed(pubkey) },
+                onClose = { navController.popBackStack() },
+            )
+        }
+    }
 
 private fun NavGraphBuilder.feed(
     route: String,
@@ -426,19 +434,17 @@ private fun NavGraphBuilder.noteEditor(
 }
 
 @OptIn(ExperimentalMaterialNavigationApi::class)
-private fun NavGraphBuilder.feedList(
-    route: String,
-    navController: NavController,
-) = bottomSheet(
-    route = route
-) {
-    val viewModel = hiltViewModel<FeedListViewModel>(it)
-    LockToOrientationPortrait()
-    FeedListScreen(
-        viewModel = viewModel,
-        onFeedSelected = { directive -> navController.navigateToFeed(directive = directive) }
-    )
-}
+private fun NavGraphBuilder.feedList(route: String, navController: NavController) =
+    bottomSheet(
+        route = route,
+    ) {
+        val viewModel = hiltViewModel<FeedListViewModel>(it)
+        LockToOrientationPortrait()
+        FeedListScreen(
+            viewModel = viewModel,
+            onFeedSelected = { directive -> navController.navigateToFeed(directive = directive) },
+        )
+    }
 
 private fun NavGraphBuilder.explore(
     route: String,
@@ -481,21 +487,19 @@ private fun NavGraphBuilder.exploreFeed(
     )
 }
 
-private fun NavGraphBuilder.search(
-    route: String,
-    navController: NavController,
-) = composable(
-    route = route,
-) {
-    val viewModel = hiltViewModel<SearchViewModel>(it)
-    LockToOrientationPortrait()
-    SearchScreen(
-        viewModel = viewModel,
-        onClose = { navController.navigateUp() },
-        onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
-        onSearchContent = { query -> navController.navigateToExploreFeed(query) },
-    )
-}
+private fun NavGraphBuilder.search(route: String, navController: NavController) =
+    composable(
+        route = route,
+    ) {
+        val viewModel = hiltViewModel<SearchViewModel>(it)
+        LockToOrientationPortrait()
+        SearchScreen(
+            viewModel = viewModel,
+            onClose = { navController.navigateUp() },
+            onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
+            onSearchContent = { query -> navController.navigateToExploreFeed(query) },
+        )
+    }
 
 private fun NavGraphBuilder.messages(
     route: String,
@@ -530,28 +534,26 @@ private fun NavGraphBuilder.chat(
         viewModel = viewModel,
         onClose = { navController.navigateUp() },
         onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
-        onNoteClick = { noteId -> navController.navigateToThread(noteId)},
+        onNoteClick = { noteId -> navController.navigateToThread(noteId) },
         onHashtagClick = { hashtag -> navController.navigateToExploreFeed(hashtag) },
     )
 }
 
-private fun NavGraphBuilder.newMessage(
-    route: String,
-    navController: NavController,
-) = composable(
-    route = route,
-) { navBackEntry ->
-    val viewModel = hiltViewModel<SearchViewModel>(navBackEntry)
-    LockToOrientationPortrait()
-    NewConversationScreen(
-        viewModel = viewModel,
-        onClose = { navController.navigateUp() },
-        onProfileClick = { profileId ->
-            navController.popBackStack()
-            navController.navigateToChat(profileId)
-        },
-    )
-}
+private fun NavGraphBuilder.newMessage(route: String, navController: NavController) =
+    composable(
+        route = route,
+    ) { navBackEntry ->
+        val viewModel = hiltViewModel<SearchViewModel>(navBackEntry)
+        LockToOrientationPortrait()
+        NewConversationScreen(
+            viewModel = viewModel,
+            onClose = { navController.navigateUp() },
+            onProfileClick = { profileId ->
+                navController.popBackStack()
+                navController.navigateToChat(profileId)
+            },
+        )
+    }
 
 private fun NavGraphBuilder.notifications(
     route: String,
@@ -602,7 +604,7 @@ private fun NavGraphBuilder.thread(
                 preFillContent = text,
                 preFillFileUri = uri,
             )
-        }
+        },
     )
 }
 
@@ -631,28 +633,24 @@ private fun NavGraphBuilder.profile(
     )
 }
 
-private fun NavGraphBuilder.editProfile(
-    route: String,
-    navController: NavController,
-) = composable(
-    route = route
-) {
-    val viewModel = hiltViewModel<EditProfileViewModel>()
+private fun NavGraphBuilder.editProfile(route: String, navController: NavController) =
+    composable(
+        route = route,
+    ) {
+        val viewModel = hiltViewModel<EditProfileViewModel>()
 
-    LockToOrientationPortrait()
-    EditProfileScreen(viewModel = viewModel, onClose = { navController.navigateUp() })
-}
+        LockToOrientationPortrait()
+        EditProfileScreen(viewModel = viewModel, onClose = { navController.navigateUp() })
+    }
 
-private fun NavGraphBuilder.logout(
-    route: String,
-    navController: NavController,
-) = dialog(
-    route = route,
-) {
-    val viewModel: LogoutViewModel = hiltViewModel(it)
-    LockToOrientationPortrait()
-    LogoutScreen(
-        viewModel = viewModel,
-        onClose = { navController.popBackStack() },
-    )
-}
+private fun NavGraphBuilder.logout(route: String, navController: NavController) =
+    dialog(
+        route = route,
+    ) {
+        val viewModel: LogoutViewModel = hiltViewModel(it)
+        LockToOrientationPortrait()
+        LogoutScreen(
+            viewModel = viewModel,
+            onClose = { navController.popBackStack() },
+        )
+    }

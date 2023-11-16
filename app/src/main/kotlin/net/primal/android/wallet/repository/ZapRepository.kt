@@ -1,5 +1,7 @@
 package net.primal.android.wallet.repository
 
+import java.io.IOException
+import javax.inject.Inject
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.feed.repository.PostStatsUpdater
 import net.primal.android.networking.relays.RelaysManager
@@ -11,8 +13,6 @@ import net.primal.android.wallet.api.ZapsApi
 import net.primal.android.wallet.model.LightningPayRequest
 import net.primal.android.wallet.model.LightningPayResponse
 import net.primal.android.wallet.model.ZapTarget
-import java.io.IOException
-import javax.inject.Inject
 
 class ZapRepository @Inject constructor(
     private val zapsApi: ZapsApi,
@@ -97,14 +97,14 @@ class ZapRepository @Inject constructor(
         zapPayRequest: LightningPayRequest,
         zapEvent: NostrEvent,
         satoshiAmountInMilliSats: ULong,
-        comment: String = ""
+        comment: String = "",
     ): LightningPayResponse {
         return try {
             this.fetchInvoice(
                 request = zapPayRequest,
                 zapEvent = zapEvent,
                 satoshiAmountInMilliSats = satoshiAmountInMilliSats,
-                comment = comment
+                comment = comment,
             )
         } catch (error: IOException) {
             throw ZapFailureException(cause = error)

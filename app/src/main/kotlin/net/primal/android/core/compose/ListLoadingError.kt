@@ -13,15 +13,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import net.primal.android.theme.AppTheme
 
-
 @Composable
-fun ListLoadingError(
-    text: String
-) {
+fun ListLoadingError(text: String) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .wrapContentHeight()
+            .wrapContentHeight(),
     ) {
         Text(
             modifier = Modifier

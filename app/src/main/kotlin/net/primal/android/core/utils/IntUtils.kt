@@ -1,6 +1,5 @@
 package net.primal.android.core.utils
 
-
 fun Int.shortened(): String = toLong().shortened()
 
 fun ULong.shortened(): String = toLong().shortened()
@@ -13,7 +12,7 @@ fun Long.shortened(): String {
     val multipliers = listOf(
         Pair("K", 1000.0),
         Pair("M", 1000000.0),
-        Pair("B", 1000000000.0)
+        Pair("B", 1000000000.0),
     )
 
     for ((shorten, multiplier) in multipliers) {

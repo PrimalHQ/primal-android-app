@@ -1,5 +1,6 @@
 package net.primal.android.nostr.ext
 
+import java.util.regex.Pattern
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.core.utils.usernameUiFriendly
@@ -13,7 +14,6 @@ import net.primal.android.messages.db.DirectMessageData
 import net.primal.android.nostr.utils.Nip19TLV
 import net.primal.android.profile.db.ProfileData
 import timber.log.Timber
-import java.util.regex.Pattern
 
 private const val NOSTR = "nostr:"
 private const val NPUB = "npub1"
@@ -26,13 +26,13 @@ private const val NPROFILE = "nprofile1"
 
 private val nostrUriRegexPattern: Pattern = Pattern.compile(
     "($NOSTR)?@?($NSEC|$NPUB|$NEVENT|$NADDR|$NOTE|$NPROFILE|$NRELAY)([qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)([\\S]*)",
-    Pattern.CASE_INSENSITIVE
+    Pattern.CASE_INSENSITIVE,
 )
 
 fun String.isNostrUri(): Boolean {
     val uri = lowercase()
-    return uri.startsWith(NOSTR) || uri.startsWith(NPUB) || uri.startsWith(NOTE)
-            || uri.startsWith(NEVENT) || uri.startsWith(NPROFILE)
+    return uri.startsWith(NOSTR) || uri.startsWith(NPUB) || uri.startsWith(NOTE) ||
+        uri.startsWith(NEVENT) || uri.startsWith(NPROFILE)
 }
 
 fun String.isNote() = lowercase().startsWith(NOTE)
@@ -79,7 +79,7 @@ fun String.nostrUriToNoteIdAndRelay() = nostrUriToIdAndRelay()
 
 fun String.nostrUriToPubkeyAndRelay() = nostrUriToIdAndRelay()
 
-fun String.extractProfileId() : String? {
+fun String.extractProfileId(): String? {
     val matcher = nostrUriRegexPattern.matcher(this)
     if (!matcher.find()) return null
 
@@ -101,7 +101,7 @@ fun String.extractProfileId() : String? {
     }
 }
 
-fun String.extractNoteId() : String? {
+fun String.extractNoteId(): String? {
     val matcher = nostrUriRegexPattern.matcher(this)
     if (!matcher.find()) return null
 
@@ -126,13 +126,14 @@ fun String.extractNoteId() : String? {
 fun List<PostData>.flatMapPostsAsNostrResourcePO(
     postIdToPostDataMap: Map<String, PostData>,
     profileIdToProfileDataMap: Map<String, ProfileData>,
-): List<NostrResource> = flatMap { postData ->
-    postData.uris.mapAsNostrResourcePO(
-        eventId = postData.postId,
-        postIdToPostDataMap = postIdToPostDataMap,
-        profileIdToProfileDataMap = profileIdToProfileDataMap,
-    )
-}
+): List<NostrResource> =
+    flatMap { postData ->
+        postData.uris.mapAsNostrResourcePO(
+            eventId = postData.postId,
+            postIdToPostDataMap = postIdToPostDataMap,
+            profileIdToProfileDataMap = profileIdToProfileDataMap,
+        )
+    }
 
 fun List<DirectMessageData>.flatMapMessagesAsNostrResourcePO(
     postIdToPostDataMap: Map<String, PostData>,
@@ -158,26 +159,34 @@ fun List<String>.mapAsNostrResourcePO(
     NostrResource(
         postId = eventId,
         uri = link,
-        referencedUser = if (refUserProfileId != null) ReferencedUser(
-            userId = refUserProfileId,
-            handle = profileIdToProfileDataMap[refUserProfileId]
-                ?.usernameUiFriendly()
-                ?: refUserProfileId.asEllipsizedNpub(),
-        ) else null,
-        referencedPost = if (refPost != null && refPostAuthor != null) ReferencedPost(
-            postId = refPost.postId,
-            createdAt = refPost.createdAt,
-            content = refPost.content,
-            authorId = refPost.authorId,
-            authorName = refPostAuthor.authorNameUiFriendly(),
-            authorAvatarUrl = refPostAuthor.picture,
-            authorInternetIdentifier = refPostAuthor.internetIdentifier,
-            authorLightningAddress = refPostAuthor.lightningAddress,
-            mediaResources = listOf(refPost).flatMapPostsAsMediaResourcePO(),
-            nostrResources = listOf(refPost).flatMapPostsAsNostrResourcePO(
-                postIdToPostDataMap = postIdToPostDataMap,
-                profileIdToProfileDataMap = profileIdToProfileDataMap,
-            ),
-        ) else null,
+        referencedUser = if (refUserProfileId != null) {
+            ReferencedUser(
+                userId = refUserProfileId,
+                handle = profileIdToProfileDataMap[refUserProfileId]
+                    ?.usernameUiFriendly()
+                    ?: refUserProfileId.asEllipsizedNpub(),
+            )
+        } else {
+            null
+        },
+        referencedPost = if (refPost != null && refPostAuthor != null) {
+            ReferencedPost(
+                postId = refPost.postId,
+                createdAt = refPost.createdAt,
+                content = refPost.content,
+                authorId = refPost.authorId,
+                authorName = refPostAuthor.authorNameUiFriendly(),
+                authorAvatarUrl = refPostAuthor.picture,
+                authorInternetIdentifier = refPostAuthor.internetIdentifier,
+                authorLightningAddress = refPostAuthor.lightningAddress,
+                mediaResources = listOf(refPost).flatMapPostsAsMediaResourcePO(),
+                nostrResources = listOf(refPost).flatMapPostsAsNostrResourcePO(
+                    postIdToPostDataMap = postIdToPostDataMap,
+                    profileIdToProfileDataMap = profileIdToProfileDataMap,
+                ),
+            )
+        } else {
+            null
+        },
     )
 }

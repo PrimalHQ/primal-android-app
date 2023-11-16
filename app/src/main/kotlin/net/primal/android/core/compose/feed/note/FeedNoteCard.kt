@@ -28,6 +28,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 import kotlinx.coroutines.launch
 import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.feed.model.FeedPostAction
@@ -36,8 +38,6 @@ import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.ext.openUriSafely
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
-import java.time.Instant
-import java.time.temporal.ChronoUnit
 
 @Composable
 fun FeedNoteCard(
@@ -56,7 +56,7 @@ fun FeedNoteCard(
     onPostAction: (FeedPostAction) -> Unit,
     onPostLongClickAction: (FeedPostAction) -> Unit,
     onHashtagClick: (String) -> Unit,
-    onMuteUserClick: () -> Unit
+    onMuteUserClick: () -> Unit,
 ) {
     val localUriHandler = LocalUriHandler.current
     val uiScope = rememberCoroutineScope()
@@ -94,7 +94,7 @@ fun FeedNoteCard(
                 noteContent = data.content,
                 noteRawData = data.rawNostrEventJson,
                 authorId = data.authorId,
-                onMuteUserClick = onMuteUserClick
+                onMuteUserClick = onMuteUserClick,
             )
 
             Column {
@@ -109,7 +109,7 @@ fun FeedNoteCard(
                             if (data.repostAuthorId != null) {
                                 onProfileClick(data.repostAuthorId)
                             }
-                        }
+                        },
                     )
                 }
 
@@ -149,12 +149,13 @@ fun FeedNoteCard(
                             onAuthorAvatarClick = { onProfileClick(data.authorId) },
                         )
 
-
                         val postAuthorGuessHeight = with(LocalDensity.current) { 128.dp.toPx() }
                         val launchRippleEffect: (Offset) -> Unit = {
                             uiScope.launch {
                                 val press =
-                                    PressInteraction.Press(it.copy(y = it.y + postAuthorGuessHeight))
+                                    PressInteraction.Press(
+                                        it.copy(y = it.y + postAuthorGuessHeight),
+                                    )
                                 interactionSource.emit(press)
                                 interactionSource.emit(PressInteraction.Release(press))
                             }
@@ -163,13 +164,20 @@ fun FeedNoteCard(
                         FeedNoteContent(
                             modifier = Modifier
                                 .padding(horizontal = if (fullWidthContent) 10.dp else 8.dp)
-                                .padding(start = if (forceContentIndent && fullWidthContent) {
-                                    avatarSizeDp + 6.dp
-                                } else {
-                                    0.dp
-                                }
+                                .padding(
+                                    start = if (forceContentIndent && fullWidthContent) {
+                                        avatarSizeDp + 6.dp
+                                    } else {
+                                        0.dp
+                                    },
                                 )
-                                .padding(top = if (fullWidthContent || !headerSingleLine) 10.dp else 2.dp),
+                                .padding(
+                                    top = if (fullWidthContent || !headerSingleLine) {
+                                        10.dp
+                                    } else {
+                                        2.dp
+                                    },
+                                ),
                             content = data.content,
                             expanded = expanded,
                             hashtags = data.hashtags,
@@ -269,7 +277,7 @@ class FeedPostUiProvider : PreviewParameterProvider<FeedPostUi> {
 @Composable
 fun PreviewFeedNoteListItemLightMultiLineHeader(
     @PreviewParameter(FeedPostUiProvider::class)
-    feedPostUi: FeedPostUi
+    feedPostUi: FeedPostUi,
 ) {
     PrimalTheme(primalTheme = PrimalTheme.Sunrise) {
         FeedNoteCard(
@@ -290,7 +298,7 @@ fun PreviewFeedNoteListItemLightMultiLineHeader(
 @Composable
 fun PreviewFeedNoteListItemLightMultiLineHeaderFullWidth(
     @PreviewParameter(FeedPostUiProvider::class)
-    feedPostUi: FeedPostUi
+    feedPostUi: FeedPostUi,
 ) {
     PrimalTheme(primalTheme = PrimalTheme.Sunrise) {
         FeedNoteCard(
@@ -311,7 +319,7 @@ fun PreviewFeedNoteListItemLightMultiLineHeaderFullWidth(
 @Composable
 fun PreviewFeedNoteListItemDarkSingleLineHeader(
     @PreviewParameter(FeedPostUiProvider::class)
-    feedPostUi: FeedPostUi
+    feedPostUi: FeedPostUi,
 ) {
     PrimalTheme(primalTheme = PrimalTheme.Sunset) {
         FeedNoteCard(
@@ -332,7 +340,7 @@ fun PreviewFeedNoteListItemDarkSingleLineHeader(
 @Composable
 fun PreviewFeedNoteListItemDarkSingleLineHeaderFullWidth(
     @PreviewParameter(FeedPostUiProvider::class)
-    feedPostUi: FeedPostUi
+    feedPostUi: FeedPostUi,
 ) {
     PrimalTheme(primalTheme = PrimalTheme.Sunset) {
         FeedNoteCard(
@@ -353,7 +361,7 @@ fun PreviewFeedNoteListItemDarkSingleLineHeaderFullWidth(
 @Composable
 fun PreviewFeedNoteListItemLightForcedContentIndentFullWidthSingleLineHeader(
     @PreviewParameter(FeedPostUiProvider::class)
-    feedPostUi: FeedPostUi
+    feedPostUi: FeedPostUi,
 ) {
     PrimalTheme(primalTheme = PrimalTheme.Sunrise) {
         FeedNoteCard(
@@ -372,12 +380,11 @@ fun PreviewFeedNoteListItemLightForcedContentIndentFullWidthSingleLineHeader(
     }
 }
 
-
 @Preview
 @Composable
 fun PreviewFeedNoteListItemDarkForcedContentIndentSingleLineHeader(
     @PreviewParameter(FeedPostUiProvider::class)
-    feedPostUi: FeedPostUi
+    feedPostUi: FeedPostUi,
 ) {
     PrimalTheme(primalTheme = PrimalTheme.Sunset) {
         FeedNoteCard(

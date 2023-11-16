@@ -14,10 +14,11 @@ fun String.parseUris(): List<String> {
     return urls + nostr
 }
 
-private fun List<Url>.filterInvalidTLDs() = filter {
-    val tld = it.host.split(".").lastOrNull()
-    tld != null && tld.all { char -> char.isLetter() }
-}
+private fun List<Url>.filterInvalidTLDs() =
+    filter {
+        val tld = it.host.split(".").lastOrNull()
+        tld != null && tld.all { char -> char.isLetter() }
+    }
 
 fun String?.detectContentType(): String? {
     return when {

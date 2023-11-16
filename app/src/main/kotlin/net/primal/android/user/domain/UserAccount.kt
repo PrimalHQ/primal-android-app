@@ -29,10 +29,11 @@ data class UserAccount(
             userDisplayName = "",
         )
 
-        fun buildLocal(pubkey: String) = UserAccount(
-            pubkey = pubkey,
-            authorDisplayName = pubkey.asEllipsizedNpub(),
-            userDisplayName = pubkey.asEllipsizedNpub(),
-        )
+        fun buildLocal(pubkey: String) =
+            UserAccount(
+                pubkey = pubkey,
+                authorDisplayName = pubkey.asEllipsizedNpub(),
+                userDisplayName = pubkey.asEllipsizedNpub(),
+            )
     }
 }

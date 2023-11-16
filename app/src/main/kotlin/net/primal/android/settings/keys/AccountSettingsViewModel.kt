@@ -3,6 +3,7 @@ package net.primal.android.settings.keys
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
@@ -11,7 +12,6 @@ import net.primal.android.crypto.hexToNpubHrp
 import net.primal.android.settings.keys.AccountSettingsContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.credentials.CredentialsStore
-import javax.inject.Inject
 
 @HiltViewModel
 class AccountSettingsViewModel @Inject constructor(
@@ -27,16 +27,17 @@ class AccountSettingsViewModel @Inject constructor(
         observeActiveAccount()
     }
 
-    private fun observeActiveAccount() = viewModelScope.launch {
-        activeAccountStore.activeUserAccount.collect {
-            setState {
-                val credential = credentialsStore.findOrThrow(it.pubkey.hexToNpubHrp())
-                copy(
-                    avatarUrl = it.pictureUrl,
-                    nsec = credential.nsec,
-                    npub = credential.npub,
-                )
+    private fun observeActiveAccount() =
+        viewModelScope.launch {
+            activeAccountStore.activeUserAccount.collect {
+                setState {
+                    val credential = credentialsStore.findOrThrow(it.pubkey.hexToNpubHrp())
+                    copy(
+                        avatarUrl = it.pictureUrl,
+                        nsec = credential.nsec,
+                        npub = credential.npub,
+                    )
+                }
             }
         }
-    }
 }

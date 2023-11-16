@@ -6,7 +6,7 @@ import androidx.room.Index
 @Entity(
     primaryKeys = [
         "feedDirective",
-        "eventId"
+        "eventId",
     ],
     indices = [
         Index(value = ["feedDirective"]),

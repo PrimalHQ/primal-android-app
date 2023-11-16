@@ -37,7 +37,7 @@ interface FeedContract {
         data class RepostAction(
             val postId: String,
             val postAuthorId: String,
-            val postNostrEvent: String
+            val postNostrEvent: String,
         ) : UiEvent()
 
         data class ZapAction(
@@ -49,5 +49,4 @@ interface FeedContract {
 
         data class MuteAction(val userId: String) : UiEvent()
     }
-
 }

@@ -5,7 +5,6 @@ import androidx.compose.ui.unit.dp
 import net.primal.android.core.compose.media.model.MediaResourceUi
 import net.primal.android.nostr.model.primal.PrimalResourceVariant
 
-
 fun List<MediaResourceUi>?.findByUrl(url: String?): MediaResourceUi? =
     if (url == null) null else this?.find { it.url.startsWith(url) }
 
@@ -17,7 +16,7 @@ fun List<PrimalResourceVariant>?.findNearestOrNull(maxWidthPx: Int): PrimalResou
 fun PrimalResourceVariant?.calculateImageSize(
     maxWidth: Int,
     maxHeight: Int,
-    density: Float
+    density: Float,
 ): DpSize {
     if (this == null) return DpSize(maxWidth.dp, maxWidth.dp)
 
@@ -31,6 +30,6 @@ fun PrimalResourceVariant?.calculateImageSize(
             variantHeight == 0 -> maxWidth.dp
             variantHeight > maxHeight -> maxHeight.dp
             else -> ((maxWidth * variantHeight) / variantWidth).dp
-        }
+        },
     )
 }

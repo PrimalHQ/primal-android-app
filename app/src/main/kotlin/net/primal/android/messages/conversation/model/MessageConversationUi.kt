@@ -1,8 +1,8 @@
 package net.primal.android.messages.conversation.model
 
+import java.time.Instant
 import net.primal.android.core.compose.feed.model.NostrResourceUi
 import net.primal.android.core.compose.media.model.MediaResourceUi
-import java.time.Instant
 
 data class MessageConversationUi(
     val participantId: String,

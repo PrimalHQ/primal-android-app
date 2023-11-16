@@ -94,7 +94,9 @@ fun NotificationsScreen(
 
     DisposableLifecycleObserverEffect {
         when (it) {
-            Lifecycle.Event.ON_DESTROY -> viewModel.setEvent(NotificationsContract.UiEvent.NotificationsSeen)
+            Lifecycle.Event.ON_DESTROY -> viewModel.setEvent(
+                NotificationsContract.UiEvent.NotificationsSeen,
+            )
             else -> Unit
         }
     }
@@ -147,7 +149,13 @@ fun NotificationsScreen(
     PrimalDrawerScaffold(
         drawerState = drawerState,
         activeDestination = PrimalTopLevelDestination.Notifications,
-        onActiveDestinationClick = { uiScope.launch { notificationsListState.animateScrollToItem(0) } },
+        onActiveDestinationClick = {
+            uiScope.launch {
+                notificationsListState.animateScrollToItem(
+                    0,
+                )
+            }
+        },
         onPrimaryDestinationChanged = onPrimaryDestinationChanged,
         onDrawerDestinationClick = onDrawerDestinationClick,
         bottomBarHeight = bottomBarHeight,
@@ -167,7 +175,7 @@ fun NotificationsScreen(
                         icon = PrimalIcons.Settings,
                         onClick = onNotificationSettings,
                     )
-                }
+                },
             )
         },
         snackbarHost = {
@@ -195,7 +203,7 @@ fun NotificationsScreen(
                         NotificationsContract.UiEvent.PostLikeAction(
                             postId = it.postId,
                             postAuthorId = it.authorId,
-                        )
+                        ),
                     )
                 },
                 onRepostClick = {
@@ -204,7 +212,7 @@ fun NotificationsScreen(
                             postId = it.postId,
                             postAuthorId = it.authorId,
                             postNostrEvent = it.rawNostrEventJson,
-                        )
+                        ),
                     )
                 },
                 onZapClick = { postData, amount, description ->
@@ -214,7 +222,7 @@ fun NotificationsScreen(
                             postAuthorId = postData.authorId,
                             zapAmount = amount,
                             zapDescription = description,
-                        )
+                        ),
                     )
                 },
                 onPostQuoteClick = {
@@ -251,25 +259,29 @@ private fun NotificationsList(
     val uiScope = rememberCoroutineScope()
 
     var repostQuotePostConfirmation by remember { mutableStateOf<FeedPostUi?>(null) }
-    if (repostQuotePostConfirmation != null) repostQuotePostConfirmation?.let { post ->
-        RepostOrQuoteBottomSheet(
-            onDismiss = { repostQuotePostConfirmation = null },
-            onRepostClick = { onRepostClick(post) },
-            onPostQuoteClick = { onPostQuoteClick(post) },
-        )
+    if (repostQuotePostConfirmation != null) {
+        repostQuotePostConfirmation?.let { post ->
+            RepostOrQuoteBottomSheet(
+                onDismiss = { repostQuotePostConfirmation = null },
+                onRepostClick = { onRepostClick(post) },
+                onPostQuoteClick = { onPostQuoteClick(post) },
+            )
+        }
     }
 
     var zapOptionsPostConfirmation by remember { mutableStateOf<FeedPostUi?>(null) }
-    if (zapOptionsPostConfirmation != null) zapOptionsPostConfirmation?.let { post ->
-        ZapBottomSheet(
-            onDismissRequest = { zapOptionsPostConfirmation = null },
-            receiverName = post.authorName,
-            defaultZapAmount = state.defaultZapAmount ?: 42.toULong(),
-            userZapOptions = state.zapOptions,
-            onZap = { zapAmount, zapDescription ->
-                onZapClick(post, zapAmount, zapDescription)
-            }
-        )
+    if (zapOptionsPostConfirmation != null) {
+        zapOptionsPostConfirmation?.let { post ->
+            ZapBottomSheet(
+                onDismissRequest = { zapOptionsPostConfirmation = null },
+                receiverName = post.authorName,
+                defaultZapAmount = state.defaultZapAmount ?: 42.toULong(),
+                userZapOptions = state.zapOptions,
+                onZap = { zapAmount, zapDescription ->
+                    onZapClick(post, zapAmount, zapDescription)
+                },
+            )
+        }
     }
 
     val canScrollUp by remember(listState) {
@@ -363,7 +375,9 @@ private fun NotificationsList(
                         item(contentType = "NoContent") {
                             ListNoContent(
                                 modifier = Modifier.fillParentMaxSize(),
-                                noContentText = stringResource(id = R.string.notifications_no_content),
+                                noContentText = stringResource(
+                                    id = R.string.notifications_no_content,
+                                ),
                                 refreshButtonVisible = false,
                             )
                         }
@@ -373,8 +387,10 @@ private fun NotificationsList(
                         item(contentType = "RefreshError") {
                             ListNoContent(
                                 modifier = Modifier.fillParentMaxSize(),
-                                noContentText = stringResource(id = R.string.notifications_initial_loading_error),
-                                onRefresh = { seenPagingItems.refresh() }
+                                noContentText = stringResource(
+                                    id = R.string.notifications_initial_loading_error,
+                                ),
+                                onRefresh = { seenPagingItems.refresh() },
                             )
                         }
                     }
@@ -386,13 +402,13 @@ private fun NotificationsList(
                     ListLoading(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(64.dp)
+                            .height(64.dp),
                     )
                 }
 
                 is LoadState.Error -> item(contentType = "AppendError") {
                     ListLoadingError(
-                        text = stringResource(R.string.app_error_loading_next_page)
+                        text = stringResource(R.string.app_error_loading_next_page),
                     )
                 }
 
@@ -424,9 +440,7 @@ private fun NotificationsList(
 }
 
 @Composable
-private fun NewNotificationsButton(
-    onClick: () -> Unit,
-) {
+private fun NewNotificationsButton(onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .background(
@@ -447,7 +461,6 @@ private fun NewNotificationsButton(
         )
     }
 }
-
 
 @Composable
 private fun ErrorHandler(

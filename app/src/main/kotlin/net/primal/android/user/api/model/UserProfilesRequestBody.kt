@@ -5,5 +5,5 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class UserProfilesRequestBody(
-    @SerialName("pubkeys") val userIds: Set<String> = emptySet()
+    @SerialName("pubkeys") val userIds: Set<String> = emptySet(),
 )

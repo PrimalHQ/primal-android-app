@@ -1,9 +1,9 @@
 package net.primal.android.nostr.notary
 
+import java.time.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonArray
-import java.time.Instant
 
 @Serializable
 data class NostrUnsignedEvent(

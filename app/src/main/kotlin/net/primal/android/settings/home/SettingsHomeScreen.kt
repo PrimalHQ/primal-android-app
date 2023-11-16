@@ -33,7 +33,6 @@ fun SettingsHomeScreen(
     onClose: () -> Unit,
     onSettingsSectionClick: (PrimalSettingsSection) -> Unit,
 ) {
-
     val uiState = viewModel.state.collectAsState()
 
     SettingsHomeScreen(
@@ -41,7 +40,6 @@ fun SettingsHomeScreen(
         onClose = onClose,
         onSettingsSectionClick = onSettingsSectionClick,
     )
-
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -62,11 +60,11 @@ fun SettingsHomeScreen(
         },
         content = { paddingValues ->
             LazyColumn(
-                modifier = Modifier.padding(paddingValues)
+                modifier = Modifier.padding(paddingValues),
             ) {
                 items(
                     items = PrimalSettingsSection.values(),
-                    key = { it.name }
+                    key = { it.name },
                 ) {
                     SettingsListItem(
                         title = it.title(),
@@ -122,14 +120,12 @@ private fun SettingsListItem(
             if (trailingIcon != null) {
                 Icon(imageVector = trailingIcon, contentDescription = null)
             }
-        }
+        },
     )
 }
 
 @Composable
-private fun VersionListItem(
-    versionName: String,
-) {
+private fun VersionListItem(versionName: String) {
     ListItem(
         headlineContent = {
             Text(
@@ -143,7 +139,7 @@ private fun VersionListItem(
                 style = AppTheme.typography.titleLarge,
             )
         },
-        leadingContent = { }
+        leadingContent = { },
     )
 }
 
@@ -165,10 +161,14 @@ private fun PrimalSettingsSection.title(): String {
         PrimalSettingsSection.Account -> stringResource(id = R.string.settings_keys_title)
         PrimalSettingsSection.Wallet -> stringResource(id = R.string.settings_wallet_title)
         PrimalSettingsSection.Appearance -> stringResource(id = R.string.settings_appearance_title)
-        PrimalSettingsSection.Notifications -> stringResource(id = R.string.settings_notifications_title)
+        PrimalSettingsSection.Notifications -> stringResource(
+            id = R.string.settings_notifications_title,
+        )
         PrimalSettingsSection.Feeds -> stringResource(id = R.string.settings_feeds_title)
         PrimalSettingsSection.Zaps -> stringResource(id = R.string.settings_zaps_title)
-        PrimalSettingsSection.MutedAccounts -> stringResource(id = R.string.settings_muted_accounts_title)
+        PrimalSettingsSection.MutedAccounts -> stringResource(
+            id = R.string.settings_muted_accounts_title,
+        )
     }
 }
 
@@ -179,7 +179,7 @@ fun PreviewSettingsHomeScreen() {
         SettingsHomeScreen(
             state = SettingsHomeContract.UiState(version = "1.1"),
             onClose = { },
-            onSettingsSectionClick = {}
+            onSettingsSectionClick = {},
         )
     }
 }

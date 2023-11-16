@@ -1,9 +1,9 @@
 package net.primal.android.serialization
 
 import androidx.datastore.core.Serializer
-import net.primal.android.security.Encryption
 import java.io.InputStream
 import java.io.OutputStream
+import net.primal.android.security.Encryption
 
 class StringSerializer(
     private val encryption: Encryption? = null,

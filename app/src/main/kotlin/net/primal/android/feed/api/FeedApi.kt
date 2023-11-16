@@ -11,5 +11,4 @@ interface FeedApi {
     suspend fun getThread(body: ThreadRequestBody): FeedResponse
 
     suspend fun getNotes(noteIds: Set<String>, extendedResponse: Boolean = true): FeedResponse
-
 }

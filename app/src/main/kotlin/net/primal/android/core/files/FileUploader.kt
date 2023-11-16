@@ -3,6 +3,10 @@ package net.primal.android.core.files
 import android.content.ContentResolver
 import android.net.Uri
 import android.util.Base64
+import java.io.IOException
+import java.net.UnknownHostException
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
@@ -16,10 +20,6 @@ import net.primal.android.networking.primal.PrimalVerb
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.notary.NostrNotary
-import java.io.IOException
-import java.net.UnknownHostException
-import javax.inject.Inject
-import javax.inject.Singleton
 
 @Singleton
 class FileUploader @Inject constructor(
@@ -40,7 +40,7 @@ class FileUploader @Inject constructor(
 
         val uploadImageNostrEvent = nostrNotary.signImageUploadNostrEvent(
             userId = userId,
-            base64Content = "data:image/svg+xml;base64,$imageAsBase64"
+            base64Content = "data:image/svg+xml;base64,$imageAsBase64",
         )
 
         val queryResult = try {
@@ -48,9 +48,9 @@ class FileUploader @Inject constructor(
                 message = PrimalCacheFilter(
                     primalVerb = PrimalVerb.UPLOAD,
                     optionsJson = uploadJsonSerializer.encodeToString(
-                        UploadImageRequest(uploadImageEvent = uploadImageNostrEvent)
-                    )
-                )
+                        UploadImageRequest(uploadImageEvent = uploadImageNostrEvent),
+                    ),
+                ),
             )
         } catch (error: WssException) {
             throw UnsuccessfulFileUpload(cause = error)
@@ -65,7 +65,8 @@ class FileUploader @Inject constructor(
             ?.content ?: throw UnsuccessfulFileUpload(cause = null)
     }
 
-    private suspend fun Uri.readBytesSafely(): ByteArray? = withContext(Dispatchers.IO) {
-        contentResolver.openInputStream(this@readBytesSafely)?.use { it.readBytes() }
-    }
+    private suspend fun Uri.readBytesSafely(): ByteArray? =
+        withContext(Dispatchers.IO) {
+            contentResolver.openInputStream(this@readBytesSafely)?.use { it.readBytes() }
+        }
 }

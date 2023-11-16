@@ -8,7 +8,6 @@ import kotlinx.serialization.json.jsonPrimitive
 import net.primal.android.serialization.NostrJson
 import net.primal.android.user.domain.Relay
 
-
 fun String.parseRelays(): List<Relay> {
     val jsonContent = try {
         NostrJson.parseToJsonElement(this)

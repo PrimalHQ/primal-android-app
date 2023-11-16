@@ -5,9 +5,9 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import dagger.multibindings.ElementsIntoSet
+import javax.inject.Singleton
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
-import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -24,9 +24,8 @@ object NetworkingModule {
 
     @Provides
     @Singleton
-    fun unauthenticatedOkHttpClient(
-        interceptors: Set<@JvmSuppressWildcards Interceptor>
-    ) = OkHttpClient.Builder()
-        .withInterceptors(interceptors)
-        .build()
+    fun unauthenticatedOkHttpClient(interceptors: Set<@JvmSuppressWildcards Interceptor>) =
+        OkHttpClient.Builder()
+            .withInterceptors(interceptors)
+            .build()
 }

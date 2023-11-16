@@ -2,38 +2,44 @@ package net.primal.android.navigation
 
 import androidx.lifecycle.SavedStateHandle
 
+const val FEED_DIRECTIVE = "directive"
+inline val SavedStateHandle.feedDirective: String? get() = get<String>(
+    FEED_DIRECTIVE,
+)?.asUrlDecoded()
 
-const val FeedDirective = "directive"
-inline val SavedStateHandle.feedDirective: String? get() = get<String>(FeedDirective)?.asUrlDecoded()
-
-
-const val PostId = "postId"
+const val POST_ID = "postId"
 inline val SavedStateHandle.postIdOrThrow: String
-    get() = get(PostId) ?: throw IllegalArgumentException("Missing required postId argument.")
+    get() = get(POST_ID) ?: throw IllegalArgumentException("Missing required postId argument.")
 
-
-const val ProfileId = "profileId"
-inline val SavedStateHandle.profileId: String? get() = get(ProfileId)
+const val PROFILE_ID = "profileId"
+inline val SavedStateHandle.profileId: String? get() = get(PROFILE_ID)
 inline val SavedStateHandle.profileIdOrThrow: String
-    get() = get(ProfileId) ?: throw IllegalArgumentException("Missing required profileId argument")
+    get() = get(PROFILE_ID) ?: throw IllegalArgumentException("Missing required profileId argument")
 
-
-const val SearchQuery = "searchQuery"
+const val SEARCH_QUERY = "searchQuery"
 inline val SavedStateHandle.searchQueryOrThrow: String
-    get() = get(SearchQuery) ?: throw IllegalArgumentException("Missing required searchQuery argument.")
+    get() = get(SEARCH_QUERY) ?: throw IllegalArgumentException("Missing required searchQuery argument.")
 
+const val NEW_POST_PRE_FILL_CONTENT = "preFillContent"
+inline val SavedStateHandle.newPostPreFillContent: String? get() = get<String>(
+    NEW_POST_PRE_FILL_CONTENT,
+)?.asUrlDecoded()?.ifEmpty {
+    null
+}
 
-const val NewPostPreFillContent = "preFillContent"
-inline val SavedStateHandle.newPostPreFillContent: String? get() = get<String>(NewPostPreFillContent)?.asUrlDecoded()?.ifEmpty { null }
+const val NEW_POST_PRE_FILL_FILE_URI = "preFillFileUri"
+inline val SavedStateHandle.newPostPreFillFileUri: String? get() = get<String?>(
+    NEW_POST_PRE_FILL_FILE_URI,
+)?.asUrlDecoded()?.ifEmpty {
+    null
+}
 
+const val NEW_POST_REPLY_TO_NOTE_ID = "replyToNoteId"
+inline val SavedStateHandle.replyToNoteId: String? get() = get<String?>(
+    NEW_POST_REPLY_TO_NOTE_ID,
+)?.ifEmpty {
+    null
+}
 
-const val NewPostPreFillFileUri = "preFillFileUri"
-inline val SavedStateHandle.newPostPreFillFileUri: String? get() = get<String?>(NewPostPreFillFileUri)?.asUrlDecoded()?.ifEmpty { null }
-
-
-const val NewPostReplyToNoteId = "replyToNoteId"
-inline val SavedStateHandle.replyToNoteId: String? get() = get<String?>(NewPostReplyToNoteId)?.ifEmpty { null }
-
-
-const val NWCUrl = "nwcUrl"
-inline val SavedStateHandle.nwcUrl: String? get() = get(NWCUrl)
+const val NWC_URL = "nwcUrl"
+inline val SavedStateHandle.nwcUrl: String? get() = get(NWC_URL)

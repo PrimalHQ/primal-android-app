@@ -44,7 +44,7 @@ fun PrimalNavigationBar(
     ) {
         val badgesMap = mapOf(
             Pair(PrimalTopLevelDestination.Messages, badges.messages),
-            Pair(PrimalTopLevelDestination.Notifications, badges.notifications)
+            Pair(PrimalTopLevelDestination.Notifications, badges.notifications),
         )
         PrimalTopLevelDestination.values().forEach {
             PrimalNavigationBarItem(
@@ -79,10 +79,12 @@ private fun RowScope.PrimalNavigationBarItem(
         icon = {
             BadgedBox(
                 badge = {
-                    if (badge > 0) Badge(
-                        containerColor = AppTheme.colorScheme.primary,
-                    )
-                }
+                    if (badge > 0) {
+                        Badge(
+                            containerColor = AppTheme.colorScheme.primary,
+                        )
+                    }
+                },
             ) {
                 Icon(
                     imageVector = if (selected) {
@@ -93,7 +95,6 @@ private fun RowScope.PrimalNavigationBarItem(
                     contentDescription = primaryDestination.label(),
                 )
             }
-
         },
         colors = NavigationBarItemDefaults.colors(
             indicatorColor = AppTheme.colorScheme.surface,
@@ -104,7 +105,10 @@ private fun RowScope.PrimalNavigationBarItem(
 }
 
 enum class PrimalTopLevelDestination {
-    Feed, Explore, Messages, Notifications
+    Feed,
+    Explore,
+    Messages,
+    Notifications,
 }
 
 private fun PrimalTopLevelDestination.imageVector(): ImageVector {
@@ -128,9 +132,17 @@ private fun PrimalTopLevelDestination.imageVectorSelected(): ImageVector {
 @Composable
 private fun PrimalTopLevelDestination.label(): String {
     return when (this) {
-        PrimalTopLevelDestination.Feed -> stringResource(id = R.string.primary_destination_feed_label)
-        PrimalTopLevelDestination.Explore -> stringResource(id = R.string.primary_destination_explore_label)
-        PrimalTopLevelDestination.Messages -> stringResource(id = R.string.primary_destination_messages_label)
-        PrimalTopLevelDestination.Notifications -> stringResource(id = R.string.primary_destination_notifications_label)
+        PrimalTopLevelDestination.Feed -> stringResource(
+            id = R.string.primary_destination_feed_label,
+        )
+        PrimalTopLevelDestination.Explore -> stringResource(
+            id = R.string.primary_destination_explore_label,
+        )
+        PrimalTopLevelDestination.Messages -> stringResource(
+            id = R.string.primary_destination_messages_label,
+        )
+        PrimalTopLevelDestination.Notifications -> stringResource(
+            id = R.string.primary_destination_notifications_label,
+        )
     }
 }

@@ -1,5 +1,6 @@
 package net.primal.android.user.repository
 
+import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import net.primal.android.core.files.FileUploader
@@ -17,7 +18,6 @@ import net.primal.android.user.accounts.copyIfNotNull
 import net.primal.android.user.api.UsersApi
 import net.primal.android.user.domain.NostrWallet
 import net.primal.android.user.domain.UserAccount
-import javax.inject.Inject
 
 class UserRepository @Inject constructor(
     private val database: PrimalDatabase,
@@ -71,11 +71,15 @@ class UserRepository @Inject constructor(
     suspend fun setProfileMetadata(userId: String, profileMetadata: ProfileMetadata) {
         val pictureUrl = if (profileMetadata.localPictureUri != null) {
             fileUploader.uploadFile(userId = userId, uri = profileMetadata.localPictureUri)
-        } else profileMetadata.remotePictureUrl
+        } else {
+            profileMetadata.remotePictureUrl
+        }
 
         val bannerUrl = if (profileMetadata.localBannerUri != null) {
             fileUploader.uploadFile(userId = userId, uri = profileMetadata.localBannerUri)
-        } else profileMetadata.remoteBannerUrl
+        } else {
+            profileMetadata.remoteBannerUrl
+        }
 
         withContext(Dispatchers.IO) {
             val profileMetadataNostrEvent = usersApi.setUserProfile(

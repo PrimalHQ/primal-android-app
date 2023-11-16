@@ -33,7 +33,7 @@ fun PrimalOutlinedTextField(
     onValueChange: (String) -> Unit,
     isRequired: Boolean = false,
     prefix: String? = null,
-    isMultiline: Boolean = false
+    isMultiline: Boolean = false,
 ) {
     Column(
         modifier = Modifier
@@ -48,30 +48,32 @@ fun PrimalOutlinedTextField(
                 text = header.uppercase(),
                 fontWeight = FontWeight.Normal,
                 fontSize = 16.sp,
-                color = AppTheme.extraColorScheme.onSurfaceVariantAlt4
+                color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
             )
             if (isRequired) {
-                Text(buildAnnotatedString {
-                    withStyle(
-                        style = SpanStyle(
-                            color = Color.Red,
-                            fontWeight = FontWeight.W400,
-                            fontSize = 16.sp
-                        )
-                    ) {
-                        append("*")
-                    }
-                    withStyle(
-                        style = SpanStyle(
-                            color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
-                            fontWeight = FontWeight.W400,
-                            fontSize = 16.sp
-                        )
-                    ) {
-                        append(" ")
-                        append(stringResource(id = R.string.create_account_required_hint))
-                    }
-                })
+                Text(
+                    buildAnnotatedString {
+                        withStyle(
+                            style = SpanStyle(
+                                color = Color.Red,
+                                fontWeight = FontWeight.W400,
+                                fontSize = 16.sp,
+                            ),
+                        ) {
+                            append("*")
+                        }
+                        withStyle(
+                            style = SpanStyle(
+                                color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
+                                fontWeight = FontWeight.W400,
+                                fontSize = 16.sp,
+                            ),
+                        ) {
+                            append(" ")
+                            append(stringResource(id = R.string.create_account_required_hint))
+                        }
+                    },
+                )
             }
         }
         Spacer(modifier = Modifier.height(4.dp))
@@ -99,7 +101,9 @@ fun PrimalOutlinedTextField(
                         color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
                     )
                 }
-            } else null,
+            } else {
+                null
+            },
         )
     }
 }

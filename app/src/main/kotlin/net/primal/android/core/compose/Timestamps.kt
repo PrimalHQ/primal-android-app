@@ -5,16 +5,14 @@ import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import net.primal.android.R
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.temporal.ChronoUnit
+import net.primal.android.R
 
 @Composable
-fun Instant.asBeforeNowFormat(
-    shortFormat: Boolean = true,
-): String {
+fun Instant.asBeforeNowFormat(shortFormat: Boolean = true): String {
     val now = LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()
     val diff = ChronoUnit.SECONDS.between(this, now)
 

@@ -37,20 +37,17 @@ import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
 
 @Composable
-fun WelcomeScreen(
-    onSignInClick: () -> Unit,
-    onCreateAccountClick: () -> Unit,
-) {
+fun WelcomeScreen(onSignInClick: () -> Unit, onCreateAccountClick: () -> Unit) {
     val localUriHandler = LocalUriHandler.current
 
     Surface(
         modifier = Modifier
             .systemBarsPadding()
             .navigationBarsPadding()
-            .fillMaxSize()
+            .fillMaxSize(),
     ) {
         Column(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
         ) {
             Column(
                 modifier = Modifier
@@ -89,7 +86,7 @@ fun WelcomeScreen(
                 val maxHeight = with(LocalDensity.current) { maxHeight.roundToPx() }
                 Column(
                     modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.Top
+                    verticalArrangement = Arrangement.Top,
                 ) {
                     PrimalCallToActionButton(
                         modifier = Modifier.padding(horizontal = 32.dp),
@@ -120,7 +117,7 @@ fun WelcomeScreen(
                     TermsAndServiceHint(
                         onTosClick = {
                             localUriHandler.openUriSafely(TOS_URL)
-                        }
+                        },
                     )
                 }
             }
@@ -134,14 +131,12 @@ private const val TOS_ANNOTATION_TAG = "TosAnnotationTag"
 private const val TOS_URL = "https://www.primal.net/terms"
 
 @Composable
-fun TermsAndServiceHint(
-    onTosClick: () -> Unit,
-) {
+fun TermsAndServiceHint(onTosClick: () -> Unit) {
     val tosHint = stringResource(id = R.string.welcome_tos_hint)
     val tosLink = stringResource(id = R.string.welcome_tos_hint_highlighted_word)
     val annotatedString = buildAnnotatedString {
         append(tosHint)
-        
+
         val startIndex = tosHint.indexOf(tosLink)
         if (startIndex >= 0) {
             val endIndex = startIndex + tosLink.length
@@ -176,7 +171,7 @@ fun TermsAndServiceHint(
 @Composable
 fun PreviewWelcomeScreen() {
     PrimalTheme(
-        primalTheme = PrimalTheme.Sunset
+        primalTheme = PrimalTheme.Sunset,
     ) {
         WelcomeScreen(
             onSignInClick = {},

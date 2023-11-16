@@ -13,10 +13,8 @@ import net.primal.android.networking.primal.PrimalApiClient
 @InstallIn(SingletonComponent::class)
 object ExploreModule {
     @Provides
-    fun provideExploreApi(
-        @PrimalCacheApiClient primalApiClient: PrimalApiClient,
-    ): ExploreApi = ExploreApiImpl(
-        primalApiClient = primalApiClient,
-    )
-
+    fun provideExploreApi(@PrimalCacheApiClient primalApiClient: PrimalApiClient): ExploreApi =
+        ExploreApiImpl(
+            primalApiClient = primalApiClient,
+        )
 }

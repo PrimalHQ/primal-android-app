@@ -11,13 +11,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 import net.primal.android.core.compose.feed.model.FeedPostStatsUi
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
-import java.time.Instant
-import java.time.temporal.ChronoUnit
 
 @Composable
 fun ReferencedNoteCard(
@@ -26,7 +26,7 @@ fun ReferencedNoteCard(
     onPostClick: (String) -> Unit,
     colors: CardColors = CardDefaults.cardColors(
         containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
-    )
+    ),
 ) {
     NoteSurfaceCard(
         modifier = modifier
@@ -36,7 +36,6 @@ fun ReferencedNoteCard(
             },
         colors = colors,
     ) {
-
         FeedNoteHeader(
             modifier = Modifier
                 .padding(horizontal = 12.dp)
@@ -109,7 +108,6 @@ fun PreviewReferencedPostListItemLight() {
             onPostClick = {},
         )
     }
-
 }
 
 @Preview
