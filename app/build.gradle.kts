@@ -1,4 +1,4 @@
-import java.util.Properties
+import java.util.*
 
 plugins {
     alias(libs.plugins.com.android.application)
@@ -170,6 +170,10 @@ android {
             excludes += "META-INF/LICENSE-notice.md"
         }
     }
+
+    sourceSets {
+        findByName("main")?.java?.srcDirs(project.file("src/main/kotlin"))
+    }
 }
 
 dependencies {
@@ -259,5 +263,4 @@ dependencies {
     androidTestImplementation(libs.kotest.assertions.json)
     androidTestImplementation(libs.mockk.android)
 
-    detektPlugins(libs.ktlint.compose.rules)
 }

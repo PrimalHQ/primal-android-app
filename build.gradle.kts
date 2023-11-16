@@ -1,3 +1,5 @@
+import org.jlleitschuh.gradle.ktlint.KtlintExtension
+
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 plugins {
     alias(libs.plugins.com.android.application) apply false
@@ -5,7 +7,7 @@ plugins {
     alias(libs.plugins.org.jetbrains.kotlin.plugin.serialization) apply false
     alias(libs.plugins.ksp) apply false
     alias(libs.plugins.detekt)
-    alias(libs.plugins.kotlinter)
+    alias(libs.plugins.ktlint.wrapper.plugin)
 }
 
 buildscript {
@@ -15,8 +17,18 @@ buildscript {
     }
 }
 
+dependencies {
+    detektPlugins(libs.ktlint.compose.rules)
+    ktlintRuleset(libs.ktlint.compose.rules)
+}
+
 subprojects {
-    apply(plugin = "org.jmailen.kotlinter")
+    apply(plugin = "org.jlleitschuh.gradle.ktlint")
+    configure<KtlintExtension> {
+        version = "1.0.1"
+        android = true
+        verbose = true
+    }
 
     apply(plugin = "io.gitlab.arturbosch.detekt")
     detekt {

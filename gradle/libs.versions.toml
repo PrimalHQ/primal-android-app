@@ -19,8 +19,8 @@ espresso-core = "3.5.1"
 hilt = "1.1.0"
 junit = "4.13.2"
 junit-android-runner = "1.1.5"
+ktlint-wrapper-plugin = "11.6.1"
 kotlin = "1.9.10"
-kotlinter = "4.1.0"
 kotlinx-coroutines = "1.7.3"
 kotlinx-serialization-json = "1.6.0"
 kotest = "5.6.2"
@@ -157,4 +157,5 @@ hilt = { id = "com.google.dagger.hilt.android", version.ref = "dagger" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 play-publishing = { id = "com.github.triplet.play", version.ref = "play-publishing" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
-kotlinter = { id = "org.jmailen.kotlinter", version.ref = "kotlinter" }
+spotless = { id = "com.diffplug.spotless", version.ref = "spotless"}
+ktlint-wrapper-plugin = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint-wrapper-plugin" }
