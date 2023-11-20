@@ -1,7 +1,8 @@
 package net.primal.android.editor
 
 import android.net.Uri
-import java.util.UUID
+import java.util.*
+import net.primal.android.attachments.domain.CdnResourceVariant
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.editor.domain.NoteAttachment
 
@@ -13,6 +14,7 @@ interface NoteEditorContract {
         val publishing: Boolean = false,
         val error: NewPostError? = null,
         val activeAccountAvatarUrl: String? = null,
+        val activeAccountAvatarVariants: List<CdnResourceVariant> = emptyList(),
         val uploadingAttachments: Boolean = false,
         val attachments: List<NoteAttachment> = emptyList(),
     ) {

@@ -5,7 +5,7 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.JsonArray
-import net.primal.android.nostr.model.primal.PrimalResourceVariant
+import net.primal.android.attachments.domain.CdnResourceVariant
 import org.junit.Test
 
 class RoomCustomTypeConvertersTest {
@@ -97,7 +97,7 @@ class RoomCustomTypeConvertersTest {
     @Test
     fun `listOfPrimalResourceVariantToString returns correct String`() {
         val input = listOf(
-            PrimalResourceVariant(
+            CdnResourceVariant(
                 mimeType = "image/png",
                 height = 100,
                 width = 100,
@@ -121,7 +121,7 @@ class RoomCustomTypeConvertersTest {
     @Test
     fun `stringToListOfPrimalResourceVariant returns correct List`() {
         val input = listOf(
-            PrimalResourceVariant(
+            CdnResourceVariant(
                 mimeType = "image/png",
                 height = 100,
                 width = 100,

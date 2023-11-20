@@ -1,19 +1,14 @@
-package net.primal.android.core.ext
+package net.primal.android.attachments.domain
 
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import net.primal.android.core.compose.media.model.MediaResourceUi
-import net.primal.android.nostr.model.primal.PrimalResourceVariant
 
-fun List<MediaResourceUi>?.findByUrl(url: String?): MediaResourceUi? =
-    if (url == null) null else this?.find { it.url.startsWith(url) }
-
-fun List<PrimalResourceVariant>?.findNearestOrNull(maxWidthPx: Int): PrimalResourceVariant? {
+fun List<CdnResourceVariant>?.findNearestOrNull(maxWidthPx: Int): CdnResourceVariant? {
     return this?.sortedBy { it.width }?.find { it.width >= maxWidthPx }
         ?: this?.maxByOrNull { it.width }
 }
 
-fun PrimalResourceVariant?.calculateImageSize(
+fun CdnResourceVariant?.calculateImageSize(
     maxWidth: Int,
     maxHeight: Int,
     density: Float,

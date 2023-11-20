@@ -87,7 +87,7 @@ class SettingsApiImpl @Inject constructor(
         return GetMuteListResponse(
             muteList = queryResult.findNostrEvent(NostrEventKind.MuteList),
             metadataEvents = queryResult.filterNostrEvents(NostrEventKind.Metadata),
-            eventResources = queryResult.filterPrimalEvents(NostrEventKind.PrimalEventResources),
+            eventResources = queryResult.filterPrimalEvents(NostrEventKind.PrimalCdnResource),
         )
     }
 

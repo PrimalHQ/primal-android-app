@@ -68,7 +68,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import kotlinx.coroutines.launch
 import net.primal.android.R
-import net.primal.android.core.compose.AvatarThumbnailListItemImage
+import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.ListLoading
 import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.NostrUserText
@@ -84,7 +84,6 @@ import net.primal.android.core.compose.icons.primaliconpack.NewDM
 import net.primal.android.core.compose.isEmpty
 import net.primal.android.core.compose.isNotEmpty
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
-import net.primal.android.core.ext.findByUrl
 import net.primal.android.core.utils.parseHashtags
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.PrimalBottomBarHeightDp
@@ -165,6 +164,7 @@ fun MessageListScreen(
             PrimalTopAppBar(
                 title = stringResource(id = R.string.messages_title),
                 avatarUrl = state.activeAccountAvatarUrl,
+                avatarVariants = state.activeAccountAvatarVariants,
                 navigationIcon = PrimalIcons.AvatarDefault,
                 onNavigationIconClick = {
                     uiScope.launch { drawerState.open() }
@@ -302,13 +302,9 @@ private fun ConversationListItem(conversation: MessageConversationUi, onConversa
             containerColor = AppTheme.colorScheme.surfaceVariant,
         ),
         leadingContent = {
-            val resource = conversation.participantMediaResources.findByUrl(
-                url = conversation.participantAvatarUrl,
-            )
-            val variant = resource?.variants?.minByOrNull { it.width }
-            val imageSource = variant?.mediaUrl ?: conversation.participantAvatarUrl
-            AvatarThumbnailListItemImage(
-                source = imageSource,
+            AvatarThumbnail(
+                avatarUrl = conversation.participantAvatarUrl,
+                avatarVariants = conversation.participantAvatarVariants,
             )
         },
         headlineContent = {
@@ -354,7 +350,7 @@ private fun ConversationListItem(conversation: MessageConversationUi, onConversa
                 expanded = false,
                 seeMoreText = "",
                 hashtags = conversation.lastMessageSnippet.parseHashtags(),
-                mediaResources = conversation.lastMessageMediaResources,
+                attachments = conversation.lastMessageAttachments,
                 nostrResources = conversation.lastMessageNostrResources,
                 shouldKeepNostrNoteUris = true,
                 highlightColor = AppTheme.colorScheme.primary,

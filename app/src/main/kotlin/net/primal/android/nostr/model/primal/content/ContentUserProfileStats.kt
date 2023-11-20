@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ContentUserProfileStats(
-    @SerialName("pubkey") val profileId: String? = null,
+    @SerialName("pubkey") val profileId: String,
     @SerialName("follows_count") val followsCount: Int,
     @SerialName("followers_count") val followersCount: Int,
     @SerialName("note_count") val noteCount: Int,

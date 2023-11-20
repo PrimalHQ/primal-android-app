@@ -12,6 +12,6 @@ fun NostrEvent.asUserAccountFromContactsEvent() =
         authorDisplayName = pubKey.asEllipsizedNpub(),
         userDisplayName = pubKey.asEllipsizedNpub(),
         relays = content.parseRelays(),
-        following = tags?.parseFollowings() ?: emptySet(),
-        interests = tags?.parseInterests() ?: emptyList(),
+        following = tags.parseFollowings(),
+        interests = tags.parseInterests(),
     )

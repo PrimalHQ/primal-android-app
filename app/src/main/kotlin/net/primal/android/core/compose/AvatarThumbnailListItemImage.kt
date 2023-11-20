@@ -18,12 +18,35 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.SubcomposeAsyncImage
+import net.primal.android.attachments.domain.CdnResourceVariant
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 import net.primal.android.theme.AppTheme
 
 @Composable
-fun AvatarThumbnailListItemImage(
+fun AvatarThumbnail(
+    modifier: Modifier = Modifier,
+    avatarUrl: String? = null,
+    avatarVariants: List<CdnResourceVariant> = emptyList(),
+    avatarSize: Dp = 48.dp,
+    hasBorder: Boolean = false,
+    borderColor: Color = AppTheme.colorScheme.primary,
+    onClick: (() -> Unit)? = null,
+) {
+    val variant = avatarVariants.minByOrNull { it.width }
+    val imageSource = variant?.mediaUrl ?: avatarUrl
+    AvatarThumbnailListItemImage(
+        modifier = modifier,
+        avatarSize = avatarSize,
+        source = imageSource,
+        hasBorder = hasBorder,
+        borderColor = borderColor,
+        onClick = onClick,
+    )
+}
+
+@Composable
+private fun AvatarThumbnailListItemImage(
     source: Any?,
     modifier: Modifier = Modifier,
     avatarSize: Dp = 48.dp,
@@ -75,7 +98,7 @@ fun Modifier.adjustAvatarBackground(
 }
 
 @Composable
-fun DefaultAvatarThumbnailPlaceholderListItemImage() {
+private fun DefaultAvatarThumbnailPlaceholderListItemImage() {
     Box(
         modifier = Modifier
             .background(color = AppTheme.extraColorScheme.surfaceVariantAlt1)

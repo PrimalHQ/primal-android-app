@@ -54,7 +54,7 @@ import java.time.Instant
 import kotlin.time.Duration.Companion.minutes
 import net.primal.android.R
 import net.primal.android.core.compose.AppBarIcon
-import net.primal.android.core.compose.AvatarThumbnailListItemImage
+import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.ListLoading
 import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.PrimalDefaults
@@ -67,7 +67,6 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.isEmpty
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
-import net.primal.android.core.ext.findByUrl
 import net.primal.android.core.ext.openUriSafely
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.formatNip05Identifier
@@ -143,13 +142,9 @@ fun ChatScreen(
                             .padding(horizontal = 8.dp)
                             .clip(CircleShape),
                     ) {
-                        val resource = state.participantMediaResources.findByUrl(
-                            url = state.participantProfile?.avatarUrl,
-                        )
-                        val variant = resource?.variants?.minByOrNull { it.width }
-                        val imageSource = variant?.mediaUrl ?: state.participantProfile?.avatarUrl
-                        AvatarThumbnailListItemImage(
-                            source = imageSource,
+                        AvatarThumbnail(
+                            avatarUrl = state.participantProfile?.avatarUrl,
+                            avatarVariants = state.participantProfile?.avatarVariants ?: emptyList(),
                             modifier = Modifier.size(32.dp),
                             onClick = { onProfileClick(state.participantId) },
                         )
@@ -391,7 +386,7 @@ private fun ChatMessageListItem(
                 content = chatMessage.content.trim(),
                 expanded = true,
                 hashtags = chatMessage.hashtags,
-                mediaResources = chatMessage.mediaResources,
+                attachments = chatMessage.noteAttachments,
                 nostrResources = chatMessage.nostrResources,
                 onClick = { },
                 onProfileClick = onProfileClick,

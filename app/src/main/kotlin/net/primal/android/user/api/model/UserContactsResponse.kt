@@ -9,5 +9,5 @@ data class UserContactsResponse(
     val contactsEvent: NostrEvent? = null,
     val contactsMetadata: List<NostrEvent> = emptyList(),
     val userScores: PrimalEvent? = null,
-    val eventResources: List<PrimalEvent> = emptyList(),
+    val cdnResources: List<PrimalEvent> = emptyList(),
 )

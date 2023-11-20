@@ -1,6 +1,7 @@
 package net.primal.android.nostr.ext
 
 import kotlinx.serialization.encodeToString
+import net.primal.android.attachments.domain.CdnResource
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.content.ContentMetadata
 import net.primal.android.profile.db.ProfileData
@@ -10,9 +11,13 @@ import net.primal.android.serialization.toJsonObject
 import net.primal.android.wallet.api.decodeLNUrlOrNull
 import net.primal.android.wallet.api.parseAsLNUrlOrNull
 
-fun List<NostrEvent>.mapAsProfileDataPO() = map { it.asProfileDataPO() }
+fun List<NostrEvent>.mapAsProfileDataPO(
+    cdnResources: Map<String, CdnResource>,
+) = map {
+    it.asProfileDataPO(cdnResources = cdnResources)
+}
 
-fun NostrEvent.asProfileDataPO(): ProfileData {
+fun NostrEvent.asProfileDataPO(cdnResources: Map<String, CdnResource>): ProfileData {
     val metadata = NostrJson.decodeFromStringOrNull<ContentMetadata>(this.content)
 
     return ProfileData(
@@ -23,12 +28,13 @@ fun NostrEvent.asProfileDataPO(): ProfileData {
         handle = metadata?.name,
         internetIdentifier = metadata?.nip05,
         lightningAddress = metadata?.lud16,
-        lnUrl = metadata?.lud16?.parseAsLNUrlOrNull()
-            ?: metadata?.lud06?.decodeLNUrlOrNull(),
+        lnUrl = metadata?.lud16?.parseAsLNUrlOrNull() ?: metadata?.lud06?.decodeLNUrlOrNull(),
         about = metadata?.about,
         displayName = metadata?.displayName,
-        picture = metadata?.picture,
-        banner = metadata?.banner,
+        avatarUrl = metadata?.picture,
+        avatarVariants = metadata?.picture?.let { cdnResources[it]?.variants } ?: emptyList(),
+        bannerUrl = metadata?.banner,
+        bannerVariants = metadata?.banner?.let { cdnResources[it]?.variants } ?: emptyList(),
         website = metadata?.website,
     )
 }

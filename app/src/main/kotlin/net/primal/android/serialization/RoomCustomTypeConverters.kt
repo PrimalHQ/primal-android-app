@@ -3,9 +3,8 @@ package net.primal.android.serialization
 import androidx.room.TypeConverter
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.JsonArray
-import net.primal.android.feed.db.MediaResource
-import net.primal.android.feed.db.NostrResource
-import net.primal.android.nostr.model.primal.PrimalResourceVariant
+import net.primal.android.attachments.domain.CdnResourceVariant
+import net.primal.android.attachments.db.NoteNostrUri
 
 class RoomCustomTypeConverters {
 
@@ -36,41 +35,54 @@ class RoomCustomTypeConverters {
     }
 
     @TypeConverter
-    fun stringToListOfPrimalResourceVariant(value: String?): List<PrimalResourceVariant>? {
-        return NostrJson.decodeFromStringOrNull<List<PrimalResourceVariant>>(value)
+    fun stringToListOfCdnResourceVariant(value: String?): List<CdnResourceVariant>? {
+        return NostrJson.decodeFromStringOrNull<List<CdnResourceVariant>>(value)
     }
 
     @TypeConverter
-    fun listOfPrimalResourceVariantToString(list: List<PrimalResourceVariant>?): String? {
+    fun listOfCdnResourceVariantToString(list: List<CdnResourceVariant>?): String? {
         return when (list) {
             null -> null
             else -> NostrJson.encodeToString(list)
         }
     }
 
+//    @TypeConverter
+//    fun stringToListOfEventResourceVariant(value: String?): List<EventResourceVariant>? {
+//        return NostrJson.decodeFromStringOrNull<List<EventResourceVariant>>(value)
+//    }
+//
+//    @TypeConverter
+//    fun listOfEventResourceVariantToString(list: List<EventResourceVariant>?): String? {
+//        return when (list) {
+//            null -> null
+//            else -> NostrJson.encodeToString(list)
+//        }
+//    }
+
     @TypeConverter
-    fun stringToListOfNostrResource(value: String?): List<NostrResource>? {
-        return NostrJson.decodeFromStringOrNull<List<NostrResource>>(value)
+    fun stringToListOfNostrResource(value: String?): List<NoteNostrUri>? {
+        return NostrJson.decodeFromStringOrNull<List<NoteNostrUri>>(value)
     }
 
     @TypeConverter
-    fun listOfNostrResourceToString(list: List<NostrResource>?): String? {
+    fun listOfNostrResourceToString(list: List<NoteNostrUri>?): String? {
         return when (list) {
             null -> null
             else -> NostrJson.encodeToString(list)
         }
     }
 
-    @TypeConverter
-    fun stringToListOfMediaResource(value: String?): List<MediaResource>? {
-        return NostrJson.decodeFromStringOrNull<List<MediaResource>>(value)
-    }
-
-    @TypeConverter
-    fun listOfMediaResourceToString(list: List<MediaResource>?): String? {
-        return when (list) {
-            null -> null
-            else -> NostrJson.encodeToString(list)
-        }
-    }
+//    @TypeConverter
+//    fun stringToListOfMediaResource(value: String?): List<CDNResource>? {
+//        return NostrJson.decodeFromStringOrNull<List<CDNResource>>(value)
+//    }
+//
+//    @TypeConverter
+//    fun listOfMediaResourceToString(list: List<CDNResource>?): String? {
+//        return when (list) {
+//            null -> null
+//            else -> NostrJson.encodeToString(list)
+//        }
+//    }
 }

@@ -25,6 +25,7 @@ import net.primal.android.core.utils.ellipsizeMiddle
 import net.primal.android.discuss.feed.FeedContract.UiEvent
 import net.primal.android.discuss.feed.FeedContract.UiState
 import net.primal.android.discuss.feed.FeedContract.UiState.FeedError
+import net.primal.android.feed.db.FeedPost
 import net.primal.android.feed.repository.FeedRepository
 import net.primal.android.feed.repository.PostRepository
 import net.primal.android.navigation.feedDirective
@@ -99,7 +100,7 @@ class FeedViewModel @Inject constructor(
                         feedDirective = feedDirective,
                         limit = syncData.count,
                     )
-                        .filter { it.author?.picture != null }
+                        .filter { it.author?.avatarUrl != null }
                         .distinctBy { it.author?.ownerId }
                         .take(limit)
                 }
@@ -108,14 +109,18 @@ class FeedViewModel @Inject constructor(
                         syncStats = FeedPostsSyncStats(
                             postsCount = this.syncStats.postsCount + syncData.count,
                             postIds = this.syncStats.postIds + syncData.postIds,
-                            avatarUrls = newPosts.mapNotNull { feedPost ->
-                                feedPost.author?.picture
-                            },
+                            avatarUrls = newPosts.mapNotNull { it.author?.avatarUrl },
+                            avatarVariantsMap = newPosts.extractAvatarVariantsAsMap(),
                         ),
                     )
                 }
             }
         }
+
+    private fun List<FeedPost>.extractAvatarVariantsAsMap() = mapNotNull { feedPost ->
+        val avatarUrl = feedPost.author?.avatarUrl
+        if (avatarUrl != null) avatarUrl to feedPost.author.avatarVariants else null
+    }.associate { it.first to it.second }
 
     private fun subscribeToActiveAccount() =
         viewModelScope.launch {
@@ -129,7 +134,8 @@ class FeedViewModel @Inject constructor(
 
                 setState {
                     copy(
-                        activeAccountAvatarUrl = it.pictureUrl,
+                        activeAccountAvatarUrl = it.avatarUrl,
+                        activeAccountAvatarVariants = it.avatarVariants,
                         walletConnected = it.nostrWallet != null,
                         defaultZapAmount = it.appSettings?.defaultZapAmount,
                         zapOptions = it.appSettings?.zapOptions ?: emptyList(),

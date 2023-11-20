@@ -1,12 +1,12 @@
 package net.primal.android.nostr.ext
 
 import java.util.regex.Pattern
+import net.primal.android.attachments.db.NoteNostrUri
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.core.utils.usernameUiFriendly
 import net.primal.android.crypto.bechToBytes
 import net.primal.android.crypto.toHex
-import net.primal.android.feed.db.NostrResource
 import net.primal.android.feed.db.PostData
 import net.primal.android.feed.db.ReferencedPost
 import net.primal.android.feed.db.ReferencedUser
@@ -126,7 +126,7 @@ fun String.extractNoteId(): String? {
 fun List<PostData>.flatMapPostsAsNostrResourcePO(
     postIdToPostDataMap: Map<String, PostData>,
     profileIdToProfileDataMap: Map<String, ProfileData>,
-): List<NostrResource> =
+): List<NoteNostrUri> =
     flatMap { postData ->
         postData.uris.mapAsNostrResourcePO(
             eventId = postData.postId,
@@ -156,7 +156,7 @@ fun List<String>.mapAsNostrResourcePO(
     val refPost = postIdToPostDataMap[refPostId]
     val refPostAuthor = profileIdToProfileDataMap[refPost?.authorId]
 
-    NostrResource(
+    NoteNostrUri(
         postId = eventId,
         uri = link,
         referencedUser = if (refUserProfileId != null) {
@@ -176,10 +176,10 @@ fun List<String>.mapAsNostrResourcePO(
                 content = refPost.content,
                 authorId = refPost.authorId,
                 authorName = refPostAuthor.authorNameUiFriendly(),
-                authorAvatarUrl = refPostAuthor.picture,
+                authorAvatarUrl = refPostAuthor.avatarUrl,
+                authorAvatarVariants = refPostAuthor.avatarVariants,
                 authorInternetIdentifier = refPostAuthor.internetIdentifier,
                 authorLightningAddress = refPostAuthor.lightningAddress,
-                mediaResources = listOf(refPost).flatMapPostsAsMediaResourcePO(),
                 nostrResources = listOf(refPost).flatMapPostsAsNostrResourcePO(
                     postIdToPostDataMap = postIdToPostDataMap,
                     profileIdToProfileDataMap = profileIdToProfileDataMap,

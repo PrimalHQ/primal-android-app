@@ -6,10 +6,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.jsonPrimitive
+import net.primal.android.core.ext.asMapByKey
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.networking.primal.api.PrimalImportApi
 import net.primal.android.nostr.ext.asProfileDataPO
-import net.primal.android.nostr.ext.flatMapNotNullAsMediaResourcePO
+import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
 import net.primal.android.settings.api.SettingsApi
 import net.primal.android.settings.muted.db.MutedUserData
 
@@ -72,13 +73,11 @@ class MutedUserRepository @Inject constructor(
     private suspend fun fetchMuteListAndPersistProfiles(userId: String): Set<MutedUserData> {
         val response = withContext(Dispatchers.IO) { settingsApi.getMuteList(userId = userId) }
         val muteList = response.muteList?.tags?.mapToPubkeySet() ?: emptySet()
-        val profileData = response.metadataEvents.map { it.asProfileDataPO() }
-        val mediaResources = response.eventResources.flatMapNotNullAsMediaResourcePO()
+        val cdnResources = response.eventResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
+        val profileData = response.metadataEvents.map { it.asProfileDataPO(cdnResources = cdnResources) }
+
         withContext(Dispatchers.IO) {
-            database.withTransaction {
-                database.profiles().upsertAll(data = profileData)
-                database.mediaResources().upsertAll(data = mediaResources)
-            }
+            database.profiles().upsertAll(data = profileData)
         }
         return muteList
             .map { mutedUserId ->

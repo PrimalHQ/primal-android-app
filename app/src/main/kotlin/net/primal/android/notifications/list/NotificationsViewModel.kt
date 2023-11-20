@@ -17,10 +17,10 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import net.primal.android.core.compose.attachment.model.asNoteAttachmentUi
 import net.primal.android.core.compose.feed.model.FeedPostStatsUi
 import net.primal.android.core.compose.feed.model.FeedPostUi
-import net.primal.android.core.compose.feed.model.asNostrResourceUi
-import net.primal.android.core.compose.media.model.asMediaResourceUi
+import net.primal.android.core.compose.feed.model.asNostrUriResourceUi
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.core.utils.usernameUiFriendly
@@ -94,7 +94,8 @@ class NotificationsViewModel @Inject constructor(
             activeAccountStore.activeUserAccount.collect {
                 setState {
                     copy(
-                        activeAccountAvatarUrl = it.pictureUrl,
+                        activeAccountAvatarUrl = it.avatarUrl,
+                        activeAccountAvatarVariants = it.avatarVariants,
                         walletConnected = it.nostrWallet != null,
                         defaultZapAmount = it.appSettings?.defaultZapAmount,
                         zapOptions = it.appSettings?.zapOptions ?: emptyList(),
@@ -229,7 +230,8 @@ class NotificationsViewModel @Inject constructor(
             actionUserDisplayName = this.actionByUser?.authorNameUiFriendly()
                 ?: this.data.actionUserId?.asEllipsizedNpub(),
             actionUserInternetIdentifier = this.actionByUser?.internetIdentifier,
-            actionUserPicture = this.actionByUser?.picture,
+            actionUserAvatarUrl = this.actionByUser?.avatarUrl,
+            actionUserAvatarVariants = this.actionByUser?.avatarVariants ?: emptyList(),
             actionUserSatsZapped = this.data.satsZapped,
             actionPost = this.extractFeedPostUi(),
         )
@@ -246,12 +248,12 @@ class NotificationsViewModel @Inject constructor(
             authorHandle = this.actionByUser?.usernameUiFriendly()
                 ?: this.actionPost.authorId.asEllipsizedNpub(),
             authorInternetIdentifier = this.actionByUser?.internetIdentifier,
-            authorAvatarUrl = this.actionByUser?.picture,
+            authorAvatarUrl = this.actionByUser?.avatarUrl,
+            authorAvatarVariants = this.actionByUser?.avatarVariants ?: emptyList(),
             timestamp = Instant.ofEpochSecond(this.actionPost.createdAt),
             content = this.actionPost.content,
-            authorMediaResources = this.actionByUserResources.map { it.asMediaResourceUi() },
-            mediaResources = this.actionPostMediaResources.map { it.asMediaResourceUi() },
-            nostrResources = this.actionPostNostrUris.map { it.asNostrResourceUi() },
+            noteAttachments = this.actionPostNoteAttachments.map { it.asNoteAttachmentUi() },
+            nostrUriResources = this.actionPostNostrUris.map { it.asNostrUriResourceUi() },
             stats = FeedPostStatsUi.from(
                 postStats = this.actionPostStats,
                 userStats = this.actionPostUserStats,

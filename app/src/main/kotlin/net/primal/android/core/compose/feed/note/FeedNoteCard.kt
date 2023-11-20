@@ -121,8 +121,8 @@ fun FeedNoteCard(
                                 top = avatarPaddingDp,
                             ),
                             avatarSize = avatarSizeDp,
-                            authorAvatarUrl = data.authorAvatarUrl,
-                            authorMediaResources = data.authorMediaResources,
+                            avatarUrl = data.authorAvatarUrl,
+                            avatarVariants = data.authorAvatarVariants,
                             onClick = { onProfileClick(data.authorId) },
                         )
                     }
@@ -144,7 +144,7 @@ fun FeedNoteCard(
                             authorAvatarSize = avatarSizeDp,
                             authorDisplayName = data.authorName,
                             authorAvatarUrl = data.authorAvatarUrl,
-                            authorResources = data.authorMediaResources,
+                            authorAvatarVariants = data.authorAvatarVariants,
                             authorInternetIdentifier = data.authorInternetIdentifier,
                             onAuthorAvatarClick = { onProfileClick(data.authorId) },
                         )
@@ -181,8 +181,8 @@ fun FeedNoteCard(
                             content = data.content,
                             expanded = expanded,
                             hashtags = data.hashtags,
-                            mediaResources = data.mediaResources,
-                            nostrResources = data.nostrResources,
+                            attachments = data.noteAttachments,
+                            nostrResources = data.nostrUriResources,
                             onClick = {
                                 launchRippleEffect(it)
                                 onPostClick(data.postId)
@@ -220,15 +220,15 @@ class FeedPostUiProvider : PreviewParameterProvider<FeedPostUi> {
                 content = """
                     Lorem ipsum dolor sit amet, consectetur adipiscing elit.
                 """.trimIndent(),
-                mediaResources = emptyList(),
+                noteAttachments = emptyList(),
                 authorId = "npubSomething",
                 authorName = "android_robots_from_space",
                 authorHandle = "user",
                 authorInternetIdentifier = "android@primal.net",
                 authorAvatarUrl = "https://i.imgur.com/Z8dpmvc.png",
+                authorAvatarVariants = emptyList(),
                 timestamp = Instant.now().minus(30, ChronoUnit.MINUTES),
-                authorMediaResources = emptyList(),
-                nostrResources = emptyList(),
+                nostrUriResources = emptyList(),
                 stats = FeedPostStatsUi(
                     repliesCount = 0,
                     likesCount = 0,
@@ -251,15 +251,15 @@ class FeedPostUiProvider : PreviewParameterProvider<FeedPostUi> {
                     have augmented reality HUDs that incorporate real-time facial recognition. 
                     Hiding behind a pseudonym will become a distant dream.
                 """.trimIndent(),
-                mediaResources = emptyList(),
+                noteAttachments = emptyList(),
                 authorId = "npubSomething",
                 authorName = "android_robots_from_space",
                 authorHandle = "user",
                 authorInternetIdentifier = "android@primal.net",
                 authorAvatarUrl = "https://i.imgur.com/Z8dpmvc.png",
+                authorAvatarVariants = emptyList(),
                 timestamp = Instant.now().minus(30, ChronoUnit.MINUTES),
-                authorMediaResources = emptyList(),
-                nostrResources = emptyList(),
+                nostrUriResources = emptyList(),
                 stats = FeedPostStatsUi(
                     repliesCount = 11,
                     likesCount = 256,

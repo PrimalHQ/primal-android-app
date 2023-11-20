@@ -42,7 +42,7 @@ class MessagesApiImpl @Inject constructor(
                 ?.asMessageConversationsSummary(),
             messages = response.filterNostrEvents(NostrEventKind.EncryptedDirectMessages),
             profileMetadata = response.filterNostrEvents(NostrEventKind.Metadata),
-            mediaResources = response.filterPrimalEvents(NostrEventKind.PrimalEventResources),
+            mediaResources = response.filterPrimalEvents(NostrEventKind.PrimalCdnResource),
         )
     }
 
@@ -60,7 +60,7 @@ class MessagesApiImpl @Inject constructor(
             },
             messages = response.filterNostrEvents(NostrEventKind.EncryptedDirectMessages),
             profileMetadata = response.filterNostrEvents(NostrEventKind.Metadata),
-            mediaResources = response.filterPrimalEvents(NostrEventKind.PrimalEventResources),
+            mediaResources = response.filterPrimalEvents(NostrEventKind.PrimalCdnResource),
         )
     }
 

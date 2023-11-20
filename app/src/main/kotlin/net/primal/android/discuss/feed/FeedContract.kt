@@ -2,6 +2,7 @@ package net.primal.android.discuss.feed
 
 import androidx.paging.PagingData
 import kotlinx.coroutines.flow.Flow
+import net.primal.android.attachments.domain.CdnResourceVariant
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.feed.model.FeedPostsSyncStats
 import net.primal.android.user.domain.Badges
@@ -11,6 +12,7 @@ interface FeedContract {
         val feedPostsCount: Int = 0,
         val feedTitle: String = "",
         val activeAccountAvatarUrl: String? = null,
+        val activeAccountAvatarVariants: List<CdnResourceVariant> = emptyList(),
         val walletConnected: Boolean = false,
         val defaultZapAmount: ULong? = null,
         val zapOptions: List<ULong> = emptyList(),

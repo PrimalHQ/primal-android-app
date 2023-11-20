@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
-import net.primal.android.core.compose.media.model.asMediaResourceUi
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.networking.relays.errors.NostrPublishException
@@ -88,8 +87,8 @@ class MutedSettingsViewModel @Inject constructor(
             displayName = this.profileData?.authorNameUiFriendly()
                 ?: this.mutedAccount.userId.asEllipsizedNpub(),
             userId = this.mutedAccount.userId,
-            avatarUrl = this.profileData?.picture,
+            avatarUrl = this.profileData?.avatarUrl,
+            avatarVariants = this.profileData?.avatarVariants ?: emptyList(),
             internetIdentifier = this.profileData?.internetIdentifier,
-            profileResources = this.profileResources.map { it.asMediaResourceUi() },
         )
 }

@@ -165,6 +165,7 @@ fun NotificationsScreen(
             PrimalTopAppBar(
                 title = stringResource(id = R.string.notifications_title),
                 avatarUrl = state.activeAccountAvatarUrl,
+                avatarVariants = state.activeAccountAvatarVariants,
                 navigationIcon = PrimalIcons.AvatarDefault,
                 onNavigationIconClick = {
                     uiScope.launch { drawerState.open() }

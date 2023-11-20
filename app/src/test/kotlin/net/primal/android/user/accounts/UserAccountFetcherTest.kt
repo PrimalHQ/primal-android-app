@@ -60,7 +60,7 @@ class UserAccountFetcherTest {
 
         actual.authorDisplayName shouldBe expectedName
         actual.userDisplayName shouldBe expectedName
-        actual.pictureUrl shouldBe expectedPictureUrl
+        actual.avatarUrl shouldBe expectedPictureUrl
         actual.internetIdentifier shouldBe expectedInternetIdentifier
         actual.followersCount shouldBe expectedFollowersCount
         actual.followingCount shouldBe expectedFollowingCount

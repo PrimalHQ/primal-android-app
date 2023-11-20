@@ -4,12 +4,14 @@ import androidx.room.withTransaction
 import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import net.primal.android.core.ext.asMapByKey
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.explore.api.ExploreApi
 import net.primal.android.explore.api.model.HashtagScore
 import net.primal.android.explore.api.model.SearchUsersRequestBody
 import net.primal.android.explore.api.model.UsersResponse
 import net.primal.android.explore.db.TrendingHashtag
+import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
 import net.primal.android.nostr.ext.mapAsProfileDataPO
 import net.primal.android.nostr.ext.takeContentAsPrimalUserScoresOrNull
 
@@ -37,7 +39,8 @@ class ExploreRepository @Inject constructor(
 
     private suspend fun queryRemoteUsers(apiBlock: suspend () -> UsersResponse): List<UserProfileSearchItem> {
         val response = apiBlock()
-        val profiles = response.contactsMetadata.mapAsProfileDataPO()
+        val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
+        val profiles = response.contactsMetadata.mapAsProfileDataPO(cdnResources = cdnResources)
         val userScoresMap = response.userScores?.takeContentAsPrimalUserScoresOrNull()
 
         withContext(Dispatchers.IO) {

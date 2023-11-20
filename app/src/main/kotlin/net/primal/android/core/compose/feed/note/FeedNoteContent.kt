@@ -37,16 +37,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.time.Instant
 import net.primal.android.R
+import net.primal.android.attachments.domain.calculateImageSize
+import net.primal.android.attachments.domain.findNearestOrNull
 import net.primal.android.core.compose.PostImageListItemImage
 import net.primal.android.core.compose.PrimalClickableText
+import net.primal.android.core.compose.attachment.model.NoteAttachmentUi
 import net.primal.android.core.compose.feed.model.FeedPostStatsUi
 import net.primal.android.core.compose.feed.model.FeedPostUi
-import net.primal.android.core.compose.feed.model.NostrResourceUi
-import net.primal.android.core.compose.feed.model.asNostrResourceUi
-import net.primal.android.core.compose.media.model.MediaResourceUi
-import net.primal.android.core.compose.media.model.asMediaResourceUi
-import net.primal.android.core.ext.calculateImageSize
-import net.primal.android.core.ext.findNearestOrNull
+import net.primal.android.core.compose.feed.model.NostrUriResourceUi
+import net.primal.android.core.compose.feed.model.asNostrUriResourceUi
 import net.primal.android.core.utils.HashtagMatcher
 import net.primal.android.core.utils.parseHashtags
 import net.primal.android.feed.db.ReferencedPost
@@ -60,22 +59,22 @@ private const val URL_ANNOTATION_TAG = "url"
 private const val NOTE_ANNOTATION_TAG = "note"
 private const val HASHTAG_ANNOTATION_TAG = "hashtag"
 
-private fun List<MediaResourceUi>.filterImages() =
+private fun List<NoteAttachmentUi>.filterImages() =
     filter {
         it.mimeType?.startsWith("image") == true
     }
 
-private fun List<MediaResourceUi>.filterNotImages() =
+private fun List<NoteAttachmentUi>.filterNotImages() =
     filterNot {
         it.mimeType?.startsWith("image") == true
     }
 
-private fun List<NostrResourceUi>.filterReferencedPosts() =
+private fun List<NostrUriResourceUi>.filterReferencedPosts() =
     filter {
         it.referencedPost != null
     }
 
-private fun List<NostrResourceUi>.filterReferencedUsers() =
+private fun List<NostrUriResourceUi>.filterReferencedUsers() =
     filter {
         it.referencedUser != null
     }
@@ -88,7 +87,7 @@ private fun String.withoutUrls(urls: List<String>): String {
     return newContent
 }
 
-private fun String.replaceNostrProfileUrisWithHandles(resources: List<NostrResourceUi>): String {
+private fun String.replaceNostrProfileUrisWithHandles(resources: List<NostrUriResourceUi>): String {
     var newContent = this
     resources.forEach {
         checkNotNull(it.referencedUser)
@@ -154,8 +153,8 @@ fun FeedNoteContent(
     content: String,
     expanded: Boolean,
     hashtags: List<String>,
-    mediaResources: List<MediaResourceUi>,
-    nostrResources: List<NostrResourceUi>,
+    attachments: List<NoteAttachmentUi>,
+    nostrResources: List<NostrUriResourceUi>,
     onProfileClick: (String) -> Unit,
     onPostClick: (String) -> Unit,
     onClick: (Offset) -> Unit,
@@ -172,7 +171,7 @@ fun FeedNoteContent(
             expanded = expanded,
             seeMoreText = seeMoreText,
             hashtags = hashtags,
-            mediaResources = mediaResources,
+            attachments = attachments,
             nostrResources = nostrResources,
             highlightColor = highlightColor,
         )
@@ -204,9 +203,9 @@ fun FeedNoteContent(
             )
         }
 
-        val imageResources = remember { mediaResources.filterImages() }
-        if (imageResources.isNotEmpty()) {
-            FeedNoteImages(imageResources = imageResources)
+        val imageAttachments = remember { attachments.filterImages() }
+        if (imageAttachments.isNotEmpty()) {
+            FeedNoteImages(imageAttachments = imageAttachments)
         }
 
         val referencedPostResources = remember { nostrResources.filterReferencedPosts() }
@@ -226,13 +225,13 @@ fun renderContentAsAnnotatedString(
     expanded: Boolean,
     seeMoreText: String,
     hashtags: List<String>,
-    mediaResources: List<MediaResourceUi>,
-    nostrResources: List<NostrResourceUi>,
+    attachments: List<NoteAttachmentUi>,
+    nostrResources: List<NostrUriResourceUi>,
     shouldKeepNostrNoteUris: Boolean = false,
     highlightColor: Color,
 ): AnnotatedString {
-    val imageUrlResources = mediaResources.filterImages()
-    val otherUrlResources = mediaResources.filterNotImages()
+    val imageUrlResources = attachments.filterImages()
+    val otherUrlResources = attachments.filterNotImages()
     val referencedPostResources = nostrResources.filterReferencedPosts()
     val referencedUserResources = nostrResources.filterReferencedUsers()
 
@@ -319,15 +318,15 @@ fun renderContentAsAnnotatedString(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun FeedNoteImages(imageResources: List<MediaResourceUi>) {
+private fun FeedNoteImages(imageAttachments: List<NoteAttachmentUi>) {
     BoxWithConstraints {
-        val imageSizeDp = findImageSize(resource = imageResources.first())
-        val imagesCount = imageResources.size
+        val imageSizeDp = findImageSize(attachment = imageAttachments.first())
+        val imagesCount = imageAttachments.size
 
         val pagerState = rememberPagerState { imagesCount }
         HorizontalPager(state = pagerState) {
             NoteImage(
-                resource = imageResources[it],
+                attachment = imageAttachments[it],
                 imageSizeDp = imageSizeDp,
             )
         }
@@ -360,15 +359,15 @@ private fun FeedNoteImages(imageResources: List<MediaResourceUi>) {
 }
 
 @Composable
-fun NoteImage(resource: MediaResourceUi, imageSizeDp: DpSize) {
+fun NoteImage(attachment: NoteAttachmentUi, imageSizeDp: DpSize) {
     BoxWithConstraints(
         modifier = Modifier
             .padding(vertical = 4.dp)
             .clip(AppTheme.shapes.medium),
     ) {
         val maxWidthPx = with(LocalDensity.current) { maxWidth.roundToPx() }
-        val variant = resource.variants.findNearestOrNull(maxWidthPx = maxWidthPx)
-        val imageSource = variant?.mediaUrl ?: resource.url
+        val variant = attachment.variants.findNearestOrNull(maxWidthPx = maxWidthPx)
+        val imageSource = variant?.mediaUrl ?: attachment.url
         PostImageListItemImage(
             source = imageSource,
             modifier = Modifier
@@ -379,12 +378,12 @@ fun NoteImage(resource: MediaResourceUi, imageSizeDp: DpSize) {
 }
 
 @Composable
-private fun BoxWithConstraintsScope.findImageSize(resource: MediaResourceUi): DpSize {
+private fun BoxWithConstraintsScope.findImageSize(attachment: NoteAttachmentUi): DpSize {
     val density = LocalDensity.current.density
     val maxWidthPx = with(LocalDensity.current) { maxWidth.roundToPx() }
     val maxWidth = maxWidth.value.toInt()
     val maxHeight = (LocalConfiguration.current.screenHeightDp * 0.77).toInt()
-    val variant = resource.variants.findNearestOrNull(maxWidthPx = maxWidthPx)
+    val variant = attachment.variants.findNearestOrNull(maxWidthPx = maxWidthPx)
     return variant.calculateImageSize(
         maxWidth = maxWidth,
         maxHeight = maxHeight,
@@ -394,7 +393,7 @@ private fun BoxWithConstraintsScope.findImageSize(resource: MediaResourceUi): Dp
 
 @Composable
 fun FeedReferencedNotes(
-    postResources: List<NostrResourceUi>,
+    postResources: List<NostrUriResourceUi>,
     expanded: Boolean,
     containerColor: Color,
     onPostClick: (String) -> Unit,
@@ -421,9 +420,9 @@ fun FeedReferencedNotes(
                     authorHandle = data.authorName,
                     authorInternetIdentifier = data.authorInternetIdentifier,
                     authorAvatarUrl = data.authorAvatarUrl,
-                    authorMediaResources = emptyList(),
-                    mediaResources = data.mediaResources.map { it.asMediaResourceUi() },
-                    nostrResources = data.nostrResources.map { it.asNostrResourceUi() },
+                    authorAvatarVariants = emptyList(),
+                    noteAttachments = emptyList(),
+                    nostrUriResources = data.nostrResources.map { it.asNostrUriResourceUi() },
                     timestamp = Instant.ofEpochSecond(data.createdAt),
                     content = data.content,
                     stats = FeedPostStatsUi(),
@@ -449,9 +448,9 @@ fun PreviewPostContent() {
                 """.trimIndent(),
                 expanded = false,
                 hashtags = listOf("#nostr"),
-                mediaResources = emptyList(),
+                attachments = emptyList(),
                 nostrResources = listOf(
-                    NostrResourceUi(
+                    NostrUriResourceUi(
                         uri = "nostr:referencedUser",
                         referencedPost = null,
                         referencedUser = ReferencedUser(
@@ -487,9 +486,9 @@ fun PreviewPostContentWithReferencedPost() {
                 """.trimIndent(),
                 expanded = false,
                 hashtags = listOf("#nostr"),
-                mediaResources = emptyList(),
+                attachments = emptyList(),
                 nostrResources = listOf(
-                    NostrResourceUi(
+                    NostrUriResourceUi(
                         uri = "nostr:referencedPost",
                         referencedPost = ReferencedPost(
                             postId = "postId",
@@ -498,15 +497,15 @@ fun PreviewPostContentWithReferencedPost() {
                             authorId = "authorId",
                             authorName = "primal",
                             authorAvatarUrl = null,
+                            authorAvatarVariants = emptyList(),
                             authorInternetIdentifier = "hi@primal.net",
                             authorLightningAddress = "h@getalby.com",
-                            mediaResources = emptyList(),
                             nostrResources = emptyList(),
 
                         ),
                         referencedUser = null,
                     ),
-                    NostrResourceUi(
+                    NostrUriResourceUi(
                         uri = "nostr:referenced2Post",
                         referencedPost = ReferencedPost(
                             postId = "postId",
@@ -515,9 +514,9 @@ fun PreviewPostContentWithReferencedPost() {
                             authorId = "authorId",
                             authorName = "primal",
                             authorAvatarUrl = null,
+                            authorAvatarVariants = emptyList(),
                             authorInternetIdentifier = "hi@primal.net",
                             authorLightningAddress = "h@getalby.com",
-                            mediaResources = emptyList(),
                             nostrResources = emptyList(),
                         ),
                         referencedUser = null,

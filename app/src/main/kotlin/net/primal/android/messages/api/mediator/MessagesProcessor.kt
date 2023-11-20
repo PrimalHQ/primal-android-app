@@ -2,6 +2,8 @@ package net.primal.android.messages.api.mediator
 
 import androidx.room.withTransaction
 import javax.inject.Inject
+import net.primal.android.attachments.flatMapMessagesAsNoteAttachmentPO
+import net.primal.android.core.ext.asMapByKey
 import net.primal.android.crypto.hexToNpubHrp
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.feed.api.FeedApi
@@ -10,9 +12,8 @@ import net.primal.android.messages.db.DirectMessageData
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.ext.extractNoteId
 import net.primal.android.nostr.ext.extractProfileId
-import net.primal.android.nostr.ext.flatMapMessagesAsMediaResourcePO
 import net.primal.android.nostr.ext.flatMapMessagesAsNostrResourcePO
-import net.primal.android.nostr.ext.flatMapNotNullAsMediaResourcePO
+import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
 import net.primal.android.nostr.ext.isNostrUri
 import net.primal.android.nostr.ext.mapAsMessageDataPO
 import net.primal.android.nostr.ext.mapAsPostDataPO
@@ -41,19 +42,15 @@ class MessagesProcessor @Inject constructor(
             nsec = credentialsStore.findOrThrow(npub = userId.hexToNpubHrp()).nsec,
         )
 
-        processNostrUrisAndSave(
-            userId = userId,
-            messageDataList = messageDataList,
-        )
+        processNostrUrisAndSave(userId = userId, messageDataList = messageDataList)
+
+        val cdnResources = mediaResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
+        val attachments = messageDataList.flatMapMessagesAsNoteAttachmentPO()
 
         database.withTransaction {
-            database.profiles().upsertAll(data = profileMetadata.mapAsProfileDataPO())
-            database.mediaResources().upsertAll(
-                data = messageDataList.flatMapMessagesAsMediaResourcePO(),
-            )
-            database.mediaResources()
-                .upsertAll(data = mediaResources.flatMapNotNullAsMediaResourcePO())
+            database.profiles().upsertAll(data = profileMetadata.mapAsProfileDataPO(cdnResources = cdnResources))
             database.messages().upsertAll(data = messageDataList)
+            database.attachments().upsertAllNoteAttachments(data = attachments)
         }
     }
 
@@ -92,13 +89,9 @@ class MessagesProcessor @Inject constructor(
         val remoteProfiles = if (missingProfileIds.isNotEmpty()) {
             try {
                 val response = usersApi.getUserProfilesMetadata(userIds = missingProfileIds)
-                val profiles = response.metadataEvents.mapAsProfileDataPO()
-                database.withTransaction {
-                    database.profiles().upsertAll(data = profiles)
-                    database.mediaResources().upsertAll(
-                        data = response.eventResources.flatMapNotNullAsMediaResourcePO(),
-                    )
-                }
+                val cdnResources = response.eventResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
+                val profiles = response.metadataEvents.mapAsProfileDataPO(cdnResources = cdnResources)
+                database.profiles().upsertAll(data = profiles)
                 profiles
             } catch (error: WssException) {
                 Timber.e(error)
@@ -112,7 +105,7 @@ class MessagesProcessor @Inject constructor(
             .groupBy { it.ownerId }
             .mapValues { it.value.first() }
 
-        database.nostrResources().upsertAll(
+        database.attachments().upsertAllNostrUris(
             data = messageDataList.flatMapMessagesAsNostrResourcePO(
                 postIdToPostDataMap = referencedNotesMap,
                 profileIdToProfileDataMap = referencedProfilesMap,

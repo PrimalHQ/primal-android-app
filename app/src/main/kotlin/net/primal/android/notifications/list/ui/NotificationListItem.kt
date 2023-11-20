@@ -22,6 +22,7 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import net.primal.android.R
+import net.primal.android.attachments.domain.CdnResourceVariant
 import net.primal.android.core.compose.AvatarThumbnailsRow
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.feed.model.FeedPostAction
@@ -206,7 +207,8 @@ private fun NotificationListItem(
 
             Column {
                 AvatarThumbnailsRow(
-                    avatarUrls = notifications.map { it.actionUserPicture },
+                    avatarUrls = notifications.map { it.actionUserAvatarUrl },
+                    avatarVariants = notifications.extractAvatarVariantsAsMap(),
                     overlapAvatars = false,
                     hasAvatarBorder = false,
                     onClick = { index ->
@@ -245,8 +247,8 @@ private fun NotificationListItem(
                         content = actionPost.content,
                         expanded = false,
                         hashtags = actionPost.hashtags,
-                        mediaResources = actionPost.mediaResources,
-                        nostrResources = actionPost.nostrResources,
+                        attachments = actionPost.noteAttachments,
+                        nostrResources = actionPost.nostrUriResources,
                         onClick = { onPostClick(actionPost.postId) },
                         onProfileClick = onProfileClick,
                         onPostClick = onPostClick,
@@ -271,6 +273,16 @@ private fun NotificationListItem(
     }
 }
 
+private fun List<NotificationUi>.extractAvatarVariantsAsMap(): Map<String, List<CdnResourceVariant>> {
+    return this.mapNotNull {
+        if (it.actionUserAvatarUrl != null) {
+            it.actionUserAvatarUrl to it.actionUserAvatarVariants
+        } else {
+            null
+        }
+    }.associate { it.first to it.second }
+}
+
 @Composable
 private fun NotificationType.toSuffixText(usersZappedCount: Int = 0, totalSatsZapped: String? = null): String =
     when (this) {
@@ -289,9 +301,11 @@ private fun NotificationType.toSuffixText(usersZappedCount: Int = 0, totalSatsZa
         NotificationType.YOUR_POST_WAS_LIKED -> stringResource(
             id = R.string.notification_list_item_liked_your_post,
         )
+
         NotificationType.YOUR_POST_WAS_REPOSTED -> stringResource(
             id = R.string.notification_list_item_reposted_your_post,
         )
+
         NotificationType.YOUR_POST_WAS_REPLIED_TO -> stringResource(
             id = R.string.notification_list_item_replied_to_your_post,
         )
@@ -299,6 +313,7 @@ private fun NotificationType.toSuffixText(usersZappedCount: Int = 0, totalSatsZa
         NotificationType.YOU_WERE_MENTIONED_IN_POST -> stringResource(
             id = R.string.notification_list_item_mentioned_you_in_post,
         )
+
         NotificationType.YOUR_POST_WAS_MENTIONED_IN_POST -> stringResource(
             id = R.string.notification_list_item_mentioned_your_post,
         )
@@ -307,6 +322,7 @@ private fun NotificationType.toSuffixText(usersZappedCount: Int = 0, totalSatsZa
             null -> stringResource(
                 id = R.string.notification_list_item_post_you_were_mentioned_in_was_zapped,
             )
+
             else -> when (usersZappedCount) {
                 1 -> stringResource(
                     id = R.string.notification_list_item_post_you_were_mentioned_in_was_zapped_for,
@@ -327,9 +343,11 @@ private fun NotificationType.toSuffixText(usersZappedCount: Int = 0, totalSatsZa
         NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_LIKED -> stringResource(
             id = R.string.notification_list_item_post_you_were_mentioned_in_was_liked,
         )
+
         NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_REPOSTED -> stringResource(
             id = R.string.notification_list_item_post_you_were_mentioned_in_was_reposted,
         )
+
         NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_REPLIED_TO -> stringResource(
             id = R.string.notification_list_item_post_you_were_mentioned_in_was_replied_to,
         )
@@ -338,6 +356,7 @@ private fun NotificationType.toSuffixText(usersZappedCount: Int = 0, totalSatsZa
             null -> stringResource(
                 id = R.string.notification_list_item_post_where_you_post_was_mentioned_was_zapped,
             )
+
             else -> when (usersZappedCount) {
                 1 -> stringResource(
                     id = R.string.notification_list_item_post_where_you_post_was_mentioned_was_zapped_for,
@@ -358,9 +377,11 @@ private fun NotificationType.toSuffixText(usersZappedCount: Int = 0, totalSatsZa
         NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_LIKED -> stringResource(
             id = R.string.notification_list_item_post_where_you_post_was_mentioned_was_liked,
         )
+
         NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPOSTED -> stringResource(
             id = R.string.notification_list_item_post_where_you_post_was_mentioned_was_reposted,
         )
+
         NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO -> stringResource(
             id = R.string.notification_list_item_post_where_you_post_was_mentioned_was_replied_to,
         )

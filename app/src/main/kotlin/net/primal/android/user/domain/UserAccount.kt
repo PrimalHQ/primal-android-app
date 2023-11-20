@@ -1,6 +1,7 @@
 package net.primal.android.user.domain
 
 import kotlinx.serialization.Serializable
+import net.primal.android.attachments.domain.CdnResourceVariant
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.nostr.model.primal.content.ContentAppSettings
 
@@ -9,7 +10,8 @@ data class UserAccount(
     val pubkey: String,
     val authorDisplayName: String,
     val userDisplayName: String,
-    val pictureUrl: String? = null,
+    val avatarUrl: String? = null,
+    val avatarVariants: List<CdnResourceVariant> = emptyList(),
     val internetIdentifier: String? = null,
     val lightningAddress: String? = null,
     val followingCount: Int? = null,

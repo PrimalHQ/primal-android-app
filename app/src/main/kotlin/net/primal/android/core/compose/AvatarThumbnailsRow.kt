@@ -17,12 +17,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import net.primal.android.attachments.domain.CdnResourceVariant
 import net.primal.android.theme.AppTheme
 
 @Composable
 fun AvatarThumbnailsRow(
     modifier: Modifier = Modifier,
-    avatarUrls: List<Any?>,
+    avatarUrls: List<String?>,
+    avatarVariants: Map<String, List<CdnResourceVariant>> = emptyMap(),
     overlapAvatars: Boolean = true,
     hasAvatarBorder: Boolean = true,
     avatarBorderColor: Color = Color.White,
@@ -37,9 +39,10 @@ fun AvatarThumbnailsRow(
 
         avatarUrls.take(avatarsToRender).forEachIndexed { index, imageUrl ->
             AvatarSpacer(width = (index * avatarVisibleWidth.value).dp) {
-                AvatarThumbnailListItemImage(
+                AvatarThumbnail(
                     modifier = Modifier.size(32.dp),
-                    source = imageUrl,
+                    avatarUrl = imageUrl,
+                    avatarVariants = avatarVariants[imageUrl] ?: emptyList(),
                     hasBorder = hasAvatarBorder,
                     borderColor = avatarBorderColor,
                     onClick = { onClick(index) },

@@ -39,6 +39,7 @@ class UsersApiImpl @Inject constructor(
         return UserProfileResponse(
             metadata = queryResult.findNostrEvent(NostrEventKind.Metadata),
             profileStats = queryResult.findPrimalEvent(NostrEventKind.PrimalUserProfileStats),
+            cdnResources = queryResult.filterPrimalEvents(NostrEventKind.PrimalCdnResource),
         )
     }
 
@@ -56,7 +57,7 @@ class UsersApiImpl @Inject constructor(
             contactsEvent = queryResult.findNostrEvent(NostrEventKind.Contacts),
             contactsMetadata = queryResult.filterNostrEvents(NostrEventKind.Metadata),
             userScores = queryResult.findPrimalEvent(NostrEventKind.PrimalUserScores),
-            eventResources = queryResult.filterPrimalEvents(NostrEventKind.PrimalEventResources),
+            cdnResources = queryResult.filterPrimalEvents(NostrEventKind.PrimalCdnResource),
         )
     }
 
@@ -95,7 +96,7 @@ class UsersApiImpl @Inject constructor(
 
         return UserProfilesResponse(
             metadataEvents = queryResult.filterNostrEvents(NostrEventKind.Metadata),
-            eventResources = queryResult.filterPrimalEvents(NostrEventKind.PrimalEventResources),
+            eventResources = queryResult.filterPrimalEvents(NostrEventKind.PrimalCdnResource),
             userScores = queryResult.findPrimalEvent(NostrEventKind.PrimalUserScores),
         )
     }

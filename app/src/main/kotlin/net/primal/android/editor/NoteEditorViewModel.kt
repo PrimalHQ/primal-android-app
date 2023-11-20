@@ -93,7 +93,10 @@ class NoteEditorViewModel @Inject constructor(
                 .filterIsInstance<ActiveUserAccountState.ActiveUserAccount>()
                 .collect {
                     setState {
-                        copy(activeAccountAvatarUrl = it.data.pictureUrl)
+                        copy(
+                            activeAccountAvatarUrl = it.data.avatarUrl,
+                            activeAccountAvatarVariants = it.data.avatarVariants,
+                        )
                     }
                 }
         }

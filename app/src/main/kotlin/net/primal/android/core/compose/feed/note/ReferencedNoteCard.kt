@@ -45,7 +45,7 @@ fun ReferencedNoteCard(
             singleLine = true,
             authorAvatarSize = 30.dp,
             authorAvatarUrl = data.authorAvatarUrl,
-            authorResources = data.authorMediaResources,
+            authorAvatarVariants = data.authorAvatarVariants,
             authorInternetIdentifier = data.authorInternetIdentifier,
         )
 
@@ -56,8 +56,8 @@ fun ReferencedNoteCard(
             content = data.content.trim(),
             expanded = false,
             hashtags = data.hashtags,
-            mediaResources = data.mediaResources,
-            nostrResources = data.nostrResources,
+            attachments = data.noteAttachments,
+            nostrResources = data.nostrUriResources,
             onClick = { onPostClick(data.postId) },
             onProfileClick = { onPostClick(data.postId) },
             onPostClick = { postId -> onPostClick(postId) },
@@ -86,15 +86,15 @@ fun PreviewReferencedPostListItemLight() {
                     have augmented reality HUDs that incorporate real-time facial recognition. 
                     Hiding behind a pseudonym will become a distant dream.
                 """.trimIndent(),
-                mediaResources = emptyList(),
+                noteAttachments = emptyList(),
                 authorId = "npubSomething",
                 authorName = "android_robots_from_space",
                 authorHandle = "user",
                 authorInternetIdentifier = "android@primal.net",
                 authorAvatarUrl = "https://i.imgur.com/Z8dpmvc.png",
                 timestamp = Instant.now().minus(30, ChronoUnit.MINUTES),
-                authorMediaResources = emptyList(),
-                nostrResources = emptyList(),
+                authorAvatarVariants = emptyList(),
+                nostrUriResources = emptyList(),
                 stats = FeedPostStatsUi(
                     repliesCount = 11,
                     likesCount = 256,
@@ -127,15 +127,15 @@ fun PreviewReferencedPostListItemDark() {
                     have augmented reality HUDs that incorporate real-time facial recognition. 
                     Hiding behind a pseudonym will become a distant dream.
                 """.trimIndent(),
-                mediaResources = emptyList(),
+                noteAttachments = emptyList(),
                 authorId = "npubSomething",
                 authorName = "android",
                 authorHandle = "user",
                 authorInternetIdentifier = "android@primal.net",
                 authorAvatarUrl = "https://i.imgur.com/Z8dpmvc.png",
                 timestamp = Instant.now().minus(30, ChronoUnit.MINUTES),
-                authorMediaResources = emptyList(),
-                nostrResources = emptyList(),
+                authorAvatarVariants = emptyList(),
+                nostrUriResources = emptyList(),
                 stats = FeedPostStatsUi(
                     repliesCount = 11,
                     userReplied = true,

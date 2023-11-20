@@ -38,7 +38,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import java.text.NumberFormat
 import kotlinx.coroutines.launch
 import net.primal.android.R
-import net.primal.android.core.compose.AvatarThumbnailListItemImage
+import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.DarkMode
@@ -133,13 +133,14 @@ private fun DrawerHeader(userAccount: UserAccount?) {
         val startGuideline = createGuidelineFromStart(24.dp)
         val (avatarRef, usernameRef, iconRef, identifierRef, statsRef) = createRefs()
 
-        AvatarThumbnailListItemImage(
+        AvatarThumbnail(
             modifier = Modifier.constrainAs(avatarRef) {
                 start.linkTo(startGuideline)
                 top.linkTo(parent.top, margin = 16.dp)
             },
-            source = userAccount?.pictureUrl,
             avatarSize = 52.dp,
+            avatarUrl = userAccount?.avatarUrl,
+            avatarVariants = userAccount?.avatarVariants ?: emptyList(),
         )
 
         NostrUserText(
