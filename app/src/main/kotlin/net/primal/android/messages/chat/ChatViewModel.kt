@@ -22,7 +22,7 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import net.primal.android.core.compose.attachment.model.asNoteAttachmentUi
-import net.primal.android.core.compose.feed.model.asNostrUriResourceUi
+import net.primal.android.core.compose.feed.model.asNoteNostrUriUi
 import net.primal.android.core.compose.profile.model.asProfileDetailsUi
 import net.primal.android.messages.chat.ChatContract.UiEvent
 import net.primal.android.messages.chat.ChatContract.UiState
@@ -158,8 +158,8 @@ class ChatViewModel @Inject constructor(
             senderId = this.data.senderId,
             timestamp = Instant.ofEpochSecond(this.data.createdAt),
             content = this.data.content,
-            noteAttachments = this.attachments.map { it.asNoteAttachmentUi() },
-            nostrResources = this.nostrUris.map { it.asNostrUriResourceUi() },
+            attachments = this.attachments.map { it.asNoteAttachmentUi() },
+            nostrUris = this.nostrUris.map { it.asNoteNostrUriUi() },
             hashtags = this.data.hashtags,
         )
 

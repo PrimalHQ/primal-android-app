@@ -68,7 +68,7 @@ class NotificationsApiImpl @Inject constructor(
             metadata = queryResult.filterNostrEvents(NostrEventKind.Metadata),
             notes = queryResult.filterNostrEvents(NostrEventKind.ShortTextNote),
             primalNoteStats = queryResult.filterPrimalEvents(NostrEventKind.PrimalEventStats),
-            primalMediaResources = queryResult.filterPrimalEvents(
+            cdnResources = queryResult.filterPrimalEvents(
                 NostrEventKind.PrimalCdnResource,
             ),
             primalReferencedNotes = queryResult.filterPrimalEvents(

@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import net.primal.android.core.compose.attachment.model.asNoteAttachmentUi
-import net.primal.android.core.compose.feed.model.asNostrUriResourceUi
+import net.primal.android.core.compose.feed.model.asNoteNostrUriUi
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.usernameUiFriendly
 import net.primal.android.messages.conversation.MessageConversationListContract.UiEvent
@@ -152,7 +152,7 @@ class MessageConversationListViewModel @Inject constructor(
                 ?: this.data.participantId.asEllipsizedNpub(),
             lastMessageSnippet = this.lastMessage.content,
             lastMessageAttachments = this.lastMessageNoteAttachments.map { it.asNoteAttachmentUi() },
-            lastMessageNostrResources = this.lastMessageNostrUris.map { it.asNostrUriResourceUi() },
+            lastMessageNostrUris = this.lastMessageNostrUris.map { it.asNoteNostrUriUi() },
             lastMessageAt = Instant.ofEpochSecond(this.lastMessage.createdAt),
             isLastMessageFromUser = this.lastMessage.senderId == activeUserId,
             participantInternetIdentifier = this.participant?.internetIdentifier,

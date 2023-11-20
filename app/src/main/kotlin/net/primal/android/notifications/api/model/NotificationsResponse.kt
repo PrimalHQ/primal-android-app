@@ -10,6 +10,6 @@ data class NotificationsResponse(
     val primalUserProfileStats: List<PrimalEvent>,
     val primalReferencedNotes: List<PrimalEvent>,
     val primalNotifications: List<PrimalEvent>,
-    val primalMediaResources: List<PrimalEvent>,
+    val cdnResources: List<PrimalEvent>,
     val primalLinkPreviews: List<PrimalEvent>,
 )

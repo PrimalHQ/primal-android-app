@@ -89,7 +89,7 @@ class MessagesProcessor @Inject constructor(
         val remoteProfiles = if (missingProfileIds.isNotEmpty()) {
             try {
                 val response = usersApi.getUserProfilesMetadata(userIds = missingProfileIds)
-                val cdnResources = response.eventResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
+                val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
                 val profiles = response.metadataEvents.mapAsProfileDataPO(cdnResources = cdnResources)
                 database.profiles().upsertAll(data = profiles)
                 profiles

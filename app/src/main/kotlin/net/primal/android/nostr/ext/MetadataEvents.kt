@@ -11,11 +11,10 @@ import net.primal.android.serialization.toJsonObject
 import net.primal.android.wallet.api.decodeLNUrlOrNull
 import net.primal.android.wallet.api.parseAsLNUrlOrNull
 
-fun List<NostrEvent>.mapAsProfileDataPO(
-    cdnResources: Map<String, CdnResource>,
-) = map {
-    it.asProfileDataPO(cdnResources = cdnResources)
-}
+fun List<NostrEvent>.mapAsProfileDataPO(cdnResources: Map<String, CdnResource>) =
+    map {
+        it.asProfileDataPO(cdnResources = cdnResources)
+    }
 
 fun NostrEvent.asProfileDataPO(cdnResources: Map<String, CdnResource>): ProfileData {
     val metadata = NostrJson.decodeFromStringOrNull<ContentMetadata>(this.content)

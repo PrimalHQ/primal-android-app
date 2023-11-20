@@ -27,6 +27,7 @@ import net.primal.android.core.compose.AvatarThumbnailsRow
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.feed.model.FeedPostAction
 import net.primal.android.core.compose.feed.model.FeedPostUi
+import net.primal.android.core.compose.feed.model.toNoteContentUi
 import net.primal.android.core.compose.feed.note.FeedNoteContent
 import net.primal.android.core.compose.feed.note.FeedNoteStatsRow
 import net.primal.android.core.compose.notifications.toImagePainter
@@ -244,11 +245,8 @@ private fun NotificationListItem(
                 if (actionPost != null) {
                     FeedNoteContent(
                         modifier = Modifier.padding(end = 16.dp),
-                        content = actionPost.content,
+                        data = actionPost.toNoteContentUi(),
                         expanded = false,
-                        hashtags = actionPost.hashtags,
-                        attachments = actionPost.noteAttachments,
-                        nostrResources = actionPost.nostrUriResources,
                         onClick = { onPostClick(actionPost.postId) },
                         onProfileClick = onProfileClick,
                         onPostClick = onPostClick,

@@ -73,7 +73,7 @@ class MutedUserRepository @Inject constructor(
     private suspend fun fetchMuteListAndPersistProfiles(userId: String): Set<MutedUserData> {
         val response = withContext(Dispatchers.IO) { settingsApi.getMuteList(userId = userId) }
         val muteList = response.muteList?.tags?.mapToPubkeySet() ?: emptySet()
-        val cdnResources = response.eventResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
+        val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
         val profileData = response.metadataEvents.map { it.asProfileDataPO(cdnResources = cdnResources) }
 
         withContext(Dispatchers.IO) {

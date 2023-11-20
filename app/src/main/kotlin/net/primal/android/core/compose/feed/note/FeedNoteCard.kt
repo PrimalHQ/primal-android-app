@@ -35,6 +35,7 @@ import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.feed.model.FeedPostAction
 import net.primal.android.core.compose.feed.model.FeedPostStatsUi
 import net.primal.android.core.compose.feed.model.FeedPostUi
+import net.primal.android.core.compose.feed.model.toNoteContentUi
 import net.primal.android.core.ext.openUriSafely
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
@@ -178,11 +179,8 @@ fun FeedNoteCard(
                                         2.dp
                                     },
                                 ),
-                            content = data.content,
+                            data = data.toNoteContentUi(),
                             expanded = expanded,
-                            hashtags = data.hashtags,
-                            attachments = data.noteAttachments,
-                            nostrResources = data.nostrUriResources,
                             onClick = {
                                 launchRippleEffect(it)
                                 onPostClick(data.postId)
@@ -220,7 +218,7 @@ class FeedPostUiProvider : PreviewParameterProvider<FeedPostUi> {
                 content = """
                     Lorem ipsum dolor sit amet, consectetur adipiscing elit.
                 """.trimIndent(),
-                noteAttachments = emptyList(),
+                attachments = emptyList(),
                 authorId = "npubSomething",
                 authorName = "android_robots_from_space",
                 authorHandle = "user",
@@ -228,7 +226,7 @@ class FeedPostUiProvider : PreviewParameterProvider<FeedPostUi> {
                 authorAvatarUrl = "https://i.imgur.com/Z8dpmvc.png",
                 authorAvatarVariants = emptyList(),
                 timestamp = Instant.now().minus(30, ChronoUnit.MINUTES),
-                nostrUriResources = emptyList(),
+                nostrUris = emptyList(),
                 stats = FeedPostStatsUi(
                     repliesCount = 0,
                     likesCount = 0,
@@ -251,7 +249,7 @@ class FeedPostUiProvider : PreviewParameterProvider<FeedPostUi> {
                     have augmented reality HUDs that incorporate real-time facial recognition. 
                     Hiding behind a pseudonym will become a distant dream.
                 """.trimIndent(),
-                noteAttachments = emptyList(),
+                attachments = emptyList(),
                 authorId = "npubSomething",
                 authorName = "android_robots_from_space",
                 authorHandle = "user",
@@ -259,7 +257,7 @@ class FeedPostUiProvider : PreviewParameterProvider<FeedPostUi> {
                 authorAvatarUrl = "https://i.imgur.com/Z8dpmvc.png",
                 authorAvatarVariants = emptyList(),
                 timestamp = Instant.now().minus(30, ChronoUnit.MINUTES),
-                nostrUriResources = emptyList(),
+                nostrUris = emptyList(),
                 stats = FeedPostStatsUi(
                     repliesCount = 11,
                     likesCount = 256,

@@ -3,8 +3,8 @@ package net.primal.android.serialization
 import androidx.room.TypeConverter
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.JsonArray
-import net.primal.android.attachments.domain.CdnResourceVariant
 import net.primal.android.attachments.db.NoteNostrUri
+import net.primal.android.attachments.domain.CdnResourceVariant
 
 class RoomCustomTypeConverters {
 
@@ -47,42 +47,16 @@ class RoomCustomTypeConverters {
         }
     }
 
-//    @TypeConverter
-//    fun stringToListOfEventResourceVariant(value: String?): List<EventResourceVariant>? {
-//        return NostrJson.decodeFromStringOrNull<List<EventResourceVariant>>(value)
-//    }
-//
-//    @TypeConverter
-//    fun listOfEventResourceVariantToString(list: List<EventResourceVariant>?): String? {
-//        return when (list) {
-//            null -> null
-//            else -> NostrJson.encodeToString(list)
-//        }
-//    }
-
     @TypeConverter
-    fun stringToListOfNostrResource(value: String?): List<NoteNostrUri>? {
+    fun stringToListOfNoteNostrUri(value: String?): List<NoteNostrUri>? {
         return NostrJson.decodeFromStringOrNull<List<NoteNostrUri>>(value)
     }
 
     @TypeConverter
-    fun listOfNostrResourceToString(list: List<NoteNostrUri>?): String? {
+    fun listOfNoteNostrUriToString(list: List<NoteNostrUri>?): String? {
         return when (list) {
             null -> null
             else -> NostrJson.encodeToString(list)
         }
     }
-
-//    @TypeConverter
-//    fun stringToListOfMediaResource(value: String?): List<CDNResource>? {
-//        return NostrJson.decodeFromStringOrNull<List<CDNResource>>(value)
-//    }
-//
-//    @TypeConverter
-//    fun listOfMediaResourceToString(list: List<CDNResource>?): String? {
-//        return when (list) {
-//            null -> null
-//            else -> NostrJson.encodeToString(list)
-//        }
-//    }
 }

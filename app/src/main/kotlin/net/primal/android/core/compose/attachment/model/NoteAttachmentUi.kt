@@ -1,9 +1,8 @@
 package net.primal.android.core.compose.attachment.model
 
-import net.primal.android.attachments.domain.CdnResourceVariant
 import net.primal.android.attachments.db.NoteAttachment
+import net.primal.android.attachments.domain.CdnResourceVariant
 import net.primal.android.attachments.domain.NoteAttachmentType
-
 
 data class NoteAttachmentUi(
     val url: String,

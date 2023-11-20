@@ -8,5 +8,5 @@ import net.primal.android.nostr.model.primal.PrimalEvent
 data class GetMuteListResponse(
     val muteList: NostrEvent? = null,
     val metadataEvents: List<NostrEvent> = emptyList(),
-    val eventResources: List<PrimalEvent> = emptyList(),
+    val cdnResources: List<PrimalEvent> = emptyList(),
 )

@@ -67,6 +67,7 @@ import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.feed.model.FeedPostUi
+import net.primal.android.core.compose.feed.model.toNoteContentUi
 import net.primal.android.core.compose.feed.note.FeedNoteContent
 import net.primal.android.core.compose.feed.note.FeedNoteHeader
 import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
@@ -395,11 +396,8 @@ private fun ReplyToNote(replyToNote: FeedPostUi, connectionLineColor: Color) {
                 start = avatarsColumnWidthDp,
                 end = 16.dp,
             ),
-            content = replyToNote.content,
+            data = replyToNote.toNoteContentUi(),
             expanded = true,
-            hashtags = replyToNote.hashtags,
-            attachments = replyToNote.noteAttachments,
-            nostrResources = replyToNote.nostrUriResources,
             onProfileClick = {},
             onPostClick = {},
             onClick = {},

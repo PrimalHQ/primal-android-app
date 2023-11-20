@@ -15,9 +15,8 @@ import net.primal.android.nostr.ext.mapNotNullAsPostStatsPO
 import net.primal.android.nostr.ext.mapNotNullAsPostUserStatsPO
 import net.primal.android.nostr.ext.mapNotNullAsRepostDataPO
 
-
 suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String, database: PrimalDatabase) {
-    val cdnResources = this.primalCdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
+    val cdnResources = this.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
     val linkPreviews = primalLinkPreviews.flatMapNotNullAsLinkPreviewResource().asMapByKey { it.url }
 
     val feedPosts = posts.mapAsPostDataPO()

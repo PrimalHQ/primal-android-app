@@ -82,7 +82,7 @@ class MessageRepository @Inject constructor(
                     userId = userId,
                     messages = response.messages,
                     profileMetadata = response.profileMetadata,
-                    mediaResources = response.mediaResources,
+                    mediaResources = response.cdnResources,
                 )
                 database.messageConversations().upsertAll(data = messageConversation)
             }
@@ -113,7 +113,7 @@ class MessageRepository @Inject constructor(
                 userId = userId,
                 messages = response.messages,
                 profileMetadata = response.profileMetadata,
-                mediaResources = response.mediaResources,
+                mediaResources = response.cdnResources,
             )
         }
     }

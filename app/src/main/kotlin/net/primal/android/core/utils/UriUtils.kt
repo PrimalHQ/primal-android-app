@@ -70,7 +70,7 @@ private val extensionToMimeType = mapOf(
     "yml" to "text/yaml",
     "exe" to "application/x-msdownload",
     "dmg" to "application/x-apple-diskimage",
-    "apk" to "application/vnd.android.package-archive"
+    "apk" to "application/vnd.android.package-archive",
 )
 
 fun String?.detectMimeType(): String? {

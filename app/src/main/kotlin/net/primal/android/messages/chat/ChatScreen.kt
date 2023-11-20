@@ -61,6 +61,7 @@ import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.asBeforeNowFormat
+import net.primal.android.core.compose.feed.model.toNoteContentUi
 import net.primal.android.core.compose.feed.note.FeedNoteContent
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -383,11 +384,8 @@ private fun ChatMessageListItem(
                     .wrapContentWidth()
                     .wrapContentHeight()
                     .padding(horizontal = 16.dp, vertical = 8.dp),
-                content = chatMessage.content.trim(),
+                data = chatMessage.toNoteContentUi(),
                 expanded = true,
-                hashtags = chatMessage.hashtags,
-                attachments = chatMessage.noteAttachments,
-                nostrResources = chatMessage.nostrResources,
                 onClick = { },
                 onProfileClick = onProfileClick,
                 onPostClick = onNoteClick,

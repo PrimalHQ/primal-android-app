@@ -7,6 +7,6 @@ import net.primal.android.nostr.model.primal.PrimalEvent
 @Serializable
 data class UserProfilesResponse(
     val metadataEvents: List<NostrEvent> = emptyList(),
-    val eventResources: List<PrimalEvent> = emptyList(),
+    val cdnResources: List<PrimalEvent> = emptyList(),
     val userScores: PrimalEvent? = null,
 )

@@ -1,8 +1,8 @@
 package net.primal.android.feed.db
 
 import kotlinx.serialization.Serializable
-import net.primal.android.attachments.domain.CdnResourceVariant
 import net.primal.android.attachments.db.NoteNostrUri
+import net.primal.android.attachments.domain.CdnResourceVariant
 
 @Serializable
 data class ReferencedPost(

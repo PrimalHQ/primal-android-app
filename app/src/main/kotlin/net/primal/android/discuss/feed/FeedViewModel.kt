@@ -117,10 +117,11 @@ class FeedViewModel @Inject constructor(
             }
         }
 
-    private fun List<FeedPost>.extractAvatarVariantsAsMap() = mapNotNull { feedPost ->
-        val avatarUrl = feedPost.author?.avatarUrl
-        if (avatarUrl != null) avatarUrl to feedPost.author.avatarVariants else null
-    }.associate { it.first to it.second }
+    private fun List<FeedPost>.extractAvatarVariantsAsMap() =
+        mapNotNull { feedPost ->
+            val avatarUrl = feedPost.author?.avatarUrl
+            if (avatarUrl != null) avatarUrl to feedPost.author.avatarVariants else null
+        }.associate { it.first to it.second }
 
     private fun subscribeToActiveAccount() =
         viewModelScope.launch {

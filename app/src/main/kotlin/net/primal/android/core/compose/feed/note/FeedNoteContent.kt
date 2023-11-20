@@ -44,8 +44,9 @@ import net.primal.android.core.compose.PrimalClickableText
 import net.primal.android.core.compose.attachment.model.NoteAttachmentUi
 import net.primal.android.core.compose.feed.model.FeedPostStatsUi
 import net.primal.android.core.compose.feed.model.FeedPostUi
-import net.primal.android.core.compose.feed.model.NostrUriResourceUi
-import net.primal.android.core.compose.feed.model.asNostrUriResourceUi
+import net.primal.android.core.compose.feed.model.NoteContentUi
+import net.primal.android.core.compose.feed.model.NoteNostrUriUi
+import net.primal.android.core.compose.feed.model.asNoteNostrUriUi
 import net.primal.android.core.utils.HashtagMatcher
 import net.primal.android.core.utils.parseHashtags
 import net.primal.android.feed.db.ReferencedPost
@@ -69,12 +70,12 @@ private fun List<NoteAttachmentUi>.filterNotImages() =
         it.mimeType?.startsWith("image") == true
     }
 
-private fun List<NostrUriResourceUi>.filterReferencedPosts() =
+private fun List<NoteNostrUriUi>.filterReferencedPosts() =
     filter {
         it.referencedPost != null
     }
 
-private fun List<NostrUriResourceUi>.filterReferencedUsers() =
+private fun List<NoteNostrUriUi>.filterReferencedUsers() =
     filter {
         it.referencedUser != null
     }
@@ -87,7 +88,7 @@ private fun String.withoutUrls(urls: List<String>): String {
     return newContent
 }
 
-private fun String.replaceNostrProfileUrisWithHandles(resources: List<NostrUriResourceUi>): String {
+private fun String.replaceNostrProfileUrisWithHandles(resources: List<NoteNostrUriUi>): String {
     var newContent = this
     resources.forEach {
         checkNotNull(it.referencedUser)
@@ -150,11 +151,8 @@ private fun String.ellipsize(expanded: Boolean, ellipsizeText: String): String {
 @Composable
 fun FeedNoteContent(
     modifier: Modifier = Modifier,
-    content: String,
+    data: NoteContentUi,
     expanded: Boolean,
-    hashtags: List<String>,
-    attachments: List<NoteAttachmentUi>,
-    nostrResources: List<NostrUriResourceUi>,
     onProfileClick: (String) -> Unit,
     onPostClick: (String) -> Unit,
     onClick: (Offset) -> Unit,
@@ -167,12 +165,9 @@ fun FeedNoteContent(
     val seeMoreText = stringResource(id = R.string.feed_see_more)
     val contentText = remember {
         renderContentAsAnnotatedString(
-            content = content,
+            data = data,
             expanded = expanded,
             seeMoreText = seeMoreText,
-            hashtags = hashtags,
-            attachments = attachments,
-            nostrResources = nostrResources,
             highlightColor = highlightColor,
         )
     }
@@ -203,12 +198,12 @@ fun FeedNoteContent(
             )
         }
 
-        val imageAttachments = remember { attachments.filterImages() }
+        val imageAttachments = remember { data.attachments.filterImages() }
         if (imageAttachments.isNotEmpty()) {
             FeedNoteImages(imageAttachments = imageAttachments)
         }
 
-        val referencedPostResources = remember { nostrResources.filterReferencedPosts() }
+        val referencedPostResources = remember { data.nostrUris.filterReferencedPosts() }
         if (referencedPostResources.isNotEmpty()) {
             FeedReferencedNotes(
                 postResources = referencedPostResources,
@@ -221,21 +216,18 @@ fun FeedNoteContent(
 }
 
 fun renderContentAsAnnotatedString(
-    content: String,
+    data: NoteContentUi,
     expanded: Boolean,
     seeMoreText: String,
-    hashtags: List<String>,
-    attachments: List<NoteAttachmentUi>,
-    nostrResources: List<NostrUriResourceUi>,
-    shouldKeepNostrNoteUris: Boolean = false,
     highlightColor: Color,
+    shouldKeepNostrNoteUris: Boolean = false,
 ): AnnotatedString {
-    val imageUrlResources = attachments.filterImages()
-    val otherUrlResources = attachments.filterNotImages()
-    val referencedPostResources = nostrResources.filterReferencedPosts()
-    val referencedUserResources = nostrResources.filterReferencedUsers()
+    val imageUrlResources = data.attachments.filterImages()
+    val otherUrlResources = data.attachments.filterNotImages()
+    val referencedPostResources = data.nostrUris.filterReferencedPosts()
+    val referencedUserResources = data.nostrUris.filterReferencedUsers()
 
-    val refinedContent = content
+    val refinedContent = data.content
         .withoutUrls(urls = imageUrlResources.map { it.url })
         .withoutUrls(
             urls = if (!shouldKeepNostrNoteUris) {
@@ -298,8 +290,7 @@ fun renderContentAsAnnotatedString(
             }
         }
 
-        HashtagMatcher(content = refinedContent, hashtags = hashtags)
-            .matches()
+        HashtagMatcher(content = refinedContent, hashtags = data.hashtags).matches()
             .forEach {
                 addStyle(
                     style = SpanStyle(color = highlightColor),
@@ -393,7 +384,7 @@ private fun BoxWithConstraintsScope.findImageSize(attachment: NoteAttachmentUi):
 
 @Composable
 fun FeedReferencedNotes(
-    postResources: List<NostrUriResourceUi>,
+    postResources: List<NoteNostrUriUi>,
     expanded: Boolean,
     containerColor: Color,
     onPostClick: (String) -> Unit,
@@ -421,8 +412,8 @@ fun FeedReferencedNotes(
                     authorInternetIdentifier = data.authorInternetIdentifier,
                     authorAvatarUrl = data.authorAvatarUrl,
                     authorAvatarVariants = emptyList(),
-                    noteAttachments = emptyList(),
-                    nostrUriResources = data.nostrResources.map { it.asNostrUriResourceUi() },
+                    attachments = emptyList(),
+                    nostrUris = data.nostrResources.map { it.asNoteNostrUriUi() },
                     timestamp = Instant.ofEpochSecond(data.createdAt),
                     content = data.content,
                     stats = FeedPostStatsUi(),
@@ -442,23 +433,25 @@ fun PreviewPostContent() {
     PrimalTheme(primalTheme = PrimalTheme.Sunset) {
         Surface {
             FeedNoteContent(
-                content = """
-                    Unfortunately the days of using pseudonyms in metaspace are numbered. #nostr 
-                    nostr:referencedUser
-                """.trimIndent(),
-                expanded = false,
-                hashtags = listOf("#nostr"),
-                attachments = emptyList(),
-                nostrResources = listOf(
-                    NostrUriResourceUi(
-                        uri = "nostr:referencedUser",
-                        referencedPost = null,
-                        referencedUser = ReferencedUser(
-                            userId = "nostr:referencedUser",
-                            handle = "alex",
+                data = NoteContentUi(
+                    content = """
+                        Unfortunately the days of using pseudonyms in metaspace are numbered. #nostr 
+                        nostr:referencedUser
+                    """.trimIndent(),
+                    attachments = emptyList(),
+                    nostrUris = listOf(
+                        NoteNostrUriUi(
+                            uri = "nostr:referencedUser",
+                            referencedPost = null,
+                            referencedUser = ReferencedUser(
+                                userId = "nostr:referencedUser",
+                                handle = "alex",
+                            ),
                         ),
                     ),
+                    hashtags = listOf("#nostr"),
                 ),
+                expanded = false,
                 onProfileClick = {},
                 onPostClick = {},
                 onClick = {},
@@ -475,53 +468,55 @@ fun PreviewPostContentWithReferencedPost() {
     PrimalTheme(primalTheme = PrimalTheme.Sunset) {
         Surface {
             FeedNoteContent(
-                content = """
-                    Unfortunately the days of using pseudonyms in metaspace are numbered. #nostr
-                    
-                    nostr:referencedPost
-                    
-                    Or maybe not.
-                    
-                    nostr:referenced2Post
-                """.trimIndent(),
-                expanded = false,
-                hashtags = listOf("#nostr"),
-                attachments = emptyList(),
-                nostrResources = listOf(
-                    NostrUriResourceUi(
-                        uri = "nostr:referencedPost",
-                        referencedPost = ReferencedPost(
-                            postId = "postId",
-                            createdAt = 0,
-                            content = "This is referenced post.",
-                            authorId = "authorId",
-                            authorName = "primal",
-                            authorAvatarUrl = null,
-                            authorAvatarVariants = emptyList(),
-                            authorInternetIdentifier = "hi@primal.net",
-                            authorLightningAddress = "h@getalby.com",
-                            nostrResources = emptyList(),
+                data = NoteContentUi(
+                    content = """
+                        Unfortunately the days of using pseudonyms in metaspace are numbered. #nostr
+                        
+                        nostr:referencedPost
+                        
+                        Or maybe not.
+                        
+                        nostr:referenced2Post
+                    """.trimIndent(),
+                    attachments = emptyList(),
+                    nostrUris = listOf(
+                        NoteNostrUriUi(
+                            uri = "nostr:referencedPost",
+                            referencedPost = ReferencedPost(
+                                postId = "postId",
+                                createdAt = 0,
+                                content = "This is referenced post.",
+                                authorId = "authorId",
+                                authorName = "primal",
+                                authorAvatarUrl = null,
+                                authorAvatarVariants = emptyList(),
+                                authorInternetIdentifier = "hi@primal.net",
+                                authorLightningAddress = "h@getalby.com",
+                                nostrResources = emptyList(),
 
+                            ),
+                            referencedUser = null,
                         ),
-                        referencedUser = null,
-                    ),
-                    NostrUriResourceUi(
-                        uri = "nostr:referenced2Post",
-                        referencedPost = ReferencedPost(
-                            postId = "postId",
-                            createdAt = 0,
-                            content = "This is referenced post #2.",
-                            authorId = "authorId",
-                            authorName = "primal",
-                            authorAvatarUrl = null,
-                            authorAvatarVariants = emptyList(),
-                            authorInternetIdentifier = "hi@primal.net",
-                            authorLightningAddress = "h@getalby.com",
-                            nostrResources = emptyList(),
+                        NoteNostrUriUi(
+                            uri = "nostr:referenced2Post",
+                            referencedPost = ReferencedPost(
+                                postId = "postId",
+                                createdAt = 0,
+                                content = "This is referenced post #2.",
+                                authorId = "authorId",
+                                authorName = "primal",
+                                authorAvatarUrl = null,
+                                authorAvatarVariants = emptyList(),
+                                authorInternetIdentifier = "hi@primal.net",
+                                authorLightningAddress = "h@getalby.com",
+                                nostrResources = emptyList(),
+                            ),
+                            referencedUser = null,
                         ),
-                        referencedUser = null,
                     ),
+                    hashtags = listOf("#nostr"),
                 ),
+                expanded = false,
                 onProfileClick = {},
                 onPostClick = {},
                 onClick = {},

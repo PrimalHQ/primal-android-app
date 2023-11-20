@@ -8,5 +8,5 @@ data class ConversationsResponse(
     val conversationsSummary: ConversationsSummary?,
     val messages: List<NostrEvent>,
     val profileMetadata: List<NostrEvent>,
-    val mediaResources: List<PrimalEvent>,
+    val cdnResources: List<PrimalEvent>,
 )

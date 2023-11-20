@@ -1,41 +1,39 @@
 package net.primal.android.attachments
 
+import net.primal.android.attachments.db.NoteAttachment
 import net.primal.android.attachments.domain.CdnResource
 import net.primal.android.attachments.domain.LinkPreviewData
-import net.primal.android.attachments.db.NoteAttachment
 import net.primal.android.attachments.domain.NoteAttachmentType
 import net.primal.android.core.utils.detectMimeType
 import net.primal.android.feed.db.PostData
 import net.primal.android.messages.db.DirectMessageData
 import net.primal.android.nostr.ext.isNostrUri
 
-
 fun List<PostData>.flatMapPostsAsNoteAttachmentPO(
     cdnResources: Map<String, CdnResource>,
     linkPreviews: Map<String, LinkPreviewData>,
-) =
-    flatMap { postData ->
-        postData.uris.map { uri ->
-            postData.postId to uri
-        }
+) = flatMap { postData ->
+    postData.uris.map { uri ->
+        postData.postId to uri
     }
-        .filterNot { (_, uri) -> uri.isNostrUri() }
-        .map { (eventId, uri) ->
-            val cdnResource = cdnResources[uri]
-            val linkPreview = linkPreviews[uri]
-            val mimeType = uri.detectMimeType() ?: cdnResource?.contentType ?: linkPreview?.mimeType
-            NoteAttachment(
-                eventId = eventId,
-                url = uri,
-                type = detectNoteAttachmentType(url = uri, mimeType = mimeType),
-                mimeType = mimeType,
-                variants = cdnResource?.variants,
-                title = linkPreview?.title?.ifBlank { null },
-                description = linkPreview?.description?.ifBlank { null },
-                thumbnail = linkPreview?.thumbnailUrl?.ifBlank { null },
-                authorAvatarUrl = linkPreview?.authorAvatarUrl?.ifBlank { null },
-            )
-        }
+}
+    .filterNot { (_, uri) -> uri.isNostrUri() }
+    .map { (eventId, uri) ->
+        val cdnResource = cdnResources[uri]
+        val linkPreview = linkPreviews[uri]
+        val mimeType = uri.detectMimeType() ?: cdnResource?.contentType ?: linkPreview?.mimeType
+        NoteAttachment(
+            eventId = eventId,
+            url = uri,
+            type = detectNoteAttachmentType(url = uri, mimeType = mimeType),
+            mimeType = mimeType,
+            variants = cdnResource?.variants,
+            title = linkPreview?.title?.ifBlank { null },
+            description = linkPreview?.description?.ifBlank { null },
+            thumbnail = linkPreview?.thumbnailUrl?.ifBlank { null },
+            authorAvatarUrl = linkPreview?.authorAvatarUrl?.ifBlank { null },
+        )
+    }
 
 fun List<DirectMessageData>.flatMapMessagesAsNoteAttachmentPO() =
     flatMap { messageData ->

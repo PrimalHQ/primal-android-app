@@ -76,6 +76,7 @@ import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.compose.asBeforeNowFormat
+import net.primal.android.core.compose.feed.model.NoteContentUi
 import net.primal.android.core.compose.feed.note.renderContentAsAnnotatedString
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -346,12 +347,14 @@ private fun ConversationListItem(conversation: MessageConversationUi, onConversa
         },
         supportingContent = {
             val annotatedContent = renderContentAsAnnotatedString(
-                content = conversation.lastMessageSnippet,
+                data = NoteContentUi(
+                    content = conversation.lastMessageSnippet,
+                    hashtags = conversation.lastMessageSnippet.parseHashtags(),
+                    attachments = conversation.lastMessageAttachments,
+                    nostrUris = conversation.lastMessageNostrUris,
+                ),
                 expanded = false,
                 seeMoreText = "",
-                hashtags = conversation.lastMessageSnippet.parseHashtags(),
-                attachments = conversation.lastMessageAttachments,
-                nostrResources = conversation.lastMessageNostrResources,
                 shouldKeepNostrNoteUris = true,
                 highlightColor = AppTheme.colorScheme.primary,
             )

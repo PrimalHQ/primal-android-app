@@ -96,7 +96,7 @@ class UsersApiImpl @Inject constructor(
 
         return UserProfilesResponse(
             metadataEvents = queryResult.filterNostrEvents(NostrEventKind.Metadata),
-            eventResources = queryResult.filterPrimalEvents(NostrEventKind.PrimalCdnResource),
+            cdnResources = queryResult.filterPrimalEvents(NostrEventKind.PrimalCdnResource),
             userScores = queryResult.findPrimalEvent(NostrEventKind.PrimalUserScores),
         )
     }

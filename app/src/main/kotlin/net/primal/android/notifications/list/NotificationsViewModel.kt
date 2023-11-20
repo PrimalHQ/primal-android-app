@@ -20,7 +20,7 @@ import kotlinx.coroutines.withContext
 import net.primal.android.core.compose.attachment.model.asNoteAttachmentUi
 import net.primal.android.core.compose.feed.model.FeedPostStatsUi
 import net.primal.android.core.compose.feed.model.FeedPostUi
-import net.primal.android.core.compose.feed.model.asNostrUriResourceUi
+import net.primal.android.core.compose.feed.model.asNoteNostrUriUi
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.core.utils.usernameUiFriendly
@@ -252,8 +252,8 @@ class NotificationsViewModel @Inject constructor(
             authorAvatarVariants = this.actionByUser?.avatarVariants ?: emptyList(),
             timestamp = Instant.ofEpochSecond(this.actionPost.createdAt),
             content = this.actionPost.content,
-            noteAttachments = this.actionPostNoteAttachments.map { it.asNoteAttachmentUi() },
-            nostrUriResources = this.actionPostNostrUris.map { it.asNostrUriResourceUi() },
+            attachments = this.actionPostNoteAttachments.map { it.asNoteAttachmentUi() },
+            nostrUris = this.actionPostNostrUris.map { it.asNoteNostrUriUi() },
             stats = FeedPostStatsUi.from(
                 postStats = this.actionPostStats,
                 userStats = this.actionPostUserStats,

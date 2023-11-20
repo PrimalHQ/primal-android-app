@@ -52,7 +52,6 @@ fun FeedNoteHeader(
     ) {
         if (authorAvatarVisible) {
             AvatarThumbnail(
-                modifier = Modifier,
                 avatarUrl = authorAvatarUrl,
                 avatarVariants = authorAvatarVariants,
                 avatarSize = authorAvatarSize,
@@ -61,15 +60,9 @@ fun FeedNoteHeader(
         }
 
         Column(
-            modifier = Modifier.padding(
-                horizontal = if (authorAvatarVisible) 8.dp else 0.dp,
-            ),
+            modifier = Modifier.padding(horizontal = if (authorAvatarVisible) 8.dp else 0.dp),
         ) {
-            val identifier = if (!singleLine) {
-                ""
-            } else {
-                authorInternetIdentifier?.formatNip05Identifier() ?: ""
-            }
+            val identifier = if (!singleLine) "" else authorInternetIdentifier?.formatNip05Identifier() ?: ""
             val suffixText = buildAnnotatedString {
                 append(
                     AnnotatedString(

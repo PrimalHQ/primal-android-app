@@ -83,7 +83,7 @@ class MessagesRemoteMediator(
                 userId = userId,
                 messages = response.messages,
                 profileMetadata = response.profileMetadata,
-                mediaResources = response.mediaResources,
+                mediaResources = response.cdnResources,
             )
         }
 
