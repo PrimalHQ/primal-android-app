@@ -144,8 +144,7 @@ fun ChatScreen(
                             .clip(CircleShape),
                     ) {
                         AvatarThumbnail(
-                            avatarUrl = state.participantProfile?.avatarUrl,
-                            avatarVariants = state.participantProfile?.avatarVariants ?: emptyList(),
+                            avatarCdnImage = state.participantProfile?.avatarCdnImage,
                             modifier = Modifier.size(32.dp),
                             onClick = { onProfileClick(state.participantId) },
                         )

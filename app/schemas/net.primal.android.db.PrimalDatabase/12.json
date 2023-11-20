@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 12,
-    "identityHash": "3ef486224b5edc564d6a18f43efa12dc",
+    "identityHash": "57f8c458372d44141f5997798a9c3b13",
     "entities": [
       {
         "tableName": "PostData",
@@ -80,7 +80,7 @@
       },
       {
         "tableName": "ProfileData",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ownerId` TEXT NOT NULL, `eventId` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `raw` TEXT NOT NULL, `handle` TEXT, `displayName` TEXT, `internetIdentifier` TEXT, `lightningAddress` TEXT, `lnUrl` TEXT, `avatarUrl` TEXT, `avatarVariants` TEXT NOT NULL, `bannerUrl` TEXT, `bannerVariants` TEXT NOT NULL, `website` TEXT, `about` TEXT, PRIMARY KEY(`ownerId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ownerId` TEXT NOT NULL, `eventId` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `raw` TEXT NOT NULL, `handle` TEXT, `displayName` TEXT, `internetIdentifier` TEXT, `lightningAddress` TEXT, `lnUrl` TEXT, `avatarCdnImage` TEXT, `bannerCdnImage` TEXT, `website` TEXT, `about` TEXT, PRIMARY KEY(`ownerId`))",
         "fields": [
           {
             "fieldPath": "ownerId",
@@ -137,28 +137,16 @@
             "notNull": false
           },
           {
-            "fieldPath": "avatarUrl",
-            "columnName": "avatarUrl",
+            "fieldPath": "avatarCdnImage",
+            "columnName": "avatarCdnImage",
             "affinity": "TEXT",
             "notNull": false
           },
           {
-            "fieldPath": "avatarVariants",
-            "columnName": "avatarVariants",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "bannerUrl",
-            "columnName": "bannerUrl",
+            "fieldPath": "bannerCdnImage",
+            "columnName": "bannerCdnImage",
             "affinity": "TEXT",
             "notNull": false
-          },
-          {
-            "fieldPath": "bannerVariants",
-            "columnName": "bannerVariants",
-            "affinity": "TEXT",
-            "notNull": true
           },
           {
             "fieldPath": "website",
@@ -318,7 +306,7 @@
       },
       {
         "tableName": "NoteNostrUri",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`postId` TEXT NOT NULL, `uri` TEXT NOT NULL, `refPost_postId` TEXT, `refPost_createdAt` INTEGER, `refPost_content` TEXT, `refPost_authorId` TEXT, `refPost_authorName` TEXT, `refPost_authorAvatarUrl` TEXT, `refPost_authorAvatarVariants` TEXT, `refPost_authorInternetIdentifier` TEXT, `refPost_authorLightningAddress` TEXT, `refPost_nostrResources` TEXT, `refUser_userId` TEXT, `refUser_handle` TEXT, PRIMARY KEY(`postId`, `uri`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`postId` TEXT NOT NULL, `uri` TEXT NOT NULL, `refPost_postId` TEXT, `refPost_createdAt` INTEGER, `refPost_content` TEXT, `refPost_authorId` TEXT, `refPost_authorName` TEXT, `refPost_authorAvatarCdnImage` TEXT, `refPost_authorInternetIdentifier` TEXT, `refPost_authorLightningAddress` TEXT, `refPost_nostrUris` TEXT, `refUser_userId` TEXT, `refUser_handle` TEXT, PRIMARY KEY(`postId`, `uri`))",
         "fields": [
           {
             "fieldPath": "postId",
@@ -363,14 +351,8 @@
             "notNull": false
           },
           {
-            "fieldPath": "referencedPost.authorAvatarUrl",
-            "columnName": "refPost_authorAvatarUrl",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "referencedPost.authorAvatarVariants",
-            "columnName": "refPost_authorAvatarVariants",
+            "fieldPath": "referencedPost.authorAvatarCdnImage",
+            "columnName": "refPost_authorAvatarCdnImage",
             "affinity": "TEXT",
             "notNull": false
           },
@@ -387,8 +369,8 @@
             "notNull": false
           },
           {
-            "fieldPath": "referencedPost.nostrResources",
-            "columnName": "refPost_nostrResources",
+            "fieldPath": "referencedPost.nostrUris",
+            "columnName": "refPost_nostrUris",
             "affinity": "TEXT",
             "notNull": false
           },
@@ -1020,7 +1002,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '3ef486224b5edc564d6a18f43efa12dc')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '57f8c458372d44141f5997798a9c3b13')"
     ]
   }
 }

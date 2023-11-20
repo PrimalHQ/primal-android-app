@@ -21,6 +21,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.R
+import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.auth.create.CreateAccountContract
 import net.primal.android.auth.create.ui.CreateAccountContent
 import net.primal.android.auth.create.ui.RecommendedFollow
@@ -123,8 +124,7 @@ fun FollowRecommendedAccountsStep(
                         leadingContent = {
                             AvatarThumbnail(
                                 modifier = Modifier.padding(start = 8.dp),
-                                avatarUrl = suggestion.content.picture,
-                                avatarVariants = emptyList(),
+                                avatarCdnImage = suggestion.content.picture?.let { CdnImage(sourceUrl = it) },
                             )
                         },
                         headlineContent = {

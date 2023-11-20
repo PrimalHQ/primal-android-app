@@ -176,11 +176,10 @@ fun List<String>.mapAsNostrResourcePO(
                 content = refPost.content,
                 authorId = refPost.authorId,
                 authorName = refPostAuthor.authorNameUiFriendly(),
-                authorAvatarUrl = refPostAuthor.avatarUrl,
-                authorAvatarVariants = refPostAuthor.avatarVariants,
+                authorAvatarCdnImage = refPostAuthor.avatarCdnImage,
                 authorInternetIdentifier = refPostAuthor.internetIdentifier,
                 authorLightningAddress = refPostAuthor.lightningAddress,
-                nostrResources = listOf(refPost).flatMapPostsAsNostrResourcePO(
+                nostrUris = listOf(refPost).flatMapPostsAsNostrResourcePO(
                     postIdToPostDataMap = postIdToPostDataMap,
                     profileIdToProfileDataMap = profileIdToProfileDataMap,
                 ),

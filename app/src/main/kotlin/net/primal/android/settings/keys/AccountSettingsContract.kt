@@ -1,11 +1,10 @@
 package net.primal.android.settings.keys
 
-import net.primal.android.attachments.domain.CdnResourceVariant
+import net.primal.android.attachments.domain.CdnImage
 
 interface AccountSettingsContract {
     data class UiState(
-        val avatarUrl: String? = null,
-        val avatarVariants: List<CdnResourceVariant> = emptyList(),
+        val avatarCdnImage: CdnImage? = null,
         val nsec: String = "",
         val npub: String = "",
     )

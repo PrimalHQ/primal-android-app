@@ -26,7 +26,7 @@ fun UserProfileListItem(data: UserProfileUi, onClick: (String) -> Unit) {
             containerColor = AppTheme.colorScheme.surfaceVariant,
         ),
         leadingContent = {
-            AvatarThumbnail(avatarUrl = data.avatarUrl, avatarVariants = data.avatarVariants)
+            AvatarThumbnail(avatarCdnImage = data.avatarCdnImage)
         },
         headlineContent = {
             Text(

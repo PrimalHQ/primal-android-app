@@ -139,8 +139,7 @@ private fun DrawerHeader(userAccount: UserAccount?) {
                 top.linkTo(parent.top, margin = 16.dp)
             },
             avatarSize = 52.dp,
-            avatarUrl = userAccount?.avatarUrl,
-            avatarVariants = userAccount?.avatarVariants ?: emptyList(),
+            avatarCdnImage = userAccount?.avatarCdnImage,
         )
 
         NostrUserText(

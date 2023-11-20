@@ -410,10 +410,10 @@ private fun ProfileTopCoverBar(
         modifier = Modifier.fillMaxWidth(),
         contentAlignment = Alignment.TopCenter,
     ) {
-        val variant = state.profileDetails?.coverVariants?.findNearestOrNull(
+        val variant = state.profileDetails?.coverCdnImage?.variants?.findNearestOrNull(
             maxWidthPx = with(LocalDensity.current) { maxWidth.roundToPx() },
         )
-        val imageSource = variant?.mediaUrl ?: state.profileDetails?.coverUrl
+        val imageSource = variant?.mediaUrl ?: state.profileDetails?.coverCdnImage?.sourceUrl
         SubcomposeAsyncImage(
             modifier = Modifier
                 .background(color = AppTheme.colorScheme.surface)
@@ -468,8 +468,7 @@ private fun ProfileTopCoverBar(
                         start = avatarPadding * 1 / 8,
                         end = avatarPadding * 7 / 8,
                     ),
-                avatarUrl = state.profileDetails?.avatarUrl,
-                avatarVariants = state.profileDetails?.avatarVariants ?: emptyList(),
+                avatarCdnImage = state.profileDetails?.avatarCdnImage,
             )
         }
     }

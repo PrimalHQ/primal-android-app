@@ -13,6 +13,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import java.time.Instant
 import java.time.temporal.ChronoUnit
+import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.feed.model.FeedPostStatsUi
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.feed.model.toNoteContentUi
@@ -45,8 +46,7 @@ fun ReferencedNoteCard(
             postTimestamp = data.timestamp,
             singleLine = true,
             authorAvatarSize = 30.dp,
-            authorAvatarUrl = data.authorAvatarUrl,
-            authorAvatarVariants = data.authorAvatarVariants,
+            authorAvatarCdnImage = data.authorAvatarCdnImage,
             authorInternetIdentifier = data.authorInternetIdentifier,
         )
 
@@ -89,9 +89,8 @@ fun PreviewReferencedPostListItemLight() {
                 authorName = "android_robots_from_space",
                 authorHandle = "user",
                 authorInternetIdentifier = "android@primal.net",
-                authorAvatarUrl = "https://i.imgur.com/Z8dpmvc.png",
+                authorAvatarCdnImage = CdnImage("https://i.imgur.com/Z8dpmvc.png"),
                 timestamp = Instant.now().minus(30, ChronoUnit.MINUTES),
-                authorAvatarVariants = emptyList(),
                 nostrUris = emptyList(),
                 stats = FeedPostStatsUi(
                     repliesCount = 11,
@@ -130,9 +129,8 @@ fun PreviewReferencedPostListItemDark() {
                 authorName = "android",
                 authorHandle = "user",
                 authorInternetIdentifier = "android@primal.net",
-                authorAvatarUrl = "https://i.imgur.com/Z8dpmvc.png",
+                authorAvatarCdnImage = CdnImage("https://i.imgur.com/Z8dpmvc.png"),
                 timestamp = Instant.now().minus(30, ChronoUnit.MINUTES),
-                authorAvatarVariants = emptyList(),
                 nostrUris = emptyList(),
                 stats = FeedPostStatsUi(
                     repliesCount = 11,

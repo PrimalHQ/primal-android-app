@@ -4,6 +4,7 @@ import androidx.room.TypeConverter
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.JsonArray
 import net.primal.android.attachments.db.NoteNostrUri
+import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.attachments.domain.CdnResourceVariant
 
 class RoomCustomTypeConverters {
@@ -57,6 +58,19 @@ class RoomCustomTypeConverters {
         return when (list) {
             null -> null
             else -> NostrJson.encodeToString(list)
+        }
+    }
+
+    @TypeConverter
+    fun stringToCdnImage(value: String?): CdnImage? {
+        return NostrJson.decodeFromStringOrNull<CdnImage>(value)
+    }
+
+    @TypeConverter
+    fun cdnImageToString(data: CdnImage?): String? {
+        return when (data) {
+            null -> null
+            else -> NostrJson.encodeToString(data)
         }
     }
 }

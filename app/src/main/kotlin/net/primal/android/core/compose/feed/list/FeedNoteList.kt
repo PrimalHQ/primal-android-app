@@ -154,8 +154,7 @@ private fun NewPostsButton(syncStats: FeedPostsSyncStats, onClick: () -> Unit) {
     ) {
         AvatarThumbnailsRow(
             modifier = Modifier.padding(start = 6.dp),
-            avatarUrls = syncStats.avatarUrls,
-            avatarVariants = syncStats.avatarVariantsMap,
+            avatarCdnImages = syncStats.avatarCdnImages,
             onClick = { onClick() },
         )
 

@@ -2,7 +2,7 @@ package net.primal.android.profile.db
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import net.primal.android.attachments.domain.CdnResourceVariant
+import net.primal.android.attachments.domain.CdnImage
 
 @Entity
 data class ProfileData(
@@ -16,10 +16,8 @@ data class ProfileData(
     val internetIdentifier: String? = null,
     val lightningAddress: String? = null,
     val lnUrl: String? = null,
-    val avatarUrl: String? = null,
-    val avatarVariants: List<CdnResourceVariant> = emptyList(),
-    val bannerUrl: String? = null,
-    val bannerVariants: List<CdnResourceVariant> = emptyList(),
+    val avatarCdnImage: CdnImage? = null,
+    val bannerCdnImage: CdnImage? = null,
     val website: String? = null,
     val about: String? = null,
 )

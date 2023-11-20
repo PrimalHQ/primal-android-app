@@ -1,6 +1,7 @@
 package net.primal.android.nostr.ext
 
 import kotlinx.serialization.encodeToString
+import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.attachments.domain.CdnResource
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.content.ContentMetadata
@@ -30,10 +31,18 @@ fun NostrEvent.asProfileDataPO(cdnResources: Map<String, CdnResource>): ProfileD
         lnUrl = metadata?.lud16?.parseAsLNUrlOrNull() ?: metadata?.lud06?.decodeLNUrlOrNull(),
         about = metadata?.about,
         displayName = metadata?.displayName,
-        avatarUrl = metadata?.picture,
-        avatarVariants = metadata?.picture?.let { cdnResources[it]?.variants } ?: emptyList(),
-        bannerUrl = metadata?.banner,
-        bannerVariants = metadata?.banner?.let { cdnResources[it]?.variants } ?: emptyList(),
+        avatarCdnImage = metadata?.picture?.let {
+            CdnImage(
+                sourceUrl = it,
+                variants = cdnResources[it]?.variants ?: emptyList(),
+            )
+        },
+        bannerCdnImage = metadata?.banner?.let {
+            CdnImage(
+                sourceUrl = it,
+                variants = cdnResources[it]?.variants ?: emptyList(),
+            )
+        },
         website = metadata?.website,
     )
 }

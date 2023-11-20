@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import kotlinx.coroutines.launch
+import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.feed.model.FeedPostAction
 import net.primal.android.core.compose.feed.model.FeedPostStatsUi
@@ -122,8 +123,7 @@ fun FeedNoteCard(
                                 top = avatarPaddingDp,
                             ),
                             avatarSize = avatarSizeDp,
-                            avatarUrl = data.authorAvatarUrl,
-                            avatarVariants = data.authorAvatarVariants,
+                            avatarCdnImage = data.authorAvatarCdnImage,
                             onClick = { onProfileClick(data.authorId) },
                         )
                     }
@@ -144,8 +144,7 @@ fun FeedNoteCard(
                             authorAvatarVisible = fullWidthContent,
                             authorAvatarSize = avatarSizeDp,
                             authorDisplayName = data.authorName,
-                            authorAvatarUrl = data.authorAvatarUrl,
-                            authorAvatarVariants = data.authorAvatarVariants,
+                            authorAvatarCdnImage = data.authorAvatarCdnImage,
                             authorInternetIdentifier = data.authorInternetIdentifier,
                             onAuthorAvatarClick = { onProfileClick(data.authorId) },
                         )
@@ -223,8 +222,7 @@ class FeedPostUiProvider : PreviewParameterProvider<FeedPostUi> {
                 authorName = "android_robots_from_space",
                 authorHandle = "user",
                 authorInternetIdentifier = "android@primal.net",
-                authorAvatarUrl = "https://i.imgur.com/Z8dpmvc.png",
-                authorAvatarVariants = emptyList(),
+                authorAvatarCdnImage = CdnImage(sourceUrl = "https://i.imgur.com/Z8dpmvc.png"),
                 timestamp = Instant.now().minus(30, ChronoUnit.MINUTES),
                 nostrUris = emptyList(),
                 stats = FeedPostStatsUi(
@@ -254,8 +252,7 @@ class FeedPostUiProvider : PreviewParameterProvider<FeedPostUi> {
                 authorName = "android_robots_from_space",
                 authorHandle = "user",
                 authorInternetIdentifier = "android@primal.net",
-                authorAvatarUrl = "https://i.imgur.com/Z8dpmvc.png",
-                authorAvatarVariants = emptyList(),
+                authorAvatarCdnImage = CdnImage(sourceUrl = "https://i.imgur.com/Z8dpmvc.png"),
                 timestamp = Instant.now().minus(30, ChronoUnit.MINUTES),
                 nostrUris = emptyList(),
                 stats = FeedPostStatsUi(

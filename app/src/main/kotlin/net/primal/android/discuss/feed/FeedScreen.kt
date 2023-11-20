@@ -134,8 +134,7 @@ fun FeedScreen(
         topBar = {
             PrimalTopAppBar(
                 title = state.feedTitle,
-                avatarUrl = state.activeAccountAvatarUrl,
-                avatarVariants = state.activeAccountAvatarVariants,
+                avatarCdnImage = state.activeAccountAvatarCdnImage,
                 navigationIcon = PrimalIcons.AvatarDefault,
                 onNavigationIconClick = {
                     uiScope.launch { drawerState.open() }

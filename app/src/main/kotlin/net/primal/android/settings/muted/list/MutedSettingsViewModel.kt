@@ -87,8 +87,7 @@ class MutedSettingsViewModel @Inject constructor(
             displayName = this.profileData?.authorNameUiFriendly()
                 ?: this.mutedAccount.userId.asEllipsizedNpub(),
             userId = this.mutedAccount.userId,
-            avatarUrl = this.profileData?.avatarUrl,
-            avatarVariants = this.profileData?.avatarVariants ?: emptyList(),
+            avatarCdnImage = this.profileData?.avatarCdnImage,
             internetIdentifier = this.profileData?.internetIdentifier,
         )
 }

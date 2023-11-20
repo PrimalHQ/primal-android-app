@@ -94,8 +94,7 @@ class NotificationsViewModel @Inject constructor(
             activeAccountStore.activeUserAccount.collect {
                 setState {
                     copy(
-                        activeAccountAvatarUrl = it.avatarUrl,
-                        activeAccountAvatarVariants = it.avatarVariants,
+                        activeAccountAvatarCdnImage = it.avatarCdnImage,
                         walletConnected = it.nostrWallet != null,
                         defaultZapAmount = it.appSettings?.defaultZapAmount,
                         zapOptions = it.appSettings?.zapOptions ?: emptyList(),
@@ -230,8 +229,7 @@ class NotificationsViewModel @Inject constructor(
             actionUserDisplayName = this.actionByUser?.authorNameUiFriendly()
                 ?: this.data.actionUserId?.asEllipsizedNpub(),
             actionUserInternetIdentifier = this.actionByUser?.internetIdentifier,
-            actionUserAvatarUrl = this.actionByUser?.avatarUrl,
-            actionUserAvatarVariants = this.actionByUser?.avatarVariants ?: emptyList(),
+            actionUserAvatarCdnImage = this.actionByUser?.avatarCdnImage,
             actionUserSatsZapped = this.data.satsZapped,
             actionPost = this.extractFeedPostUi(),
         )
@@ -248,8 +246,7 @@ class NotificationsViewModel @Inject constructor(
             authorHandle = this.actionByUser?.usernameUiFriendly()
                 ?: this.actionPost.authorId.asEllipsizedNpub(),
             authorInternetIdentifier = this.actionByUser?.internetIdentifier,
-            authorAvatarUrl = this.actionByUser?.avatarUrl,
-            authorAvatarVariants = this.actionByUser?.avatarVariants ?: emptyList(),
+            authorAvatarCdnImage = this.actionByUser?.avatarCdnImage,
             timestamp = Instant.ofEpochSecond(this.actionPost.createdAt),
             content = this.actionPost.content,
             attachments = this.actionPostNoteAttachments.map { it.asNoteAttachmentUi() },

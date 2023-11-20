@@ -103,7 +103,7 @@ class UserRepository @Inject constructor(
                 this.copy(
                     authorDisplayName = profileData.authorNameUiFriendly(),
                     userDisplayName = profileData.usernameUiFriendly(),
-                    avatarUrl = profileData.avatarUrl,
+                    avatarCdnImage = profileData.avatarCdnImage,
                     internetIdentifier = profileData.internetIdentifier,
                     lightningAddress = profileData.lightningAddress,
                 )

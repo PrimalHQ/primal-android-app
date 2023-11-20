@@ -253,8 +253,7 @@ fun NoteEditorScreen(
                                     .padding(start = 16.dp)
                                     .padding(top = 8.dp),
                                 avatarSize = avatarSizeDp,
-                                avatarUrl = state.activeAccountAvatarUrl,
-                                avatarVariants = state.activeAccountAvatarVariants,
+                                avatarCdnImage = state.activeAccountAvatarCdnImage,
                             )
 
                             OutlinedTextField(
@@ -385,8 +384,7 @@ private fun ReplyToNote(replyToNote: FeedPostUi, connectionLineColor: Color) {
                 ),
             authorDisplayName = replyToNote.authorName,
             postTimestamp = replyToNote.timestamp,
-            authorAvatarUrl = replyToNote.authorAvatarUrl,
-            authorAvatarVariants = replyToNote.authorAvatarVariants,
+            authorAvatarCdnImage = replyToNote.authorAvatarCdnImage,
             authorInternetIdentifier = replyToNote.authorInternetIdentifier,
             onAuthorAvatarClick = {},
         )

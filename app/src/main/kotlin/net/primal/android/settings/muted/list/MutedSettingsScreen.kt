@@ -21,6 +21,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.R
+import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.NostrUserText
@@ -118,8 +119,7 @@ fun MutedUserListItem(
         ),
         leadingContent = {
             AvatarThumbnail(
-                avatarUrl = item.avatarUrl,
-                avatarVariants = item.avatarVariants,
+                avatarCdnImage = item.avatarCdnImage,
                 onClick = { onProfileClick(item.userId) },
             )
         },
@@ -174,31 +174,31 @@ fun PreviewMutedScreen() {
                     MutedUserUi(
                         userId = "pubkey",
                         displayName = "username",
-                        avatarUrl = null,
+                        avatarCdnImage = null,
                         internetIdentifier = "nip05",
                     ),
                     MutedUserUi(
                         userId = "pubkey",
                         displayName = "username",
-                        avatarUrl = "avatarUrl",
+                        avatarCdnImage = CdnImage("avatarUrl"),
                         internetIdentifier = "nip05",
                     ),
                     MutedUserUi(
                         userId = "pubkey",
                         displayName = "username",
-                        avatarUrl = null,
+                        avatarCdnImage = null,
                         internetIdentifier = "nip05",
                     ),
                     MutedUserUi(
                         userId = "pubkey",
                         displayName = "username",
-                        avatarUrl = null,
+                        avatarCdnImage = null,
                         internetIdentifier = "nip05",
                     ),
                     MutedUserUi(
                         userId = "pubkey",
                         displayName = "username",
-                        avatarUrl = "avatarUrl",
+                        avatarCdnImage = CdnImage("avatarUrl"),
                         internetIdentifier = "nip05",
                     ),
                 ),

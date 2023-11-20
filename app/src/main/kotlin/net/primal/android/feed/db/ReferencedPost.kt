@@ -2,7 +2,7 @@ package net.primal.android.feed.db
 
 import kotlinx.serialization.Serializable
 import net.primal.android.attachments.db.NoteNostrUri
-import net.primal.android.attachments.domain.CdnResourceVariant
+import net.primal.android.attachments.domain.CdnImage
 
 @Serializable
 data class ReferencedPost(
@@ -11,9 +11,8 @@ data class ReferencedPost(
     val content: String,
     val authorId: String,
     val authorName: String,
-    val authorAvatarUrl: String?,
-    val authorAvatarVariants: List<CdnResourceVariant>,
+    val authorAvatarCdnImage: CdnImage?,
     val authorInternetIdentifier: String?,
     val authorLightningAddress: String?,
-    val nostrResources: List<NoteNostrUri>,
+    val nostrUris: List<NoteNostrUri>,
 )

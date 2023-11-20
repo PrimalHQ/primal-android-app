@@ -62,7 +62,9 @@ class UserAccountFetcherTest {
 
         actual.authorDisplayName shouldBe expectedName
         actual.userDisplayName shouldBe expectedName
-        actual.avatarUrl shouldBe expectedPictureUrl
+        val avatarCdnImage = actual.avatarCdnImage
+        avatarCdnImage.shouldNotBeNull()
+        avatarCdnImage.sourceUrl shouldBe expectedPictureUrl
         actual.internetIdentifier shouldBe expectedInternetIdentifier
         actual.followersCount shouldBe expectedFollowersCount
         actual.followingCount shouldBe expectedFollowingCount

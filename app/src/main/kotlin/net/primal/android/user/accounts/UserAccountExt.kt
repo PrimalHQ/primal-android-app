@@ -11,7 +11,7 @@ fun UserAccount.copyProfileIfNotNull(profile: UserAccount?): UserAccount {
         copy(
             authorDisplayName = profile.authorDisplayName,
             userDisplayName = profile.userDisplayName,
-            avatarUrl = profile.avatarUrl,
+            avatarCdnImage = profile.avatarCdnImage,
             internetIdentifier = profile.internetIdentifier,
             lightningAddress = profile.lightningAddress,
             followersCount = profile.followersCount,

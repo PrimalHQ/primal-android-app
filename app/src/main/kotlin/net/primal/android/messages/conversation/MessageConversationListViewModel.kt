@@ -76,10 +76,7 @@ class MessageConversationListViewModel @Inject constructor(
         viewModelScope.launch {
             activeAccountStore.activeUserAccount.collect {
                 setState {
-                    copy(
-                        activeAccountAvatarUrl = it.avatarUrl,
-                        activeAccountAvatarVariants = it.avatarVariants,
-                    )
+                    copy(activeAccountAvatarCdnImage = it.avatarCdnImage)
                 }
             }
         }
@@ -156,8 +153,7 @@ class MessageConversationListViewModel @Inject constructor(
             lastMessageAt = Instant.ofEpochSecond(this.lastMessage.createdAt),
             isLastMessageFromUser = this.lastMessage.senderId == activeUserId,
             participantInternetIdentifier = this.participant?.internetIdentifier,
-            participantAvatarUrl = this.participant?.avatarUrl,
-            participantAvatarVariants = this.participant?.avatarVariants ?: emptyList(),
+            participantAvatarCdnImage = this.participant?.avatarCdnImage,
             unreadMessagesCount = this.data.unreadMessagesCount,
         )
 }

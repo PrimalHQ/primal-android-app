@@ -17,14 +17,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import net.primal.android.attachments.domain.CdnResourceVariant
+import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.theme.AppTheme
 
 @Composable
 fun AvatarThumbnailsRow(
     modifier: Modifier = Modifier,
-    avatarUrls: List<String?>,
-    avatarVariants: Map<String, List<CdnResourceVariant>> = emptyMap(),
+    avatarCdnImages: List<CdnImage?>,
     overlapAvatars: Boolean = true,
     hasAvatarBorder: Boolean = true,
     avatarBorderColor: Color = Color.White,
@@ -33,16 +32,15 @@ fun AvatarThumbnailsRow(
     val avatarVisibleWidth = if (overlapAvatars) 24.dp else 36.dp
     BoxWithConstraints(modifier = modifier) {
         val maxAvatars = (maxWidth.value / avatarVisibleWidth.value).toInt() - 2
-        val avatarsSize = avatarUrls.size
-        val avatarsToRender = avatarsSize.coerceAtMost(maxAvatars)
-        val avatarsOverflowCount = avatarsSize - avatarsToRender
+        val avatarsCount = avatarCdnImages.size
+        val avatarsToRender = avatarsCount.coerceAtMost(maxAvatars)
+        val avatarsOverflowCount = avatarsCount - avatarsToRender
 
-        avatarUrls.take(avatarsToRender).forEachIndexed { index, imageUrl ->
+        avatarCdnImages.take(avatarsToRender).forEachIndexed { index, imageCdnImage ->
             AvatarSpacer(width = (index * avatarVisibleWidth.value).dp) {
                 AvatarThumbnail(
                     modifier = Modifier.size(32.dp),
-                    avatarUrl = imageUrl,
-                    avatarVariants = avatarVariants[imageUrl] ?: emptyList(),
+                    avatarCdnImage = imageCdnImage,
                     hasBorder = hasAvatarBorder,
                     borderColor = avatarBorderColor,
                     onClick = { onClick(index) },
@@ -50,7 +48,7 @@ fun AvatarThumbnailsRow(
             }
         }
 
-        if (avatarsToRender < avatarsSize) {
+        if (avatarsToRender < avatarsCount) {
             AvatarSpacer(width = (avatarsToRender * avatarVisibleWidth.value).dp) {
                 Box(
                     modifier = Modifier

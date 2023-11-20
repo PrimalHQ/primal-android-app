@@ -18,7 +18,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.SubcomposeAsyncImage
-import net.primal.android.attachments.domain.CdnResourceVariant
+import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 import net.primal.android.theme.AppTheme
@@ -26,15 +26,14 @@ import net.primal.android.theme.AppTheme
 @Composable
 fun AvatarThumbnail(
     modifier: Modifier = Modifier,
-    avatarUrl: String? = null,
-    avatarVariants: List<CdnResourceVariant> = emptyList(),
+    avatarCdnImage: CdnImage? = null,
     avatarSize: Dp = 48.dp,
     hasBorder: Boolean = false,
     borderColor: Color = AppTheme.colorScheme.primary,
     onClick: (() -> Unit)? = null,
 ) {
-    val variant = avatarVariants.minByOrNull { it.width }
-    val imageSource = variant?.mediaUrl ?: avatarUrl
+    val variant = avatarCdnImage?.variants?.minByOrNull { it.width }
+    val imageSource = variant?.mediaUrl ?: avatarCdnImage?.sourceUrl
     AvatarThumbnailListItemImage(
         modifier = modifier,
         avatarSize = avatarSize,

@@ -22,7 +22,6 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import net.primal.android.R
-import net.primal.android.attachments.domain.CdnResourceVariant
 import net.primal.android.core.compose.AvatarThumbnailsRow
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.feed.model.FeedPostAction
@@ -208,8 +207,7 @@ private fun NotificationListItem(
 
             Column {
                 AvatarThumbnailsRow(
-                    avatarUrls = notifications.map { it.actionUserAvatarUrl },
-                    avatarVariants = notifications.extractAvatarVariantsAsMap(),
+                    avatarCdnImages = notifications.map { it.actionUserAvatarCdnImage },
                     overlapAvatars = false,
                     hasAvatarBorder = false,
                     onClick = { index ->
@@ -269,16 +267,6 @@ private fun NotificationListItem(
             }
         }
     }
-}
-
-private fun List<NotificationUi>.extractAvatarVariantsAsMap(): Map<String, List<CdnResourceVariant>> {
-    return this.mapNotNull {
-        if (it.actionUserAvatarUrl != null) {
-            it.actionUserAvatarUrl to it.actionUserAvatarVariants
-        } else {
-            null
-        }
-    }.associate { it.first to it.second }
 }
 
 @Composable

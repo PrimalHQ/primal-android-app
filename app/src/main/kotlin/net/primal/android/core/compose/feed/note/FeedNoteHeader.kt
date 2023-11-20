@@ -23,7 +23,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import java.time.Instant
 import kotlin.time.Duration.Companion.seconds
-import net.primal.android.attachments.domain.CdnResourceVariant
+import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.asBeforeNowFormat
@@ -40,8 +40,7 @@ fun FeedNoteHeader(
     postTimestamp: Instant? = null,
     authorAvatarSize: Dp = 42.dp,
     authorAvatarVisible: Boolean = true,
-    authorAvatarUrl: String? = null,
-    authorAvatarVariants: List<CdnResourceVariant> = emptyList(),
+    authorAvatarCdnImage: CdnImage? = null,
     authorInternetIdentifier: String? = null,
     onAuthorAvatarClick: (() -> Unit)? = null,
 ) {
@@ -52,8 +51,7 @@ fun FeedNoteHeader(
     ) {
         if (authorAvatarVisible) {
             AvatarThumbnail(
-                avatarUrl = authorAvatarUrl,
-                avatarVariants = authorAvatarVariants,
+                avatarCdnImage = authorAvatarCdnImage,
                 avatarSize = authorAvatarSize,
                 onClick = onAuthorAvatarClick,
             )
@@ -138,8 +136,6 @@ fun PreviewLightNoteHeader() {
                 modifier = Modifier.fillMaxWidth(),
                 authorDisplayName = "Donald Duck",
                 postTimestamp = Instant.now().minusSeconds(3600.seconds.inWholeSeconds),
-                authorAvatarUrl = null,
-                authorAvatarVariants = emptyList(),
                 authorInternetIdentifier = "donald@the.duck",
                 onAuthorAvatarClick = {},
             )
@@ -159,8 +155,6 @@ fun PreviewLightSingleNoteHeader() {
                 authorDisplayName = "Donald Duck",
                 postTimestamp = Instant.now().minusSeconds(3600.seconds.inWholeSeconds),
                 singleLine = true,
-                authorAvatarUrl = null,
-                authorAvatarVariants = emptyList(),
                 authorInternetIdentifier = "donald@the.duck",
                 onAuthorAvatarClick = {},
             )
@@ -180,8 +174,6 @@ fun PreviewDarkNoteHeader() {
                 authorDisplayName = "Donald Duck",
                 postTimestamp = Instant.now().minusSeconds(3600.seconds.inWholeSeconds),
                 authorAvatarVisible = false,
-                authorAvatarUrl = null,
-                authorAvatarVariants = emptyList(),
                 authorInternetIdentifier = "donald@the.duck",
                 onAuthorAvatarClick = {},
             )
@@ -202,8 +194,6 @@ fun PreviewDarkSingleLineNoAvatarNoteHeader() {
                 postTimestamp = Instant.now().minusSeconds(3600.seconds.inWholeSeconds),
                 singleLine = true,
                 authorAvatarVisible = false,
-                authorAvatarUrl = null,
-                authorAvatarVariants = emptyList(),
                 authorInternetIdentifier = "donald@the.duck",
                 onAuthorAvatarClick = {},
             )

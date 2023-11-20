@@ -164,8 +164,7 @@ fun MessageListScreen(
         topBar = {
             PrimalTopAppBar(
                 title = stringResource(id = R.string.messages_title),
-                avatarUrl = state.activeAccountAvatarUrl,
-                avatarVariants = state.activeAccountAvatarVariants,
+                avatarCdnImage = state.activeAccountAvatarCdnImage,
                 navigationIcon = PrimalIcons.AvatarDefault,
                 onNavigationIconClick = {
                     uiScope.launch { drawerState.open() }
@@ -303,10 +302,7 @@ private fun ConversationListItem(conversation: MessageConversationUi, onConversa
             containerColor = AppTheme.colorScheme.surfaceVariant,
         ),
         leadingContent = {
-            AvatarThumbnail(
-                avatarUrl = conversation.participantAvatarUrl,
-                avatarVariants = conversation.participantAvatarVariants,
-            )
+            AvatarThumbnail(avatarCdnImage = conversation.participantAvatarCdnImage)
         },
         headlineContent = {
             Row {
