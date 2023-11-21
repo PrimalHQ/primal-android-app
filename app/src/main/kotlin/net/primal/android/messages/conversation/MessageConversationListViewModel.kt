@@ -15,8 +15,8 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import net.primal.android.core.compose.feed.model.asNostrResourceUi
-import net.primal.android.core.compose.media.model.asMediaResourceUi
+import net.primal.android.core.compose.attachment.model.asNoteAttachmentUi
+import net.primal.android.core.compose.feed.model.asNoteNostrUriUi
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.usernameUiFriendly
 import net.primal.android.messages.conversation.MessageConversationListContract.UiEvent
@@ -76,7 +76,7 @@ class MessageConversationListViewModel @Inject constructor(
         viewModelScope.launch {
             activeAccountStore.activeUserAccount.collect {
                 setState {
-                    copy(activeAccountAvatarUrl = it.pictureUrl)
+                    copy(activeAccountAvatarCdnImage = it.avatarCdnImage)
                 }
             }
         }
@@ -148,13 +148,12 @@ class MessageConversationListViewModel @Inject constructor(
             participantUsername = this.participant?.usernameUiFriendly()
                 ?: this.data.participantId.asEllipsizedNpub(),
             lastMessageSnippet = this.lastMessage.content,
-            lastMessageMediaResources = this.lastMessageMediaResources.map { it.asMediaResourceUi() },
-            lastMessageNostrResources = this.lastMessageNostrUris.map { it.asNostrResourceUi() },
+            lastMessageAttachments = this.lastMessageNoteAttachments.map { it.asNoteAttachmentUi() },
+            lastMessageNostrUris = this.lastMessageNostrUris.map { it.asNoteNostrUriUi() },
             lastMessageAt = Instant.ofEpochSecond(this.lastMessage.createdAt),
             isLastMessageFromUser = this.lastMessage.senderId == activeUserId,
             participantInternetIdentifier = this.participant?.internetIdentifier,
-            participantAvatarUrl = this.participant?.picture,
-            participantMediaResources = this.participantResources.map { it.asMediaResourceUi() },
+            participantAvatarCdnImage = this.participant?.avatarCdnImage,
             unreadMessagesCount = this.data.unreadMessagesCount,
         )
 }

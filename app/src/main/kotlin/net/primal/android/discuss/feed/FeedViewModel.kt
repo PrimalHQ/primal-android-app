@@ -99,7 +99,7 @@ class FeedViewModel @Inject constructor(
                         feedDirective = feedDirective,
                         limit = syncData.count,
                     )
-                        .filter { it.author?.picture != null }
+                        .filter { it.author?.avatarCdnImage != null }
                         .distinctBy { it.author?.ownerId }
                         .take(limit)
                 }
@@ -108,9 +108,7 @@ class FeedViewModel @Inject constructor(
                         syncStats = FeedPostsSyncStats(
                             postsCount = this.syncStats.postsCount + syncData.count,
                             postIds = this.syncStats.postIds + syncData.postIds,
-                            avatarUrls = newPosts.mapNotNull { feedPost ->
-                                feedPost.author?.picture
-                            },
+                            avatarCdnImages = newPosts.mapNotNull { it.author?.avatarCdnImage },
                         ),
                     )
                 }
@@ -129,7 +127,7 @@ class FeedViewModel @Inject constructor(
 
                 setState {
                     copy(
-                        activeAccountAvatarUrl = it.pictureUrl,
+                        activeAccountAvatarCdnImage = it.avatarCdnImage,
                         walletConnected = it.nostrWallet != null,
                         defaultZapAmount = it.appSettings?.defaultZapAmount,
                         zapOptions = it.appSettings?.zapOptions ?: emptyList(),

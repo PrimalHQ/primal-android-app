@@ -96,14 +96,14 @@ class UserRepository @Inject constructor(
                 ),
             )
 
-            val profileData = profileMetadataNostrEvent.asProfileDataPO()
+            val profileData = profileMetadataNostrEvent.asProfileDataPO(cdnResources = emptyMap())
             database.profiles().upsertAll(data = listOf(profileData))
 
             accountsStore.getAndUpdateAccount(userId = userId) {
                 this.copy(
                     authorDisplayName = profileData.authorNameUiFriendly(),
                     userDisplayName = profileData.usernameUiFriendly(),
-                    pictureUrl = profileData.picture,
+                    avatarCdnImage = profileData.avatarCdnImage,
                     internetIdentifier = profileData.internetIdentifier,
                     lightningAddress = profileData.lightningAddress,
                 )

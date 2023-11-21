@@ -13,8 +13,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import java.time.Instant
 import java.time.temporal.ChronoUnit
+import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.feed.model.FeedPostStatsUi
 import net.primal.android.core.compose.feed.model.FeedPostUi
+import net.primal.android.core.compose.feed.model.toNoteContentUi
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
@@ -44,8 +46,7 @@ fun ReferencedNoteCard(
             postTimestamp = data.timestamp,
             singleLine = true,
             authorAvatarSize = 30.dp,
-            authorAvatarUrl = data.authorAvatarUrl,
-            authorResources = data.authorMediaResources,
+            authorAvatarCdnImage = data.authorAvatarCdnImage,
             authorInternetIdentifier = data.authorInternetIdentifier,
         )
 
@@ -53,16 +54,14 @@ fun ReferencedNoteCard(
             modifier = Modifier
                 .padding(horizontal = 12.dp)
                 .padding(top = 4.dp),
-            content = data.content.trim(),
+            data = data.toNoteContentUi(),
             expanded = false,
-            hashtags = data.hashtags,
-            mediaResources = data.mediaResources,
-            nostrResources = data.nostrResources,
             onClick = { onPostClick(data.postId) },
             onProfileClick = { onPostClick(data.postId) },
             onPostClick = { postId -> onPostClick(postId) },
             onUrlClick = { onPostClick(data.postId) },
             onHashtagClick = { onPostClick(data.postId) },
+            onMediaClick = {},
         )
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -86,15 +85,14 @@ fun PreviewReferencedPostListItemLight() {
                     have augmented reality HUDs that incorporate real-time facial recognition. 
                     Hiding behind a pseudonym will become a distant dream.
                 """.trimIndent(),
-                mediaResources = emptyList(),
+                attachments = emptyList(),
                 authorId = "npubSomething",
                 authorName = "android_robots_from_space",
                 authorHandle = "user",
                 authorInternetIdentifier = "android@primal.net",
-                authorAvatarUrl = "https://i.imgur.com/Z8dpmvc.png",
+                authorAvatarCdnImage = CdnImage("https://i.imgur.com/Z8dpmvc.png"),
                 timestamp = Instant.now().minus(30, ChronoUnit.MINUTES),
-                authorMediaResources = emptyList(),
-                nostrResources = emptyList(),
+                nostrUris = emptyList(),
                 stats = FeedPostStatsUi(
                     repliesCount = 11,
                     likesCount = 256,
@@ -127,15 +125,14 @@ fun PreviewReferencedPostListItemDark() {
                     have augmented reality HUDs that incorporate real-time facial recognition. 
                     Hiding behind a pseudonym will become a distant dream.
                 """.trimIndent(),
-                mediaResources = emptyList(),
+                attachments = emptyList(),
                 authorId = "npubSomething",
                 authorName = "android",
                 authorHandle = "user",
                 authorInternetIdentifier = "android@primal.net",
-                authorAvatarUrl = "https://i.imgur.com/Z8dpmvc.png",
+                authorAvatarCdnImage = CdnImage("https://i.imgur.com/Z8dpmvc.png"),
                 timestamp = Instant.now().minus(30, ChronoUnit.MINUTES),
-                authorMediaResources = emptyList(),
-                nostrResources = emptyList(),
+                nostrUris = emptyList(),
                 stats = FeedPostStatsUi(
                     repliesCount = 11,
                     userReplied = true,

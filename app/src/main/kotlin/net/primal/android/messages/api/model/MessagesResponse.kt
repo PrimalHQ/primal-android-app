@@ -8,5 +8,5 @@ data class MessagesResponse(
     val messages: List<NostrEvent>,
     val paging: ContentPrimalPaging? = null,
     val profileMetadata: List<NostrEvent> = emptyList(),
-    val mediaResources: List<PrimalEvent> = emptyList(),
+    val cdnResources: List<PrimalEvent> = emptyList(),
 )

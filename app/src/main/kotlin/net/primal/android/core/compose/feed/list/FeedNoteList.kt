@@ -58,6 +58,7 @@ fun FeedNoteList(
     onPostReplyClick: (String) -> Unit,
     onPostQuoteClick: (FeedPostUi) -> Unit,
     onHashtagClick: (String) -> Unit,
+    onMediaClick: (String, String) -> Unit,
     onWalletUnavailable: () -> Unit,
     defaultZapAmount: ULong? = null,
     zapOptions: List<ULong>? = null,
@@ -111,6 +112,7 @@ fun FeedNoteList(
             onPostReplyClick = onPostReplyClick,
             onPostQuoteClick = onPostQuoteClick,
             onHashtagClick = onHashtagClick,
+            onMediaClick = onMediaClick,
             onWalletUnavailable = onWalletUnavailable,
             defaultZapAmount = defaultZapAmount,
             zapOptions = zapOptions,
@@ -154,7 +156,7 @@ private fun NewPostsButton(syncStats: FeedPostsSyncStats, onClick: () -> Unit) {
     ) {
         AvatarThumbnailsRow(
             modifier = Modifier.padding(start = 6.dp),
-            avatarUrls = syncStats.avatarUrls,
+            avatarCdnImages = syncStats.avatarCdnImages,
             onClick = { onClick() },
         )
 

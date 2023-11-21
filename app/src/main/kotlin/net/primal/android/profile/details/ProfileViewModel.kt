@@ -18,7 +18,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.core.compose.feed.model.asFeedPostUi
-import net.primal.android.core.compose.media.model.asMediaResourceUi
 import net.primal.android.core.compose.profile.model.asProfileDetailsUi
 import net.primal.android.core.compose.profile.model.asProfileStatsUi
 import net.primal.android.feed.repository.FeedRepository
@@ -130,7 +129,6 @@ class ProfileViewModel @Inject constructor(
                     copy(
                         profileDetails = it.metadata?.asProfileDetailsUi() ?: this.profileDetails,
                         profileStats = it.stats?.asProfileStatsUi() ?: this.profileStats,
-                        resources = it.resources.map { it.asMediaResourceUi() },
                     )
                 }
             }

@@ -33,7 +33,7 @@ class AccountSettingsViewModel @Inject constructor(
                 setState {
                     val credential = credentialsStore.findOrThrow(it.pubkey.hexToNpubHrp())
                     copy(
-                        avatarUrl = it.pictureUrl,
+                        avatarCdnImage = it.avatarCdnImage,
                         nsec = credential.nsec,
                         npub = credential.npub,
                     )

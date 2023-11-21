@@ -85,6 +85,7 @@ fun NotificationsScreen(
     onNoteReplyClick: (String) -> Unit,
     onPostQuoteClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
+    onMediaClick: (String, String) -> Unit,
     onNotificationSettings: () -> Unit,
     onWalletUnavailable: () -> Unit,
     onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
@@ -107,6 +108,7 @@ fun NotificationsScreen(
         onNoteClick = onNoteClick,
         onNoteReplyClick = onNoteReplyClick,
         onHashtagClick = onHashtagClick,
+        onMediaClick = onMediaClick,
         onNotificationSettings = onNotificationSettings,
         onPrimaryDestinationChanged = onTopLevelDestinationChanged,
         onDrawerDestinationClick = onDrawerScreenClick,
@@ -124,6 +126,7 @@ fun NotificationsScreen(
     onNoteClick: (String) -> Unit,
     onNoteReplyClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
+    onMediaClick: (String, String) -> Unit,
     onWalletUnavailable: () -> Unit,
     onPostQuoteClick: (String) -> Unit,
     onNotificationSettings: () -> Unit,
@@ -164,7 +167,7 @@ fun NotificationsScreen(
         topBar = {
             PrimalTopAppBar(
                 title = stringResource(id = R.string.notifications_title),
-                avatarUrl = state.activeAccountAvatarUrl,
+                avatarCdnImage = state.activeAccountAvatarCdnImage,
                 navigationIcon = PrimalIcons.AvatarDefault,
                 onNavigationIconClick = {
                     uiScope.launch { drawerState.open() }
@@ -196,6 +199,7 @@ fun NotificationsScreen(
                 onProfileClick = onProfileClick,
                 onNoteClick = onNoteClick,
                 onHashtagClick = onHashtagClick,
+                onMediaClick = onMediaClick,
                 onWalletUnavailable = onWalletUnavailable,
                 onNoteReplyClick = onNoteReplyClick,
                 onPostLikeClick = {
@@ -248,6 +252,7 @@ private fun NotificationsList(
     onNoteClick: (String) -> Unit,
     onNoteReplyClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
+    onMediaClick: (String, String) -> Unit,
     onWalletUnavailable: () -> Unit,
     onPostLikeClick: (FeedPostUi) -> Unit,
     onRepostClick: (FeedPostUi) -> Unit,
@@ -308,6 +313,7 @@ private fun NotificationsList(
                     onNoteClick = onNoteClick,
                     onReplyClick = onNoteClick,
                     onHashtagClick = onHashtagClick,
+                    onMediaClick = onMediaClick,
                     onPostLikeClick = onPostLikeClick,
                     onDefaultZapClick = { postData -> onZapClick(postData, null, null) },
                     onZapOptionsClick = { postData -> zapOptionsPostConfirmation = postData },
@@ -340,6 +346,7 @@ private fun NotificationsList(
                             onNoteClick = onNoteClick,
                             onReplyClick = onNoteReplyClick,
                             onHashtagClick = onHashtagClick,
+                            onMediaClick = onMediaClick,
                             onPostLikeClick = onPostLikeClick,
                             onDefaultZapClick = { postData -> onZapClick(postData, null, null) },
                             onZapOptionsClick = { postData ->

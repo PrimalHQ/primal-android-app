@@ -54,20 +54,20 @@ import java.time.Instant
 import kotlin.time.Duration.Companion.minutes
 import net.primal.android.R
 import net.primal.android.core.compose.AppBarIcon
-import net.primal.android.core.compose.AvatarThumbnailListItemImage
+import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.ListLoading
 import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.asBeforeNowFormat
+import net.primal.android.core.compose.feed.model.toNoteContentUi
 import net.primal.android.core.compose.feed.note.FeedNoteContent
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.isEmpty
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
-import net.primal.android.core.ext.findByUrl
 import net.primal.android.core.ext.openUriSafely
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.formatNip05Identifier
@@ -81,6 +81,7 @@ fun ChatScreen(
     onProfileClick: (String) -> Unit,
     onNoteClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
+    onMediaClick: (String, String) -> Unit,
 ) {
     val state = viewModel.state.collectAsState()
 
@@ -99,6 +100,7 @@ fun ChatScreen(
         onProfileClick = onProfileClick,
         onNoteClick = onNoteClick,
         onHashtagClick = onHashtagClick,
+        onMediaClick = onMediaClick,
         eventPublisher = { viewModel.setEvent(it) },
     )
 }
@@ -111,6 +113,7 @@ fun ChatScreen(
     onProfileClick: (String) -> Unit,
     onNoteClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
+    onMediaClick: (String, String) -> Unit,
     eventPublisher: (ChatContract.UiEvent) -> Unit,
 ) {
     val messagesPagingItems = state.messages.collectAsLazyPagingItems()
@@ -143,13 +146,8 @@ fun ChatScreen(
                             .padding(horizontal = 8.dp)
                             .clip(CircleShape),
                     ) {
-                        val resource = state.participantMediaResources.findByUrl(
-                            url = state.participantProfile?.avatarUrl,
-                        )
-                        val variant = resource?.variants?.minByOrNull { it.width }
-                        val imageSource = variant?.mediaUrl ?: state.participantProfile?.avatarUrl
-                        AvatarThumbnailListItemImage(
-                            source = imageSource,
+                        AvatarThumbnail(
+                            avatarCdnImage = state.participantProfile?.avatarCdnImage,
                             modifier = Modifier.size(32.dp),
                             onClick = { onProfileClick(state.participantId) },
                         )
@@ -168,6 +166,7 @@ fun ChatScreen(
                 onProfileClick = onProfileClick,
                 onNoteClick = onNoteClick,
                 onHashtagClick = onHashtagClick,
+                onMediaClick = onMediaClick,
             )
         },
         bottomBar = {
@@ -209,6 +208,7 @@ private fun ChatList(
     onProfileClick: (String) -> Unit,
     onNoteClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
+    onMediaClick: (String, String) -> Unit,
 ) {
     val localUriHandler = LocalUriHandler.current
 
@@ -258,6 +258,7 @@ private fun ChatList(
                             localUriHandler.openUriSafely(it)
                         },
                         onHashtagClick = onHashtagClick,
+                        onMediaClick = onMediaClick,
                     )
                 }
 
@@ -318,6 +319,7 @@ private fun ChatMessageListItem(
     onNoteClick: (String) -> Unit,
     onUrlClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
+    onMediaClick: (String, String) -> Unit,
 ) {
     val timeDiffBetweenThisAndNextMessage = (nextMessage?.timestamp ?: Instant.MAX).epochSecond -
         chatMessage.timestamp.epochSecond
@@ -388,16 +390,16 @@ private fun ChatMessageListItem(
                     .wrapContentWidth()
                     .wrapContentHeight()
                     .padding(horizontal = 16.dp, vertical = 8.dp),
-                content = chatMessage.content.trim(),
+                data = chatMessage.toNoteContentUi(),
                 expanded = true,
-                hashtags = chatMessage.hashtags,
-                mediaResources = chatMessage.mediaResources,
-                nostrResources = chatMessage.nostrResources,
                 onClick = { },
                 onProfileClick = onProfileClick,
                 onPostClick = onNoteClick,
                 onUrlClick = onUrlClick,
                 onHashtagClick = onHashtagClick,
+                onMediaClick = { mediaUrl ->
+                    onMediaClick(chatMessage.messageId, mediaUrl)
+                },
                 contentColor = if (chatMessage.isUserMessage) {
                     Color.White
                 } else {

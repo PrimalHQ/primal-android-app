@@ -23,10 +23,10 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import java.time.Instant
 import kotlin.time.Duration.Companion.seconds
+import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.asBeforeNowFormat
-import net.primal.android.core.compose.media.model.MediaResourceUi
 import net.primal.android.core.utils.formatNip05Identifier
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
@@ -40,8 +40,7 @@ fun FeedNoteHeader(
     postTimestamp: Instant? = null,
     authorAvatarSize: Dp = 42.dp,
     authorAvatarVisible: Boolean = true,
-    authorAvatarUrl: String? = null,
-    authorResources: List<MediaResourceUi> = emptyList(),
+    authorAvatarCdnImage: CdnImage? = null,
     authorInternetIdentifier: String? = null,
     onAuthorAvatarClick: (() -> Unit)? = null,
 ) {
@@ -52,24 +51,16 @@ fun FeedNoteHeader(
     ) {
         if (authorAvatarVisible) {
             AvatarThumbnail(
-                modifier = Modifier,
-                authorAvatarUrl = authorAvatarUrl,
-                authorMediaResources = authorResources,
+                avatarCdnImage = authorAvatarCdnImage,
                 avatarSize = authorAvatarSize,
                 onClick = onAuthorAvatarClick,
             )
         }
 
         Column(
-            modifier = Modifier.padding(
-                horizontal = if (authorAvatarVisible) 8.dp else 0.dp,
-            ),
+            modifier = Modifier.padding(horizontal = if (authorAvatarVisible) 8.dp else 0.dp),
         ) {
-            val identifier = if (!singleLine) {
-                ""
-            } else {
-                authorInternetIdentifier?.formatNip05Identifier() ?: ""
-            }
+            val identifier = if (!singleLine) "" else authorInternetIdentifier?.formatNip05Identifier() ?: ""
             val suffixText = buildAnnotatedString {
                 append(
                     AnnotatedString(
@@ -145,8 +136,6 @@ fun PreviewLightNoteHeader() {
                 modifier = Modifier.fillMaxWidth(),
                 authorDisplayName = "Donald Duck",
                 postTimestamp = Instant.now().minusSeconds(3600.seconds.inWholeSeconds),
-                authorAvatarUrl = null,
-                authorResources = emptyList(),
                 authorInternetIdentifier = "donald@the.duck",
                 onAuthorAvatarClick = {},
             )
@@ -166,8 +155,6 @@ fun PreviewLightSingleNoteHeader() {
                 authorDisplayName = "Donald Duck",
                 postTimestamp = Instant.now().minusSeconds(3600.seconds.inWholeSeconds),
                 singleLine = true,
-                authorAvatarUrl = null,
-                authorResources = emptyList(),
                 authorInternetIdentifier = "donald@the.duck",
                 onAuthorAvatarClick = {},
             )
@@ -187,8 +174,6 @@ fun PreviewDarkNoteHeader() {
                 authorDisplayName = "Donald Duck",
                 postTimestamp = Instant.now().minusSeconds(3600.seconds.inWholeSeconds),
                 authorAvatarVisible = false,
-                authorAvatarUrl = null,
-                authorResources = emptyList(),
                 authorInternetIdentifier = "donald@the.duck",
                 onAuthorAvatarClick = {},
             )
@@ -209,8 +194,6 @@ fun PreviewDarkSingleLineNoAvatarNoteHeader() {
                 postTimestamp = Instant.now().minusSeconds(3600.seconds.inWholeSeconds),
                 singleLine = true,
                 authorAvatarVisible = false,
-                authorAvatarUrl = null,
-                authorResources = emptyList(),
                 authorInternetIdentifier = "donald@the.duck",
                 onAuthorAvatarClick = {},
             )

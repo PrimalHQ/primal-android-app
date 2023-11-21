@@ -31,10 +31,12 @@ import androidx.compose.ui.unit.dp
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import kotlinx.coroutines.launch
+import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.feed.model.FeedPostAction
 import net.primal.android.core.compose.feed.model.FeedPostStatsUi
 import net.primal.android.core.compose.feed.model.FeedPostUi
+import net.primal.android.core.compose.feed.model.toNoteContentUi
 import net.primal.android.core.ext.openUriSafely
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
@@ -56,6 +58,7 @@ fun FeedNoteCard(
     onPostAction: (FeedPostAction) -> Unit,
     onPostLongClickAction: (FeedPostAction) -> Unit,
     onHashtagClick: (String) -> Unit,
+    onMediaClick: (String, String) -> Unit,
     onMuteUserClick: () -> Unit,
 ) {
     val localUriHandler = LocalUriHandler.current
@@ -121,8 +124,7 @@ fun FeedNoteCard(
                                 top = avatarPaddingDp,
                             ),
                             avatarSize = avatarSizeDp,
-                            authorAvatarUrl = data.authorAvatarUrl,
-                            authorMediaResources = data.authorMediaResources,
+                            avatarCdnImage = data.authorAvatarCdnImage,
                             onClick = { onProfileClick(data.authorId) },
                         )
                     }
@@ -143,8 +145,7 @@ fun FeedNoteCard(
                             authorAvatarVisible = fullWidthContent,
                             authorAvatarSize = avatarSizeDp,
                             authorDisplayName = data.authorName,
-                            authorAvatarUrl = data.authorAvatarUrl,
-                            authorResources = data.authorMediaResources,
+                            authorAvatarCdnImage = data.authorAvatarCdnImage,
                             authorInternetIdentifier = data.authorInternetIdentifier,
                             onAuthorAvatarClick = { onProfileClick(data.authorId) },
                         )
@@ -178,11 +179,8 @@ fun FeedNoteCard(
                                         2.dp
                                     },
                                 ),
-                            content = data.content,
+                            data = data.toNoteContentUi(),
                             expanded = expanded,
-                            hashtags = data.hashtags,
-                            mediaResources = data.mediaResources,
-                            nostrResources = data.nostrResources,
                             onClick = {
                                 launchRippleEffect(it)
                                 onPostClick(data.postId)
@@ -193,6 +191,9 @@ fun FeedNoteCard(
                                 localUriHandler.openUriSafely(it)
                             },
                             onHashtagClick = onHashtagClick,
+                            onMediaClick = {
+                                onMediaClick(data.postId, it)
+                            },
                         )
 
                         FeedNoteStatsRow(
@@ -220,15 +221,14 @@ class FeedPostUiProvider : PreviewParameterProvider<FeedPostUi> {
                 content = """
                     Lorem ipsum dolor sit amet, consectetur adipiscing elit.
                 """.trimIndent(),
-                mediaResources = emptyList(),
+                attachments = emptyList(),
                 authorId = "npubSomething",
                 authorName = "android_robots_from_space",
                 authorHandle = "user",
                 authorInternetIdentifier = "android@primal.net",
-                authorAvatarUrl = "https://i.imgur.com/Z8dpmvc.png",
+                authorAvatarCdnImage = CdnImage(sourceUrl = "https://i.imgur.com/Z8dpmvc.png"),
                 timestamp = Instant.now().minus(30, ChronoUnit.MINUTES),
-                authorMediaResources = emptyList(),
-                nostrResources = emptyList(),
+                nostrUris = emptyList(),
                 stats = FeedPostStatsUi(
                     repliesCount = 0,
                     likesCount = 0,
@@ -251,15 +251,14 @@ class FeedPostUiProvider : PreviewParameterProvider<FeedPostUi> {
                     have augmented reality HUDs that incorporate real-time facial recognition. 
                     Hiding behind a pseudonym will become a distant dream.
                 """.trimIndent(),
-                mediaResources = emptyList(),
+                attachments = emptyList(),
                 authorId = "npubSomething",
                 authorName = "android_robots_from_space",
                 authorHandle = "user",
                 authorInternetIdentifier = "android@primal.net",
-                authorAvatarUrl = "https://i.imgur.com/Z8dpmvc.png",
+                authorAvatarCdnImage = CdnImage(sourceUrl = "https://i.imgur.com/Z8dpmvc.png"),
                 timestamp = Instant.now().minus(30, ChronoUnit.MINUTES),
-                authorMediaResources = emptyList(),
-                nostrResources = emptyList(),
+                nostrUris = emptyList(),
                 stats = FeedPostStatsUi(
                     repliesCount = 11,
                     likesCount = 256,
@@ -290,6 +289,7 @@ fun PreviewFeedNoteListItemLightMultiLineHeader(
             onPostLongClickAction = {},
             onHashtagClick = {},
             onMuteUserClick = {},
+            onMediaClick = { _, _ -> },
         )
     }
 }
@@ -311,6 +311,7 @@ fun PreviewFeedNoteListItemLightMultiLineHeaderFullWidth(
             onPostLongClickAction = {},
             onHashtagClick = {},
             onMuteUserClick = {},
+            onMediaClick = { _, _ -> },
         )
     }
 }
@@ -332,6 +333,7 @@ fun PreviewFeedNoteListItemDarkSingleLineHeader(
             onPostLongClickAction = {},
             onHashtagClick = {},
             onMuteUserClick = {},
+            onMediaClick = { _, _ -> },
         )
     }
 }
@@ -353,6 +355,7 @@ fun PreviewFeedNoteListItemDarkSingleLineHeaderFullWidth(
             onPostLongClickAction = {},
             onHashtagClick = {},
             onMuteUserClick = {},
+            onMediaClick = { _, _ -> },
         )
     }
 }
@@ -376,6 +379,7 @@ fun PreviewFeedNoteListItemLightForcedContentIndentFullWidthSingleLineHeader(
             onPostLongClickAction = {},
             onHashtagClick = {},
             onMuteUserClick = {},
+            onMediaClick = { _, _ -> },
         )
     }
 }
@@ -399,6 +403,7 @@ fun PreviewFeedNoteListItemDarkForcedContentIndentSingleLineHeader(
             onPostLongClickAction = {},
             onHashtagClick = {},
             onMuteUserClick = {},
+            onMediaClick = { _, _ -> },
         )
     }
 }

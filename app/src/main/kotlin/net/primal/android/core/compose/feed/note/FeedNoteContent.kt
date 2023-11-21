@@ -2,6 +2,7 @@ package net.primal.android.core.compose.feed.note
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -37,16 +38,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.time.Instant
 import net.primal.android.R
+import net.primal.android.attachments.domain.calculateImageSize
+import net.primal.android.attachments.domain.findNearestOrNull
 import net.primal.android.core.compose.PostImageListItemImage
 import net.primal.android.core.compose.PrimalClickableText
+import net.primal.android.core.compose.attachment.model.NoteAttachmentUi
 import net.primal.android.core.compose.feed.model.FeedPostStatsUi
 import net.primal.android.core.compose.feed.model.FeedPostUi
-import net.primal.android.core.compose.feed.model.NostrResourceUi
-import net.primal.android.core.compose.feed.model.asNostrResourceUi
-import net.primal.android.core.compose.media.model.MediaResourceUi
-import net.primal.android.core.compose.media.model.asMediaResourceUi
-import net.primal.android.core.ext.calculateImageSize
-import net.primal.android.core.ext.findNearestOrNull
+import net.primal.android.core.compose.feed.model.NoteContentUi
+import net.primal.android.core.compose.feed.model.NoteNostrUriUi
+import net.primal.android.core.compose.feed.model.asNoteNostrUriUi
 import net.primal.android.core.utils.HashtagMatcher
 import net.primal.android.core.utils.parseHashtags
 import net.primal.android.feed.db.ReferencedPost
@@ -60,22 +61,22 @@ private const val URL_ANNOTATION_TAG = "url"
 private const val NOTE_ANNOTATION_TAG = "note"
 private const val HASHTAG_ANNOTATION_TAG = "hashtag"
 
-private fun List<MediaResourceUi>.filterImages() =
+private fun List<NoteAttachmentUi>.filterImages() =
     filter {
         it.mimeType?.startsWith("image") == true
     }
 
-private fun List<MediaResourceUi>.filterNotImages() =
+private fun List<NoteAttachmentUi>.filterNotImages() =
     filterNot {
         it.mimeType?.startsWith("image") == true
     }
 
-private fun List<NostrResourceUi>.filterReferencedPosts() =
+private fun List<NoteNostrUriUi>.filterReferencedPosts() =
     filter {
         it.referencedPost != null
     }
 
-private fun List<NostrResourceUi>.filterReferencedUsers() =
+private fun List<NoteNostrUriUi>.filterReferencedUsers() =
     filter {
         it.referencedUser != null
     }
@@ -88,7 +89,7 @@ private fun String.withoutUrls(urls: List<String>): String {
     return newContent
 }
 
-private fun String.replaceNostrProfileUrisWithHandles(resources: List<NostrResourceUi>): String {
+private fun String.replaceNostrProfileUrisWithHandles(resources: List<NoteNostrUriUi>): String {
     var newContent = this
     resources.forEach {
         checkNotNull(it.referencedUser)
@@ -151,16 +152,14 @@ private fun String.ellipsize(expanded: Boolean, ellipsizeText: String): String {
 @Composable
 fun FeedNoteContent(
     modifier: Modifier = Modifier,
-    content: String,
+    data: NoteContentUi,
     expanded: Boolean,
-    hashtags: List<String>,
-    mediaResources: List<MediaResourceUi>,
-    nostrResources: List<NostrResourceUi>,
     onProfileClick: (String) -> Unit,
     onPostClick: (String) -> Unit,
     onClick: (Offset) -> Unit,
     onUrlClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
+    onMediaClick: (String) -> Unit,
     highlightColor: Color = AppTheme.colorScheme.secondary,
     contentColor: Color = AppTheme.colorScheme.onSurface,
     referencedNoteContainerColor: Color = AppTheme.extraColorScheme.surfaceVariantAlt1,
@@ -168,12 +167,9 @@ fun FeedNoteContent(
     val seeMoreText = stringResource(id = R.string.feed_see_more)
     val contentText = remember {
         renderContentAsAnnotatedString(
-            content = content,
+            data = data,
             expanded = expanded,
             seeMoreText = seeMoreText,
-            hashtags = hashtags,
-            mediaResources = mediaResources,
-            nostrResources = nostrResources,
             highlightColor = highlightColor,
         )
     }
@@ -204,12 +200,15 @@ fun FeedNoteContent(
             )
         }
 
-        val imageResources = remember { mediaResources.filterImages() }
-        if (imageResources.isNotEmpty()) {
-            FeedNoteImages(imageResources = imageResources)
+        val imageAttachments = remember { data.attachments.filterImages() }
+        if (imageAttachments.isNotEmpty()) {
+            FeedNoteImages(
+                imageAttachments = imageAttachments,
+                onAttachmentClick = onMediaClick,
+            )
         }
 
-        val referencedPostResources = remember { nostrResources.filterReferencedPosts() }
+        val referencedPostResources = remember { data.nostrUris.filterReferencedPosts() }
         if (referencedPostResources.isNotEmpty()) {
             FeedReferencedNotes(
                 postResources = referencedPostResources,
@@ -222,21 +221,18 @@ fun FeedNoteContent(
 }
 
 fun renderContentAsAnnotatedString(
-    content: String,
+    data: NoteContentUi,
     expanded: Boolean,
     seeMoreText: String,
-    hashtags: List<String>,
-    mediaResources: List<MediaResourceUi>,
-    nostrResources: List<NostrResourceUi>,
-    shouldKeepNostrNoteUris: Boolean = false,
     highlightColor: Color,
+    shouldKeepNostrNoteUris: Boolean = false,
 ): AnnotatedString {
-    val imageUrlResources = mediaResources.filterImages()
-    val otherUrlResources = mediaResources.filterNotImages()
-    val referencedPostResources = nostrResources.filterReferencedPosts()
-    val referencedUserResources = nostrResources.filterReferencedUsers()
+    val imageUrlResources = data.attachments.filterImages()
+    val otherUrlResources = data.attachments.filterNotImages()
+    val referencedPostResources = data.nostrUris.filterReferencedPosts()
+    val referencedUserResources = data.nostrUris.filterReferencedUsers()
 
-    val refinedContent = content
+    val refinedContent = data.content
         .withoutUrls(urls = imageUrlResources.map { it.url })
         .withoutUrls(
             urls = if (!shouldKeepNostrNoteUris) {
@@ -299,8 +295,7 @@ fun renderContentAsAnnotatedString(
             }
         }
 
-        HashtagMatcher(content = refinedContent, hashtags = hashtags)
-            .matches()
+        HashtagMatcher(content = refinedContent, hashtags = data.hashtags).matches()
             .forEach {
                 addStyle(
                     style = SpanStyle(color = highlightColor),
@@ -319,16 +314,19 @@ fun renderContentAsAnnotatedString(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun FeedNoteImages(imageResources: List<MediaResourceUi>) {
+private fun FeedNoteImages(imageAttachments: List<NoteAttachmentUi>, onAttachmentClick: (String) -> Unit) {
     BoxWithConstraints {
-        val imageSizeDp = findImageSize(resource = imageResources.first())
-        val imagesCount = imageResources.size
+        val imageSizeDp = findImageSize(attachment = imageAttachments.first())
+        val imagesCount = imageAttachments.size
 
         val pagerState = rememberPagerState { imagesCount }
         HorizontalPager(state = pagerState) {
             NoteImage(
-                resource = imageResources[it],
+                attachment = imageAttachments[it],
                 imageSizeDp = imageSizeDp,
+                onClick = {
+                    onAttachmentClick(imageAttachments[it].url)
+                },
             )
         }
 
@@ -360,31 +358,36 @@ private fun FeedNoteImages(imageResources: List<MediaResourceUi>) {
 }
 
 @Composable
-fun NoteImage(resource: MediaResourceUi, imageSizeDp: DpSize) {
+fun NoteImage(
+    attachment: NoteAttachmentUi,
+    imageSizeDp: DpSize,
+    onClick: () -> Unit,
+) {
     BoxWithConstraints(
         modifier = Modifier
             .padding(vertical = 4.dp)
             .clip(AppTheme.shapes.medium),
     ) {
         val maxWidthPx = with(LocalDensity.current) { maxWidth.roundToPx() }
-        val variant = resource.variants.findNearestOrNull(maxWidthPx = maxWidthPx)
-        val imageSource = variant?.mediaUrl ?: resource.url
+        val variant = attachment.variants.findNearestOrNull(maxWidthPx = maxWidthPx)
+        val imageSource = variant?.mediaUrl ?: attachment.url
         PostImageListItemImage(
             source = imageSource,
             modifier = Modifier
                 .width(imageSizeDp.width)
-                .height(imageSizeDp.height),
+                .height(imageSizeDp.height)
+                .clickable(onClick = onClick),
         )
     }
 }
 
 @Composable
-private fun BoxWithConstraintsScope.findImageSize(resource: MediaResourceUi): DpSize {
+private fun BoxWithConstraintsScope.findImageSize(attachment: NoteAttachmentUi): DpSize {
     val density = LocalDensity.current.density
     val maxWidthPx = with(LocalDensity.current) { maxWidth.roundToPx() }
     val maxWidth = maxWidth.value.toInt()
     val maxHeight = (LocalConfiguration.current.screenHeightDp * 0.77).toInt()
-    val variant = resource.variants.findNearestOrNull(maxWidthPx = maxWidthPx)
+    val variant = attachment.variants.findNearestOrNull(maxWidthPx = maxWidthPx)
     return variant.calculateImageSize(
         maxWidth = maxWidth,
         maxHeight = maxHeight,
@@ -394,7 +397,7 @@ private fun BoxWithConstraintsScope.findImageSize(resource: MediaResourceUi): Dp
 
 @Composable
 fun FeedReferencedNotes(
-    postResources: List<NostrResourceUi>,
+    postResources: List<NoteNostrUriUi>,
     expanded: Boolean,
     containerColor: Color,
     onPostClick: (String) -> Unit,
@@ -420,10 +423,9 @@ fun FeedReferencedNotes(
                     authorName = data.authorName,
                     authorHandle = data.authorName,
                     authorInternetIdentifier = data.authorInternetIdentifier,
-                    authorAvatarUrl = data.authorAvatarUrl,
-                    authorMediaResources = emptyList(),
-                    mediaResources = data.mediaResources.map { it.asMediaResourceUi() },
-                    nostrResources = data.nostrResources.map { it.asNostrResourceUi() },
+                    authorAvatarCdnImage = data.authorAvatarCdnImage,
+                    attachments = emptyList(),
+                    nostrUris = data.nostrUris.map { it.asNoteNostrUriUi() },
                     timestamp = Instant.ofEpochSecond(data.createdAt),
                     content = data.content,
                     stats = FeedPostStatsUi(),
@@ -443,28 +445,31 @@ fun PreviewPostContent() {
     PrimalTheme(primalTheme = PrimalTheme.Sunset) {
         Surface {
             FeedNoteContent(
-                content = """
-                    Unfortunately the days of using pseudonyms in metaspace are numbered. #nostr 
-                    nostr:referencedUser
-                """.trimIndent(),
-                expanded = false,
-                hashtags = listOf("#nostr"),
-                mediaResources = emptyList(),
-                nostrResources = listOf(
-                    NostrResourceUi(
-                        uri = "nostr:referencedUser",
-                        referencedPost = null,
-                        referencedUser = ReferencedUser(
-                            userId = "nostr:referencedUser",
-                            handle = "alex",
+                data = NoteContentUi(
+                    content = """
+                        Unfortunately the days of using pseudonyms in metaspace are numbered. #nostr 
+                        nostr:referencedUser
+                    """.trimIndent(),
+                    attachments = emptyList(),
+                    nostrUris = listOf(
+                        NoteNostrUriUi(
+                            uri = "nostr:referencedUser",
+                            referencedPost = null,
+                            referencedUser = ReferencedUser(
+                                userId = "nostr:referencedUser",
+                                handle = "alex",
+                            ),
                         ),
                     ),
+                    hashtags = listOf("#nostr"),
                 ),
+                expanded = false,
                 onProfileClick = {},
                 onPostClick = {},
                 onClick = {},
                 onUrlClick = {},
                 onHashtagClick = {},
+                onMediaClick = {},
             )
         }
     }
@@ -476,58 +481,59 @@ fun PreviewPostContentWithReferencedPost() {
     PrimalTheme(primalTheme = PrimalTheme.Sunset) {
         Surface {
             FeedNoteContent(
-                content = """
-                    Unfortunately the days of using pseudonyms in metaspace are numbered. #nostr
-                    
-                    nostr:referencedPost
-                    
-                    Or maybe not.
-                    
-                    nostr:referenced2Post
-                """.trimIndent(),
-                expanded = false,
-                hashtags = listOf("#nostr"),
-                mediaResources = emptyList(),
-                nostrResources = listOf(
-                    NostrResourceUi(
-                        uri = "nostr:referencedPost",
-                        referencedPost = ReferencedPost(
-                            postId = "postId",
-                            createdAt = 0,
-                            content = "This is referenced post.",
-                            authorId = "authorId",
-                            authorName = "primal",
-                            authorAvatarUrl = null,
-                            authorInternetIdentifier = "hi@primal.net",
-                            authorLightningAddress = "h@getalby.com",
-                            mediaResources = emptyList(),
-                            nostrResources = emptyList(),
+                data = NoteContentUi(
+                    content = """
+                        Unfortunately the days of using pseudonyms in metaspace are numbered. #nostr
+                        
+                        nostr:referencedPost
+                        
+                        Or maybe not.
+                        
+                        nostr:referenced2Post
+                    """.trimIndent(),
+                    attachments = emptyList(),
+                    nostrUris = listOf(
+                        NoteNostrUriUi(
+                            uri = "nostr:referencedPost",
+                            referencedPost = ReferencedPost(
+                                postId = "postId",
+                                createdAt = 0,
+                                content = "This is referenced post.",
+                                authorId = "authorId",
+                                authorName = "primal",
+                                authorAvatarCdnImage = null,
+                                authorInternetIdentifier = "hi@primal.net",
+                                authorLightningAddress = "h@getalby.com",
+                                nostrUris = emptyList(),
 
+                            ),
+                            referencedUser = null,
                         ),
-                        referencedUser = null,
-                    ),
-                    NostrResourceUi(
-                        uri = "nostr:referenced2Post",
-                        referencedPost = ReferencedPost(
-                            postId = "postId",
-                            createdAt = 0,
-                            content = "This is referenced post #2.",
-                            authorId = "authorId",
-                            authorName = "primal",
-                            authorAvatarUrl = null,
-                            authorInternetIdentifier = "hi@primal.net",
-                            authorLightningAddress = "h@getalby.com",
-                            mediaResources = emptyList(),
-                            nostrResources = emptyList(),
+                        NoteNostrUriUi(
+                            uri = "nostr:referenced2Post",
+                            referencedPost = ReferencedPost(
+                                postId = "postId",
+                                createdAt = 0,
+                                content = "This is referenced post #2.",
+                                authorId = "authorId",
+                                authorName = "primal",
+                                authorAvatarCdnImage = null,
+                                authorInternetIdentifier = "hi@primal.net",
+                                authorLightningAddress = "h@getalby.com",
+                                nostrUris = emptyList(),
+                            ),
+                            referencedUser = null,
                         ),
-                        referencedUser = null,
                     ),
+                    hashtags = listOf("#nostr"),
                 ),
+                expanded = false,
                 onProfileClick = {},
                 onPostClick = {},
                 onClick = {},
                 onUrlClick = {},
                 onHashtagClick = {},
+                onMediaClick = {},
             )
         }
     }

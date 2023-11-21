@@ -111,8 +111,8 @@ class EditProfileViewModel @Inject constructor(
                         website = it.metadata?.website.orEmpty(),
                         lightningAddress = it.metadata?.lightningAddress.orEmpty(),
                         nip05Identifier = it.metadata?.internetIdentifier.orEmpty(),
-                        remoteBannerUrl = it.metadata?.banner,
-                        remoteAvatarUrl = it.metadata?.picture,
+                        remoteBannerUrl = it.metadata?.bannerCdnImage?.sourceUrl,
+                        remoteAvatarUrl = it.metadata?.avatarCdnImage?.sourceUrl,
                     )
                 }
             }

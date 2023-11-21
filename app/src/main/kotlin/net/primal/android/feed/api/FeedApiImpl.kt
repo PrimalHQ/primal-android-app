@@ -39,8 +39,11 @@ class FeedApiImpl @Inject constructor(
             primalEventUserStats = queryResult.filterPrimalEvents(
                 NostrEventKind.PrimalEventUserStats,
             ),
-            primalEventResources = queryResult.filterPrimalEvents(
-                NostrEventKind.PrimalEventResources,
+            cdnResources = queryResult.filterPrimalEvents(
+                NostrEventKind.PrimalCdnResource,
+            ),
+            primalLinkPreviews = queryResult.filterPrimalEvents(
+                NostrEventKind.PrimalLinkPreview,
             ),
             referencedPosts = queryResult.filterPrimalEvents(NostrEventKind.PrimalReferencedEvent),
         )
@@ -65,8 +68,11 @@ class FeedApiImpl @Inject constructor(
             primalEventUserStats = queryResult.filterPrimalEvents(
                 NostrEventKind.PrimalEventUserStats,
             ),
-            primalEventResources = queryResult.filterPrimalEvents(
-                NostrEventKind.PrimalEventResources,
+            cdnResources = queryResult.filterPrimalEvents(
+                NostrEventKind.PrimalCdnResource,
+            ),
+            primalLinkPreviews = queryResult.filterPrimalEvents(
+                NostrEventKind.PrimalLinkPreview,
             ),
             referencedPosts = queryResult.filterPrimalEvents(NostrEventKind.PrimalReferencedEvent),
         )
@@ -92,8 +98,11 @@ class FeedApiImpl @Inject constructor(
             primalEventUserStats = queryResult.filterPrimalEvents(
                 NostrEventKind.PrimalEventUserStats,
             ),
-            primalEventResources = queryResult.filterPrimalEvents(
-                NostrEventKind.PrimalEventResources,
+            primalLinkPreviews = queryResult.filterPrimalEvents(
+                NostrEventKind.PrimalLinkPreview,
+            ),
+            cdnResources = queryResult.filterPrimalEvents(
+                NostrEventKind.PrimalCdnResource,
             ),
         )
     }

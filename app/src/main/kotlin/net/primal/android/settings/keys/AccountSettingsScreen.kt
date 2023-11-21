@@ -38,7 +38,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.R
-import net.primal.android.core.compose.AvatarThumbnailListItemImage
+import net.primal.android.attachments.domain.CdnImage
+import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.button.PrimalLoadingButton
@@ -79,8 +80,8 @@ fun AccountSettingsScreen(state: AccountSettingsContract.UiState, onClose: () ->
             ) {
                 item {
                     PublicKeySection(
-                        avatarUrl = state.avatarUrl,
                         npub = state.npub,
+                        avatarCdnImage = state.avatarCdnImage,
                     )
                 }
 
@@ -102,7 +103,7 @@ fun AccountSettingsScreen(state: AccountSettingsContract.UiState, onClose: () ->
 }
 
 @Composable
-fun PublicKeySection(npub: String, avatarUrl: String?) {
+fun PublicKeySection(npub: String, avatarCdnImage: CdnImage?) {
     val context = LocalContext.current
 
     Text(
@@ -124,9 +125,7 @@ fun PublicKeySection(npub: String, avatarUrl: String?) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(modifier = Modifier.padding(start = 16.dp)) {
-            AvatarThumbnailListItemImage(
-                source = avatarUrl,
-            )
+            AvatarThumbnail(avatarCdnImage = avatarCdnImage)
         }
         Text(
             modifier = Modifier.padding(all = 16.dp),
@@ -270,7 +269,7 @@ fun PreviewSettingsHomeScreen() {
     PrimalTheme(primalTheme = PrimalTheme.Sunset) {
         AccountSettingsScreen(
             state = AccountSettingsContract.UiState(
-                avatarUrl = "https://i.imgur.com/Z8dpmvc.png",
+                avatarCdnImage = CdnImage("https://i.imgur.com/Z8dpmvc.png"),
                 npub = "npub16c0nh3dnadzqpm76uctf5hqhe2lny344zsmpm6feee9p5rdxaa9q586nvr",
                 nsec = "nsec1w33tr4t0gg3gvrhjh5mxqzvt7xzdrrk64tr0j7mnqdfrrarfj3yqlf8hxp",
             ),

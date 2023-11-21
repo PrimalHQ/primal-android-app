@@ -5,7 +5,7 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.JsonArray
-import net.primal.android.nostr.model.primal.PrimalResourceVariant
+import net.primal.android.attachments.domain.CdnResourceVariant
 import org.junit.Test
 
 class RoomCustomTypeConvertersTest {
@@ -95,54 +95,50 @@ class RoomCustomTypeConvertersTest {
 
 
     @Test
-    fun `listOfPrimalResourceVariantToString returns correct String`() {
+    fun `listOfCdnResourceVariantToString returns correct String`() {
         val input = listOf(
-            PrimalResourceVariant(
-                mimeType = "image/png",
+            CdnResourceVariant(
                 height = 100,
                 width = 100,
-                size = "L",
                 mediaUrl = "https://image.png"
             )
         )
         val expected = NostrJson.encodeToString(input)
 
-        val actual = RoomCustomTypeConverters().listOfPrimalResourceVariantToString(input)
+        val actual = RoomCustomTypeConverters().listOfCdnResourceVariantToString(input)
         actual.shouldNotBeNull()
         actual shouldEqualJson expected
     }
 
     @Test
-    fun `listOfPrimalResourceVariantToString supports null`() {
-        val actual = RoomCustomTypeConverters().listOfPrimalResourceVariantToString(null)
+    fun `listOfCdnResourceVariantToString supports null`() {
+        val actual = RoomCustomTypeConverters().listOfCdnResourceVariantToString(null)
         actual shouldBe null
     }
 
     @Test
-    fun `stringToListOfPrimalResourceVariant returns correct List`() {
+    fun `stringToListOfCdnResourceVariant returns correct List`() {
         val input = listOf(
-            PrimalResourceVariant(
-                mimeType = "image/png",
+            CdnResourceVariant(
                 height = 100,
                 width = 100,
-                size = "L",
                 mediaUrl = "https://image.png"
             )
         )
         val jsonString = NostrJson.encodeToString(input)
-        val actual = RoomCustomTypeConverters().stringToListOfPrimalResourceVariant(jsonString)
+        val actual = RoomCustomTypeConverters().stringToListOfCdnResourceVariant(jsonString)
         actual shouldBe input
     }
 
     @Test
-    fun `invalid input to stringToListOfPrimalResourceVariant returns null`() {
-        val actual = RoomCustomTypeConverters().stringToListOfPrimalResourceVariant("giberish")
+    fun `invalid input to stringToListOfCdnResourceVariant returns null`() {
+        val actual = RoomCustomTypeConverters().stringToListOfCdnResourceVariant("giberish")
         actual shouldBe null
     }
 
     @Test
-    fun `stringToListOfPrimalResourceVariant supports null`() {
-        val actual = RoomCustomTypeConverters().stringToListOfPrimalResourceVariant(null)
+    fun `stringToListOfCdnResourceVariant supports null`() {
+        val actual = RoomCustomTypeConverters().stringToListOfCdnResourceVariant(null)
         actual shouldBe null
     }
 

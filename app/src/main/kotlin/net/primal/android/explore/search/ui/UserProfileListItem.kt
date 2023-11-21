@@ -13,7 +13,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import net.primal.android.R
-import net.primal.android.core.compose.AvatarThumbnailListItemImage
+import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.utils.formatNip05Identifier
 import net.primal.android.core.utils.shortened
 import net.primal.android.theme.AppTheme
@@ -26,7 +26,7 @@ fun UserProfileListItem(data: UserProfileUi, onClick: (String) -> Unit) {
             containerColor = AppTheme.colorScheme.surfaceVariant,
         ),
         leadingContent = {
-            AvatarThumbnailListItemImage(source = data.avatarUrl)
+            AvatarThumbnail(avatarCdnImage = data.avatarCdnImage)
         },
         headlineContent = {
             Text(

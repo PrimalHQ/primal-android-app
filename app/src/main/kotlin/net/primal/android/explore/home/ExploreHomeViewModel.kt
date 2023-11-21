@@ -40,7 +40,7 @@ class ExploreHomeViewModel @Inject constructor(
         viewModelScope.launch {
             activeAccountStore.activeUserAccount.collect {
                 setState {
-                    copy(activeAccountAvatarUrl = it.pictureUrl)
+                    copy(activeAccountAvatarCdnImage = it.avatarCdnImage)
                 }
             }
         }

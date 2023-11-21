@@ -84,9 +84,10 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import net.primal.android.R
+import net.primal.android.attachments.domain.findNearestOrNull
 import net.primal.android.core.compose.AdjustTemporarilySystemBarColors
 import net.primal.android.core.compose.AppBarIcon
-import net.primal.android.core.compose.AvatarThumbnailListItemImage
+import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.ListLoading
 import net.primal.android.core.compose.ListNoContent
@@ -111,8 +112,6 @@ import net.primal.android.core.compose.icons.primaliconpack.UserFeedAdd
 import net.primal.android.core.compose.isEmpty
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.core.compose.profile.model.ProfileStatsUi
-import net.primal.android.core.ext.findByUrl
-import net.primal.android.core.ext.findNearestOrNull
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.copyText
 import net.primal.android.core.utils.formatNip05Identifier
@@ -136,6 +135,7 @@ fun ProfileScreen(
     onEditProfileClick: () -> Unit,
     onMessageClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
+    onMediaClick: (String, String) -> Unit,
     onWalletUnavailable: () -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
@@ -152,6 +152,7 @@ fun ProfileScreen(
         onEditProfileClick = onEditProfileClick,
         onMessageClick = onMessageClick,
         onHashtagClick = onHashtagClick,
+        onMediaClick = onMediaClick,
         onWalletUnavailable = onWalletUnavailable,
         eventPublisher = { viewModel.setEvent(it) },
     )
@@ -169,6 +170,7 @@ fun ProfileScreen(
     onEditProfileClick: () -> Unit,
     onMessageClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
+    onMediaClick: (String, String) -> Unit,
     onWalletUnavailable: () -> Unit,
     eventPublisher: (ProfileContract.UiEvent) -> Unit,
 ) {
@@ -284,6 +286,7 @@ fun ProfileScreen(
                     onPostQuoteClick("\n\nnostr:${it.postId.hexToNoteHrp()}")
                 },
                 onHashtagClick = onHashtagClick,
+                onMediaClick = onMediaClick,
                 onWalletUnavailable = onWalletUnavailable,
                 defaultZapAmount = state.defaultZapAmount,
                 zapOptions = state.zapOptions,
@@ -411,11 +414,10 @@ private fun ProfileTopCoverBar(
         modifier = Modifier.fillMaxWidth(),
         contentAlignment = Alignment.TopCenter,
     ) {
-        val resource = state.resources.findByUrl(url = state.profileDetails?.coverUrl)
-        val variant = resource?.variants.findNearestOrNull(
+        val variant = state.profileDetails?.coverCdnImage?.variants?.findNearestOrNull(
             maxWidthPx = with(LocalDensity.current) { maxWidth.roundToPx() },
         )
-        val imageSource = variant?.mediaUrl ?: state.profileDetails?.coverUrl
+        val imageSource = variant?.mediaUrl ?: state.profileDetails?.coverCdnImage?.sourceUrl
         SubcomposeAsyncImage(
             modifier = Modifier
                 .background(color = AppTheme.colorScheme.surface)
@@ -461,7 +463,7 @@ private fun ProfileTopCoverBar(
                 .offset(y = avatarOffsetY, x = avatarOffsetX)
                 .padding(horizontal = 16.dp),
         ) {
-            AvatarThumbnailListItemImage(
+            AvatarThumbnail(
                 modifier = Modifier
                     .size(avatarSize)
                     .padding(
@@ -470,7 +472,7 @@ private fun ProfileTopCoverBar(
                         start = avatarPadding * 1 / 8,
                         end = avatarPadding * 7 / 8,
                     ),
-                source = state.profileDetails?.avatarUrl,
+                avatarCdnImage = state.profileDetails?.avatarCdnImage,
             )
         }
     }
@@ -1050,6 +1052,7 @@ fun PreviewProfileScreen() {
             onEditProfileClick = {},
             onMessageClick = {},
             onHashtagClick = {},
+            onMediaClick = { _, _ -> },
             onWalletUnavailable = {},
             eventPublisher = {},
         )

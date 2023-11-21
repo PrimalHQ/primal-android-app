@@ -2,6 +2,7 @@ package net.primal.android.notifications.list
 
 import androidx.paging.PagingData
 import kotlinx.coroutines.flow.Flow
+import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.notifications.list.ui.NotificationUi
 import net.primal.android.user.domain.Badges
 
@@ -13,7 +14,7 @@ interface NotificationsContract {
         val zapOptions: List<ULong> = emptyList(),
         val seenNotifications: Flow<PagingData<NotificationUi>>,
         val unseenNotifications: List<List<NotificationUi>> = emptyList(),
-        val activeAccountAvatarUrl: String? = null,
+        val activeAccountAvatarCdnImage: CdnImage? = null,
         val badges: Badges = Badges(),
         val error: NotificationsError? = null,
     ) {

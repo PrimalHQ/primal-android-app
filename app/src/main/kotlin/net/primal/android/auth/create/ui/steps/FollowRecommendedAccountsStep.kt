@@ -21,10 +21,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.R
+import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.auth.create.CreateAccountContract
 import net.primal.android.auth.create.ui.CreateAccountContent
 import net.primal.android.auth.create.ui.RecommendedFollow
-import net.primal.android.core.compose.AvatarThumbnailListItemImage
+import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.button.PrimalFilledButton
@@ -121,9 +122,9 @@ fun FollowRecommendedAccountsStep(
                     )
                     ListItem(
                         leadingContent = {
-                            AvatarThumbnailListItemImage(
+                            AvatarThumbnail(
                                 modifier = Modifier.padding(start = 8.dp),
-                                source = suggestion.content.picture,
+                                avatarCdnImage = suggestion.content.picture?.let { CdnImage(sourceUrl = it) },
                             )
                         },
                         headlineContent = {

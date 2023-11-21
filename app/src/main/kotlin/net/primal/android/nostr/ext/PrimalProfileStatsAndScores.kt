@@ -22,18 +22,9 @@ fun PrimalEvent.takeContentAsUserProfileStatsOrNull(): ContentUserProfileStats? 
     }
 }
 
-// TODO Update after backend confirmation
 fun ContentUserProfileStats.asProfileStats() =
     ProfileStats(
-        profileId = this.profileId ?: throw RuntimeException(),
-        following = this.followsCount,
-        followers = this.followersCount,
-        notes = this.noteCount,
-    )
-
-fun ContentUserProfileStats.asProfileStats(profileId: String) =
-    ProfileStats(
-        profileId = profileId,
+        profileId = this.profileId,
         following = this.followsCount,
         followers = this.followersCount,
         notes = this.noteCount,

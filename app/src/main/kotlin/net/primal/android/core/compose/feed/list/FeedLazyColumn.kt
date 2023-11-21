@@ -52,6 +52,7 @@ fun FeedLazyColumn(
     onPostReplyClick: (String) -> Unit,
     onPostQuoteClick: (FeedPostUi) -> Unit,
     onHashtagClick: (String) -> Unit,
+    onMediaClick: (String, String) -> Unit,
     onWalletUnavailable: () -> Unit,
     walletConnected: Boolean,
     defaultZapAmount: ULong? = null,
@@ -157,6 +158,7 @@ fun FeedLazyColumn(
                         },
                         onHashtagClick = onHashtagClick,
                         onMuteUserClick = { onMuteClick?.invoke(item.authorId) },
+                        onMediaClick = onMediaClick,
                     )
 
                     PrimalDivider()

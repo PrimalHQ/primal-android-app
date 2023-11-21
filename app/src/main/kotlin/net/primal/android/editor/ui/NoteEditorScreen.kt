@@ -59,14 +59,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import java.util.UUID
+import java.util.*
 import kotlinx.coroutines.flow.filter
 import net.primal.android.R
-import net.primal.android.core.compose.AvatarThumbnailListItemImage
+import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.feed.model.FeedPostUi
+import net.primal.android.core.compose.feed.model.toNoteContentUi
 import net.primal.android.core.compose.feed.note.FeedNoteContent
 import net.primal.android.core.compose.feed.note.FeedNoteHeader
 import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
@@ -228,7 +229,7 @@ fun NoteEditorScreen(
                         }
 
                         Row {
-                            AvatarThumbnailListItemImage(
+                            AvatarThumbnail(
                                 modifier = Modifier
                                     .drawWithCache {
                                         onDrawBehind {
@@ -252,7 +253,7 @@ fun NoteEditorScreen(
                                     .padding(start = 16.dp)
                                     .padding(top = 8.dp),
                                 avatarSize = avatarSizeDp,
-                                source = state.activeAccountAvatarUrl,
+                                avatarCdnImage = state.activeAccountAvatarCdnImage,
                             )
 
                             OutlinedTextField(
@@ -383,8 +384,7 @@ private fun ReplyToNote(replyToNote: FeedPostUi, connectionLineColor: Color) {
                 ),
             authorDisplayName = replyToNote.authorName,
             postTimestamp = replyToNote.timestamp,
-            authorAvatarUrl = replyToNote.authorAvatarUrl,
-            authorResources = replyToNote.authorMediaResources,
+            authorAvatarCdnImage = replyToNote.authorAvatarCdnImage,
             authorInternetIdentifier = replyToNote.authorInternetIdentifier,
             onAuthorAvatarClick = {},
         )
@@ -394,16 +394,14 @@ private fun ReplyToNote(replyToNote: FeedPostUi, connectionLineColor: Color) {
                 start = avatarsColumnWidthDp,
                 end = 16.dp,
             ),
-            content = replyToNote.content,
+            data = replyToNote.toNoteContentUi(),
             expanded = true,
-            hashtags = replyToNote.hashtags,
-            mediaResources = replyToNote.mediaResources,
-            nostrResources = replyToNote.nostrResources,
             onProfileClick = {},
             onPostClick = {},
             onClick = {},
             onUrlClick = {},
             onHashtagClick = {},
+            onMediaClick = {},
         )
     }
 }

@@ -7,9 +7,9 @@ inline val SavedStateHandle.feedDirective: String? get() = get<String>(
     FEED_DIRECTIVE,
 )?.asUrlDecoded()
 
-const val POST_ID = "postId"
-inline val SavedStateHandle.postIdOrThrow: String
-    get() = get(POST_ID) ?: throw IllegalArgumentException("Missing required postId argument.")
+const val NOTE_ID = "noteId"
+inline val SavedStateHandle.noteIdOrThrow: String
+    get() = get(NOTE_ID) ?: throw IllegalArgumentException("Missing required noteId argument.")
 
 const val PROFILE_ID = "profileId"
 inline val SavedStateHandle.profileId: String? get() = get(PROFILE_ID)
@@ -43,3 +43,6 @@ inline val SavedStateHandle.replyToNoteId: String? get() = get<String?>(
 
 const val NWC_URL = "nwcUrl"
 inline val SavedStateHandle.nwcUrl: String? get() = get(NWC_URL)
+
+const val MEDIA_URL = "mediaUrl"
+inline val SavedStateHandle.mediaUrl: String? get() = get(MEDIA_URL)

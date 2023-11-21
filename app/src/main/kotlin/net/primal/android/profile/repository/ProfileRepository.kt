@@ -5,10 +5,12 @@ import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.withContext
+import net.primal.android.core.ext.asMapByKey
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.nostr.ext.asProfileDataPO
 import net.primal.android.nostr.ext.asProfileStats
+import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
 import net.primal.android.nostr.ext.takeContentAsUserProfileStatsOrNull
 import net.primal.android.user.accounts.UserAccountFetcher
 import net.primal.android.user.api.UsersApi
@@ -35,7 +37,8 @@ class ProfileRepository @Inject constructor(
 
     suspend fun requestProfileUpdate(profileId: String) {
         val response = withContext(Dispatchers.IO) { usersApi.getUserProfile(pubkey = profileId) }
-        val profileMetadata = response.metadata?.asProfileDataPO()
+        val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
+        val profileMetadata = response.metadata?.asProfileDataPO(cdnResources = cdnResources)
         val userProfileStats = response.profileStats?.takeContentAsUserProfileStatsOrNull()
 
         withContext(Dispatchers.IO) {
@@ -45,9 +48,7 @@ class ProfileRepository @Inject constructor(
                 }
 
                 if (userProfileStats != null) {
-                    database.profileStats().upsert(
-                        data = userProfileStats.asProfileStats(profileId = profileId),
-                    )
+                    database.profileStats().upsert(data = userProfileStats.asProfileStats())
                 }
             }
         }

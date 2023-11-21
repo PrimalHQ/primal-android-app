@@ -68,7 +68,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import kotlinx.coroutines.launch
 import net.primal.android.R
-import net.primal.android.core.compose.AvatarThumbnailListItemImage
+import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.ListLoading
 import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.NostrUserText
@@ -76,6 +76,7 @@ import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.compose.asBeforeNowFormat
+import net.primal.android.core.compose.feed.model.NoteContentUi
 import net.primal.android.core.compose.feed.note.renderContentAsAnnotatedString
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -84,7 +85,6 @@ import net.primal.android.core.compose.icons.primaliconpack.NewDM
 import net.primal.android.core.compose.isEmpty
 import net.primal.android.core.compose.isNotEmpty
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
-import net.primal.android.core.ext.findByUrl
 import net.primal.android.core.utils.parseHashtags
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.PrimalBottomBarHeightDp
@@ -164,7 +164,7 @@ fun MessageListScreen(
         topBar = {
             PrimalTopAppBar(
                 title = stringResource(id = R.string.messages_title),
-                avatarUrl = state.activeAccountAvatarUrl,
+                avatarCdnImage = state.activeAccountAvatarCdnImage,
                 navigationIcon = PrimalIcons.AvatarDefault,
                 onNavigationIconClick = {
                     uiScope.launch { drawerState.open() }
@@ -302,14 +302,7 @@ private fun ConversationListItem(conversation: MessageConversationUi, onConversa
             containerColor = AppTheme.colorScheme.surfaceVariant,
         ),
         leadingContent = {
-            val resource = conversation.participantMediaResources.findByUrl(
-                url = conversation.participantAvatarUrl,
-            )
-            val variant = resource?.variants?.minByOrNull { it.width }
-            val imageSource = variant?.mediaUrl ?: conversation.participantAvatarUrl
-            AvatarThumbnailListItemImage(
-                source = imageSource,
-            )
+            AvatarThumbnail(avatarCdnImage = conversation.participantAvatarCdnImage)
         },
         headlineContent = {
             Row {
@@ -350,12 +343,14 @@ private fun ConversationListItem(conversation: MessageConversationUi, onConversa
         },
         supportingContent = {
             val annotatedContent = renderContentAsAnnotatedString(
-                content = conversation.lastMessageSnippet,
+                data = NoteContentUi(
+                    content = conversation.lastMessageSnippet,
+                    hashtags = conversation.lastMessageSnippet.parseHashtags(),
+                    attachments = conversation.lastMessageAttachments,
+                    nostrUris = conversation.lastMessageNostrUris,
+                ),
                 expanded = false,
                 seeMoreText = "",
-                hashtags = conversation.lastMessageSnippet.parseHashtags(),
-                mediaResources = conversation.lastMessageMediaResources,
-                nostrResources = conversation.lastMessageNostrResources,
                 shouldKeepNostrNoteUris = true,
                 highlightColor = AppTheme.colorScheme.primary,
             )

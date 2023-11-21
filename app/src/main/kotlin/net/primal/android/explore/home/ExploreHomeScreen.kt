@@ -43,7 +43,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import net.primal.android.R
-import net.primal.android.core.compose.AvatarThumbnailListItemImage
+import net.primal.android.attachments.domain.CdnImage
+import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopLevelDestination
@@ -99,7 +100,7 @@ fun ExploreHomeScreen(
                         onClick = onSearchClick,
                     )
                 },
-                avatarUrl = state.activeAccountAvatarUrl,
+                avatarCdnImage = state.activeAccountAvatarCdnImage,
                 onNavigationIconClick = {
                     uiScope.launch { drawerState.open() }
                 },
@@ -160,7 +161,7 @@ fun ExploreHomeScreen(
 fun ExploreTopAppBar(
     title: @Composable () -> Unit,
     onNavigationIconClick: () -> Unit,
-    avatarUrl: String? = null,
+    avatarCdnImage: CdnImage? = null,
     actions: @Composable RowScope.() -> Unit = {},
     scrollBehavior: TopAppBarScrollBehavior? = null,
 ) {
@@ -172,8 +173,8 @@ fun ExploreTopAppBar(
                         .padding(horizontal = 8.dp)
                         .clip(CircleShape),
                 ) {
-                    AvatarThumbnailListItemImage(
-                        source = avatarUrl,
+                    AvatarThumbnail(
+                        avatarCdnImage = avatarCdnImage,
                         modifier = Modifier.size(32.dp),
                         onClick = onNavigationIconClick,
                     )

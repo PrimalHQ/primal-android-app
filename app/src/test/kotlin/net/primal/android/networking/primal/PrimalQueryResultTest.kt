@@ -73,7 +73,7 @@ class PrimalQueryResultTest {
     fun `findNostrEvent returns null for missing event`() {
         val queryResult = buildQueryResult()
 
-        val actual = queryResult.findNostrEvent(kind = NostrEventKind.PrimalEventResources)
+        val actual = queryResult.findNostrEvent(kind = NostrEventKind.PrimalCdnResource)
         actual.shouldBeNull()
     }
 
@@ -119,7 +119,7 @@ class PrimalQueryResultTest {
     fun `filterNostrEvents returns empty list if no events found`() {
         val queryResult = buildQueryResult()
 
-        val actual = queryResult.filterNostrEvents(kind = NostrEventKind.PrimalEventResources)
+        val actual = queryResult.filterNostrEvents(kind = NostrEventKind.PrimalCdnResource)
         actual.shouldBeEmpty()
     }
 

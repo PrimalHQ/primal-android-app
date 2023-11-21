@@ -21,8 +21,8 @@ import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import net.primal.android.core.compose.feed.model.asNostrResourceUi
-import net.primal.android.core.compose.media.model.asMediaResourceUi
+import net.primal.android.core.compose.attachment.model.asNoteAttachmentUi
+import net.primal.android.core.compose.feed.model.asNoteNostrUriUi
 import net.primal.android.core.compose.profile.model.asProfileDetailsUi
 import net.primal.android.messages.chat.ChatContract.UiEvent
 import net.primal.android.messages.chat.ChatContract.UiState
@@ -99,11 +99,7 @@ class ChatViewModel @Inject constructor(
         viewModelScope.launch {
             profileRepository.observeProfile(profileId = participantId).collect {
                 setState {
-                    copy(
-                        participantProfile = it.metadata?.asProfileDetailsUi()
-                            ?: this.participantProfile,
-                        participantMediaResources = it.resources.map { it.asMediaResourceUi() },
-                    )
+                    copy(participantProfile = it.metadata?.asProfileDetailsUi() ?: this.participantProfile)
                 }
             }
         }
@@ -162,8 +158,8 @@ class ChatViewModel @Inject constructor(
             senderId = this.data.senderId,
             timestamp = Instant.ofEpochSecond(this.data.createdAt),
             content = this.data.content,
-            mediaResources = this.mediaResources.map { it.asMediaResourceUi() },
-            nostrResources = this.nostrUris.map { it.asNostrResourceUi() },
+            attachments = this.attachments.map { it.asNoteAttachmentUi() },
+            nostrUris = this.nostrUris.map { it.asNoteNostrUriUi() },
             hashtags = this.data.hashtags,
         )
 

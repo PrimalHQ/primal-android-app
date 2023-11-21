@@ -84,7 +84,7 @@ class SearchViewModel @Inject constructor(
             profileId = this.metadata.ownerId,
             displayName = this.metadata.authorNameUiFriendly(),
             internetIdentifier = this.metadata.internetIdentifier,
-            avatarUrl = this.metadata.picture,
+            avatarCdnImage = this.metadata.avatarCdnImage,
             followersCount = this.score?.toInt(),
         )
 }

@@ -26,6 +26,7 @@ import net.primal.android.core.compose.AvatarThumbnailsRow
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.feed.model.FeedPostAction
 import net.primal.android.core.compose.feed.model.FeedPostUi
+import net.primal.android.core.compose.feed.model.toNoteContentUi
 import net.primal.android.core.compose.feed.note.FeedNoteContent
 import net.primal.android.core.compose.feed.note.FeedNoteStatsRow
 import net.primal.android.core.compose.notifications.toImagePainter
@@ -42,6 +43,7 @@ fun NotificationListItem(
     onProfileClick: (String) -> Unit,
     onNoteClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
+    onMediaClick: (String, String) -> Unit,
     onReplyClick: (String) -> Unit,
     onPostLikeClick: (FeedPostUi) -> Unit,
     onRepostClick: (FeedPostUi) -> Unit,
@@ -82,6 +84,7 @@ fun NotificationListItem(
         onProfileClick = onProfileClick,
         onPostClick = onNoteClick,
         onHashtagClick = onHashtagClick,
+        onMediaClick = onMediaClick,
         onPostAction = { postAction ->
             when (postAction) {
                 FeedPostAction.Reply -> {
@@ -131,6 +134,7 @@ private fun NotificationListItem(
     onProfileClick: (String) -> Unit,
     onPostClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
+    onMediaClick: (String, String) -> Unit,
     onPostAction: (FeedPostAction) -> Unit,
     onPostLongPressAction: (FeedPostAction) -> Unit,
 ) {
@@ -206,7 +210,7 @@ private fun NotificationListItem(
 
             Column {
                 AvatarThumbnailsRow(
-                    avatarUrls = notifications.map { it.actionUserPicture },
+                    avatarCdnImages = notifications.map { it.actionUserAvatarCdnImage },
                     overlapAvatars = false,
                     hasAvatarBorder = false,
                     onClick = { index ->
@@ -242,16 +246,16 @@ private fun NotificationListItem(
                 if (actionPost != null) {
                     FeedNoteContent(
                         modifier = Modifier.padding(end = 16.dp),
-                        content = actionPost.content,
+                        data = actionPost.toNoteContentUi(),
                         expanded = false,
-                        hashtags = actionPost.hashtags,
-                        mediaResources = actionPost.mediaResources,
-                        nostrResources = actionPost.nostrResources,
                         onClick = { onPostClick(actionPost.postId) },
                         onProfileClick = onProfileClick,
                         onPostClick = onPostClick,
                         onUrlClick = { localUriHandler.openUriSafely(it) },
                         onHashtagClick = { onHashtagClick(it) },
+                        onMediaClick = { mediaUrl ->
+                            onMediaClick(actionPost.postId, mediaUrl)
+                        },
                     )
 
                     FeedNoteStatsRow(
@@ -289,9 +293,11 @@ private fun NotificationType.toSuffixText(usersZappedCount: Int = 0, totalSatsZa
         NotificationType.YOUR_POST_WAS_LIKED -> stringResource(
             id = R.string.notification_list_item_liked_your_post,
         )
+
         NotificationType.YOUR_POST_WAS_REPOSTED -> stringResource(
             id = R.string.notification_list_item_reposted_your_post,
         )
+
         NotificationType.YOUR_POST_WAS_REPLIED_TO -> stringResource(
             id = R.string.notification_list_item_replied_to_your_post,
         )
@@ -299,6 +305,7 @@ private fun NotificationType.toSuffixText(usersZappedCount: Int = 0, totalSatsZa
         NotificationType.YOU_WERE_MENTIONED_IN_POST -> stringResource(
             id = R.string.notification_list_item_mentioned_you_in_post,
         )
+
         NotificationType.YOUR_POST_WAS_MENTIONED_IN_POST -> stringResource(
             id = R.string.notification_list_item_mentioned_your_post,
         )
@@ -307,6 +314,7 @@ private fun NotificationType.toSuffixText(usersZappedCount: Int = 0, totalSatsZa
             null -> stringResource(
                 id = R.string.notification_list_item_post_you_were_mentioned_in_was_zapped,
             )
+
             else -> when (usersZappedCount) {
                 1 -> stringResource(
                     id = R.string.notification_list_item_post_you_were_mentioned_in_was_zapped_for,
@@ -327,9 +335,11 @@ private fun NotificationType.toSuffixText(usersZappedCount: Int = 0, totalSatsZa
         NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_LIKED -> stringResource(
             id = R.string.notification_list_item_post_you_were_mentioned_in_was_liked,
         )
+
         NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_REPOSTED -> stringResource(
             id = R.string.notification_list_item_post_you_were_mentioned_in_was_reposted,
         )
+
         NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_REPLIED_TO -> stringResource(
             id = R.string.notification_list_item_post_you_were_mentioned_in_was_replied_to,
         )
@@ -338,6 +348,7 @@ private fun NotificationType.toSuffixText(usersZappedCount: Int = 0, totalSatsZa
             null -> stringResource(
                 id = R.string.notification_list_item_post_where_you_post_was_mentioned_was_zapped,
             )
+
             else -> when (usersZappedCount) {
                 1 -> stringResource(
                     id = R.string.notification_list_item_post_where_you_post_was_mentioned_was_zapped_for,
@@ -358,9 +369,11 @@ private fun NotificationType.toSuffixText(usersZappedCount: Int = 0, totalSatsZa
         NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_LIKED -> stringResource(
             id = R.string.notification_list_item_post_where_you_post_was_mentioned_was_liked,
         )
+
         NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPOSTED -> stringResource(
             id = R.string.notification_list_item_post_where_you_post_was_mentioned_was_reposted,
         )
+
         NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO -> stringResource(
             id = R.string.notification_list_item_post_where_you_post_was_mentioned_was_replied_to,
         )

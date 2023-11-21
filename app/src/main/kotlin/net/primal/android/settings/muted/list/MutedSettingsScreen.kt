@@ -21,7 +21,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.R
-import net.primal.android.core.compose.AvatarThumbnailListItemImage
+import net.primal.android.attachments.domain.CdnImage
+import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.PrimalDivider
@@ -29,7 +30,6 @@ import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
-import net.primal.android.core.ext.findByUrl
 import net.primal.android.settings.muted.list.model.MutedUserUi
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
@@ -118,11 +118,8 @@ fun MutedUserListItem(
             containerColor = AppTheme.colorScheme.surfaceVariant,
         ),
         leadingContent = {
-            val resource = item.profileResources.findByUrl(url = item.avatarUrl)
-            val variant = resource?.variants?.minByOrNull { it.width }
-            val imageSource = variant?.mediaUrl ?: item.avatarUrl
-            AvatarThumbnailListItemImage(
-                source = imageSource,
+            AvatarThumbnail(
+                avatarCdnImage = item.avatarCdnImage,
                 onClick = { onProfileClick(item.userId) },
             )
         },
@@ -177,31 +174,31 @@ fun PreviewMutedScreen() {
                     MutedUserUi(
                         userId = "pubkey",
                         displayName = "username",
-                        avatarUrl = null,
+                        avatarCdnImage = null,
                         internetIdentifier = "nip05",
                     ),
                     MutedUserUi(
                         userId = "pubkey",
                         displayName = "username",
-                        avatarUrl = "avatarUrl",
+                        avatarCdnImage = CdnImage("avatarUrl"),
                         internetIdentifier = "nip05",
                     ),
                     MutedUserUi(
                         userId = "pubkey",
                         displayName = "username",
-                        avatarUrl = null,
+                        avatarCdnImage = null,
                         internetIdentifier = "nip05",
                     ),
                     MutedUserUi(
                         userId = "pubkey",
                         displayName = "username",
-                        avatarUrl = null,
+                        avatarCdnImage = null,
                         internetIdentifier = "nip05",
                     ),
                     MutedUserUi(
                         userId = "pubkey",
                         displayName = "username",
-                        avatarUrl = "avatarUrl",
+                        avatarCdnImage = CdnImage("avatarUrl"),
                         internetIdentifier = "nip05",
                     ),
                 ),

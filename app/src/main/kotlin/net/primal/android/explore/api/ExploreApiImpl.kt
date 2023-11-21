@@ -65,6 +65,7 @@ class ExploreApiImpl @Inject constructor(
         return UsersResponse(
             contactsMetadata = queryResult.filterNostrEvents(NostrEventKind.Metadata),
             userScores = queryResult.findPrimalEvent(NostrEventKind.PrimalUserScores),
+            cdnResources = queryResult.filterPrimalEvents(NostrEventKind.PrimalCdnResource),
         )
     }
 }

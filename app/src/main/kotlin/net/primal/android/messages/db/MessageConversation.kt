@@ -2,12 +2,11 @@ package net.primal.android.messages.db
 
 import androidx.room.Embedded
 import androidx.room.Relation
-import net.primal.android.feed.db.MediaResource
-import net.primal.android.feed.db.NostrResource
+import net.primal.android.attachments.db.NoteAttachment
+import net.primal.android.attachments.db.NoteNostrUri
 import net.primal.android.profile.db.ProfileData
 
 data class MessageConversation(
-
     @Embedded
     val data: MessageConversationData,
 
@@ -16,12 +15,6 @@ data class MessageConversation(
         parentColumn = "participantId",
     )
     val participant: ProfileData?,
-
-    @Relation(
-        entityColumn = "eventId",
-        parentColumn = "participantMetadataId",
-    )
-    val participantResources: List<MediaResource> = emptyList(),
 
     @Relation(
         entityColumn = "messageId",
@@ -33,12 +26,11 @@ data class MessageConversation(
         entityColumn = "eventId",
         parentColumn = "lastMessageId",
     )
-    val lastMessageMediaResources: List<MediaResource>,
+    val lastMessageNoteAttachments: List<NoteAttachment>,
 
     @Relation(
         entityColumn = "postId",
         parentColumn = "lastMessageId",
     )
-    val lastMessageNostrUris: List<NostrResource>,
-
+    val lastMessageNostrUris: List<NoteNostrUri>,
 )

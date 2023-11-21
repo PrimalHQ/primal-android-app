@@ -2,6 +2,8 @@ package net.primal.android.feed.db
 
 import androidx.room.Embedded
 import androidx.room.Relation
+import net.primal.android.attachments.db.NoteAttachment
+import net.primal.android.attachments.db.NoteNostrUri
 import net.primal.android.profile.db.ProfileData
 
 data class FeedPost(
@@ -13,25 +15,19 @@ data class FeedPost(
         entityColumn = "eventId",
         parentColumn = "postId",
     )
-    val postResources: List<MediaResource>,
+    val attachments: List<NoteAttachment>,
 
     @Relation(
         entityColumn = "postId",
         parentColumn = "postId",
     )
-    val nostrUris: List<NostrResource>,
+    val nostrUris: List<NoteNostrUri>,
 
     @Relation(
         entityColumn = "ownerId",
         parentColumn = "authorId",
     )
     val author: ProfileData? = null,
-
-    @Relation(
-        entityColumn = "eventId",
-        parentColumn = "authorMetadataId",
-    )
-    val authorResources: List<MediaResource>,
 
     @Relation(
         entityColumn = "postId",

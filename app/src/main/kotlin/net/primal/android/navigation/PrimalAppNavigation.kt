@@ -23,6 +23,8 @@ import com.google.accompanist.navigation.material.rememberBottomSheetNavigator
 import java.net.URLEncoder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import net.primal.android.attachments.gallery.MediaGalleryScreen
+import net.primal.android.attachments.gallery.MediaGalleryViewModel
 import net.primal.android.auth.create.CreateAccountViewModel
 import net.primal.android.auth.create.ui.CreateAccountScreen
 import net.primal.android.auth.login.LoginScreen
@@ -154,7 +156,10 @@ private fun NavController.navigateToWallet(nwcUrl: String? = null) =
         else -> navigate(route = "wallet_settings")
     }
 
-private fun NavController.navigateToThread(postId: String) = navigate(route = "thread/$postId")
+private fun NavController.navigateToThread(noteId: String) = navigate(route = "thread/$noteId")
+
+private fun NavController.navigateToMediaGallery(noteId: String, mediaUrl: String) =
+    navigate(route = "media/$noteId?$MEDIA_URL=$mediaUrl")
 
 private fun NavController.navigateToExploreFeed(query: String) = navigate(route = "explore/$query")
 
@@ -324,10 +329,25 @@ fun PrimalAppNavigation() {
             )
 
             thread(
-                route = "thread/{$POST_ID}",
+                route = "thread/{$NOTE_ID}",
                 arguments = listOf(
-                    navArgument(POST_ID) {
+                    navArgument(NOTE_ID) {
                         type = NavType.StringType
+                    },
+                ),
+                navController = navController,
+            )
+
+            media(
+                route = "media/{$NOTE_ID}?$MEDIA_URL={$MEDIA_URL}",
+                arguments = listOf(
+                    navArgument(NOTE_ID) {
+                        type = NavType.StringType
+                    },
+                    navArgument(MEDIA_URL) {
+                        type = NavType.StringType
+                        nullable = true
+                        defaultValue = null
                     },
                 ),
                 navController = navController,
@@ -407,10 +427,16 @@ private fun NavGraphBuilder.feed(
         viewModel = viewModel,
         onFeedsClick = { navController.navigateToFeedList() },
         onNewPostClick = { preFillContent -> navController.navigateToNoteEditor(preFillContent) },
-        onPostClick = { postId -> navController.navigateToThread(postId = postId) },
+        onPostClick = { postId -> navController.navigateToThread(noteId = postId) },
         onPostReplyClick = { postId -> navController.navigateToNoteEditor(replyToNoteId = postId) },
         onProfileClick = { profileId -> navController.navigateToProfile(profileId = profileId) },
         onHashtagClick = { hashtag -> navController.navigateToExploreFeed(query = hashtag) },
+        onMediaClick = { noteId, mediaUrl ->
+            navController.navigateToMediaGallery(
+                noteId = noteId,
+                mediaUrl = mediaUrl,
+            )
+        },
         onWalletUnavailable = { navController.navigateToWallet() },
         onTopLevelDestinationChanged = onTopLevelDestinationChanged,
         onDrawerScreenClick = onDrawerScreenClick,
@@ -483,6 +509,12 @@ private fun NavGraphBuilder.exploreFeed(
         onPostQuoteClick = { preFillContent -> navController.navigateToNoteEditor(preFillContent) },
         onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
         onHashtagClick = { hashtag -> navController.navigateToExploreFeed(query = hashtag) },
+        onMediaClick = { noteId, mediaUrl ->
+            navController.navigateToMediaGallery(
+                noteId = noteId,
+                mediaUrl = mediaUrl,
+            )
+        },
         onWalletUnavailable = { navController.navigateToWallet() },
     )
 }
@@ -536,6 +568,12 @@ private fun NavGraphBuilder.chat(
         onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
         onNoteClick = { noteId -> navController.navigateToThread(noteId) },
         onHashtagClick = { hashtag -> navController.navigateToExploreFeed(hashtag) },
+        onMediaClick = { noteId, mediaUrl ->
+            navController.navigateToMediaGallery(
+                noteId = noteId,
+                mediaUrl = mediaUrl,
+            )
+        },
     )
 }
 
@@ -568,9 +606,15 @@ private fun NavGraphBuilder.notifications(
     NotificationsScreen(
         viewModel = viewModel,
         onProfileClick = { navController.navigateToProfile(profileId = it) },
-        onNoteClick = { navController.navigateToThread(postId = it) },
+        onNoteClick = { navController.navigateToThread(noteId = it) },
         onNoteReplyClick = { noteId -> navController.navigateToNoteEditor(replyToNoteId = noteId) },
         onHashtagClick = { navController.navigateToExploreFeed(query = it) },
+        onMediaClick = { noteId, mediaUrl ->
+            navController.navigateToMediaGallery(
+                noteId = noteId,
+                mediaUrl = mediaUrl,
+            )
+        },
         onPostQuoteClick = { preFillContent -> navController.navigateToNoteEditor(preFillContent) },
         onNotificationSettings = { navController.navigateToNotificationsSettings() },
         onWalletUnavailable = { navController.navigateToWallet() },
@@ -597,6 +641,12 @@ private fun NavGraphBuilder.thread(
         onPostQuoteClick = { preFillContent -> navController.navigateToNoteEditor(preFillContent) },
         onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
         onHashtagClick = { hashtag -> navController.navigateToExploreFeed(query = hashtag) },
+        onMediaClick = { noteId, mediaUrl ->
+            navController.navigateToMediaGallery(
+                noteId = noteId,
+                mediaUrl = mediaUrl,
+            )
+        },
         onWalletUnavailable = { navController.navigateToWallet() },
         onReplyInNoteEditor = { replyToId, uri, text ->
             navController.navigateToNoteEditor(
@@ -605,6 +655,21 @@ private fun NavGraphBuilder.thread(
                 preFillFileUri = uri,
             )
         },
+    )
+}
+
+private fun NavGraphBuilder.media(
+    route: String,
+    arguments: List<NamedNavArgument>,
+    navController: NavController,
+) = composable(
+    route = route,
+    arguments = arguments,
+) { navBackEntry ->
+    val viewModel = hiltViewModel<MediaGalleryViewModel>(navBackEntry)
+    MediaGalleryScreen(
+        onClose = { navController.navigateUp() },
+        viewModel = viewModel,
     )
 }
 
@@ -622,13 +687,19 @@ private fun NavGraphBuilder.profile(
     ProfileScreen(
         viewModel = viewModel,
         onClose = { navController.navigateUp() },
-        onPostClick = { postId -> navController.navigateToThread(postId = postId) },
+        onPostClick = { postId -> navController.navigateToThread(noteId = postId) },
         onPostReplyClick = { postId -> navController.navigateToNoteEditor(replyToNoteId = postId) },
         onPostQuoteClick = { preFillContent -> navController.navigateToNoteEditor(preFillContent) },
         onProfileClick = { profileId -> navController.navigateToProfile(profileId = profileId) },
         onEditProfileClick = { navController.navigateToEditProfile() },
         onMessageClick = { profileId -> navController.navigateToChat(profileId = profileId) },
         onHashtagClick = { hashtag -> navController.navigateToExploreFeed(query = hashtag) },
+        onMediaClick = { noteId, mediaUrl ->
+            navController.navigateToMediaGallery(
+                noteId = noteId,
+                mediaUrl = mediaUrl,
+            )
+        },
         onWalletUnavailable = { navController.navigateToWallet() },
     )
 }

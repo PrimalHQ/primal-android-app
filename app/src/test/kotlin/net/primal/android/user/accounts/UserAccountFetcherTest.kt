@@ -10,6 +10,7 @@ import kotlinx.serialization.json.add
 import kotlinx.serialization.json.buildJsonArray
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.model.NostrEvent
+import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.model.primal.PrimalEvent
 import net.primal.android.user.api.UsersApi
 import net.primal.android.user.api.model.UserContactsResponse
@@ -44,8 +45,9 @@ class UserAccountFetcherTest {
                     sig = "invalidSig"
                 ),
                 profileStats = PrimalEvent(
-                    kind = 10000105,
+                    kind = NostrEventKind.PrimalUserProfileStats.value,
                     content = "{" +
+                            "\"pubkey\": \"$expectedPubkey\"," +
                             "\"follows_count\":$expectedFollowingCount," +
                             "\"followers_count\":$expectedFollowersCount," +
                             "\"note_count\":$expectedNotesCount," +
@@ -60,7 +62,9 @@ class UserAccountFetcherTest {
 
         actual.authorDisplayName shouldBe expectedName
         actual.userDisplayName shouldBe expectedName
-        actual.pictureUrl shouldBe expectedPictureUrl
+        val avatarCdnImage = actual.avatarCdnImage
+        avatarCdnImage.shouldNotBeNull()
+        avatarCdnImage.sourceUrl shouldBe expectedPictureUrl
         actual.internetIdentifier shouldBe expectedInternetIdentifier
         actual.followersCount shouldBe expectedFollowersCount
         actual.followingCount shouldBe expectedFollowingCount

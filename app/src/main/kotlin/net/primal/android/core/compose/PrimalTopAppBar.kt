@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.foundation.ClickDebounce
 import net.primal.android.theme.AppTheme
 
@@ -34,7 +35,7 @@ fun PrimalTopAppBar(
     modifier: Modifier = Modifier,
     subtitle: String? = null,
     navigationIcon: ImageVector? = null,
-    avatarUrl: String? = null,
+    avatarCdnImage: CdnImage? = null,
     actions: @Composable RowScope.() -> Unit = {},
     showDivider: Boolean = true,
     scrollBehavior: TopAppBarScrollBehavior? = null,
@@ -44,14 +45,14 @@ fun PrimalTopAppBar(
         CenterAlignedTopAppBar(
             modifier = modifier,
             navigationIcon = {
-                if (avatarUrl != null) {
+                if (avatarCdnImage != null) {
                     Box(
                         modifier = Modifier
                             .padding(horizontal = 8.dp)
                             .clip(CircleShape),
                     ) {
-                        AvatarThumbnailListItemImage(
-                            source = avatarUrl,
+                        AvatarThumbnail(
+                            avatarCdnImage = avatarCdnImage,
                             modifier = Modifier.size(32.dp),
                             onClick = onNavigationIconClick,
                         )
