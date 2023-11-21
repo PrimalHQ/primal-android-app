@@ -135,6 +135,7 @@ fun ProfileScreen(
     onEditProfileClick: () -> Unit,
     onMessageClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
+    onMediaClick: (String, String) -> Unit,
     onWalletUnavailable: () -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
@@ -151,6 +152,7 @@ fun ProfileScreen(
         onEditProfileClick = onEditProfileClick,
         onMessageClick = onMessageClick,
         onHashtagClick = onHashtagClick,
+        onMediaClick = onMediaClick,
         onWalletUnavailable = onWalletUnavailable,
         eventPublisher = { viewModel.setEvent(it) },
     )
@@ -168,6 +170,7 @@ fun ProfileScreen(
     onEditProfileClick: () -> Unit,
     onMessageClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
+    onMediaClick: (String, String) -> Unit,
     onWalletUnavailable: () -> Unit,
     eventPublisher: (ProfileContract.UiEvent) -> Unit,
 ) {
@@ -283,6 +286,7 @@ fun ProfileScreen(
                     onPostQuoteClick("\n\nnostr:${it.postId.hexToNoteHrp()}")
                 },
                 onHashtagClick = onHashtagClick,
+                onMediaClick = onMediaClick,
                 onWalletUnavailable = onWalletUnavailable,
                 defaultZapAmount = state.defaultZapAmount,
                 zapOptions = state.zapOptions,
@@ -1048,6 +1052,7 @@ fun PreviewProfileScreen() {
             onEditProfileClick = {},
             onMessageClick = {},
             onHashtagClick = {},
+            onMediaClick = { _, _ -> },
             onWalletUnavailable = {},
             eventPublisher = {},
         )

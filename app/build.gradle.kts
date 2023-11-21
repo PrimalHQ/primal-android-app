@@ -228,6 +228,8 @@ dependencies {
     implementation(libs.coil)
     implementation(libs.coil.compose)
     implementation(libs.coil.svg)
+    implementation(libs.telephoto.zoomable.image)
+    implementation(libs.telephoto.zoomable.image.coil)
 
     implementation(libs.lottie.compose)
 

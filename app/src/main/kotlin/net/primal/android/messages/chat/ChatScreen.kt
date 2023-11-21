@@ -81,6 +81,7 @@ fun ChatScreen(
     onProfileClick: (String) -> Unit,
     onNoteClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
+    onMediaClick: (String, String) -> Unit,
 ) {
     val state = viewModel.state.collectAsState()
 
@@ -99,6 +100,7 @@ fun ChatScreen(
         onProfileClick = onProfileClick,
         onNoteClick = onNoteClick,
         onHashtagClick = onHashtagClick,
+        onMediaClick = onMediaClick,
         eventPublisher = { viewModel.setEvent(it) },
     )
 }
@@ -111,6 +113,7 @@ fun ChatScreen(
     onProfileClick: (String) -> Unit,
     onNoteClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
+    onMediaClick: (String, String) -> Unit,
     eventPublisher: (ChatContract.UiEvent) -> Unit,
 ) {
     val messagesPagingItems = state.messages.collectAsLazyPagingItems()
@@ -163,6 +166,7 @@ fun ChatScreen(
                 onProfileClick = onProfileClick,
                 onNoteClick = onNoteClick,
                 onHashtagClick = onHashtagClick,
+                onMediaClick = onMediaClick,
             )
         },
         bottomBar = {
@@ -204,6 +208,7 @@ private fun ChatList(
     onProfileClick: (String) -> Unit,
     onNoteClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
+    onMediaClick: (String, String) -> Unit,
 ) {
     val localUriHandler = LocalUriHandler.current
 
@@ -253,6 +258,7 @@ private fun ChatList(
                             localUriHandler.openUriSafely(it)
                         },
                         onHashtagClick = onHashtagClick,
+                        onMediaClick = onMediaClick,
                     )
                 }
 
@@ -313,6 +319,7 @@ private fun ChatMessageListItem(
     onNoteClick: (String) -> Unit,
     onUrlClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
+    onMediaClick: (String, String) -> Unit,
 ) {
     val timeDiffBetweenThisAndNextMessage = (nextMessage?.timestamp ?: Instant.MAX).epochSecond -
         chatMessage.timestamp.epochSecond
@@ -390,6 +397,9 @@ private fun ChatMessageListItem(
                 onPostClick = onNoteClick,
                 onUrlClick = onUrlClick,
                 onHashtagClick = onHashtagClick,
+                onMediaClick = { mediaUrl ->
+                    onMediaClick(chatMessage.messageId, mediaUrl)
+                },
                 contentColor = if (chatMessage.isUserMessage) {
                     Color.White
                 } else {

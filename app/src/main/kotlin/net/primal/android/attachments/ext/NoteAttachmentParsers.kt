@@ -1,4 +1,4 @@
-package net.primal.android.attachments
+package net.primal.android.attachments.ext
 
 import net.primal.android.attachments.db.NoteAttachment
 import net.primal.android.attachments.domain.CdnResource

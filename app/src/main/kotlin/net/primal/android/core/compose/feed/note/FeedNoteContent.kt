@@ -2,6 +2,7 @@ package net.primal.android.core.compose.feed.note
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -158,6 +159,7 @@ fun FeedNoteContent(
     onClick: (Offset) -> Unit,
     onUrlClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
+    onMediaClick: (String) -> Unit,
     highlightColor: Color = AppTheme.colorScheme.secondary,
     contentColor: Color = AppTheme.colorScheme.onSurface,
     referencedNoteContainerColor: Color = AppTheme.extraColorScheme.surfaceVariantAlt1,
@@ -200,7 +202,10 @@ fun FeedNoteContent(
 
         val imageAttachments = remember { data.attachments.filterImages() }
         if (imageAttachments.isNotEmpty()) {
-            FeedNoteImages(imageAttachments = imageAttachments)
+            FeedNoteImages(
+                imageAttachments = imageAttachments,
+                onAttachmentClick = onMediaClick,
+            )
         }
 
         val referencedPostResources = remember { data.nostrUris.filterReferencedPosts() }
@@ -309,7 +314,7 @@ fun renderContentAsAnnotatedString(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun FeedNoteImages(imageAttachments: List<NoteAttachmentUi>) {
+private fun FeedNoteImages(imageAttachments: List<NoteAttachmentUi>, onAttachmentClick: (String) -> Unit) {
     BoxWithConstraints {
         val imageSizeDp = findImageSize(attachment = imageAttachments.first())
         val imagesCount = imageAttachments.size
@@ -319,6 +324,9 @@ private fun FeedNoteImages(imageAttachments: List<NoteAttachmentUi>) {
             NoteImage(
                 attachment = imageAttachments[it],
                 imageSizeDp = imageSizeDp,
+                onClick = {
+                    onAttachmentClick(imageAttachments[it].url)
+                },
             )
         }
 
@@ -350,7 +358,11 @@ private fun FeedNoteImages(imageAttachments: List<NoteAttachmentUi>) {
 }
 
 @Composable
-fun NoteImage(attachment: NoteAttachmentUi, imageSizeDp: DpSize) {
+fun NoteImage(
+    attachment: NoteAttachmentUi,
+    imageSizeDp: DpSize,
+    onClick: () -> Unit,
+) {
     BoxWithConstraints(
         modifier = Modifier
             .padding(vertical = 4.dp)
@@ -363,7 +375,8 @@ fun NoteImage(attachment: NoteAttachmentUi, imageSizeDp: DpSize) {
             source = imageSource,
             modifier = Modifier
                 .width(imageSizeDp.width)
-                .height(imageSizeDp.height),
+                .height(imageSizeDp.height)
+                .clickable(onClick = onClick),
         )
     }
 }
@@ -456,6 +469,7 @@ fun PreviewPostContent() {
                 onClick = {},
                 onUrlClick = {},
                 onHashtagClick = {},
+                onMediaClick = {},
             )
         }
     }
@@ -519,6 +533,7 @@ fun PreviewPostContentWithReferencedPost() {
                 onClick = {},
                 onUrlClick = {},
                 onHashtagClick = {},
+                onMediaClick = {},
             )
         }
     }

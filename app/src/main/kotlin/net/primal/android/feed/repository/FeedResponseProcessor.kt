@@ -1,7 +1,7 @@
 package net.primal.android.feed.repository
 
 import androidx.room.withTransaction
-import net.primal.android.attachments.flatMapPostsAsNoteAttachmentPO
+import net.primal.android.attachments.ext.flatMapPostsAsNoteAttachmentPO
 import net.primal.android.core.ext.asMapByKey
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.feed.api.model.FeedResponse

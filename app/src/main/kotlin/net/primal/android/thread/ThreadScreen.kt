@@ -94,6 +94,7 @@ fun ThreadScreen(
     onPostQuoteClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
+    onMediaClick: (String, String) -> Unit,
     onWalletUnavailable: () -> Unit,
     onReplyInNoteEditor: (String, Uri?, String) -> Unit,
 ) {
@@ -116,6 +117,7 @@ fun ThreadScreen(
         onPostQuoteClick = onPostQuoteClick,
         onProfileClick = onProfileClick,
         onHashtagClick = onHashtagClick,
+        onMediaClick = onMediaClick,
         onWalletUnavailable = onWalletUnavailable,
         onReplyInNoteEditor = onReplyInNoteEditor,
         eventPublisher = { viewModel.setEvent(it) },
@@ -132,6 +134,7 @@ fun ThreadScreen(
     onPostQuoteClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
+    onMediaClick: (String, String) -> Unit,
     onWalletUnavailable: () -> Unit,
     onReplyInNoteEditor: (String, Uri?, String) -> Unit,
     eventPublisher: (ThreadContract.UiEvent) -> Unit,
@@ -314,6 +317,7 @@ fun ThreadScreen(
                                 }
                             },
                             onHashtagClick = onHashtagClick,
+                            onMediaClick = onMediaClick,
                             onMuteUserClick = {
                                 eventPublisher(ThreadContract.UiEvent.MuteAction(item.authorId))
                             },
@@ -595,6 +599,7 @@ fun ThreadScreenPreview() {
             onPostQuoteClick = {},
             onProfileClick = {},
             onHashtagClick = {},
+            onMediaClick = { _, _ -> },
             onWalletUnavailable = {},
             onReplyInNoteEditor = { _, _, _ -> },
             eventPublisher = {},

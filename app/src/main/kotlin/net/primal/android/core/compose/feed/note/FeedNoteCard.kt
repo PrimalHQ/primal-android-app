@@ -58,6 +58,7 @@ fun FeedNoteCard(
     onPostAction: (FeedPostAction) -> Unit,
     onPostLongClickAction: (FeedPostAction) -> Unit,
     onHashtagClick: (String) -> Unit,
+    onMediaClick: (String, String) -> Unit,
     onMuteUserClick: () -> Unit,
 ) {
     val localUriHandler = LocalUriHandler.current
@@ -190,6 +191,9 @@ fun FeedNoteCard(
                                 localUriHandler.openUriSafely(it)
                             },
                             onHashtagClick = onHashtagClick,
+                            onMediaClick = {
+                                onMediaClick(data.postId, it)
+                            },
                         )
 
                         FeedNoteStatsRow(
@@ -285,6 +289,7 @@ fun PreviewFeedNoteListItemLightMultiLineHeader(
             onPostLongClickAction = {},
             onHashtagClick = {},
             onMuteUserClick = {},
+            onMediaClick = { _, _ -> },
         )
     }
 }
@@ -306,6 +311,7 @@ fun PreviewFeedNoteListItemLightMultiLineHeaderFullWidth(
             onPostLongClickAction = {},
             onHashtagClick = {},
             onMuteUserClick = {},
+            onMediaClick = { _, _ -> },
         )
     }
 }
@@ -327,6 +333,7 @@ fun PreviewFeedNoteListItemDarkSingleLineHeader(
             onPostLongClickAction = {},
             onHashtagClick = {},
             onMuteUserClick = {},
+            onMediaClick = { _, _ -> },
         )
     }
 }
@@ -348,6 +355,7 @@ fun PreviewFeedNoteListItemDarkSingleLineHeaderFullWidth(
             onPostLongClickAction = {},
             onHashtagClick = {},
             onMuteUserClick = {},
+            onMediaClick = { _, _ -> },
         )
     }
 }
@@ -371,6 +379,7 @@ fun PreviewFeedNoteListItemLightForcedContentIndentFullWidthSingleLineHeader(
             onPostLongClickAction = {},
             onHashtagClick = {},
             onMuteUserClick = {},
+            onMediaClick = { _, _ -> },
         )
     }
 }
@@ -394,6 +403,7 @@ fun PreviewFeedNoteListItemDarkForcedContentIndentSingleLineHeader(
             onPostLongClickAction = {},
             onHashtagClick = {},
             onMuteUserClick = {},
+            onMediaClick = { _, _ -> },
         )
     }
 }

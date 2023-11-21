@@ -64,6 +64,7 @@ fun FeedScreen(
     onPostReplyClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
+    onMediaClick: (String, String) -> Unit,
     onWalletUnavailable: () -> Unit,
     onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
@@ -83,6 +84,7 @@ fun FeedScreen(
         onPostReplyClick = onPostReplyClick,
         onProfileClick = onProfileClick,
         onHashtagClick = onHashtagClick,
+        onMediaClick = onMediaClick,
         onWalletUnavailable = onWalletUnavailable,
         onPrimaryDestinationChanged = onTopLevelDestinationChanged,
         onDrawerDestinationClick = onDrawerScreenClick,
@@ -100,6 +102,7 @@ fun FeedScreen(
     onPostReplyClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
+    onMediaClick: (String, String) -> Unit,
     onWalletUnavailable: () -> Unit,
     onPrimaryDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
@@ -202,6 +205,7 @@ fun FeedScreen(
                 onMuteClick = {
                     eventPublisher(FeedContract.UiEvent.MuteAction(it))
                 },
+                onMediaClick = onMediaClick,
             )
         },
         floatingActionButton = {
@@ -282,6 +286,7 @@ fun FeedScreenPreview() {
             onPostReplyClick = {},
             onProfileClick = {},
             onHashtagClick = {},
+            onMediaClick = { _, _ -> },
             onWalletUnavailable = {},
             onPrimaryDestinationChanged = {},
             onDrawerDestinationClick = {},

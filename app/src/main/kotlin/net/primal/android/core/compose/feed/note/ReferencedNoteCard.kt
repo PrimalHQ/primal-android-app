@@ -61,6 +61,7 @@ fun ReferencedNoteCard(
             onPostClick = { postId -> onPostClick(postId) },
             onUrlClick = { onPostClick(data.postId) },
             onHashtagClick = { onPostClick(data.postId) },
+            onMediaClick = {},
         )
 
         Spacer(modifier = Modifier.height(12.dp))

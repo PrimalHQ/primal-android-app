@@ -41,6 +41,7 @@ fun ExploreFeedScreen(
     onPostQuoteClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
+    onMediaClick: (String, String) -> Unit,
     onWalletUnavailable: () -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
@@ -53,6 +54,7 @@ fun ExploreFeedScreen(
         onProfileClick = onProfileClick,
         onPostQuoteClick = onPostQuoteClick,
         onHashtagClick = onHashtagClick,
+        onMediaClick = onMediaClick,
         onWalletUnavailable = onWalletUnavailable,
         eventPublisher = { viewModel.setEvent(it) },
     )
@@ -68,6 +70,7 @@ fun ExploreFeedScreen(
     onPostQuoteClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
+    onMediaClick: (String, String) -> Unit,
     onWalletUnavailable: () -> Unit,
     eventPublisher: (ExploreFeedContract.UiEvent) -> Unit,
 ) {
@@ -171,6 +174,7 @@ fun ExploreFeedScreen(
                 onMuteClick = {
                     eventPublisher(ExploreFeedContract.UiEvent.MuteAction(profileId = it))
                 },
+                onMediaClick = onMediaClick,
             )
         },
         snackbarHost = {

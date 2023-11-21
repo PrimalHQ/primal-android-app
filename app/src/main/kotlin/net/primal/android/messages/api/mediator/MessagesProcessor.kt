@@ -2,7 +2,7 @@ package net.primal.android.messages.api.mediator
 
 import androidx.room.withTransaction
 import javax.inject.Inject
-import net.primal.android.attachments.flatMapMessagesAsNoteAttachmentPO
+import net.primal.android.attachments.ext.flatMapMessagesAsNoteAttachmentPO
 import net.primal.android.core.ext.asMapByKey
 import net.primal.android.crypto.hexToNpubHrp
 import net.primal.android.db.PrimalDatabase

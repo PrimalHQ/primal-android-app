@@ -43,6 +43,7 @@ fun NotificationListItem(
     onProfileClick: (String) -> Unit,
     onNoteClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
+    onMediaClick: (String, String) -> Unit,
     onReplyClick: (String) -> Unit,
     onPostLikeClick: (FeedPostUi) -> Unit,
     onRepostClick: (FeedPostUi) -> Unit,
@@ -83,6 +84,7 @@ fun NotificationListItem(
         onProfileClick = onProfileClick,
         onPostClick = onNoteClick,
         onHashtagClick = onHashtagClick,
+        onMediaClick = onMediaClick,
         onPostAction = { postAction ->
             when (postAction) {
                 FeedPostAction.Reply -> {
@@ -132,6 +134,7 @@ private fun NotificationListItem(
     onProfileClick: (String) -> Unit,
     onPostClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
+    onMediaClick: (String, String) -> Unit,
     onPostAction: (FeedPostAction) -> Unit,
     onPostLongPressAction: (FeedPostAction) -> Unit,
 ) {
@@ -250,6 +253,9 @@ private fun NotificationListItem(
                         onPostClick = onPostClick,
                         onUrlClick = { localUriHandler.openUriSafely(it) },
                         onHashtagClick = { onHashtagClick(it) },
+                        onMediaClick = { mediaUrl ->
+                            onMediaClick(actionPost.postId, mediaUrl)
+                        },
                     )
 
                     FeedNoteStatsRow(
