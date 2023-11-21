@@ -397,9 +397,7 @@ private fun ChatMessageListItem(
                 onPostClick = onNoteClick,
                 onUrlClick = onUrlClick,
                 onHashtagClick = onHashtagClick,
-                onMediaClick = { mediaUrl ->
-                    onMediaClick(chatMessage.messageId, mediaUrl)
-                },
+                onMediaClick = onMediaClick,
                 contentColor = if (chatMessage.isUserMessage) {
                     Color.White
                 } else {

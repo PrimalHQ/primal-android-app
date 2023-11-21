@@ -43,6 +43,7 @@ import net.primal.android.attachments.domain.findNearestOrNull
 import net.primal.android.core.compose.PostImageListItemImage
 import net.primal.android.core.compose.PrimalClickableText
 import net.primal.android.core.compose.attachment.model.NoteAttachmentUi
+import net.primal.android.core.compose.attachment.model.asNoteAttachmentUi
 import net.primal.android.core.compose.feed.model.FeedPostStatsUi
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.feed.model.NoteContentUi
@@ -159,7 +160,7 @@ fun FeedNoteContent(
     onClick: (Offset) -> Unit,
     onUrlClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
-    onMediaClick: (String) -> Unit,
+    onMediaClick: (String, String) -> Unit,
     highlightColor: Color = AppTheme.colorScheme.secondary,
     contentColor: Color = AppTheme.colorScheme.onSurface,
     referencedNoteContainerColor: Color = AppTheme.extraColorScheme.surfaceVariantAlt1,
@@ -204,7 +205,7 @@ fun FeedNoteContent(
         if (imageAttachments.isNotEmpty()) {
             FeedNoteImages(
                 imageAttachments = imageAttachments,
-                onAttachmentClick = onMediaClick,
+                onAttachmentClick = { onMediaClick(data.noteId, it) },
             )
         }
 
@@ -215,6 +216,7 @@ fun FeedNoteContent(
                 expanded = expanded,
                 containerColor = referencedNoteContainerColor,
                 onPostClick = onPostClick,
+                onMediaClick = onMediaClick,
             )
         }
     }
@@ -401,6 +403,7 @@ fun FeedReferencedNotes(
     expanded: Boolean,
     containerColor: Color,
     onPostClick: (String) -> Unit,
+    onMediaClick: (String, String) -> Unit,
 ) {
     val displayableNotes = if (postResources.isNotEmpty()) {
         if (expanded) postResources else postResources.subList(0, 1)
@@ -424,7 +427,7 @@ fun FeedReferencedNotes(
                     authorHandle = data.authorName,
                     authorInternetIdentifier = data.authorInternetIdentifier,
                     authorAvatarCdnImage = data.authorAvatarCdnImage,
-                    attachments = emptyList(),
+                    attachments = data.attachments.map { it.asNoteAttachmentUi() },
                     nostrUris = data.nostrUris.map { it.asNoteNostrUriUi() },
                     timestamp = Instant.ofEpochSecond(data.createdAt),
                     content = data.content,
@@ -433,6 +436,7 @@ fun FeedReferencedNotes(
                     rawNostrEventJson = "",
                 ),
                 onPostClick = onPostClick,
+                onMediaClick = onMediaClick,
                 colors = CardDefaults.cardColors(containerColor = containerColor),
             )
         }
@@ -446,6 +450,7 @@ fun PreviewPostContent() {
         Surface {
             FeedNoteContent(
                 data = NoteContentUi(
+                    noteId = "",
                     content = """
                         Unfortunately the days of using pseudonyms in metaspace are numbered. #nostr 
                         nostr:referencedUser
@@ -469,7 +474,7 @@ fun PreviewPostContent() {
                 onClick = {},
                 onUrlClick = {},
                 onHashtagClick = {},
-                onMediaClick = {},
+                onMediaClick = { _, _ -> },
             )
         }
     }
@@ -482,6 +487,7 @@ fun PreviewPostContentWithReferencedPost() {
         Surface {
             FeedNoteContent(
                 data = NoteContentUi(
+                    noteId = "",
                     content = """
                         Unfortunately the days of using pseudonyms in metaspace are numbered. #nostr
                         
@@ -504,6 +510,7 @@ fun PreviewPostContentWithReferencedPost() {
                                 authorAvatarCdnImage = null,
                                 authorInternetIdentifier = "hi@primal.net",
                                 authorLightningAddress = "h@getalby.com",
+                                attachments = emptyList(),
                                 nostrUris = emptyList(),
 
                             ),
@@ -520,6 +527,7 @@ fun PreviewPostContentWithReferencedPost() {
                                 authorAvatarCdnImage = null,
                                 authorInternetIdentifier = "hi@primal.net",
                                 authorLightningAddress = "h@getalby.com",
+                                attachments = emptyList(),
                                 nostrUris = emptyList(),
                             ),
                             referencedUser = null,
@@ -533,7 +541,7 @@ fun PreviewPostContentWithReferencedPost() {
                 onClick = {},
                 onUrlClick = {},
                 onHashtagClick = {},
-                onMediaClick = {},
+                onMediaClick = { _, _ -> },
             )
         }
     }

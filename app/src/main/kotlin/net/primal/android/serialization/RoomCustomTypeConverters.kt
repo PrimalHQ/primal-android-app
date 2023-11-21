@@ -3,6 +3,7 @@ package net.primal.android.serialization
 import androidx.room.TypeConverter
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.JsonArray
+import net.primal.android.attachments.db.NoteAttachment
 import net.primal.android.attachments.db.NoteNostrUri
 import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.attachments.domain.CdnResourceVariant
@@ -55,6 +56,19 @@ class RoomCustomTypeConverters {
 
     @TypeConverter
     fun listOfNoteNostrUriToString(list: List<NoteNostrUri>?): String? {
+        return when (list) {
+            null -> null
+            else -> NostrJson.encodeToString(list)
+        }
+    }
+
+    @TypeConverter
+    fun stringToListOfNoteAttachment(value: String?): List<NoteAttachment>? {
+        return NostrJson.decodeFromStringOrNull<List<NoteAttachment>>(value)
+    }
+
+    @TypeConverter
+    fun listOfNoteAttachmentToString(list: List<NoteAttachment>?): String? {
         return when (list) {
             null -> null
             else -> NostrJson.encodeToString(list)

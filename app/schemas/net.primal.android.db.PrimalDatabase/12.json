@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 12,
-    "identityHash": "57f8c458372d44141f5997798a9c3b13",
+    "identityHash": "0505deaa356863773cd19c04a8036c62",
     "entities": [
       {
         "tableName": "PostData",
@@ -306,7 +306,7 @@
       },
       {
         "tableName": "NoteNostrUri",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`postId` TEXT NOT NULL, `uri` TEXT NOT NULL, `refPost_postId` TEXT, `refPost_createdAt` INTEGER, `refPost_content` TEXT, `refPost_authorId` TEXT, `refPost_authorName` TEXT, `refPost_authorAvatarCdnImage` TEXT, `refPost_authorInternetIdentifier` TEXT, `refPost_authorLightningAddress` TEXT, `refPost_nostrUris` TEXT, `refUser_userId` TEXT, `refUser_handle` TEXT, PRIMARY KEY(`postId`, `uri`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`postId` TEXT NOT NULL, `uri` TEXT NOT NULL, `refPost_postId` TEXT, `refPost_createdAt` INTEGER, `refPost_content` TEXT, `refPost_authorId` TEXT, `refPost_authorName` TEXT, `refPost_authorAvatarCdnImage` TEXT, `refPost_authorInternetIdentifier` TEXT, `refPost_authorLightningAddress` TEXT, `refPost_attachments` TEXT, `refPost_nostrUris` TEXT, `refUser_userId` TEXT, `refUser_handle` TEXT, PRIMARY KEY(`postId`, `uri`))",
         "fields": [
           {
             "fieldPath": "postId",
@@ -365,6 +365,12 @@
           {
             "fieldPath": "referencedPost.authorLightningAddress",
             "columnName": "refPost_authorLightningAddress",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "referencedPost.attachments",
+            "columnName": "refPost_attachments",
             "affinity": "TEXT",
             "notNull": false
           },
@@ -1002,7 +1008,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '57f8c458372d44141f5997798a9c3b13')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '0505deaa356863773cd19c04a8036c62')"
     ]
   }
 }

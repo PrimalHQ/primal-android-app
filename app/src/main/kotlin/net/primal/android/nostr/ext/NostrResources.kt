@@ -2,6 +2,7 @@ package net.primal.android.nostr.ext
 
 import java.util.regex.Pattern
 import net.primal.android.attachments.db.NoteNostrUri
+import net.primal.android.attachments.ext.flatMapPostsAsNoteAttachmentPO
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.core.utils.usernameUiFriendly
@@ -123,12 +124,12 @@ fun String.extractNoteId(): String? {
     }
 }
 
-fun List<PostData>.flatMapPostsAsNostrResourcePO(
+fun List<PostData>.flatMapPostsAsNoteNostrUriPO(
     postIdToPostDataMap: Map<String, PostData>,
     profileIdToProfileDataMap: Map<String, ProfileData>,
 ): List<NoteNostrUri> =
     flatMap { postData ->
-        postData.uris.mapAsNostrResourcePO(
+        postData.uris.mapAsNoteNostrUriPO(
             eventId = postData.postId,
             postIdToPostDataMap = postIdToPostDataMap,
             profileIdToProfileDataMap = profileIdToProfileDataMap,
@@ -139,14 +140,14 @@ fun List<DirectMessageData>.flatMapMessagesAsNostrResourcePO(
     postIdToPostDataMap: Map<String, PostData>,
     profileIdToProfileDataMap: Map<String, ProfileData>,
 ) = flatMap { messageData ->
-    messageData.uris.mapAsNostrResourcePO(
+    messageData.uris.mapAsNoteNostrUriPO(
         eventId = messageData.messageId,
         postIdToPostDataMap = postIdToPostDataMap,
         profileIdToProfileDataMap = profileIdToProfileDataMap,
     )
 }
 
-fun List<String>.mapAsNostrResourcePO(
+fun List<String>.mapAsNoteNostrUriPO(
     eventId: String,
     postIdToPostDataMap: Map<String, PostData>,
     profileIdToProfileDataMap: Map<String, ProfileData>,
@@ -179,7 +180,11 @@ fun List<String>.mapAsNostrResourcePO(
                 authorAvatarCdnImage = refPostAuthor.avatarCdnImage,
                 authorInternetIdentifier = refPostAuthor.internetIdentifier,
                 authorLightningAddress = refPostAuthor.lightningAddress,
-                nostrUris = listOf(refPost).flatMapPostsAsNostrResourcePO(
+                attachments = listOf(refPost).flatMapPostsAsNoteAttachmentPO(
+                    cdnResources = emptyMap(),
+                    linkPreviews = emptyMap(),
+                ),
+                nostrUris = listOf(refPost).flatMapPostsAsNoteNostrUriPO(
                     postIdToPostDataMap = postIdToPostDataMap,
                     profileIdToProfileDataMap = profileIdToProfileDataMap,
                 ),

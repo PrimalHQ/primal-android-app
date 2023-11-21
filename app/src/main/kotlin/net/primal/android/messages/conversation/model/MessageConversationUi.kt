@@ -8,6 +8,7 @@ import net.primal.android.core.compose.feed.model.NoteNostrUriUi
 data class MessageConversationUi(
     val participantId: String,
     val participantUsername: String,
+    val lastMessageId: String,
     val lastMessageSnippet: String,
     val lastMessageAttachments: List<NoteAttachmentUi>,
     val lastMessageNostrUris: List<NoteNostrUriUi>,

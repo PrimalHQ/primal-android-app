@@ -191,9 +191,7 @@ fun FeedNoteCard(
                                 localUriHandler.openUriSafely(it)
                             },
                             onHashtagClick = onHashtagClick,
-                            onMediaClick = {
-                                onMediaClick(data.postId, it)
-                            },
+                            onMediaClick = onMediaClick,
                         )
 
                         FeedNoteStatsRow(

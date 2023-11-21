@@ -253,9 +253,7 @@ private fun NotificationListItem(
                         onPostClick = onPostClick,
                         onUrlClick = { localUriHandler.openUriSafely(it) },
                         onHashtagClick = { onHashtagClick(it) },
-                        onMediaClick = { mediaUrl ->
-                            onMediaClick(actionPost.postId, mediaUrl)
-                        },
+                        onMediaClick = onMediaClick,
                     )
 
                     FeedNoteStatsRow(

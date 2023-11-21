@@ -1,12 +1,14 @@
 package net.primal.android.attachments.db
 
 import androidx.room.Entity
+import kotlinx.serialization.Serializable
 import net.primal.android.attachments.domain.CdnResourceVariant
 import net.primal.android.attachments.domain.NoteAttachmentType
 
 @Entity(
     primaryKeys = ["eventId", "url"],
 )
+@Serializable
 data class NoteAttachment(
     val eventId: String,
     val url: String,

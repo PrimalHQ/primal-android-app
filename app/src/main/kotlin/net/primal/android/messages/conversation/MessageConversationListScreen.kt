@@ -344,6 +344,7 @@ private fun ConversationListItem(conversation: MessageConversationUi, onConversa
         supportingContent = {
             val annotatedContent = renderContentAsAnnotatedString(
                 data = NoteContentUi(
+                    noteId = conversation.lastMessageId,
                     content = conversation.lastMessageSnippet,
                     hashtags = conversation.lastMessageSnippet.parseHashtags(),
                     attachments = conversation.lastMessageAttachments,

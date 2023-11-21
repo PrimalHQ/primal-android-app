@@ -26,6 +26,7 @@ fun ReferencedNoteCard(
     modifier: Modifier = Modifier,
     data: FeedPostUi,
     onPostClick: (String) -> Unit,
+    onMediaClick: (String, String) -> Unit,
     colors: CardColors = CardDefaults.cardColors(
         containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
     ),
@@ -61,7 +62,7 @@ fun ReferencedNoteCard(
             onPostClick = { postId -> onPostClick(postId) },
             onUrlClick = { onPostClick(data.postId) },
             onHashtagClick = { onPostClick(data.postId) },
-            onMediaClick = {},
+            onMediaClick = onMediaClick,
         )
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -104,6 +105,7 @@ fun PreviewReferencedPostListItemLight() {
                 rawNostrEventJson = "",
             ),
             onPostClick = {},
+            onMediaClick = { _, _ -> },
         )
     }
 }
@@ -144,6 +146,7 @@ fun PreviewReferencedPostListItemDark() {
                 rawNostrEventJson = "",
             ),
             onPostClick = {},
+            onMediaClick = { _, _ -> },
         )
     }
 }

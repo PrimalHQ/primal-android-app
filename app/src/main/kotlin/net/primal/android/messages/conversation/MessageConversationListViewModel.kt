@@ -147,6 +147,7 @@ class MessageConversationListViewModel @Inject constructor(
             participantId = this.data.participantId,
             participantUsername = this.participant?.usernameUiFriendly()
                 ?: this.data.participantId.asEllipsizedNpub(),
+            lastMessageId = this.lastMessage.messageId,
             lastMessageSnippet = this.lastMessage.content,
             lastMessageAttachments = this.lastMessageNoteAttachments.map { it.asNoteAttachmentUi() },
             lastMessageNostrUris = this.lastMessageNostrUris.map { it.asNoteNostrUriUi() },
