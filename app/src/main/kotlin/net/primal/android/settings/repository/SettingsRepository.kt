@@ -109,8 +109,14 @@ class SettingsRepository @Inject constructor(
 
         val userFeeds = appSettings.feeds.distinctBy { it.directive }.map { it.asFeedPO() }
         val hasLatestFeed = userFeeds.find { it.directive == userId } != null
+        val userIdDirectiveIndex = userFeeds.indexOfFirst { it.directive == userId }
         val finalFeeds = if (hasLatestFeed) {
-            userFeeds
+            userFeeds.toMutableList().apply {
+                if (userIdDirectiveIndex >= 0) {
+                    removeAt(userIdDirectiveIndex)
+                    add(userIdDirectiveIndex, Feed(directive = userId, name = "Latest"))
+                }
+            }
         } else {
             userFeeds.toMutableList().apply {
                 add(0, Feed(directive = userId, name = "Latest"))
