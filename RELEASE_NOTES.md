@@ -1,9 +1,9 @@
-## Changes
-- Implemented Direct Messages;
-- Implemented Feed settings screen;
-- Implemented Mute User feature;
-- Local database encryption;
-- Visual revamp;
+## Features
+- Implemented media gallery for images;
+- Implemented link previews;
+- Implemented lud06 support;
 
-## Fixes
-- Fixed errors not showing up on Edit profile screen;
+## Improvements
+- Improved CDN use in the entire app;
+- Fixed highlight color in note content;
+- Removed shimmer from avatars when loading;
