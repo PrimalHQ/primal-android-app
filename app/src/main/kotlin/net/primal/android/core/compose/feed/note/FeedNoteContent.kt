@@ -2,6 +2,7 @@ package net.primal.android.core.compose.feed.note
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -9,16 +10,19 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.BoxWithConstraintsScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -38,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.time.Instant
 import net.primal.android.R
+import net.primal.android.attachments.domain.NoteAttachmentType
 import net.primal.android.attachments.domain.calculateImageSize
 import net.primal.android.attachments.domain.findNearestOrNull
 import net.primal.android.core.compose.PostImageListItemImage
@@ -62,27 +67,18 @@ private const val URL_ANNOTATION_TAG = "url"
 private const val NOTE_ANNOTATION_TAG = "note"
 private const val HASHTAG_ANNOTATION_TAG = "hashtag"
 
-private fun List<NoteAttachmentUi>.filterImages() =
-    filter {
-        it.mimeType?.startsWith("image") == true
-    }
+private fun List<NoteAttachmentUi>.filterImages() = filter { it.type == NoteAttachmentType.Image }
 
-private fun List<NoteAttachmentUi>.filterNotImages() =
-    filterNot {
-        it.mimeType?.startsWith("image") == true
-    }
+private fun List<NoteAttachmentUi>.filterNotImages() = filterNot { it.type == NoteAttachmentType.Image }
 
-private fun List<NoteNostrUriUi>.filterReferencedPosts() =
-    filter {
-        it.referencedPost != null
-    }
+private fun List<NoteAttachmentUi>.filterLinkPreviews() =
+    filterNot { it.type == NoteAttachmentType.Image || it.type == NoteAttachmentType.Video }
 
-private fun List<NoteNostrUriUi>.filterReferencedUsers() =
-    filter {
-        it.referencedUser != null
-    }
+private fun List<NoteNostrUriUi>.filterMentionedPosts() = filter { it.referencedPost != null }
 
-private fun String.withoutUrls(urls: List<String>): String {
+private fun List<NoteNostrUriUi>.filterMentionedUsers() = filter { it.referencedUser != null }
+
+private fun String.removeUrls(urls: List<String>): String {
     var newContent = this
     urls.forEach {
         newContent = newContent.replace(it, "")
@@ -201,15 +197,36 @@ fun FeedNoteContent(
             )
         }
 
-        val imageAttachments = remember { data.attachments.filterImages() }
-        if (imageAttachments.isNotEmpty()) {
-            FeedNoteImages(
-                imageAttachments = imageAttachments,
-                onAttachmentClick = { onMediaClick(data.noteId, it) },
-            )
+        if (data.attachments.isNotEmpty()) {
+            val imageAttachments = data.attachments.filterImages()
+            val linkAttachments = data.attachments.filterLinkPreviews()
+
+            when {
+                imageAttachments.isNotEmpty() -> {
+                    FeedNoteImages(
+                        imageAttachments = imageAttachments,
+                        onAttachmentClick = { onMediaClick(data.noteId, it) },
+                    )
+                }
+
+                linkAttachments.size == 1 -> {
+                    val attachment = linkAttachments.first()
+                    if (!attachment.title.isNullOrBlank() || !attachment.description.isNullOrBlank() ||
+                        !attachment.thumbnailUrl.isNullOrBlank()
+                    ) {
+                        LinkPreview(
+                            url = attachment.url,
+                            title = attachment.title,
+                            description = attachment.description,
+                            thumbnailUrl = attachment.thumbnailUrl,
+                            onClick = { onUrlClick(attachment.url) },
+                        )
+                    }
+                }
+            }
         }
 
-        val referencedPostResources = remember { data.nostrUris.filterReferencedPosts() }
+        val referencedPostResources = data.nostrUris.filterMentionedPosts()
         if (referencedPostResources.isNotEmpty()) {
             FeedReferencedNotes(
                 postResources = referencedPostResources,
@@ -229,22 +246,22 @@ fun renderContentAsAnnotatedString(
     highlightColor: Color,
     shouldKeepNostrNoteUris: Boolean = false,
 ): AnnotatedString {
-    val imageUrlResources = data.attachments.filterImages()
-    val otherUrlResources = data.attachments.filterNotImages()
-    val referencedPostResources = data.nostrUris.filterReferencedPosts()
-    val referencedUserResources = data.nostrUris.filterReferencedUsers()
+    val imageAttachments = data.attachments.filterImages()
+    val otherNonImageAttachments = data.attachments.filterNotImages()
+    val mentionedPosts = data.nostrUris.filterMentionedPosts()
+    val mentionedUsers = data.nostrUris.filterMentionedUsers()
 
     val refinedContent = data.content
-        .withoutUrls(urls = imageUrlResources.map { it.url })
-        .withoutUrls(
+        .removeUrls(urls = imageAttachments.map { it.url })
+        .removeUrls(
             urls = if (!shouldKeepNostrNoteUris) {
-                referencedPostResources.map { it.uri }
+                mentionedPosts.map { it.uri }
             } else {
                 emptyList()
             },
         )
         .ellipsize(expanded = expanded, ellipsizeText = seeMoreText)
-        .replaceNostrProfileUrisWithHandles(resources = referencedUserResources)
+        .replaceNostrProfileUrisWithHandles(resources = mentionedUsers)
         .clearParsedPrimalLinks()
         .trim()
 
@@ -259,7 +276,7 @@ fun renderContentAsAnnotatedString(
             )
         }
 
-        otherUrlResources.map { it.url }.forEach {
+        otherNonImageAttachments.map { it.url }.forEach {
             val startIndex = refinedContent.indexOf(it)
             if (startIndex >= 0) {
                 val endIndex = startIndex + it.length
@@ -277,7 +294,7 @@ fun renderContentAsAnnotatedString(
             }
         }
 
-        referencedUserResources.forEach {
+        mentionedUsers.forEach {
             checkNotNull(it.referencedUser)
             val displayHandle = it.referencedUser.displayUsername
             val startIndex = refinedContent.indexOf(displayHandle)
@@ -323,7 +340,7 @@ private fun FeedNoteImages(imageAttachments: List<NoteAttachmentUi>, onAttachmen
 
         val pagerState = rememberPagerState { imagesCount }
         HorizontalPager(state = pagerState) {
-            NoteImage(
+            NoteImageAttachment(
                 attachment = imageAttachments[it],
                 imageSizeDp = imageSizeDp,
                 onClick = {
@@ -333,34 +350,43 @@ private fun FeedNoteImages(imageAttachments: List<NoteAttachmentUi>, onAttachmen
         }
 
         if (imagesCount > 1) {
-            Row(
-                Modifier
-                    .height(32.dp)
-                    .fillMaxWidth()
-                    .align(Alignment.BottomCenter),
-                horizontalArrangement = Arrangement.Center,
-            ) {
-                repeat(imagesCount) { iteration ->
-                    val color = if (pagerState.currentPage == iteration) {
-                        AppTheme.colorScheme.primary
-                    } else {
-                        AppTheme.colorScheme.onPrimary
-                    }
-                    Box(
-                        modifier = Modifier
-                            .padding(2.dp)
-                            .clip(CircleShape)
-                            .background(color)
-                            .size(8.dp),
-                    )
-                }
+            NoteImagesPagerIndicator(
+                imagesCount = imagesCount,
+                currentPage = pagerState.currentPage,
+            )
+        }
+    }
+}
+
+@ExperimentalFoundationApi
+@Composable
+fun BoxWithConstraintsScope.NoteImagesPagerIndicator(imagesCount: Int, currentPage: Int) {
+    Row(
+        Modifier
+            .height(32.dp)
+            .fillMaxWidth()
+            .align(Alignment.BottomCenter),
+        horizontalArrangement = Arrangement.Center,
+    ) {
+        repeat(imagesCount) { iteration ->
+            val color = if (currentPage == iteration) {
+                AppTheme.colorScheme.primary
+            } else {
+                AppTheme.colorScheme.onPrimary
             }
+            Box(
+                modifier = Modifier
+                    .padding(2.dp)
+                    .clip(CircleShape)
+                    .background(color)
+                    .size(8.dp),
+            )
         }
     }
 }
 
 @Composable
-fun NoteImage(
+fun NoteImageAttachment(
     attachment: NoteAttachmentUi,
     imageSizeDp: DpSize,
     onClick: () -> Unit,
@@ -380,6 +406,79 @@ fun NoteImage(
                 .height(imageSizeDp.height)
                 .clickable(onClick = onClick),
         )
+    }
+}
+
+@Composable
+fun LinkPreview(
+    url: String,
+    title: String?,
+    description: String?,
+    thumbnailUrl: String?,
+    onClick: () -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .padding(vertical = 8.dp)
+            .background(
+                color = AppTheme.extraColorScheme.surfaceVariantAlt3,
+                shape = AppTheme.shapes.small,
+            )
+            .border(
+                width = 0.5.dp,
+                color = AppTheme.colorScheme.outline,
+                shape = AppTheme.shapes.small,
+            )
+            .clickable(onClick = onClick),
+    ) {
+        if (thumbnailUrl != null) {
+            PostImageListItemImage(
+                source = thumbnailUrl,
+                modifier = Modifier
+                    .clip(shape = AppTheme.shapes.small)
+                    .fillMaxWidth()
+                    .wrapContentHeight(),
+            )
+        }
+
+        Text(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            text = "domain.tbd",
+            maxLines = 1,
+            color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
+            style = AppTheme.typography.bodySmall,
+        )
+
+        if (title != null) {
+            Text(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight()
+                    .padding(horizontal = 16.dp),
+                text = title,
+                maxLines = 2,
+                color = AppTheme.colorScheme.onSurface,
+                style = AppTheme.typography.bodyMedium,
+            )
+        }
+
+        if (description != null) {
+            Text(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight()
+                    .padding(horizontal = 16.dp),
+                text = description,
+                maxLines = 4,
+                color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
+                style = AppTheme.typography.bodyMedium,
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
     }
 }
 

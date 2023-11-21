@@ -11,7 +11,7 @@ data class NoteAttachmentUi(
     val variants: List<CdnResourceVariant>? = null,
     val title: String? = null,
     val description: String? = null,
-    val thumbnail: String? = null,
+    val thumbnailUrl: String? = null,
     val authorAvatarUrl: String? = null,
 )
 
@@ -23,6 +23,6 @@ fun NoteAttachment.asNoteAttachmentUi() =
         variants = this.variants ?: emptyList(),
         title = this.title,
         description = this.description,
-        thumbnail = this.thumbnail,
+        thumbnailUrl = this.thumbnail,
         authorAvatarUrl = this.authorAvatarUrl,
     )
