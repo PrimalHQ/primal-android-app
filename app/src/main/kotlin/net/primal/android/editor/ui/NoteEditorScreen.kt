@@ -188,11 +188,13 @@ fun NoteEditorScreen(
         content = { paddingValues ->
             var noteEditorMaxHeightPx by remember { mutableIntStateOf(0) }
             var replyNoteHeightPx by remember { mutableIntStateOf(0) }
+            val replyingToPaddingTop = 8.dp
+            var replyingToNoticeHeightPx by remember { mutableIntStateOf(0) }
 
             var extraSpacing by remember { mutableStateOf(0.dp) }
             extraSpacing = if (state.isReply) {
                 with(LocalDensity.current) {
-                    val replyHeight = replyNoteHeightPx.toDp() + 60.dp
+                    val replyHeight = replyNoteHeightPx.toDp() + replyingToNoticeHeightPx.toDp() + replyingToPaddingTop
                     val noteEditorMaxHeight = noteEditorMaxHeightPx.toDp()
                     noteEditorMaxHeight - replyHeight - attachmentsHeightDp
                 }
@@ -222,8 +224,9 @@ fun NoteEditorScreen(
                         if (state.isReply && state.replyToNote != null) {
                             ReplyingToText(
                                 modifier = Modifier
-                                    .padding(top = 8.dp, start = avatarsColumnWidthDp, end = 16.dp)
-                                    .fillMaxWidth(),
+                                    .fillMaxWidth()
+                                    .padding(top = replyingToPaddingTop, start = avatarsColumnWidthDp, end = 16.dp)
+                                    .onSizeChanged { replyingToNoticeHeightPx = it.height },
                                 replyToUsername = state.replyToNote.authorHandle,
                             )
                         }
