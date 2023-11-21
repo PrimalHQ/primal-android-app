@@ -5,8 +5,8 @@ import net.primal.android.core.utils.parseHashtags
 import net.primal.android.core.utils.parseUris
 import net.primal.android.feed.db.PostData
 import net.primal.android.nostr.model.NostrEvent
-import net.primal.android.serialization.NostrJson
-import net.primal.android.serialization.toJsonObject
+import net.primal.android.serialization.json.NostrJson
+import net.primal.android.serialization.json.toJsonObject
 
 fun List<NostrEvent>.mapAsPostDataPO() = map { it.asPost() }
 

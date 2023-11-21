@@ -11,7 +11,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Qualifier
 import javax.inject.Singleton
-import net.primal.android.serialization.StringSerializer
+import net.primal.android.serialization.datastore.StringSerializer
 
 @Module
 @InstallIn(SingletonComponent::class)

@@ -4,8 +4,8 @@ import net.primal.android.attachments.domain.CdnResource
 import net.primal.android.attachments.domain.CdnResourceVariant
 import net.primal.android.nostr.model.primal.PrimalEvent
 import net.primal.android.nostr.model.primal.content.ContentPrimalEventResources
-import net.primal.android.serialization.NostrJson
-import net.primal.android.serialization.decodeFromStringOrNull
+import net.primal.android.serialization.json.NostrJson
+import net.primal.android.serialization.json.decodeFromStringOrNull
 
 fun List<PrimalEvent>.flatMapNotNullAsCdnResource() =
     mapNotNull { NostrJson.decodeFromStringOrNull<ContentPrimalEventResources>(it.content) }

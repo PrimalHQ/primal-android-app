@@ -14,7 +14,7 @@ import net.primal.android.BuildConfig
 import net.primal.android.security.AESEncryption
 import net.primal.android.security.Encryption
 import net.primal.android.security.PrimalDatabasePasswordProvider
-import net.primal.android.serialization.StringSerializer
+import net.primal.android.serialization.datastore.StringSerializer
 import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
 
 @Module

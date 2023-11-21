@@ -20,7 +20,7 @@ import net.primal.android.networking.sockets.NostrSocketClient
 import net.primal.android.networking.sockets.errors.NostrNoticeException
 import net.primal.android.networking.sockets.filterByEventId
 import net.primal.android.nostr.model.NostrEvent
-import net.primal.android.serialization.toJsonObject
+import net.primal.android.serialization.json.toJsonObject
 import net.primal.android.user.domain.Relay
 import okhttp3.OkHttpClient
 import okhttp3.Request

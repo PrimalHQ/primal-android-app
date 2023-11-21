@@ -16,9 +16,9 @@ import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.relays.RelaysManager
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.security.Encryption
-import net.primal.android.serialization.CredentialsSerialization
-import net.primal.android.serialization.StringSerializer
-import net.primal.android.serialization.UserAccountsSerialization
+import net.primal.android.serialization.datastore.CredentialsSerialization
+import net.primal.android.serialization.datastore.StringSerializer
+import net.primal.android.serialization.datastore.UserAccountsSerialization
 import net.primal.android.user.api.UsersApi
 import net.primal.android.user.api.UsersApiImpl
 import net.primal.android.user.domain.Credential

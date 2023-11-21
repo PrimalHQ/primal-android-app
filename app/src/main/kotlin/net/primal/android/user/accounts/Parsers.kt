@@ -5,7 +5,7 @@ import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.boolean
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import net.primal.android.serialization.NostrJson
+import net.primal.android.serialization.json.NostrJson
 import net.primal.android.user.domain.Relay
 
 fun String.parseRelays(): List<Relay> {

@@ -13,8 +13,8 @@ import net.primal.android.networking.primal.PrimalVerb.FEED_DIRECTIVE
 import net.primal.android.networking.primal.PrimalVerb.NOTES
 import net.primal.android.networking.primal.PrimalVerb.THREAD_VIEW
 import net.primal.android.nostr.model.NostrEventKind
-import net.primal.android.serialization.NostrJson
-import net.primal.android.serialization.decodeFromStringOrNull
+import net.primal.android.serialization.json.NostrJson
+import net.primal.android.serialization.json.decodeFromStringOrNull
 
 class FeedApiImpl @Inject constructor(
     @PrimalCacheApiClient private val primalApiClient: PrimalApiClient,

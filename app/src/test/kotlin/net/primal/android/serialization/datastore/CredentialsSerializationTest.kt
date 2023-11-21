@@ -1,4 +1,4 @@
-package net.primal.android.serialization
+package net.primal.android.serialization.datastore
 
 import androidx.datastore.core.CorruptionException
 import io.kotest.assertions.throwables.shouldThrow
@@ -7,30 +7,23 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import kotlinx.coroutines.test.runTest
-import net.primal.android.security.Encryption
-import net.primal.android.user.domain.UserAccount
-import org.junit.Test
 import java.io.InputStream
 import java.io.OutputStream
+import kotlinx.coroutines.test.runTest
+import net.primal.android.security.Encryption
+import org.junit.Test
 
-class UserAccountsSerializationTest {
+class CredentialsSerializationTest {
 
     private fun encryptionMock(
-        decryptResult: String = """
-            [{   
-                "pubkey":"b10b0d5e5fae9c6c48a8c77f7e5abd42a79e9480e25a4094051d4ba4ce14456b",
-                "authorDisplayName":"Alex",
-                "userDisplayName":"alex"
-            }]
-        """.trimIndent(),
+        decryptResult: String = """[{"npub":"dummyNpub", "nsec":"dummyNsec"}]""",
     ) = mockk<Encryption>(relaxed = true) {
         every { decrypt(any()) } returns decryptResult
     }
 
     @Test
     fun `defaultValue returns empty list`() {
-        val serializer = UserAccountsSerialization(mockk(), mockk())
+        val serializer = CredentialsSerialization(mockk(), mockk())
         val actual = serializer.defaultValue
         actual shouldBe emptyList()
     }
@@ -38,14 +31,14 @@ class UserAccountsSerializationTest {
     @Test
     fun `readFrom calls decrypt with proper inputStream`() = runTest {
         val encryptionMock = encryptionMock()
-        val serializer = UserAccountsSerialization(encryption = encryptionMock)
+        val serializer = CredentialsSerialization(encryption = encryptionMock)
 
         val inputStream = mockk<InputStream>()
         serializer.readFrom(inputStream)
 
         verify {
             encryptionMock.decrypt(
-                withArg { it shouldBe inputStream },
+                withArg { it shouldBe inputStream }
             )
         }
     }
@@ -53,7 +46,7 @@ class UserAccountsSerializationTest {
     @Test
     fun `readFrom throws CorruptionException for invalid data`() = runTest {
         val encryptionMock = encryptionMock(decryptResult = "giberish")
-        val serializer = UserAccountsSerialization(encryption = encryptionMock)
+        val serializer = CredentialsSerialization(encryption = encryptionMock)
 
         shouldThrow<CorruptionException> {
             serializer.readFrom(mockk())
@@ -63,10 +56,10 @@ class UserAccountsSerializationTest {
     @Test
     fun `writeTo calls encrypt with proper outputStream`() = runTest {
         val encryptionMock = encryptionMock()
-        val serializer = UserAccountsSerialization(encryption = encryptionMock)
+        val serializer = CredentialsSerialization(encryption = encryptionMock)
 
         val outputStream = mockk<OutputStream>()
-        serializer.writeTo(listOf(UserAccount.EMPTY), outputStream)
+        serializer.writeTo(listOf(), outputStream)
 
         coVerify {
             encryptionMock.encrypt(
@@ -75,4 +68,5 @@ class UserAccountsSerializationTest {
             )
         }
     }
+
 }

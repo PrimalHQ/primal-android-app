@@ -1,4 +1,4 @@
-package net.primal.android.serialization
+package net.primal.android.serialization.datastore
 
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.test.runTest

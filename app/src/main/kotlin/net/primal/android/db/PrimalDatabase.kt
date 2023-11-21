@@ -37,7 +37,8 @@ import net.primal.android.profile.db.ProfileData
 import net.primal.android.profile.db.ProfileDataDao
 import net.primal.android.profile.db.ProfileStats
 import net.primal.android.profile.db.ProfileStatsDao
-import net.primal.android.serialization.RoomCustomTypeConverters
+import net.primal.android.serialization.room.AttachmentTypeConverters
+import net.primal.android.serialization.room.ListsTypeConverters
 import net.primal.android.settings.muted.db.MutedUserDao
 import net.primal.android.settings.muted.db.MutedUserData
 import net.primal.android.thread.db.ThreadConversationCrossRef
@@ -68,7 +69,10 @@ import net.primal.android.thread.db.ThreadConversationDao
     version = 12,
     exportSchema = true,
 )
-@TypeConverters(RoomCustomTypeConverters::class)
+@TypeConverters(
+    ListsTypeConverters::class,
+    AttachmentTypeConverters::class,
+)
 abstract class PrimalDatabase : RoomDatabase() {
 
     abstract fun profiles(): ProfileDataDao

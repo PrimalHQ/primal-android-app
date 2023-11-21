@@ -3,8 +3,8 @@ package net.primal.android.nostr.ext
 import net.primal.android.nostr.model.primal.PrimalEvent
 import net.primal.android.nostr.model.primal.content.ContentPrimalEventUserStats
 import net.primal.android.profile.db.PostUserStats
-import net.primal.android.serialization.NostrJson
-import net.primal.android.serialization.decodeFromStringOrNull
+import net.primal.android.serialization.json.NostrJson
+import net.primal.android.serialization.json.decodeFromStringOrNull
 
 fun ContentPrimalEventUserStats.asPostUserStatsPO(userId: String) =
     PostUserStats(

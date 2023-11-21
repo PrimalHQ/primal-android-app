@@ -2,8 +2,8 @@ package net.primal.android.nostr.ext
 
 import net.primal.android.feed.db.RepostData
 import net.primal.android.nostr.model.NostrEvent
-import net.primal.android.serialization.NostrJson
-import net.primal.android.serialization.decodeFromStringOrNull
+import net.primal.android.serialization.json.NostrJson
+import net.primal.android.serialization.json.decodeFromStringOrNull
 
 fun List<NostrEvent>.mapNotNullAsRepostDataPO() =
     mapNotNull {

@@ -8,8 +8,8 @@ import net.primal.android.nostr.model.primal.content.ContentPrimalNotification
 import net.primal.android.notifications.db.NotificationData
 import net.primal.android.notifications.domain.NotificationType
 import net.primal.android.notifications.domain.NotificationsSummary
-import net.primal.android.serialization.NostrJson
-import net.primal.android.serialization.decodeFromStringOrNull
+import net.primal.android.serialization.json.NostrJson
+import net.primal.android.serialization.json.decodeFromStringOrNull
 
 fun PrimalEvent.asNotificationSummary(): NotificationsSummary {
     val summaryJsonObject = NostrJson.parseToJsonElement(this.content).jsonObject

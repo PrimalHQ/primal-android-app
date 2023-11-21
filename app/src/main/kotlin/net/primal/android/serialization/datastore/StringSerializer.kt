@@ -1,4 +1,4 @@
-package net.primal.android.serialization
+package net.primal.android.serialization.datastore
 
 import androidx.datastore.core.Serializer
 import java.io.InputStream

@@ -3,7 +3,7 @@ package net.primal.android.networking.primal
 import kotlinx.serialization.json.add
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
-import net.primal.android.serialization.NostrJson
+import net.primal.android.serialization.json.NostrJson
 
 data class PrimalCacheFilter(
     val primalVerb: PrimalVerb? = null,

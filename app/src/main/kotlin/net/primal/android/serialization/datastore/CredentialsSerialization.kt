@@ -1,4 +1,4 @@
-package net.primal.android.serialization
+package net.primal.android.serialization.datastore
 
 import androidx.datastore.core.CorruptionException
 import androidx.datastore.core.Serializer
@@ -8,6 +8,7 @@ import kotlinx.serialization.SerializationException
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import net.primal.android.security.Encryption
+import net.primal.android.serialization.json.NostrJson
 import net.primal.android.user.domain.Credential
 import timber.log.Timber
 

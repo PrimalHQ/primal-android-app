@@ -9,8 +9,8 @@ import net.primal.android.db.PrimalDatabase
 import net.primal.android.feed.db.Feed
 import net.primal.android.nostr.model.primal.content.ContentAppSettings
 import net.primal.android.nostr.model.primal.content.ContentFeedData
-import net.primal.android.serialization.NostrJson
-import net.primal.android.serialization.decodeFromStringOrNull
+import net.primal.android.serialization.json.NostrJson
+import net.primal.android.serialization.json.decodeFromStringOrNull
 import net.primal.android.settings.api.SettingsApi
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.domain.UserAccount

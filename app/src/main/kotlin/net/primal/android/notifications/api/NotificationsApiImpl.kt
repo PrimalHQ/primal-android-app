@@ -12,7 +12,7 @@ import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.notifications.api.model.NotificationsRequestBody
 import net.primal.android.notifications.api.model.NotificationsResponse
 import net.primal.android.notifications.api.model.PubkeyRequestBody
-import net.primal.android.serialization.NostrJson
+import net.primal.android.serialization.json.NostrJson
 import net.primal.android.settings.api.model.AppSpecificDataRequest
 
 class NotificationsApiImpl @Inject constructor(

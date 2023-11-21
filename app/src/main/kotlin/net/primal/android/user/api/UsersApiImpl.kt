@@ -13,7 +13,7 @@ import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.model.content.ContentMetadata
 import net.primal.android.nostr.notary.NostrNotary
-import net.primal.android.serialization.NostrJson
+import net.primal.android.serialization.json.NostrJson
 import net.primal.android.user.api.model.ContactsRequestBody
 import net.primal.android.user.api.model.UserContactsResponse
 import net.primal.android.user.api.model.UserProfileResponse

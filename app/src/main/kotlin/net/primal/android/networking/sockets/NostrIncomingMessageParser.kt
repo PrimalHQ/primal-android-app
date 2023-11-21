@@ -14,8 +14,8 @@ import net.primal.android.nostr.ext.isNotPrimalEventKind
 import net.primal.android.nostr.ext.isNotUnknown
 import net.primal.android.nostr.ext.isPrimalEventKind
 import net.primal.android.nostr.model.NostrEventKind
-import net.primal.android.serialization.NostrJson
-import net.primal.android.serialization.decodeFromStringOrNull
+import net.primal.android.serialization.json.NostrJson
+import net.primal.android.serialization.json.decodeFromStringOrNull
 import timber.log.Timber
 
 fun String.parseIncomingMessage(): NostrIncomingMessage? {

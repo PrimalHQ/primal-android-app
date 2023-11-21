@@ -16,8 +16,8 @@ import net.primal.android.networking.primal.PrimalVerb.RECOMMENDED_USERS
 import net.primal.android.networking.primal.PrimalVerb.TRENDING_HASHTAGS_7D
 import net.primal.android.networking.primal.PrimalVerb.USER_SEARCH
 import net.primal.android.nostr.model.NostrEventKind
-import net.primal.android.serialization.NostrJson
-import net.primal.android.serialization.decodeFromStringOrNull
+import net.primal.android.serialization.json.NostrJson
+import net.primal.android.serialization.json.decodeFromStringOrNull
 
 class ExploreApiImpl @Inject constructor(
     @PrimalCacheApiClient private val primalApiClient: PrimalApiClient,
