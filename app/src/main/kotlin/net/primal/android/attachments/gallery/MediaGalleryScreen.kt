@@ -5,11 +5,15 @@ import androidx.compose.animation.core.spring
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerDefaults
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -18,16 +22,21 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
+import coil.imageLoader
+import coil.memory.MemoryCache
+import coil.request.ErrorResult
 import coil.request.ImageRequest
+import coil.request.SuccessResult
 import me.saket.telephoto.zoomable.ZoomSpec
 import me.saket.telephoto.zoomable.coil.ZoomableAsyncImage
 import me.saket.telephoto.zoomable.rememberZoomableImageState
 import me.saket.telephoto.zoomable.rememberZoomableState
 import net.primal.android.core.compose.AppBarIcon
-import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.attachment.model.NoteAttachmentUi
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
@@ -79,7 +88,7 @@ private fun AttachmentsHorizontalPager(
     imageAttachments: List<NoteAttachmentUi>,
     initialIndex: Int = 0,
 ) {
-    val zoomSpec = ZoomSpec(maxZoomFactor = 4.0f)
+    val zoomSpec = ZoomSpec(maxZoomFactor = 2.5f)
     val pagerState = rememberPagerState { imageAttachments.size }
 
     HorizontalPager(
@@ -91,30 +100,65 @@ private fun AttachmentsHorizontalPager(
             snapAnimationSpec = spring(stiffness = Spring.StiffnessLow),
         ),
     ) { index ->
-        val imageUrl = imageAttachments[index].url
+        val attachment = imageAttachments[index]
+        val imageUrl = attachment.url
         Box(modifier = Modifier.fillMaxSize()) {
-            val loading by remember { mutableStateOf(true) }
+            var error by remember { mutableStateOf<ErrorResult?>(null) }
+            val loadingImageListener = remember {
+                object : ImageRequest.Listener {
+                    override fun onSuccess(request: ImageRequest, result: SuccessResult) {
+                        error = null
+                    }
 
-            if (loading) {
-                PrimalLoadingSpinner()
+                    override fun onError(request: ImageRequest, result: ErrorResult) {
+                        error = result
+                    }
+                }
             }
 
-            val zoomableImageState = rememberZoomableImageState(rememberZoomableState(zoomSpec = zoomSpec))
+            val imageLoader = LocalContext.current.imageLoader
+            val keys = attachment.variants.orEmpty()
+                .sortedBy { it.width }
+                .mapNotNull {
+                    val cacheKey = MemoryCache.Key(it.mediaUrl)
+                    if (imageLoader.memoryCache?.keys?.contains(cacheKey) == true) cacheKey else null
+                }
+
             ZoomableAsyncImage(
                 modifier = modifier,
-                state = zoomableImageState,
+                state = rememberZoomableImageState(rememberZoomableState(zoomSpec = zoomSpec)),
+                imageLoader = imageLoader,
                 model = ImageRequest.Builder(LocalContext.current)
                     .data(imageUrl)
-                    .placeholderMemoryCacheKey(imageUrl)
+                    .placeholderMemoryCacheKey(keys.lastOrNull())
+                    .listener(loadingImageListener)
                     .crossfade(IMAGE_CROSSFADE_DURATION)
                     .build(),
                 contentDescription = null,
             )
+
+            if (error != null) {
+                AttachmentLoadingError()
+            }
         }
     }
 
     LaunchedEffect(initialIndex) {
         pagerState.scrollToPage(initialIndex)
+    }
+}
+
+@Composable
+private fun AttachmentLoadingError() {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            imageVector = Icons.Filled.Warning,
+            contentDescription = null,
+            modifier = Modifier.size(48.dp),
+        )
     }
 }
 
