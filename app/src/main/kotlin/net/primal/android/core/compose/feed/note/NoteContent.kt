@@ -227,12 +227,14 @@ fun renderContentAsAnnotatedString(
 ): AnnotatedString {
     val imageAttachments = data.attachments.filterImages()
     val linkAttachments = data.attachments.filterLinkPreviews()
-    val otherNonImageAttachments = data.attachments.filterNotImages()
     val mentionedPosts = data.nostrUris.filterMentionedPosts()
     val mentionedUsers = data.nostrUris.filterMentionedUsers()
 
     val shouldDeleteLinks = imageAttachments.isEmpty() && linkAttachments.size == 1 &&
-        data.content.trim().endsWith(linkAttachments.first().url)
+        linkAttachments.first().let { singleLink ->
+            data.content.trim().endsWith(singleLink.url) &&
+                (!singleLink.title.isNullOrBlank() || !singleLink.description.isNullOrBlank())
+        }
 
     val refinedContent = data.content
         .removeUrls(urls = imageAttachments.map { it.url })
@@ -254,7 +256,7 @@ fun renderContentAsAnnotatedString(
             )
         }
 
-        otherNonImageAttachments.map { it.url }.forEach {
+        data.attachments.filterNotImages().map { it.url }.forEach {
             val startIndex = refinedContent.indexOf(it)
             if (startIndex >= 0) {
                 val endIndex = startIndex + it.length
