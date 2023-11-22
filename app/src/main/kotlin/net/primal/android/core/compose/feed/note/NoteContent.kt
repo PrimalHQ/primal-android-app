@@ -226,19 +226,18 @@ fun renderContentAsAnnotatedString(
     shouldKeepNostrNoteUris: Boolean = false,
 ): AnnotatedString {
     val imageAttachments = data.attachments.filterImages()
+    val linkAttachments = data.attachments.filterLinkPreviews()
     val otherNonImageAttachments = data.attachments.filterNotImages()
     val mentionedPosts = data.nostrUris.filterMentionedPosts()
     val mentionedUsers = data.nostrUris.filterMentionedUsers()
 
+    val shouldDeleteLinks = imageAttachments.isEmpty() && linkAttachments.size == 1 &&
+        data.content.trim().endsWith(linkAttachments.first().url)
+
     val refinedContent = data.content
         .removeUrls(urls = imageAttachments.map { it.url })
-        .removeUrls(
-            urls = if (!shouldKeepNostrNoteUris) {
-                mentionedPosts.map { it.uri }
-            } else {
-                emptyList()
-            },
-        )
+        .removeUrls(urls = if (!shouldKeepNostrNoteUris) mentionedPosts.map { it.uri } else emptyList())
+        .removeUrls(urls = if (shouldDeleteLinks) linkAttachments.map { it.url } else emptyList())
         .ellipsize(expanded = expanded, ellipsizeText = seeMoreText)
         .replaceNostrProfileUrisWithHandles(resources = mentionedUsers)
         .clearParsedPrimalLinks()

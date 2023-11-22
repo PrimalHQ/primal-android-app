@@ -30,7 +30,7 @@ fun NoteLinkPreview(
 ) {
     Column(
         modifier = Modifier
-            .padding(vertical = 8.dp)
+            .padding(top = 4.dp, bottom = 8.dp)
             .background(
                 color = AppTheme.extraColorScheme.surfaceVariantAlt3,
                 shape = AppTheme.shapes.small,
