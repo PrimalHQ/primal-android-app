@@ -162,7 +162,7 @@ fun FeedNoteCard(
                             }
                         }
 
-                        FeedNoteContent(
+                        NoteContent(
                             modifier = Modifier
                                 .padding(horizontal = if (fullWidthContent) 10.dp else 8.dp)
                                 .padding(

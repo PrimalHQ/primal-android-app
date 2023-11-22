@@ -68,8 +68,8 @@ import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.feed.model.toNoteContentUi
-import net.primal.android.core.compose.feed.note.FeedNoteContent
 import net.primal.android.core.compose.feed.note.FeedNoteHeader
+import net.primal.android.core.compose.feed.note.NoteContent
 import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromGallery
@@ -392,7 +392,7 @@ private fun ReplyToNote(replyToNote: FeedPostUi, connectionLineColor: Color) {
             onAuthorAvatarClick = {},
         )
 
-        FeedNoteContent(
+        NoteContent(
             modifier = Modifier.padding(
                 start = avatarsColumnWidthDp,
                 end = 16.dp,

@@ -36,7 +36,7 @@ import net.primal.android.theme.AppTheme
 @ExperimentalFoundationApi
 @Composable
 fun NoteMediaAttachmentsHorizontalPager(
-    onAttachmentClick: (String) -> Unit,
+    onAttachmentClick: (NoteAttachmentUi, String) -> Unit,
     mediaAttachments: List<NoteAttachmentUi> = emptyList(),
 ) {
     BoxWithConstraints {
@@ -45,11 +45,12 @@ fun NoteMediaAttachmentsHorizontalPager(
 
         val pagerState = rememberPagerState { imagesCount }
         HorizontalPager(state = pagerState) {
+            val attachment = mediaAttachments[it]
             NoteMediaAttachment(
-                attachment = mediaAttachments[it],
+                attachment = attachment,
                 imageSizeDp = imageSizeDp,
                 onClick = {
-                    onAttachmentClick(mediaAttachments[it].url)
+                    onAttachmentClick(attachment, attachment.url)
                 },
             )
         }

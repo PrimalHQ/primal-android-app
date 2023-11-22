@@ -15,9 +15,8 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import net.primal.android.R
-import net.primal.android.attachments.domain.NoteAttachmentType
 import net.primal.android.core.compose.PrimalClickableText
-import net.primal.android.core.compose.attachment.model.NoteAttachmentUi
+import net.primal.android.core.compose.attachment.model.isMediaAttachment
 import net.primal.android.core.compose.feed.model.NoteContentUi
 import net.primal.android.core.compose.feed.model.NoteNostrUriUi
 import net.primal.android.core.utils.HashtagMatcher
@@ -31,13 +30,6 @@ private const val PROFILE_ID_ANNOTATION_TAG = "profileId"
 private const val URL_ANNOTATION_TAG = "url"
 private const val NOTE_ANNOTATION_TAG = "note"
 private const val HASHTAG_ANNOTATION_TAG = "hashtag"
-
-private fun NoteAttachmentUi.isMediaAttachment() =
-    type == NoteAttachmentType.Image || (type == NoteAttachmentType.Video && thumbnailUrl != null)
-
-private fun List<NoteAttachmentUi>.filterMedia() = filter { it.isMediaAttachment() }
-
-private fun List<NoteAttachmentUi>.filterNotMedia() = filterNot { it.isMediaAttachment() }
 
 private fun List<NoteNostrUriUi>.filterMentionedPosts() = filter { it.referencedPost != null }
 
@@ -115,7 +107,7 @@ private fun String.ellipsize(expanded: Boolean, ellipsizeText: String): String {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun FeedNoteContent(
+fun NoteContent(
     modifier: Modifier = Modifier,
     data: NoteContentUi,
     expanded: Boolean,
@@ -166,29 +158,12 @@ fun FeedNoteContent(
         }
 
         if (data.attachments.isNotEmpty()) {
-            val mediaAttachments = data.attachments.filterMedia()
-            val linkAttachments = data.attachments.filterNotMedia()
-            when {
-                mediaAttachments.isNotEmpty() -> {
-                    NoteMediaAttachmentsHorizontalPager(
-                        mediaAttachments = mediaAttachments,
-                        onAttachmentClick = { onMediaClick(data.noteId, it) },
-                    )
-                }
-
-                linkAttachments.size == 1 -> {
-                    val attachment = linkAttachments.first()
-                    if (!attachment.title.isNullOrBlank() || !attachment.description.isNullOrBlank()) {
-                        NoteLinkPreview(
-                            url = attachment.url,
-                            title = attachment.title,
-                            description = attachment.description,
-                            thumbnailUrl = attachment.thumbnailUrl,
-                            onClick = { onUrlClick(attachment.url) },
-                        )
-                    }
-                }
-            }
+            NoteAttachments(
+                noteId = data.noteId,
+                attachments = data.attachments,
+                onUrlClick = onUrlClick,
+                onMediaClick = onMediaClick,
+            )
         }
 
         val referencedPostResources = data.nostrUris.filterMentionedPosts()
@@ -211,8 +186,8 @@ fun renderContentAsAnnotatedString(
     highlightColor: Color,
     shouldKeepNostrNoteUris: Boolean = false,
 ): AnnotatedString {
-    val mediaAttachments = data.attachments.filterMedia()
-    val linkAttachments = data.attachments.filterNotMedia()
+    val mediaAttachments = data.attachments.filter { it.isMediaAttachment() }
+    val linkAttachments = data.attachments.filterNot { it.isMediaAttachment() }
     val mentionedPosts = data.nostrUris.filterMentionedPosts()
     val mentionedUsers = data.nostrUris.filterMentionedUsers()
 
@@ -242,7 +217,7 @@ fun renderContentAsAnnotatedString(
             )
         }
 
-        data.attachments.filterNotMedia().map { it.url }.forEach {
+        data.attachments.filterNot { it.isMediaAttachment() }.map { it.url }.forEach {
             val startIndex = refinedContent.indexOf(it)
             if (startIndex >= 0) {
                 val endIndex = startIndex + it.length
@@ -302,7 +277,7 @@ fun renderContentAsAnnotatedString(
 fun PreviewPostContent() {
     PrimalTheme(primalTheme = PrimalTheme.Sunset) {
         Surface {
-            FeedNoteContent(
+            NoteContent(
                 data = NoteContentUi(
                     noteId = "",
                     content = """
@@ -339,7 +314,7 @@ fun PreviewPostContent() {
 fun PreviewPostContentWithReferencedPost() {
     PrimalTheme(primalTheme = PrimalTheme.Sunset) {
         Surface {
-            FeedNoteContent(
+            NoteContent(
                 data = NoteContentUi(
                     noteId = "",
                     content = """

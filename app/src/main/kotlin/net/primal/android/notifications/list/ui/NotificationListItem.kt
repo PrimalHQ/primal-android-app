@@ -27,8 +27,8 @@ import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.feed.model.FeedPostAction
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.feed.model.toNoteContentUi
-import net.primal.android.core.compose.feed.note.FeedNoteContent
 import net.primal.android.core.compose.feed.note.FeedNoteStatsRow
+import net.primal.android.core.compose.feed.note.NoteContent
 import net.primal.android.core.compose.notifications.toImagePainter
 import net.primal.android.core.ext.openUriSafely
 import net.primal.android.core.utils.shortened
@@ -244,7 +244,7 @@ private fun NotificationListItem(
                 val localUriHandler = LocalUriHandler.current
 
                 if (actionPost != null) {
-                    FeedNoteContent(
+                    NoteContent(
                         modifier = Modifier.padding(end = 16.dp),
                         data = actionPost.toNoteContentUi(),
                         expanded = false,

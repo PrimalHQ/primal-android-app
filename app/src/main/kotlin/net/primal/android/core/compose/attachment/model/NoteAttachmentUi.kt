@@ -26,3 +26,6 @@ fun NoteAttachment.asNoteAttachmentUi() =
         thumbnailUrl = this.thumbnail,
         authorAvatarUrl = this.authorAvatarUrl,
     )
+
+fun NoteAttachmentUi.isMediaAttachment() =
+    type == NoteAttachmentType.Image || (type == NoteAttachmentType.Video && thumbnailUrl != null)

@@ -51,7 +51,7 @@ fun ReferencedNoteCard(
             authorInternetIdentifier = data.authorInternetIdentifier,
         )
 
-        FeedNoteContent(
+        NoteContent(
             modifier = Modifier
                 .padding(horizontal = 12.dp)
                 .padding(top = 4.dp),
