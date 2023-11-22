@@ -12,6 +12,7 @@ import net.primal.android.nostr.ext.isNostrUri
 fun List<PostData>.flatMapPostsAsNoteAttachmentPO(
     cdnResources: Map<String, CdnResource>,
     linkPreviews: Map<String, LinkPreviewData>,
+    videoThumbnails: Map<String, String>,
 ) = flatMap { postData ->
     postData.uris.map { uri ->
         postData.postId to uri
@@ -21,16 +22,18 @@ fun List<PostData>.flatMapPostsAsNoteAttachmentPO(
     .map { (eventId, uri) ->
         val cdnResource = cdnResources[uri]
         val linkPreview = linkPreviews[uri]
+        val videoThumbnail = videoThumbnails[uri]
         val mimeType = uri.detectMimeType() ?: cdnResource?.contentType ?: linkPreview?.mimeType
+        val type = detectNoteAttachmentType(url = uri, mimeType = mimeType)
         NoteAttachment(
             eventId = eventId,
             url = uri,
-            type = detectNoteAttachmentType(url = uri, mimeType = mimeType),
+            type = type,
             mimeType = mimeType,
             variants = cdnResource?.variants,
             title = linkPreview?.title?.ifBlank { null },
             description = linkPreview?.description?.ifBlank { null },
-            thumbnail = linkPreview?.thumbnailUrl?.ifBlank { null },
+            thumbnail = linkPreview?.thumbnailUrl?.ifBlank { null } ?: videoThumbnail,
             authorAvatarUrl = linkPreview?.authorAvatarUrl?.ifBlank { null },
         )
     }

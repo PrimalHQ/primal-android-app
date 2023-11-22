@@ -7,8 +7,11 @@ import net.primal.android.nostr.model.primal.content.ContentPrimalEventResources
 import net.primal.android.serialization.json.NostrJson
 import net.primal.android.serialization.json.decodeFromStringOrNull
 
-fun List<PrimalEvent>.flatMapNotNullAsCdnResource() =
+private fun List<PrimalEvent>.flatMapNotNullAsContentPrimalEventResources() =
     mapNotNull { NostrJson.decodeFromStringOrNull<ContentPrimalEventResources>(it.content) }
+
+fun List<PrimalEvent>.flatMapNotNullAsCdnResource() =
+    flatMapNotNullAsContentPrimalEventResources()
         .flatMap {
             val eventId = it.eventId
             it.resources.map { eventResource ->
@@ -26,3 +29,13 @@ fun List<PrimalEvent>.flatMapNotNullAsCdnResource() =
                 )
             }
         }
+
+fun List<PrimalEvent>.flatMapNotNullAsVideoThumbnailsMap(): Map<String, String> {
+    val thumbnailsMap = hashMapOf<String, String>()
+    flatMapNotNullAsContentPrimalEventResources()
+        .map { it.videoThumbnails }
+        .fold(thumbnailsMap) { finalMap, currentMap ->
+            finalMap.apply { putAll(currentMap) }
+        }
+    return thumbnailsMap
+}

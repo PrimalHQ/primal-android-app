@@ -183,6 +183,7 @@ fun List<String>.mapAsNoteNostrUriPO(
                 attachments = listOf(refPost).flatMapPostsAsNoteAttachmentPO(
                     cdnResources = emptyMap(),
                     linkPreviews = emptyMap(),
+                    videoThumbnails = emptyMap(),
                 ),
                 nostrUris = listOf(refPost).flatMapPostsAsNoteNostrUriPO(
                     postIdToPostDataMap = postIdToPostDataMap,

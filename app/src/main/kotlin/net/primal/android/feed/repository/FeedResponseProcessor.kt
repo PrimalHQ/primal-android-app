@@ -7,6 +7,7 @@ import net.primal.android.db.PrimalDatabase
 import net.primal.android.feed.api.model.FeedResponse
 import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
 import net.primal.android.nostr.ext.flatMapNotNullAsLinkPreviewResource
+import net.primal.android.nostr.ext.flatMapNotNullAsVideoThumbnailsMap
 import net.primal.android.nostr.ext.flatMapPostsAsNoteNostrUriPO
 import net.primal.android.nostr.ext.mapAsPostDataPO
 import net.primal.android.nostr.ext.mapAsProfileDataPO
@@ -17,6 +18,7 @@ import net.primal.android.nostr.ext.mapNotNullAsRepostDataPO
 
 suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String, database: PrimalDatabase) {
     val cdnResources = this.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
+    val videoThumbnails = this.cdnResources.flatMapNotNullAsVideoThumbnailsMap()
     val linkPreviews = primalLinkPreviews.flatMapNotNullAsLinkPreviewResource().asMapByKey { it.url }
 
     val feedPosts = posts.mapAsPostDataPO()
@@ -33,6 +35,7 @@ suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String, database
     val noteAttachments = allPosts.flatMapPostsAsNoteAttachmentPO(
         cdnResources = cdnResources,
         linkPreviews = linkPreviews,
+        videoThumbnails = videoThumbnails,
     )
 
     val noteNostrUris = allPosts.flatMapPostsAsNoteNostrUriPO(
