@@ -54,6 +54,8 @@ fun NostrEvent.mapAsMessageDataPO(userId: String, nsec: String): DirectMessageDa
     } catch (error: GeneralSecurityException) {
         Timber.w(NostrJson.encodeToString(this.toJsonObject()))
         return null
+    } catch (error: Exception) {
+        "Failed to decrypt message"
     }
 
     return DirectMessageData(
