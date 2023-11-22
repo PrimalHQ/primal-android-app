@@ -61,7 +61,7 @@ class FeedRemoteMediator(
         val firstPost = withContext(Dispatchers.IO) {
             database.feedPosts().newestFeedPosts(query = feedQueryBuilder.feedQuery()).firstOrNull()
         }
-        return firstPost.isOlderThan(7.days)
+        return firstPost.isOlderThan(2.days)
     }
 
     private suspend fun shouldRefreshNonLatestFeed(feedDirective: String): Boolean {
