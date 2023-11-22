@@ -1,4 +1,4 @@
-package net.primal.android.core.compose
+package net.primal.android.core.compose.feed.note
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,19 +18,19 @@ import com.google.accompanist.placeholder.material.placeholder
 import net.primal.android.theme.AppTheme
 
 @Composable
-fun PostImageListItemImage(source: Any?, modifier: Modifier = Modifier) {
+fun NoteImagePreview(source: Any?, modifier: Modifier = Modifier) {
     SubcomposeAsyncImage(
         model = source,
         modifier = modifier,
         contentDescription = null,
         contentScale = ContentScale.Crop,
-        loading = { PostImageLoadingPlaceholder() },
-        error = { PostImageErrorImage() },
+        loading = { NoteImageLoadingPlaceholder() },
+        error = { NoteImageErrorImage() },
     )
 }
 
 @Composable
-fun PostImageLoadingPlaceholder() {
+fun NoteImageLoadingPlaceholder() {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -45,7 +45,7 @@ fun PostImageLoadingPlaceholder() {
 }
 
 @Composable
-fun PostImageErrorImage() {
+private fun NoteImageErrorImage() {
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center,

@@ -2,7 +2,6 @@ package net.primal.android.core.compose.feed.note
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -33,12 +32,12 @@ private const val URL_ANNOTATION_TAG = "url"
 private const val NOTE_ANNOTATION_TAG = "note"
 private const val HASHTAG_ANNOTATION_TAG = "hashtag"
 
-private fun List<NoteAttachmentUi>.filterImages() = filter { it.type == NoteAttachmentType.Image }
+private fun NoteAttachmentUi.isMediaAttachment() =
+    type == NoteAttachmentType.Image || (type == NoteAttachmentType.Video && thumbnailUrl != null)
 
-private fun List<NoteAttachmentUi>.filterNotImages() = filterNot { it.type == NoteAttachmentType.Image }
+private fun List<NoteAttachmentUi>.filterMedia() = filter { it.isMediaAttachment() }
 
-private fun List<NoteAttachmentUi>.filterLinkPreviews() =
-    filterNot { it.type == NoteAttachmentType.Image || it.type == NoteAttachmentType.Video }
+private fun List<NoteAttachmentUi>.filterNotMedia() = filterNot { it.isMediaAttachment() }
 
 private fun List<NoteNostrUriUi>.filterMentionedPosts() = filter { it.referencedPost != null }
 
@@ -167,13 +166,12 @@ fun FeedNoteContent(
         }
 
         if (data.attachments.isNotEmpty()) {
-            val imageAttachments = data.attachments.filterImages()
-            val linkAttachments = data.attachments.filterLinkPreviews()
-
+            val mediaAttachments = data.attachments.filterMedia()
+            val linkAttachments = data.attachments.filterNotMedia()
             when {
-                imageAttachments.isNotEmpty() -> {
-                    NoteMediaAttachmentsPreview(
-                        imageAttachments = imageAttachments,
+                mediaAttachments.isNotEmpty() -> {
+                    NoteMediaAttachmentsHorizontalPager(
+                        mediaAttachments = mediaAttachments,
                         onAttachmentClick = { onMediaClick(data.noteId, it) },
                     )
                 }
@@ -213,19 +211,19 @@ fun renderContentAsAnnotatedString(
     highlightColor: Color,
     shouldKeepNostrNoteUris: Boolean = false,
 ): AnnotatedString {
-    val imageAttachments = data.attachments.filterImages()
-    val linkAttachments = data.attachments.filterLinkPreviews()
+    val mediaAttachments = data.attachments.filterMedia()
+    val linkAttachments = data.attachments.filterNotMedia()
     val mentionedPosts = data.nostrUris.filterMentionedPosts()
     val mentionedUsers = data.nostrUris.filterMentionedUsers()
 
-    val shouldDeleteLinks = imageAttachments.isEmpty() && linkAttachments.size == 1 &&
+    val shouldDeleteLinks = mediaAttachments.isEmpty() && linkAttachments.size == 1 &&
         linkAttachments.first().let { singleLink ->
             data.content.trim().endsWith(singleLink.url) &&
                 (!singleLink.title.isNullOrBlank() || !singleLink.description.isNullOrBlank())
         }
 
     val refinedContent = data.content
-        .removeUrls(urls = imageAttachments.map { it.url })
+        .removeUrls(urls = mediaAttachments.map { it.url })
         .removeUrls(urls = if (!shouldKeepNostrNoteUris) mentionedPosts.map { it.uri } else emptyList())
         .removeUrls(urls = if (shouldDeleteLinks) linkAttachments.map { it.url } else emptyList())
         .ellipsize(expanded = expanded, ellipsizeText = seeMoreText)
@@ -244,7 +242,7 @@ fun renderContentAsAnnotatedString(
             )
         }
 
-        data.attachments.filterNotImages().map { it.url }.forEach {
+        data.attachments.filterNotMedia().map { it.url }.forEach {
             val startIndex = refinedContent.indexOf(it)
             if (startIndex >= 0) {
                 val endIndex = startIndex + it.length

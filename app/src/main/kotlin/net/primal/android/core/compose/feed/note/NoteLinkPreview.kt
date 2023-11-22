@@ -16,7 +16,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil.compose.SubcomposeAsyncImage
-import net.primal.android.core.compose.PostImageLoadingPlaceholder
 import net.primal.android.core.utils.extractTLD
 import net.primal.android.theme.AppTheme
 
@@ -51,7 +50,7 @@ fun NoteLinkPreview(
                     .wrapContentHeight(),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
-                loading = { PostImageLoadingPlaceholder() },
+                loading = { NoteImageLoadingPlaceholder() },
             )
         }
 
