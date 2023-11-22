@@ -82,3 +82,17 @@ fun String?.detectMimeType(): String? {
         }
     }
 }
+
+private val tldExtractionRegex = Regex("(?:https?://)?(?:www\\.)?([\\w\\d\\-]+\\.[\\w\\d\\-.]+)")
+
+fun String.extractTLD(): String? {
+    val matchResult = tldExtractionRegex.find(this)
+    val tldCandidate = matchResult?.groupValues?.get(1)
+    val parts = tldCandidate?.split(".").orEmpty()
+    val partsCount = parts.size
+    return when {
+        partsCount < 2 -> null
+        partsCount == 2 -> tldCandidate
+        else -> parts.drop(partsCount - 2).joinToString(".")
+    }
+}

@@ -2,27 +2,17 @@ package net.primal.android.core.compose.feed.note
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.BoxWithConstraintsScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -30,32 +20,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import java.time.Instant
 import net.primal.android.R
 import net.primal.android.attachments.domain.NoteAttachmentType
-import net.primal.android.attachments.domain.calculateImageSize
-import net.primal.android.attachments.domain.findNearestOrNull
-import net.primal.android.core.compose.PostImageListItemImage
 import net.primal.android.core.compose.PrimalClickableText
 import net.primal.android.core.compose.attachment.model.NoteAttachmentUi
-import net.primal.android.core.compose.attachment.model.asNoteAttachmentUi
-import net.primal.android.core.compose.feed.model.FeedPostStatsUi
-import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.feed.model.NoteContentUi
 import net.primal.android.core.compose.feed.model.NoteNostrUriUi
-import net.primal.android.core.compose.feed.model.asNoteNostrUriUi
 import net.primal.android.core.utils.HashtagMatcher
-import net.primal.android.core.utils.parseHashtags
 import net.primal.android.feed.db.ReferencedPost
 import net.primal.android.feed.db.ReferencedUser
 import net.primal.android.theme.AppTheme
@@ -137,15 +115,18 @@ private fun String.clearParsedPrimalLinks(): String {
     return newContent
 }
 
+private const val ELLIPSIZE_THRESHOLD = 500
+
 private fun String.ellipsize(expanded: Boolean, ellipsizeText: String): String {
-    val shouldEllipsize = length > 500
+    val shouldEllipsize = length > ELLIPSIZE_THRESHOLD
     return if (expanded || !shouldEllipsize) {
         this
     } else {
-        substring(0, 500).plus(" $ellipsizeText")
+        substring(0, ELLIPSIZE_THRESHOLD).plus(" $ellipsizeText")
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun FeedNoteContent(
     modifier: Modifier = Modifier,
@@ -203,7 +184,7 @@ fun FeedNoteContent(
 
             when {
                 imageAttachments.isNotEmpty() -> {
-                    FeedNoteImages(
+                    NoteMediaAttachmentsPreview(
                         imageAttachments = imageAttachments,
                         onAttachmentClick = { onMediaClick(data.noteId, it) },
                     )
@@ -211,10 +192,8 @@ fun FeedNoteContent(
 
                 linkAttachments.size == 1 -> {
                     val attachment = linkAttachments.first()
-                    if (!attachment.title.isNullOrBlank() || !attachment.description.isNullOrBlank() ||
-                        !attachment.thumbnailUrl.isNullOrBlank()
-                    ) {
-                        LinkPreview(
+                    if (!attachment.title.isNullOrBlank() || !attachment.description.isNullOrBlank()) {
+                        NoteLinkPreview(
                             url = attachment.url,
                             title = attachment.title,
                             description = attachment.description,
@@ -228,7 +207,7 @@ fun FeedNoteContent(
 
         val referencedPostResources = data.nostrUris.filterMentionedPosts()
         if (referencedPostResources.isNotEmpty()) {
-            FeedReferencedNotes(
+            ReferencedNotesColumn(
                 postResources = referencedPostResources,
                 expanded = expanded,
                 containerColor = referencedNoteContainerColor,
@@ -331,33 +310,6 @@ fun renderContentAsAnnotatedString(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-private fun FeedNoteImages(imageAttachments: List<NoteAttachmentUi>, onAttachmentClick: (String) -> Unit) {
-    BoxWithConstraints {
-        val imageSizeDp = findImageSize(attachment = imageAttachments.first())
-        val imagesCount = imageAttachments.size
-
-        val pagerState = rememberPagerState { imagesCount }
-        HorizontalPager(state = pagerState) {
-            NoteImageAttachment(
-                attachment = imageAttachments[it],
-                imageSizeDp = imageSizeDp,
-                onClick = {
-                    onAttachmentClick(imageAttachments[it].url)
-                },
-            )
-        }
-
-        if (imagesCount > 1) {
-            NoteImagesPagerIndicator(
-                imagesCount = imagesCount,
-                currentPage = pagerState.currentPage,
-            )
-        }
-    }
-}
-
 @ExperimentalFoundationApi
 @Composable
 fun BoxWithConstraintsScope.NoteImagesPagerIndicator(imagesCount: Int, currentPage: Int) {
@@ -380,163 +332,6 @@ fun BoxWithConstraintsScope.NoteImagesPagerIndicator(imagesCount: Int, currentPa
                     .clip(CircleShape)
                     .background(color)
                     .size(8.dp),
-            )
-        }
-    }
-}
-
-@Composable
-fun NoteImageAttachment(
-    attachment: NoteAttachmentUi,
-    imageSizeDp: DpSize,
-    onClick: () -> Unit,
-) {
-    BoxWithConstraints(
-        modifier = Modifier
-            .padding(vertical = 4.dp)
-            .clip(AppTheme.shapes.medium),
-    ) {
-        val maxWidthPx = with(LocalDensity.current) { maxWidth.roundToPx() }
-        val variant = attachment.variants.findNearestOrNull(maxWidthPx = maxWidthPx)
-        val imageSource = variant?.mediaUrl ?: attachment.url
-        PostImageListItemImage(
-            source = imageSource,
-            modifier = Modifier
-                .width(imageSizeDp.width)
-                .height(imageSizeDp.height)
-                .clickable(onClick = onClick),
-        )
-    }
-}
-
-@Composable
-fun LinkPreview(
-    url: String,
-    title: String?,
-    description: String?,
-    thumbnailUrl: String?,
-    onClick: () -> Unit,
-) {
-    Column(
-        modifier = Modifier
-            .padding(vertical = 8.dp)
-            .background(
-                color = AppTheme.extraColorScheme.surfaceVariantAlt3,
-                shape = AppTheme.shapes.small,
-            )
-            .border(
-                width = 0.5.dp,
-                color = AppTheme.colorScheme.outline,
-                shape = AppTheme.shapes.small,
-            )
-            .clickable(onClick = onClick),
-    ) {
-        if (thumbnailUrl != null) {
-            PostImageListItemImage(
-                source = thumbnailUrl,
-                modifier = Modifier
-                    .clip(shape = AppTheme.shapes.small)
-                    .fillMaxWidth()
-                    .wrapContentHeight(),
-            )
-        }
-
-        Text(
-            modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentHeight()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            text = "domain.tbd",
-            maxLines = 1,
-            color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
-            style = AppTheme.typography.bodySmall,
-        )
-
-        if (title != null) {
-            Text(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentHeight()
-                    .padding(horizontal = 16.dp),
-                text = title,
-                maxLines = 2,
-                color = AppTheme.colorScheme.onSurface,
-                style = AppTheme.typography.bodyMedium,
-            )
-        }
-
-        if (description != null) {
-            Text(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentHeight()
-                    .padding(horizontal = 16.dp),
-                text = description,
-                maxLines = 4,
-                color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
-                style = AppTheme.typography.bodyMedium,
-            )
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-    }
-}
-
-@Composable
-private fun BoxWithConstraintsScope.findImageSize(attachment: NoteAttachmentUi): DpSize {
-    val density = LocalDensity.current.density
-    val maxWidthPx = with(LocalDensity.current) { maxWidth.roundToPx() }
-    val maxWidth = maxWidth.value.toInt()
-    val maxHeight = (LocalConfiguration.current.screenHeightDp * 0.77).toInt()
-    val variant = attachment.variants.findNearestOrNull(maxWidthPx = maxWidthPx)
-    return variant.calculateImageSize(
-        maxWidth = maxWidth,
-        maxHeight = maxHeight,
-        density = density,
-    )
-}
-
-@Composable
-fun FeedReferencedNotes(
-    postResources: List<NoteNostrUriUi>,
-    expanded: Boolean,
-    containerColor: Color,
-    onPostClick: (String) -> Unit,
-    onMediaClick: (String, String) -> Unit,
-) {
-    val displayableNotes = if (postResources.isNotEmpty()) {
-        if (expanded) postResources else postResources.subList(0, 1)
-    } else {
-        emptyList()
-    }
-
-    Column {
-        displayableNotes.forEach { nostrResourceUi ->
-            val data = nostrResourceUi.referencedPost
-            checkNotNull(data)
-            ReferencedNoteCard(
-                modifier = Modifier.padding(vertical = 4.dp),
-                data = FeedPostUi(
-                    postId = data.postId,
-                    repostId = null,
-                    repostAuthorId = null,
-                    repostAuthorName = null,
-                    authorId = data.authorId,
-                    authorName = data.authorName,
-                    authorHandle = data.authorName,
-                    authorInternetIdentifier = data.authorInternetIdentifier,
-                    authorAvatarCdnImage = data.authorAvatarCdnImage,
-                    attachments = data.attachments.map { it.asNoteAttachmentUi() },
-                    nostrUris = data.nostrUris.map { it.asNoteNostrUriUi() },
-                    timestamp = Instant.ofEpochSecond(data.createdAt),
-                    content = data.content,
-                    stats = FeedPostStatsUi(),
-                    hashtags = data.content.parseHashtags(),
-                    rawNostrEventJson = "",
-                ),
-                onPostClick = onPostClick,
-                onMediaClick = onMediaClick,
-                colors = CardDefaults.cardColors(containerColor = containerColor),
             )
         }
     }
