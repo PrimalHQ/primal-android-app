@@ -5,9 +5,13 @@ import androidx.compose.animation.core.spring
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerDefaults
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Warning
@@ -37,6 +41,7 @@ import me.saket.telephoto.zoomable.coil.ZoomableAsyncImage
 import me.saket.telephoto.zoomable.rememberZoomableImageState
 import me.saket.telephoto.zoomable.rememberZoomableState
 import net.primal.android.core.compose.AppBarIcon
+import net.primal.android.core.compose.HorizontalPagerIndicator
 import net.primal.android.core.compose.attachment.model.NoteAttachmentUi
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
@@ -51,18 +56,25 @@ fun MediaGalleryScreen(onClose: () -> Unit, viewModel: MediaGalleryViewModel) {
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun MediaGalleryScreen(state: MediaGalleryContract.UiState, onClose: () -> Unit) {
     Surface(color = AppTheme.colorScheme.background) {
         Box(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .systemBarsPadding(),
             contentAlignment = Alignment.TopStart,
         ) {
-            if (state.attachments.isNotEmpty()) {
+            val imageAttachments = state.attachments
+            val imagesCount = imageAttachments.size
+
+            val pagerState = rememberPagerState { imagesCount }
+            if (imageAttachments.isNotEmpty()) {
                 AttachmentsHorizontalPager(
                     modifier = Modifier.fillMaxSize(),
-                    imageAttachments = state.attachments,
+                    imageAttachments = imageAttachments,
+                    pagerState = pagerState,
                     initialIndex = state.initialAttachmentIndex,
                 )
             }
@@ -77,19 +89,30 @@ fun MediaGalleryScreen(state: MediaGalleryContract.UiState, onClose: () -> Unit)
                     scrolledContainerColor = AppTheme.colorScheme.surface.copy(alpha = 0.2f),
                 ),
             )
+
+            if (imagesCount > 1) {
+                HorizontalPagerIndicator(
+                    modifier = Modifier
+                        .height(32.dp)
+                        .fillMaxWidth()
+                        .align(Alignment.BottomCenter),
+                    imagesCount = imagesCount,
+                    currentPage = pagerState.currentPage,
+                )
+            }
         }
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
+@ExperimentalFoundationApi
 @Composable
 private fun AttachmentsHorizontalPager(
     modifier: Modifier = Modifier,
+    pagerState: PagerState,
     imageAttachments: List<NoteAttachmentUi>,
     initialIndex: Int = 0,
 ) {
     val zoomSpec = ZoomSpec(maxZoomFactor = 2.5f)
-    val pagerState = rememberPagerState { imageAttachments.size }
 
     HorizontalPager(
         modifier = modifier,

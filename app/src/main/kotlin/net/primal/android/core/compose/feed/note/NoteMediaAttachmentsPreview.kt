@@ -4,12 +4,14 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.BoxWithConstraintsScope
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalConfiguration
@@ -18,6 +20,7 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import net.primal.android.attachments.domain.calculateImageSize
 import net.primal.android.attachments.domain.findNearestOrNull
+import net.primal.android.core.compose.HorizontalPagerIndicator
 import net.primal.android.core.compose.PostImageListItemImage
 import net.primal.android.core.compose.attachment.model.NoteAttachmentUi
 import net.primal.android.theme.AppTheme
@@ -44,7 +47,11 @@ fun NoteMediaAttachmentsPreview(
         }
 
         if (imagesCount > 1) {
-            NoteImagesPagerIndicator(
+            HorizontalPagerIndicator(
+                modifier = Modifier
+                    .height(32.dp)
+                    .fillMaxWidth()
+                    .align(Alignment.BottomCenter),
                 imagesCount = imagesCount,
                 currentPage = pagerState.currentPage,
             )

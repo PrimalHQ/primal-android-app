@@ -1,23 +1,12 @@
 package net.primal.android.core.compose.feed.note
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraintsScope
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -25,7 +14,6 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.R
 import net.primal.android.attachments.domain.NoteAttachmentType
@@ -308,33 +296,6 @@ fun renderContentAsAnnotatedString(
                     end = it.endIndex,
                 )
             }
-    }
-}
-
-@ExperimentalFoundationApi
-@Composable
-fun BoxWithConstraintsScope.NoteImagesPagerIndicator(imagesCount: Int, currentPage: Int) {
-    Row(
-        Modifier
-            .height(32.dp)
-            .fillMaxWidth()
-            .align(Alignment.BottomCenter),
-        horizontalArrangement = Arrangement.Center,
-    ) {
-        repeat(imagesCount) { iteration ->
-            val color = if (currentPage == iteration) {
-                AppTheme.colorScheme.primary
-            } else {
-                AppTheme.colorScheme.onPrimary
-            }
-            Box(
-                modifier = Modifier
-                    .padding(2.dp)
-                    .clip(CircleShape)
-                    .background(color)
-                    .size(8.dp),
-            )
-        }
     }
 }
 
