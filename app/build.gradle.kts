@@ -193,13 +193,12 @@ dependencies {
     implementation(libs.compose.ui.graphics)
     implementation(libs.compose.ui.tooling.preview)
     implementation(libs.compose.material3)
-
-    implementation(libs.androidx.material.icons.extended)
-
     implementation(libs.compose.placeholdermaterial)
 
-    implementation(libs.constraintlayout)
     implementation(libs.compose.constraintlayout)
+    implementation(libs.constraintlayout)
+
+    implementation(libs.androidx.material.icons.extended)
 
     implementation(libs.navigation.material)
 

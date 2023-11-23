@@ -16,8 +16,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.App.Starting"
         android:usesCleartextTraffic="true"
-        tools:targetApi="33"
-        tools:replace="android:allowBackup" >
+        tools:replace="android:allowBackup"
+        tools:targetApi="33">
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -33,11 +34,12 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data android:scheme="nostr+walletconnect"/>
-                <data android:scheme="nostrwalletconnect"/>
-                <data android:scheme="primal"/>
+                <data android:scheme="nostr+walletconnect" />
+                <data android:scheme="nostrwalletconnect" />
+                <data android:scheme="primal" />
             </intent-filter>
         </activity>
+
     </application>
 
 </manifest>
