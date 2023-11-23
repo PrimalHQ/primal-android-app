@@ -4,6 +4,8 @@ import java.security.GeneralSecurityException
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.jsonObject
+import net.primal.android.core.serialization.json.NostrJson
+import net.primal.android.core.serialization.json.toJsonObject
 import net.primal.android.core.utils.parseHashtags
 import net.primal.android.core.utils.parseUris
 import net.primal.android.crypto.CryptoUtils
@@ -15,8 +17,6 @@ import net.primal.android.messages.domain.ConversationsSummary
 import net.primal.android.messages.domain.MessagesUnreadCount
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.primal.PrimalEvent
-import net.primal.android.serialization.json.NostrJson
-import net.primal.android.serialization.json.toJsonObject
 import timber.log.Timber
 
 fun PrimalEvent.asMessagesTotalCount(): MessagesUnreadCount? {
