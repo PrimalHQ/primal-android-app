@@ -1,10 +1,10 @@
 package net.primal.android.nostr.ext
 
+import net.primal.android.core.serialization.json.NostrJson
+import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.feed.db.PostStats
 import net.primal.android.nostr.model.primal.PrimalEvent
 import net.primal.android.nostr.model.primal.content.ContentPrimalEventStats
-import net.primal.android.serialization.json.NostrJson
-import net.primal.android.serialization.json.decodeFromStringOrNull
 
 fun ContentPrimalEventStats.asPostStatsPO() =
     PostStats(

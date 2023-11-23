@@ -12,8 +12,8 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.test.runTest
 import net.primal.android.security.NoEncryption
-import net.primal.android.serialization.datastore.StringSerializer
-import net.primal.android.serialization.datastore.UserAccountsSerialization
+import net.primal.android.core.serialization.datastore.StringSerializer
+import net.primal.android.user.accounts.UserAccountsSerialization
 import net.primal.android.test.MainDispatcherRule
 import net.primal.android.test.advanceUntilIdleAndDelay
 import net.primal.android.user.accounts.UserAccountsStore

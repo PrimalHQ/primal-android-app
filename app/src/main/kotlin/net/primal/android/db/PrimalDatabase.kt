@@ -8,6 +8,8 @@ import androidx.room.TypeConverters
 import net.primal.android.attachments.db.AttachmentDao
 import net.primal.android.attachments.db.NoteAttachment
 import net.primal.android.attachments.db.NoteNostrUri
+import net.primal.android.attachments.db.serialization.AttachmentTypeConverters
+import net.primal.android.core.serialization.room.ListsTypeConverters
 import net.primal.android.explore.db.TrendingHashtag
 import net.primal.android.explore.db.TrendingHashtagDao
 import net.primal.android.feed.db.Feed
@@ -37,8 +39,6 @@ import net.primal.android.profile.db.ProfileData
 import net.primal.android.profile.db.ProfileDataDao
 import net.primal.android.profile.db.ProfileStats
 import net.primal.android.profile.db.ProfileStatsDao
-import net.primal.android.serialization.room.AttachmentTypeConverters
-import net.primal.android.serialization.room.ListsTypeConverters
 import net.primal.android.settings.muted.db.MutedUserDao
 import net.primal.android.settings.muted.db.MutedUserData
 import net.primal.android.thread.db.ThreadConversationCrossRef

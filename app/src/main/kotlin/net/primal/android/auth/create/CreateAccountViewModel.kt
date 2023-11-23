@@ -19,11 +19,11 @@ import net.primal.android.auth.create.CreateAccountContract.UiState
 import net.primal.android.auth.create.api.RecommendedFollowsApi
 import net.primal.android.auth.create.ui.RecommendedFollow
 import net.primal.android.core.files.error.UnsuccessfulFileUpload
+import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.profile.domain.ProfileMetadata
 import net.primal.android.profile.repository.ProfileRepository
-import net.primal.android.serialization.json.NostrJson
 import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.user.accounts.BOOTSTRAP_RELAYS
 import net.primal.android.user.repository.UserRepository

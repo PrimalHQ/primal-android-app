@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.timeout
 import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.launch
+import net.primal.android.core.serialization.json.toJsonObject
 import net.primal.android.networking.UserAgentProvider
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.NostrIncomingMessage
@@ -20,7 +21,6 @@ import net.primal.android.networking.sockets.NostrSocketClient
 import net.primal.android.networking.sockets.errors.NostrNoticeException
 import net.primal.android.networking.sockets.filterByEventId
 import net.primal.android.nostr.model.NostrEvent
-import net.primal.android.serialization.json.toJsonObject
 import net.primal.android.user.domain.Relay
 import okhttp3.OkHttpClient
 import okhttp3.Request

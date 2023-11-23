@@ -6,6 +6,8 @@ import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.float
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import net.primal.android.core.serialization.json.NostrJson
+import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.explore.api.model.HashtagScore
 import net.primal.android.explore.api.model.SearchUsersRequestBody
 import net.primal.android.explore.api.model.UsersResponse
@@ -16,8 +18,6 @@ import net.primal.android.networking.primal.PrimalVerb.RECOMMENDED_USERS
 import net.primal.android.networking.primal.PrimalVerb.TRENDING_HASHTAGS_7D
 import net.primal.android.networking.primal.PrimalVerb.USER_SEARCH
 import net.primal.android.nostr.model.NostrEventKind
-import net.primal.android.serialization.json.NostrJson
-import net.primal.android.serialization.json.decodeFromStringOrNull
 
 class ExploreApiImpl @Inject constructor(
     @PrimalCacheApiClient private val primalApiClient: PrimalApiClient,

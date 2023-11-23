@@ -8,14 +8,14 @@ import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import net.primal.android.core.serialization.json.NostrJson
+import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.nostr.ext.asNostrEventOrNull
 import net.primal.android.nostr.ext.asPrimalEventOrNull
 import net.primal.android.nostr.ext.isNotPrimalEventKind
 import net.primal.android.nostr.ext.isNotUnknown
 import net.primal.android.nostr.ext.isPrimalEventKind
 import net.primal.android.nostr.model.NostrEventKind
-import net.primal.android.serialization.json.NostrJson
-import net.primal.android.serialization.json.decodeFromStringOrNull
 import timber.log.Timber
 
 fun String.parseIncomingMessage(): NostrIncomingMessage? {

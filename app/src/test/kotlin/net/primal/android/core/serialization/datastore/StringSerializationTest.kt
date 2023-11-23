@@ -1,10 +1,10 @@
-package net.primal.android.serialization.datastore
+package net.primal.android.core.serialization.datastore
 
 import io.kotest.matchers.shouldBe
-import kotlinx.coroutines.test.runTest
-import org.junit.Test
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
+import kotlinx.coroutines.test.runTest
+import org.junit.Test
 
 class StringSerializationTest {
 

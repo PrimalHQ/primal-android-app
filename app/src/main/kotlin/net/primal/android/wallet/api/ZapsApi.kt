@@ -7,10 +7,10 @@ import javax.inject.Singleton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
+import net.primal.android.core.serialization.json.NostrJson
+import net.primal.android.core.serialization.json.decodeFromStringOrNull
+import net.primal.android.core.serialization.json.toJsonObject
 import net.primal.android.nostr.model.NostrEvent
-import net.primal.android.serialization.json.NostrJson
-import net.primal.android.serialization.json.decodeFromStringOrNull
-import net.primal.android.serialization.json.toJsonObject
 import net.primal.android.wallet.model.LightningPayRequest
 import net.primal.android.wallet.model.LightningPayResponse
 import net.primal.android.wallet.utils.LnInvoiceUtils

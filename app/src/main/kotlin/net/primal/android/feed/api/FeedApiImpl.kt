@@ -2,6 +2,8 @@ package net.primal.android.feed.api
 
 import javax.inject.Inject
 import kotlinx.serialization.encodeToString
+import net.primal.android.core.serialization.json.NostrJson
+import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.feed.api.model.FeedRequestBody
 import net.primal.android.feed.api.model.FeedResponse
 import net.primal.android.feed.api.model.NotesRequestBody
@@ -13,8 +15,6 @@ import net.primal.android.networking.primal.PrimalVerb.FEED_DIRECTIVE
 import net.primal.android.networking.primal.PrimalVerb.NOTES
 import net.primal.android.networking.primal.PrimalVerb.THREAD_VIEW
 import net.primal.android.nostr.model.NostrEventKind
-import net.primal.android.serialization.json.NostrJson
-import net.primal.android.serialization.json.decodeFromStringOrNull
 
 class FeedApiImpl @Inject constructor(
     @PrimalCacheApiClient private val primalApiClient: PrimalApiClient,

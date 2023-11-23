@@ -13,7 +13,6 @@ import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import net.primal.android.security.NoEncryption
-import net.primal.android.serialization.datastore.UserAccountsSerialization
 import net.primal.android.test.MainDispatcherRule
 import net.primal.android.test.advanceUntilIdleAndDelay
 import net.primal.android.user.domain.UserAccount

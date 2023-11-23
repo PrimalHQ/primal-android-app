@@ -1,11 +1,11 @@
 package net.primal.android.nostr.ext
 
 import kotlinx.serialization.json.decodeFromJsonElement
+import net.primal.android.core.serialization.json.NostrJson
+import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.nostr.model.primal.PrimalEvent
 import net.primal.android.nostr.model.primal.content.ContentUserProfileStats
 import net.primal.android.profile.db.ProfileStats
-import net.primal.android.serialization.json.NostrJson
-import net.primal.android.serialization.json.decodeFromStringOrNull
 
 fun List<PrimalEvent>.mapNotNullAsProfileStatsPO() =
     this.mapNotNull {

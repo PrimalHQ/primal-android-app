@@ -1,4 +1,4 @@
-package net.primal.android.serialization.json
+package net.primal.android.core.serialization.json
 
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull

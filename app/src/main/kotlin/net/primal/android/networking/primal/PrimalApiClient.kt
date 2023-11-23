@@ -1,21 +1,58 @@
 package net.primal.android.networking.primal
 
-import java.util.UUID
+import java.util.*
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.transformWhile
+import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonObject
+import net.primal.android.config.AppConfigProvider
+import net.primal.android.config.dynamic.AppConfigUpdater
+import net.primal.android.networking.UserAgentProvider
 import net.primal.android.networking.sockets.NostrIncomingMessage
 import net.primal.android.networking.sockets.NostrSocketClient
 import net.primal.android.networking.sockets.errors.NostrNoticeException
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.networking.sockets.filterBySubscriptionId
+import okhttp3.OkHttpClient
+import okhttp3.Request
 
 class PrimalApiClient @Inject constructor(
-    private val socketClient: NostrSocketClient,
+    private val okHttpClient: OkHttpClient,
+    private val serverType: PrimalServerType,
+    private val appConfigProvider: AppConfigProvider,
+    private val appConfigUpdater: AppConfigUpdater,
 ) {
+
+    private val scope = CoroutineScope(Dispatchers.IO)
+
+    private var socketClientInitialized: Boolean = false
+    private lateinit var socketClient: NostrSocketClient
+
+    init {
+        observeApiUrlAndInitializeSocketClient()
+    }
+
+    private fun observeApiUrlAndInitializeSocketClient() =
+        scope.launch {
+            appConfigProvider.observeApiUrlByType(type = serverType).collect { apiUrl ->
+                if (socketClientInitialized) socketClient.close()
+
+                socketClient = NostrSocketClient(
+                    okHttpClient = okHttpClient,
+                    wssRequest = Request.Builder()
+                        .url(apiUrl)
+                        .addHeader("User-Agent", UserAgentProvider.USER_AGENT)
+                        .build(),
+                )
+                socketClientInitialized = true
+            }
+        }
 
     private suspend fun sendREQWithRetry(data: JsonObject): UUID? {
         var queryAttempts = 0
@@ -89,6 +126,14 @@ class PrimalApiClient @Inject constructor(
             emit(it)
             it is NostrIncomingMessage.EventMessage
         }
+
+    private suspend fun AppConfigProvider.observeApiUrlByType(type: PrimalServerType): StateFlow<String> {
+        return when (type) {
+            PrimalServerType.Caching -> cacheUrl()
+            PrimalServerType.Upload -> uploadUrl()
+            PrimalServerType.Wallet -> walletUrl()
+        }
+    }
 
     companion object {
         private const val MAX_QUERY_ATTEMPTS = 3

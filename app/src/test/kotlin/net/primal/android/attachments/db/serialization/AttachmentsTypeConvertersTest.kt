@@ -1,11 +1,11 @@
-package net.primal.android.serialization.room
+package net.primal.android.attachments.db.serialization
 
 import io.kotest.assertions.json.shouldEqualJson
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import kotlinx.serialization.encodeToString
 import net.primal.android.attachments.domain.CdnResourceVariant
-import net.primal.android.serialization.json.NostrJson
+import net.primal.android.core.serialization.json.NostrJson
 import org.junit.Test
 
 class AttachmentsTypeConvertersTest {

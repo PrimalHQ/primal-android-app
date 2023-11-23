@@ -2,6 +2,8 @@ package net.primal.android.messages.api
 
 import javax.inject.Inject
 import kotlinx.serialization.encodeToString
+import net.primal.android.core.serialization.json.NostrJson
+import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.messages.api.model.ConversationRequestBody
 import net.primal.android.messages.api.model.ConversationsResponse
 import net.primal.android.messages.api.model.MarkMessagesReadRequestBody
@@ -15,8 +17,6 @@ import net.primal.android.networking.primal.PrimalVerb
 import net.primal.android.nostr.ext.asMessageConversationsSummary
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.notary.NostrNotary
-import net.primal.android.serialization.json.NostrJson
-import net.primal.android.serialization.json.decodeFromStringOrNull
 
 class MessagesApiImpl @Inject constructor(
     @PrimalCacheApiClient private val primalApiClient: PrimalApiClient,

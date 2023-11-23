@@ -1,4 +1,4 @@
-package net.primal.android.serialization.datastore
+package net.primal.android.user.accounts
 
 import androidx.datastore.core.CorruptionException
 import io.kotest.assertions.throwables.shouldThrow

@@ -16,7 +16,6 @@ import net.primal.android.crypto.CryptoUtils
 import net.primal.android.crypto.toHex
 import net.primal.android.crypto.toNpub
 import net.primal.android.security.NoEncryption
-import net.primal.android.serialization.datastore.CredentialsSerialization
 import net.primal.android.test.MainDispatcherRule
 import net.primal.android.test.advanceUntilIdleAndDelay
 import net.primal.android.user.domain.Credential

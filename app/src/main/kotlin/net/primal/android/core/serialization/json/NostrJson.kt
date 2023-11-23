@@ -1,4 +1,4 @@
-package net.primal.android.serialization.json
+package net.primal.android.core.serialization.json
 
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray

@@ -1,4 +1,4 @@
-package net.primal.android.serialization.room
+package net.primal.android.attachments.db.serialization
 
 import androidx.room.TypeConverter
 import kotlinx.serialization.encodeToString
@@ -6,8 +6,8 @@ import net.primal.android.attachments.db.NoteAttachment
 import net.primal.android.attachments.db.NoteNostrUri
 import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.attachments.domain.CdnResourceVariant
-import net.primal.android.serialization.json.NostrJson
-import net.primal.android.serialization.json.decodeFromStringOrNull
+import net.primal.android.core.serialization.json.NostrJson
+import net.primal.android.core.serialization.json.decodeFromStringOrNull
 
 class AttachmentTypeConverters {
 

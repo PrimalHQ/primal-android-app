@@ -1,10 +1,10 @@
-package net.primal.android.serialization.room
+package net.primal.android.core.serialization.room
 
 import androidx.room.TypeConverter
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.JsonArray
-import net.primal.android.serialization.json.NostrJson
-import net.primal.android.serialization.json.decodeFromStringOrNull
+import net.primal.android.core.serialization.json.NostrJson
+import net.primal.android.core.serialization.json.decodeFromStringOrNull
 
 class ListsTypeConverters {
 

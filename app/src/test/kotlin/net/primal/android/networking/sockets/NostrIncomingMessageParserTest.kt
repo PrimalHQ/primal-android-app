@@ -8,7 +8,7 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.json.put
 import net.primal.android.nostr.model.NostrEvent
-import net.primal.android.serialization.json.NostrJson
+import net.primal.android.core.serialization.json.NostrJson
 import org.junit.Test
 import java.time.Instant
 import java.util.UUID

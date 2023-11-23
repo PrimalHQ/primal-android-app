@@ -11,10 +11,10 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import net.primal.android.BuildConfig
+import net.primal.android.core.serialization.datastore.StringSerializer
 import net.primal.android.security.AESEncryption
 import net.primal.android.security.Encryption
 import net.primal.android.security.PrimalDatabasePasswordProvider
-import net.primal.android.serialization.datastore.StringSerializer
 import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
 
 @Module

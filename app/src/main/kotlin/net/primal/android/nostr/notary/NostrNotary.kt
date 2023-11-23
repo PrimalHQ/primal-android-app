@@ -5,6 +5,8 @@ import javax.inject.Inject
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
+import net.primal.android.core.serialization.json.NostrJson
+import net.primal.android.core.serialization.json.toNostrRelayMap
 import net.primal.android.crypto.CryptoUtils
 import net.primal.android.crypto.toNpub
 import net.primal.android.networking.UserAgentProvider
@@ -16,8 +18,6 @@ import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.model.content.ContentMetadata
 import net.primal.android.nostr.model.primal.content.ContentAppSettings
-import net.primal.android.serialization.json.NostrJson
-import net.primal.android.serialization.json.toNostrRelayMap
 import net.primal.android.settings.api.model.AppSettingsDescription
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.NostrWallet

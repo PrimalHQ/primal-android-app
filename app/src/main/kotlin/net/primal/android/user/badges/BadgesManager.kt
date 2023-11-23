@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
+import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.primal.PrimalCacheFilter
@@ -26,7 +27,6 @@ import net.primal.android.networking.sockets.NostrIncomingMessage
 import net.primal.android.nostr.ext.asMessagesTotalCount
 import net.primal.android.nostr.ext.asNotificationSummary
 import net.primal.android.notifications.api.model.PubkeyRequestBody
-import net.primal.android.serialization.json.NostrJson
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
 import net.primal.android.user.domain.Badges
