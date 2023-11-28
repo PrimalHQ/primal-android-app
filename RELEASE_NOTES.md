@@ -9,3 +9,4 @@
 - Improved CDN use in the entire app;
 - Fixed highlight color in note content;
 - Removed shimmer from avatars when loading;
+- Stability improvements;
