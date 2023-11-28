@@ -3,6 +3,7 @@ package net.primal.android.user.updater
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import java.time.Instant
+import kotlin.time.Duration
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.user.repository.UserRepository
@@ -16,12 +17,12 @@ class UserDataUpdater @AssistedInject constructor(
 
     private var lastTimeFetched: Instant = Instant.EPOCH
 
-    private fun isUserDataSyncedInLast(seconds: Long): Boolean {
-        return lastTimeFetched < Instant.now().minusSeconds(seconds)
+    private fun isUserDataSyncedInLast(duration: Duration): Boolean {
+        return lastTimeFetched < Instant.now().minusMillis(duration.inWholeMilliseconds)
     }
 
-    suspend fun updateUserDataWithDebounce(timeoutInSeconds: Long) {
-        if (isUserDataSyncedInLast(seconds = timeoutInSeconds)) {
+    suspend fun updateUserDataWithDebounce(duration: Duration) {
+        if (isUserDataSyncedInLast(duration)) {
             try {
                 updateData()
                 lastTimeFetched = Instant.now()

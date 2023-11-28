@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.timeout
 import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.launch
+import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.serialization.json.toJsonObject
 import net.primal.android.networking.UserAgentProvider
 import net.primal.android.networking.relays.errors.NostrPublishException
@@ -26,6 +27,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 
 class RelayPool @AssistedInject constructor(
+    private val dispatchers: CoroutineDispatcherProvider,
     @Assisted val relays: List<Relay>,
     private val okHttpClient: OkHttpClient,
 ) {
@@ -43,6 +45,7 @@ class RelayPool @AssistedInject constructor(
             .mapNotNull { it.toWssRequestOrNull() }
             .map {
                 NostrSocketClient(
+                    dispatcherProvider = dispatchers,
                     okHttpClient = okHttpClient,
                     wssRequest = it,
                 )

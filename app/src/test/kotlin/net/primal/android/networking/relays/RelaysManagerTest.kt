@@ -5,16 +5,21 @@ import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
+import net.primal.android.core.coroutines.CoroutinesTestRule
 import net.primal.android.test.advanceUntilIdleAndDelay
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
 import net.primal.android.user.domain.Relay
 import net.primal.android.user.domain.UserAccount
 import okhttp3.OkHttpClient
+import org.junit.Rule
 import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class RelaysManagerTest {
+
+    @get:Rule
+    val coroutinesTestRule = CoroutinesTestRule()
 
     private val invalidRelays = listOf(
         Relay(url = "abcdefghijkl", true, true),
@@ -27,6 +32,7 @@ class RelaysManagerTest {
         relays: List<Relay> = emptyList()
     ) = mockk<RelayPoolFactory>() {
         every { create(any()) } returns RelayPool(
+            dispatchers = coroutinesTestRule.dispatcherProvider,
             relays = relays,
             okHttpClient = OkHttpClient()
         )

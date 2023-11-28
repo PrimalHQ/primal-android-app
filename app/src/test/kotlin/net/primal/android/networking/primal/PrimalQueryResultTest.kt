@@ -5,6 +5,7 @@ import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
+import java.util.*
 import net.primal.android.networking.sockets.NostrIncomingMessage
 import net.primal.android.nostr.ext.isNotPrimalEventKind
 import net.primal.android.nostr.ext.isNotUnknown
@@ -13,7 +14,6 @@ import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.model.primal.PrimalEvent
 import org.junit.Test
-import java.util.UUID
 
 class PrimalQueryResultTest {
 

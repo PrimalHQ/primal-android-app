@@ -6,15 +6,23 @@ import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import java.util.*
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.buildJsonObject
+import net.primal.android.core.coroutines.CoroutinesTestRule
 import okhttp3.WebSocket
+import org.junit.Rule
 import org.junit.Test
-import java.util.UUID
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class NostrSocketClientTest {
 
+    @get:Rule
+    val coroutinesTestRule = CoroutinesTestRule()
+
     private fun fakeNostrSocketClient(webSocket: WebSocket) = NostrSocketClient(
+        dispatcherProvider = coroutinesTestRule.dispatcherProvider,
         okHttpClient = mockk(relaxed = true) {
             every { newWebSocket(any(), any()) } returns webSocket
         },

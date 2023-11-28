@@ -2,17 +2,17 @@ package net.primal.android.networking.primal
 
 import java.util.*
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.minutes
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.transformWhile
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonObject
 import net.primal.android.config.AppConfigProvider
 import net.primal.android.config.dynamic.AppConfigUpdater
+import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.networking.UserAgentProvider
 import net.primal.android.networking.sockets.NostrIncomingMessage
 import net.primal.android.networking.sockets.NostrSocketClient
@@ -23,15 +23,17 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 
 class PrimalApiClient @Inject constructor(
+    private val dispatcherProvider: CoroutineDispatcherProvider,
     private val okHttpClient: OkHttpClient,
     private val serverType: PrimalServerType,
     private val appConfigProvider: AppConfigProvider,
     private val appConfigUpdater: AppConfigUpdater,
 ) {
 
-    private val scope = CoroutineScope(Dispatchers.IO)
+    private val scope = CoroutineScope(dispatcherProvider.io())
 
     private var socketClientInitialized: Boolean = false
+
     private lateinit var socketClient: NostrSocketClient
 
     init {
@@ -44,13 +46,21 @@ class PrimalApiClient @Inject constructor(
                 if (socketClientInitialized) socketClient.close()
 
                 socketClient = NostrSocketClient(
+                    dispatcherProvider = dispatcherProvider,
                     okHttpClient = okHttpClient,
                     wssRequest = Request.Builder()
                         .url(apiUrl)
                         .addHeader("User-Agent", UserAgentProvider.USER_AGENT)
                         .build(),
-                )
-                socketClientInitialized = true
+                    onSocketConnectionFailure = {
+                        scope.launch {
+                            appConfigUpdater.updateAppConfigWithDebounce(1.minutes)
+                        }
+                    },
+                ).apply {
+                    socketClientInitialized = true
+                    ensureSocketConnection()
+                }
             }
         }
 
@@ -127,16 +137,8 @@ class PrimalApiClient @Inject constructor(
             it is NostrIncomingMessage.EventMessage
         }
 
-    private suspend fun AppConfigProvider.observeApiUrlByType(type: PrimalServerType): StateFlow<String> {
-        return when (type) {
-            PrimalServerType.Caching -> cacheUrl()
-            PrimalServerType.Upload -> uploadUrl()
-            PrimalServerType.Wallet -> walletUrl()
-        }
-    }
-
     companion object {
         private const val MAX_QUERY_ATTEMPTS = 3
-        private const val RETRY_DELAY_MILLIS = 500L
+        private const val RETRY_DELAY_MILLIS = 1_000L
     }
 }

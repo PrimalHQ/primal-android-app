@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import net.primal.android.config.dynamic.AppConfigUpdater
 import net.primal.android.core.compose.feed.model.FeedPostsSyncStats
 import net.primal.android.core.compose.feed.model.asFeedPostUi
 import net.primal.android.core.utils.ellipsizeMiddle
@@ -47,6 +48,7 @@ class FeedViewModel @Inject constructor(
     private val postRepository: PostRepository,
     private val activeAccountStore: ActiveAccountStore,
     private val userDataSyncerFactory: UserDataUpdaterFactory,
+    private val appConfigUpdater: AppConfigUpdater,
     private val profileRepository: ProfileRepository,
     private val zapRepository: ZapRepository,
     private val badgesManager: BadgesManager,
@@ -172,9 +174,8 @@ class FeedViewModel @Inject constructor(
 
     private fun updateUserData() =
         viewModelScope.launch {
-            userDataUpdater?.updateUserDataWithDebounce(
-                timeoutInSeconds = 30.minutes.inWholeSeconds,
-            )
+            userDataUpdater?.updateUserDataWithDebounce(30.minutes)
+            appConfigUpdater.updateAppConfigWithDebounce(30.minutes)
         }
 
     private fun likePost(postLikeAction: UiEvent.PostLikeAction) =

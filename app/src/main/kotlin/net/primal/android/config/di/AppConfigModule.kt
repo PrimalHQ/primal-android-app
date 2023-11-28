@@ -16,6 +16,7 @@ import net.primal.android.config.domain.AppConfig
 import net.primal.android.config.dynamic.DynamicConfigProvider
 import net.primal.android.config.store.AppConfigDataStore
 import net.primal.android.config.store.AppConfigSerialization
+import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.security.Encryption
 import retrofit2.Retrofit
 import retrofit2.create
@@ -37,6 +38,12 @@ object AppConfigModule {
         )
 
     @Provides
-    fun appConfigProvider(appConfigDataStore: AppConfigDataStore): AppConfigProvider =
-        DynamicConfigProvider(appConfigStore = appConfigDataStore)
+    fun appConfigProvider(
+        appConfigDataStore: AppConfigDataStore,
+        dispatcherProvider: CoroutineDispatcherProvider,
+    ): AppConfigProvider =
+        DynamicConfigProvider(
+            appConfigStore = appConfigDataStore,
+            dispatcherProvider = dispatcherProvider,
+        )
 }
