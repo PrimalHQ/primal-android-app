@@ -176,6 +176,8 @@ class CreateAccountViewModel @Inject constructor(
             setEffect(SideEffect.AccountCreatedAndPersisted(pubkey = userId))
         } catch (e: NostrPublishException) {
             setState { copy(error = UiState.CreateError.FailedToFollow(e)) }
+        } catch (e: WssException) {
+            setState { copy(error = UiState.CreateError.FailedToFollow(e)) }
         } finally {
             setState { copy(loading = false) }
         }
