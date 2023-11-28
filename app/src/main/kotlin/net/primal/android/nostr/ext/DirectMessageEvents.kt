@@ -1,6 +1,5 @@
 package net.primal.android.nostr.ext
 
-import java.security.GeneralSecurityException
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.jsonObject
@@ -42,21 +41,18 @@ fun List<NostrEvent>.mapAsMessageDataPO(userId: String, nsec: String) =
 
 fun NostrEvent.mapAsMessageDataPO(userId: String, nsec: String): DirectMessageData? {
     val senderId = this.pubKey
-    val receiverId = this.tags.findFirstProfileId() ?: throw RuntimeException("no receiver id")
+    val receiverId = this.tags.findFirstProfileId() ?: return null
     val participantId = if (senderId != userId) senderId else receiverId
 
-    val decryptedMessage = try {
+    val decryptedMessage = runCatching {
         CryptoUtils.decrypt(
-            msg = this.content,
+            message = this.content,
             privateKey = nsec.bechToBytes(hrp = "nsec"),
             pubKey = participantId.hexToNpubHrp().bechToBytes(hrp = "npub"),
         )
-    } catch (error: GeneralSecurityException) {
+    }.getOrElse {
         Timber.w(NostrJson.encodeToString(this.toJsonObject()))
-        return null
-    } catch (error: IndexOutOfBoundsException) {
-        Timber.w(NostrJson.encodeToString(this.toJsonObject()))
-        "Failed to decrypt message"
+        this.content
     }
 
     return DirectMessageData(

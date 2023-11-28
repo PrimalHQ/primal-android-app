@@ -3,35 +3,35 @@
 package net.primal.android.crypto
 
 /**
- * Copied from:
+ * Originally copied from:
  * https://github.com/Giszmo/NostrPostr/blob/master/nostrpostrlib/src/main/java/nostr/postr/Utils.kt
  */
 
 import fr.acinq.secp256k1.Secp256k1
+import java.security.GeneralSecurityException
+import java.security.InvalidAlgorithmParameterException
 import java.security.MessageDigest
 import java.security.SecureRandom
 import javax.crypto.Cipher
 import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
 import org.spongycastle.util.encoders.Base64
+import org.spongycastle.util.encoders.DecoderException
 import org.spongycastle.util.encoders.Hex
 
 object CryptoUtils {
-    data class Keypair(val privkey: String, val pubkey: String)
+
+    data class Keypair(val privateKey: String, val pubKey: String)
 
     private val sha256: MessageDigest = MessageDigest.getInstance("SHA-256")
 
     fun generateHexEncodedKeypair(): Keypair {
-        val privkeyByteArray = privateKeyCreate()
-        val pubkeyByteArray = publicKeyCreate(privateKey = privkeyByteArray)
-
-        return Keypair(privkey = privkeyByteArray.toHex(), pubkey = pubkeyByteArray.toHex())
+        val privateKeyByteArray = privateKeyCreate()
+        val pubkeyByteArray = publicKeyCreate(privateKey = privateKeyByteArray)
+        return Keypair(privateKey = privateKeyByteArray.toHex(), pubKey = pubkeyByteArray.toHex())
     }
 
-    /**
-     * Provides a 32B "private key" aka random number
-     */
-    fun privateKeyCreate(): ByteArray {
+    private fun privateKeyCreate(): ByteArray {
         val bytes = ByteArray(32)
         random.nextBytes(bytes)
         return bytes
@@ -67,25 +67,30 @@ object CryptoUtils {
         return "$encryptedMsgBase64?iv=$ivBase64"
     }
 
+    @Throws(GeneralSecurityException::class, DecoderException::class)
     fun decrypt(
-        msg: String,
+        message: String,
         privateKey: ByteArray,
         pubKey: ByteArray,
     ): String {
         val sharedSecret = getSharedSecret(privateKey, pubKey)
-        return decrypt(msg, sharedSecret)
+        return decrypt(message, sharedSecret)
     }
 
-    fun decrypt(msg: String, sharedSecret: ByteArray): String {
-        val parts = msg.split("?iv=")
-        val iv = parts[1].run { Base64.decode(this) }
-        val encryptedMsg = parts.first().run { Base64.decode(this) }
+    @Throws(GeneralSecurityException::class, DecoderException::class)
+    private fun decrypt(message: String, sharedSecret: ByteArray): String {
+        val parts = message.split("?iv=")
+        if (parts.size != 2 || sharedSecret.isEmpty()) throw InvalidAlgorithmParameterException()
+
+        val encryptedMsg = Base64.decode(parts[0])
+        val iv = Base64.decode(parts[1])
+
         val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
         cipher.init(Cipher.DECRYPT_MODE, SecretKeySpec(sharedSecret, "AES"), IvParameterSpec(iv))
         return String(cipher.doFinal(encryptedMsg))
     }
 
-    fun getSharedSecret(privateKey: ByteArray, pubKey: ByteArray): ByteArray =
+    private fun getSharedSecret(privateKey: ByteArray, pubKey: ByteArray): ByteArray =
         secp256k1.pubKeyTweakMul(Hex.decode("02") + pubKey, privateKey).copyOfRange(1, 33)
 
     fun sha256(byteArray: ByteArray): ByteArray = sha256.digest(byteArray)

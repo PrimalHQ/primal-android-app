@@ -18,7 +18,7 @@ class AuthRepository @Inject constructor(
 
     suspend fun createAccountAndLogin(): String {
         val keypair = CryptoUtils.generateHexEncodedKeypair()
-        val userId = login(nostrKey = keypair.privkey)
+        val userId = login(nostrKey = keypair.privateKey)
         relaysBootstrapper.bootstrap(userId = userId)
         return userId
     }

@@ -64,7 +64,7 @@
     <ID>LongParameterList:ExtraColorScheme.kt$( onBrand: Color, surfaceVariantAlt1: Color, surfaceVariantAlt2: Color, surfaceVariantAlt3: Color, onSurfaceVariantAlt1: Color, onSurfaceVariantAlt2: Color, onSurfaceVariantAlt3: Color, onSurfaceVariantAlt4: Color, warning: Color, successBright: Color, successDim: Color, replied: Color, zapped: Color, liked: Color, reposted: Color, )</ID>
     <ID>LongParameterList:ExtraColorScheme.kt$ExtraColorScheme$( onBrand: Color = this.onBrand, surfaceVariantAlt1: Color = this.surfaceVariantAlt1, surfaceVariantAlt2: Color = this.surfaceVariantAlt2, surfaceVariantAlt3: Color = this.surfaceVariantAlt3, onSurfaceVariantAlt1: Color = this.onSurfaceVariantAlt1, onSurfaceVariantAlt2: Color = this.onSurfaceVariantAlt2, onSurfaceVariantAlt3: Color = this.onSurfaceVariantAlt3, onSurfaceVariantAlt4: Color = this.onSurfaceVariantAlt4, warning: Color = this.warning, successBright: Color = this.successBright, successDim: Color = this.successDim, replied: Color = this.replied, zapped: Color = this.zapped, liked: Color = this.liked, reposted: Color = this.reposted, )</ID>
     <ID>LongParameterList:ExtraColorScheme.kt$ExtraColorScheme$( onBrand: Color, surfaceVariantAlt1: Color, surfaceVariantAlt2: Color, surfaceVariantAlt3: Color, onSurfaceVariantAlt1: Color, onSurfaceVariantAlt2: Color, onSurfaceVariantAlt3: Color, onSurfaceVariantAlt4: Color, warning: Color, successBright: Color, successDim: Color, replied: Color, zapped: Color, liked: Color, reposted: Color, )</ID>
-    <ID>LongParameterList:FeedViewModel.kt$FeedViewModel$( savedStateHandle: SavedStateHandle, private val feedRepository: FeedRepository, private val postRepository: PostRepository, private val activeAccountStore: ActiveAccountStore, private val userDataSyncerFactory: UserDataUpdaterFactory, private val profileRepository: ProfileRepository, private val zapRepository: ZapRepository, private val badgesManager: BadgesManager, private val mutedUserRepository: MutedUserRepository, )</ID>
+    <ID>LongParameterList:FeedViewModel.kt$FeedViewModel$( savedStateHandle: SavedStateHandle, private val feedRepository: FeedRepository, private val postRepository: PostRepository, private val activeAccountStore: ActiveAccountStore, private val userDataSyncerFactory: UserDataUpdaterFactory, private val appConfigUpdater: AppConfigUpdater, private val profileRepository: ProfileRepository, private val zapRepository: ZapRepository, private val badgesManager: BadgesManager, private val mutedUserRepository: MutedUserRepository, )</ID>
     <ID>LongParameterList:MessageRepository.kt$MessageRepository$( private val activeAccountStore: ActiveAccountStore, private val credentialsStore: CredentialsStore, private val database: PrimalDatabase, private val messagesApi: MessagesApi, private val messagesProcessor: MessagesProcessor, private val relaysManager: RelaysManager, private val nostrNotary: NostrNotary, )</ID>
     <ID>LongParameterList:ProfileViewModel.kt$ProfileViewModel$( savedStateHandle: SavedStateHandle, feedRepository: FeedRepository, private val activeAccountStore: ActiveAccountStore, private val profileRepository: ProfileRepository, private val postRepository: PostRepository, private val zapRepository: ZapRepository, private val settingsRepository: SettingsRepository, private val mutedUserRepository: MutedUserRepository, )</ID>
     <ID>LongParameterList:ThreadViewModel.kt$ThreadViewModel$( savedStateHandle: SavedStateHandle, private val activeAccountStore: ActiveAccountStore, private val feedRepository: FeedRepository, private val postRepository: PostRepository, private val profileRepository: ProfileRepository, private val zapRepository: ZapRepository, private val mutedUserRepository: MutedUserRepository, )</ID>
@@ -80,8 +80,6 @@
     <ID>MagicNumber:CreateAccountContract.kt$CreateAccountContract.UiState.CreateAccountStep.FOLLOW_RECOMMENDED_ACCOUNTS$4</ID>
     <ID>MagicNumber:ExploreHomeViewModel.kt$ExploreHomeViewModel$3</ID>
     <ID>MagicNumber:Fading.kt$0.99f</ID>
-    <ID>MagicNumber:FeedNoteContent.kt$0.77</ID>
-    <ID>MagicNumber:FeedNoteContent.kt$500</ID>
     <ID>MagicNumber:FeedNoteList.kt$100</ID>
     <ID>MagicNumber:FeedNoteList.kt$30</ID>
     <ID>MagicNumber:FeedNoteList.kt$5</ID>
@@ -153,10 +151,8 @@
     <ID>ReturnCount:NotificationsRemoteMediator.kt$NotificationsRemoteMediator$override suspend fun load(loadType: LoadType, state: PagingState&lt;Int, Notification&gt;): MediatorResult</ID>
     <ID>SwallowedException:CredentialsStore.kt$CredentialsStore$error: DecoderException</ID>
     <ID>SwallowedException:CredentialsStore.kt$CredentialsStore$error: IllegalArgumentException</ID>
-    <ID>SwallowedException:DirectMessageEvents.kt$error: GeneralSecurityException</ID>
     <ID>SwallowedException:EditProfileViewModel.kt$EditProfileViewModel$error: WssException</ID>
     <ID>SwallowedException:ExploreHomeViewModel.kt$ExploreHomeViewModel$error: WssException</ID>
-    <ID>SwallowedException:LightningExt.kt$error: IllegalArgumentException</ID>
     <ID>SwallowedException:NostrEvents.kt$error: IllegalArgumentException</ID>
     <ID>SwallowedException:NostrJson.kt$error: IllegalArgumentException</ID>
     <ID>SwallowedException:NostrNotary.kt$NostrNotary$error: IllegalArgumentException</ID>
@@ -186,7 +182,6 @@
     <ID>ThrowsCount:ZapRepository.kt$ZapRepository$suspend fun zap( userId: String, target: ZapTarget, amountInSats: ULong? = null, comment: String? = null, )</ID>
     <ID>ThrowsCount:ZapsApi.kt$ZapsApi$suspend fun fetchInvoice( request: LightningPayRequest, zapEvent: NostrEvent, satoshiAmountInMilliSats: ULong, comment: String = "", ): LightningPayResponse</ID>
     <ID>TooGenericExceptionCaught:NostrIncomingMessageParser.kt$error: Exception</ID>
-    <ID>TooGenericExceptionThrown:DirectMessageEvents.kt$throw RuntimeException("no receiver id")</ID>
     <ID>TooManyFunctions:ConversionUtils.kt$net.primal.android.crypto.ConversionUtils.kt</ID>
     <ID>TooManyFunctions:NostrNotary.kt$NostrNotary</ID>
     <ID>TooManyFunctions:NostrResources.kt$net.primal.android.nostr.ext.NostrResources.kt</ID>
