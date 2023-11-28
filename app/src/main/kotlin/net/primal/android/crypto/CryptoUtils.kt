@@ -31,7 +31,7 @@ object CryptoUtils {
         return Keypair(privateKey = privateKeyByteArray.toHex(), pubKey = pubkeyByteArray.toHex())
     }
 
-    private fun privateKeyCreate(): ByteArray {
+    fun privateKeyCreate(): ByteArray {
         val bytes = ByteArray(32)
         random.nextBytes(bytes)
         return bytes

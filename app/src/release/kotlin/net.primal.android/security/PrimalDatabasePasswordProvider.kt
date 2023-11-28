@@ -13,8 +13,6 @@ class PrimalDatabasePasswordProvider @Inject constructor(
     private val dataStore: DataStore<String>,
 ) {
 
-    private fun generateRandomPassword() = CryptoUtils.privateKeyCreate()
-
     private fun readPassword(): String? =
         runBlocking {
             dataStore.data.firstOrNull()
@@ -26,7 +24,7 @@ class PrimalDatabasePasswordProvider @Inject constructor(
         }
 
     fun providePassword(): String {
-        return readPassword() ?: generateRandomPassword().toNsec().apply {
+        return readPassword() ?: CryptoUtils.privateKeyCreate().toNsec().apply {
             updatePassword(this)
         }
     }
