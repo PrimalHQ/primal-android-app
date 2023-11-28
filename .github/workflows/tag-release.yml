@@ -54,7 +54,7 @@ jobs:
           primal-${{ github.ref_name }}-mapping.zip
 
     - name: Upload Bundle artifacts to Play Store
-      run: ./gradlew uploadBundle --artifact-dir app/build/outputs/bundle/releasePlayStore
+      run: ./gradlew uploadReleasePlayStorePrivateBundle --artifact-dir app/build/outputs/bundle/releasePlayStore
 
   release:
    name: Create GitHub release
