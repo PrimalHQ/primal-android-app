@@ -12,12 +12,4 @@ fun String.parseAsLNUrlOrNull(): String? {
     return "https://$host/.well-known/lnurlp/$lnurlp"
 }
 
-fun String.decodeLNUrlOrNull(): String? {
-    return try {
-        this.bechToBytes(hrp = "lnurl").let {
-            String(it)
-        }
-    } catch (error: IllegalArgumentException) {
-        null
-    }
-}
+fun String.decodeLNUrlOrNull(): String? = runCatching { String(this.bechToBytes(hrp = "lnurl")) }.getOrNull()

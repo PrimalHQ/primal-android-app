@@ -39,7 +39,8 @@ class LightningExtTest {
         "lnurl1dp68gurn8ghj7ampd3xxxxx".decodeLNUrlOrNull() shouldBe null
     }
 
+    @Test
+    fun `decodeLNUrl() returns null for lud16`() {
+        "alex@primal.net".decodeLNUrlOrNull() shouldBe null
+    }
 }
-
-
-
