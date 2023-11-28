@@ -43,7 +43,7 @@ jobs:
     - name: Prepare Bundle artifacts
       run: |
         mv app/build/outputs/bundle/releasePlayStore/*aab primal-${{ github.ref_name }}.aab
-        mv app/build/outputs/mapping/releasePlayStore/mapping.txt ../../bundle/releasePlayStore/primal-${{ github.ref_name }}.mapping.txt
+        cp app/build/outputs/mapping/releasePlayStore/mapping.txt app/build/outputs/bundle/releasePlayStore/primal-${{ github.ref_name }}.mapping.txt
 
     - name: Upload APK artifacts to GitHub
       uses: actions/upload-artifact@v3
