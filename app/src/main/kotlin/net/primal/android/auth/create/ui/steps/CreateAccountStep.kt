@@ -41,7 +41,7 @@ fun CreateAccountStep(state: CreateAccountContract.UiState, eventPublisher: (Cre
         header = stringResource(id = R.string.create_input_header_display_name).uppercase(),
         value = state.displayName,
         onValueChange = {
-            eventPublisher(CreateAccountContract.UiEvent.DisplayNameChangedEvent(it.trim()))
+            eventPublisher(CreateAccountContract.UiEvent.DisplayNameChangedEvent(it))
         },
     )
     Spacer(modifier = Modifier.height(12.dp))
@@ -69,7 +69,7 @@ fun CreateAccountStep(state: CreateAccountContract.UiState, eventPublisher: (Cre
         value = state.lightningAddress,
         onValueChange = {
             eventPublisher(
-                CreateAccountContract.UiEvent.LightningAddressChangedEvent(it),
+                CreateAccountContract.UiEvent.LightningAddressChangedEvent(it.trim()),
             )
         },
     )
@@ -79,7 +79,7 @@ fun CreateAccountStep(state: CreateAccountContract.UiState, eventPublisher: (Cre
         value = state.nip05Identifier,
         onValueChange = {
             eventPublisher(
-                CreateAccountContract.UiEvent.Nip05IdentifierChangedEvent(it),
+                CreateAccountContract.UiEvent.Nip05IdentifierChangedEvent(it.trim()),
             )
         },
     )

@@ -178,7 +178,7 @@ fun EditProfileContent(
                 ).uppercase(),
                 value = state.lightningAddress,
                 onValueChange = {
-                    eventPublisher(EditProfileContract.UiEvent.LightningAddressChangedEvent(it))
+                    eventPublisher(EditProfileContract.UiEvent.LightningAddressChangedEvent(it.trim()))
                 },
             )
             Spacer(modifier = Modifier.height(12.dp))
@@ -186,7 +186,7 @@ fun EditProfileContent(
                 header = stringResource(id = R.string.create_input_header_nip_05).uppercase(),
                 value = state.nip05Identifier,
                 onValueChange = {
-                    eventPublisher(EditProfileContract.UiEvent.Nip05IdentifierChangedEvent(it))
+                    eventPublisher(EditProfileContract.UiEvent.Nip05IdentifierChangedEvent(it.trim()))
                 },
             )
         }
