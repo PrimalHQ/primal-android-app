@@ -29,25 +29,32 @@ jobs:
         openssl base64 -d -out app/primal_alternative_android.jks <<< "${{ secrets.CERT_ALTERNATIVE }}"
         openssl base64 -d -out app/primal_googlePlay_android.jks <<< "${{ secrets.CERT_PLAYSTORE }}"
 
-    - name: Build Github APK
+    - name: Build APK
       run: ./gradlew assembleReleaseAlternative --no-daemon
 
-    - name: Build PlayStore bundle
+    - name: Build Bundle
       run: ./gradlew bundleReleasePlayStore --no-daemon
 
-    - name: Prepare APK
-      run: mv app/build/outputs/apk/releaseAlternative/*apk primal-${{ github.ref_name }}.apk
+    - name: Prepare APK artifacts
+      run: |
+        mv app/build/outputs/apk/releaseAlternative/*apk primal-${{ github.ref_name }}.apk
+        zip -j primal-${{ github.ref_name }}-mapping.zip app/build/outputs/mapping/releaseAlternative/mapping.txt
 
-    - name: Zip R8 mapping file
-      run: zip -j primal-${{ github.ref_name }}-mapping.zip app/build/outputs/mapping/releaseAlternative/mapping.txt
+    - name: Prepare Bundle artifacts
+      run: |
+        mv app/build/outputs/bundle/releasePlayStore/*aab primal-${{ github.ref_name }}.aab
+        mv app/build/outputs/mapping/releasePlayStore/mapping.txt ../../bundle/releasePlayStore/primal-${{ github.ref_name }}.mapping.txt
 
-    - name: Upload artifacts
+    - name: Upload APK artifacts to GitHub
       uses: actions/upload-artifact@v3
       with:
         name: primal-${{ github.ref_name }}
         path: |
           primal-${{ github.ref_name }}.apk
           primal-${{ github.ref_name }}-mapping.zip
+
+    - name: Upload Bundle artifacts to Play Store
+      run: ./gradlew uploadBundle --artifact-dir app/build/outputs/bundle/releasePlayStore
 
   release:
    name: Create GitHub release
