@@ -4,9 +4,9 @@ import java.io.IOException
 import java.math.BigDecimal
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
+import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.core.serialization.json.toJsonObject
@@ -20,6 +20,7 @@ import okhttp3.Request
 
 @Singleton
 class ZapsApi @Inject constructor(
+    private val dispatcherProvider: CoroutineDispatcherProvider,
     private val okHttpClient: OkHttpClient,
 ) {
     suspend fun fetchZapPayRequest(lnUrl: String): LightningPayRequest {
@@ -29,13 +30,14 @@ class ZapsApi @Inject constructor(
             .get()
             .build()
 
-        val response = withContext(Dispatchers.IO) {
+        val response = withContext(dispatcherProvider.io()) {
             okHttpClient.newCall(getRequest).execute()
         }
 
         val responseBody = response.body
         return if (responseBody != null) {
-            NostrJson.decodeFromStringOrNull(string = responseBody.string())
+            val responseString = withContext(dispatcherProvider.io()) { responseBody.string() }
+            NostrJson.decodeFromStringOrNull(string = responseString)
                 ?: throw IOException("Invalid body content.")
         } else {
             throw IOException("Empty response body.")
@@ -67,12 +69,11 @@ class ZapsApi @Inject constructor(
             .get()
             .build()
 
-        val response = withContext(Dispatchers.IO) { okHttpClient.newCall(getRequest).execute() }
+        val response = withContext(dispatcherProvider.io()) { okHttpClient.newCall(getRequest).execute() }
         val responseBody = response.body
         if (responseBody != null) {
-            val decoded = NostrJson.decodeFromStringOrNull<LightningPayResponse>(
-                responseBody.string(),
-            )
+            val responseString = withContext(dispatcherProvider.io()) { responseBody.string() }
+            val decoded = NostrJson.decodeFromStringOrNull<LightningPayResponse>(responseString)
             if (decoded?.pr == null) throw IOException("Invalid invoice response.")
 
             val invoiceAmount = try {
