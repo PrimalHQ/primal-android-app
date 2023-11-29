@@ -23,7 +23,7 @@ inline val SavedStateHandle.searchQueryOrThrow: String
 const val NEW_POST_PRE_FILL_CONTENT = "preFillContent"
 inline val SavedStateHandle.newPostPreFillContent: String? get() = get<String>(
     NEW_POST_PRE_FILL_CONTENT,
-)?.asUrlDecoded()?.ifEmpty {
+)?.asBase64Decoded()?.ifEmpty {
     null
 }
 

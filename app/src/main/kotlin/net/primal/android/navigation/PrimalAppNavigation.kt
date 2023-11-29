@@ -94,7 +94,7 @@ private fun NavController.navigateToNoteEditor(
     val route = "editor" +
         "?$NEW_POST_REPLY_TO_NOTE_ID=${replyToNoteId.orEmpty()}" +
         "&$NEW_POST_PRE_FILL_FILE_URI=${preFillFileUri?.toString().orEmpty().asUrlEncoded()}" +
-        "&$NEW_POST_PRE_FILL_CONTENT=${preFillContent.orEmpty().asUrlEncoded()}"
+        "&$NEW_POST_PRE_FILL_CONTENT=${preFillContent.orEmpty().asBase64Encoded()}"
     navigate(route = route)
 }
 
