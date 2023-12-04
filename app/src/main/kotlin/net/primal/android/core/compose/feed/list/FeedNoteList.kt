@@ -29,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.LazyPagingItems
@@ -42,6 +43,7 @@ import net.primal.android.R
 import net.primal.android.core.compose.AvatarThumbnailsRow
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.feed.model.FeedPostsSyncStats
+import net.primal.android.drawer.PrimalBottomBarHeightDp
 import net.primal.android.theme.AppTheme
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
@@ -64,7 +66,9 @@ fun FeedNoteList(
     zapOptions: List<ULong>? = null,
     syncStats: FeedPostsSyncStats = FeedPostsSyncStats(),
     paddingValues: PaddingValues = PaddingValues(0.dp),
-    bottomBarHeightPx: Float = 0F,
+    bottomBarHeightPx: Float = with(LocalDensity.current) {
+        PrimalBottomBarHeightDp.roundToPx().toFloat()
+    },
     bottomBarOffsetHeightPx: Float = 0F,
     onScrolledToTop: (() -> Unit)? = null,
     onMuteClick: ((String) -> Unit)? = null,

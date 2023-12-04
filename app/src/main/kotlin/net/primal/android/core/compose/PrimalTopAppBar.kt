@@ -1,6 +1,9 @@
 package net.primal.android.core.compose
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,6 +30,7 @@ import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.foundation.ClickDebounce
 import net.primal.android.theme.AppTheme
 
+@OptIn(ExperimentalFoundationApi::class)
 @ExperimentalMaterial3Api
 @Composable
 fun PrimalTopAppBar(
@@ -39,6 +43,7 @@ fun PrimalTopAppBar(
     actions: @Composable RowScope.() -> Unit = {},
     showDivider: Boolean = true,
     scrollBehavior: TopAppBarScrollBehavior? = null,
+    onTitleLongClick: (() -> Unit)? = null,
     footer: @Composable () -> Unit = {},
 ) {
     Column {
@@ -67,7 +72,14 @@ fun PrimalTopAppBar(
             },
             title = {
                 Column(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .combinedClickable(
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() },
+                            onClick = {},
+                            onLongClick = onTitleLongClick,
+                        ),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Top,
                 ) {

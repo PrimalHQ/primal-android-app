@@ -48,6 +48,7 @@ fun PrimalDrawerScaffold(
     snackbarHost: @Composable () -> Unit = {},
     bottomBarHeight: Dp = PrimalBottomBarHeightDp,
     onBottomBarOffsetChange: (Float) -> Unit = {},
+    focusModeEnabled: Boolean = true,
 ) {
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -59,7 +60,7 @@ fun PrimalDrawerScaffold(
         },
         content = {
             val topAppBarState = rememberTopAppBarState()
-            val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(topAppBarState)
+            val topAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(topAppBarState)
 
             val bottomBarHeightPx = with(LocalDensity.current) {
                 bottomBarHeight.roundToPx().toFloat()
@@ -78,10 +79,14 @@ fun PrimalDrawerScaffold(
             }
 
             Scaffold(
-                modifier = Modifier
-                    .nestedScroll(bottomBarNestedScrollConnection)
-                    .nestedScroll(scrollBehavior.nestedScrollConnection),
-                topBar = { topBar(scrollBehavior) },
+                modifier = if (focusModeEnabled) {
+                    Modifier
+                        .nestedScroll(topAppBarScrollBehavior.nestedScrollConnection)
+                        .nestedScroll(bottomBarNestedScrollConnection)
+                } else {
+                    Modifier
+                },
+                topBar = { topBar(if (focusModeEnabled) topAppBarScrollBehavior else null) },
                 content = { paddingValues -> content(paddingValues) },
                 bottomBar = {
                     Column(

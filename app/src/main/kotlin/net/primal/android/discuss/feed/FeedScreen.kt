@@ -24,14 +24,17 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -49,7 +52,6 @@ import net.primal.android.core.compose.icons.primaliconpack.FeedPicker
 import net.primal.android.crypto.hexToNoteHrp
 import net.primal.android.discuss.feed.FeedContract.UiState.FeedError
 import net.primal.android.drawer.DrawerScreenDestination
-import net.primal.android.drawer.PrimalBottomBarHeightDp
 import net.primal.android.drawer.PrimalDrawerScaffold
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
@@ -113,12 +115,14 @@ fun FeedScreen(
     val feedPagingItems = state.posts.collectAsLazyPagingItems()
     val feedListState = feedPagingItems.rememberLazyListStatePagingWorkaround()
 
-    val bottomBarHeight = PrimalBottomBarHeightDp
     var bottomBarOffsetHeightPx by remember { mutableFloatStateOf(0f) }
 
     val focusMode by remember { derivedStateOf { bottomBarOffsetHeightPx < 0f } }
 
     val snackbarHostState = remember { SnackbarHostState() }
+
+    val haptic = LocalHapticFeedback.current
+    var focusModeEnabled by rememberSaveable { mutableStateOf(true) }
 
     ErrorHandler(
         error = state.error,
@@ -132,8 +136,8 @@ fun FeedScreen(
         onPrimaryDestinationChanged = onPrimaryDestinationChanged,
         onDrawerDestinationClick = onDrawerDestinationClick,
         badges = state.badges,
-        bottomBarHeight = bottomBarHeight,
         onBottomBarOffsetChange = { bottomBarOffsetHeightPx = it },
+        focusModeEnabled = focusModeEnabled,
         topBar = {
             PrimalTopAppBar(
                 title = state.feedTitle,
@@ -149,6 +153,10 @@ fun FeedScreen(
                     )
                 },
                 scrollBehavior = it,
+                onTitleLongClick = {
+                    focusModeEnabled = !focusModeEnabled
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                },
             )
         },
         content = { paddingValues ->
@@ -195,9 +203,6 @@ fun FeedScreen(
                 zapOptions = state.zapOptions,
                 syncStats = state.syncStats,
                 paddingValues = paddingValues,
-                bottomBarHeightPx = with(LocalDensity.current) {
-                    bottomBarHeight.roundToPx().toFloat()
-                },
                 bottomBarOffsetHeightPx = bottomBarOffsetHeightPx,
                 onScrolledToTop = {
                     eventPublisher(FeedContract.UiEvent.FeedScrolledToTop)
@@ -217,7 +222,7 @@ fun FeedScreen(
                 FloatingActionButton(
                     onClick = { onNewPostClick(null) },
                     modifier = Modifier
-                        .size(bottomBarHeight)
+                        .size(64.dp)
                         .clip(CircleShape)
                         .background(color = AppTheme.colorScheme.primary, shape = CircleShape),
                     elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp),
@@ -246,21 +251,27 @@ private fun ErrorHandler(error: FeedError?, snackbarHostState: SnackbarHostState
             is FeedError.InvalidZapRequest -> context.getString(
                 R.string.post_action_invalid_zap_request,
             )
+
             is FeedError.MissingLightningAddress -> context.getString(
                 R.string.post_action_missing_lightning_address,
             )
+
             is FeedError.FailedToPublishZapEvent -> context.getString(
                 R.string.post_action_zap_failed,
             )
+
             is FeedError.FailedToPublishLikeEvent -> context.getString(
                 R.string.post_action_like_failed,
             )
+
             is FeedError.FailedToPublishRepostEvent -> context.getString(
                 R.string.post_action_repost_failed,
             )
+
             is FeedError.MissingRelaysConfiguration -> context.getString(
                 R.string.app_missing_relays_config,
             )
+
             else -> null
         }
 
