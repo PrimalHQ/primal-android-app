@@ -4,7 +4,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
-import java.util.UUID
+import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
@@ -24,12 +24,14 @@ import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.primal.PrimalCacheFilter
 import net.primal.android.networking.primal.PrimalVerb
 import net.primal.android.networking.sockets.NostrIncomingMessage
+import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.ext.asMessagesTotalCount
 import net.primal.android.nostr.ext.asNotificationSummary
 import net.primal.android.notifications.api.model.PubkeyRequestBody
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
 import net.primal.android.user.domain.Badges
+import timber.log.Timber
 
 @Singleton
 class BadgesManager @Inject constructor(
@@ -114,10 +116,18 @@ class BadgesManager @Inject constructor(
         unsubscribeAll()
         subscriptionsActive = true
         notificationsSummarySubscriptionJob = scope.launch {
-            subscribeNotifications(userId = userId)
+            try {
+                subscribeNotifications(userId = userId)
+            } catch (error: WssException) {
+                Timber.e(error)
+            }
         }
         messagesSummarySubscriptionJob = scope.launch {
-            subscribeMessages(userId = userId)
+            try {
+                subscribeMessages(userId = userId)
+            } catch (error: WssException) {
+                Timber.e(error)
+            }
         }
     }
 
