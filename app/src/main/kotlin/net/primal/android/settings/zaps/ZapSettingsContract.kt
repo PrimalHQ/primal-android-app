@@ -14,3 +14,12 @@ interface ZapSettingsContract {
 }
 
 const val PRESETS_COUNT = 6
+
+val DEFAULT_ZAP_OPTIONS = listOf(
+    21.toULong(),
+    420.toULong(),
+    1_000.toULong(),
+    5_000.toULong(),
+    10_000.toULong(),
+    100_000.toULong(),
+)

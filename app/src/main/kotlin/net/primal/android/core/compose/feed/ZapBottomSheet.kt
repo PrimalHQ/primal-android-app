@@ -51,6 +51,7 @@ import net.primal.android.core.compose.AdjustTemporarilySystemBarColors
 import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.utils.shortened
+import net.primal.android.settings.zaps.DEFAULT_ZAP_OPTIONS
 import net.primal.android.settings.zaps.PRESETS_COUNT
 import net.primal.android.theme.AppTheme
 
@@ -63,18 +64,11 @@ fun ZapBottomSheet(
     onDismissRequest: () -> Unit,
     onZap: (ULong, String?) -> Unit,
 ) {
-    if (userZapOptions != null && userZapOptions.size != PRESETS_COUNT) {
-        throw IllegalArgumentException("There should be 6 zap options.")
+    val zapOptionsValues = if (userZapOptions != null && userZapOptions.size == PRESETS_COUNT) {
+        userZapOptions
+    } else {
+        DEFAULT_ZAP_OPTIONS
     }
-
-    val zapOptionsValues = userZapOptions ?: listOf(
-        21L.toULong(),
-        420.toULong(),
-        1_000.toULong(),
-        5_000.toULong(),
-        10_000.toULong(),
-        100_000.toULong(),
-    )
 
     val zapOptions = mutableListOf(
         Pair(zapOptionsValues[0], "👍"),
