@@ -25,4 +25,5 @@ enum class PrimalVerb(val identifier: String) {
     MARK_DM_CONVERSATION_AS_READ("reset_directmsg_count"),
     MARK_ALL_DMS_AS_READ("reset_directmsg_counts"),
     NEW_DMS_COUNT("directmsg_count_2"),
+    WALLET("wallet"),
 }

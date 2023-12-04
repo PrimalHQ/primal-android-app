@@ -3,7 +3,7 @@ package net.primal.android.user.domain
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class NostrWallet(
+data class NostrWalletConnect(
     val lightningAddress: String?,
     val relays: List<String>,
     val pubkey: String,

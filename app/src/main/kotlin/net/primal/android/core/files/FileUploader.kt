@@ -10,9 +10,9 @@ import javax.inject.Singleton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import net.primal.android.core.files.error.UnsuccessfulFileUpload
 import net.primal.android.core.files.model.UploadImageRequest
+import net.primal.android.core.serialization.json.NostrJsonEncodeDefaults
 import net.primal.android.networking.di.PrimalUploadApiClient
 import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.primal.PrimalCacheFilter
@@ -28,11 +28,6 @@ class FileUploader @Inject constructor(
     @PrimalUploadApiClient private val primalUploadClient: PrimalApiClient,
 ) {
 
-    private val uploadJsonSerializer = Json {
-        ignoreUnknownKeys = true
-        encodeDefaults = true
-    }
-
     @Throws(UnsuccessfulFileUpload::class)
     suspend fun uploadFile(userId: String, uri: Uri): String {
         val imageBytes = uri.readBytesSafely()
@@ -47,7 +42,7 @@ class FileUploader @Inject constructor(
             primalUploadClient.query(
                 message = PrimalCacheFilter(
                     primalVerb = PrimalVerb.UPLOAD,
-                    optionsJson = uploadJsonSerializer.encodeToString(
+                    optionsJson = NostrJsonEncodeDefaults.encodeToString(
                         UploadImageRequest(uploadImageEvent = uploadImageNostrEvent),
                     ),
                 ),

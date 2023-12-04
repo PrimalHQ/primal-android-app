@@ -36,7 +36,6 @@ class NostrSocketClient constructor(
 
         override fun onMessage(webSocket: WebSocket, text: String) {
             Timber.d("<-- $text")
-            println(text)
             text.parseIncomingMessage()?.let {
                 scope.launch {
                     mutableIncomingMessagesSharedFlow.emit(value = it)
@@ -85,7 +84,6 @@ class NostrSocketClient constructor(
 
     private fun sendMessage(text: String): Boolean {
         Timber.i("--> $text")
-        println(text)
         return webSocket?.send(text) == true
     }
 

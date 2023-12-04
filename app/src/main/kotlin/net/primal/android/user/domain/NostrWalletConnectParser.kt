@@ -5,31 +5,36 @@ import fr.acinq.secp256k1.Hex
 import net.primal.android.crypto.CryptoUtils
 import net.primal.android.crypto.toHex
 
-fun String.parseNWCUrl(): NostrWallet {
+fun String.parseNWCUrl(): NostrWalletConnect {
     val uri = Uri.parse(this)
 
     val host = uri.host
     val pubkey = when {
         host != null && host.toByteArray(Charsets.UTF_8).size == 64 -> host
-        else -> throw NWCParseException()
+        else -> null
     }
 
-    val relay = uri.getQueryParameter("relay") ?: throw NWCParseException()
+    val relay = uri.getQueryParameter("relay")
     val lud16 = uri.getQueryParameter("lud16")
 
     val secretParam = uri.getQueryParameter("secret")
-    val keypairSecret: String = when {
+    val keypairSecret = when {
         secretParam != null && secretParam.toByteArray().size == 64 -> secretParam
-        else -> throw NWCParseException()
+        else -> null
     }
 
-    val keypairPubkey = CryptoUtils.publicKeyCreate(Hex.decode(keypairSecret)).toHex()
+    if (pubkey == null || relay == null || keypairSecret == null) {
+        throw NWCParseException()
+    }
 
-    return NostrWallet(
+    return NostrWalletConnect(
         pubkey = pubkey,
         lightningAddress = lud16,
         relays = listOf(relay),
-        keypair = NostrWalletKeypair(privateKey = keypairSecret, pubkey = keypairPubkey),
+        keypair = NostrWalletKeypair(
+            privateKey = keypairSecret,
+            pubkey = CryptoUtils.publicKeyCreate(Hex.decode(keypairSecret)).toHex(),
+        ),
     )
 }
 

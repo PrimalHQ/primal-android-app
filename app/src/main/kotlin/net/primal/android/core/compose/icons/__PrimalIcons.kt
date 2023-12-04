@@ -71,6 +71,14 @@ import net.primal.android.core.compose.icons.primaliconpack.Unmute
 import net.primal.android.core.compose.icons.primaliconpack.UserFeedAdd
 import net.primal.android.core.compose.icons.primaliconpack.UserFeedRemove
 import net.primal.android.core.compose.icons.primaliconpack.Verified
+import net.primal.android.core.compose.icons.primaliconpack.WalletError
+import net.primal.android.core.compose.icons.primaliconpack.WalletLightning
+import net.primal.android.core.compose.icons.primaliconpack.WalletLnPayment
+import net.primal.android.core.compose.icons.primaliconpack.WalletPay
+import net.primal.android.core.compose.icons.primaliconpack.WalletPrimalActivation
+import net.primal.android.core.compose.icons.primaliconpack.WalletPurchaseSats
+import net.primal.android.core.compose.icons.primaliconpack.WalletReceive
+import net.primal.android.core.compose.icons.primaliconpack.WalletSuccess
 import net.primal.android.core.compose.icons.primaliconpack.Zap
 
 object PrimalIcons
@@ -153,6 +161,14 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             Unmute,
             Play,
             Mute,
+            WalletPrimalActivation,
+            WalletPay,
+            WalletLnPayment,
+            WalletPurchaseSats,
+            WalletReceive,
+            WalletLightning,
+            WalletError,
+            WalletSuccess,
         )
         return __PrimalIcons!!
     }

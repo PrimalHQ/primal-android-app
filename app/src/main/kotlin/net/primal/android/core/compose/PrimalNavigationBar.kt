@@ -27,6 +27,8 @@ import net.primal.android.core.compose.icons.primaliconpack.NavNotifications
 import net.primal.android.core.compose.icons.primaliconpack.NavNotificationsFilled
 import net.primal.android.core.compose.icons.primaliconpack.NavSearch
 import net.primal.android.core.compose.icons.primaliconpack.NavSearchFilled
+import net.primal.android.core.compose.icons.primaliconpack.NavWallet
+import net.primal.android.core.compose.icons.primaliconpack.NavWalletFilled
 import net.primal.android.theme.AppTheme
 import net.primal.android.user.domain.Badges
 
@@ -107,6 +109,7 @@ private fun RowScope.PrimalNavigationBarItem(
 enum class PrimalTopLevelDestination {
     Feed,
     Explore,
+    Wallet,
     Messages,
     Notifications,
 }
@@ -115,6 +118,7 @@ private fun PrimalTopLevelDestination.imageVector(): ImageVector {
     return when (this) {
         PrimalTopLevelDestination.Feed -> PrimalIcons.NavHome
         PrimalTopLevelDestination.Explore -> PrimalIcons.NavSearch
+        PrimalTopLevelDestination.Wallet -> PrimalIcons.NavWallet
         PrimalTopLevelDestination.Messages -> PrimalIcons.NavMessages
         PrimalTopLevelDestination.Notifications -> PrimalIcons.NavNotifications
     }
@@ -124,6 +128,7 @@ private fun PrimalTopLevelDestination.imageVectorSelected(): ImageVector {
     return when (this) {
         PrimalTopLevelDestination.Feed -> PrimalIcons.NavHomeFilled
         PrimalTopLevelDestination.Explore -> PrimalIcons.NavSearchFilled
+        PrimalTopLevelDestination.Wallet -> PrimalIcons.NavWalletFilled
         PrimalTopLevelDestination.Messages -> PrimalIcons.NavMessagesFilled
         PrimalTopLevelDestination.Notifications -> PrimalIcons.NavNotificationsFilled
     }
@@ -132,17 +137,10 @@ private fun PrimalTopLevelDestination.imageVectorSelected(): ImageVector {
 @Composable
 private fun PrimalTopLevelDestination.label(): String {
     return when (this) {
-        PrimalTopLevelDestination.Feed -> stringResource(
-            id = R.string.primary_destination_feed_label,
-        )
-        PrimalTopLevelDestination.Explore -> stringResource(
-            id = R.string.primary_destination_explore_label,
-        )
-        PrimalTopLevelDestination.Messages -> stringResource(
-            id = R.string.primary_destination_messages_label,
-        )
-        PrimalTopLevelDestination.Notifications -> stringResource(
-            id = R.string.primary_destination_notifications_label,
-        )
+        PrimalTopLevelDestination.Feed -> stringResource(id = R.string.primary_destination_feed_label)
+        PrimalTopLevelDestination.Explore -> stringResource(id = R.string.primary_destination_explore_label)
+        PrimalTopLevelDestination.Wallet -> stringResource(id = R.string.primary_destination_wallet_label)
+        PrimalTopLevelDestination.Messages -> stringResource(id = R.string.primary_destination_messages_label)
+        PrimalTopLevelDestination.Notifications -> stringResource(id = R.string.primary_destination_notifications_label)
     }
 }

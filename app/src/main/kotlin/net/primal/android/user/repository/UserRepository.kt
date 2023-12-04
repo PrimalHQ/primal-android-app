@@ -16,7 +16,7 @@ import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.accounts.copyContactsIfNotNull
 import net.primal.android.user.accounts.copyIfNotNull
 import net.primal.android.user.api.UsersApi
-import net.primal.android.user.domain.NostrWallet
+import net.primal.android.user.domain.NostrWalletConnect
 import net.primal.android.user.domain.UserAccount
 
 class UserRepository @Inject constructor(
@@ -51,7 +51,7 @@ class UserRepository @Inject constructor(
         }
     }
 
-    suspend fun connectNostrWallet(userId: String, nostrWalletConnect: NostrWallet) {
+    suspend fun connectNostrWallet(userId: String, nostrWalletConnect: NostrWalletConnect) {
         accountsStore.getAndUpdateAccount(userId = userId) {
             copy(nostrWallet = nostrWalletConnect)
         }

@@ -1,6 +1,6 @@
 package net.primal.android.networking.sockets
 
-import java.util.UUID
+import java.util.*
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
@@ -100,10 +100,16 @@ private fun JsonObject.getMessageNostrEventKind(): NostrEventKind {
 }
 
 private fun JsonArray.takeAsNoticeIncomingMessage(): NostrIncomingMessage {
-    val messageElement = elementAtOrNull(1)
-    return NostrIncomingMessage.NoticeMessage(
-        message = messageElement?.jsonPrimitive?.content,
-    )
+    val subscriptionId = elementAtOrNull(1)?.let {
+        try {
+            UUID.fromString(it.jsonPrimitive.content)
+        } catch (error: IllegalArgumentException) {
+            Timber.e(error)
+            null
+        }
+    }
+    val messageText = elementAtOrNull(2)?.jsonPrimitive?.content
+    return NostrIncomingMessage.NoticeMessage(subscriptionId = subscriptionId, message = messageText)
 }
 
 private fun JsonArray.takeAsOkIncomingMessage(): NostrIncomingMessage? {

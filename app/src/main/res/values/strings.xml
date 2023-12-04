@@ -65,6 +65,7 @@
     <string name="primary_destination_feed_label">Feed</string>
     <string name="primary_destination_read_label">Read</string>
     <string name="primary_destination_explore_label">Explore</string>
+    <string name="primary_destination_wallet_label">Wallet</string>
     <string name="primary_destination_messages_label">Messages</string>
     <string name="primary_destination_notifications_label">Notifications</string>
 
@@ -159,6 +160,8 @@
     <string name="explore_enter_query">Enter text to search</string>
 
     <string name="search_followers_text">Followers</string>
+
+    <string name="wallet_title">Wallet</string>
 
     <string name="notifications_title">Notifications</string>
     <string name="notifications_no_content">Your notifications will appear here.</string>
@@ -297,4 +300,23 @@
 
     <string name="zap_bottom_sheet_comment_placeholder">Add a comment…</string>
     <string name="zap_bottom_sheet_zap_button">Zap</string>
+
+    <string name="wallet_dashboard_activate_notice_hint">You need to activate your wallet</string>
+    <string name="wallet_dashboard_activate_button">Activate Wallet Now</string>
+
+    <string name="wallet_activation_title">Activate Wallet</string>
+    <string name="wallet_activation_pending_data_hint">Activating your wallet is easy! All we need is your name and email address:</string>
+    <string name="wallet_activation_pending_code_hint">We emailed your activation code. Please enter it below:</string>
+    <string name="wallet_activation_error_invalid_code">Incorrect code. Please try again.</string>
+    <string name="wallet_activation_success_title">Success</string>
+    <string name="wallet_activation_success_description">Your wallet has been activated. Your new Nostr lightning address is:</string>
+    <string name="wallet_activation_your_name">Your name</string>
+    <string name="wallet_activation_your_email_address">Your email address</string>
+    <string name="wallet_activation_your_code">Activation code</string>
+    <string name="wallet_activation_next_button">Next</string>
+    <string name="wallet_activation_finish_button">Finish</string>
+    <string name="wallet_activation_done_button">Done</string>
+
+
+
 </resources>

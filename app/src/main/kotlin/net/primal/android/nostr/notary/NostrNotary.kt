@@ -20,7 +20,7 @@ import net.primal.android.nostr.model.content.ContentMetadata
 import net.primal.android.nostr.model.primal.content.ContentAppSettings
 import net.primal.android.settings.api.model.AppSettingsDescription
 import net.primal.android.user.credentials.CredentialsStore
-import net.primal.android.user.domain.NostrWallet
+import net.primal.android.user.domain.NostrWalletConnect
 import net.primal.android.user.domain.Relay
 import net.primal.android.user.domain.toZapTag
 import net.primal.android.wallet.model.PayInvoiceRequest
@@ -145,7 +145,10 @@ class NostrNotary @Inject constructor(
         ).signOrThrow(nsec = findNsecOrThrow(userId))
     }
 
-    fun signWalletInvoiceRequestNostrEvent(request: WalletRequest<PayInvoiceRequest>, nwc: NostrWallet): NostrEvent {
+    fun signWalletInvoiceRequestNostrEvent(
+        request: WalletRequest<PayInvoiceRequest>,
+        nwc: NostrWalletConnect,
+    ): NostrEvent {
         val tags = listOf(nwc.pubkey.asPubkeyTag())
         val content = json.encodeToString(request)
         val encryptedMessage = CryptoUtils.encrypt(
@@ -191,6 +194,15 @@ class NostrNotary @Inject constructor(
             content = encryptedContent,
             kind = NostrEventKind.EncryptedDirectMessages.value,
             tags = listOf(receiverId.asPubkeyTag()),
+        ).signOrThrow(nsec = findNsecOrThrow(pubkey = userId))
+    }
+
+    fun signPrimalWalletOperationNostrEvent(userId: String, content: String): NostrEvent {
+        return NostrUnsignedEvent(
+            pubKey = userId,
+            content = content,
+            kind = NostrEventKind.PrimalWalletOperation.value,
+            tags = listOf(),
         ).signOrThrow(nsec = findNsecOrThrow(pubkey = userId))
     }
 }

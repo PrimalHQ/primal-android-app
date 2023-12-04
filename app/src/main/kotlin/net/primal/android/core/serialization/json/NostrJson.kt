@@ -16,6 +16,11 @@ val NostrJson = Json {
     coerceInputValues = true
 }
 
+val NostrJsonEncodeDefaults = Json {
+    ignoreUnknownKeys = true
+    encodeDefaults = true
+}
+
 inline fun <reified T> Json.decodeFromStringOrNull(string: String?): T? {
     if (string.isNullOrEmpty()) return null
 

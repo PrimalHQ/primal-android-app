@@ -1,6 +1,6 @@
 package net.primal.android.networking.sockets
 
-import java.util.UUID
+import java.util.*
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.primal.PrimalEvent
 
@@ -23,6 +23,7 @@ sealed class NostrIncomingMessage {
     ) : NostrIncomingMessage()
 
     data class NoticeMessage(
+        val subscriptionId: UUID? = null,
         val message: String? = null,
     ) : NostrIncomingMessage()
 

@@ -17,20 +17,20 @@ import net.primal.android.user.domain.parseNWCUrl
 import net.primal.android.user.repository.UserRepository
 
 @HiltViewModel
-class WalletViewModel @Inject constructor(
+class WalletSettingsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val activeAccountStore: ActiveAccountStore,
     private val userRepository: UserRepository,
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(WalletContract.UiState())
+    private val _state = MutableStateFlow(WalletSettingsContract.UiState())
     val state = _state.asStateFlow()
-    private fun setState(reducer: WalletContract.UiState.() -> WalletContract.UiState) {
+    private fun setState(reducer: WalletSettingsContract.UiState.() -> WalletSettingsContract.UiState) {
         _state.getAndUpdate { it.reducer() }
     }
 
-    private val events: MutableSharedFlow<WalletContract.UiEvent> = MutableSharedFlow()
-    fun setEvent(event: WalletContract.UiEvent) = viewModelScope.launch { events.emit(event) }
+    private val events: MutableSharedFlow<WalletSettingsContract.UiEvent> = MutableSharedFlow()
+    fun setEvent(event: WalletSettingsContract.UiEvent) = viewModelScope.launch { events.emit(event) }
 
     init {
         val nwcConnectionUrl = savedStateHandle.nwcUrl
@@ -47,7 +47,7 @@ class WalletViewModel @Inject constructor(
         viewModelScope.launch {
             events.collect {
                 when (it) {
-                    is WalletContract.UiEvent.DisconnectWallet -> disconnectWallet()
+                    is WalletSettingsContract.UiEvent.DisconnectWallet -> disconnectWallet()
                 }
             }
         }

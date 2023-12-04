@@ -53,6 +53,22 @@ object SocketModule {
 
     @Provides
     @Singleton
+    @PrimalWalletApiClient
+    fun providesPrimalWalletClient(
+        dispatchers: CoroutineDispatcherProvider,
+        okHttpClient: OkHttpClient,
+        appConfigProvider: AppConfigProvider,
+        appConfigUpdater: AppConfigUpdater,
+    ) = PrimalApiClient(
+        okHttpClient = okHttpClient,
+        serverType = PrimalServerType.Wallet,
+        appConfigProvider = appConfigProvider,
+        appConfigUpdater = appConfigUpdater,
+        dispatcherProvider = dispatchers,
+    )
+
+    @Provides
+    @Singleton
     fun providesRelaysManager(relayPoolFactory: RelayPoolFactory, activeAccountStore: ActiveAccountStore) =
         RelaysManager(
             relayPoolFactory = relayPoolFactory,

@@ -1,10 +1,10 @@
 package net.primal.android.settings.wallet
 
-import net.primal.android.user.domain.NostrWallet
+import net.primal.android.user.domain.NostrWalletConnect
 
-interface WalletContract {
+interface WalletSettingsContract {
     data class UiState(
-        val wallet: NostrWallet? = null,
+        val wallet: NostrWalletConnect? = null,
         val userLightningAddress: String? = null,
     )
 

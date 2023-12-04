@@ -49,14 +49,14 @@ import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
-import net.primal.android.user.domain.NostrWallet
+import net.primal.android.user.domain.NostrWalletConnect
 import net.primal.android.user.domain.NostrWalletKeypair
 
 @Composable
-fun WalletScreen(viewModel: WalletViewModel, onClose: () -> Unit) {
+fun WalletSettingsScreen(viewModel: WalletSettingsViewModel, onClose: () -> Unit) {
     val uiState = viewModel.state.collectAsState()
 
-    WalletScreen(
+    WalletSettingsScreen(
         state = uiState.value,
         onClose = onClose,
         eventPublisher = { viewModel.setEvent(it) },
@@ -65,10 +65,10 @@ fun WalletScreen(viewModel: WalletViewModel, onClose: () -> Unit) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun WalletScreen(
-    state: WalletContract.UiState,
+fun WalletSettingsScreen(
+    state: WalletSettingsContract.UiState,
     onClose: () -> Unit,
-    eventPublisher: (WalletContract.UiEvent) -> Unit,
+    eventPublisher: (WalletSettingsContract.UiEvent) -> Unit,
 ) {
     Scaffold(
         modifier = Modifier,
@@ -95,7 +95,7 @@ fun WalletScreen(
                     WalletConnected(
                         state = state,
                         disconnectWallet = {
-                            eventPublisher(WalletContract.UiEvent.DisconnectWallet)
+                            eventPublisher(WalletSettingsContract.UiEvent.DisconnectWallet)
                         },
                     )
                 } else {
@@ -107,7 +107,7 @@ fun WalletScreen(
 }
 
 @Composable
-fun WalletConnected(state: WalletContract.UiState, disconnectWallet: () -> Unit) {
+fun WalletConnected(state: WalletSettingsContract.UiState, disconnectWallet: () -> Unit) {
     WalletImage(
         modifier = Modifier.size(200.dp),
         connected = true,
@@ -251,11 +251,13 @@ fun WalletImage(modifier: Modifier = Modifier, connected: Boolean = false) {
     }
 }
 
+private val albyColor = Color(0xFFFFDF6F)
+
 @Composable
 fun ConnectAlbyWalletButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
     PrimalFilledButton(
         modifier = modifier,
-        containerColor = Color(0xFFFFDF6F),
+        containerColor = albyColor,
         onClick = onClick,
     ) {
         IconText(
@@ -270,11 +272,13 @@ fun ConnectAlbyWalletButton(modifier: Modifier = Modifier, onClick: () -> Unit) 
     }
 }
 
+private val mutinyColor = Color(0xFF4F1425)
+
 @Composable
 fun ConnectMutinyWalletButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
     PrimalFilledButton(
         modifier = modifier,
-        containerColor = Color(0xFF4F1425),
+        containerColor = mutinyColor,
         onClick = onClick,
     ) {
         IconText(
@@ -289,11 +293,11 @@ fun ConnectMutinyWalletButton(modifier: Modifier = Modifier, onClick: () -> Unit
     }
 }
 
-class WalletUiStateProvider : PreviewParameterProvider<WalletContract.UiState> {
-    override val values: Sequence<WalletContract.UiState>
+class WalletUiStateProvider : PreviewParameterProvider<WalletSettingsContract.UiState> {
+    override val values: Sequence<WalletSettingsContract.UiState>
         get() = sequenceOf(
-            WalletContract.UiState(
-                wallet = NostrWallet(
+            WalletSettingsContract.UiState(
+                wallet = NostrWalletConnect(
                     relays = listOf("wss://relay.getalby.com/v1"),
                     lightningAddress = "miljan@getalby.com",
                     pubkey = "69effe7b49a6dd5cf525bd0905917a5005ffe480b58eeb8e861418cf3ae760d9",
@@ -303,7 +307,7 @@ class WalletUiStateProvider : PreviewParameterProvider<WalletContract.UiState> {
                     ),
                 ),
             ),
-            WalletContract.UiState(
+            WalletSettingsContract.UiState(
                 wallet = null,
             ),
         )
@@ -313,10 +317,10 @@ class WalletUiStateProvider : PreviewParameterProvider<WalletContract.UiState> {
 @Composable
 private fun PreviewSettingsWalletScreen(
     @PreviewParameter(WalletUiStateProvider::class)
-    state: WalletContract.UiState,
+    state: WalletSettingsContract.UiState,
 ) {
     PrimalTheme(primalTheme = PrimalTheme.Sunset) {
-        WalletScreen(
+        WalletSettingsScreen(
             state = state,
             onClose = {},
             eventPublisher = {},

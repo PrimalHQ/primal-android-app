@@ -14,7 +14,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
@@ -24,6 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import net.primal.android.attachments.domain.CdnImage
@@ -39,11 +42,16 @@ fun PrimalTopAppBar(
     modifier: Modifier = Modifier,
     subtitle: String? = null,
     navigationIcon: ImageVector? = null,
+    navigationIconTintColor: Color = LocalContentColor.current,
     avatarCdnImage: CdnImage? = null,
     actions: @Composable RowScope.() -> Unit = {},
     showDivider: Boolean = true,
     scrollBehavior: TopAppBarScrollBehavior? = null,
     onTitleLongClick: (() -> Unit)? = null,
+    colors: TopAppBarColors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+        containerColor = AppTheme.colorScheme.surface,
+        scrolledContainerColor = AppTheme.colorScheme.surface,
+    ),
     footer: @Composable () -> Unit = {},
 ) {
     Column {
@@ -67,6 +75,7 @@ fun PrimalTopAppBar(
                     AppBarIcon(
                         icon = navigationIcon,
                         onClick = { clickDebounce.processEvent(onNavigationIconClick) },
+                        tint = navigationIconTintColor,
                     )
                 }
             },
@@ -96,10 +105,7 @@ fun PrimalTopAppBar(
                 }
             },
             actions = actions,
-            colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                containerColor = AppTheme.colorScheme.surface,
-                scrolledContainerColor = AppTheme.colorScheme.surface,
-            ),
+            colors = colors,
             scrollBehavior = scrollBehavior,
         )
 

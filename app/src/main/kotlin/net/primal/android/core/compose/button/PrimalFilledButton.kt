@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.ProvideTextStyle
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.rememberUpdatedState
@@ -28,6 +29,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
@@ -46,7 +48,9 @@ fun PrimalFilledButton(
     contentColor: Color = Color.White,
     disabledContainerColor: Color = AppTheme.extraColorScheme.surfaceVariantAlt1,
     disabledContentColor: Color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-    textStyle: TextStyle = AppTheme.typography.bodyLarge,
+    textStyle: TextStyle = AppTheme.typography.bodyLarge.copy(
+        fontWeight = FontWeight.SemiBold,
+    ),
     border: BorderStroke = BorderStroke(0.dp, Color.Unspecified),
     contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
     content: @Composable RowScope.() -> Unit,
@@ -60,6 +64,7 @@ fun PrimalFilledButton(
 
     Box(
         modifier = modifier
+            .height(58.dp)
             .semantics { role = Role.Button }
             .shadow(elevation = 0.dp, shape)
             .clip(shape)
@@ -102,11 +107,14 @@ fun PrimalButtonPreview(
     state: PrimalButtonPreviewState,
 ) {
     PrimalTheme(primalTheme = PrimalTheme.Sunset) {
-        PrimalLoadingButton(
+        PrimalFilledButton(
             modifier = Modifier.height(48.dp),
             onClick = { },
             enabled = state.enabled,
-            text = "Hello Primal!",
-        )
+        ) {
+            Text(
+                text = "Hello Primal!",
+            )
+        }
     }
 }

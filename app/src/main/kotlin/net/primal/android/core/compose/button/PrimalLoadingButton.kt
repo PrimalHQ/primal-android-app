@@ -36,6 +36,8 @@ fun PrimalLoadingButton(
     fontSize: TextUnit = TextUnit.Unspecified,
     fontWeight: FontWeight = FontWeight.SemiBold,
     contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
+    containerColor: Color = AppTheme.colorScheme.primary,
+    disabledContainerColor: Color = AppTheme.extraColorScheme.surfaceVariantAlt1,
 ) {
     PrimalFilledButton(
         modifier = modifier,
@@ -44,6 +46,8 @@ fun PrimalLoadingButton(
         enabled = enabled,
         textStyle = AppTheme.typography.bodyLarge,
         contentPadding = contentPadding,
+        containerColor = containerColor,
+        disabledContainerColor = disabledContainerColor,
         content = {
             if (loading) {
                 LoadingContent()

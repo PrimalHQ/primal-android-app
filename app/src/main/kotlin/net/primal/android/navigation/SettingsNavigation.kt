@@ -22,17 +22,17 @@ import net.primal.android.settings.muted.list.MutedSettingsScreen
 import net.primal.android.settings.muted.list.MutedSettingsViewModel
 import net.primal.android.settings.notifications.NotificationsSettingsScreen
 import net.primal.android.settings.notifications.NotificationsSettingsViewModel
-import net.primal.android.settings.wallet.WalletScreen
-import net.primal.android.settings.wallet.WalletViewModel
+import net.primal.android.settings.wallet.WalletSettingsScreen
+import net.primal.android.settings.wallet.WalletSettingsViewModel
 import net.primal.android.settings.zaps.ZapSettingsScreen
 import net.primal.android.settings.zaps.ZapSettingsViewModel
 
-private fun NavController.navigateToAccount() = navigate(route = "account_settings")
-private fun NavController.navigateToWallet() = navigate(route = "wallet_settings")
-private fun NavController.navigateToAppearance() = navigate(route = "appearance_settings")
+private fun NavController.navigateToAccountSettings() = navigate(route = "account_settings")
+private fun NavController.navigateToWalletSettings() = navigate(route = "wallet_settings")
+private fun NavController.navigateToAppearanceSettings() = navigate(route = "appearance_settings")
 fun NavController.navigateToNotificationsSettings() = navigate(route = "notifications_settings")
-private fun NavController.navigateToFeeds() = navigate(route = "feeds_settings")
-private fun NavController.navigateToZaps() = navigate(route = "zaps_settings")
+private fun NavController.navigateToFeedsSettings() = navigate(route = "feeds_settings")
+private fun NavController.navigateToZapsSettings() = navigate(route = "zaps_settings")
 private fun NavController.navigateToMutedAccounts() = navigate(route = "muted_accounts_settings")
 
 fun NavGraphBuilder.settingsNavigation(route: String, navController: NavController) =
@@ -45,12 +45,12 @@ fun NavGraphBuilder.settingsNavigation(route: String, navController: NavControll
             onClose = { navController.navigateUp() },
             onSettingsSectionClick = {
                 when (it) {
-                    PrimalSettingsSection.Account -> navController.navigateToAccount()
-                    PrimalSettingsSection.Wallet -> navController.navigateToWallet()
-                    PrimalSettingsSection.Appearance -> navController.navigateToAppearance()
+                    PrimalSettingsSection.Account -> navController.navigateToAccountSettings()
+                    PrimalSettingsSection.Wallet -> navController.navigateToWalletSettings()
+                    PrimalSettingsSection.Appearance -> navController.navigateToAppearanceSettings()
                     PrimalSettingsSection.Notifications -> navController.navigateToNotificationsSettings()
-                    PrimalSettingsSection.Feeds -> navController.navigateToFeeds()
-                    PrimalSettingsSection.Zaps -> navController.navigateToZaps()
+                    PrimalSettingsSection.Feeds -> navController.navigateToFeedsSettings()
+                    PrimalSettingsSection.Zaps -> navController.navigateToZapsSettings()
                     PrimalSettingsSection.MutedAccounts -> navController.navigateToMutedAccounts()
                 }
             },
@@ -110,9 +110,9 @@ private fun NavGraphBuilder.wallet(
     route = route,
     arguments = arguments,
 ) { navBackEntry ->
-    val viewModel = hiltViewModel<WalletViewModel>(navBackEntry)
+    val viewModel = hiltViewModel<WalletSettingsViewModel>(navBackEntry)
     LockToOrientationPortrait()
-    WalletScreen(
+    WalletSettingsScreen(
         viewModel = viewModel,
         onClose = { navController.navigateUp() },
     )
