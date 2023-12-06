@@ -24,8 +24,6 @@
     <ID>EmptyDefaultConstructor:ProfileViewModelTest.kt$ProfileViewModelTest$()</ID>
     <ID>EmptyFunctionBlock:PostStatsUpdaterTest.kt$PostStatsUpdaterTest${ }</ID>
     <ID>EmptyFunctionBlock:ProfileRepositoryTest.kt$ProfileRepositoryTest${ }</ID>
-    <ID>ExplicitItLambdaParameter:BadgesManager.kt$BadgesManager${ it -&gt; when (it) { is NostrIncomingMessage.EventMessage -&gt; { it.primalEvent?.asMessagesTotalCount()?.let { summary -&gt; emit(summary) } } else -&gt; Unit } }</ID>
-    <ID>ExplicitItLambdaParameter:BadgesManager.kt$BadgesManager${ it -&gt; when (it) { is NostrIncomingMessage.EventMessage -&gt; { it.primalEvent?.asNotificationSummary()?.let { summary -&gt; emit(summary) } } else -&gt; Unit } }</ID>
     <ID>ForEachOnRange:ConversionUtils.kt$0..3</ID>
     <ID>ImplicitDefaultLocale:IntUtils.kt$String.format("%.1f", total)</ID>
     <ID>LongMethod:AccountSettingsScreen.kt$@Composable fun PrivateKeySection(nsec: String)</ID>
@@ -60,14 +58,14 @@
     <ID>LongMethod:WelcomeScreen.kt$@Composable fun WelcomeScreen(onSignInClick: () -&gt; Unit, onCreateAccountClick: () -&gt; Unit)</ID>
     <ID>LongMethod:ZapBottomSheet.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun ZapBottomSheet( receiverName: String, defaultZapAmount: ULong, userZapOptions: List&lt;ULong&gt;? = null, onDismissRequest: () -&gt; Unit, onZap: (ULong, String?) -&gt; Unit, )</ID>
     <ID>LongMethod:ZapSettingsScreen.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun ZapSettingsScreen( uiState: ZapSettingsContract.UiState, onClose: () -&gt; Unit, eventPublisher: (ZapSettingsContract.UiEvent) -&gt; Unit, )</ID>
-    <ID>LongParameterList:ExploreFeedViewModel.kt$ExploreFeedViewModel$( savedStateHandle: SavedStateHandle, private val activeAccountStore: ActiveAccountStore, private val feedRepository: FeedRepository, private val postRepository: PostRepository, private val profileRepository: ProfileRepository, private val zapRepository: ZapRepository, private val settingsRepository: SettingsRepository, private val mutedUserRepository: MutedUserRepository, )</ID>
+    <ID>LongParameterList:ExploreFeedViewModel.kt$ExploreFeedViewModel$( savedStateHandle: SavedStateHandle, private val activeAccountStore: ActiveAccountStore, private val feedRepository: FeedRepository, private val postRepository: PostRepository, private val profileRepository: ProfileRepository, private val zapHandler: ZapHandler, private val settingsRepository: SettingsRepository, private val mutedUserRepository: MutedUserRepository, )</ID>
     <ID>LongParameterList:ExtraColorScheme.kt$( onBrand: Color, surfaceVariantAlt1: Color, surfaceVariantAlt2: Color, surfaceVariantAlt3: Color, onSurfaceVariantAlt1: Color, onSurfaceVariantAlt2: Color, onSurfaceVariantAlt3: Color, onSurfaceVariantAlt4: Color, warning: Color, successBright: Color, successDim: Color, replied: Color, zapped: Color, liked: Color, reposted: Color, )</ID>
     <ID>LongParameterList:ExtraColorScheme.kt$ExtraColorScheme$( onBrand: Color = this.onBrand, surfaceVariantAlt1: Color = this.surfaceVariantAlt1, surfaceVariantAlt2: Color = this.surfaceVariantAlt2, surfaceVariantAlt3: Color = this.surfaceVariantAlt3, onSurfaceVariantAlt1: Color = this.onSurfaceVariantAlt1, onSurfaceVariantAlt2: Color = this.onSurfaceVariantAlt2, onSurfaceVariantAlt3: Color = this.onSurfaceVariantAlt3, onSurfaceVariantAlt4: Color = this.onSurfaceVariantAlt4, warning: Color = this.warning, successBright: Color = this.successBright, successDim: Color = this.successDim, replied: Color = this.replied, zapped: Color = this.zapped, liked: Color = this.liked, reposted: Color = this.reposted, )</ID>
     <ID>LongParameterList:ExtraColorScheme.kt$ExtraColorScheme$( onBrand: Color, surfaceVariantAlt1: Color, surfaceVariantAlt2: Color, surfaceVariantAlt3: Color, onSurfaceVariantAlt1: Color, onSurfaceVariantAlt2: Color, onSurfaceVariantAlt3: Color, onSurfaceVariantAlt4: Color, warning: Color, successBright: Color, successDim: Color, replied: Color, zapped: Color, liked: Color, reposted: Color, )</ID>
-    <ID>LongParameterList:FeedViewModel.kt$FeedViewModel$( savedStateHandle: SavedStateHandle, private val feedRepository: FeedRepository, private val postRepository: PostRepository, private val activeAccountStore: ActiveAccountStore, private val userDataSyncerFactory: UserDataUpdaterFactory, private val appConfigUpdater: AppConfigUpdater, private val profileRepository: ProfileRepository, private val zapRepository: ZapRepository, private val badgesManager: BadgesManager, private val mutedUserRepository: MutedUserRepository, )</ID>
+    <ID>LongParameterList:FeedViewModel.kt$FeedViewModel$( savedStateHandle: SavedStateHandle, private val feedRepository: FeedRepository, private val postRepository: PostRepository, private val activeAccountStore: ActiveAccountStore, private val userDataSyncerFactory: UserDataUpdaterFactory, private val appConfigUpdater: AppConfigUpdater, private val profileRepository: ProfileRepository, private val zapHandler: ZapHandler, private val subscriptionsManager: SubscriptionsManager, private val mutedUserRepository: MutedUserRepository, )</ID>
     <ID>LongParameterList:MessageRepository.kt$MessageRepository$( private val activeAccountStore: ActiveAccountStore, private val credentialsStore: CredentialsStore, private val database: PrimalDatabase, private val messagesApi: MessagesApi, private val messagesProcessor: MessagesProcessor, private val relaysManager: RelaysManager, private val nostrNotary: NostrNotary, )</ID>
-    <ID>LongParameterList:ProfileViewModel.kt$ProfileViewModel$( savedStateHandle: SavedStateHandle, feedRepository: FeedRepository, private val activeAccountStore: ActiveAccountStore, private val profileRepository: ProfileRepository, private val postRepository: PostRepository, private val zapRepository: ZapRepository, private val settingsRepository: SettingsRepository, private val mutedUserRepository: MutedUserRepository, )</ID>
-    <ID>LongParameterList:ThreadViewModel.kt$ThreadViewModel$( savedStateHandle: SavedStateHandle, private val activeAccountStore: ActiveAccountStore, private val feedRepository: FeedRepository, private val postRepository: PostRepository, private val profileRepository: ProfileRepository, private val zapRepository: ZapRepository, private val mutedUserRepository: MutedUserRepository, )</ID>
+    <ID>LongParameterList:ProfileViewModel.kt$ProfileViewModel$( savedStateHandle: SavedStateHandle, feedRepository: FeedRepository, private val activeAccountStore: ActiveAccountStore, private val profileRepository: ProfileRepository, private val postRepository: PostRepository, private val zapHandler: ZapHandler, private val settingsRepository: SettingsRepository, private val mutedUserRepository: MutedUserRepository, )</ID>
+    <ID>LongParameterList:ThreadViewModel.kt$ThreadViewModel$( savedStateHandle: SavedStateHandle, private val activeAccountStore: ActiveAccountStore, private val feedRepository: FeedRepository, private val postRepository: PostRepository, private val profileRepository: ProfileRepository, private val zapHandler: ZapHandler, private val mutedUserRepository: MutedUserRepository, )</ID>
     <ID>MagicNumber:AvatarThumbnailsRow.kt$0xFF111111</ID>
     <ID>MagicNumber:AvatarThumbnailsRow.kt$0xFFC8C8C8</ID>
     <ID>MagicNumber:AvatarThumbnailsRow.kt$99</ID>
@@ -91,24 +89,6 @@
     <ID>MagicNumber:IntUtils.kt$1000000.0</ID>
     <ID>MagicNumber:IntUtils.kt$1000000000.0</ID>
     <ID>MagicNumber:ListNoContent.kt$500L</ID>
-    <ID>MagicNumber:LnInvoiceUtils.kt$LnInvoiceUtils$0x07</ID>
-    <ID>MagicNumber:LnInvoiceUtils.kt$LnInvoiceUtils$0x1ea119fa</ID>
-    <ID>MagicNumber:LnInvoiceUtils.kt$LnInvoiceUtils$0x1ffffff</ID>
-    <ID>MagicNumber:LnInvoiceUtils.kt$LnInvoiceUtils$0x26508e6d</ID>
-    <ID>MagicNumber:LnInvoiceUtils.kt$LnInvoiceUtils$0x2a1462b3</ID>
-    <ID>MagicNumber:LnInvoiceUtils.kt$LnInvoiceUtils$0x3b6a57b2</ID>
-    <ID>MagicNumber:LnInvoiceUtils.kt$LnInvoiceUtils$0x3d4233dd</ID>
-    <ID>MagicNumber:LnInvoiceUtils.kt$LnInvoiceUtils$0x7f</ID>
-    <ID>MagicNumber:LnInvoiceUtils.kt$LnInvoiceUtils$0xff</ID>
-    <ID>MagicNumber:LnInvoiceUtils.kt$LnInvoiceUtils$100000000</ID>
-    <ID>MagicNumber:LnInvoiceUtils.kt$LnInvoiceUtils$126</ID>
-    <ID>MagicNumber:LnInvoiceUtils.kt$LnInvoiceUtils$16</ID>
-    <ID>MagicNumber:LnInvoiceUtils.kt$LnInvoiceUtils$25</ID>
-    <ID>MagicNumber:LnInvoiceUtils.kt$LnInvoiceUtils$33</ID>
-    <ID>MagicNumber:LnInvoiceUtils.kt$LnInvoiceUtils$4</ID>
-    <ID>MagicNumber:LnInvoiceUtils.kt$LnInvoiceUtils$5</ID>
-    <ID>MagicNumber:LnInvoiceUtils.kt$LnInvoiceUtils$6</ID>
-    <ID>MagicNumber:LnInvoiceUtils.kt$LnInvoiceUtils$8</ID>
     <ID>MagicNumber:Nip19TLV.kt$Nip19TLV$4</ID>
     <ID>MagicNumber:Nip19TLV.kt$Nip19TLV.Type.KIND$3</ID>
     <ID>MagicNumber:NostrIncomingMessageParser.kt$3</ID>
@@ -129,8 +109,6 @@
     <ID>MagicNumber:Timestamps.kt$7</ID>
     <ID>MagicNumber:ValidationUtils.kt$32</ID>
     <ID>MagicNumber:ValidationUtils.kt$64</ID>
-    <ID>MagicNumber:WalletScreen.kt$0xFF4F1425</ID>
-    <ID>MagicNumber:WalletScreen.kt$0xFFFFDF6F</ID>
     <ID>MagicNumber:WelcomeScreen.kt$0.4f</ID>
     <ID>MagicNumber:WelcomeScreen.kt$0.6f</ID>
     <ID>MagicNumber:ZapBottomSheet.kt$3</ID>
@@ -139,7 +117,6 @@
     <ID>MagicNumber:ZapSettingsScreen.kt$3</ID>
     <ID>MagicNumber:ZapSettingsScreen.kt$4</ID>
     <ID>MagicNumber:ZapSettingsScreen.kt$5</ID>
-    <ID>MagicNumber:ZapsApi.kt$ZapsApi$1000</ID>
     <ID>MatchingDeclarationName:__PrimalIcons.kt$PrimalIcons</ID>
     <ID>NestedBlockDepth:FeedRemoteMediator.kt$FeedRemoteMediator$override suspend fun load(loadType: LoadType, state: PagingState&lt;Int, FeedPost&gt;): MediatorResult</ID>
     <ID>ReturnCount:FeedRemoteMediator.kt$FeedRemoteMediator$override suspend fun load(loadType: LoadType, state: PagingState&lt;Int, FeedPost&gt;): MediatorResult</ID>
@@ -170,7 +147,6 @@
     <ID>SwallowedException:ValidationUtils.kt$error: DecoderException</ID>
     <ID>SwallowedException:ValidationUtils.kt$error: IllegalArgumentException</ID>
     <ID>SwallowedException:ZapSettingsViewModel.kt$ZapSettingsViewModel$error: WssException</ID>
-    <ID>SwallowedException:ZapsApi.kt$ZapsApi$error: LnInvoiceUtils.AddressFormatException</ID>
     <ID>ThrowingExceptionsWithoutMessageOrCause:ExploreFeedViewModel.kt$ExploreFeedViewModel$IllegalStateException()</ID>
     <ID>ThrowingExceptionsWithoutMessageOrCause:FeedViewModel.kt$FeedViewModel$IllegalStateException()</ID>
     <ID>ThrowingExceptionsWithoutMessageOrCause:NotificationsViewModel.kt$NotificationsViewModel$IllegalStateException()</ID>
@@ -178,9 +154,6 @@
     <ID>ThrowingExceptionsWithoutMessageOrCause:ThreadViewModel.kt$ThreadViewModel$IllegalStateException()</ID>
     <ID>ThrowsCount:FileUploader.kt$FileUploader$@Throws(UnsuccessfulFileUpload::class) suspend fun uploadFile(userId: String, uri: Uri): String</ID>
     <ID>ThrowsCount:LnInvoiceUtils.kt$LnInvoiceUtils$private fun decodeUnlimitedLength(invoice: String): Boolean</ID>
-    <ID>ThrowsCount:NostrWalletConnectParser.kt$fun String.parseNWCUrl(): NostrWallet</ID>
-    <ID>ThrowsCount:ZapRepository.kt$ZapRepository$suspend fun zap( userId: String, target: ZapTarget, amountInSats: ULong? = null, comment: String? = null, )</ID>
-    <ID>ThrowsCount:ZapsApi.kt$ZapsApi$suspend fun fetchInvoice( request: LightningPayRequest, zapEvent: NostrEvent, satoshiAmountInMilliSats: ULong, comment: String = "", ): LightningPayResponse</ID>
     <ID>TooGenericExceptionCaught:NostrIncomingMessageParser.kt$error: Exception</ID>
     <ID>TooManyFunctions:ConversionUtils.kt$net.primal.android.crypto.ConversionUtils.kt</ID>
     <ID>TooManyFunctions:NostrNotary.kt$NostrNotary</ID>
@@ -191,7 +164,5 @@
     <ID>UnusedPrivateProperty:UnsuccessfulFileUpload.kt$UnsuccessfulFileUpload$cause: Throwable?</ID>
     <ID>UseCheckOrError:RelayPool.kt$RelayPool$throw IllegalStateException("$it is not allowed")</ID>
     <ID>UseRequire:ConversionUtils.kt$throw IllegalArgumentException("Expected $it but obtained ${decodedForm.first}")</ID>
-    <ID>UseRequire:ZapBottomSheet.kt$throw IllegalArgumentException("There should be 6 zap options.")</ID>
-    <ID>UseRequire:ZapsApi.kt$ZapsApi$throw IllegalArgumentException("request.allowsNostr must not be null or false.")</ID>
   </CurrentIssues>
 </SmellBaseline>

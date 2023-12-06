@@ -14,13 +14,13 @@ import net.primal.android.explore.home.ExploreHomeContract.UiState
 import net.primal.android.explore.repository.ExploreRepository
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.android.user.badges.BadgesManager
+import net.primal.android.user.subscriptions.SubscriptionsManager
 
 @HiltViewModel
 class ExploreHomeViewModel @Inject constructor(
     private val exploreRepository: ExploreRepository,
     private val activeAccountStore: ActiveAccountStore,
-    private val badgesManager: BadgesManager,
+    private val subscriptionsManager: SubscriptionsManager,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(UiState())
@@ -56,7 +56,7 @@ class ExploreHomeViewModel @Inject constructor(
 
     private fun subscribeToBadgesUpdates() =
         viewModelScope.launch {
-            badgesManager.badges.collect {
+            subscriptionsManager.badges.collect {
                 setState {
                     copy(badges = it)
                 }

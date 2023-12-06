@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.domain.WalletPreference
+import net.primal.android.user.subscriptions.SubscriptionsManager
 import net.primal.android.wallet.dashboard.WalletDashboardContract.UiEvent
 import net.primal.android.wallet.dashboard.WalletDashboardContract.UiState
 import net.primal.android.wallet.repository.WalletRepository
@@ -19,6 +20,7 @@ import net.primal.android.wallet.repository.WalletRepository
 class WalletDashboardViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val walletRepository: WalletRepository,
+    private val subscriptionsManager: SubscriptionsManager,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(value = UiState())
@@ -31,6 +33,7 @@ class WalletDashboardViewModel @Inject constructor(
     init {
         subscribeToEvents()
         subscribeToActiveAccount()
+        subscribeToWalletBalance()
     }
 
     private fun subscribeToEvents() =
@@ -52,6 +55,13 @@ class WalletDashboardViewModel @Inject constructor(
                         walletPreference = it.walletPreference,
                     )
                 }
+            }
+        }
+
+    private fun subscribeToWalletBalance() =
+        viewModelScope.launch {
+            subscriptionsManager.walletBalance.collect {
+                setState { copy(walletBalance = it) }
             }
         }
 

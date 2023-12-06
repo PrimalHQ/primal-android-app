@@ -25,16 +25,17 @@ class WalletRepository @Inject constructor(
 
     suspend fun activateWallet(userId: String, code: String): String {
         return withContext(dispatcherProvider.io()) {
-            val lightningAddress = walletApi.activateWallet(code)
-            // TODO Store lightning address
-            // walletInfo.storeWalletInfoLocally(userId = userId)
-            lightningAddress
+            walletApi.activateWallet(userId, code)
         }
     }
 
-    suspend fun requestActivationCodeToEmail(name: String, email: String) {
+    suspend fun requestActivationCodeToEmail(
+        userId: String,
+        name: String,
+        email: String,
+    ) {
         withContext(dispatcherProvider.io()) {
-            walletApi.requestActivationCodeToEmail(name, email)
+            walletApi.requestActivationCodeToEmail(userId, name, email)
         }
     }
 

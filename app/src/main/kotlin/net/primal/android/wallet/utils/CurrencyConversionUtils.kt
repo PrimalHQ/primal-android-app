@@ -1,7 +1,7 @@
 package net.primal.android.wallet.utils
 
 @SuppressWarnings("ImplicitDefaultLocale")
-object ZapConversionUtils {
+object CurrencyConversionUtils {
     private const val BTC_IN_SATS = 100_000_000.00
 
     fun ULong.toBtc() = this.toDouble() / BTC_IN_SATS

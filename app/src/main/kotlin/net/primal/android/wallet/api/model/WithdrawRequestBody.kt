@@ -3,10 +3,11 @@ package net.primal.android.wallet.api.model
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import net.primal.android.nostr.model.NostrEvent
+import net.primal.android.wallet.domain.SubWallet
 
 @Serializable
 data class WithdrawRequestBody(
-    @SerialName("subwallet") val subWallet: Int,
+    @SerialName("subwallet") val subWallet: SubWallet,
     @SerialName("target_lud16") val targetLud16: String? = null,
     @SerialName("target_lnurl") val targetLnUrl: String? = null,
     @SerialName("target_pubkey") val targetPubKey: String? = null,

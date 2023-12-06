@@ -35,7 +35,7 @@ import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.settings.muted.repository.MutedUserRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.android.user.badges.BadgesManager
+import net.primal.android.user.subscriptions.SubscriptionsManager
 import net.primal.android.user.updater.UserDataUpdater
 import net.primal.android.user.updater.UserDataUpdaterFactory
 import net.primal.android.wallet.domain.ZapTarget
@@ -53,7 +53,7 @@ class FeedViewModel @Inject constructor(
     private val appConfigUpdater: AppConfigUpdater,
     private val profileRepository: ProfileRepository,
     private val zapHandler: ZapHandler,
-    private val badgesManager: BadgesManager,
+    private val subscriptionsManager: SubscriptionsManager,
     private val mutedUserRepository: MutedUserRepository,
 ) : ViewModel() {
 
@@ -156,7 +156,7 @@ class FeedViewModel @Inject constructor(
 
     private fun subscribeToBadgesUpdates() =
         viewModelScope.launch {
-            badgesManager.badges.collect {
+            subscriptionsManager.badges.collect {
                 setState {
                     copy(badges = it)
                 }

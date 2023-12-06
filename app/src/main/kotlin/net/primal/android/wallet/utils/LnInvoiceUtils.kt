@@ -7,6 +7,7 @@ import java.util.regex.Pattern
 // Made by Vitor Pamplona
 // https://github.com/vitorpamplona/amethyst/blob/main/quartz/src/main/java/com/vitorpamplona/quartz/encoders/LnInvoiceUtil.kt
 /** based on litecoinj */
+@SuppressWarnings("MagicNumber")
 object LnInvoiceUtils {
     private val invoicePattern = Pattern.compile(
         "lnbc((?<amount>\\d+)(?<multiplier>[munp])?)?1[^1\\s]+",

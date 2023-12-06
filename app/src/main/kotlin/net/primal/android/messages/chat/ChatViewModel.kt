@@ -35,14 +35,14 @@ import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.android.user.badges.BadgesManager
+import net.primal.android.user.subscriptions.SubscriptionsManager
 import timber.log.Timber
 
 @HiltViewModel
 class ChatViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     activeAccountStore: ActiveAccountStore,
-    private val badgesManager: BadgesManager,
+    private val subscriptionsManager: SubscriptionsManager,
     private val messageRepository: MessageRepository,
     private val profileRepository: ProfileRepository,
 ) : ViewModel() {
@@ -106,7 +106,7 @@ class ChatViewModel @Inject constructor(
 
     private fun subscribeToTotalUnreadCountChanges() =
         viewModelScope.launch {
-            badgesManager.badges
+            subscriptionsManager.badges
                 .map { it.messages }
                 .distinctUntilChanged()
                 .collect {

@@ -11,11 +11,15 @@ interface WalletApi {
 
     suspend fun getWalletUserInfo(userId: String): WalletUserInfoResponse
 
-    suspend fun requestActivationCodeToEmail(name: String, email: String)
+    suspend fun requestActivationCodeToEmail(
+        userId: String,
+        name: String,
+        email: String,
+    )
 
-    suspend fun activateWallet(code: String): String
+    suspend fun activateWallet(userId: String, code: String): String
 
-    suspend fun balance(userId: String)
+    suspend fun balance(userId: String): Double
 
     suspend fun withdraw(userId: String, body: WithdrawRequestBody)
 

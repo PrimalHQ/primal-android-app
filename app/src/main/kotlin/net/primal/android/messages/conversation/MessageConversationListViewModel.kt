@@ -27,13 +27,13 @@ import net.primal.android.messages.domain.ConversationRelation
 import net.primal.android.messages.repository.MessageRepository
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.android.user.badges.BadgesManager
+import net.primal.android.user.subscriptions.SubscriptionsManager
 import timber.log.Timber
 
 @HiltViewModel
 class MessageConversationListViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
-    private val badgesManager: BadgesManager,
+    private val subscriptionsManager: SubscriptionsManager,
     private val messageRepository: MessageRepository,
 ) : ViewModel() {
 
@@ -83,7 +83,7 @@ class MessageConversationListViewModel @Inject constructor(
 
     private fun subscribeToBadgesUpdates() =
         viewModelScope.launch {
-            badgesManager.badges.collect {
+            subscriptionsManager.badges.collect {
                 setState {
                     copy(badges = it)
                 }
@@ -92,7 +92,7 @@ class MessageConversationListViewModel @Inject constructor(
 
     private fun subscribeToTotalUnreadCountChanges() =
         viewModelScope.launch {
-            badgesManager.badges
+            subscriptionsManager.badges
                 .map { it.messages }
                 .distinctUntilChanged()
                 .collect {

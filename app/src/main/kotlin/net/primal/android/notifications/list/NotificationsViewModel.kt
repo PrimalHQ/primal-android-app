@@ -43,7 +43,7 @@ import net.primal.android.notifications.list.ui.NotificationUi
 import net.primal.android.notifications.repository.NotificationRepository
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.android.user.badges.BadgesManager
+import net.primal.android.user.subscriptions.SubscriptionsManager
 import net.primal.android.wallet.domain.ZapTarget
 import net.primal.android.wallet.zaps.InvalidZapRequestException
 import net.primal.android.wallet.zaps.ZapFailureException
@@ -56,7 +56,7 @@ class NotificationsViewModel @Inject constructor(
     private val postRepository: PostRepository,
     private val profileRepository: ProfileRepository,
     private val zapHandler: ZapHandler,
-    private val badgesManager: BadgesManager,
+    private val subscriptionsManager: SubscriptionsManager,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(
@@ -107,7 +107,7 @@ class NotificationsViewModel @Inject constructor(
 
     private fun subscribeToBadgesUpdates() =
         viewModelScope.launch {
-            badgesManager.badges.collect {
+            subscriptionsManager.badges.collect {
                 setState { copy(badges = it) }
             }
         }

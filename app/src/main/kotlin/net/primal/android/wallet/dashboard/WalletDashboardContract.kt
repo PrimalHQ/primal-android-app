@@ -9,6 +9,7 @@ interface WalletDashboardContract {
         val activeAccountAvatarCdnImage: CdnImage? = null,
         val primalWallet: PrimalWallet? = null,
         val walletPreference: WalletPreference = WalletPreference.Undefined,
+        val walletBalance: Double? = null,
     )
 
     sealed class UiEvent {

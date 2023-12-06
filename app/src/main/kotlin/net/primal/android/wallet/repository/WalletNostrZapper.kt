@@ -3,8 +3,9 @@ package net.primal.android.wallet.repository
 import net.primal.android.crypto.urlToLnUrlHrp
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.wallet.api.model.WithdrawRequestBody
-import net.primal.android.wallet.utils.ZapConversionUtils.formatAsString
-import net.primal.android.wallet.utils.ZapConversionUtils.toBtc
+import net.primal.android.wallet.domain.SubWallet
+import net.primal.android.wallet.utils.CurrencyConversionUtils.formatAsString
+import net.primal.android.wallet.utils.CurrencyConversionUtils.toBtc
 import net.primal.android.wallet.zaps.NostrZapper
 import net.primal.android.wallet.zaps.ZapFailureException
 import net.primal.android.wallet.zaps.ZapRequestData
@@ -18,7 +19,7 @@ class WalletNostrZapper(
             walletRepository.withdraw(
                 userId = data.zapperUserId,
                 body = WithdrawRequestBody(
-                    subWallet = 1,
+                    subWallet = SubWallet.Open,
                     targetLnUrl = data.lnUrlDecoded.urlToLnUrlHrp(),
                     targetPubKey = data.targetUserId,
                     amountBtc = data.zapAmountInSats.toBtc().formatAsString(),

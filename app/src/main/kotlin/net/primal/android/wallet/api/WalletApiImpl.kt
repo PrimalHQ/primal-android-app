@@ -14,13 +14,13 @@ import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.primal.PrimalCacheFilter
 import net.primal.android.networking.primal.PrimalVerb
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.nostr.ext.asWalletBalanceInBtcOrNull
 import net.primal.android.nostr.ext.takeContentOrNull
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.model.primal.PrimalEvent
 import net.primal.android.nostr.model.primal.content.WalletActivationContent
 import net.primal.android.nostr.model.primal.content.WalletUserInfoContent
 import net.primal.android.nostr.notary.NostrNotary
-import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.api.model.ActivateWalletRequestBody
 import net.primal.android.wallet.api.model.BalanceRequestBody
 import net.primal.android.wallet.api.model.DepositRequestBody
@@ -30,12 +30,13 @@ import net.primal.android.wallet.api.model.TransactionsRequestBody
 import net.primal.android.wallet.api.model.UserWalletInfoRequestBody
 import net.primal.android.wallet.api.model.WalletOperationRequestBody
 import net.primal.android.wallet.api.model.WalletOperationVerb
+import net.primal.android.wallet.api.model.WalletRequestBody
 import net.primal.android.wallet.api.model.WalletUserInfoResponse
 import net.primal.android.wallet.api.model.WithdrawRequestBody
+import net.primal.android.wallet.domain.SubWallet
 
 class WalletApiImpl @Inject constructor(
     @PrimalWalletApiClient private val primalApiClient: PrimalApiClient,
-    private val activeAccountStore: ActiveAccountStore,
     private val nostrNotary: NostrNotary,
 ) : WalletApi {
 
@@ -44,6 +45,7 @@ class WalletApiImpl @Inject constructor(
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.WALLET,
                 optionsJson = buildWalletOptionsJson(
+                    userId = userId,
                     walletVerb = WalletOperationVerb.IS_USER,
                     requestBody = IsWalletUserRequestBody(userId),
                 ),
@@ -59,6 +61,7 @@ class WalletApiImpl @Inject constructor(
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.WALLET,
                 optionsJson = buildWalletOptionsJson(
+                    userId = userId,
                     walletVerb = WalletOperationVerb.USER_INFO,
                     requestBody = UserWalletInfoRequestBody(userId),
                 ),
@@ -70,11 +73,16 @@ class WalletApiImpl @Inject constructor(
             .toUserWalletInfoResponseOrThrow()
     }
 
-    override suspend fun requestActivationCodeToEmail(name: String, email: String) {
+    override suspend fun requestActivationCodeToEmail(
+        userId: String,
+        name: String,
+        email: String,
+    ) {
         primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.WALLET,
                 optionsJson = buildWalletOptionsJson(
+                    userId = userId,
                     walletVerb = WalletOperationVerb.GET_ACTIVATION_CODE,
                     requestBody = GetActivationCodeRequestBody(name, email),
                 ),
@@ -82,11 +90,12 @@ class WalletApiImpl @Inject constructor(
         )
     }
 
-    override suspend fun activateWallet(code: String): String {
+    override suspend fun activateWallet(userId: String, code: String): String {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.WALLET,
                 optionsJson = buildWalletOptionsJson(
+                    userId = userId,
                     walletVerb = WalletOperationVerb.ACTIVATE,
                     requestBody = ActivateWalletRequestBody(code),
                 ),
@@ -98,23 +107,29 @@ class WalletApiImpl @Inject constructor(
             .toWalletLightningAddressOrThrow()
     }
 
-    override suspend fun balance(userId: String) {
+    override suspend fun balance(userId: String): Double {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.WALLET,
                 optionsJson = buildWalletOptionsJson(
+                    userId = userId,
                     walletVerb = WalletOperationVerb.BALANCE,
-                    requestBody = BalanceRequestBody(),
+                    requestBody = BalanceRequestBody(subWallet = SubWallet.Open),
                 ),
             ),
         )
+
+        return queryResult.findPrimalEvent(NostrEventKind.PrimalWalletBalance)
+            ?.asWalletBalanceInBtcOrNull()
+            ?: throw WssException("Missing or invalid content in response.")
     }
 
     override suspend fun withdraw(userId: String, body: WithdrawRequestBody) {
-        val queryResult = primalApiClient.query(
+        primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.WALLET,
                 optionsJson = buildWalletOptionsJson(
+                    userId = userId,
                     walletVerb = WalletOperationVerb.WITHDRAW,
                     requestBody = body,
                 ),
@@ -123,10 +138,11 @@ class WalletApiImpl @Inject constructor(
     }
 
     override suspend fun deposit(userId: String, body: DepositRequestBody) {
-        val queryResult = primalApiClient.query(
+        primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.WALLET,
                 optionsJson = buildWalletOptionsJson(
+                    userId = userId,
                     walletVerb = WalletOperationVerb.DEPOSIT,
                     requestBody = body,
                 ),
@@ -135,10 +151,11 @@ class WalletApiImpl @Inject constructor(
     }
 
     override suspend fun transactions(userId: String, body: TransactionsRequestBody) {
-        val queryResult = primalApiClient.query(
+        primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.WALLET,
                 optionsJson = buildWalletOptionsJson(
+                    userId = userId,
                     walletVerb = WalletOperationVerb.TRANSACTIONS,
                     requestBody = body,
                 ),
@@ -147,13 +164,14 @@ class WalletApiImpl @Inject constructor(
     }
 
     private fun buildWalletOptionsJson(
+        userId: String,
         walletVerb: WalletOperationVerb,
         requestBody: WalletOperationRequestBody,
     ): String =
         NostrJsonEncodeDefaults.encodeToString(
-            net.primal.android.wallet.api.model.WalletRequestBody(
+            WalletRequestBody(
                 event = nostrNotary.signPrimalWalletOperationNostrEvent(
-                    userId = activeAccountStore.activeUserId(),
+                    userId = userId,
                     content = buildJsonArray {
                         add(walletVerb.identifier)
                         add(

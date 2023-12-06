@@ -1,12 +1,12 @@
 package net.primal.android.wallet.utils
 
 import io.kotest.matchers.shouldBe
-import net.primal.android.wallet.utils.ZapConversionUtils.formatAsString
-import net.primal.android.wallet.utils.ZapConversionUtils.toBtc
-import net.primal.android.wallet.utils.ZapConversionUtils.toSats
+import net.primal.android.wallet.utils.CurrencyConversionUtils.formatAsString
+import net.primal.android.wallet.utils.CurrencyConversionUtils.toBtc
+import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
 import org.junit.Test
 
-class ZapConversionUtilsTest {
+class CurrencyConversionUtilsTest {
 
     @Test
     fun satsToBtc_1_sat() {

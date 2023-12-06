@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import java.text.NumberFormat
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.PrimalTopAppBar
@@ -38,9 +39,11 @@ import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.PrimalBottomBarHeightDp
 import net.primal.android.drawer.PrimalDrawerScaffold
 import net.primal.android.theme.AppTheme
+import net.primal.android.user.domain.PrimalWallet
 import net.primal.android.user.domain.WalletPreference
 import net.primal.android.wallet.dashboard.WalletDashboardContract.UiEvent
 import net.primal.android.wallet.domain.WalletKycLevel
+import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
 
 @Composable
 fun WalletDashboardScreen(
@@ -102,40 +105,12 @@ fun WalletDashboardScreen(
                 contentAlignment = Alignment.Center,
             ) {
                 if (state.primalWallet != null && state.primalWallet.kycLevel != WalletKycLevel.None) {
-                    Column(
-                        modifier = Modifier
-                            .wrapContentSize(align = Alignment.Center)
-                            .padding(horizontal = 32.dp),
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                    ) {
-                        Text(
-                            modifier = Modifier.padding(vertical = 16.dp),
-                            text = "Primal wallet is activated.\n\n" +
-                                "Primal wallet lightning address is ${state.primalWallet.lightningAddress}.\n\n" +
-                                "Primal KYC level is ${state.primalWallet.kycLevel}.\n\n" +
-                                "Your wallet preference is ${state.walletPreference}.\n\n",
-                            textAlign = TextAlign.Center,
-                            color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
-                            style = AppTheme.typography.bodyMedium,
-                        )
-
-                        PrimalLoadingButton(
-                            text = "Set Primal Wallet Preferred",
-                            onClick = {
-                                eventPublisher(UiEvent.UpdateWalletPreference(WalletPreference.PrimalWallet))
-                            },
-                        )
-
-                        Spacer(modifier = Modifier.height(32.dp))
-
-                        PrimalLoadingButton(
-                            text = "Set NWC Preferred",
-                            onClick = {
-                                eventPublisher(UiEvent.UpdateWalletPreference(WalletPreference.NostrWalletConnect))
-                            },
-                        )
-                    }
+                    WalletDashboard(
+                        walletBalance = state.walletBalance,
+                        primalWallet = state.primalWallet,
+                        walletPreference = state.walletPreference,
+                        eventPublisher = eventPublisher,
+                    )
                 } else {
                     ActivateWalletNotice(
                         modifier = Modifier.wrapContentSize(align = Alignment.Center),
@@ -145,6 +120,60 @@ fun WalletDashboardScreen(
             }
         },
     )
+}
+
+@Composable
+fun WalletDashboard(
+    walletBalance: Double?,
+    primalWallet: PrimalWallet,
+    walletPreference: WalletPreference,
+    eventPublisher: (UiEvent) -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .wrapContentSize(align = Alignment.Center)
+            .padding(horizontal = 32.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        val numberFormat = remember { NumberFormat.getNumberInstance() }
+
+        Text(
+            modifier = Modifier.fillMaxWidth(),
+            text = walletBalance?.toSats()?.let {
+                "${numberFormat.format(it.toLong())} sats"
+            } ?: "\\-.-/",
+            textAlign = TextAlign.Center,
+            style = AppTheme.typography.headlineMedium,
+        )
+
+        Text(
+            modifier = Modifier.padding(vertical = 16.dp),
+            text = "Primal wallet is activated.\n\n" +
+                "Primal wallet lightning address is ${primalWallet.lightningAddress}.\n\n" +
+                "Primal KYC level is ${primalWallet.kycLevel}.\n\n" +
+                "Your wallet preference is $walletPreference.\n\n",
+            textAlign = TextAlign.Center,
+            color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
+            style = AppTheme.typography.bodyMedium,
+        )
+
+        PrimalLoadingButton(
+            text = "Set Primal Wallet Preferred",
+            onClick = {
+                eventPublisher(UiEvent.UpdateWalletPreference(WalletPreference.PrimalWallet))
+            },
+        )
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        PrimalLoadingButton(
+            text = "Set NWC Preferred",
+            onClick = {
+                eventPublisher(UiEvent.UpdateWalletPreference(WalletPreference.NostrWalletConnect))
+            },
+        )
+    }
 }
 
 @Composable
