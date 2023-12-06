@@ -23,6 +23,13 @@ fun String.hexToNsecHrp() =
         encoding = Bech32.Encoding.Bech32,
     )
 
+fun String.urlToLnUrlHrp() =
+    Bech32.encodeBytes(
+        hrp = "lnurl",
+        data = this.toByteArray(),
+        encoding = Bech32.Encoding.Bech32,
+    )
+
 fun String.bech32ToHex() = Bech32.decodeBytes(bech32 = this).second.toHex()
 
 fun ByteArray.toNsec() = Bech32.encodeBytes(hrp = "nsec", this, Bech32.Encoding.Bech32)

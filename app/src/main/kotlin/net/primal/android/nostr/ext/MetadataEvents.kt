@@ -28,7 +28,7 @@ fun NostrEvent.asProfileDataPO(cdnResources: Map<String, CdnResource>): ProfileD
         handle = metadata?.name,
         internetIdentifier = metadata?.nip05,
         lightningAddress = metadata?.lud16,
-        lnUrl = metadata?.lud16?.parseAsLNUrlOrNull() ?: metadata?.lud06?.decodeLNUrlOrNull(),
+        lnUrlDecoded = metadata?.lud16?.parseAsLNUrlOrNull() ?: metadata?.lud06?.decodeLNUrlOrNull(),
         about = metadata?.about,
         displayName = metadata?.displayName,
         avatarCdnImage = metadata?.picture?.let {

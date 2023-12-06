@@ -22,12 +22,16 @@ import net.primal.android.nostr.model.primal.content.WalletUserInfoContent
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.api.model.ActivateWalletRequestBody
+import net.primal.android.wallet.api.model.BalanceRequestBody
+import net.primal.android.wallet.api.model.DepositRequestBody
 import net.primal.android.wallet.api.model.GetActivationCodeRequestBody
 import net.primal.android.wallet.api.model.IsWalletUserRequestBody
+import net.primal.android.wallet.api.model.TransactionsRequestBody
 import net.primal.android.wallet.api.model.UserWalletInfoRequestBody
 import net.primal.android.wallet.api.model.WalletOperationRequestBody
 import net.primal.android.wallet.api.model.WalletOperationVerb
 import net.primal.android.wallet.api.model.WalletUserInfoResponse
+import net.primal.android.wallet.api.model.WithdrawRequestBody
 
 class WalletApiImpl @Inject constructor(
     @PrimalWalletApiClient private val primalApiClient: PrimalApiClient,
@@ -92,6 +96,54 @@ class WalletApiImpl @Inject constructor(
         return queryResult
             .findPrimalEvent(NostrEventKind.PrimalWalletActivation)
             .toWalletLightningAddressOrThrow()
+    }
+
+    override suspend fun balance(userId: String) {
+        val queryResult = primalApiClient.query(
+            message = PrimalCacheFilter(
+                primalVerb = PrimalVerb.WALLET,
+                optionsJson = buildWalletOptionsJson(
+                    walletVerb = WalletOperationVerb.BALANCE,
+                    requestBody = BalanceRequestBody(),
+                ),
+            ),
+        )
+    }
+
+    override suspend fun withdraw(userId: String, body: WithdrawRequestBody) {
+        val queryResult = primalApiClient.query(
+            message = PrimalCacheFilter(
+                primalVerb = PrimalVerb.WALLET,
+                optionsJson = buildWalletOptionsJson(
+                    walletVerb = WalletOperationVerb.WITHDRAW,
+                    requestBody = body,
+                ),
+            ),
+        )
+    }
+
+    override suspend fun deposit(userId: String, body: DepositRequestBody) {
+        val queryResult = primalApiClient.query(
+            message = PrimalCacheFilter(
+                primalVerb = PrimalVerb.WALLET,
+                optionsJson = buildWalletOptionsJson(
+                    walletVerb = WalletOperationVerb.DEPOSIT,
+                    requestBody = body,
+                ),
+            ),
+        )
+    }
+
+    override suspend fun transactions(userId: String, body: TransactionsRequestBody) {
+        val queryResult = primalApiClient.query(
+            message = PrimalCacheFilter(
+                primalVerb = PrimalVerb.WALLET,
+                optionsJson = buildWalletOptionsJson(
+                    walletVerb = WalletOperationVerb.TRANSACTIONS,
+                    requestBody = body,
+                ),
+            ),
+        )
     }
 
     private fun buildWalletOptionsJson(

@@ -15,7 +15,7 @@ data class ProfileData(
     val displayName: String? = null,
     val internetIdentifier: String? = null,
     val lightningAddress: String? = null,
-    val lnUrl: String? = null,
+    val lnUrlDecoded: String? = null,
     val avatarCdnImage: CdnImage? = null,
     val bannerCdnImage: CdnImage? = null,
     val website: String? = null,

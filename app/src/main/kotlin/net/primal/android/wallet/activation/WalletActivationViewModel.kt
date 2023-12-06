@@ -71,10 +71,9 @@ class WalletActivationViewModel @Inject constructor(
         viewModelScope.launch {
             setState { copy(working = true) }
             try {
-                val lightningAddress = repository.activateWallet(
-                    userId = activeAccountStore.activeUserId(),
-                    code = code,
-                )
+                val userId = activeAccountStore.activeUserId()
+                val lightningAddress = repository.activateWallet(userId = userId, code = code)
+                repository.fetchUserWalletInfoAndUpdateUserAccount(userId)
                 // TODO Update profile with lightning address
                 // TODO Set Primal Wallet as preferred if there is no NWC
                 setState {

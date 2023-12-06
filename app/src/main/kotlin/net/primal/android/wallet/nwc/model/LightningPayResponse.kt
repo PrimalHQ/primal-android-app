@@ -1,4 +1,4 @@
-package net.primal.android.wallet.model
+package net.primal.android.wallet.nwc.model
 
 import kotlinx.serialization.Serializable
 
@@ -6,8 +6,8 @@ import kotlinx.serialization.Serializable
 data class LightningPayResponse(
     val pr: String,
 ) {
-    fun toWalletPayRequest(): WalletRequest<PayInvoiceRequest> =
-        WalletRequest(
+    fun toWalletPayRequest(): NwcWalletRequest<PayInvoiceRequest> =
+        NwcWalletRequest(
             method = "pay_invoice",
             params = PayInvoiceRequest(this.pr),
         )

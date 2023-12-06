@@ -1,9 +1,9 @@
-package net.primal.android.wallet.model
+package net.primal.android.wallet.nwc.model
 
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class WalletRequest<T>(
+data class NwcWalletRequest<T>(
     val method: String,
     val params: T,
 )

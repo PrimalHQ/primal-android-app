@@ -3,8 +3,10 @@ package net.primal.android.wallet.dashboard
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.DrawerState
@@ -22,18 +24,23 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.compose.button.PrimalFilledButton
+import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.PrimalBottomBarHeightDp
 import net.primal.android.drawer.PrimalDrawerScaffold
 import net.primal.android.theme.AppTheme
+import net.primal.android.user.domain.WalletPreference
+import net.primal.android.wallet.dashboard.WalletDashboardContract.UiEvent
+import net.primal.android.wallet.domain.WalletKycLevel
 
 @Composable
 fun WalletDashboardScreen(
@@ -49,6 +56,7 @@ fun WalletDashboardScreen(
         onPrimaryDestinationChanged = onPrimaryDestinationChanged,
         onDrawerDestinationClick = onDrawerDestinationClick,
         onWalletActivateClick = onWalletActivateClick,
+        eventPublisher = { viewModel.setEvents(it) },
     )
 }
 
@@ -59,6 +67,7 @@ fun WalletDashboardScreen(
     onPrimaryDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
     onWalletActivateClick: () -> Unit,
+    eventPublisher: (UiEvent) -> Unit,
 ) {
     val uiScope = rememberCoroutineScope()
     val drawerState: DrawerState = rememberDrawerState(DrawerValue.Closed)
@@ -92,10 +101,47 @@ fun WalletDashboardScreen(
                     .fillMaxSize(),
                 contentAlignment = Alignment.Center,
             ) {
-                ActivateWalletNotice(
-                    modifier = Modifier.wrapContentSize(align = Alignment.Center),
-                    onActivateClick = onWalletActivateClick,
-                )
+                if (state.primalWallet != null && state.primalWallet.kycLevel != WalletKycLevel.None) {
+                    Column(
+                        modifier = Modifier
+                            .wrapContentSize(align = Alignment.Center)
+                            .padding(horizontal = 32.dp),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
+                        Text(
+                            modifier = Modifier.padding(vertical = 16.dp),
+                            text = "Primal wallet is activated.\n\n" +
+                                "Primal wallet lightning address is ${state.primalWallet.lightningAddress}.\n\n" +
+                                "Primal KYC level is ${state.primalWallet.kycLevel}.\n\n" +
+                                "Your wallet preference is ${state.walletPreference}.\n\n",
+                            textAlign = TextAlign.Center,
+                            color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
+                            style = AppTheme.typography.bodyMedium,
+                        )
+
+                        PrimalLoadingButton(
+                            text = "Set Primal Wallet Preferred",
+                            onClick = {
+                                eventPublisher(UiEvent.UpdateWalletPreference(WalletPreference.PrimalWallet))
+                            },
+                        )
+
+                        Spacer(modifier = Modifier.height(32.dp))
+
+                        PrimalLoadingButton(
+                            text = "Set NWC Preferred",
+                            onClick = {
+                                eventPublisher(UiEvent.UpdateWalletPreference(WalletPreference.NostrWalletConnect))
+                            },
+                        )
+                    }
+                } else {
+                    ActivateWalletNotice(
+                        modifier = Modifier.wrapContentSize(align = Alignment.Center),
+                        onActivateClick = onWalletActivateClick,
+                    )
+                }
             }
         },
     )

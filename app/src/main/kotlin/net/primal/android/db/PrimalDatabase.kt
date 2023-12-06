@@ -66,7 +66,7 @@ import net.primal.android.thread.db.ThreadConversationDao
         DirectMessageData::class,
         MessageConversationData::class,
     ],
-    version = 12,
+    version = 13,
     exportSchema = true,
 )
 @TypeConverters(

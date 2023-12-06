@@ -31,8 +31,10 @@ import net.primal.android.thread.ThreadContract.UiEvent
 import net.primal.android.thread.ThreadContract.UiState.ThreadError
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
-import net.primal.android.wallet.model.ZapTarget
-import net.primal.android.wallet.repository.ZapRepository
+import net.primal.android.wallet.domain.ZapTarget
+import net.primal.android.wallet.zaps.InvalidZapRequestException
+import net.primal.android.wallet.zaps.ZapFailureException
+import net.primal.android.wallet.zaps.ZapHandler
 
 @HiltViewModel
 class ThreadViewModel @Inject constructor(
@@ -41,7 +43,7 @@ class ThreadViewModel @Inject constructor(
     private val feedRepository: FeedRepository,
     private val postRepository: PostRepository,
     private val profileRepository: ProfileRepository,
-    private val zapRepository: ZapRepository,
+    private val zapHandler: ZapHandler,
     private val mutedUserRepository: MutedUserRepository,
 ) : ViewModel() {
 
@@ -177,29 +179,27 @@ class ThreadViewModel @Inject constructor(
                 profileRepository.findProfileData(profileId = zapAction.postAuthorId)
             }
 
-            if (postAuthorProfileData.lnUrl == null) {
+            if (postAuthorProfileData.lnUrlDecoded == null) {
                 setErrorState(error = ThreadError.MissingLightningAddress(IllegalStateException()))
                 return@launch
             }
 
             try {
-                zapRepository.zap(
+                zapHandler.zap(
                     userId = activeAccountStore.activeUserId(),
                     comment = zapAction.zapDescription,
                     amountInSats = zapAction.zapAmount,
                     target = ZapTarget.Note(
                         zapAction.postId,
                         zapAction.postAuthorId,
-                        postAuthorProfileData.lnUrl,
+                        postAuthorProfileData.lnUrlDecoded,
                     ),
                 )
-            } catch (error: ZapRepository.ZapFailureException) {
-                setErrorState(error = ThreadError.FailedToPublishZapEvent(error))
-            } catch (error: NostrPublishException) {
+            } catch (error: ZapFailureException) {
                 setErrorState(error = ThreadError.FailedToPublishZapEvent(error))
             } catch (error: MissingRelaysException) {
                 setErrorState(error = ThreadError.MissingRelaysConfiguration(error))
-            } catch (error: ZapRepository.InvalidZapRequestException) {
+            } catch (error: InvalidZapRequestException) {
                 setErrorState(error = ThreadError.InvalidZapRequest(error))
             }
         }

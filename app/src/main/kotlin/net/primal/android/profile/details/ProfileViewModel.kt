@@ -33,8 +33,10 @@ import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.settings.muted.repository.MutedUserRepository
 import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.android.wallet.model.ZapTarget
-import net.primal.android.wallet.repository.ZapRepository
+import net.primal.android.wallet.domain.ZapTarget
+import net.primal.android.wallet.zaps.InvalidZapRequestException
+import net.primal.android.wallet.zaps.ZapFailureException
+import net.primal.android.wallet.zaps.ZapHandler
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
@@ -43,7 +45,7 @@ class ProfileViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val profileRepository: ProfileRepository,
     private val postRepository: PostRepository,
-    private val zapRepository: ZapRepository,
+    private val zapHandler: ZapHandler,
     private val settingsRepository: SettingsRepository,
     private val mutedUserRepository: MutedUserRepository,
 ) : ViewModel() {
@@ -189,29 +191,27 @@ class ProfileViewModel @Inject constructor(
                 profileRepository.findProfileData(profileId = zapAction.postAuthorId)
             }
 
-            if (postAuthorProfileData.lnUrl == null) {
+            if (postAuthorProfileData.lnUrlDecoded == null) {
                 setErrorState(error = ProfileError.MissingLightningAddress(IllegalStateException()))
                 return@launch
             }
 
             try {
-                zapRepository.zap(
+                zapHandler.zap(
                     userId = activeAccountStore.activeUserId(),
                     comment = zapAction.zapDescription,
                     amountInSats = zapAction.zapAmount,
                     target = ZapTarget.Note(
                         zapAction.postId,
                         zapAction.postAuthorId,
-                        postAuthorProfileData.lnUrl,
+                        postAuthorProfileData.lnUrlDecoded,
                     ),
                 )
-            } catch (error: ZapRepository.ZapFailureException) {
-                setErrorState(error = ProfileError.FailedToPublishZapEvent(error))
-            } catch (error: NostrPublishException) {
+            } catch (error: ZapFailureException) {
                 setErrorState(error = ProfileError.FailedToPublishZapEvent(error))
             } catch (error: MissingRelaysException) {
                 setErrorState(error = ProfileError.MissingRelaysConfiguration(error))
-            } catch (error: ZapRepository.InvalidZapRequestException) {
+            } catch (error: InvalidZapRequestException) {
                 setErrorState(error = ProfileError.InvalidZapRequest(error))
             }
         }

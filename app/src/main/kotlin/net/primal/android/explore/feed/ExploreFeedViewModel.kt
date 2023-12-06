@@ -34,8 +34,10 @@ import net.primal.android.settings.muted.repository.MutedUserRepository
 import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
-import net.primal.android.wallet.model.ZapTarget
-import net.primal.android.wallet.repository.ZapRepository
+import net.primal.android.wallet.domain.ZapTarget
+import net.primal.android.wallet.zaps.InvalidZapRequestException
+import net.primal.android.wallet.zaps.ZapFailureException
+import net.primal.android.wallet.zaps.ZapHandler
 
 @HiltViewModel
 class ExploreFeedViewModel @Inject constructor(
@@ -44,7 +46,7 @@ class ExploreFeedViewModel @Inject constructor(
     private val feedRepository: FeedRepository,
     private val postRepository: PostRepository,
     private val profileRepository: ProfileRepository,
-    private val zapRepository: ZapRepository,
+    private val zapHandler: ZapHandler,
     private val settingsRepository: SettingsRepository,
     private val mutedUserRepository: MutedUserRepository,
 ) : ViewModel() {
@@ -171,7 +173,7 @@ class ExploreFeedViewModel @Inject constructor(
                 profileRepository.findProfileData(profileId = zapAction.postAuthorId)
             }
 
-            if (postAuthorProfileData.lnUrl == null) {
+            if (postAuthorProfileData.lnUrlDecoded == null) {
                 setErrorState(
                     error = ExploreFeedError.MissingLightningAddress(IllegalStateException()),
                 )
@@ -179,23 +181,21 @@ class ExploreFeedViewModel @Inject constructor(
             }
 
             try {
-                zapRepository.zap(
+                zapHandler.zap(
                     userId = activeAccountStore.activeUserId(),
                     comment = zapAction.zapDescription,
                     amountInSats = zapAction.zapAmount,
                     target = ZapTarget.Note(
                         zapAction.postId,
                         zapAction.postAuthorId,
-                        postAuthorProfileData.lnUrl,
+                        postAuthorProfileData.lnUrlDecoded,
                     ),
                 )
-            } catch (error: ZapRepository.ZapFailureException) {
-                setErrorState(error = ExploreFeedError.FailedToPublishZapEvent(error))
-            } catch (error: NostrPublishException) {
+            } catch (error: ZapFailureException) {
                 setErrorState(error = ExploreFeedError.FailedToPublishZapEvent(error))
             } catch (error: MissingRelaysException) {
                 setErrorState(error = ExploreFeedError.MissingRelaysConfiguration(error))
-            } catch (error: ZapRepository.InvalidZapRequestException) {
+            } catch (error: InvalidZapRequestException) {
                 setErrorState(error = ExploreFeedError.InvalidZapRequest(error))
             }
         }

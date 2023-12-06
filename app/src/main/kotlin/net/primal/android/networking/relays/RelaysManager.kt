@@ -82,11 +82,12 @@ class RelaysManager @Inject constructor(
             walletRelaysPool = null
         }
 
-    @Throws(NostrPublishException::class)
+    @Throws(NostrPublishException::class, MissingRelaysException::class)
     suspend fun publishEvent(nostrEvent: NostrEvent) {
         regularRelaysPool?.publishEvent(nostrEvent) ?: throw MissingRelaysException()
     }
 
+    @Throws(NostrPublishException::class, MissingRelaysException::class)
     suspend fun publishWalletEvent(nostrEvent: NostrEvent) {
         walletRelaysPool?.publishEvent(nostrEvent) ?: throw MissingRelaysException()
     }

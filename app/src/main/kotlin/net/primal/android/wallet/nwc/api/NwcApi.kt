@@ -1,4 +1,4 @@
-package net.primal.android.wallet.api
+package net.primal.android.wallet.nwc.api
 
 import java.io.IOException
 import java.math.BigDecimal
@@ -11,15 +11,16 @@ import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.core.serialization.json.toJsonObject
 import net.primal.android.nostr.model.NostrEvent
-import net.primal.android.wallet.model.LightningPayRequest
-import net.primal.android.wallet.model.LightningPayResponse
+import net.primal.android.wallet.nwc.model.LightningPayRequest
+import net.primal.android.wallet.nwc.model.LightningPayResponse
 import net.primal.android.wallet.utils.LnInvoiceUtils
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import timber.log.Timber
 
 @Singleton
-class ZapsApi @Inject constructor(
+class NwcApi @Inject constructor(
     private val dispatcherProvider: CoroutineDispatcherProvider,
     private val okHttpClient: OkHttpClient,
 ) {
@@ -50,9 +51,7 @@ class ZapsApi @Inject constructor(
         satoshiAmountInMilliSats: ULong,
         comment: String = "",
     ): LightningPayResponse {
-        if (request.allowsNostr != null && request.allowsNostr == false) {
-            throw IllegalArgumentException("request.allowsNostr must not be null or false.")
-        }
+        require(request.allowsNostr == true)
 
         val zapEventString = NostrJson.encodeToString(zapEvent.toJsonObject())
 
@@ -70,25 +69,29 @@ class ZapsApi @Inject constructor(
             .build()
 
         val response = withContext(dispatcherProvider.io()) { okHttpClient.newCall(getRequest).execute() }
-        val responseBody = response.body
-        if (responseBody != null) {
-            val responseString = withContext(dispatcherProvider.io()) { responseBody.string() }
-            val decoded = NostrJson.decodeFromStringOrNull<LightningPayResponse>(responseString)
-            if (decoded?.pr == null) throw IOException("Invalid invoice response.")
+        val responseString = withContext(dispatcherProvider.io()) { response.body?.string() }
+        val decoded = NostrJson.decodeFromStringOrNull<LightningPayResponse>(responseString)
 
-            val invoiceAmount = try {
-                LnInvoiceUtils.getAmountInSats(decoded.pr)
-            } catch (error: LnInvoiceUtils.AddressFormatException) {
-                throw IOException("Invalid invoice response")
-            }
+        val responseInvoiceAmountInMillis = decoded?.pr?.extractInvoiceAmountInMilliSats()
+        val requestAmountInMillis = BigDecimal(satoshiAmountInMilliSats.toLong()).toLong()
 
-            val amountInMillis = BigDecimal(satoshiAmountInMilliSats.toLong()).toLong()
-            val invoiceAmountInMillis = invoiceAmount.multiply(BigDecimal(1000)).toLong()
-            if (amountInMillis != invoiceAmountInMillis) throw IOException("Amount mismatch.")
+        if (decoded == null || requestAmountInMillis != responseInvoiceAmountInMillis) {
+            throw IOException("Invalid invoice response.")
+        }
 
-            return decoded
-        } else {
-            throw IOException("Empty response body.")
+        return decoded
+    }
+
+    private val thousandAsBigDecimal = BigDecimal(1000)
+
+    private fun String.extractInvoiceAmountInMilliSats(): Long? {
+        return try {
+            LnInvoiceUtils.getAmountInSats(this)
+                .multiply(thousandAsBigDecimal)
+                .toLong()
+        } catch (error: LnInvoiceUtils.AddressFormatException) {
+            Timber.e(error)
+            null
         }
     }
 }

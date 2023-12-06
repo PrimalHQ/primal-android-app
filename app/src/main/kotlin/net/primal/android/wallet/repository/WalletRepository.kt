@@ -8,6 +8,7 @@ import net.primal.android.user.domain.PrimalWallet
 import net.primal.android.user.domain.WalletPreference
 import net.primal.android.wallet.api.WalletApi
 import net.primal.android.wallet.api.model.WalletUserInfoResponse
+import net.primal.android.wallet.api.model.WithdrawRequestBody
 import net.primal.android.wallet.domain.WalletKycLevel
 
 class WalletRepository @Inject constructor(
@@ -37,7 +38,13 @@ class WalletRepository @Inject constructor(
         }
     }
 
-    private suspend fun updateWalletPreference(userId: String, walletPreference: WalletPreference) {
+    suspend fun withdraw(userId: String, body: WithdrawRequestBody) {
+        withContext(dispatcherProvider.io()) {
+            walletApi.withdraw(userId, body)
+        }
+    }
+
+    suspend fun updateWalletPreference(userId: String, walletPreference: WalletPreference) {
         accountsStore.getAndUpdateAccount(userId = userId) {
             copy(walletPreference = walletPreference)
         }

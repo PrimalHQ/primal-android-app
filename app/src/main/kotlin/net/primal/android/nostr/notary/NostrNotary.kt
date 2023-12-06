@@ -3,9 +3,9 @@ package net.primal.android.nostr.notary
 import fr.acinq.secp256k1.Hex
 import javax.inject.Inject
 import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import net.primal.android.core.serialization.json.NostrJson
+import net.primal.android.core.serialization.json.NostrNotaryJson
 import net.primal.android.core.serialization.json.toNostrRelayMap
 import net.primal.android.crypto.CryptoUtils
 import net.primal.android.crypto.toNpub
@@ -23,15 +23,13 @@ import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.NostrWalletConnect
 import net.primal.android.user.domain.Relay
 import net.primal.android.user.domain.toZapTag
-import net.primal.android.wallet.model.PayInvoiceRequest
-import net.primal.android.wallet.model.WalletRequest
-import net.primal.android.wallet.model.ZapTarget
+import net.primal.android.wallet.domain.ZapTarget
+import net.primal.android.wallet.nwc.model.NwcWalletRequest
+import net.primal.android.wallet.nwc.model.PayInvoiceRequest
 
 class NostrNotary @Inject constructor(
     private val credentialsStore: CredentialsStore,
 ) {
-
-    private val json = Json { ignoreUnknownKeys = true }
 
     private fun findNsecOrThrow(pubkey: String): String {
         return try {
@@ -51,7 +49,7 @@ class NostrNotary @Inject constructor(
             pubKey = userId,
             kind = NostrEventKind.Metadata.value,
             tags = tags,
-            content = json.encodeToString(metadata),
+            content = NostrNotaryJson.encodeToString(metadata),
         ).signOrThrow(nsec = findNsecOrThrow(userId))
     }
 
@@ -146,11 +144,11 @@ class NostrNotary @Inject constructor(
     }
 
     fun signWalletInvoiceRequestNostrEvent(
-        request: WalletRequest<PayInvoiceRequest>,
+        request: NwcWalletRequest<PayInvoiceRequest>,
         nwc: NostrWalletConnect,
     ): NostrEvent {
         val tags = listOf(nwc.pubkey.asPubkeyTag())
-        val content = json.encodeToString(request)
+        val content = NostrNotaryJson.encodeToString(request)
         val encryptedMessage = CryptoUtils.encrypt(
             msg = content,
             privateKey = Hex.decode(nwc.keypair.privateKey),

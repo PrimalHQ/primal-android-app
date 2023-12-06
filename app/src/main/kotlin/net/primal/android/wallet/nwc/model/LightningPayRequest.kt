@@ -1,4 +1,4 @@
-package net.primal.android.wallet.model
+package net.primal.android.wallet.nwc.model
 
 import kotlinx.serialization.Serializable
 
