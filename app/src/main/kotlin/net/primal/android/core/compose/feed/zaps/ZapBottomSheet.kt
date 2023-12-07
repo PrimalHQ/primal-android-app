@@ -1,4 +1,4 @@
-package net.primal.android.core.compose.feed
+package net.primal.android.core.compose.feed.zaps
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -50,6 +50,7 @@ import net.primal.android.R
 import net.primal.android.core.compose.AdjustTemporarilySystemBarColors
 import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.button.PrimalLoadingButton
+import net.primal.android.core.compose.feed.model.ZappingState
 import net.primal.android.core.utils.shortened
 import net.primal.android.settings.zaps.DEFAULT_ZAP_OPTIONS
 import net.primal.android.settings.zaps.PRESETS_COUNT
@@ -59,27 +60,13 @@ import net.primal.android.theme.AppTheme
 @Composable
 fun ZapBottomSheet(
     receiverName: String,
-    defaultZapAmount: ULong,
-    userZapOptions: List<ULong>? = null,
+    zappingState: ZappingState,
     onDismissRequest: () -> Unit,
     onZap: (ULong, String?) -> Unit,
 ) {
-    val zapOptionsValues = if (userZapOptions != null && userZapOptions.size == PRESETS_COUNT) {
-        userZapOptions
-    } else {
-        DEFAULT_ZAP_OPTIONS
-    }
+    val zapOptionPairs = zappingState.extractOptionPairs()
 
-    val zapOptions = mutableListOf(
-        Pair(zapOptionsValues[0], "👍"),
-        Pair(zapOptionsValues[1], "🌿"),
-        Pair(zapOptionsValues[2], "🤙"),
-        Pair(zapOptionsValues[3], "💜"),
-        Pair(zapOptionsValues[4], "🔥"),
-        Pair(zapOptionsValues[5], "🚀"),
-    )
-
-    var selectedZapAmount by remember { mutableStateOf(defaultZapAmount) }
+    var selectedZapAmount by remember { mutableStateOf(zappingState.defaultZapAmount) }
     var selectedZapComment by remember { mutableStateOf("") }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
@@ -101,12 +88,13 @@ fun ZapBottomSheet(
         ) {
             ZapTitle(receiverName = receiverName, amount = selectedZapAmount)
             ZapOptions(
-                zapOptions = zapOptions,
+                zapOptionPairs = zapOptionPairs,
                 selectedZapAmount = selectedZapAmount,
                 onSelectedZapAmountChange = { amount ->
                     selectedZapAmount = amount
-                    selectedZapComment =
-                        zapOptions.find { it.first == amount }?.second ?: selectedZapComment
+                    selectedZapComment = zapOptionPairs.find {
+                        it.first == amount
+                    }?.second ?: selectedZapComment
                 },
             )
             OutlinedTextField(
@@ -153,7 +141,7 @@ fun ZapBottomSheet(
 
 @Composable
 private fun ZapOptions(
-    zapOptions: List<Pair<ULong, String>>,
+    zapOptionPairs: List<Pair<ULong, String>>,
     selectedZapAmount: ULong,
     onSelectedZapAmountChange: (ULong) -> Unit,
 ) {
@@ -161,7 +149,7 @@ private fun ZapOptions(
         columns = GridCells.Fixed(3),
         contentPadding = PaddingValues(12.dp),
     ) {
-        items(zapOptions) { (defaultAmount, defaultComment) ->
+        items(zapOptionPairs) { (defaultAmount, defaultComment) ->
             ZapOption(
                 defaultAmount = defaultAmount,
                 defaultComment = defaultComment,
@@ -288,4 +276,23 @@ private fun ZapTitle(receiverName: String, amount: ULong) {
             },
         )
     }
+}
+
+private fun ZappingState.extractOptionPairs(): List<Pair<ULong, String>> {
+    return if (this.zapOptions.size == PRESETS_COUNT) {
+        this.zapOptions
+    } else {
+        DEFAULT_ZAP_OPTIONS
+    }.toUiPairs()
+}
+
+private fun List<ULong>.toUiPairs(): List<Pair<ULong, String>> {
+    return listOf(
+        Pair(this[0], "👍"),
+        Pair(this[1], "🌿"),
+        Pair(this[2], "🤙"),
+        Pair(this[3], "💜"),
+        Pair(this[4], "🔥"),
+        Pair(this[5], "🚀"),
+    )
 }

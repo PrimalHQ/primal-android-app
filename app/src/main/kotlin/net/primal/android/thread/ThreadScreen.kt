@@ -68,11 +68,12 @@ import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.feed.RepostOrQuoteBottomSheet
-import net.primal.android.core.compose.feed.ZapBottomSheet
 import net.primal.android.core.compose.feed.model.FeedPostAction
 import net.primal.android.core.compose.feed.model.FeedPostStatsUi
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.feed.note.FeedNoteCard
+import net.primal.android.core.compose.feed.zaps.UnableToZapBottomSheet
+import net.primal.android.core.compose.feed.zaps.ZapBottomSheet
 import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
@@ -84,6 +85,7 @@ import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.thread.ThreadContract.UiState.ThreadError
+import net.primal.android.wallet.ext.canZap
 
 @Composable
 fun ThreadScreen(
@@ -95,7 +97,7 @@ fun ThreadScreen(
     onProfileClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
     onMediaClick: (String, String) -> Unit,
-    onWalletUnavailable: () -> Unit,
+    onGoToWallet: () -> Unit,
     onReplyInNoteEditor: (String, Uri?, String) -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
@@ -118,7 +120,7 @@ fun ThreadScreen(
         onProfileClick = onProfileClick,
         onHashtagClick = onHashtagClick,
         onMediaClick = onMediaClick,
-        onWalletUnavailable = onWalletUnavailable,
+        onGoToWallet = onGoToWallet,
         onReplyInNoteEditor = onReplyInNoteEditor,
         eventPublisher = { viewModel.setEvent(it) },
     )
@@ -135,7 +137,7 @@ fun ThreadScreen(
     onProfileClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
     onMediaClick: (String, String) -> Unit,
-    onWalletUnavailable: () -> Unit,
+    onGoToWallet: () -> Unit,
     onReplyInNoteEditor: (String, Uri?, String) -> Unit,
     eventPublisher: (ThreadContract.UiEvent) -> Unit,
 ) {
@@ -164,23 +166,35 @@ fun ThreadScreen(
         }
     }
 
+    var showCantZapWarning by remember { mutableStateOf(false) }
+    if (showCantZapWarning) {
+        UnableToZapBottomSheet(
+            zappingState = state.zappingState,
+            onDismissRequest = { showCantZapWarning = false },
+            onGoToWallet = onGoToWallet,
+        )
+    }
+
     var zapOptionsPostConfirmation by remember { mutableStateOf<FeedPostUi?>(null) }
     if (zapOptionsPostConfirmation != null) {
         zapOptionsPostConfirmation?.let { post ->
             ZapBottomSheet(
                 onDismissRequest = { zapOptionsPostConfirmation = null },
                 receiverName = post.authorName,
-                defaultZapAmount = state.defaultZapAmount ?: 42.toULong(),
-                userZapOptions = state.zapOptions,
+                zappingState = state.zappingState,
                 onZap = { zapAmount, zapDescription ->
-                    eventPublisher(
-                        ThreadContract.UiEvent.ZapAction(
-                            postId = post.postId,
-                            postAuthorId = post.authorId,
-                            zapAmount = zapAmount,
-                            zapDescription = zapDescription,
-                        ),
-                    )
+                    if (state.zappingState.canZap(zapAmount)) {
+                        eventPublisher(
+                            ThreadContract.UiEvent.ZapAction(
+                                postId = post.postId,
+                                postAuthorId = post.authorId,
+                                zapAmount = zapAmount,
+                                zapDescription = zapDescription,
+                            ),
+                        )
+                    } else {
+                        showCantZapWarning = true
+                    }
                 },
             )
         }
@@ -275,7 +289,7 @@ fun ThreadScreen(
                                     FeedPostAction.Reply -> onPostReplyClick(item.postId)
 
                                     FeedPostAction.Zap -> {
-                                        if (state.walletConnected) {
+                                        if (state.zappingState.canZap()) {
                                             eventPublisher(
                                                 ThreadContract.UiEvent.ZapAction(
                                                     postId = item.postId,
@@ -285,7 +299,7 @@ fun ThreadScreen(
                                                 ),
                                             )
                                         } else {
-                                            onWalletUnavailable()
+                                            showCantZapWarning = true
                                         }
                                     }
 
@@ -306,10 +320,10 @@ fun ThreadScreen(
                             onPostLongClickAction = {
                                 when (it) {
                                     FeedPostAction.Zap -> {
-                                        if (state.walletConnected) {
+                                        if (state.zappingState.walletConnected) {
                                             zapOptionsPostConfirmation = item
                                         } else {
-                                            onWalletUnavailable()
+                                            showCantZapWarning = true
                                         }
                                     }
 
@@ -600,7 +614,7 @@ fun ThreadScreenPreview() {
             onProfileClick = {},
             onHashtagClick = {},
             onMediaClick = { _, _ -> },
-            onWalletUnavailable = {},
+            onGoToWallet = {},
             onReplyInNoteEditor = { _, _, _ -> },
             eventPublisher = {},
         )

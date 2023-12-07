@@ -60,8 +60,9 @@ import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.compose.feed.RepostOrQuoteBottomSheet
-import net.primal.android.core.compose.feed.ZapBottomSheet
 import net.primal.android.core.compose.feed.model.FeedPostUi
+import net.primal.android.core.compose.feed.zaps.UnableToZapBottomSheet
+import net.primal.android.core.compose.feed.zaps.ZapBottomSheet
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
@@ -76,6 +77,7 @@ import net.primal.android.drawer.PrimalDrawerScaffold
 import net.primal.android.notifications.list.ui.NotificationListItem
 import net.primal.android.notifications.list.ui.NotificationUi
 import net.primal.android.theme.AppTheme
+import net.primal.android.wallet.ext.canZap
 
 @Composable
 fun NotificationsScreen(
@@ -87,7 +89,7 @@ fun NotificationsScreen(
     onHashtagClick: (String) -> Unit,
     onMediaClick: (String, String) -> Unit,
     onNotificationSettings: () -> Unit,
-    onWalletUnavailable: () -> Unit,
+    onGoToWallet: () -> Unit,
     onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
 ) {
@@ -98,6 +100,7 @@ fun NotificationsScreen(
             Lifecycle.Event.ON_DESTROY -> viewModel.setEvent(
                 NotificationsContract.UiEvent.NotificationsSeen,
             )
+
             else -> Unit
         }
     }
@@ -112,7 +115,7 @@ fun NotificationsScreen(
         onNotificationSettings = onNotificationSettings,
         onPrimaryDestinationChanged = onTopLevelDestinationChanged,
         onDrawerDestinationClick = onDrawerScreenClick,
-        onWalletUnavailable = onWalletUnavailable,
+        onGoToWallet = onGoToWallet,
         onPostQuoteClick = onPostQuoteClick,
         eventPublisher = { viewModel.setEvent(it) },
     )
@@ -127,7 +130,7 @@ fun NotificationsScreen(
     onNoteReplyClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
     onMediaClick: (String, String) -> Unit,
-    onWalletUnavailable: () -> Unit,
+    onGoToWallet: () -> Unit,
     onPostQuoteClick: (String) -> Unit,
     onNotificationSettings: () -> Unit,
     onPrimaryDestinationChanged: (PrimalTopLevelDestination) -> Unit,
@@ -186,7 +189,7 @@ fun NotificationsScreen(
         },
         content = { paddingValues ->
             LaunchedEffect(state.badges) {
-                if (state.badges.notifications > 0) {
+                if (state.badges.unreadNotificationsCount > 0) {
                     seenNotificationsPagingItems.refresh()
                 }
             }
@@ -200,7 +203,7 @@ fun NotificationsScreen(
                 onNoteClick = onNoteClick,
                 onHashtagClick = onHashtagClick,
                 onMediaClick = onMediaClick,
-                onWalletUnavailable = onWalletUnavailable,
+                onGoToWallet = onGoToWallet,
                 onNoteReplyClick = onNoteReplyClick,
                 onPostLikeClick = {
                     eventPublisher(
@@ -253,7 +256,7 @@ private fun NotificationsList(
     onNoteReplyClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
     onMediaClick: (String, String) -> Unit,
-    onWalletUnavailable: () -> Unit,
+    onGoToWallet: () -> Unit,
     onPostLikeClick: (FeedPostUi) -> Unit,
     onRepostClick: (FeedPostUi) -> Unit,
     onZapClick: (FeedPostUi, ULong?, String?) -> Unit,
@@ -274,16 +277,28 @@ private fun NotificationsList(
         }
     }
 
+    var showCantZapWarning by remember { mutableStateOf(false) }
+    if (showCantZapWarning) {
+        UnableToZapBottomSheet(
+            zappingState = state.zappingState,
+            onDismissRequest = { showCantZapWarning = false },
+            onGoToWallet = onGoToWallet,
+        )
+    }
+
     var zapOptionsPostConfirmation by remember { mutableStateOf<FeedPostUi?>(null) }
     if (zapOptionsPostConfirmation != null) {
         zapOptionsPostConfirmation?.let { post ->
             ZapBottomSheet(
                 onDismissRequest = { zapOptionsPostConfirmation = null },
                 receiverName = post.authorName,
-                defaultZapAmount = state.defaultZapAmount ?: 42.toULong(),
-                userZapOptions = state.zapOptions,
+                zappingState = state.zappingState,
                 onZap = { zapAmount, zapDescription ->
-                    onZapClick(post, zapAmount, zapDescription)
+                    if (state.zappingState.canZap(zapAmount)) {
+                        onZapClick(post, zapAmount, zapDescription)
+                    } else {
+                        showCantZapWarning = true
+                    }
                 },
             )
         }
@@ -308,17 +323,27 @@ private fun NotificationsList(
                 NotificationListItem(
                     notifications = it,
                     type = it.first().notificationType,
-                    walletConnected = state.walletConnected,
                     onProfileClick = onProfileClick,
                     onNoteClick = onNoteClick,
                     onReplyClick = onNoteClick,
                     onHashtagClick = onHashtagClick,
                     onMediaClick = onMediaClick,
                     onPostLikeClick = onPostLikeClick,
-                    onDefaultZapClick = { postData -> onZapClick(postData, null, null) },
-                    onZapOptionsClick = { postData -> zapOptionsPostConfirmation = postData },
+                    onDefaultZapClick = { postData ->
+                        if (state.zappingState.canZap()) {
+                            onZapClick(postData, null, null)
+                        } else {
+                            showCantZapWarning = true
+                        }
+                    },
+                    onZapOptionsClick = { postData ->
+                        if (state.zappingState.walletConnected) {
+                            zapOptionsPostConfirmation = postData
+                        } else {
+                            showCantZapWarning = true
+                        }
+                    },
                     onRepostClick = { postData -> repostQuotePostConfirmation = postData },
-                    onWalletUnavailable = onWalletUnavailable,
                 )
 
                 if (state.unseenNotifications.last() != it || seenPagingItems.isNotEmpty()) {
@@ -341,19 +366,27 @@ private fun NotificationsList(
                         NotificationListItem(
                             notifications = listOf(item),
                             type = item.notificationType,
-                            walletConnected = state.walletConnected,
                             onProfileClick = onProfileClick,
                             onNoteClick = onNoteClick,
                             onReplyClick = onNoteReplyClick,
                             onHashtagClick = onHashtagClick,
                             onMediaClick = onMediaClick,
                             onPostLikeClick = onPostLikeClick,
-                            onDefaultZapClick = { postData -> onZapClick(postData, null, null) },
+                            onDefaultZapClick = { postData ->
+                                if (state.zappingState.canZap()) {
+                                    onZapClick(postData, null, null)
+                                } else {
+                                    showCantZapWarning = true
+                                }
+                            },
                             onZapOptionsClick = { postData ->
-                                zapOptionsPostConfirmation = postData
+                                if (state.zappingState.walletConnected) {
+                                    zapOptionsPostConfirmation = postData
+                                } else {
+                                    showCantZapWarning = true
+                                }
                             },
                             onRepostClick = { postData -> repostQuotePostConfirmation = postData },
-                            onWalletUnavailable = onWalletUnavailable,
                         )
 
                         if (it < seenPagingItems.itemCount - 1) {
@@ -424,7 +457,7 @@ private fun NotificationsList(
         }
 
         AnimatedVisibility(
-            visible = canScrollUp && state.badges.notifications > 0,
+            visible = canScrollUp && state.badges.unreadNotificationsCount > 0,
             enter = fadeIn() + slideInVertically(),
             exit = slideOutVertically() + fadeOut(),
             modifier = Modifier

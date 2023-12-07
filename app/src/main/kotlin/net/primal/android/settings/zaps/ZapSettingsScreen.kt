@@ -72,53 +72,15 @@ fun ZapSettingsScreen(
                 horizontalAlignment = Alignment.Start,
             ) {
                 item {
-                    Text(
-                        modifier = Modifier.padding(bottom = 16.dp),
-                        text = stringResource(
-                            id = R.string.settings_zaps_default_zap_amount_header,
-                        ).uppercase(),
-                        style = AppTheme.typography.bodySmall,
-                    )
-
-                    OutlinedTextField(
-                        modifier = Modifier.fillMaxWidth(fraction = 0.3f),
-                        value = uiState.defaultZapAmount?.toString() ?: "",
-                        onValueChange = {
-                            if (it.isDigitsOnly()) {
-                                eventPublisher(
-                                    ZapSettingsContract.UiEvent.ZapDefaultAmountChanged(
-                                        newAmount = it.toULongOrNull(),
-                                    ),
-                                )
-                            }
+                    ZapDefaultAmount(
+                        defaultZapAmount = uiState.defaultZapAmount,
+                        onDefaultZapAmountChanged = {
+                            eventPublisher(ZapSettingsContract.UiEvent.ZapDefaultAmountChanged(newAmount = it))
                         },
-                        enabled = true,
-                        textStyle = AppTheme.typography.bodyLarge.copy(
-                            textAlign = TextAlign.Center,
-                            fontWeight = FontWeight.Bold,
-                        ),
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Number,
-                            autoCorrect = false,
-                        ),
-                        shape = AppTheme.shapes.small,
-                        colors = zapTextFieldColors(),
                     )
+                }
 
-                    PrimalDivider(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 16.dp),
-                    )
-
-                    Text(
-                        modifier = Modifier.padding(bottom = 16.dp),
-                        text = stringResource(
-                            id = R.string.settings_zaps_custom_zaps_header,
-                        ).uppercase(),
-                        style = AppTheme.typography.bodySmall,
-                    )
-
+                item {
                     ZapOptionDashboard(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -126,16 +88,58 @@ fun ZapSettingsScreen(
                         zapOptions = uiState.zapOptions,
                         editable = true,
                         onZapOptionsChanged = {
-                            eventPublisher(
-                                ZapSettingsContract.UiEvent.ZapOptionsChanged(
-                                    newOptions = it,
-                                ),
-                            )
+                            eventPublisher(ZapSettingsContract.UiEvent.ZapOptionsChanged(newOptions = it))
                         },
                     )
                 }
             }
         },
+    )
+}
+
+@Composable
+private fun ZapDefaultAmount(defaultZapAmount: ULong?, onDefaultZapAmountChanged: (ULong?) -> Unit) {
+    Text(
+        modifier = Modifier.padding(bottom = 16.dp),
+        text = stringResource(
+            id = R.string.settings_zaps_default_zap_amount_header,
+        ).uppercase(),
+        style = AppTheme.typography.bodySmall,
+    )
+
+    OutlinedTextField(
+        modifier = Modifier.fillMaxWidth(fraction = 0.3f),
+        value = defaultZapAmount?.toString() ?: "",
+        onValueChange = {
+            if (it.isDigitsOnly()) {
+                onDefaultZapAmountChanged(it.toULongOrNull())
+            }
+        },
+        enabled = true,
+        textStyle = AppTheme.typography.bodyLarge.copy(
+            textAlign = TextAlign.Center,
+            fontWeight = FontWeight.Bold,
+        ),
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Number,
+            autoCorrect = false,
+        ),
+        shape = AppTheme.shapes.small,
+        colors = zapTextFieldColors(),
+    )
+
+    PrimalDivider(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 16.dp),
+    )
+
+    Text(
+        modifier = Modifier.padding(bottom = 16.dp),
+        text = stringResource(
+            id = R.string.settings_zaps_custom_zaps_header,
+        ).uppercase(),
+        style = AppTheme.typography.bodySmall,
     )
 }
 

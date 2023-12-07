@@ -45,6 +45,7 @@ import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.subscriptions.SubscriptionsManager
 import net.primal.android.wallet.domain.ZapTarget
+import net.primal.android.wallet.ext.hasWallet
 import net.primal.android.wallet.zaps.InvalidZapRequestException
 import net.primal.android.wallet.zaps.ZapFailureException
 import net.primal.android.wallet.zaps.ZapHandler
@@ -97,9 +98,12 @@ class NotificationsViewModel @Inject constructor(
                 setState {
                     copy(
                         activeAccountAvatarCdnImage = it.avatarCdnImage,
-                        walletConnected = it.nostrWallet != null,
-                        defaultZapAmount = it.appSettings?.defaultZapAmount,
-                        zapOptions = it.appSettings?.zapOptions ?: emptyList(),
+                        zappingState = this.zappingState.copy(
+                            walletConnected = it.hasWallet(),
+                            walletPreference = it.walletPreference,
+                            defaultZapAmount = it.appSettings?.defaultZapAmount ?: this.zappingState.defaultZapAmount,
+                            zapOptions = it.appSettings?.zapOptions ?: this.zappingState.zapOptions,
+                        ),
                     )
                 }
             }
@@ -108,7 +112,14 @@ class NotificationsViewModel @Inject constructor(
     private fun subscribeToBadgesUpdates() =
         viewModelScope.launch {
             subscriptionsManager.badges.collect {
-                setState { copy(badges = it) }
+                setState {
+                    copy(
+                        badges = it,
+                        zappingState = this.zappingState.copy(
+                            walletBalanceInBtc = it.walletBalanceInBtc,
+                        ),
+                    )
+                }
             }
         }
 

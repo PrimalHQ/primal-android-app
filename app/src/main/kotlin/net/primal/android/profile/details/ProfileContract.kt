@@ -3,6 +3,7 @@ package net.primal.android.profile.details
 import androidx.paging.PagingData
 import kotlinx.coroutines.flow.Flow
 import net.primal.android.core.compose.feed.model.FeedPostUi
+import net.primal.android.core.compose.feed.model.ZappingState
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.core.compose.profile.model.ProfileStatsUi
 
@@ -15,9 +16,7 @@ interface ProfileContract {
         val isProfileFeedInActiveUserFeeds: Boolean,
         val profileDetails: ProfileDetailsUi? = null,
         val profileStats: ProfileStatsUi? = null,
-        val walletConnected: Boolean = false,
-        val defaultZapAmount: ULong? = null,
-        val zapOptions: List<ULong> = emptyList(),
+        val zappingState: ZappingState = ZappingState(),
         val authoredPosts: Flow<PagingData<FeedPostUi>>,
         val error: ProfileError? = null,
     ) {

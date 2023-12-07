@@ -43,6 +43,7 @@ import net.primal.android.R
 import net.primal.android.core.compose.AvatarThumbnailsRow
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.feed.model.FeedPostsSyncStats
+import net.primal.android.core.compose.feed.model.ZappingState
 import net.primal.android.drawer.PrimalBottomBarHeightDp
 import net.primal.android.theme.AppTheme
 
@@ -51,7 +52,8 @@ import net.primal.android.theme.AppTheme
 fun FeedNoteList(
     feedListState: LazyListState,
     pagingItems: LazyPagingItems<FeedPostUi>,
-    walletConnected: Boolean,
+    zappingState: ZappingState,
+    syncStats: FeedPostsSyncStats = FeedPostsSyncStats(),
     onPostClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
     onPostLikeClick: (FeedPostUi) -> Unit,
@@ -61,10 +63,7 @@ fun FeedNoteList(
     onPostQuoteClick: (FeedPostUi) -> Unit,
     onHashtagClick: (String) -> Unit,
     onMediaClick: (String, String) -> Unit,
-    onWalletUnavailable: () -> Unit,
-    defaultZapAmount: ULong? = null,
-    zapOptions: List<ULong>? = null,
-    syncStats: FeedPostsSyncStats = FeedPostsSyncStats(),
+    onGoToWallet: () -> Unit,
     paddingValues: PaddingValues = PaddingValues(0.dp),
     bottomBarHeightPx: Float = with(LocalDensity.current) {
         PrimalBottomBarHeightDp.roundToPx().toFloat()
@@ -107,7 +106,7 @@ fun FeedNoteList(
             pagingItems = pagingItems,
             contentPadding = paddingValues,
             listState = feedListState,
-            walletConnected = walletConnected,
+            zappingState = zappingState,
             onPostClick = onPostClick,
             onProfileClick = onProfileClick,
             onPostLikeClick = onPostLikeClick,
@@ -117,9 +116,7 @@ fun FeedNoteList(
             onPostQuoteClick = onPostQuoteClick,
             onHashtagClick = onHashtagClick,
             onMediaClick = onMediaClick,
-            onWalletUnavailable = onWalletUnavailable,
-            defaultZapAmount = defaultZapAmount,
-            zapOptions = zapOptions,
+            onGoToWallet = onGoToWallet,
             onMuteClick = onMuteClick,
         )
 

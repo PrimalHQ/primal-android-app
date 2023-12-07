@@ -93,7 +93,7 @@ class MessageConversationListViewModel @Inject constructor(
     private fun subscribeToTotalUnreadCountChanges() =
         viewModelScope.launch {
             subscriptionsManager.badges
-                .map { it.messages }
+                .map { it.unreadMessagesCount }
                 .distinctUntilChanged()
                 .collect {
                     fetchConversations()

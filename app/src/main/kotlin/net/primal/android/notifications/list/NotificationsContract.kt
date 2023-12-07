@@ -3,18 +3,17 @@ package net.primal.android.notifications.list
 import androidx.paging.PagingData
 import kotlinx.coroutines.flow.Flow
 import net.primal.android.attachments.domain.CdnImage
+import net.primal.android.core.compose.feed.model.ZappingState
 import net.primal.android.notifications.list.ui.NotificationUi
 import net.primal.android.user.domain.Badges
 
 interface NotificationsContract {
 
     data class UiState(
-        val walletConnected: Boolean = false,
-        val defaultZapAmount: ULong? = null,
-        val zapOptions: List<ULong> = emptyList(),
         val seenNotifications: Flow<PagingData<NotificationUi>>,
         val unseenNotifications: List<List<NotificationUi>> = emptyList(),
         val activeAccountAvatarCdnImage: CdnImage? = null,
+        val zappingState: ZappingState = ZappingState(),
         val badges: Badges = Badges(),
         val error: NotificationsError? = null,
     ) {

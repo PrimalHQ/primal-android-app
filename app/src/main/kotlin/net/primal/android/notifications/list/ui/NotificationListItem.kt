@@ -39,7 +39,6 @@ import net.primal.android.theme.AppTheme
 fun NotificationListItem(
     notifications: List<NotificationUi>,
     type: NotificationType,
-    walletConnected: Boolean,
     onProfileClick: (String) -> Unit,
     onNoteClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
@@ -49,7 +48,6 @@ fun NotificationListItem(
     onRepostClick: (FeedPostUi) -> Unit,
     onDefaultZapClick: (FeedPostUi) -> Unit,
     onZapOptionsClick: (FeedPostUi) -> Unit,
-    onWalletUnavailable: () -> Unit,
 ) {
     notifications.map { it.actionUserSatsZapped }
 
@@ -87,39 +85,15 @@ fun NotificationListItem(
         onMediaClick = onMediaClick,
         onPostAction = { postAction ->
             when (postAction) {
-                FeedPostAction.Reply -> {
-                    postData?.postId?.let(onReplyClick)
-                }
-
-                FeedPostAction.Zap -> {
-                    if (walletConnected) {
-                        postData?.let { postData ->
-                            onDefaultZapClick(postData)
-                        }
-                    } else {
-                        onWalletUnavailable()
-                    }
-                }
-
-                FeedPostAction.Like -> {
-                    postData?.let(onPostLikeClick)
-                }
-
-                FeedPostAction.Repost -> {
-                    postData?.let(onRepostClick)
-                }
+                FeedPostAction.Reply -> postData?.postId?.let(onReplyClick)
+                FeedPostAction.Zap -> postData?.let(onDefaultZapClick)
+                FeedPostAction.Like -> postData?.let(onPostLikeClick)
+                FeedPostAction.Repost -> postData?.let(onRepostClick)
             }
         },
         onPostLongPressAction = { postAction ->
             when (postAction) {
-                FeedPostAction.Zap -> {
-                    if (walletConnected) {
-                        postData?.let(onZapOptionsClick)
-                    } else {
-                        onWalletUnavailable()
-                    }
-                }
-
+                FeedPostAction.Zap -> postData?.let(onZapOptionsClick)
                 else -> Unit
             }
         },

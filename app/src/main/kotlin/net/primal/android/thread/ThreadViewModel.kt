@@ -31,7 +31,9 @@ import net.primal.android.thread.ThreadContract.UiEvent
 import net.primal.android.thread.ThreadContract.UiState.ThreadError
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
+import net.primal.android.user.subscriptions.SubscriptionsManager
 import net.primal.android.wallet.domain.ZapTarget
+import net.primal.android.wallet.ext.hasWallet
 import net.primal.android.wallet.zaps.InvalidZapRequestException
 import net.primal.android.wallet.zaps.ZapFailureException
 import net.primal.android.wallet.zaps.ZapHandler
@@ -45,6 +47,7 @@ class ThreadViewModel @Inject constructor(
     private val profileRepository: ProfileRepository,
     private val zapHandler: ZapHandler,
     private val mutedUserRepository: MutedUserRepository,
+    private val subscriptionsManager: SubscriptionsManager,
 ) : ViewModel() {
 
     private val postId = savedStateHandle.noteIdOrThrow
@@ -64,6 +67,7 @@ class ThreadViewModel @Inject constructor(
         observeEvents()
         observeConversation()
         observeActiveAccount()
+        subscribeToBadgesUpdates()
     }
 
     private fun observeEvents() =
@@ -95,12 +99,29 @@ class ThreadViewModel @Inject constructor(
                 .collect {
                     setState {
                         copy(
-                            walletConnected = it.data.nostrWallet != null,
-                            defaultZapAmount = it.data.appSettings?.defaultZapAmount,
-                            zapOptions = it.data.appSettings?.zapOptions ?: emptyList(),
+                            zappingState = this.zappingState.copy(
+                                walletConnected = it.data.hasWallet(),
+                                walletPreference = it.data.walletPreference,
+                                defaultZapAmount = it.data.appSettings?.defaultZapAmount
+                                    ?: this.zappingState.defaultZapAmount,
+                                zapOptions = it.data.appSettings?.zapOptions ?: this.zappingState.zapOptions,
+                            ),
                         )
                     }
                 }
+        }
+
+    private fun subscribeToBadgesUpdates() =
+        viewModelScope.launch {
+            subscriptionsManager.badges.collect {
+                setState {
+                    copy(
+                        zappingState = this.zappingState.copy(
+                            walletBalanceInBtc = it.walletBalanceInBtc,
+                        ),
+                    )
+                }
+            }
         }
 
     private suspend fun loadHighlightedPost() {

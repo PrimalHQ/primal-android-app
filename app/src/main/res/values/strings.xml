@@ -301,6 +301,11 @@
     <string name="zap_bottom_sheet_comment_placeholder">Add a comment…</string>
     <string name="zap_bottom_sheet_zap_button">Zap</string>
 
+    <string name="zap_warning_bottom_sheet_enable_wallet_text">To zap people on Nostr, you need to enable your Primal wallet or connect the external wallet.</string>
+    <string name="zap_warning_bottom_sheet_activate_wallet_text">To zap people on Nostr, you need to activate your wallet and get some sats.</string>
+    <string name="zap_warning_bottom_sheet_no_sats_to_zap">Insufficient sats to zap, you need to get some sats before you can zap.</string>
+    <string name="zap_warning_bottom_sheet_go_to_wallet_button">Go to Wallet</string>
+
     <string name="wallet_dashboard_activate_notice_hint">You need to activate your wallet</string>
     <string name="wallet_dashboard_activate_button">Activate Wallet Now</string>
 

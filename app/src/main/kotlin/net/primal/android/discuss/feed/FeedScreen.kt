@@ -67,7 +67,7 @@ fun FeedScreen(
     onProfileClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
     onMediaClick: (String, String) -> Unit,
-    onWalletUnavailable: () -> Unit,
+    onGoToWallet: () -> Unit,
     onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
 ) {
@@ -87,7 +87,7 @@ fun FeedScreen(
         onProfileClick = onProfileClick,
         onHashtagClick = onHashtagClick,
         onMediaClick = onMediaClick,
-        onWalletUnavailable = onWalletUnavailable,
+        onGoToWallet = onGoToWallet,
         onPrimaryDestinationChanged = onTopLevelDestinationChanged,
         onDrawerDestinationClick = onDrawerScreenClick,
     )
@@ -105,7 +105,7 @@ fun FeedScreen(
     onProfileClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
     onMediaClick: (String, String) -> Unit,
-    onWalletUnavailable: () -> Unit,
+    onGoToWallet: () -> Unit,
     onPrimaryDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
 ) {
@@ -163,7 +163,8 @@ fun FeedScreen(
             FeedNoteList(
                 pagingItems = feedPagingItems,
                 feedListState = feedListState,
-                walletConnected = state.walletConnected,
+                zappingState = state.zappingState,
+                syncStats = state.syncStats,
                 onPostClick = onPostClick,
                 onProfileClick = onProfileClick,
                 onPostReplyClick = onPostReplyClick,
@@ -198,10 +199,7 @@ fun FeedScreen(
                     onNewPostClick("\n\nnostr:${it.postId.hexToNoteHrp()}")
                 },
                 onHashtagClick = onHashtagClick,
-                onWalletUnavailable = onWalletUnavailable,
-                defaultZapAmount = state.defaultZapAmount,
-                zapOptions = state.zapOptions,
-                syncStats = state.syncStats,
+                onGoToWallet = onGoToWallet,
                 paddingValues = paddingValues,
                 bottomBarOffsetHeightPx = bottomBarOffsetHeightPx,
                 onScrolledToTop = {
@@ -298,7 +296,7 @@ fun FeedScreenPreview() {
             onProfileClick = {},
             onHashtagClick = {},
             onMediaClick = { _, _ -> },
-            onWalletUnavailable = {},
+            onGoToWallet = {},
             onPrimaryDestinationChanged = {},
             onDrawerDestinationClick = {},
         )

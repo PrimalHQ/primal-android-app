@@ -136,7 +136,7 @@ fun ProfileScreen(
     onMessageClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
     onMediaClick: (String, String) -> Unit,
-    onWalletUnavailable: () -> Unit,
+    onGoToWallet: () -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
 
@@ -153,7 +153,7 @@ fun ProfileScreen(
         onMessageClick = onMessageClick,
         onHashtagClick = onHashtagClick,
         onMediaClick = onMediaClick,
-        onWalletUnavailable = onWalletUnavailable,
+        onGoToWallet = onGoToWallet,
         eventPublisher = { viewModel.setEvent(it) },
     )
 }
@@ -171,7 +171,7 @@ fun ProfileScreen(
     onMessageClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
     onMediaClick: (String, String) -> Unit,
-    onWalletUnavailable: () -> Unit,
+    onGoToWallet: () -> Unit,
     eventPublisher: (ProfileContract.UiEvent) -> Unit,
 ) {
     val density = LocalDensity.current
@@ -246,7 +246,7 @@ fun ProfileScreen(
             FeedLazyColumn(
                 contentPadding = PaddingValues(0.dp),
                 pagingItems = if (!state.isProfileMuted) pagingItems else noPagingItems,
-                walletConnected = state.walletConnected,
+                zappingState = state.zappingState,
                 listState = listState,
                 onPostClick = onPostClick,
                 onProfileClick = {
@@ -287,9 +287,7 @@ fun ProfileScreen(
                 },
                 onHashtagClick = onHashtagClick,
                 onMediaClick = onMediaClick,
-                onWalletUnavailable = onWalletUnavailable,
-                defaultZapAmount = state.defaultZapAmount,
-                zapOptions = state.zapOptions,
+                onGoToWallet = onGoToWallet,
                 shouldShowLoadingState = false,
                 shouldShowNoContentState = false,
                 stickyHeader = {
@@ -1053,7 +1051,7 @@ fun PreviewProfileScreen() {
             onMessageClick = {},
             onHashtagClick = {},
             onMediaClick = { _, _ -> },
-            onWalletUnavailable = {},
+            onGoToWallet = {},
             eventPublisher = {},
         )
     }

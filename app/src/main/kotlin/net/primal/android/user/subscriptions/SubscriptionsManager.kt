@@ -54,22 +54,17 @@ class SubscriptionsManager @Inject constructor(
     private var messagesUnreadCountSubscription: PrimalSocketSubscription<MessagesUnreadCount>? = null
     private var walletBalanceSubscription: PrimalSocketSubscription<Double>? = null
 
-    private var latestBadge: Badges = Badges()
     private val _badges = MutableSharedFlow<Badges>(
         replay = 1,
         onBufferOverflow = BufferOverflow.DROP_OLDEST,
     )
     val badges = _badges.asSharedFlow().distinctUntilChanged()
 
-    private val _walletBalance = MutableSharedFlow<Double>(
-        replay = 1,
-        onBufferOverflow = BufferOverflow.DROP_OLDEST,
-    )
-    val walletBalance = _walletBalance.asSharedFlow().distinctUntilChanged()
-
     init {
         observeActiveAccount()
     }
+
+    private var latestBadge: Badges = Badges()
 
     private suspend fun emitBadgesUpdate(updateReducer: (Badges) -> Badges) {
         val updatedBadges = updateReducer(latestBadge)
@@ -147,7 +142,7 @@ class SubscriptionsManager @Inject constructor(
             transformer = { primalEvent?.asNotificationSummary() },
         ) {
             emitBadgesUpdate { currentState ->
-                currentState.copy(notifications = it.count)
+                currentState.copy(unreadNotificationsCount = it.count)
             }
         }
 
@@ -162,7 +157,7 @@ class SubscriptionsManager @Inject constructor(
             transformer = { primalEvent?.asMessagesTotalCount() },
         ) {
             emitBadgesUpdate { currentState ->
-                currentState.copy(messages = it.count)
+                currentState.copy(unreadMessagesCount = it.count)
             }
         }
 
@@ -185,6 +180,8 @@ class SubscriptionsManager @Inject constructor(
             ),
             transformer = { this.primalEvent?.asWalletBalanceInBtcOrNull() },
         ) {
-            _walletBalance.emit(it)
+            emitBadgesUpdate { currentState ->
+                currentState.copy(walletBalanceInBtc = it)
+            }
         }
 }

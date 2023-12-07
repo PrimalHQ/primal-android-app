@@ -1,6 +1,7 @@
 package net.primal.android.thread
 
 import net.primal.android.core.compose.feed.model.FeedPostUi
+import net.primal.android.core.compose.feed.model.ZappingState
 
 interface ThreadContract {
 
@@ -10,9 +11,7 @@ interface ThreadContract {
         val publishingReply: Boolean = false,
         val conversation: List<FeedPostUi> = emptyList(),
         val highlightPostIndex: Int = 0,
-        val walletConnected: Boolean = false,
-        val defaultZapAmount: ULong? = null,
-        val zapOptions: List<ULong> = emptyList(),
+        val zappingState: ZappingState = ZappingState(),
         val error: ThreadError? = null,
     ) {
         sealed class ThreadError {

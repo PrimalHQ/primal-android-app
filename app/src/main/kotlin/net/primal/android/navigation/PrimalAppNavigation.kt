@@ -462,7 +462,7 @@ private fun NavGraphBuilder.feed(
                 mediaUrl = mediaUrl,
             )
         },
-        onWalletUnavailable = { navController.navigateToWalletSettings() },
+        onGoToWallet = { navController.navigateToWalletDashboard() },
         onTopLevelDestinationChanged = onTopLevelDestinationChanged,
         onDrawerScreenClick = onDrawerScreenClick,
     )
@@ -540,7 +540,7 @@ private fun NavGraphBuilder.exploreFeed(
                 mediaUrl = mediaUrl,
             )
         },
-        onWalletUnavailable = { navController.navigateToWalletSettings() },
+        onGoToWallet = { navController.navigateToWalletDashboard() },
     )
 }
 
@@ -642,7 +642,7 @@ private fun NavGraphBuilder.notifications(
         },
         onPostQuoteClick = { preFillContent -> navController.navigateToNoteEditor(preFillContent) },
         onNotificationSettings = { navController.navigateToNotificationsSettings() },
-        onWalletUnavailable = { navController.navigateToWalletSettings() },
+        onGoToWallet = { navController.navigateToWalletDashboard() },
         onTopLevelDestinationChanged = onTopLevelDestinationChanged,
         onDrawerScreenClick = onDrawerScreenClick,
     )
@@ -672,7 +672,7 @@ private fun NavGraphBuilder.thread(
                 mediaUrl = mediaUrl,
             )
         },
-        onWalletUnavailable = { navController.navigateToWalletSettings() },
+        onGoToWallet = { navController.navigateToWalletDashboard() },
         onReplyInNoteEditor = { replyToId, uri, text ->
             navController.navigateToNoteEditor(
                 replyToNoteId = replyToId,
@@ -725,7 +725,7 @@ private fun NavGraphBuilder.profile(
                 mediaUrl = mediaUrl,
             )
         },
-        onWalletUnavailable = { navController.navigateToWalletSettings() },
+        onGoToWallet = { navController.navigateToWalletDashboard() },
     )
 }
 

@@ -3,14 +3,13 @@ package net.primal.android.explore.feed
 import androidx.paging.PagingData
 import kotlinx.coroutines.flow.Flow
 import net.primal.android.core.compose.feed.model.FeedPostUi
+import net.primal.android.core.compose.feed.model.ZappingState
 
 interface ExploreFeedContract {
     data class UiState(
         val title: String,
         val existsInUserFeeds: Boolean = false,
-        val walletConnected: Boolean = false,
-        val defaultZapAmount: ULong? = null,
-        val zapOptions: List<ULong> = emptyList(),
+        val zappingState: ZappingState = ZappingState(),
         val posts: Flow<PagingData<FeedPostUi>>,
         val error: ExploreFeedError? = null,
     ) {

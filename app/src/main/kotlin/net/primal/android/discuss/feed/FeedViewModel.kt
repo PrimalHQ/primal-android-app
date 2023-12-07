@@ -39,6 +39,7 @@ import net.primal.android.user.subscriptions.SubscriptionsManager
 import net.primal.android.user.updater.UserDataUpdater
 import net.primal.android.user.updater.UserDataUpdaterFactory
 import net.primal.android.wallet.domain.ZapTarget
+import net.primal.android.wallet.ext.hasWallet
 import net.primal.android.wallet.zaps.InvalidZapRequestException
 import net.primal.android.wallet.zaps.ZapFailureException
 import net.primal.android.wallet.zaps.ZapHandler
@@ -132,9 +133,12 @@ class FeedViewModel @Inject constructor(
                 setState {
                     copy(
                         activeAccountAvatarCdnImage = it.avatarCdnImage,
-                        walletConnected = it.nostrWallet != null,
-                        defaultZapAmount = it.appSettings?.defaultZapAmount,
-                        zapOptions = it.appSettings?.zapOptions ?: emptyList(),
+                        zappingState = this.zappingState.copy(
+                            walletConnected = it.hasWallet(),
+                            walletPreference = it.walletPreference,
+                            defaultZapAmount = it.appSettings?.defaultZapAmount ?: this.zappingState.defaultZapAmount,
+                            zapOptions = it.appSettings?.zapOptions ?: this.zappingState.zapOptions,
+                        ),
                     )
                 }
             }
@@ -158,7 +162,12 @@ class FeedViewModel @Inject constructor(
         viewModelScope.launch {
             subscriptionsManager.badges.collect {
                 setState {
-                    copy(badges = it)
+                    copy(
+                        badges = it,
+                        zappingState = this.zappingState.copy(
+                            walletBalanceInBtc = it.walletBalanceInBtc,
+                        ),
+                    )
                 }
             }
         }

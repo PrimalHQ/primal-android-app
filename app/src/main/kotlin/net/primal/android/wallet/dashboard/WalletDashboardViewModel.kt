@@ -60,8 +60,8 @@ class WalletDashboardViewModel @Inject constructor(
 
     private fun subscribeToWalletBalance() =
         viewModelScope.launch {
-            subscriptionsManager.walletBalance.collect {
-                setState { copy(walletBalance = it) }
+            subscriptionsManager.badges.collect {
+                setState { copy(walletBalance = it.walletBalanceInBtc) }
             }
         }
 

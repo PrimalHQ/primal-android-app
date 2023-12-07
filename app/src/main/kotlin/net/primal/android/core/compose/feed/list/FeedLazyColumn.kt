@@ -30,11 +30,14 @@ import net.primal.android.core.compose.ListLoadingError
 import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.feed.RepostOrQuoteBottomSheet
-import net.primal.android.core.compose.feed.ZapBottomSheet
 import net.primal.android.core.compose.feed.model.FeedPostAction
 import net.primal.android.core.compose.feed.model.FeedPostUi
+import net.primal.android.core.compose.feed.model.ZappingState
 import net.primal.android.core.compose.feed.note.FeedNoteCard
+import net.primal.android.core.compose.feed.zaps.UnableToZapBottomSheet
+import net.primal.android.core.compose.feed.zaps.ZapBottomSheet
 import net.primal.android.core.compose.isEmpty
+import net.primal.android.wallet.ext.canZap
 
 @ExperimentalMaterial3Api
 @ExperimentalFoundationApi
@@ -43,7 +46,7 @@ fun FeedLazyColumn(
     pagingItems: LazyPagingItems<FeedPostUi>,
     contentPadding: PaddingValues,
     listState: LazyListState,
-    onMuteClick: ((String) -> Unit)? = null,
+    zappingState: ZappingState,
     onPostClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
     onPostLikeClick: (FeedPostUi) -> Unit,
@@ -53,10 +56,8 @@ fun FeedLazyColumn(
     onPostQuoteClick: (FeedPostUi) -> Unit,
     onHashtagClick: (String) -> Unit,
     onMediaClick: (String, String) -> Unit,
-    onWalletUnavailable: () -> Unit,
-    walletConnected: Boolean,
-    defaultZapAmount: ULong? = null,
-    zapOptions: List<ULong>? = null,
+    onGoToWallet: () -> Unit,
+    onMuteClick: ((String) -> Unit)? = null,
     shouldShowLoadingState: Boolean = true,
     shouldShowNoContentState: Boolean = true,
     header: @Composable (LazyItemScope.() -> Unit)? = null,
@@ -73,16 +74,28 @@ fun FeedLazyColumn(
         }
     }
 
+    var showCantZapWarning by remember { mutableStateOf(false) }
+    if (showCantZapWarning) {
+        UnableToZapBottomSheet(
+            zappingState = zappingState,
+            onDismissRequest = { showCantZapWarning = false },
+            onGoToWallet = onGoToWallet,
+        )
+    }
+
     var zapOptionsPostConfirmation by remember { mutableStateOf<FeedPostUi?>(null) }
     if (zapOptionsPostConfirmation != null) {
         zapOptionsPostConfirmation?.let { post ->
             ZapBottomSheet(
                 onDismissRequest = { zapOptionsPostConfirmation = null },
                 receiverName = post.authorName,
-                defaultZapAmount = defaultZapAmount ?: 42.toULong(),
-                userZapOptions = zapOptions,
+                zappingState = zappingState,
                 onZap = { zapAmount, zapDescription ->
-                    onZapClick(post, zapAmount, zapDescription)
+                    if (zappingState.canZap(zapAmount)) {
+                        onZapClick(post, zapAmount, zapDescription)
+                    } else {
+                        showCantZapWarning = true
+                    }
                 },
             )
         }
@@ -132,10 +145,10 @@ fun FeedLazyColumn(
                             when (postAction) {
                                 FeedPostAction.Reply -> onPostReplyClick(item.postId)
                                 FeedPostAction.Zap -> {
-                                    if (walletConnected) {
+                                    if (zappingState.canZap()) {
                                         onZapClick(item, null, null)
                                     } else {
-                                        onWalletUnavailable()
+                                        showCantZapWarning = true
                                     }
                                 }
 
@@ -146,10 +159,10 @@ fun FeedLazyColumn(
                         onPostLongClickAction = { postAction ->
                             when (postAction) {
                                 FeedPostAction.Zap -> {
-                                    if (walletConnected) {
+                                    if (zappingState.walletConnected) {
                                         zapOptionsPostConfirmation = item
                                     } else {
-                                        onWalletUnavailable()
+                                        showCantZapWarning = true
                                     }
                                 }
 

@@ -42,7 +42,7 @@ fun ExploreFeedScreen(
     onProfileClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
     onMediaClick: (String, String) -> Unit,
-    onWalletUnavailable: () -> Unit,
+    onGoToWallet: () -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
 
@@ -55,7 +55,7 @@ fun ExploreFeedScreen(
         onPostQuoteClick = onPostQuoteClick,
         onHashtagClick = onHashtagClick,
         onMediaClick = onMediaClick,
-        onWalletUnavailable = onWalletUnavailable,
+        onGoToWallet = onGoToWallet,
         eventPublisher = { viewModel.setEvent(it) },
     )
 }
@@ -71,7 +71,7 @@ fun ExploreFeedScreen(
     onProfileClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
     onMediaClick: (String, String) -> Unit,
-    onWalletUnavailable: () -> Unit,
+    onGoToWallet: () -> Unit,
     eventPublisher: (ExploreFeedContract.UiEvent) -> Unit,
 ) {
     val topAppBarState = rememberTopAppBarState()
@@ -132,7 +132,7 @@ fun ExploreFeedScreen(
             FeedNoteList(
                 feedListState = feedListState,
                 pagingItems = feedPagingItems,
-                walletConnected = state.walletConnected,
+                zappingState = state.zappingState,
                 paddingValues = paddingValues,
                 onPostClick = onPostClick,
                 onProfileClick = onProfileClick,
@@ -168,9 +168,7 @@ fun ExploreFeedScreen(
                     onPostQuoteClick("\n\nnostr:${it.postId.hexToNoteHrp()}")
                 },
                 onHashtagClick = onHashtagClick,
-                onWalletUnavailable = onWalletUnavailable,
-                defaultZapAmount = state.defaultZapAmount,
-                zapOptions = state.zapOptions,
+                onGoToWallet = onGoToWallet,
                 onMuteClick = {
                     eventPublisher(ExploreFeedContract.UiEvent.MuteAction(profileId = it))
                 },

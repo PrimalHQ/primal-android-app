@@ -45,8 +45,8 @@ fun PrimalNavigationBar(
         tonalElevation = 0.dp,
     ) {
         val badgesMap = mapOf(
-            Pair(PrimalTopLevelDestination.Messages, badges.messages),
-            Pair(PrimalTopLevelDestination.Notifications, badges.notifications),
+            Pair(PrimalTopLevelDestination.Messages, badges.unreadMessagesCount),
+            Pair(PrimalTopLevelDestination.Notifications, badges.unreadNotificationsCount),
         )
         PrimalTopLevelDestination.values().forEach {
             PrimalNavigationBarItem(

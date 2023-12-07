@@ -4,6 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Badges(
-    val notifications: Int = 0,
-    val messages: Int = 0,
+    val unreadNotificationsCount: Int = 0,
+    val unreadMessagesCount: Int = 0,
+    val walletBalanceInBtc: Double? = null,
 )
