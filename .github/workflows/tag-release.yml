@@ -44,7 +44,7 @@ jobs:
           primal-${{ github.ref_name }}-mapping.zip
 
     - name: Build & Upload bundle to Google Play
-      run: ./gradlew publishReleasePlayStoreBundle --track alpha --release-name "${{ github.ref_name }}"
+      run: ./gradlew publishReleasePlayStoreBundle --track "alpha" --release-name "${{ github.ref_name }}" --stacktrace
 
   release:
    name: Create GitHub release
