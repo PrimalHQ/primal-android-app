@@ -60,7 +60,7 @@ enum class NostrEventKind(val value: Int) {
     PrimalWalletOperation(value = 10_000_300),
     PrimalWalletBalance(value = 10_000_301),
     PrimalWalletDepositInvoice(value = 10_000_302),
-    PrimalWalletDepositLnurl(value = 10_000_303),
+    PrimalWalletDepositLnUrl(value = 10_000_303),
     PrimalWalletTransactions(value = 10_000_304),
     PrimalWalletExchangeRate(value = 10_000_305),
     PrimalWalletIsUser(value = 10_000_306),

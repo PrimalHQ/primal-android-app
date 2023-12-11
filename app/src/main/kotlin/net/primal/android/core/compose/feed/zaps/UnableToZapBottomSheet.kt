@@ -50,7 +50,9 @@ fun UnableToZapBottomSheet(
         ) {
             val warningMessage = if (!zappingState.walletConnected) {
                 when (zappingState.walletPreference) {
-                    WalletPreference.NostrWalletConnect -> stringResource(id = R.string.zap_warning_bottom_sheet_enable_wallet_text)
+                    WalletPreference.NostrWalletConnect -> stringResource(
+                        id = R.string.zap_warning_bottom_sheet_enable_wallet_text,
+                    )
                     else -> stringResource(id = R.string.zap_warning_bottom_sheet_activate_wallet_text)
                 }
             } else {

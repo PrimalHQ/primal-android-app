@@ -48,7 +48,7 @@ fun PrimalNavigationBar(
             Pair(PrimalTopLevelDestination.Messages, badges.unreadMessagesCount),
             Pair(PrimalTopLevelDestination.Notifications, badges.unreadNotificationsCount),
         )
-        PrimalTopLevelDestination.values().forEach {
+        PrimalTopLevelDestination.entries.forEach {
             PrimalNavigationBarItem(
                 primaryDestination = it,
                 activeDestination = activeDestination,

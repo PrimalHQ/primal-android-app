@@ -765,6 +765,7 @@ private fun NavGraphBuilder.walletDashboard(
         onPrimaryDestinationChanged = onTopLevelDestinationChanged,
         onDrawerDestinationClick = onDrawerDestinationClick,
         onWalletActivateClick = { navController.navigateToWalletActivation() },
+        onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
     )
 }
 

@@ -1,8 +1,10 @@
 package net.primal.android.wallet.dashboard
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -26,6 +28,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.paging.compose.collectAsLazyPagingItems
+import java.math.BigDecimal
 import java.text.NumberFormat
 import kotlinx.coroutines.launch
 import net.primal.android.R
@@ -33,6 +37,7 @@ import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.button.PrimalLoadingButton
+import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 import net.primal.android.drawer.DrawerScreenDestination
@@ -43,6 +48,7 @@ import net.primal.android.user.domain.PrimalWallet
 import net.primal.android.user.domain.WalletPreference
 import net.primal.android.wallet.dashboard.WalletDashboardContract.UiEvent
 import net.primal.android.wallet.domain.WalletKycLevel
+import net.primal.android.wallet.transactions.TransactionsLazyColumn
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
 
 @Composable
@@ -51,6 +57,7 @@ fun WalletDashboardScreen(
     onPrimaryDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
     onWalletActivateClick: () -> Unit,
+    onProfileClick: (String) -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
 
@@ -59,17 +66,19 @@ fun WalletDashboardScreen(
         onPrimaryDestinationChanged = onPrimaryDestinationChanged,
         onDrawerDestinationClick = onDrawerDestinationClick,
         onWalletActivateClick = onWalletActivateClick,
+        onProfileClick = onProfileClick,
         eventPublisher = { viewModel.setEvents(it) },
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun WalletDashboardScreen(
     state: WalletDashboardContract.UiState,
     onPrimaryDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
     onWalletActivateClick: () -> Unit,
+    onProfileClick: (String) -> Unit,
     eventPublisher: (UiEvent) -> Unit,
 ) {
     val uiScope = rememberCoroutineScope()
@@ -78,10 +87,13 @@ fun WalletDashboardScreen(
     val bottomBarHeight = PrimalBottomBarHeightDp
     var bottomBarOffsetHeightPx by remember { mutableFloatStateOf(0f) }
 
+    val pagingItems = state.transactions.collectAsLazyPagingItems()
+    val listState = pagingItems.rememberLazyListStatePagingWorkaround()
+
     PrimalDrawerScaffold(
         drawerState = drawerState,
         activeDestination = PrimalTopLevelDestination.Wallet,
-        onActiveDestinationClick = { uiScope.launch { /* TODO Scroll to top */ } },
+        onActiveDestinationClick = { uiScope.launch { listState.animateScrollToItem(0) } },
         onPrimaryDestinationChanged = onPrimaryDestinationChanged,
         onDrawerDestinationClick = onDrawerDestinationClick,
         bottomBarHeight = bottomBarHeight,
@@ -98,25 +110,24 @@ fun WalletDashboardScreen(
             )
         },
         content = { paddingValues ->
-            Box(
-                modifier = Modifier
-                    .padding(paddingValues)
-                    .fillMaxSize(),
-                contentAlignment = Alignment.Center,
-            ) {
-                if (state.primalWallet != null && state.primalWallet.kycLevel != WalletKycLevel.None) {
-                    WalletDashboard(
-                        walletBalance = state.walletBalance,
-                        primalWallet = state.primalWallet,
-                        walletPreference = state.walletPreference,
-                        eventPublisher = eventPublisher,
-                    )
-                } else {
-                    ActivateWalletNotice(
-                        modifier = Modifier.wrapContentSize(align = Alignment.Center),
-                        onActivateClick = onWalletActivateClick,
-                    )
-                }
+            if (state.primalWallet != null && state.primalWallet.kycLevel != WalletKycLevel.None) {
+                TransactionsLazyColumn(
+                    walletBalance = state.walletBalance,
+                    primalWallet = state.primalWallet,
+                    walletPreference = state.walletPreference,
+                    eventPublisher = eventPublisher,
+                    pagingItems = pagingItems,
+                    listState = listState,
+                    paddingValues = paddingValues,
+                    onProfileClick = onProfileClick,
+                )
+            } else {
+                ActivateWalletNotice(
+                    modifier = Modifier
+                        .padding(paddingValues)
+                        .fillMaxSize(),
+                    onActivateClick = onWalletActivateClick,
+                )
             }
         },
     )
@@ -124,7 +135,7 @@ fun WalletDashboardScreen(
 
 @Composable
 fun WalletDashboard(
-    walletBalance: Double?,
+    walletBalance: BigDecimal?,
     primalWallet: PrimalWallet,
     walletPreference: WalletPreference,
     eventPublisher: (UiEvent) -> Unit,
@@ -136,65 +147,94 @@ fun WalletDashboard(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        val numberFormat = remember { NumberFormat.getNumberInstance() }
-
-        Text(
-            modifier = Modifier.fillMaxWidth(),
-            text = walletBalance?.toSats()?.let {
-                "${numberFormat.format(it.toLong())} sats"
-            } ?: "\\-.-/",
-            textAlign = TextAlign.Center,
-            style = AppTheme.typography.headlineMedium,
-        )
+        WalletBalanceText(walletBalance)
 
         Text(
             modifier = Modifier.padding(vertical = 16.dp),
-            text = "Primal wallet is activated.\n\n" +
-                "Primal wallet lightning address is ${primalWallet.lightningAddress}.\n\n" +
-                "Primal KYC level is ${primalWallet.kycLevel}.\n\n" +
-                "Your wallet preference is $walletPreference.\n\n",
+            text = "Primal wallet is activated.\n" +
+                "Primal wallet lightning address is ${primalWallet.lightningAddress}.\n" +
+                "Primal KYC level is ${primalWallet.kycLevel}.\n" +
+                "Your wallet preference is $walletPreference.",
             textAlign = TextAlign.Center,
             color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
             style = AppTheme.typography.bodyMedium,
         )
 
-        PrimalLoadingButton(
-            text = "Set Primal Wallet Preferred",
-            onClick = {
-                eventPublisher(UiEvent.UpdateWalletPreference(WalletPreference.PrimalWallet))
-            },
+        Row(
+            horizontalArrangement = Arrangement.SpaceEvenly,
+        ) {
+            PrimalLoadingButton(
+                modifier = Modifier.padding(horizontal = 4.dp),
+                text = "Prefer Primal",
+                onClick = {
+                    eventPublisher(UiEvent.UpdateWalletPreference(WalletPreference.PrimalWallet))
+                },
+            )
+
+            PrimalLoadingButton(
+                modifier = Modifier.padding(horizontal = 4.dp),
+                text = "Prefer NWC",
+                onClick = {
+                    eventPublisher(UiEvent.UpdateWalletPreference(WalletPreference.NostrWalletConnect))
+                },
+            )
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+    }
+}
+
+@Composable
+private fun WalletBalanceText(walletBalance: BigDecimal?) {
+    val numberFormat = remember { NumberFormat.getNumberInstance() }
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.Bottom,
+        horizontalArrangement = Arrangement.Center,
+    ) {
+        Text(
+            text = walletBalance?.toSats()?.let { numberFormat.format(it.toLong()) } ?: "⌛",
+            textAlign = TextAlign.Center,
+            style = AppTheme.typography.displayMedium,
         )
 
-        Spacer(modifier = Modifier.height(32.dp))
-
-        PrimalLoadingButton(
-            text = "Set NWC Preferred",
-            onClick = {
-                eventPublisher(UiEvent.UpdateWalletPreference(WalletPreference.NostrWalletConnect))
-            },
-        )
+        if (walletBalance != null) {
+            Text(
+                modifier = Modifier.padding(bottom = 8.dp),
+                text = " ${stringResource(id = R.string.wallet_sats_suffix)}",
+                textAlign = TextAlign.Center,
+                style = AppTheme.typography.bodyMedium,
+                color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
+            )
+        }
     }
 }
 
 @Composable
 private fun ActivateWalletNotice(modifier: Modifier, onActivateClick: () -> Unit) {
-    Column(
+    Box(
         modifier = modifier,
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
+        contentAlignment = Alignment.Center,
     ) {
-        Text(
-            modifier = Modifier.padding(vertical = 16.dp),
-            text = stringResource(id = R.string.wallet_dashboard_activate_notice_hint),
-            color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
-            style = AppTheme.typography.bodyMedium,
-        )
-
-        PrimalFilledButton(
-            modifier = Modifier.fillMaxWidth(fraction = 0.8f),
-            onClick = onActivateClick,
+        Column(
+            modifier = Modifier.wrapContentSize(align = Alignment.Center),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Text(text = stringResource(id = R.string.wallet_dashboard_activate_button))
+            Text(
+                modifier = Modifier.padding(vertical = 16.dp),
+                text = stringResource(id = R.string.wallet_dashboard_activate_notice_hint),
+                color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
+                style = AppTheme.typography.bodyMedium,
+            )
+
+            PrimalFilledButton(
+                modifier = Modifier.fillMaxWidth(fraction = 0.8f),
+                onClick = onActivateClick,
+            ) {
+                Text(text = stringResource(id = R.string.wallet_dashboard_activate_button))
+            }
         }
     }
 }

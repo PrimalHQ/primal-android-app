@@ -255,7 +255,7 @@ fun PrivateKeySection(nsec: String) {
         modifier = Modifier.padding(horizontal = 4.dp, vertical = 8.dp),
         text = stringResource(id = R.string.settings_keys_private_key_hint),
         leadingIcon = Icons.Outlined.Warning,
-        leadingIconSize = 16.sp,
+        iconSize = 16.sp,
         lineHeight = 20.sp,
         color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
         leadingIconTintColor = AppTheme.extraColorScheme.onSurfaceVariantAlt3,

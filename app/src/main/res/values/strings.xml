@@ -321,7 +321,15 @@
     <string name="wallet_activation_next_button">Next</string>
     <string name="wallet_activation_finish_button">Finish</string>
     <string name="wallet_activation_done_button">Done</string>
-
+    <string name="wallet_sats_suffix">sats</string>
+    <string name="wallet_transaction_list_item_received">Received</string>
+    <string name="wallet_transaction_list_item_sent">Sent</string>
+    <string name="wallet_transaction_list_item_zap_received">Zap received</string>
+    <string name="wallet_transaction_list_item_zap_sent">Zap sent</string>
+    <string name="wallet_transaction_list_item_payment_received">Payment received</string>
+    <string name="wallet_transaction_list_item_payment_sent">Payment sent</string>
+    <string name="wallet_transactions_today">Today</string>
+    <string name="wallet_transactions_yesterday">Yesterday</string>
 
 
 </resources>

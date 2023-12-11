@@ -87,7 +87,7 @@ private fun ActionButton(
         IconText(
             text = text,
             leadingIcon = leadingIcon,
-            leadingIconSize = 32.sp,
+            iconSize = 32.sp,
         )
     }
 }

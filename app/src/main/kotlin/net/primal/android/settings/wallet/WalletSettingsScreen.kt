@@ -263,7 +263,7 @@ fun ConnectAlbyWalletButton(modifier: Modifier = Modifier, onClick: () -> Unit) 
         IconText(
             text = stringResource(id = R.string.settings_wallet_connect_alby_wallet),
             leadingIcon = ImageVector.vectorResource(id = R.drawable.alby_logo),
-            leadingIconSize = 42.sp,
+            iconSize = 42.sp,
             style = AppTheme.typography.bodyLarge,
             fontWeight = FontWeight.Medium,
             color = Color.Black,
@@ -284,7 +284,7 @@ fun ConnectMutinyWalletButton(modifier: Modifier = Modifier, onClick: () -> Unit
         IconText(
             text = stringResource(id = R.string.settings_wallet_connect_mutiny_wallet),
             leadingIcon = ImageVector.vectorResource(id = R.drawable.mutiny_logo),
-            leadingIconSize = 42.sp,
+            iconSize = 42.sp,
             style = AppTheme.typography.bodyLarge,
             fontWeight = FontWeight.Medium,
             color = Color.White,

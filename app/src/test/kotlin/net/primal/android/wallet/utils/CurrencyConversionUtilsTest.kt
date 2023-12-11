@@ -55,27 +55,27 @@ class CurrencyConversionUtilsTest {
 
     @Test
     fun btcToSats_ten_sats() {
-        0.00_000_010.toSats() shouldBe 10L.toULong()
+        "0.00000010".toSats() shouldBe 10L.toULong()
     }
 
     @Test
     fun btcToSats_hundred_sats() {
-        0.00_000_100.toSats() shouldBe 100L.toULong()
+        "0.00000100".toSats() shouldBe 100L.toULong()
     }
 
     @Test
     fun btcToSats_1K_sats() {
-        0.00_001_000.toSats() shouldBe 1_000L.toULong()
+        "0.00001000".toSats() shouldBe 1_000L.toULong()
     }
 
     @Test
     fun btcToSats_100K_sats() {
-        0.00_100_000.toSats() shouldBe 100_000L.toULong()
+        "0.00100000".toSats() shouldBe 100_000L.toULong()
     }
 
     @Test
     fun btcToSats_100M_sats() {
-        1.00_000_000.toSats() shouldBe 100_000_000L.toULong()
+        "1.00000000".toSats() shouldBe 100_000_000L.toULong()
     }
 
     @Test
@@ -116,5 +116,10 @@ class CurrencyConversionUtilsTest {
     @Test
     fun satsToBtc_1B_toStringSats() {
         1_000_000_000.toBtc().formatAsString() shouldBe "10"
+    }
+
+    @Test
+    fun btcToSats_properRounding() {
+        "0.00000999".toBigDecimal().toSats() shouldBe 999.toULong()
     }
 }

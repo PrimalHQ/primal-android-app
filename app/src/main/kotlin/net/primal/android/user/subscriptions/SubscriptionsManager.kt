@@ -52,7 +52,7 @@ class SubscriptionsManager @Inject constructor(
 
     private var notificationsSummarySubscription: PrimalSocketSubscription<NotificationsSummary>? = null
     private var messagesUnreadCountSubscription: PrimalSocketSubscription<MessagesUnreadCount>? = null
-    private var walletBalanceSubscription: PrimalSocketSubscription<Double>? = null
+    private var walletBalanceSubscription: PrimalSocketSubscription<String>? = null
 
     private val _badges = MutableSharedFlow<Badges>(
         replay = 1,

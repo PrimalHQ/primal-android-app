@@ -9,6 +9,7 @@ import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.json.jsonObject
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.NostrJsonEncodeDefaults
+import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.networking.di.PrimalWalletApiClient
 import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.primal.PrimalCacheFilter
@@ -27,6 +28,7 @@ import net.primal.android.wallet.api.model.DepositRequestBody
 import net.primal.android.wallet.api.model.GetActivationCodeRequestBody
 import net.primal.android.wallet.api.model.IsWalletUserRequestBody
 import net.primal.android.wallet.api.model.TransactionsRequestBody
+import net.primal.android.wallet.api.model.TransactionsResponse
 import net.primal.android.wallet.api.model.UserWalletInfoRequestBody
 import net.primal.android.wallet.api.model.WalletOperationRequestBody
 import net.primal.android.wallet.api.model.WalletOperationVerb
@@ -107,7 +109,7 @@ class WalletApiImpl @Inject constructor(
             .toWalletLightningAddressOrThrow()
     }
 
-    override suspend fun balance(userId: String): Double {
+    override suspend fun getBalance(userId: String): String {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.WALLET,
@@ -150,8 +152,8 @@ class WalletApiImpl @Inject constructor(
         )
     }
 
-    override suspend fun transactions(userId: String, body: TransactionsRequestBody) {
-        primalApiClient.query(
+    override suspend fun getTransactions(userId: String, body: TransactionsRequestBody): TransactionsResponse {
+        val result = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.WALLET,
                 optionsJson = buildWalletOptionsJson(
@@ -160,6 +162,16 @@ class WalletApiImpl @Inject constructor(
                     requestBody = body,
                 ),
             ),
+        )
+
+        val transactionsEvent = result.findPrimalEvent(kind = NostrEventKind.PrimalWalletTransactions)
+            ?: throw WssException("Missing or invalid content in response.")
+
+        return TransactionsResponse(
+            transactions = NostrJson.decodeFromString(transactionsEvent.content),
+            paging = result.findPrimalEvent(kind = NostrEventKind.PrimalPaging)?.let {
+                NostrJson.decodeFromStringOrNull(it.content)
+            },
         )
     }
 

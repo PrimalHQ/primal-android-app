@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -19,13 +18,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.constraintlayout.compose.Dimension
 import java.time.Instant
 import kotlin.time.Duration.Companion.seconds
 import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.NostrUserText
+import net.primal.android.core.compose.WrappedContentWithSuffix
 import net.primal.android.core.compose.asBeforeNowFormat
 import net.primal.android.core.utils.formatNip05Identifier
 import net.primal.android.theme.AppTheme
@@ -73,44 +71,28 @@ fun FeedNoteHeader(
                 )
             }
 
-            ConstraintLayout(
-                modifier = Modifier.wrapContentWidth(),
-            ) {
-                val (mainRef, endRef) = createRefs()
-
-                NostrUserText(
-                    modifier = Modifier
-                        .constrainAs(mainRef) {
-                            start.linkTo(parent.start)
-                            end.linkTo(endRef.start)
-                            width = Dimension.preferredWrapContent
+            WrappedContentWithSuffix(
+                wrappedContent = {
+                    NostrUserText(
+                        displayName = authorDisplayName,
+                        internetIdentifier = authorInternetIdentifier,
+                        annotatedStringSuffixBuilder = {
+                            append(suffixText)
                         },
-                    displayName = authorDisplayName,
-                    internetIdentifier = authorInternetIdentifier,
-                    annotatedStringSuffixBuilder = {
-                        append(suffixText)
-                    },
-                    style = AppTheme.typography.bodyMedium,
-                    overflow = TextOverflow.Ellipsis,
-                )
-
-                Text(
-                    modifier = Modifier
-                        .constrainAs(endRef) {
-                            end.linkTo(parent.end)
-                            start.linkTo(mainRef.end)
-                            top.linkTo(mainRef.top)
-                            bottom.linkTo(mainRef.bottom)
-                            height = Dimension.fillToConstraints
-                        }
-                        .padding(top = 2.dp),
-                    text = " • ${postTimestamp?.asBeforeNowFormat().orEmpty()}",
-                    textAlign = TextAlign.Center,
-                    maxLines = 1,
-                    style = AppTheme.typography.bodySmall,
-                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-                )
-            }
+                        style = AppTheme.typography.bodyMedium,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                },
+                suffixFixedContent = {
+                    Text(
+                        text = " • ${postTimestamp?.asBeforeNowFormat().orEmpty()}",
+                        textAlign = TextAlign.Center,
+                        maxLines = 1,
+                        style = AppTheme.typography.bodySmall,
+                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                    )
+                },
+            )
 
             if (!authorInternetIdentifier.isNullOrEmpty() && !singleLine) {
                 Text(

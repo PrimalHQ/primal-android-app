@@ -910,7 +910,7 @@ private fun UserWebsiteText(website: String, onClick: () -> Unit) {
         style = AppTheme.typography.bodySmall,
         color = AppTheme.colorScheme.secondary,
         leadingIcon = PrimalIcons.Link,
-        leadingIconSize = 12.sp,
+        iconSize = 12.sp,
         leadingIconTintColor = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
     )
 }
@@ -934,7 +934,7 @@ private fun UserPublicKey(
             color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
             leadingIconTintColor = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
             leadingIcon = PrimalIcons.Key,
-            leadingIconSize = 12.sp,
+            iconSize = 12.sp,
         )
 
         Box(

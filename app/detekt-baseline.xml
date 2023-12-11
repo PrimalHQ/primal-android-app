@@ -19,6 +19,7 @@
     <ID>CyclomaticComplexMethod:ProfileScreen.kt$@Composable private fun ErrorHandler(error: ProfileError?, snackbarHostState: SnackbarHostState)</ID>
     <ID>CyclomaticComplexMethod:ProfileScreen.kt$@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class) @Composable fun ProfileScreen( state: ProfileContract.UiState, onClose: () -&gt; Unit, onPostClick: (String) -&gt; Unit, onPostReplyClick: (String) -&gt; Unit, onPostQuoteClick: (String) -&gt; Unit, onProfileClick: (String) -&gt; Unit, onEditProfileClick: () -&gt; Unit, onMessageClick: (String) -&gt; Unit, onHashtagClick: (String) -&gt; Unit, onMediaClick: (String, String) -&gt; Unit, onGoToWallet: () -&gt; Unit, eventPublisher: (ProfileContract.UiEvent) -&gt; Unit, )</ID>
     <ID>CyclomaticComplexMethod:ThreadScreen.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun ThreadScreen( state: ThreadContract.UiState, onClose: () -&gt; Unit, onPostClick: (String) -&gt; Unit, onPostReplyClick: (String) -&gt; Unit, onPostQuoteClick: (String) -&gt; Unit, onProfileClick: (String) -&gt; Unit, onHashtagClick: (String) -&gt; Unit, onMediaClick: (String, String) -&gt; Unit, onGoToWallet: () -&gt; Unit, onReplyInNoteEditor: (String, Uri?, String) -&gt; Unit, eventPublisher: (ThreadContract.UiEvent) -&gt; Unit, )</ID>
+    <ID>CyclomaticComplexMethod:WalletTransactionsMediator.kt$WalletTransactionsMediator$override suspend fun load(loadType: LoadType, state: PagingState&lt;Int, WalletTransaction&gt;): MediatorResult</ID>
     <ID>DestructuringDeclarationWithTooManyEntries:PrimalDrawer.kt$val (avatarRef, usernameRef, iconRef, identifierRef, statsRef) = createRefs()</ID>
     <ID>EmptyDefaultConstructor:ProfileViewModelTest.kt$ProfileViewModelTest$()</ID>
     <ID>EmptyFunctionBlock:PostStatsUpdaterTest.kt$PostStatsUpdaterTest${ }</ID>
@@ -123,6 +124,7 @@
     <ID>ReturnCount:NostrResources.kt$private fun String.nostrUriToBytes(): ByteArray?</ID>
     <ID>ReturnCount:NotificationEvents.kt$fun ContentPrimalNotification.asNotificationPOOrNull(): NotificationData?</ID>
     <ID>ReturnCount:NotificationsRemoteMediator.kt$NotificationsRemoteMediator$override suspend fun load(loadType: LoadType, state: PagingState&lt;Int, Notification&gt;): MediatorResult</ID>
+    <ID>ReturnCount:WalletTransactionsMediator.kt$WalletTransactionsMediator$override suspend fun load(loadType: LoadType, state: PagingState&lt;Int, WalletTransaction&gt;): MediatorResult</ID>
     <ID>SwallowedException:CredentialsStore.kt$CredentialsStore$error: DecoderException</ID>
     <ID>SwallowedException:CredentialsStore.kt$CredentialsStore$error: IllegalArgumentException</ID>
     <ID>SwallowedException:EditProfileViewModel.kt$EditProfileViewModel$error: WssException</ID>

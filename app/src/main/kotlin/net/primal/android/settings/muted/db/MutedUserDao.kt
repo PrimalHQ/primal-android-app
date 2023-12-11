@@ -4,6 +4,8 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.RewriteQueriesToDropUnusedColumns
+import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -12,6 +14,8 @@ interface MutedUserDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun upsertAll(data: Set<MutedUserData>)
 
+    @Transaction
+    @RewriteQueriesToDropUnusedColumns
     @Query(
         """
         SELECT * FROM MutedUserData 

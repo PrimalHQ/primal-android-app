@@ -3,6 +3,7 @@ package net.primal.android.core.compose
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material3.LocalContentColor
@@ -26,6 +27,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
@@ -33,9 +35,11 @@ fun IconText(
     text: String,
     modifier: Modifier = Modifier,
     leadingIcon: ImageVector? = null,
-    leadingIconSize: TextUnit = 24.sp,
+    trailingIcon: ImageVector? = null,
+    iconSize: TextUnit = 24.sp,
     color: Color = LocalContentColor.current,
     leadingIconTintColor: Color? = color,
+    trailingIconTintColor: Color? = color,
     fontSize: TextUnit = TextUnit.Unspecified,
     fontStyle: FontStyle? = null,
     fontWeight: FontWeight? = null,
@@ -52,37 +56,24 @@ fun IconText(
 ) {
     val contentText = buildAnnotatedString {
         if (leadingIcon != null) {
-            appendInlineContent("icon", "[icon]")
+            appendInlineContent("leadingIcon", "[leadingIcon]")
             append("  ")
         }
         append(text)
+        if (trailingIcon != null) {
+            append("  ")
+            appendInlineContent("trailingIcon", "[trailingIcon]")
+        }
     }
 
-    val inlineContent = if (leadingIcon != null) {
-        mapOf(
-            "icon" to InlineTextContent(
-                placeholder = Placeholder(
-                    leadingIconSize, leadingIconSize, PlaceholderVerticalAlign.TextCenter,
-                ),
-            ) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Image(
-                        imageVector = leadingIcon,
-                        contentDescription = null,
-                        colorFilter = if (leadingIconTintColor != null) {
-                            ColorFilter.tint(color = leadingIconTintColor)
-                        } else {
-                            null
-                        },
-                    )
-                }
-            },
-        )
-    } else {
-        emptyMap()
+    val inlineContent = mutableMapOf<String, InlineTextContent>().apply {
+        if (leadingIcon != null) {
+            this["leadingIcon"] = buildIconInlineTextContent(iconSize, leadingIcon, leadingIconTintColor)
+        }
+
+        if (trailingIcon != null) {
+            this["trailingIcon"] = buildIconInlineTextContent(iconSize, trailingIcon, trailingIconTintColor)
+        }
     }
 
     Text(
@@ -104,4 +95,32 @@ fun IconText(
         onTextLayout = onTextLayout,
         inlineContent = inlineContent,
     )
+}
+
+@Composable
+private fun buildIconInlineTextContent(
+    iconSize: TextUnit,
+    icon: ImageVector,
+    iconTintColor: Color?,
+) = InlineTextContent(
+    placeholder = Placeholder(
+        iconSize,
+        iconSize,
+        PlaceholderVerticalAlign.TextCenter,
+    ),
+) {
+    Box(
+        modifier = Modifier.padding(bottom = 2.dp).fillMaxSize(),
+        contentAlignment = Alignment.Center,
+    ) {
+        Image(
+            imageVector = icon,
+            contentDescription = null,
+            colorFilter = if (iconTintColor != null) {
+                ColorFilter.tint(color = iconTintColor)
+            } else {
+                null
+            },
+        )
+    }
 }
