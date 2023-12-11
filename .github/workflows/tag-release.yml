@@ -30,7 +30,6 @@ jobs:
         openssl base64 -d -out app/primal_googlePlay_android.jks <<< "${{ secrets.CERT_PLAYSTORE }}"
 
     - name: Build & Prepare APK artifacts
-      id: githubBuild
       run: |
         ./gradlew assembleReleaseAlternative --no-daemon
         mv app/build/outputs/apk/releaseAlternative/*apk primal-${{ github.ref_name }}.apk
@@ -49,7 +48,6 @@ jobs:
 
   release:
    name: Create GitHub release
-   if: steps.githubBuild.outcome == 'success'
    needs: build
    runs-on: ubuntu-latest
    steps:
