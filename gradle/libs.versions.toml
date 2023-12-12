@@ -1,5 +1,5 @@
 [versions]
-accompanist = "0.31.6-rc"
+accompanist = "0.32.0"
 activity-compose = "1.8.1"
 agp = "8.2.0"
 appcompat = "1.6.1"

@@ -132,7 +132,7 @@ val PrimalTypography = Typography(
     displaySmall = TextStyle(
         fontFamily = NacelleFontFamily,
         fontWeight = FontWeight.Bold,
-        fontSize = 36.sp,
+        fontSize = 32.sp,
         lineHeight = 44.sp,
     ),
 )

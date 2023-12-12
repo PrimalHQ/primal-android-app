@@ -330,6 +330,9 @@
     <string name="wallet_transaction_list_item_payment_sent">Payment sent</string>
     <string name="wallet_transactions_today">Today</string>
     <string name="wallet_transactions_yesterday">Yesterday</string>
+    <string name="wallet_in_app_purchase_now_button">Purchase Now</string>
+    <string name="wallet_in_app_purchase_pay_label">Pay</string>
+    <string name="wallet_in_app_purchase_to_receive_label">To receive</string>
 
 
 </resources>

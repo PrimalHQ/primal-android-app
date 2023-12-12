@@ -245,6 +245,10 @@ dependencies {
 
     implementation(libs.url.detector)
 
+    val billingVersion = "6.1.0"
+    implementation("com.android.billingclient:billing:$billingVersion")
+    implementation("com.android.billingclient:billing-ktx:$billingVersion")
+
     debugImplementation(libs.compose.ui.tooling)
     debugImplementation(libs.compose.ui.test.manifest)
 

@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -33,6 +34,7 @@ import java.math.BigDecimal
 import java.text.NumberFormat
 import kotlinx.coroutines.launch
 import net.primal.android.R
+import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.compose.button.PrimalFilledButton
@@ -40,6 +42,7 @@ import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
+import net.primal.android.core.compose.icons.primaliconpack.WalletPurchaseSats
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.PrimalBottomBarHeightDp
 import net.primal.android.drawer.PrimalDrawerScaffold
@@ -48,6 +51,7 @@ import net.primal.android.user.domain.PrimalWallet
 import net.primal.android.user.domain.WalletPreference
 import net.primal.android.wallet.dashboard.WalletDashboardContract.UiEvent
 import net.primal.android.wallet.domain.WalletKycLevel
+import net.primal.android.wallet.store.inapp.InAppPurchaseBuyBottomSheet
 import net.primal.android.wallet.transactions.TransactionsLazyColumn
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
 
@@ -90,6 +94,15 @@ fun WalletDashboardScreen(
     val pagingItems = state.transactions.collectAsLazyPagingItems()
     val listState = pagingItems.rememberLazyListStatePagingWorkaround()
 
+    var inAppPurchaseVisible by remember { mutableStateOf(false) }
+    if (inAppPurchaseVisible) {
+        InAppPurchaseBuyBottomSheet(
+            onDismiss = {
+                inAppPurchaseVisible = false
+            },
+        )
+    }
+
     PrimalDrawerScaffold(
         drawerState = drawerState,
         activeDestination = PrimalTopLevelDestination.Wallet,
@@ -105,6 +118,14 @@ fun WalletDashboardScreen(
                 navigationIcon = PrimalIcons.AvatarDefault,
                 onNavigationIconClick = {
                     uiScope.launch { drawerState.open() }
+                },
+                actions = {
+                    AppBarIcon(
+                        icon = PrimalIcons.WalletPurchaseSats,
+                        onClick = {
+                            inAppPurchaseVisible = true
+                        },
+                    )
                 },
                 scrollBehavior = it,
             )

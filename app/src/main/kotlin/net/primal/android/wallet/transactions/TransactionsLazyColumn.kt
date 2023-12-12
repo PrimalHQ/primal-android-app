@@ -93,10 +93,7 @@ fun TransactionsLazyColumn(
     }
 }
 
-private fun Instant.formatDay(
-    todayTranslation: String,
-    yesterdayTranslation: String,
-): String {
+private fun Instant.formatDay(todayTranslation: String, yesterdayTranslation: String): String {
     val zoneId = ZoneId.systemDefault()
     val zonedDateTime: ZonedDateTime = this.atZone(zoneId)
     val now = ZonedDateTime.now(zoneId)
