@@ -333,6 +333,7 @@
     <string name="wallet_in_app_purchase_now_button">Purchase Now</string>
     <string name="wallet_in_app_purchase_pay_label">Pay</string>
     <string name="wallet_in_app_purchase_to_receive_label">To receive</string>
-
+    <string name="wallet_in_app_purchase_not_supported">In app purchases not supported on your device. You can always transfer sats from other wallets.</string>
+    <string name="wallet_in_app_purchase_error_confirmation_failed">We were unable to confirm your purchase. Please reach out to Primal Support.</string>
 
 </resources>

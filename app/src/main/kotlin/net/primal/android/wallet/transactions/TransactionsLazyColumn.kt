@@ -3,6 +3,7 @@ package net.primal.android.wallet.transactions
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -44,6 +45,7 @@ fun TransactionsLazyColumn(
     val numberFormat = remember { NumberFormat.getNumberInstance() }
     LazyColumn(
         modifier = Modifier
+            .fillMaxSize()
             .background(color = AppTheme.colorScheme.surfaceVariant)
             .systemBarsPadding(),
         state = listState,

@@ -1,6 +1,7 @@
 package net.primal.android.wallet.api
 
 import net.primal.android.wallet.api.model.DepositRequestBody
+import net.primal.android.wallet.api.model.InAppPurchaseQuoteResponse
 import net.primal.android.wallet.api.model.TransactionsRequestBody
 import net.primal.android.wallet.api.model.TransactionsResponse
 import net.primal.android.wallet.api.model.WalletUserInfoResponse
@@ -27,4 +28,16 @@ interface WalletApi {
     suspend fun deposit(userId: String, body: DepositRequestBody)
 
     suspend fun getTransactions(userId: String, body: TransactionsRequestBody): TransactionsResponse
+
+    suspend fun getInAppPurchaseQuote(
+        userId: String,
+        productId: String,
+        region: String,
+    ): InAppPurchaseQuoteResponse
+
+    suspend fun confirmInAppPurchase(
+        userId: String,
+        quoteId: String,
+        purchaseToken: String,
+    )
 }

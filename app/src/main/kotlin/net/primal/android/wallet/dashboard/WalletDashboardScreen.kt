@@ -14,9 +14,14 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -26,6 +31,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -50,6 +56,7 @@ import net.primal.android.theme.AppTheme
 import net.primal.android.user.domain.PrimalWallet
 import net.primal.android.user.domain.WalletPreference
 import net.primal.android.wallet.dashboard.WalletDashboardContract.UiEvent
+import net.primal.android.wallet.dashboard.WalletDashboardContract.UiState.DashboardError
 import net.primal.android.wallet.domain.WalletKycLevel
 import net.primal.android.wallet.store.inapp.InAppPurchaseBuyBottomSheet
 import net.primal.android.wallet.transactions.TransactionsLazyColumn
@@ -97,10 +104,19 @@ fun WalletDashboardScreen(
     var inAppPurchaseVisible by remember { mutableStateOf(false) }
     if (inAppPurchaseVisible) {
         InAppPurchaseBuyBottomSheet(
-            onDismiss = {
-                inAppPurchaseVisible = false
-            },
+            onDismiss = { inAppPurchaseVisible = false },
         )
+    }
+
+    val snackbarHostState = remember { SnackbarHostState() }
+    ErrorHandler(
+        error = state.error,
+        snackbarHostState = snackbarHostState,
+        onErrorDismiss = { eventPublisher(UiEvent.DismissError) },
+    )
+
+    LaunchedEffect(state.walletBalance) {
+        pagingItems.refresh()
     }
 
     PrimalDrawerScaffold(
@@ -150,6 +166,9 @@ fun WalletDashboardScreen(
                     onActivateClick = onWalletActivateClick,
                 )
             }
+        },
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
         },
     )
 }
@@ -256,6 +275,35 @@ private fun ActivateWalletNotice(modifier: Modifier, onActivateClick: () -> Unit
             ) {
                 Text(text = stringResource(id = R.string.wallet_dashboard_activate_button))
             }
+        }
+    }
+}
+
+@Composable
+private fun ErrorHandler(
+    error: DashboardError?,
+    snackbarHostState: SnackbarHostState,
+    onErrorDismiss: (() -> Unit)? = null,
+    onActionPerformed: (() -> Unit)? = null,
+) {
+    val context = LocalContext.current
+    LaunchedEffect(error ?: true) {
+        val errorMessage = when (error) {
+            is DashboardError.InAppPurchaseConfirmationFailed ->
+                context.getString(R.string.wallet_in_app_purchase_error_confirmation_failed)
+
+            null -> return@LaunchedEffect
+        }
+
+        val result = snackbarHostState.showSnackbar(
+            message = errorMessage,
+            duration = SnackbarDuration.Indefinite,
+            withDismissAction = true,
+        )
+
+        when (result) {
+            SnackbarResult.Dismissed -> onErrorDismiss?.invoke()
+            SnackbarResult.ActionPerformed -> onActionPerformed?.invoke()
         }
     }
 }

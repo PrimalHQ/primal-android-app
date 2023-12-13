@@ -1,7 +1,9 @@
 package net.primal.android.core.compose
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.runtime.Composable
@@ -19,7 +21,7 @@ import net.primal.android.R
 import net.primal.android.theme.domain.PrimalAccent
 
 @Composable
-fun PrimalLoadingSpinner(size: Dp = 96.dp) {
+fun PrimalLoadingSpinner(size: Dp = 96.dp, paddingValues: PaddingValues = PaddingValues(all = 0.dp)) {
     val primalTheme = LocalPrimalTheme.current
     val animationRawResId = remember(primalTheme) {
         when (primalTheme.accent) {
@@ -39,7 +41,8 @@ fun PrimalLoadingSpinner(size: Dp = 96.dp) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .wrapContentSize(),
+            .wrapContentSize()
+            .padding(paddingValues),
     ) {
         LottieAnimation(
             modifier = Modifier.size(size),

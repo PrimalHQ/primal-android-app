@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import net.primal.android.core.utils.authorNameUiFriendly
+import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.domain.WalletPreference
 import net.primal.android.user.subscriptions.SubscriptionsManager
@@ -22,14 +23,18 @@ import net.primal.android.wallet.dashboard.WalletDashboardContract.UiEvent
 import net.primal.android.wallet.dashboard.WalletDashboardContract.UiState
 import net.primal.android.wallet.db.WalletTransaction
 import net.primal.android.wallet.repository.WalletRepository
+import net.primal.android.wallet.store.domain.SatsPurchase
+import net.primal.android.wallet.store.play.BillingClientHandler
 import net.primal.android.wallet.transactions.TransactionDataUi
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
+import timber.log.Timber
 
 @HiltViewModel
 class WalletDashboardViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val walletRepository: WalletRepository,
     private val subscriptionsManager: SubscriptionsManager,
+    private val billingClientHandler: BillingClientHandler,
 ) : ViewModel() {
 
     private val activeUserId = activeAccountStore.activeUserId()
@@ -51,6 +56,7 @@ class WalletDashboardViewModel @Inject constructor(
         subscribeToEvents()
         subscribeToActiveAccount()
         subscribeToWalletBalance()
+        subscribeToPurchases()
     }
 
     private fun subscribeToEvents() =
@@ -58,6 +64,7 @@ class WalletDashboardViewModel @Inject constructor(
             events.collect {
                 when (it) {
                     is UiEvent.UpdateWalletPreference -> updateWalletPreference(it.walletPreference)
+                    UiEvent.DismissError -> setState { copy(error = null) }
                 }
             }
         }
@@ -82,6 +89,27 @@ class WalletDashboardViewModel @Inject constructor(
             }
         }
 
+    private fun subscribeToPurchases() =
+        viewModelScope.launch {
+            billingClientHandler.purchases.collect { purchase ->
+                confirmPurchase(purchase = purchase)
+            }
+        }
+
+    private fun confirmPurchase(purchase: SatsPurchase) =
+        viewModelScope.launch {
+            try {
+                walletRepository.confirmInAppPurchase(
+                    userId = activeAccountStore.activeUserId(),
+                    quoteId = purchase.quote.quoteId,
+                    purchaseToken = purchase.purchaseToken,
+                )
+            } catch (error: WssException) {
+                Timber.e(error)
+                setErrorState(UiState.DashboardError.InAppPurchaseConfirmationFailed(cause = error))
+            }
+        }
+
     private suspend fun updateWalletPreference(walletPreference: WalletPreference) =
         viewModelScope.launch {
             walletRepository.updateWalletPreference(
@@ -89,6 +117,10 @@ class WalletDashboardViewModel @Inject constructor(
                 walletPreference = walletPreference,
             )
         }
+
+    private fun setErrorState(error: UiState.DashboardError) {
+        setState { copy(error = error) }
+    }
 
     private fun Flow<PagingData<WalletTransaction>>.mapAsPagingDataOfTransactionUi() =
         map { pagingData -> pagingData.map { it.mapAsTransactionUi() } }

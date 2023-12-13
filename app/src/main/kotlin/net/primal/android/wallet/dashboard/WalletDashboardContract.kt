@@ -15,9 +15,15 @@ interface WalletDashboardContract {
         val primalWallet: PrimalWallet? = null,
         val walletPreference: WalletPreference = WalletPreference.Undefined,
         val walletBalance: BigDecimal? = null,
-    )
+        val error: DashboardError? = null,
+    ) {
+        sealed class DashboardError {
+            data class InAppPurchaseConfirmationFailed(val cause: Throwable) : DashboardError()
+        }
+    }
 
     sealed class UiEvent {
         data class UpdateWalletPreference(val walletPreference: WalletPreference) : UiEvent()
+        data object DismissError : UiEvent()
     }
 }

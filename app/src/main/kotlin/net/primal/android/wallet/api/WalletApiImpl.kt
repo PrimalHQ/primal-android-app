@@ -26,6 +26,9 @@ import net.primal.android.wallet.api.model.ActivateWalletRequestBody
 import net.primal.android.wallet.api.model.BalanceRequestBody
 import net.primal.android.wallet.api.model.DepositRequestBody
 import net.primal.android.wallet.api.model.GetActivationCodeRequestBody
+import net.primal.android.wallet.api.model.InAppPurchaseQuoteRequestBody
+import net.primal.android.wallet.api.model.InAppPurchaseQuoteResponse
+import net.primal.android.wallet.api.model.InAppPurchaseRequestBody
 import net.primal.android.wallet.api.model.IsWalletUserRequestBody
 import net.primal.android.wallet.api.model.TransactionsRequestBody
 import net.primal.android.wallet.api.model.TransactionsResponse
@@ -172,6 +175,44 @@ class WalletApiImpl @Inject constructor(
             paging = result.findPrimalEvent(kind = NostrEventKind.PrimalPaging)?.let {
                 NostrJson.decodeFromStringOrNull(it.content)
             },
+        )
+    }
+
+    override suspend fun getInAppPurchaseQuote(
+        userId: String,
+        productId: String,
+        region: String,
+    ): InAppPurchaseQuoteResponse {
+        val result = primalApiClient.query(
+            message = PrimalCacheFilter(
+                primalVerb = PrimalVerb.WALLET,
+                optionsJson = buildWalletOptionsJson(
+                    userId = userId,
+                    walletVerb = WalletOperationVerb.IN_APP_PURCHASE_QUOTE,
+                    requestBody = InAppPurchaseQuoteRequestBody(productId = productId, region = region),
+                ),
+            ),
+        )
+
+        val quoteEvent = result.findPrimalEvent(NostrEventKind.PrimalWalletInAppPurchaseQuote)
+        return quoteEvent?.takeContentOrNull<InAppPurchaseQuoteResponse>()
+            ?: throw WssException("Missing or invalid content in response.")
+    }
+
+    override suspend fun confirmInAppPurchase(
+        userId: String,
+        purchaseToken: String,
+        quoteId: String,
+    ) {
+        val result = primalApiClient.query(
+            message = PrimalCacheFilter(
+                primalVerb = PrimalVerb.WALLET,
+                optionsJson = buildWalletOptionsJson(
+                    userId = userId,
+                    walletVerb = WalletOperationVerb.IN_APP_PURCHASE,
+                    requestBody = InAppPurchaseRequestBody(purchaseToken = purchaseToken, quoteId = quoteId),
+                ),
+            ),
         )
     }
 
