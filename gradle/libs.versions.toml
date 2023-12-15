@@ -46,6 +46,7 @@ sqlcipher-android = "4.5.3"
 telephoto = "0.7.1"
 timber = "5.0.1"
 url-detector = "0.1.23"
+camera = "1.3.1"
 
 [libraries]
 # Core libs
@@ -149,6 +150,10 @@ mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 mockk-android = { module = "io.mockk:mockk-android", version.ref = "mockk" }
 kotest-assertions-core = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }
 kotest-assertions-json = { module = "io.kotest:kotest-assertions-json", version.ref = "kotest" }
+androidx-camera-core = { group = "androidx.camera", name = "camera-core", version.ref = "camera" }
+androidx-camera-camera2 = { group = "androidx.camera", name = "camera-camera2", version.ref = "camera" }
+androidx-camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "camera" }
+androidx-camera-view = { group = "androidx.camera", name = "camera-view", version.ref = "camera" }
 
 [bundles]
 hilt = ["hilt-android", "navigation-hilt"]

@@ -335,5 +335,12 @@
     <string name="wallet_in_app_purchase_to_receive_label">To receive</string>
     <string name="wallet_in_app_purchase_not_supported">In app purchases not supported on your device. You can always transfer sats from other wallets.</string>
     <string name="wallet_in_app_purchase_error_confirmation_failed">We were unable to confirm your purchase. Please reach out to Primal Support.</string>
+    <string name="wallet_action_button_send">Send</string>
+    <string name="wallet_action_button_scan">Scan</string>
+    <string name="wallet_action_button_receive">Receive</string>
 
+    <string name="qrcode_scanner_permission_title">Permission required</string>
+    <string name="qrcode_scanner_permission_rationale">Primal needs access to your camera to scan QR codes.</string>
+    <string name="qrcode_scanner_grant_permission_button">Allow access</string>
+    <string name="qrcode_scanner_cancel_button">Cancel</string>
 </resources>

@@ -5,9 +5,11 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.AcUnit
 import androidx.compose.material.icons.outlined.CopyAll
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -26,13 +28,15 @@ import net.primal.android.theme.domain.PrimalTheme
 
 @Composable
 fun PrimalLoadingButton(
-    text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     shape: Shape = AppTheme.shapes.extraLarge,
+    text: String? = null,
+    icon: ImageVector? = null,
     enabled: Boolean = true,
     loading: Boolean = false,
     leadingIcon: ImageVector? = null,
+    trailingIcon: ImageVector? = null,
     fontSize: TextUnit = TextUnit.Unspecified,
     fontWeight: FontWeight = FontWeight.SemiBold,
     contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
@@ -52,13 +56,18 @@ fun PrimalLoadingButton(
             if (loading) {
                 LoadingContent()
             } else {
-                IconText(
-                    modifier = Modifier.background(Color.Unspecified),
-                    text = text,
-                    fontSize = fontSize,
-                    leadingIcon = leadingIcon,
-                    fontWeight = fontWeight,
-                )
+                if (text != null) {
+                    IconText(
+                        modifier = Modifier.background(Color.Unspecified),
+                        text = text,
+                        fontSize = fontSize,
+                        leadingIcon = leadingIcon,
+                        trailingIcon = trailingIcon,
+                        fontWeight = fontWeight,
+                    )
+                } else if (icon != null) {
+                    Icon(imageVector = icon, contentDescription = null)
+                }
             }
         },
     )
@@ -76,6 +85,8 @@ private fun LoadingContent() {
 data class PrimalLoadingButtonPreviewState(
     val enabled: Boolean,
     val loading: Boolean,
+    val text: String? = "Hello Nostr",
+    val icon: ImageVector? = null,
     val leadingIcon: ImageVector? = null,
 )
 
@@ -87,6 +98,12 @@ class PrimalButtonStatePreviewProvider : PreviewParameterProvider<PrimalLoadingB
                 enabled = true,
                 loading = false,
                 leadingIcon = Icons.Outlined.CopyAll,
+            ),
+            PrimalLoadingButtonPreviewState(
+                enabled = true,
+                loading = false,
+                text = null,
+                icon = Icons.Outlined.AcUnit,
             ),
             PrimalLoadingButtonPreviewState(enabled = false, loading = true),
             PrimalLoadingButtonPreviewState(enabled = false, loading = false),
@@ -106,7 +123,8 @@ fun PrimalLoadingButtonPreview(
             onClick = { },
             enabled = state.enabled,
             loading = state.loading,
-            text = "Hello Primal!",
+            text = state.text,
+            icon = state.icon,
             leadingIcon = state.leadingIcon,
         )
     }

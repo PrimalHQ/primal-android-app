@@ -64,6 +64,8 @@ import net.primal.android.profile.details.ProfileScreen
 import net.primal.android.profile.details.ProfileViewModel
 import net.primal.android.profile.edit.EditProfileScreen
 import net.primal.android.profile.edit.EditProfileViewModel
+import net.primal.android.scan.ScanViewModel
+import net.primal.android.scan.ui.ScanScreen
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
@@ -174,6 +176,12 @@ private fun NavController.navigateToMediaGallery(noteId: String, mediaUrl: Strin
 private fun NavController.navigateToExploreFeed(query: String) = navigate(route = "explore/$query")
 
 private fun NavController.navigateToWalletActivation() = navigate(route = "wallet/activation")
+
+private fun NavController.navigateToWalletScan() = navigate(route = "wallet/scan")
+
+private fun NavController.navigateToWalletSend() = navigate(route = "wallet/send")
+
+private fun NavController.navigateToWalletReceive() = navigate(route = "wallet/receive")
 
 @OptIn(ExperimentalMaterialNavigationApi::class)
 @Composable
@@ -390,6 +398,21 @@ fun PrimalAppNavigation() {
 
             walletActivation(
                 route = "wallet/activation",
+                navController = navController,
+            )
+
+            walletScan(
+                route = "wallet/scan",
+                navController = navController,
+            )
+
+            walletSend(
+                route = "wallet/send",
+                navController = navController,
+            )
+
+            walletReceive(
+                route = "wallet/receive",
                 navController = navController,
             )
         }
@@ -766,6 +789,9 @@ private fun NavGraphBuilder.walletDashboard(
         onDrawerDestinationClick = onDrawerDestinationClick,
         onWalletActivateClick = { navController.navigateToWalletActivation() },
         onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
+        onSendClick = { navController.navigateToWalletSend() },
+        onScanClick = { navController.navigateToWalletScan() },
+        onReceiveClick = { navController.navigateToWalletReceive() },
     )
 }
 
@@ -778,4 +804,25 @@ private fun NavGraphBuilder.walletActivation(route: String, navController: NavCo
             viewModel = viewModel,
             onClose = { navController.navigateUp() },
         )
+    }
+
+private fun NavGraphBuilder.walletScan(route: String, navController: NavController) =
+    composable(route = route) {
+        val viewModel = hiltViewModel<ScanViewModel>()
+        LockToOrientationPortrait()
+        ScanScreen(
+            viewModel = viewModel,
+            onClose = { navController.navigateUp() },
+            onScanningCompleted = { navController.navigateUp() },
+        )
+    }
+
+private fun NavGraphBuilder.walletSend(route: String, navController: NavController) =
+    composable(route = route) {
+        LockToOrientationPortrait()
+    }
+
+private fun NavGraphBuilder.walletReceive(route: String, navController: NavController) =
+    composable(route = route) {
+        LockToOrientationPortrait()
     }

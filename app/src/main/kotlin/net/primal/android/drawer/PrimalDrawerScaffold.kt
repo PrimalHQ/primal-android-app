@@ -51,6 +51,7 @@ fun PrimalDrawerScaffold(
     focusModeEnabled: Boolean = true,
 ) {
     ModalNavigationDrawer(
+        modifier = Modifier,
         drawerState = drawerState,
         drawerContent = {
             PrimalDrawer(

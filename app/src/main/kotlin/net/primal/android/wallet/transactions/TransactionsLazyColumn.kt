@@ -3,16 +3,18 @@ package net.primal.android.wallet.transactions
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.paging.compose.LazyPagingItems
 import java.math.BigDecimal
 import java.text.NumberFormat
@@ -25,12 +27,14 @@ import net.primal.android.R
 import net.primal.android.theme.AppTheme
 import net.primal.android.user.domain.PrimalWallet
 import net.primal.android.user.domain.WalletPreference
-import net.primal.android.wallet.dashboard.WalletDashboard
 import net.primal.android.wallet.dashboard.WalletDashboardContract
+import net.primal.android.wallet.dashboard.ui.WalletAction
+import net.primal.android.wallet.dashboard.ui.WalletDashboard
 
 @ExperimentalFoundationApi
 @Composable
 fun TransactionsLazyColumn(
+    modifier: Modifier,
     walletBalance: BigDecimal?,
     primalWallet: PrimalWallet,
     walletPreference: WalletPreference,
@@ -38,16 +42,14 @@ fun TransactionsLazyColumn(
     listState: LazyListState,
     paddingValues: PaddingValues,
     onProfileClick: (String) -> Unit,
+    onWalletAction: (WalletAction) -> Unit,
     eventPublisher: (WalletDashboardContract.UiEvent) -> Unit,
 ) {
     val today = stringResource(id = R.string.wallet_transactions_today).lowercase()
     val yesterday = stringResource(id = R.string.wallet_transactions_yesterday).lowercase()
     val numberFormat = remember { NumberFormat.getNumberInstance() }
     LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(color = AppTheme.colorScheme.surfaceVariant)
-            .systemBarsPadding(),
+        modifier = modifier,
         state = listState,
         contentPadding = paddingValues,
     ) {
@@ -55,10 +57,17 @@ fun TransactionsLazyColumn(
             contentType = "Balance & Actions",
         ) {
             WalletDashboard(
+                modifier = Modifier
+                    .wrapContentSize(align = Alignment.Center)
+                    .padding(horizontal = 32.dp),
                 walletBalance = walletBalance,
                 primalWallet = primalWallet,
                 walletPreference = walletPreference,
-                eventPublisher = eventPublisher,
+                actions = listOf(WalletAction.Send, WalletAction.Scan, WalletAction.Receive),
+                onWalletAction = onWalletAction,
+                onWalletPreferenceChanged = {
+                    eventPublisher(WalletDashboardContract.UiEvent.UpdateWalletPreference(it))
+                },
             )
         }
 

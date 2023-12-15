@@ -20,6 +20,18 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
+# Uncomment this to preserve the line number information for debugging stack traces.
+-keepattributes SourceFile,LineNumberTable
+
+# If you keep the line number information, uncomment this to hide the original source file name.
+-renamesourcefileattribute SourceFile
+
 -keep class fr.acinq.secp256k1.** { *; }
 
 -keep class net.zetetic.** { *; }
+
+# ZBar Library
+-keepclassmembers class net.sourceforge.zbar.ImageScanner { *; }
+-keepclassmembers class net.sourceforge.zbar.Image { *; }
+-keepclassmembers class net.sourceforge.zbar.Symbol { *; }
+-keepclassmembers class net.sourceforge.zbar.SymbolSet { *; }

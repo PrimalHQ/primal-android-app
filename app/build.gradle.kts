@@ -249,6 +249,12 @@ dependencies {
     implementation("com.android.billingclient:billing:$billingVersion")
     implementation("com.android.billingclient:billing-ktx:$billingVersion")
 
+    implementation(libs.androidx.camera.core)
+    implementation(libs.androidx.camera.camera2)
+    implementation(libs.androidx.camera.lifecycle)
+    implementation(libs.androidx.camera.view)
+    implementation(files("$projectDir/libs/zbar.jar"))
+
     debugImplementation(libs.compose.ui.tooling)
     debugImplementation(libs.compose.ui.test.manifest)
 
