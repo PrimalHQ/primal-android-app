@@ -94,6 +94,14 @@ class WalletRepository @Inject constructor(
         }
     }
 
+    suspend fun parseLnUrl(userId: String, lnurl: String) {
+        walletApi.parseLnUrl(userId = userId, lnurl = lnurl)
+    }
+
+    suspend fun parseLnInvoice(userId: String, lnbc: String) {
+        walletApi.parseLnInvoice(userId = userId, lnbc = lnbc)
+    }
+
     private suspend fun WalletUserInfoResponse.storeWalletInfoLocally(userId: String) {
         val kycLevel = WalletKycLevel.valueOf(kycLevel) ?: return
         val primalWallet = PrimalWallet(kycLevel = kycLevel, lightningAddress = this.lightningAddress)

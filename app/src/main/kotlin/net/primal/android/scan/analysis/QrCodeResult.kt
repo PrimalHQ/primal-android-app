@@ -1,5 +1,7 @@
 package net.primal.android.scan.analysis
 
+import android.util.Patterns
+
 enum class QrCodeDataType(val validator: (String) -> Boolean) {
     NPUB(validator = { it.startsWith(prefix = "nostr:npub1", ignoreCase = true) }),
 
@@ -10,6 +12,13 @@ enum class QrCodeDataType(val validator: (String) -> Boolean) {
     LNBC(validator = { it.startsWith(prefix = "lnbc", ignoreCase = true) }),
 
     LNURL(validator = { it.startsWith(prefix = "lnurl", ignoreCase = true) }),
+
+    LUD16(
+        validator = {
+            it.startsWith(prefix = "lightning:", ignoreCase = true) &&
+                Patterns.EMAIL_ADDRESS.matcher(it.split(":").last()).matches()
+        },
+    ),
 
     ;
 
@@ -23,4 +32,6 @@ enum class QrCodeDataType(val validator: (String) -> Boolean) {
 data class QrCodeResult(
     val value: String,
     val type: QrCodeDataType,
-)
+) {
+    fun equalValues(other: QrCodeResult?): Boolean = this.value == other?.value
+}

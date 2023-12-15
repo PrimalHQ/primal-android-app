@@ -30,6 +30,10 @@ import net.primal.android.wallet.api.model.InAppPurchaseQuoteRequestBody
 import net.primal.android.wallet.api.model.InAppPurchaseQuoteResponse
 import net.primal.android.wallet.api.model.InAppPurchaseRequestBody
 import net.primal.android.wallet.api.model.IsWalletUserRequestBody
+import net.primal.android.wallet.api.model.ParseLnInvoiceRequestBody
+import net.primal.android.wallet.api.model.ParseLnUrlRequestBody
+import net.primal.android.wallet.api.model.ParsedLnInvoiceResponse
+import net.primal.android.wallet.api.model.ParsedLnUrlResponse
 import net.primal.android.wallet.api.model.TransactionsRequestBody
 import net.primal.android.wallet.api.model.TransactionsResponse
 import net.primal.android.wallet.api.model.UserWalletInfoRequestBody
@@ -214,6 +218,40 @@ class WalletApiImpl @Inject constructor(
                 ),
             ),
         )
+    }
+
+    override suspend fun parseLnUrl(userId: String, lnurl: String): ParsedLnUrlResponse {
+        val result = primalApiClient.query(
+            message = PrimalCacheFilter(
+                primalVerb = PrimalVerb.WALLET,
+                optionsJson = buildWalletOptionsJson(
+                    userId = userId,
+                    walletVerb = WalletOperationVerb.PARSE_LNURL,
+                    requestBody = ParseLnUrlRequestBody(lnurl = lnurl),
+                ),
+            ),
+        )
+
+        return result.findPrimalEvent(kind = NostrEventKind.PrimalWalletParsedLnurl)
+            ?.takeContentOrNull<ParsedLnUrlResponse>()
+            ?: throw WssException("Missing or invalid content in response.")
+    }
+
+    override suspend fun parseLnInvoice(userId: String, lnbc: String): ParsedLnInvoiceResponse {
+        val result = primalApiClient.query(
+            message = PrimalCacheFilter(
+                primalVerb = PrimalVerb.WALLET,
+                optionsJson = buildWalletOptionsJson(
+                    userId = userId,
+                    walletVerb = WalletOperationVerb.PARSE_LNINVOICE,
+                    requestBody = ParseLnInvoiceRequestBody(lnbc = lnbc),
+                ),
+            ),
+        )
+
+        return result.findPrimalEvent(kind = NostrEventKind.PrimalWalletParsedLnInvoice)
+            ?.takeContentOrNull<ParsedLnInvoiceResponse>()
+            ?: throw WssException("Missing or invalid content in response.")
     }
 
     private fun buildWalletOptionsJson(

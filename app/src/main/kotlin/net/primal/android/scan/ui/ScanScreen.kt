@@ -58,7 +58,6 @@ import net.primal.android.scan.analysis.QrCodeAnalyzer
 import net.primal.android.scan.analysis.QrCodeResult
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
-import timber.log.Timber
 
 @Composable
 fun ScanScreen(
@@ -106,7 +105,6 @@ fun ScanScreen(
                     state = state,
                     eventPublisher = eventPublisher,
                     onClose = onClose,
-                    onScanningCompleted = {},
                 )
             }
         } else {
@@ -125,17 +123,20 @@ private fun CameraContent(
     state: ScanContract.UiState,
     eventPublisher: (ScanContract.UiEvent) -> Unit,
     modifier: Modifier = Modifier,
-    onScanningCompleted: (QrCodeResult) -> Unit,
     onClose: () -> Unit,
 ) {
     KeepScreenOn()
+
+    var lastScannedQrCodeData by remember { mutableStateOf<QrCodeResult?>(null) }
 
     BoxWithConstraints(
         modifier = modifier,
     ) {
         CameraQrCodeDetector { result ->
-            eventPublisher(ScanContract.UiEvent.ProcessScannedData(result = result))
-            Timber.e("Scanned = $result")
+            if (!result.equalValues(lastScannedQrCodeData)) {
+                eventPublisher(ScanContract.UiEvent.ProcessScannedData(result = result))
+                lastScannedQrCodeData = result
+            }
         }
 
         CameraOverlayContent(
@@ -324,7 +325,6 @@ fun CameraContentPreview() {
             state = ScanContract.UiState(),
             eventPublisher = {},
             onClose = {},
-            onScanningCompleted = {},
         )
     }
 }

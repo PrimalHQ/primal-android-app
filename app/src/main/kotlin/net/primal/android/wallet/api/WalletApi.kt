@@ -2,6 +2,8 @@ package net.primal.android.wallet.api
 
 import net.primal.android.wallet.api.model.DepositRequestBody
 import net.primal.android.wallet.api.model.InAppPurchaseQuoteResponse
+import net.primal.android.wallet.api.model.ParsedLnInvoiceResponse
+import net.primal.android.wallet.api.model.ParsedLnUrlResponse
 import net.primal.android.wallet.api.model.TransactionsRequestBody
 import net.primal.android.wallet.api.model.TransactionsResponse
 import net.primal.android.wallet.api.model.WalletUserInfoResponse
@@ -40,4 +42,8 @@ interface WalletApi {
         quoteId: String,
         purchaseToken: String,
     )
+
+    suspend fun parseLnUrl(userId: String, lnurl: String): ParsedLnUrlResponse
+
+    suspend fun parseLnInvoice(userId: String, lnbc: String): ParsedLnInvoiceResponse
 }
