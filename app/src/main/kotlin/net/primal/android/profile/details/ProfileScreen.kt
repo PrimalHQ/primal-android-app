@@ -78,11 +78,13 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.SubcomposeAsyncImage
 import java.text.NumberFormat
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import net.primal.android.R
 import net.primal.android.attachments.domain.findNearestOrNull
 import net.primal.android.core.compose.AdjustTemporarilySystemBarColors
@@ -209,34 +211,38 @@ fun ProfileScreen(
     )
 
     LaunchedEffect(listState) {
-        snapshotFlow { listState.firstVisibleItemIndex to listState.firstVisibleItemScrollOffset }
-            .filter { it.first == 0 }
-            .map { it.second }
-            .collect { scrollOffset ->
-                val newCoverHeight = maxCoverHeightPx - scrollOffset
-                coverHeightPx.floatValue =
-                    newCoverHeight.coerceIn(minCoverHeightPx, maxCoverHeightPx)
+        withContext(Dispatchers.IO) {
+            snapshotFlow { listState.firstVisibleItemIndex to listState.firstVisibleItemScrollOffset }
+                .filter { it.first == 0 }
+                .map { it.second }
+                .collect { scrollOffset ->
+                    val newCoverHeight = maxCoverHeightPx - scrollOffset
+                    coverHeightPx.floatValue =
+                        newCoverHeight.coerceIn(minCoverHeightPx, maxCoverHeightPx)
 
-                val newAvatarSize = maxAvatarSizePx - (scrollOffset * 1f)
-                avatarSizePx.floatValue = newAvatarSize.coerceIn(0f, maxAvatarSizePx)
+                    val newAvatarSize = maxAvatarSizePx - (scrollOffset * 1f)
+                    avatarSizePx.floatValue = newAvatarSize.coerceIn(0f, maxAvatarSizePx)
 
-                topBarTitleVisible.value = scrollOffset > maxAvatarSizePx
+                    topBarTitleVisible.value = scrollOffset > maxAvatarSizePx
 
-                val newCoverAlpha = 0f + scrollOffset / (maxCoverHeightPx - minCoverHeightPx)
-                coverTransparency.floatValue = newCoverAlpha.coerceIn(0.0f, 0.7f)
-            }
+                    val newCoverAlpha = 0f + scrollOffset / (maxCoverHeightPx - minCoverHeightPx)
+                    coverTransparency.floatValue = newCoverAlpha.coerceIn(0.0f, 0.7f)
+                }
+        }
     }
 
     LaunchedEffect(listState) {
-        snapshotFlow { listState.firstVisibleItemIndex }
-            .collect { visiblePage ->
-                if (visiblePage >= 1) {
-                    topBarTitleVisible.value = true
-                    coverHeightPx.floatValue = minCoverHeightPx
-                    avatarSizePx.floatValue = 0f
-                    coverTransparency.floatValue = 0.7f
+        withContext(Dispatchers.IO) {
+            snapshotFlow { listState.firstVisibleItemIndex }
+                .collect { visiblePage ->
+                    if (visiblePage >= 1) {
+                        topBarTitleVisible.value = true
+                        coverHeightPx.floatValue = minCoverHeightPx
+                        avatarSizePx.floatValue = 0f
+                        coverTransparency.floatValue = 0.7f
+                    }
                 }
-            }
+        }
     }
 
     Surface(

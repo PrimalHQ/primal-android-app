@@ -35,10 +35,12 @@ import androidx.compose.ui.unit.dp
 import androidx.paging.compose.LazyPagingItems
 import kotlin.random.Random
 import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import net.primal.android.R
 import net.primal.android.core.compose.AvatarThumbnailsRow
 import net.primal.android.core.compose.feed.model.FeedPostUi
@@ -75,22 +77,26 @@ fun FeedNoteList(
     val uiScope = rememberCoroutineScope()
 
     LaunchedEffect(feedListState) {
-        snapshotFlow { feedListState.firstVisibleItemIndex == 0 }
-            .distinctUntilChanged()
-            .filter { it }
-            .collect {
-                onScrolledToTop?.invoke()
-            }
+        withContext(Dispatchers.IO) {
+            snapshotFlow { feedListState.firstVisibleItemIndex == 0 }
+                .distinctUntilChanged()
+                .filter { it }
+                .collect {
+                    onScrolledToTop?.invoke()
+                }
+        }
     }
 
     val newPostsCount = syncStats.postsCount
 
     LaunchedEffect(pagingItems) {
-        while (true) {
-            val syncInterval = 30 + Random.nextInt(-5, 5)
-            delay(syncInterval.seconds)
-            if (newPostsCount < 100) {
-                pagingItems.refresh()
+        withContext(Dispatchers.IO) {
+            while (true) {
+                val syncInterval = 30 + Random.nextInt(-5, 5)
+                delay(syncInterval.seconds)
+                if (newPostsCount < 100) {
+                    pagingItems.refresh()
+                }
             }
         }
     }

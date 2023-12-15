@@ -30,11 +30,13 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import java.text.NumberFormat
 import kotlin.time.Duration.Companion.minutes
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import net.primal.android.R
 import net.primal.android.core.compose.AdjustTemporarilySystemBarColors
 import net.primal.android.core.compose.PrimalLoadingSpinner
@@ -56,9 +58,11 @@ fun InAppPurchaseBuyBottomSheet(onDismiss: () -> Unit) {
     }
 
     LaunchedEffect(viewModel, onDismiss) {
-        while (true) {
-            viewModel.setEvent(InAppPurchaseBuyContract.UiEvent.RefreshQuote)
-            delay(1.minutes)
+        withContext(Dispatchers.IO) {
+            while (true) {
+                viewModel.setEvent(InAppPurchaseBuyContract.UiEvent.RefreshQuote)
+                delay(1.minutes)
+            }
         }
     }
 
