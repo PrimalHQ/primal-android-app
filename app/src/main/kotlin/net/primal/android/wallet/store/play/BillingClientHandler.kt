@@ -11,7 +11,6 @@ import com.android.billingclient.api.PurchasesUpdatedListener
 import com.android.billingclient.api.QueryProductDetailsParams
 import com.android.billingclient.api.queryProductDetails
 import dagger.hilt.android.qualifiers.ApplicationContext
-import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.time.Duration.Companion.seconds
@@ -53,11 +52,8 @@ class BillingClientHandler @Inject constructor(
     private val _purchases = MutableSharedFlow<SatsPurchase>()
     val purchases = _purchases.asSharedFlow()
 
-    private var minSatsInAppProduct: InAppProduct? = null
-
-    val currency: Currency get() = minSatsInAppProduct.resolveLocalCurrencyOrDefault()
-
-    val supported: Boolean get() = minSatsInAppProduct != null
+    var minSatsInAppProduct: InAppProduct? = null
+        private set
 
     init {
         scope.launch { ensureBillingClientInitialized() }
@@ -158,13 +154,6 @@ class BillingClientHandler @Inject constructor(
                     )
                 }
             }
-        }
-    }
-
-    private fun InAppProduct?.resolveLocalCurrencyOrDefault(): Currency {
-        return when {
-            this != null -> Currency.getInstance(this.priceCurrencyCode)
-            else -> Currency.getInstance(Locale.getDefault())
         }
     }
 

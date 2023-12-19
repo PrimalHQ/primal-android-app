@@ -186,6 +186,7 @@ class WalletApiImpl @Inject constructor(
         userId: String,
         productId: String,
         region: String,
+        previousQuoteId: String?,
     ): InAppPurchaseQuoteResponse {
         val result = primalApiClient.query(
             message = PrimalCacheFilter(
@@ -193,7 +194,12 @@ class WalletApiImpl @Inject constructor(
                 optionsJson = buildWalletOptionsJson(
                     userId = userId,
                     walletVerb = WalletOperationVerb.IN_APP_PURCHASE_QUOTE,
-                    requestBody = InAppPurchaseQuoteRequestBody(productId = productId, region = region),
+                    requestBody = InAppPurchaseQuoteRequestBody(
+                        productId = productId,
+                        region = region,
+                        platform = "android",
+                        quoteId = previousQuoteId,
+                    ),
                 ),
             ),
         )
@@ -205,10 +211,10 @@ class WalletApiImpl @Inject constructor(
 
     override suspend fun confirmInAppPurchase(
         userId: String,
-        purchaseToken: String,
         quoteId: String,
+        purchaseToken: String,
     ) {
-        val result = primalApiClient.query(
+        primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.WALLET,
                 optionsJson = buildWalletOptionsJson(

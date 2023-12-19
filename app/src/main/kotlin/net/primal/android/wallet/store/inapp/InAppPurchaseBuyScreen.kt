@@ -105,7 +105,7 @@ fun InAppPurchaseBuyBottomSheet(
         tonalElevation = 0.dp,
         onDismissRequest = onDismiss,
     ) {
-        if (activity != null && state.inAppSupported) {
+        if (activity != null && state.minSatsInAppProduct != null) {
             PurchaseQuoteColumn(
                 quote = state.quote,
                 onPurchaseRequest = {
@@ -134,7 +134,7 @@ private fun PurchaseQuoteColumn(quote: SatsPurchaseQuote?, onPurchaseRequest: ()
         CurrencyText(
             modifier = Modifier.padding(bottom = 48.dp),
             topLabel = stringResource(id = R.string.wallet_in_app_purchase_to_receive_label).uppercase(),
-            amount = quote?.amountInBtc?.toSats()?.toString(),
+            amount = quote?.amountInBtc?.toSats()?.toLong(),
             currency = stringResource(id = R.string.wallet_sats_suffix),
         )
 
@@ -155,7 +155,7 @@ private fun PurchaseQuoteColumn(quote: SatsPurchaseQuote?, onPurchaseRequest: ()
 @Composable
 private fun CurrencyText(
     topLabel: String,
-    amount: String?,
+    amount: Long?,
     currency: String?,
     modifier: Modifier = Modifier,
     symbol: String? = null,
@@ -226,6 +226,7 @@ private fun InAppPurchaseNotSupportedNotice() {
             text = stringResource(id = R.string.wallet_in_app_purchase_not_supported),
             textAlign = TextAlign.Center,
             style = AppTheme.typography.bodyLarge,
+            color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
         )
     }
 }

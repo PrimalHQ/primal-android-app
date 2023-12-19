@@ -35,6 +35,7 @@ interface WalletApi {
         userId: String,
         productId: String,
         region: String,
+        previousQuoteId: String? = null,
     ): InAppPurchaseQuoteResponse
 
     suspend fun confirmInAppPurchase(

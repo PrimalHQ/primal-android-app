@@ -5,6 +5,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class InAppPurchaseRequestBody(
-    @SerialName("transaction_id") val purchaseToken: String,
     @SerialName("quote_id") val quoteId: String,
+    @SerialName("transaction_id") val purchaseToken: String,
 ) : WalletOperationRequestBody()

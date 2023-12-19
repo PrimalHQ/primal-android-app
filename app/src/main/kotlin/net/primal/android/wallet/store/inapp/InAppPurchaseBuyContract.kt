@@ -2,10 +2,11 @@ package net.primal.android.wallet.store.inapp
 
 import android.app.Activity
 import net.primal.android.wallet.store.domain.SatsPurchaseQuote
+import net.primal.android.wallet.store.play.InAppProduct
 
 interface InAppPurchaseBuyContract {
     data class UiState(
-        val inAppSupported: Boolean,
+        val minSatsInAppProduct: InAppProduct?,
         val quote: SatsPurchaseQuote? = null,
         val purchasingQuote: SatsPurchaseQuote? = null,
         val error: Throwable? = null,

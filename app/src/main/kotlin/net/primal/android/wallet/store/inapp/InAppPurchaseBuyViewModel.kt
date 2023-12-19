@@ -3,6 +3,7 @@ package net.primal.android.wallet.store.inapp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.util.*
 import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -29,7 +30,11 @@ class InAppPurchaseBuyViewModel @Inject constructor(
     private val walletRepository: WalletRepository,
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(UiState(inAppSupported = billingClientHandler.supported))
+    private val _state = MutableStateFlow(
+        UiState(
+            minSatsInAppProduct = billingClientHandler.minSatsInAppProduct,
+        )
+    )
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) {
         _state.getAndUpdate { it.reducer() }
@@ -60,27 +65,31 @@ class InAppPurchaseBuyViewModel @Inject constructor(
 
     private fun refreshQuote() =
         viewModelScope.launch {
-            try {
-                val localCurrency = billingClientHandler.currency
-                val response = walletRepository.getInAppPurchaseMinSatsQuote(
-                    userId = activeAccountStore.activeUserId(),
-                    region = localCurrency.currencyCode,
-                )
-                setState {
-                    copy(
-                        quote = SatsPurchaseQuote(
-                            quoteId = response.quoteId,
-                            amountInBtc = response.amountBtc,
-                            purchaseAmount = response.inAppPurchaseAmount,
-                            purchaseSymbol = localCurrency.symbol,
-                            purchaseCurrency = localCurrency.currencyCode,
-                        ),
+            _state.value.minSatsInAppProduct?.let { inAppProduct ->
+                try {
+                    val previousQuote = _state.value.quote
+                    val localCurrency = Currency.getInstance(inAppProduct.priceCurrencyCode)
+                    val response = walletRepository.getInAppPurchaseMinSatsQuote(
+                        userId = activeAccountStore.activeUserId(),
+                        region = localCurrency.currencyCode,
+                        previousQuoteId = previousQuote?.quoteId,
                     )
-                }
-            } catch (error: WssException) {
-                Timber.e(error)
-                if (_state.value.quote == null) {
-                    setState { copy(error = error) }
+                    setState {
+                        copy(
+                            quote = SatsPurchaseQuote(
+                                quoteId = response.quoteId,
+                                amountInBtc = response.amountBtc,
+                                purchaseAmount = inAppProduct.priceAmountMicros / 1_000_000,
+                                purchaseSymbol = localCurrency.symbol,
+                                purchaseCurrency = localCurrency.currencyCode,
+                            ),
+                        )
+                    }
+                } catch (error: WssException) {
+                    Timber.e(error)
+                    if (_state.value.quote == null) {
+                        setState { copy(error = error) }
+                    }
                 }
             }
         }

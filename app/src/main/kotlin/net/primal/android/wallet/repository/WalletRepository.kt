@@ -70,12 +70,17 @@ class WalletRepository @Inject constructor(
         }
     }
 
-    suspend fun getInAppPurchaseMinSatsQuote(userId: String, region: String): InAppPurchaseQuoteResponse {
+    suspend fun getInAppPurchaseMinSatsQuote(
+        userId: String,
+        region: String,
+        previousQuoteId: String?,
+    ): InAppPurchaseQuoteResponse {
         return withContext(dispatcherProvider.io()) {
             walletApi.getInAppPurchaseQuote(
                 userId = userId,
-                productId = BillingClientHandler.MIN_SATS_PRODUCT_ID.uppercase(),
+                productId = BillingClientHandler.MIN_SATS_PRODUCT_ID,
                 region = region,
+                previousQuoteId = previousQuoteId,
             )
         }
     }
