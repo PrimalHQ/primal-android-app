@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import net.primal.android.core.utils.authorNameUiFriendly
+import net.primal.android.networking.sockets.errors.NostrNoticeException
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.domain.WalletPreference
@@ -106,7 +107,12 @@ class WalletDashboardViewModel @Inject constructor(
                 )
             } catch (error: WssException) {
                 Timber.e(error)
-                setErrorState(UiState.DashboardError.InAppPurchaseConfirmationFailed(cause = error))
+                val dashboardError = if (error.cause is NostrNoticeException) {
+                    UiState.DashboardError.InAppPurchaseNoticeError(message = error.message)
+                } else {
+                    UiState.DashboardError.InAppPurchaseConfirmationFailed(cause = error)
+                }
+                setErrorState(dashboardError)
             }
         }
 

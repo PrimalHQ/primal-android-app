@@ -262,6 +262,8 @@ private fun ErrorHandler(
     val context = LocalContext.current
     LaunchedEffect(error ?: true) {
         val errorMessage = when (error) {
+            is DashboardError.InAppPurchaseNoticeError -> error.message ?: context.getString(R.string.app_generic_error)
+
             is DashboardError.InAppPurchaseConfirmationFailed ->
                 context.getString(R.string.wallet_in_app_purchase_error_confirmation_failed)
 

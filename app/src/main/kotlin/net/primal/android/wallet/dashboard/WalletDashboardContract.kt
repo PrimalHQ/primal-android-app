@@ -19,6 +19,7 @@ interface WalletDashboardContract {
     ) {
         sealed class DashboardError {
             data class InAppPurchaseConfirmationFailed(val cause: Throwable) : DashboardError()
+            data class InAppPurchaseNoticeError(val message: String?) : DashboardError()
         }
     }
 
