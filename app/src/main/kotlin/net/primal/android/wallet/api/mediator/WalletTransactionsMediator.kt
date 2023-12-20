@@ -72,7 +72,7 @@ class WalletTransactionsMediator(
             LoadType.APPEND -> initialRequestBody.copy(until = timestamp)
         }
 
-        if (lastRequests[loadType] == requestBody) {
+        if (loadType != LoadType.REFRESH && lastRequests[loadType] == requestBody) {
             return MediatorResult.Success(endOfPaginationReached = true)
         }
 
