@@ -1,5 +1,6 @@
 package net.primal.android.wallet.dashboard
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -7,9 +8,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
@@ -23,23 +24,23 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.collectAsLazyPagingItems
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import net.primal.android.R
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.PrimalTopAppBar
@@ -56,6 +57,7 @@ import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.dashboard.WalletDashboardContract.UiEvent
 import net.primal.android.wallet.dashboard.WalletDashboardContract.UiState.DashboardError
 import net.primal.android.wallet.dashboard.ui.WalletAction
+import net.primal.android.wallet.dashboard.ui.WalletDashboard
 import net.primal.android.wallet.dashboard.ui.WalletDashboardLite
 import net.primal.android.wallet.domain.WalletKycLevel
 import net.primal.android.wallet.store.inapp.InAppPurchaseBuyBottomSheet
@@ -127,16 +129,13 @@ fun WalletDashboardScreen(
         pagingItems.refresh()
     }
 
-    var dashboardLiteVisible by remember { mutableStateOf(false) }
-    LaunchedEffect(listState) {
-        withContext(Dispatchers.IO) {
-            snapshotFlow { listState.isScrollInProgress }
-                .distinctUntilChanged()
-                .collect {
-                    dashboardLiteVisible = listState.firstVisibleItemIndex >= 2
-                }
+    val dashboardExpanded by remember(listState) {
+        derivedStateOf {
+            listState.firstVisibleItemScrollOffset == 0
         }
     }
+
+    var topBarHeight by remember { mutableIntStateOf(0) }
 
     PrimalDrawerScaffold(
         drawerState = drawerState,
@@ -147,8 +146,9 @@ fun WalletDashboardScreen(
         bottomBarHeight = bottomBarHeight,
         onBottomBarOffsetChange = { bottomBarOffsetHeightPx = it },
         focusModeEnabled = false,
-        topBar = {
+        topBar = { scrollBehaviour ->
             PrimalTopAppBar(
+                modifier = Modifier.onSizeChanged { topBarHeight = it.height },
                 title = stringResource(id = R.string.wallet_title),
                 avatarCdnImage = state.activeAccountAvatarCdnImage,
                 navigationIcon = PrimalIcons.AvatarDefault,
@@ -163,25 +163,46 @@ fun WalletDashboardScreen(
                         },
                     )
                 },
-                scrollBehavior = it,
+                scrollBehavior = scrollBehaviour,
+                showDivider = false,
                 footer = {
-                    Column {
-                        WalletDashboardLite(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(if (dashboardLiteVisible) 80.dp else 0.dp)
-                                .background(color = AppTheme.colorScheme.surface)
-                                .padding(horizontal = 8.dp, vertical = 16.dp),
-                            walletBalance = state.walletBalance,
-                            actions = listOf(WalletAction.Send, WalletAction.Scan, WalletAction.Receive),
-                            onWalletAction = { action ->
-                                when (action) {
-                                    WalletAction.Send -> onSendClick()
-                                    WalletAction.Scan -> onScanClick()
-                                    WalletAction.Receive -> onReceiveClick()
-                                }
-                            },
-                        )
+                    AnimatedContent(
+                        targetState = dashboardExpanded,
+                        label = "DashboardAnimation",
+                    ) { expanded ->
+                        when (expanded) {
+                            true -> WalletDashboard(
+                                modifier = Modifier
+                                    .wrapContentSize(align = Alignment.Center)
+                                    .padding(horizontal = 32.dp)
+                                    .padding(vertical = 32.dp),
+                                walletBalance = state.walletBalance,
+                                actions = listOf(WalletAction.Send, WalletAction.Scan, WalletAction.Receive),
+                                onWalletAction = { action ->
+                                    when (action) {
+                                        WalletAction.Send -> onSendClick()
+                                        WalletAction.Scan -> onScanClick()
+                                        WalletAction.Receive -> onReceiveClick()
+                                    }
+                                },
+                            )
+                            false -> WalletDashboardLite(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .wrapContentHeight()
+                                    .background(color = AppTheme.colorScheme.surface)
+                                    .padding(horizontal = 8.dp, vertical = 16.dp),
+                                walletBalance = state.walletBalance,
+                                actions = listOf(WalletAction.Send, WalletAction.Scan, WalletAction.Receive),
+                                onWalletAction = { action ->
+                                    when (action) {
+                                        WalletAction.Send -> onSendClick()
+                                        WalletAction.Scan -> onScanClick()
+                                        WalletAction.Receive -> onReceiveClick()
+                                    }
+                                },
+                            )
+                        }
                     }
                 },
             )
@@ -192,28 +213,18 @@ fun WalletDashboardScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .background(color = AppTheme.colorScheme.surfaceVariant)
-                        .systemBarsPadding(),
-                    walletBalance = state.walletBalance,
-                    primalWallet = state.primalWallet,
-                    walletPreference = state.walletPreference,
-                    eventPublisher = eventPublisher,
+                        .padding(top = with(LocalDensity.current) { topBarHeight.toDp() }),
                     pagingItems = pagingItems,
                     listState = listState,
-                    paddingValues = paddingValues,
                     onProfileClick = onProfileClick,
-                    onWalletAction = { action ->
-                        when (action) {
-                            WalletAction.Send -> onSendClick()
-                            WalletAction.Scan -> onScanClick()
-                            WalletAction.Receive -> onReceiveClick()
-                        }
-                    },
                 )
             } else {
                 ActivateWalletNotice(
                     modifier = Modifier
+                        .fillMaxSize()
                         .padding(paddingValues)
-                        .fillMaxSize(),
+                        .padding(bottom = 32.dp)
+                        .navigationBarsPadding(),
                     onActivateClick = onWalletActivateClick,
                 )
             }

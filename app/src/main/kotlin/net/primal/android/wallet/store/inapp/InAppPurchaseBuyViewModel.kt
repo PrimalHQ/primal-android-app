@@ -33,7 +33,7 @@ class InAppPurchaseBuyViewModel @Inject constructor(
     private val _state = MutableStateFlow(
         UiState(
             minSatsInAppProduct = billingClientHandler.minSatsInAppProduct,
-        )
+        ),
     )
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) {

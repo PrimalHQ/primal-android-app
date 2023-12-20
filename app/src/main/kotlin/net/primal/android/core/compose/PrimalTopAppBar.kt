@@ -54,9 +54,10 @@ fun PrimalTopAppBar(
     ),
     footer: @Composable () -> Unit = {},
 ) {
-    Column {
+    Column(
+        modifier = modifier,
+    ) {
         CenterAlignedTopAppBar(
-            modifier = modifier,
             navigationIcon = {
                 if (avatarCdnImage != null) {
                     Box(
