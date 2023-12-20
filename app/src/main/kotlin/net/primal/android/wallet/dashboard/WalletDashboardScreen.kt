@@ -1,11 +1,9 @@
 package net.primal.android.wallet.dashboard
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -19,7 +17,6 @@ import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
-import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -39,17 +36,18 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.PrimalTopLevelDestination
-import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 import net.primal.android.core.compose.icons.primaliconpack.WalletPurchaseSats
+import net.primal.android.core.compose.isEmpty
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.PrimalBottomBarHeightDp
 import net.primal.android.drawer.PrimalDrawerScaffold
@@ -57,6 +55,7 @@ import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.dashboard.WalletDashboardContract.UiEvent
 import net.primal.android.wallet.dashboard.WalletDashboardContract.UiState.DashboardError
 import net.primal.android.wallet.dashboard.ui.WalletAction
+import net.primal.android.wallet.dashboard.ui.WalletCallToActionBox
 import net.primal.android.wallet.dashboard.ui.WalletDashboard
 import net.primal.android.wallet.dashboard.ui.WalletDashboardLite
 import net.primal.android.wallet.domain.WalletKycLevel
@@ -209,23 +208,56 @@ fun WalletDashboardScreen(
         },
         content = { paddingValues ->
             if (state.primalWallet != null && state.primalWallet.kycLevel != WalletKycLevel.None) {
-                TransactionsLazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(color = AppTheme.colorScheme.surfaceVariant)
-                        .padding(top = with(LocalDensity.current) { topBarHeight.toDp() }),
-                    pagingItems = pagingItems,
-                    listState = listState,
-                    onProfileClick = onProfileClick,
-                )
+                if (pagingItems.loadState.refresh is LoadState.NotLoading && pagingItems.isEmpty()) {
+                    WalletCallToActionBox(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .animateContentSize()
+                            .padding(paddingValues)
+                            .padding(bottom = 32.dp)
+                            .navigationBarsPadding(),
+                        message = stringResource(id = R.string.wallet_dashboard_no_transactions_hint),
+                        actionLabel = stringResource(id = R.string.wallet_dashboard_buy_sats_button),
+                        onActionClick = {
+                            inAppPurchaseVisible = true
+                        },
+                    )
+                } else {
+                    TransactionsLazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(color = AppTheme.colorScheme.surfaceVariant)
+                            .padding(top = with(LocalDensity.current) { topBarHeight.toDp() }),
+                        pagingItems = pagingItems,
+                        listState = listState,
+                        onProfileClick = onProfileClick,
+                        header = {
+                            if (state.lowBalance && pagingItems.itemCount > 0) {
+                                WalletCallToActionBox(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .animateContentSize()
+                                        .padding(bottom = 32.dp),
+                                    message = stringResource(id = R.string.wallet_dashboard_low_sats_hint),
+                                    actionLabel = stringResource(id = R.string.wallet_dashboard_buy_sats_button),
+                                    onActionClick = {
+                                        inAppPurchaseVisible = true
+                                    },
+                                )
+                            }
+                        },
+                    )
+                }
             } else {
-                ActivateWalletNotice(
+                WalletCallToActionBox(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(paddingValues)
                         .padding(bottom = 32.dp)
                         .navigationBarsPadding(),
-                    onActivateClick = onWalletActivateClick,
+                    message = stringResource(id = R.string.wallet_dashboard_activate_notice_hint),
+                    actionLabel = stringResource(id = R.string.wallet_dashboard_activate_button),
+                    onActionClick = onWalletActivateClick,
                 )
             }
         },
@@ -233,34 +265,6 @@ fun WalletDashboardScreen(
             SnackbarHost(hostState = snackbarHostState)
         },
     )
-}
-
-@Composable
-private fun ActivateWalletNotice(modifier: Modifier, onActivateClick: () -> Unit) {
-    Box(
-        modifier = modifier,
-        contentAlignment = Alignment.Center,
-    ) {
-        Column(
-            modifier = Modifier.wrapContentSize(align = Alignment.Center),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Text(
-                modifier = Modifier.padding(vertical = 16.dp),
-                text = stringResource(id = R.string.wallet_dashboard_activate_notice_hint),
-                color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
-                style = AppTheme.typography.bodyMedium,
-            )
-
-            PrimalFilledButton(
-                modifier = Modifier.fillMaxWidth(fraction = 0.8f),
-                onClick = onActivateClick,
-            ) {
-                Text(text = stringResource(id = R.string.wallet_dashboard_activate_button))
-            }
-        }
-    }
 }
 
 @Composable

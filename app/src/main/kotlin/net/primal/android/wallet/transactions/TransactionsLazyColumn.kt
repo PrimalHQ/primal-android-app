@@ -30,6 +30,7 @@ fun TransactionsLazyColumn(
     listState: LazyListState,
     onProfileClick: (String) -> Unit,
     paddingValues: PaddingValues = PaddingValues(0.dp),
+    header: (@Composable () -> Unit)? = null,
 ) {
     val today = stringResource(id = R.string.wallet_transactions_today).lowercase()
     val yesterday = stringResource(id = R.string.wallet_transactions_yesterday).lowercase()
@@ -39,6 +40,12 @@ fun TransactionsLazyColumn(
         state = listState,
         contentPadding = paddingValues,
     ) {
+        if (header != null) {
+            item {
+                header()
+            }
+        }
+
         pagingItems.itemSnapshotList.items.groupBy {
             it.txInstant.formatDay(
                 todayTranslation = today,

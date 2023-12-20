@@ -308,6 +308,9 @@
 
     <string name="wallet_dashboard_activate_notice_hint">You need to activate your wallet</string>
     <string name="wallet_dashboard_activate_button">Activate Wallet Now</string>
+    <string name="wallet_dashboard_no_transactions_hint">You need sats to zap people on Nostr</string>
+    <string name="wallet_dashboard_low_sats_hint">You are running low on sats</string>
+    <string name="wallet_dashboard_buy_sats_button">Buy Sats Now</string>
 
     <string name="wallet_activation_title">Activate Wallet</string>
     <string name="wallet_activation_pending_data_hint">Activating your wallet is easy! All we need is your name and email address:</string>

@@ -15,6 +15,7 @@ interface WalletDashboardContract {
         val primalWallet: PrimalWallet? = null,
         val walletPreference: WalletPreference = WalletPreference.Undefined,
         val walletBalance: BigDecimal? = null,
+        val lowBalance: Boolean = false,
         val error: DashboardError? = null,
     ) {
         sealed class DashboardError {

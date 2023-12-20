@@ -86,7 +86,14 @@ class WalletDashboardViewModel @Inject constructor(
     private fun subscribeToWalletBalance() =
         viewModelScope.launch {
             subscriptionsManager.badges.collect {
-                setState { copy(walletBalance = it.walletBalanceInBtc?.toBigDecimal()) }
+                setState {
+                    val btcBalance = it.walletBalanceInBtc?.toBigDecimal()
+                    val satsBalance = btcBalance?.toSats()
+                    copy(
+                        walletBalance = btcBalance,
+                        lowBalance = satsBalance != null && satsBalance.toLong() in (0..1000),
+                    )
+                }
             }
         }
 
