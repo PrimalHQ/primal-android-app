@@ -28,17 +28,21 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import kotlinx.coroutines.launch
+import net.primal.android.LocalPrimalTheme
 import net.primal.android.R
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.PrimalTopAppBar
@@ -134,6 +138,8 @@ fun WalletDashboardScreen(
         }
     }
 
+    val haptic = LocalHapticFeedback.current
+    var focusModeEnabled by rememberSaveable { mutableStateOf(false) }
     var topBarHeight by remember { mutableIntStateOf(0) }
 
     PrimalDrawerScaffold(
@@ -144,7 +150,7 @@ fun WalletDashboardScreen(
         onDrawerDestinationClick = onDrawerDestinationClick,
         bottomBarHeight = bottomBarHeight,
         onBottomBarOffsetChange = { bottomBarOffsetHeightPx = it },
-        focusModeEnabled = false,
+        focusModeEnabled = focusModeEnabled,
         topBar = { scrollBehaviour ->
             PrimalTopAppBar(
                 modifier = Modifier.onSizeChanged { topBarHeight = it.height },
@@ -163,7 +169,11 @@ fun WalletDashboardScreen(
                     )
                 },
                 scrollBehavior = scrollBehaviour,
-                showDivider = false,
+                showDivider = !LocalPrimalTheme.current.isDarkTheme,
+                onTitleLongClick = {
+                    focusModeEnabled = !focusModeEnabled
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                },
                 footer = {
                     AnimatedContent(
                         targetState = dashboardExpanded,
