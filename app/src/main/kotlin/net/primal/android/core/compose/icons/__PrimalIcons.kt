@@ -38,6 +38,7 @@ import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromCamer
 import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromGallery
 import net.primal.android.core.compose.icons.primaliconpack.Key
 import net.primal.android.core.compose.icons.primaliconpack.LightMode
+import net.primal.android.core.compose.icons.primaliconpack.LightningBolt
 import net.primal.android.core.compose.icons.primaliconpack.Link
 import net.primal.android.core.compose.icons.primaliconpack.Message
 import net.primal.android.core.compose.icons.primaliconpack.Messages
@@ -53,6 +54,8 @@ import net.primal.android.core.compose.icons.primaliconpack.NavNotificationsFill
 import net.primal.android.core.compose.icons.primaliconpack.NavSearch
 import net.primal.android.core.compose.icons.primaliconpack.NavSearchFilled
 import net.primal.android.core.compose.icons.primaliconpack.NavWallet
+import net.primal.android.core.compose.icons.primaliconpack.NavWalletBolt
+import net.primal.android.core.compose.icons.primaliconpack.NavWalletBoltFilled
 import net.primal.android.core.compose.icons.primaliconpack.NavWalletFilled
 import net.primal.android.core.compose.icons.primaliconpack.NewDM
 import net.primal.android.core.compose.icons.primaliconpack.Notifications
@@ -156,6 +159,8 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             NavSearch,
             NavWalletFilled,
             NavWallet,
+            NavWalletBolt,
+            NavWalletBoltFilled,
             Send,
             NewDM,
             Unmute,
@@ -169,6 +174,7 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             WalletLightning,
             WalletError,
             WalletSuccess,
+            LightningBolt,
         )
         return __PrimalIcons!!
     }

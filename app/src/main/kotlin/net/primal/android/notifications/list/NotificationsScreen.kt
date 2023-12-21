@@ -1,20 +1,13 @@
 package net.primal.android.notifications.list
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
@@ -32,17 +25,14 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
@@ -72,7 +62,6 @@ import net.primal.android.core.compose.isNotEmpty
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.crypto.hexToNoteHrp
 import net.primal.android.drawer.DrawerScreenDestination
-import net.primal.android.drawer.PrimalBottomBarHeightDp
 import net.primal.android.drawer.PrimalDrawerScaffold
 import net.primal.android.notifications.list.ui.NotificationListItem
 import net.primal.android.notifications.list.ui.NotificationUi
@@ -144,8 +133,17 @@ fun NotificationsScreen(
     val seenNotificationsPagingItems = state.seenNotifications.collectAsLazyPagingItems()
     val notificationsListState = seenNotificationsPagingItems.rememberLazyListStatePagingWorkaround()
 
-    val bottomBarHeight = PrimalBottomBarHeightDp
-    var bottomBarOffsetHeightPx by remember { mutableFloatStateOf(0f) }
+    val canScrollUp by remember(notificationsListState) {
+        derivedStateOf {
+            notificationsListState.firstVisibleItemIndex > 0
+        }
+    }
+
+    LaunchedEffect(seenNotificationsPagingItems, state.badges) {
+        if (state.badges.unreadNotificationsCount > 0) {
+            seenNotificationsPagingItems.refresh()
+        }
+    }
 
     ErrorHandler(
         error = state.error,
@@ -164,8 +162,6 @@ fun NotificationsScreen(
         },
         onPrimaryDestinationChanged = onPrimaryDestinationChanged,
         onDrawerDestinationClick = onDrawerDestinationClick,
-        bottomBarHeight = bottomBarHeight,
-        onBottomBarOffsetChange = { bottomBarOffsetHeightPx = it },
         badges = state.badges,
         topBar = {
             PrimalTopAppBar(
@@ -188,12 +184,6 @@ fun NotificationsScreen(
             SnackbarHost(hostState = snackbarHostState)
         },
         content = { paddingValues ->
-            LaunchedEffect(state.badges) {
-                if (state.badges.unreadNotificationsCount > 0) {
-                    seenNotificationsPagingItems.refresh()
-                }
-            }
-
             NotificationsList(
                 state = state,
                 seenPagingItems = seenNotificationsPagingItems,
@@ -235,11 +225,18 @@ fun NotificationsScreen(
                 onPostQuoteClick = {
                     onPostQuoteClick("\n\nnostr:${it.postId.hexToNoteHrp()}")
                 },
-                bottomBarHeightPx = with(LocalDensity.current) {
-                    bottomBarHeight.roundToPx().toFloat()
-                },
-                bottomBarOffsetHeightPx = bottomBarOffsetHeightPx,
             )
+        },
+        floatingNewDataHost = {
+            if (canScrollUp && state.badges.unreadNotificationsCount > 0) {
+                NewNotificationsButton(
+                    onClick = {
+                        uiScope.launch {
+                            notificationsListState.animateScrollToItem(0)
+                        }
+                    },
+                )
+            }
         },
     )
 }
@@ -261,11 +258,7 @@ private fun NotificationsList(
     onRepostClick: (FeedPostUi) -> Unit,
     onZapClick: (FeedPostUi, ULong?, String?) -> Unit,
     onPostQuoteClick: (FeedPostUi) -> Unit,
-    bottomBarHeightPx: Float = 0F,
-    bottomBarOffsetHeightPx: Float = 0F,
 ) {
-    val uiScope = rememberCoroutineScope()
-
     var repostQuotePostConfirmation by remember { mutableStateOf<FeedPostUi?>(null) }
     if (repostQuotePostConfirmation != null) {
         repostQuotePostConfirmation?.let { post ->
@@ -304,177 +297,148 @@ private fun NotificationsList(
         }
     }
 
-    val canScrollUp by remember(listState) {
-        derivedStateOf {
-            listState.firstVisibleItemIndex > 0
-        }
-    }
-
-    Box {
-        LazyColumn(
-            contentPadding = paddingValues,
-            state = listState,
+    LazyColumn(
+        contentPadding = paddingValues,
+        state = listState,
+    ) {
+        items(
+            items = state.unseenNotifications,
+            key = { it.map { notificationUi -> notificationUi.uniqueKey }.toString() },
+            contentType = { it.first().notificationType },
         ) {
-            items(
-                items = state.unseenNotifications,
-                key = { it.map { notificationUi -> notificationUi.uniqueKey }.toString() },
-                contentType = { it.first().notificationType },
-            ) {
-                NotificationListItem(
-                    notifications = it,
-                    type = it.first().notificationType,
-                    onProfileClick = onProfileClick,
-                    onNoteClick = onNoteClick,
-                    onReplyClick = onNoteClick,
-                    onHashtagClick = onHashtagClick,
-                    onMediaClick = onMediaClick,
-                    onPostLikeClick = onPostLikeClick,
-                    onDefaultZapClick = { postData ->
-                        if (state.zappingState.canZap()) {
-                            onZapClick(postData, null, null)
-                        } else {
-                            showCantZapWarning = true
-                        }
-                    },
-                    onZapOptionsClick = { postData ->
-                        if (state.zappingState.walletConnected) {
-                            zapOptionsPostConfirmation = postData
-                        } else {
-                            showCantZapWarning = true
-                        }
-                    },
-                    onRepostClick = { postData -> repostQuotePostConfirmation = postData },
-                )
-
-                if (state.unseenNotifications.last() != it || seenPagingItems.isNotEmpty()) {
-                    Divider(
-                        color = AppTheme.colorScheme.outline,
-                        thickness = 1.dp,
-                    )
-                }
-            }
-
-            items(
-                count = seenPagingItems.itemCount,
-                key = seenPagingItems.itemKey(key = { it.uniqueKey }),
-                contentType = seenPagingItems.itemContentType { it.notificationType },
-            ) {
-                val item = seenPagingItems[it]
-
-                when {
-                    item != null -> {
-                        NotificationListItem(
-                            notifications = listOf(item),
-                            type = item.notificationType,
-                            onProfileClick = onProfileClick,
-                            onNoteClick = onNoteClick,
-                            onReplyClick = onNoteReplyClick,
-                            onHashtagClick = onHashtagClick,
-                            onMediaClick = onMediaClick,
-                            onPostLikeClick = onPostLikeClick,
-                            onDefaultZapClick = { postData ->
-                                if (state.zappingState.canZap()) {
-                                    onZapClick(postData, null, null)
-                                } else {
-                                    showCantZapWarning = true
-                                }
-                            },
-                            onZapOptionsClick = { postData ->
-                                if (state.zappingState.walletConnected) {
-                                    zapOptionsPostConfirmation = postData
-                                } else {
-                                    showCantZapWarning = true
-                                }
-                            },
-                            onRepostClick = { postData -> repostQuotePostConfirmation = postData },
-                        )
-
-                        if (it < seenPagingItems.itemCount - 1) {
-                            Divider(
-                                color = AppTheme.colorScheme.outline,
-                                thickness = 1.dp,
-                            )
-                        }
-                    }
-
-                    else -> {}
-                }
-            }
-
-            if (seenPagingItems.isEmpty() && state.unseenNotifications.isEmpty()) {
-                when (seenPagingItems.loadState.refresh) {
-                    LoadState.Loading -> {
-                        item(contentType = "LoadingRefresh") {
-                            ListLoading(
-                                modifier = Modifier.fillParentMaxSize(),
-                            )
-                        }
-                    }
-
-                    is LoadState.NotLoading -> {
-                        item(contentType = "NoContent") {
-                            ListNoContent(
-                                modifier = Modifier.fillParentMaxSize(),
-                                noContentText = stringResource(
-                                    id = R.string.notifications_no_content,
-                                ),
-                                refreshButtonVisible = false,
-                            )
-                        }
-                    }
-
-                    is LoadState.Error -> {
-                        item(contentType = "RefreshError") {
-                            ListNoContent(
-                                modifier = Modifier.fillParentMaxSize(),
-                                noContentText = stringResource(
-                                    id = R.string.notifications_initial_loading_error,
-                                ),
-                                onRefresh = { seenPagingItems.refresh() },
-                            )
-                        }
-                    }
-                }
-            }
-
-            when (seenPagingItems.loadState.mediator?.append) {
-                LoadState.Loading -> item(contentType = "LoadingAppend") {
-                    ListLoading(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(64.dp),
-                    )
-                }
-
-                is LoadState.Error -> item(contentType = "AppendError") {
-                    ListLoadingError(
-                        text = stringResource(R.string.app_error_loading_next_page),
-                    )
-                }
-
-                else -> Unit
-            }
-        }
-
-        AnimatedVisibility(
-            visible = canScrollUp && state.badges.unreadNotificationsCount > 0,
-            enter = fadeIn() + slideInVertically(),
-            exit = slideOutVertically() + fadeOut(),
-            modifier = Modifier
-                .padding(paddingValues)
-                .padding(top = 42.dp)
-                .height(40.dp)
-                .wrapContentWidth()
-                .align(Alignment.TopCenter)
-                .alpha(1 / bottomBarHeightPx * bottomBarOffsetHeightPx + 1f),
-        ) {
-            NewNotificationsButton(
-                onClick = {
-                    uiScope.launch {
-                        listState.animateScrollToItem(0)
+            NotificationListItem(
+                notifications = it,
+                type = it.first().notificationType,
+                onProfileClick = onProfileClick,
+                onNoteClick = onNoteClick,
+                onReplyClick = onNoteClick,
+                onHashtagClick = onHashtagClick,
+                onMediaClick = onMediaClick,
+                onPostLikeClick = onPostLikeClick,
+                onDefaultZapClick = { postData ->
+                    if (state.zappingState.canZap()) {
+                        onZapClick(postData, null, null)
+                    } else {
+                        showCantZapWarning = true
                     }
                 },
+                onZapOptionsClick = { postData ->
+                    if (state.zappingState.walletConnected) {
+                        zapOptionsPostConfirmation = postData
+                    } else {
+                        showCantZapWarning = true
+                    }
+                },
+                onRepostClick = { postData -> repostQuotePostConfirmation = postData },
             )
+
+            if (state.unseenNotifications.last() != it || seenPagingItems.isNotEmpty()) {
+                Divider(
+                    color = AppTheme.colorScheme.outline,
+                    thickness = 1.dp,
+                )
+            }
+        }
+
+        items(
+            count = seenPagingItems.itemCount,
+            key = seenPagingItems.itemKey(key = { it.uniqueKey }),
+            contentType = seenPagingItems.itemContentType { it.notificationType },
+        ) {
+            val item = seenPagingItems[it]
+
+            when {
+                item != null -> {
+                    NotificationListItem(
+                        notifications = listOf(item),
+                        type = item.notificationType,
+                        onProfileClick = onProfileClick,
+                        onNoteClick = onNoteClick,
+                        onReplyClick = onNoteReplyClick,
+                        onHashtagClick = onHashtagClick,
+                        onMediaClick = onMediaClick,
+                        onPostLikeClick = onPostLikeClick,
+                        onDefaultZapClick = { postData ->
+                            if (state.zappingState.canZap()) {
+                                onZapClick(postData, null, null)
+                            } else {
+                                showCantZapWarning = true
+                            }
+                        },
+                        onZapOptionsClick = { postData ->
+                            if (state.zappingState.walletConnected) {
+                                zapOptionsPostConfirmation = postData
+                            } else {
+                                showCantZapWarning = true
+                            }
+                        },
+                        onRepostClick = { postData -> repostQuotePostConfirmation = postData },
+                    )
+
+                    if (it < seenPagingItems.itemCount - 1) {
+                        Divider(
+                            color = AppTheme.colorScheme.outline,
+                            thickness = 1.dp,
+                        )
+                    }
+                }
+
+                else -> {}
+            }
+        }
+
+        if (seenPagingItems.isEmpty() && state.unseenNotifications.isEmpty()) {
+            when (seenPagingItems.loadState.refresh) {
+                LoadState.Loading -> {
+                    item(contentType = "LoadingRefresh") {
+                        ListLoading(
+                            modifier = Modifier.fillParentMaxSize(),
+                        )
+                    }
+                }
+
+                is LoadState.NotLoading -> {
+                    item(contentType = "NoContent") {
+                        ListNoContent(
+                            modifier = Modifier.fillParentMaxSize(),
+                            noContentText = stringResource(
+                                id = R.string.notifications_no_content,
+                            ),
+                            refreshButtonVisible = false,
+                        )
+                    }
+                }
+
+                is LoadState.Error -> {
+                    item(contentType = "RefreshError") {
+                        ListNoContent(
+                            modifier = Modifier.fillParentMaxSize(),
+                            noContentText = stringResource(
+                                id = R.string.notifications_initial_loading_error,
+                            ),
+                            onRefresh = { seenPagingItems.refresh() },
+                        )
+                    }
+                }
+            }
+        }
+
+        when (seenPagingItems.loadState.mediator?.append) {
+            LoadState.Loading -> item(contentType = "LoadingAppend") {
+                ListLoading(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(64.dp),
+                )
+            }
+
+            is LoadState.Error -> item(contentType = "AppendError") {
+                ListLoadingError(
+                    text = stringResource(R.string.app_error_loading_next_page),
+                )
+            }
+
+            else -> Unit
         }
     }
 }
@@ -483,6 +447,7 @@ private fun NotificationsList(
 private fun NewNotificationsButton(onClick: () -> Unit) {
     Row(
         modifier = Modifier
+            .height(40.dp)
             .background(
                 color = AppTheme.colorScheme.primary,
                 shape = AppTheme.shapes.extraLarge,

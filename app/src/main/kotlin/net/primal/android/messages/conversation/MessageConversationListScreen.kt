@@ -1,9 +1,6 @@
 package net.primal.android.messages.conversation
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateIntAsState
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -39,9 +36,7 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -87,7 +82,6 @@ import net.primal.android.core.compose.isNotEmpty
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.core.utils.parseHashtags
 import net.primal.android.drawer.DrawerScreenDestination
-import net.primal.android.drawer.PrimalBottomBarHeightDp
 import net.primal.android.drawer.PrimalDrawerScaffold
 import net.primal.android.messages.conversation.MessageConversationListContract.UiEvent
 import net.primal.android.messages.conversation.MessageConversationListContract.UiEvent.ChangeRelation
@@ -111,6 +105,7 @@ fun MessageListScreen(
             Lifecycle.Event.ON_START -> {
                 viewModel.setEvent(UiEvent.ConversationsSeen)
             }
+
             else -> Unit
         }
     }
@@ -138,10 +133,6 @@ fun MessageListScreen(
     val uiScope = rememberCoroutineScope()
     val drawerState: DrawerState = rememberDrawerState(DrawerValue.Closed)
 
-    val bottomBarHeight = PrimalBottomBarHeightDp
-    var bottomBarOffsetHeightPx by remember { mutableFloatStateOf(0f) }
-    val focusMode by remember { derivedStateOf { bottomBarOffsetHeightPx < 0f } }
-
     val conversations = state.conversations.collectAsLazyPagingItems()
     val listState = conversations.rememberLazyListStatePagingWorkaround()
 
@@ -159,8 +150,6 @@ fun MessageListScreen(
         onPrimaryDestinationChanged = onPrimaryDestinationChanged,
         onDrawerDestinationClick = onDrawerDestinationClick,
         badges = state.badges,
-        bottomBarHeight = bottomBarHeight,
-        onBottomBarOffsetChange = { bottomBarOffsetHeightPx = it },
         topBar = {
             PrimalTopAppBar(
                 title = stringResource(id = R.string.messages_title),
@@ -198,28 +187,22 @@ fun MessageListScreen(
             )
         },
         floatingActionButton = {
-            AnimatedVisibility(
-                visible = !focusMode,
-                enter = fadeIn(),
-                exit = fadeOut(),
-            ) {
-                FloatingActionButton(
-                    onClick = onNewMessageClick,
-                    modifier = Modifier
-                        .size(bottomBarHeight)
-                        .clip(CircleShape)
-                        .background(color = AppTheme.colorScheme.primary, shape = CircleShape),
-                    elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp),
-                    containerColor = Color.Unspecified,
-                    content = {
-                        Icon(
-                            imageVector = PrimalIcons.NewDM,
-                            contentDescription = null,
-                            tint = Color.White,
-                        )
-                    },
-                )
-            }
+            FloatingActionButton(
+                onClick = onNewMessageClick,
+                modifier = Modifier
+                    .size(64.dp)
+                    .clip(CircleShape)
+                    .background(color = AppTheme.colorScheme.primary, shape = CircleShape),
+                elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp),
+                containerColor = Color.Unspecified,
+                content = {
+                    Icon(
+                        imageVector = PrimalIcons.NewDM,
+                        contentDescription = null,
+                        tint = Color.White,
+                    )
+                },
+            )
         },
     )
 }

@@ -1,5 +1,3 @@
-@file:Suppress("MagicNumber")
-
 package net.primal.android.core.compose.icons.primaliconpack
 
 import androidx.compose.ui.graphics.Color
@@ -23,31 +21,31 @@ public val PrimalIcons.NavMessagesFilled: ImageVector
             path(fill = SolidColor(Color(0xFFffffff)), stroke = null, strokeLineWidth = 0.0f,
                     strokeLineCap = Butt, strokeLineJoin = Miter, strokeLineMiter = 4.0f,
                     pathFillType = NonZero) {
-                moveTo(0.0f, 6.8907f)
-                curveTo(0.0f, 6.6384f, 0.2926f, 6.4988f, 0.4888f, 6.6575f)
-                lineTo(10.2403f, 14.5517f)
-                curveTo(11.2648f, 15.381f, 12.73f, 15.3802f, 13.7536f, 14.5498f)
-                lineTo(23.511f, 6.6334f)
-                curveTo(23.7071f, 6.4743f, 24.0f, 6.6139f, 24.0f, 6.8664f)
-                verticalLineTo(20.0f)
-                curveTo(24.0f, 21.1046f, 23.1046f, 22.0f, 22.0f, 22.0f)
-                horizontalLineTo(2.0f)
-                curveTo(0.8954f, 22.0f, 0.0f, 21.1046f, 0.0f, 20.0f)
-                verticalLineTo(6.8907f)
+                moveTo(0.3983f, 6.6935f)
+                curveTo(0.2332f, 6.5719f, 0.0f, 6.6898f, 0.0f, 6.8948f)
+                verticalLineTo(18.0f)
+                curveTo(0.0f, 20.2091f, 1.7909f, 22.0f, 4.0f, 22.0f)
+                horizontalLineTo(20.0f)
+                curveTo(22.2091f, 22.0f, 24.0f, 20.2091f, 24.0f, 18.0f)
+                verticalLineTo(6.8948f)
+                curveTo(24.0f, 6.6898f, 23.7668f, 6.5719f, 23.6017f, 6.6935f)
+                lineTo(13.1864f, 14.368f)
+                curveTo(12.4809f, 14.8878f, 11.5191f, 14.8878f, 10.8136f, 14.368f)
+                lineTo(0.3983f, 6.6935f)
                 close()
             }
             path(fill = SolidColor(Color(0xFFffffff)), stroke = null, strokeLineWidth = 0.0f,
                     strokeLineCap = Butt, strokeLineJoin = Miter, strokeLineMiter = 4.0f,
                     pathFillType = NonZero) {
-                moveTo(0.1494f, 3.8353f)
-                curveTo(0.0679f, 3.7694f, 0.0251f, 3.6653f, 0.0479f, 3.563f)
-                curveTo(0.2472f, 2.6686f, 1.0455f, 2.0f, 2.0f, 2.0f)
-                horizontalLineTo(22.0f)
-                curveTo(22.9451f, 2.0f, 23.737f, 2.6555f, 23.946f, 3.5366f)
-                curveTo(23.9705f, 3.6397f, 23.9278f, 3.7455f, 23.8455f, 3.8123f)
-                lineTo(12.5061f, 13.0122f)
-                curveTo(12.209f, 13.2533f, 11.7836f, 13.2535f, 11.4861f, 13.0127f)
-                lineTo(0.1494f, 3.8353f)
+                moveTo(23.2462f, 4.4712f)
+                curveTo(23.4416f, 4.3272f, 23.5082f, 4.0615f, 23.3779f, 3.8567f)
+                curveTo(22.6682f, 2.7405f, 21.4206f, 2.0f, 20.0f, 2.0f)
+                horizontalLineTo(4.0f)
+                curveTo(2.5794f, 2.0f, 1.3318f, 2.7405f, 0.6221f, 3.8567f)
+                curveTo(0.4918f, 4.0615f, 0.5584f, 4.3272f, 0.7538f, 4.4712f)
+                lineTo(11.4068f, 12.3208f)
+                curveTo(11.7596f, 12.5807f, 12.2404f, 12.5807f, 12.5932f, 12.3208f)
+                lineTo(23.2462f, 4.4712f)
                 close()
             }
         }

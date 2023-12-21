@@ -1,36 +1,12 @@
 package net.primal.android.core.compose.feed.list
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.LazyPagingItems
 import kotlin.random.Random
@@ -39,15 +15,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import net.primal.android.R
-import net.primal.android.core.compose.AvatarThumbnailsRow
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.feed.model.FeedPostsSyncStats
 import net.primal.android.core.compose.feed.model.ZappingState
-import net.primal.android.drawer.PrimalBottomBarHeightDp
-import net.primal.android.theme.AppTheme
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -67,16 +38,10 @@ fun FeedNoteList(
     onMediaClick: (String, String) -> Unit,
     onGoToWallet: () -> Unit,
     paddingValues: PaddingValues = PaddingValues(0.dp),
-    bottomBarHeightPx: Float = with(LocalDensity.current) {
-        PrimalBottomBarHeightDp.roundToPx().toFloat()
-    },
-    bottomBarOffsetHeightPx: Float = 0F,
     onScrolledToTop: (() -> Unit)? = null,
     onMuteClick: ((String) -> Unit)? = null,
 ) {
-    val uiScope = rememberCoroutineScope()
-
-    LaunchedEffect(feedListState) {
+    LaunchedEffect(feedListState, onScrolledToTop) {
         withContext(Dispatchers.IO) {
             snapshotFlow { feedListState.firstVisibleItemIndex == 0 }
                 .distinctUntilChanged()
@@ -87,94 +52,33 @@ fun FeedNoteList(
         }
     }
 
-    val newPostsCount = syncStats.postsCount
-
-    LaunchedEffect(pagingItems) {
+    LaunchedEffect(pagingItems, syncStats) {
         withContext(Dispatchers.IO) {
             while (true) {
                 val syncInterval = 30 + Random.nextInt(-5, 5)
                 delay(syncInterval.seconds)
-                if (newPostsCount < 100) {
+                if (syncStats.postsCount < 100) {
                     pagingItems.refresh()
                 }
             }
         }
     }
 
-    val canScrollUp by remember(feedListState) {
-        derivedStateOf {
-            feedListState.firstVisibleItemIndex > 0
-        }
-    }
-
-    Box {
-        FeedLazyColumn(
-            pagingItems = pagingItems,
-            contentPadding = paddingValues,
-            listState = feedListState,
-            zappingState = zappingState,
-            onPostClick = onPostClick,
-            onProfileClick = onProfileClick,
-            onPostLikeClick = onPostLikeClick,
-            onZapClick = onZapClick,
-            onRepostClick = onRepostClick,
-            onPostReplyClick = onPostReplyClick,
-            onPostQuoteClick = onPostQuoteClick,
-            onHashtagClick = onHashtagClick,
-            onMediaClick = onMediaClick,
-            onGoToWallet = onGoToWallet,
-            onMuteClick = onMuteClick,
-        )
-
-        AnimatedVisibility(
-            visible = canScrollUp && newPostsCount > 0,
-            enter = fadeIn() + slideInVertically(),
-            exit = slideOutVertically() + fadeOut(),
-            modifier = Modifier
-                .padding(paddingValues)
-                .padding(top = 42.dp)
-                .height(40.dp)
-                .wrapContentWidth()
-                .align(Alignment.TopCenter)
-                .alpha(1 / bottomBarHeightPx * bottomBarOffsetHeightPx + 1f),
-        ) {
-            NewPostsButton(
-                syncStats = syncStats,
-                onClick = {
-                    uiScope.launch {
-                        feedListState.animateScrollToItem(0)
-                    }
-                },
-            )
-        }
-    }
-}
-
-@Composable
-private fun NewPostsButton(syncStats: FeedPostsSyncStats, onClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .background(
-                color = AppTheme.colorScheme.primary,
-                shape = AppTheme.shapes.extraLarge,
-            )
-            .clickable { onClick() },
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        AvatarThumbnailsRow(
-            modifier = Modifier.padding(start = 6.dp),
-            avatarCdnImages = syncStats.avatarCdnImages,
-            onClick = { onClick() },
-        )
-
-        Text(
-            modifier = Modifier
-                .padding(start = 12.dp, end = 16.dp)
-                .padding(bottom = 4.dp)
-                .wrapContentHeight(),
-            text = stringResource(id = R.string.feed_new_posts_notice_general),
-            style = AppTheme.typography.bodySmall,
-            color = Color.White,
-        )
-    }
+    FeedLazyColumn(
+        pagingItems = pagingItems,
+        contentPadding = paddingValues,
+        listState = feedListState,
+        zappingState = zappingState,
+        onPostClick = onPostClick,
+        onProfileClick = onProfileClick,
+        onPostLikeClick = onPostLikeClick,
+        onZapClick = onZapClick,
+        onRepostClick = onRepostClick,
+        onPostReplyClick = onPostReplyClick,
+        onPostQuoteClick = onPostQuoteClick,
+        onHashtagClick = onHashtagClick,
+        onMediaClick = onMediaClick,
+        onGoToWallet = onGoToWallet,
+        onMuteClick = onMuteClick,
+    )
 }

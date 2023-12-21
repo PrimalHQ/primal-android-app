@@ -1,10 +1,15 @@
 package net.primal.android.drawer
 
-import androidx.compose.foundation.layout.Column
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalNavigationDrawer
@@ -13,24 +18,21 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
-import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import kotlin.math.roundToInt
-import net.primal.android.core.compose.PrimalDivider
-import net.primal.android.core.compose.PrimalNavigationBar
+import net.primal.android.core.compose.PrimalNavigationBarLightningBolt
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.user.domain.Badges
-
-val PrimalBottomBarHeightDp = 64.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -40,16 +42,37 @@ fun PrimalDrawerScaffold(
     onPrimaryDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
     badges: Badges = Badges(),
-    showBottomBarDivider: Boolean = true,
     onActiveDestinationClick: () -> Unit = {},
     topBar: @Composable (TopAppBarScrollBehavior?) -> Unit = {},
     content: @Composable (PaddingValues) -> Unit = {},
+    floatingNewDataHost: @Composable () -> Unit = {},
     floatingActionButton: @Composable () -> Unit = {},
     snackbarHost: @Composable () -> Unit = {},
-    bottomBarHeight: Dp = PrimalBottomBarHeightDp,
-    onBottomBarOffsetChange: (Float) -> Unit = {},
     focusModeEnabled: Boolean = true,
 ) {
+    val localDensity = LocalDensity.current
+
+    val topAppBarState = rememberTopAppBarState()
+    val topAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(topAppBarState)
+
+    var bottomBarInitialHeight by remember { mutableStateOf(0.dp) }
+    val bottomBarMeasureHeightModifier = Modifier.onGloballyPositioned { layoutCoordinates ->
+        bottomBarInitialHeight = with(localDensity) { layoutCoordinates.size.height.toDp() }
+    }
+    val bottomBarRealHeight by remember(topAppBarState) {
+        derivedStateOf {
+            with(localDensity) {
+                ((1 - topAppBarState.collapsedFraction) * bottomBarInitialHeight.roundToPx()).toDp()
+            }
+        }
+    }
+
+    val focusModeOn by remember(topAppBarState) {
+        derivedStateOf {
+            topAppBarState.collapsedFraction > 0.5f
+        }
+    }
+
     ModalNavigationDrawer(
         modifier = Modifier,
         drawerState = drawerState,
@@ -60,60 +83,71 @@ fun PrimalDrawerScaffold(
             )
         },
         content = {
-            val topAppBarState = rememberTopAppBarState()
-            val topAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(topAppBarState)
-
-            val bottomBarHeightPx = with(LocalDensity.current) {
-                bottomBarHeight.roundToPx().toFloat()
-            }
-            val bottomBarOffsetHeightPx = remember { mutableFloatStateOf(0f) }
-            val bottomBarNestedScrollConnection = remember {
-                object : NestedScrollConnection {
-                    override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-                        val delta = available.y
-                        val newOffset = bottomBarOffsetHeightPx.floatValue + delta
-                        bottomBarOffsetHeightPx.floatValue = newOffset.coerceIn(-bottomBarHeightPx, 0f)
-                        onBottomBarOffsetChange(bottomBarOffsetHeightPx.floatValue)
-                        return Offset.Zero
-                    }
-                }
-            }
-
             Scaffold(
                 modifier = if (focusModeEnabled) {
-                    Modifier
-                        .nestedScroll(topAppBarScrollBehavior.nestedScrollConnection)
-                        .nestedScroll(bottomBarNestedScrollConnection)
+                    Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection)
                 } else {
                     Modifier
                 },
                 topBar = { topBar(if (focusModeEnabled) topAppBarScrollBehavior else null) },
-                content = { paddingValues -> content(paddingValues) },
-                bottomBar = {
-                    Column(
-                        modifier = Modifier
-                            .navigationBarsPadding()
-                            .height(bottomBarHeight)
-                            .offset {
-                                IntOffset(
-                                    x = 0,
-                                    y = -bottomBarOffsetHeightPx.floatValue.roundToInt(),
-                                )
-                            },
-                    ) {
-                        if (showBottomBarDivider) {
-                            PrimalDivider()
-                        }
+                content = { paddingValues ->
+                    Box {
+                        content(paddingValues)
 
-                        PrimalNavigationBar(
-                            activeDestination = activeDestination,
-                            onTopLevelDestinationChanged = onPrimaryDestinationChanged,
-                            onActiveDestinationClick = onActiveDestinationClick,
-                            badges = badges,
-                        )
+                        AnimatedVisibility(
+                            visible = !focusModeOn,
+                            enter = fadeIn(),
+                            exit = fadeOut(),
+                            modifier = Modifier
+                                .padding(paddingValues)
+                                .padding(top = 42.dp)
+                                .wrapContentHeight()
+                                .wrapContentWidth()
+                                .align(Alignment.TopCenter)
+                                .graphicsLayer {
+                                    this.alpha = (1 - topAppBarState.collapsedFraction) * 1.0f
+                                },
+                        ) {
+                            floatingNewDataHost()
+                        }
                     }
                 },
-                floatingActionButton = floatingActionButton,
+                bottomBar = {
+                    PrimalNavigationBarLightningBolt(
+                        modifier = Modifier
+                            .navigationBarsPadding()
+                            .then(if (bottomBarInitialHeight == 0.dp) bottomBarMeasureHeightModifier else Modifier)
+                            .then(
+                                if (bottomBarInitialHeight > 0.dp) {
+                                    Modifier.offset(
+                                        y = bottomBarInitialHeight - bottomBarRealHeight,
+                                    )
+                                } else {
+                                    Modifier
+                                },
+                            ),
+                        activeDestination = activeDestination,
+                        onTopLevelDestinationChanged = onPrimaryDestinationChanged,
+                        onActiveDestinationClick = onActiveDestinationClick,
+                        badges = badges,
+                    )
+                },
+                floatingActionButton = {
+                    AnimatedVisibility(
+                        visible = !focusModeOn,
+                        enter = fadeIn(),
+                        exit = fadeOut(),
+                        modifier = Modifier
+                            .graphicsLayer {
+                                this.alpha = (1 - topAppBarState.collapsedFraction) * 1.0f
+                                this.translationY = (bottomBarInitialHeight - bottomBarRealHeight).toPx()
+                                this.rotationZ = (bottomBarInitialHeight - bottomBarRealHeight).toPx().coerceIn(0f, 45f)
+                                this.clip = false
+                            },
+                    ) {
+                        floatingActionButton()
+                    }
+                },
                 snackbarHost = snackbarHost,
             )
         },

@@ -23,20 +23,16 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
@@ -53,7 +49,6 @@ import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 import net.primal.android.core.compose.icons.primaliconpack.WalletPurchaseSats
 import net.primal.android.core.compose.isEmpty
 import net.primal.android.drawer.DrawerScreenDestination
-import net.primal.android.drawer.PrimalBottomBarHeightDp
 import net.primal.android.drawer.PrimalDrawerScaffold
 import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.dashboard.WalletDashboardContract.UiEvent
@@ -108,9 +103,6 @@ fun WalletDashboardScreen(
     val uiScope = rememberCoroutineScope()
     val drawerState: DrawerState = rememberDrawerState(DrawerValue.Closed)
 
-    val bottomBarHeight = PrimalBottomBarHeightDp
-    var bottomBarOffsetHeightPx by remember { mutableFloatStateOf(0f) }
-
     val pagingItems = state.transactions.collectAsLazyPagingItems()
     val listState = pagingItems.rememberLazyListStatePagingWorkaround()
 
@@ -138,8 +130,6 @@ fun WalletDashboardScreen(
         }
     }
 
-    val haptic = LocalHapticFeedback.current
-    var focusModeEnabled by rememberSaveable { mutableStateOf(false) }
     var topBarHeight by remember { mutableIntStateOf(0) }
 
     PrimalDrawerScaffold(
@@ -148,9 +138,7 @@ fun WalletDashboardScreen(
         onActiveDestinationClick = { uiScope.launch { listState.animateScrollToItem(0) } },
         onPrimaryDestinationChanged = onPrimaryDestinationChanged,
         onDrawerDestinationClick = onDrawerDestinationClick,
-        bottomBarHeight = bottomBarHeight,
-        onBottomBarOffsetChange = { bottomBarOffsetHeightPx = it },
-        focusModeEnabled = focusModeEnabled,
+        focusModeEnabled = false,
         topBar = { scrollBehaviour ->
             PrimalTopAppBar(
                 modifier = Modifier.onSizeChanged { topBarHeight = it.height },
@@ -170,10 +158,6 @@ fun WalletDashboardScreen(
                 },
                 scrollBehavior = scrollBehaviour,
                 showDivider = !LocalPrimalTheme.current.isDarkTheme,
-                onTitleLongClick = {
-                    focusModeEnabled = !focusModeEnabled
-                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                },
                 footer = {
                     AnimatedContent(
                         targetState = dashboardExpanded,

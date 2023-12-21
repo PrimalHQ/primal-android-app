@@ -191,7 +191,7 @@ fun PrimalAppNavigation() {
 
     val topLevelDestinationHandler: (PrimalTopLevelDestination) -> Unit = {
         when (it) {
-            PrimalTopLevelDestination.Feed -> navController.popBackStack()
+            PrimalTopLevelDestination.Home -> navController.popBackStack()
             PrimalTopLevelDestination.Explore -> navController.navigateToExplore()
             PrimalTopLevelDestination.Wallet -> navController.navigateToWalletDashboard()
             PrimalTopLevelDestination.Messages -> navController.navigateToMessages()
