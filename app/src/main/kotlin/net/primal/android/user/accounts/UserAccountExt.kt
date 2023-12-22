@@ -2,9 +2,14 @@ package net.primal.android.user.accounts
 
 import net.primal.android.user.domain.UserAccount
 
-fun UserAccount.copyIfNotNull(profile: UserAccount?, contacts: UserAccount?): UserAccount {
-    return copyProfileIfNotNull(profile = profile).copyContactsIfNotNull(contacts = contacts)
-}
+fun UserAccount.copyIfNotNull(
+    profile: UserAccount?,
+    stats: UserAccount?,
+    contacts: UserAccount?,
+): UserAccount =
+    this.copyProfileIfNotNull(profile = profile)
+        .copyStatsIfNotNull(stats = stats)
+        .copyContactsIfNotNull(contacts = contacts)
 
 fun UserAccount.copyProfileIfNotNull(profile: UserAccount?): UserAccount {
     return if (profile != null) {
@@ -14,9 +19,6 @@ fun UserAccount.copyProfileIfNotNull(profile: UserAccount?): UserAccount {
             avatarCdnImage = profile.avatarCdnImage,
             internetIdentifier = profile.internetIdentifier,
             lightningAddress = profile.lightningAddress,
-            followersCount = profile.followersCount,
-            followingCount = profile.followingCount,
-            notesCount = profile.notesCount,
         )
     } else {
         this
@@ -30,6 +32,18 @@ fun UserAccount.copyContactsIfNotNull(contacts: UserAccount?): UserAccount {
             following = contacts.following,
             followers = contacts.followers,
             interests = contacts.interests,
+        )
+    } else {
+        this
+    }
+}
+
+fun UserAccount.copyStatsIfNotNull(stats: UserAccount?): UserAccount {
+    return if (stats != null) {
+        copy(
+            followersCount = stats.followersCount,
+            followingCount = stats.followingCount,
+            notesCount = stats.notesCount,
         )
     } else {
         this

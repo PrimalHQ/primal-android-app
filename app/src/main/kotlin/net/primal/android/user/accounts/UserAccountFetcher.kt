@@ -1,10 +1,9 @@
 package net.primal.android.user.accounts
 
 import javax.inject.Inject
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.ext.asMapByKey
-import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.core.utils.usernameUiFriendly
 import net.primal.android.nostr.ext.asProfileDataPO
@@ -15,33 +14,34 @@ import net.primal.android.user.domain.UserAccount
 import net.primal.android.user.domain.asUserAccountFromContactsEvent
 
 class UserAccountFetcher @Inject constructor(
+    private val dispatcherProvider: CoroutineDispatcherProvider,
     private val usersApi: UsersApi,
 ) {
 
-    suspend fun fetchUserProfile(pubkey: String): UserAccount {
-        val userProfileResponse = withContext(Dispatchers.IO) {
-            usersApi.getUserProfile(pubkey = pubkey)
+    suspend fun fetchUserProfileOrNull(userId: String): UserAccount? {
+        val userProfileResponse = withContext(dispatcherProvider.io()) {
+            usersApi.getUserProfile(pubkey = userId)
         }
         val cdnResources = userProfileResponse.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
-        val profileData = userProfileResponse.metadata?.asProfileDataPO(cdnResources = cdnResources)
+        val profileData = userProfileResponse.metadata?.asProfileDataPO(cdnResources = cdnResources) ?: return null
         val userProfileStats = userProfileResponse.profileStats?.takeContentAsUserProfileStatsOrNull()
 
         return UserAccount(
-            pubkey = pubkey,
-            authorDisplayName = profileData?.authorNameUiFriendly() ?: pubkey.asEllipsizedNpub(),
-            userDisplayName = profileData?.usernameUiFriendly() ?: pubkey.asEllipsizedNpub(),
-            avatarCdnImage = profileData?.avatarCdnImage,
-            internetIdentifier = profileData?.internetIdentifier,
-            lightningAddress = profileData?.lightningAddress,
+            pubkey = userId,
+            authorDisplayName = profileData.authorNameUiFriendly(),
+            userDisplayName = profileData.usernameUiFriendly(),
+            avatarCdnImage = profileData.avatarCdnImage,
+            internetIdentifier = profileData.internetIdentifier,
+            lightningAddress = profileData.lightningAddress,
             followersCount = userProfileStats?.followersCount,
             followingCount = userProfileStats?.followsCount,
             notesCount = userProfileStats?.noteCount,
         )
     }
 
-    suspend fun fetchUserContacts(pubkey: String): UserAccount? {
-        val contactsResponse = withContext(Dispatchers.IO) {
-            usersApi.getUserContacts(pubkey = pubkey, extendedResponse = false)
+    suspend fun fetchUserContactsOrNull(userId: String): UserAccount? {
+        val contactsResponse = withContext(dispatcherProvider.io()) {
+            usersApi.getUserContacts(pubkey = userId, extendedResponse = false)
         }
 
         return contactsResponse.contactsEvent?.asUserAccountFromContactsEvent()

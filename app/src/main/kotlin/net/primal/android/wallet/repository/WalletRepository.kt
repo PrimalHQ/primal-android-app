@@ -15,7 +15,6 @@ import net.primal.android.user.domain.WalletPreference
 import net.primal.android.wallet.api.WalletApi
 import net.primal.android.wallet.api.mediator.WalletTransactionsMediator
 import net.primal.android.wallet.api.model.InAppPurchaseQuoteResponse
-import net.primal.android.wallet.api.model.WalletUserInfoResponse
 import net.primal.android.wallet.api.model.WithdrawRequestBody
 import net.primal.android.wallet.db.WalletTransaction
 import net.primal.android.wallet.domain.WalletKycLevel
@@ -37,8 +36,9 @@ class WalletRepository @Inject constructor(
 
     suspend fun fetchUserWalletInfoAndUpdateUserAccount(userId: String) {
         withContext(dispatcherProvider.io()) {
-            val walletInfo = walletApi.getWalletUserInfo(userId)
-            walletInfo.storeWalletInfoLocally(userId = userId)
+            val response = walletApi.getWalletUserInfo(userId)
+            val kycLevel = WalletKycLevel.valueOf(response.kycLevel) ?: return@withContext
+            storeWalletInfoLocally(userId = userId, kycLevel = kycLevel, lightningAddress = response.lightningAddress)
         }
     }
 
@@ -107,9 +107,12 @@ class WalletRepository @Inject constructor(
         walletApi.parseLnInvoice(userId = userId, lnbc = lnbc)
     }
 
-    private suspend fun WalletUserInfoResponse.storeWalletInfoLocally(userId: String) {
-        val kycLevel = WalletKycLevel.valueOf(kycLevel) ?: return
-        val primalWallet = PrimalWallet(kycLevel = kycLevel, lightningAddress = this.lightningAddress)
+    private suspend fun storeWalletInfoLocally(
+        userId: String,
+        kycLevel: WalletKycLevel,
+        lightningAddress: String,
+    ) {
+        val primalWallet = PrimalWallet(kycLevel = kycLevel, lightningAddress = lightningAddress)
         accountsStore.getAndUpdateAccount(userId = userId) {
             copy(primalWallet = primalWallet)
         }

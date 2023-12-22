@@ -174,7 +174,9 @@ fun LoginContent(
                             modifier = Modifier.fillMaxWidth(),
                             text = when {
                                 isValidNsec -> stringResource(id = R.string.login_valid_nsec_key)
-                                nsecValue.isValidNostrPublicKey() -> stringResource(id = R.string.login_cant_login_with_public_key)
+                                nsecValue.isValidNostrPublicKey() -> stringResource(
+                                    id = R.string.login_cant_login_with_public_key,
+                                )
                                 else -> stringResource(id = R.string.login_invalid_nsec_key)
                             },
                             textAlign = TextAlign.Center,

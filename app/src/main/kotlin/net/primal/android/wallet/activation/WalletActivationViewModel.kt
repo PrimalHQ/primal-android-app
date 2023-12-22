@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.domain.WalletPreference
+import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.activation.WalletActivationContract.UiEvent
 import net.primal.android.wallet.activation.WalletActivationContract.UiState
 import net.primal.android.wallet.repository.WalletRepository
@@ -20,7 +21,8 @@ import timber.log.Timber
 @HiltViewModel
 class WalletActivationViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
-    private val repository: WalletRepository,
+    private val walletRepository: WalletRepository,
+    private val userRepository: UserRepository,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(value = UiState())
@@ -59,7 +61,7 @@ class WalletActivationViewModel @Inject constructor(
             setState { copy(working = true) }
             try {
                 val userId = activeAccountStore.activeUserId()
-                repository.requestActivationCodeToEmail(userId, name, email)
+                walletRepository.requestActivationCodeToEmail(userId, name, email)
                 setState { copy(status = WalletActivationStatus.PendingCodeConfirmation) }
             } catch (error: WssException) {
                 Timber.e(error)
@@ -74,12 +76,17 @@ class WalletActivationViewModel @Inject constructor(
             setState { copy(working = true) }
             try {
                 val userId = activeAccountStore.activeUserId()
-                val lightningAddress = repository.activateWallet(userId, code)
-                repository.fetchUserWalletInfoAndUpdateUserAccount(userId)
-                if (activeAccountStore.activeUserAccount().nostrWallet == null) {
-                    repository.updateWalletPreference(userId, WalletPreference.PrimalWallet)
+                val lightningAddress = walletRepository.activateWallet(userId, code)
+                walletRepository.fetchUserWalletInfoAndUpdateUserAccount(userId)
+
+                val activeUser = activeAccountStore.activeUserAccount()
+                if (activeUser.nostrWallet == null) {
+                    walletRepository.updateWalletPreference(userId, WalletPreference.PrimalWallet)
                 }
-                // TODO Update profile with lightning address
+                activeUser.primalWallet?.lightningAddress?.let {
+                    userRepository.setLightningAddress(userId = userId, lightningAddress = it)
+                }
+
                 setState {
                     copy(
                         activatedLightningAddress = lightningAddress,

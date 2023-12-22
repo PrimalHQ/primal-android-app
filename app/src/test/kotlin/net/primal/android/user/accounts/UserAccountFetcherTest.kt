@@ -5,9 +5,11 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.mockk
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.add
 import kotlinx.serialization.json.buildJsonArray
+import net.primal.android.core.coroutines.CoroutinesTestRule
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.NostrEventKind
@@ -16,9 +18,15 @@ import net.primal.android.user.api.UsersApi
 import net.primal.android.user.api.model.UserContactsResponse
 import net.primal.android.user.api.model.UserProfileResponse
 import net.primal.android.user.domain.Relay
+import org.junit.Rule
 import org.junit.Test
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class UserAccountFetcherTest {
+
+
+    @get:Rule
+    val coroutinesTestRule = CoroutinesTestRule()
 
     @Test
     fun `fetchUserProfile fetches user details for given pubkey`() = runTest {
@@ -38,28 +46,32 @@ class UserAccountFetcherTest {
                     kind = 0,
                     tags = emptyList(),
                     content = "{" +
-                            "\"name\":\"$expectedName\"," +
-                            "\"picture\":\"$expectedPictureUrl\"," +
-                            "\"nip05\":\"$expectedInternetIdentifier\"" +
-                            "}",
-                    sig = "invalidSig"
+                        "\"name\":\"$expectedName\"," +
+                        "\"picture\":\"$expectedPictureUrl\"," +
+                        "\"nip05\":\"$expectedInternetIdentifier\"" +
+                        "}",
+                    sig = "invalidSig",
                 ),
                 profileStats = PrimalEvent(
                     kind = NostrEventKind.PrimalUserProfileStats.value,
                     content = "{" +
-                            "\"pubkey\": \"$expectedPubkey\"," +
-                            "\"follows_count\":$expectedFollowingCount," +
-                            "\"followers_count\":$expectedFollowersCount," +
-                            "\"note_count\":$expectedNotesCount," +
-                            "\"time_joined\":null" +
-                            "}",
-                )
+                        "\"pubkey\": \"$expectedPubkey\"," +
+                        "\"follows_count\":$expectedFollowingCount," +
+                        "\"followers_count\":$expectedFollowersCount," +
+                        "\"note_count\":$expectedNotesCount," +
+                        "\"time_joined\":null" +
+                        "}",
+                ),
             )
         }
 
-        val fetcher = UserAccountFetcher(usersApi = usersApiMock)
-        val actual = fetcher.fetchUserProfile(pubkey = expectedPubkey)
+        val fetcher = UserAccountFetcher(
+            dispatcherProvider = coroutinesTestRule.dispatcherProvider,
+            usersApi = usersApiMock,
+        )
+        val actual = fetcher.fetchUserProfileOrNull(userId = expectedPubkey)
 
+        actual.shouldNotBeNull()
         actual.authorDisplayName shouldBe expectedName
         actual.userDisplayName shouldBe expectedName
         val avatarCdnImage = actual.avatarCdnImage
@@ -76,8 +88,11 @@ class UserAccountFetcherTest {
         val usersApiMock = mockk<UsersApi> {
             coEvery { getUserProfile(any()) } throws WssException()
         }
-        val fetcher = UserAccountFetcher(usersApi = usersApiMock)
-        shouldThrow<WssException> { fetcher.fetchUserProfile(pubkey = "any") }
+        val fetcher = UserAccountFetcher(
+            dispatcherProvider = coroutinesTestRule.dispatcherProvider,
+            usersApi = usersApiMock,
+        )
+        shouldThrow<WssException> { fetcher.fetchUserProfileOrNull(userId = "any") }
     }
 
     @Test
@@ -139,13 +154,16 @@ class UserAccountFetcherTest {
                         }
                      }
                      """.trimIndent(),
-                    sig = "invalidSig"
+                    sig = "invalidSig",
                 ),
             )
         }
 
-        val fetcher = UserAccountFetcher(usersApi = usersApiMock)
-        val actual = fetcher.fetchUserContacts(pubkey = expectedPubkey)
+        val fetcher = UserAccountFetcher(
+            dispatcherProvider = coroutinesTestRule.dispatcherProvider,
+            usersApi = usersApiMock,
+        )
+        val actual = fetcher.fetchUserContactsOrNull(userId = expectedPubkey)
 
         actual.shouldNotBeNull()
         actual.relays shouldBe expectedRelays
@@ -158,8 +176,11 @@ class UserAccountFetcherTest {
         val usersApiMock = mockk<UsersApi> {
             coEvery { getUserContacts(any(), any()) } throws WssException()
         }
-        val fetcher = UserAccountFetcher(usersApi = usersApiMock)
-        shouldThrow<WssException> { fetcher.fetchUserContacts(pubkey = "any") }
+        val fetcher = UserAccountFetcher(
+            dispatcherProvider = coroutinesTestRule.dispatcherProvider,
+            usersApi = usersApiMock,
+        )
+        shouldThrow<WssException> { fetcher.fetchUserContactsOrNull(userId = "any") }
     }
 
 }

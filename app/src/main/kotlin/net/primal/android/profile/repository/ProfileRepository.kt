@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.withContext
 import net.primal.android.core.ext.asMapByKey
 import net.primal.android.db.PrimalDatabase
-import net.primal.android.networking.relays.errors.MissingRelaysException
+import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.ext.asProfileDataPO
 import net.primal.android.nostr.ext.asProfileStats
 import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
@@ -67,8 +67,7 @@ class ProfileRepository @Inject constructor(
     }
 
     private suspend fun updateFollowing(userId: String, reducer: Set<String>.() -> Set<String>) {
-        val userContacts = userAccountFetcher.fetchUserContacts(pubkey = userId)
-            ?: throw MissingRelaysException()
+        val userContacts = userAccountFetcher.fetchUserContactsOrNull(userId = userId) ?: throw WssException()
 
         userRepository.updateContacts(userId, userContacts)
 
