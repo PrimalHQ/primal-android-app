@@ -55,6 +55,7 @@
     <string name="login_button_continue">Continue</string>
     <string name="login_button_paste_key">Paste your key</string>
     <string name="login_invalid_nsec_key">Please enter a valid Nostr key</string>
+    <string name="login_cant_login_with_public_key">Signing in with an npub is not supported yet. Please sign in with your nsec key.</string>
     <string name="login_valid_nsec_key">Valid key confirmed</string>
 
     <string name="logout_title">Sign out</string>

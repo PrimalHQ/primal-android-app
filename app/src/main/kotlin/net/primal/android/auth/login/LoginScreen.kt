@@ -50,6 +50,7 @@ import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.utils.isValidNostrPrivateKey
+import net.primal.android.core.utils.isValidNostrPublicKey
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
@@ -120,7 +121,7 @@ fun LoginContent(
 
     val pasteKey = {
         val clipboardText = clipboardManager.getText()?.text.orEmpty().trim()
-        if (clipboardText.isValidNostrPrivateKey()) {
+        if (clipboardText.isValidNostrPrivateKey() || clipboardText.isValidNostrPublicKey()) {
             nsecValue = clipboardText
         }
     }
@@ -171,10 +172,10 @@ fun LoginContent(
                     if (nsecValue.isNotEmpty()) {
                         Text(
                             modifier = Modifier.fillMaxWidth(),
-                            text = if (isValidNsec) {
-                                stringResource(id = R.string.login_valid_nsec_key)
-                            } else {
-                                stringResource(id = R.string.login_invalid_nsec_key)
+                            text = when {
+                                isValidNsec -> stringResource(id = R.string.login_valid_nsec_key)
+                                nsecValue.isValidNostrPublicKey() -> stringResource(id = R.string.login_cant_login_with_public_key)
+                                else -> stringResource(id = R.string.login_invalid_nsec_key)
                             },
                             textAlign = TextAlign.Center,
                             color = if (isValidNsec) {
