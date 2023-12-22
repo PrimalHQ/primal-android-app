@@ -25,7 +25,6 @@ interface WalletDashboardContract {
     }
 
     sealed class UiEvent {
-        data class UpdateWalletPreference(val walletPreference: WalletPreference) : UiEvent()
         data object DismissError : UiEvent()
     }
 }

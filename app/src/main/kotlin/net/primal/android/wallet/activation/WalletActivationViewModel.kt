@@ -81,7 +81,7 @@ class WalletActivationViewModel @Inject constructor(
 
                 val activeUser = activeAccountStore.activeUserAccount()
                 if (activeUser.nostrWallet == null) {
-                    walletRepository.updateWalletPreference(userId, WalletPreference.PrimalWallet)
+                    userRepository.updateWalletPreference(userId, WalletPreference.PrimalWallet)
                 }
                 activeUser.primalWallet?.lightningAddress?.let {
                     userRepository.setLightningAddress(userId = userId, lightningAddress = it)

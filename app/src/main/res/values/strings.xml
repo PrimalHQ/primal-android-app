@@ -231,6 +231,7 @@
     <string name="settings_wallet_disconnect_action">Disconnect wallet</string>
     <string name="settings_wallet_connect_alby_wallet">Connect Alby Wallet</string>
     <string name="settings_wallet_connect_mutiny_wallet">Connect Mutiny Wallet</string>
+    <string name="settings_wallet_nwc_activation">Activate Nostr Wallet Connect (NWC)</string>
 
     <string name="settings_notifications_title">Notifications</string>
     <string name="settings_notifications_error_update_settings">Unable to update notification settings.</string>

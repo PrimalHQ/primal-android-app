@@ -11,7 +11,6 @@ import net.primal.android.db.PrimalDatabase
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.api.UsersApi
 import net.primal.android.user.domain.PrimalWallet
-import net.primal.android.user.domain.WalletPreference
 import net.primal.android.wallet.api.WalletApi
 import net.primal.android.wallet.api.mediator.WalletTransactionsMediator
 import net.primal.android.wallet.api.model.InAppPurchaseQuoteResponse
@@ -61,12 +60,6 @@ class WalletRepository @Inject constructor(
     suspend fun withdraw(userId: String, body: WithdrawRequestBody) {
         withContext(dispatcherProvider.io()) {
             walletApi.withdraw(userId, body)
-        }
-    }
-
-    suspend fun updateWalletPreference(userId: String, walletPreference: WalletPreference) {
-        accountsStore.getAndUpdateAccount(userId = userId) {
-            copy(walletPreference = walletPreference)
         }
     }
 

@@ -16,7 +16,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.Warning
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
@@ -41,6 +40,7 @@ import net.primal.android.R
 import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.IconText
+import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -86,10 +86,7 @@ fun AccountSettingsScreen(state: AccountSettingsContract.UiState, onClose: () ->
                 }
 
                 item {
-                    Divider(
-                        modifier = Modifier.padding(vertical = 16.dp),
-                        thickness = (0.5).dp,
-                    )
+                    PrimalDivider(modifier = Modifier.padding(vertical = 16.dp))
                 }
 
                 item {
@@ -138,7 +135,9 @@ fun PublicKeySection(npub: String, avatarCdnImage: CdnImage?) {
     Box(modifier = Modifier.padding(vertical = 8.dp)) {
         var keyCopied by remember { mutableStateOf(false) }
         PrimalLoadingButton(
-            modifier = Modifier.fillMaxWidth().height(56.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp),
             leadingIcon = if (keyCopied) Icons.Outlined.Check else Icons.Outlined.ContentCopy,
             text = if (keyCopied) {
                 stringResource(id = R.string.settings_keys_key_copied)
@@ -235,7 +234,9 @@ fun PrivateKeySection(nsec: String) {
     Box(modifier = Modifier.padding(vertical = 8.dp)) {
         var keyCopied by remember { mutableStateOf(false) }
         PrimalLoadingButton(
-            modifier = Modifier.fillMaxWidth().height(56.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp),
             leadingIcon = if (keyCopied) Icons.Outlined.Check else Icons.Outlined.ContentCopy,
             text = if (keyCopied) {
                 stringResource(id = R.string.settings_keys_key_copied)

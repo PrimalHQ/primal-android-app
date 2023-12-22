@@ -40,7 +40,7 @@ import net.primal.android.theme.domain.PrimalTheme
 
 @Composable
 fun PrimalFilledButton(
-    onClick: () -> Unit,
+    onClick: (() -> Unit)?,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     shape: Shape = AppTheme.shapes.extraLarge,
@@ -68,7 +68,7 @@ fun PrimalFilledButton(
             .semantics { role = Role.Button }
             .shadow(elevation = 0.dp, shape)
             .clip(shape)
-            .clickable(enabled = enabled, onClick = onClick)
+            .clickable(enabled = enabled && onClick != null, onClick = { onClick?.invoke() })
             .background(color = buttonContainerColor.value, shape = shape)
             .border(border = border, shape = shape),
         contentAlignment = Alignment.Center,

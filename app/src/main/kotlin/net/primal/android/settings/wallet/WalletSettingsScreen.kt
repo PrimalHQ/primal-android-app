@@ -6,6 +6,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,7 +17,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Check
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
@@ -27,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
@@ -34,6 +35,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
@@ -41,16 +43,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.R
 import net.primal.android.core.compose.IconText
+import net.primal.android.core.compose.PrimalDivider
+import net.primal.android.core.compose.PrimalSwitch
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
+import net.primal.android.settings.wallet.WalletSettingsContract.UiEvent
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.user.domain.NostrWalletConnect
 import net.primal.android.user.domain.NostrWalletKeypair
+import net.primal.android.user.domain.WalletPreference
 
 @Composable
 fun WalletSettingsScreen(viewModel: WalletSettingsViewModel, onClose: () -> Unit) {
@@ -68,7 +74,7 @@ fun WalletSettingsScreen(viewModel: WalletSettingsViewModel, onClose: () -> Unit
 fun WalletSettingsScreen(
     state: WalletSettingsContract.UiState,
     onClose: () -> Unit,
-    eventPublisher: (WalletSettingsContract.UiEvent) -> Unit,
+    eventPublisher: (UiEvent) -> Unit,
 ) {
     Scaffold(
         modifier = Modifier,
@@ -87,19 +93,59 @@ fun WalletSettingsScreen(
             Column(
                 modifier = Modifier
                     .padding(paddingValues)
-                    .padding(top = 56.dp),
+                    .padding(top = 16.dp),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
+                NwcActivationSwitch(
+                    preferredNwc = state.walletPreference == WalletPreference.NostrWalletConnect,
+                    onNwcChecked = { nwcActivated ->
+                        eventPublisher(
+                            UiEvent.UpdateWalletPreference(
+                                walletPreference = if (nwcActivated) {
+                                    WalletPreference.NostrWalletConnect
+                                } else {
+                                    WalletPreference.PrimalWallet
+                                },
+                            ),
+                        )
+                    },
+                )
+
+                PrimalDivider(modifier = Modifier.padding(horizontal = 8.dp))
+
+                val nwcModifier = if (state.walletPreference != WalletPreference.NostrWalletConnect) {
+                    Modifier.graphicsLayer { alpha = 0.42f }
+                } else {
+                    Modifier
+                }.then(
+                    Modifier.fillMaxSize().padding(top = 32.dp),
+                )
+
                 if (state.wallet != null) {
                     WalletConnected(
+                        modifier = nwcModifier,
                         state = state,
+                        enabled = state.walletPreference == WalletPreference.NostrWalletConnect,
                         disconnectWallet = {
-                            eventPublisher(WalletSettingsContract.UiEvent.DisconnectWallet)
+                            eventPublisher(UiEvent.DisconnectWallet)
                         },
                     )
                 } else {
-                    WalletDisconnected()
+                    val uriHandler = LocalUriHandler.current
+                    WalletDisconnected(
+                        modifier = nwcModifier,
+                        enabled = state.walletPreference == WalletPreference.NostrWalletConnect,
+                        onAlbyConnectClick = {
+                            uriHandler.openUri("https://nwc.getalby.com/apps/new?c=Primal-Android")
+                        },
+                        onMutinyConnectClick = {
+                            uriHandler.openUri(
+                                "https://app.mutinywallet.com/settings/connections" +
+                                    "?callbackUri=primal&name=Primal-Android",
+                            )
+                        },
+                    )
                 }
             }
         },
@@ -107,94 +153,128 @@ fun WalletSettingsScreen(
 }
 
 @Composable
-fun WalletConnected(state: WalletSettingsContract.UiState, disconnectWallet: () -> Unit) {
-    WalletImage(
-        modifier = Modifier.size(200.dp),
-        connected = true,
-    )
-
-    Spacer(modifier = Modifier.height(50.dp))
-
-    Text(
-        modifier = Modifier.padding(32.dp),
-        text = stringResource(id = R.string.settings_wallet_connected_subtitle),
-        textAlign = TextAlign.Center,
-    )
-
-    Spacer(modifier = Modifier.height(20.dp))
-
-    Column(
-        modifier = Modifier
-            .padding(horizontal = 16.dp)
-            .height(88.dp)
-            .background(
-                color = AppTheme.extraColorScheme.surfaceVariantAlt1,
-                shape = RoundedCornerShape(size = 12.dp),
-            ),
-        verticalArrangement = Arrangement.SpaceEvenly,
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Text(
-            text = state.wallet?.relays?.first() ?: "",
-            textAlign = TextAlign.Center,
-        )
-        Divider()
-        Text(
-            text = state.wallet?.lightningAddress ?: state.userLightningAddress ?: "",
-            textAlign = TextAlign.Center,
-        )
-    }
-    Spacer(modifier = Modifier.height(20.dp))
-
-    PrimalLoadingButton(
+private fun NwcActivationSwitch(preferredNwc: Boolean, onNwcChecked: (Boolean) -> Unit) {
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(56.dp)
             .padding(horizontal = 16.dp),
-        text = stringResource(id = R.string.settings_wallet_disconnect_action),
-        onClick = disconnectWallet,
-    )
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            modifier = Modifier
+                .fillMaxWidth(0.75f)
+                .padding(bottom = 5.dp),
+            text = stringResource(id = R.string.settings_wallet_nwc_activation),
+            fontWeight = FontWeight.W400,
+            fontSize = 16.sp,
+            lineHeight = 20.sp,
+            color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+        PrimalSwitch(
+            checked = preferredNwc,
+            onCheckedChange = onNwcChecked,
+        )
+    }
 }
 
 @Composable
-fun WalletDisconnected() {
-    WalletImage(
-        modifier = Modifier.size(200.dp),
-    )
+fun WalletConnected(
+    state: WalletSettingsContract.UiState,
+    disconnectWallet: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        WalletImage(
+            modifier = Modifier.size(200.dp),
+            connected = true,
+        )
 
-    Spacer(modifier = Modifier.height(50.dp))
+        Text(
+            modifier = Modifier.padding(32.dp),
+            text = stringResource(id = R.string.settings_wallet_connected_subtitle),
+            textAlign = TextAlign.Center,
+        )
 
-    Text(
-        modifier = Modifier.padding(32.dp),
-        text = stringResource(id = R.string.settings_wallet_not_connected_subtitle),
-        textAlign = TextAlign.Center,
-    )
-
-    Spacer(modifier = Modifier.height(20.dp))
-
-    val uriHandler = LocalUriHandler.current
-    ConnectAlbyWalletButton(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(56.dp)
-            .padding(horizontal = 16.dp),
-        onClick = {
-            uriHandler.openUri("https://nwc.getalby.com/apps/new?c=Primal-Android")
-        },
-    )
-    Spacer(modifier = Modifier.height(20.dp))
-    ConnectMutinyWalletButton(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(56.dp)
-            .padding(horizontal = 16.dp),
-        onClick = {
-            uriHandler.openUri(
-                "https://app.mutinywallet.com/settings/connections" +
-                    "?callbackUri=primal&name=Primal-Android",
+        Column(
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .height(88.dp)
+                .background(
+                    color = AppTheme.extraColorScheme.surfaceVariantAlt1,
+                    shape = RoundedCornerShape(size = 12.dp),
+                ),
+            verticalArrangement = Arrangement.SpaceEvenly,
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(
+                text = state.wallet?.relays?.first() ?: "",
+                textAlign = TextAlign.Center,
             )
-        },
-    )
+            PrimalDivider()
+            Text(
+                text = state.wallet?.lightningAddress ?: state.userLightningAddress ?: "",
+                textAlign = TextAlign.Center,
+            )
+        }
+        Spacer(modifier = Modifier.height(20.dp))
+
+        PrimalLoadingButton(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp)
+                .padding(horizontal = 16.dp),
+            text = stringResource(id = R.string.settings_wallet_disconnect_action),
+            onClick = if (enabled) disconnectWallet else null,
+        )
+    }
+}
+
+@Composable
+fun WalletDisconnected(
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    onAlbyConnectClick: () -> Unit,
+    onMutinyConnectClick: () -> Unit,
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        WalletImage(
+            modifier = Modifier.size(200.dp),
+        )
+
+        Text(
+            modifier = Modifier.padding(32.dp),
+            text = stringResource(id = R.string.settings_wallet_not_connected_subtitle),
+            textAlign = TextAlign.Center,
+        )
+
+        ConnectAlbyWalletButton(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp)
+                .padding(horizontal = 16.dp),
+            onClick = if (enabled) onAlbyConnectClick else null,
+        )
+        Spacer(modifier = Modifier.height(20.dp))
+        ConnectMutinyWalletButton(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp)
+                .padding(horizontal = 16.dp),
+            onClick = if (enabled) onMutinyConnectClick else null,
+        )
+    }
 }
 
 @Composable
@@ -254,7 +334,7 @@ fun WalletImage(modifier: Modifier = Modifier, connected: Boolean = false) {
 private val albyColor = Color(0xFFFFDF6F)
 
 @Composable
-fun ConnectAlbyWalletButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
+fun ConnectAlbyWalletButton(modifier: Modifier = Modifier, onClick: (() -> Unit)?) {
     PrimalFilledButton(
         modifier = modifier,
         containerColor = albyColor,
@@ -275,7 +355,7 @@ fun ConnectAlbyWalletButton(modifier: Modifier = Modifier, onClick: () -> Unit) 
 private val mutinyColor = Color(0xFF4F1425)
 
 @Composable
-fun ConnectMutinyWalletButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
+fun ConnectMutinyWalletButton(modifier: Modifier = Modifier, onClick: (() -> Unit)?) {
     PrimalFilledButton(
         modifier = modifier,
         containerColor = mutinyColor,

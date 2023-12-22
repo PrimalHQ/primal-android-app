@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Divider
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -47,6 +46,7 @@ import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.ListLoading
 import net.primal.android.core.compose.ListLoadingError
 import net.primal.android.core.compose.ListNoContent
+import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.compose.feed.RepostOrQuoteBottomSheet
@@ -333,10 +333,7 @@ private fun NotificationsList(
             )
 
             if (state.unseenNotifications.last() != it || seenPagingItems.isNotEmpty()) {
-                Divider(
-                    color = AppTheme.colorScheme.outline,
-                    thickness = 1.dp,
-                )
+                PrimalDivider()
             }
         }
 
@@ -376,10 +373,7 @@ private fun NotificationsList(
                     )
 
                     if (it < seenPagingItems.itemCount - 1) {
-                        Divider(
-                            color = AppTheme.colorScheme.outline,
-                            thickness = 1.dp,
-                        )
+                        PrimalDivider()
                     }
                 }
 

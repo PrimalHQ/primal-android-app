@@ -28,7 +28,7 @@ import net.primal.android.theme.domain.PrimalTheme
 
 @Composable
 fun PrimalLoadingButton(
-    onClick: () -> Unit,
+    onClick: (() -> Unit)?,
     modifier: Modifier = Modifier,
     shape: Shape = AppTheme.shapes.extraLarge,
     text: String? = null,

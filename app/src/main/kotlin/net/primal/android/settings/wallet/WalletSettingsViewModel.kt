@@ -13,8 +13,10 @@ import kotlinx.coroutines.launch
 import net.primal.android.navigation.nwcUrl
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.domain.NWCParseException
+import net.primal.android.user.domain.WalletPreference
 import net.primal.android.user.domain.parseNWCUrl
 import net.primal.android.user.repository.UserRepository
+import timber.log.Timber
 
 @HiltViewModel
 class WalletSettingsViewModel @Inject constructor(
@@ -48,6 +50,8 @@ class WalletSettingsViewModel @Inject constructor(
             events.collect {
                 when (it) {
                     is WalletSettingsContract.UiEvent.DisconnectWallet -> disconnectWallet()
+                    is WalletSettingsContract.UiEvent.UpdateWalletPreference ->
+                        updateWalletPreference(walletPreference = it.walletPreference)
                 }
             }
         }
@@ -55,16 +59,12 @@ class WalletSettingsViewModel @Inject constructor(
     private fun observeUserAccount() =
         viewModelScope.launch {
             activeAccountStore.activeUserAccount.collect {
-                val nostrWalletConnect = activeAccountStore.activeUserAccount().nostrWallet
-                val lightningAddress = activeAccountStore.activeUserAccount().lightningAddress
-
-                if (nostrWalletConnect != null) {
-                    setState {
-                        copy(
-                            wallet = nostrWalletConnect,
-                            userLightningAddress = lightningAddress,
-                        )
-                    }
+                setState {
+                    copy(
+                        wallet = it.nostrWallet,
+                        walletPreference = it.walletPreference,
+                        userLightningAddress = it.lightningAddress,
+                    )
                 }
             }
         }
@@ -87,7 +87,7 @@ class WalletSettingsViewModel @Inject constructor(
                     )
                 }
             } catch (error: NWCParseException) {
-                // Propagate error to the UI
+                Timber.e(error)
             }
         }
 
@@ -103,4 +103,10 @@ class WalletSettingsViewModel @Inject constructor(
             )
         }
     }
+
+    private fun updateWalletPreference(walletPreference: WalletPreference) =
+        viewModelScope.launch {
+            val activeUserId = activeAccountStore.activeUserId()
+            userRepository.updateWalletPreference(userId = activeUserId, walletPreference = walletPreference)
+        }
 }

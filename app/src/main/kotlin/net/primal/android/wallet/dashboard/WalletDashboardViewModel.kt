@@ -18,7 +18,6 @@ import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.networking.sockets.errors.NostrNoticeException
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.android.user.domain.WalletPreference
 import net.primal.android.user.subscriptions.SubscriptionsManager
 import net.primal.android.wallet.dashboard.WalletDashboardContract.UiEvent
 import net.primal.android.wallet.dashboard.WalletDashboardContract.UiState
@@ -64,7 +63,6 @@ class WalletDashboardViewModel @Inject constructor(
         viewModelScope.launch {
             events.collect {
                 when (it) {
-                    is UiEvent.UpdateWalletPreference -> updateWalletPreference(it.walletPreference)
                     UiEvent.DismissError -> setState { copy(error = null) }
                 }
             }
@@ -121,14 +119,6 @@ class WalletDashboardViewModel @Inject constructor(
                 }
                 setErrorState(dashboardError)
             }
-        }
-
-    private suspend fun updateWalletPreference(walletPreference: WalletPreference) =
-        viewModelScope.launch {
-            walletRepository.updateWalletPreference(
-                userId = activeAccountStore.activeUserId(),
-                walletPreference = walletPreference,
-            )
         }
 
     private fun setErrorState(error: UiState.DashboardError) {

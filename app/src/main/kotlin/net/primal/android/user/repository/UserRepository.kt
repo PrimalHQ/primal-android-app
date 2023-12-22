@@ -21,6 +21,7 @@ import net.primal.android.user.accounts.copyIfNotNull
 import net.primal.android.user.api.UsersApi
 import net.primal.android.user.domain.NostrWalletConnect
 import net.primal.android.user.domain.UserAccount
+import net.primal.android.user.domain.WalletPreference
 
 class UserRepository @Inject constructor(
     private val dispatcherProvider: CoroutineDispatcherProvider,
@@ -132,6 +133,12 @@ class UserRepository @Inject constructor(
                 internetIdentifier = profileData.internetIdentifier,
                 lightningAddress = profileData.lightningAddress,
             )
+        }
+    }
+
+    suspend fun updateWalletPreference(userId: String, walletPreference: WalletPreference) {
+        accountsStore.getAndUpdateAccount(userId = userId) {
+            copy(walletPreference = walletPreference)
         }
     }
 }
