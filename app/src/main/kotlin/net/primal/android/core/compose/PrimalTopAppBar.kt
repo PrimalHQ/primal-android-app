@@ -24,16 +24,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.foundation.ClickDebounce
 import net.primal.android.theme.AppTheme
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalComposeUiApi::class)
 @ExperimentalMaterial3Api
 @Composable
 fun PrimalTopAppBar(
@@ -43,6 +45,7 @@ fun PrimalTopAppBar(
     subtitle: String? = null,
     navigationIcon: ImageVector? = null,
     navigationIconTintColor: Color = LocalContentColor.current,
+    autoCloseKeyboardOnNavigationIconClick: Boolean = true,
     avatarCdnImage: CdnImage? = null,
     actions: @Composable RowScope.() -> Unit = {},
     showDivider: Boolean = true,
@@ -54,6 +57,7 @@ fun PrimalTopAppBar(
     ),
     footer: @Composable () -> Unit = {},
 ) {
+    val keyboardController = LocalSoftwareKeyboardController.current
     Column(
         modifier = modifier,
     ) {
@@ -75,7 +79,14 @@ fun PrimalTopAppBar(
                     val clickDebounce by remember { mutableStateOf(ClickDebounce()) }
                     AppBarIcon(
                         icon = navigationIcon,
-                        onClick = { clickDebounce.processEvent(onNavigationIconClick) },
+                        onClick = {
+                            clickDebounce.processEvent {
+                                if (autoCloseKeyboardOnNavigationIconClick) {
+                                    keyboardController?.hide()
+                                }
+                                onNavigationIconClick()
+                            }
+                        },
                         tint = navigationIconTintColor,
                     )
                 }
