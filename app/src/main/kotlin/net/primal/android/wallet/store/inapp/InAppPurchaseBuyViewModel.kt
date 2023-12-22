@@ -79,7 +79,7 @@ class InAppPurchaseBuyViewModel @Inject constructor(
                             quote = SatsPurchaseQuote(
                                 quoteId = response.quoteId,
                                 amountInBtc = response.amountBtc,
-                                purchaseAmount = inAppProduct.priceAmountMicros / 1_000_000,
+                                purchaseAmount = inAppProduct.priceAmountMicros / 1_000_000.00,
                                 purchaseSymbol = localCurrency.symbol,
                                 purchaseCurrency = localCurrency.currencyCode,
                             ),

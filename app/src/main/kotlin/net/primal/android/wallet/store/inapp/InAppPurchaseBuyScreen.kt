@@ -134,7 +134,7 @@ private fun PurchaseQuoteColumn(quote: SatsPurchaseQuote?, onPurchaseRequest: ()
         CurrencyText(
             modifier = Modifier.padding(bottom = 48.dp),
             topLabel = stringResource(id = R.string.wallet_in_app_purchase_to_receive_label).uppercase(),
-            amount = quote?.amountInBtc?.toSats()?.toLong(),
+            amount = quote?.amountInBtc?.toSats()?.toDouble(),
             currency = stringResource(id = R.string.wallet_sats_suffix),
         )
 
@@ -155,7 +155,7 @@ private fun PurchaseQuoteColumn(quote: SatsPurchaseQuote?, onPurchaseRequest: ()
 @Composable
 private fun CurrencyText(
     topLabel: String,
-    amount: Long?,
+    amount: Double?,
     currency: String?,
     modifier: Modifier = Modifier,
     symbol: String? = null,

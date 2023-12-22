@@ -5,5 +5,5 @@ data class SatsPurchaseQuote(
     val amountInBtc: String,
     val purchaseSymbol: String,
     val purchaseCurrency: String,
-    val purchaseAmount: Long,
+    val purchaseAmount: Double,
 )
