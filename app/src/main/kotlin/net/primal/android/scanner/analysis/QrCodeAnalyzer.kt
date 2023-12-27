@@ -1,4 +1,4 @@
-package net.primal.android.scan.analysis
+package net.primal.android.scanner.analysis
 
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy

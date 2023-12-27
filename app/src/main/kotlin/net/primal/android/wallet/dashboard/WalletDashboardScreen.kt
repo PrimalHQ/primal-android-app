@@ -126,7 +126,7 @@ fun WalletDashboardScreen(
 
     val dashboardExpanded by remember(listState) {
         derivedStateOf {
-            listState.firstVisibleItemScrollOffset == 0
+            listState.firstVisibleItemScrollOffset == 0 && listState.firstVisibleItemIndex <= 1
         }
     }
 
@@ -184,7 +184,7 @@ fun WalletDashboardScreen(
                                     .fillMaxWidth()
                                     .wrapContentHeight()
                                     .background(color = AppTheme.colorScheme.surface)
-                                    .padding(horizontal = 8.dp, vertical = 16.dp),
+                                    .padding(horizontal = 10.dp, vertical = 16.dp),
                                 walletBalance = state.walletBalance,
                                 actions = listOf(WalletAction.Send, WalletAction.Scan, WalletAction.Receive),
                                 onWalletAction = { action ->

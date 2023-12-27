@@ -113,19 +113,22 @@ fun NewConversationScreen(
 fun SearchBar(
     query: String,
     onQueryChange: (String) -> Unit,
-    focusRequester: FocusRequester = remember { FocusRequester() },
+    focusRequester: FocusRequester? = remember { FocusRequester() },
 ) {
     var focusRequested by rememberSaveable { mutableStateOf(false) }
-    LaunchedEffect(focusRequester) {
-        if (!focusRequested) {
-            focusRequester.requestFocus()
-            focusRequested = true
+
+    if (focusRequester != null) {
+        LaunchedEffect(focusRequester) {
+            if (!focusRequested) {
+                focusRequester.requestFocus()
+                focusRequested = true
+            }
         }
     }
 
     OutlinedTextField(
         modifier = Modifier
-            .focusRequester(focusRequester)
+            .then(if (focusRequester != null) Modifier.focusRequester(focusRequester) else Modifier)
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
             .padding(bottom = 8.dp),

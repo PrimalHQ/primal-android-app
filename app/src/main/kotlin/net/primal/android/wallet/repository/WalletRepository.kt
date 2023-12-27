@@ -14,6 +14,8 @@ import net.primal.android.user.domain.PrimalWallet
 import net.primal.android.wallet.api.WalletApi
 import net.primal.android.wallet.api.mediator.WalletTransactionsMediator
 import net.primal.android.wallet.api.model.InAppPurchaseQuoteResponse
+import net.primal.android.wallet.api.model.ParsedLnInvoiceResponse
+import net.primal.android.wallet.api.model.ParsedLnUrlResponse
 import net.primal.android.wallet.api.model.WithdrawRequestBody
 import net.primal.android.wallet.db.WalletTransaction
 import net.primal.android.wallet.domain.WalletKycLevel
@@ -92,12 +94,12 @@ class WalletRepository @Inject constructor(
         }
     }
 
-    suspend fun parseLnUrl(userId: String, lnurl: String) {
-        walletApi.parseLnUrl(userId = userId, lnurl = lnurl)
+    suspend fun parseLnUrl(userId: String, lnurl: String): ParsedLnUrlResponse {
+        return walletApi.parseLnUrl(userId = userId, lnurl = lnurl)
     }
 
-    suspend fun parseLnInvoice(userId: String, lnbc: String) {
-        walletApi.parseLnInvoice(userId = userId, lnbc = lnbc)
+    suspend fun parseLnInvoice(userId: String, lnbc: String): ParsedLnInvoiceResponse {
+        return walletApi.parseLnInvoice(userId = userId, lnbc = lnbc)
     }
 
     private suspend fun storeWalletInfoLocally(

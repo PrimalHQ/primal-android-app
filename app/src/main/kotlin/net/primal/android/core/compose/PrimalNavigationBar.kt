@@ -200,7 +200,11 @@ fun PrimalNavigationBarLightningBolt(
                     .clip(CircleShape)
                     .clickable {
                         clickDebounce.processEvent {
-                            onTopLevelDestinationChanged(PrimalTopLevelDestination.Wallet)
+                            if (activeDestination == PrimalTopLevelDestination.Wallet) {
+                                onActiveDestinationClick?.invoke()
+                            } else {
+                                onTopLevelDestinationChanged(PrimalTopLevelDestination.Wallet)
+                            }
                         }
                     },
                 contentAlignment = Alignment.Center,

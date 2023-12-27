@@ -42,6 +42,8 @@ fun UserProfileListItem(data: UserProfileUi, onClick: (String) -> Unit) {
                 Text(
                     text = data.internetIdentifier.formatNip05Identifier(),
                     color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
         },

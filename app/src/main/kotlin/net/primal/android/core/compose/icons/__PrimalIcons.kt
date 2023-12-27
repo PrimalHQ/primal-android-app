@@ -19,6 +19,7 @@ import net.primal.android.core.compose.icons.primaliconpack.ContextShare
 import net.primal.android.core.compose.icons.primaliconpack.Copy
 import net.primal.android.core.compose.icons.primaliconpack.DarkMode
 import net.primal.android.core.compose.icons.primaliconpack.Delete
+import net.primal.android.core.compose.icons.primaliconpack.Directory
 import net.primal.android.core.compose.icons.primaliconpack.Discuss
 import net.primal.android.core.compose.icons.primaliconpack.Download
 import net.primal.android.core.compose.icons.primaliconpack.Edit
@@ -37,6 +38,7 @@ import net.primal.android.core.compose.icons.primaliconpack.Home
 import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromCamera
 import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromGallery
 import net.primal.android.core.compose.icons.primaliconpack.Key
+import net.primal.android.core.compose.icons.primaliconpack.Keyboard
 import net.primal.android.core.compose.icons.primaliconpack.LightMode
 import net.primal.android.core.compose.icons.primaliconpack.LightningBolt
 import net.primal.android.core.compose.icons.primaliconpack.Link
@@ -60,6 +62,8 @@ import net.primal.android.core.compose.icons.primaliconpack.NavWalletFilled
 import net.primal.android.core.compose.icons.primaliconpack.NewDM
 import net.primal.android.core.compose.icons.primaliconpack.Notifications
 import net.primal.android.core.compose.icons.primaliconpack.Notrich
+import net.primal.android.core.compose.icons.primaliconpack.Paste
+import net.primal.android.core.compose.icons.primaliconpack.PhotoFromGallery
 import net.primal.android.core.compose.icons.primaliconpack.Play
 import net.primal.android.core.compose.icons.primaliconpack.QrCode
 import net.primal.android.core.compose.icons.primaliconpack.Quote
@@ -70,6 +74,7 @@ import net.primal.android.core.compose.icons.primaliconpack.Search
 import net.primal.android.core.compose.icons.primaliconpack.Send
 import net.primal.android.core.compose.icons.primaliconpack.Settings
 import net.primal.android.core.compose.icons.primaliconpack.Share
+import net.primal.android.core.compose.icons.primaliconpack.Subtract
 import net.primal.android.core.compose.icons.primaliconpack.Unmute
 import net.primal.android.core.compose.icons.primaliconpack.UserFeedAdd
 import net.primal.android.core.compose.icons.primaliconpack.UserFeedRemove
@@ -175,6 +180,11 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             WalletError,
             WalletSuccess,
             LightningBolt,
+            Keyboard,
+            PhotoFromGallery,
+            Paste,
+            Directory,
+            Subtract,
         )
         return __PrimalIcons!!
     }

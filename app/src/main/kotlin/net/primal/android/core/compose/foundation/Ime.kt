@@ -12,7 +12,7 @@ import androidx.compose.ui.unit.dp
 fun keyboardVisibilityAsState(): State<Boolean> {
     val density = LocalDensity.current
     val imeBottom = WindowInsets.ime.getBottom(density)
-    val minKeyboardVisibility = with(density) { 128.dp.toPx() }
+    val minKeyboardVisibility = with(density) { 64.dp.toPx() }
     val isImeVisible = imeBottom > minKeyboardVisibility
     return rememberUpdatedState(isImeVisible)
 }

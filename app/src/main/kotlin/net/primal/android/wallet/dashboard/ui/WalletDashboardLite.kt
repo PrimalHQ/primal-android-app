@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.math.BigDecimal
@@ -22,7 +23,10 @@ fun WalletDashboardLite(
         verticalAlignment = Alignment.Bottom,
     ) {
         WalletBalanceText(
-            modifier = Modifier,
+            modifier = Modifier.graphicsLayer {
+                clip = false
+                translationY = 4.dp.toPx()
+            },
             walletBalance = walletBalance,
             textSize = 32.sp,
         )

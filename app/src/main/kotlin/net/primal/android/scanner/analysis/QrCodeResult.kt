@@ -1,6 +1,8 @@
-package net.primal.android.scan.analysis
+package net.primal.android.scanner.analysis
 
-import android.util.Patterns
+import net.primal.android.wallet.utils.isLightningAddressUri
+import net.primal.android.wallet.utils.isLnInvoice
+import net.primal.android.wallet.utils.isLnUrl
 
 enum class QrCodeDataType(val validator: (String) -> Boolean) {
     NPUB(validator = { it.startsWith(prefix = "nostr:npub1", ignoreCase = true) }),
@@ -9,16 +11,11 @@ enum class QrCodeDataType(val validator: (String) -> Boolean) {
 
     NEVENT(validator = { it.startsWith(prefix = "nostr:nevent1", ignoreCase = true) }),
 
-    LNBC(validator = { it.startsWith(prefix = "lnbc", ignoreCase = true) }),
+    LNBC(validator = { it.isLnInvoice() }),
 
-    LNURL(validator = { it.startsWith(prefix = "lnurl", ignoreCase = true) }),
+    LNURL(validator = { it.isLnUrl() }),
 
-    LUD16(
-        validator = {
-            it.startsWith(prefix = "lightning:", ignoreCase = true) &&
-                Patterns.EMAIL_ADDRESS.matcher(it.split(":").last()).matches()
-        },
-    ),
+    LUD16(validator = { it.isLightningAddressUri() }),
 
     ;
 

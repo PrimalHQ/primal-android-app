@@ -23,6 +23,7 @@ import com.google.accompanist.navigation.material.rememberBottomSheetNavigator
 import java.net.URLEncoder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.encodeToString
 import net.primal.android.attachments.gallery.MediaGalleryScreen
 import net.primal.android.attachments.gallery.MediaGalleryViewModel
 import net.primal.android.auth.create.CreateAccountViewModel
@@ -35,6 +36,7 @@ import net.primal.android.auth.welcome.WelcomeScreen
 import net.primal.android.core.compose.LockToOrientationPortrait
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.compose.findActivity
+import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.discuss.feed.FeedScreen
 import net.primal.android.discuss.feed.FeedViewModel
 import net.primal.android.discuss.list.FeedListScreen
@@ -64,8 +66,6 @@ import net.primal.android.profile.details.ProfileScreen
 import net.primal.android.profile.details.ProfileViewModel
 import net.primal.android.profile.edit.EditProfileScreen
 import net.primal.android.profile.edit.EditProfileViewModel
-import net.primal.android.scan.ScanViewModel
-import net.primal.android.scan.ui.ScanScreen
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
@@ -75,6 +75,12 @@ import net.primal.android.wallet.activation.WalletActivationScreen
 import net.primal.android.wallet.activation.WalletActivationViewModel
 import net.primal.android.wallet.dashboard.WalletDashboardScreen
 import net.primal.android.wallet.dashboard.WalletDashboardViewModel
+import net.primal.android.wallet.send.create.CreateTransactionScreen
+import net.primal.android.wallet.send.create.CreateTransactionViewModel
+import net.primal.android.wallet.send.create.DraftTransaction
+import net.primal.android.wallet.send.prepare.SendPaymentScreen
+import net.primal.android.wallet.send.prepare.SendPaymentViewModel
+import net.primal.android.wallet.send.prepare.tabs.SendPaymentTab
 
 private fun NavController.navigateToWelcome() =
     navigate(
@@ -177,9 +183,14 @@ private fun NavController.navigateToExploreFeed(query: String) = navigate(route 
 
 private fun NavController.navigateToWalletActivation() = navigate(route = "wallet/activation")
 
-private fun NavController.navigateToWalletScan() = navigate(route = "wallet/scan")
+private fun NavController.navigateToWalletSendPayment(tab: SendPaymentTab) =
+    navigate(route = "wallet/send?$SEND_PAYMENT_TAB=$tab")
 
-private fun NavController.navigateToWalletSend() = navigate(route = "wallet/send")
+private fun NavController.navigateToWalletCreateTransaction(draftTransaction: DraftTransaction) =
+    navigate(
+        route = "wallet/transaction/create?$DRAFT_TRANSACTION=" +
+            NostrJson.encodeToString(draftTransaction).asBase64Encoded(),
+    )
 
 private fun NavController.navigateToWalletReceive() = navigate(route = "wallet/receive")
 
@@ -401,13 +412,25 @@ fun PrimalAppNavigation() {
                 navController = navController,
             )
 
-            walletScan(
-                route = "wallet/scan",
+            walletSend(
+                route = "wallet/send?$SEND_PAYMENT_TAB={$SEND_PAYMENT_TAB}",
+                arguments = listOf(
+                    navArgument(SEND_PAYMENT_TAB) {
+                        type = NavType.StringType
+                        nullable = true
+                    },
+                ),
                 navController = navController,
             )
 
-            walletSend(
-                route = "wallet/send",
+            walletCreateTransaction(
+                route = "wallet/transaction/create?$DRAFT_TRANSACTION={$DRAFT_TRANSACTION}",
+                arguments = listOf(
+                    navArgument(DRAFT_TRANSACTION) {
+                        type = NavType.StringType
+                        nullable = true
+                    },
+                ),
                 navController = navController,
             )
 
@@ -789,8 +812,8 @@ private fun NavGraphBuilder.walletDashboard(
         onDrawerDestinationClick = onDrawerDestinationClick,
         onWalletActivateClick = { navController.navigateToWalletActivation() },
         onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
-        onSendClick = { navController.navigateToWalletSend() },
-        onScanClick = { navController.navigateToWalletScan() },
+        onSendClick = { navController.navigateToWalletSendPayment(tab = SendPaymentTab.Nostr) },
+        onScanClick = { navController.navigateToWalletSendPayment(tab = SendPaymentTab.Scan) },
         onReceiveClick = { navController.navigateToWalletReceive() },
     )
 }
@@ -806,21 +829,37 @@ private fun NavGraphBuilder.walletActivation(route: String, navController: NavCo
         )
     }
 
-private fun NavGraphBuilder.walletScan(route: String, navController: NavController) =
-    composable(route = route) {
-        val viewModel = hiltViewModel<ScanViewModel>()
-        LockToOrientationPortrait()
-        ScanScreen(
-            viewModel = viewModel,
-            onClose = { navController.navigateUp() },
-            onScanningCompleted = { navController.navigateUp() },
-        )
-    }
+private fun NavGraphBuilder.walletSend(
+    route: String,
+    arguments: List<NamedNavArgument>,
+    navController: NavController,
+) = composable(route = route, arguments = arguments) {
+    val viewModel = hiltViewModel<SendPaymentViewModel>(it)
 
-private fun NavGraphBuilder.walletSend(route: String, navController: NavController) =
-    composable(route = route) {
-        LockToOrientationPortrait()
-    }
+    LockToOrientationPortrait()
+    SendPaymentScreen(
+        viewModel = viewModel,
+        onClose = { navController.navigateUp() },
+        onCreateTransaction = { draft ->
+            navController.popBackStack()
+            navController.navigateToWalletCreateTransaction(draftTransaction = draft)
+        },
+    )
+}
+
+private fun NavGraphBuilder.walletCreateTransaction(
+    route: String,
+    arguments: List<NamedNavArgument>,
+    navController: NavController,
+) = composable(route = route, arguments = arguments) {
+    val viewModel = hiltViewModel<CreateTransactionViewModel>()
+
+    LockToOrientationPortrait()
+    CreateTransactionScreen(
+        viewModel = viewModel,
+        onClose = { navController.navigateUp() },
+    )
+}
 
 private fun NavGraphBuilder.walletReceive(route: String, navController: NavController) =
     composable(route = route) {

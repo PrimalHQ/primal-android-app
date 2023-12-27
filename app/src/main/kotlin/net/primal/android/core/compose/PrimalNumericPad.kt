@@ -1,0 +1,213 @@
+@file:Suppress("MagicNumber")
+
+package net.primal.android.core.compose
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import net.primal.android.core.compose.button.PrimalFilledButton
+import net.primal.android.core.compose.icons.PrimalIcons
+import net.primal.android.core.compose.icons.primaliconpack.Subtract
+import net.primal.android.theme.AppTheme
+import net.primal.android.theme.PrimalTheme
+
+private val PadButtonMargin = 16.dp
+
+@Composable
+fun PrimalNumericPad(
+    onNumberClick: (Int) -> Unit,
+    onDotClick: () -> Unit,
+    onBackspaceClick: () -> Unit,
+    onBackspaceLongClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier,
+    ) {
+        Row {
+            NumericPadNumbersRow(
+                numbers = listOf(1, 2, 3),
+                onClick = onNumberClick,
+            )
+        }
+
+        Spacer(modifier = Modifier.height(PadButtonMargin))
+
+        Row {
+            NumericPadNumbersRow(
+                numbers = listOf(4, 5, 6),
+                onClick = onNumberClick,
+            )
+        }
+
+        Spacer(modifier = Modifier.height(PadButtonMargin))
+
+        Row {
+            NumericPadNumbersRow(
+                numbers = listOf(7, 8, 9),
+                onClick = onNumberClick,
+            )
+        }
+
+        Spacer(modifier = Modifier.height(PadButtonMargin))
+
+        Row {
+            NumericPadLastRow(
+                onNumberClick = onNumberClick,
+                onDotClick = onDotClick,
+                onBackspaceClick = onBackspaceClick,
+                onBackspaceLongClick = onBackspaceLongClick,
+            )
+        }
+    }
+}
+
+@Composable
+fun NumericPadNumbersRow(
+    numbers: List<Int>,
+    onClick: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    require(numbers.size == 3)
+
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        numbers.forEachIndexed { index, number ->
+            NumericPadTextButton(
+                modifier = Modifier.weight(1f),
+                text = "$number",
+                onClick = { onClick(number) },
+            )
+
+            if (index < 2) {
+                Spacer(modifier = Modifier.width(PadButtonMargin))
+            }
+        }
+    }
+}
+
+@Composable
+fun NumericPadLastRow(
+    onNumberClick: (Int) -> Unit,
+    onDotClick: () -> Unit,
+    onBackspaceClick: () -> Unit,
+    onBackspaceLongClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        NumericPadTextButton(
+            modifier = Modifier.weight(1f),
+            text = ".",
+            onClick = onDotClick,
+        )
+
+        Spacer(modifier = Modifier.width(PadButtonMargin))
+
+        NumericPadTextButton(
+            modifier = Modifier.weight(1f),
+            text = "0",
+            onClick = { onNumberClick(0) },
+        )
+
+        Spacer(modifier = Modifier.width(PadButtonMargin))
+
+        NumericPadIconButton(
+            modifier = Modifier.weight(1f),
+            icon = PrimalIcons.Subtract,
+            onClick = onBackspaceClick,
+            onLongClick = onBackspaceLongClick,
+        )
+    }
+}
+
+@Composable
+fun NumericPadButton(
+    modifier: Modifier = Modifier,
+    onClick: (() -> Unit)?,
+    onLongClick: (() -> Unit)?,
+    content: @Composable RowScope.() -> Unit,
+) {
+    PrimalFilledButton(
+        modifier = modifier
+            .defaultMinSize(minWidth = 88.dp, minHeight = 56.dp),
+        containerColor = AppTheme.extraColorScheme.surfaceVariantAlt3,
+        contentColor = AppTheme.colorScheme.onSurface,
+        onClick = onClick,
+        onLongClick = onLongClick,
+        content = content,
+    )
+}
+
+@Composable
+fun NumericPadTextButton(
+    modifier: Modifier = Modifier,
+    text: String,
+    onClick: (() -> Unit)?,
+    onLongClick: (() -> Unit)? = null,
+) {
+    NumericPadButton(
+        modifier = modifier,
+        onClick = onClick,
+        onLongClick = onLongClick,
+    ) {
+        Text(
+            text = text,
+            style = AppTheme.typography.bodyLarge,
+            fontSize = 36.sp,
+        )
+    }
+}
+
+@Composable
+fun NumericPadIconButton(
+    modifier: Modifier = Modifier,
+    icon: ImageVector,
+    onClick: (() -> Unit)?,
+    onLongClick: (() -> Unit)? = null,
+) {
+    NumericPadButton(
+        modifier = modifier,
+        onClick = onClick,
+        onLongClick = onLongClick,
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+        )
+    }
+}
+
+@Preview
+@Composable
+fun PreviewPrimalNumericPad() {
+    PrimalTheme(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
+        Surface {
+            PrimalNumericPad(
+                modifier = Modifier,
+                onDotClick = {},
+                onBackspaceClick = {},
+                onBackspaceLongClick = {},
+                onNumberClick = {},
+            )
+        }
+    }
+}

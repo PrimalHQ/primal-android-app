@@ -41,9 +41,10 @@ fun WalletBalanceText(
 
         if (walletBalance != null) {
             Text(
-                modifier = Modifier.padding(bottom = (textSize.value / 7).dp),
+                modifier = Modifier.padding(bottom = (textSize.value / 6).dp),
                 text = " ${stringResource(id = R.string.wallet_sats_suffix)}",
                 textAlign = TextAlign.Center,
+                maxLines = 1,
                 style = AppTheme.typography.bodyMedium,
                 color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
             )

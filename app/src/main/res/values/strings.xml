@@ -344,6 +344,31 @@
     <string name="wallet_action_button_scan">Scan</string>
     <string name="wallet_action_button_receive">Receive</string>
 
+    <string name="wallet_send_payment_nostr_title">Nostr Recipient</string>
+    <string name="wallet_send_payment_scan_qr_code_title">Scan</string>
+    <string name="wallet_send_payment_keyboard_title">Keyboard</string>
+    <string name="wallet_send_payment_scan_image_title">Scan Image</string>
+    <string name="wallet_send_payment_text_description">Type or paste the recipient’s lightning address or an invoice.</string>
+    <string name="wallet_send_payment_text_paste_from_keyboard">Paste from clipboard</string>
+    <string name="wallet_send_payment_text_next">Next</string>
+
+    <string name="wallet_create_transaction_draft_title">Sending To</string>
+    <string name="wallet_create_transaction_send_button">Send</string>
+    <string name="wallet_create_transaction_cancel_numeric_pad_button">Cancel</string>
+    <string name="wallet_create_transaction_next_numeric_pad_button">Next</string>
+    <string name="wallet_create_transaction_note_hint">Add message</string>
+    <string name="wallet_create_transaction_note_hint_with_recipient">Add message for %1$s</string>
+    <string name="wallet_create_transaction_sending_title">Sending…</string>
+    <string name="wallet_create_transaction_sending_headline">Sending</string>
+    <string name="wallet_create_transaction_transaction_description_lite">%1$s sats</string>
+    <string name="wallet_create_transaction_transaction_description">%1$s sats to\n%2$s</string>
+    <string name="wallet_create_transaction_success_title">Success</string>
+    <string name="wallet_create_transaction_success_headline">Payment sent</string>
+    <string name="wallet_create_transaction_failed_title">Payment Failed</string>
+    <string name="wallet_create_transaction_failed_headline">Unable to send</string>
+    <string name="wallet_create_transaction_done_button">Done</string>
+    <string name="wallet_create_transaction_close_button">Close</string>
+
     <string name="qrcode_scanner_permission_title">Permission required</string>
     <string name="qrcode_scanner_permission_rationale">Primal needs access to your camera to scan QR codes.</string>
     <string name="qrcode_scanner_grant_permission_button">Allow access</string>

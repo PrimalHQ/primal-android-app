@@ -1,4 +1,4 @@
-package net.primal.android.scan.ui
+package net.primal.android.scanner
 
 import android.Manifest
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -19,12 +19,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import net.primal.android.R
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromCamera
 import net.primal.android.theme.AppTheme
+import net.primal.android.theme.PrimalTheme
+import net.primal.android.theme.domain.PrimalTheme
 
 @Composable
 fun MissingCameraPermissionContent(modifier: Modifier = Modifier, onPermissionChange: (Boolean) -> Unit) {
@@ -91,5 +94,13 @@ fun MissingCameraPermissionContent(modifier: Modifier = Modifier, onPermissionCh
                 launcher.launch(Manifest.permission.CAMERA)
             },
         )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun MissingCameraPermissionContentPreview() {
+    PrimalTheme(primalTheme = PrimalTheme.Sunset) {
+        MissingCameraPermissionContent(onPermissionChange = {})
     }
 }

@@ -1,9 +1,10 @@
 package net.primal.android.core.compose.button
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -38,11 +39,13 @@ import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun PrimalFilledButton(
-    onClick: (() -> Unit)?,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    onClick: (() -> Unit)? = null,
+    onLongClick: (() -> Unit)? = null,
     shape: Shape = AppTheme.shapes.extraLarge,
     containerColor: Color = AppTheme.colorScheme.primary,
     contentColor: Color = Color.White,
@@ -68,7 +71,11 @@ fun PrimalFilledButton(
             .semantics { role = Role.Button }
             .shadow(elevation = 0.dp, shape)
             .clip(shape)
-            .clickable(enabled = enabled && onClick != null, onClick = { onClick?.invoke() })
+            .combinedClickable(
+                enabled = enabled && onClick != null,
+                onClick = { onClick?.invoke() },
+                onLongClick = { onLongClick?.invoke() },
+            )
             .background(color = buttonContainerColor.value, shape = shape)
             .border(border = border, shape = shape),
         contentAlignment = Alignment.Center,

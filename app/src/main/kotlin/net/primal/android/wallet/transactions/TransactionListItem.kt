@@ -1,5 +1,6 @@
 package net.primal.android.wallet.transactions
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -49,6 +50,7 @@ fun TransactionListItem(
     onAvatarClick: (String) -> Unit,
 ) {
     ListItem(
+        modifier = Modifier.animateContentSize(),
         colors = ListItemDefaults.colors(
             containerColor = AppTheme.colorScheme.surfaceVariant,
         ),

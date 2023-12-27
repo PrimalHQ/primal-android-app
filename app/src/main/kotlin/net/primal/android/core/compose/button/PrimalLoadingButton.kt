@@ -28,8 +28,8 @@ import net.primal.android.theme.domain.PrimalTheme
 
 @Composable
 fun PrimalLoadingButton(
-    onClick: (() -> Unit)?,
     modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null,
     shape: Shape = AppTheme.shapes.extraLarge,
     text: String? = null,
     icon: ImageVector? = null,
@@ -41,6 +41,7 @@ fun PrimalLoadingButton(
     fontWeight: FontWeight = FontWeight.SemiBold,
     contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
     containerColor: Color = AppTheme.colorScheme.primary,
+    contentColor: Color = Color.White,
     disabledContainerColor: Color = AppTheme.extraColorScheme.surfaceVariantAlt1,
 ) {
     PrimalFilledButton(
@@ -49,6 +50,7 @@ fun PrimalLoadingButton(
         shape = shape,
         enabled = enabled,
         textStyle = AppTheme.typography.bodyLarge,
+        contentColor = contentColor,
         contentPadding = contentPadding,
         containerColor = containerColor,
         disabledContainerColor = disabledContainerColor,
