@@ -119,8 +119,9 @@ fun WalletDashboardScreen(
         snackbarHostState = snackbarHostState,
         errorMessageResolver = {
             when (it) {
-                is DashboardError.InAppPurchaseNoticeError -> it.message
-                    ?: context.getString(R.string.app_generic_error)
+                is DashboardError.InAppPurchaseNoticeError ->
+                    it.message
+                        ?: context.getString(R.string.app_generic_error)
 
                 is DashboardError.InAppPurchaseConfirmationFailed ->
                     context.getString(R.string.wallet_in_app_purchase_error_confirmation_failed)

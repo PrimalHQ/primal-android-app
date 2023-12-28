@@ -249,6 +249,8 @@ dependencies {
     implementation("com.android.billingclient:billing:$billingVersion")
     implementation("com.android.billingclient:billing-ktx:$billingVersion")
 
+    implementation("com.github.alexzhirkevich:custom-qr-generator:1.6.2")
+
     implementation(libs.androidx.camera.core)
     implementation(libs.androidx.camera.camera2)
     implementation(libs.androidx.camera.lifecycle)

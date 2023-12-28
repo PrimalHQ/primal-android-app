@@ -175,8 +175,8 @@ class SendPaymentViewModel @Inject constructor(
                 setState {
                     copy(
                         error = UiState.SendPaymentError.NostrUserWithoutLightningAddress(
-                            userDisplayName = profileData.authorNameUiFriendly()
-                        )
+                            userDisplayName = profileData.authorNameUiFriendly(),
+                        ),
                     )
                 }
             }

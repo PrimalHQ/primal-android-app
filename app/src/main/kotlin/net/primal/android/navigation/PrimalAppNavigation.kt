@@ -75,6 +75,8 @@ import net.primal.android.wallet.activation.WalletActivationScreen
 import net.primal.android.wallet.activation.WalletActivationViewModel
 import net.primal.android.wallet.dashboard.WalletDashboardScreen
 import net.primal.android.wallet.dashboard.WalletDashboardViewModel
+import net.primal.android.wallet.receive.ReceivePaymentScreen
+import net.primal.android.wallet.receive.ReceivePaymentViewModel
 import net.primal.android.wallet.send.create.CreateTransactionScreen
 import net.primal.android.wallet.send.create.CreateTransactionViewModel
 import net.primal.android.wallet.send.create.DraftTransaction
@@ -863,5 +865,11 @@ private fun NavGraphBuilder.walletCreateTransaction(
 
 private fun NavGraphBuilder.walletReceive(route: String, navController: NavController) =
     composable(route = route) {
+        val viewModel = hiltViewModel<ReceivePaymentViewModel>()
+
         LockToOrientationPortrait()
+        ReceivePaymentScreen(
+            viewModel = viewModel,
+            onClose = { navController.navigateUp() },
+        )
     }

@@ -93,19 +93,18 @@ fun SendPaymentScreen(
         error = if (activeTab != SendPaymentTab.Scan) state.error else null,
         snackbarHostState = snackbarHostState,
         errorMessageResolver = {
-           when (it) {
-               is SendPaymentContract.UiState.SendPaymentError.NostrUserWithoutLightningAddress ->
-                   context.getString(
-                       R.string.wallet_send_payment_error_nostr_user_without_lightning_address,
-                       it.userDisplayName,
-                   )
+            when (it) {
+                is SendPaymentContract.UiState.SendPaymentError.NostrUserWithoutLightningAddress ->
+                    context.getString(
+                        R.string.wallet_send_payment_error_nostr_user_without_lightning_address,
+                        it.userDisplayName,
+                    )
 
-               is SendPaymentContract.UiState.SendPaymentError.ParseException ->
-                   context.getString(
-                       R.string.wallet_send_payment_error_unable_to_parse_text
-                   )
-
-           }
+                is SendPaymentContract.UiState.SendPaymentError.ParseException ->
+                    context.getString(
+                        R.string.wallet_send_payment_error_unable_to_parse_text,
+                    )
+            }
         },
         onErrorDismiss = { eventPublisher(SendPaymentContract.UiEvent.DismissError) },
     )
