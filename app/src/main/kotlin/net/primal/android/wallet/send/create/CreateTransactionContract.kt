@@ -7,7 +7,6 @@ interface CreateTransactionContract {
     data class UiState(
         val transaction: DraftTransaction,
         val error: Throwable? = null,
-        val hasPositiveValue: Boolean = false,
         val profileAvatarCdnImage: CdnImage? = null,
         val profileDisplayName: String? = null,
         val profileLightningAddress: String? = null,

@@ -16,6 +16,7 @@ import kotlinx.coroutines.withContext
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.crypto.urlToLnUrlHrp
+import net.primal.android.navigation.asUrlDecoded
 import net.primal.android.navigation.sendPaymentTab
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.profile.repository.ProfileRepository
@@ -81,13 +82,15 @@ class SendPaymentViewModel @Inject constructor(
                         val response = withContext(dispatchers.io()) {
                             walletRepository.parseLnInvoice(userId = userId, lnbc = text)
                         }
+                        Timber.i(response.toString())
                         setEffect(
                             SideEffect.DraftTransactionReady(
                                 draft = DraftTransaction(
                                     targetUserId = response.userId,
                                     lnInvoice = text,
                                     lnInvoiceData = response.lnInvoiceData,
-                                    note = response.comment,
+                                    amountSats = (response.lnInvoiceData.amountMilliSats / 1000).toString(),
+                                    note = response.comment.asUrlDecoded(),
                                 ),
                             ),
                         )

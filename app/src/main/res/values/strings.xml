@@ -351,8 +351,8 @@
     <string name="wallet_send_payment_text_description">Type or paste the recipient’s lightning address or an invoice.</string>
     <string name="wallet_send_payment_text_paste_from_keyboard">Paste from clipboard</string>
     <string name="wallet_send_payment_text_next">Next</string>
-    <string name="wallet_send_payment_error_nostr_user_without_lightning_address">%1$s doesn’t have bitcoin lightning address on profile.</string>
-    <string name="wallet_send_payment_error_unable_to_parse_text">Please enter valid lightning address or an invoice.</string>
+    <string name="wallet_send_payment_error_nostr_user_without_lightning_address">Cannot make payment. %1$s doesn’t have a lightning address set.</string>
+    <string name="wallet_send_payment_error_unable_to_parse_text">Please enter a valid lightning address or an invoice.</string>
 
     <string name="wallet_create_transaction_draft_title">Sending To</string>
     <string name="wallet_create_transaction_send_button">Send</string>

@@ -57,6 +57,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import java.math.BigDecimal
 import java.text.NumberFormat
 import net.primal.android.LocalPrimalTheme
 import net.primal.android.R
@@ -179,8 +180,10 @@ private fun TransactionEditor(
     val keyboardController = LocalSoftwareKeyboardController.current
     val keyboardVisible by keyboardVisibilityAsState()
 
-    var noteText by remember { mutableStateOf("") }
-    var isNumericPadOn by remember { mutableStateOf(true) }
+    var noteText by remember { mutableStateOf(state.transaction.note ?: "") }
+    var isNumericPadOn by remember {
+        mutableStateOf(state.transaction.lnInvoiceData == null)
+    }
 
     val sendPayment = {
         eventPublisher(SendTransaction(note = noteText.ifEmpty { null }))
@@ -202,17 +205,17 @@ private fun TransactionEditor(
                 avatarSize = 88.dp,
             )
 
-            Text(
-                modifier = Modifier.padding(vertical = 4.dp),
-                text = state.profileDisplayName
-                    ?: state.transaction.targetLud16
-                    ?: state.transaction.lnInvoiceData?.description
-                    ?: "",
-                color = AppTheme.colorScheme.onSurface,
-                style = AppTheme.typography.bodyLarge,
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 20.sp,
-            )
+            val receiver = state.profileDisplayName ?: state.transaction.targetLud16 ?: ""
+            if (receiver.isNotEmpty()) {
+                Text(
+                    modifier = Modifier.padding(vertical = 4.dp),
+                    text = receiver,
+                    color = AppTheme.colorScheme.onSurface,
+                    style = AppTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 20.sp,
+                )
+            }
 
             if (state.profileLightningAddress != null) {
                 Text(
@@ -231,7 +234,11 @@ private fun TransactionEditor(
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null,
-                        onClick = { isNumericPadOn = true },
+                        onClick = {
+                            if (state.transaction.lnInvoiceData == null) {
+                                isNumericPadOn = true
+                            }
+                        },
                     ),
                 walletBalance = state.transaction.amountSats.toLong().toBtc().toBigDecimal(),
                 textSize = when (state.transaction.amountSats.toLong().toString().length) {
@@ -282,7 +289,7 @@ private fun TransactionEditor(
                                     .fillMaxWidth()
                                     .padding(horizontal = 32.dp),
                                 value = noteText,
-                                onValueChange = { noteText = it },
+                                onValueChange = { input -> noteText = input },
                                 colors = PrimalDefaults.outlinedTextFieldColors(),
                                 shape = AppTheme.shapes.extraLarge,
                                 maxLines = 3,
@@ -314,6 +321,14 @@ private fun TransactionEditor(
                                     },
                                 ),
                             )
+                        } else {
+                            Text(
+                                modifier = Modifier.padding(horizontal = 32.dp),
+                                text = noteText.ifEmpty { state.transaction.lnInvoiceData.description ?: "" },
+                                color = AppTheme.colorScheme.onSurface,
+                                style = AppTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.SemiBold,
+                            )
                         }
                     }
                 }
@@ -343,7 +358,7 @@ private fun TransactionEditor(
 
                 PrimalLoadingButton(
                     modifier = Modifier.weight(1f),
-                    enabled = state.hasPositiveValue,
+                    enabled = state.transaction.amountSats.toBigDecimal() > BigDecimal.ZERO,
                     text = if (isNumericPadOn) {
                         stringResource(id = R.string.wallet_create_transaction_next_numeric_pad_button)
                     } else {

@@ -87,7 +87,6 @@ class CreateTransactionViewModel @Inject constructor(
 
             copy(
                 transaction = transaction.copy(amountSats = newValue),
-                hasPositiveValue = newValue.toBigDecimal() > BigDecimal.ZERO,
             )
         }
     }
@@ -103,15 +102,17 @@ class CreateTransactionViewModel @Inject constructor(
     private fun String.inputDigit(digit: Int): String {
         val oldValue = this
         return if (oldValue.length < 8) {
-            if (oldValue.toBigDecimal() == BigDecimal.ZERO) {
-                "$digit"
-            } else {
+            if (oldValue.isPositive()) {
                 "$oldValue$digit"
+            } else {
+                "$digit"
             }
         } else {
             oldValue
         }
     }
+
+    private fun String.isPositive() = toBigDecimal() > BigDecimal.ZERO
 
     private fun sendTransaction(note: String?) =
         viewModelScope.launch {
