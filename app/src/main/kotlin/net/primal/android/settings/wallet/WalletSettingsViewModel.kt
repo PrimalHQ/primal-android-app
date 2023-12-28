@@ -84,6 +84,7 @@ class WalletSettingsViewModel @Inject constructor(
                     copy(
                         wallet = nostrWalletConnect,
                         userLightningAddress = lightningAddress,
+                        walletPreference = WalletPreference.NostrWalletConnect,
                     )
                 }
             } catch (error: NWCParseException) {
