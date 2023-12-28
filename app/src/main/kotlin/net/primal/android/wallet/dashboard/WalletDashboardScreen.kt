@@ -13,10 +13,8 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -43,6 +41,7 @@ import net.primal.android.R
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.PrimalTopLevelDestination
+import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
@@ -113,10 +112,20 @@ fun WalletDashboardScreen(
         )
     }
 
+    val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
-    ErrorHandler(
+    SnackbarErrorHandler(
         error = state.error,
         snackbarHostState = snackbarHostState,
+        errorMessageResolver = {
+            when (it) {
+                is DashboardError.InAppPurchaseNoticeError -> it.message
+                    ?: context.getString(R.string.app_generic_error)
+
+                is DashboardError.InAppPurchaseConfirmationFailed ->
+                    context.getString(R.string.wallet_in_app_purchase_error_confirmation_failed)
+            }
+        },
         onErrorDismiss = { eventPublisher(UiEvent.DismissError) },
     )
 
@@ -179,6 +188,7 @@ fun WalletDashboardScreen(
                                     }
                                 },
                             )
+
                             false -> WalletDashboardLite(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -259,35 +269,4 @@ fun WalletDashboardScreen(
             SnackbarHost(hostState = snackbarHostState)
         },
     )
-}
-
-@Composable
-private fun ErrorHandler(
-    error: DashboardError?,
-    snackbarHostState: SnackbarHostState,
-    onErrorDismiss: (() -> Unit)? = null,
-    onActionPerformed: (() -> Unit)? = null,
-) {
-    val context = LocalContext.current
-    LaunchedEffect(error ?: true) {
-        val errorMessage = when (error) {
-            is DashboardError.InAppPurchaseNoticeError -> error.message ?: context.getString(R.string.app_generic_error)
-
-            is DashboardError.InAppPurchaseConfirmationFailed ->
-                context.getString(R.string.wallet_in_app_purchase_error_confirmation_failed)
-
-            null -> return@LaunchedEffect
-        }
-
-        val result = snackbarHostState.showSnackbar(
-            message = errorMessage,
-            duration = SnackbarDuration.Indefinite,
-            withDismissAction = true,
-        )
-
-        when (result) {
-            SnackbarResult.Dismissed -> onErrorDismiss?.invoke()
-            SnackbarResult.ActionPerformed -> onActionPerformed?.invoke()
-        }
-    }
 }

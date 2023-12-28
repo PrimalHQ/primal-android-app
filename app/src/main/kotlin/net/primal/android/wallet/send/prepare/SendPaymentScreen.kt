@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -26,11 +28,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import net.primal.android.R
 import net.primal.android.core.compose.PrimalCircleButton
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
+import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
@@ -81,6 +86,29 @@ fun SendPaymentScreen(
         closingScreen = true
         onClose()
     }
+
+    val context = LocalContext.current
+    val snackbarHostState = remember { SnackbarHostState() }
+    SnackbarErrorHandler(
+        error = if (activeTab != SendPaymentTab.Scan) state.error else null,
+        snackbarHostState = snackbarHostState,
+        errorMessageResolver = {
+           when (it) {
+               is SendPaymentContract.UiState.SendPaymentError.NostrUserWithoutLightningAddress ->
+                   context.getString(
+                       R.string.wallet_send_payment_error_nostr_user_without_lightning_address,
+                       it.userDisplayName,
+                   )
+
+               is SendPaymentContract.UiState.SendPaymentError.ParseException ->
+                   context.getString(
+                       R.string.wallet_send_payment_error_unable_to_parse_text
+                   )
+
+           }
+        },
+        onErrorDismiss = { eventPublisher(SendPaymentContract.UiEvent.DismissError) },
+    )
 
     Scaffold(
         modifier = Modifier.imePadding(),
@@ -148,6 +176,9 @@ fun SendPaymentScreen(
                     },
                 )
             }
+        },
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
         },
     )
 }

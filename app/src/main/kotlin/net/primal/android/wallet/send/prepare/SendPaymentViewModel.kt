@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
+import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.crypto.urlToLnUrlHrp
 import net.primal.android.navigation.sendPaymentTab
 import net.primal.android.networking.sockets.errors.WssException
@@ -65,6 +66,7 @@ class SendPaymentViewModel @Inject constructor(
                 when (it) {
                     is UiEvent.ProcessTextData -> processTextData(text = it.text)
                     is UiEvent.ProcessProfileData -> processProfileData(profileId = it.profileId)
+                    UiEvent.DismissError -> setState { copy(error = null) }
                 }
             }
         }
@@ -135,7 +137,7 @@ class SendPaymentViewModel @Inject constructor(
                 }
             } catch (error: WssException) {
                 Timber.e(error)
-                // TODO Handle parsing error
+                setState { copy(error = UiState.SendPaymentError.ParseException(error)) }
             } finally {
                 setState { copy(parsing = false) }
             }
@@ -167,7 +169,13 @@ class SendPaymentViewModel @Inject constructor(
                     ),
                 )
             } else {
-                // TODO Handle invalid lud16 address
+                setState {
+                    copy(
+                        error = UiState.SendPaymentError.NostrUserWithoutLightningAddress(
+                            userDisplayName = profileData.authorNameUiFriendly()
+                        )
+                    )
+                }
             }
         }
 }
