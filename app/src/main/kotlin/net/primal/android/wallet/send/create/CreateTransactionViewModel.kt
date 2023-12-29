@@ -128,8 +128,8 @@ class CreateTransactionViewModel @Inject constructor(
                         targetLnUrl = draftTransaction.targetLnUrl,
                         targetPubKey = draftTransaction.targetUserId,
                         lnInvoice = draftTransaction.lnInvoice,
-                        amountBtc = draftTransaction.amountSats.toULong().toBtc().formatAsString(),
-                        noteRecipient = note,
+                        amountBtc = if (draftTransaction.lnInvoice == null) draftTransaction.amountSats.toULong().toBtc().formatAsString() else null,
+                        noteRecipient = if (draftTransaction.lnInvoice == null) note else null,
                         noteSelf = note,
                     ),
                 )

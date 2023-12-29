@@ -82,7 +82,6 @@ class SendPaymentViewModel @Inject constructor(
                         val response = withContext(dispatchers.io()) {
                             walletRepository.parseLnInvoice(userId = userId, lnbc = text)
                         }
-                        Timber.i(response.toString())
                         setEffect(
                             SideEffect.DraftTransactionReady(
                                 draft = DraftTransaction(
