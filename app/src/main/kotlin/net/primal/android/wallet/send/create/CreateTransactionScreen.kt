@@ -397,7 +397,7 @@ fun TransactionSending(amountInSats: Long, receiver: String?) {
                 )
             } else {
                 stringResource(
-                    id = R.string.wallet_create_transaction_transaction_description,
+                    id = R.string.wallet_create_transaction_transaction_description_lite,
                     numberFormat.format(amountInSats),
                 )
             },
