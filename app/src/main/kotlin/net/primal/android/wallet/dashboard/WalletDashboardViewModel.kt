@@ -89,7 +89,7 @@ class WalletDashboardViewModel @Inject constructor(
                     val satsBalance = btcBalance?.toSats()
                     copy(
                         walletBalance = btcBalance,
-                        lowBalance = satsBalance != null && satsBalance.toLong() in (0..1000),
+                        lowBalance = satsBalance != null && satsBalance.toLong() == 0L,
                     )
                 }
             }
