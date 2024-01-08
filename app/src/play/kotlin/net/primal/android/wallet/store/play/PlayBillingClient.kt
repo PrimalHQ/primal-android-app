@@ -25,15 +25,16 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeout
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
+import net.primal.android.wallet.store.PrimalBillingClient
+import net.primal.android.wallet.store.domain.InAppProduct
 import net.primal.android.wallet.store.domain.SatsPurchase
 import net.primal.android.wallet.store.domain.SatsPurchaseQuote
 import timber.log.Timber
 
-@Singleton
-class BillingClientHandler @Inject constructor(
+class PlayBillingClient @Inject constructor(
     @ApplicationContext appContext: Context,
     dispatchers: CoroutineDispatcherProvider,
-) : PurchasesUpdatedListener {
+) : PrimalBillingClient, PurchasesUpdatedListener {
 
     private val scope = CoroutineScope(dispatchers.io())
 
@@ -50,10 +51,17 @@ class BillingClientHandler @Inject constructor(
     private var purchaseQuote: SatsPurchaseQuote? = null
 
     private val _purchases = MutableSharedFlow<SatsPurchase>()
-    val purchases = _purchases.asSharedFlow()
+    override val purchases = _purchases.asSharedFlow()
 
-    var minSatsInAppProduct: InAppProduct? = null
-        private set
+    private var _minSatsInAppProduct: PlayInAppProduct? = null
+    override val minSatsInAppProduct: InAppProduct?
+        get() = _minSatsInAppProduct?.let {
+            InAppProduct(
+                productId = it.productId,
+                priceCurrencyCode = it.priceCurrencyCode,
+                priceAmountMicros = it.priceAmountMicros,
+            )
+        }
 
     init {
         scope.launch { ensureBillingClientInitialized() }
@@ -65,7 +73,7 @@ class BillingClientHandler @Inject constructor(
             connected = connectSuccess
             if (!connectSuccess) return false
 
-            if (minSatsInAppProduct == null) {
+            if (_minSatsInAppProduct == null) {
                 initializeProducts()
             }
             return true
@@ -106,7 +114,7 @@ class BillingClientHandler @Inject constructor(
         val productDetails = response.productDetailsList?.firstOrNull()
         val offerDetails = productDetails?.oneTimePurchaseOfferDetails
         if (productDetails != null && offerDetails != null) {
-            minSatsInAppProduct = InAppProduct(
+            _minSatsInAppProduct = PlayInAppProduct(
                 productId = productDetails.productId,
                 title = productDetails.title,
                 name = productDetails.name,
@@ -119,11 +127,11 @@ class BillingClientHandler @Inject constructor(
     }
 
     @Throws(BillingNotAvailable::class, ProductNotAvailable::class)
-    suspend fun launchMinSatsBillingFlow(quote: SatsPurchaseQuote, activity: Activity) {
+    override suspend fun launchMinSatsBillingFlow(quote: SatsPurchaseQuote, activity: Activity) {
         val initialized = ensureBillingClientInitialized()
         if (!initialized) throw BillingNotAvailable()
 
-        val minSatsProduct = minSatsInAppProduct ?: throw ProductNotAvailable()
+        val minSatsProduct = _minSatsInAppProduct ?: throw ProductNotAvailable()
         val minSatsParamsList = listOf(
             BillingFlowParams.ProductDetailsParams.newBuilder()
                 .setProductDetails(minSatsProduct.googlePlayProductDetails)
@@ -158,7 +166,7 @@ class BillingClientHandler @Inject constructor(
     }
 
     companion object {
-        const val MIN_SATS_PRODUCT_ID = "minsats"
+        private const val MIN_SATS_PRODUCT_ID = "minsats"
         private val minSatsQueryProductDetailsParams = QueryProductDetailsParams.newBuilder()
             .setProductList(
                 listOf(

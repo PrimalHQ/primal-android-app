@@ -19,7 +19,6 @@ import net.primal.android.wallet.api.model.ParsedLnUrlResponse
 import net.primal.android.wallet.api.model.WithdrawRequestBody
 import net.primal.android.wallet.db.WalletTransaction
 import net.primal.android.wallet.domain.WalletKycLevel
-import net.primal.android.wallet.store.play.BillingClientHandler
 
 @OptIn(ExperimentalPagingApi::class)
 class WalletRepository @Inject constructor(
@@ -68,12 +67,13 @@ class WalletRepository @Inject constructor(
     suspend fun getInAppPurchaseMinSatsQuote(
         userId: String,
         region: String,
+        productId: String,
         previousQuoteId: String?,
     ): InAppPurchaseQuoteResponse {
         return withContext(dispatcherProvider.io()) {
             walletApi.getInAppPurchaseQuote(
                 userId = userId,
-                productId = BillingClientHandler.MIN_SATS_PRODUCT_ID,
+                productId = productId,
                 region = region,
                 previousQuoteId = previousQuoteId,
             )

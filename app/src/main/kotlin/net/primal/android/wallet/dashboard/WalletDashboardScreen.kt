@@ -47,6 +47,7 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 import net.primal.android.core.compose.icons.primaliconpack.WalletPurchaseSats
 import net.primal.android.core.compose.isEmpty
+import net.primal.android.core.utils.isPlayBuild
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.PrimalDrawerScaffold
 import net.primal.android.theme.AppTheme
@@ -159,12 +160,14 @@ fun WalletDashboardScreen(
                     uiScope.launch { drawerState.open() }
                 },
                 actions = {
-                    AppBarIcon(
-                        icon = PrimalIcons.WalletPurchaseSats,
-                        onClick = {
-                            inAppPurchaseVisible = true
-                        },
-                    )
+                    if (isPlayBuild()) {
+                        AppBarIcon(
+                            icon = PrimalIcons.WalletPurchaseSats,
+                            onClick = {
+                                inAppPurchaseVisible = true
+                            },
+                        )
+                    }
                 },
                 scrollBehavior = scrollBehaviour,
                 showDivider = !LocalPrimalTheme.current.isDarkTheme,
@@ -222,7 +225,7 @@ fun WalletDashboardScreen(
                             .padding(bottom = 32.dp)
                             .navigationBarsPadding(),
                         message = stringResource(id = R.string.wallet_dashboard_no_transactions_hint),
-                        actionLabel = stringResource(id = R.string.wallet_dashboard_buy_sats_button),
+                        actionLabel = if (isPlayBuild()) stringResource(id = R.string.wallet_dashboard_buy_sats_button) else null,
                         onActionClick = {
                             inAppPurchaseVisible = true
                         },
@@ -237,7 +240,7 @@ fun WalletDashboardScreen(
                         listState = listState,
                         onProfileClick = onProfileClick,
                         header = {
-                            if (state.lowBalance && pagingItems.itemCount > 0) {
+                            if (state.lowBalance && pagingItems.itemCount > 0 && isPlayBuild()) {
                                 WalletCallToActionBox(
                                     modifier = Modifier
                                         .fillMaxSize()

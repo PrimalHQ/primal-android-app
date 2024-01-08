@@ -15,24 +15,24 @@ import kotlinx.coroutines.launch
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.repository.WalletRepository
+import net.primal.android.wallet.store.PrimalBillingClient
+import net.primal.android.wallet.store.domain.InAppPurchaseException
 import net.primal.android.wallet.store.domain.SatsPurchaseQuote
 import net.primal.android.wallet.store.inapp.InAppPurchaseBuyContract.SideEffect
 import net.primal.android.wallet.store.inapp.InAppPurchaseBuyContract.UiEvent
 import net.primal.android.wallet.store.inapp.InAppPurchaseBuyContract.UiState
-import net.primal.android.wallet.store.play.BillingClientHandler
-import net.primal.android.wallet.store.play.InAppPurchaseException
 import timber.log.Timber
 
 @HiltViewModel
 class InAppPurchaseBuyViewModel @Inject constructor(
-    private val billingClientHandler: BillingClientHandler,
+    private val primalBillingClient: PrimalBillingClient,
     private val activeAccountStore: ActiveAccountStore,
     private val walletRepository: WalletRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(
         UiState(
-            minSatsInAppProduct = billingClientHandler.minSatsInAppProduct,
+            minSatsInAppProduct = primalBillingClient.minSatsInAppProduct,
         ),
     )
     val state = _state.asStateFlow()
@@ -72,6 +72,7 @@ class InAppPurchaseBuyViewModel @Inject constructor(
                     val response = walletRepository.getInAppPurchaseMinSatsQuote(
                         userId = activeAccountStore.activeUserId(),
                         region = localCurrency.currencyCode,
+                        productId = inAppProduct.productId,
                         previousQuoteId = previousQuote?.quoteId,
                     )
                     setState {
@@ -96,7 +97,7 @@ class InAppPurchaseBuyViewModel @Inject constructor(
 
     private fun subscribeToPurchases() =
         viewModelScope.launch {
-            billingClientHandler.purchases.collect { purchase ->
+            primalBillingClient.purchases.collect { purchase ->
                 if (purchase.quote.quoteId == _state.value.purchasingQuote?.quoteId) {
                     setEffect(SideEffect.PurchaseConfirmed)
                 }
@@ -108,7 +109,7 @@ class InAppPurchaseBuyViewModel @Inject constructor(
             try {
                 _state.value.quote?.let {
                     setState { copy(purchasingQuote = it) }
-                    billingClientHandler.launchMinSatsBillingFlow(quote = it, activity = event.activity)
+                    primalBillingClient.launchMinSatsBillingFlow(quote = it, activity = event.activity)
                 }
             } catch (error: InAppPurchaseException) {
                 Timber.e(error)

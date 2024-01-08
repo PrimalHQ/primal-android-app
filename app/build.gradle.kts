@@ -123,6 +123,20 @@ android {
         }
     }
 
+    flavorDimensions.addAll(
+        listOf("distribution")
+    )
+
+    productFlavors {
+        create("play") {
+            dimension = "distribution"
+        }
+
+        create("aosp") {
+            dimension = "distribution"
+        }
+    }
+
     sourceSets {
         named("releasePlayStore") {
             java.srcDirs("src/release/kotlin")
@@ -245,11 +259,10 @@ dependencies {
 
     implementation(libs.url.detector)
 
-    val billingVersion = "6.1.0"
-    implementation("com.android.billingclient:billing:$billingVersion")
-    implementation("com.android.billingclient:billing-ktx:$billingVersion")
+    "playImplementation"(libs.play.billing)
+    "playImplementation"(libs.play.billing.ktx)
 
-    implementation("com.github.alexzhirkevich:custom-qr-generator:1.6.2")
+    implementation(libs.qrcode.generator)
 
     implementation(libs.androidx.camera.core)
     implementation(libs.androidx.camera.camera2)

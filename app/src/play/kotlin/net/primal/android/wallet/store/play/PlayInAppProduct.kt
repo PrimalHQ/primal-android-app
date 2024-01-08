@@ -2,7 +2,7 @@ package net.primal.android.wallet.store.play
 
 import com.android.billingclient.api.ProductDetails
 
-data class InAppProduct(
+data class PlayInAppProduct(
     val productId: String,
     val title: String,
     val name: String,

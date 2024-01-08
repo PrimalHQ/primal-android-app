@@ -1,6 +1,6 @@
 package net.primal.android.wallet.store.play
 
-open class InAppPurchaseException : RuntimeException()
+import net.primal.android.wallet.store.domain.InAppPurchaseException
 
 class ProductNotAvailable : InAppPurchaseException()
 

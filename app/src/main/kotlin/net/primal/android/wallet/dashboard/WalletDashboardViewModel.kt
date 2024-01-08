@@ -23,8 +23,8 @@ import net.primal.android.wallet.dashboard.WalletDashboardContract.UiEvent
 import net.primal.android.wallet.dashboard.WalletDashboardContract.UiState
 import net.primal.android.wallet.db.WalletTransaction
 import net.primal.android.wallet.repository.WalletRepository
+import net.primal.android.wallet.store.PrimalBillingClient
 import net.primal.android.wallet.store.domain.SatsPurchase
-import net.primal.android.wallet.store.play.BillingClientHandler
 import net.primal.android.wallet.transactions.TransactionDataUi
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
 import timber.log.Timber
@@ -34,7 +34,7 @@ class WalletDashboardViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val walletRepository: WalletRepository,
     private val subscriptionsManager: SubscriptionsManager,
-    private val billingClientHandler: BillingClientHandler,
+    private val primalBillingClient: PrimalBillingClient,
 ) : ViewModel() {
 
     private val activeUserId = activeAccountStore.activeUserId()
@@ -97,7 +97,7 @@ class WalletDashboardViewModel @Inject constructor(
 
     private fun subscribeToPurchases() =
         viewModelScope.launch {
-            billingClientHandler.purchases.collect { purchase ->
+            primalBillingClient.purchases.collect { purchase ->
                 confirmPurchase(purchase = purchase)
             }
         }

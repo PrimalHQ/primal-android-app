@@ -1,8 +1,8 @@
 package net.primal.android.wallet.store.inapp
 
 import android.app.Activity
+import net.primal.android.wallet.store.domain.InAppProduct
 import net.primal.android.wallet.store.domain.SatsPurchaseQuote
-import net.primal.android.wallet.store.play.InAppProduct
 
 interface InAppPurchaseBuyContract {
     data class UiState(
