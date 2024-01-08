@@ -82,4 +82,16 @@ class UriUtilsTest {
         "https://m.youtube.com/watch?v=SAN5CKbZnD0".extractTLD() shouldBe "youtube.com"
     }
 
+    @Test
+    fun detectMimeTypeDoesNotBreakWithQueryInUrl() {
+        val urlLink = "https://image.nostr.build/23aa118ad8eee6152dc080ec9084d29fc437880b7591114a2c206665282189bf.jpg" +
+            "#m=image%2Fjpeg&dim=720x1280"
+        urlLink.detectMimeType() shouldBe "image/jpeg"
+    }
+
+    @Test
+    fun detectMimeTypeGracefullyIgnoresTLDs() {
+        val urlLink = "https://unleashed.chat"
+        urlLink.detectMimeType() shouldBe null
+    }
 }

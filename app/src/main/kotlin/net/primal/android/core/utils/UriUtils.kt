@@ -3,6 +3,8 @@ package net.primal.android.core.utils
 import com.linkedin.urls.Url
 import com.linkedin.urls.detection.UrlDetector
 import com.linkedin.urls.detection.UrlDetectorOptions
+import java.net.MalformedURLException
+import java.net.URL
 import net.primal.android.nostr.ext.parseNostrUris
 
 fun String.parseUris(): List<String> {
@@ -77,7 +79,12 @@ fun String?.detectMimeType(): String? {
     return when {
         this == null -> null
         else -> {
-            val extension = substringAfterLast(".", "")
+            val ref = try {
+                URL(this).file
+            } catch (error: MalformedURLException) {
+                this
+            }
+            val extension = ref.substringAfterLast(".", "")
             extensionToMimeType[extension.lowercase()]
         }
     }
