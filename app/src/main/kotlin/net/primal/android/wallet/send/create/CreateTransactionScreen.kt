@@ -446,6 +446,7 @@ fun TransactionSuccess(
         PrimalTopAppBar(
             modifier = if (isClosing) Modifier.alpha(0.0f) else Modifier,
             title = stringResource(id = R.string.wallet_create_transaction_success_title),
+            textColor = walletSuccessContentColor,
             navigationIcon = PrimalIcons.ArrowBack,
             showDivider = false,
             onNavigationIconClick = { closingSequence() },

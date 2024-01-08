@@ -43,6 +43,7 @@ fun PrimalTopAppBar(
     onNavigationIconClick: () -> Unit,
     modifier: Modifier = Modifier,
     subtitle: String? = null,
+    textColor: Color = LocalContentColor.current,
     navigationIcon: ImageVector? = null,
     navigationIconTintColor: Color = LocalContentColor.current,
     autoCloseKeyboardOnNavigationIconClick: Boolean = true,
@@ -106,6 +107,7 @@ fun PrimalTopAppBar(
                 ) {
                     Text(
                         text = title,
+                        color = textColor,
                     )
                     if (subtitle?.isNotBlank() == true) {
                         Text(
