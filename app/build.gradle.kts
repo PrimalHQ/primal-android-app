@@ -124,7 +124,7 @@ android {
     }
 
     flavorDimensions.addAll(
-        listOf("distribution")
+        listOf("distribution"),
     )
 
     productFlavors {

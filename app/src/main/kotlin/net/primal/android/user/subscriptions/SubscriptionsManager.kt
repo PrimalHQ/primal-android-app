@@ -33,6 +33,7 @@ import net.primal.android.notifications.domain.NotificationsSummary
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
 import net.primal.android.user.domain.Badges
+import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.api.model.BalanceRequestBody
 import net.primal.android.wallet.api.model.WalletRequestBody
 import net.primal.android.wallet.domain.SubWallet
@@ -41,6 +42,7 @@ import net.primal.android.wallet.domain.SubWallet
 class SubscriptionsManager @Inject constructor(
     dispatcherProvider: CoroutineDispatcherProvider,
     private val activeAccountStore: ActiveAccountStore,
+    private val userRepository: UserRepository,
     private val nostrNotary: NostrNotary,
     @PrimalCacheApiClient private val cacheApiClient: PrimalApiClient,
     @PrimalWalletApiClient private val walletApiClient: PrimalApiClient,
@@ -180,8 +182,6 @@ class SubscriptionsManager @Inject constructor(
             ),
             transformer = { this.primalEvent?.asWalletBalanceInBtcOrNull() },
         ) {
-            emitBadgesUpdate { currentState ->
-                currentState.copy(walletBalanceInBtc = it)
-            }
+            userRepository.updatePrimalWalletBalance(userId = userId, balanceInBtc = it)
         }
 }

@@ -225,7 +225,11 @@ fun WalletDashboardScreen(
                             .padding(bottom = 32.dp)
                             .navigationBarsPadding(),
                         message = stringResource(id = R.string.wallet_dashboard_no_transactions_hint),
-                        actionLabel = if (isGoogleBuild()) stringResource(id = R.string.wallet_dashboard_buy_sats_button) else null,
+                        actionLabel = if (isGoogleBuild()) {
+                            stringResource(id = R.string.wallet_dashboard_buy_sats_button)
+                        } else {
+                            null
+                        },
                         onActionClick = {
                             inAppPurchaseVisible = true
                         },

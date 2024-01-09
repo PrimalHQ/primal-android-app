@@ -18,7 +18,6 @@ import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.networking.sockets.errors.NostrNoticeException
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.android.user.subscriptions.SubscriptionsManager
 import net.primal.android.wallet.dashboard.WalletDashboardContract.UiEvent
 import net.primal.android.wallet.dashboard.WalletDashboardContract.UiState
 import net.primal.android.wallet.db.WalletTransaction
@@ -33,7 +32,6 @@ import timber.log.Timber
 class WalletDashboardViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val walletRepository: WalletRepository,
-    private val subscriptionsManager: SubscriptionsManager,
     private val primalBillingClient: PrimalBillingClient,
 ) : ViewModel() {
 
@@ -55,7 +53,6 @@ class WalletDashboardViewModel @Inject constructor(
     init {
         subscribeToEvents()
         subscribeToActiveAccount()
-        subscribeToWalletBalance()
         subscribeToPurchases()
     }
 
@@ -76,20 +73,8 @@ class WalletDashboardViewModel @Inject constructor(
                         activeAccountAvatarCdnImage = it.avatarCdnImage,
                         primalWallet = it.primalWallet,
                         walletPreference = it.walletPreference,
-                    )
-                }
-            }
-        }
-
-    private fun subscribeToWalletBalance() =
-        viewModelScope.launch {
-            subscriptionsManager.badges.collect {
-                setState {
-                    val btcBalance = it.walletBalanceInBtc?.toBigDecimal()
-                    val satsBalance = btcBalance?.toSats()
-                    copy(
-                        walletBalance = btcBalance,
-                        lowBalance = satsBalance != null && satsBalance.toLong() == 0L,
+                        walletBalance = it.primalWalletBalanceInBtc?.toBigDecimal(),
+                        lowBalance = it.primalWalletBalanceInBtc?.toSats()?.toLong() == 0L,
                     )
                 }
             }

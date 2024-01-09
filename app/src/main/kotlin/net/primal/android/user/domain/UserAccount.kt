@@ -18,6 +18,7 @@ data class UserAccount(
     val notesCount: Int? = null,
     val nostrWallet: NostrWalletConnect? = null,
     val primalWallet: PrimalWallet? = null,
+    val primalWalletBalanceInBtc: String? = null,
     val walletPreference: WalletPreference = WalletPreference.Undefined,
     val appSettings: ContentAppSettings? = null,
     val relays: List<Relay> = emptyList(),

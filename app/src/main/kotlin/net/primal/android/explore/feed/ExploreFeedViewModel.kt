@@ -34,7 +34,6 @@ import net.primal.android.settings.muted.repository.MutedUserRepository
 import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
-import net.primal.android.user.subscriptions.SubscriptionsManager
 import net.primal.android.wallet.domain.ZapTarget
 import net.primal.android.wallet.ext.hasWallet
 import net.primal.android.wallet.zaps.InvalidZapRequestException
@@ -51,7 +50,6 @@ class ExploreFeedViewModel @Inject constructor(
     private val zapHandler: ZapHandler,
     private val settingsRepository: SettingsRepository,
     private val mutedUserRepository: MutedUserRepository,
-    private val subscriptionsManager: SubscriptionsManager,
 ) : ViewModel() {
 
     private val exploreQuery = "search;\"${savedStateHandle.searchQueryOrThrow}\""
@@ -78,7 +76,6 @@ class ExploreFeedViewModel @Inject constructor(
         observeContainsFeed()
         observeEvents()
         observeActiveAccount()
-        subscribeToBadgesUpdates()
     }
 
     private fun observeContainsFeed() =
@@ -117,23 +114,11 @@ class ExploreFeedViewModel @Inject constructor(
                                 defaultZapAmount = it.data.appSettings?.defaultZapAmount
                                     ?: this.zappingState.defaultZapAmount,
                                 zapOptions = it.data.appSettings?.zapOptions ?: this.zappingState.zapOptions,
+                                walletBalanceInBtc = it.data.primalWalletBalanceInBtc,
                             ),
                         )
                     }
                 }
-        }
-
-    private fun subscribeToBadgesUpdates() =
-        viewModelScope.launch {
-            subscriptionsManager.badges.collect {
-                setState {
-                    copy(
-                        zappingState = this.zappingState.copy(
-                            walletBalanceInBtc = it.walletBalanceInBtc,
-                        ),
-                    )
-                }
-            }
         }
 
     private suspend fun addToMyFeeds() {

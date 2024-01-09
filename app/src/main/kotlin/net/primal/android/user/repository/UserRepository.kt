@@ -141,4 +141,10 @@ class UserRepository @Inject constructor(
             copy(walletPreference = walletPreference)
         }
     }
+
+    suspend fun updatePrimalWalletBalance(userId: String, balanceInBtc: String) {
+        accountsStore.getAndUpdateAccount(userId = userId) {
+            copy(primalWalletBalanceInBtc = balanceInBtc)
+        }
+    }
 }

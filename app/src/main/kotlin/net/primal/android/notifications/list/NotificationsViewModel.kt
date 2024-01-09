@@ -103,6 +103,7 @@ class NotificationsViewModel @Inject constructor(
                             walletPreference = it.walletPreference,
                             defaultZapAmount = it.appSettings?.defaultZapAmount ?: this.zappingState.defaultZapAmount,
                             zapOptions = it.appSettings?.zapOptions ?: this.zappingState.zapOptions,
+                            walletBalanceInBtc = it.primalWalletBalanceInBtc,
                         ),
                     )
                 }
@@ -113,12 +114,7 @@ class NotificationsViewModel @Inject constructor(
         viewModelScope.launch {
             subscriptionsManager.badges.collect {
                 setState {
-                    copy(
-                        badges = it,
-                        zappingState = this.zappingState.copy(
-                            walletBalanceInBtc = it.walletBalanceInBtc,
-                        ),
-                    )
+                    copy(badges = it)
                 }
             }
         }
