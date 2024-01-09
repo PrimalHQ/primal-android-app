@@ -6,6 +6,9 @@ on:
       - '*'
   workflow_dispatch:
 
+env:
+  ANDROID_PUBLISHER_CREDENTIALS: ${{ secrets.ANDROID_PUBLISHER_CREDENTIALS }}
+
 jobs:
   build:
     name: Build, sign and upload artifacts
@@ -26,8 +29,6 @@ jobs:
         openssl base64 -d -out config.properties <<< "${{ secrets.CONFIG_PROPERTIES }}"
         openssl base64 -d -out app/primal_alternative_android.jks <<< "${{ secrets.CERT_ALTERNATIVE }}"
         openssl base64 -d -out app/primal_googlePlay_android.jks <<< "${{ secrets.CERT_PLAYSTORE }}"
-        play_credentials="${{ secrets.ANDROID_PUBLISHER_CREDENTIALS }}"
-        echo "ANDROID_PUBLISHER_CREDENTIALS=$play_credentials" >> $GITHUB_ENV
 
     - name: Build & Sign APK artifacts
       run: |
