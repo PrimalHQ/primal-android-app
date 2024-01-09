@@ -21,19 +21,19 @@ jobs:
         distribution: 'temurin'
         cache: 'gradle'
 
-    - name: Unpack Config file
-      run:  openssl base64 -d -out config.properties <<< "${{ secrets.CONFIG_PROPERTIES }}"
-
-    - name: Unpack Certificates
+    - name: Unpack secrets
       run: |
+        openssl base64 -d -out config.properties <<< "${{ secrets.CONFIG_PROPERTIES }}"
         openssl base64 -d -out app/primal_alternative_android.jks <<< "${{ secrets.CERT_ALTERNATIVE }}"
         openssl base64 -d -out app/primal_googlePlay_android.jks <<< "${{ secrets.CERT_PLAYSTORE }}"
+        play_credentials="${{ secrets.ANDROID_PUBLISHER_CREDENTIALS }}"
+        echo "ANDROID_PUBLISHER_CREDENTIALS=$play_credentials" >> $GITHUB_ENV
 
-    - name: Build & Prepare APK artifacts
+    - name: Build & Sign APK artifacts
       run: |
-        ./gradlew assembleReleaseAlternative --no-daemon
-        mv app/build/outputs/apk/releaseAlternative/*apk primal-${{ github.ref_name }}.apk
-        zip -j primal-${{ github.ref_name }}-mapping.zip app/build/outputs/mapping/releaseAlternative/mapping.txt
+        ./gradlew assembleAospAltRelease --no-daemon
+        mv app/build/outputs/apk/aosp/altRelease/*apk primal-${{ github.ref_name }}.apk
+        zip -j primal-${{ github.ref_name }}-mapping.zip app/build/outputs/mapping/aospAltRelease/mapping.txt
 
     - name: Upload APK artifacts to GitHub
       uses: actions/upload-artifact@v3
@@ -43,8 +43,8 @@ jobs:
           primal-${{ github.ref_name }}.apk
           primal-${{ github.ref_name }}-mapping.zip
 
-    - name: Build & Upload bundle to Google Play
-      run: ./gradlew publishReleasePlayStoreBundle --track "alpha" --release-name "${{ github.ref_name }}" --stacktrace
+    - name: Publish AAB to Google Play
+      run: ./gradlew publishGooglePlayReleaseBundle --track "alpha" --release-name "${{ github.ref_name }}" --stacktrace
 
   release:
    name: Create GitHub release

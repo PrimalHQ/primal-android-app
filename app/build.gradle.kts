@@ -104,7 +104,7 @@ android {
             )
         }
 
-        create("releasePlayStore") {
+        create("playRelease") {
             initWith(getByName("release"))
             signingConfig = try {
                 signingConfigs.getByName("playStore")
@@ -113,7 +113,7 @@ android {
             }
         }
 
-        create("releaseAlternative") {
+        create("altRelease") {
             initWith(getByName("release"))
             signingConfig = try {
                 signingConfigs.getByName("alternative")
@@ -128,7 +128,7 @@ android {
     )
 
     productFlavors {
-        create("play") {
+        create("google") {
             dimension = "distribution"
         }
 
@@ -138,12 +138,12 @@ android {
     }
 
     sourceSets {
-        named("releasePlayStore") {
+        named("playRelease") {
             java.srcDirs("src/release/kotlin")
             res.srcDirs("src/release/res")
         }
 
-        named("releaseAlternative") {
+        named("altRelease") {
             java.srcDirs("src/release/kotlin")
             res.srcDirs("src/release/res")
         }
@@ -259,8 +259,8 @@ dependencies {
 
     implementation(libs.url.detector)
 
-    "playImplementation"(libs.play.billing)
-    "playImplementation"(libs.play.billing.ktx)
+    "googleImplementation"(libs.play.billing)
+    "googleImplementation"(libs.play.billing.ktx)
 
     implementation(libs.qrcode.generator)
 

@@ -47,7 +47,7 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 import net.primal.android.core.compose.icons.primaliconpack.WalletPurchaseSats
 import net.primal.android.core.compose.isEmpty
-import net.primal.android.core.utils.isPlayBuild
+import net.primal.android.core.utils.isGoogleBuild
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.PrimalDrawerScaffold
 import net.primal.android.theme.AppTheme
@@ -160,7 +160,7 @@ fun WalletDashboardScreen(
                     uiScope.launch { drawerState.open() }
                 },
                 actions = {
-                    if (isPlayBuild()) {
+                    if (isGoogleBuild()) {
                         AppBarIcon(
                             icon = PrimalIcons.WalletPurchaseSats,
                             onClick = {
@@ -225,7 +225,7 @@ fun WalletDashboardScreen(
                             .padding(bottom = 32.dp)
                             .navigationBarsPadding(),
                         message = stringResource(id = R.string.wallet_dashboard_no_transactions_hint),
-                        actionLabel = if (isPlayBuild()) stringResource(id = R.string.wallet_dashboard_buy_sats_button) else null,
+                        actionLabel = if (isGoogleBuild()) stringResource(id = R.string.wallet_dashboard_buy_sats_button) else null,
                         onActionClick = {
                             inAppPurchaseVisible = true
                         },
@@ -240,7 +240,7 @@ fun WalletDashboardScreen(
                         listState = listState,
                         onProfileClick = onProfileClick,
                         header = {
-                            if (state.lowBalance && pagingItems.itemCount > 0 && isPlayBuild()) {
+                            if (state.lowBalance && pagingItems.itemCount > 0 && isGoogleBuild()) {
                                 WalletCallToActionBox(
                                     modifier = Modifier
                                         .fillMaxSize()
