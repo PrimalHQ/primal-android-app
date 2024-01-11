@@ -25,6 +25,7 @@ import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.wallet.api.model.ActivateWalletRequestBody
 import net.primal.android.wallet.api.model.BalanceRequestBody
 import net.primal.android.wallet.api.model.DepositRequestBody
+import net.primal.android.wallet.api.model.DepositResponse
 import net.primal.android.wallet.api.model.GetActivationCodeRequestBody
 import net.primal.android.wallet.api.model.InAppPurchaseQuoteRequestBody
 import net.primal.android.wallet.api.model.InAppPurchaseQuoteResponse
@@ -146,7 +147,7 @@ class WalletApiImpl @Inject constructor(
         )
     }
 
-    override suspend fun deposit(userId: String, body: DepositRequestBody): String {
+    override suspend fun deposit(userId: String, body: DepositRequestBody): DepositResponse {
         val response = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.WALLET,
@@ -158,9 +159,9 @@ class WalletApiImpl @Inject constructor(
             ),
         )
 
-        // TODO Parse invoice from response
-
-        return "no invoice found"
+        return response.findPrimalEvent(NostrEventKind.PrimalWalletDepositInvoice)
+            ?.takeContentOrNull<DepositResponse>()
+            ?: throw WssException("Missing or invalid content in response.")
     }
 
     override suspend fun getTransactions(userId: String, body: TransactionsRequestBody): TransactionsResponse {

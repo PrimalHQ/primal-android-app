@@ -42,12 +42,7 @@ class ReceivePaymentViewModel @Inject constructor(
         viewModelScope.launch {
             events.collect {
                 when (it) {
-                    UiEvent.OpenInvoiceCreation -> setState {
-                        copy(
-                            paymentDetails = PaymentDetails(lightningAddress = this.paymentDetails.lightningAddress),
-                            editMode = true,
-                        )
-                    }
+                    UiEvent.OpenInvoiceCreation -> setState { copy(editMode = true) }
                     UiEvent.CancelInvoiceCreation -> setState { copy(editMode = false) }
                     is UiEvent.CreateInvoice -> createInvoice(amountInBtc = it.amountInBtc, comment = it.comment)
                 }
@@ -74,7 +69,7 @@ class ReceivePaymentViewModel @Inject constructor(
         viewModelScope.launch {
             setState { copy(creating = true) }
             try {
-                val invoice = walletRepository.deposit(
+                val response = walletRepository.deposit(
                     userId = activeAccountStore.activeUserId(),
                     amountInBtc = amountInBtc,
                     comment = comment,
@@ -83,7 +78,7 @@ class ReceivePaymentViewModel @Inject constructor(
                     copy(
                         editMode = false,
                         paymentDetails = PaymentDetails(
-                            invoice = invoice,
+                            invoice = response.lnInvoice,
                             amountInBtc = amountInBtc,
                             comment = comment,
                             lightningAddress = this.paymentDetails.lightningAddress,

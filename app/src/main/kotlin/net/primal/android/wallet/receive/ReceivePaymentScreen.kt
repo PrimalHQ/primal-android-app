@@ -255,7 +255,11 @@ private fun ReceivePaymentViewer(
                 contentColor = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 16.sp,
-                text = stringResource(id = R.string.wallet_receive_transaction_add_details_button).uppercase(),
+                text = if (paymentDetails.invoice == null) {
+                    stringResource(id = R.string.wallet_receive_transaction_add_details_button)
+                } else {
+                    stringResource(id = R.string.wallet_receive_transaction_edit_details_button)
+                }.uppercase(),
                 onClick = onEditClick,
             )
         }

@@ -14,6 +14,7 @@ import net.primal.android.user.domain.PrimalWallet
 import net.primal.android.wallet.api.WalletApi
 import net.primal.android.wallet.api.mediator.WalletTransactionsMediator
 import net.primal.android.wallet.api.model.DepositRequestBody
+import net.primal.android.wallet.api.model.DepositResponse
 import net.primal.android.wallet.api.model.InAppPurchaseQuoteResponse
 import net.primal.android.wallet.api.model.ParsedLnInvoiceResponse
 import net.primal.android.wallet.api.model.ParsedLnUrlResponse
@@ -70,8 +71,8 @@ class WalletRepository @Inject constructor(
         userId: String,
         amountInBtc: String?,
         comment: String?,
-    ): String {
-        val invoice = withContext(dispatcherProvider.io()) {
+    ): DepositResponse {
+        return withContext(dispatcherProvider.io()) {
             walletApi.deposit(
                 userId = userId,
                 body = DepositRequestBody(
@@ -81,7 +82,6 @@ class WalletRepository @Inject constructor(
                 ),
             )
         }
-        return invoice
     }
 
     suspend fun getInAppPurchaseMinSatsQuote(
