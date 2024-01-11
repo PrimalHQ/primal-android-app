@@ -15,6 +15,7 @@ import java.math.BigDecimal
 @Composable
 fun WalletDashboard(
     modifier: Modifier,
+    enabled: Boolean = true,
     walletBalance: BigDecimal?,
     actions: List<WalletAction>,
     onWalletAction: (WalletAction) -> Unit,
@@ -38,6 +39,7 @@ fun WalletDashboard(
                 .padding(horizontal = 16.dp),
             actionSize = 80.dp,
             actions = actions,
+            enabled = enabled,
             onWalletAction = onWalletAction,
         )
     }

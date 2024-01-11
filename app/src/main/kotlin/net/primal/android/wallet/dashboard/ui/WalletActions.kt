@@ -29,6 +29,7 @@ fun WalletActionsRow(
     actions: List<WalletAction>,
     actionSize: Dp,
     showLabels: Boolean = true,
+    enabled: Boolean = true,
     onWalletAction: (WalletAction) -> Unit,
 ) {
     Row(
@@ -41,6 +42,7 @@ fun WalletActionsRow(
                 onClick = { onWalletAction(it) },
                 text = if (showLabels) stringResource(id = it.textResId) else null,
                 icon = it.imageVector,
+                enabled = enabled,
             )
         }
     }
@@ -52,6 +54,7 @@ private fun WalletActionButton(
     text: String?,
     icon: ImageVector,
     onClick: () -> Unit,
+    enabled: Boolean = true,
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -59,6 +62,7 @@ private fun WalletActionButton(
         PrimalCircleButton(
             modifier = modifier,
             onClick = onClick,
+            enabled = enabled,
             containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
             contentColor = AppTheme.colorScheme.onSurface,
         ) {

@@ -28,6 +28,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -181,8 +182,16 @@ fun WalletDashboardScreen(
                                 modifier = Modifier
                                     .wrapContentSize(align = Alignment.Center)
                                     .padding(horizontal = 32.dp)
-                                    .padding(vertical = 32.dp),
+                                    .padding(vertical = 32.dp)
+                                    .then(
+                                        if (state.primalWallet?.kycLevel == WalletKycLevel.None) {
+                                            Modifier.graphicsLayer { alpha = 0.42f }
+                                        } else {
+                                            Modifier
+                                        },
+                                    ),
                                 walletBalance = state.walletBalance,
+                                enabled = state.primalWallet?.kycLevel != WalletKycLevel.None,
                                 actions = listOf(WalletAction.Send, WalletAction.Scan, WalletAction.Receive),
                                 onWalletAction = { action ->
                                     when (action) {
