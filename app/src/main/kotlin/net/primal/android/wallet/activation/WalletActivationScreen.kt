@@ -44,6 +44,8 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -113,6 +115,7 @@ fun WalletActivationScreen(
                     WalletActivationStatus.ActivationSuccess -> stringResource(
                         id = R.string.wallet_activation_success_title,
                     )
+
                     else -> stringResource(id = R.string.wallet_activation_title)
                 },
                 colors = when (uiState.status) {
@@ -166,6 +169,7 @@ fun WalletActivationScreen(
                         WalletActivationStatus.PendingCodeConfirmation -> WalletCodeActivationInput(
                             working = uiState.working,
                             error = uiState.error,
+                            email = uiState.email,
                             isKeyboardVisible = isKeyboardVisible,
                             onCodeChanged = { eventPublisher(UiEvent.ClearErrorMessage) },
                             onCodeConfirmation = { code -> eventPublisher(UiEvent.Activate(code = code)) },
@@ -314,6 +318,7 @@ private fun isNameAndEmailValid(name: String, email: String): Boolean {
 private fun WalletCodeActivationInput(
     working: Boolean,
     error: Throwable?,
+    email: String,
     onCodeChanged: () -> Unit,
     onCodeConfirmation: (String) -> Unit,
     isKeyboardVisible: Boolean,
@@ -350,13 +355,35 @@ private fun WalletCodeActivationInput(
             Text(
                 modifier = Modifier
                     .fillMaxWidth(fraction = 0.8f)
-                    .padding(vertical = 32.dp),
-                text = stringResource(id = R.string.wallet_activation_pending_code_hint),
+                    .padding(top = 32.dp),
+                text = stringResource(id = R.string.wallet_activation_pending_code_subtitle),
                 textAlign = TextAlign.Center,
                 color = AppTheme.colorScheme.onSurface,
-                style = AppTheme.typography.bodyLarge.copy(
-                    fontWeight = FontWeight.SemiBold,
-                ),
+                style = AppTheme.typography.titleLarge,
+            )
+
+            val textHint = stringResource(id = R.string.wallet_activation_pending_code_hint, email)
+            val textHintAnnotation = buildAnnotatedString {
+                append(textHint)
+                val startIndex = textHint.indexOf(email)
+                if (startIndex >= 0) {
+                    val endIndex = startIndex + email.length
+                    addStyle(
+                        style = SpanStyle(fontWeight = FontWeight.Bold),
+                        start = startIndex,
+                        end = endIndex,
+                    )
+                }
+            }
+
+            Text(
+                modifier = Modifier
+                    .fillMaxWidth(fraction = 0.8f)
+                    .padding(top = 16.dp, bottom = 32.dp),
+                text = textHintAnnotation,
+                textAlign = TextAlign.Center,
+                color = AppTheme.colorScheme.onSurface,
+                style = AppTheme.typography.bodyMedium,
             )
 
             WalletOutlinedTextField(
@@ -524,6 +551,7 @@ private fun PreviewWalletCodeActivationInput() {
             WalletCodeActivationInput(
                 working = false,
                 error = null,
+                email = "alex@primal.net",
                 isKeyboardVisible = false,
                 onCodeChanged = { },
                 onCodeConfirmation = { },

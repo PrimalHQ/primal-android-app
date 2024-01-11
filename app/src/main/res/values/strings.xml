@@ -315,8 +315,9 @@
     <string name="wallet_dashboard_buy_sats_button">Buy Sats Now</string>
 
     <string name="wallet_activation_title">Activate Wallet</string>
-    <string name="wallet_activation_pending_data_hint">Activating your wallet is easy! All we need is your name and email address:</string>
-    <string name="wallet_activation_pending_code_hint">We emailed your activation code. Please enter it below:</string>
+    <string name="wallet_activation_pending_data_hint">Activating your wallet is easy!\nWe just need a few details below:</string>
+    <string name="wallet_activation_pending_code_subtitle">Check Your Email</string>
+    <string name="wallet_activation_pending_code_hint">Your activation code was sent to <b>%1$s</b>. You may need to check your Junk or Spam folder.</string>
     <string name="wallet_activation_error_invalid_code">Incorrect code. Please try again.</string>
     <string name="wallet_activation_success_title">Success</string>
     <string name="wallet_activation_success_description">Your wallet has been activated. Your new Nostr lightning address is:</string>
