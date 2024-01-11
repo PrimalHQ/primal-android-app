@@ -1,2 +1,2 @@
 ## Features
-- Testing Google Play auto uploads;
+- Implemented invoice creation on Wallet Receive screen;
