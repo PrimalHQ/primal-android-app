@@ -381,6 +381,7 @@
     <string name="wallet_receive_transaction_comment_hint">Add a comment</string>
     <string name="wallet_receive_transaction_cancel_numeric_pad_button">Cancel</string>
     <string name="wallet_receive_transaction_apply_numeric_pad_button">Apply</string>
+    <string name="wallet_receive_transaction_invoice_creation_error">Unable to add details. Please try again in few moments.</string>
 
     <string name="qrcode_scanner_permission_title">Permission required</string>
     <string name="qrcode_scanner_permission_rationale">Primal needs access to your camera to scan QR codes.</string>

@@ -29,6 +29,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -69,6 +71,7 @@ import net.primal.android.R
 import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.PrimalTopAppBar
+import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -107,6 +110,20 @@ fun ReceivePaymentScreen(
 
     val onCancel = { eventPublisher(ReceivePaymentContract.UiEvent.CancelInvoiceCreation) }
     BackHandler(enabled = state.editMode) { onCancel() }
+
+    val context = LocalContext.current
+    val snackbarHostState = remember { SnackbarHostState() }
+    SnackbarErrorHandler(
+        error = state.error,
+        snackbarHostState = snackbarHostState,
+        errorMessageResolver = {
+            when (it) {
+                is UiState.ReceivePaymentError.FailedToCreateInvoice ->
+                    context.getString(R.string.wallet_receive_transaction_invoice_creation_error)
+            }
+        },
+        onErrorDismiss = { eventPublisher(ReceivePaymentContract.UiEvent.DismissError) },
+    )
 
     Scaffold(
         topBar = {
@@ -156,6 +173,9 @@ fun ReceivePaymentScreen(
                     )
                 }
             }
+        },
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
         },
     )
 }

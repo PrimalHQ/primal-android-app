@@ -15,7 +15,6 @@ import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.receive.ReceivePaymentContract.UiEvent
 import net.primal.android.wallet.receive.ReceivePaymentContract.UiState
 import net.primal.android.wallet.repository.WalletRepository
-import timber.log.Timber
 
 @HiltViewModel
 class ReceivePaymentViewModel @Inject constructor(
@@ -45,6 +44,7 @@ class ReceivePaymentViewModel @Inject constructor(
                     UiEvent.OpenInvoiceCreation -> setState { copy(editMode = true) }
                     UiEvent.CancelInvoiceCreation -> setState { copy(editMode = false) }
                     is UiEvent.CreateInvoice -> createInvoice(amountInBtc = it.amountInBtc, comment = it.comment)
+                    UiEvent.DismissError -> setState { copy(error = null) }
                 }
             }
         }
@@ -86,7 +86,7 @@ class ReceivePaymentViewModel @Inject constructor(
                     )
                 }
             } catch (error: WssException) {
-                Timber.e(error)
+                setState { copy(error = UiState.ReceivePaymentError.FailedToCreateInvoice(cause = error)) }
             } finally {
                 setState { copy(creating = false) }
             }
