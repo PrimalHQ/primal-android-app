@@ -20,9 +20,9 @@ import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
 
 @Composable
-fun WalletBalanceText(
+fun AmountText(
     modifier: Modifier,
-    walletBalance: BigDecimal?,
+    amountInBtc: BigDecimal?,
     textSize: TextUnit = 42.sp,
 ) {
     val numberFormat = remember { NumberFormat.getNumberInstance() }
@@ -33,13 +33,13 @@ fun WalletBalanceText(
         horizontalArrangement = Arrangement.Start,
     ) {
         Text(
-            text = walletBalance?.toSats()?.let { numberFormat.format(it.toLong()) } ?: "⌛",
+            text = amountInBtc?.toSats()?.let { numberFormat.format(it.toLong()) } ?: "⌛",
             textAlign = TextAlign.Center,
             style = AppTheme.typography.displayMedium,
             fontSize = textSize,
         )
 
-        if (walletBalance != null) {
+        if (amountInBtc != null) {
             Text(
                 modifier = Modifier.padding(bottom = (textSize.value / 6).dp),
                 text = " ${stringResource(id = R.string.wallet_sats_suffix)}",

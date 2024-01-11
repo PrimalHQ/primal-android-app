@@ -146,8 +146,8 @@ class WalletApiImpl @Inject constructor(
         )
     }
 
-    override suspend fun deposit(userId: String, body: DepositRequestBody) {
-        primalApiClient.query(
+    override suspend fun deposit(userId: String, body: DepositRequestBody): String {
+        val response = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.WALLET,
                 optionsJson = buildWalletOptionsJson(
@@ -157,6 +157,10 @@ class WalletApiImpl @Inject constructor(
                 ),
             ),
         )
+
+        // TODO Parse invoice from response
+
+        return "no invoice found"
     }
 
     override suspend fun getTransactions(userId: String, body: TransactionsRequestBody): TransactionsResponse {

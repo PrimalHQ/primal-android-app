@@ -373,7 +373,12 @@
 
     <string name="wallet_receive_transaction_title">Receive</string>
     <string name="wallet_receive_transaction_receiving_to">Receiving to:</string>
+    <string name="wallet_receive_transaction_comment">Comment:</string>
     <string name="wallet_receive_transaction_copy_button">Copy</string>
+    <string name="wallet_receive_transaction_add_details_button">Add Details</string>
+    <string name="wallet_receive_transaction_comment_hint">Add a comment</string>
+    <string name="wallet_receive_transaction_cancel_numeric_pad_button">Cancel</string>
+    <string name="wallet_receive_transaction_apply_numeric_pad_button">Apply</string>
 
     <string name="qrcode_scanner_permission_title">Permission required</string>
     <string name="qrcode_scanner_permission_rationale">Primal needs access to your camera to scan QR codes.</string>

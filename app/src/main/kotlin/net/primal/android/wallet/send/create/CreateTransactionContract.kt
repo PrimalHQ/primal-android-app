@@ -13,14 +13,7 @@ interface CreateTransactionContract {
     )
 
     sealed class UiEvent {
-        sealed class NumericInputEvent : UiEvent() {
-            data class DigitInputEvent(val digit: Int) : NumericInputEvent()
-            data object BackspaceEvent : NumericInputEvent()
-            data object ResetAmountEvent : NumericInputEvent()
-        }
-
+        data class AmountChanged(val amountInSats: String) : UiEvent()
         data class SendTransaction(val note: String?) : UiEvent()
     }
-
-    sealed class SideEffect
 }

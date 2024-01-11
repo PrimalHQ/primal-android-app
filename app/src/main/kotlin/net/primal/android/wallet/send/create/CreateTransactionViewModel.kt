@@ -4,7 +4,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import java.math.BigDecimal
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -40,7 +39,7 @@ class CreateTransactionViewModel @Inject constructor(
         UiState(transaction = savedStateHandle.draftTransaction),
     )
     val state = _state.asStateFlow()
-    fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
+    private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
 
     private val events = MutableSharedFlow<UiEvent>()
     fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
@@ -54,8 +53,10 @@ class CreateTransactionViewModel @Inject constructor(
         viewModelScope.launch {
             events.collect {
                 when (it) {
-                    is UiEvent.NumericInputEvent -> handleNumericPadInput(it)
                     is UiEvent.SendTransaction -> sendTransaction(note = it.note)
+                    is UiEvent.AmountChanged -> setState {
+                        copy(transaction = transaction.copy(amountSats = it.amountInSats))
+                    }
                 }
             }
         }
@@ -76,43 +77,6 @@ class CreateTransactionViewModel @Inject constructor(
                 }
             }
         }
-
-    private fun handleNumericPadInput(event: UiEvent.NumericInputEvent) {
-        setState {
-            val newValue = when (event) {
-                UiEvent.NumericInputEvent.BackspaceEvent -> this.transaction.amountSats.backspace()
-                is UiEvent.NumericInputEvent.DigitInputEvent -> this.transaction.amountSats.inputDigit(event.digit)
-                UiEvent.NumericInputEvent.ResetAmountEvent -> "0"
-            }
-
-            copy(
-                transaction = transaction.copy(amountSats = newValue),
-            )
-        }
-    }
-
-    private fun String.backspace(): String {
-        return if (this.length > 1) {
-            this.substring(0, this.length - 1)
-        } else {
-            "0"
-        }
-    }
-
-    private fun String.inputDigit(digit: Int): String {
-        val oldValue = this
-        return if (oldValue.length < 8) {
-            if (oldValue.isPositive()) {
-                "$oldValue$digit"
-            } else {
-                "$digit"
-            }
-        } else {
-            oldValue
-        }
-    }
-
-    private fun String.isPositive() = toBigDecimal() > BigDecimal.ZERO
 
     private fun sendTransaction(note: String?) =
         viewModelScope.launch {

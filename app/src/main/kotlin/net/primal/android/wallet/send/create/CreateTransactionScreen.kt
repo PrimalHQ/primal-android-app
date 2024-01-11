@@ -3,12 +3,6 @@ package net.primal.android.wallet.send.create
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -47,8 +41,6 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
@@ -65,7 +57,6 @@ import net.primal.android.core.compose.ApplySystemBarColors
 import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.PrimalLoadingSpinner
-import net.primal.android.core.compose.PrimalNumericPad
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.applySystemColors
 import net.primal.android.core.compose.button.PrimalLoadingButton
@@ -74,11 +65,10 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.WalletError
 import net.primal.android.core.compose.icons.primaliconpack.WalletSuccess
+import net.primal.android.core.compose.numericpad.PrimalNumericPad
 import net.primal.android.theme.AppTheme
-import net.primal.android.wallet.dashboard.ui.WalletBalanceText
-import net.primal.android.wallet.send.create.CreateTransactionContract.UiEvent.NumericInputEvent.BackspaceEvent
-import net.primal.android.wallet.send.create.CreateTransactionContract.UiEvent.NumericInputEvent.DigitInputEvent
-import net.primal.android.wallet.send.create.CreateTransactionContract.UiEvent.NumericInputEvent.ResetAmountEvent
+import net.primal.android.wallet.dashboard.ui.AmountText
+import net.primal.android.wallet.numericPadContentTransformAnimation
 import net.primal.android.wallet.send.create.CreateTransactionContract.UiEvent.SendTransaction
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toBtc
 import net.primal.android.wallet.walletSuccessColor
@@ -176,7 +166,6 @@ private fun TransactionEditor(
     eventPublisher: (CreateTransactionContract.UiEvent) -> Unit,
     onCancelClick: () -> Unit,
 ) {
-    val haptic = LocalHapticFeedback.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val keyboardVisible by keyboardVisibilityAsState()
 
@@ -227,7 +216,7 @@ private fun TransactionEditor(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            WalletBalanceText(
+            AmountText(
                 modifier = Modifier
                     .padding(start = 32.dp)
                     .height(72.dp)
@@ -240,21 +229,15 @@ private fun TransactionEditor(
                             }
                         },
                     ),
-                walletBalance = state.transaction.amountSats.toLong().toBtc().toBigDecimal(),
-                textSize = when (state.transaction.amountSats.toLong().toString().length) {
-                    in (0..8) -> 48.sp
-                    else -> 40.sp
-                },
+                amountInBtc = state.transaction.amountSats.toLong().toBtc().toBigDecimal(),
+                textSize = 48.sp,
             )
 
             Spacer(modifier = Modifier.height(48.dp))
 
             AnimatedContent(
                 targetState = isNumericPadOn,
-                transitionSpec = {
-                    (fadeIn(animationSpec = tween(220, delayMillis = 90)) + scaleIn())
-                        .togetherWith(fadeOut(animationSpec = tween(90)) + scaleOut())
-                },
+                transitionSpec = { numericPadContentTransformAnimation },
                 label = "NumericPadAndNote",
             ) {
                 when (it) {
@@ -264,20 +247,9 @@ private fun TransactionEditor(
                     ) {
                         PrimalNumericPad(
                             modifier = Modifier.fillMaxWidth(),
-                            onNumberClick = { digit ->
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                eventPublisher(DigitInputEvent(digit))
-                            },
-                            onDotClick = {
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            },
-                            onBackspaceClick = {
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                eventPublisher(BackspaceEvent)
-                            },
-                            onBackspaceLongClick = {
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                eventPublisher(ResetAmountEvent)
+                            amountInSats = state.transaction.amountSats,
+                            onAmountInSatsChanged = {
+                                eventPublisher(CreateTransactionContract.UiEvent.AmountChanged(amountInSats = it))
                             },
                         )
                     }

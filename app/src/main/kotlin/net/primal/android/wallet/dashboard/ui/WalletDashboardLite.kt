@@ -22,12 +22,12 @@ fun WalletDashboardLite(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.Bottom,
     ) {
-        WalletBalanceText(
+        AmountText(
             modifier = Modifier.graphicsLayer {
                 clip = false
                 translationY = 4.dp.toPx()
             },
-            walletBalance = walletBalance,
+            amountInBtc = walletBalance,
             textSize = 32.sp,
         )
 

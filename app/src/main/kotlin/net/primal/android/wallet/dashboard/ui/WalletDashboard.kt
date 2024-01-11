@@ -24,11 +24,11 @@ fun WalletDashboard(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        WalletBalanceText(
+        AmountText(
             modifier = Modifier.wrapContentWidth()
                 .padding(start = if (walletBalance != null) 32.dp else 0.dp)
                 .padding(bottom = 32.dp),
-            walletBalance = walletBalance,
+            amountInBtc = walletBalance,
             textSize = 48.sp,
         )
 

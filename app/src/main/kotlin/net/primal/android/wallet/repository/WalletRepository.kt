@@ -13,11 +13,13 @@ import net.primal.android.user.api.UsersApi
 import net.primal.android.user.domain.PrimalWallet
 import net.primal.android.wallet.api.WalletApi
 import net.primal.android.wallet.api.mediator.WalletTransactionsMediator
+import net.primal.android.wallet.api.model.DepositRequestBody
 import net.primal.android.wallet.api.model.InAppPurchaseQuoteResponse
 import net.primal.android.wallet.api.model.ParsedLnInvoiceResponse
 import net.primal.android.wallet.api.model.ParsedLnUrlResponse
 import net.primal.android.wallet.api.model.WithdrawRequestBody
 import net.primal.android.wallet.db.WalletTransaction
+import net.primal.android.wallet.domain.SubWallet
 import net.primal.android.wallet.domain.WalletKycLevel
 
 @OptIn(ExperimentalPagingApi::class)
@@ -62,6 +64,24 @@ class WalletRepository @Inject constructor(
         withContext(dispatcherProvider.io()) {
             walletApi.withdraw(userId, body)
         }
+    }
+
+    suspend fun deposit(
+        userId: String,
+        amountInBtc: String?,
+        comment: String?,
+    ): String {
+        val invoice = withContext(dispatcherProvider.io()) {
+            walletApi.deposit(
+                userId = userId,
+                body = DepositRequestBody(
+                    subWallet = SubWallet.Open,
+                    amountBtc = amountInBtc,
+                    description = comment,
+                ),
+            )
+        }
+        return invoice
     }
 
     suspend fun getInAppPurchaseMinSatsQuote(

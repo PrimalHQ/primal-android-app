@@ -27,7 +27,7 @@ interface WalletApi {
 
     suspend fun withdraw(userId: String, body: WithdrawRequestBody)
 
-    suspend fun deposit(userId: String, body: DepositRequestBody)
+    suspend fun deposit(userId: String, body: DepositRequestBody): String
 
     suspend fun getTransactions(userId: String, body: TransactionsRequestBody): TransactionsResponse
 

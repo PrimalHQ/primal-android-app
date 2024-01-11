@@ -1,6 +1,6 @@
 @file:Suppress("MagicNumber")
 
-package net.primal.android.core.compose
+package net.primal.android.core.compose.numericpad
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -14,14 +14,19 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.Subtract
+import net.primal.android.core.compose.numericpad.PrimalNumericPadContract.UiEvent.NumericInputEvent
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 
@@ -29,12 +34,44 @@ private val PadButtonMargin = 16.dp
 
 @Composable
 fun PrimalNumericPad(
-    onNumberClick: (Int) -> Unit,
-    onDotClick: () -> Unit,
-    onBackspaceClick: () -> Unit,
-    onBackspaceLongClick: () -> Unit,
     modifier: Modifier = Modifier,
+    amountInSats: String,
+    onAmountInSatsChanged: (String) -> Unit,
 ) {
+    val haptic = LocalHapticFeedback.current
+    val viewModel = viewModel<PrimalNumericPadViewModel>()
+
+    LaunchedEffect(amountInSats) {
+        viewModel.setEvent(PrimalNumericPadContract.UiEvent.SetAmount(valueInSats = amountInSats))
+    }
+
+    LaunchedEffect(viewModel) {
+        viewModel.channel.collect {
+            when (it) {
+                is PrimalNumericPadContract.SideEffect.AmountChanged -> onAmountInSatsChanged(it.amountInSats)
+            }
+        }
+    }
+
+    val onNumberClick: (Int) -> Unit = {
+        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+        viewModel.setEvent(NumericInputEvent.DigitInputEvent(it))
+    }
+
+    val onDotClick: () -> Unit = {
+        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+    }
+
+    val onBackspaceClick: () -> Unit = {
+        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+        viewModel.setEvent(NumericInputEvent.BackspaceEvent)
+    }
+
+    val onBackspaceLongClick: () -> Unit = {
+        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+        viewModel.setEvent(NumericInputEvent.ResetAmountEvent)
+    }
+
     Column(
         modifier = modifier,
     ) {
@@ -202,11 +239,8 @@ fun PreviewPrimalNumericPad() {
     PrimalTheme(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
         Surface {
             PrimalNumericPad(
-                modifier = Modifier,
-                onDotClick = {},
-                onBackspaceClick = {},
-                onBackspaceLongClick = {},
-                onNumberClick = {},
+                amountInSats = "0",
+                onAmountInSatsChanged = {},
             )
         }
     }
