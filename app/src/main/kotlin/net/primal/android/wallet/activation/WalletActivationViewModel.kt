@@ -40,28 +40,27 @@ class WalletActivationViewModel @Inject constructor(
         viewModelScope.launch {
             events.collect {
                 when (it) {
-                    is UiEvent.ActivationDataChanged -> setState {
-                        copy(
-                            name = it.name,
-                            email = it.email,
-                            error = null,
-                        )
-                    }
-
+                    is UiEvent.ActivationDataChanged -> setState { copy(data = it.data, error = null) }
                     is UiEvent.Activate -> onActivateWallet(code = it.code)
-                    is UiEvent.ActivationRequest -> onActivationRequest(name = it.name, email = it.email)
+                    is UiEvent.ActivationRequest -> onActivationRequest(data = it.data)
                     UiEvent.ClearErrorMessage -> setState { copy(error = null) }
                     UiEvent.RequestBackToDataInput -> setState { copy(status = WalletActivationStatus.PendingData) }
                 }
             }
         }
 
-    private fun onActivationRequest(name: String, email: String) =
+    private fun onActivationRequest(data: WalletActivationData) =
         viewModelScope.launch {
             setState { copy(working = true) }
             try {
                 val userId = activeAccountStore.activeUserId()
-                walletRepository.requestActivationCodeToEmail(userId, name, email)
+                walletRepository.requestActivationCodeToEmail(
+                    userId = userId,
+                    name = data.name,
+                    email = data.email,
+                    country = data.country?.code,
+                    state = data.state?.code,
+                )
                 setState { copy(status = WalletActivationStatus.PendingCodeConfirmation) }
             } catch (error: WssException) {
                 Timber.e(error)

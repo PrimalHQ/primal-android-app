@@ -20,6 +20,8 @@ interface WalletApi {
         userId: String,
         name: String,
         email: String,
+        country: String?,
+        state: String?,
     )
 
     suspend fun activateWallet(userId: String, code: String): String

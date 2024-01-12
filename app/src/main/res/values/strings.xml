@@ -323,10 +323,14 @@
     <string name="wallet_activation_success_description">Your wallet has been activated. Your new Nostr lightning address is:</string>
     <string name="wallet_activation_your_name">Your name</string>
     <string name="wallet_activation_your_email_address">Your email address</string>
+    <string name="wallet_activation_state">State</string>
+    <string name="wallet_activation_your_country_of_residence">Country of residence</string>
     <string name="wallet_activation_your_code">Activation code</string>
     <string name="wallet_activation_next_button">Next</string>
     <string name="wallet_activation_finish_button">Finish</string>
     <string name="wallet_activation_done_button">Done</string>
+    <string name="wallet_activation_country_picker_title">Select country</string>
+    <string name="wallet_activation_state_picker_title">Select state</string>
     <string name="wallet_sats_suffix">sats</string>
     <string name="wallet_transaction_list_item_received">Received</string>
     <string name="wallet_transaction_list_item_sent">Sent</string>

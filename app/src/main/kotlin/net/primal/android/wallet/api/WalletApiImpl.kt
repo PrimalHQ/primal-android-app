@@ -87,6 +87,8 @@ class WalletApiImpl @Inject constructor(
         userId: String,
         name: String,
         email: String,
+        country: String?,
+        state: String?,
     ) {
         primalApiClient.query(
             message = PrimalCacheFilter(
@@ -94,7 +96,7 @@ class WalletApiImpl @Inject constructor(
                 optionsJson = buildWalletOptionsJson(
                     userId = userId,
                     walletVerb = WalletOperationVerb.GET_ACTIVATION_CODE,
-                    requestBody = GetActivationCodeRequestBody(name, email),
+                    requestBody = GetActivationCodeRequestBody(name, email, country, state),
                 ),
             ),
         )

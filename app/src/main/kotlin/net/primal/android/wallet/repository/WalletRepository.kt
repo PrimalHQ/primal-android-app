@@ -55,9 +55,11 @@ class WalletRepository @Inject constructor(
         userId: String,
         name: String,
         email: String,
+        country: String?,
+        state: String?,
     ) {
         withContext(dispatcherProvider.io()) {
-            walletApi.requestActivationCodeToEmail(userId, name, email)
+            walletApi.requestActivationCodeToEmail(userId, name, email, country, state)
         }
     }
 

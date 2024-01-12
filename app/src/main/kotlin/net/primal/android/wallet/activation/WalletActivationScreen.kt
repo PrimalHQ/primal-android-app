@@ -4,15 +4,20 @@ import android.util.Patterns
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.interaction.Interaction
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -33,8 +38,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -42,6 +49,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -53,6 +61,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.text.isDigitsOnly
+import java.io.IOException
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.json.decodeFromStream
 import net.primal.android.R
 import net.primal.android.core.compose.AdjustTemporarilySystemBarColors
 import net.primal.android.core.compose.PrimalDefaults
@@ -63,9 +76,15 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.WalletPrimalActivation
 import net.primal.android.core.compose.icons.primaliconpack.WalletSuccess
+import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.wallet.activation.WalletActivationContract.UiEvent
+import net.primal.android.wallet.activation.regions.Country
+import net.primal.android.wallet.activation.regions.RegionSelectionBottomSheet
+import net.primal.android.wallet.activation.regions.Regions
+import net.primal.android.wallet.activation.regions.State
+import net.primal.android.wallet.activation.regions.toListOfCountries
 import net.primal.android.wallet.walletSuccessColor
 import net.primal.android.wallet.walletSuccessContentColor
 import net.primal.android.wallet.walletSuccessDimColor
@@ -153,23 +172,18 @@ fun WalletActivationScreen(
                 content = { status ->
                     when (status) {
                         WalletActivationStatus.PendingData -> WalletActivationDataInput(
-                            inputName = uiState.name,
-                            inputEmail = uiState.email,
+                            data = uiState.data,
                             working = uiState.working,
                             error = uiState.error,
                             isKeyboardVisible = isKeyboardVisible,
-                            onDataChanged = { name, email ->
-                                eventPublisher(UiEvent.ActivationDataChanged(name = name, email = email))
-                            },
-                            onActivationCodeRequest = { name, email ->
-                                eventPublisher(UiEvent.ActivationRequest(name = name, email = email))
-                            },
+                            onDataChanged = { eventPublisher(UiEvent.ActivationDataChanged(data = it)) },
+                            onActivationCodeRequest = { eventPublisher(UiEvent.ActivationRequest(data = it)) },
                         )
 
                         WalletActivationStatus.PendingCodeConfirmation -> WalletCodeActivationInput(
                             working = uiState.working,
                             error = uiState.error,
-                            email = uiState.email,
+                            email = uiState.data.email,
                             isKeyboardVisible = isKeyboardVisible,
                             onCodeChanged = { eventPublisher(UiEvent.ClearErrorMessage) },
                             onCodeConfirmation = { code -> eventPublisher(UiEvent.Activate(code = code)) },
@@ -216,24 +230,53 @@ private fun StepContainerWithActionButton(
 @ExperimentalComposeUiApi
 @Composable
 private fun WalletActivationDataInput(
-    inputName: String,
-    inputEmail: String,
+    data: WalletActivationData,
     working: Boolean,
     error: Throwable?,
-    onDataChanged: (String, String) -> Unit,
-    onActivationCodeRequest: (String, String) -> Unit,
+    onDataChanged: (WalletActivationData) -> Unit,
+    onActivationCodeRequest: (WalletActivationData) -> Unit,
     isKeyboardVisible: Boolean,
 ) {
-    var name by rememberSaveable { mutableStateOf(inputName) }
-    var email by rememberSaveable { mutableStateOf(inputEmail) }
+    var name by rememberSaveable { mutableStateOf(data.name) }
+    var email by rememberSaveable { mutableStateOf(data.email) }
+    var country by rememberSaveable { mutableStateOf(data.country) }
+    var state by rememberSaveable { mutableStateOf(data.state) }
+    val activationDataSnapshot = {
+        WalletActivationData(name = name, email = email, country = country, state = state)
+    }
+
+    val countries = rememberListOfCountries()
+    val availableStates by remember {
+        derivedStateOf {
+            countries.find { it.code == country?.code }?.states
+        }
+    }
 
     val keyboardController = LocalSoftwareKeyboardController.current
+    var countrySelectionVisible by remember { mutableStateOf(false) }
+    var stateSelectionVisible by remember { mutableStateOf(false) }
+
+    if (countrySelectionVisible) {
+        RegionSelectionBottomSheet(
+            regions = countries,
+            title = stringResource(id = R.string.wallet_activation_country_picker_title),
+            onRegionClick = { country = it },
+            onDismissRequest = { countrySelectionVisible = false },
+        )
+    } else if (stateSelectionVisible) {
+        RegionSelectionBottomSheet(
+            regions = countries.find { it.code == country?.code }?.states ?: emptyList(),
+            title = stringResource(id = R.string.wallet_activation_state_picker_title),
+            onRegionClick = { state = it },
+            onDismissRequest = { stateSelectionVisible = false },
+        )
+    }
 
     StepContainerWithActionButton(
         actionButtonText = stringResource(id = R.string.wallet_activation_next_button),
-        actionButtonEnabled = isNameAndEmailValid(name, email),
+        actionButtonEnabled = activationDataSnapshot().isValid(availableStates),
         actionButtonLoading = working,
-        onActionClick = { onActivationCodeRequest(name, email) },
+        onActionClick = { onActivationCodeRequest(activationDataSnapshot()) },
     ) {
         Column(
             modifier = Modifier
@@ -264,10 +307,11 @@ private fun WalletActivationDataInput(
             )
 
             WalletOutlinedTextField(
+                modifier = Modifier.fillMaxWidth(fraction = 0.8f),
                 value = name,
                 onValueChange = {
                     name = it
-                    onDataChanged(name, email)
+                    onDataChanged(activationDataSnapshot())
                 },
                 placeholderText = stringResource(id = R.string.wallet_activation_your_name),
                 keyboardOptions = KeyboardOptions(
@@ -279,25 +323,56 @@ private fun WalletActivationDataInput(
             Spacer(modifier = Modifier.height(16.dp))
 
             WalletOutlinedTextField(
+                modifier = Modifier.fillMaxWidth(fraction = 0.8f),
                 value = email,
                 onValueChange = {
                     email = it.trim()
-                    onDataChanged(name, email)
+                    onDataChanged(activationDataSnapshot())
                 },
                 placeholderText = stringResource(id = R.string.wallet_activation_your_email_address),
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Email,
-                    imeAction = if (isNameAndEmailValid(name, email)) ImeAction.Go else ImeAction.None,
+                    imeAction = if (activationDataSnapshot().isValid(availableStates)) ImeAction.Go else ImeAction.None,
                 ),
                 keyboardActions = KeyboardActions(
                     onGo = {
-                        if (isNameAndEmailValid(name, email)) {
+                        if (activationDataSnapshot().isValid(availableStates)) {
                             keyboardController?.hide()
-                            onActivationCodeRequest(name, email)
+                            onActivationCodeRequest(activationDataSnapshot())
                         }
                     },
                 ),
             )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(fraction = 0.8f)
+                    .animateContentSize(),
+            ) {
+                WalletOutlinedTextField(
+                    modifier = Modifier.weight(0.75f),
+                    onClick = { countrySelectionVisible = true },
+                    value = country?.name ?: "",
+                    onValueChange = {},
+                    readOnly = true,
+                    placeholderText = stringResource(id = R.string.wallet_activation_your_country_of_residence),
+                )
+
+                if (!availableStates.isNullOrEmpty()) {
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    WalletOutlinedTextField(
+                        modifier = Modifier.weight(0.25f),
+                        onClick = { stateSelectionVisible = true },
+                        value = state?.code?.split("-")?.last() ?: "",
+                        onValueChange = {},
+                        readOnly = true,
+                        placeholderText = stringResource(id = R.string.wallet_activation_state),
+                    )
+                }
+            }
 
             WalletErrorText(
                 error = error,
@@ -309,8 +384,21 @@ private fun WalletActivationDataInput(
     }
 }
 
-private fun isNameAndEmailValid(name: String, email: String): Boolean {
-    return name.isNotBlank() && Patterns.EMAIL_ADDRESS.matcher(email).matches()
+@OptIn(ExperimentalSerializationApi::class)
+@Composable
+private fun rememberListOfCountries(): List<Country> {
+    val assets = LocalContext.current.assets
+    val regionsInputStream = try {
+        assets.open("regions.json")
+    } catch (error: IOException) {
+        return emptyList()
+    }
+    return remember { NostrJson.decodeFromStream<Regions>(regionsInputStream).toListOfCountries() }
+}
+
+private fun WalletActivationData.isValid(availableStates: List<State>?): Boolean {
+    return name.isNotBlank() && Patterns.EMAIL_ADDRESS.matcher(email).matches() &&
+        country != null && (availableStates.isNullOrEmpty() || state != null)
 }
 
 @ExperimentalComposeUiApi
@@ -387,6 +475,7 @@ private fun WalletCodeActivationInput(
             )
 
             WalletOutlinedTextField(
+                modifier = Modifier.fillMaxWidth(fraction = 0.8f),
                 value = code,
                 onValueChange = {
                     if (it.isDigitsOnly()) {
@@ -501,16 +590,46 @@ private fun WalletOutlinedTextField(
     value: String,
     onValueChange: (String) -> Unit,
     placeholderText: String,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    readOnly: Boolean = false,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions.Default,
+    onClick: (() -> Unit)? = null,
 ) {
+    val interactionSource = remember {
+        if (onClick != null) {
+            object : MutableInteractionSource {
+                override val interactions = MutableSharedFlow<Interaction>(
+                    extraBufferCapacity = 16,
+                    onBufferOverflow = BufferOverflow.DROP_OLDEST,
+                )
+
+                override suspend fun emit(interaction: Interaction) {
+                    if (interaction is PressInteraction.Release) {
+                        onClick()
+                    }
+                    interactions.emit(interaction)
+                }
+
+                override fun tryEmit(interaction: Interaction): Boolean {
+                    return interactions.tryEmit(interaction)
+                }
+            }
+        } else {
+            MutableInteractionSource()
+        }
+    }
+
     OutlinedTextField(
+        modifier = modifier,
         value = value,
         onValueChange = onValueChange,
-        modifier = Modifier.fillMaxWidth(fraction = 0.8f),
         colors = PrimalDefaults.outlinedTextFieldColors(),
         shape = AppTheme.shapes.large,
         singleLine = true,
+        enabled = enabled,
+        readOnly = readOnly,
         keyboardOptions = keyboardOptions,
         keyboardActions = keyboardActions,
         placeholder = {
@@ -520,6 +639,7 @@ private fun WalletOutlinedTextField(
                 style = AppTheme.typography.bodyLarge,
             )
         },
+        interactionSource = interactionSource,
     )
 }
 
@@ -530,13 +650,12 @@ private fun PreviewWalletActivationDataInput() {
     PrimalTheme(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
         Surface {
             WalletActivationDataInput(
-                inputName = "alex",
-                inputEmail = "alex@primal.net",
+                data = WalletActivationData(name = "alex", email = "alex@primal.net"),
                 working = false,
                 error = null,
                 isKeyboardVisible = false,
-                onDataChanged = { _, _ -> },
-                onActivationCodeRequest = { _, _ -> },
+                onDataChanged = { },
+                onActivationCodeRequest = { },
             )
         }
     }

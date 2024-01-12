@@ -6,4 +6,6 @@ import kotlinx.serialization.Serializable
 data class GetActivationCodeRequestBody(
     val name: String,
     val email: String,
+    val country: String?,
+    val state: String?,
 ) : WalletOperationRequestBody()
