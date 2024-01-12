@@ -331,6 +331,8 @@
     <string name="wallet_activation_done_button">Done</string>
     <string name="wallet_activation_country_picker_title">Select country</string>
     <string name="wallet_activation_state_picker_title">Select state</string>
+    <string name="wallet_activation_error_dialog_title">Warning</string>
+
     <string name="wallet_sats_suffix">sats</string>
     <string name="wallet_transaction_list_item_received">Received</string>
     <string name="wallet_transaction_list_item_sent">Sent</string>

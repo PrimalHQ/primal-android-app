@@ -29,12 +29,14 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -176,6 +178,10 @@ fun WalletActivationScreen(
                             working = uiState.working,
                             error = uiState.error,
                             isKeyboardVisible = isKeyboardVisible,
+                            onErrorDismiss = {
+                                eventPublisher(UiEvent.ClearErrorMessage)
+                                onClose()
+                            },
                             onDataChanged = { eventPublisher(UiEvent.ActivationDataChanged(data = it)) },
                             onActivationCodeRequest = { eventPublisher(UiEvent.ActivationRequest(data = it)) },
                         )
@@ -233,14 +239,15 @@ private fun WalletActivationDataInput(
     data: WalletActivationData,
     working: Boolean,
     error: Throwable?,
+    onErrorDismiss: () -> Unit,
     onDataChanged: (WalletActivationData) -> Unit,
     onActivationCodeRequest: (WalletActivationData) -> Unit,
     isKeyboardVisible: Boolean,
 ) {
     var name by rememberSaveable { mutableStateOf(data.name) }
     var email by rememberSaveable { mutableStateOf(data.email) }
-    var country by rememberSaveable { mutableStateOf(data.country) }
-    var state by rememberSaveable { mutableStateOf(data.state) }
+    var country by remember { mutableStateOf(data.country) }
+    var state by remember { mutableStateOf(data.state) }
     val activationDataSnapshot = {
         WalletActivationData(name = name, email = email, country = country, state = state)
     }
@@ -260,17 +267,29 @@ private fun WalletActivationDataInput(
         RegionSelectionBottomSheet(
             regions = countries,
             title = stringResource(id = R.string.wallet_activation_country_picker_title),
-            onRegionClick = { country = it },
+            onRegionClick = {
+                country = it
+                onDataChanged(activationDataSnapshot())
+            },
             onDismissRequest = { countrySelectionVisible = false },
         )
     } else if (stateSelectionVisible) {
         RegionSelectionBottomSheet(
             regions = countries.find { it.code == country?.code }?.states ?: emptyList(),
             title = stringResource(id = R.string.wallet_activation_state_picker_title),
-            onRegionClick = { state = it },
+            onRegionClick = {
+                state = it
+                onDataChanged(activationDataSnapshot())
+            },
             onDismissRequest = { stateSelectionVisible = false },
         )
     }
+
+    WalletActivationErrorHandler(
+        error = error,
+        fallbackMessage = stringResource(id = R.string.app_generic_error),
+        onErrorDismiss = onErrorDismiss,
+    )
 
     StepContainerWithActionButton(
         actionButtonText = stringResource(id = R.string.wallet_activation_next_button),
@@ -361,7 +380,7 @@ private fun WalletActivationDataInput(
                 )
 
                 if (!availableStates.isNullOrEmpty()) {
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(16.dp))
 
                     WalletOutlinedTextField(
                         modifier = Modifier.weight(0.25f),
@@ -373,11 +392,6 @@ private fun WalletActivationDataInput(
                     )
                 }
             }
-
-            WalletErrorText(
-                error = error,
-                fallbackMessage = stringResource(id = R.string.app_generic_error),
-            )
 
             Spacer(modifier = Modifier.height(16.dp))
         }
@@ -586,6 +600,40 @@ private fun WalletErrorText(error: Throwable?, fallbackMessage: String) {
 }
 
 @Composable
+private fun WalletActivationErrorHandler(
+    error: Throwable?,
+    fallbackMessage: String,
+    onErrorDismiss: () -> Unit,
+) {
+    if (error != null) {
+        val text = (error.message ?: "").ifEmpty { fallbackMessage }
+        AlertDialog(
+            containerColor = AppTheme.colorScheme.surfaceVariant,
+            onDismissRequest = onErrorDismiss,
+            title = {
+                Text(
+                    text = stringResource(id = R.string.wallet_activation_error_dialog_title),
+                    style = AppTheme.typography.titleLarge,
+                )
+            },
+            text = {
+                Text(
+                    text = text,
+                    style = AppTheme.typography.bodyLarge,
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = onErrorDismiss) {
+                    Text(
+                        text = stringResource(id = android.R.string.ok),
+                    )
+                }
+            },
+        )
+    }
+}
+
+@Composable
 private fun WalletOutlinedTextField(
     value: String,
     onValueChange: (String) -> Unit,
@@ -654,6 +702,7 @@ private fun PreviewWalletActivationDataInput() {
                 working = false,
                 error = null,
                 isKeyboardVisible = false,
+                onErrorDismiss = { },
                 onDataChanged = { },
                 onActivationCodeRequest = { },
             )
