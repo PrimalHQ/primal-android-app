@@ -52,6 +52,7 @@ import net.primal.android.core.utils.isGoogleBuild
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.PrimalDrawerScaffold
 import net.primal.android.theme.AppTheme
+import net.primal.android.user.domain.WalletPreference
 import net.primal.android.wallet.dashboard.WalletDashboardContract.UiEvent
 import net.primal.android.wallet.dashboard.WalletDashboardContract.UiState.DashboardError
 import net.primal.android.wallet.dashboard.ui.WalletAction
@@ -173,113 +174,134 @@ fun WalletDashboardScreen(
                 scrollBehavior = scrollBehaviour,
                 showDivider = !LocalPrimalTheme.current.isDarkTheme,
                 footer = {
-                    AnimatedContent(
-                        targetState = dashboardExpanded,
-                        label = "DashboardAnimation",
-                    ) { expanded ->
-                        when (expanded) {
-                            true -> WalletDashboard(
-                                modifier = Modifier
-                                    .wrapContentSize(align = Alignment.Center)
-                                    .padding(horizontal = 32.dp)
-                                    .padding(vertical = 32.dp)
-                                    .then(
-                                        if (state.primalWallet?.kycLevel == WalletKycLevel.None) {
-                                            Modifier.graphicsLayer { alpha = 0.42f }
-                                        } else {
-                                            Modifier
-                                        },
-                                    ),
-                                walletBalance = state.walletBalance,
-                                enabled = state.primalWallet?.kycLevel != WalletKycLevel.None,
-                                actions = listOf(WalletAction.Send, WalletAction.Scan, WalletAction.Receive),
-                                onWalletAction = { action ->
-                                    when (action) {
-                                        WalletAction.Send -> onSendClick()
-                                        WalletAction.Scan -> onScanClick()
-                                        WalletAction.Receive -> onReceiveClick()
-                                    }
-                                },
-                            )
+                    if (state.walletPreference != WalletPreference.NostrWalletConnect) {
+                        AnimatedContent(
+                            targetState = dashboardExpanded,
+                            label = "DashboardAnimation",
+                        ) { expanded ->
+                            when (expanded) {
+                                true -> WalletDashboard(
+                                    modifier = Modifier
+                                        .wrapContentSize(align = Alignment.Center)
+                                        .padding(horizontal = 32.dp)
+                                        .padding(vertical = 32.dp)
+                                        .then(
+                                            if (state.primalWallet?.kycLevel == WalletKycLevel.None) {
+                                                Modifier.graphicsLayer { alpha = 0.42f }
+                                            } else {
+                                                Modifier
+                                            },
+                                        ),
+                                    walletBalance = state.walletBalance,
+                                    enabled = state.primalWallet?.kycLevel != WalletKycLevel.None,
+                                    actions = listOf(WalletAction.Send, WalletAction.Scan, WalletAction.Receive),
+                                    onWalletAction = { action ->
+                                        when (action) {
+                                            WalletAction.Send -> onSendClick()
+                                            WalletAction.Scan -> onScanClick()
+                                            WalletAction.Receive -> onReceiveClick()
+                                        }
+                                    },
+                                )
 
-                            false -> WalletDashboardLite(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .wrapContentHeight()
-                                    .background(color = AppTheme.colorScheme.surface)
-                                    .padding(horizontal = 10.dp, vertical = 16.dp),
-                                walletBalance = state.walletBalance,
-                                actions = listOf(WalletAction.Send, WalletAction.Scan, WalletAction.Receive),
-                                onWalletAction = { action ->
-                                    when (action) {
-                                        WalletAction.Send -> onSendClick()
-                                        WalletAction.Scan -> onScanClick()
-                                        WalletAction.Receive -> onReceiveClick()
-                                    }
-                                },
-                            )
+                                false -> WalletDashboardLite(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .wrapContentHeight()
+                                        .background(color = AppTheme.colorScheme.surface)
+                                        .padding(horizontal = 10.dp, vertical = 16.dp),
+                                    walletBalance = state.walletBalance,
+                                    actions = listOf(WalletAction.Send, WalletAction.Scan, WalletAction.Receive),
+                                    onWalletAction = { action ->
+                                        when (action) {
+                                            WalletAction.Send -> onSendClick()
+                                            WalletAction.Scan -> onScanClick()
+                                            WalletAction.Receive -> onReceiveClick()
+                                        }
+                                    },
+                                )
+                            }
                         }
                     }
                 },
             )
         },
         content = { paddingValues ->
-            if (state.primalWallet != null && state.primalWallet.kycLevel != WalletKycLevel.None) {
-                if (pagingItems.loadState.refresh is LoadState.NotLoading && pagingItems.isEmpty()) {
+            when {
+                state.walletPreference == WalletPreference.NostrWalletConnect -> {
                     WalletCallToActionBox(
                         modifier = Modifier
                             .fillMaxSize()
-                            .animateContentSize()
                             .padding(paddingValues)
+                            .padding(horizontal = 64.dp)
                             .padding(bottom = 32.dp)
                             .navigationBarsPadding(),
-                        message = stringResource(id = R.string.wallet_dashboard_no_transactions_hint),
-                        actionLabel = if (isGoogleBuild()) {
-                            stringResource(id = R.string.wallet_dashboard_buy_sats_button)
-                        } else {
-                            null
-                        },
-                        onActionClick = {
-                            inAppPurchaseVisible = true
-                        },
-                    )
-                } else {
-                    TransactionsLazyColumn(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(color = AppTheme.colorScheme.surfaceVariant)
-                            .padding(top = with(LocalDensity.current) { topBarHeight.toDp() }),
-                        pagingItems = pagingItems,
-                        listState = listState,
-                        onProfileClick = onProfileClick,
-                        header = {
-                            if (state.lowBalance && pagingItems.itemCount > 0 && isGoogleBuild()) {
-                                WalletCallToActionBox(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .animateContentSize()
-                                        .padding(bottom = 32.dp),
-                                    message = stringResource(id = R.string.wallet_dashboard_low_sats_hint),
-                                    actionLabel = stringResource(id = R.string.wallet_dashboard_buy_sats_button),
-                                    onActionClick = {
-                                        inAppPurchaseVisible = true
-                                    },
-                                )
-                            }
-                        },
+                        message = stringResource(id = R.string.wallet_dashboard_enable_wallet_notice_hint),
+                        actionLabel = stringResource(id = R.string.wallet_dashboard_enable_wallet_button),
+                        onActionClick = { eventPublisher(UiEvent.EnablePrimalWallet) },
                     )
                 }
-            } else {
-                WalletCallToActionBox(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues)
-                        .padding(bottom = 32.dp)
-                        .navigationBarsPadding(),
-                    message = stringResource(id = R.string.wallet_dashboard_activate_notice_hint),
-                    actionLabel = stringResource(id = R.string.wallet_dashboard_activate_button),
-                    onActionClick = onWalletActivateClick,
-                )
+
+                state.primalWallet != null && state.primalWallet.kycLevel == WalletKycLevel.None -> {
+                    WalletCallToActionBox(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues)
+                            .padding(horizontal = 64.dp)
+                            .padding(bottom = 32.dp)
+                            .navigationBarsPadding(),
+                        message = stringResource(id = R.string.wallet_dashboard_activate_notice_hint),
+                        actionLabel = stringResource(id = R.string.wallet_dashboard_activate_button),
+                        onActionClick = onWalletActivateClick,
+                    )
+                }
+
+                else -> {
+                    if (pagingItems.loadState.refresh is LoadState.NotLoading && pagingItems.isEmpty()) {
+                        WalletCallToActionBox(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .animateContentSize()
+                                .padding(paddingValues)
+                                .padding(bottom = 32.dp)
+                                .navigationBarsPadding(),
+                            message = stringResource(id = R.string.wallet_dashboard_no_transactions_hint),
+                            actionLabel = if (isGoogleBuild()) {
+                                stringResource(id = R.string.wallet_dashboard_buy_sats_button)
+                            } else {
+                                null
+                            },
+                            onActionClick = {
+                                inAppPurchaseVisible = true
+                            },
+                        )
+                    } else {
+                        TransactionsLazyColumn(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(color = AppTheme.colorScheme.surfaceVariant)
+                                .padding(top = with(LocalDensity.current) { topBarHeight.toDp() }),
+                            pagingItems = pagingItems,
+                            listState = listState,
+                            onProfileClick = onProfileClick,
+                            header = {
+                                if (state.lowBalance && pagingItems.itemCount > 0 && isGoogleBuild()) {
+                                    WalletCallToActionBox(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .animateContentSize()
+                                            .padding(bottom = 32.dp),
+                                        message = stringResource(id = R.string.wallet_dashboard_low_sats_hint),
+                                        actionLabel = stringResource(id = R.string.wallet_dashboard_buy_sats_button),
+                                        onActionClick = {
+                                            inAppPurchaseVisible = true
+                                        },
+                                    )
+                                }
+                            },
+                        )
+                    }
+                }
             }
         },
         snackbarHost = {

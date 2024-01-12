@@ -18,6 +18,8 @@ import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.networking.sockets.errors.NostrNoticeException
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.android.user.domain.WalletPreference
+import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.dashboard.WalletDashboardContract.UiEvent
 import net.primal.android.wallet.dashboard.WalletDashboardContract.UiState
 import net.primal.android.wallet.db.WalletTransaction
@@ -32,6 +34,7 @@ import timber.log.Timber
 class WalletDashboardViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val walletRepository: WalletRepository,
+    private val userRepository: UserRepository,
     private val primalBillingClient: PrimalBillingClient,
 ) : ViewModel() {
 
@@ -61,6 +64,7 @@ class WalletDashboardViewModel @Inject constructor(
             events.collect {
                 when (it) {
                     UiEvent.DismissError -> setState { copy(error = null) }
+                    UiEvent.EnablePrimalWallet -> enablePrimalWallet()
                 }
             }
         }
@@ -85,6 +89,14 @@ class WalletDashboardViewModel @Inject constructor(
             primalBillingClient.purchases.collect { purchase ->
                 confirmPurchase(purchase = purchase)
             }
+        }
+
+    private fun enablePrimalWallet() =
+        viewModelScope.launch {
+            userRepository.updateWalletPreference(
+                userId = activeUserId,
+                walletPreference = WalletPreference.PrimalWallet,
+            )
         }
 
     private fun confirmPurchase(purchase: SatsPurchase) =

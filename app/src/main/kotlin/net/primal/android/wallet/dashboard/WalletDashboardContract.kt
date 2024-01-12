@@ -26,5 +26,6 @@ interface WalletDashboardContract {
 
     sealed class UiEvent {
         data object DismissError : UiEvent()
+        data object EnablePrimalWallet : UiEvent()
     }
 }

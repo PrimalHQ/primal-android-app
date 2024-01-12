@@ -10,6 +10,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.theme.AppTheme
@@ -33,6 +34,7 @@ fun WalletCallToActionBox(
             Text(
                 modifier = Modifier.padding(vertical = 16.dp),
                 text = message,
+                textAlign = TextAlign.Center,
                 color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
                 style = AppTheme.typography.bodyMedium,
             )

@@ -310,6 +310,8 @@
 
     <string name="wallet_dashboard_activate_notice_hint">You need to activate your wallet</string>
     <string name="wallet_dashboard_activate_button">Activate Wallet Now</string>
+    <string name="wallet_dashboard_enable_wallet_notice_hint">External wallet is currently enabled via Nostr Wallet Connect</string>
+    <string name="wallet_dashboard_enable_wallet_button">Enable Primal Wallet</string>
     <string name="wallet_dashboard_no_transactions_hint">You need sats to zap people on Nostr</string>
     <string name="wallet_dashboard_low_sats_hint">You are running low on sats</string>
     <string name="wallet_dashboard_buy_sats_button">Buy Sats Now</string>

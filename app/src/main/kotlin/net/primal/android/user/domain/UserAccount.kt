@@ -19,7 +19,11 @@ data class UserAccount(
     val nostrWallet: NostrWalletConnect? = null,
     val primalWallet: PrimalWallet? = null,
     val primalWalletBalanceInBtc: String? = null,
-    val walletPreference: WalletPreference = WalletPreference.Undefined,
+    val walletPreference: WalletPreference = when {
+        primalWallet != null -> WalletPreference.PrimalWallet
+        nostrWallet != null -> WalletPreference.NostrWalletConnect
+        else -> WalletPreference.Undefined
+    },
     val appSettings: ContentAppSettings? = null,
     val relays: List<Relay> = emptyList(),
     val following: Set<String> = emptySet(),
