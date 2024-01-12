@@ -70,5 +70,5 @@ jobs:
        name: Primal ${{ github.ref_name }}
        draft: true
        prerelease: true
-       body_path: app/src/release/github/release-notes/github.md
+       body_path: app/src/main/github/release-notes/github.md
        files: primal-${{ github.ref_name }}/*
