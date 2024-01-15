@@ -137,11 +137,13 @@ fun WalletDashboardScreen(
         pagingItems.refresh()
     }
 
-    val dashboardExpanded by remember(listState) {
-        derivedStateOf {
-            listState.firstVisibleItemScrollOffset == 0 && listState.firstVisibleItemIndex <= 1
+    LaunchedEffect(pagingItems.itemCount, listState) {
+        if (listState.firstVisibleItemScrollOffset == 0) {
+            listState.animateScrollToItem(0)
         }
     }
+
+    val dashboardExpanded by remember(listState) { derivedStateOf { listState.firstVisibleItemScrollOffset == 0 } }
 
     var topBarHeight by remember { mutableIntStateOf(0) }
 
