@@ -1,3 +1,4 @@
-- Implement country/state selection on wallet activation;
-- Implement enable primal wallet on wallet tab if NWC is preferred;
-- Implement new bolt looks on navigation bar;
+- Implemented wallet api changes;
+- Implemented scroll to top on transactions refresh if list is at top;
+- Fixed transactions scrolling glitch;
+- Fixed minor padding issues on wallet;
