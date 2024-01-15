@@ -14,7 +14,7 @@ data class WalletTransactionData(
     val type: TxType,
     val state: TxState,
     val createdAt: Long,
-    val completedAt: Long,
+    val completedAt: Long?,
     val amountInBtc: String,
     val isZap: Boolean,
     val isStorePurchase: Boolean,

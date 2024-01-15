@@ -130,7 +130,7 @@ class WalletDashboardViewModel @Inject constructor(
             txId = this.data.id,
             txType = this.data.type,
             txAmountInSats = this.data.amountInBtc.toBigDecimal().abs().toSats(),
-            txInstant = Instant.ofEpochSecond(this.data.completedAt),
+            txInstant = Instant.ofEpochSecond(this.data.createdAt),
             txNote = this.data.note,
             otherUserId = this.data.otherUserId,
             otherUserAvatarCdnImage = this.otherProfileData?.avatarCdnImage,

@@ -14,7 +14,7 @@ interface WalletTransactionDao {
     fun upsertAll(data: List<WalletTransactionData>)
 
     @Transaction
-    @Query("SELECT * FROM WalletTransactionData ORDER BY completedAt DESC")
+    @Query("SELECT * FROM WalletTransactionData WHERE state IS \"SUCCEEDED\" ORDER BY completedAt DESC")
     fun latestTransactionsPaged(): PagingSource<Int, WalletTransaction>
 
     @Query("SELECT * FROM WalletTransactionData ORDER BY createdAt DESC LIMIT 1")

@@ -12,7 +12,7 @@ data class ContentWalletTransaction(
     val type: TxType,
     val state: TxState,
     @SerialName("created_at") val createdAt: Long,
-    @SerialName("completed_at") val completedAt: Long,
+    @SerialName("completed_at") val completedAt: Long?,
     @SerialName("amount_btc") val amountInBtc: String,
     @SerialName("amount_usd") val amountInUsd: String?,
     @SerialName("pubkey_1") val selfPubkey: String,
