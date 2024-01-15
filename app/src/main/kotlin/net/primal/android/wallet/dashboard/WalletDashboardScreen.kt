@@ -233,7 +233,7 @@ fun WalletDashboardScreen(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(paddingValues)
-                            .padding(horizontal = 64.dp)
+                            .padding(horizontal = 32.dp)
                             .padding(bottom = 32.dp)
                             .navigationBarsPadding(),
                         message = stringResource(id = R.string.wallet_dashboard_enable_wallet_notice_hint),
@@ -247,7 +247,7 @@ fun WalletDashboardScreen(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(paddingValues)
-                            .padding(horizontal = 64.dp)
+                            .padding(horizontal = 32.dp)
                             .padding(bottom = 32.dp)
                             .navigationBarsPadding(),
                         message = stringResource(id = R.string.wallet_dashboard_activate_notice_hint),

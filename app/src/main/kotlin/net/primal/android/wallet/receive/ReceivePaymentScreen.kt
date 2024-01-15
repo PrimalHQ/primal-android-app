@@ -254,7 +254,7 @@ private fun ReceivePaymentViewer(
         Spacer(modifier = Modifier.height(8.dp))
 
         Row(
-            modifier = Modifier.fillMaxWidth(fraction = 0.8f),
+            modifier = Modifier.fillMaxWidth(fraction = 0.85f),
             horizontalArrangement = Arrangement.SpaceEvenly,
         ) {
             PrimalLoadingButton(

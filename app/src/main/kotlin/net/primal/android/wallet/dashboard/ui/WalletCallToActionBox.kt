@@ -32,7 +32,7 @@ fun WalletCallToActionBox(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
-                modifier = Modifier.padding(vertical = 16.dp),
+                modifier = Modifier.padding(vertical = 16.dp, horizontal = 16.dp),
                 text = message,
                 textAlign = TextAlign.Center,
                 color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
@@ -41,7 +41,7 @@ fun WalletCallToActionBox(
 
             if (actionLabel != null) {
                 PrimalFilledButton(
-                    modifier = Modifier.fillMaxWidth(fraction = 0.8f),
+                    modifier = Modifier.fillMaxWidth(),
                     onClick = { onActionClick?.invoke() },
                 ) {
                     Text(text = actionLabel)

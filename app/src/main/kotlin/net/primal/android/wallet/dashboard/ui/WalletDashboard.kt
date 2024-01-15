@@ -34,9 +34,7 @@ fun WalletDashboard(
         )
 
         WalletActionsRow(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
+            modifier = Modifier.fillMaxWidth(),
             actionSize = 80.dp,
             actions = actions,
             enabled = enabled,
