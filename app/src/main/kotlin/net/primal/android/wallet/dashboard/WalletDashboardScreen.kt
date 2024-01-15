@@ -4,8 +4,10 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -137,7 +139,12 @@ fun WalletDashboardScreen(
         pagingItems.refresh()
     }
 
+    var shouldAddFooter by remember { mutableStateOf(false) }
     LaunchedEffect(pagingItems.itemCount, listState) {
+        if (listState.canScrollForward) {
+            shouldAddFooter = true
+        }
+
         if (listState.firstVisibleItemScrollOffset == 0) {
             listState.animateScrollToItem(0)
         }
@@ -299,6 +306,11 @@ fun WalletDashboardScreen(
                                             inAppPurchaseVisible = true
                                         },
                                     )
+                                }
+                            },
+                            footer = {
+                                if (shouldAddFooter) {
+                                    Spacer(modifier = Modifier.height(200.dp))
                                 }
                             },
                         )

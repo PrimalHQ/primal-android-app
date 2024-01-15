@@ -31,6 +31,7 @@ fun TransactionsLazyColumn(
     onProfileClick: (String) -> Unit,
     paddingValues: PaddingValues = PaddingValues(0.dp),
     header: (@Composable () -> Unit)? = null,
+    footer: (@Composable () -> Unit)? = null,
 ) {
     val today = stringResource(id = R.string.wallet_transactions_today).lowercase()
     val yesterday = stringResource(id = R.string.wallet_transactions_yesterday).lowercase()
@@ -41,7 +42,9 @@ fun TransactionsLazyColumn(
         contentPadding = paddingValues,
     ) {
         if (header != null) {
-            item {
+            item(
+                contentType = { "Header" },
+            ) {
                 header()
             }
         }
@@ -74,6 +77,14 @@ fun TransactionsLazyColumn(
                     numberFormat = numberFormat,
                     onAvatarClick = onProfileClick,
                 )
+            }
+        }
+
+        if (footer != null) {
+            item(
+                contentType = { "Footer" },
+            ) {
+                footer()
             }
         }
     }
