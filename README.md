@@ -117,7 +117,7 @@
 This project requires the following pre-requisites:
 - Java 17;
 - Android SDK;
-- Android Studio (Giraffe 2022.3.1 and AGP 8.1);
+- Android Studio (Hedgehog 2023.1.1 and AGP 8.2);
 - Android 8.0+ device or emulator;
 
 ## Building
@@ -130,7 +130,7 @@ Following properties in `config.properties` are **MANDATORY** for any release bu
 ```properties
 localStorage.keyAlias={KeystoreAliasForEncryption}
 ```
-If you want to build the release build with your own certificate you can use `releasePlayStore` or `releaseAlternative`
+If you want to build the release build with your own certificate you can use `googlePlayRelease` or `aospAltRelease`
 build variant which will read the certificate details from following properties in `config.properties`:
 ```properties
 {signingConfigName}.storeFile={PathToYourCertificate}
@@ -149,8 +149,8 @@ Please note that debug builds do not use encryption when storing sensitive infor
 significantly slower compared to release builds.
 
 ### Release builds
-To install release build execute `./gradlew installReleaseAlternative` or `./gradlew installReleasePlayStore`, or
-run in AndroidStudio. Please note that `releasePlayStore` and `releaseAlternative` build variants require
+To install release build execute `./gradlew installAospAltRelease` or `./gradlew installGooglePlayRelease`, or
+run in AndroidStudio. Please note that `googlePlayRelease` and `aospAltRelease` build variants require
 `config.properties` configured with mandatory properties. If no certificate properties are provided it fallbacks
 to `debug` certificate.
 
