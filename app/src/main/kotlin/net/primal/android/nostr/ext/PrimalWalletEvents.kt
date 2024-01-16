@@ -24,8 +24,10 @@ fun ContentWalletTransaction.asWalletTransactionPO(walletAddress: String): Walle
         type = this.type,
         state = this.state,
         createdAt = this.createdAt,
+        updatedAt = this.updatedAt,
         completedAt = this.completedAt,
         amountInBtc = this.amountInBtc,
+        amountInUsd = this.amountInUsd,
         userId = this.selfPubkey,
         userSubWallet = this.selfSubWallet,
         userLightningAddress = this.selfLud16,
@@ -37,5 +39,9 @@ fun ContentWalletTransaction.asWalletTransactionPO(walletAddress: String): Walle
         zapNoteId = zapEvent?.tags?.findFirstEventId(),
         zapNoteAuthorId = zapEvent?.tags?.findFirstProfileId(),
         zappedByUserId = zapEvent?.pubKey,
+        invoice = this.invoice,
+        totalFeeInBtc = this.totalFeeInBtc,
+        exchangeRate = this.exchangeRate,
+        onChainAddress = this.onChainAddress,
     )
 }

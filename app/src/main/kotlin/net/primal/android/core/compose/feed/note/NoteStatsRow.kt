@@ -41,8 +41,8 @@ import net.primal.android.theme.AppTheme
 fun FeedNoteStatsRow(
     modifier: Modifier,
     postStats: FeedPostStatsUi,
-    onPostAction: (FeedPostAction) -> Unit,
-    onPostLongPressAction: (FeedPostAction) -> Unit,
+    onPostAction: ((FeedPostAction) -> Unit)? = null,
+    onPostLongPressAction: ((FeedPostAction) -> Unit)? = null,
 ) {
     Row(
         modifier = modifier,
@@ -54,8 +54,12 @@ fun FeedNoteStatsRow(
             iconVector = PrimalIcons.FeedReplies,
             iconVectorHighlight = PrimalIcons.FeedRepliesFilled,
             colorHighlight = AppTheme.extraColorScheme.replied,
-            onClick = { onPostAction(FeedPostAction.Reply) },
-            onLongClick = { onPostLongPressAction(FeedPostAction.Reply) },
+            onClick = onPostAction?.let {
+                { onPostAction(FeedPostAction.Reply) }
+            },
+            onLongClick = onPostLongPressAction?.let {
+                { onPostLongPressAction(FeedPostAction.Reply) }
+            },
         )
 
         SinglePostStat(
@@ -64,8 +68,12 @@ fun FeedNoteStatsRow(
             iconVector = PrimalIcons.FeedZaps,
             iconVectorHighlight = PrimalIcons.FeedZapsFilled,
             colorHighlight = AppTheme.extraColorScheme.zapped,
-            onClick = { onPostAction(FeedPostAction.Zap) },
-            onLongClick = { onPostLongPressAction(FeedPostAction.Zap) },
+            onClick = onPostAction?.let {
+                { onPostAction(FeedPostAction.Zap) }
+            },
+            onLongClick = onPostLongPressAction?.let {
+                { onPostLongPressAction(FeedPostAction.Zap) }
+            },
         )
 
         SinglePostStat(
@@ -74,12 +82,14 @@ fun FeedNoteStatsRow(
             iconVector = PrimalIcons.FeedLikes,
             iconVectorHighlight = PrimalIcons.FeedLikesFilled,
             colorHighlight = AppTheme.extraColorScheme.liked,
-            onClick = {
-                if (!postStats.userLiked) {
-                    onPostAction(FeedPostAction.Like)
-                }
+            onClick = if (!postStats.userLiked && onPostAction != null) {
+                { onPostAction(FeedPostAction.Like) }
+            } else {
+                null
             },
-            onLongClick = { onPostLongPressAction(FeedPostAction.Like) },
+            onLongClick = onPostLongPressAction?.let {
+                { onPostLongPressAction(FeedPostAction.Like) }
+            },
         )
 
         SinglePostStat(
@@ -88,8 +98,12 @@ fun FeedNoteStatsRow(
             iconVector = PrimalIcons.FeedReposts,
             iconVectorHighlight = PrimalIcons.FeedRepostsFilled,
             colorHighlight = AppTheme.extraColorScheme.reposted,
-            onClick = { onPostAction(FeedPostAction.Repost) },
-            onLongClick = { onPostLongPressAction(FeedPostAction.Repost) },
+            onClick = onPostAction?.let {
+                { onPostAction(FeedPostAction.Repost) }
+            },
+            onLongClick = onPostLongPressAction?.let {
+                { onPostLongPressAction(FeedPostAction.Repost) }
+            },
         )
     }
 }
@@ -102,8 +116,8 @@ private fun SinglePostStat(
     iconVector: ImageVector,
     iconVectorHighlight: ImageVector,
     colorHighlight: Color,
-    onClick: () -> Unit,
-    onLongClick: () -> Unit,
+    onClick: (() -> Unit)? = null,
+    onLongClick: (() -> Unit)? = null,
 ) {
     val titleText = buildAnnotatedString {
         appendInlineContent("icon", "[icon]")
@@ -139,7 +153,8 @@ private fun SinglePostStat(
             .clip(CircleShape)
             .animateContentSize()
             .combinedClickable(
-                onClick = onClick,
+                enabled = onClick != null || onLongClick != null,
+                onClick = { onClick?.invoke() },
                 onLongClick = onLongClick,
             ),
         text = titleText,

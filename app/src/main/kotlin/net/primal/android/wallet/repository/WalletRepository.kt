@@ -37,6 +37,8 @@ class WalletRepository @Inject constructor(
             database.walletTransactions().latestTransactionsPaged()
         }.flow
 
+    fun findTransactionById(txId: String) = database.walletTransactions().findTransactionById(txId = txId)
+
     suspend fun fetchUserWalletInfoAndUpdateUserAccount(userId: String) {
         withContext(dispatcherProvider.io()) {
             val response = walletApi.getWalletUserInfo(userId)

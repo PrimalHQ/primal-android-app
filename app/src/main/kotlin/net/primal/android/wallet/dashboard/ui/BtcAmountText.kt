@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.TextUnit
@@ -20,10 +21,12 @@ import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
 
 @Composable
-fun AmountText(
+fun BtcAmountText(
     modifier: Modifier,
     amountInBtc: BigDecimal?,
     textSize: TextUnit = 42.sp,
+    amountColor: Color = Color.Unspecified,
+    currencyColor: Color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
 ) {
     val numberFormat = remember { NumberFormat.getNumberInstance() }
 
@@ -37,6 +40,7 @@ fun AmountText(
             textAlign = TextAlign.Center,
             style = AppTheme.typography.displayMedium,
             fontSize = textSize,
+            color = amountColor,
         )
 
         if (amountInBtc != null) {
@@ -46,7 +50,7 @@ fun AmountText(
                 textAlign = TextAlign.Center,
                 maxLines = 1,
                 style = AppTheme.typography.bodyMedium,
-                color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
+                color = currencyColor,
             )
         }
     }

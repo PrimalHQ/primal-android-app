@@ -19,7 +19,9 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import net.primal.android.core.compose.feed.model.asFeedPostUi
+import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.files.FileAnalyser
 import net.primal.android.core.files.error.UnsuccessfulFileUpload
 import net.primal.android.editor.NoteEditorContract.SideEffect
@@ -36,10 +38,12 @@ import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
+import timber.log.Timber
 
 @HiltViewModel
 class NoteEditorViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
+    private val dispatcherProvider: CoroutineDispatcherProvider,
     private val fileAnalyser: FileAnalyser,
     private val activeAccountStore: ActiveAccountStore,
     private val feedRepository: FeedRepository,
@@ -119,9 +123,11 @@ class NoteEditorViewModel @Inject constructor(
     private fun fetchRepliesFromNetwork(replyToNoteId: String) =
         viewModelScope.launch {
             try {
-                feedRepository.fetchReplies(postId = replyToNoteId)
+                withContext(dispatcherProvider.io()) {
+                    feedRepository.fetchReplies(postId = replyToNoteId)
+                }
             } catch (error: WssException) {
-                // Ignore
+                Timber.e(error)
             }
         }
 

@@ -2,12 +2,8 @@ package net.primal.android.wallet.transactions.list
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.Surface
@@ -23,7 +19,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.text.NumberFormat
 import java.time.Instant
@@ -200,21 +195,6 @@ private fun TransactionTrailingContent(txAmountInSats: String, txType: TxType) {
             style = AppTheme.typography.bodySmall,
             color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
         )
-    }
-}
-
-@Composable
-private fun TransactionIcon(content: @Composable () -> Unit) {
-    Box(
-        modifier = Modifier
-            .background(
-                color = AppTheme.extraColorScheme.surfaceVariantAlt1,
-                shape = CircleShape,
-            )
-            .size(48.dp),
-        contentAlignment = Alignment.Center,
-    ) {
-        content()
     }
 }
 

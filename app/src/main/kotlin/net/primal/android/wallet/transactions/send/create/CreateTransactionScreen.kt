@@ -67,7 +67,7 @@ import net.primal.android.core.compose.icons.primaliconpack.WalletError
 import net.primal.android.core.compose.icons.primaliconpack.WalletSuccess
 import net.primal.android.core.compose.numericpad.PrimalNumericPad
 import net.primal.android.theme.AppTheme
-import net.primal.android.wallet.dashboard.ui.AmountText
+import net.primal.android.wallet.dashboard.ui.BtcAmountText
 import net.primal.android.wallet.numericPadContentTransformAnimation
 import net.primal.android.wallet.transactions.send.create.CreateTransactionContract.UiEvent.SendTransaction
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toBtc
@@ -216,7 +216,7 @@ private fun TransactionEditor(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            AmountText(
+            BtcAmountText(
                 modifier = Modifier
                     .padding(start = 32.dp)
                     .height(72.dp)

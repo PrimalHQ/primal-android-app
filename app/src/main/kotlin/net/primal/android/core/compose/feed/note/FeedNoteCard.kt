@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -44,7 +45,9 @@ import net.primal.android.theme.domain.PrimalTheme
 @Composable
 fun FeedNoteCard(
     data: FeedPostUi,
+    modifier: Modifier = Modifier,
     shape: Shape = CardDefaults.shape,
+    colors: CardColors = CardDefaults.cardColors(),
     cardPadding: PaddingValues = PaddingValues(all = 0.dp),
     fullWidthNote: Boolean = false,
     headerSingleLine: Boolean = true,
@@ -55,8 +58,8 @@ fun FeedNoteCard(
     expanded: Boolean = false,
     onPostClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
-    onPostAction: (FeedPostAction) -> Unit,
-    onPostLongClickAction: (FeedPostAction) -> Unit,
+    onPostAction: ((FeedPostAction) -> Unit)? = null,
+    onPostLongClickAction: ((FeedPostAction) -> Unit)? = null,
     onHashtagClick: (String) -> Unit,
     onMediaClick: (String, String) -> Unit,
     onMuteUserClick: () -> Unit,
@@ -71,7 +74,7 @@ fun FeedNoteCard(
     val overflowIconSizeDp = 40.dp
 
     NoteSurfaceCard(
-        modifier = Modifier
+        modifier = modifier
             .wrapContentHeight()
             .padding(cardPadding)
             .clickable(
@@ -80,6 +83,7 @@ fun FeedNoteCard(
                 onClick = { onPostClick(data.postId) },
             ),
         shape = shape,
+        colors = colors,
         drawLineAboveAvatar = drawLineAboveAvatar,
         drawLineBelowAvatar = drawLineBelowAvatar,
         lineOffsetX = (avatarSizeDp / 2) + avatarPaddingDp + notePaddingDp,

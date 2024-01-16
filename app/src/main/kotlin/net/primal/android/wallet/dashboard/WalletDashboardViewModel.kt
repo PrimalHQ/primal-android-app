@@ -123,9 +123,9 @@ class WalletDashboardViewModel @Inject constructor(
     }
 
     private fun Flow<PagingData<WalletTransaction>>.mapAsPagingDataOfTransactionUi() =
-        map { pagingData -> pagingData.map { it.mapAsTransactionUi() } }
+        map { pagingData -> pagingData.map { it.mapAsTransactionDataUi() } }
 
-    private fun WalletTransaction.mapAsTransactionUi() =
+    private fun WalletTransaction.mapAsTransactionDataUi() =
         TransactionDataUi(
             txId = this.data.id,
             txType = this.data.type,

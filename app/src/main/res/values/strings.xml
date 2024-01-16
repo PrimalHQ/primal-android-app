@@ -391,7 +391,30 @@
     <string name="wallet_receive_transaction_apply_numeric_pad_button">Apply</string>
     <string name="wallet_receive_transaction_invoice_creation_error">Unable to add details. Please try again in few moments.</string>
 
-    <string name="wallet_transaction_details_something">Something</string>
+    <string name="wallet_transaction_details_title_zap_received">Zap Received</string>
+    <string name="wallet_transaction_details_title_zap_sent">Zap Sent</string>
+    <string name="wallet_transaction_details_title_payment_received">Payment Received</string>
+    <string name="wallet_transaction_details_title_payment_sent">Payment Sent</string>
+    <string name="wallet_transaction_details_sent_to">Sent To</string>
+    <string name="wallet_transaction_details_received_from">Received From</string>
+    <string name="wallet_transaction_details_zapped_note">Zapped Note</string>
+    <string name="wallet_transaction_details_date_item">Date</string>
+    <string name="wallet_transaction_details_status_item">Status</string>
+    <string name="wallet_transaction_details_type_item">Transaction Type</string>
+    <string name="wallet_transaction_details_currents_usd_item">Current USD value</string>
+    <string name="wallet_transaction_details_original_usd_item">Original USD value</string>
+    <string name="wallet_transaction_details_fee_item">Transaction Fee</string>
+    <string name="wallet_transaction_details_invoice_item">Invoice</string>
+    <string name="wallet_transaction_details_expand_collapse_hint">Transaction details</string>
+    <string name="wallet_transaction_details_type_nostr_zap">Nostr Zap</string>
+    <string name="wallet_transaction_details_type_in_app_purchase">In-app Purchase</string>
+    <string name="wallet_transaction_details_type_on_chain_payment">On-chain Payment</string>
+    <string name="wallet_transaction_details_type_lightning_payment">Lightning Payment</string>
+    <string name="wallet_transaction_details_status_created">Draft</string>
+    <string name="wallet_transaction_details_status_processing">Pending</string>
+    <string name="wallet_transaction_details_status_succeeded">Paid</string>
+    <string name="wallet_transaction_details_status_failed">Failed</string>
+    <string name="wallet_transaction_details_status_canceled">Canceled</string>
 
     <string name="qrcode_scanner_permission_title">Permission required</string>
     <string name="qrcode_scanner_permission_rationale">Primal needs access to your camera to scan QR codes.</string>

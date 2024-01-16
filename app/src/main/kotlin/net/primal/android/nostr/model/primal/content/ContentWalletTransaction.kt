@@ -12,6 +12,7 @@ data class ContentWalletTransaction(
     val type: TxType,
     val state: TxState,
     @SerialName("created_at") val createdAt: Long,
+    @SerialName("updated_at") val updatedAt: Long,
     @SerialName("completed_at") val completedAt: Long?,
     @SerialName("amount_btc") val amountInBtc: String,
     @SerialName("amount_usd") val amountInUsd: String?,
@@ -25,4 +26,8 @@ data class ContentWalletTransaction(
     @SerialName("is_zap") val isZap: Boolean,
     @SerialName("zap_request") val zapRequestRawJson: String?,
     @SerialName("is_in_app_purchase") val isInAppPurchase: Boolean,
+    val invoice: String?,
+    @SerialName("total_fee_btc") val totalFeeInBtc: String?,
+    @SerialName("exchange_rate") val exchangeRate: String?,
+    @SerialName("onchainAddress") val onChainAddress: String?,
 )

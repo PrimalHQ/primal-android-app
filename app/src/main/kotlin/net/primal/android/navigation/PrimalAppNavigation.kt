@@ -162,12 +162,12 @@ private fun NavController.navigateToWalletSettings(nwcUrl: String? = null) =
         else -> navigate(route = "wallet_settings")
     }
 
-private fun NavController.navigateToThread(noteId: String) = navigate(route = "thread/$noteId")
+fun NavController.navigateToThread(noteId: String) = navigate(route = "thread/$noteId")
 
-private fun NavController.navigateToMediaGallery(noteId: String, mediaUrl: String) =
+fun NavController.navigateToMediaGallery(noteId: String, mediaUrl: String) =
     navigate(route = "media/$noteId?$MEDIA_URL=$mediaUrl")
 
-private fun NavController.navigateToExploreFeed(query: String) = navigate(route = "explore/$query")
+fun NavController.navigateToExploreFeed(query: String) = navigate(route = "explore/$query")
 
 @OptIn(ExperimentalMaterialNavigationApi::class)
 @Composable

@@ -22,4 +22,8 @@ interface WalletTransactionDao {
 
     @Query("SELECT * FROM WalletTransactionData ORDER BY createdAt ASC LIMIT 1")
     fun last(): WalletTransactionData?
+
+    @Transaction
+    @Query("SELECT * FROM WalletTransactionData WHERE id IS :txId")
+    fun findTransactionById(txId: String): WalletTransaction?
 }

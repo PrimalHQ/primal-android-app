@@ -27,6 +27,8 @@
 
 
 <!-- PROJECT LOGO -->
+<!--suppress ALL -->
+
 <br />
 <div align="center">
   <a href="https://github.com/PrimalHQ/primal-android-app">

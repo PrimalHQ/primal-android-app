@@ -6,10 +6,8 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.PagingSource
 import javax.inject.Inject
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.withContext
 import net.primal.android.core.ext.isLatestFeed
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.feed.api.FeedApi
@@ -63,23 +61,22 @@ class FeedRepository @Inject constructor(
             userId = activeAccountStore.activeUserId(),
         )
 
-    suspend fun fetchReplies(postId: String) =
-        withContext(Dispatchers.IO) {
-            val userId = activeAccountStore.activeUserId()
-            val response = feedApi.getThread(
-                ThreadRequestBody(postId = postId, userPubKey = userId, limit = 100),
-            )
+    suspend fun fetchReplies(postId: String) {
+        val userId = activeAccountStore.activeUserId()
+        val response = feedApi.getThread(
+            ThreadRequestBody(postId = postId, userPubKey = userId, limit = 100),
+        )
 
-            response.persistToDatabaseAsTransaction(userId = userId, database = database)
-            database.conversationConnections().connect(
-                data = response.posts.map {
-                    ThreadConversationCrossRef(
-                        postId = postId,
-                        replyPostId = it.id,
-                    )
-                },
-            )
-        }
+        response.persistToDatabaseAsTransaction(userId = userId, database = database)
+        database.conversationConnections().connect(
+            data = response.posts.map {
+                ThreadConversationCrossRef(
+                    postId = postId,
+                    replyPostId = it.id,
+                )
+            },
+        )
+    }
 
     @OptIn(ExperimentalPagingApi::class)
     private fun createPager(feedDirective: String, pagingSourceFactory: () -> PagingSource<Int, FeedPost>) =
@@ -105,6 +102,7 @@ class FeedRepository @Inject constructor(
                 feedDirective = feedDirective,
                 userPubkey = activeAccountStore.activeUserId(),
             )
+
             else -> ExploreFeedQueryBuilder(
                 feedDirective = feedDirective,
                 userPubkey = activeAccountStore.activeUserId(),

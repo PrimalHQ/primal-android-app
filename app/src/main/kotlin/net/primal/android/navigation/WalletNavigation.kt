@@ -189,5 +189,14 @@ private fun NavGraphBuilder.transactionDetails(
     TransactionDetailsScreen(
         viewModel = viewModel,
         onClose = { navController.navigateUp() },
+        onPostClick = { noteId -> navController.navigateToThread(noteId) },
+        onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
+        onHashtagClick = { hashtag -> navController.navigateToExploreFeed(query = hashtag) },
+        onMediaClick = { noteId, mediaUrl ->
+            navController.navigateToMediaGallery(
+                noteId = noteId,
+                mediaUrl = mediaUrl,
+            )
+        },
     )
 }

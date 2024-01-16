@@ -80,7 +80,7 @@ import net.primal.android.core.compose.numericpad.PrimalNumericPad
 import net.primal.android.crypto.urlToLnUrlHrp
 import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.api.parseAsLNUrlOrNull
-import net.primal.android.wallet.dashboard.ui.AmountText
+import net.primal.android.wallet.dashboard.ui.BtcAmountText
 import net.primal.android.wallet.transactions.receive.ReceivePaymentContract.UiState
 import net.primal.android.wallet.utils.CurrencyConversionUtils.formatAsString
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toBtc
@@ -221,7 +221,7 @@ private fun ReceivePaymentViewer(
 
         if (paymentDetails.amountInBtc != null) {
             Spacer(modifier = Modifier.height(16.dp))
-            AmountText(
+            BtcAmountText(
                 modifier = Modifier
                     .padding(start = 32.dp)
                     .height(72.dp),
@@ -372,7 +372,7 @@ private fun ReceivePaymentEditor(
         ) {
             Spacer(modifier = Modifier.height(32.dp))
 
-            AmountText(
+            BtcAmountText(
                 modifier = Modifier
                     .padding(start = 32.dp)
                     .height(72.dp),

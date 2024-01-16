@@ -12,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -40,6 +41,8 @@ fun FeedNoteHeader(
     authorAvatarVisible: Boolean = true,
     authorAvatarCdnImage: CdnImage? = null,
     authorInternetIdentifier: String? = null,
+    label: String? = authorInternetIdentifier,
+    labelStyle: TextStyle? = null,
     onAuthorAvatarClick: (() -> Unit)? = null,
 ) {
     Row(
@@ -84,22 +87,24 @@ fun FeedNoteHeader(
                     )
                 },
                 suffixFixedContent = {
-                    Text(
-                        text = " • ${postTimestamp?.asBeforeNowFormat().orEmpty()}",
-                        textAlign = TextAlign.Center,
-                        maxLines = 1,
-                        style = AppTheme.typography.bodySmall,
-                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-                    )
+                    if (postTimestamp != null) {
+                        Text(
+                            text = " • ${postTimestamp.asBeforeNowFormat()}",
+                            textAlign = TextAlign.Center,
+                            maxLines = 1,
+                            style = AppTheme.typography.bodySmall,
+                            color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                        )
+                    }
                 },
             )
 
-            if (!authorInternetIdentifier.isNullOrEmpty() && !singleLine) {
+            if (!label.isNullOrEmpty() && !singleLine) {
                 Text(
-                    text = authorInternetIdentifier,
+                    text = label,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    style = AppTheme.typography.bodySmall,
+                    style = labelStyle ?: AppTheme.typography.bodySmall,
                     color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
                 )
             }
