@@ -85,7 +85,7 @@ import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.thread.ThreadContract.UiState.ThreadError
-import net.primal.android.wallet.ext.canZap
+import net.primal.android.wallet.zaps.canZap
 
 @Composable
 fun ThreadScreen(

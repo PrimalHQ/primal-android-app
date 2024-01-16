@@ -1,4 +1,4 @@
-package net.primal.android.wallet.receive
+package net.primal.android.wallet.transactions.receive
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,9 +12,9 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.android.wallet.receive.ReceivePaymentContract.UiEvent
-import net.primal.android.wallet.receive.ReceivePaymentContract.UiState
 import net.primal.android.wallet.repository.WalletRepository
+import net.primal.android.wallet.transactions.receive.ReceivePaymentContract.UiEvent
+import net.primal.android.wallet.transactions.receive.ReceivePaymentContract.UiState
 
 @HiltViewModel
 class ReceivePaymentViewModel @Inject constructor(

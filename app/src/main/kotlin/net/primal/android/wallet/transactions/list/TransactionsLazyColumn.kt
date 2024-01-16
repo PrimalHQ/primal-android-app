@@ -1,4 +1,4 @@
-package net.primal.android.wallet.transactions
+package net.primal.android.wallet.transactions.list
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -29,6 +29,7 @@ fun TransactionsLazyColumn(
     pagingItems: LazyPagingItems<TransactionDataUi>,
     listState: LazyListState,
     onProfileClick: (String) -> Unit,
+    onTransactionClick: (String) -> Unit,
     paddingValues: PaddingValues = PaddingValues(0.dp),
     header: (@Composable () -> Unit)? = null,
     footer: (@Composable () -> Unit)? = null,
@@ -76,6 +77,7 @@ fun TransactionsLazyColumn(
                     data = it,
                     numberFormat = numberFormat,
                     onAvatarClick = onProfileClick,
+                    onClick = onTransactionClick,
                 )
             }
         }

@@ -2,8 +2,8 @@ package net.primal.android.navigation
 
 import androidx.lifecycle.SavedStateHandle
 import net.primal.android.core.serialization.json.NostrJson
-import net.primal.android.wallet.send.create.DraftTransaction
-import net.primal.android.wallet.send.prepare.tabs.SendPaymentTab
+import net.primal.android.wallet.transactions.send.create.DraftTransaction
+import net.primal.android.wallet.transactions.send.prepare.tabs.SendPaymentTab
 
 const val FEED_DIRECTIVE = "directive"
 inline val SavedStateHandle.feedDirective: String?
@@ -54,3 +54,7 @@ inline val SavedStateHandle.draftTransaction: DraftTransaction
         ?.asBase64Decoded()?.let {
             NostrJson.decodeFromString(it)
         } ?: throw IllegalArgumentException("Missing draft transaction.")
+
+const val TRANSACTION_ID = "transactionId"
+inline val SavedStateHandle.transactionIdOrThrow: String
+    get() = get(TRANSACTION_ID) ?: throw IllegalArgumentException("Missing required transactionId argument.")

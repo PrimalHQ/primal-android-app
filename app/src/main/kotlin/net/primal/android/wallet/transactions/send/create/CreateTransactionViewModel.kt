@@ -1,4 +1,4 @@
-package net.primal.android.wallet.send.create
+package net.primal.android.wallet.transactions.send.create
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -20,8 +20,8 @@ import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.api.model.WithdrawRequestBody
 import net.primal.android.wallet.domain.SubWallet
 import net.primal.android.wallet.repository.WalletRepository
-import net.primal.android.wallet.send.create.CreateTransactionContract.UiEvent
-import net.primal.android.wallet.send.create.CreateTransactionContract.UiState
+import net.primal.android.wallet.transactions.send.create.CreateTransactionContract.UiEvent
+import net.primal.android.wallet.transactions.send.create.CreateTransactionContract.UiState
 import net.primal.android.wallet.utils.CurrencyConversionUtils.formatAsString
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toBtc
 import timber.log.Timber

@@ -1,7 +1,7 @@
-package net.primal.android.wallet.send.prepare
+package net.primal.android.wallet.transactions.send.prepare
 
-import net.primal.android.wallet.send.create.DraftTransaction
-import net.primal.android.wallet.send.prepare.tabs.SendPaymentTab
+import net.primal.android.wallet.transactions.send.create.DraftTransaction
+import net.primal.android.wallet.transactions.send.prepare.tabs.SendPaymentTab
 
 interface SendPaymentContract {
     data class UiState(

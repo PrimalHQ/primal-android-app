@@ -1,4 +1,4 @@
-package net.primal.android.wallet.transactions
+package net.primal.android.wallet.transactions.list
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box

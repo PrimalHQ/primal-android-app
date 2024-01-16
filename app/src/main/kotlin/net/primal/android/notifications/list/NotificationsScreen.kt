@@ -66,7 +66,7 @@ import net.primal.android.drawer.PrimalDrawerScaffold
 import net.primal.android.notifications.list.ui.NotificationListItem
 import net.primal.android.notifications.list.ui.NotificationUi
 import net.primal.android.theme.AppTheme
-import net.primal.android.wallet.ext.canZap
+import net.primal.android.wallet.zaps.canZap
 
 @Composable
 fun NotificationsScreen(

@@ -63,7 +63,7 @@ import net.primal.android.wallet.dashboard.ui.WalletDashboard
 import net.primal.android.wallet.dashboard.ui.WalletDashboardLite
 import net.primal.android.wallet.domain.WalletKycLevel
 import net.primal.android.wallet.store.inapp.InAppPurchaseBuyBottomSheet
-import net.primal.android.wallet.transactions.TransactionsLazyColumn
+import net.primal.android.wallet.transactions.list.TransactionsLazyColumn
 
 @Composable
 fun WalletDashboardScreen(
@@ -72,6 +72,7 @@ fun WalletDashboardScreen(
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
     onWalletActivateClick: () -> Unit,
     onProfileClick: (String) -> Unit,
+    onTransactionClick: (String) -> Unit,
     onSendClick: () -> Unit,
     onScanClick: () -> Unit,
     onReceiveClick: () -> Unit,
@@ -84,6 +85,7 @@ fun WalletDashboardScreen(
         onDrawerDestinationClick = onDrawerDestinationClick,
         onWalletActivateClick = onWalletActivateClick,
         onProfileClick = onProfileClick,
+        onTransactionClick = onTransactionClick,
         onSendClick = onSendClick,
         onScanClick = onScanClick,
         onReceiveClick = onReceiveClick,
@@ -99,6 +101,7 @@ fun WalletDashboardScreen(
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
     onWalletActivateClick: () -> Unit,
     onProfileClick: (String) -> Unit,
+    onTransactionClick: (String) -> Unit,
     onSendClick: () -> Unit,
     onScanClick: () -> Unit,
     onReceiveClick: () -> Unit,
@@ -293,6 +296,7 @@ fun WalletDashboardScreen(
                             pagingItems = pagingItems,
                             listState = listState,
                             onProfileClick = onProfileClick,
+                            onTransactionClick = onTransactionClick,
                             header = {
                                 if (state.lowBalance && pagingItems.itemCount > 0 && isGoogleBuild()) {
                                     WalletCallToActionBox(

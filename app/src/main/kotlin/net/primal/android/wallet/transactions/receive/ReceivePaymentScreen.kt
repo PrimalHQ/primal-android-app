@@ -1,4 +1,4 @@
-package net.primal.android.wallet.receive
+package net.primal.android.wallet.transactions.receive
 
 import android.graphics.drawable.Drawable
 import androidx.activity.compose.BackHandler
@@ -81,7 +81,7 @@ import net.primal.android.crypto.urlToLnUrlHrp
 import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.api.parseAsLNUrlOrNull
 import net.primal.android.wallet.dashboard.ui.AmountText
-import net.primal.android.wallet.receive.ReceivePaymentContract.UiState
+import net.primal.android.wallet.transactions.receive.ReceivePaymentContract.UiState
 import net.primal.android.wallet.utils.CurrencyConversionUtils.formatAsString
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toBtc
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats

@@ -26,7 +26,7 @@ import net.primal.android.wallet.db.WalletTransaction
 import net.primal.android.wallet.repository.WalletRepository
 import net.primal.android.wallet.store.PrimalBillingClient
 import net.primal.android.wallet.store.domain.SatsPurchase
-import net.primal.android.wallet.transactions.TransactionDataUi
+import net.primal.android.wallet.transactions.list.TransactionDataUi
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
 import timber.log.Timber
 

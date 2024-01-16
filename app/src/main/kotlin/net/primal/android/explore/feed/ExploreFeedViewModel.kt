@@ -35,10 +35,10 @@ import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
 import net.primal.android.wallet.domain.ZapTarget
-import net.primal.android.wallet.ext.hasWallet
 import net.primal.android.wallet.zaps.InvalidZapRequestException
 import net.primal.android.wallet.zaps.ZapFailureException
 import net.primal.android.wallet.zaps.ZapHandler
+import net.primal.android.wallet.zaps.hasWallet
 
 @HiltViewModel
 class ExploreFeedViewModel @Inject constructor(

@@ -1,4 +1,4 @@
-package net.primal.android.wallet.transactions
+package net.primal.android.wallet.transactions.list
 
 import java.time.Instant
 import net.primal.android.attachments.domain.CdnImage

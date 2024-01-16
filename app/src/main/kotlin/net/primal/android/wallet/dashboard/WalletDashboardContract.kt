@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.Flow
 import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.user.domain.PrimalWallet
 import net.primal.android.user.domain.WalletPreference
-import net.primal.android.wallet.transactions.TransactionDataUi
+import net.primal.android.wallet.transactions.list.TransactionDataUi
 
 interface WalletDashboardContract {
     data class UiState(

@@ -1,4 +1,4 @@
-package net.primal.android.wallet.send.prepare
+package net.primal.android.wallet.transactions.send.prepare
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.animateDpAsState
@@ -40,11 +40,11 @@ import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.theme.AppTheme
-import net.primal.android.wallet.send.create.DraftTransaction
-import net.primal.android.wallet.send.prepare.tabs.SendPaymentTab
-import net.primal.android.wallet.send.prepare.tabs.SendPaymentTabNostr
-import net.primal.android.wallet.send.prepare.tabs.SendPaymentTabScan
-import net.primal.android.wallet.send.prepare.tabs.SendPaymentTabText
+import net.primal.android.wallet.transactions.send.create.DraftTransaction
+import net.primal.android.wallet.transactions.send.prepare.tabs.SendPaymentTab
+import net.primal.android.wallet.transactions.send.prepare.tabs.SendPaymentTabNostr
+import net.primal.android.wallet.transactions.send.prepare.tabs.SendPaymentTabScan
+import net.primal.android.wallet.transactions.send.prepare.tabs.SendPaymentTabText
 
 @Composable
 fun SendPaymentScreen(

@@ -1,4 +1,4 @@
-package net.primal.android.wallet.send.create
+package net.primal.android.wallet.transactions.send.create
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
@@ -69,7 +69,7 @@ import net.primal.android.core.compose.numericpad.PrimalNumericPad
 import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.dashboard.ui.AmountText
 import net.primal.android.wallet.numericPadContentTransformAnimation
-import net.primal.android.wallet.send.create.CreateTransactionContract.UiEvent.SendTransaction
+import net.primal.android.wallet.transactions.send.create.CreateTransactionContract.UiEvent.SendTransaction
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toBtc
 import net.primal.android.wallet.walletSuccessColor
 import net.primal.android.wallet.walletSuccessContentColor
@@ -249,7 +249,11 @@ private fun TransactionEditor(
                             modifier = Modifier.fillMaxWidth(),
                             amountInSats = state.transaction.amountSats,
                             onAmountInSatsChanged = {
-                                eventPublisher(CreateTransactionContract.UiEvent.AmountChanged(amountInSats = it))
+                                eventPublisher(
+                                    CreateTransactionContract.UiEvent.AmountChanged(
+                                        amountInSats = it,
+                                    ),
+                                )
                             },
                         )
                     }

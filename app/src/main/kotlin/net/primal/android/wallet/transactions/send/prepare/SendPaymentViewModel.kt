@@ -1,4 +1,4 @@
-package net.primal.android.wallet.send.prepare
+package net.primal.android.wallet.transactions.send.prepare
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -23,12 +23,12 @@ import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.api.parseAsLNUrlOrNull
 import net.primal.android.wallet.repository.WalletRepository
-import net.primal.android.wallet.send.create.DraftTransaction
-import net.primal.android.wallet.send.prepare.SendPaymentContract.SideEffect
-import net.primal.android.wallet.send.prepare.SendPaymentContract.UiEvent
-import net.primal.android.wallet.send.prepare.SendPaymentContract.UiState
-import net.primal.android.wallet.send.prepare.domain.RecipientType
-import net.primal.android.wallet.send.prepare.tabs.SendPaymentTab
+import net.primal.android.wallet.transactions.send.create.DraftTransaction
+import net.primal.android.wallet.transactions.send.prepare.SendPaymentContract.SideEffect
+import net.primal.android.wallet.transactions.send.prepare.SendPaymentContract.UiEvent
+import net.primal.android.wallet.transactions.send.prepare.SendPaymentContract.UiState
+import net.primal.android.wallet.transactions.send.prepare.domain.RecipientType
+import net.primal.android.wallet.transactions.send.prepare.tabs.SendPaymentTab
 import net.primal.android.wallet.utils.isLightningAddress
 import net.primal.android.wallet.utils.isLightningAddressUri
 import net.primal.android.wallet.utils.isLnInvoice

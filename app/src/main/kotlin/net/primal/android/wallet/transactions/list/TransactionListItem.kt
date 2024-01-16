@@ -1,8 +1,9 @@
-package net.primal.android.wallet.transactions
+package net.primal.android.wallet.transactions.list
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.size
@@ -48,9 +49,12 @@ fun TransactionListItem(
     data: TransactionDataUi,
     numberFormat: NumberFormat,
     onAvatarClick: (String) -> Unit,
+    onClick: (String) -> Unit,
 ) {
     ListItem(
-        modifier = Modifier.animateContentSize(),
+        modifier = Modifier
+            .animateContentSize()
+            .clickable { onClick(data.txId) },
         colors = ListItemDefaults.colors(
             containerColor = AppTheme.colorScheme.surfaceVariant,
         ),
@@ -314,6 +318,7 @@ fun PreviewTransactionListItem(
                 data = tx,
                 numberFormat = NumberFormat.getNumberInstance(),
                 onAvatarClick = {},
+                onClick = {},
             )
         }
     }

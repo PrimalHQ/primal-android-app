@@ -1,4 +1,4 @@
-package net.primal.android.wallet.send.create
+package net.primal.android.wallet.transactions.send.create
 
 import kotlinx.serialization.Serializable
 import net.primal.android.wallet.api.model.LnInvoiceData

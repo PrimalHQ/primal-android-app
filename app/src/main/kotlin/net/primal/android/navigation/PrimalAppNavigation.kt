@@ -23,7 +23,6 @@ import com.google.accompanist.navigation.material.rememberBottomSheetNavigator
 import java.net.URLEncoder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.encodeToString
 import net.primal.android.attachments.gallery.MediaGalleryScreen
 import net.primal.android.attachments.gallery.MediaGalleryViewModel
 import net.primal.android.auth.create.CreateAccountViewModel
@@ -36,7 +35,6 @@ import net.primal.android.auth.welcome.WelcomeScreen
 import net.primal.android.core.compose.LockToOrientationPortrait
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.compose.findActivity
-import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.discuss.feed.FeedScreen
 import net.primal.android.discuss.feed.FeedViewModel
 import net.primal.android.discuss.list.FeedListScreen
@@ -71,18 +69,6 @@ import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.thread.ThreadScreen
 import net.primal.android.thread.ThreadViewModel
-import net.primal.android.wallet.activation.WalletActivationScreen
-import net.primal.android.wallet.activation.WalletActivationViewModel
-import net.primal.android.wallet.dashboard.WalletDashboardScreen
-import net.primal.android.wallet.dashboard.WalletDashboardViewModel
-import net.primal.android.wallet.receive.ReceivePaymentScreen
-import net.primal.android.wallet.receive.ReceivePaymentViewModel
-import net.primal.android.wallet.send.create.CreateTransactionScreen
-import net.primal.android.wallet.send.create.CreateTransactionViewModel
-import net.primal.android.wallet.send.create.DraftTransaction
-import net.primal.android.wallet.send.prepare.SendPaymentScreen
-import net.primal.android.wallet.send.prepare.SendPaymentViewModel
-import net.primal.android.wallet.send.prepare.tabs.SendPaymentTab
 
 private fun NavController.navigateToWelcome() =
     navigate(
@@ -135,9 +121,9 @@ private fun NavController.navigateToExplore() =
         navOptions = topLevelNavOptions,
     )
 
-private fun NavController.navigateToWalletDashboard() =
+private fun NavController.navigateToWallet() =
     navigate(
-        route = "wallet/dashboard",
+        route = "wallet",
         navOptions = topLevelNavOptions,
     )
 
@@ -183,19 +169,6 @@ private fun NavController.navigateToMediaGallery(noteId: String, mediaUrl: Strin
 
 private fun NavController.navigateToExploreFeed(query: String) = navigate(route = "explore/$query")
 
-private fun NavController.navigateToWalletActivation() = navigate(route = "wallet/activation")
-
-private fun NavController.navigateToWalletSendPayment(tab: SendPaymentTab) =
-    navigate(route = "wallet/send?$SEND_PAYMENT_TAB=$tab")
-
-private fun NavController.navigateToWalletCreateTransaction(draftTransaction: DraftTransaction) =
-    navigate(
-        route = "wallet/transaction/create?$DRAFT_TRANSACTION=" +
-            NostrJson.encodeToString(draftTransaction).asBase64Encoded(),
-    )
-
-private fun NavController.navigateToWalletReceive() = navigate(route = "wallet/receive")
-
 @OptIn(ExperimentalMaterialNavigationApi::class)
 @Composable
 fun PrimalAppNavigation() {
@@ -206,7 +179,7 @@ fun PrimalAppNavigation() {
         when (it) {
             PrimalTopLevelDestination.Home -> navController.popBackStack()
             PrimalTopLevelDestination.Explore -> navController.navigateToExplore()
-            PrimalTopLevelDestination.Wallet -> navController.navigateToWalletDashboard()
+            PrimalTopLevelDestination.Wallet -> navController.navigateToWallet()
             PrimalTopLevelDestination.Messages -> navController.navigateToMessages()
             PrimalTopLevelDestination.Notifications -> navController.navigateToNotifications()
         }
@@ -402,43 +375,11 @@ fun PrimalAppNavigation() {
 
             settingsNavigation(route = "settings", navController = navController)
 
-            walletDashboard(
-                route = "wallet/dashboard",
+            walletNavigation(
+                route = "wallet",
+                navController = navController,
                 onTopLevelDestinationChanged = topLevelDestinationHandler,
-                onDrawerDestinationClick = drawerDestinationHandler,
-                navController = navController,
-            )
-
-            walletActivation(
-                route = "wallet/activation",
-                navController = navController,
-            )
-
-            walletSend(
-                route = "wallet/send?$SEND_PAYMENT_TAB={$SEND_PAYMENT_TAB}",
-                arguments = listOf(
-                    navArgument(SEND_PAYMENT_TAB) {
-                        type = NavType.StringType
-                        nullable = true
-                    },
-                ),
-                navController = navController,
-            )
-
-            walletCreateTransaction(
-                route = "wallet/transaction/create?$DRAFT_TRANSACTION={$DRAFT_TRANSACTION}",
-                arguments = listOf(
-                    navArgument(DRAFT_TRANSACTION) {
-                        type = NavType.StringType
-                        nullable = true
-                    },
-                ),
-                navController = navController,
-            )
-
-            walletReceive(
-                route = "wallet/receive",
-                navController = navController,
+                onDrawerScreenClick = drawerDestinationHandler,
             )
         }
     }
@@ -510,7 +451,7 @@ private fun NavGraphBuilder.feed(
                 mediaUrl = mediaUrl,
             )
         },
-        onGoToWallet = { navController.navigateToWalletDashboard() },
+        onGoToWallet = { navController.navigateToWallet() },
         onTopLevelDestinationChanged = onTopLevelDestinationChanged,
         onDrawerScreenClick = onDrawerScreenClick,
     )
@@ -588,7 +529,7 @@ private fun NavGraphBuilder.exploreFeed(
                 mediaUrl = mediaUrl,
             )
         },
-        onGoToWallet = { navController.navigateToWalletDashboard() },
+        onGoToWallet = { navController.navigateToWallet() },
     )
 }
 
@@ -690,7 +631,7 @@ private fun NavGraphBuilder.notifications(
         },
         onPostQuoteClick = { preFillContent -> navController.navigateToNoteEditor(preFillContent) },
         onNotificationSettings = { navController.navigateToNotificationsSettings() },
-        onGoToWallet = { navController.navigateToWalletDashboard() },
+        onGoToWallet = { navController.navigateToWallet() },
         onTopLevelDestinationChanged = onTopLevelDestinationChanged,
         onDrawerScreenClick = onDrawerScreenClick,
     )
@@ -720,7 +661,7 @@ private fun NavGraphBuilder.thread(
                 mediaUrl = mediaUrl,
             )
         },
-        onGoToWallet = { navController.navigateToWalletDashboard() },
+        onGoToWallet = { navController.navigateToWallet() },
         onReplyInNoteEditor = { replyToId, uri, text ->
             navController.navigateToNoteEditor(
                 replyToNoteId = replyToId,
@@ -773,7 +714,7 @@ private fun NavGraphBuilder.profile(
                 mediaUrl = mediaUrl,
             )
         },
-        onGoToWallet = { navController.navigateToWalletDashboard() },
+        onGoToWallet = { navController.navigateToWallet() },
     )
 }
 
@@ -796,80 +737,5 @@ private fun NavGraphBuilder.logout(route: String, navController: NavController) 
         LogoutScreen(
             viewModel = viewModel,
             onClose = { navController.popBackStack() },
-        )
-    }
-
-private fun NavGraphBuilder.walletDashboard(
-    route: String,
-    onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
-    onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
-    navController: NavController,
-) = composable(route = route) {
-    val viewModel = hiltViewModel<WalletDashboardViewModel>(it)
-
-    LockToOrientationPortrait()
-    WalletDashboardScreen(
-        viewModel = viewModel,
-        onPrimaryDestinationChanged = onTopLevelDestinationChanged,
-        onDrawerDestinationClick = onDrawerDestinationClick,
-        onWalletActivateClick = { navController.navigateToWalletActivation() },
-        onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
-        onSendClick = { navController.navigateToWalletSendPayment(tab = SendPaymentTab.Nostr) },
-        onScanClick = { navController.navigateToWalletSendPayment(tab = SendPaymentTab.Scan) },
-        onReceiveClick = { navController.navigateToWalletReceive() },
-    )
-}
-
-private fun NavGraphBuilder.walletActivation(route: String, navController: NavController) =
-    composable(route = route) {
-        val viewModel = hiltViewModel<WalletActivationViewModel>(it)
-
-        LockToOrientationPortrait()
-        WalletActivationScreen(
-            viewModel = viewModel,
-            onClose = { navController.navigateUp() },
-        )
-    }
-
-private fun NavGraphBuilder.walletSend(
-    route: String,
-    arguments: List<NamedNavArgument>,
-    navController: NavController,
-) = composable(route = route, arguments = arguments) {
-    val viewModel = hiltViewModel<SendPaymentViewModel>(it)
-
-    LockToOrientationPortrait()
-    SendPaymentScreen(
-        viewModel = viewModel,
-        onClose = { navController.navigateUp() },
-        onCreateTransaction = { draft ->
-            navController.popBackStack()
-            navController.navigateToWalletCreateTransaction(draftTransaction = draft)
-        },
-    )
-}
-
-private fun NavGraphBuilder.walletCreateTransaction(
-    route: String,
-    arguments: List<NamedNavArgument>,
-    navController: NavController,
-) = composable(route = route, arguments = arguments) {
-    val viewModel = hiltViewModel<CreateTransactionViewModel>()
-
-    LockToOrientationPortrait()
-    CreateTransactionScreen(
-        viewModel = viewModel,
-        onClose = { navController.navigateUp() },
-    )
-}
-
-private fun NavGraphBuilder.walletReceive(route: String, navController: NavController) =
-    composable(route = route) {
-        val viewModel = hiltViewModel<ReceivePaymentViewModel>()
-
-        LockToOrientationPortrait()
-        ReceivePaymentScreen(
-            viewModel = viewModel,
-            onClose = { navController.navigateUp() },
         )
     }

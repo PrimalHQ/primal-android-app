@@ -1,4 +1,4 @@
-package net.primal.android.wallet.receive
+package net.primal.android.wallet.transactions.receive
 
 interface ReceivePaymentContract {
     data class UiState(

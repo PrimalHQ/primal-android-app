@@ -1,4 +1,4 @@
-package net.primal.android.wallet.send.prepare.tabs
+package net.primal.android.wallet.transactions.send.prepare.tabs
 
 import androidx.annotation.StringRes
 import androidx.compose.ui.graphics.vector.ImageVector

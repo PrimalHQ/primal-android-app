@@ -1,4 +1,4 @@
-package net.primal.android.wallet.send.prepare.domain
+package net.primal.android.wallet.transactions.send.prepare.domain
 
 enum class RecipientType {
     LnInvoice,

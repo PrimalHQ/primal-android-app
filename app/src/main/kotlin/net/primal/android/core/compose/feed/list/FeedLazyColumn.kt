@@ -37,7 +37,7 @@ import net.primal.android.core.compose.feed.note.FeedNoteCard
 import net.primal.android.core.compose.feed.zaps.UnableToZapBottomSheet
 import net.primal.android.core.compose.feed.zaps.ZapBottomSheet
 import net.primal.android.core.compose.isEmpty
-import net.primal.android.wallet.ext.canZap
+import net.primal.android.wallet.zaps.canZap
 
 @ExperimentalMaterial3Api
 @ExperimentalFoundationApi

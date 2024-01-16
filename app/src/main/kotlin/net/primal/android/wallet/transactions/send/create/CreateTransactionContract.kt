@@ -1,4 +1,4 @@
-package net.primal.android.wallet.send.create
+package net.primal.android.wallet.transactions.send.create
 
 import net.primal.android.attachments.domain.CdnImage
 

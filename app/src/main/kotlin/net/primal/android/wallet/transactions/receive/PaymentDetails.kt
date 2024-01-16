@@ -1,4 +1,4 @@
-package net.primal.android.wallet.receive
+package net.primal.android.wallet.transactions.receive
 
 data class PaymentDetails(
     val amountInBtc: String? = null,
