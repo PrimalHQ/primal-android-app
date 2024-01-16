@@ -1,5 +1,2 @@
 ## Features
-- Implemented wallet api changes;
-- Implemented scroll to top on transactions refresh if list is at top;
-- Fixed transactions scrolling glitch;
-- Fixed minor padding issues on wallet;
+- Implemented transaction details screen;
