@@ -277,6 +277,7 @@ fun WalletDashboardScreen(
                                 .fillMaxSize()
                                 .animateContentSize()
                                 .padding(paddingValues)
+                                .padding(horizontal = 32.dp)
                                 .padding(bottom = 32.dp)
                                 .navigationBarsPadding(),
                             message = stringResource(id = R.string.wallet_dashboard_no_transactions_hint),
