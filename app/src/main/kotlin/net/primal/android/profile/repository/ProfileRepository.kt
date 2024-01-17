@@ -2,9 +2,8 @@ package net.primal.android.profile.repository
 
 import androidx.room.withTransaction
 import javax.inject.Inject
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.withContext
+import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.ext.asMapByKey
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.networking.sockets.errors.WssException
@@ -19,16 +18,14 @@ import net.primal.android.user.domain.asUserAccountFromContactsEvent
 import net.primal.android.user.repository.UserRepository
 
 class ProfileRepository @Inject constructor(
+    private val dispatcherProvider: CoroutineDispatcherProvider,
     private val database: PrimalDatabase,
     private val usersApi: UsersApi,
     private val userRepository: UserRepository,
     private val userAccountFetcher: UserAccountFetcher,
 ) {
 
-    fun findProfileData(profileId: String) =
-        database.profiles().findProfileData(
-            profileId = profileId,
-        )
+    fun findProfileDataOrNull(profileId: String) = database.profiles().findProfileData(profileId = profileId)
 
     fun observeProfile(profileId: String) =
         database.profiles().observeProfile(
@@ -36,20 +33,18 @@ class ProfileRepository @Inject constructor(
         ).filterNotNull()
 
     suspend fun requestProfileUpdate(profileId: String) {
-        val response = withContext(Dispatchers.IO) { usersApi.getUserProfile(pubkey = profileId) }
+        val response = usersApi.getUserProfile(pubkey = profileId)
         val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
         val profileMetadata = response.metadata?.asProfileDataPO(cdnResources = cdnResources)
         val userProfileStats = response.profileStats?.takeContentAsUserProfileStatsOrNull()
 
-        withContext(Dispatchers.IO) {
-            database.withTransaction {
-                if (profileMetadata != null) {
-                    database.profiles().upsertAll(data = listOf(profileMetadata))
-                }
+        database.withTransaction {
+            if (profileMetadata != null) {
+                database.profiles().upsertAll(data = listOf(profileMetadata))
+            }
 
-                if (userProfileStats != null) {
-                    database.profileStats().upsert(data = userProfileStats.asProfileStats())
-                }
+            if (userProfileStats != null) {
+                database.profileStats().upsert(data = userProfileStats.asProfileStats())
             }
         }
     }

@@ -360,6 +360,7 @@
     <string name="wallet_send_payment_text_description">Type or paste the recipient’s lightning address or an invoice.</string>
     <string name="wallet_send_payment_text_paste_from_keyboard">Paste from clipboard</string>
     <string name="wallet_send_payment_text_next">Next</string>
+    <string name="wallet_send_payment_nostr_user_generic">User</string>
     <string name="wallet_send_payment_error_nostr_user_without_lightning_address">Cannot make payment. %1$s doesn’t have a lightning address set.</string>
     <string name="wallet_send_payment_error_unable_to_parse_text">Please enter a valid lightning address or an invoice.</string>
 

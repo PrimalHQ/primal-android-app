@@ -64,10 +64,11 @@ class CreateTransactionViewModel @Inject constructor(
     private fun loadProfileData() =
         viewModelScope.launch {
             state.value.transaction.targetUserId?.let {
-                val profileData = withContext(dispatchers.io()) {
-                    profileRepository.findProfileData(profileId = it)
+                withContext(dispatchers.io()) {
+                    profileRepository.requestProfileUpdate(profileId = it)
+                    profileRepository.findProfileDataOrNull(profileId = it)
                 }
-
+            }?.let { profileData ->
                 setState {
                     copy(
                         profileAvatarCdnImage = profileData.avatarCdnImage,

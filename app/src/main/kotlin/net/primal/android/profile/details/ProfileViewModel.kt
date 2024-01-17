@@ -8,7 +8,6 @@ import androidx.paging.map
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,6 +19,7 @@ import kotlinx.coroutines.withContext
 import net.primal.android.core.compose.feed.model.asFeedPostUi
 import net.primal.android.core.compose.profile.model.asProfileDetailsUi
 import net.primal.android.core.compose.profile.model.asProfileStatsUi
+import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.feed.repository.FeedRepository
 import net.primal.android.feed.repository.PostRepository
 import net.primal.android.navigation.profileId
@@ -38,11 +38,13 @@ import net.primal.android.wallet.zaps.InvalidZapRequestException
 import net.primal.android.wallet.zaps.ZapFailureException
 import net.primal.android.wallet.zaps.ZapHandler
 import net.primal.android.wallet.zaps.hasWallet
+import timber.log.Timber
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     feedRepository: FeedRepository,
+    private val dispatcherProvider: CoroutineDispatcherProvider,
     private val activeAccountStore: ActiveAccountStore,
     private val profileRepository: ProfileRepository,
     private val postRepository: PostRepository,
@@ -144,20 +146,24 @@ class ProfileViewModel @Inject constructor(
     private fun fetchLatestMuteList() =
         viewModelScope.launch {
             try {
-                mutedUserRepository.fetchAndPersistMuteList(
-                    userId = activeAccountStore.activeUserId(),
-                )
+                withContext(dispatcherProvider.io()) {
+                    mutedUserRepository.fetchAndPersistMuteList(
+                        userId = activeAccountStore.activeUserId(),
+                    )
+                }
             } catch (error: WssException) {
-                // Ignore
+                Timber.e(error)
             }
         }
 
     private fun fetchLatestProfile() =
         viewModelScope.launch {
             try {
-                profileRepository.requestProfileUpdate(profileId = profileId)
+                withContext(dispatcherProvider.io()) {
+                    profileRepository.requestProfileUpdate(profileId = profileId)
+                }
             } catch (error: WssException) {
-                // Ignore
+                Timber.e(error)
             }
         }
 
@@ -192,11 +198,11 @@ class ProfileViewModel @Inject constructor(
 
     private fun zapPost(zapAction: UiEvent.ZapAction) =
         viewModelScope.launch {
-            val postAuthorProfileData = withContext(Dispatchers.IO) {
-                profileRepository.findProfileData(profileId = zapAction.postAuthorId)
+            val postAuthorProfileData = withContext(dispatcherProvider.io()) {
+                profileRepository.findProfileDataOrNull(profileId = zapAction.postAuthorId)
             }
 
-            if (postAuthorProfileData.lnUrlDecoded == null) {
+            if (postAuthorProfileData?.lnUrlDecoded == null) {
                 setErrorState(error = ProfileError.MissingLightningAddress(IllegalStateException()))
                 return@launch
             }

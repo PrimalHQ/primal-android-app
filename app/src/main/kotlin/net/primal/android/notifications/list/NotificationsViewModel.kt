@@ -189,10 +189,10 @@ class NotificationsViewModel @Inject constructor(
     private fun zapPost(zapAction: UiEvent.ZapAction) =
         viewModelScope.launch {
             val postAuthorProfileData = withContext(Dispatchers.IO) {
-                profileRepository.findProfileData(profileId = zapAction.postAuthorId)
+                profileRepository.findProfileDataOrNull(profileId = zapAction.postAuthorId)
             }
 
-            if (postAuthorProfileData.lnUrlDecoded == null) {
+            if (postAuthorProfileData?.lnUrlDecoded == null) {
                 setErrorState(error = MissingLightningAddress(IllegalStateException()))
                 return@launch
             }

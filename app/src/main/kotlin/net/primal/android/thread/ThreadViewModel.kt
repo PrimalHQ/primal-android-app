@@ -186,10 +186,10 @@ class ThreadViewModel @Inject constructor(
     private fun zapPost(zapAction: UiEvent.ZapAction) =
         viewModelScope.launch {
             val postAuthorProfileData = withContext(dispatcherProvider.io()) {
-                profileRepository.findProfileData(profileId = zapAction.postAuthorId)
+                profileRepository.findProfileDataOrNull(profileId = zapAction.postAuthorId)
             }
 
-            if (postAuthorProfileData.lnUrlDecoded == null) {
+            if (postAuthorProfileData?.lnUrlDecoded == null) {
                 setErrorState(error = ThreadError.MissingLightningAddress(IllegalStateException()))
                 return@launch
             }

@@ -157,10 +157,10 @@ class SendPaymentViewModel @Inject constructor(
     private fun processProfileData(profileId: String) =
         viewModelScope.launch {
             val profileData = withContext(dispatchers.io()) {
-                profileRepository.findProfileData(profileId = profileId)
+                profileRepository.findProfileDataOrNull(profileId = profileId)
             }
 
-            val lud16 = profileData.lightningAddress
+            val lud16 = profileData?.lightningAddress
             if (lud16 != null && lud16.isLightningAddress()) {
                 setEffect(
                     SideEffect.DraftTransactionReady(
@@ -173,8 +173,8 @@ class SendPaymentViewModel @Inject constructor(
             } else {
                 setState {
                     copy(
-                        error = UiState.SendPaymentError.NostrUserWithoutLightningAddress(
-                            userDisplayName = profileData.authorNameUiFriendly(),
+                        error = UiState.SendPaymentError.LightningAddressNotFound(
+                            userDisplayName = profileData?.authorNameUiFriendly(),
                         ),
                     )
                 }

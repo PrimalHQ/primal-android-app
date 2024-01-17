@@ -11,7 +11,7 @@ interface SendPaymentContract {
         val error: SendPaymentError? = null,
     ) {
         sealed class SendPaymentError {
-            data class NostrUserWithoutLightningAddress(val userDisplayName: String) : SendPaymentError()
+            data class LightningAddressNotFound(val userDisplayName: String?) : SendPaymentError()
             data class ParseException(val cause: Exception) : SendPaymentError()
         }
     }

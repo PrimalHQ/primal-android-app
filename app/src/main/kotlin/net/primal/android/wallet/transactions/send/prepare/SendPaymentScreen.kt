@@ -94,10 +94,12 @@ fun SendPaymentScreen(
         snackbarHostState = snackbarHostState,
         errorMessageResolver = {
             when (it) {
-                is SendPaymentContract.UiState.SendPaymentError.NostrUserWithoutLightningAddress ->
+                is SendPaymentContract.UiState.SendPaymentError.LightningAddressNotFound ->
                     context.getString(
                         R.string.wallet_send_payment_error_nostr_user_without_lightning_address,
-                        it.userDisplayName,
+                        it.userDisplayName ?: context.getString(
+                            R.string.wallet_send_payment_nostr_user_generic,
+                        ),
                     )
 
                 is SendPaymentContract.UiState.SendPaymentError.ParseException ->
