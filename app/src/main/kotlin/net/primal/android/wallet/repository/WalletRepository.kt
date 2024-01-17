@@ -11,6 +11,7 @@ import net.primal.android.db.PrimalDatabase
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.api.UsersApi
 import net.primal.android.user.domain.PrimalWallet
+import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.api.WalletApi
 import net.primal.android.wallet.api.mediator.WalletTransactionsMediator
 import net.primal.android.wallet.api.model.DepositRequestBody
@@ -30,6 +31,7 @@ class WalletRepository @Inject constructor(
     private val walletApi: WalletApi,
     private val usersApi: UsersApi,
     private val database: PrimalDatabase,
+    private val userRepository: UserRepository,
 ) {
 
     fun latestTransactions(userId: String) =
@@ -116,6 +118,15 @@ class WalletRepository @Inject constructor(
                 purchaseToken = purchaseToken,
             )
         }
+    }
+
+    suspend fun fetchWalletBalance(userId: String) {
+        val response = withContext(dispatcherProvider.io()) { walletApi.getBalance(userId = userId) }
+        userRepository.updatePrimalWalletBalance(
+            userId = userId,
+            balanceInBtc = response.amount,
+            maxAmountInBtc = response.maxAmount,
+        )
     }
 
     suspend fun parseLnUrl(userId: String, lnurl: String): ParsedLnUrlResponse {

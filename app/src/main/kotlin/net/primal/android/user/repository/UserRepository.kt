@@ -142,9 +142,15 @@ class UserRepository @Inject constructor(
         }
     }
 
-    suspend fun updatePrimalWalletBalance(userId: String, balanceInBtc: String) {
+    suspend fun updatePrimalWalletBalance(
+        userId: String,
+        balanceInBtc: String,
+        maxAmountInBtc: String? = null,
+    ) {
         accountsStore.getAndUpdateAccount(userId = userId) {
-            copy(primalWalletBalanceInBtc = balanceInBtc)
+            copy(
+                primalWalletBalanceInBtc = balanceInBtc,
+            )
         }
     }
 }

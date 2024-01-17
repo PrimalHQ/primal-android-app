@@ -15,7 +15,6 @@ import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.primal.PrimalCacheFilter
 import net.primal.android.networking.primal.PrimalVerb
 import net.primal.android.networking.sockets.errors.WssException
-import net.primal.android.nostr.ext.asWalletBalanceInBtcOrNull
 import net.primal.android.nostr.ext.takeContentOrNull
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.model.primal.PrimalEvent
@@ -24,6 +23,7 @@ import net.primal.android.nostr.model.primal.content.WalletUserInfoContent
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.wallet.api.model.ActivateWalletRequestBody
 import net.primal.android.wallet.api.model.BalanceRequestBody
+import net.primal.android.wallet.api.model.BalanceResponse
 import net.primal.android.wallet.api.model.DepositRequestBody
 import net.primal.android.wallet.api.model.DepositResponse
 import net.primal.android.wallet.api.model.GetActivationCodeRequestBody
@@ -119,7 +119,7 @@ class WalletApiImpl @Inject constructor(
             .toWalletLightningAddressOrThrow()
     }
 
-    override suspend fun getBalance(userId: String): String {
+    override suspend fun getBalance(userId: String): BalanceResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.WALLET,
@@ -132,7 +132,7 @@ class WalletApiImpl @Inject constructor(
         )
 
         return queryResult.findPrimalEvent(NostrEventKind.PrimalWalletBalance)
-            ?.asWalletBalanceInBtcOrNull()
+            ?.takeContentOrNull<BalanceResponse>()
             ?: throw WssException("Missing or invalid content in response.")
     }
 

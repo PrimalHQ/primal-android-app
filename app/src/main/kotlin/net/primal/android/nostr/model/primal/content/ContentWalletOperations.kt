@@ -13,9 +13,3 @@ data class WalletUserInfoContent(
 data class WalletActivationContent(
     val lud16: String,
 )
-
-@Serializable
-data class WalletBalanceContent(
-    val amount: String,
-    val currency: String,
-)

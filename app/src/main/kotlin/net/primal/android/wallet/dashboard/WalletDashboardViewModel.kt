@@ -54,6 +54,7 @@ class WalletDashboardViewModel @Inject constructor(
     fun setEvents(event: UiEvent) = viewModelScope.launch { events.emit(event) }
 
     init {
+        fetchWalletBalance()
         subscribeToEvents()
         subscribeToActiveAccount()
         subscribeToPurchases()
@@ -89,6 +90,11 @@ class WalletDashboardViewModel @Inject constructor(
             primalBillingClient.purchases.collect { purchase ->
                 confirmPurchase(purchase = purchase)
             }
+        }
+
+    private fun fetchWalletBalance() =
+        viewModelScope.launch {
+            walletRepository.fetchWalletBalance(userId = activeUserId)
         }
 
     private fun enablePrimalWallet() =

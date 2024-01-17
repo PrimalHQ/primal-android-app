@@ -1,5 +1,6 @@
 package net.primal.android.wallet.api
 
+import net.primal.android.wallet.api.model.BalanceResponse
 import net.primal.android.wallet.api.model.DepositRequestBody
 import net.primal.android.wallet.api.model.DepositResponse
 import net.primal.android.wallet.api.model.InAppPurchaseQuoteResponse
@@ -26,7 +27,7 @@ interface WalletApi {
 
     suspend fun activateWallet(userId: String, code: String): String
 
-    suspend fun getBalance(userId: String): String
+    suspend fun getBalance(userId: String): BalanceResponse
 
     suspend fun withdraw(userId: String, body: WithdrawRequestBody)
 

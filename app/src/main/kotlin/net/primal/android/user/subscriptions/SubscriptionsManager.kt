@@ -26,7 +26,7 @@ import net.primal.android.networking.primal.PrimalSocketSubscription
 import net.primal.android.networking.primal.PrimalVerb
 import net.primal.android.nostr.ext.asMessagesTotalCount
 import net.primal.android.nostr.ext.asNotificationSummary
-import net.primal.android.nostr.ext.asWalletBalanceInBtcOrNull
+import net.primal.android.nostr.ext.takeContentOrNull
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.notifications.api.model.PubkeyRequestBody
 import net.primal.android.notifications.domain.NotificationsSummary
@@ -35,6 +35,7 @@ import net.primal.android.user.accounts.active.ActiveUserAccountState
 import net.primal.android.user.domain.Badges
 import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.api.model.BalanceRequestBody
+import net.primal.android.wallet.api.model.BalanceResponse
 import net.primal.android.wallet.api.model.WalletRequestBody
 import net.primal.android.wallet.domain.SubWallet
 
@@ -54,7 +55,7 @@ class SubscriptionsManager @Inject constructor(
 
     private var notificationsSummarySubscription: PrimalSocketSubscription<NotificationsSummary>? = null
     private var messagesUnreadCountSubscription: PrimalSocketSubscription<MessagesUnreadCount>? = null
-    private var walletBalanceSubscription: PrimalSocketSubscription<String>? = null
+    private var walletBalanceSubscription: PrimalSocketSubscription<BalanceResponse>? = null
 
     private val _badges = MutableSharedFlow<Badges>(
         replay = 1,
@@ -180,8 +181,12 @@ class SubscriptionsManager @Inject constructor(
                     ),
                 ),
             ),
-            transformer = { this.primalEvent?.asWalletBalanceInBtcOrNull() },
+            transformer = { this.primalEvent?.takeContentOrNull<BalanceResponse>() },
         ) {
-            userRepository.updatePrimalWalletBalance(userId = userId, balanceInBtc = it)
+            userRepository.updatePrimalWalletBalance(
+                userId = userId,
+                balanceInBtc = it.amount,
+                maxAmountInBtc = it.maxAmount,
+            )
         }
 }
