@@ -20,6 +20,7 @@ import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.domain.WalletPreference
 import net.primal.android.user.repository.UserRepository
+import net.primal.android.user.subscriptions.SubscriptionsManager
 import net.primal.android.wallet.dashboard.WalletDashboardContract.UiEvent
 import net.primal.android.wallet.dashboard.WalletDashboardContract.UiState
 import net.primal.android.wallet.db.WalletTransaction
@@ -36,6 +37,7 @@ class WalletDashboardViewModel @Inject constructor(
     private val walletRepository: WalletRepository,
     private val userRepository: UserRepository,
     private val primalBillingClient: PrimalBillingClient,
+    private val subscriptionsManager: SubscriptionsManager,
 ) : ViewModel() {
 
     private val activeUserId = activeAccountStore.activeUserId()
@@ -58,6 +60,7 @@ class WalletDashboardViewModel @Inject constructor(
         subscribeToEvents()
         subscribeToActiveAccount()
         subscribeToPurchases()
+        subscribeToBadgesUpdates()
     }
 
     private fun subscribeToEvents() =
@@ -89,6 +92,15 @@ class WalletDashboardViewModel @Inject constructor(
         viewModelScope.launch {
             primalBillingClient.purchases.collect { purchase ->
                 confirmPurchase(purchase = purchase)
+            }
+        }
+
+    private fun subscribeToBadgesUpdates() =
+        viewModelScope.launch {
+            subscriptionsManager.badges.collect {
+                setState {
+                    copy(badges = it)
+                }
             }
         }
 

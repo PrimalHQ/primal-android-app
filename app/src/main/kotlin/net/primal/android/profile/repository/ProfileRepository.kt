@@ -3,7 +3,6 @@ package net.primal.android.profile.repository
 import androidx.room.withTransaction
 import javax.inject.Inject
 import kotlinx.coroutines.flow.filterNotNull
-import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.ext.asMapByKey
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.networking.sockets.errors.WssException
@@ -18,7 +17,6 @@ import net.primal.android.user.domain.asUserAccountFromContactsEvent
 import net.primal.android.user.repository.UserRepository
 
 class ProfileRepository @Inject constructor(
-    private val dispatcherProvider: CoroutineDispatcherProvider,
     private val database: PrimalDatabase,
     private val usersApi: UsersApi,
     private val userRepository: UserRepository,
