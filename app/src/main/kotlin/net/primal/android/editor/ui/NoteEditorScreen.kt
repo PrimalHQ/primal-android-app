@@ -173,8 +173,8 @@ fun NoteEditorScreen(
                             vertical = 0.dp,
                         ),
                         enabled = !state.publishing && !state.uploadingAttachments &&
-                            content.isNotBlank() &&
-                            state.attachments.none { it.uploadError != null },
+                            state.attachments.none { it.uploadError != null } &&
+                            (content.isNotBlank() || state.attachments.isNotEmpty()),
                         onClick = {
                             eventPublisher(UiEvent.PublishPost(content = content))
                         },
