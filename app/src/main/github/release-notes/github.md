@@ -1,2 +1,7 @@
 ## Features
-- Implemented transaction details screen;
+- Fixed badges not visible on wallet tab
+- Implemented fetching wallet balance on wallet screen init
+- Enabled posting a new note with attachments only
+- Fixed buy sats button margins
+- Fixed typo on edit profile
+- Implemented fetching user profile on wallet send with targetPubkey
