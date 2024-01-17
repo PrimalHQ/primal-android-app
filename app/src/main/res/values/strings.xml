@@ -46,7 +46,7 @@
     <string name="create_input_header_handle">Username</string>
     <string name="create_input_header_website">Website</string>
     <string name="create_input_header_about_me">About me</string>
-    <string name="create_input_header_bitcoin_lightning_address">Bitcoin lighting address</string>
+    <string name="create_input_header_bitcoin_lightning_address">Bitcoin lightning address</string>
     <string name="create_input_header_nip_05">Nostr verification (NIP 05)</string>
     <string name="create_account_required_hint">required</string>
 
