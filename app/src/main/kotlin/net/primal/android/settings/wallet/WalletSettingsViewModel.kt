@@ -70,7 +70,7 @@ class WalletSettingsViewModel @Inject constructor(
                         userLightningAddress = it.lightningAddress,
                         // TODO Read from settings
                         maxWalletAmountInBtc = "0.01",
-                        minTransactionAmountInSats = "100",
+                        minTransactionAmountInSats = 100,
                     )
                 }
             }
@@ -119,7 +119,7 @@ class WalletSettingsViewModel @Inject constructor(
             setState { copy(walletPreference = walletPreference) }
         }
 
-    private fun updateMinTransactionAmount(amountInSats: String) =
+    private fun updateMinTransactionAmount(amountInSats: Long) =
         viewModelScope.launch {
             setState { copy(minTransactionAmountInSats = amountInSats) }
             // TODO Save min amount

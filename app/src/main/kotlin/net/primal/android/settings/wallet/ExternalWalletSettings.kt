@@ -93,7 +93,7 @@ private fun ExternalWalletListItem(preferPrimalWallet: Boolean, onExternalWallet
                 modifier = Modifier.padding(bottom = 4.dp),
                 text = stringResource(id = R.string.settings_wallet_use_primal_wallet),
                 style = AppTheme.typography.bodyLarge,
-                color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+                color = AppTheme.colorScheme.onPrimary,
             )
         },
         supportingContent = {

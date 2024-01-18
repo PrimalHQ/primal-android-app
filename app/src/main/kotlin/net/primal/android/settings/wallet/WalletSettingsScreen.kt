@@ -141,7 +141,7 @@ fun WalletSettingsScreen(
 
                     var hideTransactionsEditorDialog by remember { mutableStateOf(false) }
                     val hideTransactionAmountBalanceInSats = state.minTransactionAmountInSats?.let {
-                        numberFormat.format(it.toLong())
+                        numberFormat.format(it)
                     } ?: "1"
                     SettingsItem(
                         headlineText = stringResource(id = R.string.settings_wallet_hide_transactions_below),
@@ -208,7 +208,7 @@ private fun SettingsItem(
                     modifier = Modifier.padding(bottom = 4.dp),
                     text = headlineText,
                     style = AppTheme.typography.bodyLarge,
-                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+                    color = AppTheme.colorScheme.onPrimary,
                 )
             },
             supportingContent = if (supportText != null) {
@@ -245,7 +245,7 @@ private fun MaxWalletBalanceDialog(text: String, onDialogDismiss: () -> Unit) {
 }
 
 @Composable
-private fun HideTransactionsEditorDialog(onDialogDismiss: () -> Unit, onEditAmount: (String) -> Unit) {
+private fun HideTransactionsEditorDialog(onDialogDismiss: () -> Unit, onEditAmount: (Long) -> Unit) {
     var amount by remember { mutableStateOf("") }
     val focusRequester = remember { FocusRequester() }
     LaunchedEffect(Unit) {
@@ -261,7 +261,7 @@ private fun HideTransactionsEditorDialog(onDialogDismiss: () -> Unit, onEditAmou
                 modifier = Modifier.focusRequester(focusRequester),
                 value = amount,
                 onValueChange = {
-                    if (it.isDigitsOnly()) {
+                    if (it.isDigitsOnly() && it.length <= 6) {
                         amount = it
                     }
                 },
@@ -271,7 +271,7 @@ private fun HideTransactionsEditorDialog(onDialogDismiss: () -> Unit, onEditAmou
                 ),
                 keyboardActions = KeyboardActions(
                     onDone = {
-                        onEditAmount(amount)
+                        onEditAmount(amount.toLongOrNull() ?: 1L)
                         onDialogDismiss()
                     },
                 ),
@@ -287,7 +287,7 @@ private fun HideTransactionsEditorDialog(onDialogDismiss: () -> Unit, onEditAmou
         confirmButton = {
             TextButton(
                 onClick = {
-                    onEditAmount(amount)
+                    onEditAmount(amount.toLongOrNull() ?: 1L)
                     onDialogDismiss()
                 },
             ) {
