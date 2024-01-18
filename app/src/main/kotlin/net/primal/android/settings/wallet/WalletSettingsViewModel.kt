@@ -53,6 +53,9 @@ class WalletSettingsViewModel @Inject constructor(
                     is WalletSettingsContract.UiEvent.UpdateWalletPreference -> {
                         updateWalletPreference(walletPreference = it.walletPreference)
                     }
+                    is WalletSettingsContract.UiEvent.UpdateMinTransactionAmount -> {
+                        updateMinTransactionAmount(amountInSats = it.amountInSats)
+                    }
                 }
             }
         }
@@ -65,6 +68,9 @@ class WalletSettingsViewModel @Inject constructor(
                         wallet = it.nostrWallet,
                         walletPreference = it.walletPreference,
                         userLightningAddress = it.lightningAddress,
+                        // TODO Read from settings
+                        maxWalletAmountInBtc = "0.01",
+                        minTransactionAmountInSats = "100",
                     )
                 }
             }
@@ -111,5 +117,11 @@ class WalletSettingsViewModel @Inject constructor(
             val activeUserId = activeAccountStore.activeUserId()
             userRepository.updateWalletPreference(userId = activeUserId, walletPreference = walletPreference)
             setState { copy(walletPreference = walletPreference) }
+        }
+
+    private fun updateMinTransactionAmount(amountInSats: String) =
+        viewModelScope.launch {
+            setState { copy(minTransactionAmountInSats = amountInSats) }
+            // TODO Save min amount
         }
 }

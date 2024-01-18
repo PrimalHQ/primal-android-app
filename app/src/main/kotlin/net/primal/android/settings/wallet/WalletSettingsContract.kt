@@ -8,10 +8,13 @@ interface WalletSettingsContract {
         val wallet: NostrWalletConnect? = null,
         val walletPreference: WalletPreference = WalletPreference.Undefined,
         val userLightningAddress: String? = null,
+        val maxWalletAmountInBtc: String? = null,
+        val minTransactionAmountInSats: String? = null,
     )
 
     sealed class UiEvent {
         data object DisconnectWallet : UiEvent()
         data class UpdateWalletPreference(val walletPreference: WalletPreference) : UiEvent()
+        data class UpdateMinTransactionAmount(val amountInSats: String) : UiEvent()
     }
 }

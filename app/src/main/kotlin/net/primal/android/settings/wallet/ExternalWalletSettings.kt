@@ -1,8 +1,6 @@
 package net.primal.android.settings.wallet
 
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -35,7 +33,6 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
@@ -57,22 +54,20 @@ fun ExternalWalletSettings(
     nwcWallet: NostrWalletConnect?,
     walletPreference: WalletPreference,
     profileLightningAddress: String?,
-    onExternalWalletSwitchChanged: (Boolean) -> Unit,
+    onUsePrimalWalletSwitchChanged: (Boolean) -> Unit,
     onExternalWalletDisconnect: () -> Unit,
     onEditProfileClick: () -> Unit,
 ) {
     Column(
-        modifier = Modifier.animateContentSize(
-            animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
-        ),
+        modifier = Modifier.animateContentSize(),
     ) {
-        val nwcEnabled = walletPreference == WalletPreference.NostrWalletConnect
+        val primalWalletPreferred = walletPreference != WalletPreference.NostrWalletConnect
         ExternalWalletListItem(
-            preferredNwc = nwcEnabled,
-            onExternalWalletSwitchChanged = onExternalWalletSwitchChanged,
+            preferPrimalWallet = primalWalletPreferred,
+            onExternalWalletSwitchChanged = onUsePrimalWalletSwitchChanged,
         )
 
-        if (nwcEnabled) {
+        if (!primalWalletPreferred) {
             Spacer(modifier = Modifier.height(24.dp))
 
             ExternalWalletSection(
@@ -91,31 +86,27 @@ fun ExternalWalletSettings(
 }
 
 @Composable
-private fun ExternalWalletListItem(preferredNwc: Boolean, onExternalWalletSwitchChanged: (Boolean) -> Unit) {
+private fun ExternalWalletListItem(preferPrimalWallet: Boolean, onExternalWalletSwitchChanged: (Boolean) -> Unit) {
     ListItem(
         headlineContent = {
             Text(
-                modifier = Modifier
-                    .fillMaxWidth(0.75f)
-                    .padding(bottom = 5.dp),
-                text = stringResource(id = R.string.settings_wallet_use_external_wallet),
-                style = AppTheme.typography.bodyMedium.copy(fontSize = 16.sp),
+                modifier = Modifier.padding(bottom = 4.dp),
+                text = stringResource(id = R.string.settings_wallet_use_primal_wallet),
+                style = AppTheme.typography.bodyLarge,
                 color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
             )
         },
         supportingContent = {
             Text(
                 modifier = Modifier.fillMaxWidth(),
-                text = stringResource(id = R.string.settings_wallet_use_external_wallet_hint),
+                text = stringResource(id = R.string.settings_wallet_use_primal_wallet_hint),
                 style = AppTheme.typography.bodySmall,
-                color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
+                color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
             )
         },
         trailingContent = {
             PrimalSwitch(
-                checked = preferredNwc,
+                checked = preferPrimalWallet,
                 onCheckedChange = onExternalWalletSwitchChanged,
             )
         },
@@ -344,7 +335,9 @@ private fun NostrProfileLightingAddressSection(lightningAddress: String?, onEdit
                 append(stringResource(id = R.string.settings_wallet_nwc_profile_lightning_address_hint))
                 append(
                     AnnotatedString(
-                        text = stringResource(id = R.string.settings_wallet_nwc_profile_lightning_address_hint_suffix),
+                        text = " ${stringResource(
+                            id = R.string.settings_wallet_nwc_profile_lightning_address_hint_suffix,
+                        )}",
                         spanStyle = SpanStyle(
                             color = AppTheme.colorScheme.secondary,
                             fontStyle = AppTheme.typography.bodySmall.fontStyle,
@@ -371,7 +364,7 @@ private fun PreviewExternalWalletSettings(
                     nwcWallet = state.wallet,
                     walletPreference = state.walletPreference,
                     profileLightningAddress = state.userLightningAddress,
-                    onExternalWalletSwitchChanged = {},
+                    onUsePrimalWalletSwitchChanged = {},
                     onExternalWalletDisconnect = {},
                     onEditProfileClick = {},
                 )
