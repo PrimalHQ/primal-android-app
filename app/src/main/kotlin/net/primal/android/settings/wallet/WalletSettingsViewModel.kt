@@ -50,8 +50,9 @@ class WalletSettingsViewModel @Inject constructor(
             events.collect {
                 when (it) {
                     is WalletSettingsContract.UiEvent.DisconnectWallet -> disconnectWallet()
-                    is WalletSettingsContract.UiEvent.UpdateWalletPreference ->
+                    is WalletSettingsContract.UiEvent.UpdateWalletPreference -> {
                         updateWalletPreference(walletPreference = it.walletPreference)
+                    }
                 }
             }
         }
@@ -109,5 +110,6 @@ class WalletSettingsViewModel @Inject constructor(
         viewModelScope.launch {
             val activeUserId = activeAccountStore.activeUserId()
             userRepository.updateWalletPreference(userId = activeUserId, walletPreference = walletPreference)
+            setState { copy(walletPreference = walletPreference) }
         }
 }

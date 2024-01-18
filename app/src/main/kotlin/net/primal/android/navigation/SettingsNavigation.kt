@@ -115,6 +115,7 @@ private fun NavGraphBuilder.wallet(
     WalletSettingsScreen(
         viewModel = viewModel,
         onClose = { navController.navigateUp() },
+        onEditProfileClick = { navController.navigateToEditProfile() },
     )
 }
 

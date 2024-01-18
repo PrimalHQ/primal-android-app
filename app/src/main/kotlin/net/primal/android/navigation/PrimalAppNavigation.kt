@@ -152,7 +152,7 @@ fun NavController.navigateToProfile(profileId: String? = null) =
         else -> navigate(route = "profile")
     }
 
-private fun NavController.navigateToEditProfile() = navigate(route = "edit_profile")
+fun NavController.navigateToEditProfile() = navigate(route = "edit_profile")
 
 private fun NavController.navigateToSettings() = navigate(route = "settings")
 
