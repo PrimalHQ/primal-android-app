@@ -58,7 +58,7 @@ class FeedViewModel @Inject constructor(
     private val mutedUserRepository: MutedUserRepository,
 ) : ViewModel() {
 
-    private val feedDirective: String = savedStateHandle.feedDirective ?: "network;trending"
+    private val feedDirective: String = savedStateHandle.feedDirective ?: activeAccountStore.activeUserId()
 
     private var userDataUpdater: UserDataUpdater? = null
 
