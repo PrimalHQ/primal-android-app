@@ -106,7 +106,11 @@ class WalletDashboardViewModel @Inject constructor(
 
     private fun fetchWalletBalance() =
         viewModelScope.launch {
-            walletRepository.fetchWalletBalance(userId = activeUserId)
+            try {
+                walletRepository.fetchWalletBalance(userId = activeUserId)
+            } catch (error: WssException) {
+                Timber.e(error)
+            }
         }
 
     private fun enablePrimalWallet() =
