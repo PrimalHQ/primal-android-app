@@ -43,7 +43,6 @@ import androidx.compose.ui.unit.dp
 import androidx.core.text.isDigitsOnly
 import java.text.NumberFormat
 import net.primal.android.R
-import net.primal.android.core.compose.PrimalSwitch
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
@@ -122,21 +121,21 @@ fun WalletSettingsScreen(
                 )
 
                 if (state.walletPreference != WalletPreference.NostrWalletConnect) {
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    SettingsItem(
-                        headlineText = stringResource(id = R.string.settings_wallet_start_in_wallet),
-                        supportText = stringResource(id = R.string.settings_wallet_start_in_wallet_hint),
-                        trailingContent = {
-                            PrimalSwitch(
-                                checked = false,
-                                onCheckedChange = {
-                                },
-                            )
-                        },
-                        onClick = {
-                        },
-                    )
+//                    Spacer(modifier = Modifier.height(8.dp))
+//
+//                    SettingsItem(
+//                        headlineText = stringResource(id = R.string.settings_wallet_start_in_wallet),
+//                        supportText = stringResource(id = R.string.settings_wallet_start_in_wallet_hint),
+//                        trailingContent = {
+//                            PrimalSwitch(
+//                                checked = false,
+//                                onCheckedChange = {
+//                                },
+//                            )
+//                        },
+//                        onClick = {
+//                        },
+//                    )
 
                     Spacer(modifier = Modifier.height(8.dp))
 
