@@ -96,7 +96,6 @@ fun WalletSettingsScreen(
                 modifier = Modifier
                     .verticalScroll(scrollState)
                     .padding(paddingValues)
-                    .padding(top = 16.dp)
                     .animateContentSize(),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -135,6 +134,9 @@ fun WalletSettingsScreen(
                                 },
                             )
                         },
+                        onClick = {
+
+                        }
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))
@@ -168,14 +170,11 @@ fun WalletSettingsScreen(
                         headlineText = stringResource(id = R.string.settings_wallet_max_wallet_balance),
                         supportText = "$maxBalanceInSats sats",
                         trailingContent = {
-                            IconButton(
-                                onClick = {
-                                    maxWalletBalanceShown = true
-                                },
-                            ) {
+                            IconButton(onClick = { maxWalletBalanceShown = true }) {
                                 Icon(imageVector = Icons.Outlined.Info, contentDescription = null)
                             }
                         },
+                        onClick = { maxWalletBalanceShown = true },
                     )
 
                     if (maxWalletBalanceShown) {

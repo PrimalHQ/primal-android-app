@@ -86,8 +86,14 @@ fun ExternalWalletSettings(
 }
 
 @Composable
-private fun ExternalWalletListItem(preferPrimalWallet: Boolean, onExternalWalletSwitchChanged: (Boolean) -> Unit) {
+private fun ExternalWalletListItem(
+    preferPrimalWallet: Boolean,
+    onExternalWalletSwitchChanged: (Boolean) -> Unit,
+) {
     ListItem(
+        modifier = Modifier.clickable {
+            onExternalWalletSwitchChanged(!preferPrimalWallet)
+        },
         headlineContent = {
             Text(
                 modifier = Modifier.padding(bottom = 4.dp),
@@ -335,9 +341,9 @@ private fun NostrProfileLightingAddressSection(lightningAddress: String?, onEdit
                 append(stringResource(id = R.string.settings_wallet_nwc_profile_lightning_address_hint))
                 append(
                     AnnotatedString(
-                        text = " ${stringResource(
-                            id = R.string.settings_wallet_nwc_profile_lightning_address_hint_suffix,
-                        )}",
+                        text = " ${
+                            stringResource(id = R.string.settings_wallet_nwc_profile_lightning_address_hint_suffix)
+                        }",
                         spanStyle = SpanStyle(
                             color = AppTheme.colorScheme.secondary,
                             fontStyle = AppTheme.typography.bodySmall.fontStyle,
