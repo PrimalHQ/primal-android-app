@@ -4,6 +4,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
@@ -12,6 +13,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import java.text.NumberFormat
 import java.time.Instant
@@ -20,6 +22,8 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import net.primal.android.R
+import net.primal.android.core.compose.ListLoading
+import net.primal.android.core.compose.isEmpty
 import net.primal.android.theme.AppTheme
 
 @ExperimentalFoundationApi
@@ -79,6 +83,21 @@ fun TransactionsLazyColumn(
                     onAvatarClick = onProfileClick,
                     onClick = onTransactionClick,
                 )
+            }
+        }
+
+        if (pagingItems.isEmpty()) {
+            when (pagingItems.loadState.refresh) {
+                LoadState.Loading -> {
+                    item(contentType = "LoadingRefresh") {
+                        ListLoading(
+                            modifier = Modifier
+                                .fillParentMaxSize()
+                                .padding(bottom = 80.dp),
+                        )
+                    }
+                }
+                else -> Unit
             }
         }
 
