@@ -27,7 +27,7 @@ fun WalletDashboardLite(
                 clip = false
                 translationY = 4.dp.toPx()
             },
-            amountInBtc = walletBalance,
+            amountInBtc = walletBalance ?: BigDecimal.ZERO,
             textSize = 32.sp,
         )
 

@@ -33,7 +33,7 @@ fun WalletDashboard(
                 .wrapContentWidth()
                 .padding(start = if (walletBalance != null) 32.dp else 0.dp)
                 .padding(bottom = 32.dp),
-            amountInBtc = walletBalance,
+            amountInBtc = walletBalance ?: BigDecimal.ZERO,
             textSize = 48.sp,
         )
 
