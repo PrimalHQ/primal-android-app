@@ -1,3 +1,7 @@
-- Implement external wallet settings;
-- Implement Primal Wallet settings UI only;
-- Improve Wallet stability;
+- Implemented spam threshold filter in wallet settings;
+- Implemented reading real max wallet balance;
+- Implemented persisting wallet settings;
+- Implemented zap profile;
+- Implemented transactions loading spinner;
+- Handle gracefully unknown transaction states;
+- Show 0 as wallet balance on cold wallet start;
