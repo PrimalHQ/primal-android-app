@@ -186,7 +186,7 @@ class SubscriptionsManager @Inject constructor(
             userRepository.updatePrimalWalletBalance(
                 userId = userId,
                 balanceInBtc = it.amount,
-                maxAmountInBtc = it.maxAmount,
+                maxBalanceInBtc = it.maxAmount,
             )
         }
 }

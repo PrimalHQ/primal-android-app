@@ -22,6 +22,7 @@ import net.primal.android.user.api.UsersApi
 import net.primal.android.user.domain.NostrWalletConnect
 import net.primal.android.user.domain.UserAccount
 import net.primal.android.user.domain.WalletPreference
+import net.primal.android.wallet.domain.WalletSettings
 
 class UserRepository @Inject constructor(
     private val dispatcherProvider: CoroutineDispatcherProvider,
@@ -145,12 +146,21 @@ class UserRepository @Inject constructor(
     suspend fun updatePrimalWalletBalance(
         userId: String,
         balanceInBtc: String,
-        maxAmountInBtc: String? = null,
+        maxBalanceInBtc: String? = null,
     ) {
         accountsStore.getAndUpdateAccount(userId = userId) {
             copy(
                 primalWalletBalanceInBtc = balanceInBtc,
+                primalWalletSettings = this.primalWalletSettings.copy(
+                    maxBalanceInBtc = maxBalanceInBtc ?: this.primalWalletSettings.maxBalanceInBtc,
+                ),
             )
+        }
+    }
+
+    suspend fun updatePrimalWalletSettings(userId: String, reducer: WalletSettings.() -> WalletSettings) {
+        accountsStore.getAndUpdateAccount(userId = userId) {
+            copy(primalWalletSettings = this.primalWalletSettings.reducer())
         }
     }
 }

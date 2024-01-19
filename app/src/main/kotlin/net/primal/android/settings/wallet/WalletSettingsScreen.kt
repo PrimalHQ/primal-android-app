@@ -140,19 +140,19 @@ fun WalletSettingsScreen(
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    var hideTransactionsEditorDialog by remember { mutableStateOf(false) }
-                    val hideTransactionAmountBalanceInSats = state.minTransactionAmountInSats?.let {
+                    var spamThresholdAmountEditorDialog by remember { mutableStateOf(false) }
+                    val spamThresholdAmountInSats = state.spamThresholdAmountInSats?.let {
                         numberFormat.format(it)
                     } ?: "1"
                     SettingsItem(
                         headlineText = stringResource(id = R.string.settings_wallet_hide_transactions_below),
-                        supportText = "$hideTransactionAmountBalanceInSats sats",
-                        onClick = { hideTransactionsEditorDialog = true },
+                        supportText = "$spamThresholdAmountInSats sats",
+                        onClick = { spamThresholdAmountEditorDialog = true },
                     )
 
-                    if (hideTransactionsEditorDialog) {
-                        HideTransactionsEditorDialog(
-                            onDialogDismiss = { hideTransactionsEditorDialog = false },
+                    if (spamThresholdAmountEditorDialog) {
+                        SpamThresholdAmountEditorDialog(
+                            onDialogDismiss = { spamThresholdAmountEditorDialog = false },
                             onEditAmount = {
                                 eventPublisher(UiEvent.UpdateMinTransactionAmount(amountInSats = it))
                             },
@@ -162,7 +162,7 @@ fun WalletSettingsScreen(
                     Spacer(modifier = Modifier.height(8.dp))
 
                     var maxWalletBalanceShown by remember { mutableStateOf(false) }
-                    val maxBalanceInSats = state.maxWalletAmountInBtc?.toSats()?.let {
+                    val maxBalanceInSats = state.maxWalletBalanceInBtc?.toSats()?.let {
                         numberFormat.format(it.toLong())
                     } ?: "⌛"
                     SettingsItem(
@@ -243,7 +243,7 @@ private fun MaxWalletBalanceDialog(text: String, onDialogDismiss: () -> Unit) {
 }
 
 @Composable
-private fun HideTransactionsEditorDialog(onDialogDismiss: () -> Unit, onEditAmount: (Long) -> Unit) {
+private fun SpamThresholdAmountEditorDialog(onDialogDismiss: () -> Unit, onEditAmount: (Long) -> Unit) {
     var amount by remember { mutableStateOf("") }
     val focusRequester = remember { FocusRequester() }
     LaunchedEffect(Unit) {

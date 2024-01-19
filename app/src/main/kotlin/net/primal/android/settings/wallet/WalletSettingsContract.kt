@@ -8,8 +8,8 @@ interface WalletSettingsContract {
         val wallet: NostrWalletConnect? = null,
         val walletPreference: WalletPreference = WalletPreference.Undefined,
         val userLightningAddress: String? = null,
-        val maxWalletAmountInBtc: String? = null,
-        val minTransactionAmountInSats: Long? = null,
+        val maxWalletBalanceInBtc: String? = null,
+        val spamThresholdAmountInSats: Long? = null,
     )
 
     sealed class UiEvent {

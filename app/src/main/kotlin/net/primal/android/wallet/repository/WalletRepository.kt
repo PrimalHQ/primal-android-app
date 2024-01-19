@@ -125,7 +125,7 @@ class WalletRepository @Inject constructor(
         userRepository.updatePrimalWalletBalance(
             userId = userId,
             balanceInBtc = response.amount,
-            maxAmountInBtc = response.maxAmount,
+            maxBalanceInBtc = response.maxAmount,
         )
     }
 

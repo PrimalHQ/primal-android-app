@@ -54,7 +54,7 @@ class WalletSettingsViewModel @Inject constructor(
                         updateWalletPreference(walletPreference = it.walletPreference)
                     }
                     is WalletSettingsContract.UiEvent.UpdateMinTransactionAmount -> {
-                        updateMinTransactionAmount(amountInSats = it.amountInSats)
+                        updateSpamThresholdAmount(amountInSats = it.amountInSats)
                     }
                 }
             }
@@ -68,9 +68,8 @@ class WalletSettingsViewModel @Inject constructor(
                         wallet = it.nostrWallet,
                         walletPreference = it.walletPreference,
                         userLightningAddress = it.lightningAddress,
-                        // TODO Read from settings
-                        maxWalletAmountInBtc = "0.01",
-                        minTransactionAmountInSats = 100,
+                        maxWalletBalanceInBtc = it.primalWalletSettings.maxBalanceInBtc,
+                        spamThresholdAmountInSats = it.primalWalletSettings.spamThresholdAmountInSats,
                     )
                 }
             }
@@ -100,10 +99,7 @@ class WalletSettingsViewModel @Inject constructor(
         }
 
     private suspend fun disconnectWallet() {
-        userRepository.disconnectNostrWallet(
-            userId = activeAccountStore.activeUserId(),
-        )
-
+        userRepository.disconnectNostrWallet(userId = activeAccountStore.activeUserId())
         setState {
             copy(
                 wallet = null,
@@ -119,9 +115,10 @@ class WalletSettingsViewModel @Inject constructor(
             setState { copy(walletPreference = walletPreference) }
         }
 
-    private fun updateMinTransactionAmount(amountInSats: Long) =
+    private fun updateSpamThresholdAmount(amountInSats: Long) =
         viewModelScope.launch {
-            setState { copy(minTransactionAmountInSats = amountInSats) }
-            // TODO Save min amount
+            userRepository.updatePrimalWalletSettings(userId = activeAccountStore.activeUserId()) {
+                this.copy(spamThresholdAmountInSats = amountInSats)
+            }
         }
 }
