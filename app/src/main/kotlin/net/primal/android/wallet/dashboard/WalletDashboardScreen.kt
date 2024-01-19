@@ -318,7 +318,7 @@ fun WalletDashboardScreen(
                             },
                             footer = {
                                 if (shouldAddFooter) {
-                                    Spacer(modifier = Modifier.height(200.dp))
+                                    Spacer(modifier = Modifier.height(256.dp))
                                 }
                             },
                         )
