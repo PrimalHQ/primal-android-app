@@ -86,10 +86,7 @@ fun ExternalWalletSettings(
 }
 
 @Composable
-private fun ExternalWalletListItem(
-    preferPrimalWallet: Boolean,
-    onExternalWalletSwitchChanged: (Boolean) -> Unit,
-) {
+private fun ExternalWalletListItem(preferPrimalWallet: Boolean, onExternalWalletSwitchChanged: (Boolean) -> Unit) {
     ListItem(
         modifier = Modifier.clickable {
             onExternalWalletSwitchChanged(!preferPrimalWallet)

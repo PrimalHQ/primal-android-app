@@ -2,9 +2,11 @@ package net.primal.android.wallet.api
 
 import javax.inject.Inject
 import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.add
 import kotlinx.serialization.json.buildJsonArray
+import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.json.jsonObject
 import net.primal.android.core.serialization.json.NostrJson
@@ -18,6 +20,7 @@ import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.ext.takeContentOrNull
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.model.primal.PrimalEvent
+import net.primal.android.nostr.model.primal.content.ContentWalletTransaction
 import net.primal.android.nostr.model.primal.content.WalletActivationContent
 import net.primal.android.nostr.model.primal.content.WalletUserInfoContent
 import net.primal.android.nostr.notary.NostrNotary
@@ -181,8 +184,17 @@ class WalletApiImpl @Inject constructor(
         val transactionsEvent = result.findPrimalEvent(kind = NostrEventKind.PrimalWalletTransactions)
             ?: throw WssException("Missing or invalid content in response.")
 
+        val txJsonArray = NostrJson.decodeFromString<JsonArray>(transactionsEvent.content)
+        val transactions = txJsonArray.mapNotNull {
+            try {
+                NostrJson.decodeFromJsonElement<ContentWalletTransaction>(it)
+            } catch (error: IllegalArgumentException) {
+                null
+            }
+        }
+
         return TransactionsResponse(
-            transactions = NostrJson.decodeFromString(transactionsEvent.content),
+            transactions = transactions,
             paging = result.findPrimalEvent(kind = NostrEventKind.PrimalPaging)?.let {
                 NostrJson.decodeFromStringOrNull(it.content)
             },

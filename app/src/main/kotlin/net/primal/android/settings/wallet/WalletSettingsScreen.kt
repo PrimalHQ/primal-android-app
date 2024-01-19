@@ -135,8 +135,7 @@ fun WalletSettingsScreen(
                             )
                         },
                         onClick = {
-
-                        }
+                        },
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))
