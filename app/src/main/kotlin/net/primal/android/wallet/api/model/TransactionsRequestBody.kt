@@ -10,4 +10,5 @@ data class TransactionsRequestBody(
     @SerialName("limit") val limit: Int? = null,
     @SerialName("until") val until: Long? = null,
     @SerialName("since") val since: Long? = null,
+    @SerialName("min_amount_btc") val minAmountInBtc: String? = null,
 ) : WalletOperationRequestBody()

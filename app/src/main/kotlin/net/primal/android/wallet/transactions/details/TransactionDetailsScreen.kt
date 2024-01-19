@@ -358,7 +358,7 @@ private fun TransactionCard(txData: TransactionDetailDataUi, onProfileClick: (St
 
         if (expanded) {
             if (txData.txAmountInUsd != null || txData.exchangeRate != null) {
-                val usdAmount = txData.txAmountInUsd?.toDouble() ?: txData.exchangeRate?.let { rate ->
+                val usdAmount = txData.txAmountInUsd ?: txData.exchangeRate?.let { rate ->
                     txData.txAmountInSats.toBtc() / rate.toDouble()
                 }
 

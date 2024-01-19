@@ -26,4 +26,7 @@ interface WalletTransactionDao {
     @Transaction
     @Query("SELECT * FROM WalletTransactionData WHERE id IS :txId")
     fun findTransactionById(txId: String): WalletTransaction?
+
+    @Query("DELETE FROM WalletTransactionData")
+    fun deleteAllTransactions()
 }

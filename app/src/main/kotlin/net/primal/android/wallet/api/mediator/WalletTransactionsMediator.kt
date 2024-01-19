@@ -21,6 +21,8 @@ import net.primal.android.wallet.api.WalletApi
 import net.primal.android.wallet.api.model.TransactionsRequestBody
 import net.primal.android.wallet.db.WalletTransaction
 import net.primal.android.wallet.domain.SubWallet
+import net.primal.android.wallet.utils.CurrencyConversionUtils.formatAsString
+import net.primal.android.wallet.utils.CurrencyConversionUtils.toBtc
 import timber.log.Timber
 
 @ExperimentalPagingApi
@@ -64,6 +66,9 @@ class WalletTransactionsMediator(
         val initialRequestBody = TransactionsRequestBody(
             subWallet = SubWallet.Open,
             limit = state.config.pageSize,
+            minAmountInBtc = accountsStore.findByIdOrNull(userId)
+                ?.primalWalletSettings
+                ?.spamThresholdAmountInSats?.toBtc()?.formatAsString(),
         )
 
         val requestBody = when (loadType) {

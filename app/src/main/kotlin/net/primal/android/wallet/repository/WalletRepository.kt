@@ -137,6 +137,8 @@ class WalletRepository @Inject constructor(
         return walletApi.parseLnInvoice(userId = userId, lnbc = lnbc)
     }
 
+    fun deleteAllTransactions() = database.walletTransactions().deleteAllTransactions()
+
     private suspend fun storeWalletInfoLocally(
         userId: String,
         kycLevel: WalletKycLevel,

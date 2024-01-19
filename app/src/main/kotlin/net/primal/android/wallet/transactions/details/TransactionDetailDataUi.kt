@@ -11,7 +11,7 @@ data class TransactionDetailDataUi(
     val txState: TxState,
     val txInstant: Instant,
     val txAmountInSats: ULong,
-    val txAmountInUsd: String?,
+    val txAmountInUsd: Double?,
     val txNote: String?,
     val isZap: Boolean,
     val isStorePurchase: Boolean,

@@ -10,19 +10,24 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.navigation.nwcUrl
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.domain.NWCParseException
 import net.primal.android.user.domain.WalletPreference
 import net.primal.android.user.domain.parseNWCUrl
 import net.primal.android.user.repository.UserRepository
+import net.primal.android.wallet.repository.WalletRepository
 import timber.log.Timber
 
 @HiltViewModel
 class WalletSettingsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
+    private val dispatcherProvider: CoroutineDispatcherProvider,
     private val activeAccountStore: ActiveAccountStore,
     private val userRepository: UserRepository,
+    private val walletRepository: WalletRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(WalletSettingsContract.UiState())
@@ -119,6 +124,9 @@ class WalletSettingsViewModel @Inject constructor(
         viewModelScope.launch {
             userRepository.updatePrimalWalletSettings(userId = activeAccountStore.activeUserId()) {
                 this.copy(spamThresholdAmountInSats = amountInSats)
+            }
+            withContext(dispatcherProvider.io()) {
+                walletRepository.deleteAllTransactions()
             }
         }
 }

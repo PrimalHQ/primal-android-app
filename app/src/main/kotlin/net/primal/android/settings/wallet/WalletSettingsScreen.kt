@@ -259,8 +259,9 @@ private fun SpamThresholdAmountEditorDialog(onDialogDismiss: () -> Unit, onEditA
                 modifier = Modifier.focusRequester(focusRequester),
                 value = amount,
                 onValueChange = {
-                    if (it.isDigitsOnly() && it.length <= 6) {
-                        amount = it
+                    when {
+                        it.isEmpty() -> amount = ""
+                        it.isDigitsOnly() && it.length <= 6 && it.toLong() > 0 -> amount = it
                     }
                 },
                 keyboardOptions = KeyboardOptions(
