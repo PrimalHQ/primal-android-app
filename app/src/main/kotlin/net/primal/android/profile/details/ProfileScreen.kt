@@ -106,6 +106,7 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.ContextMuteUser
 import net.primal.android.core.compose.icons.primaliconpack.ContextShare
+import net.primal.android.core.compose.icons.primaliconpack.FeedZaps
 import net.primal.android.core.compose.icons.primaliconpack.Key
 import net.primal.android.core.compose.icons.primaliconpack.Link
 import net.primal.android.core.compose.icons.primaliconpack.Message
@@ -125,6 +126,8 @@ import net.primal.android.profile.details.ProfileContract.UiState.ProfileError
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
+import net.primal.android.wallet.transactions.send.create.DraftTransaction
+import net.primal.android.wallet.utils.isLightningAddress
 
 @Composable
 fun ProfileScreen(
@@ -136,6 +139,7 @@ fun ProfileScreen(
     onProfileClick: (String) -> Unit,
     onEditProfileClick: () -> Unit,
     onMessageClick: (String) -> Unit,
+    onZapProfileClick: (DraftTransaction) -> Unit,
     onHashtagClick: (String) -> Unit,
     onMediaClick: (String, String) -> Unit,
     onGoToWallet: () -> Unit,
@@ -153,6 +157,7 @@ fun ProfileScreen(
         onProfileClick = onProfileClick,
         onEditProfileClick = onEditProfileClick,
         onMessageClick = onMessageClick,
+        onZapProfileClick = onZapProfileClick,
         onHashtagClick = onHashtagClick,
         onMediaClick = onMediaClick,
         onGoToWallet = onGoToWallet,
@@ -171,6 +176,7 @@ fun ProfileScreen(
     onProfileClick: (String) -> Unit,
     onEditProfileClick: () -> Unit,
     onMessageClick: (String) -> Unit,
+    onZapProfileClick: (DraftTransaction) -> Unit,
     onHashtagClick: (String) -> Unit,
     onMediaClick: (String, String) -> Unit,
     onGoToWallet: () -> Unit,
@@ -204,6 +210,7 @@ fun ProfileScreen(
 
     val snackbarHostState = remember { SnackbarHostState() }
     val uiScope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     ErrorHandler(
         error = state.error,
@@ -342,15 +349,28 @@ fun ProfileScreen(
                         profileDetails = state.profileDetails,
                         profileStats = state.profileStats,
                         onEditProfileClick = onEditProfileClick,
-                        onMessageClick = {
-                            onMessageClick(state.profileId)
+                        onMessageClick = { onMessageClick(state.profileId) },
+                        onZapProfileClick = {
+                            val profileLud16 = state.profileDetails?.lightningAddress
+                            if (profileLud16?.isLightningAddress() == true) {
+                                onZapProfileClick(
+                                    DraftTransaction(targetUserId = state.profileId, targetLud16 = profileLud16),
+                                )
+                            } else {
+                                uiScope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = context.getString(
+                                            R.string.wallet_send_payment_error_nostr_user_without_lightning_address,
+                                            state.profileDetails?.authorDisplayName
+                                                ?: context.getString(R.string.wallet_send_payment_this_user_chunk),
+                                        ),
+                                        duration = SnackbarDuration.Short,
+                                    )
+                                }
+                            }
                         },
-                        onFollow = {
-                            eventPublisher(ProfileContract.UiEvent.FollowAction(state.profileId))
-                        },
-                        onUnfollow = {
-                            eventPublisher(ProfileContract.UiEvent.UnfollowAction(state.profileId))
-                        },
+                        onFollow = { eventPublisher(ProfileContract.UiEvent.FollowAction(state.profileId)) },
+                        onUnfollow = { eventPublisher(ProfileContract.UiEvent.UnfollowAction(state.profileId)) },
                     )
 
                     if (state.isProfileMuted) {
@@ -619,6 +639,7 @@ private fun UserProfileDetails(
     profileDetails: ProfileDetailsUi? = null,
     profileStats: ProfileStatsUi? = null,
     onEditProfileClick: () -> Unit,
+    onZapProfileClick: () -> Unit,
     onMessageClick: () -> Unit,
     onFollow: () -> Unit,
     onUnfollow: () -> Unit,
@@ -638,6 +659,7 @@ private fun UserProfileDetails(
             isActiveUser = isActiveUser,
             onEditProfileClick = onEditProfileClick,
             onMessageClick = onMessageClick,
+            onZapProfileClick = onZapProfileClick,
             onFollow = onFollow,
             onUnfollow = onUnfollow,
         )
@@ -784,6 +806,7 @@ private fun ProfileActions(
     isActiveUser: Boolean,
     onEditProfileClick: () -> Unit,
     onMessageClick: () -> Unit,
+    onZapProfileClick: () -> Unit,
     onFollow: () -> Unit,
     onUnfollow: () -> Unit,
 ) {
@@ -797,6 +820,11 @@ private fun ProfileActions(
         horizontalArrangement = Arrangement.End,
     ) {
         ActionButton(
+            onClick = onZapProfileClick,
+            iconVector = PrimalIcons.FeedZaps,
+        )
+
+        ActionButton(
             onClick = onMessageClick,
             iconVector = PrimalIcons.Message,
         )
@@ -808,9 +836,11 @@ private fun ProfileActions(
             }
         } else {
             Spacer(modifier = Modifier.width(8.dp))
-            EditProfileButton(onClick = {
-                onEditProfileClick()
-            })
+            EditProfileButton(
+                onClick = {
+                    onEditProfileClick()
+                },
+            )
         }
     }
 }
@@ -994,37 +1024,48 @@ private fun ErrorHandler(error: ProfileError?, snackbarHostState: SnackbarHostSt
             is ProfileError.InvalidZapRequest -> context.getString(
                 R.string.post_action_invalid_zap_request,
             )
+
             is ProfileError.MissingLightningAddress -> context.getString(
                 R.string.post_action_missing_lightning_address,
             )
+
             is ProfileError.FailedToPublishZapEvent -> context.getString(
                 R.string.post_action_zap_failed,
             )
+
             is ProfileError.FailedToPublishLikeEvent -> context.getString(
                 R.string.post_action_like_failed,
             )
+
             is ProfileError.FailedToPublishRepostEvent -> context.getString(
                 R.string.post_action_repost_failed,
             )
+
             is ProfileError.FailedToFollowProfile -> context.getString(
                 R.string.profile_error_unable_to_follow,
             )
+
             is ProfileError.FailedToUnfollowProfile -> context.getString(
                 R.string.profile_error_unable_to_unfollow,
             )
+
             is ProfileError.MissingRelaysConfiguration -> context.getString(
                 R.string.app_missing_relays_config,
             )
+
             is ProfileError.FailedToAddToFeed -> context.getString(
                 R.string.app_error_adding_to_feed,
             )
+
             is ProfileError.FailedToRemoveFeed -> context.getString(
                 R.string.app_error_removing_feed,
             )
+
             is ProfileError.FailedToMuteProfile -> context.getString(R.string.app_error_muting_user)
             is ProfileError.FailedToUnmuteProfile -> context.getString(
                 R.string.app_error_unmuting_user,
             )
+
             else -> return@LaunchedEffect
         }
 
@@ -1055,6 +1096,7 @@ fun PreviewProfileScreen() {
             onProfileClick = {},
             onEditProfileClick = {},
             onMessageClick = {},
+            onZapProfileClick = {},
             onHashtagClick = {},
             onMediaClick = { _, _ -> },
             onGoToWallet = {},

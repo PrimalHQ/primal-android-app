@@ -15,6 +15,7 @@ import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.navigation.draftTransaction
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.profile.db.ProfileData
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.api.model.WithdrawRequestBody
@@ -24,6 +25,7 @@ import net.primal.android.wallet.transactions.send.create.CreateTransactionContr
 import net.primal.android.wallet.transactions.send.create.CreateTransactionContract.UiState
 import net.primal.android.wallet.utils.CurrencyConversionUtils.formatAsString
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toBtc
+import net.primal.android.wallet.utils.isLightningAddress
 import timber.log.Timber
 
 @HiltViewModel
@@ -46,7 +48,8 @@ class CreateTransactionViewModel @Inject constructor(
 
     init {
         subscribeToEvents()
-        loadProfileData()
+        observeProfileData()
+        fetchProfileData()
     }
 
     private fun subscribeToEvents() =
@@ -61,23 +64,40 @@ class CreateTransactionViewModel @Inject constructor(
             }
         }
 
-    private fun loadProfileData() =
+    private fun fetchProfileData() =
         viewModelScope.launch {
-            state.value.transaction.targetUserId?.let {
+            state.value.transaction.targetUserId?.let { targetUserId ->
                 withContext(dispatchers.io()) {
-                    profileRepository.requestProfileUpdate(profileId = it)
-                    profileRepository.findProfileDataOrNull(profileId = it)
-                }
-            }?.let { profileData ->
-                setState {
-                    copy(
-                        profileAvatarCdnImage = profileData.avatarCdnImage,
-                        profileDisplayName = profileData.authorNameUiFriendly(),
-                        profileLightningAddress = profileData.lightningAddress,
-                    )
+                    profileRepository.requestProfileUpdate(profileId = targetUserId)
                 }
             }
         }
+
+    private fun observeProfileData() =
+        viewModelScope.launch {
+            state.value.transaction.targetUserId?.let { targetUserId ->
+                profileRepository.observeProfile(targetUserId).collect { profile ->
+                    profile.metadata?.updateStateWithProfileData()
+                }
+            }
+        }
+
+    private fun ProfileData.updateStateWithProfileData() {
+        setState {
+            copy(
+                profileAvatarCdnImage = this@updateStateWithProfileData.avatarCdnImage,
+                profileDisplayName = this@updateStateWithProfileData.authorNameUiFriendly(),
+                profileLightningAddress = transaction.targetLud16 ?: this@updateStateWithProfileData.lightningAddress,
+                transaction = if (transaction.targetLud16 == null &&
+                    this@updateStateWithProfileData.lightningAddress?.isLightningAddress() == true
+                ) {
+                    this.transaction.copy(targetLud16 = this@updateStateWithProfileData.lightningAddress)
+                } else {
+                    this.transaction
+                },
+            )
+        }
+    }
 
     private fun sendTransaction(note: String?) =
         viewModelScope.launch {

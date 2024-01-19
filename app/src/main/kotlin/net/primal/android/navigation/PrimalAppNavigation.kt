@@ -707,6 +707,7 @@ private fun NavGraphBuilder.profile(
         onProfileClick = { profileId -> navController.navigateToProfile(profileId = profileId) },
         onEditProfileClick = { navController.navigateToEditProfile() },
         onMessageClick = { profileId -> navController.navigateToChat(profileId = profileId) },
+        onZapProfileClick = { transaction -> navController.navigateToWalletCreateTransaction(transaction) },
         onHashtagClick = { hashtag -> navController.navigateToExploreFeed(query = hashtag) },
         onMediaClick = { noteId, mediaUrl ->
             navController.navigateToMediaGallery(

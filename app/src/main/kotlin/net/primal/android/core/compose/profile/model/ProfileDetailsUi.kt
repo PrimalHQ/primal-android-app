@@ -12,6 +12,7 @@ data class ProfileDetailsUi(
     val coverCdnImage: CdnImage?,
     val avatarCdnImage: CdnImage?,
     val internetIdentifier: String?,
+    val lightningAddress: String?,
     val about: String?,
     val website: String?,
 )
@@ -24,6 +25,7 @@ fun ProfileData.asProfileDetailsUi() =
         coverCdnImage = this.bannerCdnImage,
         avatarCdnImage = this.avatarCdnImage,
         internetIdentifier = this.internetIdentifier,
+        lightningAddress = this.lightningAddress,
         about = this.about,
         website = this.website,
     )

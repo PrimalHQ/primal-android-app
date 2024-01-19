@@ -376,6 +376,7 @@
     <string name="wallet_send_payment_nostr_user_generic">User</string>
     <string name="wallet_send_payment_error_nostr_user_without_lightning_address">Cannot make payment. %1$s doesn’t have a lightning address set.</string>
     <string name="wallet_send_payment_error_unable_to_parse_text">Please enter a valid lightning address or an invoice.</string>
+    <string name="wallet_send_payment_this_user_chunk">This user</string>
 
     <string name="wallet_create_transaction_draft_title">Sending To</string>
     <string name="wallet_create_transaction_send_button">Send</string>

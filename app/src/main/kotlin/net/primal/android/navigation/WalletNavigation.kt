@@ -33,7 +33,7 @@ private fun NavController.navigateToWalletActivation() = navigate(route = "activ
 private fun NavController.navigateToWalletSendPayment(tab: SendPaymentTab) =
     navigate(route = "send?$SEND_PAYMENT_TAB=$tab")
 
-private fun NavController.navigateToWalletCreateTransaction(draftTransaction: DraftTransaction) =
+fun NavController.navigateToWalletCreateTransaction(draftTransaction: DraftTransaction) =
     navigate(
         route = "transaction/create?$DRAFT_TRANSACTION=" +
             NostrJson.encodeToString(draftTransaction).asBase64Encoded(),
