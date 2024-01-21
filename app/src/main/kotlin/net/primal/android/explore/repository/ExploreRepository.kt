@@ -24,10 +24,13 @@ class ExploreRepository @Inject constructor(
 
     suspend fun fetchTrendingHashtags() {
         val response = exploreApi.getTrendingHashtags()
+        val hashtags = response.map { it.asTrendingHashtagPO() }
 
-        database.withTransaction {
-            database.trendingHashtags().deleteAlL()
-            database.trendingHashtags().upsertAll(data = response.map { it.asTrendingHashtagPO() })
+        if (hashtags.isNotEmpty()) {
+            database.withTransaction {
+                database.trendingHashtags().deleteAlL()
+                database.trendingHashtags().upsertAll(data = hashtags)
+            }
         }
     }
 

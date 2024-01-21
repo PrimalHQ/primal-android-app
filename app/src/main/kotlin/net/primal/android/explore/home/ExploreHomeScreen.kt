@@ -46,10 +46,13 @@ import net.primal.android.R
 import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.IconText
+import net.primal.android.core.compose.ListLoading
+import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.PrimalDrawerScaffold
+import net.primal.android.explore.home.ExploreHomeContract.UiEvent
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
@@ -70,6 +73,7 @@ fun ExploreHomeScreen(
         onSearchClick = onSearchClick,
         onPrimaryDestinationChanged = onTopLevelDestinationChanged,
         onDrawerDestinationClick = onDrawerScreenClick,
+        eventPublisher = { viewModel.setEvent(it) },
     )
 }
 
@@ -81,6 +85,7 @@ fun ExploreHomeScreen(
     onSearchClick: () -> Unit,
     onPrimaryDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
+    eventPublisher: (UiEvent) -> Unit,
 ) {
     val uiScope = rememberCoroutineScope()
     val drawerState: DrawerState = rememberDrawerState(DrawerValue.Closed)
@@ -147,6 +152,27 @@ fun ExploreHomeScreen(
                                         fontWeight = FontWeight.Medium,
                                     )
                                 },
+                            )
+                        }
+                    }
+                }
+
+                if (state.hashtags.isEmpty()) {
+                    if (state.refreshing) {
+                        item(contentType = "LoadingRefresh") {
+                            ListLoading(
+                                modifier = Modifier.fillParentMaxSize(),
+                            )
+                        }
+                    } else {
+                        item(contentType = "NoContent") {
+                            ListNoContent(
+                                modifier = Modifier.fillParentMaxSize(),
+                                noContentText = stringResource(
+                                    id = R.string.explore_trending_hashtags_no_content,
+                                ),
+                                refreshButtonVisible = true,
+                                onRefresh = { eventPublisher(UiEvent.RefreshTrendingHashtags) },
                             )
                         }
                     }
