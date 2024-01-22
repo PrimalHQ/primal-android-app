@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 data class ContentPrimalEventResources(
     @SerialName("event_id") val eventId: String,
     val resources: List<EventResource>,
-    @SerialName("thumbnails") val videoThumbnails: Map<String, String>,
+    @SerialName("thumbnails") val videoThumbnails: Map<String, String> = emptyMap(),
 )
 
 @Serializable
