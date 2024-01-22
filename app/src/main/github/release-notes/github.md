@@ -1,8 +1,4 @@
 ## Features
-- Implemented spam threshold filter in wallet settings;
-- Implemented reading real max wallet balance;
-- Implemented persisting wallet settings;
-- Implemented zap profile;
-- Implemented transactions loading spinner;
-- Handle gracefully unknown transaction states;
-- Show 0 as wallet balance on cold wallet start;
+- Implemented zap settings;
+- Added compatibility with older wallet api;
+- Improved trending hashtags updates to avoid blank screens;
