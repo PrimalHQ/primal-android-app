@@ -10,6 +10,7 @@ import kotlinx.serialization.json.putJsonArray
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.user.domain.Relay
 import net.primal.android.user.domain.RelayPermission
+import timber.log.Timber
 
 val NostrJson = Json {
     ignoreUnknownKeys = true
@@ -31,6 +32,7 @@ inline fun <reified T> Json.decodeFromStringOrNull(string: String?): T? {
     return try {
         decodeFromString(string)
     } catch (error: IllegalArgumentException) {
+        Timber.e(error)
         null
     }
 }

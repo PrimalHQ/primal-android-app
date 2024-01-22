@@ -7,5 +7,5 @@ import kotlinx.serialization.Serializable
 data class BalanceResponse(
     val amount: String,
     val currency: String,
-    @SerialName("max_amount") val maxAmount: String,
+    @SerialName("max_amount") val maxAmount: String? = null,
 )

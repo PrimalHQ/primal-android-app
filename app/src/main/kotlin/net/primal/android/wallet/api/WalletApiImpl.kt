@@ -47,6 +47,7 @@ import net.primal.android.wallet.api.model.WalletRequestBody
 import net.primal.android.wallet.api.model.WalletUserInfoResponse
 import net.primal.android.wallet.api.model.WithdrawRequestBody
 import net.primal.android.wallet.domain.SubWallet
+import timber.log.Timber
 
 class WalletApiImpl @Inject constructor(
     @PrimalWalletApiClient private val primalApiClient: PrimalApiClient,
@@ -189,6 +190,7 @@ class WalletApiImpl @Inject constructor(
             try {
                 NostrJson.decodeFromJsonElement<ContentWalletTransaction>(it)
             } catch (error: IllegalArgumentException) {
+                Timber.e(error)
                 null
             }
         }
