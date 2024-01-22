@@ -188,7 +188,7 @@ fun ThreadScreen(
                             ThreadContract.UiEvent.ZapAction(
                                 postId = post.postId,
                                 postAuthorId = post.authorId,
-                                zapAmount = zapAmount,
+                                zapAmount = zapAmount.toULong(),
                                 zapDescription = zapDescription,
                             ),
                         )

@@ -14,12 +14,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredHeight
-import androidx.compose.foundation.layout.requiredWidth
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
@@ -27,48 +27,58 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.core.text.isDigitsOnly
 import net.primal.android.R
 import net.primal.android.core.compose.AdjustTemporarilySystemBarColors
 import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.feed.model.ZappingState
+import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
 import net.primal.android.core.utils.shortened
-import net.primal.android.settings.zaps.DEFAULT_ZAP_OPTIONS
+import net.primal.android.nostr.model.primal.content.ContentZapConfigItem
+import net.primal.android.nostr.model.primal.content.DEFAULT_ZAP_CONFIG
 import net.primal.android.settings.zaps.PRESETS_COUNT
 import net.primal.android.theme.AppTheme
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun ZapBottomSheet(
     receiverName: String,
     zappingState: ZappingState,
     onDismissRequest: () -> Unit,
-    onZap: (ULong, String?) -> Unit,
+    onZap: (Long, String?) -> Unit,
 ) {
-    val zapOptionPairs = zappingState.extractOptionPairs()
+    val zapConfig: List<ContentZapConfigItem> = zappingState.ensureZapConfig()
 
-    var selectedZapAmount by remember { mutableStateOf(zappingState.defaultZapAmount) }
-    var selectedZapComment by remember { mutableStateOf("") }
+    var customZapAmount by remember { mutableStateOf("") }
+    var selectedZapComment by remember { mutableStateOf(zapConfig.first().message) }
+    var selectedZapAmount by remember { mutableLongStateOf(zapConfig.first().amount) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val keyboardVisible by keyboardVisibilityAsState()
 
     AdjustTemporarilySystemBarColors(
         navigationBarColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
@@ -86,22 +96,60 @@ fun ZapBottomSheet(
                 .fillMaxWidth()
                 .padding(bottom = 8.dp),
         ) {
-            ZapTitle(receiverName = receiverName, amount = selectedZapAmount)
+            ZapTitle(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                receiverName = receiverName,
+                amount = selectedZapAmount,
+            )
             ZapOptions(
-                zapOptionPairs = zapOptionPairs,
+                zapConfig = zapConfig,
                 selectedZapAmount = selectedZapAmount,
                 onSelectedZapAmountChange = { amount ->
+                    keyboardController?.hide()
                     selectedZapAmount = amount
-                    selectedZapComment = zapOptionPairs.find {
-                        it.first == amount
-                    }?.second ?: selectedZapComment
+                    selectedZapComment = zapConfig.find {
+                        it.amount == amount
+                    }?.message ?: selectedZapComment
                 },
             )
             OutlinedTextField(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 24.dp)
-                    .requiredHeight(height = 54.dp),
+                    .padding(horizontal = 24.dp),
+                singleLine = true,
+                colors = PrimalDefaults.outlinedTextFieldColors(
+                    unfocusedBorderColor = Color.Transparent,
+                    focusedBorderColor = Color.Transparent,
+                ),
+                shape = RoundedCornerShape(8.dp),
+                value = customZapAmount,
+                onValueChange = {
+                    when {
+                        it.isEmpty() -> customZapAmount = ""
+                        it.isDigitsOnly() && it.length <= 8 && it.toLong() > 0 -> customZapAmount = it
+                    }
+                    selectedZapAmount = customZapAmount.toLongOrNull() ?: zapConfig.first().amount
+                },
+                textStyle = AppTheme.typography.bodyMedium,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number,
+                    imeAction = ImeAction.Done,
+                ),
+                placeholder = {
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = stringResource(id = R.string.zap_bottom_sheet_custom_amount_placeholder),
+                        textAlign = TextAlign.Left,
+                        style = AppTheme.typography.bodyMedium,
+                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
+                    )
+                },
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            OutlinedTextField(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp),
                 singleLine = true,
                 colors = PrimalDefaults.outlinedTextFieldColors(
                     unfocusedBorderColor = Color.Transparent,
@@ -110,52 +158,53 @@ fun ZapBottomSheet(
                 shape = RoundedCornerShape(8.dp),
                 value = selectedZapComment,
                 onValueChange = { selectedZapComment = it },
-                textStyle = AppTheme.typography.bodySmall,
-
+                textStyle = AppTheme.typography.bodyMedium,
                 placeholder = {
                     Text(
                         modifier = Modifier.fillMaxWidth(),
                         text = stringResource(id = R.string.zap_bottom_sheet_comment_placeholder),
                         textAlign = TextAlign.Left,
-                        style = AppTheme.typography.bodySmall,
+                        style = AppTheme.typography.bodyMedium,
                         color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
                     )
                 },
             )
-            Spacer(modifier = Modifier.height(24.dp))
-            PrimalLoadingButton(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp)
-                    .padding(horizontal = 24.dp),
-                text = stringResource(id = R.string.zap_bottom_sheet_zap_button),
-                leadingIcon = ImageVector.vectorResource(id = R.drawable.zap),
-                onClick = {
-                    onDismissRequest()
-                    onZap(selectedZapAmount, selectedZapComment)
-                },
-            )
+            Spacer(modifier = Modifier.height(16.dp))
+            if (!keyboardVisible) {
+                PrimalLoadingButton(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp)
+                        .padding(horizontal = 24.dp),
+                    text = stringResource(id = R.string.zap_bottom_sheet_zap_button),
+                    leadingIcon = ImageVector.vectorResource(id = R.drawable.zap),
+                    onClick = {
+                        onDismissRequest()
+                        onZap(selectedZapAmount, selectedZapComment)
+                    },
+                )
+            }
         }
     }
 }
 
 @Composable
 private fun ZapOptions(
-    zapOptionPairs: List<Pair<ULong, String>>,
-    selectedZapAmount: ULong,
-    onSelectedZapAmountChange: (ULong) -> Unit,
+    zapConfig: List<ContentZapConfigItem>,
+    selectedZapAmount: Long,
+    onSelectedZapAmountChange: (Long) -> Unit,
 ) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(3),
         contentPadding = PaddingValues(12.dp),
     ) {
-        items(zapOptionPairs) { (defaultAmount, defaultComment) ->
+        items(zapConfig) {
             ZapOption(
-                defaultAmount = defaultAmount,
-                defaultComment = defaultComment,
-                selected = selectedZapAmount == defaultAmount,
+                defaultAmount = it.amount,
+                defaultEmoji = it.emoji,
+                selected = selectedZapAmount == it.amount,
                 onClick = {
-                    onSelectedZapAmountChange(defaultAmount)
+                    onSelectedZapAmountChange(it.amount)
                 },
             )
         }
@@ -164,75 +213,58 @@ private fun ZapOptions(
 
 @Composable
 private fun ZapOption(
-    defaultAmount: ULong,
-    defaultComment: String,
+    defaultAmount: Long,
+    defaultEmoji: String,
     selected: Boolean,
     onClick: () -> Unit,
 ) {
-    val selectedBorderGradientColors = Brush.linearGradient(
-        listOf(
-            AppTheme.colorScheme.primary,
-            AppTheme.colorScheme.primary,
-        ),
-    )
-
-    val backgroundColor =
-        if (selected) AppTheme.colorScheme.surface else AppTheme.extraColorScheme.surfaceVariantAlt1
+    val backgroundColor = if (selected) AppTheme.colorScheme.surface else AppTheme.extraColorScheme.surfaceVariantAlt1
     val borderWidth = if (selected) 1.dp else 0.dp
-    val borderBrush = if (selected) {
-        selectedBorderGradientColors
-    } else {
-        Brush.linearGradient(
-            listOf(
-                Color.Transparent,
-                Color.Transparent,
-            ),
-        )
-    }
+    val borderColor = if (selected) AppTheme.colorScheme.tertiary else Color.Transparent
 
     Box(
         modifier = Modifier
             .padding(all = 12.dp)
             .clip(AppTheme.shapes.small)
-            .border(
-                width = borderWidth,
-                shape = AppTheme.shapes.small,
-                brush = borderBrush,
-            )
-            .background(
-                color = backgroundColor,
-            )
+            .border(width = borderWidth, shape = AppTheme.shapes.small, color = borderColor)
+            .background(color = backgroundColor)
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
                 onClick = onClick,
             )
-            .requiredHeight(88.dp)
-            .requiredWidth(88.dp)
+            .requiredSize(88.dp)
             .aspectRatio(1f),
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxSize(),
+            modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
             Text(
-                text = defaultComment,
-                fontWeight = FontWeight.W600,
-                fontSize = TextUnit(
-                    value = 20f,
-                    type = TextUnitType.Sp,
-                ),
+                modifier = Modifier.padding(bottom = 8.dp),
+                text = defaultEmoji,
+                fontWeight = FontWeight.Black,
+                fontSize = 28.sp,
             )
-            Text(text = defaultAmount.shortened())
+            Text(
+                text = defaultAmount.shortened(),
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 20.sp,
+                color = AppTheme.colorScheme.onPrimary,
+            )
         }
     }
 }
 
 @Composable
-private fun ZapTitle(receiverName: String, amount: ULong) {
+private fun ZapTitle(
+    modifier: Modifier = Modifier,
+    receiverName: String,
+    amount: Long,
+) {
     Box(
+        modifier = modifier,
         contentAlignment = Alignment.Center,
     ) {
         Text(
@@ -240,11 +272,8 @@ private fun ZapTitle(receiverName: String, amount: ULong) {
                 withStyle(
                     style = SpanStyle(
                         color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
-                        fontWeight = FontWeight.W700,
-                        fontSize = TextUnit(
-                            value = 20f,
-                            type = TextUnitType.Sp,
-                        ),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 20.sp,
                     ),
                 ) {
                     append("ZAP ${receiverName.uppercase()} ")
@@ -252,11 +281,8 @@ private fun ZapTitle(receiverName: String, amount: ULong) {
                 withStyle(
                     style = SpanStyle(
                         color = AppTheme.colorScheme.onSurfaceVariant,
-                        fontWeight = FontWeight.W900,
-                        fontSize = TextUnit(
-                            value = 20f,
-                            type = TextUnitType.Sp,
-                        ),
+                        fontWeight = FontWeight.Black,
+                        fontSize = 20.sp,
                     ),
                 ) {
                     append("${amount.shortened()} ")
@@ -264,11 +290,8 @@ private fun ZapTitle(receiverName: String, amount: ULong) {
                 withStyle(
                     style = SpanStyle(
                         color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
-                        fontWeight = FontWeight.W700,
-                        fontSize = TextUnit(
-                            value = 14f,
-                            type = TextUnitType.Sp,
-                        ),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp,
                     ),
                 ) {
                     append("SATS")
@@ -278,21 +301,10 @@ private fun ZapTitle(receiverName: String, amount: ULong) {
     }
 }
 
-private fun ZappingState.extractOptionPairs(): List<Pair<ULong, String>> {
-    return if (this.zapOptions.size == PRESETS_COUNT) {
-        this.zapOptions
+private fun ZappingState.ensureZapConfig(): List<ContentZapConfigItem> {
+    return if (this.zapsConfig.size == PRESETS_COUNT) {
+        this.zapsConfig
     } else {
-        DEFAULT_ZAP_OPTIONS
-    }.toUiPairs()
-}
-
-private fun List<ULong>.toUiPairs(): List<Pair<ULong, String>> {
-    return listOf(
-        Pair(this[0], "👍"),
-        Pair(this[1], "🌿"),
-        Pair(this[2], "🤙"),
-        Pair(this[3], "💜"),
-        Pair(this[4], "🔥"),
-        Pair(this[5], "🚀"),
-    )
+        DEFAULT_ZAP_CONFIG
+    }
 }

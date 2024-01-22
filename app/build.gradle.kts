@@ -213,6 +213,8 @@ dependencies {
     implementation(libs.constraintlayout)
 
     implementation(libs.androidx.material.icons.extended)
+    implementation(libs.androidx.emoji2.emojipicker)
+    implementation("com.google.guava:guava:33.0.0-android")
 
     implementation(libs.navigation.material)
 

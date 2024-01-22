@@ -4,24 +4,26 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
-import kotlin.time.Duration.Companion.seconds
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.nostr.model.primal.content.ContentZapConfigItem
+import net.primal.android.nostr.model.primal.content.ContentZapDefault
 import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.settings.zaps.ZapSettingsContract.UiEvent
 import net.primal.android.settings.zaps.ZapSettingsContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
+import timber.log.Timber
 
 @HiltViewModel
 class ZapSettingsViewModel @Inject constructor(
+    private val dispatcherProvider: CoroutineDispatcherProvider,
     private val activeAccountStore: ActiveAccountStore,
     private val settingsRepository: SettingsRepository,
 ) : ViewModel() {
@@ -37,48 +39,34 @@ class ZapSettingsViewModel @Inject constructor(
         fetchLatestAppSettings()
         observeEvents()
         observeActiveAccount()
-        observeDebouncedZapOptionChanges()
-        observeDebouncedZapDefaultAmountChanges()
     }
 
     private fun observeEvents() =
         viewModelScope.launch {
             events.collect {
                 when (it) {
-                    is UiEvent.ZapDefaultAmountChanged -> setState {
-                        copy(
-                            defaultZapAmount = it.newAmount,
-                        )
+                    UiEvent.EditZapDefault -> {
+                        setState { copy(editPresetIndex = -1) }
                     }
-                    is UiEvent.ZapOptionsChanged -> setState { copy(zapOptions = it.newOptions) }
+
+                    is UiEvent.EditZapPreset -> {
+                        val index = _state.value.zapConfig.indexOf(it.preset)
+                        setState { copy(editPresetIndex = index) }
+                    }
+
+                    UiEvent.CloseEditor -> {
+                        setState { copy(editPresetIndex = null) }
+                    }
+
+                    is UiEvent.UpdateZapPreset -> {
+                        updateZapPreset(presetIndex = it.index, zapPreset = it.zapPreset)
+                    }
+
+                    is UiEvent.UpdateZapDefault -> {
+                        updateDefaultZapAmount(newZapDefault = it.newZapDefault)
+                    }
                 }
             }
-        }
-
-    @OptIn(FlowPreview::class)
-    private fun observeDebouncedZapOptionChanges() =
-        viewModelScope.launch {
-            events.filterIsInstance<UiEvent.ZapOptionsChanged>()
-                .debounce(1.seconds)
-                .mapNotNull { it.newOptions.toListOfULongsOrNull() }
-                .collect {
-                    updateZapOptions(newZapOptions = it)
-                }
-        }
-
-    private fun List<ULong?>.toListOfULongsOrNull(): List<ULong>? {
-        return if (this.contains(null)) null else mapNotNull { it }
-    }
-
-    @OptIn(FlowPreview::class)
-    private fun observeDebouncedZapDefaultAmountChanges() =
-        viewModelScope.launch {
-            events.filterIsInstance<UiEvent.ZapDefaultAmountChanged>()
-                .debounce(1.seconds)
-                .mapNotNull { it.newAmount }
-                .collect {
-                    updateDefaultZapAmount(newDefaultAmount = it)
-                }
         }
 
     private fun observeActiveAccount() =
@@ -87,14 +75,7 @@ class ZapSettingsViewModel @Inject constructor(
                 .mapNotNull { it.appSettings }
                 .collect {
                     setState {
-                        copy(
-                            defaultZapAmount = it.defaultZapAmount ?: 42.toULong(),
-                            zapOptions = if (it.zapOptions.size == PRESETS_COUNT) {
-                                it.zapOptions
-                            } else {
-                                List(PRESETS_COUNT) { null }
-                            },
-                        )
+                        copy(zapDefault = it.zapDefault, zapConfig = it.zapsConfig)
                     }
                 }
         }
@@ -102,35 +83,46 @@ class ZapSettingsViewModel @Inject constructor(
     private fun fetchLatestAppSettings() =
         viewModelScope.launch {
             try {
-                settingsRepository.fetchAndPersistAppSettings(
-                    userId = activeAccountStore.activeUserId(),
-                )
+                withContext(dispatcherProvider.io()) {
+                    settingsRepository.fetchAndPersistAppSettings(userId = activeAccountStore.activeUserId())
+                }
             } catch (error: WssException) {
-                // Ignore
+                Timber.e(error)
             }
         }
 
-    private suspend fun updateDefaultZapAmount(newDefaultAmount: ULong) {
-        try {
-            val userAccount = activeAccountStore.activeUserAccount()
-            settingsRepository.updateAndPersistDefaultZapAmount(
-                userId = userAccount.pubkey,
-                defaultAmount = newDefaultAmount,
-            )
-        } catch (error: WssException) {
-            // Something went wrong
+    private suspend fun updateDefaultZapAmount(newZapDefault: ContentZapDefault) =
+        viewModelScope.launch {
+            setState { copy(saving = true) }
+            try {
+                val userAccount = activeAccountStore.activeUserAccount()
+                settingsRepository.updateAndPersistZapDefault(
+                    userId = userAccount.pubkey,
+                    zapDefault = newZapDefault,
+                )
+                setState { copy(editPresetIndex = null) }
+            } catch (error: WssException) {
+                Timber.e(error)
+            } finally {
+                setState { copy(saving = false) }
+            }
         }
-    }
 
-    private suspend fun updateZapOptions(newZapOptions: List<ULong>) {
-        try {
-            val userAccount = activeAccountStore.activeUserAccount()
-            settingsRepository.updateAndPersistZapOptions(
-                userId = userAccount.pubkey,
-                zapOptions = newZapOptions,
-            )
-        } catch (error: WssException) {
-            // Something went wrong
+    private suspend fun updateZapPreset(presetIndex: Int, zapPreset: ContentZapConfigItem) =
+        viewModelScope.launch {
+            setState { copy(saving = true) }
+            try {
+                val userAccount = activeAccountStore.activeUserAccount()
+                settingsRepository.updateAndPersistZapPresetsConfig(
+                    userId = userAccount.pubkey,
+                    presetIndex = presetIndex,
+                    zapPreset = zapPreset,
+                )
+                setState { copy(editPresetIndex = null) }
+            } catch (error: WssException) {
+                Timber.e(error)
+            } finally {
+                setState { copy(saving = false) }
+            }
         }
-    }
 }

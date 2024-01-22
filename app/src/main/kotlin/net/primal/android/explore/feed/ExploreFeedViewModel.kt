@@ -111,9 +111,8 @@ class ExploreFeedViewModel @Inject constructor(
                             zappingState = this.zappingState.copy(
                                 walletConnected = it.data.hasWallet(),
                                 walletPreference = it.data.walletPreference,
-                                defaultZapAmount = it.data.appSettings?.defaultZapAmount
-                                    ?: this.zappingState.defaultZapAmount,
-                                zapOptions = it.data.appSettings?.zapOptions ?: this.zappingState.zapOptions,
+                                zapDefault = it.data.appSettings?.zapDefault ?: this.zappingState.zapDefault,
+                                zapsConfig = it.data.appSettings?.zapsConfig ?: this.zappingState.zapsConfig,
                                 walletBalanceInBtc = it.data.primalWalletBalanceInBtc,
                             ),
                         )

@@ -16,6 +16,7 @@ core-testing = "2.2.0"
 dagger = "2.48"
 datastore = "1.0.0"
 detekt = "1.23.3"
+emoji2-emojipicker = "1.4.0"
 espresso-core = "3.5.1"
 hilt = "1.1.0"
 junit = "4.13.2"
@@ -81,6 +82,8 @@ compose-pager = { module = "com.google.accompanist:accompanist-pager", version.r
 compose-pager-indicators = { module = "com.google.accompanist:accompanist-pager-indicators", version.ref = "accompanist" }
 constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version.ref = "constraintlayout" }
 compose-constraintlayout = { module = "androidx.constraintlayout:constraintlayout-compose", version.ref = "constraintlayout-compose" }
+
+androidx-emoji2-emojipicker = { group = "androidx.emoji2", name = "emoji2-emojipicker", version.ref = "emoji2-emojipicker" }
 
 lottie-compose = { module = "com.airbnb.android:lottie-compose", version.ref = "compose-lottie" }
 navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "compose-navigation" }

@@ -99,6 +99,8 @@ fun WalletSettingsScreen(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
+                Spacer(modifier = Modifier.height(16.dp))
+
                 ExternalWalletSettings(
                     nwcWallet = state.wallet,
                     walletPreference = state.walletPreference,

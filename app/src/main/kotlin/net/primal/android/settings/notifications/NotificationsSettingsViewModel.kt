@@ -14,10 +14,12 @@ import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.jsonPrimitive
+import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.notifications.domain.NotificationType
 import net.primal.android.settings.notifications.NotificationsSettingsContract.UiEvent.NotificationSettingChanged
@@ -25,11 +27,13 @@ import net.primal.android.settings.notifications.NotificationsSettingsContract.U
 import net.primal.android.settings.notifications.NotificationsSettingsContract.UiState.ApiError.UpdateAppSettingsError
 import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
+import timber.log.Timber
 
 @HiltViewModel
 class NotificationsSettingsViewModel @Inject constructor(
-    val settingsRepository: SettingsRepository,
-    val activeAccountStore: ActiveAccountStore,
+    private val dispatcherProvider: CoroutineDispatcherProvider,
+    private val settingsRepository: SettingsRepository,
+    private val activeAccountStore: ActiveAccountStore,
 ) : ViewModel() {
     private val _state = MutableStateFlow(NotificationsSettingsContract.UiState())
     val state = _state.asStateFlow()
@@ -111,10 +115,11 @@ class NotificationsSettingsViewModel @Inject constructor(
     private fun fetchLatestAppSettings() =
         viewModelScope.launch {
             try {
-                settingsRepository.fetchAndPersistAppSettings(
-                    userId = activeAccountStore.activeUserId(),
-                )
+                withContext(dispatcherProvider.io()) {
+                    settingsRepository.fetchAndPersistAppSettings(userId = activeAccountStore.activeUserId())
+                }
             } catch (error: WssException) {
+                Timber.e(error)
                 setState { copy(error = FetchAppSettingsError(cause = error)) }
             }
         }

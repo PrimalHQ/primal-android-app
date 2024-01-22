@@ -22,6 +22,7 @@ import kotlinx.coroutines.withContext
 import net.primal.android.config.dynamic.AppConfigUpdater
 import net.primal.android.core.compose.feed.model.FeedPostsSyncStats
 import net.primal.android.core.compose.feed.model.asFeedPostUi
+import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.utils.ellipsizeMiddle
 import net.primal.android.discuss.feed.FeedContract.UiEvent
 import net.primal.android.discuss.feed.FeedContract.UiState
@@ -47,6 +48,7 @@ import net.primal.android.wallet.zaps.hasWallet
 @HiltViewModel
 class FeedViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
+    private val dispatcherProvider: CoroutineDispatcherProvider,
     private val feedRepository: FeedRepository,
     private val postRepository: PostRepository,
     private val activeAccountStore: ActiveAccountStore,
@@ -136,8 +138,8 @@ class FeedViewModel @Inject constructor(
                         zappingState = this.zappingState.copy(
                             walletConnected = it.hasWallet(),
                             walletPreference = it.walletPreference,
-                            defaultZapAmount = it.appSettings?.defaultZapAmount ?: this.zappingState.defaultZapAmount,
-                            zapOptions = it.appSettings?.zapOptions ?: this.zappingState.zapOptions,
+                            zapDefault = it.appSettings?.zapDefault ?: this.zappingState.zapDefault,
+                            zapsConfig = it.appSettings?.zapsConfig ?: this.zappingState.zapsConfig,
                             walletBalanceInBtc = it.primalWalletBalanceInBtc,
                         ),
                     )
@@ -181,8 +183,10 @@ class FeedViewModel @Inject constructor(
 
     private fun updateUserData() =
         viewModelScope.launch {
-            userDataUpdater?.updateUserDataWithDebounce(30.minutes)
-            appConfigUpdater.updateAppConfigWithDebounce(30.minutes)
+            withContext(dispatcherProvider.io()) {
+                userDataUpdater?.updateUserDataWithDebounce(30.minutes)
+                appConfigUpdater.updateAppConfigWithDebounce(30.minutes)
+            }
         }
 
     private fun likePost(postLikeAction: UiEvent.PostLikeAction) =

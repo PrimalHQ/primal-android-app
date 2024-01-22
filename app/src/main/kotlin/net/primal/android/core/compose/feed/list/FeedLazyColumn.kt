@@ -92,7 +92,7 @@ fun FeedLazyColumn(
                 zappingState = zappingState,
                 onZap = { zapAmount, zapDescription ->
                     if (zappingState.canZap(zapAmount)) {
-                        onZapClick(post, zapAmount, zapDescription)
+                        onZapClick(post, zapAmount.toULong(), zapDescription)
                     } else {
                         showCantZapWarning = true
                     }

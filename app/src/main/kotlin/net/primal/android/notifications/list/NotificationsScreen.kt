@@ -288,7 +288,7 @@ private fun NotificationsList(
                 zappingState = state.zappingState,
                 onZap = { zapAmount, zapDescription ->
                     if (state.zappingState.canZap(zapAmount)) {
-                        onZapClick(post, zapAmount, zapDescription)
+                        onZapClick(post, zapAmount.toULong(), zapDescription)
                     } else {
                         showCantZapWarning = true
                     }

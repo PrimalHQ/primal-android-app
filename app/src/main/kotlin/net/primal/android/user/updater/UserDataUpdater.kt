@@ -36,6 +36,7 @@ class UserDataUpdater @AssistedInject constructor(
 
     private suspend fun updateData() {
         settingsRepository.fetchAndPersistAppSettings(userId = userId)
+        settingsRepository.ensureZapConfig(userId = userId)
         userRepository.fetchAndUpdateUserAccount(userId = userId)
         walletRepository.fetchUserWalletInfoAndUpdateUserAccount(userId = userId)
     }

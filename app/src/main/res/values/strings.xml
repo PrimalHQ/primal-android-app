@@ -285,8 +285,11 @@
     <string name="settings_feeds_dialog_dismiss">Dismiss</string>
 
     <string name="settings_zaps_title">Zaps</string>
-    <string name="settings_zaps_default_zap_amount_header">Set default zap amount</string>
-    <string name="settings_zaps_custom_zaps_header">Set custom zap amounts</string>
+    <string name="settings_zaps_description">Single tap zaps send the default amount &amp; message. Configure custom zap presets below:</string>
+    <string name="settings_zaps_editor_emoji">Emoji</string>
+    <string name="settings_zaps_editor_message">Message</string>
+    <string name="settings_zaps_editor_value">Value</string>
+    <string name="settings_zaps_editor_save">Save</string>
 
     <string name="settings_muted_accounts_title">Muted Accounts</string>
     <string name="settings_muted_accounts_unmute_button">Unmute</string>
@@ -315,6 +318,7 @@
     <string name="context_menu_unmute_user">Unmute user</string>
 
     <string name="zap_bottom_sheet_comment_placeholder">Add a comment…</string>
+    <string name="zap_bottom_sheet_custom_amount_placeholder">Custom amount…</string>
     <string name="zap_bottom_sheet_zap_button">Zap</string>
 
     <string name="zap_warning_bottom_sheet_enable_wallet_text">To zap people on Nostr, you need to enable your Primal wallet or connect the external wallet.</string>

@@ -13,9 +13,9 @@ fun UserAccount.hasWallet(): Boolean {
     }
 }
 
-fun ZappingState.canZap(zapAmount: ULong = this.defaultZapAmount): Boolean {
+fun ZappingState.canZap(zapAmount: Long = this.zapDefault.amount): Boolean {
     return walletConnected && when (walletPreference) {
         WalletPreference.NostrWalletConnect -> true
-        else -> (walletBalanceInBtc == null || walletBalanceInBtc.toSats() >= zapAmount)
+        else -> (walletBalanceInBtc == null || walletBalanceInBtc.toSats() >= zapAmount.toULong())
     }
 }

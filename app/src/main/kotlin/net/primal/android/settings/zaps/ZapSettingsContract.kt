@@ -1,25 +1,28 @@
 package net.primal.android.settings.zaps
 
+import net.primal.android.nostr.model.primal.content.ContentZapConfigItem
+import net.primal.android.nostr.model.primal.content.ContentZapDefault
+
 interface ZapSettingsContract {
 
     data class UiState(
-        val defaultZapAmount: ULong? = null,
-        val zapOptions: List<ULong?> = List(PRESETS_COUNT) { null },
+        val editPresetIndex: Int? = null,
+        val saving: Boolean = false,
+        val zapDefault: ContentZapDefault? = null,
+        val zapConfig: List<ContentZapConfigItem> = emptyList(),
     )
 
     sealed class UiEvent {
-        data class ZapOptionsChanged(val newOptions: List<ULong?>) : UiEvent()
-        data class ZapDefaultAmountChanged(val newAmount: ULong?) : UiEvent()
+        data object EditZapDefault : UiEvent()
+        data class EditZapPreset(val preset: ContentZapConfigItem) : UiEvent()
+        data object CloseEditor : UiEvent()
+        data class UpdateZapPreset(
+            val index: Int,
+            val zapPreset: ContentZapConfigItem,
+        ) : UiEvent()
+
+        data class UpdateZapDefault(val newZapDefault: ContentZapDefault) : UiEvent()
     }
 }
 
 const val PRESETS_COUNT = 6
-
-val DEFAULT_ZAP_OPTIONS = listOf(
-    21.toULong(),
-    420.toULong(),
-    1_000.toULong(),
-    5_000.toULong(),
-    10_000.toULong(),
-    100_000.toULong(),
-)

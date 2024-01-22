@@ -12,12 +12,14 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import net.primal.android.auth.AuthRepository
 import net.primal.android.auth.create.CreateAccountContract.SideEffect
 import net.primal.android.auth.create.CreateAccountContract.UiEvent
 import net.primal.android.auth.create.CreateAccountContract.UiState
 import net.primal.android.auth.create.api.RecommendedFollowsApi
 import net.primal.android.auth.create.ui.RecommendedFollow
+import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.files.error.UnsuccessfulFileUpload
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.networking.relays.errors.NostrPublishException
@@ -27,9 +29,11 @@ import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.user.accounts.BOOTSTRAP_RELAYS
 import net.primal.android.user.repository.UserRepository
+import timber.log.Timber
 
 @HiltViewModel
 class CreateAccountViewModel @Inject constructor(
+    private val dispatcherProvider: CoroutineDispatcherProvider,
     private val authRepository: AuthRepository,
     private val settingsRepository: SettingsRepository,
     private val profileRepository: ProfileRepository,
@@ -165,19 +169,23 @@ class CreateAccountViewModel @Inject constructor(
         try {
             setState { copy(loading = true) }
             val userId = state.value.userId!!
-            profileRepository.setContactsAndRelays(
-                userId = userId,
-                contacts = state.value.recommendedFollows
-                    .filter { it.isCurrentUserFollowing }
-                    .map { it.pubkey }.toSet(),
-                relays = BOOTSTRAP_RELAYS,
-            )
-            settingsRepository.fetchAndPersistAppSettings(userId = userId)
+            withContext(dispatcherProvider.io()) {
+                profileRepository.setContactsAndRelays(
+                    userId = userId,
+                    contacts = state.value.recommendedFollows
+                        .filter { it.isCurrentUserFollowing }
+                        .map { it.pubkey }.toSet(),
+                    relays = BOOTSTRAP_RELAYS,
+                )
+                settingsRepository.fetchAndPersistAppSettings(userId = userId)
+            }
             setEffect(SideEffect.AccountCreatedAndPersisted(pubkey = userId))
-        } catch (e: NostrPublishException) {
-            setState { copy(error = UiState.CreateError.FailedToFollow(e)) }
-        } catch (e: WssException) {
-            setState { copy(error = UiState.CreateError.FailedToFollow(e)) }
+        } catch (error: NostrPublishException) {
+            Timber.e(error)
+            setState { copy(error = UiState.CreateError.FailedToFollow(error)) }
+        } catch (error: WssException) {
+            Timber.e(error)
+            setState { copy(error = UiState.CreateError.FailedToFollow(error)) }
         } finally {
             setState { copy(loading = false) }
         }

@@ -1,39 +1,74 @@
 package net.primal.android.settings.zaps
 
+import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowForwardIos
+import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.text.isDigitsOnly
+import androidx.emoji2.emojipicker.EmojiPickerView
+import java.text.NumberFormat
 import net.primal.android.R
-import net.primal.android.core.compose.PrimalDivider
+import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.PrimalTopAppBar
+import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
+import net.primal.android.core.compose.icons.primaliconpack.FeedZaps
+import net.primal.android.nostr.model.primal.content.ContentZapConfigItem
+import net.primal.android.nostr.model.primal.content.ContentZapDefault
+import net.primal.android.nostr.model.primal.content.DEFAULT_ZAP_CONFIG
+import net.primal.android.nostr.model.primal.content.DEFAULT_ZAP_DEFAULT
 import net.primal.android.theme.AppTheme
+import net.primal.android.theme.PrimalTheme
 
 @Composable
 fun ZapSettingsScreen(viewModel: ZapSettingsViewModel, onClose: () -> Unit) {
@@ -52,45 +87,89 @@ fun ZapSettingsScreen(
     onClose: () -> Unit,
     eventPublisher: (ZapSettingsContract.UiEvent) -> Unit,
 ) {
+    val backSequence = {
+        if (uiState.editPresetIndex == null) {
+            onClose()
+        } else {
+            eventPublisher(ZapSettingsContract.UiEvent.CloseEditor)
+        }
+    }
+
+    BackHandler(enabled = uiState.editPresetIndex != null) {
+        backSequence()
+    }
+
     Scaffold(
         modifier = Modifier,
         topBar = {
             PrimalTopAppBar(
                 title = stringResource(id = R.string.settings_zaps_title),
                 navigationIcon = PrimalIcons.ArrowBack,
-                onNavigationIconClick = onClose,
+                onNavigationIconClick = backSequence,
             )
         },
         content = { paddingValues ->
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(horizontal = 16.dp, vertical = 16.dp)
-                    .imePadding(),
-                verticalArrangement = Arrangement.Top,
-                horizontalAlignment = Alignment.Start,
-            ) {
-                item {
-                    ZapDefaultAmount(
-                        defaultZapAmount = uiState.defaultZapAmount,
-                        onDefaultZapAmountChanged = {
-                            eventPublisher(ZapSettingsContract.UiEvent.ZapDefaultAmountChanged(newAmount = it))
-                        },
-                    )
-                }
+            AnimatedContent(
+                targetState = uiState.editPresetIndex,
+                transitionSpec = {
+                    when (targetState) {
+                        null -> {
+                            slideInHorizontally(initialOffsetX = { -it })
+                                .togetherWith(
+                                    slideOutHorizontally(targetOffsetX = { it }),
+                                )
+                        }
 
-                item {
-                    ZapOptionDashboard(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp),
-                        zapOptions = uiState.zapOptions,
-                        editable = true,
-                        onZapOptionsChanged = {
-                            eventPublisher(ZapSettingsContract.UiEvent.ZapOptionsChanged(newOptions = it))
-                        },
-                    )
+                        else -> {
+                            slideInHorizontally(initialOffsetX = { it })
+                                .togetherWith(slideOutHorizontally(targetOffsetX = { -it }))
+                        }
+                    }
+                },
+                label = "ZapSettings",
+            ) {
+                when (it) {
+                    null -> {
+                        ZapPresetsList(
+                            paddingValues = paddingValues,
+                            zapDefault = uiState.zapDefault,
+                            zapsConfig = uiState.zapConfig,
+                            onZapDefaultClick = {
+                                eventPublisher(ZapSettingsContract.UiEvent.EditZapDefault)
+                            },
+                            onPresetClick = { presetItem ->
+                                eventPublisher(ZapSettingsContract.UiEvent.EditZapPreset(presetItem))
+                            },
+                        )
+                    }
+
+                    -1 -> {
+                        ZapDefaultEditor(
+                            paddingValues = paddingValues,
+                            zapDefault = uiState.zapDefault!!,
+                            onUpdate = {
+                                eventPublisher(ZapSettingsContract.UiEvent.UpdateZapDefault(it))
+                            },
+                            updating = uiState.saving,
+                        )
+                    }
+
+                    in (0..PRESETS_COUNT) -> {
+                        ZapPresetEditor(
+                            paddingValues = paddingValues,
+                            index = it,
+                            zapsConfig = uiState.zapConfig,
+                            updating = uiState.saving,
+                            onUpdate = { zapPreset ->
+                                eventPublisher(
+                                    ZapSettingsContract.UiEvent.UpdateZapPreset(
+                                        index = it,
+                                        zapPreset = zapPreset,
+                                    ),
+                                )
+                            },
+                        )
+                    }
                 }
             }
         },
@@ -98,219 +177,382 @@ fun ZapSettingsScreen(
 }
 
 @Composable
-private fun ZapDefaultAmount(defaultZapAmount: ULong?, onDefaultZapAmountChanged: (ULong?) -> Unit) {
+fun ZapPresetsList(
+    paddingValues: PaddingValues,
+    zapDefault: ContentZapDefault?,
+    zapsConfig: List<ContentZapConfigItem> = emptyList(),
+    onZapDefaultClick: () -> Unit,
+    onPresetClick: (ContentZapConfigItem) -> Unit,
+) {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(paddingValues)
+            .imePadding(),
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.Start,
+    ) {
+        item {
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        if (zapDefault != null) {
+            item {
+                ZapDefaultListItem(
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp)
+                        .clickable {
+                            onZapDefaultClick()
+                        },
+                    text = zapDefault.message,
+                    amount = zapDefault.amount,
+                )
+
+                Text(
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
+                    text = stringResource(id = R.string.settings_zaps_description),
+                    style = AppTheme.typography.bodySmall,
+                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
+                )
+            }
+        }
+
+        if (zapsConfig.isNotEmpty()) {
+            item {
+                ZapCustomPresets(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    presets = zapsConfig,
+                    onPresetClick = {
+                        onPresetClick(it)
+                    },
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ZapDefaultListItem(
+    modifier: Modifier,
+    text: String,
+    amount: Long,
+) {
+    val numberFormat = remember { NumberFormat.getNumberInstance() }
+    Card(modifier = modifier) {
+        ListItem(
+            colors = ListItemDefaults.colors(
+                containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
+            ),
+            leadingContent = {
+                Icon(imageVector = PrimalIcons.FeedZaps, contentDescription = null)
+            },
+            headlineContent = {
+                Text(
+                    text = text,
+                    color = AppTheme.colorScheme.onPrimary,
+                )
+            },
+            supportingContent = {
+                Text(
+                    modifier = Modifier.padding(vertical = 2.dp),
+                    text = "${numberFormat.format(amount)} sats",
+                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+                )
+            },
+            trailingContent = {
+                Icon(imageVector = Icons.Default.ArrowForwardIos, contentDescription = null)
+            },
+        )
+    }
+}
+
+@Composable
+private fun ZapCustomPresets(
+    modifier: Modifier,
+    presets: List<ContentZapConfigItem>,
+    onPresetClick: (ContentZapConfigItem) -> Unit,
+) {
+    val numberFormat = remember { NumberFormat.getNumberInstance() }
+    Card(modifier = modifier) {
+        presets.forEach { zapItem ->
+            ListItem(
+                modifier = Modifier.clickable {
+                    onPresetClick(zapItem)
+                },
+                colors = ListItemDefaults.colors(
+                    containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
+                ),
+                leadingContent = {
+                    Text(text = zapItem.emoji)
+                },
+                headlineContent = {
+                    Text(
+                        text = zapItem.message,
+                        color = AppTheme.colorScheme.onPrimary,
+                    )
+                },
+                supportingContent = {
+                    Text(
+                        modifier = Modifier.padding(vertical = 2.dp),
+                        text = "${numberFormat.format(zapItem.amount)} sats",
+                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+                    )
+                },
+                trailingContent = {
+                    Icon(imageVector = Icons.Default.ArrowForwardIos, contentDescription = null)
+                },
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+fun ZapPresetEditor(
+    paddingValues: PaddingValues,
+    updating: Boolean,
+    index: Int,
+    zapsConfig: List<ContentZapConfigItem>,
+    onUpdate: (ContentZapConfigItem) -> Unit,
+) {
+    val zapConfig = zapsConfig[index]
+
+    var emoji by remember { mutableStateOf(zapConfig.emoji) }
+    var message by remember { mutableStateOf(zapConfig.message) }
+    var amount by remember { mutableStateOf(zapConfig.amount.toString()) }
+
+    Column(
+        modifier = Modifier
+            .verticalScroll(rememberScrollState())
+            .padding(paddingValues),
+    ) {
+        ZapPresetForm(
+            emojiValue = emoji,
+            onEmojiValueChange = {
+                emoji = it
+            },
+            messageValue = message,
+            onMessageValueChanged = {
+                message = it
+            },
+            amountValue = amount,
+            onAmountValueChanged = {
+                when {
+                    it.isEmpty() -> amount = ""
+                    it.isDigitsOnly() && it.length <= 8 && it.toLong() > 0 -> amount = it
+                }
+            },
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        val keyboard = LocalSoftwareKeyboardController.current
+        PrimalLoadingButton(
+            modifier = Modifier
+                .padding(horizontal = 32.dp)
+                .fillMaxWidth(),
+            enabled = emoji.isEmoji() && message.isNotEmpty() && amount.toLongOrNull() != null,
+            loading = updating,
+            text = stringResource(id = R.string.settings_zaps_editor_save),
+            onClick = {
+                keyboard?.hide()
+                onUpdate(
+                    ContentZapConfigItem(
+                        emoji = emoji,
+                        message = message,
+                        amount = amount.toLong(),
+                    ),
+                )
+            },
+        )
+    }
+}
+
+@Composable
+private fun ZapPresetForm(
+    messageValue: String,
+    onMessageValueChanged: (String) -> Unit,
+    amountValue: String,
+    onAmountValueChanged: (String) -> Unit,
+    emojiValue: String? = null,
+    onEmojiValueChange: ((String) -> Unit)? = null,
+) {
+    if (emojiValue != null && onEmojiValueChange != null) {
+        var emojiPickerVisible by remember { mutableStateOf(false) }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            text = stringResource(id = R.string.settings_zaps_editor_emoji).uppercase(),
+            style = AppTheme.typography.bodySmall,
+        )
+
+        Box(
+            modifier = Modifier
+                .width(96.dp)
+                .height(56.dp)
+                .padding(horizontal = 16.dp)
+                .background(color = AppTheme.extraColorScheme.surfaceVariantAlt1, shape = AppTheme.shapes.medium)
+                .clickable {
+                    emojiPickerVisible = true
+                },
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                text = emojiValue,
+                style = AppTheme.typography.bodyMedium.copy(fontSize = 24.sp),
+            )
+        }
+
+        if (emojiPickerVisible) {
+            EmojiPicker(
+                onEmojiSelected = {
+                    onEmojiValueChange(it)
+                },
+                onDismissRequest = {
+                    emojiPickerVisible = false
+                },
+            )
+        }
+    }
+
+    Spacer(modifier = Modifier.height(8.dp))
+
     Text(
-        modifier = Modifier.padding(bottom = 16.dp),
-        text = stringResource(
-            id = R.string.settings_zaps_default_zap_amount_header,
-        ).uppercase(),
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+        text = stringResource(id = R.string.settings_zaps_editor_message).uppercase(),
         style = AppTheme.typography.bodySmall,
     )
 
     OutlinedTextField(
-        modifier = Modifier.fillMaxWidth(fraction = 0.3f),
-        value = defaultZapAmount?.toString() ?: "",
-        onValueChange = {
-            if (it.isDigitsOnly()) {
-                onDefaultZapAmountChanged(it.toULongOrNull())
-            }
-        },
-        enabled = true,
-        textStyle = AppTheme.typography.bodyLarge.copy(
-            textAlign = TextAlign.Center,
-            fontWeight = FontWeight.Bold,
-        ),
-        keyboardOptions = KeyboardOptions(
-            keyboardType = KeyboardType.Number,
-            autoCorrect = false,
-        ),
-        shape = AppTheme.shapes.small,
-        colors = zapTextFieldColors(),
+        modifier = Modifier
+            .padding(horizontal = 16.dp)
+            .fillMaxWidth(),
+        colors = PrimalDefaults.outlinedTextFieldColors(),
+        shape = AppTheme.shapes.medium,
+        value = messageValue,
+        onValueChange = onMessageValueChanged,
+        textStyle = AppTheme.typography.bodyMedium,
     )
 
-    PrimalDivider(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 16.dp),
-    )
+    Spacer(modifier = Modifier.height(8.dp))
 
     Text(
-        modifier = Modifier.padding(bottom = 16.dp),
-        text = stringResource(
-            id = R.string.settings_zaps_custom_zaps_header,
-        ).uppercase(),
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+        text = stringResource(id = R.string.settings_zaps_editor_value).uppercase(),
         style = AppTheme.typography.bodySmall,
     )
-}
 
-@Composable
-fun ZapOptionDashboard(
-    modifier: Modifier,
-    zapOptions: List<ULong?>,
-    editable: Boolean = true,
-    zapEmojis: List<String> = listOf(
-        "\uD83D\uDC4D",
-        "\uD83C\uDF3F",
-        "\uD83E\uDD19",
-        "\uD83D\uDC9C",
-        "\uD83D\uDD25",
-        "\uD83D\uDE80",
-    ),
-    onZapOptionsChanged: (List<ULong?>) -> Unit,
-) {
-    Row(
-        modifier = modifier,
-    ) {
-        ZapOption(
-            modifier = Modifier
-                .weight(1f)
-                .padding(end = 8.dp),
-            emoji = zapEmojis[0],
-            amount = zapOptions.getOrNull(0),
-            editable = editable,
-            onZapAmountChanged = {
-                onZapOptionsChanged(zapOptions.copy(index = 0, amount = it))
-            },
-        )
-
-        ZapOption(
-            modifier = Modifier
-                .weight(1f)
-                .padding(horizontal = 8.dp),
-            emoji = zapEmojis[1],
-            amount = zapOptions.getOrNull(1),
-            editable = editable,
-            onZapAmountChanged = {
-                onZapOptionsChanged(zapOptions.copy(index = 1, amount = it))
-            },
-        )
-        ZapOption(
-            modifier = Modifier
-                .weight(1f)
-                .padding(start = 8.dp),
-            emoji = zapEmojis[2],
-            amount = zapOptions.getOrNull(2),
-            editable = editable,
-            onZapAmountChanged = {
-                onZapOptionsChanged(zapOptions.copy(index = 2, amount = it))
-            },
-        )
-    }
-
-    Row(
+    OutlinedTextField(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-    ) {
-        ZapOption(
-            modifier = Modifier
-                .weight(1f)
-                .padding(end = 8.dp),
-            emoji = zapEmojis[3],
-            amount = zapOptions.getOrNull(3),
-            editable = editable,
-            onZapAmountChanged = {
-                onZapOptionsChanged(zapOptions.copy(index = 3, amount = it))
-            },
-        )
-
-        ZapOption(
-            modifier = Modifier
-                .weight(1f)
-                .padding(horizontal = 8.dp),
-            emoji = zapEmojis[4],
-            amount = zapOptions.getOrNull(4),
-            editable = editable,
-            onZapAmountChanged = {
-                onZapOptionsChanged(zapOptions.copy(index = 4, amount = it))
-            },
-        )
-        ZapOption(
-            modifier = Modifier
-                .weight(1f)
-                .padding(start = 8.dp),
-            emoji = zapEmojis[5],
-            amount = zapOptions.getOrNull(5),
-            editable = editable,
-            onZapAmountChanged = {
-                onZapOptionsChanged(zapOptions.copy(index = 5, amount = it))
-            },
-        )
-    }
+            .padding(horizontal = 16.dp)
+            .fillMaxWidth(),
+        colors = PrimalDefaults.outlinedTextFieldColors(),
+        shape = AppTheme.shapes.medium,
+        singleLine = true,
+        value = amountValue,
+        onValueChange = onAmountValueChanged,
+        textStyle = AppTheme.typography.bodyMedium,
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Number,
+            imeAction = ImeAction.Done,
+        ),
+    )
 }
 
-private fun List<ULong?>.copy(index: Int, amount: ULong?): List<ULong?> {
-    val newOptions = this.toMutableList()
-    newOptions[index] = amount
-    return newOptions
-}
+private fun String.isEmoji(): Boolean = this.isNotEmpty()
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun ZapOption(
-    modifier: Modifier,
-    emoji: String,
-    amount: ULong?,
-    editable: Boolean = true,
-    onZapAmountChanged: (ULong?) -> Unit,
+fun ZapDefaultEditor(
+    paddingValues: PaddingValues,
+    zapDefault: ContentZapDefault,
+    onUpdate: (ContentZapDefault) -> Unit,
+    updating: Boolean,
 ) {
-    Column(modifier = modifier) {
-        Text(
-            modifier = Modifier
-                .background(
-                    color = AppTheme.extraColorScheme.surfaceVariantAlt1,
-                    shape = AppTheme.shapes.small,
-                )
-                .border(
-                    width = 1.dp,
-                    color = AppTheme.colorScheme.outline,
-                    shape = AppTheme.shapes.small.copy(
-                        bottomStart = CornerSize(0.dp),
-                        bottomEnd = CornerSize(0.dp),
-                    ),
-                )
-                .fillMaxWidth()
-                .padding(top = 16.dp, bottom = 20.dp),
-            text = emoji,
-            textAlign = TextAlign.Center,
-            fontSize = 28.sp,
-        )
+    var message by remember { mutableStateOf(zapDefault.message) }
+    var amount by remember { mutableStateOf(zapDefault.amount.toString()) }
 
-        OutlinedTextField(
-            modifier = Modifier.padding(top = 4.dp),
-            value = amount?.toString() ?: "",
-            onValueChange = {
-                if (it.isDigitsOnly()) {
-                    onZapAmountChanged(it.toULongOrNull())
+    Column(
+        modifier = Modifier
+            .verticalScroll(rememberScrollState())
+            .padding(paddingValues),
+    ) {
+        ZapPresetForm(
+            messageValue = message,
+            onMessageValueChanged = {
+                message = it
+            },
+            amountValue = amount,
+            onAmountValueChanged = {
+                when {
+                    it.isEmpty() -> amount = ""
+                    it.isDigitsOnly() && it.length <= 8 && it.toLong() > 0 -> amount = it
                 }
             },
-            enabled = editable,
-            textStyle = AppTheme.typography.bodyLarge.copy(
-                textAlign = TextAlign.Center,
-                fontWeight = FontWeight.Bold,
-            ),
-            shape = AppTheme.shapes.small.copy(
-                topStart = CornerSize(0.dp),
-                topEnd = CornerSize(0.dp),
-            ),
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Number,
-                autoCorrect = false,
-            ),
-            colors = zapTextFieldColors(),
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        val keyboard = LocalSoftwareKeyboardController.current
+        PrimalLoadingButton(
+            modifier = Modifier
+                .padding(horizontal = 32.dp)
+                .fillMaxWidth(),
+            enabled = message.isNotEmpty() && amount.toLongOrNull() != null,
+            loading = updating,
+            text = stringResource(id = R.string.settings_zaps_editor_save),
+            onClick = {
+                keyboard?.hide()
+                onUpdate(
+                    ContentZapDefault(amount = amount.toLong(), message = message),
+                )
+            },
         )
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun zapTextFieldColors() =
-    OutlinedTextFieldDefaults.colors(
-        unfocusedContainerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
-        focusedContainerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
-        disabledContainerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
-        unfocusedBorderColor = AppTheme.colorScheme.outline,
-        focusedBorderColor = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
-        disabledBorderColor = AppTheme.colorScheme.outline,
-        disabledTextColor = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-        focusedTextColor = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-        unfocusedTextColor = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-    )
+fun EmojiPicker(onEmojiSelected: (String) -> Unit, onDismissRequest: () -> Unit) {
+    ModalBottomSheet(
+        onDismissRequest = onDismissRequest,
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false),
+    ) {
+        AndroidView(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .verticalScroll(rememberScrollState())
+                .offset(y = (-32).dp),
+            factory = {
+                EmojiPickerView(it)
+                    .apply {
+                        this.emojiGridColumns = 9
+                        setOnEmojiPickedListener { item ->
+                            onEmojiSelected(item.emoji)
+                            onDismissRequest()
+                        }
+                    }
+            },
+            update = {},
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun ZapSettingsPreview() {
+    PrimalTheme(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
+        ZapSettingsScreen(
+            uiState = ZapSettingsContract.UiState(
+                editPresetIndex = 0,
+                zapDefault = DEFAULT_ZAP_DEFAULT,
+                zapConfig = DEFAULT_ZAP_CONFIG,
+            ),
+            onClose = {},
+            eventPublisher = {},
+        )
+    }
+}

@@ -13,17 +13,21 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import net.primal.android.auth.AuthRepository
 import net.primal.android.auth.login.LoginContract.SideEffect
 import net.primal.android.auth.login.LoginContract.UiEvent
 import net.primal.android.auth.login.LoginContract.UiState
+import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.settings.muted.repository.MutedUserRepository
 import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.user.repository.UserRepository
+import timber.log.Timber
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
+    private val dispatcherProvider: CoroutineDispatcherProvider,
     private val settingsRepository: SettingsRepository,
     private val authRepository: AuthRepository,
     private val userRepository: UserRepository,
@@ -66,11 +70,14 @@ class LoginViewModel @Inject constructor(
             setState { copy(loading = true) }
             try {
                 val pubkey = authRepository.login(nostrKey = nostrKey)
-                userRepository.fetchAndUpdateUserAccount(userId = pubkey)
-                settingsRepository.fetchAndPersistAppSettings(userId = pubkey)
-                mutedUserRepository.fetchAndPersistMuteList(userId = pubkey)
+                withContext(dispatcherProvider.io()) {
+                    userRepository.fetchAndUpdateUserAccount(userId = pubkey)
+                    settingsRepository.fetchAndPersistAppSettings(userId = pubkey)
+                    mutedUserRepository.fetchAndPersistMuteList(userId = pubkey)
+                }
                 setEffect(SideEffect.LoginSuccess(pubkey = pubkey))
             } catch (error: WssException) {
+                Timber.e(error)
                 setErrorState(error = UiState.LoginError.GenericError(error))
             } finally {
                 setState { copy(loading = false) }

@@ -115,8 +115,8 @@ class ProfileViewModel @Inject constructor(
                         zappingState = this.zappingState.copy(
                             walletConnected = it.hasWallet(),
                             walletPreference = it.walletPreference,
-                            defaultZapAmount = it.appSettings?.defaultZapAmount ?: this.zappingState.defaultZapAmount,
-                            zapOptions = it.appSettings?.zapOptions ?: this.zappingState.zapOptions,
+                            zapDefault = it.appSettings?.zapDefault ?: this.zappingState.zapDefault,
+                            zapsConfig = it.appSettings?.zapsConfig ?: this.zappingState.zapsConfig,
                             walletBalanceInBtc = it.primalWalletBalanceInBtc,
                         ),
                     )
