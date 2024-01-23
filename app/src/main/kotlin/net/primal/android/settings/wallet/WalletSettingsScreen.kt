@@ -163,9 +163,7 @@ fun WalletSettingsScreen(
                     Spacer(modifier = Modifier.height(8.dp))
 
                     var maxWalletBalanceShown by remember { mutableStateOf(false) }
-                    val maxBalanceInSats = state.maxWalletBalanceInBtc?.toSats()?.let {
-                        numberFormat.format(it.toLong())
-                    } ?: "⌛"
+                    val maxBalanceInSats = numberFormat.format((state.maxWalletBalanceInBtc ?: "0.01").toSats().toLong())
                     SettingsItem(
                         headlineText = stringResource(id = R.string.settings_wallet_max_wallet_balance),
                         supportText = "$maxBalanceInSats sats",
