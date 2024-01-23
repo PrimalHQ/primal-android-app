@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
@@ -143,6 +142,14 @@ fun WalletDashboardScreen(
         pagingItems.refresh()
     }
 
+    val isScrolledToTop by remember(listState) { derivedStateOf { listState.firstVisibleItemScrollOffset == 0 } }
+    val dashboardExpanded by rememberSaveable(isScrolledToTop) { mutableStateOf(isScrolledToTop) }
+
+    val dashboardLiteHeightDp = 80.dp
+    var topBarHeight by remember { mutableIntStateOf(0) }
+    var topBarFooterHeight by remember { mutableIntStateOf(0) }
+    val density = LocalDensity.current
+
     var shouldAddFooter by remember { mutableStateOf(false) }
     LaunchedEffect(pagingItems.itemCount, listState) {
         if (listState.canScrollForward) {
@@ -153,11 +160,6 @@ fun WalletDashboardScreen(
             listState.animateScrollToItem(0)
         }
     }
-
-    val isScrolledToTop by remember(listState) { derivedStateOf { listState.firstVisibleItemScrollOffset == 0 } }
-    val dashboardExpanded by rememberSaveable(isScrolledToTop) { mutableStateOf(isScrolledToTop) }
-
-    var topBarHeight by remember { mutableIntStateOf(0) }
 
     PrimalDrawerScaffold(
         drawerState = drawerState,
@@ -191,6 +193,7 @@ fun WalletDashboardScreen(
                 footer = {
                     if (state.walletPreference != WalletPreference.NostrWalletConnect) {
                         AnimatedContent(
+                            modifier = Modifier.onSizeChanged { topBarFooterHeight = it.height },
                             targetState = dashboardExpanded,
                             label = "DashboardAnimation",
                         ) { expanded ->
@@ -222,7 +225,7 @@ fun WalletDashboardScreen(
                                 false -> WalletDashboardLite(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .wrapContentHeight()
+                                        .height(dashboardLiteHeightDp)
                                         .background(color = AppTheme.colorScheme.surface)
                                         .padding(horizontal = 10.dp, vertical = 16.dp),
                                     walletBalance = state.walletBalance,
@@ -318,7 +321,13 @@ fun WalletDashboardScreen(
                             },
                             footer = {
                                 if (shouldAddFooter) {
-                                    Spacer(modifier = Modifier.height(256.dp))
+                                    val spacerHeight = with(density) {
+                                        (topBarHeight - topBarFooterHeight).toDp() +
+                                            dashboardLiteHeightDp +
+                                            64.dp /* PrimalNavigationBar */ +
+                                            48.dp /* SystemNavigationBar */
+                                    }
+                                    Spacer(modifier = Modifier.height(spacerHeight))
                                 }
                             },
                         )
