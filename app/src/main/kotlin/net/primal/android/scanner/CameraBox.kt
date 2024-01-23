@@ -12,6 +12,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.tooling.preview.Preview
+import java.time.Instant
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 import net.primal.android.scanner.analysis.QrCodeResult
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
@@ -25,7 +28,7 @@ fun CameraBox(
 ) {
     KeepScreenOn()
 
-    var lastScannedQrCodeData by remember { mutableStateOf<QrCodeResult?>(null) }
+    var lastScannedQrCodeData by remember { mutableStateOf<ScanResult?>(null) }
 
     BoxWithConstraints(
         modifier = modifier,
@@ -35,15 +38,30 @@ fun CameraBox(
             modifier = Modifier.fillMaxSize(),
             torchEnabled = false,
             onQrCodeDetected = { result ->
-                if (!result.equalValues(lastScannedQrCodeData)) {
+                val isRepeatingResult = result.equalValues(lastScannedQrCodeData?.result)
+                val lastSuccessfulScanResultExpired = lastScannedQrCodeData?.timestamp.isOlderThan(2.seconds)
+                if (!isRepeatingResult || lastSuccessfulScanResultExpired) {
                     onQrCodeDetected(result)
-                    lastScannedQrCodeData = result
+                    lastScannedQrCodeData = ScanResult(
+                        result = result,
+                        timestamp = Instant.now(),
+                    )
                 }
             },
         )
 
         overlayContent?.invoke(this)
     }
+}
+
+private data class ScanResult(
+    val result: QrCodeResult,
+    val timestamp: Instant,
+)
+
+private fun Instant?.isOlderThan(duration: Duration): Boolean {
+    if (this == null) return true
+    return this < Instant.now().minusSeconds(duration.inWholeSeconds)
 }
 
 @Composable
