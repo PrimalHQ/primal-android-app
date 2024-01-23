@@ -66,6 +66,7 @@ import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.WalletError
 import net.primal.android.core.compose.icons.primaliconpack.WalletSuccess
 import net.primal.android.core.compose.numericpad.PrimalNumericPad
+import net.primal.android.core.utils.ellipsizeMiddle
 import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.dashboard.ui.BtcAmountText
 import net.primal.android.wallet.numericPadContentTransformAnimation
@@ -133,6 +134,7 @@ fun CreateTransactionScreen(
                         amountInSats = state.transaction.amountSats.toLong(),
                         receiver = state.profileLightningAddress
                             ?: state.transaction.targetLud16
+                            ?: state.transaction.targetLnUrl?.ellipsizeLnurl()
                             ?: state.transaction.lnInvoiceData?.description,
                     )
                 }
@@ -142,6 +144,7 @@ fun CreateTransactionScreen(
                         amountInSats = state.transaction.amountSats.toLong(),
                         receiver = state.profileLightningAddress
                             ?: state.transaction.targetLud16
+                            ?: state.transaction.targetLnUrl?.ellipsizeLnurl()
                             ?: state.transaction.lnInvoiceData?.description,
                         onDoneClick = onClose,
                     )
@@ -157,6 +160,8 @@ fun CreateTransactionScreen(
         },
     )
 }
+
+private fun String.ellipsizeLnurl() = this.ellipsizeMiddle(size = 8).lowercase()
 
 @ExperimentalComposeUiApi
 @Composable
@@ -194,10 +199,13 @@ private fun TransactionEditor(
                 avatarSize = 88.dp,
             )
 
-            val receiver = state.profileDisplayName ?: state.transaction.targetLud16 ?: ""
+            val receiver = state.profileDisplayName
+                ?: state.transaction.targetLud16
+                ?: state.transaction.targetLnUrl?.ellipsizeLnurl()
+                ?: ""
             if (receiver.isNotEmpty()) {
                 Text(
-                    modifier = Modifier.padding(vertical = 4.dp),
+                    modifier = Modifier.padding(vertical = 4.dp, horizontal = 16.dp),
                     text = receiver,
                     color = AppTheme.colorScheme.onSurface,
                     style = AppTheme.typography.bodyLarge,
