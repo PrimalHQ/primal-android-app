@@ -1,4 +1,2 @@
 ## Features
-- Implemented zap settings;
-- Added compatibility with older wallet api;
-- Improved trending hashtags updates to avoid blank screens;
+- Primal Wallet beta release;
