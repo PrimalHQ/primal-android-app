@@ -1,1 +1,1 @@
-- Primal Wallet Beta release;
+Primal Wallet. You can now enjoy the integrated Nostr experience; where zaps, wallet transactions and Nostr content blend seamlessly within the same app. Try it out and let us know your thoughts!
