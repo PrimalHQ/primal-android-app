@@ -6,6 +6,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class DepositResponse(
     @SerialName("lnInvoice") val lnInvoice: String?,
-    @SerialName("description") val description: String?,
-    @SerialName("onchainAddress") val onChainAddress: String?,
+    @SerialName("description") val description: String? = null,
+    @SerialName("onchainAddress") val onChainAddress: String? = null,
 )
