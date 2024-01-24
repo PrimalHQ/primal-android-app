@@ -54,7 +54,7 @@ import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.user.domain.Badges
 
-private val NavigationBarFullHeightDp = 64.dp
+val NavigationBarFullHeightDp = 64.dp
 private val NavigationBarBoltCircleSizeDp = NavigationBarFullHeightDp
 private val NavigationBarVisibleHeightDp = 56.dp
 private val NavigationBarBoltBorderSpaceDp = 6.dp

@@ -42,6 +42,7 @@ import kotlinx.coroutines.launch
 import net.primal.android.LocalPrimalTheme
 import net.primal.android.R
 import net.primal.android.core.compose.AppBarIcon
+import net.primal.android.core.compose.NavigationBarFullHeightDp
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.compose.SnackbarErrorHandler
@@ -321,11 +322,10 @@ fun WalletDashboardScreen(
                             },
                             footer = {
                                 if (shouldAddFooter) {
+                                    val systemNavigationBarDp = 48.dp
                                     val spacerHeight = with(density) {
-                                        (topBarHeight - topBarFooterHeight).toDp() +
-                                            dashboardLiteHeightDp +
-                                            64.dp /* PrimalNavigationBar */ +
-                                            48.dp /* SystemNavigationBar */
+                                        (topBarHeight - topBarFooterHeight).toDp() + dashboardLiteHeightDp +
+                                            NavigationBarFullHeightDp + systemNavigationBarDp
                                     }
                                     Spacer(modifier = Modifier.height(spacerHeight))
                                 }

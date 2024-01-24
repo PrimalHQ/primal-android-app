@@ -1,10 +1,12 @@
 package net.primal.android.settings.wallet
 
-import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -12,6 +14,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowForwardIos
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -34,6 +37,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -43,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.text.isDigitsOnly
 import java.text.NumberFormat
 import net.primal.android.R
+import net.primal.android.core.compose.PrimalSwitch
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
@@ -81,6 +88,8 @@ fun WalletSettingsScreen(
 ) {
     val scrollState = rememberScrollState()
     val numberFormat = remember { NumberFormat.getNumberInstance() }
+    val primalWalletPreferred = state.walletPreference != WalletPreference.NostrWalletConnect
+
     Scaffold(
         modifier = Modifier,
         topBar = {
@@ -94,18 +103,15 @@ fun WalletSettingsScreen(
             Column(
                 modifier = Modifier
                     .verticalScroll(scrollState)
-                    .padding(paddingValues)
-                    .animateContentSize(),
+                    .padding(paddingValues),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Spacer(modifier = Modifier.height(16.dp))
 
-                ExternalWalletSettings(
-                    nwcWallet = state.wallet,
-                    walletPreference = state.walletPreference,
-                    profileLightningAddress = state.userLightningAddress,
-                    onUsePrimalWalletSwitchChanged = { enabled ->
+                ExternalWalletListItem(
+                    preferPrimalWallet = primalWalletPreferred,
+                    onExternalWalletSwitchChanged = { enabled ->
                         eventPublisher(
                             UiEvent.UpdateWalletPreference(
                                 walletPreference = if (enabled) {
@@ -116,73 +122,125 @@ fun WalletSettingsScreen(
                             ),
                         )
                     },
-                    onExternalWalletDisconnect = {
-                        eventPublisher(UiEvent.DisconnectWallet)
-                    },
-                    onEditProfileClick = onEditProfileClick,
                 )
 
-                if (state.walletPreference != WalletPreference.NostrWalletConnect) {
-//                    Spacer(modifier = Modifier.height(8.dp))
+                AnimatedContent(targetState = primalWalletPreferred, label = "WalletSettingsContent") {
+                    when (it) {
+                        true -> {
+                            Column {
+//                                Spacer(modifier = Modifier.height(8.dp))
 //
-//                    SettingsItem(
-//                        headlineText = stringResource(id = R.string.settings_wallet_start_in_wallet),
-//                        supportText = stringResource(id = R.string.settings_wallet_start_in_wallet_hint),
-//                        trailingContent = {
-//                            PrimalSwitch(
-//                                checked = false,
-//                                onCheckedChange = {
-//                                },
-//                            )
-//                        },
-//                        onClick = {
-//                        },
-//                    )
+//                                SettingsItem(
+//                                    headlineText = stringResource(id = R.string.settings_wallet_start_in_wallet),
+//                                    supportText = stringResource(id = R.string.settings_wallet_start_in_wallet_hint),
+//                                    trailingContent = {
+//                                        PrimalSwitch(
+//                                            checked = false,
+//                                            onCheckedChange = {
+//                                            },
+//                                        )
+//                                    },
+//                                    onClick = {
+//                                    },
+//                                )
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                                Spacer(modifier = Modifier.height(8.dp))
 
-                    var spamThresholdAmountEditorDialog by remember { mutableStateOf(false) }
-                    val spamThresholdAmountInSats = state.spamThresholdAmountInSats?.let {
-                        numberFormat.format(it)
-                    } ?: "1"
-                    SettingsItem(
-                        headlineText = stringResource(id = R.string.settings_wallet_hide_transactions_below),
-                        supportText = "$spamThresholdAmountInSats sats",
-                        onClick = { spamThresholdAmountEditorDialog = true },
-                    )
+                                var spamThresholdAmountEditorDialog by remember { mutableStateOf(false) }
+                                val spamThresholdAmountInSats = state.spamThresholdAmountInSats?.let {
+                                    numberFormat.format(it)
+                                } ?: "1"
+                                SettingsItem(
+                                    headlineText = stringResource(
+                                        id = R.string.settings_wallet_hide_transactions_below,
+                                    ),
+                                    supportText = "$spamThresholdAmountInSats sats",
+                                    onClick = { spamThresholdAmountEditorDialog = true },
+                                )
 
-                    if (spamThresholdAmountEditorDialog) {
-                        SpamThresholdAmountEditorDialog(
-                            onDialogDismiss = { spamThresholdAmountEditorDialog = false },
-                            onEditAmount = {
-                                eventPublisher(UiEvent.UpdateMinTransactionAmount(amountInSats = it))
-                            },
-                        )
-                    }
+                                if (spamThresholdAmountEditorDialog) {
+                                    SpamThresholdAmountEditorDialog(
+                                        onDialogDismiss = { spamThresholdAmountEditorDialog = false },
+                                        onEditAmount = {
+                                            eventPublisher(UiEvent.UpdateMinTransactionAmount(amountInSats = it))
+                                        },
+                                    )
+                                }
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                                Spacer(modifier = Modifier.height(8.dp))
 
-                    var maxWalletBalanceShown by remember { mutableStateOf(false) }
-                    val maxBalanceInSats = numberFormat.format((state.maxWalletBalanceInBtc ?: "0.01").toSats().toLong())
-                    SettingsItem(
-                        headlineText = stringResource(id = R.string.settings_wallet_max_wallet_balance),
-                        supportText = "$maxBalanceInSats sats",
-                        trailingContent = {
-                            IconButton(onClick = { maxWalletBalanceShown = true }) {
-                                Icon(imageVector = Icons.Outlined.Info, contentDescription = null)
+                                var maxWalletBalanceShown by remember { mutableStateOf(false) }
+                                val maxBalanceInSats =
+                                    numberFormat.format((state.maxWalletBalanceInBtc ?: "0.01").toSats().toLong())
+                                SettingsItem(
+                                    headlineText = stringResource(id = R.string.settings_wallet_max_wallet_balance),
+                                    supportText = "$maxBalanceInSats sats",
+                                    trailingContent = {
+                                        IconButton(onClick = { maxWalletBalanceShown = true }) {
+                                            Icon(imageVector = Icons.Outlined.Info, contentDescription = null)
+                                        }
+                                    },
+                                    onClick = { maxWalletBalanceShown = true },
+                                )
+
+                                if (maxWalletBalanceShown) {
+                                    MaxWalletBalanceDialog(
+                                        text = stringResource(id = R.string.settings_wallet_max_wallet_balance_hint),
+                                        onDialogDismiss = { maxWalletBalanceShown = false },
+                                    )
+                                }
                             }
-                        },
-                        onClick = { maxWalletBalanceShown = true },
-                    )
+                        }
 
-                    if (maxWalletBalanceShown) {
-                        MaxWalletBalanceDialog(
-                            text = stringResource(id = R.string.settings_wallet_max_wallet_balance_hint),
-                            onDialogDismiss = { maxWalletBalanceShown = false },
-                        )
+                        false -> {
+                            ExternalWalletSettings(
+                                nwcWallet = state.wallet,
+                                onExternalWalletDisconnect = {
+                                    eventPublisher(UiEvent.DisconnectWallet)
+                                },
+                            )
+                        }
                     }
                 }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                NostrProfileLightingAddressSection(
+                    lightningAddress = state.userLightningAddress,
+                    onEditProfileClick = onEditProfileClick,
+                )
             }
+        },
+    )
+}
+
+@Composable
+private fun ExternalWalletListItem(preferPrimalWallet: Boolean, onExternalWalletSwitchChanged: (Boolean) -> Unit) {
+    ListItem(
+        modifier = Modifier.clickable {
+            onExternalWalletSwitchChanged(!preferPrimalWallet)
+        },
+        headlineContent = {
+            Text(
+                modifier = Modifier.padding(bottom = 4.dp),
+                text = stringResource(id = R.string.settings_wallet_use_primal_wallet),
+                style = AppTheme.typography.bodyLarge,
+                color = AppTheme.colorScheme.onPrimary,
+            )
+        },
+        supportingContent = {
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                text = stringResource(id = R.string.settings_wallet_use_primal_wallet_hint),
+                style = AppTheme.typography.bodySmall,
+                color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+            )
+        },
+        trailingContent = {
+            PrimalSwitch(
+                checked = preferPrimalWallet,
+                onCheckedChange = onExternalWalletSwitchChanged,
+            )
         },
     )
 }
@@ -295,6 +353,53 @@ private fun SpamThresholdAmountEditorDialog(onDialogDismiss: () -> Unit, onEditA
             }
         },
     )
+}
+
+@Composable
+private fun NostrProfileLightingAddressSection(lightningAddress: String?, onEditProfileClick: () -> Unit) {
+    Column {
+        SettingsItem(
+            headlineText = stringResource(id = R.string.settings_wallet_ln_address),
+            supportText = lightningAddress,
+            trailingContent = {
+                Icon(imageVector = Icons.Default.ArrowForwardIos, contentDescription = null)
+            },
+            onClick = onEditProfileClick,
+        )
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+        ) {
+            Text(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 2.dp)
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                        onClick = onEditProfileClick,
+                    ),
+                text = buildAnnotatedString {
+                    append(stringResource(id = R.string.settings_wallet_nwc_profile_lightning_address_hint))
+                    append(
+                        AnnotatedString(
+                            text = " ${
+                                stringResource(id = R.string.settings_wallet_nwc_profile_lightning_address_hint_suffix)
+                            }",
+                            spanStyle = SpanStyle(
+                                color = AppTheme.colorScheme.secondary,
+                                fontStyle = AppTheme.typography.bodySmall.fontStyle,
+                            ),
+                        ),
+                    )
+                    append(".")
+                },
+                style = AppTheme.typography.bodySmall,
+            )
+        }
+    }
 }
 
 class WalletUiStateProvider : PreviewParameterProvider<WalletSettingsContract.UiState> {
