@@ -118,7 +118,7 @@ class CreateTransactionViewModel @Inject constructor(
                         } else {
                             null
                         },
-                        noteRecipient = if (draftTransaction.lnInvoice == null) note else null,
+                        noteRecipient = note,
                         noteSelf = note,
                     ),
                 )
