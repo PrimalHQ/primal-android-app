@@ -1,6 +1,7 @@
 package net.primal.android.wallet.utils
 
 import java.math.BigDecimal
+import java.util.*
 
 @SuppressWarnings("ImplicitDefaultLocale")
 object CurrencyConversionUtils {
@@ -16,5 +17,5 @@ object CurrencyConversionUtils {
 
     fun BigDecimal.toSats(): ULong = multiply(BTC_IN_SATS.toBigDecimal()).toLong().toULong()
 
-    fun Double.formatAsString() = String.format("%.11f", this).trimEnd('0').trimEnd('.')
+    fun Double.formatAsString() = String.format(Locale.US, "%.11f", this).trimEnd('0').trimEnd('.')
 }
