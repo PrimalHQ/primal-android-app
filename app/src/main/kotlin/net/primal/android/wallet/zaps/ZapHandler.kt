@@ -37,8 +37,9 @@ class ZapHandler @Inject constructor(
         val userRelays = userAccount?.relays
         val targetLnUrlDecoded = target.lnUrlDecoded()
         val nostrZapper = userAccount?.buildZapper()
-        val zapAmountInSats = amountInSats ?: userAccount?.appSettings?.defaultZapAmount
-        val zapComment = comment ?: ""
+        val defaultZapOptions = userAccount?.appSettings?.zapDefault
+        val zapAmountInSats = amountInSats ?: defaultZapOptions?.amount?.toULong()
+        val zapComment = comment ?: defaultZapOptions?.message ?: ""
 
         if (userRelays.isNullOrEmpty() || nostrZapper == null || zapAmountInSats == null) {
             throw InvalidZapRequestException()
