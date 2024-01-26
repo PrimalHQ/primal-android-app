@@ -287,6 +287,7 @@ private fun ReceivePaymentViewer(
 }
 
 @Composable
+@Suppress("MagicNumber")
 private fun rememberQrCodeDrawable(text: String): Drawable {
     val warningColor = Color(0xFF480101).toArgb()
     val context = LocalContext.current

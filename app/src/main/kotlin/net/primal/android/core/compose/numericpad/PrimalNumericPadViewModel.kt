@@ -64,7 +64,7 @@ class PrimalNumericPadViewModel : ViewModel() {
 
     private fun String.inputDigit(digit: Int): String {
         val oldValue = this
-        return if (oldValue.length < 8) {
+        return if (oldValue.length < MAX_INPUT_LENGTH) {
             if (oldValue.isPositive()) {
                 "$oldValue$digit"
             } else {
@@ -76,4 +76,8 @@ class PrimalNumericPadViewModel : ViewModel() {
     }
 
     private fun String.isPositive() = toBigDecimal() > BigDecimal.ZERO
+
+    companion object {
+        private const val MAX_INPUT_LENGTH = 8
+    }
 }

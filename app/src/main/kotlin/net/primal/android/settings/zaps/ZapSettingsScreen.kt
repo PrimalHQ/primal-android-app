@@ -529,7 +529,6 @@ fun EmojiPicker(onEmojiSelected: (String) -> Unit, onDismissRequest: () -> Unit)
             factory = {
                 EmojiPickerView(it)
                     .apply {
-                        this.emojiGridColumns = 9
                         setOnEmojiPickedListener { item ->
                             onEmojiSelected(item.emoji)
                             onDismissRequest()

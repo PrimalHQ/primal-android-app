@@ -1,9 +1,9 @@
 package net.primal.android.core.utils
 
 import net.primal.android.crypto.Bech32
+import net.primal.android.crypto.hexToNpubHrp
 import net.primal.android.crypto.hexToNsecHrp
 import org.spongycastle.util.encoders.DecoderException
-import timber.log.Timber
 
 fun String?.isValidNostrPrivateKey(): Boolean {
     if (this == null) return false
@@ -23,12 +23,10 @@ fun String?.isValidNostrPublicKey(): Boolean {
     if (this == null) return false
 
     return if (startsWith("npub")) {
-        this.isValidNpub().apply {
-            Timber.e("Is valid = $this")
-        }
+        this.isValidNpub()
     } else {
         try {
-            this.hexToNsecHrp().isValidNpub()
+            this.hexToNpubHrp().isValidNpub()
         } catch (error: DecoderException) {
             false
         }
@@ -46,12 +44,14 @@ private fun String.isValidNsec(): Boolean {
     }
 }
 
+private const val NPUB_LENGTH = 63
+
 private fun String.isValidNpub(): Boolean {
     if (!this.startsWith("npub")) return false
 
     return try {
         val decoded = Bech32.decodeBytes(this)
-        decoded.first == "npub" && this.length >= 63
+        decoded.first == "npub" && this.length >= NPUB_LENGTH
     } catch (error: IllegalArgumentException) {
         false
     }

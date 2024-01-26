@@ -7,4 +7,5 @@ import kotlinx.serialization.Serializable
 data class ContentFeedData(
     val name: String,
     @SerialName("hex") val directive: String,
+    val includeReplies: Boolean? = null,
 )

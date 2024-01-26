@@ -24,7 +24,7 @@ class SettingsRepository @Inject constructor(
 ) {
     suspend fun fetchAndPersistAppSettings(userId: String) {
         val appSettings = fetchAppSettings(userId = userId) ?: return
-        persistAppSettings(userId = userId, appSettings = appSettings)
+        persistAppSettingsLocally(userId = userId, appSettings = appSettings)
     }
 
     suspend fun updateAndPersistZapDefault(userId: String, zapDefault: ContentZapDefault) {
@@ -88,6 +88,7 @@ class SettingsRepository @Inject constructor(
         updateAndPersistFeeds(userId = userId, feeds = remoteDefaultAppSettings.feeds)
     }
 
+    @Suppress("MagicNumber")
     suspend fun ensureZapConfig(userId: String) {
         val userSettings = accountsStore.findByIdOrNull(userId)?.appSettings
         if (userSettings?.zapDefault != null && userSettings.zapsConfig.isNotEmpty()) return
@@ -125,9 +126,10 @@ class SettingsRepository @Inject constructor(
         reducer: ContentAppSettings.() -> ContentAppSettings,
     ) {
         val remoteAppSettings = fetchAppSettings(userId = userId) ?: return
-        val newAppSettings = remoteAppSettings.reducer()
+        val localAppSettings = persistAppSettingsLocally(userId = userId, appSettings = remoteAppSettings)
+        val newAppSettings = localAppSettings.reducer()
         settingsApi.setAppSettings(userId = userId, appSettings = newAppSettings)
-        persistAppSettings(userId = userId, appSettings = newAppSettings)
+        persistAppSettingsLocally(userId = userId, appSettings = newAppSettings)
     }
 
     private suspend fun fetchAppSettings(userId: String): ContentAppSettings? {
@@ -144,42 +146,39 @@ class SettingsRepository @Inject constructor(
         )
     }
 
-    private suspend fun persistAppSettings(userId: String, appSettings: ContentAppSettings) {
+    private suspend fun persistAppSettingsLocally(userId: String, appSettings: ContentAppSettings): ContentAppSettings {
         val currentUserAccount = accountsStore.findByIdOrNull(userId = userId)
             ?: UserAccount.buildLocal(pubkey = userId)
 
-        val userFeeds = appSettings.feeds.distinctBy { it.directive }.map { it.asFeedPO() }
-        val hasLatestFeed = userFeeds.find { it.directive == userId } != null
-        val userIdDirectiveIndex = userFeeds.indexOfFirst { it.directive == userId }
-        val finalFeeds = if (hasLatestFeed) {
-            userFeeds.toMutableList().apply {
-                if (userIdDirectiveIndex >= 0) {
-                    removeAt(userIdDirectiveIndex)
-                    add(userIdDirectiveIndex, Feed(directive = userId, name = "Latest"))
-                }
-            }
-        } else {
-            userFeeds.toMutableList().apply {
-                add(0, Feed(directive = userId, name = "Latest"))
-            }
+        val userFeeds = appSettings.feeds
+            .distinctBy { "${it.directive}${it.includeReplies}" }
+            .mapNotNull { it.asFeedPO() }
+            .toMutableList()
+
+        val hasLatestFeed = userFeeds.hasLatestFeed(userId)
+        val hasLatestWithRepliesFeed = userFeeds.hasLatestWithRepliesFeed(userId)
+
+        if (!hasLatestFeed && !hasLatestWithRepliesFeed) {
+            userFeeds.add(0, Feed(directive = userId, name = "Latest"))
+            userFeeds.add(0, Feed(directive = userId.toLatestWithRepliesDirective(), name = "Latest With Replies"))
+        } else if (!hasLatestFeed) {
+            userFeeds.add(0, Feed(directive = userId, name = "Latest"))
+        } else if (!hasLatestWithRepliesFeed) {
+            userFeeds.add(0, Feed(directive = userId.toLatestWithRepliesDirective(), name = "Latest With Replies"))
         }
 
-        accountsStore.upsertAccount(
-            userAccount = currentUserAccount.copy(
-                appSettings = appSettings.copy(feeds = finalFeeds.map { it.asContentFeedData() }),
-            ),
-        )
+        val localAppSettings = appSettings.copy(feeds = userFeeds.map { it.asContentFeedData() })
+        accountsStore.upsertAccount(userAccount = currentUserAccount.copy(appSettings = localAppSettings))
 
         database.withTransaction {
             database.feeds().deleteAll()
-            database.feeds().upsertAll(data = finalFeeds)
+            database.feeds().upsertAll(data = userFeeds)
         }
+
+        return localAppSettings
     }
 
-    private fun ContentFeedData.asFeedPO(): Feed = Feed(name = name, directive = directive)
-    private fun Feed.asContentFeedData(): ContentFeedData =
-        ContentFeedData(
-            name = name,
-            directive = directive,
-        )
+    private fun List<Feed>.hasLatestFeed(userId: String) = find { it.isLatest(userId) } != null
+
+    private fun List<Feed>.hasLatestWithRepliesFeed(userId: String) = find { it.isLatestWithReplies(userId) } != null
 }

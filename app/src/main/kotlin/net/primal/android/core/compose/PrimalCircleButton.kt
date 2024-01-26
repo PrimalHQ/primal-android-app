@@ -75,6 +75,7 @@ fun PrimalButtonPreview(
     PrimalTheme(primalTheme = PrimalTheme.Sunset) {
         PrimalCircleButton(
             modifier = Modifier.size(64.dp),
+            enabled = state.enabled,
             onClick = { },
         ) {
             Icon(imageVector = PrimalIcons.QrCode, contentDescription = null)
