@@ -24,7 +24,12 @@ class SettingsRepository @Inject constructor(
 ) {
     suspend fun fetchAndPersistAppSettings(userId: String) {
         val appSettings = fetchAppSettings(userId = userId) ?: return
-        persistAppSettingsLocally(userId = userId, appSettings = appSettings)
+        val persistedAppSettings = persistAppSettingsLocally(userId = userId, appSettings = appSettings)
+
+        val uniqueUserFeedsCount = appSettings.feeds.distinctBy { "${it.directive}${it.includeReplies}" }.count()
+        if (appSettings.feeds.size > uniqueUserFeedsCount) {
+            settingsApi.setAppSettings(userId = userId, appSettings = persistedAppSettings)
+        }
     }
 
     suspend fun updateAndPersistZapDefault(userId: String, zapDefault: ContentZapDefault) {
