@@ -8,23 +8,26 @@ import androidx.paging.PagingSource
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterNotNull
-import net.primal.android.core.ext.isLatestFeed
+import net.primal.android.core.coroutines.CoroutineDispatcherProvider
+import net.primal.android.core.ext.isChronologicalFeed
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.feed.api.FeedApi
 import net.primal.android.feed.api.mediator.FeedRemoteMediator
 import net.primal.android.feed.api.model.ThreadRequestBody
 import net.primal.android.feed.db.FeedPost
+import net.primal.android.feed.db.sql.ChronologicalFeedQueryBuilder
 import net.primal.android.feed.db.sql.ExploreFeedQueryBuilder
 import net.primal.android.feed.db.sql.FeedQueryBuilder
-import net.primal.android.feed.db.sql.LatestFeedQueryBuilder
 import net.primal.android.thread.db.ThreadConversationCrossRef
 import net.primal.android.user.accounts.active.ActiveAccountStore
 
 class FeedRepository @Inject constructor(
+    private val dispatcherProvider: CoroutineDispatcherProvider,
     private val feedApi: FeedApi,
     private val database: PrimalDatabase,
     private val activeAccountStore: ActiveAccountStore,
 ) {
+    fun defaultFeed() = database.feeds().first()
 
     fun observeFeeds() = database.feeds().observeAllFeeds()
 
@@ -88,8 +91,9 @@ class FeedRepository @Inject constructor(
                 enablePlaceholders = true,
             ),
             remoteMediator = FeedRemoteMediator(
+                dispatcherProvider = dispatcherProvider,
                 feedDirective = feedDirective,
-                userPubkey = activeAccountStore.activeUserId(),
+                userId = activeAccountStore.activeUserId(),
                 feedApi = feedApi,
                 database = database,
             ),
@@ -98,7 +102,7 @@ class FeedRepository @Inject constructor(
 
     private fun feedQueryBuilder(feedDirective: String): FeedQueryBuilder =
         when {
-            feedDirective.isLatestFeed() -> LatestFeedQueryBuilder(
+            feedDirective.isChronologicalFeed() -> ChronologicalFeedQueryBuilder(
                 feedDirective = feedDirective,
                 userPubkey = activeAccountStore.activeUserId(),
             )

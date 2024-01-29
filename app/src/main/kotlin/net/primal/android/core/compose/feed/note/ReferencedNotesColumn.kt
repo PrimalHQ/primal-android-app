@@ -52,6 +52,7 @@ fun ReferencedNotesColumn(
                     stats = FeedPostStatsUi(),
                     hashtags = data.content.parseHashtags(),
                     rawNostrEventJson = "",
+                    replyToAuthorHandle = null,
                 ),
                 onPostClick = onPostClick,
                 onMediaClick = onMediaClick,

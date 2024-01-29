@@ -206,7 +206,7 @@ fun PrimalAppNavigation() {
 
                     when (url.handleDeeplink()) {
                         is DeepLink.Profile, is DeepLink.Note, null -> {
-                            navController.navigateToFeed(directive = it.userPubkey)
+                            navController.navigateToFeed(directive = it.defaultFeedDirective)
                         }
 
                         is DeepLink.NostrWalletConnect -> {

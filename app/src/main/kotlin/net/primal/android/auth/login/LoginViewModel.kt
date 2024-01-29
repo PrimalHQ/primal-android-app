@@ -19,6 +19,7 @@ import net.primal.android.auth.login.LoginContract.SideEffect
 import net.primal.android.auth.login.LoginContract.UiEvent
 import net.primal.android.auth.login.LoginContract.UiState
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
+import net.primal.android.feed.repository.FeedRepository
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.settings.muted.repository.MutedUserRepository
 import net.primal.android.settings.repository.SettingsRepository
@@ -32,6 +33,7 @@ class LoginViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val userRepository: UserRepository,
     private val mutedUserRepository: MutedUserRepository,
+    private val feedRepository: FeedRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(UiState(loading = false))
@@ -69,13 +71,15 @@ class LoginViewModel @Inject constructor(
         viewModelScope.launch {
             setState { copy(loading = true) }
             try {
-                val pubkey = authRepository.login(nostrKey = nostrKey)
+                val userId = authRepository.login(nostrKey = nostrKey)
                 withContext(dispatcherProvider.io()) {
-                    userRepository.fetchAndUpdateUserAccount(userId = pubkey)
-                    settingsRepository.fetchAndPersistAppSettings(userId = pubkey)
-                    mutedUserRepository.fetchAndPersistMuteList(userId = pubkey)
+                    userRepository.fetchAndUpdateUserAccount(userId = userId)
+                    settingsRepository.fetchAndPersistAppSettings(userId = userId)
+                    mutedUserRepository.fetchAndPersistMuteList(userId = userId)
                 }
-                setEffect(SideEffect.LoginSuccess(pubkey = pubkey))
+
+                val defaultFeed = withContext(dispatcherProvider.io()) { feedRepository.defaultFeed() }
+                setEffect(SideEffect.LoginSuccess(feedDirective = defaultFeed?.directive ?: userId))
             } catch (error: WssException) {
                 Timber.e(error)
                 setErrorState(error = UiState.LoginError.GenericError(error))

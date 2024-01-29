@@ -1,4 +1,4 @@
-package net.primal.android.editor.ui
+package net.primal.android.core.compose
 
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable

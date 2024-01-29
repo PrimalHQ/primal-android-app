@@ -38,7 +38,9 @@ interface FeedPostDao {
             NULL AS repostId,
             NULL AS repostAuthorId,
             NULL AS feedCreatedAt,
-            NULL AS isMuted
+            NULL AS isMuted,
+            PostData.replyToPostId,
+            PostData.replyToAuthorId
         FROM PostData WHERE postId = :postId LIMIT 1
         """,
     )

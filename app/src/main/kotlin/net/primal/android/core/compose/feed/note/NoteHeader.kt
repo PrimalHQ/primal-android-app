@@ -3,7 +3,9 @@ package net.primal.android.core.compose.feed.note
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -24,6 +26,7 @@ import kotlin.time.Duration.Companion.seconds
 import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.NostrUserText
+import net.primal.android.core.compose.ReplyingToText
 import net.primal.android.core.compose.WrappedContentWithSuffix
 import net.primal.android.core.compose.asBeforeNowFormat
 import net.primal.android.core.utils.formatNip05Identifier
@@ -41,6 +44,7 @@ fun FeedNoteHeader(
     authorAvatarVisible: Boolean = true,
     authorAvatarCdnImage: CdnImage? = null,
     authorInternetIdentifier: String? = null,
+    replyToAuthor: String? = null,
     label: String? = authorInternetIdentifier,
     labelStyle: TextStyle? = null,
     onAuthorAvatarClick: (() -> Unit)? = null,
@@ -108,6 +112,11 @@ fun FeedNoteHeader(
                     color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
                 )
             }
+
+            if (!replyToAuthor.isNullOrEmpty()) {
+                ReplyingToText(modifier = Modifier.fillMaxWidth(), replyToUsername = replyToAuthor)
+                Spacer(modifier = Modifier.height(4.dp))
+            }
         }
     }
 }
@@ -144,6 +153,7 @@ fun PreviewLightSingleNoteHeader() {
                 singleLine = true,
                 authorInternetIdentifier = "donald@the.duck",
                 onAuthorAvatarClick = {},
+                replyToAuthor = "alex",
             )
         }
     }
@@ -183,6 +193,7 @@ fun PreviewDarkSingleLineNoAvatarNoteHeader() {
                 authorAvatarVisible = false,
                 authorInternetIdentifier = "donald@the.duck",
                 onAuthorAvatarClick = {},
+                replyToAuthor = "alex",
             )
         }
     }

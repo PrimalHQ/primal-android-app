@@ -12,6 +12,9 @@ interface FeedDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun upsertAll(data: List<Feed>)
 
+    @Query("SELECT * FROM Feed LIMIT 1")
+    fun first(): Feed?
+
     @Query("SELECT * FROM Feed")
     fun observeAllFeeds(): Flow<List<Feed>>
 

@@ -66,6 +66,7 @@ import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
+import net.primal.android.core.compose.ReplyingToText
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.feed.RepostOrQuoteBottomSheet
 import net.primal.android.core.compose.feed.model.FeedPostAction
@@ -80,7 +81,6 @@ import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromGallery
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.crypto.hexToNoteHrp
-import net.primal.android.editor.ui.ReplyingToText
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
@@ -278,6 +278,7 @@ fun ThreadScreen(
                             forceContentIndent = shouldIndentContent,
                             drawLineAboveAvatar = connectedToPreviousNote,
                             drawLineBelowAvatar = connectedToNextNote,
+                            showReplyTo = false,
                             onPostClick = { postId ->
                                 if (state.highlightPostId != postId) {
                                     onPostClick(postId)
@@ -588,6 +589,7 @@ fun ThreadScreenPreview() {
                         stats = FeedPostStatsUi(),
                         hashtags = listOf("#nostr"),
                         rawNostrEventJson = "raaaw",
+                        replyToAuthorHandle = "alex",
                     ),
                     FeedPostUi(
                         postId = "reply",
@@ -604,6 +606,7 @@ fun ThreadScreenPreview() {
                         stats = FeedPostStatsUi(),
                         hashtags = listOf("#nostr"),
                         rawNostrEventJson = "raaaw",
+                        replyToAuthorHandle = "alex",
                     ),
                 ),
             ),
