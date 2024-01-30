@@ -13,7 +13,7 @@ fun List<NostrEvent>.mapAsPostDataPO(referencedPosts: List<PostData>) = map { it
 fun NostrEvent.asPost(referencedPosts: List<PostData>): PostData {
     val replyToPostId = this.tags.find { it.hasReplyMarker() }?.getTagValueOrNull()
         ?: this.tags.find { it.hasRootMarker() }?.getTagValueOrNull()
-        ?: this.tags.lastOrNull { it.isEventIdTag() }?.getTagValueOrNull()
+        ?: this.tags.filterNot { it.hasMentionMarker() }.lastOrNull { it.isEventIdTag() }?.getTagValueOrNull()
 
     val replyToAuthorId = referencedPosts.find { it.postId == replyToPostId }?.authorId
 
