@@ -35,6 +35,7 @@ class UserAccountFetcherTest {
         val expectedFollowersCount = 123
         val expectedFollowingCount = 321
         val expectedNotesCount = 100
+        val expectedRepliesCount = 256
         val expectedPictureUrl = "https://test.com/image.jpg"
         val expectedName = "alex"
         val usersApiMock = mockk<UsersApi> {
@@ -59,8 +60,12 @@ class UserAccountFetcherTest {
                         "\"follows_count\":$expectedFollowingCount," +
                         "\"followers_count\":$expectedFollowersCount," +
                         "\"note_count\":$expectedNotesCount," +
-                        "\"time_joined\":null" +
-                        "}",
+                        "\"reply_count\":$expectedRepliesCount," +
+                        "\"time_joined\":1672527292," +
+                        "\"relay_count\": 20," +
+                        "\"total_zap_count\": 15793," +
+                        "\"total_satszapped\": 7295853" +
+                    "}",
                 ),
             )
         }
@@ -81,6 +86,7 @@ class UserAccountFetcherTest {
         actual.followersCount shouldBe expectedFollowersCount
         actual.followingCount shouldBe expectedFollowingCount
         actual.notesCount shouldBe expectedNotesCount
+        actual.repliesCount shouldBe expectedRepliesCount
     }
 
     @Test

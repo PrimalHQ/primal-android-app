@@ -9,5 +9,9 @@ data class ContentUserProfileStats(
     @SerialName("follows_count") val followsCount: Int,
     @SerialName("followers_count") val followersCount: Int,
     @SerialName("note_count") val noteCount: Int,
-    @SerialName("time_joined") val timeJoined: Long?,
+    @SerialName("reply_count") val replyCount: Int,
+    @SerialName("time_joined") val timeJoined: Long,
+    @SerialName("relay_count") val relayCount: Int,
+    @SerialName("total_zap_count") val totalZapCount: Long,
+    @SerialName("total_satszapped") val totalSatsZapped: Long,
 )

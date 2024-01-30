@@ -7,9 +7,8 @@ import net.primal.android.core.ext.asMapByKey
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.ext.asProfileDataPO
-import net.primal.android.nostr.ext.asProfileStats
+import net.primal.android.nostr.ext.asProfileStatsPO
 import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
-import net.primal.android.nostr.ext.takeContentAsUserProfileStatsOrNull
 import net.primal.android.user.accounts.UserAccountFetcher
 import net.primal.android.user.api.UsersApi
 import net.primal.android.user.domain.Relay
@@ -34,15 +33,15 @@ class ProfileRepository @Inject constructor(
         val response = usersApi.getUserProfile(pubkey = profileId)
         val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
         val profileMetadata = response.metadata?.asProfileDataPO(cdnResources = cdnResources)
-        val userProfileStats = response.profileStats?.takeContentAsUserProfileStatsOrNull()
+        val profileStats = response.profileStats?.asProfileStatsPO()
 
         database.withTransaction {
             if (profileMetadata != null) {
                 database.profiles().upsertAll(data = listOf(profileMetadata))
             }
 
-            if (userProfileStats != null) {
-                database.profileStats().upsert(data = userProfileStats.asProfileStats())
+            if (profileStats != null) {
+                database.profileStats().upsert(data = profileStats)
             }
         }
     }

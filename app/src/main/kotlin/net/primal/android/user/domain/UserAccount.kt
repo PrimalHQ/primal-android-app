@@ -17,6 +17,7 @@ data class UserAccount(
     val followingCount: Int? = null,
     val followersCount: Int? = null,
     val notesCount: Int? = null,
+    val repliesCount: Int? = null,
     val nostrWallet: NostrWalletConnect? = null,
     val primalWallet: PrimalWallet? = null,
     val primalWalletBalanceInBtc: String? = null,
