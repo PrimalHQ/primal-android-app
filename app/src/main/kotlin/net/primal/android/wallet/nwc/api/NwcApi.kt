@@ -90,7 +90,7 @@ class NwcApi @Inject constructor(
                 .multiply(thousandAsBigDecimal)
                 .toLong()
         } catch (error: LnInvoiceUtils.AddressFormatException) {
-            Timber.e(error)
+            Timber.w(error)
             null
         }
     }

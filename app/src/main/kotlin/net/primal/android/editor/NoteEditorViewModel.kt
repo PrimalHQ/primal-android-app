@@ -127,7 +127,7 @@ class NoteEditorViewModel @Inject constructor(
                     feedRepository.fetchReplies(postId = replyToNoteId)
                 }
             } catch (error: WssException) {
-                Timber.e(error)
+                Timber.w(error)
             }
         }
 
@@ -146,11 +146,11 @@ class NoteEditorViewModel @Inject constructor(
                 )
                 sendEffect(SideEffect.PostPublished)
             } catch (error: NostrPublishException) {
+                Timber.w(error)
                 setErrorState(error = UiState.NewPostError.PublishError(cause = error.cause))
             } catch (error: MissingRelaysException) {
-                setErrorState(
-                    error = UiState.NewPostError.MissingRelaysConfiguration(cause = error),
-                )
+                Timber.w(error)
+                setErrorState(error = UiState.NewPostError.MissingRelaysConfiguration(cause = error))
             } finally {
                 setState { copy(publishing = false) }
             }
@@ -189,6 +189,7 @@ class NoteEditorViewModel @Inject constructor(
                 )
             }
         } catch (error: UnsuccessfulFileUpload) {
+            Timber.w(error)
             updateNoteAttachmentState(attachment = attachment.copy(uploadError = error))
         }
     }

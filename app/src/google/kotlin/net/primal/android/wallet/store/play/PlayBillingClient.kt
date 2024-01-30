@@ -104,7 +104,7 @@ class PlayBillingClient @Inject constructor(
                 }
             }
         } catch (error: TimeoutCancellationException) {
-            Timber.e(error)
+            Timber.w(error)
             false
         }
     }

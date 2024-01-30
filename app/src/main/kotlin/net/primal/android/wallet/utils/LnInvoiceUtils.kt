@@ -3,6 +3,7 @@ package net.primal.android.wallet.utils
 import java.math.BigDecimal
 import java.util.Locale
 import java.util.regex.Pattern
+import timber.log.Timber
 
 // Made by Vitor Pamplona
 // https://github.com/vitorpamplona/amethyst/blob/main/quartz/src/main/java/com/vitorpamplona/quartz/encoders/LnInvoiceUtil.kt
@@ -115,8 +116,9 @@ object LnInvoiceUtils {
     private fun getAmount(invoice: String): BigDecimal {
         try {
             decodeUnlimitedLength(invoice) // checksum must match
-        } catch (e: AddressFormatException) {
-            throw IllegalArgumentException("Cannot decode invoice: $invoice", e)
+        } catch (error: AddressFormatException) {
+            Timber.w(error)
+            throw IllegalArgumentException("Cannot decode invoice: $invoice", error)
         }
 
         val matcher = invoicePattern.matcher(invoice)

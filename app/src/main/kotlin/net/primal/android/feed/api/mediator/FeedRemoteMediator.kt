@@ -28,6 +28,7 @@ import net.primal.android.networking.sockets.errors.NostrNoticeException
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.primal.content.ContentPrimalPaging
+import timber.log.Timber
 
 @ExperimentalPagingApi
 class FeedRemoteMediator(
@@ -166,6 +167,7 @@ class FeedRemoteMediator(
             val feedResponse = try {
                 withContext(dispatcherProvider.io()) { feedApi.getFeed(body = feedRequestBody) }
             } catch (error: WssException) {
+                Timber.w(error)
                 return MediatorResult.Error(error)
             }
 
@@ -209,10 +211,12 @@ class FeedRemoteMediator(
             }
 
             MediatorResult.Success(endOfPaginationReached = false)
-        } catch (e: IOException) {
-            MediatorResult.Error(e)
-        } catch (e: NostrNoticeException) {
-            MediatorResult.Error(e)
+        } catch (error: IOException) {
+            Timber.w(error)
+            MediatorResult.Error(error)
+        } catch (error: NostrNoticeException) {
+            Timber.w(error)
+            MediatorResult.Error(error)
         }
     }
 

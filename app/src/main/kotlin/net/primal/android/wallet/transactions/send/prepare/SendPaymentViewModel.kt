@@ -140,7 +140,7 @@ class SendPaymentViewModel @Inject constructor(
                     }
                 }
             } catch (error: WssException) {
-                Timber.e(error)
+                Timber.w(error)
                 setState { copy(error = UiState.SendPaymentError.ParseException(error)) }
             } finally {
                 setState { copy(parsing = false) }

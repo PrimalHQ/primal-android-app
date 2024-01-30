@@ -152,7 +152,7 @@ class ProfileViewModel @Inject constructor(
                     )
                 }
             } catch (error: WssException) {
-                Timber.e(error)
+                Timber.w(error)
             }
         }
 
@@ -163,7 +163,7 @@ class ProfileViewModel @Inject constructor(
                     profileRepository.requestProfileUpdate(profileId = profileId)
                 }
             } catch (error: WssException) {
-                Timber.e(error)
+                Timber.w(error)
             }
         }
 
@@ -175,8 +175,10 @@ class ProfileViewModel @Inject constructor(
                     postAuthorId = postLikeAction.postAuthorId,
                 )
             } catch (error: NostrPublishException) {
+                Timber.w(error)
                 setErrorState(error = ProfileError.FailedToPublishLikeEvent(error))
             } catch (error: MissingRelaysException) {
+                Timber.w(error)
                 setErrorState(error = ProfileError.MissingRelaysConfiguration(error))
             }
         }
@@ -190,8 +192,10 @@ class ProfileViewModel @Inject constructor(
                     postRawNostrEvent = repostAction.postNostrEvent,
                 )
             } catch (error: NostrPublishException) {
+                Timber.w(error)
                 setErrorState(error = ProfileError.FailedToPublishRepostEvent(error))
             } catch (error: MissingRelaysException) {
+                Timber.w(error)
                 setErrorState(error = ProfileError.MissingRelaysConfiguration(error))
             }
         }
@@ -219,10 +223,13 @@ class ProfileViewModel @Inject constructor(
                     ),
                 )
             } catch (error: ZapFailureException) {
+                Timber.w(error)
                 setErrorState(error = ProfileError.FailedToPublishZapEvent(error))
             } catch (error: MissingRelaysException) {
+                Timber.w(error)
                 setErrorState(error = ProfileError.MissingRelaysConfiguration(error))
             } catch (error: InvalidZapRequestException) {
+                Timber.w(error)
                 setErrorState(error = ProfileError.InvalidZapRequest(error))
             }
         }
@@ -235,10 +242,13 @@ class ProfileViewModel @Inject constructor(
                     followedUserId = followAction.profileId,
                 )
             } catch (error: WssException) {
+                Timber.w(error)
                 setErrorState(error = ProfileError.FailedToFollowProfile(error))
             } catch (error: NostrPublishException) {
+                Timber.w(error)
                 setErrorState(error = ProfileError.FailedToFollowProfile(error))
             } catch (error: MissingRelaysException) {
+                Timber.w(error)
                 setErrorState(error = ProfileError.MissingRelaysConfiguration(error))
             }
         }
@@ -251,10 +261,13 @@ class ProfileViewModel @Inject constructor(
                     unfollowedUserId = unfollowAction.profileId,
                 )
             } catch (error: WssException) {
+                Timber.w(error)
                 setErrorState(error = ProfileError.FailedToUnfollowProfile(error))
             } catch (error: NostrPublishException) {
+                Timber.w(error)
                 setErrorState(error = ProfileError.FailedToUnfollowProfile(error))
             } catch (error: MissingRelaysException) {
+                Timber.w(error)
                 setErrorState(error = ProfileError.MissingRelaysConfiguration(error))
             }
         }

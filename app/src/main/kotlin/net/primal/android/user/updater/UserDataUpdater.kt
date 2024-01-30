@@ -29,7 +29,7 @@ class UserDataUpdater @AssistedInject constructor(
                 updateData()
                 lastTimeFetched = Instant.now()
             } catch (error: WssException) {
-                Timber.i(error)
+                Timber.w(error)
             }
         }
     }

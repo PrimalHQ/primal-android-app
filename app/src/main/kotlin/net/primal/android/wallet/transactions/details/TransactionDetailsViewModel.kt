@@ -74,7 +74,7 @@ class TransactionDetailsViewModel @Inject constructor(
                     feedRepository.fetchReplies(postId = noteId)
                 }
             } catch (error: WssException) {
-                Timber.e(error)
+                Timber.w(error)
             } finally {
                 setState { copy(loading = false) }
             }

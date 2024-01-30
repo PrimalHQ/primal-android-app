@@ -44,6 +44,7 @@ import net.primal.android.wallet.zaps.InvalidZapRequestException
 import net.primal.android.wallet.zaps.ZapFailureException
 import net.primal.android.wallet.zaps.ZapHandler
 import net.primal.android.wallet.zaps.hasWallet
+import timber.log.Timber
 
 @HiltViewModel
 class FeedViewModel @Inject constructor(
@@ -197,8 +198,10 @@ class FeedViewModel @Inject constructor(
                     postAuthorId = postLikeAction.postAuthorId,
                 )
             } catch (error: NostrPublishException) {
+                Timber.w(error)
                 setErrorState(error = FeedError.FailedToPublishLikeEvent(error))
             } catch (error: MissingRelaysException) {
+                Timber.w(error)
                 setErrorState(error = FeedError.MissingRelaysConfiguration(error))
             }
         }
@@ -212,8 +215,10 @@ class FeedViewModel @Inject constructor(
                     postRawNostrEvent = repostAction.postNostrEvent,
                 )
             } catch (error: NostrPublishException) {
+                Timber.w(error)
                 setErrorState(error = FeedError.FailedToPublishRepostEvent(error))
             } catch (error: MissingRelaysException) {
+                Timber.w(error)
                 setErrorState(error = FeedError.MissingRelaysConfiguration(error))
             }
         }
@@ -241,10 +246,13 @@ class FeedViewModel @Inject constructor(
                     ),
                 )
             } catch (error: ZapFailureException) {
+                Timber.w(error)
                 setErrorState(error = FeedError.FailedToPublishZapEvent(error))
             } catch (error: MissingRelaysException) {
+                Timber.w(error)
                 setErrorState(error = FeedError.MissingRelaysConfiguration(error))
             } catch (error: InvalidZapRequestException) {
+                Timber.w(error)
                 setErrorState(error = FeedError.InvalidZapRequest(error))
             }
         }
@@ -257,8 +265,10 @@ class FeedViewModel @Inject constructor(
                     mutedUserId = action.userId,
                 )
             } catch (error: WssException) {
+                Timber.w(error)
                 setErrorState(error = FeedError.FailedToMuteUser(error))
             } catch (error: NostrPublishException) {
+                Timber.w(error)
                 setErrorState(error = FeedError.FailedToMuteUser(error))
             }
         }

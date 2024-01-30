@@ -90,6 +90,7 @@ import net.primal.android.wallet.activation.regions.toListOfCountries
 import net.primal.android.wallet.walletSuccessColor
 import net.primal.android.wallet.walletSuccessContentColor
 import net.primal.android.wallet.walletSuccessDimColor
+import timber.log.Timber
 
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -405,6 +406,7 @@ private fun rememberListOfCountries(): List<Country> {
     val regionsInputStream = try {
         assets.open("regions.json")
     } catch (error: IOException) {
+        Timber.w(error)
         return emptyList()
     }
     return remember { NostrJson.decodeFromStream<Regions>(regionsInputStream).toListOfCountries() }

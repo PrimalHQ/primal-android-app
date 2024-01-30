@@ -23,6 +23,7 @@ import net.primal.android.profile.edit.EditProfileContract.UiState.EditProfileEr
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.repository.UserRepository
+import timber.log.Timber
 
 @HiltViewModel
 class EditProfileViewModel @Inject constructor(
@@ -123,7 +124,7 @@ class EditProfileViewModel @Inject constructor(
             try {
                 profileRepository.requestProfileUpdate(profileId = profileId)
             } catch (error: WssException) {
-                // Ignore
+                Timber.w(error)
             }
         }
 
@@ -135,10 +136,13 @@ class EditProfileViewModel @Inject constructor(
                 userRepository.setProfileMetadata(userId = profileId, profileMetadata = profile)
                 setEffect(effect = EditProfileContract.SideEffect.AccountSuccessfulyEdited)
             } catch (error: NostrPublishException) {
+                Timber.w(error)
                 setErrorState(error = EditProfileError.FailedToPublishMetadata(error))
             } catch (error: MissingRelaysException) {
+                Timber.w(error)
                 setErrorState(error = EditProfileError.MissingRelaysConfiguration(error))
             } catch (error: UnsuccessfulFileUpload) {
+                Timber.w(error)
                 setErrorState(error = EditProfileError.FailedToUploadImage(error))
             } finally {
                 setState { copy(loading = false) }

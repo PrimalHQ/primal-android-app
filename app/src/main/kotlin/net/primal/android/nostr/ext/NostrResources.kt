@@ -97,7 +97,7 @@ fun String.extractProfileId(): String? {
             else -> null
         }
     } catch (error: IllegalArgumentException) {
-        Timber.e(error)
+        Timber.w(error)
         null
     }
 }
@@ -119,7 +119,7 @@ fun String.extractNoteId(): String? {
             else -> null
         }
     } catch (error: IllegalArgumentException) {
-        Timber.e(error)
+        Timber.w(error)
         null
     }
 }

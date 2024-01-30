@@ -20,6 +20,7 @@ import net.primal.android.nostr.ext.parseHashtagTags
 import net.primal.android.nostr.ext.parsePubkeyTags
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.user.accounts.active.ActiveAccountStore
+import timber.log.Timber
 
 class PostRepository @Inject constructor(
     private val database: PrimalDatabase,
@@ -45,6 +46,7 @@ class PostRepository @Inject constructor(
                 ),
             )
         } catch (error: NostrPublishException) {
+            Timber.w(error)
             statsUpdater.revertStats()
             throw error
         }
@@ -70,6 +72,7 @@ class PostRepository @Inject constructor(
                 ),
             )
         } catch (error: NostrPublishException) {
+            Timber.w(error)
             statsUpdater.revertStats()
             throw error
         }
@@ -138,6 +141,7 @@ class PostRepository @Inject constructor(
         return try {
             primalImportApi.importEvents(events = listOf(noteEvent))
         } catch (error: WssException) {
+            Timber.w(error)
             false
         }
     }

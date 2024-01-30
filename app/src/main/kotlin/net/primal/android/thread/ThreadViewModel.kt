@@ -149,7 +149,7 @@ class ThreadViewModel @Inject constructor(
                     feedRepository.fetchReplies(postId = postId)
                 }
             } catch (error: WssException) {
-                Timber.e(error)
+                Timber.w(error)
             }
         }
 
@@ -161,8 +161,10 @@ class ThreadViewModel @Inject constructor(
                     postAuthorId = postLikeAction.postAuthorId,
                 )
             } catch (error: NostrPublishException) {
+                Timber.w(error)
                 setErrorState(error = ThreadError.FailedToPublishLikeEvent(error))
             } catch (error: MissingRelaysException) {
+                Timber.w(error)
                 setErrorState(error = ThreadError.MissingRelaysConfiguration(error))
             }
         }
@@ -176,8 +178,10 @@ class ThreadViewModel @Inject constructor(
                     postRawNostrEvent = repostAction.postNostrEvent,
                 )
             } catch (error: NostrPublishException) {
+                Timber.w(error)
                 setErrorState(error = ThreadError.FailedToPublishRepostEvent(error))
             } catch (error: MissingRelaysException) {
+                Timber.w(error)
                 setErrorState(error = ThreadError.MissingRelaysConfiguration(error))
             }
         }
@@ -205,10 +209,13 @@ class ThreadViewModel @Inject constructor(
                     ),
                 )
             } catch (error: ZapFailureException) {
+                Timber.w(error)
                 setErrorState(error = ThreadError.FailedToPublishZapEvent(error))
             } catch (error: MissingRelaysException) {
+                Timber.w(error)
                 setErrorState(error = ThreadError.MissingRelaysConfiguration(error))
             } catch (error: InvalidZapRequestException) {
+                Timber.w(error)
                 setErrorState(error = ThreadError.InvalidZapRequest(error))
             }
         }
@@ -237,8 +244,10 @@ class ThreadViewModel @Inject constructor(
 
                 setState { copy(replyText = "") }
             } catch (error: NostrPublishException) {
+                Timber.w(error)
                 setErrorState(error = ThreadError.FailedToPublishReplyEvent(error))
             } catch (error: MissingRelaysException) {
+                Timber.w(error)
                 setErrorState(error = ThreadError.MissingRelaysConfiguration(error))
             } finally {
                 setState { copy(publishingReply = false) }

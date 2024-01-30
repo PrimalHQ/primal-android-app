@@ -7,11 +7,13 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.user.domain.Relay
+import timber.log.Timber
 
 fun String.parseRelays(): List<Relay> {
     val jsonContent = try {
         NostrJson.parseToJsonElement(this)
     } catch (error: SerializationException) {
+        Timber.w(error)
         null
     }
 

@@ -81,7 +81,7 @@ class LoginViewModel @Inject constructor(
                 val defaultFeed = withContext(dispatcherProvider.io()) { feedRepository.defaultFeed() }
                 setEffect(SideEffect.LoginSuccess(feedDirective = defaultFeed?.directive ?: userId))
             } catch (error: WssException) {
-                Timber.e(error)
+                Timber.w(error)
                 setErrorState(error = UiState.LoginError.GenericError(error))
             } finally {
                 setState { copy(loading = false) }

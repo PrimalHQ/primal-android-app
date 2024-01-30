@@ -99,7 +99,7 @@ class WalletSettingsViewModel @Inject constructor(
                     )
                 }
             } catch (error: NWCParseException) {
-                Timber.e(error)
+                Timber.w(error)
             }
         }
 

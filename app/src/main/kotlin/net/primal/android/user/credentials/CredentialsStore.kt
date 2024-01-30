@@ -16,6 +16,7 @@ import net.primal.android.crypto.toHex
 import net.primal.android.crypto.toNpub
 import net.primal.android.user.domain.Credential
 import org.spongycastle.util.encoders.DecoderException
+import timber.log.Timber
 
 @Singleton
 class CredentialsStore @Inject constructor(
@@ -54,8 +55,10 @@ class CredentialsStore @Inject constructor(
             val pubkey = CryptoUtils.publicKeyCreate(decoded.second)
             nsec to pubkey
         } catch (error: IllegalArgumentException) {
+            Timber.w(error)
             throw InvalidNostrKeyException()
         } catch (error: DecoderException) {
+            Timber.w(error)
             throw InvalidNostrKeyException()
         }
     }

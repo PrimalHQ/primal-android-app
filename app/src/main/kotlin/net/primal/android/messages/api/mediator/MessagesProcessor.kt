@@ -74,7 +74,7 @@ class MessagesProcessor @Inject constructor(
                 )
                 response.posts.mapAsPostDataPO(referencedPosts = referencedPostsWithReplies)
             } catch (error: WssException) {
-                Timber.e(error)
+                Timber.w(error)
                 emptyList()
             }
         } else {
@@ -99,7 +99,7 @@ class MessagesProcessor @Inject constructor(
                 database.profiles().upsertAll(data = profiles)
                 profiles
             } catch (error: WssException) {
-                Timber.e(error)
+                Timber.w(error)
                 emptyList()
             }
         } else {
