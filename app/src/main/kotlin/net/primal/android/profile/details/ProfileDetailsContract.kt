@@ -6,8 +6,9 @@ import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.feed.model.ZappingState
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.core.compose.profile.model.ProfileStatsUi
+import net.primal.android.profile.domain.ProfileFeedDirective
 
-interface ProfileContract {
+interface ProfileDetailsContract {
     data class UiState(
         val profileId: String,
         val isProfileFollowed: Boolean,
@@ -17,7 +18,8 @@ interface ProfileContract {
         val profileDetails: ProfileDetailsUi? = null,
         val profileStats: ProfileStatsUi? = null,
         val zappingState: ZappingState = ZappingState(),
-        val authoredPosts: Flow<PagingData<FeedPostUi>>,
+        val notes: Flow<PagingData<FeedPostUi>>,
+        val profileDirective: ProfileFeedDirective = ProfileFeedDirective.AuthoredNotes,
         val error: ProfileError? = null,
     ) {
         sealed class ProfileError {
@@ -57,5 +59,6 @@ interface ProfileContract {
         data class RemoveUserFeedAction(val directive: String) : UiEvent()
         data class MuteAction(val profileId: String) : UiEvent()
         data class UnmuteAction(val profileId: String) : UiEvent()
+        data class ChangeProfileFeed(val profileDirective: ProfileFeedDirective) : UiEvent()
     }
 }

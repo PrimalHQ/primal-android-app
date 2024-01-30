@@ -60,8 +60,8 @@ import net.primal.android.navigation.splash.SplashScreen
 import net.primal.android.navigation.splash.SplashViewModel
 import net.primal.android.notifications.list.NotificationsScreen
 import net.primal.android.notifications.list.NotificationsViewModel
-import net.primal.android.profile.details.ProfileScreen
-import net.primal.android.profile.details.ProfileViewModel
+import net.primal.android.profile.details.ProfileDetailsScreen
+import net.primal.android.profile.details.ProfileDetailsViewModel
 import net.primal.android.profile.edit.EditProfileScreen
 import net.primal.android.profile.edit.EditProfileViewModel
 import net.primal.android.theme.AppTheme
@@ -695,10 +695,10 @@ private fun NavGraphBuilder.profile(
     route = route,
     arguments = arguments,
 ) {
-    val viewModel = hiltViewModel<ProfileViewModel>(it)
+    val viewModel = hiltViewModel<ProfileDetailsViewModel>(it)
 
     LockToOrientationPortrait()
-    ProfileScreen(
+    ProfileDetailsScreen(
         viewModel = viewModel,
         onClose = { navController.navigateUp() },
         onPostClick = { postId -> navController.navigateToThread(noteId = postId) },
@@ -709,6 +709,8 @@ private fun NavGraphBuilder.profile(
         onMessageClick = { profileId -> navController.navigateToChat(profileId = profileId) },
         onZapProfileClick = { transaction -> navController.navigateToWalletCreateTransaction(transaction) },
         onHashtagClick = { hashtag -> navController.navigateToExploreFeed(query = hashtag) },
+        onFollowingClick = { },
+        onFollowersClick = { },
         onMediaClick = { noteId, mediaUrl ->
             navController.navigateToMediaGallery(
                 noteId = noteId,

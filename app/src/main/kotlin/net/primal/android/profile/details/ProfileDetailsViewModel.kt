@@ -26,9 +26,10 @@ import net.primal.android.navigation.profileId
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
-import net.primal.android.profile.details.ProfileContract.UiEvent
-import net.primal.android.profile.details.ProfileContract.UiState
-import net.primal.android.profile.details.ProfileContract.UiState.ProfileError
+import net.primal.android.profile.details.ProfileDetailsContract.UiEvent
+import net.primal.android.profile.details.ProfileDetailsContract.UiState
+import net.primal.android.profile.details.ProfileDetailsContract.UiState.ProfileError
+import net.primal.android.profile.domain.ProfileFeedDirective
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.settings.muted.repository.MutedUserRepository
 import net.primal.android.settings.repository.SettingsRepository
@@ -41,11 +42,11 @@ import net.primal.android.wallet.zaps.hasWallet
 import timber.log.Timber
 
 @HiltViewModel
-class ProfileViewModel @Inject constructor(
+class ProfileDetailsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    feedRepository: FeedRepository,
     private val dispatcherProvider: CoroutineDispatcherProvider,
     private val activeAccountStore: ActiveAccountStore,
+    private val feedRepository: FeedRepository,
     private val profileRepository: ProfileRepository,
     private val postRepository: PostRepository,
     private val zapHandler: ZapHandler,
@@ -55,6 +56,8 @@ class ProfileViewModel @Inject constructor(
 
     private val profileId: String = savedStateHandle.profileId ?: activeAccountStore.activeUserId()
 
+    private fun ProfileFeedDirective.toPrimalDirective() = "${this.prefix};$profileId"
+
     private val _state = MutableStateFlow(
         UiState(
             profileId = profileId,
@@ -62,26 +65,25 @@ class ProfileViewModel @Inject constructor(
             isProfileMuted = false,
             isActiveUser = false,
             isProfileFeedInActiveUserFeeds = false,
-            authoredPosts = feedRepository.feedByDirective(feedDirective = "authored;$profileId")
+            notes = feedRepository.feedByDirective(
+                feedDirective = ProfileFeedDirective.AuthoredNotes.toPrimalDirective(),
+            )
                 .map { it.map { feed -> feed.asFeedPostUi() } }
                 .cachedIn(viewModelScope),
         ),
     )
     val state = _state.asStateFlow()
-    private fun setState(reducer: UiState.() -> UiState) {
-        _state.getAndUpdate { it.reducer() }
-    }
+    private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
 
     private val events: MutableSharedFlow<UiEvent> = MutableSharedFlow()
-    fun setEvent(event: UiEvent) {
-        viewModelScope.launch { events.emit(event) }
-    }
+    fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
 
     init {
         fetchLatestProfile()
         fetchLatestMuteList()
         observeEvents()
-        observeProfile()
+        observeProfileData()
+        observeProfileStats()
         observeActiveAccount()
         observeMutedAccount()
     }
@@ -99,6 +101,7 @@ class ProfileViewModel @Inject constructor(
                     is UiEvent.RemoveUserFeedAction -> removeUserFeed(it)
                     is UiEvent.MuteAction -> mute(it)
                     is UiEvent.UnmuteAction -> unmute(it)
+                    is UiEvent.ChangeProfileFeed -> changeFeed(it)
                 }
             }
         }
@@ -110,8 +113,8 @@ class ProfileViewModel @Inject constructor(
                     copy(
                         isProfileFollowed = it.following.contains(profileId),
                         isActiveUser = it.pubkey == profileId,
-                        isProfileFeedInActiveUserFeeds = it.appSettings?.feeds?.any { it.directive == profileId }
-                            ?: false,
+                        isProfileFeedInActiveUserFeeds = it.appSettings?.feeds
+                            ?.any { it.directive == profileId } ?: false,
                         zappingState = this.zappingState.copy(
                             walletConnected = it.hasWallet(),
                             walletPreference = it.walletPreference,
@@ -131,14 +134,20 @@ class ProfileViewModel @Inject constructor(
             }
         }
 
-    private fun observeProfile() =
+    private fun observeProfileData() =
         viewModelScope.launch {
-            profileRepository.observeProfile(profileId = profileId).collect {
+            profileRepository.observeProfileData(profileId = profileId).collect {
                 setState {
-                    copy(
-                        profileDetails = it.metadata?.asProfileDetailsUi() ?: this.profileDetails,
-                        profileStats = it.stats?.asProfileStatsUi() ?: this.profileStats,
-                    )
+                    copy(profileDetails = it.asProfileDetailsUi())
+                }
+            }
+        }
+
+    private fun observeProfileStats() =
+        viewModelScope.launch {
+            profileRepository.observeProfileStats(profileId = profileId).collect {
+                setState {
+                    copy(profileStats = it.asProfileStatsUi())
                 }
             }
         }
@@ -207,7 +216,11 @@ class ProfileViewModel @Inject constructor(
             }
 
             if (postAuthorProfileData?.lnUrlDecoded == null) {
-                setErrorState(error = ProfileError.MissingLightningAddress(IllegalStateException()))
+                setErrorState(
+                    error = ProfileError.MissingLightningAddress(
+                        IllegalStateException("Missing lightning address."),
+                    ),
+                )
                 return@launch
             }
 
@@ -322,6 +335,18 @@ class ProfileViewModel @Inject constructor(
                 setState { copy(isProfileMuted = false) }
             } catch (error: NostrPublishException) {
                 setErrorState(error = ProfileError.FailedToUnmuteProfile(error))
+            }
+        }
+
+    private fun changeFeed(event: UiEvent.ChangeProfileFeed) =
+        viewModelScope.launch {
+            setState {
+                copy(
+                    profileDirective = event.profileDirective,
+                    notes = feedRepository.feedByDirective(feedDirective = event.profileDirective.toPrimalDirective())
+                        .map { it.map { feed -> feed.asFeedPostUi() } }
+                        .cachedIn(viewModelScope),
+                )
             }
         }
 

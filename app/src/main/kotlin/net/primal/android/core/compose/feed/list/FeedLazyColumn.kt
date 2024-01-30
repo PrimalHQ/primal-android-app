@@ -60,6 +60,7 @@ fun FeedLazyColumn(
     onMuteClick: ((String) -> Unit)? = null,
     shouldShowLoadingState: Boolean = true,
     shouldShowNoContentState: Boolean = true,
+    showReplyTo: Boolean = true,
     header: @Composable (LazyItemScope.() -> Unit)? = null,
     stickyHeader: @Composable (LazyItemScope.() -> Unit)? = null,
 ) {
@@ -139,6 +140,7 @@ fun FeedLazyColumn(
                         data = item,
                         shape = RectangleShape,
                         cardPadding = PaddingValues(all = 0.dp),
+                        showReplyTo = showReplyTo,
                         onPostClick = { postId -> onPostClick(postId) },
                         onProfileClick = { profileId -> onProfileClick(profileId) },
                         onPostAction = { postAction ->

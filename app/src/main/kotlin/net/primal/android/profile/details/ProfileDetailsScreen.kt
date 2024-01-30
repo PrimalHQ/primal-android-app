@@ -40,6 +40,10 @@ import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
+import androidx.compose.material3.TabRowDefaults
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -49,6 +53,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -68,6 +73,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -113,16 +119,16 @@ import net.primal.android.core.compose.icons.primaliconpack.Message
 import net.primal.android.core.compose.icons.primaliconpack.More
 import net.primal.android.core.compose.icons.primaliconpack.UserFeedAdd
 import net.primal.android.core.compose.isEmpty
-import net.primal.android.core.compose.profile.model.ProfileDetailsUi
-import net.primal.android.core.compose.profile.model.ProfileStatsUi
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.copyText
 import net.primal.android.core.utils.formatNip05Identifier
 import net.primal.android.core.utils.resolvePrimalProfileLink
+import net.primal.android.core.utils.shortened
 import net.primal.android.core.utils.systemShareText
 import net.primal.android.crypto.hexToNoteHrp
 import net.primal.android.crypto.hexToNpubHrp
-import net.primal.android.profile.details.ProfileContract.UiState.ProfileError
+import net.primal.android.profile.details.ProfileDetailsContract.UiState.ProfileError
+import net.primal.android.profile.domain.ProfileFeedDirective
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
@@ -131,8 +137,8 @@ import net.primal.android.wallet.utils.isLightningAddress
 import timber.log.Timber
 
 @Composable
-fun ProfileScreen(
-    viewModel: ProfileViewModel,
+fun ProfileDetailsScreen(
+    viewModel: ProfileDetailsViewModel,
     onClose: () -> Unit,
     onPostClick: (String) -> Unit,
     onPostReplyClick: (String) -> Unit,
@@ -143,13 +149,15 @@ fun ProfileScreen(
     onZapProfileClick: (DraftTransaction) -> Unit,
     onHashtagClick: (String) -> Unit,
     onMediaClick: (String, String) -> Unit,
+    onFollowingClick: () -> Unit,
+    onFollowersClick: () -> Unit,
     onGoToWallet: () -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
 
     AdjustTemporarilySystemBarColors(statusBarColor = Color.Transparent)
 
-    ProfileScreen(
+    ProfileDetailsScreen(
         state = uiState.value,
         onClose = onClose,
         onPostClick = onPostClick,
@@ -162,14 +170,19 @@ fun ProfileScreen(
         onHashtagClick = onHashtagClick,
         onMediaClick = onMediaClick,
         onGoToWallet = onGoToWallet,
+        onFollowingClick = onFollowingClick,
+        onFollowersClick = onFollowersClick,
         eventPublisher = { viewModel.setEvent(it) },
     )
 }
 
+private const val MAX_COVER_TRANSPARENCY = 0.70f
+
+@Suppress("MagicNumber")
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileScreen(
-    state: ProfileContract.UiState,
+fun ProfileDetailsScreen(
+    state: ProfileDetailsContract.UiState,
     onClose: () -> Unit,
     onPostClick: (String) -> Unit,
     onPostReplyClick: (String) -> Unit,
@@ -181,7 +194,9 @@ fun ProfileScreen(
     onHashtagClick: (String) -> Unit,
     onMediaClick: (String, String) -> Unit,
     onGoToWallet: () -> Unit,
-    eventPublisher: (ProfileContract.UiEvent) -> Unit,
+    onFollowingClick: () -> Unit,
+    onFollowersClick: () -> Unit,
+    eventPublisher: (ProfileDetailsContract.UiEvent) -> Unit,
 ) {
     val density = LocalDensity.current
 
@@ -206,7 +221,7 @@ fun ProfileScreen(
     val coverTransparency = rememberSaveable { mutableFloatStateOf(0f) }
 
     val noPagingItems = flowOf<PagingData<FeedPostUi>>().collectAsLazyPagingItems()
-    val pagingItems = state.authoredPosts.collectAsLazyPagingItems()
+    val pagingItems = state.notes.collectAsLazyPagingItems()
     val listState = pagingItems.rememberLazyListStatePagingWorkaround()
 
     val snackbarHostState = remember { SnackbarHostState() }
@@ -234,7 +249,7 @@ fun ProfileScreen(
                     topBarTitleVisible.value = scrollOffset > maxAvatarSizePx
 
                     val newCoverAlpha = 0f + scrollOffset / (maxCoverHeightPx - minCoverHeightPx)
-                    coverTransparency.floatValue = newCoverAlpha.coerceIn(0.0f, 0.7f)
+                    coverTransparency.floatValue = newCoverAlpha.coerceIn(0.0f, MAX_COVER_TRANSPARENCY)
                 }
         }
     }
@@ -247,7 +262,7 @@ fun ProfileScreen(
                         topBarTitleVisible.value = true
                         coverHeightPx.floatValue = minCoverHeightPx
                         avatarSizePx.floatValue = 0f
-                        coverTransparency.floatValue = 0.7f
+                        coverTransparency.floatValue = MAX_COVER_TRANSPARENCY
                     }
                 }
         }
@@ -271,7 +286,7 @@ fun ProfileScreen(
                 onPostReplyClick = onPostReplyClick,
                 onZapClick = { post, zapAmount, zapDescription ->
                     eventPublisher(
-                        ProfileContract.UiEvent.ZapAction(
+                        ProfileDetailsContract.UiEvent.ZapAction(
                             postId = post.postId,
                             postAuthorId = post.authorId,
                             zapAmount = zapAmount,
@@ -281,7 +296,7 @@ fun ProfileScreen(
                 },
                 onPostLikeClick = {
                     eventPublisher(
-                        ProfileContract.UiEvent.PostLikeAction(
+                        ProfileDetailsContract.UiEvent.PostLikeAction(
                             postId = it.postId,
                             postAuthorId = it.authorId,
                         ),
@@ -289,7 +304,7 @@ fun ProfileScreen(
                 },
                 onRepostClick = {
                     eventPublisher(
-                        ProfileContract.UiEvent.RepostAction(
+                        ProfileDetailsContract.UiEvent.RepostAction(
                             postId = it.postId,
                             postAuthorId = it.authorId,
                             postNostrEvent = it.rawNostrEventJson,
@@ -344,11 +359,8 @@ fun ProfileScreen(
                 },
                 header = {
                     UserProfileDetails(
-                        profileId = state.profileId,
-                        isFollowed = state.isProfileFollowed,
-                        isActiveUser = state.isActiveUser,
-                        profileDetails = state.profileDetails,
-                        profileStats = state.profileStats,
+                        state = state,
+                        eventPublisher = eventPublisher,
                         onEditProfileClick = onEditProfileClick,
                         onMessageClick = { onMessageClick(state.profileId) },
                         onZapProfileClick = {
@@ -370,8 +382,10 @@ fun ProfileScreen(
                                 }
                             }
                         },
-                        onFollow = { eventPublisher(ProfileContract.UiEvent.FollowAction(state.profileId)) },
-                        onUnfollow = { eventPublisher(ProfileContract.UiEvent.UnfollowAction(state.profileId)) },
+                        onFollow = { eventPublisher(ProfileDetailsContract.UiEvent.FollowAction(state.profileId)) },
+                        onUnfollow = { eventPublisher(ProfileDetailsContract.UiEvent.UnfollowAction(state.profileId)) },
+                        onFollowersClick = onFollowersClick,
+                        onFollowingClick = onFollowingClick,
                     )
 
                     if (state.isProfileMuted) {
@@ -380,7 +394,7 @@ fun ProfileScreen(
                                 ?: state.profileId.asEllipsizedNpub(),
                             onUnmuteClick = {
                                 eventPublisher(
-                                    ProfileContract.UiEvent.UnmuteAction(state.profileId),
+                                    ProfileDetailsContract.UiEvent.UnmuteAction(state.profileId),
                                 )
                             },
                         )
@@ -421,10 +435,10 @@ fun ProfileScreen(
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 private fun ProfileTopCoverBar(
-    state: ProfileContract.UiState,
+    state: ProfileDetailsContract.UiState,
     snackbarHostState: SnackbarHostState,
     uiScope: CoroutineScope,
-    eventPublisher: (ProfileContract.UiEvent) -> Unit,
+    eventPublisher: (ProfileDetailsContract.UiEvent) -> Unit,
     navigationIcon: @Composable () -> Unit,
     title: @Composable () -> Unit,
     avatarSize: Dp,
@@ -512,7 +526,7 @@ private fun ProfileDropdownMenu(
     snackbarHostState: SnackbarHostState,
     uiScope: CoroutineScope,
     name: String,
-    eventPublisher: (ProfileContract.UiEvent) -> Unit,
+    eventPublisher: (ProfileDetailsContract.UiEvent) -> Unit,
 ) {
     var menuVisible by remember { mutableStateOf(false) }
     val addedToUserFeedsMessage = stringResource(id = R.string.app_added_to_user_feeds)
@@ -542,11 +556,7 @@ private fun ProfileDropdownMenu(
                 text = itemText,
                 onClick = {
                     if (isProfileFeedInActiveUserFeeds) {
-                        eventPublisher(
-                            ProfileContract.UiEvent.RemoveUserFeedAction(
-                                directive = profileId,
-                            ),
-                        )
+                        eventPublisher(ProfileDetailsContract.UiEvent.RemoveUserFeedAction(directive = profileId))
                         uiScope.launch {
                             snackbarHostState.showSnackbar(
                                 message = removedFromUserFeedsMessage,
@@ -555,7 +565,7 @@ private fun ProfileDropdownMenu(
                         }
                     } else {
                         eventPublisher(
-                            ProfileContract.UiEvent.AddUserFeedAction(
+                            ProfileDetailsContract.UiEvent.AddUserFeedAction(
                                 name = title,
                                 directive = profileId,
                             ),
@@ -576,10 +586,7 @@ private fun ProfileDropdownMenu(
             trailingIconVector = PrimalIcons.ContextShare,
             text = stringResource(id = R.string.profile_context_share_profile),
             onClick = {
-                systemShareText(
-                    context = context,
-                    text = resolvePrimalProfileLink(profileId = profileId),
-                )
+                systemShareText(context = context, text = resolvePrimalProfileLink(profileId = profileId))
                 menuVisible = false
             },
         )
@@ -592,9 +599,9 @@ private fun ProfileDropdownMenu(
             }
 
             val action = if (isProfileMuted) {
-                ProfileContract.UiEvent.UnmuteAction(profileId = profileId)
+                ProfileDetailsContract.UiEvent.UnmuteAction(profileId = profileId)
             } else {
-                ProfileContract.UiEvent.MuteAction(profileId = profileId)
+                ProfileDetailsContract.UiEvent.MuteAction(profileId = profileId)
             }
 
             DropdownPrimalMenuItem(
@@ -634,16 +641,15 @@ private fun CoverUnavailable() {
 
 @Composable
 private fun UserProfileDetails(
-    profileId: String,
-    isFollowed: Boolean,
-    isActiveUser: Boolean,
-    profileDetails: ProfileDetailsUi? = null,
-    profileStats: ProfileStatsUi? = null,
+    state: ProfileDetailsContract.UiState,
+    eventPublisher: (ProfileDetailsContract.UiEvent) -> Unit,
     onEditProfileClick: () -> Unit,
     onZapProfileClick: () -> Unit,
     onMessageClick: () -> Unit,
     onFollow: () -> Unit,
     onUnfollow: () -> Unit,
+    onFollowingClick: () -> Unit,
+    onFollowersClick: () -> Unit,
 ) {
     val localUriHandler = LocalUriHandler.current
     val context = LocalContext.current
@@ -656,8 +662,8 @@ private fun UserProfileDetails(
             .background(color = AppTheme.colorScheme.surfaceVariant),
     ) {
         ProfileActions(
-            isFollowed = isFollowed,
-            isActiveUser = isActiveUser,
+            isFollowed = state.isProfileFollowed,
+            isActiveUser = state.isActiveUser,
             onEditProfileClick = onEditProfileClick,
             onMessageClick = onMessageClick,
             onZapProfileClick = onZapProfileClick,
@@ -667,45 +673,45 @@ private fun UserProfileDetails(
 
         NostrUserText(
             modifier = Modifier.padding(horizontal = 16.dp),
-            displayName = profileDetails?.authorDisplayName ?: profileId.asEllipsizedNpub(),
-            internetIdentifier = profileDetails?.internetIdentifier,
+            displayName = state.profileDetails?.authorDisplayName ?: state.profileId.asEllipsizedNpub(),
+            internetIdentifier = state.profileDetails?.internetIdentifier,
             style = AppTheme.typography.titleLarge,
         )
 
-        if (profileDetails?.internetIdentifier?.isNotEmpty() == true) {
+        if (state.profileDetails?.internetIdentifier?.isNotEmpty() == true) {
             UserInternetIdentifier(
                 modifier = Modifier
                     .padding(horizontal = 16.dp)
                     .padding(top = 4.dp),
-                internetIdentifier = profileDetails.internetIdentifier,
+                internetIdentifier = state.profileDetails.internetIdentifier,
             )
         }
 
         UserPublicKey(
             modifier = Modifier.padding(top = 8.dp, bottom = 4.dp),
-            pubkey = profileId,
+            pubkey = state.profileId,
             onCopyClick = {
                 copyText(context = context, text = it)
                 uiScope.launch { Toast.makeText(context, keyCopiedText, Toast.LENGTH_SHORT).show() }
             },
         )
 
-        if (profileDetails?.about?.isNotEmpty() == true) {
-            UserAbout(about = profileDetails.about)
+        if (state.profileDetails?.about?.isNotEmpty() == true) {
+            UserAbout(about = state.profileDetails.about)
         }
 
-        if (profileDetails?.website?.isNotEmpty() == true) {
+        if (state.profileDetails?.website?.isNotEmpty() == true) {
             UserWebsiteText(
-                website = profileDetails.website,
+                website = state.profileDetails.website,
                 onClick = {
                     try {
-                        localUriHandler.openUri(profileDetails.website)
+                        localUriHandler.openUri(state.profileDetails.website)
                     } catch (error: ActivityNotFoundException) {
                         Timber.w(error)
                         uiScope.launch {
                             Toast.makeText(
                                 context,
-                                "App not found that could open ${profileDetails.website}.",
+                                "App not found that could open ${state.profileDetails.website}.",
                                 Toast.LENGTH_SHORT,
                             ).show()
                         }
@@ -715,9 +721,27 @@ private fun UserProfileDetails(
         }
 
         UserStats(
-            followingCount = profileStats?.followingCount,
-            followersCount = profileStats?.followersCount,
-            notesCount = profileStats?.notesCount,
+            feedDirective = state.profileDirective,
+            notesCount = state.profileStats?.notesCount,
+            onNotesCountClick = {
+                eventPublisher(
+                    ProfileDetailsContract.UiEvent.ChangeProfileFeed(
+                        profileDirective = ProfileFeedDirective.AuthoredNotes,
+                    ),
+                )
+            },
+            repliesCount = state.profileStats?.repliesCount,
+            onRepliesCountClick = {
+                eventPublisher(
+                    ProfileDetailsContract.UiEvent.ChangeProfileFeed(
+                        profileDirective = ProfileFeedDirective.AuthoredReplies,
+                    ),
+                )
+            },
+            followingCount = state.profileStats?.followingCount,
+            onFollowingCountClick = onFollowingClick,
+            followersCount = state.profileStats?.followersCount,
+            onFollowersCountClick = onFollowersClick,
         )
 
         PrimalDivider()
@@ -726,70 +750,122 @@ private fun UserProfileDetails(
 
 @Composable
 private fun UserStats(
-    followingCount: Int?,
-    followersCount: Int?,
+    feedDirective: ProfileFeedDirective,
     notesCount: Int?,
+    onNotesCountClick: () -> Unit,
+    repliesCount: Int?,
+    onRepliesCountClick: () -> Unit,
+    followingCount: Int?,
+    onFollowingCountClick: () -> Unit,
+    followersCount: Int?,
+    onFollowersCountClick: () -> Unit,
     placeholderText: String = "-",
 ) {
-    val numberFormat = remember { NumberFormat.getNumberInstance() }
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 16.dp, horizontal = 16.dp),
-        horizontalArrangement = Arrangement.SpaceEvenly,
+    var tabIndex by remember {
+        mutableIntStateOf(
+            when (feedDirective) {
+                ProfileFeedDirective.AuthoredNotes -> 0
+                ProfileFeedDirective.AuthoredReplies -> 1
+            },
+        )
+    }
+
+    TabRow(
+        selectedTabIndex = tabIndex,
+        containerColor = Color.Transparent,
+        divider = { PrimalDivider() },
+        indicator = { tabPositions ->
+            if (tabIndex < tabPositions.size) {
+                TabRowDefaults.Indicator(
+                    modifier = Modifier.tabIndicatorOffset(tabPositions[tabIndex]),
+                    height = 4.dp,
+                    color = AppTheme.colorScheme.tertiary,
+                )
+            }
+        },
     ) {
-        TextCounter(
-            modifier = Modifier.weight(1f),
-            count = if (followingCount != null) {
-                numberFormat.format(
-                    followingCount,
-                )
-            } else {
-                placeholderText
+        CustomTab(
+            modifier = Modifier.fillMaxWidth(),
+            selected = tabIndex == 0,
+            onClick = {
+                onNotesCountClick()
+                tabIndex = 0
             },
-            text = stringResource(id = R.string.profile_following_stat),
+            text = notesCount?.asTabText() ?: placeholderText,
+            label = stringResource(id = R.string.profile_notes_stat),
         )
 
-        TextCounter(
-            modifier = Modifier.weight(1f),
-            count = if (followingCount != null) {
-                numberFormat.format(
-                    followersCount,
-                )
-            } else {
-                placeholderText
+        CustomTab(
+            modifier = Modifier.fillMaxWidth(),
+            selected = tabIndex == 1,
+            onClick = {
+                onRepliesCountClick()
+                tabIndex = 1
             },
-            text = stringResource(id = R.string.profile_followers_stat),
+            text = repliesCount?.asTabText() ?: placeholderText,
+            label = stringResource(id = R.string.profile_replies_stat),
         )
 
-        TextCounter(
-            modifier = Modifier.weight(1f),
-            count = if (notesCount != null) numberFormat.format(notesCount) else placeholderText,
-            text = stringResource(id = R.string.profile_notes_stat),
+        CustomTab(
+            selected = false,
+            onClick = onFollowingCountClick,
+            text = followingCount?.asTabText() ?: placeholderText,
+            label = stringResource(id = R.string.profile_following_stat),
+        )
+
+        CustomTab(
+            selected = false,
+            onClick = onFollowersCountClick,
+            text = followersCount?.asTabText() ?: placeholderText,
+            label = stringResource(id = R.string.profile_followers_stat),
         )
     }
 }
 
-@Composable
-private fun TextCounter(
-    count: String,
-    text: String,
-    modifier: Modifier = Modifier,
-) {
-    Column(
-        modifier = modifier,
-    ) {
-        Text(
-            text = count,
-            style = AppTheme.typography.headlineMedium,
-        )
+private const val MAX_ORIGINAL_COUNT = 9999
 
-        Text(
-            text = text,
-            style = AppTheme.typography.bodySmall,
-            color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
-        )
-    }
+@Composable
+private fun Int.asTabText(): String {
+    val numberFormat = remember { NumberFormat.getNumberInstance() }
+    val formattedInt = numberFormat.format(this)
+    return if (this > MAX_ORIGINAL_COUNT) this.shortened() else formattedInt
+}
+
+@Composable
+private fun CustomTab(
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    text: String,
+    label: String,
+) {
+    Tab(
+        modifier = modifier,
+        selected = selected,
+        onClick = onClick,
+        selectedContentColor = Color.Unspecified,
+        content = {
+            Column(
+                modifier = Modifier.padding(vertical = 12.dp),
+            ) {
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = text,
+                    textAlign = TextAlign.Center,
+                    style = AppTheme.typography.bodyLarge.copy(fontSize = 24.sp),
+                    color = AppTheme.colorScheme.onPrimary,
+                )
+
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = label,
+                    style = AppTheme.typography.bodySmall,
+                    textAlign = TextAlign.Center,
+                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
+                )
+            }
+        },
+    )
 }
 
 @Composable
@@ -1082,14 +1158,14 @@ private fun ErrorHandler(error: ProfileError?, snackbarHostState: SnackbarHostSt
 @Composable
 fun PreviewProfileScreen() {
     PrimalTheme(primalTheme = PrimalTheme.Sunset) {
-        ProfileScreen(
-            state = ProfileContract.UiState(
+        ProfileDetailsScreen(
+            state = ProfileDetailsContract.UiState(
                 profileId = "profileId",
                 isProfileFollowed = false,
                 isProfileMuted = false,
                 isActiveUser = true,
                 isProfileFeedInActiveUserFeeds = false,
-                authoredPosts = emptyFlow(),
+                notes = emptyFlow(),
             ),
             onClose = {},
             onPostClick = {},
@@ -1101,6 +1177,8 @@ fun PreviewProfileScreen() {
             onZapProfileClick = {},
             onHashtagClick = {},
             onMediaClick = { _, _ -> },
+            onFollowingClick = {},
+            onFollowersClick = {},
             onGoToWallet = {},
             eventPublisher = {},
         )

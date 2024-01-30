@@ -24,10 +24,13 @@ class ProfileRepository @Inject constructor(
 
     fun findProfileDataOrNull(profileId: String) = database.profiles().findProfileData(profileId = profileId)
 
-    fun observeProfile(profileId: String) =
-        database.profiles().observeProfile(
-            profileId = profileId,
-        ).filterNotNull()
+    fun observeProfile(profileId: String) = database.profiles().observeProfile(profileId = profileId).filterNotNull()
+
+    fun observeProfileData(profileId: String) =
+        database.profiles().observeProfileData(profileId = profileId).filterNotNull()
+
+    fun observeProfileStats(profileId: String) =
+        database.profileStats().observeProfileStats(profileId = profileId).filterNotNull()
 
     suspend fun requestProfileUpdate(profileId: String) {
         val response = usersApi.getUserProfile(pubkey = profileId)
