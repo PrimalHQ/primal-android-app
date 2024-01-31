@@ -1,5 +1,7 @@
 ## Features
-- Implemented Latest with Replies feed support on main screen 
+- Implemented notes and replies tabs on profile screen;
+- Implemented follows tabs on profile screen;
 
 ## Fixes
-- Fixed default zap amount and message not used when zapping
+- Improved internet identifier badge rendering;
+- Added following self when creating account;
