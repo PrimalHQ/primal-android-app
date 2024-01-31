@@ -30,3 +30,7 @@ private fun PrimalEvent.takeContentAsUserProfileStatsOrNull(): ContentUserProfil
 fun PrimalEvent.takeContentAsPrimalUserScoresOrNull(): Map<String, Float> {
     return NostrJson.decodeFromString(this.content)
 }
+
+fun PrimalEvent.takeContentAsPrimalUserFollowersCountsOrNull(): Map<String, Int> {
+    return NostrJson.decodeFromString(this.content)
+}

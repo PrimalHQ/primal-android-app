@@ -62,8 +62,11 @@ import net.primal.android.notifications.list.NotificationsScreen
 import net.primal.android.notifications.list.NotificationsViewModel
 import net.primal.android.profile.details.ProfileDetailsScreen
 import net.primal.android.profile.details.ProfileDetailsViewModel
+import net.primal.android.profile.domain.ProfileFollowsType
 import net.primal.android.profile.edit.EditProfileScreen
 import net.primal.android.profile.edit.EditProfileViewModel
+import net.primal.android.profile.follows.ProfileFollowsScreen
+import net.primal.android.profile.follows.ProfileFollowsViewModel
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
@@ -151,6 +154,9 @@ fun NavController.navigateToProfile(profileId: String? = null) =
         profileId != null -> navigate(route = "profile?$PROFILE_ID=$profileId")
         else -> navigate(route = "profile")
     }
+
+fun NavController.navigateToProfileFollows(profileId: String, followsType: ProfileFollowsType) =
+    navigate(route = "profile/$profileId/follows?$FOLLOWS_TYPE=$followsType")
 
 fun NavController.navigateToEditProfile() = navigate(route = "edit_profile")
 
@@ -366,6 +372,21 @@ fun PrimalAppNavigation() {
                     navArgument(PROFILE_ID) {
                         type = NavType.StringType
                         nullable = true
+                    },
+                ),
+                navController = navController,
+            )
+
+            profileFollows(
+                route = "profile/{$PROFILE_ID}/follows?$FOLLOWS_TYPE={$FOLLOWS_TYPE}",
+                arguments = listOf(
+                    navArgument(PROFILE_ID) {
+                        type = NavType.StringType
+                    },
+                    navArgument(FOLLOWS_TYPE) {
+                        type = NavType.StringType
+                        nullable = true
+                        defaultValue = ProfileFollowsType.Following.name
                     },
                 ),
                 navController = navController,
@@ -709,8 +730,12 @@ private fun NavGraphBuilder.profile(
         onMessageClick = { profileId -> navController.navigateToChat(profileId = profileId) },
         onZapProfileClick = { transaction -> navController.navigateToWalletCreateTransaction(transaction) },
         onHashtagClick = { hashtag -> navController.navigateToExploreFeed(query = hashtag) },
-        onFollowingClick = { },
-        onFollowersClick = { },
+        onFollowsClick = { profileId, followsType ->
+            navController.navigateToProfileFollows(
+                profileId = profileId,
+                followsType = followsType,
+            )
+        },
         onMediaClick = { noteId, mediaUrl ->
             navController.navigateToMediaGallery(
                 noteId = noteId,
@@ -730,6 +755,23 @@ private fun NavGraphBuilder.editProfile(route: String, navController: NavControl
         LockToOrientationPortrait()
         EditProfileScreen(viewModel = viewModel, onClose = { navController.navigateUp() })
     }
+
+private fun NavGraphBuilder.profileFollows(
+    route: String,
+    arguments: List<NamedNavArgument>,
+    navController: NavController,
+) = composable(
+    route = route,
+    arguments = arguments,
+) {
+    val viewModel = hiltViewModel<ProfileFollowsViewModel>(it)
+    LockToOrientationPortrait()
+    ProfileFollowsScreen(
+        viewModel = viewModel,
+        onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
+        onClose = { navController.navigateUp() },
+    )
+}
 
 private fun NavGraphBuilder.logout(route: String, navController: NavController) =
     dialog(

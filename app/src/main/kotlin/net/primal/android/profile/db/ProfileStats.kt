@@ -7,7 +7,6 @@ import androidx.room.PrimaryKey
 data class ProfileStats(
     @PrimaryKey
     val profileId: String,
-    val joinedAt: Long,
     val following: Int,
     val followers: Int,
     val notesCount: Int,
@@ -15,4 +14,5 @@ data class ProfileStats(
     val relaysCount: Int,
     val totalReceivedZaps: Long,
     val totalReceivedSats: Long,
+    val joinedAt: Long? = null,
 )

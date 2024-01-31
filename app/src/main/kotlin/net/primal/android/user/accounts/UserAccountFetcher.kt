@@ -20,7 +20,7 @@ class UserAccountFetcher @Inject constructor(
 
     suspend fun fetchUserProfileOrNull(userId: String): UserAccount? {
         val userProfileResponse = withContext(dispatcherProvider.io()) {
-            usersApi.getUserProfile(pubkey = userId)
+            usersApi.getUserProfile(userId = userId)
         }
         val cdnResources = userProfileResponse.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
         val profileData = userProfileResponse.metadata?.asProfileDataPO(cdnResources = cdnResources) ?: return null
@@ -42,7 +42,7 @@ class UserAccountFetcher @Inject constructor(
 
     suspend fun fetchUserContactsOrNull(userId: String): UserAccount? {
         val contactsResponse = withContext(dispatcherProvider.io()) {
-            usersApi.getUserContacts(pubkey = userId, extendedResponse = false)
+            usersApi.getUserContacts(userId = userId, extendedResponse = false)
         }
 
         return contactsResponse.contactsEvent?.asUserAccountFromContactsEvent()

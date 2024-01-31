@@ -13,17 +13,18 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
-import net.primal.android.core.utils.authorNameUiFriendly
+import kotlinx.coroutines.withContext
+import net.primal.android.core.compose.profile.model.mapAsUserProfileUi
+import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.explore.repository.ExploreRepository
-import net.primal.android.explore.repository.UserProfileSearchItem
 import net.primal.android.explore.search.SearchContract.UiEvent
 import net.primal.android.explore.search.SearchContract.UiState
-import net.primal.android.explore.search.ui.UserProfileUi
 import net.primal.android.networking.sockets.errors.WssException
 import timber.log.Timber
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
+    private val dispatcherProvider: CoroutineDispatcherProvider,
     private val exploreRepository: ExploreRepository,
 ) : ViewModel() {
 
@@ -65,7 +66,7 @@ class SearchViewModel @Inject constructor(
         viewModelScope.launch {
             setState { copy(searching = true) }
             try {
-                val result = exploreRepository.searchUsers(query = query)
+                val result = withContext(dispatcherProvider.io()) { exploreRepository.searchUsers(query = query) }
                 setState { copy(searchResults = result.map { it.mapAsUserProfileUi() }) }
             } catch (error: WssException) {
                 Timber.w(error)
@@ -76,16 +77,7 @@ class SearchViewModel @Inject constructor(
 
     private fun fetchRecommendedUsers() =
         viewModelScope.launch {
-            val recommendedUsers = exploreRepository.getRecommendedUsers()
+            val recommendedUsers = withContext(dispatcherProvider.io()) { exploreRepository.getRecommendedUsers() }
             setState { copy(recommendedUsers = recommendedUsers.map { it.mapAsUserProfileUi() }) }
         }
-
-    private fun UserProfileSearchItem.mapAsUserProfileUi() =
-        UserProfileUi(
-            profileId = this.metadata.ownerId,
-            displayName = this.metadata.authorNameUiFriendly(),
-            internetIdentifier = this.metadata.internetIdentifier,
-            avatarCdnImage = this.metadata.avatarCdnImage,
-            followersCount = this.score?.toInt(),
-        )
 }

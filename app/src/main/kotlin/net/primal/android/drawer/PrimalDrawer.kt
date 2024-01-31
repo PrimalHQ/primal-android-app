@@ -232,7 +232,7 @@ private fun DrawerMenu(modifier: Modifier, onDrawerDestinationClick: (DrawerScre
         verticalArrangement = Arrangement.Top,
     ) {
         items(
-            items = DrawerScreenDestination.values(),
+            items = DrawerScreenDestination.entries.toTypedArray(),
             key = { it.name },
         ) {
             ListItem(

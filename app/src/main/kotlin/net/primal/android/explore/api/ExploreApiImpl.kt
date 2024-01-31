@@ -28,9 +28,7 @@ class ExploreApiImpl @Inject constructor(
             message = PrimalCacheFilter(primalVerb = TRENDING_HASHTAGS_7D),
         )
 
-        val trendingHashtagEvent = queryResult.findPrimalEvent(
-            NostrEventKind.PrimalTrendingHashtags,
-        )
+        val trendingHashtagEvent = queryResult.findPrimalEvent(NostrEventKind.PrimalTrendingHashtags)
         val hashtags = NostrJson.decodeFromStringOrNull<JsonArray>(trendingHashtagEvent?.content)
 
         val result = mutableListOf<HashtagScore>()
@@ -51,6 +49,8 @@ class ExploreApiImpl @Inject constructor(
         return UsersResponse(
             contactsMetadata = queryResult.filterNostrEvents(NostrEventKind.Metadata),
             userScores = queryResult.findPrimalEvent(NostrEventKind.PrimalUserScores),
+            followerCounts = queryResult.findPrimalEvent(NostrEventKind.PrimalUserFollowersCounts),
+            cdnResources = queryResult.filterPrimalEvents(NostrEventKind.PrimalCdnResource),
         )
     }
 
@@ -65,6 +65,7 @@ class ExploreApiImpl @Inject constructor(
         return UsersResponse(
             contactsMetadata = queryResult.filterNostrEvents(NostrEventKind.Metadata),
             userScores = queryResult.findPrimalEvent(NostrEventKind.PrimalUserScores),
+            followerCounts = queryResult.findPrimalEvent(NostrEventKind.PrimalUserFollowersCounts),
             cdnResources = queryResult.filterPrimalEvents(NostrEventKind.PrimalCdnResource),
         )
     }

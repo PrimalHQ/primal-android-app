@@ -3,12 +3,11 @@ package net.primal.android.user.api
 import javax.inject.Inject
 import kotlinx.serialization.encodeToString
 import net.primal.android.core.serialization.json.NostrJson
+import net.primal.android.explore.api.model.UsersResponse
 import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.primal.PrimalCacheFilter
-import net.primal.android.networking.primal.PrimalVerb.CONTACT_LIST
-import net.primal.android.networking.primal.PrimalVerb.USER_INFOS
-import net.primal.android.networking.primal.PrimalVerb.USER_PROFILE
+import net.primal.android.networking.primal.PrimalVerb
 import net.primal.android.networking.relays.RelaysManager
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.NostrEventKind
@@ -28,11 +27,11 @@ class UsersApiImpl @Inject constructor(
     private val nostrNotary: NostrNotary,
 ) : UsersApi {
 
-    override suspend fun getUserProfile(pubkey: String): UserProfileResponse {
+    override suspend fun getUserProfile(userId: String): UserProfileResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = USER_PROFILE,
-                optionsJson = NostrJson.encodeToString(UserRequestBody(pubkey = pubkey)),
+                primalVerb = PrimalVerb.USER_PROFILE,
+                optionsJson = NostrJson.encodeToString(UserRequestBody(pubkey = userId)),
             ),
         )
 
@@ -43,12 +42,12 @@ class UsersApiImpl @Inject constructor(
         )
     }
 
-    override suspend fun getUserContacts(pubkey: String, extendedResponse: Boolean): UserContactsResponse {
+    override suspend fun getUserContacts(userId: String, extendedResponse: Boolean): UserContactsResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = CONTACT_LIST,
+                primalVerb = PrimalVerb.CONTACT_LIST,
                 optionsJson = NostrJson.encodeToString(
-                    ContactsRequestBody(pubkey = pubkey, extendedResponse = extendedResponse),
+                    ContactsRequestBody(pubkey = userId, extendedResponse = extendedResponse),
                 ),
             ),
         )
@@ -87,7 +86,7 @@ class UsersApiImpl @Inject constructor(
     override suspend fun getUserProfilesMetadata(userIds: Set<String>): UserProfilesResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = USER_INFOS,
+                primalVerb = PrimalVerb.USER_INFOS,
                 optionsJson = NostrJson.encodeToString(
                     UserProfilesRequestBody(userIds = userIds),
                 ),
@@ -98,6 +97,38 @@ class UsersApiImpl @Inject constructor(
             metadataEvents = queryResult.filterNostrEvents(NostrEventKind.Metadata),
             cdnResources = queryResult.filterPrimalEvents(NostrEventKind.PrimalCdnResource),
             userScores = queryResult.findPrimalEvent(NostrEventKind.PrimalUserScores),
+        )
+    }
+
+    override suspend fun getUserFollowing(userId: String): UsersResponse {
+        val queryResult = primalApiClient.query(
+            message = PrimalCacheFilter(
+                primalVerb = PrimalVerb.CONTACT_LIST,
+                optionsJson = NostrJson.encodeToString(UserRequestBody(pubkey = userId)),
+            ),
+        )
+
+        return UsersResponse(
+            contactsMetadata = queryResult.filterNostrEvents(NostrEventKind.Metadata),
+            followerCounts = queryResult.findPrimalEvent(NostrEventKind.PrimalUserFollowersCounts),
+            userScores = queryResult.findPrimalEvent(NostrEventKind.PrimalUserScores),
+            cdnResources = queryResult.filterPrimalEvents(NostrEventKind.PrimalCdnResource),
+        )
+    }
+
+    override suspend fun getUserFollowers(userId: String): UsersResponse {
+        val queryResult = primalApiClient.query(
+            message = PrimalCacheFilter(
+                primalVerb = PrimalVerb.USER_FOLLOWERS,
+                optionsJson = NostrJson.encodeToString(UserRequestBody(pubkey = userId)),
+            ),
+        )
+
+        return UsersResponse(
+            contactsMetadata = queryResult.filterNostrEvents(NostrEventKind.Metadata),
+            followerCounts = queryResult.findPrimalEvent(NostrEventKind.PrimalUserFollowersCounts),
+            userScores = queryResult.findPrimalEvent(NostrEventKind.PrimalUserScores),
+            cdnResources = queryResult.filterPrimalEvents(NostrEventKind.PrimalCdnResource),
         )
     }
 }

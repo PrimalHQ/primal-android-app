@@ -11,6 +11,7 @@ fun <T> SnackbarErrorHandler(
     error: T?,
     snackbarHostState: SnackbarHostState,
     errorMessageResolver: (T) -> String,
+    actionLabel: String? = null,
     onErrorDismiss: (() -> Unit)? = null,
     onActionPerformed: ((T) -> Unit)? = null,
 ) {
@@ -23,6 +24,7 @@ fun <T> SnackbarErrorHandler(
             message = errorMessage,
             duration = SnackbarDuration.Indefinite,
             withDismissAction = true,
+            actionLabel = actionLabel,
         )
 
         when (result) {

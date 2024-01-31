@@ -60,5 +60,6 @@ interface ProfileDetailsContract {
         data class MuteAction(val profileId: String) : UiEvent()
         data class UnmuteAction(val profileId: String) : UiEvent()
         data class ChangeProfileFeed(val profileDirective: ProfileFeedDirective) : UiEvent()
+        data object RequestProfileUpdate : UiEvent()
     }
 }

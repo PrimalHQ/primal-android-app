@@ -20,6 +20,9 @@ inline val SavedStateHandle.profileId: String? get() = get(PROFILE_ID)
 inline val SavedStateHandle.profileIdOrThrow: String
     get() = get(PROFILE_ID) ?: throw IllegalArgumentException("Missing required profileId argument")
 
+const val FOLLOWS_TYPE = "followsType"
+inline val SavedStateHandle.followsType: String? get() = get(FOLLOWS_TYPE)
+
 const val SEARCH_QUERY = "searchQuery"
 inline val SavedStateHandle.searchQueryOrThrow: String
     get() = get(SEARCH_QUERY) ?: throw IllegalArgumentException("Missing required searchQuery argument.")

@@ -110,7 +110,7 @@ class UserRepository @Inject constructor(
 
     suspend fun setLightningAddress(userId: String, lightningAddress: String) {
         withContext(dispatcherProvider.io()) {
-            val userProfileResponse = usersApi.getUserProfile(pubkey = userId)
+            val userProfileResponse = usersApi.getUserProfile(userId = userId)
             val metadata = NostrJson.decodeFromStringOrNull<ContentMetadata>(userProfileResponse.metadata?.content)
                 ?: throw WssException("Profile Content Metadata not found.")
 

@@ -80,6 +80,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
 import androidx.paging.LoadState
 import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -123,6 +124,7 @@ import net.primal.android.core.compose.icons.primaliconpack.More
 import net.primal.android.core.compose.icons.primaliconpack.UserFeedAdd
 import net.primal.android.core.compose.isEmpty
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
+import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.copyText
 import net.primal.android.core.utils.formatNip05Identifier
@@ -133,6 +135,7 @@ import net.primal.android.crypto.hexToNoteHrp
 import net.primal.android.crypto.hexToNpubHrp
 import net.primal.android.profile.details.ProfileDetailsContract.UiState.ProfileError
 import net.primal.android.profile.domain.ProfileFeedDirective
+import net.primal.android.profile.domain.ProfileFollowsType
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
@@ -153,13 +156,19 @@ fun ProfileDetailsScreen(
     onZapProfileClick: (DraftTransaction) -> Unit,
     onHashtagClick: (String) -> Unit,
     onMediaClick: (String, String) -> Unit,
-    onFollowingClick: () -> Unit,
-    onFollowersClick: () -> Unit,
+    onFollowsClick: (String, ProfileFollowsType) -> Unit,
     onGoToWallet: () -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
 
     AdjustTemporarilySystemBarColors(statusBarColor = Color.Transparent)
+
+    DisposableLifecycleObserverEffect {
+        when (it) {
+            Lifecycle.Event.ON_START -> viewModel.setEvent(ProfileDetailsContract.UiEvent.RequestProfileUpdate)
+            else -> Unit
+        }
+    }
 
     ProfileDetailsScreen(
         state = uiState.value,
@@ -174,8 +183,7 @@ fun ProfileDetailsScreen(
         onHashtagClick = onHashtagClick,
         onMediaClick = onMediaClick,
         onGoToWallet = onGoToWallet,
-        onFollowingClick = onFollowingClick,
-        onFollowersClick = onFollowersClick,
+        onFollowsClick = onFollowsClick,
         eventPublisher = { viewModel.setEvent(it) },
     )
 }
@@ -198,8 +206,7 @@ fun ProfileDetailsScreen(
     onHashtagClick: (String) -> Unit,
     onMediaClick: (String, String) -> Unit,
     onGoToWallet: () -> Unit,
-    onFollowingClick: () -> Unit,
-    onFollowersClick: () -> Unit,
+    onFollowsClick: (String, ProfileFollowsType) -> Unit,
     eventPublisher: (ProfileDetailsContract.UiEvent) -> Unit,
 ) {
     val density = LocalDensity.current
@@ -388,8 +395,7 @@ fun ProfileDetailsScreen(
                         },
                         onFollow = { eventPublisher(ProfileDetailsContract.UiEvent.FollowAction(state.profileId)) },
                         onUnfollow = { eventPublisher(ProfileDetailsContract.UiEvent.UnfollowAction(state.profileId)) },
-                        onFollowersClick = onFollowersClick,
-                        onFollowingClick = onFollowingClick,
+                        onFollowsClick = onFollowsClick,
                     )
 
                     if (state.isProfileMuted) {
@@ -659,8 +665,7 @@ private fun UserProfileDetails(
     onMessageClick: () -> Unit,
     onFollow: () -> Unit,
     onUnfollow: () -> Unit,
-    onFollowingClick: () -> Unit,
-    onFollowersClick: () -> Unit,
+    onFollowsClick: (String, ProfileFollowsType) -> Unit,
 ) {
     val localUriHandler = LocalUriHandler.current
     val context = LocalContext.current
@@ -751,9 +756,9 @@ private fun UserProfileDetails(
                 )
             },
             followingCount = state.profileStats?.followingCount,
-            onFollowingCountClick = onFollowingClick,
+            onFollowingCountClick = { onFollowsClick(state.profileId, ProfileFollowsType.Following) },
             followersCount = state.profileStats?.followersCount,
-            onFollowersCountClick = onFollowersClick,
+            onFollowersCountClick = { onFollowsClick(state.profileId, ProfileFollowsType.Followers) },
         )
     }
 }
@@ -1201,8 +1206,7 @@ fun PreviewProfileScreen() {
                 onZapProfileClick = {},
                 onHashtagClick = {},
                 onMediaClick = { _, _ -> },
-                onFollowingClick = {},
-                onFollowersClick = {},
+                onFollowsClick = { _, _ -> },
                 onGoToWallet = {},
                 eventPublisher = {},
             )

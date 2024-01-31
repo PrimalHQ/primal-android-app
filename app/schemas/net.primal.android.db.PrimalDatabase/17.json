@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 17,
-    "identityHash": "4b163834b78da82346bbf2d47be3be5f",
+    "identityHash": "db98a55549cb7550818bb9a09e896f8c",
     "entities": [
       {
         "tableName": "PostData",
@@ -758,18 +758,12 @@
       },
       {
         "tableName": "ProfileStats",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`profileId` TEXT NOT NULL, `joinedAt` INTEGER NOT NULL, `following` INTEGER NOT NULL, `followers` INTEGER NOT NULL, `notesCount` INTEGER NOT NULL, `repliesCount` INTEGER NOT NULL, `relaysCount` INTEGER NOT NULL, `totalReceivedZaps` INTEGER NOT NULL, `totalReceivedSats` INTEGER NOT NULL, PRIMARY KEY(`profileId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`profileId` TEXT NOT NULL, `following` INTEGER NOT NULL, `followers` INTEGER NOT NULL, `notesCount` INTEGER NOT NULL, `repliesCount` INTEGER NOT NULL, `relaysCount` INTEGER NOT NULL, `totalReceivedZaps` INTEGER NOT NULL, `totalReceivedSats` INTEGER NOT NULL, `joinedAt` INTEGER, PRIMARY KEY(`profileId`))",
         "fields": [
           {
             "fieldPath": "profileId",
             "columnName": "profileId",
             "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "joinedAt",
-            "columnName": "joinedAt",
-            "affinity": "INTEGER",
             "notNull": true
           },
           {
@@ -813,6 +807,12 @@
             "columnName": "totalReceivedSats",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "joinedAt",
+            "columnName": "joinedAt",
+            "affinity": "INTEGER",
+            "notNull": false
           }
         ],
         "primaryKey": {
@@ -1208,7 +1208,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '4b163834b78da82346bbf2d47be3be5f')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'db98a55549cb7550818bb9a09e896f8c')"
     ]
   }
 }

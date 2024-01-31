@@ -56,6 +56,7 @@ enum class NostrEventKind(val value: Int) {
     PrimalImageUploadResponse(value = 10_000_121),
     PrimalLinkPreview(value = 10_000_128),
     PrimalNotificationsSummary2(value = 10_000_132),
+    PrimalUserFollowersCounts(value = 10_000_133),
     PrimalDirectMessagesUnreadCount2(value = 10_000_134),
     PrimalWalletOperation(value = 10_000_300),
     PrimalWalletBalance(value = 10_000_301),

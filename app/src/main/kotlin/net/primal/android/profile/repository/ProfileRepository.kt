@@ -5,10 +5,14 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.filterNotNull
 import net.primal.android.core.ext.asMapByKey
 import net.primal.android.db.PrimalDatabase
-import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.explore.api.model.UsersResponse
+import net.primal.android.explore.domain.UserProfileSearchItem
+import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.nostr.ext.asProfileDataPO
 import net.primal.android.nostr.ext.asProfileStatsPO
 import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
+import net.primal.android.nostr.ext.mapAsProfileDataPO
+import net.primal.android.nostr.ext.takeContentAsPrimalUserFollowersCountsOrNull
 import net.primal.android.user.accounts.UserAccountFetcher
 import net.primal.android.user.api.UsersApi
 import net.primal.android.user.domain.Relay
@@ -33,7 +37,7 @@ class ProfileRepository @Inject constructor(
         database.profileStats().observeProfileStats(profileId = profileId).filterNotNull()
 
     suspend fun requestProfileUpdate(profileId: String) {
-        val response = usersApi.getUserProfile(pubkey = profileId)
+        val response = usersApi.getUserProfile(userId = profileId)
         val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
         val profileMetadata = response.metadata?.asProfileDataPO(cdnResources = cdnResources)
         val profileStats = response.profileStats?.asProfileStatsPO()
@@ -62,7 +66,7 @@ class ProfileRepository @Inject constructor(
     }
 
     private suspend fun updateFollowing(userId: String, reducer: Set<String>.() -> Set<String>) {
-        val userContacts = userAccountFetcher.fetchUserContactsOrNull(userId = userId) ?: throw WssException()
+        val userContacts = userAccountFetcher.fetchUserContactsOrNull(userId = userId) ?: throw MissingRelaysException()
 
         userRepository.updateContacts(userId, userContacts)
 
@@ -88,4 +92,28 @@ class ProfileRepository @Inject constructor(
             contactsUserAccount = nostrEventResponse.asUserAccountFromContactsEvent(),
         )
     }
+
+    private suspend fun queryRemoteUsers(apiBlock: suspend () -> UsersResponse): List<UserProfileSearchItem> {
+        val response = apiBlock()
+        val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
+        val profiles = response.contactsMetadata.mapAsProfileDataPO(cdnResources = cdnResources)
+        val followersCountsMap = response.followerCounts?.takeContentAsPrimalUserFollowersCountsOrNull()
+
+        database.profiles().upsertAll(data = profiles)
+
+        return profiles.map {
+            val score = followersCountsMap?.get(it.ownerId)
+            UserProfileSearchItem(metadata = it, followersCount = score)
+        }.sortedByDescending { it.followersCount }
+    }
+
+    suspend fun fetchFollowers(userId: String) =
+        queryRemoteUsers {
+            usersApi.getUserFollowers(userId = userId)
+        }
+
+    suspend fun fetchFollowing(userId: String) =
+        queryRemoteUsers {
+            usersApi.getUserFollowing(userId = userId)
+        }
 }

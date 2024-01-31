@@ -1,5 +1,6 @@
 package net.primal.android.user.api
 
+import net.primal.android.explore.api.model.UsersResponse
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.content.ContentMetadata
 import net.primal.android.user.api.model.UserContactsResponse
@@ -9,9 +10,9 @@ import net.primal.android.user.domain.Relay
 
 interface UsersApi {
 
-    suspend fun getUserProfile(pubkey: String): UserProfileResponse
+    suspend fun getUserProfile(userId: String): UserProfileResponse
 
-    suspend fun getUserContacts(pubkey: String, extendedResponse: Boolean = true): UserContactsResponse
+    suspend fun getUserContacts(userId: String, extendedResponse: Boolean = true): UserContactsResponse
 
     suspend fun setUserContacts(
         ownerId: String,
@@ -22,4 +23,8 @@ interface UsersApi {
     suspend fun setUserProfile(ownerId: String, contentMetadata: ContentMetadata): NostrEvent
 
     suspend fun getUserProfilesMetadata(userIds: Set<String>): UserProfilesResponse
+
+    suspend fun getUserFollowers(userId: String): UsersResponse
+
+    suspend fun getUserFollowing(userId: String): UsersResponse
 }
