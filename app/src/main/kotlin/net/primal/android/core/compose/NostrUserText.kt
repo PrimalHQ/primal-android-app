@@ -1,16 +1,15 @@
 package net.primal.android.core.compose
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.text.AnnotatedString
@@ -23,8 +22,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.dp
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.Verified
 import net.primal.android.core.utils.isPrimalIdentifier
@@ -42,6 +42,8 @@ fun NostrUserText(
     style: TextStyle = LocalTextStyle.current,
     overflow: TextOverflow = TextOverflow.Ellipsis,
     maxLines: Int = 1,
+    internetIdentifierBadgeSize: Dp = 14.dp,
+    internetIdentifierBadgeAlign: PlaceholderVerticalAlign = PlaceholderVerticalAlign.Center,
     annotatedStringPrefixBuilder: (AnnotatedString.Builder.() -> Unit)? = null,
     annotatedStringSuffixBuilder: (AnnotatedString.Builder.() -> Unit)? = null,
 ) {
@@ -60,33 +62,37 @@ fun NostrUserText(
             ),
         )
         if (verifiedBadge) {
+            append(' ')
             appendInlineContent("verifiedBadge", "[badge]")
+            append(' ')
         }
         annotatedStringSuffixBuilder?.invoke(this)
     }
 
     val inlineContent = mapOf(
         "verifiedBadge" to InlineTextContent(
-            placeholder = Placeholder(
-                24.sp, 24.sp, PlaceholderVerticalAlign.TextCenter,
-            ),
+            placeholder = Placeholder(style.fontSize, style.fontSize, internetIdentifierBadgeAlign),
         ) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center,
-            ) {
-                Image(
-                    imageVector = PrimalIcons.Verified,
-                    contentDescription = null,
-                    colorFilter = ColorFilter.tint(
-                        color = if (internetIdentifier.isPrimalIdentifier()) {
-                            AppTheme.colorScheme.secondary
-                        } else {
-                            AppTheme.extraColorScheme.onSurfaceVariantAlt2
-                        },
-                    ),
-                )
-            }
+            val surfaceColor = AppTheme.colorScheme.surface
+            Image(
+                modifier = Modifier
+                    .size(internetIdentifierBadgeSize)
+                    .drawBehind {
+                        drawCircle(
+                            color = if (internetIdentifier.isPrimalIdentifier()) Color.White else surfaceColor,
+                            radius = size.minDimension / 4.0f,
+                        )
+                    },
+                imageVector = PrimalIcons.Verified,
+                contentDescription = null,
+                colorFilter = ColorFilter.tint(
+                    color = if (internetIdentifier.isPrimalIdentifier()) {
+                        AppTheme.colorScheme.tertiary
+                    } else {
+                        AppTheme.extraColorScheme.onSurfaceVariantAlt2
+                    },
+                ),
+            )
         },
     )
 

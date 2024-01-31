@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.unit.dp
 import net.primal.android.R
 import net.primal.android.core.compose.AvatarThumbnailsRow
@@ -209,9 +210,12 @@ private fun NotificationListItem(
                     displayName = firstNotification.actionUserDisplayName ?: "undefined",
                     displayNameColor = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
                     internetIdentifier = firstNotification.actionUserInternetIdentifier,
+                    internetIdentifierBadgeSize = 14.dp,
+                    internetIdentifierBadgeAlign = PlaceholderVerticalAlign.TextCenter,
                     annotatedStringSuffixBuilder = {
-                        if (notifications.size > 1) append(" $andOthersText")
-                        append(" $suffixText")
+                        val appendText = if (notifications.size > 1) andOthersText else suffixText
+                        if (firstNotification.actionUserInternetIdentifier.isNullOrEmpty()) append(' ')
+                        append(appendText)
                     },
                 )
 

@@ -49,8 +49,10 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -91,6 +93,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import net.primal.android.LocalPrimalTheme
 import net.primal.android.R
 import net.primal.android.attachments.domain.findNearestOrNull
 import net.primal.android.core.compose.AdjustTemporarilySystemBarColors
@@ -119,6 +122,7 @@ import net.primal.android.core.compose.icons.primaliconpack.Message
 import net.primal.android.core.compose.icons.primaliconpack.More
 import net.primal.android.core.compose.icons.primaliconpack.UserFeedAdd
 import net.primal.android.core.compose.isEmpty
+import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.copyText
 import net.primal.android.core.utils.formatNip05Identifier
@@ -449,6 +453,7 @@ private fun ProfileTopCoverBar(
     avatarPadding: Dp = 0.dp,
 ) {
     val coverBlur = AppTheme.colorScheme.surface.copy(alpha = coverAlpha)
+    val maxCollapsed by remember { derivedStateOf { coverAlpha == MAX_COVER_TRANSPARENCY } }
     BoxWithConstraints(
         modifier = Modifier.fillMaxWidth(),
         contentAlignment = Alignment.TopCenter,
@@ -475,26 +480,32 @@ private fun ProfileTopCoverBar(
             contentScale = ContentScale.Crop,
         )
 
-        TopAppBar(
-            colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = Color.Unspecified,
-                scrolledContainerColor = Color.Unspecified,
-            ),
-            navigationIcon = navigationIcon,
-            title = title,
-            actions = {
-                ProfileDropdownMenu(
-                    profileId = state.profileId,
-                    isActiveUser = state.isActiveUser,
-                    isProfileMuted = state.isProfileMuted,
-                    isProfileFeedInActiveUserFeeds = state.isProfileFeedInActiveUserFeeds,
-                    snackbarHostState = snackbarHostState,
-                    uiScope = uiScope,
-                    name = state.profileDetails?.authorDisplayName ?: "",
-                    eventPublisher = eventPublisher,
-                )
-            },
-        )
+        Column {
+            TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Unspecified,
+                    scrolledContainerColor = Color.Unspecified,
+                ),
+                navigationIcon = navigationIcon,
+                title = title,
+                actions = {
+                    ProfileDropdownMenu(
+                        profileId = state.profileId,
+                        isActiveUser = state.isActiveUser,
+                        isProfileMuted = state.isProfileMuted,
+                        isProfileFeedInActiveUserFeeds = state.isProfileFeedInActiveUserFeeds,
+                        snackbarHostState = snackbarHostState,
+                        uiScope = uiScope,
+                        name = state.profileDetails?.authorDisplayName ?: "",
+                        eventPublisher = eventPublisher,
+                    )
+                },
+            )
+
+            if (maxCollapsed) {
+                PrimalDivider()
+            }
+        }
 
         Box(
             modifier = Modifier
@@ -675,6 +686,7 @@ private fun UserProfileDetails(
             modifier = Modifier.padding(horizontal = 16.dp),
             displayName = state.profileDetails?.authorDisplayName ?: state.profileId.asEllipsizedNpub(),
             internetIdentifier = state.profileDetails?.internetIdentifier,
+            internetIdentifierBadgeSize = 24.dp,
             style = AppTheme.typography.titleLarge,
         )
 
@@ -743,8 +755,6 @@ private fun UserProfileDetails(
             followersCount = state.profileStats?.followersCount,
             onFollowersCountClick = onFollowersClick,
         )
-
-        PrimalDivider()
     }
 }
 
@@ -773,7 +783,7 @@ private fun UserStats(
     TabRow(
         selectedTabIndex = tabIndex,
         containerColor = Color.Transparent,
-        divider = { PrimalDivider() },
+        divider = { },
         indicator = { tabPositions ->
             if (tabIndex < tabPositions.size) {
                 TabRowDefaults.Indicator(
@@ -1158,29 +1168,44 @@ private fun ErrorHandler(error: ProfileError?, snackbarHostState: SnackbarHostSt
 @Composable
 fun PreviewProfileScreen() {
     PrimalTheme(primalTheme = PrimalTheme.Sunset) {
-        ProfileDetailsScreen(
-            state = ProfileDetailsContract.UiState(
-                profileId = "profileId",
-                isProfileFollowed = false,
-                isProfileMuted = false,
-                isActiveUser = true,
-                isProfileFeedInActiveUserFeeds = false,
-                notes = emptyFlow(),
-            ),
-            onClose = {},
-            onPostClick = {},
-            onPostReplyClick = {},
-            onPostQuoteClick = {},
-            onProfileClick = {},
-            onEditProfileClick = {},
-            onMessageClick = {},
-            onZapProfileClick = {},
-            onHashtagClick = {},
-            onMediaClick = { _, _ -> },
-            onFollowingClick = {},
-            onFollowersClick = {},
-            onGoToWallet = {},
-            eventPublisher = {},
-        )
+        CompositionLocalProvider(
+            LocalPrimalTheme provides PrimalTheme.Sunset,
+        ) {
+            ProfileDetailsScreen(
+                state = ProfileDetailsContract.UiState(
+                    profileId = "b10b0d5e5fae9c6c48a8c77f7e5abd42a79e9480e25a4094051d4ba4ce14456b",
+                    profileDetails = ProfileDetailsUi(
+                        pubkey = "b10b0d5e5fae9c6c48a8c77f7e5abd42a79e9480e25a4094051d4ba4ce14456b",
+                        authorDisplayName = "alex",
+                        userDisplayName = "alex",
+                        coverCdnImage = null,
+                        avatarCdnImage = null,
+                        internetIdentifier = "alex@primal.net",
+                        lightningAddress = "alex@primal.net",
+                        about = "Primal Android",
+                        website = "https://appollo41.com",
+                    ),
+                    isProfileFollowed = false,
+                    isProfileMuted = false,
+                    isActiveUser = true,
+                    isProfileFeedInActiveUserFeeds = false,
+                    notes = emptyFlow(),
+                ),
+                onClose = {},
+                onPostClick = {},
+                onPostReplyClick = {},
+                onPostQuoteClick = {},
+                onProfileClick = {},
+                onEditProfileClick = {},
+                onMessageClick = {},
+                onZapProfileClick = {},
+                onHashtagClick = {},
+                onMediaClick = { _, _ -> },
+                onFollowingClick = {},
+                onFollowersClick = {},
+                onGoToWallet = {},
+                eventPublisher = {},
+            )
+        }
     }
 }
