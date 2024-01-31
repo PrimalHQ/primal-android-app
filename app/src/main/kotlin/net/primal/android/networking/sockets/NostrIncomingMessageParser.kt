@@ -32,7 +32,7 @@ fun String.parseIncomingMessage(): NostrIncomingMessage? {
             NostrVerb.Incoming.COUNT -> jsonArray.takeAsCountIncomingMessage()
         }
     } catch (error: Exception) {
-        Timber.e(error)
+        Timber.w(error)
         null
     }
 }
@@ -104,7 +104,7 @@ private fun JsonArray.takeAsNoticeIncomingMessage(): NostrIncomingMessage {
         try {
             UUID.fromString(it.jsonPrimitive.content)
         } catch (error: IllegalArgumentException) {
-            Timber.e(error)
+            Timber.w(error)
             null
         }
     }

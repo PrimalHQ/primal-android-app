@@ -123,12 +123,15 @@ class CreateAccountViewModel @Inject constructor(
                     currentStep = UiState.CreateAccountStep.ACCOUNT_CREATED,
                 )
             }
-        } catch (e: UnsuccessfulFileUpload) {
-            setState { copy(error = UiState.CreateError.FailedToUploadImage(e)) }
-        } catch (e: NostrPublishException) {
-            setState { copy(error = UiState.CreateError.FailedToCreateMetadata(e)) }
-        } catch (e: WssException) {
-            setState { copy(error = UiState.CreateError.FailedToCreateMetadata(e)) }
+        } catch (error: UnsuccessfulFileUpload) {
+            Timber.w(error)
+            setState { copy(error = UiState.CreateError.FailedToUploadImage(error)) }
+        } catch (error: NostrPublishException) {
+            Timber.w(error)
+            setState { copy(error = UiState.CreateError.FailedToCreateMetadata(error)) }
+        } catch (error: WssException) {
+            Timber.w(error)
+            setState { copy(error = UiState.CreateError.FailedToCreateMetadata(error)) }
         } finally {
             setState { copy(loading = false) }
         }
@@ -158,8 +161,9 @@ class CreateAccountViewModel @Inject constructor(
                     currentStep = UiState.CreateAccountStep.FOLLOW_RECOMMENDED_ACCOUNTS,
                 )
             }
-        } catch (e: IOException) {
-            setState { copy(error = UiState.CreateError.FailedToFetchRecommendedFollows(e)) }
+        } catch (error: IOException) {
+            Timber.w(error)
+            setState { copy(error = UiState.CreateError.FailedToFetchRecommendedFollows(error)) }
         } finally {
             setState { copy(loading = false) }
         }
@@ -181,10 +185,10 @@ class CreateAccountViewModel @Inject constructor(
             }
             setEffect(SideEffect.AccountCreatedAndPersisted(pubkey = userId))
         } catch (error: NostrPublishException) {
-            Timber.e(error)
+            Timber.w(error)
             setState { copy(error = UiState.CreateError.FailedToFollow(error)) }
         } catch (error: WssException) {
-            Timber.e(error)
+            Timber.w(error)
             setState { copy(error = UiState.CreateError.FailedToFollow(error)) }
         } finally {
             setState { copy(loading = false) }

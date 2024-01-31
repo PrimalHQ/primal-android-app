@@ -39,6 +39,7 @@ import net.primal.android.wallet.zaps.InvalidZapRequestException
 import net.primal.android.wallet.zaps.ZapFailureException
 import net.primal.android.wallet.zaps.ZapHandler
 import net.primal.android.wallet.zaps.hasWallet
+import timber.log.Timber
 
 @HiltViewModel
 class ExploreFeedViewModel @Inject constructor(
@@ -128,6 +129,7 @@ class ExploreFeedViewModel @Inject constructor(
                 directive = exploreQuery,
             )
         } catch (error: WssException) {
+            Timber.w(error)
             setErrorState(error = ExploreFeedError.FailedToAddToFeed(error))
         }
     }
@@ -139,6 +141,7 @@ class ExploreFeedViewModel @Inject constructor(
                 directive = exploreQuery,
             )
         } catch (error: WssException) {
+            Timber.w(error)
             setErrorState(error = ExploreFeedError.FailedToRemoveFeed(error))
         }
     }
@@ -151,8 +154,10 @@ class ExploreFeedViewModel @Inject constructor(
                     postAuthorId = postLikeAction.postAuthorId,
                 )
             } catch (error: NostrPublishException) {
+                Timber.w(error)
                 setErrorState(error = ExploreFeedError.FailedToPublishLikeEvent(error))
             } catch (error: MissingRelaysException) {
+                Timber.w(error)
                 setErrorState(error = ExploreFeedError.MissingRelaysConfiguration(error))
             }
         }
@@ -166,8 +171,10 @@ class ExploreFeedViewModel @Inject constructor(
                     postRawNostrEvent = repostAction.postNostrEvent,
                 )
             } catch (error: NostrPublishException) {
+                Timber.w(error)
                 setErrorState(error = ExploreFeedError.FailedToPublishRepostEvent(error))
             } catch (error: MissingRelaysException) {
+                Timber.w(error)
                 setErrorState(error = ExploreFeedError.MissingRelaysConfiguration(error))
             }
         }
@@ -197,10 +204,13 @@ class ExploreFeedViewModel @Inject constructor(
                     ),
                 )
             } catch (error: ZapFailureException) {
+                Timber.w(error)
                 setErrorState(error = ExploreFeedError.FailedToPublishZapEvent(error))
             } catch (error: MissingRelaysException) {
+                Timber.w(error)
                 setErrorState(error = ExploreFeedError.MissingRelaysConfiguration(error))
             } catch (error: InvalidZapRequestException) {
+                Timber.w(error)
                 setErrorState(error = ExploreFeedError.InvalidZapRequest(error))
             }
         }
@@ -213,8 +223,10 @@ class ExploreFeedViewModel @Inject constructor(
                     mutedUserId = action.profileId,
                 )
             } catch (error: WssException) {
+                Timber.w(error)
                 setErrorState(error = ExploreFeedError.FailedToMuteUser(error))
             } catch (error: NostrPublishException) {
+                Timber.w(error)
                 setErrorState(error = ExploreFeedError.FailedToMuteUser(error))
             }
         }

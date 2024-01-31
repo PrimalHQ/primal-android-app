@@ -115,7 +115,7 @@ class MessageConversationListViewModel @Inject constructor(
                     }
                 }
             } catch (error: WssException) {
-                Timber.e(error)
+                Timber.w(error)
             }
         }
 

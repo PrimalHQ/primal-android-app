@@ -12,6 +12,7 @@ import net.primal.android.messages.api.MessagesApi
 import net.primal.android.messages.api.model.MessagesRequestBody
 import net.primal.android.messages.db.DirectMessage
 import net.primal.android.networking.sockets.errors.WssException
+import timber.log.Timber
 
 @ExperimentalPagingApi
 class MessagesRemoteMediator(
@@ -73,6 +74,7 @@ class MessagesRemoteMediator(
                 messagesApi.getMessages(body = requestBody)
             }
         } catch (error: WssException) {
+            Timber.w(error)
             return MediatorResult.Error(error)
         }
 

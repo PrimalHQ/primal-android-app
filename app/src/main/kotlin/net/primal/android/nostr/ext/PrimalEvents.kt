@@ -13,7 +13,7 @@ inline fun <reified T> PrimalEvent?.takeContentOrNull(): T? {
             NostrJson.parseToJsonElement(this.content),
         )
     } catch (error: IllegalArgumentException) {
-        Timber.e(error)
+        Timber.w(error)
         null
     }
 }

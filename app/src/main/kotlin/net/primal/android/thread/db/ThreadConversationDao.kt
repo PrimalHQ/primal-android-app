@@ -29,7 +29,9 @@ interface ThreadConversationDao {
                 PostUserStats.reposted AS userReposted,
                 PostUserStats.zapped AS userZapped,
                 NULL AS feedCreatedAt,
-                CASE WHEN MutedUserData.userId IS NOT NULL THEN 1 ELSE 0 END AS isMuted
+                CASE WHEN MutedUserData.userId IS NOT NULL THEN 1 ELSE 0 END AS isMuted,
+                NULL AS replyToPostId,
+                NULL AS replyToAuthorId
             FROM PostData AS FPD1
             INNER JOIN ThreadConversationCrossRef ON FPD1.postId = ThreadConversationCrossRef.postId
             INNER JOIN PostData AS FPD2 ON ThreadConversationCrossRef.replyPostId = FPD2.postId

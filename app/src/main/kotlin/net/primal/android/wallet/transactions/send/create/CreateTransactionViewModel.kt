@@ -124,7 +124,7 @@ class CreateTransactionViewModel @Inject constructor(
                 )
                 setState { copy(transaction = transaction.copy(status = TransactionStatus.Sent)) }
             } catch (error: WssException) {
-                Timber.e(error)
+                Timber.w(error)
                 setState {
                     copy(
                         error = error,

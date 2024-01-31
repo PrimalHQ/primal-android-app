@@ -109,7 +109,7 @@ class WalletDashboardViewModel @Inject constructor(
             try {
                 walletRepository.fetchWalletBalance(userId = activeUserId)
             } catch (error: WssException) {
-                Timber.e(error)
+                Timber.w(error)
             }
         }
 
@@ -130,7 +130,7 @@ class WalletDashboardViewModel @Inject constructor(
                     purchaseToken = purchase.purchaseToken,
                 )
             } catch (error: WssException) {
-                Timber.e(error)
+                Timber.w(error)
                 val dashboardError = if (error.cause is NostrNoticeException) {
                     UiState.DashboardError.InAppPurchaseNoticeError(message = error.message)
                 } else {

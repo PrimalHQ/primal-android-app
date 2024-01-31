@@ -190,7 +190,7 @@ class WalletApiImpl @Inject constructor(
             try {
                 NostrJson.decodeFromJsonElement<ContentWalletTransaction>(it)
             } catch (error: IllegalArgumentException) {
-                Timber.e(error)
+                Timber.w(error)
                 null
             }
         }

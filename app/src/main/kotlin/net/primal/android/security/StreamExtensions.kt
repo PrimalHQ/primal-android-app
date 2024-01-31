@@ -13,10 +13,10 @@ inline fun <reified T> InputStream.readDecrypted(json: Json, encryption: Encrypt
     return try {
         json.decodeFromString(decryptedJson)
     } catch (error: SerializationException) {
-        Timber.e(error)
+        Timber.w(error)
         throw CorruptionException("Unable to deserialize decrypted value.", error)
     } catch (error: IllegalArgumentException) {
-        Timber.e(error)
+        Timber.w(error)
         throw CorruptionException("Unable to deserialize decrypted value.", error)
     }
 }

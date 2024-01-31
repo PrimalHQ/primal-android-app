@@ -32,7 +32,7 @@ inline fun <reified T> Json.decodeFromStringOrNull(string: String?): T? {
     return try {
         decodeFromString(string)
     } catch (error: IllegalArgumentException) {
-        Timber.e(error)
+        Timber.w(error)
         null
     }
 }

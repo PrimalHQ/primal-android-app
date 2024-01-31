@@ -2,11 +2,9 @@ package net.primal.android.core.compose.feed.note
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -17,28 +15,20 @@ import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import java.time.Instant
 import java.time.temporal.ChronoUnit
-import kotlinx.coroutines.launch
 import net.primal.android.attachments.domain.CdnImage
-import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.feed.model.FeedPostAction
 import net.primal.android.core.compose.feed.model.FeedPostStatsUi
 import net.primal.android.core.compose.feed.model.FeedPostUi
-import net.primal.android.core.compose.feed.model.toNoteContentUi
-import net.primal.android.core.ext.openUriSafely
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
 
@@ -56,6 +46,7 @@ fun FeedNoteCard(
     drawLineAboveAvatar: Boolean = false,
     drawLineBelowAvatar: Boolean = false,
     expanded: Boolean = false,
+    showReplyTo: Boolean = true,
     onPostClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
     onPostAction: ((FeedPostAction) -> Unit)? = null,
@@ -64,8 +55,6 @@ fun FeedNoteCard(
     onMediaClick: (String, String) -> Unit,
     onMuteUserClick: () -> Unit,
 ) {
-    val localUriHandler = LocalUriHandler.current
-    val uiScope = rememberCoroutineScope()
     val interactionSource = remember { MutableInteractionSource() }
 
     val notePaddingDp = 4.dp
@@ -120,96 +109,27 @@ fun FeedNoteCard(
                     )
                 }
 
-                Row {
-                    if (!fullWidthContent) {
-                        AvatarThumbnail(
-                            modifier = Modifier.padding(
-                                start = avatarPaddingDp,
-                                top = avatarPaddingDp,
-                            ),
-                            avatarSize = avatarSizeDp,
-                            avatarCdnImage = data.authorAvatarCdnImage,
-                            onClick = { onProfileClick(data.authorId) },
-                        )
-                    }
-
-                    Column(
-                        modifier = Modifier.padding(
-                            start = 0.dp,
-                        ),
-                    ) {
-                        FeedNoteHeader(
-                            modifier = Modifier
-                                .padding(horizontal = 8.dp)
-                                .padding(top = avatarPaddingDp)
-                                .padding(end = overflowIconSizeDp - 8.dp)
-                                .fillMaxWidth(),
-                            postTimestamp = data.timestamp,
-                            singleLine = headerSingleLine,
-                            authorAvatarVisible = fullWidthContent,
-                            authorAvatarSize = avatarSizeDp,
-                            authorDisplayName = data.authorName,
-                            authorAvatarCdnImage = data.authorAvatarCdnImage,
-                            authorInternetIdentifier = data.authorInternetIdentifier,
-                            onAuthorAvatarClick = { onProfileClick(data.authorId) },
-                        )
-
-                        val postAuthorGuessHeight = with(LocalDensity.current) { 128.dp.toPx() }
-                        val launchRippleEffect: (Offset) -> Unit = {
-                            uiScope.launch {
-                                val press =
-                                    PressInteraction.Press(
-                                        it.copy(y = it.y + postAuthorGuessHeight),
-                                    )
-                                interactionSource.emit(press)
-                                interactionSource.emit(PressInteraction.Release(press))
-                            }
-                        }
-
-                        NoteContent(
-                            modifier = Modifier
-                                .padding(horizontal = if (fullWidthContent) 10.dp else 8.dp)
-                                .padding(
-                                    start = if (forceContentIndent && fullWidthContent) {
-                                        avatarSizeDp + 6.dp
-                                    } else {
-                                        0.dp
-                                    },
-                                )
-                                .padding(
-                                    top = if (fullWidthContent || !headerSingleLine) {
-                                        10.dp
-                                    } else {
-                                        2.dp
-                                    },
-                                ),
-                            data = data.toNoteContentUi(),
-                            expanded = expanded,
-                            onClick = {
-                                launchRippleEffect(it)
-                                onPostClick(data.postId)
-                            },
-                            onProfileClick = onProfileClick,
-                            onPostClick = onPostClick,
-                            onUrlClick = {
-                                localUriHandler.openUriSafely(it)
-                            },
-                            onHashtagClick = onHashtagClick,
-                            onMediaClick = onMediaClick,
-                        )
-
-                        FeedNoteStatsRow(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 8.dp)
-                                .padding(top = 8.dp)
-                                .padding(bottom = 8.dp),
-                            postStats = data.stats,
-                            onPostAction = onPostAction,
-                            onPostLongPressAction = onPostLongClickAction,
-                        )
-                    }
-                }
+                FeedNote(
+                    fullWidthContent = fullWidthContent,
+                    avatarSizeDp = avatarSizeDp,
+                    avatarPaddingValues = PaddingValues(start = avatarPaddingDp, top = avatarPaddingDp),
+                    notePaddingValues = PaddingValues(
+                        start = 8.dp,
+                        top = avatarPaddingDp,
+                        end = overflowIconSizeDp - 8.dp,
+                    ),
+                    data = data,
+                    headerSingleLine = headerSingleLine,
+                    showReplyTo = showReplyTo,
+                    forceContentIndent = forceContentIndent,
+                    expanded = expanded,
+                    onProfileClick = onProfileClick,
+                    onPostClick = onPostClick,
+                    onHashtagClick = onHashtagClick,
+                    onMediaClick = onMediaClick,
+                    onPostAction = onPostAction,
+                    onPostLongClickAction = onPostLongClickAction,
+                )
             }
         }
     }
@@ -240,6 +160,7 @@ class FeedPostUiProvider : PreviewParameterProvider<FeedPostUi> {
                 ),
                 hashtags = listOf("#nostr"),
                 rawNostrEventJson = "",
+                replyToAuthorHandle = "alex",
             ),
             FeedPostUi(
                 postId = "random",
@@ -270,6 +191,7 @@ class FeedPostUiProvider : PreviewParameterProvider<FeedPostUi> {
                 ),
                 hashtags = listOf("#nostr"),
                 rawNostrEventJson = "",
+                replyToAuthorHandle = null,
             ),
         )
 }

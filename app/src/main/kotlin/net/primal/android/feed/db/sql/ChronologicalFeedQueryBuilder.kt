@@ -2,7 +2,7 @@ package net.primal.android.feed.db.sql
 
 import androidx.sqlite.db.SimpleSQLiteQuery
 
-class LatestFeedQueryBuilder(
+class ChronologicalFeedQueryBuilder(
     private val feedDirective: String,
     private val userPubkey: String,
 ) : FeedQueryBuilder {
@@ -24,7 +24,9 @@ class LatestFeedQueryBuilder(
                 PostUserStats.reposted AS userReposted,
                 PostUserStats.zapped AS userZapped,
                 PostData.createdAt AS feedCreatedAt,
-                CASE WHEN MutedUserData.userId IS NOT NULL THEN 1 ELSE 0 END AS isMuted
+                CASE WHEN MutedUserData.userId IS NOT NULL THEN 1 ELSE 0 END AS isMuted,
+                PostData.replyToPostId,
+                PostData.replyToAuthorId
             FROM PostData
             JOIN FeedPostDataCrossRef ON FeedPostDataCrossRef.eventId = PostData.postId
             LEFT JOIN PostUserStats ON PostUserStats.postId = PostData.postId AND PostUserStats.userId = ?
@@ -48,7 +50,9 @@ class LatestFeedQueryBuilder(
                 PostUserStats.reposted AS userReposted,
                 PostUserStats.zapped AS userZapped,
                 RepostData.createdAt AS feedCreatedAt,
-                CASE WHEN MutedUserData.userId IS NOT NULL THEN 1 ELSE 0 END AS isMuted
+                CASE WHEN MutedUserData.userId IS NOT NULL THEN 1 ELSE 0 END AS isMuted,
+                PostData.replyToPostId,
+                PostData.replyToAuthorId
             FROM RepostData
             JOIN PostData ON RepostData.postId = PostData.postId
             JOIN FeedPostDataCrossRef ON FeedPostDataCrossRef.eventId = RepostData.repostId

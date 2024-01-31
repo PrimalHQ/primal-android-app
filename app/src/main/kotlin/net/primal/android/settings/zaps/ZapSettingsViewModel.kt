@@ -87,7 +87,7 @@ class ZapSettingsViewModel @Inject constructor(
                     settingsRepository.fetchAndPersistAppSettings(userId = activeAccountStore.activeUserId())
                 }
             } catch (error: WssException) {
-                Timber.e(error)
+                Timber.w(error)
             }
         }
 
@@ -102,7 +102,7 @@ class ZapSettingsViewModel @Inject constructor(
                 )
                 setState { copy(editPresetIndex = null) }
             } catch (error: WssException) {
-                Timber.e(error)
+                Timber.w(error)
             } finally {
                 setState { copy(saving = false) }
             }
@@ -120,7 +120,7 @@ class ZapSettingsViewModel @Inject constructor(
                 )
                 setState { copy(editPresetIndex = null) }
             } catch (error: WssException) {
-                Timber.e(error)
+                Timber.w(error)
             } finally {
                 setState { copy(saving = false) }
             }

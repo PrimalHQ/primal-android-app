@@ -8,10 +8,16 @@ import net.primal.android.core.utils.parseUris
 import net.primal.android.feed.db.PostData
 import net.primal.android.nostr.model.NostrEvent
 
-fun List<NostrEvent>.mapAsPostDataPO() = map { it.asPost() }
+fun List<NostrEvent>.mapAsPostDataPO(referencedPosts: List<PostData>) = map { it.asPost(referencedPosts) }
 
-fun NostrEvent.asPost(): PostData =
-    PostData(
+fun NostrEvent.asPost(referencedPosts: List<PostData>): PostData {
+    val replyToPostId = this.tags.find { it.hasReplyMarker() }?.getTagValueOrNull()
+        ?: this.tags.find { it.hasRootMarker() }?.getTagValueOrNull()
+        ?: this.tags.filterNot { it.hasMentionMarker() }.lastOrNull { it.isEventIdTag() }?.getTagValueOrNull()
+
+    val replyToAuthorId = referencedPosts.find { it.postId == replyToPostId }?.authorId
+
+    return PostData(
         postId = this.id,
         authorId = this.pubKey,
         createdAt = this.createdAt,
@@ -21,4 +27,7 @@ fun NostrEvent.asPost(): PostData =
         hashtags = this.parseHashtags(),
         sig = this.sig,
         raw = NostrJson.encodeToString(this.toJsonObject()),
+        replyToPostId = replyToPostId,
+        replyToAuthorId = replyToAuthorId,
     )
+}

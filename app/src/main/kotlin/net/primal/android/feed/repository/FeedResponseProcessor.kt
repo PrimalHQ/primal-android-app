@@ -21,13 +21,16 @@ suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String, database
     val videoThumbnails = this.cdnResources.flatMapNotNullAsVideoThumbnailsMap()
     val linkPreviews = primalLinkPreviews.flatMapNotNullAsLinkPreviewResource().asMapByKey { it.url }
 
-    val feedPosts = posts.mapAsPostDataPO()
-    val referencedPosts = referencedPosts.mapNotNullAsPostDataPO()
+    val referencedPostsWithoutReplyTo = referencedPosts.mapNotNullAsPostDataPO()
+    val referencedPostsWithReplyTo = referencedPosts.mapNotNullAsPostDataPO(
+        referencedPosts = referencedPostsWithoutReplyTo,
+    )
+    val feedPosts = posts.mapAsPostDataPO(referencedPosts = referencedPostsWithReplyTo)
 
     val profiles = metadata.mapAsProfileDataPO(cdnResources = cdnResources)
     val profileIdToProfileDataMap = profiles.asMapByKey { it.ownerId }
 
-    val allPosts = (feedPosts + referencedPosts).map { postData ->
+    val allPosts = (referencedPostsWithReplyTo + feedPosts).map { postData ->
         val eventIdMap = profileIdToProfileDataMap.mapValues { it.value.eventId }
         postData.copy(authorMetadataId = eventIdMap[postData.authorId])
     }

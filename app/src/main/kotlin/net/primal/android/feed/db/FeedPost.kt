@@ -43,4 +43,10 @@ data class FeedPost(
         parentColumn = "repostAuthorId",
     )
     val repostAuthor: ProfileData? = null,
+
+    @Relation(
+        entityColumn = "ownerId",
+        parentColumn = "replyToAuthorId",
+    )
+    val replyToAuthor: ProfileData? = null,
 )

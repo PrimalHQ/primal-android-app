@@ -17,4 +17,6 @@ data class PostData(
     val sig: String,
     val raw: String,
     val authorMetadataId: String? = null,
+    val replyToPostId: String? = null,
+    val replyToAuthorId: String? = null,
 )

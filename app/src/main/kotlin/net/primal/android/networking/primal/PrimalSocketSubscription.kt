@@ -39,7 +39,7 @@ class PrimalSocketSubscription<T> private constructor(
                     try {
                         subscribe()
                     } catch (error: WssException) {
-                        Timber.e(error)
+                        Timber.w(error)
                     }
                 }
             }

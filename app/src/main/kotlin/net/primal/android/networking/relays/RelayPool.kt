@@ -25,6 +25,7 @@ import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.user.domain.Relay
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import timber.log.Timber
 
 class RelayPool @AssistedInject constructor(
     private val dispatchers: CoroutineDispatcherProvider,
@@ -58,6 +59,7 @@ class RelayPool @AssistedInject constructor(
                 .addHeader("User-Agent", UserAgentProvider.USER_AGENT)
                 .build()
         } catch (error: IllegalArgumentException) {
+            Timber.w(error)
             null
         }
 
@@ -108,8 +110,10 @@ class RelayPool @AssistedInject constructor(
                         val response = collectPublishResponse(eventId = nostrEvent.id)
                         responseFlow.emit(NostrPublishResult(result = response))
                     } catch (error: NostrNoticeException) {
+                        Timber.w(error)
                         responseFlow.emit(NostrPublishResult(error = error))
                     } catch (error: TimeoutCancellationException) {
+                        Timber.w(error)
                         responseFlow.emit(NostrPublishResult(error = error))
                     }
                 }

@@ -26,6 +26,7 @@ import net.primal.android.user.domain.toZapTag
 import net.primal.android.wallet.domain.ZapTarget
 import net.primal.android.wallet.nwc.model.NwcWalletRequest
 import net.primal.android.wallet.nwc.model.PayInvoiceRequest
+import timber.log.Timber
 
 class NostrNotary @Inject constructor(
     private val credentialsStore: CredentialsStore,
@@ -36,6 +37,7 @@ class NostrNotary @Inject constructor(
             val npub = Hex.decode(pubkey).toNpub()
             credentialsStore.findOrThrow(npub = npub).nsec
         } catch (error: IllegalArgumentException) {
+            Timber.w(error)
             throw NostrSignUnauthorized()
         }
     }

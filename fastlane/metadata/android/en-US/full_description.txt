@@ -1,0 +1,1 @@
+<p><i>Primal</i> is a Nostr client featuring easy onboarding, fast & snappy UI, ability to explore Nostr, and create & manage custom feeds.</p>

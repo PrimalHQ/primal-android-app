@@ -101,7 +101,7 @@ class WalletTransactionsMediator(
                 try {
                     usersApi.getUserProfilesMetadata(userIds = mentionedUserIds)
                 } catch (error: WssException) {
-                    Timber.e(error)
+                    Timber.w(error)
                     UserProfilesResponse()
                 }
             } else {

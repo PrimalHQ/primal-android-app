@@ -365,7 +365,7 @@ private fun TransactionCard(txData: TransactionDetailDataUi, onProfileClick: (St
                 val formattedUsdAmount = try {
                     numberFormat.format(usdAmount)
                 } catch (error: IllegalArgumentException) {
-                    Timber.e(error)
+                    Timber.w(error)
                     null
                 }
 

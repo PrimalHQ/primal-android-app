@@ -26,6 +26,7 @@ data class FeedPostUi(
     val stats: FeedPostStatsUi,
     val hashtags: List<String> = emptyList(),
     val rawNostrEventJson: String,
+    val replyToAuthorHandle: String?,
 )
 
 fun FeedPost.asFeedPostUi() =
@@ -46,4 +47,5 @@ fun FeedPost.asFeedPostUi() =
         stats = FeedPostStatsUi.from(postStats = this.postStats, userStats = this.userStats),
         hashtags = this.data.hashtags,
         rawNostrEventJson = this.data.raw,
+        replyToAuthorHandle = this.replyToAuthor?.usernameUiFriendly() ?: this.data.replyToAuthorId?.asEllipsizedNpub(),
     )

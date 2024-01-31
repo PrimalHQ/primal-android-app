@@ -83,7 +83,7 @@ class ExploreHomeViewModel @Inject constructor(
             try {
                 exploreRepository.fetchTrendingHashtags()
             } catch (error: WssException) {
-                Timber.e(error)
+                Timber.w(error)
             } finally {
                 setState { copy(refreshing = false) }
             }

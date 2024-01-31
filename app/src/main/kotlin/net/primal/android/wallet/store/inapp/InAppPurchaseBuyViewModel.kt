@@ -87,7 +87,7 @@ class InAppPurchaseBuyViewModel @Inject constructor(
                         )
                     }
                 } catch (error: WssException) {
-                    Timber.e(error)
+                    Timber.w(error)
                     if (_state.value.quote == null) {
                         setState { copy(error = error) }
                     }
@@ -112,7 +112,7 @@ class InAppPurchaseBuyViewModel @Inject constructor(
                     primalBillingClient.launchMinSatsBillingFlow(quote = it, activity = event.activity)
                 }
             } catch (error: InAppPurchaseException) {
-                Timber.e(error)
+                Timber.w(error)
                 setState { copy(error = error) }
             }
         }

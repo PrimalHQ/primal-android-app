@@ -128,6 +128,7 @@ import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.wallet.transactions.send.create.DraftTransaction
 import net.primal.android.wallet.utils.isLightningAddress
+import timber.log.Timber
 
 @Composable
 fun ProfileScreen(
@@ -700,6 +701,7 @@ private fun UserProfileDetails(
                     try {
                         localUriHandler.openUri(profileDetails.website)
                     } catch (error: ActivityNotFoundException) {
+                        Timber.w(error)
                         uiScope.launch {
                             Toast.makeText(
                                 context,

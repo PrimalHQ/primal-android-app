@@ -20,6 +20,7 @@ import net.primal.android.explore.search.SearchContract.UiEvent
 import net.primal.android.explore.search.SearchContract.UiState
 import net.primal.android.explore.search.ui.UserProfileUi
 import net.primal.android.networking.sockets.errors.WssException
+import timber.log.Timber
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
@@ -67,7 +68,7 @@ class SearchViewModel @Inject constructor(
                 val result = exploreRepository.searchUsers(query = query)
                 setState { copy(searchResults = result.map { it.mapAsUserProfileUi() }) }
             } catch (error: WssException) {
-                // Ignoring errors for now
+                Timber.w(error)
             } finally {
                 setState { copy(searching = false) }
             }

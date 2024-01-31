@@ -119,7 +119,7 @@ class NotificationsSettingsViewModel @Inject constructor(
                     settingsRepository.fetchAndPersistAppSettings(userId = activeAccountStore.activeUserId())
                 }
             } catch (error: WssException) {
-                Timber.e(error)
+                Timber.w(error)
                 setState { copy(error = FetchAppSettingsError(cause = error)) }
             }
         }

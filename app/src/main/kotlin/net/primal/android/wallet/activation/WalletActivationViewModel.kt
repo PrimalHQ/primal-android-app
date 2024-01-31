@@ -63,7 +63,7 @@ class WalletActivationViewModel @Inject constructor(
                 )
                 setState { copy(status = WalletActivationStatus.PendingCodeConfirmation) }
             } catch (error: WssException) {
-                Timber.e(error)
+                Timber.w(error)
                 setState { copy(error = error) }
             } finally {
                 setState { copy(working = false) }
@@ -93,7 +93,7 @@ class WalletActivationViewModel @Inject constructor(
                     )
                 }
             } catch (error: WssException) {
-                Timber.e(error)
+                Timber.w(error)
                 setState { copy(error = error) }
             } finally {
                 setState { copy(working = false) }

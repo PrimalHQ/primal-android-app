@@ -40,7 +40,6 @@
     <ID>LongMethod:ExploreFeedScreen.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun ExploreFeedScreen( state: ExploreFeedContract.UiState, onClose: () -&gt; Unit, onPostClick: (String) -&gt; Unit, onPostReplyClick: (String) -&gt; Unit, onPostQuoteClick: (String) -&gt; Unit, onProfileClick: (String) -&gt; Unit, onHashtagClick: (String) -&gt; Unit, onMediaClick: (String, String) -&gt; Unit, onGoToWallet: () -&gt; Unit, eventPublisher: (ExploreFeedContract.UiEvent) -&gt; Unit, )</ID>
     <ID>LongMethod:ExploreHomeScreen.kt$@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class) @Composable fun ExploreHomeScreen( state: ExploreHomeContract.UiState, onHashtagClick: (String) -&gt; Unit, onSearchClick: () -&gt; Unit, onPrimaryDestinationChanged: (PrimalTopLevelDestination) -&gt; Unit, onDrawerDestinationClick: (DrawerScreenDestination) -&gt; Unit, eventPublisher: (UiEvent) -&gt; Unit, )</ID>
     <ID>LongMethod:FeedLazyColumn.kt$@ExperimentalMaterial3Api @ExperimentalFoundationApi @Composable fun FeedLazyColumn( pagingItems: LazyPagingItems&lt;FeedPostUi&gt;, contentPadding: PaddingValues, listState: LazyListState, zappingState: ZappingState, onPostClick: (String) -&gt; Unit, onProfileClick: (String) -&gt; Unit, onPostLikeClick: (FeedPostUi) -&gt; Unit, onRepostClick: (FeedPostUi) -&gt; Unit, onZapClick: (FeedPostUi, ULong?, String?) -&gt; Unit, onPostReplyClick: (String) -&gt; Unit, onPostQuoteClick: (FeedPostUi) -&gt; Unit, onHashtagClick: (String) -&gt; Unit, onMediaClick: (String, String) -&gt; Unit, onGoToWallet: () -&gt; Unit, onMuteClick: ((String) -&gt; Unit)? = null, shouldShowLoadingState: Boolean = true, shouldShowNoContentState: Boolean = true, header: @Composable (LazyItemScope.() -&gt; Unit)? = null, stickyHeader: @Composable (LazyItemScope.() -&gt; Unit)? = null, )</ID>
-    <ID>LongMethod:FeedNoteCard.kt$@Composable fun FeedNoteCard( data: FeedPostUi, modifier: Modifier = Modifier, shape: Shape = CardDefaults.shape, colors: CardColors = CardDefaults.cardColors(), cardPadding: PaddingValues = PaddingValues(all = 0.dp), fullWidthNote: Boolean = false, headerSingleLine: Boolean = true, fullWidthContent: Boolean = false, forceContentIndent: Boolean = false, drawLineAboveAvatar: Boolean = false, drawLineBelowAvatar: Boolean = false, expanded: Boolean = false, onPostClick: (String) -&gt; Unit, onProfileClick: (String) -&gt; Unit, onPostAction: ((FeedPostAction) -&gt; Unit)? = null, onPostLongClickAction: ((FeedPostAction) -&gt; Unit)? = null, onHashtagClick: (String) -&gt; Unit, onMediaClick: (String, String) -&gt; Unit, onMuteUserClick: () -&gt; Unit, )</ID>
     <ID>LongMethod:FeedRemoteMediator.kt$FeedRemoteMediator$override suspend fun load(loadType: LoadType, state: PagingState&lt;Int, FeedPost&gt;): MediatorResult</ID>
     <ID>LongMethod:FeedScreen.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun FeedScreen( state: FeedContract.UiState, eventPublisher: (FeedContract.UiEvent) -&gt; Unit, onFeedsClick: () -&gt; Unit, onNewPostClick: (String?) -&gt; Unit, onPostClick: (String) -&gt; Unit, onPostReplyClick: (String) -&gt; Unit, onProfileClick: (String) -&gt; Unit, onHashtagClick: (String) -&gt; Unit, onMediaClick: (String, String) -&gt; Unit, onGoToWallet: () -&gt; Unit, onPrimaryDestinationChanged: (PrimalTopLevelDestination) -&gt; Unit, onDrawerDestinationClick: (DrawerScreenDestination) -&gt; Unit, )</ID>
     <ID>LongMethod:FeedsSettingsScreen.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun FeedsSettingsScreen( state: FeedsSettingsContract.UiState, eventPublisher: (FeedsSettingsContract.UiEvent) -&gt; Unit, onClose: () -&gt; Unit, )</ID>
@@ -152,21 +151,6 @@
     <ID>ReturnCount:NotificationEvents.kt$fun ContentPrimalNotification.asNotificationPOOrNull(): NotificationData?</ID>
     <ID>ReturnCount:NotificationsRemoteMediator.kt$NotificationsRemoteMediator$override suspend fun load(loadType: LoadType, state: PagingState&lt;Int, Notification&gt;): MediatorResult</ID>
     <ID>ReturnCount:WalletTransactionsMediator.kt$WalletTransactionsMediator$override suspend fun load(loadType: LoadType, state: PagingState&lt;Int, WalletTransaction&gt;): MediatorResult</ID>
-    <ID>SwallowedException:CredentialsStore.kt$CredentialsStore$error: DecoderException</ID>
-    <ID>SwallowedException:CredentialsStore.kt$CredentialsStore$error: IllegalArgumentException</ID>
-    <ID>SwallowedException:EditProfileViewModel.kt$EditProfileViewModel$error: WssException</ID>
-    <ID>SwallowedException:NostrEvents.kt$error: IllegalArgumentException</ID>
-    <ID>SwallowedException:NostrNotary.kt$NostrNotary$error: IllegalArgumentException</ID>
-    <ID>SwallowedException:Parsers.kt$error: SerializationException</ID>
-    <ID>SwallowedException:PostRepository.kt$PostRepository$error: WssException</ID>
-    <ID>SwallowedException:PrimalProfileStatsAndScores.kt$error: IllegalArgumentException</ID>
-    <ID>SwallowedException:ProfileScreen.kt$error: ActivityNotFoundException</ID>
-    <ID>SwallowedException:RelayPool.kt$RelayPool$error: IllegalArgumentException</ID>
-    <ID>SwallowedException:SearchViewModel.kt$SearchViewModel$error: WssException</ID>
-    <ID>SwallowedException:UriHandlerExt.kt$error: ActivityNotFoundException</ID>
-    <ID>SwallowedException:ValidationUtils.kt$error: DecoderException</ID>
-    <ID>SwallowedException:ValidationUtils.kt$error: IllegalArgumentException</ID>
-    <ID>SwallowedException:WalletActivationScreen.kt$error: IOException</ID>
     <ID>ThrowingExceptionsWithoutMessageOrCause:ExploreFeedViewModel.kt$ExploreFeedViewModel$IllegalStateException()</ID>
     <ID>ThrowingExceptionsWithoutMessageOrCause:FeedViewModel.kt$FeedViewModel$IllegalStateException()</ID>
     <ID>ThrowingExceptionsWithoutMessageOrCause:NotificationsViewModel.kt$NotificationsViewModel$IllegalStateException()</ID>

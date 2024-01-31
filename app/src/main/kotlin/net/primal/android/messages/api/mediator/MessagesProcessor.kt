@@ -18,6 +18,7 @@ import net.primal.android.nostr.ext.isNostrUri
 import net.primal.android.nostr.ext.mapAsMessageDataPO
 import net.primal.android.nostr.ext.mapAsPostDataPO
 import net.primal.android.nostr.ext.mapAsProfileDataPO
+import net.primal.android.nostr.ext.mapNotNullAsPostDataPO
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.primal.PrimalEvent
 import net.primal.android.user.api.UsersApi
@@ -67,9 +68,13 @@ class MessagesProcessor @Inject constructor(
                     userId = userId,
                     database = database,
                 )
-                response.posts.mapAsPostDataPO()
+                val referencedPostsWithoutReplies = response.referencedPosts.mapNotNullAsPostDataPO()
+                val referencedPostsWithReplies = response.referencedPosts.mapNotNullAsPostDataPO(
+                    referencedPostsWithoutReplies,
+                )
+                response.posts.mapAsPostDataPO(referencedPosts = referencedPostsWithReplies)
             } catch (error: WssException) {
-                Timber.e(error)
+                Timber.w(error)
                 emptyList()
             }
         } else {
@@ -94,7 +99,7 @@ class MessagesProcessor @Inject constructor(
                 database.profiles().upsertAll(data = profiles)
                 profiles
             } catch (error: WssException) {
-                Timber.e(error)
+                Timber.w(error)
                 emptyList()
             }
         } else {

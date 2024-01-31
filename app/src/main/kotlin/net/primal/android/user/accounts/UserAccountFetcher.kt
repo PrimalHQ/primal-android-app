@@ -7,8 +7,8 @@ import net.primal.android.core.ext.asMapByKey
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.core.utils.usernameUiFriendly
 import net.primal.android.nostr.ext.asProfileDataPO
+import net.primal.android.nostr.ext.asProfileStatsPO
 import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
-import net.primal.android.nostr.ext.takeContentAsUserProfileStatsOrNull
 import net.primal.android.user.api.UsersApi
 import net.primal.android.user.domain.UserAccount
 import net.primal.android.user.domain.asUserAccountFromContactsEvent
@@ -24,7 +24,7 @@ class UserAccountFetcher @Inject constructor(
         }
         val cdnResources = userProfileResponse.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
         val profileData = userProfileResponse.metadata?.asProfileDataPO(cdnResources = cdnResources) ?: return null
-        val userProfileStats = userProfileResponse.profileStats?.takeContentAsUserProfileStatsOrNull()
+        val profileStats = userProfileResponse.profileStats?.asProfileStatsPO()
 
         return UserAccount(
             pubkey = userId,
@@ -33,9 +33,10 @@ class UserAccountFetcher @Inject constructor(
             avatarCdnImage = profileData.avatarCdnImage,
             internetIdentifier = profileData.internetIdentifier,
             lightningAddress = profileData.lightningAddress,
-            followersCount = userProfileStats?.followersCount,
-            followingCount = userProfileStats?.followsCount,
-            notesCount = userProfileStats?.noteCount,
+            followersCount = profileStats?.followers,
+            followingCount = profileStats?.following,
+            notesCount = profileStats?.notesCount,
+            repliesCount = profileStats?.repliesCount,
         )
     }
 

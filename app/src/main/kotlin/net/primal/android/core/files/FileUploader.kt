@@ -20,6 +20,7 @@ import net.primal.android.networking.primal.PrimalVerb
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.notary.NostrNotary
+import timber.log.Timber
 
 @Singleton
 class FileUploader @Inject constructor(
@@ -48,10 +49,13 @@ class FileUploader @Inject constructor(
                 ),
             )
         } catch (error: WssException) {
+            Timber.w(error)
             throw UnsuccessfulFileUpload(cause = error)
         } catch (error: IOException) {
+            Timber.w(error)
             throw UnsuccessfulFileUpload(cause = error)
         } catch (error: UnknownHostException) {
+            Timber.w(error)
             throw UnsuccessfulFileUpload(cause = error)
         }
 

@@ -64,7 +64,7 @@ fun LoginScreen(
     LaunchedEffect(viewModel, onLoginSuccess) {
         viewModel.effect.collect {
             when (it) {
-                is LoginContract.SideEffect.LoginSuccess -> onLoginSuccess(it.pubkey)
+                is LoginContract.SideEffect.LoginSuccess -> onLoginSuccess(it.feedDirective)
             }
         }
     }

@@ -10,9 +10,9 @@ import java.time.Instant
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.minutes
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import net.primal.android.core.ext.isLatestFeed
+import net.primal.android.core.coroutines.CoroutineDispatcherProvider
+import net.primal.android.core.ext.isChronologicalFeed
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.feed.api.FeedApi
 import net.primal.android.feed.api.model.FeedRequestBody
@@ -20,32 +20,34 @@ import net.primal.android.feed.db.FeedPost
 import net.primal.android.feed.db.FeedPostDataCrossRef
 import net.primal.android.feed.db.FeedPostRemoteKey
 import net.primal.android.feed.db.FeedPostSync
+import net.primal.android.feed.db.sql.ChronologicalFeedQueryBuilder
 import net.primal.android.feed.db.sql.ExploreFeedQueryBuilder
 import net.primal.android.feed.db.sql.FeedQueryBuilder
-import net.primal.android.feed.db.sql.LatestFeedQueryBuilder
 import net.primal.android.feed.repository.persistToDatabaseAsTransaction
 import net.primal.android.networking.sockets.errors.NostrNoticeException
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.primal.content.ContentPrimalPaging
+import timber.log.Timber
 
 @ExperimentalPagingApi
 class FeedRemoteMediator(
+    private val dispatcherProvider: CoroutineDispatcherProvider,
     private val feedDirective: String,
-    private val userPubkey: String,
+    private val userId: String,
     private val feedApi: FeedApi,
     private val database: PrimalDatabase,
 ) : RemoteMediator<Int, FeedPost>() {
 
     private val feedQueryBuilder: FeedQueryBuilder = when {
-        feedDirective.isLatestFeed() -> LatestFeedQueryBuilder(
+        feedDirective.isChronologicalFeed() -> ChronologicalFeedQueryBuilder(
             feedDirective = feedDirective,
-            userPubkey = userPubkey,
+            userPubkey = userId,
         )
 
         else -> ExploreFeedQueryBuilder(
             feedDirective = feedDirective,
-            userPubkey = userPubkey,
+            userPubkey = userId,
         )
     }
 
@@ -58,14 +60,14 @@ class FeedRemoteMediator(
     }
 
     private suspend fun shouldRefreshLatestFeed(): Boolean {
-        val firstPost = withContext(Dispatchers.IO) {
+        val firstPost = withContext(dispatcherProvider.io()) {
             database.feedPosts().newestFeedPosts(query = feedQueryBuilder.feedQuery()).firstOrNull()
         }
         return firstPost.isOlderThan(2.days)
     }
 
     private suspend fun shouldRefreshNonLatestFeed(feedDirective: String): Boolean {
-        val lastCachedAt = withContext(Dispatchers.IO) {
+        val lastCachedAt = withContext(dispatcherProvider.io()) {
             database.feedPostsRemoteKeys().lastCachedAt(directive = feedDirective)
         } ?: return true
 
@@ -74,7 +76,7 @@ class FeedRemoteMediator(
 
     private suspend fun shouldResetLocalCache(feedDirective: String) =
         when {
-            feedDirective.isLatestFeed() -> shouldRefreshLatestFeed()
+            feedDirective.isChronologicalFeed() -> shouldRefreshLatestFeed()
             else -> shouldRefreshNonLatestFeed(feedDirective)
         }
 
@@ -94,11 +96,10 @@ class FeedRemoteMediator(
 
                     if (firstItem != null || lastItem != null) {
                         if (shouldResetLocalCache(feedDirective)) {
-                            withContext(Dispatchers.IO) {
+                            withContext(dispatcherProvider.io()) {
                                 database.withTransaction {
                                     database.feedPostsRemoteKeys().deleteByDirective(feedDirective)
-                                    database.feedsConnections()
-                                        .deleteConnectionsByDirective(feedDirective)
+                                    database.feedsConnections().deleteConnectionsByDirective(feedDirective)
                                     database.posts().deleteOrphanPosts()
                                 }
                             }
@@ -112,18 +113,14 @@ class FeedRemoteMediator(
 
                 LoadType.PREPEND -> {
                     val firstItem = state.firstItemOrNull()
-                        ?: withContext(Dispatchers.IO) {
+                        ?: withContext(dispatcherProvider.io()) {
                             database.feedPosts()
-                                .newestFeedPosts(
-                                    query = feedQueryBuilder.newestFeedPostsQuery(limit = 1),
-                                )
+                                .newestFeedPosts(query = feedQueryBuilder.newestFeedPostsQuery(limit = 1))
                                 .firstOrNull()
                         }
-                        ?: return MediatorResult.Success(
-                            endOfPaginationReached = true,
-                        )
+                        ?: return MediatorResult.Success(endOfPaginationReached = true)
 
-                    withContext(Dispatchers.IO) {
+                    withContext(dispatcherProvider.io()) {
                         database.feedPostsRemoteKeys().find(
                             postId = firstItem.data.postId,
                             repostId = firstItem.data.repostId,
@@ -134,18 +131,14 @@ class FeedRemoteMediator(
 
                 LoadType.APPEND -> {
                     val lastItem = state.lastItemOrNull()
-                        ?: withContext(Dispatchers.IO) {
+                        ?: withContext(dispatcherProvider.io()) {
                             database.feedPosts()
-                                .oldestFeedPosts(
-                                    query = feedQueryBuilder.oldestFeedPostsQuery(limit = 1),
-                                )
+                                .oldestFeedPosts(query = feedQueryBuilder.oldestFeedPostsQuery(limit = 1))
                                 .firstOrNull()
                         }
-                        ?: return MediatorResult.Success(
-                            endOfPaginationReached = true,
-                        )
+                        ?: return MediatorResult.Success(endOfPaginationReached = true)
 
-                    withContext(Dispatchers.IO) {
+                    withContext(dispatcherProvider.io()) {
                         database.feedPostsRemoteKeys().find(
                             postId = lastItem.data.postId,
                             repostId = lastItem.data.repostId,
@@ -157,7 +150,7 @@ class FeedRemoteMediator(
 
             val initialRequestBody = FeedRequestBody(
                 directive = feedDirective,
-                userPubKey = userPubkey,
+                userPubKey = userId,
                 limit = state.config.pageSize,
             )
 
@@ -172,8 +165,9 @@ class FeedRemoteMediator(
             }
 
             val feedResponse = try {
-                withContext(Dispatchers.IO) { feedApi.getFeed(body = feedRequestBody) }
+                withContext(dispatcherProvider.io()) { feedApi.getFeed(body = feedRequestBody) }
             } catch (error: WssException) {
+                Timber.w(error)
                 return MediatorResult.Error(error)
             }
 
@@ -181,13 +175,11 @@ class FeedRemoteMediator(
             if (pagingEvent?.untilId == pagingEvent?.sinceId) {
                 if (loadType == LoadType.PREPEND) {
                     if (prependSyncCount > 1) {
-                        withContext(Dispatchers.IO) {
+                        withContext(dispatcherProvider.io()) {
                             database.withTransaction {
                                 val actualCount = prependSyncCount - 1
                                 val postIds = database.feedPosts().newestFeedPosts(
-                                    query = feedQueryBuilder.newestFeedPostsQuery(
-                                        limit = actualCount,
-                                    ),
+                                    query = feedQueryBuilder.newestFeedPostsQuery(limit = actualCount),
                                 ).map { it.data.postId }
 
                                 database.feedPostsSync().upsert(
@@ -211,21 +203,20 @@ class FeedRemoteMediator(
                 }
             }
 
-            withContext(Dispatchers.IO) {
-                feedResponse.persistToDatabaseAsTransaction(
-                    userId = userPubkey,
-                    database = database,
-                )
+            withContext(dispatcherProvider.io()) {
+                feedResponse.persistToDatabaseAsTransaction(userId = userId, database = database)
                 val feedEvents = feedResponse.posts + feedResponse.reposts
                 feedEvents.processRemoteKeys(pagingEvent)
                 feedEvents.processFeedConnections()
             }
 
             MediatorResult.Success(endOfPaginationReached = false)
-        } catch (e: IOException) {
-            MediatorResult.Error(e)
-        } catch (e: NostrNoticeException) {
-            MediatorResult.Error(e)
+        } catch (error: IOException) {
+            Timber.w(error)
+            MediatorResult.Error(error)
+        } catch (error: NostrNoticeException) {
+            Timber.w(error)
+            MediatorResult.Error(error)
         }
     }
 
