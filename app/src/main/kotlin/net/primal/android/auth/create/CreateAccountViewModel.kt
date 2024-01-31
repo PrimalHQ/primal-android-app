@@ -178,7 +178,9 @@ class CreateAccountViewModel @Inject constructor(
                     userId = userId,
                     contacts = state.value.recommendedFollows
                         .filter { it.isCurrentUserFollowing }
-                        .map { it.pubkey }.toSet(),
+                        .map { it.pubkey }
+                        .toMutableSet()
+                        .apply { add(userId) },
                     relays = BOOTSTRAP_RELAYS,
                 )
                 settingsRepository.fetchAndPersistAppSettings(userId = userId)
