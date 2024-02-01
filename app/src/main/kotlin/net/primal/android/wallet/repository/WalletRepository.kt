@@ -42,17 +42,13 @@ class WalletRepository @Inject constructor(
     fun findTransactionById(txId: String) = database.walletTransactions().findTransactionById(txId = txId)
 
     suspend fun fetchUserWalletInfoAndUpdateUserAccount(userId: String) {
-        withContext(dispatcherProvider.io()) {
-            val response = walletApi.getWalletUserInfo(userId)
-            val kycLevel = WalletKycLevel.valueOf(response.kycLevel) ?: return@withContext
-            storeWalletInfoLocally(userId = userId, kycLevel = kycLevel, lightningAddress = response.lightningAddress)
-        }
+        val response = walletApi.getWalletUserInfo(userId)
+        val kycLevel = WalletKycLevel.valueOf(response.kycLevel) ?: return
+        storeWalletInfoLocally(userId = userId, kycLevel = kycLevel, lightningAddress = response.lightningAddress)
     }
 
     suspend fun activateWallet(userId: String, code: String): String {
-        return withContext(dispatcherProvider.io()) {
-            walletApi.activateWallet(userId, code)
-        }
+        return walletApi.activateWallet(userId, code)
     }
 
     suspend fun requestActivationCodeToEmail(

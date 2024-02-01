@@ -1,8 +1,6 @@
 package net.primal.android.user.repository
 
 import javax.inject.Inject
-import kotlinx.coroutines.withContext
-import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.files.FileUploader
 import net.primal.android.core.files.error.UnsuccessfulFileUpload
 import net.primal.android.core.serialization.json.NostrJson
@@ -10,6 +8,7 @@ import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.core.utils.usernameUiFriendly
 import net.primal.android.db.PrimalDatabase
+import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.ext.asProfileDataPO
 import net.primal.android.nostr.model.content.ContentMetadata
@@ -25,7 +24,6 @@ import net.primal.android.user.domain.WalletPreference
 import net.primal.android.wallet.domain.WalletSettings
 
 class UserRepository @Inject constructor(
-    private val dispatcherProvider: CoroutineDispatcherProvider,
     private val database: PrimalDatabase,
     private val userAccountFetcher: UserAccountFetcher,
     private val accountsStore: UserAccountsStore,
@@ -77,7 +75,7 @@ class UserRepository @Inject constructor(
         accountsStore.clearAllAccounts()
     }
 
-    @Throws(UnsuccessfulFileUpload::class)
+    @Throws(UnsuccessfulFileUpload::class, MissingRelaysException::class)
     suspend fun setProfileMetadata(userId: String, profileMetadata: ProfileMetadata) {
         val pictureUrl = if (profileMetadata.localPictureUri != null) {
             fileUploader.uploadFile(userId = userId, uri = profileMetadata.localPictureUri)
@@ -91,34 +89,31 @@ class UserRepository @Inject constructor(
             profileMetadata.remoteBannerUrl
         }
 
-        withContext(dispatcherProvider.io()) {
-            setUserProfileAndUpdateLocally(
-                userId = userId,
-                contentMetadata = ContentMetadata(
-                    displayName = profileMetadata.displayName,
-                    name = profileMetadata.username,
-                    website = profileMetadata.website,
-                    about = profileMetadata.about,
-                    lud16 = profileMetadata.lightningAddress,
-                    nip05 = profileMetadata.nostrVerification,
-                    picture = pictureUrl,
-                    banner = bannerUrl,
-                ),
-            )
-        }
+        setUserProfileAndUpdateLocally(
+            userId = userId,
+            contentMetadata = ContentMetadata(
+                displayName = profileMetadata.displayName,
+                name = profileMetadata.username,
+                website = profileMetadata.website,
+                about = profileMetadata.about,
+                lud16 = profileMetadata.lightningAddress,
+                nip05 = profileMetadata.nostrVerification,
+                picture = pictureUrl,
+                banner = bannerUrl,
+            ),
+        )
     }
 
+    @Throws(MissingRelaysException::class)
     suspend fun setLightningAddress(userId: String, lightningAddress: String) {
-        withContext(dispatcherProvider.io()) {
-            val userProfileResponse = usersApi.getUserProfile(userId = userId)
-            val metadata = NostrJson.decodeFromStringOrNull<ContentMetadata>(userProfileResponse.metadata?.content)
-                ?: throw WssException("Profile Content Metadata not found.")
+        val userProfileResponse = usersApi.getUserProfile(userId = userId)
+        val metadata = NostrJson.decodeFromStringOrNull<ContentMetadata>(userProfileResponse.metadata?.content)
+            ?: throw WssException("Profile Content Metadata not found.")
 
-            setUserProfileAndUpdateLocally(
-                userId = userId,
-                contentMetadata = metadata.copy(lud16 = lightningAddress),
-            )
-        }
+        setUserProfileAndUpdateLocally(
+            userId = userId,
+            contentMetadata = metadata.copy(lud16 = lightningAddress),
+        )
     }
 
     private suspend fun setUserProfileAndUpdateLocally(userId: String, contentMetadata: ContentMetadata) {

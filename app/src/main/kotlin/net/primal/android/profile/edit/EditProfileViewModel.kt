@@ -13,6 +13,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.files.error.UnsuccessfulFileUpload
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
@@ -28,6 +30,7 @@ import timber.log.Timber
 @HiltViewModel
 class EditProfileViewModel @Inject constructor(
     activeAccountStore: ActiveAccountStore,
+    private val dispatcherProvider: CoroutineDispatcherProvider,
     private val profileRepository: ProfileRepository,
     private val userRepository: UserRepository,
 ) : ViewModel() {
@@ -133,7 +136,9 @@ class EditProfileViewModel @Inject constructor(
             setState { copy(loading = true) }
             try {
                 val profile = state.value.toProfileMetadata()
-                userRepository.setProfileMetadata(userId = profileId, profileMetadata = profile)
+                withContext(dispatcherProvider.io()) {
+                    userRepository.setProfileMetadata(userId = profileId, profileMetadata = profile)
+                }
                 setEffect(effect = EditProfileContract.SideEffect.AccountSuccessfulyEdited)
             } catch (error: NostrPublishException) {
                 Timber.w(error)

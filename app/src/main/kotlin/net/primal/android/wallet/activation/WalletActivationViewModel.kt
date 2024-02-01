@@ -9,6 +9,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import net.primal.android.core.coroutines.CoroutineDispatcherProvider
+import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.domain.WalletPreference
@@ -20,6 +23,7 @@ import timber.log.Timber
 
 @HiltViewModel
 class WalletActivationViewModel @Inject constructor(
+    private val coroutineDispatcher: CoroutineDispatcherProvider,
     private val activeAccountStore: ActiveAccountStore,
     private val walletRepository: WalletRepository,
     private val userRepository: UserRepository,
@@ -75,15 +79,24 @@ class WalletActivationViewModel @Inject constructor(
             setState { copy(working = true) }
             try {
                 val userId = activeAccountStore.activeUserId()
-                val lightningAddress = walletRepository.activateWallet(userId, code)
-                walletRepository.fetchUserWalletInfoAndUpdateUserAccount(userId)
+                val lightningAddress = withContext(coroutineDispatcher.io()) {
+                    val lightningAddress = walletRepository.activateWallet(userId, code)
+                    walletRepository.fetchUserWalletInfoAndUpdateUserAccount(userId)
+                    lightningAddress
+                }
 
                 val activeUser = activeAccountStore.activeUserAccount()
                 if (activeUser.nostrWallet == null) {
                     userRepository.updateWalletPreference(userId, WalletPreference.PrimalWallet)
                 }
                 activeUser.primalWallet?.lightningAddress?.let {
-                    userRepository.setLightningAddress(userId = userId, lightningAddress = it)
+                    withContext(coroutineDispatcher.io()) {
+                        try {
+                            userRepository.setLightningAddress(userId = userId, lightningAddress = it)
+                        } catch (error: MissingRelaysException) {
+                            Timber.w(error)
+                        }
+                    }
                 }
 
                 setState {

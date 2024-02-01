@@ -116,7 +116,9 @@ class CreateAccountViewModel @Inject constructor(
             setState { copy(loading = true) }
             val userId = authRepository.createAccountAndLogin()
             val profile = state.value.asProfileMetadata()
-            userRepository.setProfileMetadata(userId = userId, profileMetadata = profile)
+            withContext(dispatcherProvider.io()) {
+                userRepository.setProfileMetadata(userId = userId, profileMetadata = profile)
+            }
             setState {
                 copy(
                     userId = userId,
@@ -140,7 +142,9 @@ class CreateAccountViewModel @Inject constructor(
     private suspend fun fetchRecommendedFollows() {
         try {
             setState { copy(loading = true) }
-            val response = recommendedFollowsApi.fetch(state.value.displayName)
+            val response = withContext(dispatcherProvider.io()) {
+                recommendedFollowsApi.fetch(state.value.displayName)
+            }
 
             val result = response.suggestions.map { sg ->
                 return@map sg.members.map { Pair(sg.group, it) }
