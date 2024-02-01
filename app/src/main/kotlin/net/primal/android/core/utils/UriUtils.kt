@@ -79,17 +79,18 @@ private val extensionToMimeType = mapOf(
 fun String?.detectMimeType(): String? {
     return when {
         this == null -> null
-        else -> {
-            val ref = try {
-                URL(this).file
-            } catch (error: MalformedURLException) {
-                Timber.w(error)
-                this
-            }
-            val extension = ref.substringAfterLast(".", "")
-            extensionToMimeType[extension.lowercase()]
-        }
+        else -> extensionToMimeType[this.extractExtensionFromUrl().lowercase()]
     }
+}
+
+fun String.extractExtensionFromUrl(): String {
+    val file = try {
+        URL(this).file
+    } catch (error: MalformedURLException) {
+        Timber.w(error)
+        this
+    }
+    return file.substringAfterLast(".", "")
 }
 
 private val tldExtractionRegex = Regex("(?:https?://)?(?:www\\.)?([\\w\\d\\-]+\\.[\\w\\d\\-.]+)")

@@ -212,6 +212,11 @@
     <string name="new_message_title">New message</string>
     <string name="new_message_search_hint">Search users</string>
 
+    <string name="media_gallery_context_save">Save</string>
+    <string name="media_gallery_toast_photo_saved">Photo saved.</string>
+    <string name="media_gallery_retry_save">Retry</string>
+    <string name="media_gallery_error_photo_not_saved">Unable to save photo. Please try again.</string>
+
     <string name="settings_title">Settings</string>
 
     <string name="settings_keys_title">Account</string>
