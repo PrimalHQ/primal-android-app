@@ -737,7 +737,8 @@ private fun UserProfileDetails(
             )
         }
 
-        UserStats(
+        UserTabs(
+            modifier = Modifier.padding(bottom = 8.dp),
             feedDirective = state.profileDirective,
             notesCount = state.profileStats?.notesCount,
             onNotesCountClick = {
@@ -764,7 +765,7 @@ private fun UserProfileDetails(
 }
 
 @Composable
-private fun UserStats(
+private fun UserTabs(
     feedDirective: ProfileFeedDirective,
     notesCount: Int?,
     onNotesCountClick: () -> Unit,
@@ -774,6 +775,7 @@ private fun UserStats(
     onFollowingCountClick: () -> Unit,
     followersCount: Int?,
     onFollowersCountClick: () -> Unit,
+    modifier: Modifier = Modifier,
     placeholderText: String = "-",
 ) {
     var tabIndex by remember {
@@ -786,6 +788,7 @@ private fun UserStats(
     }
 
     TabRow(
+        modifier = modifier,
         selectedTabIndex = tabIndex,
         containerColor = Color.Transparent,
         divider = { },
