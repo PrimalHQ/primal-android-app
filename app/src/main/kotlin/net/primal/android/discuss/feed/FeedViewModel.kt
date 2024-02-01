@@ -260,16 +260,21 @@ class FeedViewModel @Inject constructor(
     private fun mute(action: UiEvent.MuteAction) =
         viewModelScope.launch {
             try {
-                mutedUserRepository.muteUserAndPersistMuteList(
-                    userId = activeAccountStore.activeUserId(),
-                    mutedUserId = action.userId,
-                )
+                withContext(dispatcherProvider.io()) {
+                    mutedUserRepository.muteUserAndPersistMuteList(
+                        userId = activeAccountStore.activeUserId(),
+                        mutedUserId = action.userId,
+                    )
+                }
             } catch (error: WssException) {
                 Timber.w(error)
                 setErrorState(error = FeedError.FailedToMuteUser(error))
             } catch (error: NostrPublishException) {
                 Timber.w(error)
                 setErrorState(error = FeedError.FailedToMuteUser(error))
+            } catch (error: MissingRelaysException) {
+                Timber.w(error)
+                setErrorState(error = FeedError.MissingRelaysConfiguration(error))
             }
         }
 

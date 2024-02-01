@@ -2,6 +2,7 @@ package net.primal.android.settings.muted.repository
 
 import androidx.room.withTransaction
 import javax.inject.Inject
+import kotlin.jvm.Throws
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonArray
@@ -9,6 +10,7 @@ import kotlinx.serialization.json.jsonPrimitive
 import net.primal.android.core.ext.asMapByKey
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.networking.primal.api.PrimalImportApi
+import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.nostr.ext.asProfileDataPO
 import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
 import net.primal.android.settings.api.SettingsApi
@@ -32,6 +34,7 @@ class MutedUserRepository @Inject constructor(
         persistMuteList(muteList = muteList)
     }
 
+    @Throws(MissingRelaysException::class)
     suspend fun muteUserAndPersistMuteList(userId: String, mutedUserId: String) {
         val userMetadataEventId = withContext(Dispatchers.IO) {
             database.profiles().findMetadataEventId(mutedUserId)
@@ -48,6 +51,7 @@ class MutedUserRepository @Inject constructor(
         }
     }
 
+    @Throws(MissingRelaysException::class)
     suspend fun unmuteUserAndPersistMuteList(userId: String, unmutedUserId: String) {
         updateAndPersistMuteList(userId = userId) {
             toMutableSet().apply {

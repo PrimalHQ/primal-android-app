@@ -294,6 +294,7 @@ class ProfileDetailsViewModel @Inject constructor(
                     directive = action.directive,
                 )
             } catch (error: WssException) {
+                Timber.w(error)
                 setErrorState(error = ProfileError.FailedToAddToFeed(error))
             }
         }
@@ -306,6 +307,7 @@ class ProfileDetailsViewModel @Inject constructor(
                     directive = action.directive,
                 )
             } catch (error: WssException) {
+                Timber.w(error)
                 setErrorState(error = ProfileError.FailedToRemoveFeed(error))
             }
         }
@@ -313,14 +315,21 @@ class ProfileDetailsViewModel @Inject constructor(
     private fun mute(action: UiEvent.MuteAction) =
         viewModelScope.launch {
             try {
-                mutedUserRepository.muteUserAndPersistMuteList(
-                    userId = activeAccountStore.activeUserId(),
-                    mutedUserId = action.profileId,
-                )
+                withContext(dispatcherProvider.io()) {
+                    mutedUserRepository.muteUserAndPersistMuteList(
+                        userId = activeAccountStore.activeUserId(),
+                        mutedUserId = action.profileId,
+                    )
+                }
                 setState { copy(isProfileMuted = true) }
             } catch (error: NostrPublishException) {
+                Timber.w(error)
                 setErrorState(error = ProfileError.FailedToMuteProfile(error))
+            } catch (error: MissingRelaysException) {
+                Timber.w(error)
+                setErrorState(error = ProfileError.MissingRelaysConfiguration(error))
             } catch (error: WssException) {
+                Timber.w(error)
                 setErrorState(error = ProfileError.FailedToMuteProfile(error))
             }
         }
@@ -328,12 +337,21 @@ class ProfileDetailsViewModel @Inject constructor(
     private fun unmute(action: UiEvent.UnmuteAction) =
         viewModelScope.launch {
             try {
-                mutedUserRepository.unmuteUserAndPersistMuteList(
-                    userId = activeAccountStore.activeUserId(),
-                    unmutedUserId = action.profileId,
-                )
+                withContext(dispatcherProvider.io()) {
+                    mutedUserRepository.unmuteUserAndPersistMuteList(
+                        userId = activeAccountStore.activeUserId(),
+                        unmutedUserId = action.profileId,
+                    )
+                }
                 setState { copy(isProfileMuted = false) }
             } catch (error: NostrPublishException) {
+                Timber.w(error)
+                setErrorState(error = ProfileError.FailedToUnmuteProfile(error))
+            } catch (error: MissingRelaysException) {
+                Timber.w(error)
+                setErrorState(error = ProfileError.MissingRelaysConfiguration(error))
+            } catch (error: WssException) {
+                Timber.w(error)
                 setErrorState(error = ProfileError.FailedToUnmuteProfile(error))
             }
         }
