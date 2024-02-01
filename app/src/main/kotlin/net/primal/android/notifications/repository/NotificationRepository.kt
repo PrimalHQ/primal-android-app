@@ -7,9 +7,9 @@ import androidx.paging.PagingData
 import androidx.paging.PagingSource
 import java.time.Instant
 import javax.inject.Inject
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
+import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.notifications.api.NotificationsApi
 import net.primal.android.notifications.api.mediator.NotificationsRemoteMediator
@@ -18,6 +18,7 @@ import net.primal.android.user.accounts.active.ActiveAccountStore
 
 @OptIn(ExperimentalPagingApi::class)
 class NotificationRepository @Inject constructor(
+    private val dispatcherProvider: CoroutineDispatcherProvider,
     private val database: PrimalDatabase,
     private val notificationsApi: NotificationsApi,
     private val activeAccountStore: ActiveAccountStore,
@@ -26,7 +27,7 @@ class NotificationRepository @Inject constructor(
     fun observeUnseenNotifications() = database.notifications().allUnseenNotifications()
 
     suspend fun markAllNotificationsAsSeen() {
-        withContext(Dispatchers.IO) {
+        withContext(dispatcherProvider.io()) {
             val seenAt = Instant.now()
             val userId = activeAccountStore.activeUserId()
             notificationsApi.setLastSeenTimestamp(userId = userId)

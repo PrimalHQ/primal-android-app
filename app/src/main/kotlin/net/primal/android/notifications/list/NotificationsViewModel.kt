@@ -27,6 +27,7 @@ import net.primal.android.core.utils.usernameUiFriendly
 import net.primal.android.feed.repository.PostRepository
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
+import net.primal.android.nostr.notary.NostrSignUnauthorized
 import net.primal.android.notifications.db.Notification
 import net.primal.android.notifications.list.NotificationsContract.UiEvent
 import net.primal.android.notifications.list.NotificationsContract.UiEvent.NotificationsSeen
@@ -49,6 +50,7 @@ import net.primal.android.wallet.zaps.InvalidZapRequestException
 import net.primal.android.wallet.zaps.ZapFailureException
 import net.primal.android.wallet.zaps.ZapHandler
 import net.primal.android.wallet.zaps.hasWallet
+import timber.log.Timber
 
 @HiltViewModel
 class NotificationsViewModel @Inject constructor(
@@ -154,7 +156,13 @@ class NotificationsViewModel @Inject constructor(
 
     private fun handleNotificationsSeen() =
         viewModelScope.launch {
-            notificationsRepository.markAllNotificationsAsSeen()
+            try {
+                notificationsRepository.markAllNotificationsAsSeen()
+            } catch (error: NostrSignUnauthorized) {
+                // If user logs out on notifications screen local account gets cleared
+                // and when this is called there is no authenticated user and signing fails
+                Timber.w(error)
+            }
         }
 
     private fun likePost(postLikeAction: PostLikeAction) =
