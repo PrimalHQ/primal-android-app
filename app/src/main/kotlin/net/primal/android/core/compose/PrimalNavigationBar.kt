@@ -109,7 +109,7 @@ fun PrimalNavigationBarLightningBolt(
     onActiveDestinationClick: (() -> Unit)? = null,
     badges: Badges = Badges(),
 ) {
-    val clickDebounce by remember(activeDestination) { mutableStateOf(ClickDebounce()) }
+    val clickDebounce by remember(onTopLevelDestinationChanged) { mutableStateOf(ClickDebounce()) }
     val badgesMap = mapOf(
         Pair(PrimalTopLevelDestination.Messages, badges.unreadMessagesCount),
         Pair(PrimalTopLevelDestination.Notifications, badges.unreadNotificationsCount),
@@ -268,7 +268,7 @@ private fun RowScope.PrimalNavigationBarItem(
     badge: Int = 0,
 ) {
     val selected = primaryDestination == activeDestination
-    val clickDebounce by remember(activeDestination) { mutableStateOf(ClickDebounce()) }
+    val clickDebounce by remember { mutableStateOf(ClickDebounce()) }
     NavigationBarItem(
         selected = selected,
         onClick = { clickDebounce.processEvent(onClick) },
