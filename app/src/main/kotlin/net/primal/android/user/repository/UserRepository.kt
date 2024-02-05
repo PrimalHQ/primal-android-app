@@ -145,11 +145,17 @@ class UserRepository @Inject constructor(
     ) {
         accountsStore.getAndUpdateAccount(userId = userId) {
             copy(
-                primalWalletBalanceInBtc = balanceInBtc,
+                primalWalletState = this.primalWalletState.copy(balanceInBtc = balanceInBtc),
                 primalWalletSettings = this.primalWalletSettings.copy(
                     maxBalanceInBtc = maxBalanceInBtc ?: this.primalWalletSettings.maxBalanceInBtc,
                 ),
             )
+        }
+    }
+
+    suspend fun updatePrimalWalletLastUpdatedAt(userId: String, lastUpdatedAt: Long) {
+        accountsStore.getAndUpdateAccount(userId = userId) {
+            copy(primalWalletState = this.primalWalletState.copy(lastUpdatedAt = lastUpdatedAt))
         }
     }
 

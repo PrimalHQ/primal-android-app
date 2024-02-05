@@ -27,6 +27,8 @@ import net.primal.android.networking.primal.PrimalVerb
 import net.primal.android.nostr.ext.asMessagesTotalCount
 import net.primal.android.nostr.ext.asNotificationSummary
 import net.primal.android.nostr.ext.takeContentOrNull
+import net.primal.android.nostr.model.NostrEventKind
+import net.primal.android.nostr.model.primal.PrimalEvent
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.notifications.api.model.PubkeyRequestBody
 import net.primal.android.notifications.domain.NotificationsSummary
@@ -36,6 +38,7 @@ import net.primal.android.user.domain.Badges
 import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.api.model.BalanceRequestBody
 import net.primal.android.wallet.api.model.BalanceResponse
+import net.primal.android.wallet.api.model.LastUpdatedAtResponse
 import net.primal.android.wallet.api.model.WalletRequestBody
 import net.primal.android.wallet.domain.SubWallet
 
@@ -55,7 +58,7 @@ class SubscriptionsManager @Inject constructor(
 
     private var notificationsSummarySubscription: PrimalSocketSubscription<NotificationsSummary>? = null
     private var messagesUnreadCountSubscription: PrimalSocketSubscription<MessagesUnreadCount>? = null
-    private var walletBalanceSubscription: PrimalSocketSubscription<BalanceResponse>? = null
+    private var walletBalanceSubscription: PrimalSocketSubscription<PrimalEvent>? = null
 
     private val _badges = MutableSharedFlow<Badges>(
         replay = 1,
@@ -181,12 +184,27 @@ class SubscriptionsManager @Inject constructor(
                     ),
                 ),
             ),
-            transformer = { this.primalEvent?.takeContentOrNull<BalanceResponse>() },
-        ) {
-            userRepository.updatePrimalWalletBalance(
-                userId = userId,
-                balanceInBtc = it.amount,
-                maxBalanceInBtc = it.maxAmount,
-            )
+            transformer = { this.primalEvent },
+        ) { event ->
+            when (event.kind) {
+                NostrEventKind.PrimalWalletBalance.value -> {
+                    event.takeContentOrNull<BalanceResponse>()?.let { response ->
+                        userRepository.updatePrimalWalletBalance(
+                            userId = userId,
+                            balanceInBtc = response.amount,
+                            maxBalanceInBtc = response.maxAmount,
+                        )
+                    }
+                }
+
+                NostrEventKind.PrimalWalletUpdatedAt.value -> {
+                    event.takeContentOrNull<LastUpdatedAtResponse>()?.let { response ->
+                        userRepository.updatePrimalWalletLastUpdatedAt(
+                            userId = userId,
+                            lastUpdatedAt = response.lastUpdatedAt,
+                        )
+                    }
+                }
+            }
         }
 }

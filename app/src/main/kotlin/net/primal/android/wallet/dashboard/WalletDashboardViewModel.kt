@@ -81,8 +81,8 @@ class WalletDashboardViewModel @Inject constructor(
                         activeAccountAvatarCdnImage = it.avatarCdnImage,
                         primalWallet = it.primalWallet,
                         walletPreference = it.walletPreference,
-                        walletBalance = it.primalWalletBalanceInBtc?.toBigDecimal(),
-                        lowBalance = it.primalWalletBalanceInBtc?.toSats()?.toLong() == 0L,
+                        walletBalance = it.primalWalletState.balanceInBtc?.toBigDecimal(),
+                        lowBalance = it.primalWalletState.balanceInBtc?.toSats()?.toLong() == 0L,
                     )
                 }
             }

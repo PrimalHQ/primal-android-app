@@ -5,6 +5,7 @@ import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.nostr.model.primal.content.ContentAppSettings
 import net.primal.android.wallet.domain.WalletSettings
+import net.primal.android.wallet.domain.WalletState
 
 @Serializable
 data class UserAccount(
@@ -20,7 +21,7 @@ data class UserAccount(
     val repliesCount: Int? = null,
     val nostrWallet: NostrWalletConnect? = null,
     val primalWallet: PrimalWallet? = null,
-    val primalWalletBalanceInBtc: String? = null,
+    val primalWalletState: WalletState = WalletState(),
     val primalWalletSettings: WalletSettings = WalletSettings(),
     val walletPreference: WalletPreference = when {
         primalWallet != null -> WalletPreference.PrimalWallet

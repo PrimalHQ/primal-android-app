@@ -103,7 +103,7 @@ class ThreadViewModel @Inject constructor(
                                 walletPreference = it.data.walletPreference,
                                 zapDefault = it.data.appSettings?.zapDefault ?: this.zappingState.zapDefault,
                                 zapsConfig = it.data.appSettings?.zapsConfig ?: this.zappingState.zapsConfig,
-                                walletBalanceInBtc = it.data.primalWalletBalanceInBtc,
+                                walletBalanceInBtc = it.data.primalWalletState.balanceInBtc,
                             ),
                         )
                     }

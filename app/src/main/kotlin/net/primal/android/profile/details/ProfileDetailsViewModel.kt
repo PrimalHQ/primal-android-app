@@ -120,7 +120,7 @@ class ProfileDetailsViewModel @Inject constructor(
                             walletPreference = it.walletPreference,
                             zapDefault = it.appSettings?.zapDefault ?: this.zappingState.zapDefault,
                             zapsConfig = it.appSettings?.zapsConfig ?: this.zappingState.zapsConfig,
-                            walletBalanceInBtc = it.primalWalletBalanceInBtc,
+                            walletBalanceInBtc = it.primalWalletState.balanceInBtc,
                         ),
                     )
                 }
