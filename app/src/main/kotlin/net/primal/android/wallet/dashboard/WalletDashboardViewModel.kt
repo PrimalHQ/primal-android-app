@@ -82,6 +82,7 @@ class WalletDashboardViewModel @Inject constructor(
                         primalWallet = it.primalWallet,
                         walletPreference = it.walletPreference,
                         walletBalance = it.primalWalletState.balanceInBtc?.toBigDecimal(),
+                        lastWalletUpdatedAt = it.primalWalletState.lastUpdatedAt,
                         lowBalance = it.primalWalletState.balanceInBtc?.toSats()?.toLong() == 0L,
                     )
                 }

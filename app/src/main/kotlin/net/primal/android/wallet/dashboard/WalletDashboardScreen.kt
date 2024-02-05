@@ -139,7 +139,7 @@ fun WalletDashboardScreen(
         onErrorDismiss = { eventPublisher(UiEvent.DismissError) },
     )
 
-    LaunchedEffect(state.walletBalance) {
+    LaunchedEffect(state.lastWalletUpdatedAt) {
         pagingItems.refresh()
     }
 
