@@ -6,19 +6,19 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class ParsedLnInvoiceResponse(
     @SerialName("lninvoice") var lnInvoiceData: LnInvoiceData,
-    @SerialName("pubkey") var userId: String?,
-    val comment: String?,
+    @SerialName("pubkey") var userId: String? = null,
+    val comment: String? = null,
 )
 
 @Serializable
 data class LnInvoiceData(
     @SerialName("amount_msat") var amountMilliSats: Int,
-    var description: String?,
-    val signature: String?,
-    val currency: String?,
-    @SerialName("payment_secret") val paymentSecret: String?,
-    val date: Long?,
-    val expiry: Long?,
-    val payee: String?,
-    @SerialName("payment_hash") val paymentHash: String?,
+    var description: String? = null,
+    val signature: String? = null,
+    val currency: String? = null,
+    @SerialName("payment_secret") val paymentSecret: String? = null,
+    val date: Long? = null,
+    val expiry: Long? = null,
+    val payee: String? = null,
+    @SerialName("payment_hash") val paymentHash: String? = null,
 )
