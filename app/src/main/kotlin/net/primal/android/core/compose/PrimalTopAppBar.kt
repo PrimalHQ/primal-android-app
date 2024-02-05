@@ -20,8 +20,6 @@ import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -32,7 +30,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import net.primal.android.attachments.domain.CdnImage
-import net.primal.android.core.compose.foundation.ClickDebounce
 import net.primal.android.theme.AppTheme
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalComposeUiApi::class)
@@ -77,16 +74,13 @@ fun PrimalTopAppBar(
                         )
                     }
                 } else if (navigationIcon != null) {
-                    val clickDebounce by remember { mutableStateOf(ClickDebounce()) }
                     AppBarIcon(
                         icon = navigationIcon,
                         onClick = {
-                            clickDebounce.processEvent {
-                                if (autoCloseKeyboardOnNavigationIconClick) {
-                                    keyboardController?.hide()
-                                }
-                                onNavigationIconClick()
+                            if (autoCloseKeyboardOnNavigationIconClick) {
+                                keyboardController?.hide()
                             }
+                            onNavigationIconClick()
                         },
                         tint = navigationIconTintColor,
                     )
