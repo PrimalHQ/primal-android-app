@@ -36,5 +36,6 @@ fun ContentWalletTransaction.asWalletTransactionPO(walletAddress: String): Walle
         totalFeeInBtc = this.totalFeeInBtc,
         exchangeRate = this.exchangeRate,
         onChainAddress = this.onChainAddress,
+        onChainTxId = this.onChainTxId,
     )
 }

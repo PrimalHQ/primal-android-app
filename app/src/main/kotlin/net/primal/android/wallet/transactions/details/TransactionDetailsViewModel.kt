@@ -93,6 +93,7 @@ class TransactionDetailsViewModel @Inject constructor(
             totalFeeInSats = this.data.totalFeeInBtc?.toBigDecimal()?.abs()?.toSats(),
             exchangeRate = this.data.exchangeRate,
             onChainAddress = this.data.onChainAddress,
+            onChainTxId = this.data.onChainTxId,
             otherUserId = this.data.otherUserId,
             otherUserAvatarCdnImage = this.otherProfileData?.avatarCdnImage,
             otherUserDisplayName = this.otherProfileData?.authorNameUiFriendly(),

@@ -86,6 +86,7 @@ class WalletTransactionsMediator(
                 walletApi.getTransactions(userId = userId, body = requestBody)
             }
         } catch (error: WssException) {
+            Timber.w(error)
             return MediatorResult.Error(error)
         }
 

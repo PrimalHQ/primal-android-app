@@ -69,7 +69,7 @@ import net.primal.android.wallet.db.WalletTransactionData
         MessageConversationData::class,
         WalletTransactionData::class,
     ],
-    version = 18,
+    version = 19,
     exportSchema = true,
 )
 @TypeConverters(

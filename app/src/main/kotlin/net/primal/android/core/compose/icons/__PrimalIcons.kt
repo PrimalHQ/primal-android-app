@@ -5,6 +5,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 import net.primal.android.core.compose.icons.primaliconpack.AvatarNostrich
+import net.primal.android.core.compose.icons.primaliconpack.WalletBtcPayment
 import net.primal.android.core.compose.icons.primaliconpack.ContextAddBookmark
 import net.primal.android.core.compose.icons.primaliconpack.ContextBroadcast
 import net.primal.android.core.compose.icons.primaliconpack.ContextCopyNoteId
@@ -179,6 +180,7 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             WalletLightning,
             WalletError,
             WalletSuccess,
+            WalletBtcPayment,
             LightningBolt,
             Keyboard,
             PhotoFromGallery,

@@ -30,4 +30,5 @@ data class ContentWalletTransaction(
     @SerialName("total_fee_btc") val totalFeeInBtc: String? = null,
     @SerialName("exchange_rate") val exchangeRate: String? = null,
     @SerialName("onchainAddress") val onChainAddress: String? = null,
+    @SerialName("onchain_transaction_id") val onChainTxId: String? = null,
 )

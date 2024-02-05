@@ -42,6 +42,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -68,7 +69,9 @@ import net.primal.android.core.compose.feed.note.FeedNoteHeader
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.Copy
+import net.primal.android.core.compose.icons.primaliconpack.WalletBtcPayment
 import net.primal.android.core.compose.icons.primaliconpack.WalletLnPayment
+import net.primal.android.core.ext.openUriSafely
 import net.primal.android.core.utils.ellipsizeMiddle
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
@@ -240,7 +243,7 @@ private fun TransactionDetailDataUi.typeToReadableString(): String {
         isZap -> stringResource(id = R.string.wallet_transaction_details_type_nostr_zap)
         isStorePurchase -> stringResource(id = R.string.wallet_transaction_details_type_in_app_purchase)
         onChainAddress != null -> stringResource(
-            id = R.string.wallet_transaction_details_type_on_chain_payment,
+            id = R.string.wallet_transaction_details_type_bitcoin_payment,
         )
 
         else -> stringResource(id = R.string.wallet_transaction_details_type_lightning_payment)
@@ -249,8 +252,6 @@ private fun TransactionDetailDataUi.typeToReadableString(): String {
 
 @Composable
 private fun TransactionCard(txData: TransactionDetailDataUi, onProfileClick: (String) -> Unit) {
-    val numberFormat = remember { NumberFormat.getNumberInstance().apply { maximumFractionDigits = 2 } }
-
     val isExpandable = txData.isZap && (
         txData.txAmountInUsd != null || txData.exchangeRate != null ||
             txData.totalFeeInSats != null || txData.invoice != null
@@ -286,45 +287,11 @@ private fun TransactionCard(txData: TransactionDetailDataUi, onProfileClick: (St
                 labelStyle = AppTheme.typography.bodyMedium,
             )
         } else {
-            Row(
-                modifier = Modifier
-                    .padding(horizontal = 12.dp, vertical = 12.dp)
-                    .fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                TransactionIcon(
-                    background = Color(0xFF222222),
-                ) {
-                    Image(
-                        imageVector = PrimalIcons.WalletLnPayment,
-                        contentDescription = null,
-                        colorFilter = ColorFilter.tint(color = AppTheme.extraColorScheme.zapped),
-                    )
-                }
-
-                Column(
-                    modifier = Modifier.padding(horizontal = 10.dp),
-                ) {
-                    Text(
-                        text = txData.typeToReadableString(),
-                        style = AppTheme.typography.bodyMedium.copy(
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.SemiBold,
-                        ),
-                    )
-
-                    txData.otherUserLightningAddress?.let { lud16Receiver ->
-                        Spacer(modifier = Modifier.height(2.dp))
-                        Text(
-                            text = lud16Receiver,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            style = AppTheme.typography.bodyMedium,
-                            color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-                        )
-                    }
-                }
-            }
+            TxHeader(
+                onChainAddress = txData.onChainAddress,
+                otherUserLightningAddress = txData.otherUserLightningAddress,
+                type = txData.typeToReadableString(),
+            )
         }
 
         txData.txNote?.ifEmpty { null }?.let { note ->
@@ -338,75 +305,8 @@ private fun TransactionCard(txData: TransactionDetailDataUi, onProfileClick: (St
             )
         }
 
-        PrimalDivider()
-        TransactionDetailListItem(
-            section = stringResource(id = R.string.wallet_transaction_details_date_item),
-            value = txData.txInstant.formatToDefaultFormat(FormatStyle.MEDIUM),
-        )
-
-        PrimalDivider()
-        TransactionDetailListItem(
-            section = stringResource(id = R.string.wallet_transaction_details_status_item),
-            value = txData.txState.toReadableString(),
-        )
-
-        PrimalDivider()
-        TransactionDetailListItem(
-            section = stringResource(id = R.string.wallet_transaction_details_type_item),
-            value = txData.typeToReadableString(),
-        )
-
         if (expanded) {
-            if (txData.txAmountInUsd != null || txData.exchangeRate != null) {
-                val usdAmount = txData.txAmountInUsd ?: txData.exchangeRate?.let { rate ->
-                    txData.txAmountInSats.toBtc() / rate.toDouble()
-                }
-
-                val formattedUsdAmount = try {
-                    numberFormat.format(usdAmount)
-                } catch (error: IllegalArgumentException) {
-                    Timber.w(error)
-                    null
-                }
-
-                if (formattedUsdAmount != null) {
-                    PrimalDivider()
-                    TransactionDetailListItem(
-                        section = stringResource(id = R.string.wallet_transaction_details_original_usd_item),
-                        value = "$$formattedUsdAmount",
-                    )
-                }
-            }
-
-            txData.totalFeeInSats?.let { feeAmount ->
-                PrimalDivider()
-                TransactionDetailListItem(
-                    section = stringResource(id = R.string.wallet_transaction_details_fee_item),
-                    value = "${
-                        numberFormat.format(
-                            feeAmount.toLong(),
-                        )
-                    } ${stringResource(id = R.string.wallet_sats_suffix)}",
-                )
-            }
-
-            txData.invoice?.let { invoice ->
-                val clipboardManager = LocalClipboardManager.current
-
-                PrimalDivider()
-                TransactionDetailListItem(
-                    modifier = Modifier.clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null,
-                        onClick = {
-                            clipboardManager.setText(AnnotatedString(text = invoice))
-                        },
-                    ),
-                    section = stringResource(id = R.string.wallet_transaction_details_invoice_item),
-                    value = invoice.ellipsizeMiddle(size = 10),
-                    trailingIcon = PrimalIcons.Copy,
-                )
-            }
+            TransactionExpandableDetails(txData = txData)
         }
 
         if (isExpandable) {
@@ -432,11 +332,161 @@ private fun TransactionCard(txData: TransactionDetailDataUi, onProfileClick: (St
 }
 
 @Composable
-private fun TxState.toReadableString(): String {
+private fun TransactionExpandableDetails(txData: TransactionDetailDataUi) {
+    val numberFormat = remember { NumberFormat.getNumberInstance().apply { maximumFractionDigits = 2 } }
+
+    Column {
+        PrimalDivider()
+        TransactionDetailListItem(
+            section = stringResource(id = R.string.wallet_transaction_details_date_item),
+            value = txData.txInstant.formatToDefaultFormat(FormatStyle.MEDIUM),
+        )
+
+        PrimalDivider()
+        TransactionDetailListItem(
+            section = stringResource(id = R.string.wallet_transaction_details_status_item),
+            value = txData.txState.toReadableString(isOnChainPayment = txData.onChainAddress != null),
+        )
+
+        PrimalDivider()
+        TransactionDetailListItem(
+            section = stringResource(id = R.string.wallet_transaction_details_type_item),
+            value = txData.typeToReadableString(),
+        )
+
+        if (txData.txAmountInUsd != null || txData.exchangeRate != null) {
+            val usdAmount = txData.txAmountInUsd ?: txData.exchangeRate?.let { rate ->
+                txData.txAmountInSats.toBtc() / rate.toDouble()
+            }
+
+            numberFormat.formatSafely(usdAmount)?.let { formattedUsdAmount ->
+                PrimalDivider()
+                TransactionDetailListItem(
+                    section = stringResource(id = R.string.wallet_transaction_details_original_usd_item),
+                    value = "$$formattedUsdAmount",
+                )
+            }
+        }
+
+        txData.totalFeeInSats?.let { feeAmount ->
+            PrimalDivider()
+            TransactionDetailListItem(
+                section = if (txData.onChainAddress == null) {
+                    stringResource(id = R.string.wallet_transaction_details_fee_item)
+                } else {
+                    stringResource(id = R.string.wallet_transaction_details_mining_fee_item)
+                },
+                value = "${numberFormat.format(
+                    feeAmount.toLong(),
+                )} ${stringResource(id = R.string.wallet_sats_suffix)}",
+            )
+        }
+
+        if (txData.onChainAddress == null) {
+            txData.invoice?.let { invoice ->
+                val clipboardManager = LocalClipboardManager.current
+
+                PrimalDivider()
+                TransactionDetailListItem(
+                    modifier = Modifier.clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                        onClick = { clipboardManager.setText(AnnotatedString(text = invoice)) },
+                    ),
+                    section = stringResource(id = R.string.wallet_transaction_details_invoice_item),
+                    value = invoice.ellipsizeMiddle(size = 10),
+                    trailingIcon = PrimalIcons.Copy,
+                )
+            }
+        }
+
+        txData.onChainTxId?.let {
+            val uriHandler = LocalUriHandler.current
+            PrimalDivider()
+            TransactionDetailListItem(
+                modifier = Modifier.clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null,
+                    onClick = { uriHandler.openUriSafely("https://mempool.space/tx/$it") },
+                ),
+                section = stringResource(id = R.string.wallet_transaction_details_details_item),
+                value = stringResource(id = R.string.wallet_transaction_details_view_on_blockchain).lowercase(),
+                valueColor = AppTheme.colorScheme.secondary,
+            )
+        }
+    }
+}
+
+private fun NumberFormat.formatSafely(any: Any?): String? {
+    return try {
+        format(any)
+    } catch (error: IllegalArgumentException) {
+        Timber.w(error)
+        null
+    }
+}
+
+@Composable
+private fun TxHeader(
+    onChainAddress: String?,
+    otherUserLightningAddress: String?,
+    type: String,
+) {
+    Row(
+        modifier = Modifier
+            .padding(horizontal = 12.dp, vertical = 12.dp)
+            .fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        TransactionIcon(
+            background = Color(0xFF222222),
+        ) {
+            Image(
+                imageVector = when (onChainAddress != null) {
+                    true -> PrimalIcons.WalletBtcPayment
+                    false -> PrimalIcons.WalletLnPayment
+                },
+                contentDescription = null,
+                colorFilter = ColorFilter.tint(color = AppTheme.extraColorScheme.zapped),
+            )
+        }
+
+        Column(
+            modifier = Modifier.padding(horizontal = 10.dp),
+        ) {
+            Text(
+                text = type,
+                style = AppTheme.typography.bodyMedium.copy(
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.SemiBold,
+                ),
+            )
+
+            otherUserLightningAddress?.let { lud16Receiver ->
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = lud16Receiver,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    style = AppTheme.typography.bodyMedium,
+                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun TxState.toReadableString(isOnChainPayment: Boolean): String {
     return when (this) {
         TxState.CREATED -> stringResource(id = R.string.wallet_transaction_details_status_created)
         TxState.PROCESSING -> stringResource(id = R.string.wallet_transaction_details_status_processing)
-        TxState.SUCCEEDED -> stringResource(id = R.string.wallet_transaction_details_status_succeeded)
+        TxState.SUCCEEDED -> if (isOnChainPayment) {
+            stringResource(id = R.string.wallet_transaction_details_status_succeeded_confirmed)
+        } else {
+            stringResource(id = R.string.wallet_transaction_details_status_succeeded)
+        }
+
         TxState.FAILED -> stringResource(id = R.string.wallet_transaction_details_status_failed)
         TxState.CANCELED -> stringResource(id = R.string.wallet_transaction_details_status_canceled)
     }
@@ -459,6 +509,7 @@ private fun TransactionDetailListItem(
     section: String,
     value: String,
     modifier: Modifier = Modifier,
+    valueColor: Color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
     trailingIcon: ImageVector? = null,
 ) {
     Row(
@@ -478,7 +529,7 @@ private fun TransactionDetailListItem(
         IconText(
             text = value,
             style = AppTheme.typography.bodyMedium,
-            color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+            color = valueColor,
             trailingIcon = trailingIcon,
             trailingIconTintColor = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
         )
@@ -503,6 +554,7 @@ class TransactionParameterProvider : PreviewParameterProvider<TransactionDetailD
                 txState = TxState.SUCCEEDED,
                 invoice = "",
                 onChainAddress = null,
+                onChainTxId = "sfdas215h12j51hkj251k25k1",
                 totalFeeInSats = null,
             ),
         )

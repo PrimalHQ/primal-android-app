@@ -18,6 +18,7 @@ import net.primal.android.notifications.api.NotificationsApi
 import net.primal.android.notifications.api.model.NotificationsRequestBody
 import net.primal.android.notifications.db.Notification
 import net.primal.android.notifications.db.NotificationData
+import timber.log.Timber
 
 @ExperimentalPagingApi
 class NotificationsRemoteMediator(
@@ -100,6 +101,7 @@ class NotificationsRemoteMediator(
                 notificationsApi.getNotifications(body = requestBody)
             }
         } catch (error: WssException) {
+            Timber.w(error)
             return MediatorResult.Error(error)
         }
 

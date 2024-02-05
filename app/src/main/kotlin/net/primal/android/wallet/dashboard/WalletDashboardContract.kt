@@ -7,11 +7,11 @@ import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.user.domain.Badges
 import net.primal.android.user.domain.PrimalWallet
 import net.primal.android.user.domain.WalletPreference
-import net.primal.android.wallet.transactions.list.TransactionDataUi
+import net.primal.android.wallet.transactions.list.TransactionListItemDataUi
 
 interface WalletDashboardContract {
     data class UiState(
-        val transactions: Flow<PagingData<TransactionDataUi>>,
+        val transactions: Flow<PagingData<TransactionListItemDataUi>>,
         val activeAccountAvatarCdnImage: CdnImage? = null,
         val badges: Badges = Badges(),
         val primalWallet: PrimalWallet? = null,

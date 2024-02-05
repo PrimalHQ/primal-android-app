@@ -27,7 +27,7 @@ import net.primal.android.wallet.db.WalletTransaction
 import net.primal.android.wallet.repository.WalletRepository
 import net.primal.android.wallet.store.PrimalBillingClient
 import net.primal.android.wallet.store.domain.SatsPurchase
-import net.primal.android.wallet.transactions.list.TransactionDataUi
+import net.primal.android.wallet.transactions.list.TransactionListItemDataUi
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
 import timber.log.Timber
 
@@ -148,16 +148,20 @@ class WalletDashboardViewModel @Inject constructor(
         map { pagingData -> pagingData.map { it.mapAsTransactionDataUi() } }
 
     private fun WalletTransaction.mapAsTransactionDataUi() =
-        TransactionDataUi(
+        TransactionListItemDataUi(
             txId = this.data.id,
             txType = this.data.type,
+            txState = this.data.state,
             txAmountInSats = this.data.amountInBtc.toBigDecimal().abs().toSats(),
-            txInstant = Instant.ofEpochSecond(this.data.createdAt),
+            txCreatedAt = Instant.ofEpochSecond(this.data.createdAt),
+            txUpdatedAt = Instant.ofEpochSecond(this.data.updatedAt),
+            txCompletedAt = this.data.completedAt?.let { Instant.ofEpochSecond(it) },
             txNote = this.data.note,
             otherUserId = this.data.otherUserId,
             otherUserAvatarCdnImage = this.otherProfileData?.avatarCdnImage,
             otherUserDisplayName = this.otherProfileData?.authorNameUiFriendly(),
             isZap = this.data.isZap,
             isStorePurchase = this.data.isStorePurchase,
+            isOnChainPayment = this.data.onChainAddress != null,
         )
 }

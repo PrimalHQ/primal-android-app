@@ -30,7 +30,7 @@ import net.primal.android.theme.AppTheme
 @Composable
 fun TransactionsLazyColumn(
     modifier: Modifier,
-    pagingItems: LazyPagingItems<TransactionDataUi>,
+    pagingItems: LazyPagingItems<TransactionListItemDataUi>,
     listState: LazyListState,
     onProfileClick: (String) -> Unit,
     onTransactionClick: (String) -> Unit,
@@ -55,7 +55,7 @@ fun TransactionsLazyColumn(
         }
 
         pagingItems.itemSnapshotList.items.groupBy {
-            it.txInstant.formatDay(
+            it.txUpdatedAt.formatDay(
                 todayTranslation = today,
                 yesterdayTranslation = yesterday,
             )

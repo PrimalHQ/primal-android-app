@@ -19,6 +19,7 @@ data class TransactionDetailDataUi(
     val totalFeeInSats: ULong?,
     val exchangeRate: String?,
     val onChainAddress: String?,
+    val onChainTxId: String?,
     val otherUserId: String? = null,
     val otherUserAvatarCdnImage: CdnImage? = null,
     val otherUserInternetIdentifier: String? = null,

@@ -30,6 +30,7 @@ data class WalletTransactionData(
     val totalFeeInBtc: String?,
     val exchangeRate: String?,
     val onChainAddress: String?,
+    val onChainTxId: String?,
     val zapNoteId: String?,
     val zapNoteAuthorId: String?,
     val zappedByUserId: String?,

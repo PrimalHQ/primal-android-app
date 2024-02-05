@@ -372,8 +372,12 @@
     <string name="wallet_transaction_list_item_zap_sent">Zap sent</string>
     <string name="wallet_transaction_list_item_payment_received">Payment received</string>
     <string name="wallet_transaction_list_item_payment_sent">Payment sent</string>
+    <string name="wallet_transaction_list_item_bitcoin">Bitcoin</string>
+    <string name="wallet_transaction_list_item_lightning">Lightning</string>
+    <string name="wallet_transaction_list_item_bitcoin_pending">Incoming on-chain payment</string>
     <string name="wallet_transactions_today">Today</string>
     <string name="wallet_transactions_yesterday">Yesterday</string>
+    <string name="wallet_transactions_pending">Pending</string>
     <string name="wallet_in_app_purchase_now_button">Purchase Now</string>
     <string name="wallet_in_app_purchase_pay_label">Pay</string>
     <string name="wallet_in_app_purchase_to_receive_label">To receive</string>
@@ -436,15 +440,20 @@
     <string name="wallet_transaction_details_currents_usd_item">Current USD value</string>
     <string name="wallet_transaction_details_original_usd_item">Original USD value</string>
     <string name="wallet_transaction_details_fee_item">Transaction Fee</string>
+    <string name="wallet_transaction_details_mining_fee_item">Mining Fee</string>
+    <string name="wallet_transaction_details_details_item">Details</string>
     <string name="wallet_transaction_details_invoice_item">Invoice</string>
     <string name="wallet_transaction_details_expand_collapse_hint">Transaction details</string>
     <string name="wallet_transaction_details_type_nostr_zap">Nostr Zap</string>
     <string name="wallet_transaction_details_type_in_app_purchase">In-app Purchase</string>
+    <string name="wallet_transaction_details_type_bitcoin_payment">Bitcoin Payment</string>
     <string name="wallet_transaction_details_type_on_chain_payment">On-chain Payment</string>
     <string name="wallet_transaction_details_type_lightning_payment">Lightning Payment</string>
+    <string name="wallet_transaction_details_view_on_blockchain">View on Blockchain</string>
     <string name="wallet_transaction_details_status_created">Draft</string>
     <string name="wallet_transaction_details_status_processing">Pending</string>
     <string name="wallet_transaction_details_status_succeeded">Paid</string>
+    <string name="wallet_transaction_details_status_succeeded_confirmed">Confirmed</string>
     <string name="wallet_transaction_details_status_failed">Failed</string>
     <string name="wallet_transaction_details_status_canceled">Canceled</string>
 

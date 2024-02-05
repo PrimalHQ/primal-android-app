@@ -2,8 +2,15 @@ package net.primal.android.wallet.transactions.list
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.Surface
@@ -11,6 +18,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.stringResource
@@ -19,6 +27,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.text.NumberFormat
 import java.time.Instant
@@ -30,18 +39,20 @@ import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.WrappedContentWithSuffix
 import net.primal.android.core.compose.icons.PrimalIcons
+import net.primal.android.core.compose.icons.primaliconpack.WalletBtcPayment
 import net.primal.android.core.compose.icons.primaliconpack.WalletLnPayment
 import net.primal.android.core.compose.icons.primaliconpack.WalletPay
 import net.primal.android.core.compose.icons.primaliconpack.WalletReceive
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
+import net.primal.android.wallet.domain.TxState
 import net.primal.android.wallet.domain.TxType
 import net.primal.android.wallet.walletDepositColor
 import net.primal.android.wallet.walletWithdrawColor
 
 @Composable
 fun TransactionListItem(
-    data: TransactionDataUi,
+    data: TransactionListItemDataUi,
     numberFormat: NumberFormat,
     onAvatarClick: (String) -> Unit,
     onClick: (String) -> Unit,
@@ -55,18 +66,21 @@ fun TransactionListItem(
         ),
         leadingContent = {
             TransactionLeadingContent(
+                onChainPayment = data.isOnChainPayment,
+                isPending = data.txState == TxState.PROCESSING,
                 otherUserId = data.otherUserId,
                 otherUserAvatarCdnImage = data.otherUserAvatarCdnImage,
                 onAvatarClick = onAvatarClick,
             )
         },
         headlineContent = {
+            val suffix = data.txCompletedAt?.formatAsTime() ?: stringResource(id = R.string.wallet_transactions_pending)
             TransactionHeadlineContent(
-                wrappedText = data.otherUserDisplayName ?: when (data.txType) {
-                    TxType.DEPOSIT -> stringResource(id = R.string.wallet_transaction_list_item_received)
-                    TxType.WITHDRAW -> stringResource(id = R.string.wallet_transaction_list_item_sent)
+                wrappedText = data.otherUserDisplayName ?: when (data.isOnChainPayment) {
+                    true -> stringResource(id = R.string.wallet_transaction_list_item_bitcoin)
+                    false -> stringResource(id = R.string.wallet_transaction_list_item_lightning)
                 },
-                suffixText = " | ${data.txInstant.formatAsTime()}",
+                suffixText = " | $suffix",
             )
         },
         supportingContent = {
@@ -87,6 +101,8 @@ fun TransactionListItem(
 
 @Composable
 private fun TransactionLeadingContent(
+    onChainPayment: Boolean,
+    isPending: Boolean,
     otherUserId: String?,
     otherUserAvatarCdnImage: CdnImage?,
     onAvatarClick: (String) -> Unit,
@@ -102,10 +118,30 @@ private fun TransactionLeadingContent(
         else -> {
             TransactionIcon {
                 Image(
-                    imageVector = PrimalIcons.WalletLnPayment,
+                    imageVector = when (onChainPayment) {
+                        true -> PrimalIcons.WalletBtcPayment
+                        false -> PrimalIcons.WalletLnPayment
+                    },
                     contentDescription = null,
                     colorFilter = ColorFilter.tint(color = AppTheme.extraColorScheme.zapped),
                 )
+
+                if (isPending) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.BottomEnd,
+                    ) {
+                        Image(
+                            modifier = Modifier
+                                .size(18.dp)
+                                .clip(CircleShape)
+                                .background(color = AppTheme.colorScheme.surfaceVariant),
+                            imageVector = Icons.Default.Schedule,
+                            contentDescription = null,
+                            colorFilter = ColorFilter.tint(color = AppTheme.extraColorScheme.onSurfaceVariantAlt1),
+                        )
+                    }
+                }
             }
         }
     }
@@ -203,95 +239,135 @@ private fun Instant.formatAsTime(): String {
     return formatter.format(this.atZone(ZoneId.systemDefault()))
 }
 
-class TxDataProvider : PreviewParameterProvider<TransactionDataUi> {
-    override val values: Sequence<TransactionDataUi>
+class TxDataProvider : PreviewParameterProvider<TransactionListItemDataUi> {
+    override val values: Sequence<TransactionListItemDataUi>
         get() = sequenceOf(
-            TransactionDataUi(
+            TransactionListItemDataUi(
                 txId = "123",
                 txType = TxType.DEPOSIT,
+                txState = TxState.SUCCEEDED,
                 txAmountInSats = 9999.toULong(),
                 txNote = "Bought sats from Primal",
-                txInstant = Instant.now(),
+                txCreatedAt = Instant.now(),
+                txUpdatedAt = Instant.now(),
+                txCompletedAt = Instant.now(),
                 otherUserId = "storeId",
                 otherUserAvatarCdnImage = null,
                 isZap = false,
                 isStorePurchase = true,
+                isOnChainPayment = false,
             ),
-            TransactionDataUi(
+            TransactionListItemDataUi(
                 txId = "123",
                 txType = TxType.DEPOSIT,
+                txState = TxState.SUCCEEDED,
                 txAmountInSats = 333.toULong(),
                 txNote = null,
-                txInstant = Instant.now(),
+                txCreatedAt = Instant.now(),
+                txUpdatedAt = Instant.now(),
+                txCompletedAt = Instant.now(),
                 otherUserId = null,
                 otherUserAvatarCdnImage = null,
                 isZap = false,
                 isStorePurchase = false,
+                isOnChainPayment = false,
             ),
-            TransactionDataUi(
+            TransactionListItemDataUi(
                 txId = "123",
                 txType = TxType.WITHDRAW,
+                txState = TxState.SUCCEEDED,
                 txAmountInSats = 111.toULong(),
                 txNote = null,
-                txInstant = Instant.now(),
+                txCreatedAt = Instant.now(),
+                txUpdatedAt = Instant.now(),
+                txCompletedAt = Instant.now(),
                 otherUserId = null,
                 otherUserAvatarCdnImage = null,
                 isZap = false,
                 isStorePurchase = false,
+                isOnChainPayment = false,
             ),
-            TransactionDataUi(
+            TransactionListItemDataUi(
                 txId = "123",
                 txType = TxType.DEPOSIT,
-                txAmountInSats = 256.toULong(),
+                txState = TxState.SUCCEEDED,
+                txAmountInSats = 128256.toULong(),
                 txNote = null,
-                txInstant = Instant.now(),
+                txCreatedAt = Instant.now(),
+                txUpdatedAt = Instant.now(),
+                txCompletedAt = Instant.now(),
+                otherUserId = "abcId",
+                otherUserAvatarCdnImage = null,
+                isZap = false,
+                isStorePurchase = false,
+                isOnChainPayment = true,
+            ),
+            TransactionListItemDataUi(
+                txId = "123",
+                txType = TxType.DEPOSIT,
+                txState = TxState.SUCCEEDED,
+                txAmountInSats = 100.toULong(),
+                txNote = null,
+                txCreatedAt = Instant.now(),
+                txUpdatedAt = Instant.now(),
+                txCompletedAt = Instant.now(),
                 otherUserId = "abcId",
                 otherUserAvatarCdnImage = null,
                 isZap = true,
                 isStorePurchase = false,
+                isOnChainPayment = false,
             ),
-            TransactionDataUi(
+            TransactionListItemDataUi(
                 txId = "123",
                 txType = TxType.WITHDRAW,
+                txState = TxState.SUCCEEDED,
                 txAmountInSats = 888.toULong(),
                 txNote = null,
-                txInstant = Instant.now(),
+                txCreatedAt = Instant.now(),
+                txUpdatedAt = Instant.now(),
+                txCompletedAt = Instant.now(),
                 otherUserId = "abcId",
                 otherUserAvatarCdnImage = null,
                 isZap = true,
                 isStorePurchase = false,
+                isOnChainPayment = false,
             ),
-            TransactionDataUi(
+            TransactionListItemDataUi(
                 txId = "123",
                 txType = TxType.DEPOSIT,
+                txState = TxState.SUCCEEDED,
                 txAmountInSats = 1024.toULong(),
                 txNote = "LFG!",
-                txInstant = Instant.now(),
+                txCreatedAt = Instant.now(),
+                txUpdatedAt = Instant.now(),
+                txCompletedAt = Instant.now(),
                 otherUserId = "abdId",
                 otherUserAvatarCdnImage = null,
                 isZap = true,
                 isStorePurchase = false,
+                isOnChainPayment = false,
             ),
-            TransactionDataUi(
+            TransactionListItemDataUi(
                 txId = "123",
                 txType = TxType.WITHDRAW,
+                txState = TxState.SUCCEEDED,
                 txAmountInSats = 128.toULong(),
                 txNote = "Zap Comment",
-                txInstant = Instant.now(),
+                txCompletedAt = Instant.now(),
+                txUpdatedAt = Instant.now(),
+                txCreatedAt = Instant.now(),
                 otherUserId = "abcId",
                 otherUserAvatarCdnImage = null,
                 isZap = true,
                 isStorePurchase = false,
+                isOnChainPayment = false,
             ),
         )
 }
 
 @Preview
 @Composable
-fun PreviewTransactionListItem(
-    @PreviewParameter(provider = TxDataProvider::class)
-    tx: TransactionDataUi,
-) {
+fun PreviewTransactionListItem(@PreviewParameter(provider = TxDataProvider::class) tx: TransactionListItemDataUi) {
     PrimalTheme(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
         Surface {
             TransactionListItem(
