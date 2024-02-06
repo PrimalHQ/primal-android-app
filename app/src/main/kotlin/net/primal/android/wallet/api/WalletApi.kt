@@ -2,8 +2,9 @@ package net.primal.android.wallet.api
 
 import net.primal.android.wallet.api.model.BalanceResponse
 import net.primal.android.wallet.api.model.DepositRequestBody
-import net.primal.android.wallet.api.model.DepositResponse
 import net.primal.android.wallet.api.model.InAppPurchaseQuoteResponse
+import net.primal.android.wallet.api.model.LightningInvoiceResponse
+import net.primal.android.wallet.api.model.OnChainAddressResponse
 import net.primal.android.wallet.api.model.ParsedLnInvoiceResponse
 import net.primal.android.wallet.api.model.ParsedLnUrlResponse
 import net.primal.android.wallet.api.model.TransactionsRequestBody
@@ -31,7 +32,9 @@ interface WalletApi {
 
     suspend fun withdraw(userId: String, body: WithdrawRequestBody)
 
-    suspend fun deposit(userId: String, body: DepositRequestBody): DepositResponse
+    suspend fun createLightningInvoice(userId: String, body: DepositRequestBody): LightningInvoiceResponse
+
+    suspend fun createOnChainAddress(userId: String, body: DepositRequestBody): OnChainAddressResponse
 
     suspend fun getTransactions(userId: String, body: TransactionsRequestBody): TransactionsResponse
 

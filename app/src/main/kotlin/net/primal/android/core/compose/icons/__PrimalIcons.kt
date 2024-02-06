@@ -5,7 +5,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 import net.primal.android.core.compose.icons.primaliconpack.AvatarNostrich
-import net.primal.android.core.compose.icons.primaliconpack.WalletBtcPayment
 import net.primal.android.core.compose.icons.primaliconpack.ContextAddBookmark
 import net.primal.android.core.compose.icons.primaliconpack.ContextBroadcast
 import net.primal.android.core.compose.icons.primaliconpack.ContextCopyNoteId
@@ -80,9 +79,11 @@ import net.primal.android.core.compose.icons.primaliconpack.Unmute
 import net.primal.android.core.compose.icons.primaliconpack.UserFeedAdd
 import net.primal.android.core.compose.icons.primaliconpack.UserFeedRemove
 import net.primal.android.core.compose.icons.primaliconpack.Verified
+import net.primal.android.core.compose.icons.primaliconpack.WalletBitcoinPayment
 import net.primal.android.core.compose.icons.primaliconpack.WalletError
-import net.primal.android.core.compose.icons.primaliconpack.WalletLightning
-import net.primal.android.core.compose.icons.primaliconpack.WalletLnPayment
+import net.primal.android.core.compose.icons.primaliconpack.WalletLightningPayment
+import net.primal.android.core.compose.icons.primaliconpack.WalletLightningPaymentAlt
+import net.primal.android.core.compose.icons.primaliconpack.WalletLightningPaymentFilled
 import net.primal.android.core.compose.icons.primaliconpack.WalletPay
 import net.primal.android.core.compose.icons.primaliconpack.WalletPrimalActivation
 import net.primal.android.core.compose.icons.primaliconpack.WalletPurchaseSats
@@ -174,13 +175,14 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             Mute,
             WalletPrimalActivation,
             WalletPay,
-            WalletLnPayment,
             WalletPurchaseSats,
             WalletReceive,
-            WalletLightning,
             WalletError,
             WalletSuccess,
-            WalletBtcPayment,
+            WalletBitcoinPayment,
+            WalletLightningPayment,
+            WalletLightningPaymentFilled,
+            WalletLightningPaymentAlt,
             LightningBolt,
             Keyboard,
             PhotoFromGallery,

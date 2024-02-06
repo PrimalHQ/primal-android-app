@@ -215,6 +215,7 @@ dependencies {
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.emoji2.emojipicker)
     implementation("com.google.guava:guava:33.0.0-android")
+    implementation("com.wajahatkarim:flippable:1.5.4")
 
     implementation(libs.navigation.material)
 

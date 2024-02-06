@@ -15,12 +15,14 @@ import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.api.WalletApi
 import net.primal.android.wallet.api.mediator.WalletTransactionsMediator
 import net.primal.android.wallet.api.model.DepositRequestBody
-import net.primal.android.wallet.api.model.DepositResponse
 import net.primal.android.wallet.api.model.InAppPurchaseQuoteResponse
+import net.primal.android.wallet.api.model.LightningInvoiceResponse
+import net.primal.android.wallet.api.model.OnChainAddressResponse
 import net.primal.android.wallet.api.model.ParsedLnInvoiceResponse
 import net.primal.android.wallet.api.model.ParsedLnUrlResponse
 import net.primal.android.wallet.api.model.WithdrawRequestBody
 import net.primal.android.wallet.db.WalletTransaction
+import net.primal.android.wallet.domain.Network
 import net.primal.android.wallet.domain.SubWallet
 import net.primal.android.wallet.domain.WalletKycLevel
 
@@ -69,19 +71,24 @@ class WalletRepository @Inject constructor(
         }
     }
 
-    suspend fun deposit(
+    suspend fun createLightningInvoice(
         userId: String,
         amountInBtc: String?,
         comment: String?,
-    ): DepositResponse {
+    ): LightningInvoiceResponse {
         return withContext(dispatcherProvider.io()) {
-            walletApi.deposit(
+            walletApi.createLightningInvoice(
                 userId = userId,
-                body = DepositRequestBody(
-                    subWallet = SubWallet.Open,
-                    amountBtc = amountInBtc,
-                    description = comment,
-                ),
+                body = DepositRequestBody(subWallet = SubWallet.Open, amountBtc = amountInBtc, description = comment),
+            )
+        }
+    }
+
+    suspend fun generateOnChainAddress(userId: String): OnChainAddressResponse {
+        return withContext(dispatcherProvider.io()) {
+            walletApi.createOnChainAddress(
+                userId = userId,
+                body = DepositRequestBody(subWallet = SubWallet.Open, network = Network.Bitcoin),
             )
         }
     }

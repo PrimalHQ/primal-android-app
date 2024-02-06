@@ -12,9 +12,13 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.android.wallet.domain.Network
 import net.primal.android.wallet.repository.WalletRepository
 import net.primal.android.wallet.transactions.receive.ReceivePaymentContract.UiEvent
 import net.primal.android.wallet.transactions.receive.ReceivePaymentContract.UiState
+import net.primal.android.wallet.transactions.receive.model.PaymentDetails
+import net.primal.android.wallet.transactions.receive.tabs.ReceivePaymentTab
+import timber.log.Timber
 
 @HiltViewModel
 class ReceivePaymentViewModel @Inject constructor(
@@ -22,7 +26,7 @@ class ReceivePaymentViewModel @Inject constructor(
     private val walletRepository: WalletRepository,
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(UiState())
+    private val _state = MutableStateFlow(UiState(initialTab = ReceivePaymentTab.Lightning))
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) =
         viewModelScope.launch {
@@ -33,6 +37,7 @@ class ReceivePaymentViewModel @Inject constructor(
     fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
 
     init {
+        fetchOnChainAddress()
         observeEvents()
         observeActiveAccount()
     }
@@ -45,6 +50,7 @@ class ReceivePaymentViewModel @Inject constructor(
                     UiEvent.CancelInvoiceCreation -> setState { copy(editMode = false) }
                     is UiEvent.CreateInvoice -> createInvoice(amountInBtc = it.amountInBtc, comment = it.comment)
                     UiEvent.DismissError -> setState { copy(error = null) }
+                    is UiEvent.ChangeNetwork -> changeNetwork(network = it.network)
                 }
             }
         }
@@ -56,39 +62,79 @@ class ReceivePaymentViewModel @Inject constructor(
                 .collect {
                     setState {
                         copy(
-                            loading = false,
-                            paymentDetails = this.paymentDetails.copy(
-                                lightningAddress = it,
-                            ),
+                            lightningNetworkDetails = this.lightningNetworkDetails.copy(address = it),
                         )
                     }
                 }
         }
 
+    private fun fetchOnChainAddress() =
+        viewModelScope.launch {
+            setState { copy(loading = true) }
+            try {
+                val response = walletRepository.generateOnChainAddress(userId = activeAccountStore.activeUserId())
+                setState {
+                    copy(bitcoinNetworkDetails = this.bitcoinNetworkDetails.copy(address = response.onChainAddress))
+                }
+            } catch (error: WssException) {
+                Timber.w(error)
+            } finally {
+                setState { copy(loading = false) }
+            }
+        }
+
     private fun createInvoice(amountInBtc: String, comment: String?) =
         viewModelScope.launch {
-            setState { copy(creating = true) }
+            setState { copy(creatingInvoice = true) }
             try {
-                val response = walletRepository.deposit(
+                val response = walletRepository.createLightningInvoice(
                     userId = activeAccountStore.activeUserId(),
                     amountInBtc = amountInBtc,
                     comment = comment,
                 )
+
                 setState {
                     copy(
                         editMode = false,
                         paymentDetails = PaymentDetails(
-                            invoice = response.lnInvoice,
                             amountInBtc = amountInBtc,
                             comment = comment,
-                            lightningAddress = this.paymentDetails.lightningAddress,
+                        ),
+                        lightningNetworkDetails = this.lightningNetworkDetails.copy(
+                            invoice = response.lnInvoice,
+                        ),
+                        bitcoinNetworkDetails = this.bitcoinNetworkDetails.copy(
+                            invoice = "bitcoin:${this.bitcoinNetworkDetails.address}?amount=$amountInBtc".let {
+                                if (!comment.isNullOrEmpty()) "$it&label=$comment" else it
+                            },
                         ),
                     )
                 }
             } catch (error: WssException) {
-                setState { copy(error = UiState.ReceivePaymentError.FailedToCreateInvoice(cause = error)) }
+                Timber.w(error)
+                setState { copy(error = UiState.ReceivePaymentError.FailedToCreateLightningInvoice(cause = error)) }
             } finally {
-                setState { copy(creating = false) }
+                setState { copy(creatingInvoice = false) }
+            }
+        }
+
+    private fun changeNetwork(network: Network) =
+        viewModelScope.launch {
+            when (network) {
+                Network.Lightning -> setState {
+                    copy(currentTab = ReceivePaymentTab.Lightning)
+                }
+
+                Network.Bitcoin -> {
+                    val state = _state.value
+                    if (state.bitcoinNetworkDetails.address == null && !state.loading) {
+                        fetchOnChainAddress()
+                    }
+
+                    setState {
+                        copy(currentTab = ReceivePaymentTab.Bitcoin)
+                    }
+                }
             }
         }
 }

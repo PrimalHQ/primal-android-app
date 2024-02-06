@@ -69,8 +69,8 @@ import net.primal.android.core.compose.feed.note.FeedNoteHeader
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.Copy
-import net.primal.android.core.compose.icons.primaliconpack.WalletBtcPayment
-import net.primal.android.core.compose.icons.primaliconpack.WalletLnPayment
+import net.primal.android.core.compose.icons.primaliconpack.WalletBitcoinPayment
+import net.primal.android.core.compose.icons.primaliconpack.WalletLightningPaymentAlt
 import net.primal.android.core.ext.openUriSafely
 import net.primal.android.core.utils.ellipsizeMiddle
 import net.primal.android.theme.AppTheme
@@ -443,8 +443,8 @@ private fun TxHeader(
         ) {
             Image(
                 imageVector = when (onChainAddress != null) {
-                    true -> PrimalIcons.WalletBtcPayment
-                    false -> PrimalIcons.WalletLnPayment
+                    true -> PrimalIcons.WalletBitcoinPayment
+                    false -> PrimalIcons.WalletLightningPaymentAlt
                 },
                 contentDescription = null,
                 colorFilter = ColorFilter.tint(color = AppTheme.extraColorScheme.zapped),

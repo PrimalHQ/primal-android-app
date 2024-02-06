@@ -28,12 +28,13 @@ import net.primal.android.wallet.api.model.ActivateWalletRequestBody
 import net.primal.android.wallet.api.model.BalanceRequestBody
 import net.primal.android.wallet.api.model.BalanceResponse
 import net.primal.android.wallet.api.model.DepositRequestBody
-import net.primal.android.wallet.api.model.DepositResponse
 import net.primal.android.wallet.api.model.GetActivationCodeRequestBody
 import net.primal.android.wallet.api.model.InAppPurchaseQuoteRequestBody
 import net.primal.android.wallet.api.model.InAppPurchaseQuoteResponse
 import net.primal.android.wallet.api.model.InAppPurchaseRequestBody
 import net.primal.android.wallet.api.model.IsWalletUserRequestBody
+import net.primal.android.wallet.api.model.LightningInvoiceResponse
+import net.primal.android.wallet.api.model.OnChainAddressResponse
 import net.primal.android.wallet.api.model.ParseLnInvoiceRequestBody
 import net.primal.android.wallet.api.model.ParseLnUrlRequestBody
 import net.primal.android.wallet.api.model.ParsedLnInvoiceResponse
@@ -153,7 +154,7 @@ class WalletApiImpl @Inject constructor(
         )
     }
 
-    override suspend fun deposit(userId: String, body: DepositRequestBody): DepositResponse {
+    override suspend fun createLightningInvoice(userId: String, body: DepositRequestBody): LightningInvoiceResponse {
         val response = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.WALLET,
@@ -166,7 +167,24 @@ class WalletApiImpl @Inject constructor(
         )
 
         return response.findPrimalEvent(NostrEventKind.PrimalWalletDepositInvoice)
-            ?.takeContentOrNull<DepositResponse>()
+            ?.takeContentOrNull<LightningInvoiceResponse>()
+            ?: throw WssException("Missing or invalid content in response.")
+    }
+
+    override suspend fun createOnChainAddress(userId: String, body: DepositRequestBody): OnChainAddressResponse {
+        val response = primalApiClient.query(
+            message = PrimalCacheFilter(
+                primalVerb = PrimalVerb.WALLET,
+                optionsJson = buildWalletOptionsJson(
+                    userId = userId,
+                    walletVerb = WalletOperationVerb.DEPOSIT,
+                    requestBody = body,
+                ),
+            ),
+        )
+
+        return response.findPrimalEvent(NostrEventKind.PrimalWalletOnChainAddress)
+            ?.takeContentOrNull<OnChainAddressResponse>()
             ?: throw WssException("Missing or invalid content in response.")
     }
 

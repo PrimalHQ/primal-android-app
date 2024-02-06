@@ -39,8 +39,8 @@ import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.WrappedContentWithSuffix
 import net.primal.android.core.compose.icons.PrimalIcons
-import net.primal.android.core.compose.icons.primaliconpack.WalletBtcPayment
-import net.primal.android.core.compose.icons.primaliconpack.WalletLnPayment
+import net.primal.android.core.compose.icons.primaliconpack.WalletBitcoinPayment
+import net.primal.android.core.compose.icons.primaliconpack.WalletLightningPaymentAlt
 import net.primal.android.core.compose.icons.primaliconpack.WalletPay
 import net.primal.android.core.compose.icons.primaliconpack.WalletReceive
 import net.primal.android.theme.AppTheme
@@ -119,8 +119,8 @@ private fun TransactionLeadingContent(
             TransactionIcon {
                 Image(
                     imageVector = when (onChainPayment) {
-                        true -> PrimalIcons.WalletBtcPayment
-                        false -> PrimalIcons.WalletLnPayment
+                        true -> PrimalIcons.WalletBitcoinPayment
+                        false -> PrimalIcons.WalletLightningPaymentAlt
                     },
                     contentDescription = null,
                     colorFilter = ColorFilter.tint(color = AppTheme.extraColorScheme.zapped),

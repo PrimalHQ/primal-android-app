@@ -71,6 +71,7 @@ enum class NostrEventKind(val value: Int) {
     PrimalWalletActivation(value = 10_000_311),
     PrimalWalletParsedLnurl(value = 10_000_312),
     PrimalWalletParsedLnInvoice(value = 10_000_313),
+    PrimalWalletOnChainAddress(value = 10_000_316),
     PrimalWalletUpdatedAt(value = 10_000_317),
     PrimalAppState(value = 10_000_999),
     Unknown(value = -1),

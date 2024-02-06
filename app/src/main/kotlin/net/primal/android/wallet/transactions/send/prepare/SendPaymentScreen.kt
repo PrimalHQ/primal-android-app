@@ -3,18 +3,13 @@ package net.primal.android.wallet.transactions.send.prepare
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -25,14 +20,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import net.primal.android.R
-import net.primal.android.core.compose.PrimalCircleButton
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.SnackbarErrorHandler
@@ -45,6 +37,8 @@ import net.primal.android.wallet.transactions.send.prepare.tabs.SendPaymentTab
 import net.primal.android.wallet.transactions.send.prepare.tabs.SendPaymentTabNostr
 import net.primal.android.wallet.transactions.send.prepare.tabs.SendPaymentTabScan
 import net.primal.android.wallet.transactions.send.prepare.tabs.SendPaymentTabText
+import net.primal.android.wallet.ui.WalletTabsBar
+import net.primal.android.wallet.ui.WalletTabsHeight
 
 @Composable
 fun SendPaymentScreen(
@@ -115,7 +109,7 @@ fun SendPaymentScreen(
         modifier = Modifier.imePadding(),
         topBar = {
             PrimalTopAppBar(
-                title = stringResource(id = activeTab.labelResId),
+                title = stringResource(id = activeTab.data.labelResId),
                 navigationIcon = PrimalIcons.ArrowBack,
                 showDivider = activeTab != SendPaymentTab.Nostr,
                 onNavigationIconClick = {
@@ -160,19 +154,18 @@ fun SendPaymentScreen(
         bottomBar = {
             Column {
                 val hideHeight by animateDpAsState(targetValue = 0.dp, label = "HideSendPaymentTabsBar")
-                val showHeight by animateDpAsState(targetValue = 96.dp, label = "ShowSendPaymentTabsBar")
+                val showHeight by animateDpAsState(targetValue = WalletTabsHeight, label = "ShowSendPaymentTabsBar")
                 PrimalDivider()
-                SendPaymentTabsBar(
+                WalletTabsBar(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(if (keyboardVisible) hideHeight else showHeight)
                         .background(color = AppTheme.colorScheme.surface),
-                    activeTab = activeTab,
+                    tabs = SendPaymentTab.entries.map { it.data },
+                    activeTab = activeTab.data,
                     onTabClick = {
-                        if (activeTab == it) {
-                            // Nothing
-                        } else {
-                            activeTab = it
+                        if (activeTab.data != it) {
+                            activeTab = SendPaymentTab.valueOfOrThrow(it)
                         }
                     },
                 )
@@ -182,45 +175,4 @@ fun SendPaymentScreen(
             SnackbarHost(hostState = snackbarHostState)
         },
     )
-}
-
-@Composable
-fun SendPaymentTabsBar(
-    modifier: Modifier = Modifier,
-    activeTab: SendPaymentTab,
-    onTabClick: (SendPaymentTab) -> Unit,
-) {
-    Row(
-        modifier = modifier.navigationBarsPadding(),
-        horizontalArrangement = Arrangement.SpaceEvenly,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        SendPaymentTab.entries.forEach {
-            TabButton(
-                icon = it.icon,
-                selected = activeTab == it,
-                onClick = { onTabClick(it) },
-            )
-        }
-    }
-}
-
-@Composable
-private fun TabButton(
-    icon: ImageVector,
-    selected: Boolean,
-    onClick: () -> Unit,
-) {
-    PrimalCircleButton(
-        modifier = Modifier.size(56.dp),
-        containerColor = if (selected) AppTheme.colorScheme.onSurface else AppTheme.extraColorScheme.surfaceVariantAlt1,
-        contentColor = if (selected) AppTheme.colorScheme.surface else AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-        onClick = onClick,
-    ) {
-        Icon(
-            modifier = Modifier.size(24.dp),
-            imageVector = icon,
-            contentDescription = null,
-        )
-    }
 }

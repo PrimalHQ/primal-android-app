@@ -45,7 +45,6 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -55,9 +54,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.github.alexzhirkevich.customqrgenerator.QrData
+import com.github.alexzhirkevich.customqrgenerator.style.BitmapScale
 import com.github.alexzhirkevich.customqrgenerator.vector.QrCodeDrawable
 import com.github.alexzhirkevich.customqrgenerator.vector.createQrVectorOptions
 import com.github.alexzhirkevich.customqrgenerator.vector.style.QrVectorBallShape
@@ -66,9 +67,12 @@ import com.github.alexzhirkevich.customqrgenerator.vector.style.QrVectorFrameSha
 import com.github.alexzhirkevich.customqrgenerator.vector.style.QrVectorLogoPadding
 import com.github.alexzhirkevich.customqrgenerator.vector.style.QrVectorLogoShape
 import com.github.alexzhirkevich.customqrgenerator.vector.style.QrVectorPixelShape
+import com.wajahatkarim.flippable.Flippable
+import com.wajahatkarim.flippable.rememberFlipController
 import java.math.BigDecimal
 import net.primal.android.R
 import net.primal.android.core.compose.PrimalDefaults
+import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.SnackbarErrorHandler
@@ -77,11 +81,16 @@ import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.numericpad.PrimalNumericPad
-import net.primal.android.crypto.urlToLnUrlHrp
+import net.primal.android.core.utils.ellipsizeMiddle
 import net.primal.android.theme.AppTheme
-import net.primal.android.wallet.api.parseAsLNUrlOrNull
 import net.primal.android.wallet.dashboard.ui.BtcAmountText
+import net.primal.android.wallet.domain.Network
 import net.primal.android.wallet.transactions.receive.ReceivePaymentContract.UiState
+import net.primal.android.wallet.transactions.receive.model.NetworkDetails
+import net.primal.android.wallet.transactions.receive.model.PaymentDetails
+import net.primal.android.wallet.transactions.receive.tabs.ReceivePaymentTab
+import net.primal.android.wallet.ui.WalletTabsBar
+import net.primal.android.wallet.ui.WalletTabsHeight
 import net.primal.android.wallet.utils.CurrencyConversionUtils.formatAsString
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toBtc
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
@@ -106,8 +115,6 @@ fun ReceivePaymentScreen(
     onClose: () -> Unit,
     eventPublisher: (ReceivePaymentContract.UiEvent) -> Unit,
 ) {
-    val clipboardManager = LocalClipboardManager.current
-
     val onCancel = { eventPublisher(ReceivePaymentContract.UiEvent.CancelInvoiceCreation) }
     BackHandler(enabled = state.editMode) { onCancel() }
 
@@ -118,7 +125,7 @@ fun ReceivePaymentScreen(
         snackbarHostState = snackbarHostState,
         errorMessageResolver = {
             when (it) {
-                is UiState.ReceivePaymentError.FailedToCreateInvoice ->
+                is UiState.ReceivePaymentError.FailedToCreateLightningInvoice ->
                     context.getString(R.string.wallet_receive_transaction_invoice_creation_error)
             }
         },
@@ -128,7 +135,12 @@ fun ReceivePaymentScreen(
     Scaffold(
         topBar = {
             PrimalTopAppBar(
-                title = stringResource(id = R.string.wallet_receive_transaction_title),
+                title = when (state.currentTab) {
+                    ReceivePaymentTab.Lightning -> stringResource(
+                        id = R.string.wallet_receive_lightning_transaction_title,
+                    )
+                    ReceivePaymentTab.Bitcoin -> stringResource(id = R.string.wallet_receive_btc_transaction_title)
+                },
                 navigationIcon = PrimalIcons.ArrowBack,
                 showDivider = false,
                 onNavigationIconClick = {
@@ -141,37 +153,34 @@ fun ReceivePaymentScreen(
             )
         },
         content = { paddingValues ->
-            AnimatedContent(targetState = state.editMode, label = "ReceivePaymentContent") {
-                when (it) {
-                    true -> ReceivePaymentEditor(
-                        paddingValues = paddingValues,
-                        paymentDetails = state.paymentDetails,
-                        applying = state.creating,
-                        onCancel = onCancel,
-                        onApplyChanges = { amountInBtc, comment ->
-                            eventPublisher(
-                                ReceivePaymentContract.UiEvent.CreateInvoice(
-                                    amountInBtc = amountInBtc,
-                                    comment = comment,
-                                ),
-                            )
-                        },
-                    )
-
-                    false -> ReceivePaymentViewer(
-                        paddingValues = paddingValues,
-                        paymentDetails = state.paymentDetails,
-                        onCopyClick = {
-                            val copyInput = state.paymentDetails.invoice ?: state.paymentDetails.lightningAddress
-                            if (copyInput != null) {
-                                clipboardManager.setText(AnnotatedString(text = copyInput))
+            ReceiveContent(
+                state = state,
+                paddingValues = paddingValues,
+                onCancel = onCancel,
+                eventPublisher = eventPublisher,
+            )
+        },
+        bottomBar = {
+            Column {
+                PrimalDivider()
+                WalletTabsBar(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(WalletTabsHeight)
+                        .background(color = AppTheme.colorScheme.surface),
+                    tabs = ReceivePaymentTab.entries.map { it.data },
+                    activeTab = state.currentTab.data,
+                    onTabClick = {
+                        if (state.currentTab.data != it) {
+                            val network = when (ReceivePaymentTab.valueOfOrThrow(it)) {
+                                ReceivePaymentTab.Lightning -> Network.Lightning
+                                ReceivePaymentTab.Bitcoin -> Network.Bitcoin
                             }
-                        },
-                        onEditClick = {
-                            eventPublisher(ReceivePaymentContract.UiEvent.OpenInvoiceCreation)
-                        },
-                    )
-                }
+                            eventPublisher(ReceivePaymentContract.UiEvent.ChangeNetwork(network))
+                        }
+                    },
+                    tabIconSize = 32.dp,
+                )
             }
         },
         snackbarHost = {
@@ -180,13 +189,78 @@ fun ReceivePaymentScreen(
     )
 }
 
+@ExperimentalComposeUiApi
+@Composable
+private fun ReceiveContent(
+    state: UiState,
+    paddingValues: PaddingValues,
+    eventPublisher: (ReceivePaymentContract.UiEvent) -> Unit,
+    onCancel: () -> Unit,
+) {
+    val clipboardManager = LocalClipboardManager.current
+
+    AnimatedContent(
+        targetState = state.editMode,
+        label = "ReceivePaymentContent",
+    ) {
+        when (it) {
+            true -> {
+                ReceivePaymentEditor(
+                    paddingValues = paddingValues,
+                    paymentDetails = state.paymentDetails,
+                    applying = state.creatingInvoice,
+                    onCancel = onCancel,
+                    onApplyChanges = { amountInBtc, comment ->
+                        eventPublisher(
+                            ReceivePaymentContract.UiEvent.CreateInvoice(
+                                amountInBtc = amountInBtc,
+                                comment = comment,
+                            ),
+                        )
+                    },
+                )
+            }
+
+            false -> {
+                ReceivePaymentViewer(
+                    paddingValues = paddingValues,
+                    state = state,
+                    onCopyClick = {
+                        when (state.currentTab) {
+                            ReceivePaymentTab.Lightning -> state.lightningNetworkDetails.copyValue
+                            ReceivePaymentTab.Bitcoin -> state.bitcoinNetworkDetails.copyValue
+                        }?.let { text ->
+                            clipboardManager.setText(AnnotatedString(text = text))
+                        }
+                    },
+                    onEditClick = {
+                        eventPublisher(ReceivePaymentContract.UiEvent.OpenInvoiceCreation)
+                    },
+                )
+            }
+        }
+    }
+}
+
 @Composable
 private fun ReceivePaymentViewer(
     paddingValues: PaddingValues,
-    paymentDetails: PaymentDetails,
+    state: UiState,
     onCopyClick: () -> Unit,
     onEditClick: () -> Unit,
 ) {
+    val flipController = rememberFlipController()
+
+    val networkDetails = when (state.currentTab) {
+        ReceivePaymentTab.Lightning -> state.lightningNetworkDetails
+        ReceivePaymentTab.Bitcoin -> state.bitcoinNetworkDetails
+    }
+
+    when (state.currentTab) {
+        ReceivePaymentTab.Lightning -> flipController.flipToFront()
+        ReceivePaymentTab.Bitcoin -> flipController.flipToBack()
+    }
+
     Column(
         modifier = Modifier
             .padding(paddingValues)
@@ -195,38 +269,32 @@ private fun ReceivePaymentViewer(
     ) {
         Spacer(modifier = Modifier.height(24.dp))
 
-        Box(
-            modifier = Modifier
-                .size(280.dp)
-                .background(Color.White, shape = AppTheme.shapes.extraLarge),
-            contentAlignment = Alignment.Center,
-        ) {
-            val text = paymentDetails.invoice ?: paymentDetails.lightningAddress?.parseAsLNUrlOrNull()?.urlToLnUrlHrp()
-            if (!text.isNullOrEmpty()) {
-                val drawable = rememberQrCodeDrawable(text)
-                Spacer(
-                    modifier = Modifier
-                        .drawWithContent {
-                            drawIntoCanvas { canvas ->
-                                drawable.setBounds(0, 0, size.width.toInt(), size.height.toInt())
-                                drawable.draw(canvas.nativeCanvas)
-                            }
-                        }
-                        .fillMaxSize(),
+        Flippable(
+            modifier = Modifier.size(280.dp),
+            flipController = flipController,
+            flipOnTouch = false,
+            frontSide = {
+                QrCodeBox(
+                    qrCodeValue = state.lightningNetworkDetails.qrCodeValue,
+                    network = Network.Lightning,
                 )
-            } else {
-                PrimalLoadingSpinner()
-            }
-        }
+            },
+            backSide = {
+                QrCodeBox(
+                    qrCodeValue = state.bitcoinNetworkDetails.qrCodeValue,
+                    network = Network.Bitcoin,
+                )
+            },
+        )
 
-        if (paymentDetails.amountInBtc != null) {
+        if (state.paymentDetails.amountInBtc != null) {
             Spacer(modifier = Modifier.height(16.dp))
             BtcAmountText(
                 modifier = Modifier
                     .padding(start = 32.dp)
                     .height(72.dp),
-                amountInBtc = paymentDetails.amountInBtc.toBigDecimal(),
-                textSize = when (paymentDetails.amountInBtc.toSats().toString().length) {
+                amountInBtc = state.paymentDetails.amountInBtc.toBigDecimal(),
+                textSize = when (state.paymentDetails.amountInBtc.toSats().toString().length) {
                     in (0..8) -> 48.sp
                     else -> 40.sp
                 },
@@ -235,88 +303,134 @@ private fun ReceivePaymentViewer(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        if (paymentDetails.lightningAddress != null) {
+        if (networkDetails.address != null) {
             TwoLineText(
                 title = stringResource(id = R.string.wallet_receive_transaction_receiving_to),
-                content = paymentDetails.lightningAddress,
+                content = when (state.currentTab) {
+                    ReceivePaymentTab.Lightning -> networkDetails.address
+                    ReceivePaymentTab.Bitcoin -> networkDetails.address.ellipsizeMiddle(size = 12)
+                },
+                contentFontSize = 20.sp,
+                maxLines = when (state.currentTab) {
+                    ReceivePaymentTab.Lightning -> 3
+                    ReceivePaymentTab.Bitcoin -> 1
+                },
             )
             Spacer(modifier = Modifier.height(16.dp))
         }
 
-        if (paymentDetails.comment != null) {
+        if (state.paymentDetails.comment != null) {
             TwoLineText(
                 title = stringResource(id = R.string.wallet_receive_transaction_comment),
-                content = paymentDetails.comment,
+                content = state.paymentDetails.comment,
             )
             Spacer(modifier = Modifier.height(16.dp))
         }
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        Row(
+        ViewerActionsRow(
             modifier = Modifier.fillMaxWidth(fraction = 0.85f),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-        ) {
-            PrimalLoadingButton(
-                modifier = Modifier.weight(1f),
-                containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
-                contentColor = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 16.sp,
-                text = stringResource(id = R.string.wallet_receive_transaction_copy_button).uppercase(),
-                onClick = onCopyClick,
-            )
+            networkDetails = networkDetails,
+            onCopyClick = onCopyClick,
+            onEditClick = onEditClick,
+        )
+    }
+}
 
-            Spacer(modifier = Modifier.width(16.dp))
+@Composable
+private fun ViewerActionsRow(
+    modifier: Modifier,
+    networkDetails: NetworkDetails,
+    onCopyClick: () -> Unit,
+    onEditClick: () -> Unit,
+) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.SpaceEvenly,
+    ) {
+        PrimalLoadingButton(
+            modifier = Modifier.weight(1f),
+            containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
+            contentColor = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 16.sp,
+            text = stringResource(id = R.string.wallet_receive_transaction_copy_button).uppercase(),
+            onClick = onCopyClick,
+        )
 
-            PrimalLoadingButton(
-                modifier = Modifier.weight(1f),
-                containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
-                contentColor = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 16.sp,
-                text = if (paymentDetails.invoice == null) {
-                    stringResource(id = R.string.wallet_receive_transaction_add_details_button)
-                } else {
-                    stringResource(id = R.string.wallet_receive_transaction_edit_details_button)
-                }.uppercase(),
-                onClick = onEditClick,
+        Spacer(modifier = Modifier.width(16.dp))
+
+        PrimalLoadingButton(
+            modifier = Modifier.weight(1f),
+            containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
+            contentColor = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 16.sp,
+            text = if (networkDetails.invoice == null) {
+                stringResource(id = R.string.wallet_receive_transaction_add_details_button)
+            } else {
+                stringResource(id = R.string.wallet_receive_transaction_edit_details_button)
+            }.uppercase(),
+            onClick = onEditClick,
+        )
+    }
+}
+
+@Composable
+private fun QrCodeBox(qrCodeValue: String?, network: Network) {
+    Box(
+        modifier = Modifier.background(Color.White, shape = AppTheme.shapes.extraLarge),
+        contentAlignment = Alignment.Center,
+    ) {
+        if (!qrCodeValue.isNullOrEmpty()) {
+            val drawable = rememberQrCodeDrawable(text = qrCodeValue, network = network)
+            Spacer(
+                modifier = Modifier
+                    .drawWithContent {
+                        drawIntoCanvas { canvas ->
+                            drawable.setBounds(0, 0, size.width.toInt(), size.height.toInt())
+                            drawable.draw(canvas.nativeCanvas)
+                        }
+                    }
+                    .fillMaxSize(),
             )
+        } else {
+            PrimalLoadingSpinner()
         }
     }
 }
 
 @Composable
 @Suppress("MagicNumber")
-private fun rememberQrCodeDrawable(text: String): Drawable {
-    val warningColor = Color(0xFF480101).toArgb()
+private fun rememberQrCodeDrawable(text: String, network: Network): Drawable {
     val context = LocalContext.current
-    return remember(text) {
+    return remember(text, network) {
         val data = QrData.Text(text)
         val options = createQrVectorOptions {
             padding = .125f
 
             logo {
-                drawable = context.getDrawable(R.drawable.primal_wave_logo_summer)
-                size = .25f
-                padding = QrVectorLogoPadding.Natural(.1f)
+                drawable = context.getDrawable(
+                    when (network) {
+                        Network.Lightning -> R.drawable.qr_center_lightning
+                        Network.Bitcoin -> R.drawable.qr_center_bitcoin
+                    },
+                )
+                size = .12f
+                scale = BitmapScale.CenterCrop
+                padding = QrVectorLogoPadding.Natural(.72f)
                 shape = QrVectorLogoShape.Circle
+                backgroundColor = QrVectorColor.Solid(android.graphics.Color.BLACK)
             }
             colors {
-                ball = QrVectorColor.Solid(warningColor)
-                frame = QrVectorColor.LinearGradient(
-                    colors = listOf(
-                        0f to android.graphics.Color.RED,
-                        1f to android.graphics.Color.BLUE,
-                    ),
-                    orientation = QrVectorColor.LinearGradient
-                        .Orientation.LeftDiagonal,
-                )
+                ball = QrVectorColor.Solid(android.graphics.Color.BLACK)
+                frame = QrVectorColor.Solid(android.graphics.Color.BLACK)
             }
             shapes {
                 darkPixel = QrVectorPixelShape.RoundCorners(.5f)
-                ball = QrVectorBallShape.RoundCorners(.25f)
-                frame = QrVectorFrameShape.RoundCorners(.25f)
+                ball = QrVectorBallShape.RoundCorners(.21f)
+                frame = QrVectorFrameShape.RoundCorners(.21f)
             }
         }
 
@@ -325,7 +439,12 @@ private fun rememberQrCodeDrawable(text: String): Drawable {
 }
 
 @Composable
-private fun TwoLineText(title: String, content: String) {
+private fun TwoLineText(
+    title: String,
+    content: String,
+    maxLines: Int = 3,
+    contentFontSize: TextUnit = 18.sp,
+) {
     Text(
         modifier = Modifier.padding(horizontal = 32.dp),
         text = title,
@@ -334,11 +453,11 @@ private fun TwoLineText(title: String, content: String) {
     )
 
     Text(
-        modifier = Modifier.padding(vertical = 8.dp, horizontal = 32.dp),
+        modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp),
         text = content,
-        style = AppTheme.typography.bodyLarge,
+        style = AppTheme.typography.bodyLarge.copy(fontSize = contentFontSize),
         fontWeight = FontWeight.Bold,
-        maxLines = 3,
+        maxLines = maxLines,
         overflow = TextOverflow.Ellipsis,
     )
 }

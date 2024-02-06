@@ -13,7 +13,7 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 import net.primal.android.core.compose.icons.PrimalIcons
 
-public val PrimalIcons.WalletLnPayment: ImageVector
+public val PrimalIcons.WalletLightningPaymentAlt: ImageVector
     get() {
         if (_walletLnPayment != null) {
             return _walletLnPayment!!
