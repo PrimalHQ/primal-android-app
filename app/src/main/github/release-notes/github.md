@@ -1,10 +1,8 @@
 ## Features
-- Implemented notes and replies tabs on profile screen;
-- Implemented follows tabs on profile screen;
-- Implemented image saving from media gallery;
+- Implemented rendering btc txs (w/o pulsing);
+- Implemented new wallet monitor and updating pending btc txs;
+- Implemented on-chain support on receive payments screen;
 
 ## Fixes
-- Improved internet identifier badge rendering;
-- Added following self by default when creating account;
-- Fixed default zap amount and message issues;
-- Stability improvements;
+- Fixed badge size on collapsed top bar on profile screen
+- Back button on top bar should work properly;
