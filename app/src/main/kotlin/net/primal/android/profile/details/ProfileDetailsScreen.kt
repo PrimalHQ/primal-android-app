@@ -361,6 +361,7 @@ fun ProfileDetailsScreen(
                                     displayName = state.profileDetails?.authorDisplayName
                                         ?: state.profileId.asEllipsizedNpub(),
                                     internetIdentifier = state.profileDetails?.internetIdentifier,
+                                    internetIdentifierBadgeSize = 24.dp,
                                 )
                             }
                         },
