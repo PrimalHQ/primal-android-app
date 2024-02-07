@@ -17,6 +17,7 @@ import net.primal.android.wallet.api.mediator.WalletTransactionsMediator
 import net.primal.android.wallet.api.model.DepositRequestBody
 import net.primal.android.wallet.api.model.InAppPurchaseQuoteResponse
 import net.primal.android.wallet.api.model.LightningInvoiceResponse
+import net.primal.android.wallet.api.model.MiningFeeTier
 import net.primal.android.wallet.api.model.OnChainAddressResponse
 import net.primal.android.wallet.api.model.ParsedLnInvoiceResponse
 import net.primal.android.wallet.api.model.ParsedLnUrlResponse
@@ -141,6 +142,14 @@ class WalletRepository @Inject constructor(
     }
 
     fun deleteAllTransactions() = database.walletTransactions().deleteAllTransactions()
+
+    suspend fun fetchMiningFees(
+        userId: String,
+        onChainAddress: String,
+        amountInBtc: String,
+    ): List<MiningFeeTier> {
+        return walletApi.getMiningFees(userId = userId, onChainAddress = onChainAddress, amountInBtc = amountInBtc)
+    }
 
     private suspend fun storeWalletInfoLocally(
         userId: String,

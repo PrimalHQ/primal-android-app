@@ -22,8 +22,8 @@ import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.api.parseAsLNUrlOrNull
+import net.primal.android.wallet.domain.DraftTx
 import net.primal.android.wallet.repository.WalletRepository
-import net.primal.android.wallet.transactions.send.create.DraftTransaction
 import net.primal.android.wallet.transactions.send.prepare.SendPaymentContract.SideEffect
 import net.primal.android.wallet.transactions.send.prepare.SendPaymentContract.UiEvent
 import net.primal.android.wallet.transactions.send.prepare.SendPaymentContract.UiState
@@ -102,7 +102,7 @@ class SendPaymentViewModel @Inject constructor(
         }
         setEffect(
             SideEffect.DraftTransactionReady(
-                draft = DraftTransaction(
+                draft = DraftTx(
                     targetUserId = response.userId,
                     lnInvoice = text,
                     lnInvoiceData = response.lnInvoiceData,
@@ -119,7 +119,7 @@ class SendPaymentViewModel @Inject constructor(
         }
         setEffect(
             SideEffect.DraftTransactionReady(
-                draft = DraftTransaction(
+                draft = DraftTx(
                     minSendable = response.minSendable,
                     maxSendable = response.maxSendable,
                     targetUserId = response.targetPubkey,
@@ -140,7 +140,7 @@ class SendPaymentViewModel @Inject constructor(
             }
             setEffect(
                 SideEffect.DraftTransactionReady(
-                    draft = DraftTransaction(
+                    draft = DraftTx(
                         minSendable = response.minSendable,
                         maxSendable = response.maxSendable,
                         targetUserId = response.targetPubkey,
@@ -158,7 +158,7 @@ class SendPaymentViewModel @Inject constructor(
         if (btcInstructions != null) {
             setEffect(
                 SideEffect.DraftTransactionReady(
-                    draft = DraftTransaction(
+                    draft = DraftTx(
                         targetOnChainAddress = btcInstructions.address,
                         onChainInvoice = if (btcInstructions.hasParams()) text else null,
                         amountSats = btcInstructions.amount?.toSats()?.toString() ?: "0",
@@ -189,7 +189,7 @@ class SendPaymentViewModel @Inject constructor(
             if (lud16 != null && lud16.isLightningAddress()) {
                 setEffect(
                     SideEffect.DraftTransactionReady(
-                        draft = DraftTransaction(
+                        draft = DraftTx(
                             targetLud16 = lud16,
                             targetUserId = profileData.ownerId,
                         ),

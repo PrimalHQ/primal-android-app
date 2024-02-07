@@ -17,13 +17,13 @@ import net.primal.android.wallet.activation.WalletActivationScreen
 import net.primal.android.wallet.activation.WalletActivationViewModel
 import net.primal.android.wallet.dashboard.WalletDashboardScreen
 import net.primal.android.wallet.dashboard.WalletDashboardViewModel
+import net.primal.android.wallet.domain.DraftTx
 import net.primal.android.wallet.transactions.details.TransactionDetailsScreen
 import net.primal.android.wallet.transactions.details.TransactionDetailsViewModel
 import net.primal.android.wallet.transactions.receive.ReceivePaymentScreen
 import net.primal.android.wallet.transactions.receive.ReceivePaymentViewModel
 import net.primal.android.wallet.transactions.send.create.CreateTransactionScreen
 import net.primal.android.wallet.transactions.send.create.CreateTransactionViewModel
-import net.primal.android.wallet.transactions.send.create.DraftTransaction
 import net.primal.android.wallet.transactions.send.prepare.SendPaymentScreen
 import net.primal.android.wallet.transactions.send.prepare.SendPaymentViewModel
 import net.primal.android.wallet.transactions.send.prepare.tabs.SendPaymentTab
@@ -33,7 +33,7 @@ private fun NavController.navigateToWalletActivation() = navigate(route = "activ
 private fun NavController.navigateToWalletSendPayment(tab: SendPaymentTab) =
     navigate(route = "send?$SEND_PAYMENT_TAB=$tab")
 
-fun NavController.navigateToWalletCreateTransaction(draftTransaction: DraftTransaction) =
+fun NavController.navigateToWalletCreateTransaction(draftTransaction: DraftTx) =
     navigate(
         route = "transaction/create?$DRAFT_TRANSACTION=" +
             NostrJson.encodeToString(draftTransaction).asBase64Encoded(),

@@ -2,7 +2,7 @@ package net.primal.android.navigation
 
 import androidx.lifecycle.SavedStateHandle
 import net.primal.android.core.serialization.json.NostrJson
-import net.primal.android.wallet.transactions.send.create.DraftTransaction
+import net.primal.android.wallet.domain.DraftTx
 import net.primal.android.wallet.transactions.send.prepare.tabs.SendPaymentTab
 
 const val FEED_DIRECTIVE = "directive"
@@ -52,7 +52,7 @@ inline val SavedStateHandle.sendPaymentTab: SendPaymentTab?
     }
 
 const val DRAFT_TRANSACTION = "draftTransaction"
-inline val SavedStateHandle.draftTransaction: DraftTransaction
+inline val SavedStateHandle.draftTransaction: DraftTx
     get() = get<String>(DRAFT_TRANSACTION)
         ?.asBase64Decoded()?.let {
             NostrJson.decodeFromString(it)

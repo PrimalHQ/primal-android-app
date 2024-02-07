@@ -417,6 +417,9 @@
     <string name="wallet_create_transaction_done_button">Done</string>
     <string name="wallet_create_transaction_close_button">Close</string>
     <string name="wallet_create_transaction_bitcoin_address">Bitcoin Address</string>
+    <string name="wallet_create_transaction_mining_fee">Mining Fee</string>
+    <string name="wallet_create_transaction_mining_fee_free_label">Free: %1$s</string>
+    <string name="wallet_create_transaction_min_btc_tx_amount">Minimal amount for Bitcoin transaction: %1$s</string>
 
     <string name="wallet_receive_lightning_transaction_title">Receive via Lightning</string>
     <string name="wallet_receive_btc_transaction_title">Receive On-chain</string>

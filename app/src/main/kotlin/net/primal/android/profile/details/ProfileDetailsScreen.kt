@@ -138,7 +138,7 @@ import net.primal.android.profile.domain.ProfileFollowsType
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
-import net.primal.android.wallet.transactions.send.create.DraftTransaction
+import net.primal.android.wallet.domain.DraftTx
 import net.primal.android.wallet.utils.isLightningAddress
 import timber.log.Timber
 
@@ -152,7 +152,7 @@ fun ProfileDetailsScreen(
     onProfileClick: (String) -> Unit,
     onEditProfileClick: () -> Unit,
     onMessageClick: (String) -> Unit,
-    onZapProfileClick: (DraftTransaction) -> Unit,
+    onZapProfileClick: (DraftTx) -> Unit,
     onHashtagClick: (String) -> Unit,
     onMediaClick: (String, String) -> Unit,
     onFollowsClick: (String, ProfileFollowsType) -> Unit,
@@ -201,7 +201,7 @@ fun ProfileDetailsScreen(
     onProfileClick: (String) -> Unit,
     onEditProfileClick: () -> Unit,
     onMessageClick: (String) -> Unit,
-    onZapProfileClick: (DraftTransaction) -> Unit,
+    onZapProfileClick: (DraftTx) -> Unit,
     onHashtagClick: (String) -> Unit,
     onMediaClick: (String, String) -> Unit,
     onGoToWallet: () -> Unit,
@@ -377,7 +377,7 @@ fun ProfileDetailsScreen(
                             val profileLud16 = state.profileDetails?.lightningAddress
                             if (profileLud16?.isLightningAddress() == true) {
                                 onZapProfileClick(
-                                    DraftTransaction(targetUserId = state.profileId, targetLud16 = profileLud16),
+                                    DraftTx(targetUserId = state.profileId, targetLud16 = profileLud16),
                                 )
                             } else {
                                 uiScope.launch {

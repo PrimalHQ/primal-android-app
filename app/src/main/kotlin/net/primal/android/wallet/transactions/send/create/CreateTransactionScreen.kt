@@ -3,6 +3,7 @@ package net.primal.android.wallet.transactions.send.create
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -26,6 +27,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -40,6 +42,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -72,9 +75,11 @@ import net.primal.android.core.compose.numericpad.PrimalNumericPad
 import net.primal.android.core.utils.ellipsizeMiddle
 import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.dashboard.ui.BtcAmountText
+import net.primal.android.wallet.domain.DraftTxStatus
 import net.primal.android.wallet.numericPadContentTransformAnimation
 import net.primal.android.wallet.transactions.send.create.CreateTransactionContract.UiEvent.SendTransaction
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toBtc
+import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
 import net.primal.android.wallet.walletSuccessColor
 import net.primal.android.wallet.walletSuccessContentColor
 import net.primal.android.wallet.walletSuccessDimColor
@@ -102,16 +107,16 @@ fun CreateTransactionScreen(
     Scaffold(
         modifier = Modifier.imePadding(),
         topBar = {
-            if (state.transaction.status != TransactionStatus.Sent) {
+            if (state.transaction.status != DraftTxStatus.Sent) {
                 PrimalTopAppBar(
                     title = when (state.transaction.status) {
-                        TransactionStatus.Draft -> stringResource(id = R.string.wallet_create_transaction_draft_title)
-                        TransactionStatus.Sending -> stringResource(
+                        DraftTxStatus.Draft -> stringResource(id = R.string.wallet_create_transaction_draft_title)
+                        DraftTxStatus.Sending -> stringResource(
                             id = R.string.wallet_create_transaction_sending_title,
                         )
 
-                        TransactionStatus.Sent -> stringResource(id = R.string.wallet_create_transaction_success_title)
-                        TransactionStatus.Failed -> stringResource(id = R.string.wallet_create_transaction_failed_title)
+                        DraftTxStatus.Sent -> stringResource(id = R.string.wallet_create_transaction_success_title)
+                        DraftTxStatus.Failed -> stringResource(id = R.string.wallet_create_transaction_failed_title)
                     },
                     navigationIcon = PrimalIcons.ArrowBack,
                     showDivider = false,
@@ -121,7 +126,7 @@ fun CreateTransactionScreen(
         },
         content = { paddingValues ->
             when (state.transaction.status) {
-                TransactionStatus.Draft -> {
+                DraftTxStatus.Draft -> {
                     TransactionEditor(
                         modifier = Modifier
                             .fillMaxSize()
@@ -132,28 +137,28 @@ fun CreateTransactionScreen(
                     )
                 }
 
-                TransactionStatus.Sending -> {
+                DraftTxStatus.Sending -> {
                     TransactionSending(
                         amountInSats = state.transaction.amountSats.toLong(),
                         receiver = state.profileLightningAddress
                             ?: state.transaction.targetLud16
-                            ?: state.transaction.targetLnUrl?.ellipsizeLnurl()
+                            ?: state.transaction.targetLnUrl?.ellipsizeLnUrl()
                             ?: state.transaction.lnInvoiceData?.description,
                     )
                 }
 
-                TransactionStatus.Sent -> {
+                DraftTxStatus.Sent -> {
                     TransactionSuccess(
                         amountInSats = state.transaction.amountSats.toLong(),
                         receiver = state.profileLightningAddress
                             ?: state.transaction.targetLud16
-                            ?: state.transaction.targetLnUrl?.ellipsizeLnurl()
+                            ?: state.transaction.targetLnUrl?.ellipsizeLnUrl()
                             ?: state.transaction.lnInvoiceData?.description,
                         onDoneClick = onClose,
                     )
                 }
 
-                TransactionStatus.Failed -> {
+                DraftTxStatus.Failed -> {
                     TransactionFailed(
                         errorMessage = state.error?.message ?: stringResource(id = R.string.app_generic_error),
                         onCloseClick = onClose,
@@ -164,7 +169,7 @@ fun CreateTransactionScreen(
     )
 }
 
-private fun String.ellipsizeLnurl() = this.ellipsizeMiddle(size = 8).lowercase()
+private fun String.ellipsizeLnUrl() = this.ellipsizeMiddle(size = 8).lowercase()
 
 @ExperimentalComposeUiApi
 @Composable
@@ -185,75 +190,25 @@ private fun TransactionEditor(
             SendTransaction(
                 noteRecipient = noteRecipientText.ifEmpty { null },
                 noteSelf = noteSelfText.ifEmpty { null },
+                miningFeeTierId = state.resolveSelectedMiningFee()?.id,
             ),
         )
     }
+
+    val headerSpacing = animateDpAsState(targetValue = if (keyboardVisible) 0.dp else 32.dp, label = "headerSpacing")
+    val amountSpacing = animateDpAsState(targetValue = if (keyboardVisible) 16.dp else 48.dp, label = "amountSpacing")
 
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Spacer(modifier = Modifier.height(16.dp))
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Spacer(modifier = Modifier.height(headerSpacing.value / 2))
 
-            if (state.transaction.targetOnChainAddress != null) {
-                Box(
-                    modifier = Modifier
-                        .padding(vertical = 16.dp)
-                        .size(88.dp)
-                        .clip(CircleShape)
-                        .background(color = AppTheme.colorScheme.onPrimary),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Image(
-                        modifier = Modifier.size(56.dp),
-                        imageVector = PrimalIcons.WalletBitcoinPayment,
-                        contentDescription = null,
-                    )
-                }
-            } else {
-                AvatarThumbnail(
-                    modifier = Modifier.padding(vertical = 16.dp),
-                    avatarCdnImage = state.profileAvatarCdnImage,
-                    avatarSize = 88.dp,
-                )
-            }
+            TransactionHeader(state = state, keyboardVisible = keyboardVisible)
 
-            val title = state.profileDisplayName
-                ?: state.transaction.targetLud16
-                ?: state.transaction.targetLnUrl?.ellipsizeLnurl()
-                ?: state.transaction.targetOnChainAddress?.let {
-                    stringResource(id = R.string.wallet_create_transaction_bitcoin_address)
-                }
-                ?: ""
-
-            if (title.isNotEmpty()) {
-                Text(
-                    modifier = Modifier.padding(vertical = 4.dp, horizontal = 16.dp),
-                    text = title,
-                    color = AppTheme.colorScheme.onSurface,
-                    style = AppTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 20.sp,
-                )
-            }
-
-            val subtitle = state.profileLightningAddress
-                ?: state.transaction.targetOnChainAddress?.ellipsizeMiddle(size = 16)
-
-            if (!subtitle.isNullOrEmpty()) {
-                Text(
-                    modifier = Modifier.padding(horizontal = 32.dp),
-                    text = subtitle,
-                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-                    style = AppTheme.typography.bodyMedium,
-                )
-            }
-
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(headerSpacing.value))
 
             BtcAmountText(
                 modifier = Modifier
@@ -272,7 +227,7 @@ private fun TransactionEditor(
                 textSize = 48.sp,
             )
 
-            Spacer(modifier = Modifier.height(48.dp))
+            Spacer(modifier = Modifier.height(amountSpacing.value))
 
             AnimatedContent(
                 targetState = isNumericPadOn,
@@ -287,11 +242,9 @@ private fun TransactionEditor(
                         PrimalNumericPad(
                             modifier = Modifier.fillMaxWidth(),
                             amountInSats = state.transaction.amountSats,
-                            onAmountInSatsChanged = {
+                            onAmountInSatsChanged = { newAmount ->
                                 eventPublisher(
-                                    CreateTransactionContract.UiEvent.AmountChanged(
-                                        amountInSats = it,
-                                    ),
+                                    CreateTransactionContract.UiEvent.AmountChanged(amountInSats = newAmount),
                                 )
                             },
                         )
@@ -326,49 +279,131 @@ private fun TransactionEditor(
             }
         }
 
-        if (!keyboardVisible) {
-            Row(
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(0.8f)
+                .padding(bottom = if (keyboardVisible) 0.dp else 32.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            PrimalLoadingButton(
+                modifier = if (isNumericPadOn) Modifier.weight(1f) else Modifier.width(0.dp),
+                text = stringResource(id = R.string.wallet_create_transaction_cancel_numeric_pad_button),
+                containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
+                contentColor = AppTheme.colorScheme.onSurface,
+                onClick = onCancelClick,
+            )
+
+            Spacer(
                 modifier = Modifier
-                    .fillMaxWidth(0.8f)
-                    .padding(bottom = 32.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
-                PrimalLoadingButton(
-                    modifier = if (isNumericPadOn) Modifier.weight(1f) else Modifier.width(0.dp),
-                    text = stringResource(id = R.string.wallet_create_transaction_cancel_numeric_pad_button),
-                    containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
-                    contentColor = AppTheme.colorScheme.onSurface,
-                    onClick = onCancelClick,
-                )
+                    .animateContentSize()
+                    .width(if (isNumericPadOn) 16.dp else 0.dp),
+            )
 
-                Spacer(
-                    modifier = Modifier
-                        .animateContentSize()
-                        .width(if (isNumericPadOn) 16.dp else 0.dp),
-                )
-
-                PrimalLoadingButton(
-                    modifier = Modifier.weight(1f),
-                    enabled = state.transaction.amountSats.toBigDecimal() > BigDecimal.ZERO,
-                    text = if (isNumericPadOn) {
-                        stringResource(id = R.string.wallet_create_transaction_next_numeric_pad_button)
+            PrimalLoadingButton(
+                modifier = Modifier.weight(1f),
+                enabled = if (isNumericPadOn) !state.isAmountZero() else state.isTxReady(),
+                text = if (isNumericPadOn) {
+                    stringResource(id = R.string.wallet_create_transaction_next_numeric_pad_button)
+                } else {
+                    stringResource(id = R.string.wallet_create_transaction_send_button)
+                },
+                onClick = {
+                    if (isNumericPadOn) {
+                        isNumericPadOn = false
                     } else {
-                        stringResource(id = R.string.wallet_create_transaction_send_button)
-                    },
-                    onClick = {
-                        if (isNumericPadOn) {
-                            isNumericPadOn = false
-                        } else {
-                            sendPayment()
-                        }
-                    },
-                )
-            }
+                        sendPayment()
+                    }
+                },
+            )
         }
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
+private fun CreateTransactionContract.UiState.isAmountZero(): Boolean {
+    return transaction.amountSats.toBigDecimal() == BigDecimal.ZERO
+}
+
+private fun CreateTransactionContract.UiState.isTxReady(): Boolean {
+    val txAmount = transaction.amountSats.toBigDecimal()
+    val minTxAmount = if (transaction.isBtcTx()) {
+        minBtcTxAmountInSats?.toBigDecimal() ?: BigDecimal.ONE
+    } else {
+        BigDecimal.ONE
+    }
+    return txAmount >= minTxAmount
+}
+
+@Composable
+private fun TransactionHeader(
+    state: CreateTransactionContract.UiState,
+    keyboardVisible: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    val verticalPadding = animateDpAsState(targetValue = if (keyboardVisible) 4.dp else 16.dp, label = "verticalMargin")
+    val avatarSize = animateDpAsState(targetValue = if (keyboardVisible) 56.dp else 88.dp, label = "avatarSize")
+    val iconSize = animateDpAsState(targetValue = if (keyboardVisible) 36.dp else 56.dp, label = "iconSize")
+
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        if (state.transaction.targetOnChainAddress != null) {
+            Box(
+                modifier = Modifier
+                    .padding(vertical = verticalPadding.value)
+                    .size(avatarSize.value)
+                    .clip(CircleShape)
+                    .background(color = AppTheme.colorScheme.onPrimary),
+                contentAlignment = Alignment.Center,
+            ) {
+                Image(
+                    modifier = Modifier.size(iconSize.value),
+                    imageVector = PrimalIcons.WalletBitcoinPayment,
+                    contentDescription = null,
+                )
+            }
+        } else {
+            AvatarThumbnail(
+                modifier = Modifier.padding(vertical = verticalPadding.value),
+                avatarCdnImage = state.profileAvatarCdnImage,
+                avatarSize = avatarSize.value,
+            )
+        }
+
+        val title = state.profileDisplayName
+            ?: state.transaction.targetLud16
+            ?: state.transaction.targetLnUrl?.ellipsizeLnUrl()
+            ?: state.transaction.targetOnChainAddress?.let {
+                stringResource(id = R.string.wallet_create_transaction_bitcoin_address)
+            }
+            ?: ""
+
+        if (title.isNotEmpty()) {
+            Text(
+                modifier = Modifier.padding(vertical = 4.dp, horizontal = 16.dp),
+                text = title,
+                color = AppTheme.colorScheme.onSurface,
+                style = AppTheme.typography.bodyLarge,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 20.sp,
+            )
+        }
+
+        val subtitle = state.profileLightningAddress
+            ?: state.transaction.targetOnChainAddress?.ellipsizeMiddle(size = 16)
+
+        if (!subtitle.isNullOrEmpty()) {
+            Text(
+                modifier = Modifier.padding(horizontal = 32.dp),
+                text = subtitle,
+                color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                style = AppTheme.typography.bodyMedium,
+            )
+        }
+    }
+}
+
+@ExperimentalComposeUiApi
 @Composable
 private fun LightningTxNotes(
     state: CreateTransactionContract.UiState,
@@ -379,67 +414,62 @@ private fun LightningTxNotes(
     keyboardVisible: Boolean,
     sendPayment: () -> Unit,
 ) {
-    val keyboardController = LocalSoftwareKeyboardController.current
-
     Column {
-        if (state.isNotInvoice()) {
-            OutlinedTextField(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 32.dp),
-                value = noteRecipientText,
-                onValueChange = onNoteRecipientTextChanged,
-                colors = PrimalDefaults.outlinedTextFieldColors(),
-                shape = AppTheme.shapes.extraLarge,
-                maxLines = 3,
-                placeholder = {
-                    if (!keyboardVisible) {
-                        Text(
-                            modifier = Modifier.fillMaxWidth(),
-                            text = if (state.profileDisplayName != null) {
-                                stringResource(
-                                    id = R.string.wallet_create_transaction_note_hint_with_recipient,
-                                    state.profileDisplayName,
-                                )
-                            } else {
-                                stringResource(id = R.string.wallet_create_transaction_note_hint)
-                            },
-                            textAlign = TextAlign.Center,
-                            color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
-                            style = AppTheme.typography.bodyMedium,
-                        )
-                    }
-                },
-                keyboardOptions = KeyboardOptions(
-                    imeAction = ImeAction.Next,
-                ),
-            )
-        } else {
-            Text(
-                modifier = Modifier.padding(horizontal = 32.dp),
-                text = noteRecipientText.ifEmpty { state.transaction.lnInvoiceData?.description ?: "" },
-                color = AppTheme.colorScheme.onSurface,
-                style = AppTheme.typography.bodyLarge,
-                fontWeight = FontWeight.SemiBold,
-            )
-        }
+        LightningNoteToRecipientTextField(
+            state = state,
+            noteRecipientText = noteRecipientText,
+            onNoteRecipientTextChanged = onNoteRecipientTextChanged,
+            keyboardVisible = keyboardVisible,
+        )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(
+            modifier = Modifier
+                .height(16.dp),
+        )
 
+        NoteToSelfTextField(
+            noteSelfText = noteSelfText,
+            onNoteSelfTextChanged = onNoteSelfTextChanged,
+            keyboardVisible = keyboardVisible,
+            onGoAction = sendPayment,
+        )
+    }
+}
+
+@Composable
+private fun LightningNoteToRecipientTextField(
+    state: CreateTransactionContract.UiState,
+    noteRecipientText: String,
+    onNoteRecipientTextChanged: (String) -> Unit,
+    keyboardVisible: Boolean,
+) {
+    var isFocused by remember { mutableStateOf(false) }
+
+    if (state.isNotInvoice()) {
         OutlinedTextField(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 32.dp),
-            value = noteSelfText,
-            onValueChange = onNoteSelfTextChanged,
+                .padding(horizontal = 32.dp)
+                .onFocusChanged {
+                    isFocused = it.isFocused
+                },
+            value = noteRecipientText,
+            onValueChange = onNoteRecipientTextChanged,
             colors = PrimalDefaults.outlinedTextFieldColors(),
             shape = AppTheme.shapes.extraLarge,
-            maxLines = 3,
+            maxLines = if (keyboardVisible) 2 else 3,
             placeholder = {
-                if (!keyboardVisible) {
+                if (!keyboardVisible || !isFocused) {
                     Text(
                         modifier = Modifier.fillMaxWidth(),
-                        text = stringResource(id = R.string.wallet_create_transaction_note_to_self),
+                        text = if (state.profileDisplayName != null) {
+                            stringResource(
+                                id = R.string.wallet_create_transaction_note_hint_with_recipient,
+                                state.profileDisplayName,
+                            )
+                        } else {
+                            stringResource(id = R.string.wallet_create_transaction_note_hint)
+                        },
                         textAlign = TextAlign.Center,
                         color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
                         style = AppTheme.typography.bodyMedium,
@@ -447,18 +477,67 @@ private fun LightningTxNotes(
                 }
             },
             keyboardOptions = KeyboardOptions(
-                imeAction = ImeAction.Go,
+                imeAction = ImeAction.Next,
             ),
-            keyboardActions = KeyboardActions(
-                onGo = {
-                    keyboardController?.hide()
-                    sendPayment()
-                },
-            ),
+        )
+    } else {
+        Text(
+            modifier = Modifier.padding(horizontal = 32.dp),
+            text = noteRecipientText.ifEmpty { state.transaction.lnInvoiceData?.description ?: "" },
+            color = AppTheme.colorScheme.onSurface,
+            style = AppTheme.typography.bodyLarge,
+            fontWeight = FontWeight.SemiBold,
         )
     }
 }
 
+@ExperimentalComposeUiApi
+@Composable
+private fun NoteToSelfTextField(
+    noteSelfText: String,
+    onNoteSelfTextChanged: (String) -> Unit,
+    keyboardVisible: Boolean,
+    onGoAction: () -> Unit,
+) {
+    val keyboardController = LocalSoftwareKeyboardController.current
+    var isFocused by remember { mutableStateOf(false) }
+
+    OutlinedTextField(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 32.dp)
+            .onFocusChanged {
+                isFocused = it.isFocused
+            },
+        value = noteSelfText,
+        onValueChange = onNoteSelfTextChanged,
+        colors = PrimalDefaults.outlinedTextFieldColors(),
+        shape = AppTheme.shapes.extraLarge,
+        maxLines = if (keyboardVisible) 2 else 3,
+        placeholder = {
+            if (!keyboardVisible || !isFocused) {
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = stringResource(id = R.string.wallet_create_transaction_note_to_self),
+                    textAlign = TextAlign.Center,
+                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+                    style = AppTheme.typography.bodyMedium,
+                )
+            }
+        },
+        keyboardOptions = KeyboardOptions(
+            imeAction = ImeAction.Go,
+        ),
+        keyboardActions = KeyboardActions(
+            onGo = {
+                keyboardController?.hide()
+                onGoAction()
+            },
+        ),
+    )
+}
+
+@ExperimentalComposeUiApi
 @Composable
 private fun BitcoinTxSelfNoteAndMiningFee(
     state: CreateTransactionContract.UiState,
@@ -467,6 +546,108 @@ private fun BitcoinTxSelfNoteAndMiningFee(
     keyboardVisible: Boolean,
     sendPayment: () -> Unit,
 ) {
+    Column {
+        NoteToSelfTextField(
+            noteSelfText = noteSelfText,
+            onNoteSelfTextChanged = onNoteSelfTextChanged,
+            keyboardVisible = keyboardVisible,
+            onGoAction = sendPayment,
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        MiningFeeRow(
+            miningFee = state.resolveSelectedMiningFee(),
+            fetching = state.fetchingMiningFees,
+            minBtcTxInSats = state.minBtcTxAmountInSats,
+            onClick = {
+            },
+        )
+    }
+}
+
+private fun CreateTransactionContract.UiState.resolveSelectedMiningFee(): MiningFeeUi? {
+    return selectedFeeTierIndex?.let { index -> miningFeeTiers.getOrNull(index) }
+}
+
+@Composable
+private fun MiningFeeRow(
+    miningFee: MiningFeeUi?,
+    fetching: Boolean,
+    minBtcTxInSats: String?,
+    onClick: () -> Unit,
+) {
+    val numberFormat = remember { NumberFormat.getNumberInstance() }
+    val maxHeight = OutlinedTextFieldDefaults.MinHeight
+    Column {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(maxHeight)
+                .padding(horizontal = 32.dp)
+                .background(
+                    color = AppTheme.extraColorScheme.surfaceVariantAlt1,
+                    shape = AppTheme.shapes.extraLarge,
+                )
+                .clickable(enabled = true, onClick = onClick),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                modifier = Modifier.padding(start = 24.dp),
+                style = AppTheme.typography.bodyMedium,
+                color = AppTheme.colorScheme.onPrimary,
+                text = stringResource(id = R.string.wallet_create_transaction_mining_fee),
+            )
+
+            if (miningFee != null) {
+                val formattedAmountInSats = numberFormat.format(miningFee.feeInBtc.toSats().toLong())
+                Text(
+                    modifier = Modifier.padding(end = 24.dp),
+                    style = AppTheme.typography.bodyMedium,
+                    color = AppTheme.colorScheme.onPrimary,
+                    text = "${miningFee.label}: $formattedAmountInSats sats",
+                )
+            } else if (fetching) {
+                Box(
+                    modifier = Modifier
+                        .padding(end = 24.dp)
+                        .padding(vertical = 8.dp)
+                        .width(maxHeight),
+                    contentAlignment = Alignment.CenterEnd,
+                ) {
+                    PrimalLoadingSpinner(size = maxHeight)
+                }
+            } else {
+                Text(
+                    modifier = Modifier.padding(end = 24.dp),
+                    style = AppTheme.typography.bodyMedium,
+                    color = AppTheme.colorScheme.onPrimary,
+                    text = stringResource(
+                        id = R.string.wallet_create_transaction_mining_fee_free_label,
+                        "0 sats",
+                    ),
+                )
+            }
+        }
+
+        if (miningFee == null && !fetching) {
+            val minSatsForBtcTxFormatted = minBtcTxInSats?.let { numberFormat.format(it.toLong()) }
+            Text(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 40.dp)
+                    .padding(top = 16.dp),
+                style = AppTheme.typography.bodySmall,
+                text = stringResource(
+                    id = R.string.wallet_create_transaction_min_btc_tx_amount,
+                    "$minSatsForBtcTxFormatted sats",
+                ),
+                color = AppTheme.colorScheme.error,
+                textAlign = TextAlign.Center,
+            )
+        }
+    }
 }
 
 @Composable

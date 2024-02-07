@@ -1,11 +1,11 @@
-package net.primal.android.wallet.transactions.send.create
+package net.primal.android.wallet.domain
 
 import kotlinx.serialization.Serializable
 import net.primal.android.wallet.api.model.LnInvoiceData
 
 @Serializable
-data class DraftTransaction(
-    val status: TransactionStatus = TransactionStatus.Draft,
+data class DraftTx(
+    val status: DraftTxStatus = DraftTxStatus.Draft,
     val minSendable: String? = null,
     val maxSendable: String? = null,
     val targetLud16: String? = null,
@@ -20,6 +20,5 @@ data class DraftTransaction(
     val noteSelf: String? = null,
 ) {
     fun isLightningTx() = targetOnChainAddress == null
-
     fun isBtcTx() = targetOnChainAddress != null
 }

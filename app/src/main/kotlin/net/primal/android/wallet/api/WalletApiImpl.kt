@@ -34,6 +34,8 @@ import net.primal.android.wallet.api.model.InAppPurchaseQuoteResponse
 import net.primal.android.wallet.api.model.InAppPurchaseRequestBody
 import net.primal.android.wallet.api.model.IsWalletUserRequestBody
 import net.primal.android.wallet.api.model.LightningInvoiceResponse
+import net.primal.android.wallet.api.model.MiningFeeTier
+import net.primal.android.wallet.api.model.MiningFeesRequestBody
 import net.primal.android.wallet.api.model.OnChainAddressResponse
 import net.primal.android.wallet.api.model.ParseLnInvoiceRequestBody
 import net.primal.android.wallet.api.model.ParseLnUrlRequestBody
@@ -277,7 +279,7 @@ class WalletApiImpl @Inject constructor(
             ),
         )
 
-        return result.findPrimalEvent(kind = NostrEventKind.PrimalWalletParsedLnurl)
+        return result.findPrimalEvent(kind = NostrEventKind.PrimalWalletParsedLnUrl)
             ?.takeContentOrNull<ParsedLnUrlResponse>()
             ?: throw WssException("Missing or invalid content in response.")
     }
@@ -296,6 +298,27 @@ class WalletApiImpl @Inject constructor(
 
         return result.findPrimalEvent(kind = NostrEventKind.PrimalWalletParsedLnInvoice)
             ?.takeContentOrNull<ParsedLnInvoiceResponse>()
+            ?: throw WssException("Missing or invalid content in response.")
+    }
+
+    override suspend fun getMiningFees(
+        userId: String,
+        onChainAddress: String,
+        amountInBtc: String,
+    ): List<MiningFeeTier> {
+        val result = primalApiClient.query(
+            message = PrimalCacheFilter(
+                primalVerb = PrimalVerb.WALLET,
+                optionsJson = buildWalletOptionsJson(
+                    userId = userId,
+                    walletVerb = WalletOperationVerb.ONCHAIN_PAYMENT_TIERS,
+                    requestBody = MiningFeesRequestBody(btcAddress = onChainAddress, amountInBtc = amountInBtc),
+                ),
+            ),
+        )
+
+        return result.findPrimalEvent(kind = NostrEventKind.PrimalWalletMiningFees)
+            ?.takeContentOrNull<List<MiningFeeTier>>()
             ?: throw WssException("Missing or invalid content in response.")
     }
 

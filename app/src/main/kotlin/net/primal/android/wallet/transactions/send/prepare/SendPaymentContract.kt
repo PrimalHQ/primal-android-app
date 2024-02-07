@@ -1,6 +1,6 @@
 package net.primal.android.wallet.transactions.send.prepare
 
-import net.primal.android.wallet.transactions.send.create.DraftTransaction
+import net.primal.android.wallet.domain.DraftTx
 import net.primal.android.wallet.transactions.send.prepare.tabs.SendPaymentTab
 
 interface SendPaymentContract {
@@ -22,8 +22,6 @@ interface SendPaymentContract {
     }
 
     sealed class SideEffect {
-        data class DraftTransactionReady(
-            val draft: DraftTransaction,
-        ) : SideEffect()
+        data class DraftTransactionReady(val draft: DraftTx) : SideEffect()
     }
 }
