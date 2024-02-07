@@ -56,7 +56,9 @@ class CreateTransactionViewModel @Inject constructor(
         viewModelScope.launch {
             events.collect {
                 when (it) {
-                    is UiEvent.SendTransaction -> sendTransaction(note = it.note)
+                    is UiEvent.SendTransaction -> {
+                        sendTransaction(noteRecipient = it.noteRecipient, noteSelf = it.noteSelf)
+                    }
                     is UiEvent.AmountChanged -> setState {
                         copy(transaction = transaction.copy(amountSats = it.amountInSats))
                     }
@@ -99,7 +101,7 @@ class CreateTransactionViewModel @Inject constructor(
         }
     }
 
-    private fun sendTransaction(note: String?) =
+    private fun sendTransaction(noteRecipient: String?, noteSelf: String?) =
         viewModelScope.launch {
             try {
                 setState { copy(transaction = transaction.copy(status = TransactionStatus.Sending)) }
@@ -113,13 +115,14 @@ class CreateTransactionViewModel @Inject constructor(
                         targetLnUrl = draftTransaction.targetLnUrl,
                         targetPubKey = draftTransaction.targetUserId,
                         lnInvoice = draftTransaction.lnInvoice,
+                        targetBtcAddress = draftTransaction.targetOnChainAddress,
                         amountBtc = if (draftTransaction.lnInvoice == null) {
                             draftTransaction.amountSats.toULong().toBtc().formatAsString()
                         } else {
                             null
                         },
-                        noteRecipient = note,
-                        noteSelf = note,
+                        noteRecipient = noteRecipient,
+                        noteSelf = noteSelf,
                     ),
                 )
                 setState { copy(transaction = transaction.copy(status = TransactionStatus.Sent)) }

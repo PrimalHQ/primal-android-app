@@ -14,4 +14,5 @@ enum class WalletOperationVerb(val identifier: String) {
     ACTIVATE("activate"),
     PARSE_LNURL("parse_lnurl"),
     PARSE_LNINVOICE("parse_lninvoice"),
+    ONCHAIN_PAYMENT_TIERS("onchain_payment_tiers"),
 }

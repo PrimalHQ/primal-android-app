@@ -107,7 +107,7 @@ class SendPaymentViewModel @Inject constructor(
                     lnInvoice = text,
                     lnInvoiceData = response.lnInvoiceData,
                     amountSats = (response.lnInvoiceData.amountMilliSats / 1000).toString(),
-                    note = response.comment.asUrlDecoded(),
+                    noteRecipient = response.comment.asUrlDecoded(),
                 ),
             ),
         )
@@ -125,7 +125,7 @@ class SendPaymentViewModel @Inject constructor(
                     targetUserId = response.targetPubkey,
                     targetLud16 = response.targetLud16,
                     targetLnUrl = text,
-                    note = response.description,
+                    noteRecipient = response.description,
                 ),
             ),
         )
@@ -146,7 +146,7 @@ class SendPaymentViewModel @Inject constructor(
                         targetUserId = response.targetPubkey,
                         targetLud16 = lud16Value,
                         targetLnUrl = lnurl,
-                        note = response.description,
+                        noteRecipient = response.description,
                     ),
                 ),
             )
@@ -160,8 +160,9 @@ class SendPaymentViewModel @Inject constructor(
                 SideEffect.DraftTransactionReady(
                     draft = DraftTransaction(
                         targetOnChainAddress = btcInstructions.address,
+                        onChainInvoice = if (btcInstructions.hasParams()) text else null,
                         amountSats = btcInstructions.amount?.toSats()?.toString() ?: "0",
-                        note = btcInstructions.label,
+                        noteRecipient = btcInstructions.label,
                     ),
                 ),
             )

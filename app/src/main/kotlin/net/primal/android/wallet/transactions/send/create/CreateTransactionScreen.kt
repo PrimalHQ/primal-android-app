@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -38,6 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -63,6 +65,7 @@ import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
+import net.primal.android.core.compose.icons.primaliconpack.WalletBitcoinPayment
 import net.primal.android.core.compose.icons.primaliconpack.WalletError
 import net.primal.android.core.compose.icons.primaliconpack.WalletSuccess
 import net.primal.android.core.compose.numericpad.PrimalNumericPad
@@ -171,16 +174,19 @@ private fun TransactionEditor(
     eventPublisher: (CreateTransactionContract.UiEvent) -> Unit,
     onCancelClick: () -> Unit,
 ) {
-    val keyboardController = LocalSoftwareKeyboardController.current
     val keyboardVisible by keyboardVisibilityAsState()
 
-    var noteText by remember { mutableStateOf(state.transaction.note ?: "") }
-    var isNumericPadOn by remember {
-        mutableStateOf(state.transaction.lnInvoiceData == null)
-    }
+    var noteRecipientText by remember { mutableStateOf(state.transaction.noteRecipient ?: "") }
+    var noteSelfText by remember { mutableStateOf(state.transaction.noteSelf ?: "") }
+    var isNumericPadOn by remember { mutableStateOf(state.isNotInvoice()) }
 
     val sendPayment = {
-        eventPublisher(SendTransaction(note = noteText.ifEmpty { null }))
+        eventPublisher(
+            SendTransaction(
+                noteRecipient = noteRecipientText.ifEmpty { null },
+                noteSelf = noteSelfText.ifEmpty { null },
+            ),
+        )
     }
 
     Column(
@@ -193,20 +199,41 @@ private fun TransactionEditor(
         ) {
             Spacer(modifier = Modifier.height(16.dp))
 
-            AvatarThumbnail(
-                modifier = Modifier.padding(vertical = 16.dp),
-                avatarCdnImage = state.profileAvatarCdnImage,
-                avatarSize = 88.dp,
-            )
+            if (state.transaction.targetOnChainAddress != null) {
+                Box(
+                    modifier = Modifier
+                        .padding(vertical = 16.dp)
+                        .size(88.dp)
+                        .clip(CircleShape)
+                        .background(color = AppTheme.colorScheme.onPrimary),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Image(
+                        modifier = Modifier.size(56.dp),
+                        imageVector = PrimalIcons.WalletBitcoinPayment,
+                        contentDescription = null,
+                    )
+                }
+            } else {
+                AvatarThumbnail(
+                    modifier = Modifier.padding(vertical = 16.dp),
+                    avatarCdnImage = state.profileAvatarCdnImage,
+                    avatarSize = 88.dp,
+                )
+            }
 
-            val receiver = state.profileDisplayName
+            val title = state.profileDisplayName
                 ?: state.transaction.targetLud16
                 ?: state.transaction.targetLnUrl?.ellipsizeLnurl()
+                ?: state.transaction.targetOnChainAddress?.let {
+                    stringResource(id = R.string.wallet_create_transaction_bitcoin_address)
+                }
                 ?: ""
-            if (receiver.isNotEmpty()) {
+
+            if (title.isNotEmpty()) {
                 Text(
                     modifier = Modifier.padding(vertical = 4.dp, horizontal = 16.dp),
-                    text = receiver,
+                    text = title,
                     color = AppTheme.colorScheme.onSurface,
                     style = AppTheme.typography.bodyLarge,
                     fontWeight = FontWeight.SemiBold,
@@ -214,9 +241,13 @@ private fun TransactionEditor(
                 )
             }
 
-            if (state.profileLightningAddress != null) {
+            val subtitle = state.profileLightningAddress
+                ?: state.transaction.targetOnChainAddress?.ellipsizeMiddle(size = 16)
+
+            if (!subtitle.isNullOrEmpty()) {
                 Text(
-                    text = state.profileLightningAddress,
+                    modifier = Modifier.padding(horizontal = 32.dp),
+                    text = subtitle,
                     color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
                     style = AppTheme.typography.bodyMedium,
                 )
@@ -232,7 +263,7 @@ private fun TransactionEditor(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null,
                         onClick = {
-                            if (state.transaction.lnInvoiceData == null) {
+                            if (state.isNotInvoice()) {
                                 isNumericPadOn = true
                             }
                         },
@@ -267,52 +298,28 @@ private fun TransactionEditor(
                     }
 
                     false -> {
-                        if (state.transaction.lnInvoiceData == null) {
-                            OutlinedTextField(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 32.dp),
-                                value = noteText,
-                                onValueChange = { input -> noteText = input },
-                                colors = PrimalDefaults.outlinedTextFieldColors(),
-                                shape = AppTheme.shapes.extraLarge,
-                                maxLines = 3,
-                                placeholder = {
-                                    if (!keyboardVisible) {
-                                        Text(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            text = if (state.profileDisplayName != null) {
-                                                stringResource(
-                                                    id = R.string.wallet_create_transaction_note_hint_with_recipient,
-                                                    state.profileDisplayName,
-                                                )
-                                            } else {
-                                                stringResource(id = R.string.wallet_create_transaction_note_hint)
-                                            },
-                                            textAlign = TextAlign.Center,
-                                            color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
-                                            style = AppTheme.typography.bodyMedium,
-                                        )
-                                    }
-                                },
-                                keyboardOptions = KeyboardOptions(
-                                    imeAction = ImeAction.Go,
-                                ),
-                                keyboardActions = KeyboardActions(
-                                    onGo = {
-                                        keyboardController?.hide()
-                                        sendPayment()
-                                    },
-                                ),
-                            )
-                        } else {
-                            Text(
-                                modifier = Modifier.padding(horizontal = 32.dp),
-                                text = noteText.ifEmpty { state.transaction.lnInvoiceData.description ?: "" },
-                                color = AppTheme.colorScheme.onSurface,
-                                style = AppTheme.typography.bodyLarge,
-                                fontWeight = FontWeight.SemiBold,
-                            )
+                        when {
+                            state.transaction.isLightningTx() -> {
+                                LightningTxNotes(
+                                    state = state,
+                                    noteRecipientText = noteRecipientText,
+                                    onNoteRecipientTextChanged = { text -> noteRecipientText = text },
+                                    noteSelfText = noteSelfText,
+                                    onNoteSelfTextChanged = { text -> noteSelfText = text },
+                                    keyboardVisible = keyboardVisible,
+                                    sendPayment = sendPayment,
+                                )
+                            }
+
+                            state.transaction.isBtcTx() -> {
+                                BitcoinTxSelfNoteAndMiningFee(
+                                    state = state,
+                                    noteSelfText = noteSelfText,
+                                    onNoteSelfTextChanged = { text -> noteSelfText = text },
+                                    keyboardVisible = keyboardVisible,
+                                    sendPayment = sendPayment,
+                                )
+                            }
                         }
                     }
                 }
@@ -359,6 +366,107 @@ private fun TransactionEditor(
             }
         }
     }
+}
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+private fun LightningTxNotes(
+    state: CreateTransactionContract.UiState,
+    noteRecipientText: String,
+    onNoteRecipientTextChanged: (String) -> Unit,
+    noteSelfText: String,
+    onNoteSelfTextChanged: (String) -> Unit,
+    keyboardVisible: Boolean,
+    sendPayment: () -> Unit,
+) {
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    Column {
+        if (state.isNotInvoice()) {
+            OutlinedTextField(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 32.dp),
+                value = noteRecipientText,
+                onValueChange = onNoteRecipientTextChanged,
+                colors = PrimalDefaults.outlinedTextFieldColors(),
+                shape = AppTheme.shapes.extraLarge,
+                maxLines = 3,
+                placeholder = {
+                    if (!keyboardVisible) {
+                        Text(
+                            modifier = Modifier.fillMaxWidth(),
+                            text = if (state.profileDisplayName != null) {
+                                stringResource(
+                                    id = R.string.wallet_create_transaction_note_hint_with_recipient,
+                                    state.profileDisplayName,
+                                )
+                            } else {
+                                stringResource(id = R.string.wallet_create_transaction_note_hint)
+                            },
+                            textAlign = TextAlign.Center,
+                            color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+                            style = AppTheme.typography.bodyMedium,
+                        )
+                    }
+                },
+                keyboardOptions = KeyboardOptions(
+                    imeAction = ImeAction.Next,
+                ),
+            )
+        } else {
+            Text(
+                modifier = Modifier.padding(horizontal = 32.dp),
+                text = noteRecipientText.ifEmpty { state.transaction.lnInvoiceData?.description ?: "" },
+                color = AppTheme.colorScheme.onSurface,
+                style = AppTheme.typography.bodyLarge,
+                fontWeight = FontWeight.SemiBold,
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        OutlinedTextField(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 32.dp),
+            value = noteSelfText,
+            onValueChange = onNoteSelfTextChanged,
+            colors = PrimalDefaults.outlinedTextFieldColors(),
+            shape = AppTheme.shapes.extraLarge,
+            maxLines = 3,
+            placeholder = {
+                if (!keyboardVisible) {
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = stringResource(id = R.string.wallet_create_transaction_note_to_self),
+                        textAlign = TextAlign.Center,
+                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+                        style = AppTheme.typography.bodyMedium,
+                    )
+                }
+            },
+            keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Go,
+            ),
+            keyboardActions = KeyboardActions(
+                onGo = {
+                    keyboardController?.hide()
+                    sendPayment()
+                },
+            ),
+        )
+    }
+}
+
+@Composable
+private fun BitcoinTxSelfNoteAndMiningFee(
+    state: CreateTransactionContract.UiState,
+    noteSelfText: String,
+    onNoteSelfTextChanged: (String) -> Unit,
+    keyboardVisible: Boolean,
+    sendPayment: () -> Unit,
+) {
 }
 
 @Composable

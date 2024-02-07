@@ -405,6 +405,7 @@
     <string name="wallet_create_transaction_next_numeric_pad_button">Next</string>
     <string name="wallet_create_transaction_note_hint">Add message</string>
     <string name="wallet_create_transaction_note_hint_with_recipient">Add message for %1$s</string>
+    <string name="wallet_create_transaction_note_to_self">Add a note to self</string>
     <string name="wallet_create_transaction_sending_title">Sending…</string>
     <string name="wallet_create_transaction_sending_headline">Sending</string>
     <string name="wallet_create_transaction_transaction_description_lite">%1$s sats</string>
@@ -415,6 +416,7 @@
     <string name="wallet_create_transaction_failed_headline">Unable to send</string>
     <string name="wallet_create_transaction_done_button">Done</string>
     <string name="wallet_create_transaction_close_button">Close</string>
+    <string name="wallet_create_transaction_bitcoin_address">Bitcoin Address</string>
 
     <string name="wallet_receive_lightning_transaction_title">Receive via Lightning</string>
     <string name="wallet_receive_btc_transaction_title">Receive On-chain</string>

@@ -12,8 +12,14 @@ data class DraftTransaction(
     val targetLnUrl: String? = null,
     val targetOnChainAddress: String? = null,
     val targetUserId: String? = null,
+    val onChainInvoice: String? = null,
     val lnInvoice: String? = null,
     val lnInvoiceData: LnInvoiceData? = null,
     val amountSats: String = "0",
-    val note: String? = null,
-)
+    val noteRecipient: String? = null,
+    val noteSelf: String? = null,
+) {
+    fun isLightningTx() = targetOnChainAddress == null
+
+    fun isBtcTx() = targetOnChainAddress != null
+}
