@@ -1,5 +1,7 @@
 package net.primal.android.scanner.analysis
 
+import net.primal.android.wallet.utils.isBitcoinAddress
+import net.primal.android.wallet.utils.isBitcoinAddressUri
 import net.primal.android.wallet.utils.isLightningAddressUri
 import net.primal.android.wallet.utils.isLnInvoice
 import net.primal.android.wallet.utils.isLnUrl
@@ -16,6 +18,8 @@ enum class QrCodeDataType(val validator: (String) -> Boolean) {
     LNURL(validator = { it.isLnUrl() }),
 
     LUD16(validator = { it.isLightningAddressUri() }),
+
+    BITCOIN(validator = { it.isBitcoinAddressUri() || it.isBitcoinAddress() }),
 
     ;
 

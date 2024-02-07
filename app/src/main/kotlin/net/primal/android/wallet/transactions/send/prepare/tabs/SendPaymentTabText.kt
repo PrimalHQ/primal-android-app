@@ -32,6 +32,8 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.Paste
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
+import net.primal.android.wallet.utils.isBitcoinAddress
+import net.primal.android.wallet.utils.isBitcoinAddressUri
 import net.primal.android.wallet.utils.isLightningAddress
 import net.primal.android.wallet.utils.isLightningAddressUri
 import net.primal.android.wallet.utils.isLnInvoice
@@ -44,7 +46,7 @@ fun SendPaymentTabText(parsing: Boolean, onTextConfirmed: (String) -> Unit) {
     var textState by remember { mutableStateOf("") }
 
     val isInputValid by remember {
-        derivedStateOf { textState.hasLnRecipient() }
+        derivedStateOf { textState.hasValidPaymentInput() }
     }
 
     Column(
@@ -93,7 +95,7 @@ fun SendPaymentTabText(parsing: Boolean, onTextConfirmed: (String) -> Unit) {
                 modifier = Modifier.padding(vertical = 16.dp),
                 onClick = {
                     val clipboardText = clipboardManager.getText()?.text.orEmpty().trim()
-                    if (clipboardText.hasLnRecipient()) {
+                    if (clipboardText.hasValidPaymentInput()) {
                         textState = clipboardText
                     }
                 },
@@ -108,8 +110,9 @@ fun SendPaymentTabText(parsing: Boolean, onTextConfirmed: (String) -> Unit) {
     }
 }
 
-private fun String.hasLnRecipient(): Boolean {
-    return isLnInvoice() || isLnUrl() || isLightningAddress() || isLightningAddressUri()
+private fun String.hasValidPaymentInput(): Boolean {
+    return isLnInvoice() || isLnUrl() || isLightningAddress() || isLightningAddressUri() ||
+        isBitcoinAddress() || isBitcoinAddressUri()
 }
 
 @Preview

@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
+import net.primal.android.navigation.asUrlEncoded
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.domain.Network
@@ -105,7 +106,7 @@ class ReceivePaymentViewModel @Inject constructor(
                         ),
                         bitcoinNetworkDetails = this.bitcoinNetworkDetails.copy(
                             invoice = "bitcoin:${this.bitcoinNetworkDetails.address}?amount=$amountInBtc".let {
-                                if (!comment.isNullOrEmpty()) "$it&label=$comment" else it
+                                if (!comment.isNullOrEmpty()) "$it&label=${comment.asUrlEncoded()}" else it
                             },
                         ),
                     )

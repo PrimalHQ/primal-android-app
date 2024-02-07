@@ -459,6 +459,7 @@ private fun TwoLineText(
         fontWeight = FontWeight.Bold,
         maxLines = maxLines,
         overflow = TextOverflow.Ellipsis,
+        textAlign = TextAlign.Center,
     )
 }
 

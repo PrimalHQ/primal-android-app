@@ -10,6 +10,7 @@ data class DraftTransaction(
     val maxSendable: String? = null,
     val targetLud16: String? = null,
     val targetLnUrl: String? = null,
+    val targetOnChainAddress: String? = null,
     val targetUserId: String? = null,
     val lnInvoice: String? = null,
     val lnInvoiceData: LnInvoiceData? = null,

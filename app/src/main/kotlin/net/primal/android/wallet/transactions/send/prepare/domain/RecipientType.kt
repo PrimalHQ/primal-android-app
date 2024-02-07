@@ -4,4 +4,5 @@ enum class RecipientType {
     LnInvoice,
     LnUrl,
     LightningAddress,
+    BitcoinAddress,
 }
