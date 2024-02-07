@@ -71,7 +71,7 @@ class WalletStringUtilsTest {
 
     @Test
     fun isBitcoinAddress_returnsFalseForInvalidBtcAddress() {
-        "bc1q99ygnq68xrvqd9up7vgapnytwessw".isBitcoinAddress() shouldBe true
+        "bc1invalidbitcoinaddress".isBitcoinAddress() shouldBe false
     }
 
     @Test
