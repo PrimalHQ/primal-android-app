@@ -56,12 +56,17 @@ class WalletStringUtilsTest {
 
     @Test
     fun isBitcoinAddressUri_returnsTrueForCorrectBitcoinUri() {
-        "bitcoin:bc1sdklfjadsldkfjsaklfdjsalkfdjals".isBitcoinAddressUri() shouldBe true
+        "bitcoin:bc1q99ygnq68xrvqd9up7vgapnytwmss4am6ytessw".isBitcoinAddressUri() shouldBe true
     }
 
     @Test
     fun isBitcoinAddressUri_returnsFalseForMissingProtocol() {
-        "bc1sdklfjadsldkfjsaklfdjsalkfdjals".isBitcoinAddressUri() shouldBe false
+        "bc1q99ygnq68xrvqd9up7vgapnytwmss4am6ytessw".isBitcoinAddressUri() shouldBe false
+    }
+
+    @Test
+    fun isBitcoinAddressUri_returnsFalseForInvalidBtcAddress() {
+        "bitcoin:butInvalidBtcAddress".isBitcoinAddressUri() shouldBe false
     }
 
     @Test

@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -61,6 +62,7 @@ import net.primal.android.wallet.transactions.send.create.ui.model.MiningFeeUi
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toBtc
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
 
+@ExperimentalMaterial3Api
 @ExperimentalComposeUiApi
 @Composable
 fun TransactionEditor(
@@ -115,6 +117,11 @@ fun TransactionEditor(
                         CreateTransactionContract.UiEvent.AmountChanged(amountInSats = it),
                     )
                 },
+                onMiningFeeChanged = {
+                    eventPublisher(
+                        CreateTransactionContract.UiEvent.MiningFeeChanged(tierId = it.id),
+                    )
+                },
             )
         }
 
@@ -134,6 +141,7 @@ fun TransactionEditor(
     }
 }
 
+@ExperimentalMaterial3Api
 @ExperimentalComposeUiApi
 @Composable
 private fun TransactionMainContent(
@@ -145,6 +153,7 @@ private fun TransactionMainContent(
     noteSelfText: String,
     onNoteSelfTextChanged: (String) -> Unit,
     onAmountChanged: (String) -> Unit,
+    onMiningFeeChanged: (MiningFeeUi) -> Unit,
 ) {
     AnimatedContent(
         targetState = isNumericPadOn,
@@ -179,9 +188,10 @@ private fun TransactionMainContent(
                     state.transaction.isBtcTx() -> {
                         BitcoinTxSelfNoteAndMiningFee(
                             state = state,
+                            keyboardVisible = keyboardVisible,
                             noteSelfText = noteSelfText,
                             onNoteSelfTextChanged = onNoteSelfTextChanged,
-                            keyboardVisible = keyboardVisible,
+                            onMiningFeeChanged = onMiningFeeChanged,
                         )
                     }
                 }
@@ -447,14 +457,19 @@ private fun NoteToSelfTextField(
     )
 }
 
+@ExperimentalMaterial3Api
 @ExperimentalComposeUiApi
 @Composable
 private fun BitcoinTxSelfNoteAndMiningFee(
     state: CreateTransactionContract.UiState,
+    keyboardVisible: Boolean,
     noteSelfText: String,
     onNoteSelfTextChanged: (String) -> Unit,
-    keyboardVisible: Boolean,
+    onMiningFeeChanged: (MiningFeeUi) -> Unit,
 ) {
+    val selectedFeeTierIndex = state.selectedFeeTierIndex
+    var isMiningFeeSelectionVisible by remember { mutableStateOf(false) }
+
     Column {
         NoteToSelfTextField(
             noteSelfText = noteSelfText,
@@ -468,7 +483,20 @@ private fun BitcoinTxSelfNoteAndMiningFee(
             miningFee = state.resolveSelectedMiningFee(),
             fetching = state.fetchingMiningFees,
             minBtcTxInSats = state.minBtcTxAmountInSats,
+            clickable = selectedFeeTierIndex != null,
             onClick = {
+                isMiningFeeSelectionVisible = true
+            },
+        )
+    }
+
+    if (isMiningFeeSelectionVisible && selectedFeeTierIndex != null) {
+        MiningFeeBottomSheet(
+            fees = state.miningFeeTiers,
+            selectedFeeIndex = selectedFeeTierIndex,
+            onMiningFeeChanged = onMiningFeeChanged,
+            onDismissRequest = {
+                isMiningFeeSelectionVisible = false
             },
         )
     }
@@ -479,6 +507,7 @@ private fun MiningFeeRow(
     miningFee: MiningFeeUi?,
     fetching: Boolean,
     minBtcTxInSats: String?,
+    clickable: Boolean,
     onClick: () -> Unit,
 ) {
     val numberFormat = remember { NumberFormat.getNumberInstance() }
@@ -493,7 +522,8 @@ private fun MiningFeeRow(
                     color = AppTheme.extraColorScheme.surfaceVariantAlt1,
                     shape = AppTheme.shapes.extraLarge,
                 )
-                .clickable(enabled = true, onClick = onClick),
+                .clip(AppTheme.shapes.extraLarge)
+                .clickable(enabled = clickable, onClick = onClick),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -508,7 +538,7 @@ private fun MiningFeeRow(
                 val formattedAmountInSats = numberFormat.format(miningFee.feeInBtc.toSats().toLong())
                 Text(
                     modifier = Modifier.padding(end = 24.dp),
-                    style = AppTheme.typography.bodyMedium,
+                    style = AppTheme.typography.bodyMedium.copy(fontSize = 16.sp),
                     color = AppTheme.colorScheme.onPrimary,
                     text = "${miningFee.label}: $formattedAmountInSats sats",
                 )
@@ -525,7 +555,7 @@ private fun MiningFeeRow(
             } else {
                 Text(
                     modifier = Modifier.padding(end = 24.dp),
-                    style = AppTheme.typography.bodyMedium,
+                    style = AppTheme.typography.bodyMedium.copy(fontSize = 16.sp),
                     color = AppTheme.colorScheme.onPrimary,
                     text = stringResource(
                         id = R.string.wallet_create_transaction_mining_fee_free_label,

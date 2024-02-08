@@ -22,6 +22,7 @@ interface CreateTransactionContract {
 
     sealed class UiEvent {
         data class AmountChanged(val amountInSats: String) : UiEvent()
+        data class MiningFeeChanged(val tierId: String) : UiEvent()
         data class SendTransaction(
             val noteRecipient: String?,
             val noteSelf: String?,

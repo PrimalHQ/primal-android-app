@@ -421,6 +421,12 @@
     <string name="wallet_create_transaction_mining_fee_free_label">Free: %1$s</string>
     <string name="wallet_create_transaction_min_btc_tx_amount">Minimal amount for Bitcoin transaction: %1$s</string>
 
+    <string name="wallet_create_transaction_mining_fee_selector_title">Mining fee</string>
+    <string name="wallet_create_transaction_mining_fee_selector_approx_label_prefix">Approx.</string>
+    <string name="wallet_create_transaction_mining_fee_selector_about_text_button">About Mining Fees</string>
+    <string name="wallet_create_transaction_mining_fee_selector_about_title">About mining fees</string>
+    <string name="wallet_create_transaction_mining_fee_selector_about_text">Bitcoin mining fees are small payments made by users to compensate the network of computers that process and verify Bitcoin transactions. These fees help prioritize your transaction, ensuring it gets added to the blockchain quickly. They also support the overall security and maintenance of the Bitcoin network.</string>
+
     <string name="wallet_receive_lightning_transaction_title">Receive via Lightning</string>
     <string name="wallet_receive_btc_transaction_title">Receive On-chain</string>
     <string name="wallet_receive_transaction_title">Receive</string>

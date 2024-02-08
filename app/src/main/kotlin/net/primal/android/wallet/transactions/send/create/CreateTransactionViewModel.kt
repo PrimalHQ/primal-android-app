@@ -65,15 +65,21 @@ class CreateTransactionViewModel @Inject constructor(
 
     private fun subscribeToEvents() =
         viewModelScope.launch {
-            events.collect {
-                when (it) {
+            events.collect { event ->
+                when (event) {
                     is UiEvent.SendTransaction -> {
-                        sendTransaction(noteRecipient = it.noteRecipient, noteSelf = it.noteSelf)
+                        sendTransaction(noteRecipient = event.noteRecipient, noteSelf = event.noteSelf)
                     }
 
                     is UiEvent.AmountChanged -> {
-                        setState { copy(transaction = transaction.copy(amountSats = it.amountInSats)) }
+                        setState { copy(transaction = transaction.copy(amountSats = event.amountInSats)) }
                         clearAndRestartMiningFees()
+                    }
+
+                    is UiEvent.MiningFeeChanged -> {
+                        setState {
+                            copy(selectedFeeTierIndex = this.miningFeeTiers.indexOfFirst { it.id == event.tierId })
+                        }
                     }
                 }
             }
@@ -205,8 +211,10 @@ class CreateTransactionViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 setState { copy(transaction = transaction.copy(status = DraftTxStatus.Sending)) }
+                val uiState = _state.value
                 val activeUserId = activeUserStore.activeUserId()
-                val draftTransaction = _state.value.transaction
+                val miningFeeTier = uiState.selectedFeeTierIndex?.let { uiState.miningFeeTiers.getOrNull(it) }
+                val draftTransaction = uiState.transaction
                 walletRepository.withdraw(
                     userId = activeUserId,
                     body = WithdrawRequestBody(
@@ -221,6 +229,7 @@ class CreateTransactionViewModel @Inject constructor(
                         } else {
                             null
                         },
+                        onChainTier = miningFeeTier?.id,
                         noteRecipient = noteRecipient,
                         noteSelf = noteSelf,
                     ),
