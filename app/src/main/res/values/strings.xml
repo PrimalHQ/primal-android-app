@@ -418,8 +418,10 @@
     <string name="wallet_create_transaction_close_button">Close</string>
     <string name="wallet_create_transaction_bitcoin_address">Bitcoin Address</string>
     <string name="wallet_create_transaction_mining_fee">Mining Fee</string>
-    <string name="wallet_create_transaction_mining_fee_free_label">Free: %1$s</string>
-    <string name="wallet_create_transaction_min_btc_tx_amount">Minimal amount for Bitcoin transaction: %1$s</string>
+    <string name="wallet_create_transaction_mining_fees_not_fetched">Try again</string>
+    <string name="wallet_create_transaction_min_tx_amount_title">Alert</string>
+    <string name="wallet_create_transaction_min_tx_amount_text">Amount too small for an on-chain transaction.</string>
+    <string name="wallet_create_transaction_min_tx_amount_for_selected_fee_tier_error">%1$s is minimal amount for %2$s tier.</string>
 
     <string name="wallet_create_transaction_mining_fee_selector_title">Mining fee</string>
     <string name="wallet_create_transaction_mining_fee_selector_approx_label_prefix">Approx.</string>

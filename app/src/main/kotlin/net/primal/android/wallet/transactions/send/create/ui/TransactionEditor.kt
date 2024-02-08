@@ -20,10 +20,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -122,9 +124,13 @@ fun TransactionEditor(
                         CreateTransactionContract.UiEvent.MiningFeeChanged(tierId = it.id),
                     )
                 },
+                onReloadMiningFees = {
+                    eventPublisher(CreateTransactionContract.UiEvent.ReloadMiningFees)
+                },
             )
         }
 
+        var minAmountAlertVisible by remember { mutableStateOf(false) }
         TransactionActionsRow(
             state = state,
             keyboardVisible = keyboardVisible,
@@ -132,12 +138,21 @@ fun TransactionEditor(
             onCancelClick = onCancelClick,
             onActionClick = {
                 if (isNumericPadOn) {
-                    isNumericPadOn = false
+                    if (state.isTxSatisfiesMinAmount()) {
+                        isNumericPadOn = false
+                        eventPublisher(CreateTransactionContract.UiEvent.AmountApplied)
+                    } else {
+                        minAmountAlertVisible = true
+                    }
                 } else {
                     sendPayment()
                 }
             },
         )
+
+        if (minAmountAlertVisible) {
+            MinTxAmountAlertDialog(onDismissRequest = { minAmountAlertVisible = false })
+        }
     }
 }
 
@@ -154,6 +169,7 @@ private fun TransactionMainContent(
     onNoteSelfTextChanged: (String) -> Unit,
     onAmountChanged: (String) -> Unit,
     onMiningFeeChanged: (MiningFeeUi) -> Unit,
+    onReloadMiningFees: () -> Unit,
 ) {
     AnimatedContent(
         targetState = isNumericPadOn,
@@ -192,6 +208,7 @@ private fun TransactionMainContent(
                             noteSelfText = noteSelfText,
                             onNoteSelfTextChanged = onNoteSelfTextChanged,
                             onMiningFeeChanged = onMiningFeeChanged,
+                            onReloadMiningFees = onReloadMiningFees,
                         )
                     }
                 }
@@ -231,7 +248,11 @@ private fun TransactionActionsRow(
 
         PrimalLoadingButton(
             modifier = Modifier.weight(1f),
-            enabled = if (isNumericPadOn) !state.isAmountZero() else state.isTxReady(),
+            enabled = if (isNumericPadOn) {
+                !state.isAmountZero()
+            } else {
+                state.isTxSatisfiesMinAmount() && state.isSelectedMiningFeeValidForBtcTx()
+            },
             text = if (isNumericPadOn) {
                 stringResource(id = R.string.wallet_create_transaction_next_numeric_pad_button)
             } else {
@@ -466,6 +487,7 @@ private fun BitcoinTxSelfNoteAndMiningFee(
     noteSelfText: String,
     onNoteSelfTextChanged: (String) -> Unit,
     onMiningFeeChanged: (MiningFeeUi) -> Unit,
+    onReloadMiningFees: () -> Unit,
 ) {
     val selectedFeeTierIndex = state.selectedFeeTierIndex
     var isMiningFeeSelectionVisible by remember { mutableStateOf(false) }
@@ -482,11 +504,11 @@ private fun BitcoinTxSelfNoteAndMiningFee(
         MiningFeeRow(
             miningFee = state.resolveSelectedMiningFee(),
             fetching = state.fetchingMiningFees,
-            minBtcTxInSats = state.minBtcTxAmountInSats,
             clickable = selectedFeeTierIndex != null,
-            onClick = {
-                isMiningFeeSelectionVisible = true
-            },
+            isTxAmountEligibleForSelectedTier = state.isSelectedMiningFeeValidForBtcTx(),
+            keyboardVisible = keyboardVisible,
+            onClick = { isMiningFeeSelectionVisible = true },
+            onRetry = onReloadMiningFees,
         )
     }
 
@@ -506,9 +528,11 @@ private fun BitcoinTxSelfNoteAndMiningFee(
 private fun MiningFeeRow(
     miningFee: MiningFeeUi?,
     fetching: Boolean,
-    minBtcTxInSats: String?,
     clickable: Boolean,
+    isTxAmountEligibleForSelectedTier: Boolean,
+    keyboardVisible: Boolean,
     onClick: () -> Unit,
+    onRetry: () -> Unit,
 ) {
     val numberFormat = remember { NumberFormat.getNumberInstance() }
     val maxHeight = OutlinedTextFieldDefaults.MinHeight
@@ -554,28 +578,29 @@ private fun MiningFeeRow(
                 }
             } else {
                 Text(
-                    modifier = Modifier.padding(end = 24.dp),
+                    modifier = Modifier
+                        .padding(end = 24.dp)
+                        .clickable { onRetry() },
                     style = AppTheme.typography.bodyMedium.copy(fontSize = 16.sp),
-                    color = AppTheme.colorScheme.onPrimary,
-                    text = stringResource(
-                        id = R.string.wallet_create_transaction_mining_fee_free_label,
-                        "0 sats",
-                    ),
+                    color = AppTheme.colorScheme.error,
+                    text = stringResource(id = R.string.wallet_create_transaction_mining_fees_not_fetched),
                 )
             }
         }
 
-        if (miningFee == null && !fetching) {
-            val minSatsForBtcTxFormatted = minBtcTxInSats?.let { numberFormat.format(it.toLong()) }
+        if (!isTxAmountEligibleForSelectedTier && miningFee?.minAmountInBtc != null && !keyboardVisible) {
+            val minAmountInSatsFormatted = numberFormat.format(miningFee.minAmountInBtc.toSats().toLong())
             Text(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 40.dp)
-                    .padding(top = 16.dp),
+                    .padding(horizontal = 32.dp)
+                    .padding(vertical = 16.dp)
+                    .clickable { onRetry() },
                 style = AppTheme.typography.bodySmall,
                 text = stringResource(
-                    id = R.string.wallet_create_transaction_min_btc_tx_amount,
-                    "$minSatsForBtcTxFormatted sats",
+                    id = R.string.wallet_create_transaction_min_tx_amount_for_selected_fee_tier_error,
+                    "$minAmountInSatsFormatted sats",
+                    miningFee.label,
                 ),
                 color = AppTheme.colorScheme.error,
                 textAlign = TextAlign.Center,
@@ -584,18 +609,51 @@ private fun MiningFeeRow(
     }
 }
 
+@Composable
+private fun MinTxAmountAlertDialog(onDismissRequest: () -> Unit) {
+    AlertDialog(
+        containerColor = AppTheme.colorScheme.surfaceVariant,
+        onDismissRequest = onDismissRequest,
+        title = {
+            Text(
+                text = stringResource(id = R.string.wallet_create_transaction_min_tx_amount_title),
+            )
+        },
+        text = {
+            Text(
+                text = stringResource(id = R.string.wallet_create_transaction_min_tx_amount_text),
+            )
+        },
+        confirmButton = {
+            TextButton(onClick = onDismissRequest) {
+                Text(
+                    text = stringResource(id = android.R.string.ok),
+                )
+            }
+        },
+    )
+}
+
 private fun CreateTransactionContract.UiState.isAmountZero(): Boolean {
     return transaction.amountSats.toBigDecimal() == BigDecimal.ZERO
 }
 
-private fun CreateTransactionContract.UiState.isTxReady(): Boolean {
+private val MIN_BTC_TX_AMOUNT = BigDecimal.valueOf(21_000)
+
+private fun CreateTransactionContract.UiState.isTxSatisfiesMinAmount(): Boolean {
     val txAmount = transaction.amountSats.toBigDecimal()
-    val minTxAmount = if (transaction.isBtcTx()) {
-        minBtcTxAmountInSats?.toBigDecimal() ?: BigDecimal.ONE
-    } else {
-        BigDecimal.ONE
-    }
+    val minTxAmount = if (transaction.isBtcTx()) MIN_BTC_TX_AMOUNT else BigDecimal.ONE
     return txAmount >= minTxAmount
+}
+
+private fun CreateTransactionContract.UiState.isSelectedMiningFeeValidForBtcTx(): Boolean {
+    if (!transaction.isBtcTx()) return true
+
+    val miningFee = selectedFeeTierIndex?.let { miningFeeTiers.getOrNull(it) }
+    val txAmountInSats = transaction.amountSats.toBigDecimal()
+    val miningFeeMinTxAmountInSats = miningFee?.minAmountInBtc?.toSats()?.toLong()?.toBigDecimal() ?: BigDecimal.ZERO
+
+    return miningFee != null && txAmountInSats >= miningFeeMinTxAmountInSats
 }
 
 private fun CreateTransactionContract.UiState.resolveSelectedMiningFee(): MiningFeeUi? {
