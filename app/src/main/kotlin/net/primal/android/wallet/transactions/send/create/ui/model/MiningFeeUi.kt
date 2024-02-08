@@ -1,4 +1,4 @@
-package net.primal.android.wallet.transactions.send.create
+package net.primal.android.wallet.transactions.send.create.ui.model
 
 data class MiningFeeUi(
     val id: String,
