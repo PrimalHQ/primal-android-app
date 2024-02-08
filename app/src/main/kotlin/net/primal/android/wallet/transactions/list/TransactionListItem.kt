@@ -74,7 +74,12 @@ fun TransactionListItem(
             )
         },
         headlineContent = {
-            val suffix = data.txCompletedAt?.formatAsTime() ?: stringResource(id = R.string.wallet_transactions_pending)
+            val suffix = data.txCompletedAt?.formatAsTime() ?: when (data.txState) {
+                TxState.CREATED -> stringResource(id = R.string.wallet_transactions_created)
+                TxState.PROCESSING -> stringResource(id = R.string.wallet_transactions_pending)
+                else -> ""
+            }
+
             TransactionHeadlineContent(
                 wrappedText = data.otherUserDisplayName ?: when (data.isOnChainPayment) {
                     true -> stringResource(id = R.string.wallet_transaction_list_item_bitcoin)

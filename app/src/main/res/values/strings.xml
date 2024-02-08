@@ -377,6 +377,7 @@
     <string name="wallet_transaction_list_item_bitcoin_pending">Incoming on-chain payment</string>
     <string name="wallet_transactions_today">Today</string>
     <string name="wallet_transactions_yesterday">Yesterday</string>
+    <string name="wallet_transactions_created">Sent</string>
     <string name="wallet_transactions_pending">Pending</string>
     <string name="wallet_in_app_purchase_now_button">Purchase Now</string>
     <string name="wallet_in_app_purchase_pay_label">Pay</string>
@@ -465,7 +466,7 @@
     <string name="wallet_transaction_details_type_on_chain_payment">On-chain Payment</string>
     <string name="wallet_transaction_details_type_lightning_payment">Lightning Payment</string>
     <string name="wallet_transaction_details_view_on_blockchain">View on Blockchain</string>
-    <string name="wallet_transaction_details_status_created">Draft</string>
+    <string name="wallet_transaction_details_status_created">Sent</string>
     <string name="wallet_transaction_details_status_processing">Pending</string>
     <string name="wallet_transaction_details_status_succeeded">Paid</string>
     <string name="wallet_transaction_details_status_succeeded_confirmed">Confirmed</string>
