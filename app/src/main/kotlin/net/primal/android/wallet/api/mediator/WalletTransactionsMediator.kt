@@ -13,7 +13,7 @@ import net.primal.android.db.PrimalDatabase
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.ext.asProfileDataPO
 import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
-import net.primal.android.nostr.ext.mapNotNullAsWalletTransactionPO
+import net.primal.android.nostr.ext.mapAsWalletTransactionPO
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.api.UsersApi
 import net.primal.android.user.api.model.UserProfilesResponse
@@ -44,16 +44,16 @@ class WalletTransactionsMediator(
         val timestamp: Long? = when (loadType) {
             LoadType.REFRESH -> null
             LoadType.PREPEND -> {
-                state.firstItemOrNull()?.data?.createdAt
+                state.firstItemOrNull()?.data?.updatedAt
                     ?: withContext(dispatchers.io()) {
-                        database.walletTransactions().first()?.createdAt
+                        database.walletTransactions().first()?.updatedAt
                     }
                     ?: return MediatorResult.Success(endOfPaginationReached = true)
             }
             LoadType.APPEND -> {
-                state.lastItemOrNull()?.data?.createdAt
+                state.lastItemOrNull()?.data?.updatedAt
                     ?: withContext(dispatchers.io()) {
-                        database.walletTransactions().last()?.createdAt
+                        database.walletTransactions().last()?.updatedAt
                     }
                     ?: return MediatorResult.Success(endOfPaginationReached = true)
             }
@@ -93,7 +93,7 @@ class WalletTransactionsMediator(
         lastRequests[loadType] = requestBody
 
         withContext(dispatchers.io()) {
-            val transactions = response.transactions.mapNotNullAsWalletTransactionPO(
+            val transactions = response.transactions.mapAsWalletTransactionPO(
                 walletAddress = walletLightningAddress,
             )
 

@@ -6,7 +6,7 @@ import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.primal.content.ContentWalletTransaction
 import net.primal.android.wallet.db.WalletTransactionData
 
-fun List<ContentWalletTransaction>.mapNotNullAsWalletTransactionPO(walletAddress: String) =
+fun List<ContentWalletTransaction>.mapAsWalletTransactionPO(walletAddress: String) =
     map { it.asWalletTransactionPO(walletAddress) }
 
 fun ContentWalletTransaction.asWalletTransactionPO(walletAddress: String): WalletTransactionData {

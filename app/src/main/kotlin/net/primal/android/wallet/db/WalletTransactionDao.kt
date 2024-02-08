@@ -15,14 +15,18 @@ interface WalletTransactionDao {
 
     @Transaction
     @Query(
-        "SELECT * FROM WalletTransactionData WHERE state IS \"SUCCEEDED\" OR \"PROCESSING\" ORDER BY completedAt DESC",
+        """
+            SELECT * FROM WalletTransactionData 
+            WHERE state IN ("SUCCEEDED", "PROCESSING", "CREATED") 
+            ORDER BY updatedAt DESC
+        """,
     )
     fun latestTransactionsPaged(): PagingSource<Int, WalletTransaction>
 
-    @Query("SELECT * FROM WalletTransactionData ORDER BY createdAt DESC LIMIT 1")
+    @Query("SELECT * FROM WalletTransactionData ORDER BY updatedAt DESC LIMIT 1")
     fun first(): WalletTransactionData?
 
-    @Query("SELECT * FROM WalletTransactionData ORDER BY createdAt ASC LIMIT 1")
+    @Query("SELECT * FROM WalletTransactionData ORDER BY updatedAt ASC LIMIT 1")
     fun last(): WalletTransactionData?
 
     @Transaction
