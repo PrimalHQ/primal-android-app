@@ -81,7 +81,8 @@ fun CreateTransactionScreen(
                         receiver = state.profileLightningAddress
                             ?: state.transaction.targetLud16
                             ?: state.transaction.targetLnUrl?.ellipsizeLnUrl()
-                            ?: state.transaction.lnInvoiceData?.description,
+                            ?: state.transaction.lnInvoiceData?.description
+                            ?: state.transaction.targetOnChainAddress?.ellipsizeOnChainAddress(),
                     )
                 }
 
@@ -92,7 +93,8 @@ fun CreateTransactionScreen(
                         receiver = state.profileLightningAddress
                             ?: state.transaction.targetLud16
                             ?: state.transaction.targetLnUrl?.ellipsizeLnUrl()
-                            ?: state.transaction.lnInvoiceData?.description,
+                            ?: state.transaction.lnInvoiceData?.description
+                            ?: state.transaction.targetOnChainAddress?.ellipsizeOnChainAddress(),
                         onDoneClick = onClose,
                     )
                 }
@@ -110,3 +112,5 @@ fun CreateTransactionScreen(
 }
 
 fun String.ellipsizeLnUrl() = this.ellipsizeMiddle(size = 8).lowercase()
+
+fun String.ellipsizeOnChainAddress() = this.ellipsizeMiddle(size = 16)

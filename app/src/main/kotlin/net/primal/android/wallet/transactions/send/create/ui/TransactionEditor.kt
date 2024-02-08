@@ -54,12 +54,12 @@ import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.WalletBitcoinPayment
 import net.primal.android.core.compose.numericpad.PrimalNumericPad
-import net.primal.android.core.utils.ellipsizeMiddle
 import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.dashboard.ui.BtcAmountText
 import net.primal.android.wallet.numericPadContentTransformAnimation
 import net.primal.android.wallet.transactions.send.create.CreateTransactionContract
 import net.primal.android.wallet.transactions.send.create.ellipsizeLnUrl
+import net.primal.android.wallet.transactions.send.create.ellipsizeOnChainAddress
 import net.primal.android.wallet.transactions.send.create.ui.model.MiningFeeUi
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toBtc
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
@@ -672,6 +672,5 @@ private fun CreateTransactionContract.UiState.resolveTransactionTitle(): String?
 
 @Composable
 private fun CreateTransactionContract.UiState.resolveTransactionSubtitle(): String? {
-    return profileLightningAddress
-        ?: transaction.targetOnChainAddress?.ellipsizeMiddle(size = 16)
+    return profileLightningAddress ?: transaction.targetOnChainAddress?.ellipsizeOnChainAddress()
 }
