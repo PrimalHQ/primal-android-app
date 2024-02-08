@@ -1,6 +1,11 @@
 package net.primal.android.wallet.transactions.list
 
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -16,8 +21,12 @@ import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
@@ -33,6 +42,7 @@ import java.text.NumberFormat
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import kotlin.time.Duration.Companion.seconds
 import net.primal.android.R
 import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.AvatarThumbnail
@@ -57,9 +67,25 @@ fun TransactionListItem(
     onAvatarClick: (String) -> Unit,
     onClick: (String) -> Unit,
 ) {
+    val alphaScale by if (data.txState == TxState.CREATED || data.txState == TxState.PROCESSING) {
+        val infiniteTransition = rememberInfiniteTransition(label = "PendingPulsing${data.txId}")
+        infiniteTransition.animateFloat(
+            initialValue = 1.0f,
+            targetValue = 0.5f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(1.seconds.inWholeMilliseconds.toInt()),
+                repeatMode = RepeatMode.Reverse,
+            ),
+            label = "AlphaScale${data.txId}",
+        )
+    } else {
+        remember { mutableFloatStateOf(1.0f) }
+    }
+
     ListItem(
         modifier = Modifier
             .animateContentSize()
+            .alpha(alphaScale)
             .clickable { onClick(data.txId) },
         colors = ListItemDefaults.colors(
             containerColor = AppTheme.colorScheme.surfaceVariant,

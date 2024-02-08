@@ -1,8 +1,13 @@
 package net.primal.android.wallet.transactions.details
 
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.Spring.StiffnessMediumLow
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -33,11 +38,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -59,6 +66,7 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.*
+import kotlin.time.Duration.Companion.seconds
 import net.primal.android.LocalPrimalTheme
 import net.primal.android.R
 import net.primal.android.core.compose.IconText
@@ -138,20 +146,12 @@ fun TransactionDetailsScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 state.txData?.let { txData ->
-                    val color = when (state.txData.txType) {
-                        TxType.DEPOSIT -> walletDepositColor
-                        TxType.WITHDRAW -> walletWithdrawColor
-                    }
-
-                    BtcAmountText(
+                    TxAmount(
                         modifier = Modifier
                             .wrapContentWidth()
                             .padding(vertical = 32.dp)
                             .padding(start = 32.dp),
-                        amountInBtc = txData.txAmountInSats.toBtc().toBigDecimal(),
-                        textSize = 48.sp,
-                        amountColor = color,
-                        currencyColor = color,
+                        txData = txData,
                     )
 
                     val text = when (txData.txType) {
@@ -207,6 +207,37 @@ fun TransactionDetailsScreen(
 }
 
 @Composable
+private fun TxAmount(modifier: Modifier, txData: TransactionDetailDataUi) {
+    val alphaScale by if (txData.txState == TxState.CREATED || txData.txState == TxState.PROCESSING) {
+        val infiniteTransition = rememberInfiniteTransition(label = "PendingPulsing${txData.txId}")
+        infiniteTransition.animateFloat(
+            initialValue = 1.0f,
+            targetValue = 0.5f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(1.seconds.inWholeMilliseconds.toInt()),
+                repeatMode = RepeatMode.Reverse,
+            ),
+            label = "AlphaScale${txData.txId}",
+        )
+    } else {
+        remember { mutableFloatStateOf(1.0f) }
+    }
+
+    val color = when (txData.txType) {
+        TxType.DEPOSIT -> walletDepositColor
+        TxType.WITHDRAW -> walletWithdrawColor
+    }
+
+    BtcAmountText(
+        modifier = modifier.alpha(alphaScale),
+        amountInBtc = txData.txAmountInSats.toBtc().toBigDecimal(),
+        textSize = 48.sp,
+        amountColor = color,
+        currencyColor = color,
+    )
+}
+
+@Composable
 private fun TransactionDetailDataUi?.resolveTitle(): String {
     return when (this?.txType) {
         TxType.DEPOSIT -> if (isZap) {
@@ -238,13 +269,14 @@ private fun transactionCardColors(): CardColors {
 }
 
 @Composable
-private fun TransactionDetailDataUi.typeToReadableString(): String {
+private fun TransactionDetailDataUi.typeToReadableString(useBitcoinTerm: Boolean = true): String {
     return when {
         isZap -> stringResource(id = R.string.wallet_transaction_details_type_nostr_zap)
         isStorePurchase -> stringResource(id = R.string.wallet_transaction_details_type_in_app_purchase)
-        onChainAddress != null -> stringResource(
-            id = R.string.wallet_transaction_details_type_bitcoin_payment,
-        )
+        onChainAddress != null -> when (useBitcoinTerm) {
+            true -> stringResource(id = R.string.wallet_transaction_details_type_bitcoin_payment)
+            false -> stringResource(id = R.string.wallet_transaction_details_type_on_chain_payment)
+        }
 
         else -> stringResource(id = R.string.wallet_transaction_details_type_lightning_payment)
     }
@@ -351,7 +383,7 @@ private fun TransactionExpandableDetails(txData: TransactionDetailDataUi) {
         PrimalDivider()
         TransactionDetailListItem(
             section = stringResource(id = R.string.wallet_transaction_details_type_item),
-            value = txData.typeToReadableString(),
+            value = txData.typeToReadableString(useBitcoinTerm = false),
         )
 
         if (txData.txAmountInUsd != null || txData.exchangeRate != null) {
@@ -376,9 +408,11 @@ private fun TransactionExpandableDetails(txData: TransactionDetailDataUi) {
                 } else {
                     stringResource(id = R.string.wallet_transaction_details_mining_fee_item)
                 },
-                value = "${numberFormat.format(
-                    feeAmount.toLong(),
-                )} ${stringResource(id = R.string.wallet_sats_suffix)}",
+                value = "${
+                    numberFormat.format(
+                        feeAmount.toLong(),
+                    )
+                } ${stringResource(id = R.string.wallet_sats_suffix)}",
             )
         }
 
