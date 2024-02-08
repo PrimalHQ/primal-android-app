@@ -6,4 +6,7 @@ enum class TxState(val id: Int) {
     SUCCEEDED(id = 101),
     FAILED(id = 102),
     CANCELED(id = 103),
+    ;
+
+    fun isPending() = this == CREATED || this == PROCESSING
 }

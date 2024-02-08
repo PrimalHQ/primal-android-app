@@ -58,6 +58,7 @@ import net.primal.android.theme.PrimalTheme
 import net.primal.android.wallet.domain.TxState
 import net.primal.android.wallet.domain.TxType
 import net.primal.android.wallet.walletDepositColor
+import net.primal.android.wallet.walletTransactionIconBackgroundColor
 import net.primal.android.wallet.walletWithdrawColor
 
 @Composable
@@ -93,18 +94,14 @@ fun TransactionListItem(
         leadingContent = {
             TransactionLeadingContent(
                 onChainPayment = data.isOnChainPayment,
-                isPending = data.txState == TxState.PROCESSING,
+                isPending = data.txState.isPending(),
                 otherUserId = data.otherUserId,
                 otherUserAvatarCdnImage = data.otherUserAvatarCdnImage,
                 onAvatarClick = onAvatarClick,
             )
         },
         headlineContent = {
-            val suffix = data.txCompletedAt?.formatAsTime() ?: when (data.txState) {
-                TxState.CREATED -> stringResource(id = R.string.wallet_transactions_created)
-                TxState.PROCESSING -> stringResource(id = R.string.wallet_transactions_pending)
-                else -> ""
-            }
+            val suffix = data.txCompletedAt?.formatAsTime() ?: stringResource(id = R.string.wallet_transactions_pending)
 
             TransactionHeadlineContent(
                 wrappedText = data.otherUserDisplayName ?: when (data.isOnChainPayment) {
@@ -147,7 +144,7 @@ private fun TransactionLeadingContent(
         }
 
         else -> {
-            TransactionIcon {
+            TransactionIcon(background = walletTransactionIconBackgroundColor) {
                 Image(
                     imageVector = when (onChainPayment) {
                         true -> PrimalIcons.WalletBitcoinPayment

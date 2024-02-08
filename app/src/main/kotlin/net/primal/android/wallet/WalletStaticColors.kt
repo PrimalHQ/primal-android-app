@@ -11,3 +11,5 @@ val walletSuccessContentColor = Color(0xFFFFFFFF)
 val walletDepositColor = walletSuccessColor
 
 val walletWithdrawColor = Color(0xFFCC331E)
+
+val walletTransactionIconBackgroundColor = Color(0xFF222222)
