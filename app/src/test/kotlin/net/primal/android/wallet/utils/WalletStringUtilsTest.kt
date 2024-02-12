@@ -1,8 +1,11 @@
 package net.primal.android.wallet.utils
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import io.kotest.matchers.shouldBe
 import org.junit.Test
+import org.junit.runner.RunWith
 
+@RunWith(AndroidJUnit4::class)
 class WalletStringUtilsTest {
 
     private val validLnInvoice = "lnbc1pvjluezpp5qqqsyqcyq5rqwzqfqqqsyqcyq5rqwzqfqqqsyqcyq5rqwzqfqy" +
@@ -40,8 +43,14 @@ class WalletStringUtilsTest {
     }
 
     @Test
-    fun isLightningAddressUri_returnTrueForCorrectLightningUri() {
+    fun isLightningAddressUri_returnTrueForCorrectLightningLud16Uri() {
         "lightning:alex@primal.net".isLightningAddressUri() shouldBe true
+    }
+
+    @Test
+    fun isLightningAddressUri_returnTrueForCorrectLightningLnUrlUri() {
+        "lightning:lnurl1dp68gurn8ghj7urjd9kkzmpwdejhgtewwajkcmpdddhx7amw9akxuatjd3cz7ctvv4uqjeypkv"
+            .isLightningAddressUri() shouldBe true
     }
 
     @Test
@@ -50,7 +59,7 @@ class WalletStringUtilsTest {
     }
 
     @Test
-    fun isLightningAddressUri_returnFalseForMissingLud16() {
+    fun isLightningAddressUri_returnFalseForMissingLud16OrLnUrl() {
         "lightning:somethingInvalid".isLightningAddressUri() shouldBe false
     }
 

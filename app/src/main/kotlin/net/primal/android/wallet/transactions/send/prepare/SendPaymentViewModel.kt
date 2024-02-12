@@ -84,9 +84,16 @@ class SendPaymentViewModel @Inject constructor(
                 when (text.parseRecipientType()) {
                     RecipientType.LnInvoice -> handleLnInvoiceText(userId = userId, text = text)
                     RecipientType.LnUrl -> handleLnUrlText(userId = userId, text = text)
-                    RecipientType.LightningAddress -> handleLightningAddressText(userId = userId, text = text)
+                    RecipientType.LnAddress -> handleLightningAddressText(userId = userId, text = text)
+                    RecipientType.LightningUri -> {
+                        val path = text.split(":").last()
+                        when {
+                            path.isLightningAddress() -> handleLightningAddressText(userId = userId, text = path)
+                            path.isLnUrl() -> handleLnUrlText(userId = userId, text = path)
+                        }
+                    }
                     RecipientType.BitcoinAddress -> handleBitcoinAddressText(text = text)
-                    else -> Unit // Handle not supported stuff
+                    null -> Unit
                 }
             } catch (error: WssException) {
                 Timber.w(error)
@@ -173,7 +180,8 @@ class SendPaymentViewModel @Inject constructor(
         return when {
             isLnInvoice() -> RecipientType.LnInvoice
             isLnUrl() -> RecipientType.LnUrl
-            isLightningAddress() || isLightningAddressUri() -> RecipientType.LightningAddress
+            isLightningAddress() -> RecipientType.LnAddress
+            isLightningAddressUri() -> RecipientType.LightningUri
             isBitcoinAddress() || isBitcoinAddressUri() -> RecipientType.BitcoinAddress
             else -> null
         }

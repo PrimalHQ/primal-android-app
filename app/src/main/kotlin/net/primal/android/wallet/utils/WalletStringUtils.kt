@@ -1,7 +1,6 @@
 package net.primal.android.wallet.utils
 
 import android.util.Patterns
-import androidx.core.util.PatternsCompat
 import java.util.regex.Pattern
 import net.primal.android.navigation.asUrlDecoded
 
@@ -11,15 +10,18 @@ fun String.isLnUrl() = startsWith(prefix = "lnurl", ignoreCase = true)
 
 fun String.isLightningAddress() = Patterns.EMAIL_ADDRESS.matcher(this).matches()
 
-fun String.isLightningAddressUri() =
-    startsWith(prefix = "lightning:", ignoreCase = true) &&
-        PatternsCompat.EMAIL_ADDRESS.matcher(this.split(":").last()).matches()
+fun String.isLightningAddressUri(): Boolean {
+    val isPrefixCorrect = startsWith(prefix = "lightning:", ignoreCase = true)
+    val path = this.split(":").last()
+    val isPathCorrect = path.isLightningAddress() || path.isLnUrl()
+    return isPrefixCorrect && isPathCorrect
+}
 
 fun String.isBitcoinAddressUri() =
     startsWith(prefix = "bitcoin:", ignoreCase = true) &&
         this.split(":").lastOrNull()?.split("?")?.firstOrNull().isBitcoinAddress()
 
-private val btcAddressPatern = Pattern.compile(
+private val btcAddressPattern = Pattern.compile(
     "^(bc1|[13])[a-zA-HJ-NP-Z0-9]{25,39}\$",
     Pattern.CASE_INSENSITIVE,
 )
@@ -27,7 +29,7 @@ private val btcAddressPatern = Pattern.compile(
 fun String?.isBitcoinAddress(): Boolean {
     return when (this) {
         null -> false
-        else -> btcAddressPatern.matcher(this).matches()
+        else -> btcAddressPattern.matcher(this).matches()
     }
 }
 
