@@ -190,6 +190,11 @@ android {
     sourceSets {
         findByName("main")?.java?.srcDirs(project.file("src/main/kotlin"))
     }
+
+    dependenciesInfo {
+        includeInApk = false
+        includeInBundle = false
+    }
 }
 
 dependencies {
