@@ -593,9 +593,7 @@ private fun MiningFeeRow(
             Text(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 32.dp)
-                    .padding(vertical = 16.dp)
-                    .clickable { onRetry() },
+                    .padding(horizontal = 32.dp, vertical = 16.dp),
                 style = AppTheme.typography.bodySmall,
                 text = stringResource(
                     id = R.string.wallet_create_transaction_min_tx_amount_for_selected_fee_tier_error,
