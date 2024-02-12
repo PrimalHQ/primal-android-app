@@ -53,6 +53,7 @@ class RelaysManagerTest {
     @Test
     fun `invalid relays does not cause the crash`() = runTest {
         RelaysManager(
+            dispatchers = coroutinesTestRule.dispatcherProvider,
             relayPoolFactory = buildRelayPoolFactory(relays = invalidRelays),
             activeAccountStore = buildActiveAccountStore(relays = invalidRelays),
         )
