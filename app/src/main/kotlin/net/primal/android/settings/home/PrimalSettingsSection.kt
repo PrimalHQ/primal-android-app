@@ -5,6 +5,7 @@ enum class PrimalSettingsSection {
     Appearance,
     MutedAccounts,
     Notifications,
+    Network,
     Wallet,
     Feeds,
     Zaps,

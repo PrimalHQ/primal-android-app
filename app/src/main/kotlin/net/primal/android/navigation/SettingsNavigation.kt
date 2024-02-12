@@ -20,6 +20,8 @@ import net.primal.android.settings.keys.AccountSettingsScreen
 import net.primal.android.settings.keys.AccountSettingsViewModel
 import net.primal.android.settings.muted.list.MutedSettingsScreen
 import net.primal.android.settings.muted.list.MutedSettingsViewModel
+import net.primal.android.settings.network.NetworkSettingsScreen
+import net.primal.android.settings.network.NetworkSettingsViewModel
 import net.primal.android.settings.notifications.NotificationsSettingsScreen
 import net.primal.android.settings.notifications.NotificationsSettingsViewModel
 import net.primal.android.settings.wallet.WalletSettingsScreen
@@ -28,6 +30,7 @@ import net.primal.android.settings.zaps.ZapSettingsScreen
 import net.primal.android.settings.zaps.ZapSettingsViewModel
 
 private fun NavController.navigateToAccountSettings() = navigate(route = "account_settings")
+private fun NavController.navigateToNetworkSettings() = navigate(route = "network")
 private fun NavController.navigateToWalletSettings() = navigate(route = "wallet_settings")
 private fun NavController.navigateToAppearanceSettings() = navigate(route = "appearance_settings")
 fun NavController.navigateToNotificationsSettings() = navigate(route = "notifications_settings")
@@ -46,6 +49,7 @@ fun NavGraphBuilder.settingsNavigation(route: String, navController: NavControll
             onSettingsSectionClick = {
                 when (it) {
                     PrimalSettingsSection.Account -> navController.navigateToAccountSettings()
+                    PrimalSettingsSection.Network -> navController.navigateToNetworkSettings()
                     PrimalSettingsSection.Wallet -> navController.navigateToWalletSettings()
                     PrimalSettingsSection.Appearance -> navController.navigateToAppearanceSettings()
                     PrimalSettingsSection.Notifications -> navController.navigateToNotificationsSettings()
@@ -67,6 +71,7 @@ fun NavGraphBuilder.settingsNavigation(route: String, navController: NavControll
             ),
             navController = navController,
         )
+        network(route = "network", navController = navController)
         appearance(route = "appearance_settings", navController = navController)
         mutedAccounts(route = "muted_accounts_settings", navController = navController)
         notifications(route = "notifications_settings", navController = navController)
@@ -97,6 +102,18 @@ private fun NavGraphBuilder.keys(route: String, navController: NavController) =
         val viewModel = hiltViewModel<AccountSettingsViewModel>(it)
         LockToOrientationPortrait()
         AccountSettingsScreen(
+            viewModel = viewModel,
+            onClose = { navController.navigateUp() },
+        )
+    }
+
+private fun NavGraphBuilder.network(route: String, navController: NavController) =
+    composable(
+        route = route,
+    ) {
+        val viewModel = hiltViewModel<NetworkSettingsViewModel>(it)
+        LockToOrientationPortrait()
+        NetworkSettingsScreen(
             viewModel = viewModel,
             onClose = { navController.navigateUp() },
         )

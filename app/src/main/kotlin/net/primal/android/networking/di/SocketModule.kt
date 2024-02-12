@@ -69,9 +69,13 @@ object SocketModule {
 
     @Provides
     @Singleton
-    fun providesRelaysManager(relayPoolFactory: RelayPoolFactory, activeAccountStore: ActiveAccountStore) =
-        RelaysManager(
-            relayPoolFactory = relayPoolFactory,
-            activeAccountStore = activeAccountStore,
-        )
+    fun providesRelaysManager(
+        dispatchers: CoroutineDispatcherProvider,
+        relayPoolFactory: RelayPoolFactory,
+        activeAccountStore: ActiveAccountStore,
+    ) = RelaysManager(
+        dispatchers = dispatchers,
+        relayPoolFactory = relayPoolFactory,
+        activeAccountStore = activeAccountStore,
+    )
 }

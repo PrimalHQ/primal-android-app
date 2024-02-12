@@ -3,10 +3,10 @@ package net.primal.android.networking.relays
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.model.NostrEvent
@@ -18,10 +18,11 @@ import net.primal.android.user.domain.toRelay
 
 @Singleton
 class RelaysManager @Inject constructor(
+    dispatchers: CoroutineDispatcherProvider,
     private val relayPoolFactory: RelayPoolFactory,
     private val activeAccountStore: ActiveAccountStore,
 ) {
-    private val scope = CoroutineScope(Dispatchers.IO)
+    private val scope = CoroutineScope(dispatchers.io())
     private val relayPoolsMutex = Mutex()
 
     private var regularRelaysPool: RelayPool? = null

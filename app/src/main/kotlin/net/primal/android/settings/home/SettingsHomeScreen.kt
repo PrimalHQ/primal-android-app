@@ -63,7 +63,7 @@ fun SettingsHomeScreen(
                 modifier = Modifier.padding(paddingValues),
             ) {
                 items(
-                    items = PrimalSettingsSection.values(),
+                    items = PrimalSettingsSection.entries,
                     key = { it.name },
                 ) {
                     SettingsListItem(
@@ -146,6 +146,7 @@ private fun VersionListItem(versionName: String) {
 private fun PrimalSettingsSection.leadingIcon(): ImageVector? {
     return when (this) {
         PrimalSettingsSection.Account -> null
+        PrimalSettingsSection.Network -> null
         PrimalSettingsSection.Wallet -> null
         PrimalSettingsSection.Appearance -> null
         PrimalSettingsSection.Notifications -> null
@@ -159,6 +160,7 @@ private fun PrimalSettingsSection.leadingIcon(): ImageVector? {
 private fun PrimalSettingsSection.title(): String {
     return when (this) {
         PrimalSettingsSection.Account -> stringResource(id = R.string.settings_keys_title)
+        PrimalSettingsSection.Network -> stringResource(id = R.string.settings_network_title)
         PrimalSettingsSection.Wallet -> stringResource(id = R.string.settings_wallet_title)
         PrimalSettingsSection.Appearance -> stringResource(id = R.string.settings_appearance_title)
         PrimalSettingsSection.Notifications -> stringResource(

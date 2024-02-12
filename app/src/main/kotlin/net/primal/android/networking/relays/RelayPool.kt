@@ -4,7 +4,6 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -28,12 +27,12 @@ import okhttp3.Request
 import timber.log.Timber
 
 class RelayPool @AssistedInject constructor(
-    private val dispatchers: CoroutineDispatcherProvider,
     @Assisted val relays: List<Relay>,
+    private val dispatchers: CoroutineDispatcherProvider,
     private val okHttpClient: OkHttpClient,
 ) {
 
-    private val scope = CoroutineScope(Dispatchers.IO)
+    private val scope = CoroutineScope(dispatchers.io())
 
     private var socketClients = listOf<NostrSocketClient>()
 
