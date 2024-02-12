@@ -1,5 +1,6 @@
 ## Features
-- Implemented mining fee selector;
-- Implemented min amount support for selected fee tier;
-- Updated QR code wallet values to use 'lightning:' and 'bitcoin:';
-- Implemented pending transactions;
+- Implemented read-only network settings screen; 
+- Implemented handling 'lightning:lnurl' in wallet;
+
+## Fixes
+- Updated QR code wallet LN value to 'lightning:lnurl';
