@@ -18,7 +18,7 @@ import org.junit.Test
 class PrimalQueryResultTest {
 
     private val nostrEvents = List(50) {
-        NostrEventKind.values()
+        NostrEventKind.entries
             .random()
             .takeIf { it.isNotPrimalEventKind() && !it.isNotUnknown()}
             .let {
@@ -27,7 +27,7 @@ class PrimalQueryResultTest {
     }
 
     private val primalEvents = List(20) {
-        NostrEventKind.values()
+        NostrEventKind.entries
             .random()
             .takeIf { it.isPrimalEventKind() }
             .let {
@@ -96,13 +96,13 @@ class PrimalQueryResultTest {
     fun `findPrimalEvent returns null for missing event`() {
         val queryResult = buildQueryResult()
 
-        val actual = queryResult.findPrimalEvent(kind = NostrEventKind.Contacts)
+        val actual = queryResult.findPrimalEvent(kind = NostrEventKind.FollowList)
         actual.shouldBeNull()
     }
 
     @Test
     fun `filterNostrEvents filters nostr events for given kind`() {
-        val expectedKind = NostrEventKind.Contacts
+        val expectedKind = NostrEventKind.FollowList
         val expected = buildNostrEvent(kind = expectedKind)
         val queryResult = buildQueryResult(
             nostrEvents = nostrEvents.toMutableList().apply {

@@ -53,6 +53,10 @@ class RelaysManagerTest {
                 dispatchers = coroutinesTestRule.dispatcherProvider,
                 okHttpClient = mockk<OkHttpClient>(),
             ),
+            bootstrapRelays = RelayPool(
+                dispatchers = coroutinesTestRule.dispatcherProvider,
+                okHttpClient = mockk<OkHttpClient>(),
+            ),
         )
         advanceUntilIdleAndDelay()
     }

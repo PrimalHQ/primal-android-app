@@ -141,8 +141,8 @@ class UserAccountFetcherTest {
         )
 
         val usersApiMock = mockk<UsersApi> {
-            coEvery { getUserContacts(any(), any()) } returns UserContactsResponse(
-                contactsEvent = NostrEvent(
+            coEvery { getUserFollowList(any()) } returns UserContactsResponse(
+                followListEvent = NostrEvent(
                     id = "invalidId",
                     pubKey = expectedPubkey,
                     createdAt = 1683463925,
@@ -169,7 +169,7 @@ class UserAccountFetcherTest {
             dispatcherProvider = coroutinesTestRule.dispatcherProvider,
             usersApi = usersApiMock,
         )
-        val actual = fetcher.fetchUserContactsOrNull(userId = expectedPubkey)
+        val actual = fetcher.fetchUserFollowListOrNull(userId = expectedPubkey)
 
         actual.shouldNotBeNull()
         actual.relays shouldBe expectedRelays
@@ -180,13 +180,13 @@ class UserAccountFetcherTest {
     @Test
     fun `fetchUserContacts fails if api call fails`() = runTest {
         val usersApiMock = mockk<UsersApi> {
-            coEvery { getUserContacts(any(), any()) } throws WssException()
+            coEvery { getUserFollowList(any()) } throws WssException()
         }
         val fetcher = UserAccountFetcher(
             dispatcherProvider = coroutinesTestRule.dispatcherProvider,
             usersApi = usersApiMock,
         )
-        shouldThrow<WssException> { fetcher.fetchUserContactsOrNull(userId = "any") }
+        shouldThrow<WssException> { fetcher.fetchUserFollowListOrNull(userId = "any") }
     }
 
 }

@@ -5,11 +5,11 @@ import net.primal.android.user.domain.UserAccount
 fun UserAccount.copyIfNotNull(
     profile: UserAccount?,
     stats: UserAccount?,
-    contacts: UserAccount?,
+    followList: UserAccount?,
 ): UserAccount =
     this.copyProfileIfNotNull(profile = profile)
         .copyStatsIfNotNull(stats = stats)
-        .copyContactsIfNotNull(contacts = contacts)
+        .copyFollowListIfNotNull(contacts = followList)
 
 fun UserAccount.copyProfileIfNotNull(profile: UserAccount?): UserAccount {
     return if (profile != null) {
@@ -25,7 +25,7 @@ fun UserAccount.copyProfileIfNotNull(profile: UserAccount?): UserAccount {
     }
 }
 
-fun UserAccount.copyContactsIfNotNull(contacts: UserAccount?): UserAccount {
+fun UserAccount.copyFollowListIfNotNull(contacts: UserAccount?): UserAccount {
     return if (contacts != null) {
         copy(
             relays = contacts.relays,

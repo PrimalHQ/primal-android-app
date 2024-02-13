@@ -40,11 +40,11 @@ class UserAccountFetcher @Inject constructor(
         )
     }
 
-    suspend fun fetchUserContactsOrNull(userId: String): UserAccount? {
+    suspend fun fetchUserFollowListOrNull(userId: String): UserAccount? {
         val contactsResponse = withContext(dispatcherProvider.io()) {
-            usersApi.getUserContacts(userId = userId, extendedResponse = false)
+            usersApi.getUserFollowList(userId = userId)
         }
 
-        return contactsResponse.contactsEvent?.asUserAccountFromContactsEvent()
+        return contactsResponse.followListEvent?.asUserAccountFromContactsEvent()
     }
 }

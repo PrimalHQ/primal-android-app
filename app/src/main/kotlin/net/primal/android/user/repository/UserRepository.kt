@@ -15,7 +15,7 @@ import net.primal.android.nostr.model.content.ContentMetadata
 import net.primal.android.profile.domain.ProfileMetadata
 import net.primal.android.user.accounts.UserAccountFetcher
 import net.primal.android.user.accounts.UserAccountsStore
-import net.primal.android.user.accounts.copyContactsIfNotNull
+import net.primal.android.user.accounts.copyFollowListIfNotNull
 import net.primal.android.user.accounts.copyIfNotNull
 import net.primal.android.user.api.UsersApi
 import net.primal.android.user.domain.NostrWalletConnect
@@ -42,19 +42,19 @@ class UserRepository @Inject constructor(
         val userStats = userProfile?.takeIf {
             it.followersCount != null && it.followingCount != null && it.notesCount != null
         }
-        val userContacts = userAccountFetcher.fetchUserContactsOrNull(userId = userId)
+        val followList = userAccountFetcher.fetchUserFollowListOrNull(userId = userId)
         return accountsStore.getAndUpdateAccount(userId = userId) {
             copyIfNotNull(
                 profile = userProfile,
                 stats = userStats,
-                contacts = userContacts,
+                followList = followList,
             )
         }
     }
 
     suspend fun updateContacts(userId: String, contactsUserAccount: UserAccount) {
         accountsStore.getAndUpdateAccount(userId = userId) {
-            copyContactsIfNotNull(contacts = contactsUserAccount)
+            copyFollowListIfNotNull(contacts = contactsUserAccount)
                 .copy(followingCount = contactsUserAccount.following.size)
         }
     }

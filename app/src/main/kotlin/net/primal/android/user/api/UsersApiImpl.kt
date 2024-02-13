@@ -13,11 +13,12 @@ import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.model.content.ContentMetadata
 import net.primal.android.nostr.notary.NostrNotary
-import net.primal.android.user.api.model.ContactsRequestBody
+import net.primal.android.user.api.model.FollowListRequestBody
 import net.primal.android.user.api.model.UserContactsResponse
 import net.primal.android.user.api.model.UserProfileResponse
 import net.primal.android.user.api.model.UserProfilesRequestBody
 import net.primal.android.user.api.model.UserProfilesResponse
+import net.primal.android.user.api.model.UserRelaysResponse
 import net.primal.android.user.api.model.UserRequestBody
 import net.primal.android.user.domain.Relay
 
@@ -42,19 +43,19 @@ class UsersApiImpl @Inject constructor(
         )
     }
 
-    override suspend fun getUserContacts(userId: String, extendedResponse: Boolean): UserContactsResponse {
+    override suspend fun getUserFollowList(userId: String): UserContactsResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.CONTACT_LIST,
+                primalVerb = PrimalVerb.FOLLOW_LIST,
                 optionsJson = NostrJson.encodeToString(
-                    ContactsRequestBody(pubkey = userId, extendedResponse = extendedResponse),
+                    FollowListRequestBody(pubkey = userId, extendedResponse = false),
                 ),
             ),
         )
 
         return UserContactsResponse(
-            contactsEvent = queryResult.findNostrEvent(NostrEventKind.Contacts),
-            contactsMetadata = queryResult.filterNostrEvents(NostrEventKind.Metadata),
+            followListEvent = queryResult.findNostrEvent(NostrEventKind.FollowList),
+            followMetadataList = queryResult.filterNostrEvents(NostrEventKind.Metadata),
             userScores = queryResult.findPrimalEvent(NostrEventKind.PrimalUserScores),
             cdnResources = queryResult.filterPrimalEvents(NostrEventKind.PrimalCdnResource),
         )
@@ -103,7 +104,7 @@ class UsersApiImpl @Inject constructor(
     override suspend fun getUserFollowing(userId: String): UsersResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.CONTACT_LIST,
+                primalVerb = PrimalVerb.FOLLOW_LIST,
                 optionsJson = NostrJson.encodeToString(UserRequestBody(pubkey = userId)),
             ),
         )
@@ -129,6 +130,20 @@ class UsersApiImpl @Inject constructor(
             followerCounts = queryResult.findPrimalEvent(NostrEventKind.PrimalUserFollowersCounts),
             userScores = queryResult.findPrimalEvent(NostrEventKind.PrimalUserScores),
             cdnResources = queryResult.filterPrimalEvents(NostrEventKind.PrimalCdnResource),
+        )
+    }
+
+    override suspend fun getUserRelays(userId: String): UserRelaysResponse {
+        val queryResult = primalApiClient.query(
+            message = PrimalCacheFilter(
+                primalVerb = PrimalVerb.USER_RELAYS,
+                optionsJson = NostrJson.encodeToString(UserRequestBody(pubkey = userId)),
+            ),
+        )
+
+        return UserRelaysResponse(
+            followListEvent = queryResult.findNostrEvent(NostrEventKind.FollowList),
+            relayListMetadataEvent = queryResult.findNostrEvent(NostrEventKind.RelayListMetadata),
         )
     }
 }

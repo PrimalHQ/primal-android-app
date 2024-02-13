@@ -54,19 +54,20 @@ class ProfileRepository @Inject constructor(
     }
 
     suspend fun follow(userId: String, followedUserId: String) {
-        updateFollowing(userId = userId) {
+        updateFollowList(userId = userId) {
             toMutableSet().apply { add(followedUserId) }
         }
     }
 
     suspend fun unfollow(userId: String, unfollowedUserId: String) {
-        updateFollowing(userId = userId) {
+        updateFollowList(userId = userId) {
             toMutableSet().apply { remove(unfollowedUserId) }
         }
     }
 
-    private suspend fun updateFollowing(userId: String, reducer: Set<String>.() -> Set<String>) {
-        val userContacts = userAccountFetcher.fetchUserContactsOrNull(userId = userId) ?: throw MissingRelaysException()
+    private suspend fun updateFollowList(userId: String, reducer: Set<String>.() -> Set<String>) {
+        val userContacts = userAccountFetcher.fetchUserFollowListOrNull(userId = userId)
+            ?: throw MissingRelaysException()
 
         userRepository.updateContacts(userId, userContacts)
 

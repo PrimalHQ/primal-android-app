@@ -1,10 +1,11 @@
 package net.primal.android.networking.primal
 
 enum class PrimalVerb(val identifier: String) {
-    CONTACT_LIST("contact_list"),
+    FOLLOW_LIST("contact_list"),
     USER_INFOS("user_infos"),
     USER_PROFILE("user_profile"),
     USER_FOLLOWERS("user_followers"),
+    USER_RELAYS("get_user_relays"),
     FEED_DIRECTIVE("feed_directive"),
     TRENDING_HASHTAGS_7D("trending_hashtags_7d"),
     RECOMMENDED_USERS("get_recommended_users"),

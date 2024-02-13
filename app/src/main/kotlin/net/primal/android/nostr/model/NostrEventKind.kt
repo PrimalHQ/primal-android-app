@@ -7,7 +7,7 @@ enum class NostrEventKind(val value: Int) {
     Metadata(value = 0),
     ShortTextNote(value = 1),
     RecommendRelay(value = 2),
-    Contacts(value = 3),
+    FollowList(value = 3),
     EncryptedDirectMessages(value = 4),
     EventDeletion(value = 5),
     Reposts(value = 6),

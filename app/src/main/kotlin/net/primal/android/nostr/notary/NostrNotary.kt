@@ -125,7 +125,7 @@ class NostrNotary @Inject constructor(
 
         return NostrUnsignedEvent(
             pubKey = userId,
-            kind = NostrEventKind.Contacts.value,
+            kind = NostrEventKind.FollowList.value,
             content = content,
             tags = tags,
         ).signOrThrow(nsec = findNsecOrThrow(userId))
