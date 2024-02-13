@@ -170,10 +170,7 @@ private fun NetworkLazyColumn(
             )
         }
 
-        items(
-            items = state.relays,
-            key = { it.url },
-        ) {
+        items(items = state.relays, key = { it.url }) {
             Column {
                 NetworkDestinationListItem(
                     destinationUrl = it.url,
@@ -186,7 +183,9 @@ private fun NetworkLazyColumn(
 
         item {
             Row(
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 16.dp),
                 horizontalArrangement = Arrangement.End,
             ) {
                 Text(
@@ -292,7 +291,7 @@ fun NetworkDestinationListItem(
         leadingContent = {
             Box(
                 modifier = Modifier
-                    .padding(top = 2.dp)
+                    .padding(start = 2.dp, top = 2.dp)
                     .size(10.dp)
                     .drawWithCache {
                         this.onDrawWithContent {
