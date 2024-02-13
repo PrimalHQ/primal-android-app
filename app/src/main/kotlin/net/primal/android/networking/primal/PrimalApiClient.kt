@@ -3,12 +3,16 @@ package net.primal.android.networking.primal
 import java.util.*
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
+import kotlinx.coroutines.flow.timeout
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.transformWhile
 import kotlinx.coroutines.launch
@@ -104,6 +108,8 @@ class PrimalApiClient @Inject constructor(
             collectQueryResult(subscriptionId = subscriptionId)
         } catch (error: NostrNoticeException) {
             throw WssException(message = error.reason, cause = error)
+        } catch (error: TimeoutCancellationException) {
+            throw WssException(message = error.message, cause = error)
         }
     }
 
@@ -123,10 +129,12 @@ class PrimalApiClient @Inject constructor(
         return socketClient.sendCLOSE(subscriptionId = subscriptionId)
     }
 
+    @OptIn(FlowPreview::class)
     @Throws(NostrNoticeException::class)
     private suspend fun collectQueryResult(subscriptionId: UUID): PrimalQueryResult {
         val messages = socketClient.incomingMessages
             .transformWhileEventsAreIncoming(subscriptionId)
+            .timeout(15.seconds)
             .toList()
 
         val terminationMessage = messages.last()
