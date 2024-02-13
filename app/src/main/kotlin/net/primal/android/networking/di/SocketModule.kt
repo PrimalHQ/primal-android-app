@@ -10,9 +10,6 @@ import net.primal.android.config.dynamic.AppConfigUpdater
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.primal.PrimalServerType
-import net.primal.android.networking.relays.RelayPoolFactory
-import net.primal.android.networking.relays.RelaysManager
-import net.primal.android.user.accounts.active.ActiveAccountStore
 import okhttp3.OkHttpClient
 
 @Module
@@ -65,17 +62,5 @@ object SocketModule {
         appConfigProvider = appConfigProvider,
         appConfigUpdater = appConfigUpdater,
         dispatcherProvider = dispatchers,
-    )
-
-    @Provides
-    @Singleton
-    fun providesRelaysManager(
-        dispatchers: CoroutineDispatcherProvider,
-        relayPoolFactory: RelayPoolFactory,
-        activeAccountStore: ActiveAccountStore,
-    ) = RelaysManager(
-        dispatchers = dispatchers,
-        relayPoolFactory = relayPoolFactory,
-        activeAccountStore = activeAccountStore,
     )
 }

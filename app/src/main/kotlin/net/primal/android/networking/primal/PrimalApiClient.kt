@@ -6,6 +6,9 @@ import kotlin.time.Duration.Companion.minutes
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.transformWhile
 import kotlinx.coroutines.launch
@@ -36,6 +39,11 @@ class PrimalApiClient @Inject constructor(
 
     private lateinit var socketClient: NostrSocketClient
 
+    private val _connectionStatus = MutableStateFlow(PrimalServerConnectionStatus(serverType = serverType))
+    val connectionStatus = _connectionStatus.asStateFlow()
+    private fun updateStatus(reducer: PrimalServerConnectionStatus.() -> PrimalServerConnectionStatus) =
+        scope.launch { _connectionStatus.getAndUpdate(reducer) }
+
     init {
         observeApiUrlAndInitializeSocketClient()
     }
@@ -43,7 +51,11 @@ class PrimalApiClient @Inject constructor(
     private fun observeApiUrlAndInitializeSocketClient() =
         scope.launch {
             appConfigProvider.observeApiUrlByType(type = serverType).collect { apiUrl ->
-                if (socketClientInitialized) socketClient.close()
+                scope.launch { updateStatus { copy(url = apiUrl) } }
+                if (socketClientInitialized) {
+                    scope.launch { updateStatus { copy(connected = false) } }
+                    socketClient.close()
+                }
 
                 socketClient = NostrSocketClient(
                     dispatcherProvider = dispatcherProvider,
@@ -52,8 +64,12 @@ class PrimalApiClient @Inject constructor(
                         .url(apiUrl)
                         .addHeader("User-Agent", UserAgentProvider.USER_AGENT)
                         .build(),
-                    onSocketConnectionFailure = {
+                    onSocketConnectionOpened = {
+                        scope.launch { updateStatus { copy(connected = true) } }
+                    },
+                    onSocketConnectionClosed = { _, _ ->
                         scope.launch {
+                            updateStatus { copy(connected = false) }
                             appConfigUpdater.updateAppConfigWithDebounce(1.minutes)
                         }
                     },

@@ -1,11 +1,9 @@
 package net.primal.android.settings.network
 
-import net.primal.android.user.domain.Relay
-
 interface NetworkSettingsContract {
     data class UiState(
-        val relays: List<Relay> = emptyList(),
-        val cachingUrl: String = "",
+        val relays: List<SocketDestinationUiState> = emptyList(),
+        val cachingService: SocketDestinationUiState? = null,
         val addingRelay: Boolean = false,
     )
 

@@ -16,12 +16,12 @@ import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 import timber.log.Timber
 
-class NostrSocketClient constructor(
+class NostrSocketClient(
     dispatcherProvider: CoroutineDispatcherProvider,
     private val okHttpClient: OkHttpClient,
     private val wssRequest: Request,
-    private val onSocketConnectionOpen: (() -> Unit)? = null,
-    private val onSocketConnectionFailure: ((Throwable) -> Unit)? = null,
+    private val onSocketConnectionOpened: SocketConnectionOpenedCallback? = null,
+    private val onSocketConnectionClosed: SocketConnectionClosedCallback? = null,
 ) {
     private val scope = CoroutineScope(dispatcherProvider.io())
 
@@ -31,7 +31,7 @@ class NostrSocketClient constructor(
 
     private val socketListener = object : WebSocketListener() {
         override fun onOpen(webSocket: WebSocket, response: Response) {
-            onSocketConnectionOpen?.invoke()
+            onSocketConnectionOpened?.invoke(webSocket.requestUrl())
         }
 
         override fun onMessage(webSocket: WebSocket, text: String) {
@@ -48,10 +48,19 @@ class NostrSocketClient constructor(
             t: Throwable,
             response: Response?,
         ) {
-            Timber.w("WS connection failure.")
-            Timber.w(t)
+            Timber.w("${webSocket.requestUrl()} failure.", t)
             this@NostrSocketClient.webSocket = null
-            onSocketConnectionFailure?.invoke(t)
+            onSocketConnectionClosed?.invoke(webSocket.requestUrl(), t)
+        }
+
+        override fun onClosing(
+            webSocket: WebSocket,
+            code: Int,
+            reason: String,
+        ) {
+            Timber.w("WS connection closing with code=$code and reason=$reason")
+            this@NostrSocketClient.webSocket = null
+            onSocketConnectionClosed?.invoke(webSocket.requestUrl(), null)
         }
 
         override fun onClosed(
@@ -61,8 +70,16 @@ class NostrSocketClient constructor(
         ) {
             Timber.w("WS connection closed with code=$code and reason=$reason")
             this@NostrSocketClient.webSocket = null
+            onSocketConnectionClosed?.invoke(webSocket.requestUrl(), null)
         }
     }
+
+    private fun WebSocket.requestUrl(): String =
+        request().url.toString().let { url ->
+            url.replace("https://", "wss://", ignoreCase = true)
+                .replace("http://", "ws://", ignoreCase = true)
+                .let { if (it.endsWith("/")) it.dropLast(1) else it }
+        }
 
     private val mutableIncomingMessagesSharedFlow = MutableSharedFlow<NostrIncomingMessage>()
 

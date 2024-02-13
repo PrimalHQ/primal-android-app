@@ -1,16 +1,19 @@
 package net.primal.android.networking.relays
 
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedInject
+import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.timeout
 import kotlinx.coroutines.flow.transform
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.serialization.json.toJsonObject
@@ -26,19 +29,52 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import timber.log.Timber
 
-class RelayPool @AssistedInject constructor(
-    @Assisted val relays: List<Relay>,
+class RelayPool @Inject constructor(
     private val dispatchers: CoroutineDispatcherProvider,
     private val okHttpClient: OkHttpClient,
 ) {
 
     private val scope = CoroutineScope(dispatchers.io())
 
+    var relays: List<Relay> = emptyList()
+        private set
+
     private var socketClients = listOf<NostrSocketClient>()
 
-    init {
-        initPool()
+    private val _relayPoolStatus = MutableStateFlow(mapOf<String, Boolean>())
+    val relayPoolStatus = _relayPoolStatus.asStateFlow()
+    private fun updateRelayStatus(url: String, connected: Boolean) {
+        scope.launch {
+            _relayPoolStatus.getAndUpdate {
+                it.toMutableMap().apply { this[url] = connected }
+            }
+        }
     }
+
+    private fun updatePoolStatus(relays: List<Relay>) {
+        scope.launch {
+            _relayPoolStatus.update {
+                mutableMapOf<String, Boolean>().apply {
+                    relays.forEach { this[it.url] = false }
+                }
+            }
+        }
+    }
+
+    fun changeRelays(relays: List<Relay>) {
+        closePool()
+        socketClients = relays.mapAsNostrSocketClient()
+        this.relays = relays
+        updatePoolStatus(relays)
+    }
+
+    fun closePool() {
+        socketClients.forEach { it.close() }
+        socketClients = emptyList()
+        updatePoolStatus(emptyList())
+    }
+
+    fun hasRelays() = relays.isNotEmpty()
 
     private fun List<Relay>.mapAsNostrSocketClient() =
         this
@@ -48,6 +84,8 @@ class RelayPool @AssistedInject constructor(
                     dispatcherProvider = dispatchers,
                     okHttpClient = okHttpClient,
                     wssRequest = it,
+                    onSocketConnectionOpened = { url -> updateRelayStatus(url = url, connected = true) },
+                    onSocketConnectionClosed = { url, _ -> updateRelayStatus(url = url, connected = false) },
                 )
             }
 
@@ -65,36 +103,6 @@ class RelayPool @AssistedInject constructor(
     @Throws(NostrPublishException::class)
     suspend fun publishEvent(nostrEvent: NostrEvent) {
         handlePublishEvent(socketClients, nostrEvent)
-    }
-
-    fun initPool() {
-        socketClients = relays.mapAsNostrSocketClient()
-    }
-
-    fun closePool() {
-        socketClients.forEach { it.close() }
-        socketClients = emptyList()
-    }
-
-    private fun NostrPublishResult.isSuccessful(): Boolean {
-        return result is NostrIncomingMessage.OkMessage && result.success
-    }
-
-    @FlowPreview
-    private suspend fun NostrSocketClient.collectPublishResponse(eventId: String): NostrIncomingMessage.OkMessage {
-        return incomingMessages
-            .filterByEventId(id = eventId)
-            .transform {
-                when (it) {
-                    is NostrIncomingMessage.OkMessage -> emit(it)
-                    is NostrIncomingMessage.NoticeMessage -> throw NostrNoticeException(
-                        reason = it.message,
-                    )
-                    else -> throw IllegalStateException("$it is not allowed")
-                }
-            }
-            .timeout(30.seconds)
-            .first()
     }
 
     @OptIn(FlowPreview::class)
@@ -122,5 +130,27 @@ class RelayPool @AssistedInject constructor(
         responseFlow.timeout(30.seconds)
             .catch { throw NostrPublishException(cause = it) }
             .first { it.isSuccessful() }
+    }
+
+    @FlowPreview
+    private suspend fun NostrSocketClient.collectPublishResponse(eventId: String): NostrIncomingMessage.OkMessage {
+        return incomingMessages
+            .filterByEventId(id = eventId)
+            .transform {
+                when (it) {
+                    is NostrIncomingMessage.OkMessage -> emit(it)
+                    is NostrIncomingMessage.NoticeMessage -> throw NostrNoticeException(
+                        reason = it.message,
+                    )
+
+                    else -> throw IllegalStateException("$it is not allowed")
+                }
+            }
+            .timeout(30.seconds)
+            .first()
+    }
+
+    private fun NostrPublishResult.isSuccessful(): Boolean {
+        return result is NostrIncomingMessage.OkMessage && result.success
     }
 }

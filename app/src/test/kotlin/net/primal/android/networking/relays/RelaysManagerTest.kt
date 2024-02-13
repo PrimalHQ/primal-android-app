@@ -28,16 +28,6 @@ class RelaysManagerTest {
         Relay(url = "wss://filter.nostr.wine/npubxyz\n", true, true),
     )
 
-    private fun buildRelayPoolFactory(
-        relays: List<Relay> = emptyList()
-    ) = mockk<RelayPoolFactory>() {
-        every { create(any()) } returns RelayPool(
-            dispatchers = coroutinesTestRule.dispatcherProvider,
-            relays = relays,
-            okHttpClient = OkHttpClient()
-        )
-    }
-
     private fun buildActiveAccountStore(
         relays: List<Relay> = emptyList()
     ) = mockk<ActiveAccountStore>(relaxed = true) {
@@ -54,8 +44,15 @@ class RelaysManagerTest {
     fun `invalid relays does not cause the crash`() = runTest {
         RelaysManager(
             dispatchers = coroutinesTestRule.dispatcherProvider,
-            relayPoolFactory = buildRelayPoolFactory(relays = invalidRelays),
             activeAccountStore = buildActiveAccountStore(relays = invalidRelays),
+            regularRelaysPool = RelayPool(
+                dispatchers = coroutinesTestRule.dispatcherProvider,
+                okHttpClient = mockk<OkHttpClient>(),
+            ),
+            walletRelaysPool = RelayPool(
+                dispatchers = coroutinesTestRule.dispatcherProvider,
+                okHttpClient = mockk<OkHttpClient>(),
+            ),
         )
         advanceUntilIdleAndDelay()
     }

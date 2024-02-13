@@ -14,7 +14,7 @@ class FakeWebSocket(
 
     override fun queueSize(): Long = 0
 
-    override fun request(): Request = error("Not supported")
+    override fun request(): Request = Request.Builder().url("wss://relay.primal.net").build()
 
     override fun send(text: String): Boolean = sendResponse
 

@@ -19,14 +19,14 @@ import net.primal.android.user.domain.toRelay
 @Singleton
 class RelaysManager @Inject constructor(
     dispatchers: CoroutineDispatcherProvider,
-    private val relayPoolFactory: RelayPoolFactory,
     private val activeAccountStore: ActiveAccountStore,
+    private val regularRelaysPool: RelayPool,
+    private val walletRelaysPool: RelayPool,
 ) {
     private val scope = CoroutineScope(dispatchers.io())
     private val relayPoolsMutex = Mutex()
 
-    private var regularRelaysPool: RelayPool? = null
-    private var walletRelaysPool: RelayPool? = null
+    val regularRelayPoolStatus = regularRelaysPool.relayPoolStatus
 
     init {
         observeActiveAccount()
@@ -52,45 +52,37 @@ class RelaysManager @Inject constructor(
         }
 
     private suspend fun updateRelayPools(regularRelays: List<Relay>?, walletRelays: List<Relay>?) {
-        val regularRelaysChanged = regularRelaysPool?.relays != regularRelays
-        if (regularRelaysChanged) {
-            relayPoolsMutex.withLock {
-                regularRelaysPool?.closePool()
-                regularRelaysPool = null
-                if (!regularRelays.isNullOrEmpty()) {
-                    regularRelaysPool = relayPoolFactory.create(relays = regularRelays)
-                }
+        relayPoolsMutex.withLock {
+            val regularRelaysChanged = regularRelaysPool.relays != regularRelays
+            if (regularRelaysChanged && !regularRelays.isNullOrEmpty()) {
+                regularRelaysPool.changeRelays(relays = regularRelays)
             }
-        }
 
-        val walletRelaysChanged = walletRelaysPool?.relays != walletRelays
-        if (walletRelaysChanged) {
-            relayPoolsMutex.withLock {
-                walletRelaysPool?.closePool()
-                walletRelaysPool = null
-                if (!walletRelays.isNullOrEmpty()) {
-                    walletRelaysPool = relayPoolFactory.create(relays = walletRelays)
-                }
+            val walletRelaysChanged = walletRelaysPool.relays != walletRelays
+            if (walletRelaysChanged && !walletRelays.isNullOrEmpty()) {
+                walletRelaysPool.changeRelays(relays = walletRelays)
             }
         }
     }
 
     private suspend fun clearRelayPools() =
         relayPoolsMutex.withLock {
-            regularRelaysPool?.closePool()
-            regularRelaysPool = null
-            walletRelaysPool?.closePool()
-            walletRelaysPool = null
+            regularRelaysPool.closePool()
+            walletRelaysPool.closePool()
         }
 
     @Throws(NostrPublishException::class, MissingRelaysException::class)
     suspend fun publishEvent(nostrEvent: NostrEvent) {
-        regularRelaysPool?.publishEvent(nostrEvent) ?: throw MissingRelaysException()
+        if (!regularRelaysPool.hasRelays()) throw MissingRelaysException()
+
+        regularRelaysPool.publishEvent(nostrEvent)
     }
 
     @Throws(NostrPublishException::class, MissingRelaysException::class)
     suspend fun publishWalletEvent(nostrEvent: NostrEvent) {
-        walletRelaysPool?.publishEvent(nostrEvent) ?: throw MissingRelaysException()
+        if (!walletRelaysPool.hasRelays()) throw MissingRelaysException()
+
+        walletRelaysPool.publishEvent(nostrEvent)
     }
 
     suspend fun bootstrap() {

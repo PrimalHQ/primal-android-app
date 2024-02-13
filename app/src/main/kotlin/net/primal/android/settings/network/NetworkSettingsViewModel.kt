@@ -9,15 +9,16 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
-import net.primal.android.config.AppConfigProvider
+import net.primal.android.networking.di.PrimalCacheApiClient
+import net.primal.android.networking.primal.PrimalApiClient
+import net.primal.android.networking.relays.RelaysManager
 import net.primal.android.settings.network.NetworkSettingsContract.UiEvent
 import net.primal.android.settings.network.NetworkSettingsContract.UiState
-import net.primal.android.user.accounts.active.ActiveAccountStore
 
 @HiltViewModel
 class NetworkSettingsViewModel @Inject constructor(
-    private val appConfigProvider: AppConfigProvider,
-    private val activeUserAccountsStore: ActiveAccountStore,
+    private val relaysManager: RelaysManager,
+    @PrimalCacheApiClient private val primalApiClient: PrimalApiClient,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(UiState())
@@ -29,8 +30,8 @@ class NetworkSettingsViewModel @Inject constructor(
 
     init {
         observeEvents()
-        observeActiveAccount()
-        observeCachingServiceUrl()
+        observeCachingServiceConnection()
+        observeRelayPoolConnections()
     }
 
     private fun observeEvents() =
@@ -44,17 +45,23 @@ class NetworkSettingsViewModel @Inject constructor(
             }
         }
 
-    private fun observeCachingServiceUrl() =
+    private fun observeCachingServiceConnection() =
         viewModelScope.launch {
-            appConfigProvider.cacheUrl().collect {
-                setState { copy(cachingUrl = it) }
+            primalApiClient.connectionStatus.collect {
+                setState { copy(cachingService = SocketDestinationUiState(url = it.url, it.connected)) }
             }
         }
 
-    private fun observeActiveAccount() =
+    private fun observeRelayPoolConnections() =
         viewModelScope.launch {
-            activeUserAccountsStore.activeUserAccount.collect {
-                setState { copy(relays = it.relays) }
+            relaysManager.regularRelayPoolStatus.collect { poolStatus ->
+                setState {
+                    copy(
+                        relays = poolStatus.map {
+                            SocketDestinationUiState(url = it.key, connected = it.value)
+                        },
+                    )
+                }
             }
         }
 }

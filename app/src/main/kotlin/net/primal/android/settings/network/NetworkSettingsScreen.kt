@@ -174,7 +174,7 @@ private fun NetworkLazyColumn(
             Column {
                 NetworkDestinationListItem(
                     destinationUrl = it.url,
-                    connected = true,
+                    connected = it.connected,
                     onRemoveClick = { onRemoveClick(it.url) },
                 )
                 PrimalDivider()
@@ -197,20 +197,20 @@ private fun NetworkLazyColumn(
             }
         }
 
-        item {
-            TextSection(
-                modifier = Modifier
-                    .padding(horizontal = 16.dp)
-                    .padding(top = 16.dp),
-                text = stringResource(id = R.string.settings_network_caching_service_section).uppercase(),
-            )
-        }
+        if (state.cachingService != null) {
+            item {
+                TextSection(
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp)
+                        .padding(top = 16.dp),
+                    text = stringResource(id = R.string.settings_network_caching_service_section).uppercase(),
+                )
+            }
 
-        item {
-            if (state.cachingUrl.isNotEmpty()) {
+            item {
                 NetworkDestinationListItem(
-                    destinationUrl = state.cachingUrl,
-                    connected = true,
+                    destinationUrl = state.cachingService.url,
+                    connected = state.cachingService.connected,
                 )
             }
         }
