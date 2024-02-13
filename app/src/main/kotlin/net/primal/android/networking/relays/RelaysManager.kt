@@ -96,4 +96,8 @@ class RelaysManager @Inject constructor(
     suspend fun bootstrap() {
         updateRelayPools(regularRelays = BOOTSTRAP_RELAYS, walletRelays = emptyList())
     }
+
+    suspend fun ensureUserRelayPoolConnected() {
+        regularRelaysPool.ensureConnected()
+    }
 }

@@ -77,6 +77,10 @@ class RelayPool @Inject constructor(
 
     fun hasRelays() = relays.isNotEmpty()
 
+    suspend fun ensureConnected() {
+        socketClients.forEach { it.ensureSocketConnection() }
+    }
+
     private fun List<Relay>.mapAsNostrSocketClient() =
         this
             .mapNotNull { it.toWssRequestOrNull() }

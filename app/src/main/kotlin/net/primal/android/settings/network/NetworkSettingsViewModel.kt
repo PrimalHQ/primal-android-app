@@ -30,6 +30,7 @@ class NetworkSettingsViewModel @Inject constructor(
 
     init {
         observeEvents()
+        ensureRelayPoolConnected()
         observeCachingServiceConnection()
         observeRelayPoolConnections()
     }
@@ -43,6 +44,11 @@ class NetworkSettingsViewModel @Inject constructor(
                     is UiEvent.AddRelay -> Unit
                 }
             }
+        }
+
+    private fun ensureRelayPoolConnected() =
+        viewModelScope.launch {
+            relaysManager.ensureUserRelayPoolConnected()
         }
 
     private fun observeCachingServiceConnection() =
