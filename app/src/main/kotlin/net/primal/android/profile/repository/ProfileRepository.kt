@@ -7,7 +7,7 @@ import net.primal.android.core.ext.asMapByKey
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.explore.api.model.UsersResponse
 import net.primal.android.explore.domain.UserProfileSearchItem
-import net.primal.android.networking.relays.errors.MissingRelaysException
+import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.ext.asProfileDataPO
 import net.primal.android.nostr.ext.asProfileStatsPO
 import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
@@ -67,7 +67,7 @@ class ProfileRepository @Inject constructor(
 
     private suspend fun updateFollowList(userId: String, reducer: Set<String>.() -> Set<String>) {
         val userContacts = userAccountFetcher.fetchUserFollowListOrNull(userId = userId)
-            ?: throw MissingRelaysException()
+            ?: throw WssException("Follow Lists not found.")
 
         userRepository.updateContacts(userId, userContacts)
 
