@@ -9,14 +9,20 @@ data class NetworkDetails(
     val address: String? = null,
     val invoice: String? = null,
 ) {
-    val qrCodeValue: String? get() {
-        return invoice ?: address?.let {
-            when (network) {
-                Network.Lightning -> "lightning:${it.parseAsLNUrlOrNull()?.urlToLnUrlHrp()}"
-                Network.Bitcoin -> "bitcoin:$it"
+    val qrCodeValue: String?
+        get() {
+            return invoice?.let {
+                when (network) {
+                    Network.Lightning -> "lightning:$it"
+                    Network.Bitcoin -> it
+                }
+            } ?: address?.let {
+                when (network) {
+                    Network.Lightning -> "lightning:${it.parseAsLNUrlOrNull()?.urlToLnUrlHrp()}"
+                    Network.Bitcoin -> "bitcoin:$it"
+                }
             }
         }
-    }
 
     val copyValue: String? get() = invoice ?: address
 }
