@@ -310,6 +310,7 @@ private fun TransactionHeaderColumn(
             Text(
                 modifier = Modifier.padding(vertical = 4.dp, horizontal = 16.dp),
                 text = title,
+                textAlign = TextAlign.Center,
                 color = AppTheme.colorScheme.onSurface,
                 style = AppTheme.typography.bodyLarge,
                 fontWeight = FontWeight.SemiBold,
@@ -322,6 +323,7 @@ private fun TransactionHeaderColumn(
             Text(
                 modifier = Modifier.padding(horizontal = 32.dp),
                 text = subtitle,
+                textAlign = TextAlign.Center,
                 color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
                 style = AppTheme.typography.bodyMedium,
             )
@@ -425,6 +427,7 @@ private fun LightningNoteToRecipientTextField(
         Text(
             modifier = Modifier.padding(horizontal = 32.dp),
             text = noteRecipientText.ifEmpty { state.transaction.lnInvoiceData?.description ?: "" },
+            textAlign = TextAlign.Center,
             color = AppTheme.colorScheme.onSurface,
             style = AppTheme.typography.bodyLarge,
             fontWeight = FontWeight.SemiBold,

@@ -90,6 +90,7 @@ class SendPaymentViewModel @Inject constructor(
                         when {
                             path.isLightningAddress() -> handleLightningAddressText(userId = userId, text = path)
                             path.isLnUrl() -> handleLnUrlText(userId = userId, text = path)
+                            path.isLnInvoice() -> handleLnInvoiceText(userId = userId, text = path)
                         }
                     }
                     RecipientType.BitcoinAddress -> handleBitcoinAddressText(text = text)

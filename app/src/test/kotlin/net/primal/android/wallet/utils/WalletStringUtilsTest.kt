@@ -64,6 +64,11 @@ class WalletStringUtilsTest {
     }
 
     @Test
+    fun isLightningAddressUri_returnTrueForCorrectLightningInvoice() {
+        "lightning:$validLnInvoice".isLightningAddressUri() shouldBe true
+    }
+
+    @Test
     fun isBitcoinAddressUri_returnsTrueForCorrectBitcoinUri() {
         "bitcoin:bc1q99ygnq68xrvqd9up7vgapnytwmss4am6ytessw".isBitcoinAddressUri() shouldBe true
     }

@@ -13,7 +13,7 @@ fun String.isLightningAddress() = Patterns.EMAIL_ADDRESS.matcher(this).matches()
 fun String.isLightningAddressUri(): Boolean {
     val isPrefixCorrect = startsWith(prefix = "lightning:", ignoreCase = true)
     val path = this.split(":").last()
-    val isPathCorrect = path.isLightningAddress() || path.isLnUrl()
+    val isPathCorrect = path.isLightningAddress() || path.isLnUrl() || path.isLnInvoice()
     return isPrefixCorrect && isPathCorrect
 }
 
