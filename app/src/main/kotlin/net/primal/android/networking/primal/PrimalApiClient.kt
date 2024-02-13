@@ -6,7 +6,6 @@ import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -84,7 +83,7 @@ class PrimalApiClient @Inject constructor(
             }
         }
 
-    private suspend fun sendREQWithRetry(data: JsonObject): UUID? {
+    private suspend fun sendREQWithRetryOrThrow(data: JsonObject): UUID {
         var queryAttempts = 0
         while (queryAttempts < MAX_QUERY_ATTEMPTS) {
             socketClient.ensureSocketConnection()
@@ -96,21 +95,18 @@ class PrimalApiClient @Inject constructor(
                 delay(RETRY_DELAY_MILLIS)
             }
         }
-        return null
+        throw WssException(message = "Failed to send message.")
     }
 
     @Throws(WssException::class)
     suspend fun query(message: PrimalCacheFilter): PrimalQueryResult {
-        val subscriptionId = sendREQWithRetry(data = message.toPrimalJsonObject())
-            ?: throw WssException(message = "Api unreachable at the moment.")
-
-        return try {
+        val queryResult = runCatching {
+            val subscriptionId = sendREQWithRetryOrThrow(data = message.toPrimalJsonObject())
             collectQueryResult(subscriptionId = subscriptionId)
-        } catch (error: NostrNoticeException) {
-            throw WssException(message = error.reason, cause = error)
-        } catch (error: TimeoutCancellationException) {
-            throw WssException(message = error.message, cause = error)
         }
+        val result = queryResult.getOrNull()
+        val error = queryResult.exceptionOrNull().let { WssException(message = it?.message, cause = it) }
+        return result ?: throw error
     }
 
     suspend fun subscribe(subscriptionId: UUID, message: PrimalCacheFilter): Flow<NostrIncomingMessage> {
