@@ -22,6 +22,7 @@ class RelaysManager @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val regularRelaysPool: RelayPool,
     private val walletRelaysPool: RelayPool,
+    private val bootstrapRelays: RelayPool,
 ) {
     private val scope = CoroutineScope(dispatchers.io())
     private val relayPoolsMutex = Mutex()
@@ -30,6 +31,11 @@ class RelaysManager @Inject constructor(
 
     init {
         observeActiveAccount()
+        initBootstrapRelaysPool()
+    }
+
+    private fun initBootstrapRelaysPool() {
+        bootstrapRelays.changeRelays(BOOTSTRAP_RELAYS)
     }
 
     private fun observeActiveAccount() =
@@ -71,11 +77,13 @@ class RelaysManager @Inject constructor(
             walletRelaysPool.closePool()
         }
 
-    @Throws(NostrPublishException::class, MissingRelaysException::class)
+    @Throws(NostrPublishException::class)
     suspend fun publishEvent(nostrEvent: NostrEvent) {
-        if (!regularRelaysPool.hasRelays()) throw MissingRelaysException()
-
-        regularRelaysPool.publishEvent(nostrEvent)
+        if (regularRelaysPool.hasRelays()) {
+            regularRelaysPool.publishEvent(nostrEvent)
+        } else {
+            bootstrapRelays.publishEvent(nostrEvent)
+        }
     }
 
     @Throws(NostrPublishException::class, MissingRelaysException::class)
