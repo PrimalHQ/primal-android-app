@@ -71,6 +71,7 @@ class RelayPool @Inject constructor(
     fun closePool() {
         socketClients.forEach { it.close() }
         socketClients = emptyList()
+        this.relays = emptyList()
         updatePoolStatus(emptyList())
     }
 
