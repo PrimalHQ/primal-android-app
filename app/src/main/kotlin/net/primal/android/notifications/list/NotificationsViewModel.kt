@@ -8,6 +8,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.Instant
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -21,6 +22,7 @@ import net.primal.android.core.compose.attachment.model.asNoteAttachmentUi
 import net.primal.android.core.compose.feed.model.FeedPostStatsUi
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.feed.model.asNoteNostrUriUi
+import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.core.utils.usernameUiFriendly
@@ -54,6 +56,7 @@ import timber.log.Timber
 
 @HiltViewModel
 class NotificationsViewModel @Inject constructor(
+    private val dispatcherProvider: CoroutineDispatcherProvider,
     private val activeAccountStore: ActiveAccountStore,
     private val notificationsRepository: NotificationRepository,
     private val postRepository: PostRepository,
@@ -154,8 +157,9 @@ class NotificationsViewModel @Inject constructor(
             }
         }
 
-    private fun handleNotificationsSeen() =
-        viewModelScope.launch {
+    private fun handleNotificationsSeen() {
+        // Launching in a new scope to survive view model destruction
+        CoroutineScope(dispatcherProvider.io()).launch {
             try {
                 notificationsRepository.markAllNotificationsAsSeen()
             } catch (error: NostrSignUnauthorized) {
@@ -164,6 +168,7 @@ class NotificationsViewModel @Inject constructor(
                 Timber.w(error)
             }
         }
+    }
 
     private fun likePost(postLikeAction: PostLikeAction) =
         viewModelScope.launch {
