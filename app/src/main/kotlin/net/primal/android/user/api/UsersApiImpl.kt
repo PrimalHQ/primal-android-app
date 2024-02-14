@@ -112,8 +112,7 @@ class UsersApiImpl @Inject constructor(
         )
 
         return UserRelaysResponse(
-            followListEvent = queryResult.findNostrEvent(NostrEventKind.FollowList),
-            relayListMetadataEvent = queryResult.findNostrEvent(NostrEventKind.RelayListMetadata),
+            cachedRelayListEvent = queryResult.findPrimalEvent(NostrEventKind.PrimalUserRelaysList),
         )
     }
 }

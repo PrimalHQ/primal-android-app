@@ -5,7 +5,6 @@ import javax.inject.Inject
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.networking.relays.BOOTSTRAP_RELAYS
 import net.primal.android.nostr.publish.NostrPublisher
-import net.primal.android.user.accounts.parseKind3Relays
 import net.primal.android.user.accounts.parseNip65Relays
 import net.primal.android.user.api.UsersApi
 import net.primal.android.user.domain.Relay as RelayDO
@@ -26,11 +25,8 @@ class RelayRepository @Inject constructor(
 
     suspend fun fetchAndUpdateUserRelays(userId: String) {
         val response = usersApi.getUserRelays(userId)
-        val relayList = response.relayListMetadataEvent?.tags.parseNip65Relays()
-        val relaysBackup = response.followListEvent?.content?.parseKind3Relays()
-
-        val relays = relayList.ifEmpty { relaysBackup }
-        if (!relays.isNullOrEmpty()) replaceUserRelays(userId, relays)
+        val relayList = response.cachedRelayListEvent?.tags?.parseNip65Relays()
+        if (!relayList.isNullOrEmpty()) replaceUserRelays(userId, relayList)
     }
 
     private suspend fun replaceUserRelays(userId: String, relays: List<RelayDO>) {
