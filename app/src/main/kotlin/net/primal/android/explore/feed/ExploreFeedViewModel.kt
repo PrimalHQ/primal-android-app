@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.core.compose.feed.model.asFeedPostUi
+import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.ext.removeSearchPrefix
 import net.primal.android.explore.feed.ExploreFeedContract.UiEvent
 import net.primal.android.explore.feed.ExploreFeedContract.UiState
@@ -44,6 +45,7 @@ import timber.log.Timber
 @HiltViewModel
 class ExploreFeedViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
+    private val dispatcherProvider: CoroutineDispatcherProvider,
     private val activeAccountStore: ActiveAccountStore,
     private val feedRepository: FeedRepository,
     private val postRepository: PostRepository,
@@ -218,10 +220,12 @@ class ExploreFeedViewModel @Inject constructor(
     private fun mute(action: UiEvent.MuteAction) =
         viewModelScope.launch {
             try {
-                mutedUserRepository.muteUserAndPersistMuteList(
-                    userId = activeAccountStore.activeUserId(),
-                    mutedUserId = action.profileId,
-                )
+                withContext(dispatcherProvider.io()) {
+                    mutedUserRepository.muteUserAndPersistMuteList(
+                        userId = activeAccountStore.activeUserId(),
+                        mutedUserId = action.profileId,
+                    )
+                }
             } catch (error: WssException) {
                 Timber.w(error)
                 setErrorState(error = ExploreFeedError.FailedToMuteUser(error))

@@ -27,7 +27,7 @@ import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.profile.domain.ProfileMetadata
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.settings.repository.SettingsRepository
-import net.primal.android.user.accounts.BOOTSTRAP_RELAYS
+import net.primal.android.user.repository.RelayRepository
 import net.primal.android.user.repository.UserRepository
 import timber.log.Timber
 
@@ -39,6 +39,7 @@ class CreateAccountViewModel @Inject constructor(
     private val profileRepository: ProfileRepository,
     private val userRepository: UserRepository,
     private val recommendedFollowsApi: RecommendedFollowsApi,
+    private val relayRepository: RelayRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(UiState())
@@ -114,9 +115,10 @@ class CreateAccountViewModel @Inject constructor(
     private suspend fun createNostrAccount() {
         try {
             setState { copy(loading = true) }
-            val userId = authRepository.createAccountAndLogin()
             val profile = state.value.asProfileMetadata()
+            val userId = authRepository.createAccountAndLogin()
             withContext(dispatcherProvider.io()) {
+                relayRepository.bootstrapDefaultUserRelays(userId)
                 userRepository.setProfileMetadata(userId = userId, profileMetadata = profile)
             }
             setState {
@@ -178,14 +180,13 @@ class CreateAccountViewModel @Inject constructor(
             setState { copy(loading = true) }
             val userId = state.value.userId!!
             withContext(dispatcherProvider.io()) {
-                profileRepository.setContactsAndRelays(
+                profileRepository.setFollowList(
                     userId = userId,
                     contacts = state.value.recommendedFollows
                         .filter { it.isCurrentUserFollowing }
                         .map { it.pubkey }
                         .toMutableSet()
                         .apply { add(userId) },
-                    relays = BOOTSTRAP_RELAYS,
                 )
                 settingsRepository.fetchAndPersistAppSettings(userId = userId)
             }

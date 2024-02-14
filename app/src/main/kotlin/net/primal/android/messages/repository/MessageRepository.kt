@@ -20,8 +20,7 @@ import net.primal.android.messages.db.DirectMessage
 import net.primal.android.messages.db.MessageConversation
 import net.primal.android.messages.db.MessageConversationData
 import net.primal.android.messages.domain.ConversationRelation
-import net.primal.android.networking.relays.RelaysManager
-import net.primal.android.nostr.notary.NostrNotary
+import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.credentials.CredentialsStore
 
@@ -32,8 +31,7 @@ class MessageRepository @Inject constructor(
     private val database: PrimalDatabase,
     private val messagesApi: MessagesApi,
     private val messagesProcessor: MessagesProcessor,
-    private val relaysManager: RelaysManager,
-    private val nostrNotary: NostrNotary,
+    private val nostrPublisher: NostrPublisher,
 ) {
 
     fun newestConversations(relation: ConversationRelation) =
@@ -150,14 +148,12 @@ class MessageRepository @Inject constructor(
             pubKey = receiverId.hexToNpubHrp().bechToBytes(hrp = "npub"),
         )
 
-        val nostrEvent = nostrNotary.signEncryptedDirectMessage(
-            userId = userId,
-            receiverId = receiverId,
-            encryptedContent = encryptedContent,
-        )
-
         withContext(Dispatchers.IO) {
-            relaysManager.publishEvent(nostrEvent)
+            val nostrEvent = nostrPublisher.publishDirectMessage(
+                userId = userId,
+                receiverId = receiverId,
+                encryptedContent = encryptedContent,
+            )
             messagesProcessor.processMessageEventsAndSave(
                 userId = userId,
                 messages = listOf(nostrEvent),

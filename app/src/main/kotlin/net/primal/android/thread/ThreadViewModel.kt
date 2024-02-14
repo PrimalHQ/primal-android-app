@@ -257,10 +257,12 @@ class ThreadViewModel @Inject constructor(
     private fun mute(action: UiEvent.MuteAction) =
         viewModelScope.launch {
             try {
-                mutedUserRepository.muteUserAndPersistMuteList(
-                    userId = activeAccountStore.activeUserId(),
-                    mutedUserId = action.postAuthorId,
-                )
+                withContext(dispatcherProvider.io()) {
+                    mutedUserRepository.muteUserAndPersistMuteList(
+                        userId = activeAccountStore.activeUserId(),
+                        mutedUserId = action.postAuthorId,
+                    )
+                }
             } catch (error: WssException) {
                 setErrorState(error = ThreadError.FailedToMuteUser(error))
             } catch (error: NostrPublishException) {

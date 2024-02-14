@@ -10,16 +10,20 @@ import net.primal.android.test.advanceUntilIdleAndDelay
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
 import net.primal.android.user.domain.Relay
+import net.primal.android.user.domain.RelayKind
 import net.primal.android.user.domain.UserAccount
+import net.primal.android.user.domain.mapToRelayPO
 import okhttp3.OkHttpClient
 import org.junit.Rule
 import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class RelaysManagerTest {
+class RelaysSocketManagerTest {
 
     @get:Rule
     val coroutinesTestRule = CoroutinesTestRule()
+
+    private val expectedUserId = "88cc134b1a65f54ef48acc1df3665063d3ea45f04eab8af4646e561c5ae99079"
 
     private val invalidRelays = listOf(
         Relay(url = "abcdefghijkl", true, true),
@@ -28,23 +32,29 @@ class RelaysManagerTest {
         Relay(url = "wss://filter.nostr.wine/npubxyz\n", true, true),
     )
 
-    private fun buildActiveAccountStore(
-        relays: List<Relay> = emptyList()
-    ) = mockk<ActiveAccountStore>(relaxed = true) {
+    private fun buildActiveAccountStore() = mockk<ActiveAccountStore>(relaxed = true) {
         every { activeAccountState } returns flowOf(
             ActiveUserAccountState.ActiveUserAccount(
                 data = UserAccount
-                    .buildLocal(pubkey = "")
-                    .copy(relays = relays)
-            )
+                    .buildLocal(pubkey = expectedUserId),
+            ),
         )
     }
 
     @Test
     fun `invalid relays does not cause the crash`() = runTest {
-        RelaysManager(
+        RelaysSocketManager(
             dispatchers = coroutinesTestRule.dispatcherProvider,
-            activeAccountStore = buildActiveAccountStore(relays = invalidRelays),
+            activeAccountStore = buildActiveAccountStore(),
+            primalDatabase = mockk(relaxed = true) {
+                every { relays() } returns mockk(relaxed = true) {
+                    every { observeRelays(any()) } returns flowOf(
+                    invalidRelays.map {
+                        it.mapToRelayPO(userId = expectedUserId, kind = RelayKind.UserRelay)
+                    },
+                )
+                }
+            },
             regularRelaysPool = RelayPool(
                 dispatchers = coroutinesTestRule.dispatcherProvider,
                 okHttpClient = mockk<OkHttpClient>(),

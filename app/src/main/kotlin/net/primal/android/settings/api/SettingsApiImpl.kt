@@ -7,7 +7,6 @@ import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.primal.PrimalCacheFilter
 import net.primal.android.networking.primal.PrimalVerb
-import net.primal.android.networking.relays.RelaysManager
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.model.primal.content.ContentAppSettings
@@ -20,7 +19,6 @@ import net.primal.android.settings.api.model.SetAppSettingsRequest
 
 class SettingsApiImpl @Inject constructor(
     @PrimalCacheApiClient private val primalApiClient: PrimalApiClient,
-    private val relaysManager: RelaysManager,
     private val nostrNotary: NostrNotary,
 ) : SettingsApi {
 
@@ -89,16 +87,5 @@ class SettingsApiImpl @Inject constructor(
             metadataEvents = queryResult.filterNostrEvents(NostrEventKind.Metadata),
             cdnResources = queryResult.filterPrimalEvents(NostrEventKind.PrimalCdnResource),
         )
-    }
-
-    override suspend fun setMuteList(userId: String, muteList: Set<String>): NostrEvent {
-        val signedNostrEvent = nostrNotary.signMuteListNostrEvent(
-            userId = userId,
-            mutedUserIds = muteList,
-        )
-
-        relaysManager.publishEvent(signedNostrEvent)
-
-        return signedNostrEvent
     }
 }

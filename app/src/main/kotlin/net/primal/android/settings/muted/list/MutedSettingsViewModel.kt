@@ -9,6 +9,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.networking.relays.errors.NostrPublishException
@@ -22,6 +24,7 @@ import net.primal.android.user.accounts.active.ActiveAccountStore
 
 @HiltViewModel
 class MutedSettingsViewModel @Inject constructor(
+    private val dispatcherProvider: CoroutineDispatcherProvider,
     private val activeAccountStore: ActiveAccountStore,
     private val mutedUserRepository: MutedUserRepository,
 ) : ViewModel() {
@@ -67,10 +70,12 @@ class MutedSettingsViewModel @Inject constructor(
     private suspend fun unmuteEventHandler(event: UiEvent.UnmuteEvent) =
         viewModelScope.launch {
             try {
-                mutedUserRepository.unmuteUserAndPersistMuteList(
-                    userId = activeAccountStore.activeUserId(),
-                    unmutedUserId = event.pubkey,
-                )
+                withContext(dispatcherProvider.io()) {
+                    mutedUserRepository.unmuteUserAndPersistMuteList(
+                        userId = activeAccountStore.activeUserId(),
+                        unmutedUserId = event.pubkey,
+                    )
+                }
             } catch (error: WssException) {
                 setState {
                     copy(error = UiState.MutedSettingsError.FailedToUnmuteUserError(error))

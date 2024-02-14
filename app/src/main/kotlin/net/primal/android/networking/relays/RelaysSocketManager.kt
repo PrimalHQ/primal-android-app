@@ -3,23 +3,25 @@ package net.primal.android.networking.relays
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
-import net.primal.android.networking.relays.errors.MissingRelaysException
+import net.primal.android.db.PrimalDatabase
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.model.NostrEvent
-import net.primal.android.user.accounts.BOOTSTRAP_RELAYS
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
 import net.primal.android.user.domain.Relay
-import net.primal.android.user.domain.toRelay
+import net.primal.android.user.domain.RelayKind
+import net.primal.android.user.domain.mapToRelayDO
 
 @Singleton
-class RelaysManager @Inject constructor(
+class RelaysSocketManager @Inject constructor(
     dispatchers: CoroutineDispatcherProvider,
     private val activeAccountStore: ActiveAccountStore,
+    private val primalDatabase: PrimalDatabase,
     private val regularRelaysPool: RelayPool,
     private val walletRelaysPool: RelayPool,
     private val bootstrapRelays: RelayPool,
@@ -27,11 +29,13 @@ class RelaysManager @Inject constructor(
     private val scope = CoroutineScope(dispatchers.io())
     private val relayPoolsMutex = Mutex()
 
+    private var relaysObserverJob: Job? = null
+
     val regularRelayPoolStatus = regularRelaysPool.relayPoolStatus
 
     init {
-        observeActiveAccount()
         initBootstrapRelaysPool()
+        observeActiveAccount()
     }
 
     private fun initBootstrapRelaysPool() {
@@ -44,16 +48,25 @@ class RelaysManager @Inject constructor(
                 when (activeAccountState) {
                     is ActiveUserAccountState.ActiveUserAccount -> {
                         val data = activeAccountState.data
-                        updateRelayPools(
-                            regularRelays = data.relays,
-                            walletRelays = data.nostrWallet?.relays?.map { it.toRelay() },
-                        )
+                        relaysObserverJob?.cancel()
+                        relaysObserverJob = observeRelays(data.pubkey)
                     }
 
                     ActiveUserAccountState.NoUserAccount -> {
+                        relaysObserverJob?.cancel()
+                        relaysObserverJob = null
                         clearRelayPools()
                     }
                 }
+            }
+        }
+
+    private fun observeRelays(userId: String): Job =
+        scope.launch {
+            primalDatabase.relays().observeRelays(userId = userId).collect { relays ->
+                val userRelays = relays.filter { it.kind == RelayKind.UserRelay }.map { it.mapToRelayDO() }
+                val nwcRelays = relays.filter { it.kind == RelayKind.NwcRelay }.map { it.mapToRelayDO() }
+                updateRelayPools(regularRelays = userRelays, walletRelays = nwcRelays)
             }
         }
 
@@ -86,15 +99,13 @@ class RelaysManager @Inject constructor(
         }
     }
 
-    @Throws(NostrPublishException::class, MissingRelaysException::class)
+    @Throws(NostrPublishException::class)
     suspend fun publishWalletEvent(nostrEvent: NostrEvent) {
-        if (!walletRelaysPool.hasRelays()) throw MissingRelaysException()
+        if (!walletRelaysPool.hasRelays()) {
+            throw NostrPublishException(cause = IllegalStateException("nwc relay not found"))
+        }
 
         walletRelaysPool.publishEvent(nostrEvent)
-    }
-
-    suspend fun bootstrap() {
-        updateRelayPools(regularRelays = BOOTSTRAP_RELAYS, walletRelays = emptyList())
     }
 
     suspend fun ensureUserRelayPoolConnected() {

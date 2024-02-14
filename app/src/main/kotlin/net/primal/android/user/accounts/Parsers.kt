@@ -9,7 +9,7 @@ import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.user.domain.Relay
 import timber.log.Timber
 
-fun String.parseRelays(): List<Relay> {
+fun String.parseKind3Relays(): List<Relay> {
     val jsonContent = try {
         NostrJson.parseToJsonElement(this)
     } catch (error: SerializationException) {
@@ -27,6 +27,20 @@ fun String.parseRelays(): List<Relay> {
     }
 
     return relays
+}
+
+fun List<JsonArray>?.parseNip65Relays(): List<Relay> {
+    return this?.filter { it.firstOrNull()?.jsonPrimitive?.content == "r" }
+        ?.mapNotNull {
+            it.getOrNull(1)?.jsonPrimitive?.content?.let { url ->
+                val permission = it.getOrNull(2)?.jsonPrimitive?.content?.lowercase()
+                Relay(
+                    url = url,
+                    read = permission == null || permission == "read",
+                    write = permission == null || permission == "write",
+                )
+            }
+        } ?: emptyList()
 }
 
 fun List<JsonArray>.parseFollowings(): Set<String> {

@@ -9,6 +9,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.JsonObject
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
+import net.primal.android.user.domain.cleanWebSocketUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
@@ -74,12 +75,7 @@ class NostrSocketClient(
         }
     }
 
-    private fun WebSocket.requestUrl(): String =
-        request().url.toString().let { url ->
-            url.replace("https://", "wss://", ignoreCase = true)
-                .replace("http://", "ws://", ignoreCase = true)
-                .let { if (it.endsWith("/")) it.dropLast(1) else it }
-        }
+    private fun WebSocket.requestUrl(): String = request().url.toString().cleanWebSocketUrl()
 
     private val mutableIncomingMessagesSharedFlow = MutableSharedFlow<NostrIncomingMessage>()
 

@@ -3,26 +3,27 @@ package net.primal.android.wallet.zaps
 import javax.inject.Inject
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.feed.repository.PostStatsUpdater
-import net.primal.android.networking.relays.RelaysManager
+import net.primal.android.networking.relays.BOOTSTRAP_RELAYS
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.user.accounts.UserAccountsStore
+import net.primal.android.user.domain.RelayKind
 import net.primal.android.user.domain.UserAccount
 import net.primal.android.user.domain.WalletPreference
+import net.primal.android.user.domain.mapToRelayDO
+import net.primal.android.user.repository.RelayRepository
 import net.primal.android.wallet.domain.WalletKycLevel
 import net.primal.android.wallet.domain.ZapTarget
 import net.primal.android.wallet.domain.lnUrlDecoded
 import net.primal.android.wallet.domain.userId
-import net.primal.android.wallet.nwc.NwcNostrZapper
-import net.primal.android.wallet.nwc.api.NwcApi
+import net.primal.android.wallet.nwc.NwcNostrZapperFactory
 import net.primal.android.wallet.repository.WalletNostrZapper
-import net.primal.android.wallet.repository.WalletRepository
 
 class ZapHandler @Inject constructor(
     private val accountsStore: UserAccountsStore,
+    private val nwcNostrZapperFactory: NwcNostrZapperFactory,
+    private val primalWalletZapper: WalletNostrZapper,
+    private val relayRepository: RelayRepository,
     private val notary: NostrNotary,
-    private val relaysManager: RelaysManager,
-    private val walletRepository: WalletRepository,
-    private val nwcApi: NwcApi,
     private val database: PrimalDatabase,
 ) {
 
@@ -34,16 +35,16 @@ class ZapHandler @Inject constructor(
         comment: String? = null,
     ) {
         val userAccount = accountsStore.findByIdOrNull(userId = userId)
-        val userRelays = userAccount?.relays
+        val userRelays = relayRepository.findRelays(userId, RelayKind.UserRelay)
+            .map { it.mapToRelayDO() }
+            .ifEmpty { BOOTSTRAP_RELAYS }
         val targetLnUrlDecoded = target.lnUrlDecoded()
-        val nostrZapper = userAccount?.buildZapper()
+        val nostrZapper = userAccount?.resolveZapper()
         val defaultZapOptions = userAccount?.appSettings?.zapDefault
         val zapAmountInSats = amountInSats ?: defaultZapOptions?.amount?.toULong()
         val zapComment = comment ?: defaultZapOptions?.message ?: ""
 
-        if (userRelays.isNullOrEmpty() || nostrZapper == null || zapAmountInSats == null) {
-            throw InvalidZapRequestException()
-        }
+        if (nostrZapper == null || zapAmountInSats == null) throw InvalidZapRequestException()
 
         val statsUpdater = target.buildPostStatsUpdaterIfApplicable(userId)
 
@@ -72,16 +73,11 @@ class ZapHandler @Inject constructor(
         }
     }
 
-    private fun UserAccount.buildZapper(): NostrZapper? {
+    private fun UserAccount.resolveZapper(): NostrZapper? {
         return when (this.walletPreference) {
             WalletPreference.NostrWalletConnect -> {
                 if (this.nostrWallet != null) {
-                    NwcNostrZapper(
-                        relaysManager = relaysManager,
-                        notary = notary,
-                        nwcApi = nwcApi,
-                        nostrWallet = this.nostrWallet,
-                    )
+                    nwcNostrZapperFactory.create(nwcData = this.nostrWallet)
                 } else {
                     null
                 }
@@ -89,9 +85,7 @@ class ZapHandler @Inject constructor(
 
             else -> {
                 if (this.primalWallet != null && this.primalWallet.kycLevel != WalletKycLevel.None) {
-                    WalletNostrZapper(
-                        walletRepository = walletRepository,
-                    )
+                    primalWalletZapper
                 } else {
                     null
                 }

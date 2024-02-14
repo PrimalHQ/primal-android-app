@@ -8,11 +8,7 @@ import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.primal.PrimalCacheFilter
 import net.primal.android.networking.primal.PrimalVerb
-import net.primal.android.networking.relays.RelaysManager
-import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.NostrEventKind
-import net.primal.android.nostr.model.content.ContentMetadata
-import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.user.api.model.FollowListRequestBody
 import net.primal.android.user.api.model.UserContactsResponse
 import net.primal.android.user.api.model.UserProfileResponse
@@ -20,12 +16,9 @@ import net.primal.android.user.api.model.UserProfilesRequestBody
 import net.primal.android.user.api.model.UserProfilesResponse
 import net.primal.android.user.api.model.UserRelaysResponse
 import net.primal.android.user.api.model.UserRequestBody
-import net.primal.android.user.domain.Relay
 
 class UsersApiImpl @Inject constructor(
     @PrimalCacheApiClient private val primalApiClient: PrimalApiClient,
-    private val relaysManager: RelaysManager,
-    private val nostrNotary: NostrNotary,
 ) : UsersApi {
 
     override suspend fun getUserProfile(userId: String): UserProfileResponse {
@@ -59,29 +52,6 @@ class UsersApiImpl @Inject constructor(
             userScores = queryResult.findPrimalEvent(NostrEventKind.PrimalUserScores),
             cdnResources = queryResult.filterPrimalEvents(NostrEventKind.PrimalCdnResource),
         )
-    }
-
-    override suspend fun setUserContacts(
-        ownerId: String,
-        contacts: Set<String>,
-        relays: List<Relay>,
-    ): NostrEvent {
-        val signedNostrEvent = nostrNotary.signContactsNostrEvent(
-            userId = ownerId,
-            contacts = contacts,
-            relays = relays,
-        )
-        relaysManager.publishEvent(nostrEvent = signedNostrEvent)
-        return signedNostrEvent
-    }
-
-    override suspend fun setUserProfile(ownerId: String, contentMetadata: ContentMetadata): NostrEvent {
-        val signedNostrEvent = nostrNotary.signMetadataNostrEvent(
-            userId = ownerId,
-            metadata = contentMetadata,
-        )
-        relaysManager.publishEvent(nostrEvent = signedNostrEvent)
-        return signedNostrEvent
     }
 
     override suspend fun getUserProfilesMetadata(userIds: Set<String>): UserProfilesResponse {

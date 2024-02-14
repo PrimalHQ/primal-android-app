@@ -11,13 +11,13 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.android.networking.primal.PrimalApiClient
-import net.primal.android.networking.relays.RelaysManager
+import net.primal.android.networking.relays.RelaysSocketManager
 import net.primal.android.settings.network.NetworkSettingsContract.UiEvent
 import net.primal.android.settings.network.NetworkSettingsContract.UiState
 
 @HiltViewModel
 class NetworkSettingsViewModel @Inject constructor(
-    private val relaysManager: RelaysManager,
+    private val relaysManager: RelaysSocketManager,
     @PrimalCacheApiClient private val primalApiClient: PrimalApiClient,
 ) : ViewModel() {
 

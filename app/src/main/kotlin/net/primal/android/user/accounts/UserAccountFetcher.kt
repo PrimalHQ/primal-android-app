@@ -11,7 +11,7 @@ import net.primal.android.nostr.ext.asProfileStatsPO
 import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
 import net.primal.android.user.api.UsersApi
 import net.primal.android.user.domain.UserAccount
-import net.primal.android.user.domain.asUserAccountFromContactsEvent
+import net.primal.android.user.domain.asUserAccountFromFollowListEvent
 
 class UserAccountFetcher @Inject constructor(
     private val dispatcherProvider: CoroutineDispatcherProvider,
@@ -45,6 +45,6 @@ class UserAccountFetcher @Inject constructor(
             usersApi.getUserFollowList(userId = userId)
         }
 
-        return contactsResponse.followListEvent?.asUserAccountFromContactsEvent()
+        return contactsResponse.followListEvent?.asUserAccountFromFollowListEvent()
     }
 }

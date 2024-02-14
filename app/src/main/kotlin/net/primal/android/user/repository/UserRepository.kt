@@ -11,6 +11,7 @@ import net.primal.android.db.PrimalDatabase
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.ext.asProfileDataPO
 import net.primal.android.nostr.model.content.ContentMetadata
+import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.android.profile.domain.ProfileMetadata
 import net.primal.android.user.accounts.UserAccountFetcher
 import net.primal.android.user.accounts.UserAccountsStore
@@ -28,6 +29,7 @@ class UserRepository @Inject constructor(
     private val accountsStore: UserAccountsStore,
     private val fileUploader: FileUploader,
     private val usersApi: UsersApi,
+    private val nostrPublisher: NostrPublisher,
 ) {
 
     suspend fun createNewUserAccount(userId: String): UserAccount {
@@ -51,9 +53,9 @@ class UserRepository @Inject constructor(
         }
     }
 
-    suspend fun updateContacts(userId: String, contactsUserAccount: UserAccount) {
+    suspend fun updateFollowList(userId: String, contactsUserAccount: UserAccount) {
         accountsStore.getAndUpdateAccount(userId = userId) {
-            copyFollowListIfNotNull(contacts = contactsUserAccount)
+            copyFollowListIfNotNull(followList = contactsUserAccount)
                 .copy(followingCount = contactsUserAccount.following.size)
         }
     }
@@ -115,7 +117,10 @@ class UserRepository @Inject constructor(
     }
 
     private suspend fun setUserProfileAndUpdateLocally(userId: String, contentMetadata: ContentMetadata) {
-        val profileMetadataNostrEvent = usersApi.setUserProfile(ownerId = userId, contentMetadata = contentMetadata)
+        val profileMetadataNostrEvent = nostrPublisher.publishUserProfile(
+            userId = userId,
+            contentMetadata = contentMetadata,
+        )
         val profileData = profileMetadataNostrEvent.asProfileDataPO(cdnResources = emptyMap())
         database.profiles().upsertAll(data = listOf(profileData))
 

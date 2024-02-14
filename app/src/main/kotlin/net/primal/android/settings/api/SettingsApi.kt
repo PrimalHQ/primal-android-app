@@ -14,6 +14,4 @@ interface SettingsApi {
     suspend fun setAppSettings(userId: String, appSettings: ContentAppSettings): NostrEvent
 
     suspend fun getMuteList(userId: String): GetMuteListResponse
-
-    suspend fun setMuteList(userId: String, muteList: Set<String>): NostrEvent
 }

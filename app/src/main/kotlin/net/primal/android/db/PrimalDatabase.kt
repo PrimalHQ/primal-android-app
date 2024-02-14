@@ -44,6 +44,8 @@ import net.primal.android.settings.muted.db.MutedUserData
 import net.primal.android.thread.db.ThreadConversationCrossRef
 import net.primal.android.thread.db.ThreadConversationCrossRefDao
 import net.primal.android.thread.db.ThreadConversationDao
+import net.primal.android.user.db.Relay
+import net.primal.android.user.db.RelayDao
 import net.primal.android.wallet.db.WalletTransactionDao
 import net.primal.android.wallet.db.WalletTransactionData
 
@@ -68,8 +70,9 @@ import net.primal.android.wallet.db.WalletTransactionData
         DirectMessageData::class,
         MessageConversationData::class,
         WalletTransactionData::class,
+        Relay::class,
     ],
-    version = 19,
+    version = 20,
     exportSchema = true,
 )
 @TypeConverters(
@@ -117,4 +120,6 @@ abstract class PrimalDatabase : RoomDatabase() {
     abstract fun messageConversations(): MessageConversationDao
 
     abstract fun walletTransactions(): WalletTransactionDao
+
+    abstract fun relays(): RelayDao
 }

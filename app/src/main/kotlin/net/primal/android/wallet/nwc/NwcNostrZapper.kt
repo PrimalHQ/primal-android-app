@@ -1,10 +1,11 @@
 package net.primal.android.wallet.nwc
 
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedInject
 import java.io.IOException
-import net.primal.android.networking.relays.RelaysManager
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.model.NostrEvent
-import net.primal.android.nostr.notary.NostrNotary
+import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.android.user.domain.NostrWalletConnect
 import net.primal.android.wallet.nwc.api.NwcApi
 import net.primal.android.wallet.nwc.model.LightningPayRequest
@@ -13,11 +14,10 @@ import net.primal.android.wallet.zaps.NostrZapper
 import net.primal.android.wallet.zaps.ZapFailureException
 import net.primal.android.wallet.zaps.ZapRequestData
 
-class NwcNostrZapper(
-    private val relaysManager: RelaysManager,
-    private val notary: NostrNotary,
+class NwcNostrZapper @AssistedInject constructor(
+    @Assisted private val nwcData: NostrWalletConnect,
     private val nwcApi: NwcApi,
-    private val nostrWallet: NostrWalletConnect,
+    private val nostrPublisher: NostrPublisher,
 ) : NostrZapper {
 
     override suspend fun zap(data: ZapRequestData) {
@@ -30,13 +30,8 @@ class NwcNostrZapper(
             comment = data.zapComment,
         )
 
-        val walletPayNostrEvent = notary.signWalletInvoiceRequestNostrEvent(
-            request = invoice.toWalletPayRequest(),
-            nwc = nostrWallet,
-        )
-
         try {
-            relaysManager.publishWalletEvent(nostrEvent = walletPayNostrEvent)
+            nostrPublisher.publishWalletRequest(invoice = invoice, nwcData = nwcData)
         } catch (error: NostrPublishException) {
             throw ZapFailureException(cause = error)
         }

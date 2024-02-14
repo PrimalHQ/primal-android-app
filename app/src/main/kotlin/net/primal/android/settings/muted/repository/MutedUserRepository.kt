@@ -2,24 +2,21 @@ package net.primal.android.settings.muted.repository
 
 import androidx.room.withTransaction
 import javax.inject.Inject
-import kotlin.jvm.Throws
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.jsonPrimitive
 import net.primal.android.core.ext.asMapByKey
 import net.primal.android.db.PrimalDatabase
-import net.primal.android.networking.primal.api.PrimalImportApi
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.nostr.ext.asProfileDataPO
 import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
+import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.android.settings.api.SettingsApi
 import net.primal.android.settings.muted.db.MutedUserData
 
 class MutedUserRepository @Inject constructor(
     private val database: PrimalDatabase,
     private val settingsApi: SettingsApi,
-    private val primalImportApi: PrimalImportApi,
+    private val nostrPublisher: NostrPublisher,
 ) {
 
     fun observeMutedUsers() = database.mutedUsers().observeMutedUsers()
@@ -36,9 +33,7 @@ class MutedUserRepository @Inject constructor(
 
     @Throws(MissingRelaysException::class)
     suspend fun muteUserAndPersistMuteList(userId: String, mutedUserId: String) {
-        val userMetadataEventId = withContext(Dispatchers.IO) {
-            database.profiles().findMetadataEventId(mutedUserId)
-        }
+        val userMetadataEventId = database.profiles().findMetadataEventId(mutedUserId)
         updateAndPersistMuteList(userId = userId) {
             toMutableSet().apply {
                 add(
@@ -66,23 +61,17 @@ class MutedUserRepository @Inject constructor(
     ) {
         val remoteMuteList = fetchMuteListAndPersistProfiles(userId = userId)
         val newMuteList = remoteMuteList.reducer()
-        val muteListNostrEvent = settingsApi.setMuteList(
-            userId = userId,
-            muteList = newMuteList.map { it.userId }.toSet(),
-        )
-        primalImportApi.importEvents(listOf(muteListNostrEvent))
+        nostrPublisher.setMuteList(userId = userId, muteList = newMuteList.map { it.userId }.toSet())
         persistMuteList(muteList = newMuteList)
     }
 
     private suspend fun fetchMuteListAndPersistProfiles(userId: String): Set<MutedUserData> {
-        val response = withContext(Dispatchers.IO) { settingsApi.getMuteList(userId = userId) }
+        val response = settingsApi.getMuteList(userId = userId)
         val muteList = response.muteList?.tags?.mapToPubkeySet() ?: emptySet()
         val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
         val profileData = response.metadataEvents.map { it.asProfileDataPO(cdnResources = cdnResources) }
 
-        withContext(Dispatchers.IO) {
-            database.profiles().upsertAll(data = profileData)
-        }
+        database.profiles().upsertAll(data = profileData)
         return muteList
             .map { mutedUserId ->
                 mutedUserId.asMutedAccountPO(
@@ -93,11 +82,9 @@ class MutedUserRepository @Inject constructor(
     }
 
     private suspend fun persistMuteList(muteList: Set<MutedUserData>) {
-        withContext(Dispatchers.IO) {
-            database.withTransaction {
-                database.mutedUsers().deleteAll()
-                database.mutedUsers().upsertAll(data = muteList)
-            }
+        database.withTransaction {
+            database.mutedUsers().deleteAll()
+            database.mutedUsers().upsertAll(data = muteList)
         }
     }
 

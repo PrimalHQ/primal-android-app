@@ -1,6 +1,7 @@
 package net.primal.android.user.accounts
 
 import io.kotest.matchers.collections.shouldNotBeEmpty
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.add
@@ -9,18 +10,30 @@ import org.junit.Test
 
 class ParsersTest {
 
-    @Test
-    fun `parseRelays returns empty list for empty content`() {
-        "".parseRelays() shouldBe emptyList()
+    private fun createRelayJsonArray(url: String, read: Boolean = true, write: Boolean = true): JsonArray {
+        return buildJsonArray {
+            add("r")
+            add(url)
+            when {
+                read && write -> Unit
+                read -> add("read")
+                write -> add("write")
+            }
+        }
     }
 
     @Test
-    fun `parseRelays returns empty list for invalid json content`() {
-        "{ giberish }".parseRelays() shouldBe emptyList()
+    fun parseKind3Relays_returnsEmptyListForEmptyContent() {
+        "".parseKind3Relays() shouldBe emptyList()
     }
 
     @Test
-    fun `parseRelays reads relay url, read and write`() {
+    fun parseKind3Relays_returnsEmptyListForInvalidJsonContent() {
+        "{ giberish }".parseKind3Relays() shouldBe emptyList()
+    }
+
+    @Test
+    fun parseKind3Relays_readsRelayUrlReadAndWriteFields() {
         val expectedUrl = "wss://relay.primal.net"
         val expectedRead = false
         val expectedWrite = true
@@ -36,13 +49,51 @@ class ParsersTest {
             }
         }
         """
-        val actual = content.parseRelays()
+        val actual = content.parseKind3Relays()
 
+        actual.shouldNotBeNull()
         actual.shouldNotBeEmpty()
         actual.size shouldBe 2
         actual.first().url shouldBe expectedUrl
         actual.first().read shouldBe expectedRead
         actual.first().write shouldBe expectedWrite
+    }
+
+    @Test
+    fun parseNip65Relays_returnsEmptyListForEmptyTags() {
+        listOf<JsonArray>().parseNip65Relays() shouldBe emptyList()
+    }
+
+    @Test
+    fun parseNip65Relays_returnsEmptyListForInvalidTags() {
+        listOf(
+            buildJsonArray { add("random") },
+            buildJsonArray { add("invalid") },
+            buildJsonArray { add("words") },
+        ).parseNip65Relays() shouldBe emptyList()
+    }
+
+    @Test
+    fun parseNip65Relays_readsRelayUrlReadAndWriteFields() {
+        val actualRelays = listOf(
+            createRelayJsonArray("wss://relay.primal.net"),
+            createRelayJsonArray("wss://relay.damus.io", read = true, write = false),
+            createRelayJsonArray("wss://relay.bitcoin.org", read = false, write = true),
+        ).parseNip65Relays()
+
+        actualRelays.shouldNotBeNull()
+        actualRelays.size shouldBe 3
+        actualRelays[0].url shouldBe "wss://relay.primal.net"
+        actualRelays[0].read shouldBe true
+        actualRelays[0].write shouldBe true
+
+        actualRelays[1].url shouldBe "wss://relay.damus.io"
+        actualRelays[1].read shouldBe true
+        actualRelays[1].write shouldBe false
+
+        actualRelays[2].url shouldBe "wss://relay.bitcoin.org"
+        actualRelays[2].read shouldBe false
+        actualRelays[2].write shouldBe true
     }
 
     @Test

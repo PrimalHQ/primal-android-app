@@ -1,4 +1,4 @@
-package net.primal.android.user.accounts
+package net.primal.android.networking.relays
 
 import net.primal.android.user.domain.toRelay
 

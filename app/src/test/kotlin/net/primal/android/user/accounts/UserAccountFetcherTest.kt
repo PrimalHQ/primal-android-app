@@ -17,7 +17,6 @@ import net.primal.android.nostr.model.primal.PrimalEvent
 import net.primal.android.user.api.UsersApi
 import net.primal.android.user.api.model.UserContactsResponse
 import net.primal.android.user.api.model.UserProfileResponse
-import net.primal.android.user.domain.Relay
 import org.junit.Rule
 import org.junit.Test
 
@@ -102,7 +101,7 @@ class UserAccountFetcherTest {
     }
 
     @Test
-    fun `fetchUserContacts fetches user contacts for given pubkey`() = runTest {
+    fun `fetchUserFollowList fetches user follow list for given pubkey`() = runTest {
         val expectedPubkey = "9b46c3f4a8dcdafdfff12a97c59758f38ff55002370fcfa7d14c8c857e9b5812"
         val expectedFollowing = listOf(
             "d61f3bc5b3eb4400efdae6169a5c17cabf3246b514361de939ce4a1a0da6ef4a",
@@ -127,18 +126,7 @@ class UserAccountFetcherTest {
                 add("#bitcoin")
             },
         )
-        val expectedRelays = listOf(
-            Relay(
-                url = "wss://relay.snort.social",
-                read = true,
-                write = false,
-            ),
-            Relay(
-                url = "wss://relay.primal.net",
-                read = false,
-                write = true,
-            ),
-        )
+        val expectedContent = "something in the content. we don not care about it."
 
         val usersApiMock = mockk<UsersApi> {
             coEvery { getUserFollowList(any()) } returns UserContactsResponse(
@@ -148,18 +136,7 @@ class UserAccountFetcherTest {
                     createdAt = 1683463925,
                     kind = 3,
                     tags = expectedTags,
-                    content = """
-                    {
-                        "${expectedRelays[0].url}": {
-                            "read": ${expectedRelays[0].read},
-                            "write": ${expectedRelays[0].write}
-                        },
-                        "${expectedRelays[1].url}": {
-                            "read": ${expectedRelays[1].read},
-                            "write": ${expectedRelays[1].write}
-                        }
-                     }
-                     """.trimIndent(),
+                    content = expectedContent,
                     sig = "invalidSig",
                 ),
             )
@@ -172,13 +149,12 @@ class UserAccountFetcherTest {
         val actual = fetcher.fetchUserFollowListOrNull(userId = expectedPubkey)
 
         actual.shouldNotBeNull()
-        actual.relays shouldBe expectedRelays
         actual.following shouldBe expectedFollowing
         actual.interests shouldBe listOf("#bitcoin")
     }
 
     @Test
-    fun `fetchUserContacts fails if api call fails`() = runTest {
+    fun `fetchUserFollowList fails if api call fails`() = runTest {
         val usersApiMock = mockk<UsersApi> {
             coEvery { getUserFollowList(any()) } throws WssException()
         }

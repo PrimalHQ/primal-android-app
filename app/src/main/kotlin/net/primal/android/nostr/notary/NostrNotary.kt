@@ -4,9 +4,10 @@ import fr.acinq.secp256k1.Hex
 import javax.inject.Inject
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.add
+import kotlinx.serialization.json.buildJsonArray
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.NostrNotaryJson
-import net.primal.android.core.serialization.json.toNostrRelayMap
 import net.primal.android.crypto.CryptoUtils
 import net.primal.android.crypto.toNpub
 import net.primal.android.networking.UserAgentProvider
@@ -115,14 +116,12 @@ class NostrNotary @Inject constructor(
         ).signOrThrow(nsec = findNsecOrThrow(userId))
     }
 
-    fun signContactsNostrEvent(
+    fun signFollowListNostrEvent(
         userId: String,
         contacts: Set<String>,
-        relays: List<Relay>,
+        content: String,
     ): NostrEvent {
         val tags = contacts.map { it.asPubkeyTag() }
-        val content = NostrJson.encodeToString(relays.toNostrRelayMap())
-
         return NostrUnsignedEvent(
             pubKey = userId,
             kind = NostrEventKind.FollowList.value,
@@ -203,6 +202,25 @@ class NostrNotary @Inject constructor(
             content = content,
             kind = NostrEventKind.PrimalWalletOperation.value,
             tags = listOf(),
+        ).signOrThrow(nsec = findNsecOrThrow(pubkey = userId))
+    }
+
+    fun signRelayListMetadata(userId: String, relays: List<Relay>): NostrEvent {
+        return NostrUnsignedEvent(
+            pubKey = userId,
+            content = "",
+            kind = NostrEventKind.RelayListMetadata.value,
+            tags = relays.map {
+                buildJsonArray {
+                    add("r")
+                    add(it.url)
+                    when {
+                        it.read && it.write -> Unit
+                        it.read -> add("read")
+                        it.write -> add("write")
+                    }
+                }
+            },
         ).signOrThrow(nsec = findNsecOrThrow(pubkey = userId))
     }
 }

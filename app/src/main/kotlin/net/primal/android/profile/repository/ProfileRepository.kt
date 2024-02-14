@@ -13,10 +13,10 @@ import net.primal.android.nostr.ext.asProfileStatsPO
 import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
 import net.primal.android.nostr.ext.mapAsProfileDataPO
 import net.primal.android.nostr.ext.takeContentAsPrimalUserFollowersCountsOrNull
+import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.android.user.accounts.UserAccountFetcher
 import net.primal.android.user.api.UsersApi
-import net.primal.android.user.domain.Relay
-import net.primal.android.user.domain.asUserAccountFromContactsEvent
+import net.primal.android.user.domain.asUserAccountFromFollowListEvent
 import net.primal.android.user.repository.UserRepository
 
 class ProfileRepository @Inject constructor(
@@ -24,6 +24,7 @@ class ProfileRepository @Inject constructor(
     private val usersApi: UsersApi,
     private val userRepository: UserRepository,
     private val userAccountFetcher: UserAccountFetcher,
+    private val nostrPublisher: NostrPublisher,
 ) {
 
     fun findProfileDataOrNull(profileId: String) = database.profiles().findProfileData(profileId = profileId)
@@ -66,31 +67,31 @@ class ProfileRepository @Inject constructor(
     }
 
     private suspend fun updateFollowList(userId: String, reducer: Set<String>.() -> Set<String>) {
-        val userContacts = userAccountFetcher.fetchUserFollowListOrNull(userId = userId)
+        val userFollowList = userAccountFetcher.fetchUserFollowListOrNull(userId = userId)
             ?: throw WssException("Follow Lists not found.")
 
-        userRepository.updateContacts(userId, userContacts)
+        userRepository.updateFollowList(userId, userFollowList)
 
-        setContactsAndRelays(
+        setFollowList(
             userId = userId,
-            contacts = userContacts.following.reducer(),
-            relays = userContacts.relays,
+            contacts = userFollowList.following.reducer(),
+            content = userFollowList.followListEventContent ?: "",
         )
     }
 
-    suspend fun setContactsAndRelays(
+    suspend fun setFollowList(
         userId: String,
         contacts: Set<String>,
-        relays: List<Relay>,
+        content: String = "",
     ) {
-        val nostrEventResponse = usersApi.setUserContacts(
-            ownerId = userId,
-            contacts = contacts,
-            relays = relays,
-        )
-        userRepository.updateContacts(
+        val nostrEventResponse = nostrPublisher.publishUserFollowList(
             userId = userId,
-            contactsUserAccount = nostrEventResponse.asUserAccountFromContactsEvent(),
+            contacts = contacts,
+            content = content,
+        )
+        userRepository.updateFollowList(
+            userId = userId,
+            contactsUserAccount = nostrEventResponse.asUserAccountFromFollowListEvent(),
         )
     }
 

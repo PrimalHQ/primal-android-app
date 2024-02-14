@@ -29,10 +29,9 @@ data class UserAccount(
         else -> WalletPreference.Undefined
     },
     val appSettings: ContentAppSettings? = null,
-    val relays: List<Relay> = emptyList(),
     val following: Set<String> = emptySet(),
-    val followers: List<String> = emptyList(),
     val interests: List<String> = emptyList(),
+    val followListEventContent: String? = null,
 ) {
     companion object {
         val EMPTY = UserAccount(

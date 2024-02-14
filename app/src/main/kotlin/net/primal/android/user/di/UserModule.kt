@@ -14,8 +14,6 @@ import javax.inject.Singleton
 import net.primal.android.core.serialization.datastore.StringSerializer
 import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.android.networking.primal.PrimalApiClient
-import net.primal.android.networking.relays.RelaysManager
-import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.security.Encryption
 import net.primal.android.user.accounts.UserAccountsSerialization
 import net.primal.android.user.api.UsersApi
@@ -60,16 +58,8 @@ object UserModule {
         )
 
     @Provides
-    fun provideUsersApi(
-        @PrimalCacheApiClient primalApiClient: PrimalApiClient,
-        relaysManager: RelaysManager,
-        nostrNotary: NostrNotary,
-    ): UsersApi =
-        UsersApiImpl(
-            primalApiClient = primalApiClient,
-            relaysManager = relaysManager,
-            nostrNotary = nostrNotary,
-        )
+    fun provideUsersApi(@PrimalCacheApiClient primalApiClient: PrimalApiClient): UsersApi =
+        UsersApiImpl(primalApiClient = primalApiClient)
 }
 
 @Qualifier
