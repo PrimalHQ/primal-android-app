@@ -72,7 +72,7 @@ import net.primal.android.wallet.db.WalletTransactionData
         WalletTransactionData::class,
         Relay::class,
     ],
-    version = 20,
+    version = 21,
     exportSchema = true,
 )
 @TypeConverters(

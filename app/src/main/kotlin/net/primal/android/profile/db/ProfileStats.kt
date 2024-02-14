@@ -7,12 +7,12 @@ import androidx.room.PrimaryKey
 data class ProfileStats(
     @PrimaryKey
     val profileId: String,
-    val following: Int,
-    val followers: Int,
-    val notesCount: Int,
-    val repliesCount: Int,
-    val relaysCount: Int,
-    val totalReceivedZaps: Long,
-    val totalReceivedSats: Long,
+    val following: Int? = null,
+    val followers: Int? = null,
+    val notesCount: Int? = null,
+    val repliesCount: Int? = null,
+    val relaysCount: Int? = null,
+    val totalReceivedZaps: Long? = null,
+    val totalReceivedSats: Long? = null,
     val joinedAt: Long? = null,
 )
