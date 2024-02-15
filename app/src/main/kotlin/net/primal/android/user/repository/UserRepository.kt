@@ -18,7 +18,9 @@ import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.accounts.copyFollowListIfNotNull
 import net.primal.android.user.accounts.copyIfNotNull
 import net.primal.android.user.api.UsersApi
+import net.primal.android.user.db.Relay
 import net.primal.android.user.domain.NostrWalletConnect
+import net.primal.android.user.domain.RelayKind
 import net.primal.android.user.domain.UserAccount
 import net.primal.android.user.domain.WalletPreference
 import net.primal.android.wallet.domain.WalletSettings
@@ -61,12 +63,18 @@ class UserRepository @Inject constructor(
     }
 
     suspend fun connectNostrWallet(userId: String, nostrWalletConnect: NostrWalletConnect) {
+        database.relays().upsertAll(
+            relays = nostrWalletConnect.relays.map {
+                Relay(userId = userId, kind = RelayKind.NwcRelay, url = it, read = false, write = true)
+            }
+        )
         accountsStore.getAndUpdateAccount(userId = userId) {
             copy(nostrWallet = nostrWalletConnect)
         }
     }
 
     suspend fun disconnectNostrWallet(userId: String) {
+        database.relays().deleteAll(userId = userId, kind = RelayKind.NwcRelay)
         accountsStore.getAndUpdateAccount(userId = userId) {
             copy(nostrWallet = null)
         }

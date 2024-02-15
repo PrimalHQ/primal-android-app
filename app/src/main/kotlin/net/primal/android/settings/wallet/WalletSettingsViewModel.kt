@@ -86,10 +86,12 @@ class WalletSettingsViewModel @Inject constructor(
                 val nostrWalletConnect = nwcUrl.parseNWCUrl()
                 val lightningAddress = activeAccountStore.activeUserAccount().lightningAddress
 
-                userRepository.connectNostrWallet(
-                    userId = activeAccountStore.activeUserId(),
-                    nostrWalletConnect = nostrWalletConnect,
-                )
+                withContext(dispatcherProvider.io()) {
+                    userRepository.connectNostrWallet(
+                        userId = activeAccountStore.activeUserId(),
+                        nostrWalletConnect = nostrWalletConnect,
+                    )
+                }
 
                 setState {
                     copy(
@@ -104,7 +106,9 @@ class WalletSettingsViewModel @Inject constructor(
         }
 
     private suspend fun disconnectWallet() {
-        userRepository.disconnectNostrWallet(userId = activeAccountStore.activeUserId())
+        withContext(dispatcherProvider.io()) {
+            userRepository.disconnectNostrWallet(userId = activeAccountStore.activeUserId())
+        }
         setState {
             copy(
                 wallet = null,

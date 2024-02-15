@@ -235,16 +235,18 @@ class FeedViewModel @Inject constructor(
             }
 
             try {
-                zapHandler.zap(
-                    userId = activeAccountStore.activeUserId(),
-                    comment = zapAction.zapDescription,
-                    amountInSats = zapAction.zapAmount,
-                    target = ZapTarget.Note(
-                        zapAction.postId,
-                        zapAction.postAuthorId,
-                        postAuthorProfileData.lnUrlDecoded,
-                    ),
-                )
+                withContext(dispatcherProvider.io()) {
+                    zapHandler.zap(
+                        userId = activeAccountStore.activeUserId(),
+                        comment = zapAction.zapDescription,
+                        amountInSats = zapAction.zapAmount,
+                        target = ZapTarget.Note(
+                            zapAction.postId,
+                            zapAction.postAuthorId,
+                            postAuthorProfileData.lnUrlDecoded,
+                        ),
+                    )
+                }
             } catch (error: ZapFailureException) {
                 Timber.w(error)
                 setErrorState(error = FeedError.FailedToPublishZapEvent(error))
