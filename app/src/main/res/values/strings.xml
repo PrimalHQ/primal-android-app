@@ -48,7 +48,7 @@
     <string name="create_input_header_website">Website</string>
     <string name="create_input_header_about_me">About me</string>
     <string name="create_input_header_bitcoin_lightning_address">Bitcoin lightning address</string>
-    <string name="create_input_header_nip_05">Nostr verification (NIP 05)</string>
+    <string name="create_input_header_nip_05">Verified Nostr address (NIP 05)</string>
     <string name="create_account_required_hint">required</string>
 
     <string name="login_title">Sign in</string>
