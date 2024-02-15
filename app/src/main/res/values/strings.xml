@@ -287,9 +287,10 @@
     <string name="settings_network_relays_section">Relays</string>
     <string name="settings_network_my_relays_section">My Relays</string>
     <string name="settings_network_caching_service_section">Caching Service</string>
-    <string name="settings_network_connect_to_relay_section">Relays</string>
+    <string name="settings_network_connect_to_relay_section">Connect to relay</string>
     <string name="settings_network_dialog_confirm">Confirm</string>
     <string name="settings_network_dialog_dismiss">Dismiss</string>
+    <string name="settings_network_add_relay_error">Unable to add relay. Please try again in few moments.</string>
 
     <string name="settings_feeds_title">Feeds</string>
     <string name="settings_feeds_list_title">Your Nostr feeds</string>

@@ -4,7 +4,6 @@ import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -13,7 +12,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.timeout
 import kotlinx.coroutines.flow.transform
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.serialization.json.toJsonObject
@@ -21,6 +19,8 @@ import net.primal.android.networking.UserAgentProvider
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.NostrIncomingMessage
 import net.primal.android.networking.sockets.NostrSocketClient
+import net.primal.android.networking.sockets.SocketConnectionClosedCallback
+import net.primal.android.networking.sockets.SocketConnectionOpenedCallback
 import net.primal.android.networking.sockets.errors.NostrNoticeException
 import net.primal.android.networking.sockets.filterByEventId
 import net.primal.android.nostr.model.NostrEvent
@@ -43,42 +43,53 @@ class RelayPool @Inject constructor(
 
     private val _relayPoolStatus = MutableStateFlow(mapOf<String, Boolean>())
     val relayPoolStatus = _relayPoolStatus.asStateFlow()
-    private fun updateRelayStatus(url: String, connected: Boolean) {
+    private fun updateRelayStatus(url: String, connected: Boolean) =
         scope.launch {
             _relayPoolStatus.getAndUpdate {
                 it.toMutableMap().apply { this[url] = connected }
             }
         }
+
+    private val onSocketConnectionOpenedCallback: SocketConnectionOpenedCallback = { url ->
+        updateRelayStatus(url = url, connected = true)
     }
 
-    private fun updatePoolStatus(relays: List<Relay>) {
-        scope.launch {
-            _relayPoolStatus.update {
-                mutableMapOf<String, Boolean>().apply {
-                    relays.forEach { this[it.url] = false }
-                }
-            }
-        }
+    private val onSocketConnectionClosedCallback: SocketConnectionClosedCallback = { url, _ ->
+        updateRelayStatus(url = url, connected = false)
     }
 
     fun changeRelays(relays: List<Relay>) {
-        closePool()
-        socketClients = relays.mapAsNostrSocketClient()
+        val existingRelayUrls = socketClients.map { it.socketUrl }
+        val newRelayUrls = relays.map { it.url }
+
+        val toAddRelayUrls = newRelayUrls.filter { it !in existingRelayUrls }
+        val toAddSocketClients = relays.filter { it.url in toAddRelayUrls }.mapAsNostrSocketClient()
+        val toRemoveSocketClients = socketClients.filter { it.socketUrl !in newRelayUrls }
+
+        val newSocketClients = socketClients.toMutableList().apply {
+            removeAll(toRemoveSocketClients)
+            addAll(toAddSocketClients)
+        }
+
+        socketClients = newSocketClients
+        toRemoveSocketClients.forEach { it.close() }
         this.relays = relays
-        updatePoolStatus(relays)
     }
 
     fun closePool() {
         socketClients.forEach { it.close() }
         socketClients = emptyList()
-        this.relays = emptyList()
-        updatePoolStatus(emptyList())
+        relays = emptyList()
     }
 
     fun hasRelays() = relays.isNotEmpty()
 
-    suspend fun ensureConnected() {
+    suspend fun ensureAllRelaysConnected() {
         socketClients.forEach { it.ensureSocketConnection() }
+    }
+
+    suspend fun ensureRelayConnected(url: String) {
+        socketClients.find { it.socketUrl == url }?.ensureSocketConnection()
     }
 
     private fun List<Relay>.mapAsNostrSocketClient() =
@@ -89,8 +100,8 @@ class RelayPool @Inject constructor(
                     dispatcherProvider = dispatchers,
                     okHttpClient = okHttpClient,
                     wssRequest = it,
-                    onSocketConnectionOpened = { url -> updateRelayStatus(url = url, connected = true) },
-                    onSocketConnectionClosed = { url, _ -> updateRelayStatus(url = url, connected = false) },
+                    onSocketConnectionOpened = onSocketConnectionOpenedCallback,
+                    onSocketConnectionClosed = onSocketConnectionClosedCallback,
                 )
             }
 
@@ -116,17 +127,17 @@ class RelayPool @Inject constructor(
         relayConnections.forEach { nostrSocketClient ->
             scope.launch {
                 with(nostrSocketClient) {
-                    ensureSocketConnection()
-                    sendEVENT(nostrEvent.toJsonObject())
-                    try {
-                        val response = collectPublishResponse(eventId = nostrEvent.id)
-                        responseFlow.emit(NostrPublishResult(result = response))
-                    } catch (error: NostrNoticeException) {
-                        Timber.w(error)
-                        responseFlow.emit(NostrPublishResult(error = error))
-                    } catch (error: TimeoutCancellationException) {
-                        Timber.w(error)
-                        responseFlow.emit(NostrPublishResult(error = error))
+                    val sendEventResult = runCatching {
+                        ensureSocketConnection()
+                        sendEVENT(nostrEvent.toJsonObject())
+                        collectPublishResponse(eventId = nostrEvent.id)
+                    }
+                    sendEventResult.getOrNull()?.let {
+                        responseFlow.emit(NostrPublishResult(result = it))
+                    }
+                    sendEventResult.exceptionOrNull()?.let {
+                        Timber.w(it, "sendEVENT failed to $socketUrl")
+                        responseFlow.emit(NostrPublishResult(error = it))
                     }
                 }
             }

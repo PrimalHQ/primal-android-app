@@ -2,6 +2,7 @@ package net.primal.android.user.repository
 
 import androidx.room.withTransaction
 import javax.inject.Inject
+import kotlinx.coroutines.flow.map
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.networking.relays.BOOTSTRAP_RELAYS
 import net.primal.android.nostr.publish.NostrPublisher
@@ -16,6 +17,10 @@ class RelayRepository @Inject constructor(
     private val usersApi: UsersApi,
     private val nostrPublisher: NostrPublisher,
 ) {
+    fun observeUserRelays(userId: String) =
+        primalDatabase.relays().observeRelays(userId)
+            .map { relays -> relays.filter { it.kind == RelayKind.UserRelay } }
+
     fun findRelays(userId: String, kind: RelayKind) = primalDatabase.relays().findRelays(userId, kind)
 
     suspend fun bootstrapDefaultUserRelays(userId: String) {
@@ -23,9 +28,13 @@ class RelayRepository @Inject constructor(
         replaceUserRelays(userId, BOOTSTRAP_RELAYS)
     }
 
-    suspend fun fetchAndUpdateUserRelays(userId: String) {
+    private suspend fun fetchUserRelays(userId: String): List<RelayDO>? {
         val response = usersApi.getUserRelays(userId)
-        val relayList = response.cachedRelayListEvent?.tags?.parseNip65Relays()
+        return response.cachedRelayListEvent?.tags?.parseNip65Relays()
+    }
+
+    suspend fun fetchAndUpdateUserRelays(userId: String) {
+        val relayList = fetchUserRelays(userId)
         if (!relayList.isNullOrEmpty()) replaceUserRelays(userId, relayList)
     }
 
@@ -38,5 +47,29 @@ class RelayRepository @Inject constructor(
                 },
             )
         }
+    }
+
+    suspend fun addRelayAndPublishRelayList(userId: String, url: String) {
+        val newRelay = RelayDO(url = url, read = true, write = true)
+        updateRelayList(userId = userId) {
+            this.toMutableList().apply {
+                add(0, newRelay)
+            }
+        }
+    }
+
+    suspend fun removeRelayAndPublishRelayList(userId: String, url: String) {
+        updateRelayList(userId = userId) {
+            this.toMutableList().apply {
+                removeIf { it.url == url }
+            }
+        }
+    }
+
+    private suspend fun updateRelayList(userId: String, reducer: List<RelayDO>.() -> List<RelayDO>) {
+        val latestRelayList = fetchUserRelays(userId = userId) ?: emptyList()
+        val newRelayList = latestRelayList.reducer()
+        nostrPublisher.publishRelayList(userId = userId, relays = newRelayList)
+        replaceUserRelays(userId = userId, relays = newRelayList)
     }
 }

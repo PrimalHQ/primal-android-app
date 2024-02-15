@@ -24,19 +24,20 @@ class NostrSocketClient(
     private val onSocketConnectionOpened: SocketConnectionOpenedCallback? = null,
     private val onSocketConnectionClosed: SocketConnectionClosedCallback? = null,
 ) {
+
+    val socketUrl = wssRequest.url.toString().cleanWebSocketUrl()
+
     private val scope = CoroutineScope(dispatcherProvider.io())
-
     private val webSocketMutex = Mutex()
-
     private var webSocket: WebSocket? = null
 
     private val socketListener = object : WebSocketListener() {
         override fun onOpen(webSocket: WebSocket, response: Response) {
-            onSocketConnectionOpened?.invoke(webSocket.requestUrl())
+            onSocketConnectionOpened?.invoke(socketUrl)
         }
 
         override fun onMessage(webSocket: WebSocket, text: String) {
-            Timber.d("<-- $text")
+            Timber.d("<-- $text $socketUrl")
             text.parseIncomingMessage()?.let {
                 scope.launch {
                     mutableIncomingMessagesSharedFlow.emit(value = it)
@@ -49,9 +50,9 @@ class NostrSocketClient(
             t: Throwable,
             response: Response?,
         ) {
-            Timber.w("${webSocket.requestUrl()} failure.", t)
+            Timber.w("WS $socketUrl failure.", t)
             this@NostrSocketClient.webSocket = null
-            onSocketConnectionClosed?.invoke(webSocket.requestUrl(), t)
+            onSocketConnectionClosed?.invoke(socketUrl, t)
         }
 
         override fun onClosing(
@@ -59,9 +60,9 @@ class NostrSocketClient(
             code: Int,
             reason: String,
         ) {
-            Timber.w("WS connection closing with code=$code and reason=$reason")
+            Timber.w("WS $socketUrl closing with code=$code and reason=$reason")
             this@NostrSocketClient.webSocket = null
-            onSocketConnectionClosed?.invoke(webSocket.requestUrl(), null)
+            onSocketConnectionClosed?.invoke(socketUrl, null)
         }
 
         override fun onClosed(
@@ -69,13 +70,11 @@ class NostrSocketClient(
             code: Int,
             reason: String,
         ) {
-            Timber.w("WS connection closed with code=$code and reason=$reason")
+            Timber.w("WS $socketUrl closed with code=$code and reason=$reason")
             this@NostrSocketClient.webSocket = null
-            onSocketConnectionClosed?.invoke(webSocket.requestUrl(), null)
+            onSocketConnectionClosed?.invoke(socketUrl, null)
         }
     }
-
-    private fun WebSocket.requestUrl(): String = request().url.toString().cleanWebSocketUrl()
 
     private val mutableIncomingMessagesSharedFlow = MutableSharedFlow<NostrIncomingMessage>()
 
@@ -96,7 +95,7 @@ class NostrSocketClient(
     }
 
     private fun sendMessage(text: String): Boolean {
-        Timber.i("--> $text")
+        Timber.i("--> $text $socketUrl")
         return webSocket?.send(text) == true
     }
 

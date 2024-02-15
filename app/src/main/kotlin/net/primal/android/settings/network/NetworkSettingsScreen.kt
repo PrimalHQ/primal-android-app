@@ -1,6 +1,5 @@
 package net.primal.android.settings.network
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,6 +20,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -29,9 +30,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -39,10 +44,12 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import net.primal.android.R
+import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.DeleteListItemImage
 import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
+import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.ConnectRelay
@@ -100,6 +107,20 @@ fun NetworkSettingsScreen(
         )
     }
 
+    val context = LocalContext.current
+    val snackbarHostState = remember { SnackbarHostState() }
+    SnackbarErrorHandler(
+        error = state.error,
+        snackbarHostState = snackbarHostState,
+        errorMessageResolver = {
+            when (it) {
+                is NetworkSettingsContract.UiState.NetworkSettingsError.FailedToAddRelay ->
+                    context.getString(R.string.settings_network_add_relay_error)
+            }
+        },
+        onErrorDismiss = { eventsPublisher(NetworkSettingsContract.UiEvent.DismissError) },
+    )
+
     Scaffold(
         modifier = Modifier,
         topBar = {
@@ -121,9 +142,13 @@ fun NetworkSettingsScreen(
                 onRestoreDefaultsClick = { confirmingRestoreDefaultRelaysDialog = true },
             )
         },
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
+        },
     )
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun NetworkLazyColumn(
     modifier: Modifier,
@@ -132,8 +157,7 @@ private fun NetworkLazyColumn(
     onRemoveClick: (String) -> Unit,
     onRestoreDefaultsClick: () -> Unit,
 ) {
-    var newRelayText by remember { mutableStateOf("") }
-
+    val keyboardContract = LocalSoftwareKeyboardController.current
     LazyColumn(modifier = modifier) {
         item {
             TextSection(
@@ -152,10 +176,12 @@ private fun NetworkLazyColumn(
                 Spacer(modifier = Modifier.height(8.dp))
                 NewRelayOutlinedTextField(
                     modifier = Modifier.fillMaxWidth(),
-                    value = newRelayText,
-                    onValueChange = { newRelayText = it },
+                    value = state.newRelayUrl,
+                    addRelayEnabled = !state.working && state.newRelayUrl.isValidRelayUrl(),
+                    onValueChange = { eventsPublisher(NetworkSettingsContract.UiEvent.UpdateNewRelayUrl(it)) },
                     onAddRelayConfirmed = {
-                        eventsPublisher(NetworkSettingsContract.UiEvent.AddRelay(url = newRelayText))
+                        keyboardContract?.hide()
+                        eventsPublisher(NetworkSettingsContract.UiEvent.ConfirmAddRelay(url = state.newRelayUrl))
                     },
                 )
             }
@@ -199,17 +225,8 @@ private fun NetworkLazyColumn(
 
         if (state.cachingService != null) {
             item {
-                TextSection(
-                    modifier = Modifier
-                        .padding(horizontal = 16.dp)
-                        .padding(top = 16.dp),
-                    text = stringResource(id = R.string.settings_network_caching_service_section).uppercase(),
-                )
-            }
-
-            item {
-                NetworkDestinationListItem(
-                    destinationUrl = state.cachingService.url,
+                CachingServiceSection(
+                    url = state.cachingService.url,
                     connected = state.cachingService.connected,
                 )
             }
@@ -218,46 +235,68 @@ private fun NetworkLazyColumn(
 }
 
 @Composable
+private fun CachingServiceSection(url: String, connected: Boolean) {
+    Column {
+        TextSection(
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .padding(top = 16.dp),
+            text = stringResource(id = R.string.settings_network_caching_service_section).uppercase(),
+        )
+
+        NetworkDestinationListItem(destinationUrl = url, connected = connected)
+
+        Spacer(modifier = Modifier.height(64.dp))
+    }
+}
+
+@Composable
 private fun NewRelayOutlinedTextField(
     modifier: Modifier,
     value: String,
+    addRelayEnabled: Boolean,
     onValueChange: (String) -> Unit,
     onAddRelayConfirmed: () -> Unit,
 ) {
-    OutlinedTextField(
+    Row(
         modifier = modifier,
-        colors = PrimalDefaults.outlinedTextFieldColors(),
-        shape = AppTheme.shapes.medium,
-        value = value,
-        onValueChange = onValueChange,
-        singleLine = true,
-        textStyle = AppTheme.typography.bodyMedium,
-        placeholder = {
-            Text(
-                text = "wss://",
-                color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
-                style = AppTheme.typography.bodyMedium,
-            )
-        },
-        trailingIcon = {
-            Image(
-                imageVector = PrimalIcons.ConnectRelay,
-                contentDescription = null,
-                colorFilter = ColorFilter.tint(
-                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
-                ),
-            )
-        },
-        keyboardOptions = KeyboardOptions.Default.copy(
-            capitalization = KeyboardCapitalization.None,
-            autoCorrect = false,
-            keyboardType = KeyboardType.Uri,
-            imeAction = ImeAction.Go,
-        ),
-        keyboardActions = KeyboardActions(
-            onGo = { onAddRelayConfirmed() },
-        ),
-    )
+        verticalAlignment = Alignment.Bottom,
+    ) {
+        OutlinedTextField(
+            modifier = Modifier.weight(1.0f),
+            colors = PrimalDefaults.outlinedTextFieldColors(),
+            shape = AppTheme.shapes.medium,
+            value = value,
+            onValueChange = onValueChange,
+            singleLine = true,
+            textStyle = AppTheme.typography.bodyMedium,
+            placeholder = {
+                Text(
+                    text = "wss://",
+                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
+                    style = AppTheme.typography.bodyMedium,
+                )
+            },
+            keyboardOptions = KeyboardOptions.Default.copy(
+                capitalization = KeyboardCapitalization.None,
+                autoCorrect = false,
+                keyboardType = KeyboardType.Uri,
+                imeAction = ImeAction.Go,
+            ),
+            keyboardActions = KeyboardActions(
+                onGo = { onAddRelayConfirmed() },
+            ),
+        )
+
+        AppBarIcon(
+            modifier = Modifier.padding(bottom = 4.dp, start = 8.dp),
+            icon = PrimalIcons.ConnectRelay,
+            enabledBackgroundColor = AppTheme.colorScheme.primary,
+            tint = Color.White,
+            enabled = addRelayEnabled,
+            onClick = onAddRelayConfirmed,
+        )
+    }
 }
 
 @Composable
@@ -351,3 +390,7 @@ fun ConfirmActionAlertDialog(
         },
     )
 }
+
+private fun String.isValidRelayUrl() =
+    (startsWith("wss://") || startsWith("ws://")) &&
+        !this.split("://").lastOrNull().isNullOrEmpty()

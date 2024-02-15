@@ -129,6 +129,6 @@ class NostrPublisher @Inject constructor(
             request = invoice.toWalletPayRequest(),
             nwc = nwcData,
         )
-        relaysSocketManager.publishWalletEvent(nostrEvent = walletPayNostrEvent)
+        relaysSocketManager.publishNwcEvent(nostrEvent = walletPayNostrEvent)
     }
 }

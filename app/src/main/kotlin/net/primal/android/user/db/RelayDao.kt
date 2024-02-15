@@ -16,7 +16,7 @@ interface RelayDao {
     @Query("DELETE FROM Relay WHERE userId = :userId AND kind = :kind")
     fun deleteAll(userId: String, kind: RelayKind)
 
-    @Query("SELECT * FROM Relay WHERE userId = :userId")
+    @Query("SELECT * FROM Relay WHERE userId = :userId ORDER BY url ASC")
     fun observeRelays(userId: String): Flow<List<Relay>>
 
     @Query("SELECT * FROM Relay WHERE userId = :userId AND kind = :kind")

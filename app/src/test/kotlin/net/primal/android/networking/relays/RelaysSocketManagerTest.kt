@@ -55,11 +55,11 @@ class RelaysSocketManagerTest {
                 )
                 }
             },
-            regularRelaysPool = RelayPool(
+            userRelaysPool = RelayPool(
                 dispatchers = coroutinesTestRule.dispatcherProvider,
                 okHttpClient = mockk<OkHttpClient>(),
             ),
-            walletRelaysPool = RelayPool(
+            nwcRelaysPool = RelayPool(
                 dispatchers = coroutinesTestRule.dispatcherProvider,
                 okHttpClient = mockk<OkHttpClient>(),
             ),

@@ -22,8 +22,8 @@ class RelaysSocketManager @Inject constructor(
     dispatchers: CoroutineDispatcherProvider,
     private val activeAccountStore: ActiveAccountStore,
     private val primalDatabase: PrimalDatabase,
-    private val regularRelaysPool: RelayPool,
-    private val walletRelaysPool: RelayPool,
+    private val userRelaysPool: RelayPool,
+    private val nwcRelaysPool: RelayPool,
     private val bootstrapRelays: RelayPool,
 ) {
     private val scope = CoroutineScope(dispatchers.io())
@@ -31,7 +31,7 @@ class RelaysSocketManager @Inject constructor(
 
     private var relaysObserverJob: Job? = null
 
-    val regularRelayPoolStatus = regularRelaysPool.relayPoolStatus
+    val userRelayPoolStatus = userRelaysPool.relayPoolStatus
 
     init {
         initBootstrapRelaysPool()
@@ -72,43 +72,43 @@ class RelaysSocketManager @Inject constructor(
 
     private suspend fun updateRelayPools(regularRelays: List<Relay>?, walletRelays: List<Relay>?) {
         relayPoolsMutex.withLock {
-            val regularRelaysChanged = regularRelaysPool.relays != regularRelays
-            if (regularRelaysChanged && !regularRelays.isNullOrEmpty()) {
-                regularRelaysPool.changeRelays(relays = regularRelays)
+            val userRelaysChanged = userRelaysPool.relays != regularRelays
+            if (userRelaysChanged && !regularRelays.isNullOrEmpty()) {
+                userRelaysPool.changeRelays(relays = regularRelays)
             }
 
-            val walletRelaysChanged = walletRelaysPool.relays != walletRelays
-            if (walletRelaysChanged && !walletRelays.isNullOrEmpty()) {
-                walletRelaysPool.changeRelays(relays = walletRelays)
+            val nwcRelaysChanged = nwcRelaysPool.relays != walletRelays
+            if (nwcRelaysChanged && !walletRelays.isNullOrEmpty()) {
+                nwcRelaysPool.changeRelays(relays = walletRelays)
             }
         }
     }
 
     private suspend fun clearRelayPools() =
         relayPoolsMutex.withLock {
-            regularRelaysPool.closePool()
-            walletRelaysPool.closePool()
+            userRelaysPool.closePool()
+            nwcRelaysPool.closePool()
         }
 
     @Throws(NostrPublishException::class)
     suspend fun publishEvent(nostrEvent: NostrEvent) {
-        if (regularRelaysPool.hasRelays()) {
-            regularRelaysPool.publishEvent(nostrEvent)
+        if (userRelaysPool.hasRelays()) {
+            userRelaysPool.publishEvent(nostrEvent)
         } else {
             bootstrapRelays.publishEvent(nostrEvent)
         }
     }
 
     @Throws(NostrPublishException::class)
-    suspend fun publishWalletEvent(nostrEvent: NostrEvent) {
-        if (!walletRelaysPool.hasRelays()) {
+    suspend fun publishNwcEvent(nostrEvent: NostrEvent) {
+        if (!nwcRelaysPool.hasRelays()) {
             throw NostrPublishException(cause = IllegalStateException("nwc relay not found"))
         }
 
-        walletRelaysPool.publishEvent(nostrEvent)
+        nwcRelaysPool.publishEvent(nostrEvent)
     }
 
-    suspend fun ensureUserRelayPoolConnected() {
-        regularRelaysPool.ensureConnected()
-    }
+    suspend fun ensureUserRelayPoolConnected() = userRelaysPool.ensureAllRelaysConnected()
+
+    suspend fun ensureUserRelayConnected(url: String) = userRelaysPool.ensureRelayConnected(url)
 }
