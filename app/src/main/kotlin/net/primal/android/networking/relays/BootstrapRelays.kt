@@ -10,5 +10,5 @@ val BOOTSTRAP_RELAYS = listOf(
     "wss://purplepag.es",
     "wss://nos.lol",
     "wss://onchain.pub",
-    "wss://nostr.bitcoiner.social"
+    "wss://nostr.bitcoiner.social",
 ).map { it.toRelay() }

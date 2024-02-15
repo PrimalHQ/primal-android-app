@@ -62,9 +62,11 @@ class MutedSettingsViewModel @Inject constructor(
 
     private fun fetchLatestMuteList() =
         viewModelScope.launch {
-            mutedUserRepository.fetchAndPersistMuteList(
-                userId = activeAccountStore.activeUserId(),
-            )
+            withContext(dispatcherProvider.io()) {
+                mutedUserRepository.fetchAndPersistMuteList(
+                    userId = activeAccountStore.activeUserId(),
+                )
+            }
         }
 
     private suspend fun unmuteEventHandler(event: UiEvent.UnmuteEvent) =

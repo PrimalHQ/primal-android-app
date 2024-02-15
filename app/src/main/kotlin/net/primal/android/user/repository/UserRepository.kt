@@ -66,7 +66,7 @@ class UserRepository @Inject constructor(
         database.relays().upsertAll(
             relays = nostrWalletConnect.relays.map {
                 Relay(userId = userId, kind = RelayKind.NwcRelay, url = it, read = false, write = true)
-            }
+            },
         )
         accountsStore.getAndUpdateAccount(userId = userId) {
             copy(nostrWallet = nostrWalletConnect)
