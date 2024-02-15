@@ -55,8 +55,12 @@ fun String.parseBitcoinPaymentInstructions(): BitcoinPaymentInstruction? {
                     val labelParam = params?.find { it.startsWith("label") }
                     val label = labelParam?.split("=")?.lastOrNull()?.asUrlDecoded()
 
+                    val lightningParam = params?.find { it.startsWith("lightning") }
+                    val lightning = lightningParam?.split("=")?.lastOrNull()
+
                     BitcoinPaymentInstruction(
                         address = address,
+                        lightning = lightning,
                         amount = amount,
                         label = label,
                     )

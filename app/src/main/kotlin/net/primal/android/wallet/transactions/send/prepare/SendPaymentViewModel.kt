@@ -82,19 +82,11 @@ class SendPaymentViewModel @Inject constructor(
             val userId = activeAccountStore.activeUserId()
             try {
                 when (text.parseRecipientType()) {
-                    RecipientType.LnInvoice -> handleLnInvoiceText(userId = userId, text = text)
-                    RecipientType.LnUrl -> handleLnUrlText(userId = userId, text = text)
-                    RecipientType.LnAddress -> handleLightningAddressText(userId = userId, text = text)
-                    RecipientType.LightningUri -> {
-                        val path = text.split(":").last()
-                        when {
-                            path.isLightningAddress() -> handleLightningAddressText(userId = userId, text = path)
-                            path.isLnUrl() -> handleLnUrlText(userId = userId, text = path)
-                            path.isLnInvoice() -> handleLnInvoiceText(userId = userId, text = path)
-                        }
-                    }
-                    RecipientType.BitcoinAddress -> handleBitcoinAddressText(text = text)
-                    null -> Unit
+                    RecipientType.LnInvoice -> handleLnInvoiceText(userId, text)
+                    RecipientType.LnUrl -> handleLnUrlText(userId, text)
+                    RecipientType.LnAddress -> handleLightningAddressText(userId, text)
+                    RecipientType.BitcoinAddress, RecipientType.BitcoinAddressUri -> handleBitcoinText(text = text)
+                    null -> Timber.w("Unknown text type. [text=$text]")
                 }
             } catch (error: WssException) {
                 Timber.w(error)
@@ -161,7 +153,7 @@ class SendPaymentViewModel @Inject constructor(
         }
     }
 
-    private fun handleBitcoinAddressText(text: String) {
+    private fun handleBitcoinText(text: String) {
         val btcInstructions = text.parseBitcoinPaymentInstructions()
         if (btcInstructions != null) {
             setEffect(
@@ -182,11 +174,28 @@ class SendPaymentViewModel @Inject constructor(
             isLnInvoice() -> RecipientType.LnInvoice
             isLnUrl() -> RecipientType.LnUrl
             isLightningAddress() -> RecipientType.LnAddress
-            isLightningAddressUri() -> RecipientType.LightningUri
-            isBitcoinAddress() || isBitcoinAddressUri() -> RecipientType.BitcoinAddress
+            isLightningAddressUri() -> {
+                val path = this.split(":").last()
+                path.parseLightningRecipientType()
+            }
+
+            isBitcoinAddress() -> RecipientType.BitcoinAddress
+            isBitcoinAddressUri() -> {
+                val parsedBitcoinUri = this.parseBitcoinPaymentInstructions()
+                return parsedBitcoinUri?.lightning?.parseLightningRecipientType() ?: RecipientType.BitcoinAddressUri
+            }
+
             else -> null
         }
     }
+
+    private fun String.parseLightningRecipientType(): RecipientType? =
+        when {
+            this.isLightningAddress() -> RecipientType.LnAddress
+            this.isLnUrl() -> RecipientType.LnUrl
+            this.isLnInvoice() -> RecipientType.LnInvoice
+            else -> null
+        }
 
     private fun processProfileData(profileId: String) =
         viewModelScope.launch {

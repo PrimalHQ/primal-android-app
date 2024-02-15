@@ -171,4 +171,19 @@ class WalletStringUtilsTest {
                 amount = "1.23",
             )
     }
+
+    @Test
+    fun parseBitcoinPaymentInstruction_shouldReturnBtcAddressAndLightningAddressAndAmountAndLabelIfInputsAreValid() {
+        ("bitcoin:bc1q99ygnq68xrvqd9up7vgapnytwmss4am6ytessw" +
+            "?lightning=$validLnInvoice" +
+            "&amount=1.234567" +
+            "&label=This+is+very+long+comment."
+            ).parseBitcoinPaymentInstructions() shouldBe
+            BitcoinPaymentInstruction(
+                address = "bc1q99ygnq68xrvqd9up7vgapnytwmss4am6ytessw",
+                lightning = validLnInvoice,
+                amount = "1.234567",
+                label = "This is very long comment.",
+            )
+    }
 }
