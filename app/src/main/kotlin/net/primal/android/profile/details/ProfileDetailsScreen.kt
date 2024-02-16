@@ -162,7 +162,7 @@ fun ProfileDetailsScreen(
 
     AdjustTemporarilySystemBarColors(statusBarColor = Color.Transparent)
 
-    DisposableLifecycleObserverEffect {
+    DisposableLifecycleObserverEffect(viewModel) {
         when (it) {
             Lifecycle.Event.ON_START -> viewModel.setEvent(ProfileDetailsContract.UiEvent.RequestProfileUpdate)
             else -> Unit

@@ -84,7 +84,7 @@ fun NotificationsScreen(
 ) {
     val uiState = viewModel.state.collectAsState()
 
-    DisposableLifecycleObserverEffect {
+    DisposableLifecycleObserverEffect(viewModel) {
         when (it) {
             Lifecycle.Event.ON_DESTROY -> viewModel.setEvent(
                 NotificationsContract.UiEvent.NotificationsSeen,

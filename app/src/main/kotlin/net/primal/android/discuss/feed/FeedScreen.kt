@@ -41,6 +41,7 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
 import androidx.paging.compose.collectAsLazyPagingItems
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
@@ -55,6 +56,7 @@ import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWor
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 import net.primal.android.core.compose.icons.primaliconpack.FeedPicker
+import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.crypto.hexToNoteHrp
 import net.primal.android.discuss.feed.FeedContract.UiState.FeedError
 import net.primal.android.drawer.DrawerScreenDestination
@@ -79,8 +81,10 @@ fun FeedScreen(
 ) {
     val uiState = viewModel.state.collectAsState()
 
-    LaunchedEffect(viewModel) {
-        viewModel.setEvent(FeedContract.UiEvent.RequestUserDataUpdate)
+    DisposableLifecycleObserverEffect(viewModel) {
+        if (it == Lifecycle.Event.ON_START) {
+            viewModel.setEvent(FeedContract.UiEvent.RequestUserDataUpdate)
+        }
     }
 
     FeedScreen(

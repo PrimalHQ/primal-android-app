@@ -100,7 +100,7 @@ fun MessageListScreen(
 ) {
     val uiState = viewModel.state.collectAsState()
 
-    DisposableLifecycleObserverEffect {
+    DisposableLifecycleObserverEffect(viewModel) {
         when (it) {
             Lifecycle.Event.ON_START -> {
                 viewModel.setEvent(UiEvent.ConversationsSeen)

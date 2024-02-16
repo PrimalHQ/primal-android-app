@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
 import androidx.paging.compose.LazyPagingItems
 import kotlin.random.Random
 import kotlin.time.Duration.Companion.seconds
@@ -19,6 +20,7 @@ import kotlinx.coroutines.withContext
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.feed.model.FeedPostsSyncStats
 import net.primal.android.core.compose.feed.model.ZappingState
+import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -61,6 +63,12 @@ fun FeedNoteList(
                     pagingItems.refresh()
                 }
             }
+        }
+    }
+
+    DisposableLifecycleObserverEffect(pagingItems) {
+        if (it == Lifecycle.Event.ON_RESUME) {
+            pagingItems.refresh()
         }
     }
 

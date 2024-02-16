@@ -85,7 +85,7 @@ fun ChatScreen(
 ) {
     val state = viewModel.state.collectAsState()
 
-    DisposableLifecycleObserverEffect {
+    DisposableLifecycleObserverEffect(viewModel) {
         when (it) {
             Lifecycle.Event.ON_START, Lifecycle.Event.ON_STOP -> {
                 viewModel.setEvent(ChatContract.UiEvent.MessagesSeen)
