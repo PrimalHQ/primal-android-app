@@ -10,7 +10,6 @@ import java.time.Instant
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -102,7 +101,7 @@ class FeedViewModel @Inject constructor(
                 since = Instant.now().epochSecond,
             ).collect { syncData ->
                 val limit = if (syncData.count <= 3) syncData.count else 3
-                val newPosts = withContext(Dispatchers.IO) {
+                val newPosts = withContext(dispatcherProvider.io()) {
                     feedRepository.findNewestPosts(
                         feedDirective = feedDirective,
                         limit = syncData.count,
@@ -225,7 +224,7 @@ class FeedViewModel @Inject constructor(
 
     private fun zapPost(zapAction: UiEvent.ZapAction) =
         viewModelScope.launch {
-            val postAuthorProfileData = withContext(Dispatchers.IO) {
+            val postAuthorProfileData = withContext(dispatcherProvider.io()) {
                 profileRepository.findProfileDataOrNull(profileId = zapAction.postAuthorId)
             }
 

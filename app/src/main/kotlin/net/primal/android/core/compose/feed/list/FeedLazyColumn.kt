@@ -38,6 +38,7 @@ import net.primal.android.core.compose.feed.zaps.UnableToZapBottomSheet
 import net.primal.android.core.compose.feed.zaps.ZapBottomSheet
 import net.primal.android.core.compose.isEmpty
 import net.primal.android.wallet.zaps.canZap
+import timber.log.Timber
 
 @ExperimentalMaterial3Api
 @ExperimentalFoundationApi
@@ -119,12 +120,15 @@ fun FeedLazyColumn(
             }
         }
 
-        if (pagingItems.loadState.mediator?.prepend is LoadState.Error) {
-            item(contentType = "Error") {
-                ListLoadingError(
-                    text = stringResource(R.string.app_error_loading_prev_page),
-                )
+        when (val prependMediatorLoadState = pagingItems.loadState.mediator?.prepend) {
+            is LoadState.Error -> {
+                item(contentType = "PrependError") {
+                    Timber.w(prependMediatorLoadState.error)
+                    ListLoadingError(text = stringResource(R.string.app_error_loading_prev_page))
+                }
             }
+
+            else -> Unit
         }
 
         items(
@@ -184,7 +188,7 @@ fun FeedLazyColumn(
         }
 
         if (pagingItems.isEmpty()) {
-            when (pagingItems.loadState.refresh) {
+            when (val refreshLoadState = pagingItems.loadState.refresh) {
                 LoadState.Loading -> {
                     if (shouldShowLoadingState) {
                         item(contentType = "LoadingRefresh") {
@@ -207,11 +211,21 @@ fun FeedLazyColumn(
                     }
                 }
 
-                is LoadState.Error -> Unit
+                is LoadState.Error -> {
+                    val error = refreshLoadState.error
+                    Timber.w(error)
+                    item(contentType = "RefreshError") {
+                        ListNoContent(
+                            modifier = Modifier.fillParentMaxSize(),
+                            noContentText = stringResource(id = R.string.feed_error_loading),
+                            onRefresh = { pagingItems.refresh() },
+                        )
+                    }
+                }
             }
         }
 
-        when (pagingItems.loadState.mediator?.append) {
+        when (val appendMediatorLoadState = pagingItems.loadState.mediator?.append) {
             LoadState.Loading -> item(contentType = "LoadingAppend") {
                 ListLoading(
                     modifier = Modifier
@@ -220,7 +234,9 @@ fun FeedLazyColumn(
                 )
             }
 
-            is LoadState.Error -> item(contentType = "Error") {
+            is LoadState.Error -> item(contentType = "AppendError") {
+                val error = appendMediatorLoadState.error
+                Timber.w(error)
                 ListLoadingError(
                     text = stringResource(R.string.app_error_loading_next_page),
                 )

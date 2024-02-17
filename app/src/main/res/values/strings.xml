@@ -7,8 +7,8 @@
     <string name="app_info">Info</string>
     <string name="app_generic_error">Something went wrong. Please try again.</string>
     <string name="app_missing_relays_config">No relays found. Please configure your Network.</string>
-    <string name="app_error_loading_prev_page">Unable to load newer content. Please try again.</string>
-    <string name="app_error_loading_next_page">Unable to load older content. Please try again.</string>
+    <string name="app_error_loading_prev_page">Unable to load newer content at the moment.</string>
+    <string name="app_error_loading_next_page">Unable to load older content at the moment.</string>
     <string name="app_failed_to_upload_image">Failed to upload image. Please try again.</string>
     <string name="app_error_adding_to_feed">Unable to add selected feed to your feeds. Please try again.</string>
     <string name="app_error_removing_feed">Unable to remove selected feed from your feeds. Please try again.</string>
@@ -113,7 +113,8 @@
     </plurals>
 
     <string name="feed_list_title">My Nostr Feeds</string>
-    <string name="feed_no_content">Unable to load content for this feed. Please try again.</string>
+    <string name="feed_no_content">There is no content in this feed.</string>
+    <string name="feed_error_loading">Unable to load content for this feed. Please try again.</string>
     <string name="feed_refresh_button">Refresh</string>
 
     <string name="feed_new_posts_notice_general">posted</string>
