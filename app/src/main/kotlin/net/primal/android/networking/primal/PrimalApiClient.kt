@@ -19,6 +19,8 @@ import kotlinx.coroutines.flow.timeout
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.transformWhile
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.JsonObject
 import net.primal.android.config.AppConfigProvider
 import net.primal.android.config.dynamic.AppConfigUpdater
@@ -48,6 +50,8 @@ class PrimalApiClient @Inject constructor(
     @VisibleForTesting
     lateinit var socketClient: NostrSocketClient
 
+    private val socketClientMutex = Mutex()
+
     private val _connectionStatus = MutableStateFlow(PrimalServerConnectionStatus(serverType = serverType))
     val connectionStatus = _connectionStatus.asStateFlow()
     private fun updateStatus(reducer: PrimalServerConnectionStatus.() -> PrimalServerConnectionStatus) =
@@ -60,12 +64,14 @@ class PrimalApiClient @Inject constructor(
     private fun observeApiUrlAndInitializeSocketClient() =
         scope.launch {
             appConfigProvider.observeApiUrlByType(type = serverType).collect { apiUrl ->
-                scope.launch { updateStatus { copy(url = apiUrl) } }
-                if (socketClientInitialized) {
-                    scope.launch { updateStatus { copy(connected = false) } }
-                    socketClient.close()
+                socketClientMutex.withLock {
+                    scope.launch { updateStatus { copy(url = apiUrl) } }
+                    if (socketClientInitialized) {
+                        scope.launch { updateStatus { copy(connected = false) } }
+                        socketClient.close()
+                    }
+                    socketClient = buildAndInitializeSocketClient(apiUrl)
                 }
-                socketClient = buildAndInitializeSocketClient(apiUrl)
             }
         }
 
@@ -127,7 +133,7 @@ class PrimalApiClient @Inject constructor(
         data: JsonObject,
         deferredQueryResult: Deferred<PrimalQueryResult>,
     ): PrimalQueryResult {
-        socketClient.ensureSocketConnection()
+        ensureSocketClientConnection()
         return when (socketClient.sendREQ(subscriptionId = subscriptionId, data = data)) {
             true -> {
                 deferredQueryResult.await()
@@ -140,7 +146,7 @@ class PrimalApiClient @Inject constructor(
     }
 
     suspend fun subscribe(subscriptionId: UUID, message: PrimalCacheFilter): Flow<NostrIncomingMessage> {
-        socketClient.ensureSocketConnection()
+        ensureSocketClientConnection()
         val success = socketClient.sendREQ(
             subscriptionId = subscriptionId,
             data = message.toPrimalJsonObject(),
@@ -151,7 +157,7 @@ class PrimalApiClient @Inject constructor(
     }
 
     suspend fun closeSubscription(subscriptionId: UUID): Boolean {
-        socketClient.ensureSocketConnection()
+        ensureSocketClientConnection()
         return socketClient.sendCLOSE(subscriptionId = subscriptionId)
     }
 
@@ -187,6 +193,10 @@ class PrimalApiClient @Inject constructor(
             emit(it)
             it is NostrIncomingMessage.EventMessage
         }
+
+    private suspend fun ensureSocketClientConnection() = socketClientMutex.withLock {
+        socketClient.ensureSocketConnection()
+    }
 
     companion object {
         const val MAX_QUERY_RETRIES = 3
