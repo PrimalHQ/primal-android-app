@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Surface
@@ -82,14 +83,16 @@ fun WelcomeScreen(onSignInClick: () -> Unit, onCreateAccountClick: () -> Unit) {
 
             BoxWithConstraints(
                 modifier = Modifier.weight(0.4f),
+                contentAlignment = Alignment.TopCenter,
             ) {
                 val maxHeight = with(LocalDensity.current) { maxHeight.roundToPx() }
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.Top,
+                    horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     PrimalCallToActionButton(
-                        modifier = Modifier.padding(horizontal = 32.dp),
+                        modifier = Modifier.widthIn(0.dp, 420.dp).fillMaxWidth().padding(horizontal = 32.dp),
                         title = stringResource(id = R.string.welcome_create_account_button_title),
                         subtitle = if (maxHeight > MIN_HEIGHT_FOR_SUBTITLE) {
                             stringResource(id = R.string.welcome_create_account_button_subtitle)
@@ -102,7 +105,7 @@ fun WelcomeScreen(onSignInClick: () -> Unit, onCreateAccountClick: () -> Unit) {
                     Spacer(modifier = Modifier.height(16.dp))
 
                     PrimalCallToActionButton(
-                        modifier = Modifier.padding(horizontal = 32.dp),
+                        modifier = Modifier.widthIn(0.dp, 420.dp).fillMaxWidth().padding(horizontal = 32.dp),
                         title = stringResource(id = R.string.welcome_sign_in_button_title),
                         subtitle = if (maxHeight > MIN_HEIGHT_FOR_SUBTITLE) {
                             stringResource(id = R.string.welcome_sign_in_button_subtitle)
@@ -115,6 +118,10 @@ fun WelcomeScreen(onSignInClick: () -> Unit, onCreateAccountClick: () -> Unit) {
                     Spacer(modifier = Modifier.height(16.dp))
 
                     TermsAndServiceHint(
+                        modifier = Modifier
+                            .widthIn(0.dp, 360.dp)
+                            .fillMaxWidth()
+                            .padding(horizontal = 80.dp),
                         onTosClick = {
                             localUriHandler.openUriSafely(TOS_URL)
                         },
@@ -131,7 +138,7 @@ private const val TOS_ANNOTATION_TAG = "TosAnnotationTag"
 private const val TOS_URL = "https://www.primal.net/terms"
 
 @Composable
-fun TermsAndServiceHint(onTosClick: () -> Unit) {
+fun TermsAndServiceHint(modifier: Modifier = Modifier, onTosClick: () -> Unit) {
     val tosHint = stringResource(id = R.string.welcome_tos_hint)
     val tosLink = stringResource(id = R.string.welcome_tos_hint_highlighted_word)
     val annotatedString = buildAnnotatedString {
@@ -155,9 +162,7 @@ fun TermsAndServiceHint(onTosClick: () -> Unit) {
     }
 
     PrimalClickableText(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 80.dp),
+        modifier = modifier,
         text = annotatedString,
         style = AppTheme.typography.bodySmall.copy(
             color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,

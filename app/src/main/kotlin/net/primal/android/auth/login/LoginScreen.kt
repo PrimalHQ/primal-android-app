@@ -8,9 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -131,8 +129,6 @@ fun LoginContent(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .systemBarsPadding()
-            .navigationBarsPadding()
             .imePadding()
             .padding(paddingValues = paddingValues)
             .padding(horizontal = 32.dp),
@@ -140,14 +136,14 @@ fun LoginContent(
     ) {
         Column(
             modifier = Modifier
-                .padding(bottom = 64.dp)
+                .padding(bottom = 0.dp)
                 .weight(1f)
                 .fillMaxSize(),
             verticalArrangement = Arrangement.Center,
         ) {
             Text(
                 modifier = Modifier
-                    .padding(all = 16.dp)
+                    .padding(vertical = 16.dp)
                     .fillMaxWidth(),
                 text = stringResource(id = R.string.login_description),
                 textAlign = TextAlign.Center,
@@ -229,7 +225,7 @@ fun LoginContent(
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 16.dp)
+                .padding(vertical = 8.dp)
                 .height(56.dp)
                 .align(alignment = Alignment.CenterHorizontally),
             loading = state.loading,
