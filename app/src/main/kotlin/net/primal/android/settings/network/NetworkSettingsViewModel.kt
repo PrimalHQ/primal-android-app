@@ -41,7 +41,7 @@ class NetworkSettingsViewModel @Inject constructor(
 
     init {
         observeEvents()
-        ensureRelayPoolConnected()
+        ensureRelayPoolUpdatedAndConnected()
         observeRelayPoolConnections()
         observeCachingServiceConnection()
         observeUserRelays()
@@ -77,8 +77,9 @@ class NetworkSettingsViewModel @Inject constructor(
             }
         }
 
-    private fun ensureRelayPoolConnected() =
+    private fun ensureRelayPoolUpdatedAndConnected() =
         viewModelScope.launch {
+            relayRepository.fetchAndUpdateUserRelays(userId = activeAccountStore.activeUserId())
             delay(1.seconds)
             relaysSocketManager.ensureUserRelayPoolConnected()
         }
@@ -116,7 +117,7 @@ class NetworkSettingsViewModel @Inject constructor(
         viewModelScope.launch {
             changeRelayList { userId ->
                 relayRepository.bootstrapDefaultUserRelays(userId = userId)
-                ensureRelayPoolConnected()
+                ensureRelayPoolUpdatedAndConnected()
             }
         }
 
