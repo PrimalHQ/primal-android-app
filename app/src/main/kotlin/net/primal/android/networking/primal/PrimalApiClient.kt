@@ -1,11 +1,15 @@
 package net.primal.android.networking.primal
 
+import androidx.annotation.VisibleForTesting
 import java.util.*
+import java.util.concurrent.CancellationException
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,6 +31,7 @@ import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.networking.sockets.filterBySubscriptionId
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import timber.log.Timber
 
 class PrimalApiClient @Inject constructor(
     private val dispatcherProvider: CoroutineDispatcherProvider,
@@ -40,7 +45,8 @@ class PrimalApiClient @Inject constructor(
 
     private var socketClientInitialized: Boolean = false
 
-    private lateinit var socketClient: NostrSocketClient
+    @VisibleForTesting
+    lateinit var socketClient: NostrSocketClient
 
     private val _connectionStatus = MutableStateFlow(PrimalServerConnectionStatus(serverType = serverType))
     val connectionStatus = _connectionStatus.asStateFlow()
@@ -59,54 +65,78 @@ class PrimalApiClient @Inject constructor(
                     scope.launch { updateStatus { copy(connected = false) } }
                     socketClient.close()
                 }
+                socketClient = buildAndInitializeSocketClient(apiUrl)
+            }
+        }
 
-                socketClient = NostrSocketClient(
-                    dispatcherProvider = dispatcherProvider,
-                    okHttpClient = okHttpClient,
-                    wssRequest = Request.Builder()
-                        .url(apiUrl)
-                        .addHeader("User-Agent", UserAgentProvider.USER_AGENT)
-                        .build(),
-                    onSocketConnectionOpened = {
-                        scope.launch { updateStatus { copy(connected = true) } }
-                    },
-                    onSocketConnectionClosed = { _, _ ->
-                        scope.launch {
-                            updateStatus { copy(connected = false) }
-                            appConfigUpdater.updateAppConfigWithDebounce(1.minutes)
-                        }
-                    },
-                ).apply {
-                    socketClientInitialized = true
-                    ensureSocketConnection()
+    private suspend fun buildAndInitializeSocketClient(apiUrl: String): NostrSocketClient {
+        return NostrSocketClient(
+            dispatcherProvider = dispatcherProvider,
+            okHttpClient = okHttpClient,
+            wssRequest = Request.Builder()
+                .url(apiUrl)
+                .addHeader("User-Agent", UserAgentProvider.USER_AGENT)
+                .build(),
+            onSocketConnectionOpened = {
+                scope.launch { updateStatus { copy(connected = true) } }
+            },
+            onSocketConnectionClosed = { _, _ ->
+                scope.launch {
+                    updateStatus { copy(connected = false) }
+                    appConfigUpdater.updateAppConfigWithDebounce(1.minutes)
                 }
-            }
+            },
+        ).apply {
+            socketClientInitialized = true
+            ensureSocketConnection()
         }
-
-    private suspend fun sendREQWithRetryOrThrow(data: JsonObject): UUID {
-        var queryAttempts = 0
-        while (queryAttempts < MAX_QUERY_ATTEMPTS) {
-            socketClient.ensureSocketConnection()
-            val subscriptionId = socketClient.sendREQ(data = data)
-            if (subscriptionId != null) return subscriptionId
-
-            queryAttempts++
-            if (queryAttempts < MAX_QUERY_ATTEMPTS) {
-                delay(RETRY_DELAY_MILLIS)
-            }
-        }
-        throw WssException(message = "Failed to send message.")
     }
 
     @Throws(WssException::class)
     suspend fun query(message: PrimalCacheFilter): PrimalQueryResult {
         val queryResult = runCatching {
-            val subscriptionId = sendREQWithRetryOrThrow(data = message.toPrimalJsonObject())
-            collectQueryResult(subscriptionId = subscriptionId)
+            retry(MAX_QUERY_RETRIES) {
+                val subscriptionId = UUID.randomUUID()
+                val deferredQueryResult = scope.async { collectQueryResult(subscriptionId) }
+                sendRequestAndAwaitForResultOrThrow(
+                    subscriptionId = subscriptionId,
+                    data = message.toPrimalJsonObject(),
+                    deferredQueryResult = deferredQueryResult,
+                )
+            }
         }
         val result = queryResult.getOrNull()
         val error = queryResult.exceptionOrNull().let { WssException(message = it?.message, cause = it) }
         return result ?: throw error
+    }
+
+    private suspend fun <T> retry(times: Int, block: suspend () -> T): T {
+        repeat(times) {
+            try {
+                return block()
+            } catch (error: WssException) {
+                Timber.w(error)
+                delay(RETRY_DELAY_MILLIS)
+            }
+        }
+        return block()
+    }
+
+    private suspend fun sendRequestAndAwaitForResultOrThrow(
+        subscriptionId: UUID,
+        data: JsonObject,
+        deferredQueryResult: Deferred<PrimalQueryResult>,
+    ): PrimalQueryResult {
+        socketClient.ensureSocketConnection()
+        return when (socketClient.sendREQ(subscriptionId = subscriptionId, data = data)) {
+            true -> {
+                deferredQueryResult.await()
+            }
+            false -> {
+                deferredQueryResult.cancel(CancellationException("Unable to send socket message."))
+                throw WssException("Unable to send socket message.")
+            }
+        }
     }
 
     suspend fun subscribe(subscriptionId: UUID, message: PrimalCacheFilter): Flow<NostrIncomingMessage> {
@@ -129,8 +159,9 @@ class PrimalApiClient @Inject constructor(
     @Throws(NostrNoticeException::class)
     private suspend fun collectQueryResult(subscriptionId: UUID): PrimalQueryResult {
         val messages = socketClient.incomingMessages
-            .transformWhileEventsAreIncoming(subscriptionId)
-            .timeout(15.seconds)
+            .filterBySubscriptionId(id = subscriptionId)
+            .transformWhileEventsAreIncoming()
+            .timeout(30.seconds)
             .toList()
 
         val terminationMessage = messages.last()
@@ -151,14 +182,14 @@ class PrimalApiClient @Inject constructor(
         )
     }
 
-    private fun Flow<NostrIncomingMessage>.transformWhileEventsAreIncoming(subscriptionId: UUID) =
-        this.filterBySubscriptionId(id = subscriptionId).transformWhile {
+    private fun Flow<NostrIncomingMessage>.transformWhileEventsAreIncoming() =
+        transformWhile {
             emit(it)
             it is NostrIncomingMessage.EventMessage
         }
 
     companion object {
-        private const val MAX_QUERY_ATTEMPTS = 3
+        const val MAX_QUERY_RETRIES = 3
         private const val RETRY_DELAY_MILLIS = 1_000L
     }
 }

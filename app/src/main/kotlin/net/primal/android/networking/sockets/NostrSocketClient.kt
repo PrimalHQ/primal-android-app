@@ -104,12 +104,6 @@ class NostrSocketClient(
         return sendMessage(text = reqMessage)
     }
 
-    fun sendREQ(data: JsonObject): UUID? {
-        val subscriptionId: UUID = UUID.randomUUID()
-        val success = sendREQ(data = data, subscriptionId = subscriptionId)
-        return if (success) subscriptionId else null
-    }
-
     fun sendCOUNT(data: JsonObject): UUID? {
         val subscriptionId: UUID = UUID.randomUUID()
         val reqMessage = data.buildNostrCOUNTMessage(subscriptionId)

@@ -56,22 +56,6 @@ class NostrSocketClientTest {
     }
 
     @Test
-    fun sendREQ_returnsSubscriptionIdIfMessageWasSent() = runTest {
-        val client = buildSuccessfulNostrSocketClient()
-        client.ensureSocketConnection()
-        val actual = client.sendREQ(data = buildJsonObject {})
-        actual.shouldNotBeNull()
-    }
-
-    @Test
-    fun sendREQ_returnsNullIfMessageWasNotSent() = runTest {
-        val client = buildFailingNostrSocketClient()
-        client.ensureSocketConnection()
-        val actual = client.sendREQ(data = buildJsonObject {})
-        actual.shouldBeNull()
-    }
-
-    @Test
     fun sendEVENT_returnsTrueIfMessageWasSent() = runTest {
         val client = buildSuccessfulNostrSocketClient()
         client.ensureSocketConnection()

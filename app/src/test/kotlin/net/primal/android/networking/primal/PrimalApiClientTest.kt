@@ -16,6 +16,8 @@ import net.primal.android.core.coroutines.CoroutinesTestRule
 import net.primal.android.networking.FakeWebSocketOkHttpClient
 import net.primal.android.networking.UserAgentProvider
 import net.primal.android.networking.asWssUrl
+import net.primal.android.networking.sockets.NostrSocketClient
+import net.primal.android.networking.sockets.errors.WssException
 import okhttp3.OkHttpClient
 import org.junit.Rule
 import org.junit.Test
@@ -112,6 +114,23 @@ class PrimalApiClientTest {
                 },
                 any(),
             )
+        }
+    }
+
+    @Test
+    fun queryRetriesRequestIfRequestFails() = runTest {
+        val fakeOkHttpClient = FakeWebSocketOkHttpClient()
+        val primalClient = buildPrimalApiClient(okHttpClient = fakeOkHttpClient)
+        advanceUntilIdle()
+        val mockNostrSocketClient = mockk<NostrSocketClient>(relaxed = true)
+        primalClient.socketClient = mockNostrSocketClient
+
+        try {
+            primalClient.query(message = PrimalCacheFilter(primalVerb = PrimalVerb.IMPORT_EVENTS))
+        } catch (_: WssException) {}
+
+        verify(exactly = 1 + PrimalApiClient.MAX_QUERY_RETRIES) {
+            mockNostrSocketClient.sendREQ(any(), any())
         }
     }
 }
