@@ -20,17 +20,18 @@ fun List<PostData>.flatMapPostsAsNoteAttachmentPO(
 }
     .filterNot { (_, uri) -> uri.isNostrUri() }
     .map { (eventId, uri) ->
-        val cdnResource = cdnResources[uri]
+        val uriCdnResource = cdnResources[uri]
         val linkPreview = linkPreviews[uri]
+        val linkThumbnailCdnResource = linkPreview?.thumbnailUrl?.let { cdnResources[it] }
         val videoThumbnail = videoThumbnails[uri]
-        val mimeType = uri.detectMimeType() ?: cdnResource?.contentType ?: linkPreview?.mimeType
+        val mimeType = uri.detectMimeType() ?: uriCdnResource?.contentType ?: linkPreview?.mimeType
         val type = detectNoteAttachmentType(url = uri, mimeType = mimeType)
         NoteAttachment(
             eventId = eventId,
             url = uri,
             type = type,
             mimeType = mimeType,
-            variants = cdnResource?.variants,
+            variants = (uriCdnResource?.variants ?: emptyList()) + (linkThumbnailCdnResource?.variants ?: emptyList()),
             title = linkPreview?.title?.ifBlank { null },
             description = linkPreview?.description?.ifBlank { null },
             thumbnail = linkPreview?.thumbnailUrl?.ifBlank { null } ?: videoThumbnail,

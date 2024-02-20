@@ -52,7 +52,7 @@ fun NoteLinkPreview(
                     .width(thumbnailImageSize.width)
                     .height(thumbnailImageSize.height),
                 contentDescription = null,
-                contentScale = ContentScale.Crop,
+                contentScale = ContentScale.FillHeight,
                 loading = { NoteImageLoadingPlaceholder() },
             )
         }
