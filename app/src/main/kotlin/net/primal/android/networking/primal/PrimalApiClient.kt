@@ -117,7 +117,11 @@ class PrimalApiClient @Inject constructor(
     }
 
     private fun Throwable?.takeAsWssException(): WssException {
-        return if (this is WssException) this else WssException(message = this?.message, cause = this)
+        return when (this) {
+            is WssException -> this
+            is NostrNoticeException -> WssException(message = this.reason, cause = this)
+            else -> WssException(message = this?.message, cause = this)
+        }
     }
 
     private suspend fun <T> retry(times: Int, block: suspend () -> T): T {
@@ -181,7 +185,7 @@ class PrimalApiClient @Inject constructor(
         val terminationMessage = messages.last()
 
         if (terminationMessage is NostrIncomingMessage.NoticeMessage) {
-            throw NostrNoticeException(reason = terminationMessage.message)
+            throw NostrNoticeException(reason = "${terminationMessage.message} [$subscriptionId]")
         }
 
         val events = messages.filterIsInstance(NostrIncomingMessage.EventMessage::class.java)
