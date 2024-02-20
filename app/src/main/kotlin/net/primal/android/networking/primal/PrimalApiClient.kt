@@ -2,10 +2,10 @@ package net.primal.android.networking.primal
 
 import androidx.annotation.VisibleForTesting
 import java.util.*
-import java.util.concurrent.CancellationException
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.FlowPreview
@@ -112,8 +112,12 @@ class PrimalApiClient @Inject constructor(
             }
         }
         val result = queryResult.getOrNull()
-        val error = queryResult.exceptionOrNull().let { WssException(message = it?.message, cause = it) }
+        val error = queryResult.exceptionOrNull().takeAsWssException()
         return result ?: throw error
+    }
+
+    private fun Throwable?.takeAsWssException(): WssException {
+        return if (this is WssException) this else WssException(message = this?.message, cause = this)
     }
 
     private suspend fun <T> retry(times: Int, block: suspend () -> T): T {
@@ -136,7 +140,11 @@ class PrimalApiClient @Inject constructor(
         ensureSocketClientConnection()
         return when (socketClient.sendREQ(subscriptionId = subscriptionId, data = data)) {
             true -> {
-                deferredQueryResult.await()
+                try {
+                    deferredQueryResult.await()
+                } catch (error: CancellationException) {
+                    throw error.cause ?: error
+                }
             }
             false -> {
                 deferredQueryResult.cancel(CancellationException("Unable to send socket message."))
