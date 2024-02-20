@@ -2,7 +2,6 @@ package net.primal.android.wallet.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
@@ -14,7 +13,7 @@ import androidx.compose.ui.unit.dp
 import net.primal.android.core.compose.PrimalCircleButton
 import net.primal.android.theme.AppTheme
 
-val WalletTabsHeight = 96.dp
+val WalletTabsHeight = 72.dp
 
 @Composable
 fun WalletTabsBar(
@@ -25,7 +24,7 @@ fun WalletTabsBar(
     tabIconSize: Dp = 24.dp,
 ) {
     Row(
-        modifier = modifier.navigationBarsPadding(),
+        modifier = modifier,
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically,
     ) {
