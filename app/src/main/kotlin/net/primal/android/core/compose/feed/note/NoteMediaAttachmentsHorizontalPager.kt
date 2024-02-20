@@ -5,7 +5,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.BoxWithConstraintsScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -20,12 +19,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import net.primal.android.attachments.domain.NoteAttachmentType
-import net.primal.android.attachments.domain.calculateImageSize
 import net.primal.android.attachments.domain.findNearestOrNull
 import net.primal.android.core.compose.HorizontalPagerIndicator
 import net.primal.android.core.compose.attachment.model.NoteAttachmentUi
@@ -115,20 +112,4 @@ private fun NoteMediaAttachment(
             }
         }
     }
-}
-
-private const val MAX_SCREEN_HEIGHT_VISIBLE_AREA = 0.77
-
-@Composable
-private fun BoxWithConstraintsScope.findImageSize(attachment: NoteAttachmentUi): DpSize {
-    val density = LocalDensity.current.density
-    val maxWidthPx = with(LocalDensity.current) { maxWidth.roundToPx() }
-    val maxWidth = maxWidth.value.toInt()
-    val maxHeight = (LocalConfiguration.current.screenHeightDp * MAX_SCREEN_HEIGHT_VISIBLE_AREA).toInt()
-    val variant = attachment.variants.findNearestOrNull(maxWidthPx = maxWidthPx)
-    return variant.calculateImageSize(
-        maxWidth = maxWidth,
-        maxHeight = maxHeight,
-        density = density,
-    )
 }

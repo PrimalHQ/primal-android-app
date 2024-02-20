@@ -1,6 +1,7 @@
 package net.primal.android.core.compose.feed.note
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.runtime.Composable
 import net.primal.android.attachments.domain.NoteAttachmentType
 import net.primal.android.core.compose.attachment.model.NoteAttachmentUi
@@ -30,15 +31,19 @@ fun NoteAttachments(
         }
 
         linkAttachments.size == 1 -> {
-            val attachment = linkAttachments.first()
-            if (!attachment.title.isNullOrBlank() || !attachment.description.isNullOrBlank()) {
-                NoteLinkPreview(
-                    url = attachment.url,
-                    title = attachment.title,
-                    description = attachment.description,
-                    thumbnailUrl = attachment.thumbnailUrl,
-                    onClick = { onUrlClick(attachment.url) },
-                )
+            BoxWithConstraints {
+                val attachment = linkAttachments.first()
+                val thumbnailImageSizeDp = findImageSize(attachment = attachment)
+                if (!attachment.title.isNullOrBlank() || !attachment.description.isNullOrBlank()) {
+                    NoteLinkPreview(
+                        url = attachment.url,
+                        title = attachment.title,
+                        description = attachment.description,
+                        thumbnailUrl = attachment.thumbnailUrl,
+                        thumbnailImageSize = thumbnailImageSizeDp,
+                        onClick = { onUrlClick(attachment.url) },
+                    )
+                }
             }
         }
     }
