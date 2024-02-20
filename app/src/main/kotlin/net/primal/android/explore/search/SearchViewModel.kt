@@ -77,7 +77,11 @@ class SearchViewModel @Inject constructor(
 
     private fun fetchRecommendedUsers() =
         viewModelScope.launch {
-            val recommendedUsers = withContext(dispatcherProvider.io()) { exploreRepository.getRecommendedUsers() }
-            setState { copy(recommendedUsers = recommendedUsers.map { it.mapAsUserProfileUi() }) }
+            try {
+                val recommendedUsers = withContext(dispatcherProvider.io()) { exploreRepository.getRecommendedUsers() }
+                setState { copy(recommendedUsers = recommendedUsers.map { it.mapAsUserProfileUi() }) }
+            } catch (error: WssException) {
+                Timber.w(error)
+            }
         }
 }
