@@ -194,9 +194,10 @@ class PrimalApiClient @Inject constructor(
             it is NostrIncomingMessage.EventMessage
         }
 
-    private suspend fun ensureSocketClientConnection() = socketClientMutex.withLock {
-        socketClient.ensureSocketConnection()
-    }
+    private suspend fun ensureSocketClientConnection() =
+        socketClientMutex.withLock {
+            socketClient.ensureSocketConnection()
+        }
 
     companion object {
         const val MAX_QUERY_RETRIES = 3

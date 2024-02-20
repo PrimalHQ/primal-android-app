@@ -10,6 +10,8 @@ import java.time.Instant
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.ext.isChronologicalFeed
@@ -53,6 +55,8 @@ class FeedRemoteMediator(
 
     private var prependSyncCount = 0
 
+    private val lastRequests: MutableMap<LoadType, Pair<FeedRequestBody, Long>> = mutableMapOf()
+
     private fun FeedPost?.isOlderThan(duration: Duration): Boolean {
         if (this == null) return true
         val postFeedCreateAt = Instant.ofEpochSecond(this.data.feedCreatedAt)
@@ -60,10 +64,7 @@ class FeedRemoteMediator(
     }
 
     private suspend fun shouldRefreshLatestFeed(): Boolean {
-        val firstPost = withContext(dispatcherProvider.io()) {
-            database.feedPosts().newestFeedPosts(query = feedQueryBuilder.feedQuery()).firstOrNull()
-        }
-        return firstPost.isOlderThan(2.days)
+        return newestFeedPostInDatabaseOrNull().isOlderThan(2.days)
     }
 
     private suspend fun shouldRefreshNonLatestFeed(feedDirective: String): Boolean {
@@ -71,10 +72,10 @@ class FeedRemoteMediator(
             database.feedPostsRemoteKeys().lastCachedAt(directive = feedDirective)
         } ?: return true
 
-        return lastCachedAt < Instant.now().minusSeconds(30.minutes.inWholeSeconds).epochSecond
+        return lastCachedAt < Instant.now().minusSeconds(3.minutes.inWholeSeconds).epochSecond
     }
 
-    private suspend fun shouldResetLocalCache(feedDirective: String) =
+    private suspend fun shouldResetLocalCache() =
         when {
             feedDirective.isChronologicalFeed() -> shouldRefreshLatestFeed()
             else -> shouldRefreshNonLatestFeed(feedDirective)
@@ -82,98 +83,81 @@ class FeedRemoteMediator(
 
     override suspend fun initialize(): InitializeAction {
         return when {
-            shouldResetLocalCache(feedDirective) -> InitializeAction.LAUNCH_INITIAL_REFRESH
+            shouldResetLocalCache() -> InitializeAction.LAUNCH_INITIAL_REFRESH
             else -> InitializeAction.SKIP_INITIAL_REFRESH
         }
     }
 
     override suspend fun load(loadType: LoadType, state: PagingState<Int, FeedPost>): MediatorResult {
+        Timber.i("feed_directive $feedDirective load called ($loadType)")
         return try {
-            val remoteKey: FeedPostRemoteKey? = when (loadType) {
-                LoadType.REFRESH -> {
-                    val firstItem = state.firstItemOrNull()
-                    val lastItem = state.lastItemOrNull()
-
-                    if (firstItem != null || lastItem != null) {
-                        if (shouldResetLocalCache(feedDirective)) {
-                            withContext(dispatcherProvider.io()) {
-                                database.withTransaction {
-                                    database.feedPostsRemoteKeys().deleteByDirective(feedDirective)
-                                    database.feedsConnections().deleteConnectionsByDirective(feedDirective)
-                                    database.posts().deleteOrphanPosts()
-                                }
+            if (loadType == LoadType.REFRESH) {
+                if (state.hasFeedPosts()) {
+                    if (shouldResetLocalCache()) {
+                        withContext(dispatcherProvider.io()) {
+                            database.withTransaction {
+                                database.feedPostsRemoteKeys().deleteByDirective(feedDirective)
+                                database.feedsConnections().deleteConnectionsByDirective(feedDirective)
+                                database.posts().deleteOrphanPosts()
                             }
-                        } else {
-                            return MediatorResult.Success(endOfPaginationReached = false)
                         }
-                    }
-
-                    null
-                }
-
-                LoadType.PREPEND -> {
-                    val firstItem = state.firstItemOrNull()
-                        ?: withContext(dispatcherProvider.io()) {
-                            database.feedPosts()
-                                .newestFeedPosts(query = feedQueryBuilder.newestFeedPostsQuery(limit = 1))
-                                .firstOrNull()
-                        }
-                        ?: return MediatorResult.Success(endOfPaginationReached = true)
-
-                    withContext(dispatcherProvider.io()) {
-                        database.feedPostsRemoteKeys().find(
-                            postId = firstItem.data.postId,
-                            repostId = firstItem.data.repostId,
-                            directive = feedDirective,
-                        )
-                    }
-                }
-
-                LoadType.APPEND -> {
-                    val lastItem = state.lastItemOrNull()
-                        ?: withContext(dispatcherProvider.io()) {
-                            database.feedPosts()
-                                .oldestFeedPosts(query = feedQueryBuilder.oldestFeedPostsQuery(limit = 1))
-                                .firstOrNull()
-                        }
-                        ?: return MediatorResult.Success(endOfPaginationReached = true)
-
-                    withContext(dispatcherProvider.io()) {
-                        database.feedPostsRemoteKeys().find(
-                            postId = lastItem.data.postId,
-                            repostId = lastItem.data.repostId,
-                            directive = feedDirective,
-                        )
+                    } else {
+                        Timber.w("feed_directive $feedDirective load exit 1")
+                        return MediatorResult.Success(endOfPaginationReached = false)
                     }
                 }
             }
 
-            val initialRequestBody = FeedRequestBody(
-                directive = feedDirective,
-                userPubKey = userId,
-                limit = state.config.pageSize,
-            )
+            val remoteKey = try {
+                when (loadType) {
+                    LoadType.REFRESH -> null
+                    LoadType.PREPEND -> findFirstFeedPostRemoteKey(state = state)
+                    LoadType.APPEND -> findLastFeedPostRemoteKey(state = state)
+                }
+            } catch (error: NoSuchFeedPostException) {
+                Timber.w(error)
+                Timber.w("feed_directive $feedDirective load exit 2")
+                return MediatorResult.Success(endOfPaginationReached = true)
+            }
 
             if (remoteKey == null && loadType != LoadType.REFRESH) {
-                return MediatorResult.Error(IllegalStateException("Remote key not found."))
+                val error = IllegalStateException("Remote key not found.")
+                Timber.w(error)
+                Timber.w("feed_directive $feedDirective load exit 3")
+                return MediatorResult.Error(error)
             }
 
-            val feedRequestBody = when (loadType) {
-                LoadType.REFRESH -> initialRequestBody
-                LoadType.PREPEND -> initialRequestBody.copy(since = remoteKey?.untilId)
-                LoadType.APPEND -> initialRequestBody.copy(until = remoteKey?.sinceId)
+            val requestBody = buildFeedRequestBody(
+                loadType = loadType,
+                remoteKey = remoteKey,
+                pageSize = state.config.pageSize,
+            )
+
+            lastRequests[loadType]?.let { (lastRequest, lastRequestAt) ->
+                if (lastRequest == requestBody && (Instant.now().epochSecond - lastRequestAt) < LAST_REQUEST_EXPIRY) {
+                    Timber.e("feed_directive $feedDirective paging exiting because of repeating request body.")
+                    Timber.w("feed_directive $feedDirective load exit 4")
+                    return MediatorResult.Success(endOfPaginationReached = true)
+                }
             }
 
             val feedResponse = try {
-                withContext(dispatcherProvider.io()) { feedApi.getFeed(body = feedRequestBody) }
+                retry(times = 3, delay = 500L) {
+                    val response = withContext(dispatcherProvider.io()) { feedApi.getFeed(body = requestBody) }
+                    if (response.paging == null) throw WssException("PagingEvent not found.")
+                    response
+                }
             } catch (error: WssException) {
                 Timber.w(error)
+                Timber.w("feed_directive $feedDirective load exit 5")
                 return MediatorResult.Error(error)
             }
 
             val pagingEvent = feedResponse.paging
+            Timber.w("feed_directive $feedDirective paging event = $pagingEvent")
             if (pagingEvent?.untilId == pagingEvent?.sinceId) {
                 if (loadType == LoadType.PREPEND) {
+                    // Prepend and append syncs always include and the last known item
                     if (prependSyncCount > 1) {
                         withContext(dispatcherProvider.io()) {
                             database.withTransaction {
@@ -195,8 +179,6 @@ class FeedRemoteMediator(
                     }
                     prependSyncCount = 0
                 }
-
-                return MediatorResult.Success(endOfPaginationReached = true)
             } else {
                 if (loadType == LoadType.PREPEND) {
                     prependSyncCount += feedResponse.posts.size + feedResponse.reposts.size
@@ -210,17 +192,56 @@ class FeedRemoteMediator(
                 feedEvents.processFeedConnections()
             }
 
+            lastRequests[loadType] = requestBody to Instant.now().epochSecond
+            Timber.w("feed_directive $feedDirective load exit 6")
             MediatorResult.Success(endOfPaginationReached = false)
         } catch (error: IOException) {
             Timber.w(error)
+            Timber.w("feed_directive $feedDirective load exit 7")
             MediatorResult.Error(error)
         } catch (error: NostrNoticeException) {
             Timber.w(error)
+            Timber.w("feed_directive $feedDirective load exit 8")
             MediatorResult.Error(error)
         }
     }
 
+    private fun buildFeedRequestBody(
+        loadType: LoadType,
+        remoteKey: FeedPostRemoteKey?,
+        pageSize: Int,
+    ): FeedRequestBody {
+        val initialRequestBody = FeedRequestBody(
+            directive = feedDirective,
+            userPubKey = userId,
+            limit = pageSize,
+        )
+        return when (loadType) {
+            LoadType.REFRESH -> initialRequestBody
+            LoadType.PREPEND -> initialRequestBody.copy(since = remoteKey?.untilId)
+            LoadType.APPEND -> initialRequestBody.copy(until = remoteKey?.sinceId)
+        }
+    }
+
+    private suspend fun <T> retry(
+        times: Int,
+        delay: Long,
+        block: suspend () -> T,
+    ): T {
+        repeat(times) {
+            try {
+                Timber.i("Executing retry $it.")
+                return block()
+            } catch (error: WssException) {
+                Timber.e(error)
+                delay(delay)
+            }
+        }
+        return block()
+    }
+
     private suspend fun List<NostrEvent>.processRemoteKeys(pagingEvent: ContentPrimalPaging?) {
+        Timber.i("feed_directive $feedDirective writing remote keys using $pagingEvent")
         if (pagingEvent?.sinceId != null && pagingEvent.untilId != null) {
             database.withTransaction {
                 val remoteKeys = this.map {
@@ -247,5 +268,63 @@ class FeedRemoteMediator(
                 )
             },
         )
+    }
+
+    private suspend fun findFirstFeedPostRemoteKey(state: PagingState<Int, FeedPost>): FeedPostRemoteKey? {
+        val firstItem = state.firstItemOrNull()
+            ?: newestFeedPostInDatabaseOrNull()
+            ?: throw NoSuchFeedPostException()
+
+        return withContext(dispatcherProvider.io()) {
+            Timber.i(
+                "feed_directive $feedDirective looking for firstItem postId=${firstItem.data.postId}" +
+                    " and repostId=${firstItem.data.repostId}",
+            )
+            database.feedPostsRemoteKeys().find(
+                postId = firstItem.data.postId,
+                repostId = firstItem.data.repostId,
+                directive = feedDirective,
+            )
+        }
+    }
+
+    private suspend fun findLastFeedPostRemoteKey(state: PagingState<Int, FeedPost>): FeedPostRemoteKey? {
+        val lastItem = state.lastItemOrNull()
+            ?: oldestFeedPostInDatabaseOrNull()
+            ?: throw NoSuchFeedPostException()
+
+        return withContext(dispatcherProvider.io()) {
+            Timber.i(
+                "feed_directive $feedDirective looking for lastItem postId=${lastItem.data.postId}" +
+                    " and repostId=${lastItem.data.repostId}",
+            )
+            database.feedPostsRemoteKeys().find(
+                postId = lastItem.data.postId,
+                repostId = lastItem.data.repostId,
+                directive = feedDirective,
+            )
+        }
+    }
+
+    class NoSuchFeedPostException : RuntimeException()
+
+    private suspend fun oldestFeedPostInDatabaseOrNull() =
+        withContext(dispatcherProvider.io()) {
+            database.feedPosts()
+                .oldestFeedPosts(query = feedQueryBuilder.oldestFeedPostsQuery(limit = 1))
+                .firstOrNull()
+        }
+
+    private suspend fun newestFeedPostInDatabaseOrNull() =
+        withContext(dispatcherProvider.io()) {
+            database.feedPosts()
+                .newestFeedPosts(query = feedQueryBuilder.newestFeedPostsQuery(limit = 1))
+                .firstOrNull()
+        }
+
+    private fun PagingState<Int, FeedPost>.hasFeedPosts() = firstItemOrNull() != null || lastItemOrNull() != null
+
+    companion object {
+        val LAST_REQUEST_EXPIRY = 10.seconds.inWholeSeconds
     }
 }
