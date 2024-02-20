@@ -2,6 +2,7 @@ package net.primal.android.wallet.transactions.send.create.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -33,7 +34,9 @@ fun TransactionFailed(
         )
 
         PrimalLoadingButton(
-            modifier = Modifier.width(200.dp),
+            modifier = Modifier
+                .width(200.dp)
+                .padding(bottom = 16.dp),
             text = stringResource(id = R.string.wallet_create_transaction_close_button),
             containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
             onClick = onCloseClick,

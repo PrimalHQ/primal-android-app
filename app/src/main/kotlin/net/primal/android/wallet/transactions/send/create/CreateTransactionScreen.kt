@@ -2,7 +2,6 @@ package net.primal.android.wallet.transactions.send.create
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -65,9 +64,8 @@ fun CreateTransactionScreen(
             when (state.transaction.status) {
                 DraftTxStatus.Draft -> {
                     TransactionEditor(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(paddingValues),
+                        modifier = Modifier.fillMaxSize(),
+                        paddingValues = paddingValues,
                         state = state,
                         eventPublisher = eventPublisher,
                         onCancelClick = onClose,

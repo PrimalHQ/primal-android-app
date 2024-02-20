@@ -10,8 +10,11 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -36,11 +39,15 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.math.BigDecimal
@@ -70,6 +77,7 @@ import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
 fun TransactionEditor(
     modifier: Modifier,
     state: CreateTransactionContract.UiState,
+    paddingValues: PaddingValues,
     eventPublisher: (CreateTransactionContract.UiEvent) -> Unit,
     onCancelClick: () -> Unit,
 ) {
@@ -89,14 +97,34 @@ fun TransactionEditor(
         )
     }
 
+    val density = LocalDensity.current
+    var uiMode by remember { mutableStateOf<UiMode?>(null) }
+
+    val layoutDirection = LocalLayoutDirection.current
     Column(
-        modifier = modifier,
+        modifier = modifier
+            .padding(
+                top = paddingValues.calculateTopPadding(),
+                bottom = if (keyboardVisible) 8.dp else paddingValues.calculateBottomPadding(),
+                start = paddingValues.calculateStartPadding(layoutDirection),
+                end = paddingValues.calculateEndPadding(layoutDirection),
+            )
+            .onSizeChanged {
+                with(density) {
+                    if (uiMode == null) {
+                        uiMode = it.height
+                            .toDp()
+                            .toUiMode()
+                    }
+                }
+            },
         verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             TransactionHeaderColumn(
                 modifier = Modifier.fillMaxWidth(),
+                uiMode = uiMode ?: UiMode.Normal,
                 state = state,
                 keyboardVisible = keyboardVisible,
                 onAmountClick = {
@@ -131,28 +159,48 @@ fun TransactionEditor(
         }
 
         var minAmountAlertVisible by remember { mutableStateOf(false) }
-        TransactionActionsRow(
-            state = state,
-            keyboardVisible = keyboardVisible,
-            isNumericPadOn = isNumericPadOn,
-            onCancelClick = onCancelClick,
-            onActionClick = {
-                if (isNumericPadOn) {
-                    if (state.isTxSatisfiesMinAmount()) {
-                        isNumericPadOn = false
-                        eventPublisher(CreateTransactionContract.UiEvent.AmountApplied)
+        val actionsRowHidden = (uiMode == UiMode.Compact || uiMode == UiMode.Unsupported) && keyboardVisible
+        if (!actionsRowHidden) {
+            TransactionActionsRow(
+                state = state,
+                uiMode = uiMode ?: UiMode.Normal,
+                keyboardVisible = keyboardVisible,
+                isNumericPadOn = isNumericPadOn,
+                onCancelClick = onCancelClick,
+                onActionClick = {
+                    if (isNumericPadOn) {
+                        if (state.isTxSatisfiesMinAmount()) {
+                            isNumericPadOn = false
+                            eventPublisher(CreateTransactionContract.UiEvent.AmountApplied)
+                        } else {
+                            minAmountAlertVisible = true
+                        }
                     } else {
-                        minAmountAlertVisible = true
+                        sendPayment()
                     }
-                } else {
-                    sendPayment()
-                }
-            },
-        )
+                },
+            )
+        }
 
         if (minAmountAlertVisible) {
             MinTxAmountAlertDialog(onDismissRequest = { minAmountAlertVisible = false })
         }
+    }
+}
+
+private enum class UiMode {
+    Normal,
+    Comfortable,
+    Compact,
+    Unsupported,
+}
+
+private fun Dp.toUiMode(): UiMode {
+    return when {
+        this > 730.dp -> UiMode.Normal
+        this < 730.dp && this > 680.dp -> UiMode.Comfortable
+        this < 680.dp && this > 580.dp -> UiMode.Compact
+        else -> UiMode.Unsupported
     }
 }
 
@@ -221,6 +269,7 @@ private fun TransactionMainContent(
 @Composable
 private fun TransactionActionsRow(
     state: CreateTransactionContract.UiState,
+    uiMode: UiMode,
     keyboardVisible: Boolean,
     isNumericPadOn: Boolean,
     onCancelClick: () -> Unit,
@@ -229,7 +278,17 @@ private fun TransactionActionsRow(
     Row(
         modifier = Modifier
             .fillMaxWidth(0.8f)
-            .padding(bottom = if (keyboardVisible) 0.dp else 32.dp),
+            .padding(
+                bottom = if (keyboardVisible) {
+                    0.dp
+                } else {
+                    when (uiMode) {
+                        UiMode.Normal -> 32.dp
+                        UiMode.Comfortable -> 8.dp
+                        else -> 4.dp
+                    }
+                },
+            ),
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         PrimalLoadingButton(
@@ -266,15 +325,60 @@ private fun TransactionActionsRow(
 @Composable
 private fun TransactionHeaderColumn(
     modifier: Modifier,
+    uiMode: UiMode,
     state: CreateTransactionContract.UiState,
     keyboardVisible: Boolean,
     onAmountClick: () -> Unit,
 ) {
-    val verticalPadding = animateDpAsState(targetValue = if (keyboardVisible) 4.dp else 16.dp, label = "verticalMargin")
-    val avatarSize = animateDpAsState(targetValue = if (keyboardVisible) 56.dp else 88.dp, label = "avatarSize")
+    val verticalPadding = animateDpAsState(
+        targetValue = if (keyboardVisible) {
+            4.dp
+        } else {
+            when (uiMode) {
+                UiMode.Normal, UiMode.Comfortable -> 16.dp
+                else -> 4.dp
+            }
+        },
+        label = "verticalMargin",
+    )
+    val avatarSize = animateDpAsState(
+        targetValue = if (keyboardVisible) {
+            when (uiMode) {
+                UiMode.Normal -> 64.dp
+                UiMode.Comfortable -> 48.dp
+                UiMode.Compact -> 40.dp
+                else -> 0.dp
+            }
+        } else {
+            88.dp
+        },
+        label = "avatarSize",
+    )
     val iconSize = animateDpAsState(targetValue = if (keyboardVisible) 36.dp else 56.dp, label = "iconSize")
-    val headerSpacing = animateDpAsState(targetValue = if (keyboardVisible) 0.dp else 32.dp, label = "headerSpacing")
-    val amountSpacing = animateDpAsState(targetValue = if (keyboardVisible) 16.dp else 48.dp, label = "amountSpacing")
+    val headerSpacing = animateDpAsState(
+        targetValue = if (keyboardVisible) {
+            0.dp
+        } else {
+            when (uiMode) {
+                UiMode.Normal -> 32.dp
+                UiMode.Comfortable -> 24.dp
+                else -> 8.dp
+            }
+        },
+        label = "headerSpacing",
+    )
+    val amountSpacing = animateDpAsState(
+        targetValue = if (keyboardVisible) {
+            16.dp
+        } else {
+            when (uiMode) {
+                UiMode.Normal -> 48.dp
+                UiMode.Comfortable -> 32.dp
+                else -> 24.dp
+            }
+        },
+        label = "amountSpacing",
+    )
 
     Column(
         modifier = modifier,
@@ -333,8 +437,20 @@ private fun TransactionHeaderColumn(
 
         BtcAmountText(
             modifier = Modifier
-                .padding(start = 32.dp)
-                .height(72.dp)
+                .padding(
+                    start = when (uiMode) {
+                        UiMode.Normal -> 32.dp
+                        UiMode.Comfortable -> 26.dp
+                        else -> 18.dp
+                    },
+                )
+                .height(
+                    when (uiMode) {
+                        UiMode.Normal -> 72.dp
+                        UiMode.Comfortable -> 64.dp
+                        else -> 56.dp
+                    },
+                )
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = null,
