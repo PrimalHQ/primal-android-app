@@ -85,7 +85,7 @@
     <string name="timestamp_since_hours">%1$sh</string>
     <string name="timestamp_since_days">%1$sd</string>
     <string name="timestamp_since_weeks">%1$sw</string>
-    <string name="timestamp_since_months">%1$sm</string>
+    <string name="timestamp_since_months">%1$smo</string>
     <string name="timestamp_since_years">%1$sy</string>
     <plurals name="timestamp_since_minutes">
         <item quantity="one">%1$s minute ago</item>
