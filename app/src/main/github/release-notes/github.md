@@ -1,11 +1,8 @@
-## Features
-- Implemented network settings screen;
-- Implemented connectivity status for relays and caching service;
-- Implemented adding and removing relays;
-- Implemented resetting relays to default settings;
-- Implemented writing to bootstrap relays if user relays not found;
-- Implemented support for unified QR codes for Bitcoin;
-
-## Fixes
-- Fixed handling 'lightning:lnurl' and 'lightning:lnbc' in wallet;
-- Updated QR code wallet LN value to 'lightning:lnurl' and 'lightning:lnbc';
+## Changes
+- Implemented Date of Birth and Full Name in wallet activation
+- Implemented no content state in feeds
+- Improved feed syncing and networking layer
+- Added updating relays when opening Network screen
+- Added smaller screens support for transaction editor screen
+- Fixed missing link preview thumbnail CDN images
+- Changed month abbr. from 'm' to 'mo' in feeds
