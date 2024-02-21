@@ -2,6 +2,7 @@ package net.primal.android.wallet.api
 
 import net.primal.android.wallet.api.model.BalanceResponse
 import net.primal.android.wallet.api.model.DepositRequestBody
+import net.primal.android.wallet.api.model.GetActivationCodeRequestBody
 import net.primal.android.wallet.api.model.InAppPurchaseQuoteResponse
 import net.primal.android.wallet.api.model.LightningInvoiceResponse
 import net.primal.android.wallet.api.model.MiningFeeTier
@@ -19,13 +20,7 @@ interface WalletApi {
 
     suspend fun getWalletUserInfo(userId: String): WalletUserInfoResponse
 
-    suspend fun requestActivationCodeToEmail(
-        userId: String,
-        name: String,
-        email: String,
-        country: String?,
-        state: String?,
-    )
+    suspend fun requestActivationCodeToEmail(userId: String, body: GetActivationCodeRequestBody)
 
     suspend fun activateWallet(userId: String, code: String): String
 

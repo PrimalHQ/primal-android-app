@@ -3,6 +3,9 @@ package net.primal.android.wallet.activation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.time.Duration
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,6 +21,8 @@ import net.primal.android.user.domain.WalletPreference
 import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.activation.WalletActivationContract.UiEvent
 import net.primal.android.wallet.activation.WalletActivationContract.UiState
+import net.primal.android.wallet.api.model.GetActivationCodeRequestBody
+import net.primal.android.wallet.api.model.WalletActivationDetails
 import net.primal.android.wallet.repository.WalletRepository
 import timber.log.Timber
 
@@ -58,12 +63,20 @@ class WalletActivationViewModel @Inject constructor(
             setState { copy(working = true) }
             try {
                 val userId = activeAccountStore.activeUserId()
+                checkNotNull(data.dateOfBirth)
+                checkNotNull(data.country)
                 walletRepository.requestActivationCodeToEmail(
                     userId = userId,
-                    name = data.name,
-                    email = data.email,
-                    country = data.country?.code,
-                    state = data.state?.code,
+                    body = GetActivationCodeRequestBody(
+                        userDetails = WalletActivationDetails(
+                            firstName = data.firstName,
+                            lastName = data.lastName,
+                            email = data.email,
+                            dateOfBirth = data.dateOfBirth.formatDateOfBirth(),
+                            country = data.country.code,
+                            state = data.state?.code ?: "",
+                        ),
+                    ),
                 )
                 setState { copy(status = WalletActivationStatus.PendingCodeConfirmation) }
             } catch (error: WssException) {
@@ -73,6 +86,11 @@ class WalletActivationViewModel @Inject constructor(
                 setState { copy(working = false) }
             }
         }
+
+    private fun Long.formatDateOfBirth(): String {
+        return LocalDate.ofEpochDay(this / Duration.ofDays(1).toMillis())
+            .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+    }
 
     private fun onActivateWallet(code: String) =
         viewModelScope.launch {

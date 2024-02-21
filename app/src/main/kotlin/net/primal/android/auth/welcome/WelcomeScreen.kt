@@ -20,27 +20,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import net.primal.android.R
-import net.primal.android.core.compose.PrimalClickableText
+import net.primal.android.core.compose.ToSAndPrivacyPolicyText
 import net.primal.android.core.compose.button.PrimalCallToActionButton
 import net.primal.android.core.compose.fadingBottomEdge
-import net.primal.android.core.ext.openUriSafely
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
 
 @Composable
 fun WelcomeScreen(onSignInClick: () -> Unit, onCreateAccountClick: () -> Unit) {
-    val localUriHandler = LocalUriHandler.current
-
     Surface(
         modifier = Modifier
             .systemBarsPadding()
@@ -92,7 +85,10 @@ fun WelcomeScreen(onSignInClick: () -> Unit, onCreateAccountClick: () -> Unit) {
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     PrimalCallToActionButton(
-                        modifier = Modifier.widthIn(0.dp, 420.dp).fillMaxWidth().padding(horizontal = 32.dp),
+                        modifier = Modifier
+                            .widthIn(0.dp, 420.dp)
+                            .fillMaxWidth()
+                            .padding(horizontal = 32.dp),
                         title = stringResource(id = R.string.welcome_create_account_button_title),
                         subtitle = if (maxHeight > MIN_HEIGHT_FOR_SUBTITLE) {
                             stringResource(id = R.string.welcome_create_account_button_subtitle)
@@ -105,7 +101,10 @@ fun WelcomeScreen(onSignInClick: () -> Unit, onCreateAccountClick: () -> Unit) {
                     Spacer(modifier = Modifier.height(16.dp))
 
                     PrimalCallToActionButton(
-                        modifier = Modifier.widthIn(0.dp, 420.dp).fillMaxWidth().padding(horizontal = 32.dp),
+                        modifier = Modifier
+                            .widthIn(0.dp, 420.dp)
+                            .fillMaxWidth()
+                            .padding(horizontal = 32.dp),
                         title = stringResource(id = R.string.welcome_sign_in_button_title),
                         subtitle = if (maxHeight > MIN_HEIGHT_FOR_SUBTITLE) {
                             stringResource(id = R.string.welcome_sign_in_button_subtitle)
@@ -117,14 +116,12 @@ fun WelcomeScreen(onSignInClick: () -> Unit, onCreateAccountClick: () -> Unit) {
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    TermsAndServiceHint(
+                    ToSAndPrivacyPolicyText(
                         modifier = Modifier
                             .widthIn(0.dp, 360.dp)
                             .fillMaxWidth()
-                            .padding(horizontal = 80.dp),
-                        onTosClick = {
-                            localUriHandler.openUriSafely(TOS_URL)
-                        },
+                            .padding(horizontal = 32.dp),
+                        tosPrefix = stringResource(id = R.string.welcome_tos_prefix),
                     )
                 }
             }
@@ -133,44 +130,6 @@ fun WelcomeScreen(onSignInClick: () -> Unit, onCreateAccountClick: () -> Unit) {
 }
 
 private const val MIN_HEIGHT_FOR_SUBTITLE = 500
-
-private const val TOS_ANNOTATION_TAG = "TosAnnotationTag"
-private const val TOS_URL = "https://www.primal.net/terms"
-
-@Composable
-fun TermsAndServiceHint(modifier: Modifier = Modifier, onTosClick: () -> Unit) {
-    val tosHint = stringResource(id = R.string.welcome_tos_hint)
-    val tosLink = stringResource(id = R.string.welcome_tos_hint_highlighted_word)
-    val annotatedString = buildAnnotatedString {
-        append(tosHint)
-
-        val startIndex = tosHint.indexOf(tosLink)
-        if (startIndex >= 0) {
-            val endIndex = startIndex + tosLink.length
-            addStyle(
-                style = SpanStyle(color = AppTheme.colorScheme.primary),
-                start = startIndex,
-                end = endIndex,
-            )
-            addStringAnnotation(
-                tag = TOS_ANNOTATION_TAG,
-                annotation = tosLink,
-                start = startIndex,
-                end = endIndex,
-            )
-        }
-    }
-
-    PrimalClickableText(
-        modifier = modifier,
-        text = annotatedString,
-        style = AppTheme.typography.bodySmall.copy(
-            color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
-            textAlign = TextAlign.Center,
-        ),
-        onClick = { _, _ -> onTosClick() },
-    )
-}
 
 @Preview
 @Composable

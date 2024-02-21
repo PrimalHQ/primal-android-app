@@ -26,10 +26,14 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.DatePickerFormatter
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.OutlinedTextField
@@ -38,7 +42,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -64,14 +70,20 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.text.isDigitsOnly
 import java.io.IOException
+import java.time.Duration
+import java.time.Instant
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.decodeFromStream
 import net.primal.android.R
 import net.primal.android.core.compose.AdjustTemporarilySystemBarColors
+import net.primal.android.core.compose.DatePickerModalBottomSheet
 import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.PrimalTopAppBar
+import net.primal.android.core.compose.ToSAndPrivacyPolicyText
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -178,7 +190,6 @@ fun WalletActivationScreen(
                             data = uiState.data,
                             working = uiState.working,
                             error = uiState.error,
-                            isKeyboardVisible = isKeyboardVisible,
                             onErrorDismiss = {
                                 eventPublisher(UiEvent.ClearErrorMessage)
                                 onClose()
@@ -215,25 +226,47 @@ private fun StepContainerWithActionButton(
     actionButtonText: String,
     actionButtonEnabled: Boolean,
     actionButtonLoading: Boolean = false,
+    actionButtonVisible: Boolean = true,
+    tosAndPrivacyPolicyVisible: Boolean = false,
     containerContent: @Composable ColumnScope.() -> Unit,
 ) {
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(state = rememberScrollState()),
         verticalArrangement = Arrangement.SpaceEvenly,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         containerContent()
 
-        PrimalLoadingButton(
-            modifier = Modifier.fillMaxWidth(fraction = 0.8f),
-            enabled = actionButtonEnabled && !actionButtonLoading,
-            loading = actionButtonLoading,
-            onClick = onActionClick,
-            text = actionButtonText,
-        )
+        if (actionButtonVisible) {
+            PrimalLoadingButton(
+                modifier = Modifier.fillMaxWidth(fraction = 0.8f),
+                enabled = actionButtonEnabled && !actionButtonLoading,
+                loading = actionButtonLoading,
+                onClick = onActionClick,
+                text = actionButtonText,
+            )
+
+            if (tosAndPrivacyPolicyVisible) {
+                ToSAndPrivacyPolicyText(
+                    modifier = Modifier
+                        .widthIn(0.dp, 360.dp)
+                        .fillMaxWidth()
+                        .padding(horizontal = 32.dp)
+                        .padding(top = 8.dp),
+                    tosPrefix = stringResource(id = R.string.wallet_tos_prefix),
+                )
+            }
+        }
     }
 }
 
+private const val MIN_AGE_FOR_WALLET = 18
+private const val MAX_DATE_OF_BIRTH = 1900
+
+@Suppress("MagicNumber")
+@OptIn(ExperimentalMaterial3Api::class)
 @ExperimentalComposeUiApi
 @Composable
 private fun WalletActivationDataInput(
@@ -243,14 +276,36 @@ private fun WalletActivationDataInput(
     onErrorDismiss: () -> Unit,
     onDataChanged: (WalletActivationData) -> Unit,
     onActivationCodeRequest: (WalletActivationData) -> Unit,
-    isKeyboardVisible: Boolean,
 ) {
-    var name by rememberSaveable { mutableStateOf(data.name) }
+    var firstName by rememberSaveable { mutableStateOf(data.firstName) }
+    var lastName by rememberSaveable { mutableStateOf(data.lastName) }
     var email by rememberSaveable { mutableStateOf(data.email) }
     var country by remember { mutableStateOf(data.country) }
     var state by remember { mutableStateOf(data.state) }
+
+    val maxDate = Instant.now().minus(
+        Duration.ofDays(MIN_AGE_FOR_WALLET * 365L) +
+            Duration.ofHours(MIN_AGE_FOR_WALLET / 4 * 24L),
+    )
+    val datePickerState = rememberDatePickerState(
+        initialSelectedDateMillis = data.dateOfBirth,
+        initialDisplayedMonthMillis = data.dateOfBirth ?: maxDate.toEpochMilli(),
+        yearRange = IntRange(MAX_DATE_OF_BIRTH, LocalDate.now().year - MIN_AGE_FOR_WALLET),
+    )
+    var dateOfBirth by rememberSaveable { mutableStateOf(data.dateOfBirth) }
+    LaunchedEffect(datePickerState.selectedDateMillis) {
+        dateOfBirth = datePickerState.selectedDateMillis
+    }
+
     val activationDataSnapshot = {
-        WalletActivationData(name = name, email = email, country = country, state = state)
+        WalletActivationData(
+            firstName = firstName,
+            lastName = lastName,
+            email = email,
+            dateOfBirth = dateOfBirth,
+            country = country,
+            state = state,
+        )
     }
 
     val countries = rememberListOfCountries()
@@ -260,9 +315,9 @@ private fun WalletActivationDataInput(
         }
     }
 
-    val keyboardController = LocalSoftwareKeyboardController.current
     var countrySelectionVisible by remember { mutableStateOf(false) }
     var stateSelectionVisible by remember { mutableStateOf(false) }
+    var datePickerVisible by remember { mutableStateOf(false) }
 
     if (countrySelectionVisible) {
         RegionSelectionBottomSheet(
@@ -274,7 +329,9 @@ private fun WalletActivationDataInput(
             },
             onDismissRequest = { countrySelectionVisible = false },
         )
-    } else if (stateSelectionVisible) {
+    }
+
+    if (stateSelectionVisible) {
         RegionSelectionBottomSheet(
             regions = countries.find { it.code == country?.code }?.states ?: emptyList(),
             title = stringResource(id = R.string.wallet_activation_state_picker_title),
@@ -283,6 +340,15 @@ private fun WalletActivationDataInput(
                 onDataChanged(activationDataSnapshot())
             },
             onDismissRequest = { stateSelectionVisible = false },
+        )
+    }
+
+    if (datePickerVisible) {
+        DatePickerModalBottomSheet(
+            state = datePickerState,
+            dateFormatter = remember { DatePickerFormatter() },
+            dateValidator = { it <= maxDate.toEpochMilli() },
+            onDismissRequest = { datePickerVisible = false },
         )
     }
 
@@ -296,6 +362,7 @@ private fun WalletActivationDataInput(
         actionButtonText = stringResource(id = R.string.wallet_activation_next_button),
         actionButtonEnabled = activationDataSnapshot().isValid(availableStates),
         actionButtonLoading = working,
+        tosAndPrivacyPolicyVisible = true,
         onActionClick = { onActivationCodeRequest(activationDataSnapshot()) },
     ) {
         Column(
@@ -305,35 +372,54 @@ private fun WalletActivationDataInput(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            AnimatedVisibility(visible = !isKeyboardVisible) {
+            Column(
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
                 Image(
                     modifier = Modifier.padding(vertical = 16.dp),
                     imageVector = PrimalIcons.WalletPrimalActivation,
                     contentDescription = null,
                     colorFilter = ColorFilter.tint(color = AppTheme.colorScheme.onSurface),
                 )
-            }
 
-            Text(
-                modifier = Modifier
-                    .fillMaxWidth(fraction = 0.8f)
-                    .padding(vertical = 32.dp),
-                text = stringResource(id = R.string.wallet_activation_pending_data_hint),
-                textAlign = TextAlign.Center,
-                color = AppTheme.colorScheme.onSurface,
-                style = AppTheme.typography.bodyLarge.copy(
-                    fontWeight = FontWeight.SemiBold,
-                ),
-            )
+                Text(
+                    modifier = Modifier
+                        .fillMaxWidth(fraction = 0.8f)
+                        .padding(vertical = 32.dp),
+                    text = stringResource(id = R.string.wallet_activation_pending_data_hint),
+                    textAlign = TextAlign.Center,
+                    color = AppTheme.colorScheme.onSurface,
+                    style = AppTheme.typography.bodyLarge.copy(
+                        fontWeight = FontWeight.SemiBold,
+                    ),
+                )
+            }
 
             WalletOutlinedTextField(
                 modifier = Modifier.fillMaxWidth(fraction = 0.8f),
-                value = name,
+                value = firstName,
                 onValueChange = {
-                    name = it
+                    firstName = it
                     onDataChanged(activationDataSnapshot())
                 },
-                placeholderText = stringResource(id = R.string.wallet_activation_your_name),
+                placeholderText = stringResource(id = R.string.wallet_activation_first_name),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Text,
+                    imeAction = ImeAction.Next,
+                ),
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            WalletOutlinedTextField(
+                modifier = Modifier.fillMaxWidth(fraction = 0.8f),
+                value = lastName,
+                onValueChange = {
+                    lastName = it
+                    onDataChanged(activationDataSnapshot())
+                },
+                placeholderText = stringResource(id = R.string.wallet_activation_last_name),
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Text,
                     imeAction = ImeAction.Next,
@@ -349,19 +435,22 @@ private fun WalletActivationDataInput(
                     email = it.trim()
                     onDataChanged(activationDataSnapshot())
                 },
-                placeholderText = stringResource(id = R.string.wallet_activation_your_email_address),
+                placeholderText = stringResource(id = R.string.wallet_activation_email_address),
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Email,
-                    imeAction = if (activationDataSnapshot().isValid(availableStates)) ImeAction.Go else ImeAction.None,
+                    imeAction = ImeAction.Done,
                 ),
-                keyboardActions = KeyboardActions(
-                    onGo = {
-                        if (activationDataSnapshot().isValid(availableStates)) {
-                            keyboardController?.hide()
-                            onActivationCodeRequest(activationDataSnapshot())
-                        }
-                    },
-                ),
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            WalletOutlinedTextField(
+                modifier = Modifier.fillMaxWidth(fraction = 0.8f),
+                value = dateOfBirth.toDateFormat(),
+                onClick = { datePickerVisible = true },
+                onValueChange = { },
+                readOnly = true,
+                placeholderText = stringResource(id = R.string.wallet_activation_date_of_birth),
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -377,7 +466,7 @@ private fun WalletActivationDataInput(
                     value = country?.name ?: "",
                     onValueChange = {},
                     readOnly = true,
-                    placeholderText = stringResource(id = R.string.wallet_activation_your_country_of_residence),
+                    placeholderText = stringResource(id = R.string.wallet_activation_country_of_residence),
                 )
 
                 if (!availableStates.isNullOrEmpty()) {
@@ -399,6 +488,13 @@ private fun WalletActivationDataInput(
     }
 }
 
+private fun Long?.toDateFormat(): String {
+    if (this == null) return ""
+
+    return LocalDate.ofEpochDay(this / Duration.ofDays(1).toMillis())
+        .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+}
+
 @OptIn(ExperimentalSerializationApi::class)
 @Composable
 private fun rememberListOfCountries(): List<Country> {
@@ -413,8 +509,8 @@ private fun rememberListOfCountries(): List<Country> {
 }
 
 private fun WalletActivationData.isValid(availableStates: List<State>?): Boolean {
-    return name.isNotBlank() && Patterns.EMAIL_ADDRESS.matcher(email).matches() &&
-        country != null && (availableStates.isNullOrEmpty() || state != null)
+    return firstName.isNotBlank() && lastName.isNotBlank() && Patterns.EMAIL_ADDRESS.matcher(email).matches() &&
+        dateOfBirth != null && country != null && (availableStates.isNullOrEmpty() || state != null)
 }
 
 @ExperimentalComposeUiApi
@@ -700,10 +796,9 @@ private fun PreviewWalletActivationDataInput() {
     PrimalTheme(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
         Surface {
             WalletActivationDataInput(
-                data = WalletActivationData(name = "alex", email = "alex@primal.net"),
+                data = WalletActivationData(firstName = "alex", email = "alex@primal.net"),
                 working = false,
                 error = null,
-                isKeyboardVisible = false,
                 onErrorDismiss = { },
                 onDataChanged = { },
                 onActivationCodeRequest = { },

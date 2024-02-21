@@ -65,8 +65,8 @@
     <ID>LongMethod:ThreadScreen.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun ThreadScreen( state: ThreadContract.UiState, onClose: () -&gt; Unit, onPostClick: (String) -&gt; Unit, onPostReplyClick: (String) -&gt; Unit, onPostQuoteClick: (String) -&gt; Unit, onProfileClick: (String) -&gt; Unit, onHashtagClick: (String) -&gt; Unit, onMediaClick: (String, String) -&gt; Unit, onGoToWallet: () -&gt; Unit, onReplyInNoteEditor: (String, Uri?, String) -&gt; Unit, eventPublisher: (ThreadContract.UiEvent) -&gt; Unit, )</ID>
     <ID>LongMethod:TransactionEditor.kt$@Composable private fun TransactionHeaderColumn( modifier: Modifier, uiMode: UiMode, state: CreateTransactionContract.UiState, keyboardVisible: Boolean, onAmountClick: () -&gt; Unit, )</ID>
     <ID>LongMethod:TransactionEditor.kt$@ExperimentalMaterial3Api @ExperimentalComposeUiApi @Composable fun TransactionEditor( modifier: Modifier, state: CreateTransactionContract.UiState, paddingValues: PaddingValues, eventPublisher: (CreateTransactionContract.UiEvent) -&gt; Unit, onCancelClick: () -&gt; Unit, )</ID>
-    <ID>LongMethod:WalletActivationScreen.kt$@ExperimentalComposeUiApi @Composable private fun WalletActivationDataInput( data: WalletActivationData, working: Boolean, error: Throwable?, onErrorDismiss: () -&gt; Unit, onDataChanged: (WalletActivationData) -&gt; Unit, onActivationCodeRequest: (WalletActivationData) -&gt; Unit, isKeyboardVisible: Boolean, )</ID>
     <ID>LongMethod:WalletActivationScreen.kt$@ExperimentalComposeUiApi @Composable private fun WalletCodeActivationInput( working: Boolean, error: Throwable?, email: String, onCodeChanged: () -&gt; Unit, onCodeConfirmation: (String) -&gt; Unit, isKeyboardVisible: Boolean, )</ID>
+    <ID>LongMethod:WalletActivationScreen.kt$@Suppress("MagicNumber") @OptIn(ExperimentalMaterial3Api::class) @ExperimentalComposeUiApi @Composable private fun WalletActivationDataInput( data: WalletActivationData, working: Boolean, error: Throwable?, onErrorDismiss: () -&gt; Unit, onDataChanged: (WalletActivationData) -&gt; Unit, onActivationCodeRequest: (WalletActivationData) -&gt; Unit, )</ID>
     <ID>LongMethod:WalletDashboardScreen.kt$@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class) @Composable fun WalletDashboardScreen( state: WalletDashboardContract.UiState, onPrimaryDestinationChanged: (PrimalTopLevelDestination) -&gt; Unit, onDrawerDestinationClick: (DrawerScreenDestination) -&gt; Unit, onWalletActivateClick: () -&gt; Unit, onProfileClick: (String) -&gt; Unit, onTransactionClick: (String) -&gt; Unit, onSendClick: () -&gt; Unit, onScanClick: () -&gt; Unit, onReceiveClick: () -&gt; Unit, eventPublisher: (UiEvent) -&gt; Unit, )</ID>
     <ID>LongMethod:WalletSettingsScreen.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun WalletSettingsScreen( state: WalletSettingsContract.UiState, onClose: () -&gt; Unit, onEditProfileClick: () -&gt; Unit, eventPublisher: (UiEvent) -&gt; Unit, )</ID>
     <ID>LongMethod:WelcomeScreen.kt$@Composable fun WelcomeScreen(onSignInClick: () -&gt; Unit, onCreateAccountClick: () -&gt; Unit)</ID>
@@ -130,8 +130,6 @@
     <ID>MagicNumber:Timestamps.kt$60</ID>
     <ID>MagicNumber:Timestamps.kt$7</ID>
     <ID>MagicNumber:ValidationUtils.kt$32</ID>
-    <ID>MagicNumber:WalletActivationScreen.kt$0.25f</ID>
-    <ID>MagicNumber:WalletActivationScreen.kt$0.75f</ID>
     <ID>MagicNumber:WalletDashboardScreen.kt$0.42f</ID>
     <ID>MagicNumber:WelcomeScreen.kt$0.4f</ID>
     <ID>MagicNumber:WelcomeScreen.kt$0.6f</ID>

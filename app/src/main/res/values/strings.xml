@@ -21,8 +21,10 @@
     <string name="welcome_sign_in_button_subtitle">Already have a Nostr account? Sign with your Nostr key.</string>
     <string name="welcome_create_account_button_title">Create account</string>
     <string name="welcome_create_account_button_subtitle">Your new Nostr account will be up and running in a minute.</string>
-    <string name="welcome_tos_hint">By proceeding you confirm that you accept our terms of service</string>
-    <string name="welcome_tos_hint_highlighted_word">terms of service</string>
+    <string name="welcome_tos_prefix">By proceeding you accept our</string>
+
+    <string name="legal_tos_hint_highlighted_word">Terms of Service</string>
+    <string name="legal_privacy_policy_hint_highlighted_word">Privacy Policy</string>
 
     <string name="create_title_new_account">New Account</string>
     <string name="create_title_profile_preview">Profile Preview</string>
@@ -359,6 +361,7 @@
     <string name="wallet_dashboard_low_sats_hint">You are running low on sats</string>
     <string name="wallet_dashboard_buy_sats_button">Buy Sats Now</string>
 
+    <string name="wallet_tos_prefix">By tapping \"Next\" you agree to the</string>
     <string name="wallet_activation_title">Activate Wallet</string>
     <string name="wallet_activation_pending_data_hint">Activating your wallet is easy!\nWe just need a few details below:</string>
     <string name="wallet_activation_pending_code_subtitle">Check Your Email</string>
@@ -366,10 +369,12 @@
     <string name="wallet_activation_error_invalid_code">Incorrect code. Please try again.</string>
     <string name="wallet_activation_success_title">Success</string>
     <string name="wallet_activation_success_description">Your wallet has been activated. Your new Nostr lightning address is:</string>
-    <string name="wallet_activation_your_name">Your name</string>
-    <string name="wallet_activation_your_email_address">Your email address</string>
+    <string name="wallet_activation_first_name">First name</string>
+    <string name="wallet_activation_last_name">Last name</string>
+    <string name="wallet_activation_email_address">Email address</string>
+    <string name="wallet_activation_date_of_birth">Date of birth</string>
     <string name="wallet_activation_state">State</string>
-    <string name="wallet_activation_your_country_of_residence">Country of residence</string>
+    <string name="wallet_activation_country_of_residence">Country of residence</string>
     <string name="wallet_activation_your_code">Activation code</string>
     <string name="wallet_activation_next_button">Next</string>
     <string name="wallet_activation_finish_button">Finish</string>

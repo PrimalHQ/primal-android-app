@@ -90,20 +90,14 @@ class WalletApiImpl @Inject constructor(
             .toUserWalletInfoResponseOrThrow()
     }
 
-    override suspend fun requestActivationCodeToEmail(
-        userId: String,
-        name: String,
-        email: String,
-        country: String?,
-        state: String?,
-    ) {
+    override suspend fun requestActivationCodeToEmail(userId: String, body: GetActivationCodeRequestBody) {
         primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.WALLET,
                 optionsJson = buildWalletOptionsJson(
                     userId = userId,
                     walletVerb = WalletOperationVerb.GET_ACTIVATION_CODE,
-                    requestBody = GetActivationCodeRequestBody(name, email, country, state),
+                    requestBody = body,
                 ),
             ),
         )

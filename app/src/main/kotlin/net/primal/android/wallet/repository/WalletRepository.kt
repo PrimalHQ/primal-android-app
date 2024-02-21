@@ -15,6 +15,7 @@ import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.api.WalletApi
 import net.primal.android.wallet.api.mediator.WalletTransactionsMediator
 import net.primal.android.wallet.api.model.DepositRequestBody
+import net.primal.android.wallet.api.model.GetActivationCodeRequestBody
 import net.primal.android.wallet.api.model.InAppPurchaseQuoteResponse
 import net.primal.android.wallet.api.model.LightningInvoiceResponse
 import net.primal.android.wallet.api.model.MiningFeeTier
@@ -54,15 +55,9 @@ class WalletRepository @Inject constructor(
         return walletApi.activateWallet(userId, code)
     }
 
-    suspend fun requestActivationCodeToEmail(
-        userId: String,
-        name: String,
-        email: String,
-        country: String?,
-        state: String?,
-    ) {
+    suspend fun requestActivationCodeToEmail(userId: String, body: GetActivationCodeRequestBody) {
         withContext(dispatcherProvider.io()) {
-            walletApi.requestActivationCodeToEmail(userId, name, email, country, state)
+            walletApi.requestActivationCodeToEmail(userId, body)
         }
     }
 

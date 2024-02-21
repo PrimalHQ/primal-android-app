@@ -10,7 +10,7 @@ enum class WalletOperationVerb(val identifier: String) {
     USER_INFO("user_info"),
     IN_APP_PURCHASE_QUOTE("in_app_purchase_quote"),
     IN_APP_PURCHASE("in_app_purchase"),
-    GET_ACTIVATION_CODE("get_activation_code"),
+    GET_ACTIVATION_CODE("get_activation_code_2"),
     ACTIVATE("activate"),
     PARSE_LNURL("parse_lnurl"),
     PARSE_LNINVOICE("parse_lninvoice"),
