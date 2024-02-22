@@ -249,8 +249,13 @@ class ProfileDetailsViewModel @Inject constructor(
             }
         }
 
+    private fun updateStateProfileAsFollowed() = setState { copy(isProfileFollowed = true) }
+
+    private fun updateStateProfileAsUnfollowed() = setState { copy(isProfileFollowed = false) }
+
     private fun follow(followAction: UiEvent.FollowAction) =
         viewModelScope.launch {
+            updateStateProfileAsFollowed()
             try {
                 profileRepository.follow(
                     userId = activeAccountStore.activeUserId(),
@@ -258,18 +263,22 @@ class ProfileDetailsViewModel @Inject constructor(
                 )
             } catch (error: WssException) {
                 Timber.w(error)
+                updateStateProfileAsUnfollowed()
                 setErrorState(error = ProfileError.FailedToFollowProfile(error))
             } catch (error: NostrPublishException) {
                 Timber.w(error)
+                updateStateProfileAsUnfollowed()
                 setErrorState(error = ProfileError.FailedToFollowProfile(error))
             } catch (error: MissingRelaysException) {
                 Timber.w(error)
+                updateStateProfileAsUnfollowed()
                 setErrorState(error = ProfileError.MissingRelaysConfiguration(error))
             }
         }
 
     private fun unfollow(unfollowAction: UiEvent.UnfollowAction) =
         viewModelScope.launch {
+            updateStateProfileAsUnfollowed()
             try {
                 profileRepository.unfollow(
                     userId = activeAccountStore.activeUserId(),
@@ -277,12 +286,15 @@ class ProfileDetailsViewModel @Inject constructor(
                 )
             } catch (error: WssException) {
                 Timber.w(error)
+                updateStateProfileAsFollowed()
                 setErrorState(error = ProfileError.FailedToUnfollowProfile(error))
             } catch (error: NostrPublishException) {
                 Timber.w(error)
+                updateStateProfileAsFollowed()
                 setErrorState(error = ProfileError.FailedToUnfollowProfile(error))
             } catch (error: MissingRelaysException) {
                 Timber.w(error)
+                updateStateProfileAsFollowed()
                 setErrorState(error = ProfileError.MissingRelaysConfiguration(error))
             }
         }
