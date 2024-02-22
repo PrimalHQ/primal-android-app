@@ -113,7 +113,7 @@ class PrimalApiClient @Inject constructor(
     @Throws(WssException::class)
     suspend fun query(message: PrimalCacheFilter): PrimalQueryResult {
         val queryResult = runCatching {
-            retrySendMessage(MAX_QUERY_RETRIES) {
+            retrySendMessage(MAX_RETRIES) {
                 val subscriptionId = UUID.randomUUID()
                 val deferredQueryResult = scope.async { collectQueryResult(subscriptionId) }
                 sendMessageAndAwaitForResultOrThrow(
@@ -134,19 +134,24 @@ class PrimalApiClient @Inject constructor(
         deferredQueryResult: Deferred<PrimalQueryResult>,
     ): PrimalQueryResult {
         ensureSocketClientConnection()
-        return when (socketClient.sendREQ(subscriptionId = subscriptionId, data = data)) {
-            true -> {
-                try {
-                    deferredQueryResult.await()
-                } catch (error: CancellationException) {
-                    throw error.cause ?: error
-                }
-            }
-            false -> {
-                deferredQueryResult.cancel(CancellationException("Unable to send socket message."))
-                throw SocketSendMessageException(message = "Unable to send socket message.")
-            }
+
+        try {
+            sendMessageOrThrow(subscriptionId = subscriptionId, data = data)
+        } catch (error: SocketSendMessageException) {
+            deferredQueryResult.cancel(CancellationException("Unable to send socket message."))
+            throw error
         }
+
+        return try {
+            deferredQueryResult.await()
+        } catch (error: CancellationException) {
+            throw error.cause ?: error
+        }
+    }
+
+    private fun sendMessageOrThrow(subscriptionId: UUID, data: JsonObject) {
+        val success = socketClient.sendREQ(subscriptionId = subscriptionId, data = data)
+        if (!success) throw SocketSendMessageException(message = "Unable to send socket message.")
     }
 
     private fun Throwable?.takeAsWssException(): WssException {
@@ -160,12 +165,14 @@ class PrimalApiClient @Inject constructor(
 
     suspend fun subscribe(subscriptionId: UUID, message: PrimalCacheFilter): Flow<NostrIncomingMessage> {
         ensureSocketClientConnection()
-        val success = socketClient.sendREQ(
-            subscriptionId = subscriptionId,
-            data = message.toPrimalJsonObject(),
-        )
-        if (!success) throw WssException(message = "Api unreachable at the moment.")
-
+        try {
+            retrySendMessage(MAX_RETRIES) {
+                sendMessageOrThrow(subscriptionId = subscriptionId, data = message.toPrimalJsonObject())
+            }
+        } catch (error: SocketSendMessageException) {
+            Timber.w(error)
+            throw WssException(message = "Api unreachable at the moment.", cause = error)
+        }
         return socketClient.incomingMessages.filterBySubscriptionId(id = subscriptionId)
     }
 
@@ -218,7 +225,7 @@ class PrimalApiClient @Inject constructor(
     private class SocketSendMessageException(override val message: String?) : RuntimeException()
 
     companion object {
-        const val MAX_QUERY_RETRIES = 3
+        const val MAX_RETRIES = 3
         private const val RETRY_DELAY_MILLIS = 1_000L
     }
 }
