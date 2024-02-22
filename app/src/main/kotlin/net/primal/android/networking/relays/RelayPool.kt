@@ -155,10 +155,7 @@ class RelayPool @Inject constructor(
             .transform {
                 when (it) {
                     is NostrIncomingMessage.OkMessage -> emit(it)
-                    is NostrIncomingMessage.NoticeMessage -> throw NostrNoticeException(
-                        reason = it.message,
-                    )
-
+                    is NostrIncomingMessage.NoticeMessage -> throw NostrNoticeException(reason = it.message)
                     else -> throw IllegalStateException("$it is not allowed")
                 }
             }

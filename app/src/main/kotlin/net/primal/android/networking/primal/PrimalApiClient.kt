@@ -98,13 +98,25 @@ class PrimalApiClient @Inject constructor(
         }
     }
 
+    private suspend fun <T> retrySendMessage(times: Int, block: suspend () -> T): T {
+        repeat(times) {
+            try {
+                return block()
+            } catch (error: SocketSendMessageException) {
+                Timber.w(error, "PrimalApiClient.retry()")
+                delay(RETRY_DELAY_MILLIS)
+            }
+        }
+        return block()
+    }
+
     @Throws(WssException::class)
     suspend fun query(message: PrimalCacheFilter): PrimalQueryResult {
         val queryResult = runCatching {
-            retry(MAX_QUERY_RETRIES) {
+            retrySendMessage(MAX_QUERY_RETRIES) {
                 val subscriptionId = UUID.randomUUID()
                 val deferredQueryResult = scope.async { collectQueryResult(subscriptionId) }
-                sendRequestAndAwaitForResultOrThrow(
+                sendMessageAndAwaitForResultOrThrow(
                     subscriptionId = subscriptionId,
                     data = message.toPrimalJsonObject(),
                     deferredQueryResult = deferredQueryResult,
@@ -116,27 +128,7 @@ class PrimalApiClient @Inject constructor(
         return result ?: throw error
     }
 
-    private fun Throwable?.takeAsWssException(): WssException {
-        return when (this) {
-            is WssException -> this
-            is NostrNoticeException -> WssException(message = this.reason, cause = this)
-            else -> WssException(message = this?.message, cause = this)
-        }
-    }
-
-    private suspend fun <T> retry(times: Int, block: suspend () -> T): T {
-        repeat(times) {
-            try {
-                return block()
-            } catch (error: WssException) {
-                Timber.w(error)
-                delay(RETRY_DELAY_MILLIS)
-            }
-        }
-        return block()
-    }
-
-    private suspend fun sendRequestAndAwaitForResultOrThrow(
+    private suspend fun sendMessageAndAwaitForResultOrThrow(
         subscriptionId: UUID,
         data: JsonObject,
         deferredQueryResult: Deferred<PrimalQueryResult>,
@@ -152,8 +144,17 @@ class PrimalApiClient @Inject constructor(
             }
             false -> {
                 deferredQueryResult.cancel(CancellationException("Unable to send socket message."))
-                throw WssException("Unable to send socket message.")
+                throw SocketSendMessageException(message = "Unable to send socket message.")
             }
+        }
+    }
+
+    private fun Throwable?.takeAsWssException(): WssException {
+        return when (this) {
+            is WssException -> this
+            is NostrNoticeException -> WssException(message = this.reason, cause = this)
+            is SocketSendMessageException -> WssException(message = "Api unreachable at the moment.", cause = this)
+            else -> WssException(message = this?.message, cause = this)
         }
     }
 
@@ -185,7 +186,10 @@ class PrimalApiClient @Inject constructor(
         val terminationMessage = messages.last()
 
         if (terminationMessage is NostrIncomingMessage.NoticeMessage) {
-            throw NostrNoticeException(reason = "${terminationMessage.message} [$subscriptionId]")
+            throw NostrNoticeException(
+                reason = terminationMessage.message,
+                subscriptionId = subscriptionId,
+            )
         }
 
         val events = messages.filterIsInstance(NostrIncomingMessage.EventMessage::class.java)
@@ -210,6 +214,8 @@ class PrimalApiClient @Inject constructor(
         socketClientMutex.withLock {
             socketClient.ensureSocketConnection()
         }
+
+    private class SocketSendMessageException(override val message: String?) : RuntimeException()
 
     companion object {
         const val MAX_QUERY_RETRIES = 3

@@ -233,7 +233,7 @@ class FeedRemoteMediator(
                 Timber.i("Executing retry $it.")
                 return block()
             } catch (error: WssException) {
-                Timber.e(error)
+                Timber.w(error, "FeedRemoteMediator.retry()")
                 delay(delay)
             }
         }
