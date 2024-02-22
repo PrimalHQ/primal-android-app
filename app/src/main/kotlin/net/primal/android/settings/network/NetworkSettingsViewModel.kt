@@ -79,7 +79,11 @@ class NetworkSettingsViewModel @Inject constructor(
 
     private fun ensureRelayPoolUpdatedAndConnected() =
         viewModelScope.launch {
-            relayRepository.fetchAndUpdateUserRelays(userId = activeAccountStore.activeUserId())
+            try {
+                relayRepository.fetchAndUpdateUserRelays(userId = activeAccountStore.activeUserId())
+            } catch (error: WssException) {
+                Timber.w(error)
+            }
             delay(1.seconds)
             relaysSocketManager.ensureUserRelayPoolConnected()
         }
