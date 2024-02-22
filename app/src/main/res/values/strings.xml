@@ -375,7 +375,6 @@
     <string name="wallet_activation_date_of_birth">Date of birth</string>
     <string name="wallet_activation_state">State</string>
     <string name="wallet_activation_country_of_residence">Country of residence</string>
-    <string name="wallet_activation_your_code">Activation code</string>
     <string name="wallet_activation_next_button">Next</string>
     <string name="wallet_activation_finish_button">Finish</string>
     <string name="wallet_activation_done_button">Done</string>

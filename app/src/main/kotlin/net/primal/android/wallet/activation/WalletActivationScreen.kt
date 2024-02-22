@@ -81,6 +81,7 @@ import kotlinx.serialization.json.decodeFromStream
 import net.primal.android.R
 import net.primal.android.core.compose.AdjustTemporarilySystemBarColors
 import net.primal.android.core.compose.DatePickerModalBottomSheet
+import net.primal.android.core.compose.OtpTextField
 import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.ToSAndPrivacyPolicyText
@@ -586,28 +587,21 @@ private fun WalletCodeActivationInput(
                 style = AppTheme.typography.bodyMedium,
             )
 
-            WalletOutlinedTextField(
+            OtpTextField(
                 modifier = Modifier.fillMaxWidth(fraction = 0.8f),
-                value = code,
-                onValueChange = {
+                otpText = code,
+                onOtpTextChange = {
                     if (it.isDigitsOnly()) {
                         code = it.trim()
                         onCodeChanged()
                     }
                 },
-                placeholderText = stringResource(id = R.string.wallet_activation_your_code),
-                keyboardOptions = KeyboardOptions.Default.copy(
-                    imeAction = if (code.isCodeValid()) ImeAction.Go else ImeAction.Done,
-                    keyboardType = KeyboardType.Number,
-                ),
-                keyboardActions = KeyboardActions(
-                    onGo = {
-                        if (code.isCodeValid()) {
-                            keyboardController?.hide()
-                            onCodeConfirmation(code)
-                        }
-                    },
-                ),
+                onCodeConfirmed = {
+                    if (code.isCodeValid()) {
+                        keyboardController?.hide()
+                        onCodeConfirmation(code)
+                    }
+                },
             )
 
             WalletErrorText(
