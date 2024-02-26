@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowForward
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalContentColor
@@ -22,8 +24,8 @@ import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -32,7 +34,7 @@ import androidx.compose.ui.unit.dp
 import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.theme.AppTheme
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalFoundationApi::class)
 @ExperimentalMaterial3Api
 @Composable
 fun PrimalTopAppBar(
@@ -45,7 +47,7 @@ fun PrimalTopAppBar(
     navigationIconTintColor: Color = LocalContentColor.current,
     autoCloseKeyboardOnNavigationIconClick: Boolean = true,
     avatarCdnImage: CdnImage? = null,
-    actions: @Composable RowScope.() -> Unit = {},
+    actions: (@Composable RowScope.() -> Unit)? = null,
     showDivider: Boolean = true,
     scrollBehavior: TopAppBarScrollBehavior? = null,
     onTitleLongClick: (() -> Unit)? = null,
@@ -112,7 +114,7 @@ fun PrimalTopAppBar(
                     }
                 }
             },
-            actions = actions,
+            actions = actions ?: { InvisibleAppBarIcon() },
             colors = colors,
             scrollBehavior = scrollBehavior,
         )
@@ -129,4 +131,14 @@ fun PrimalTopAppBar(
             PrimalDivider()
         }
     }
+}
+
+@Composable
+private fun InvisibleAppBarIcon() {
+    AppBarIcon(
+        modifier = Modifier.alpha(0.0f),
+        icon = Icons.AutoMirrored.Outlined.ArrowForward,
+        onClick = { },
+        enabled = false,
+    )
 }
