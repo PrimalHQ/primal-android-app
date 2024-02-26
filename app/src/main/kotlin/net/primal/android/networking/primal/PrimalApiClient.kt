@@ -123,7 +123,9 @@ class PrimalApiClient @Inject constructor(
                 try {
                     sendMessageOrThrow(subscriptionId = subscriptionId, data = message.toPrimalJsonObject())
                 } catch (error: SocketSendMessageException) {
-                    deferredQueryResult.cancel(CancellationException("Unable to send socket message for $subscriptionId."))
+                    deferredQueryResult.cancel(
+                        CancellationException("Unable to send socket message for $subscriptionId."),
+                    )
                     throw error
                 }
 

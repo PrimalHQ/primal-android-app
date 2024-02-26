@@ -10,10 +10,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
+import net.primal.android.config.AppConfigProvider
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.NostrJsonEncodeDefaults
@@ -48,6 +51,7 @@ class SubscriptionsManager @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val userRepository: UserRepository,
     private val nostrNotary: NostrNotary,
+    private val appConfigProvider: AppConfigProvider,
     @PrimalCacheApiClient private val cacheApiClient: PrimalApiClient,
     @PrimalWalletApiClient private val walletApiClient: PrimalApiClient,
 ) {
@@ -80,6 +84,7 @@ class SubscriptionsManager @Inject constructor(
 
     private fun observeActiveAccount() =
         scope.launch {
+            appConfigProvider.waitForCacheAndWalletConfigsUrls()
             activeAccountStore.activeAccountState.collect {
                 when (it) {
                     is ActiveUserAccountState.ActiveUserAccount -> {
@@ -103,6 +108,10 @@ class SubscriptionsManager @Inject constructor(
                 }
             }
         }
+
+    private suspend fun AppConfigProvider.waitForCacheAndWalletConfigsUrls() {
+        combine(cacheUrl(), walletUrl()) { array -> array.toList() }.first()
+    }
 
     private val lifecycleEventObserver = LifecycleEventObserver { _, event ->
         when (event) {
