@@ -6,8 +6,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.OutlinedTextField
@@ -90,7 +90,7 @@ fun SearchScreen(
                 contentPadding = paddingValues,
             ) {
                 item {
-                    Divider(color = AppTheme.extraColorScheme.surfaceVariantAlt1)
+                    HorizontalDivider(color = AppTheme.extraColorScheme.surfaceVariantAlt1)
                     SearchContentListItem(
                         hint = state.searchQuery.ifEmpty {
                             stringResource(id = R.string.explore_enter_query)
@@ -100,7 +100,7 @@ fun SearchScreen(
                             onSearchContent(state.searchQuery)
                         },
                     )
-                    Divider(color = AppTheme.extraColorScheme.surfaceVariantAlt1)
+                    HorizontalDivider(color = AppTheme.extraColorScheme.surfaceVariantAlt1)
                 }
 
                 items(
@@ -144,8 +144,8 @@ fun SearchTextField(
         value = query,
         onValueChange = onQueryChange,
         colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = Color.Unspecified,
-            unfocusedBorderColor = Color.Unspecified,
+            focusedBorderColor = Color.Transparent,
+            unfocusedBorderColor = Color.Transparent,
         ),
         keyboardOptions = KeyboardOptions(
             imeAction = ImeAction.Done,

@@ -33,11 +33,11 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.DatePickerFormatter
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -292,6 +292,11 @@ private fun WalletActivationDataInput(
         initialSelectedDateMillis = data.dateOfBirth,
         initialDisplayedMonthMillis = data.dateOfBirth ?: maxDate.toEpochMilli(),
         yearRange = IntRange(MAX_DATE_OF_BIRTH, LocalDate.now().year - MIN_AGE_FOR_WALLET),
+        selectableDates = object : SelectableDates {
+            override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                return utcTimeMillis <= maxDate.toEpochMilli()
+            }
+        },
     )
     var dateOfBirth by rememberSaveable { mutableStateOf(data.dateOfBirth) }
     LaunchedEffect(datePickerState.selectedDateMillis) {
@@ -347,8 +352,6 @@ private fun WalletActivationDataInput(
     if (datePickerVisible) {
         DatePickerModalBottomSheet(
             state = datePickerState,
-            dateFormatter = remember { DatePickerFormatter() },
-            dateValidator = { it <= maxDate.toEpochMilli() },
             onDismissRequest = { datePickerVisible = false },
         )
     }

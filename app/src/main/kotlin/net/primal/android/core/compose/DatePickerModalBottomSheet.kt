@@ -19,8 +19,7 @@ import net.primal.android.theme.AppTheme
 @Composable
 fun DatePickerModalBottomSheet(
     state: DatePickerState,
-    dateFormatter: DatePickerFormatter = remember { DatePickerFormatter() },
-    dateValidator: (Long) -> Boolean = { true },
+    dateFormatter: DatePickerFormatter = remember { DatePickerDefaults.dateFormatter() },
     showModeToggle: Boolean = true,
     colors: DatePickerColors = DatePickerDefaults.colors(
         selectedDayContainerColor = AppTheme.colorScheme.primary,
@@ -37,7 +36,6 @@ fun DatePickerModalBottomSheet(
             state = state,
             modifier = Modifier.padding(bottom = 16.dp),
             dateFormatter = dateFormatter,
-            dateValidator = dateValidator,
             showModeToggle = showModeToggle,
             colors = colors,
         )

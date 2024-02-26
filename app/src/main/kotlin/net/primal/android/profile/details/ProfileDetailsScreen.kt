@@ -488,8 +488,8 @@ private fun ProfileTopCoverBar(
         Column {
             TopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Unspecified,
-                    scrolledContainerColor = Color.Unspecified,
+                    containerColor = Color.Transparent,
+                    scrolledContainerColor = Color.Transparent,
                 ),
                 navigationIcon = navigationIcon,
                 title = title,
@@ -793,7 +793,7 @@ private fun UserTabs(
         divider = { },
         indicator = { tabPositions ->
             if (tabIndex < tabPositions.size) {
-                TabRowDefaults.Indicator(
+                TabRowDefaults.SecondaryIndicator(
                     modifier = Modifier.tabIndicatorOffset(tabPositions[tabIndex]),
                     height = 4.dp,
                     color = AppTheme.colorScheme.tertiary,

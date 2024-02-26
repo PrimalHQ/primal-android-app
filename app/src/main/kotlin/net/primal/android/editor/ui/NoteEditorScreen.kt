@@ -25,8 +25,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Close
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
@@ -283,12 +283,13 @@ fun NoteEditorScreen(
                                     lineHeight = 20.sp,
                                 ),
                                 colors = PrimalDefaults.outlinedTextFieldColors(
-                                    focusedContainerColor = Color.Unspecified,
-                                    unfocusedContainerColor = Color.Unspecified,
-                                    focusedBorderColor = Color.Unspecified,
-                                    unfocusedBorderColor = Color.Unspecified,
-                                    errorBorderColor = Color.Unspecified,
-                                    disabledBorderColor = Color.Unspecified,
+                                    focusedContainerColor = Color.Transparent,
+                                    unfocusedContainerColor = Color.Transparent,
+                                    disabledContainerColor = Color.Transparent,
+                                    focusedBorderColor = Color.Transparent,
+                                    unfocusedBorderColor = Color.Transparent,
+                                    disabledBorderColor = Color.Transparent,
+                                    errorBorderColor = Color.Transparent,
                                 ),
                             )
                         }
@@ -314,9 +315,7 @@ fun NoteEditorScreen(
         },
         bottomBar = {
             Column {
-                Divider(
-                    color = AppTheme.extraColorScheme.surfaceVariantAlt1,
-                )
+                HorizontalDivider(color = AppTheme.extraColorScheme.surfaceVariantAlt1)
                 NoteActionRow(
                     onPhotosImported = { photoUris ->
                         eventPublisher(UiEvent.ImportLocalFiles(uris = photoUris))
