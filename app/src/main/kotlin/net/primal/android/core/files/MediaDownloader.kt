@@ -10,6 +10,7 @@ import android.provider.MediaStore
 import androidx.annotation.RequiresApi
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
+import java.io.IOException
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
@@ -36,7 +37,11 @@ class MediaDownloader @Inject constructor(
     fun downloadToMediaGallery(url: String) {
         val request = Request.Builder().url(url).build()
         val client = OkHttpClient.Builder().followRedirects(true).build()
-        val response = client.newCall(request).execute()
+        val response = try {
+            client.newCall(request).execute()
+        } catch (error: IOException) {
+            throw UnsuccessfulFileDownload("Unable to download media.", cause = error)
+        }
 
         val remoteSource = response.body?.source() ?: throw UnsuccessfulFileDownload(message = "No remote source.")
 
