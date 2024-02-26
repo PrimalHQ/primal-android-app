@@ -20,6 +20,7 @@ import net.primal.android.core.files.error.UnsuccessfulFileDownload
 import net.primal.android.core.utils.extractExtensionFromUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.Response
 import okio.BufferedSource
 import okio.sink
 import timber.log.Timber
@@ -35,36 +36,49 @@ class MediaDownloader @Inject constructor(
 
     @Throws(UnsuccessfulFileDownload::class)
     fun downloadToMediaGallery(url: String) {
-        val request = Request.Builder().url(url).build()
-        val client = OkHttpClient.Builder().followRedirects(true).build()
-        val response = try {
-            client.newCall(request).execute()
+        try {
+            val response = requestMediaDownload(url)
+            val fileName = generateFileName()
+            val fileExtension = url.extractExtensionFromUrl()
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                val (remoteSource, contentType) = response.takeRemoteSourceAndContentTypeOrThrow()
+                saveMediaContent(
+                    fileName = fileName,
+                    contentType = contentType,
+                    contentSource = remoteSource,
+                    contentResolver = contentResolver,
+                )
+            } else {
+                val remoteSource = response.takeRemoteSourceOrThrow()
+                saveMediaContentSupportMode(
+                    fileName = "$fileName.$fileExtension",
+                    contentSource = remoteSource,
+                    context = context,
+                )
+            }
         } catch (error: IOException) {
             throw UnsuccessfulFileDownload("Unable to download media.", cause = error)
         }
+    }
 
-        val remoteSource = response.body?.source() ?: throw UnsuccessfulFileDownload(message = "No remote source.")
+    @Throws(IOException::class)
+    private fun requestMediaDownload(url: String): Response {
+        val request = Request.Builder().url(url).build()
+        val client = OkHttpClient.Builder().followRedirects(true).build()
+        return client.newCall(request).execute()
+    }
 
-        val fileName = generateFileName()
-        val fileExtension = url.extractExtensionFromUrl()
+    @Throws(IOException::class)
+    private fun Response.takeRemoteSourceOrThrow(): BufferedSource {
+        return body?.source() ?: throw IOException("Missing response body.")
+    }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            val contentType = response.header("Content-Type")
-                ?: throw UnsuccessfulFileDownload(message = "Unknown Content-Type.")
-
-            saveMediaContent(
-                fileName = fileName,
-                contentType = contentType,
-                contentSource = remoteSource,
-                contentResolver = contentResolver,
-            )
-        } else {
-            saveMediaContentSupportMode(
-                fileName = "$fileName.$fileExtension",
-                contentSource = remoteSource,
-                context = context,
-            )
-        }
+    @Throws(IOException::class)
+    private fun Response.takeRemoteSourceAndContentTypeOrThrow(): Pair<BufferedSource, String> {
+        val source = body?.source()
+        val contentType = header("Content-Type")
+        return if (source != null && contentType != null) source to contentType else throw IOException()
     }
 
     private fun generateFileName(): String {

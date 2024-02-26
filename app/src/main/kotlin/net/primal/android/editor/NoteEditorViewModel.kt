@@ -174,7 +174,9 @@ class NoteEditorViewModel @Inject constructor(
             setState { copy(uploadingAttachments = true) }
             updateNoteAttachmentState(attachment = attachment.copy(uploadError = null))
 
-            val remoteUrl = postRepository.uploadPostAttachment(attachment)
+            val remoteUrl = withContext(dispatcherProvider.io()) {
+                postRepository.uploadPostAttachment(attachment)
+            }
             updateNoteAttachmentState(attachment = attachment.copy(remoteUrl = remoteUrl))
 
             if (attachment.isImageAttachment) {
