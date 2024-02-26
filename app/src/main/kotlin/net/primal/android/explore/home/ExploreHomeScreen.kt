@@ -138,6 +138,7 @@ fun ExploreHomeScreen(
                                 onClick = { onHashtagClick("#${it.name}") },
                                 shape = AppTheme.shapes.extraLarge,
                                 border = SuggestionChipDefaults.suggestionChipBorder(
+                                    enabled = true,
                                     borderColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
                                 ),
                                 colors = SuggestionChipDefaults.suggestionChipColors(
