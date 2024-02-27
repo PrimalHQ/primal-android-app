@@ -30,7 +30,8 @@ fun String.urlToLnUrlHrp() =
         encoding = Bech32.Encoding.Bech32,
     )
 
-fun String.bech32ToHex() = Bech32.decodeBytes(bech32 = this).second.toHex()
+@Throws(IllegalArgumentException::class)
+fun String.bech32ToHexOrThrow() = Bech32.decodeBytes(bech32 = this).second.toHex()
 
 fun ByteArray.toNsec() = Bech32.encodeBytes(hrp = "nsec", this, Bech32.Encoding.Bech32)
 
@@ -49,7 +50,7 @@ fun Int.toByteArray(): ByteArray {
 }
 
 @Throws(IllegalArgumentException::class)
-fun String.bechToBytes(hrp: String? = null): ByteArray {
+fun String.bechToBytesOrThrow(hrp: String? = null): ByteArray {
     val decodedForm = Bech32.decodeBytes(this)
     hrp?.also {
         if (it != decodedForm.first) {
@@ -58,8 +59,3 @@ fun String.bechToBytes(hrp: String? = null): ByteArray {
     }
     return decodedForm.second
 }
-
-/**
- * Interpret the string as Bech32 encoded and return hrp and ByteArray as Pair
- */
-fun String.bechToBytesWithHrp() = Bech32.decodeBytes(this).run { Pair(first, second) }

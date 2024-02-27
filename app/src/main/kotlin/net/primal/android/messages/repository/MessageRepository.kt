@@ -9,7 +9,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import net.primal.android.crypto.CryptoUtils
-import net.primal.android.crypto.bechToBytes
+import net.primal.android.crypto.bechToBytesOrThrow
 import net.primal.android.crypto.hexToNpubHrp
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.messages.api.MessagesApi
@@ -144,8 +144,8 @@ class MessageRepository @Inject constructor(
             msg = text,
             privateKey = credentialsStore
                 .findOrThrow(npub = userId.hexToNpubHrp())
-                .nsec.bechToBytes(hrp = "nsec"),
-            pubKey = receiverId.hexToNpubHrp().bechToBytes(hrp = "npub"),
+                .nsec.bechToBytesOrThrow(hrp = "nsec"),
+            pubKey = receiverId.hexToNpubHrp().bechToBytesOrThrow(hrp = "npub"),
         )
 
         withContext(Dispatchers.IO) {

@@ -566,6 +566,7 @@ private fun NavGraphBuilder.search(route: String, navController: NavController) 
             viewModel = viewModel,
             onClose = { navController.navigateUp() },
             onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
+            onNoteClick = { noteId -> navController.navigateToThread(noteId) },
             onSearchContent = { query -> navController.navigateToExploreFeed(query) },
         )
     }

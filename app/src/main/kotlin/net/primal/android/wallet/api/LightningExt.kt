@@ -1,6 +1,6 @@
 package net.primal.android.wallet.api
 
-import net.primal.android.crypto.bechToBytes
+import net.primal.android.crypto.bechToBytesOrThrow
 
 fun String.parseAsLNUrlOrNull(): String? {
     val parts = this.split("@")
@@ -12,4 +12,4 @@ fun String.parseAsLNUrlOrNull(): String? {
     return "https://$host/.well-known/lnurlp/$lnurlp"
 }
 
-fun String.decodeLNUrlOrNull(): String? = runCatching { String(this.bechToBytes(hrp = "lnurl")) }.getOrNull()
+fun String.decodeLNUrlOrNull(): String? = runCatching { String(this.bechToBytesOrThrow(hrp = "lnurl")) }.getOrNull()

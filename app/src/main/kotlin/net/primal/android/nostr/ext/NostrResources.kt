@@ -6,7 +6,7 @@ import net.primal.android.attachments.ext.flatMapPostsAsNoteAttachmentPO
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.core.utils.usernameUiFriendly
-import net.primal.android.crypto.bechToBytes
+import net.primal.android.crypto.bechToBytesOrThrow
 import net.primal.android.crypto.toHex
 import net.primal.android.feed.db.PostData
 import net.primal.android.feed.db.ReferencedPost
@@ -62,8 +62,9 @@ private fun String.nostrUriToBytes(): ByteArray? {
     val type = matcher.group(2)?.lowercase() ?: return null
     val key = matcher.group(3)?.lowercase() ?: return null
     return try {
-        (type + key).bechToBytes()
+        (type + key).bechToBytesOrThrow()
     } catch (error: IllegalArgumentException) {
+        Timber.w(error)
         null
     }
 }
@@ -93,9 +94,9 @@ fun String.extractProfileId(): String? {
 
     return try {
         when (bechPrefix?.lowercase()) {
-            NPUB -> (bechPrefix + key).bechToBytes().toHex()
+            NPUB -> (bechPrefix + key).bechToBytesOrThrow().toHex()
             NPROFILE -> {
-                val tlv = Nip19TLV.parse((bechPrefix + key).bechToBytes())
+                val tlv = Nip19TLV.parse((bechPrefix + key).bechToBytesOrThrow())
                 tlv[Nip19TLV.Type.SPECIAL.id]?.first()?.toHex()
             }
             else -> null
@@ -115,9 +116,9 @@ fun String.extractNoteId(): String? {
 
     return try {
         when (bechPrefix?.lowercase()) {
-            NOTE -> (bechPrefix + key).bechToBytes().toHex()
+            NOTE -> (bechPrefix + key).bechToBytesOrThrow().toHex()
             NEVENT -> {
-                val tlv = Nip19TLV.parse((bechPrefix + key).bechToBytes())
+                val tlv = Nip19TLV.parse((bechPrefix + key).bechToBytesOrThrow())
                 tlv[Nip19TLV.Type.SPECIAL.id]?.first()?.toHex()
             }
             else -> null

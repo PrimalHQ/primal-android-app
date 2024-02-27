@@ -8,7 +8,7 @@ import net.primal.android.core.serialization.json.toJsonObject
 import net.primal.android.core.utils.parseHashtags
 import net.primal.android.core.utils.parseUris
 import net.primal.android.crypto.CryptoUtils
-import net.primal.android.crypto.bechToBytes
+import net.primal.android.crypto.bechToBytesOrThrow
 import net.primal.android.crypto.hexToNpubHrp
 import net.primal.android.messages.db.DirectMessageData
 import net.primal.android.messages.domain.ConversationSummary
@@ -47,8 +47,8 @@ fun NostrEvent.mapAsMessageDataPO(userId: String, nsec: String): DirectMessageDa
     val decryptedMessage = runCatching {
         CryptoUtils.decrypt(
             message = this.content,
-            privateKey = nsec.bechToBytes(hrp = "nsec"),
-            pubKey = participantId.hexToNpubHrp().bechToBytes(hrp = "npub"),
+            privateKey = nsec.bechToBytesOrThrow(hrp = "nsec"),
+            pubKey = participantId.hexToNpubHrp().bechToBytesOrThrow(hrp = "npub"),
         )
     }.getOrElse {
         Timber.w(NostrJson.encodeToString(this.toJsonObject()))

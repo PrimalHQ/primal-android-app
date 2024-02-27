@@ -2,7 +2,7 @@ package net.primal.android.nostr.utils
 
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.instanceOf
-import net.primal.android.crypto.bechToBytes
+import net.primal.android.crypto.bechToBytesOrThrow
 import net.primal.android.crypto.toHex
 import org.junit.Test
 
@@ -17,7 +17,7 @@ class Nip19TLVTest {
 
         val eventId = "8d2338bb62db88d13cea23f55f27c4886f68cf777dac42f2b65e6f709a5e6926"
 
-        val tlv = Nip19TLV.parse(nevent1.bechToBytes())
+        val tlv = Nip19TLV.parse(nevent1.bechToBytesOrThrow())
 
         tlv shouldBe instanceOf( Map::class)
         tlv.size shouldBe 2
