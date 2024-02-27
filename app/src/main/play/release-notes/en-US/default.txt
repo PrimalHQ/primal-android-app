@@ -1,2 +1,4 @@
 ## Changes
 - Stability improvements.
+- Do not collapse top bar on threads screens.
+- Implemented opening note1 and npub1 directly from search query.
