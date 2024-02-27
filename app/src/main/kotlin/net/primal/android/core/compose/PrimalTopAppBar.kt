@@ -134,7 +134,7 @@ fun PrimalTopAppBar(
 }
 
 @Composable
-private fun InvisibleAppBarIcon() {
+fun InvisibleAppBarIcon() {
     AppBarIcon(
         modifier = Modifier.alpha(0.0f),
         icon = Icons.AutoMirrored.Outlined.ArrowForward,

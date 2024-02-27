@@ -46,6 +46,7 @@ import net.primal.android.R
 import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.IconText
+import net.primal.android.core.compose.InvisibleAppBarIcon
 import net.primal.android.core.compose.ListLoading
 import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.PrimalDivider
@@ -189,7 +190,7 @@ fun ExploreTopAppBar(
     title: @Composable () -> Unit,
     onNavigationIconClick: () -> Unit,
     avatarCdnImage: CdnImage? = null,
-    actions: @Composable RowScope.() -> Unit = {},
+    actions: (@Composable RowScope.() -> Unit)? = null,
     scrollBehavior: TopAppBarScrollBehavior? = null,
 ) {
     Column {
@@ -208,7 +209,7 @@ fun ExploreTopAppBar(
                 }
             },
             title = title,
-            actions = actions,
+            actions = actions ?: { InvisibleAppBarIcon() },
             colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                 containerColor = AppTheme.colorScheme.surface,
                 scrolledContainerColor = AppTheme.colorScheme.surface,
