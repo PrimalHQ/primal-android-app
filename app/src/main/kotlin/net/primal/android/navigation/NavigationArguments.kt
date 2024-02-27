@@ -25,7 +25,8 @@ inline val SavedStateHandle.followsType: String? get() = get(FOLLOWS_TYPE)
 
 const val SEARCH_QUERY = "searchQuery"
 inline val SavedStateHandle.searchQueryOrThrow: String
-    get() = get(SEARCH_QUERY) ?: throw IllegalArgumentException("Missing required searchQuery argument.")
+    get() = get<String>(SEARCH_QUERY)?.asBase64Decoded()?.ifEmpty { null }
+        ?: throw IllegalArgumentException("Missing required searchQuery argument.")
 
 const val NEW_POST_PRE_FILL_CONTENT = "preFillContent"
 inline val SavedStateHandle.newPostPreFillContent: String?

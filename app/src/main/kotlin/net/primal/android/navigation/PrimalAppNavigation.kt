@@ -173,7 +173,8 @@ fun NavController.navigateToThread(noteId: String) = navigate(route = "thread/$n
 fun NavController.navigateToMediaGallery(noteId: String, mediaUrl: String) =
     navigate(route = "media/$noteId?$MEDIA_URL=$mediaUrl")
 
-fun NavController.navigateToExploreFeed(query: String) = navigate(route = "explore/$query")
+fun NavController.navigateToExploreFeed(query: String) =
+    navigate(route = "explore?$SEARCH_QUERY=${query.asBase64Encoded()}")
 
 @OptIn(ExperimentalMaterialNavigationApi::class)
 @Composable
@@ -268,10 +269,11 @@ fun PrimalAppNavigation() {
             )
 
             exploreFeed(
-                route = "explore/{$SEARCH_QUERY}",
+                route = "explore?$SEARCH_QUERY={$SEARCH_QUERY}",
                 arguments = listOf(
                     navArgument(SEARCH_QUERY) {
                         type = NavType.StringType
+                        nullable = false
                     },
                 ),
                 navController = navController,
