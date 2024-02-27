@@ -53,7 +53,7 @@ fun String.isNProfileUri() = lowercase().startsWith(NOSTR + NPROFILE)
 fun String.parseNostrUris(): List<String> {
     return nostrUriRegexPattern.toRegex().findAll(this).map { matchResult ->
         matchResult.groupValues[1] + matchResult.groupValues[2] + matchResult.groupValues[3]
-    }.toList()
+    }.filter { it.nostrUriToBytes() != null }.toList()
 }
 
 private fun String.nostrUriToBytes(): ByteArray? {
@@ -61,7 +61,11 @@ private fun String.nostrUriToBytes(): ByteArray? {
     if (!matcher.find()) return null
     val type = matcher.group(2)?.lowercase() ?: return null
     val key = matcher.group(3)?.lowercase() ?: return null
-    return (type + key).bechToBytes()
+    return try {
+        (type + key).bechToBytes()
+    } catch (error: IllegalArgumentException) {
+        null
+    }
 }
 
 fun String.nostrUriToNoteId() = nostrUriToBytes()?.toHex()

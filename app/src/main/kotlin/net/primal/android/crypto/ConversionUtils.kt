@@ -48,6 +48,7 @@ fun Int.toByteArray(): ByteArray {
     return bytes
 }
 
+@Throws(IllegalArgumentException::class)
 fun String.bechToBytes(hrp: String? = null): ByteArray {
     val decodedForm = Bech32.decodeBytes(this)
     hrp?.also {
