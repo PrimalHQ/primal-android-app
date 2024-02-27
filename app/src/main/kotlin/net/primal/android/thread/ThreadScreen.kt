@@ -34,8 +34,6 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -48,7 +46,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -141,8 +138,6 @@ fun ThreadScreen(
     onReplyInNoteEditor: (String, Uri?, String) -> Unit,
     eventPublisher: (ThreadContract.UiEvent) -> Unit,
 ) {
-    val topAppBarState = rememberTopAppBarState()
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(topAppBarState)
     val listState = rememberLazyListState()
 
     var repostQuotePostConfirmation by remember { mutableStateOf<FeedPostUi?>(null) }
@@ -210,7 +205,6 @@ fun ThreadScreen(
     var bottomBarMaxHeightPx by remember { mutableIntStateOf(0) }
     Scaffold(
         modifier = Modifier
-            .nestedScroll(scrollBehavior.nestedScrollConnection)
             .navigationBarsPadding()
             .imePadding(),
         topBar = {
@@ -220,7 +214,6 @@ fun ThreadScreen(
                 navigationIcon = PrimalIcons.ArrowBack,
                 onNavigationIconClick = onClose,
                 showDivider = true,
-                scrollBehavior = scrollBehavior,
             )
         },
         content = { paddingValues ->
