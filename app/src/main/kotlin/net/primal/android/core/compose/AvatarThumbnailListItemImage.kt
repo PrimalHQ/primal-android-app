@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.SubcomposeAsyncImage
@@ -22,6 +23,7 @@ import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 import net.primal.android.theme.AppTheme
+import net.primal.android.R
 
 @Composable
 fun AvatarThumbnail(
@@ -62,7 +64,7 @@ private fun AvatarThumbnailListItemImage(
                 borderColor = borderColor,
             )
             .clickable(enabled = onClick != null, onClick = { onClick?.invoke() }),
-        contentDescription = null,
+        contentDescription = stringResource(id = R.string.accessibility_profile_image),
         contentScale = ContentScale.Crop,
         loading = {
             Box(

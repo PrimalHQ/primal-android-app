@@ -345,6 +345,7 @@ fun ProfileDetailsScreen(
                         navigationIcon = {
                             AppBarIcon(
                                 icon = PrimalIcons.ArrowBack,
+                                contentDescription = stringResource(id = R.string.accessibility_back_button),
                                 enabledBackgroundColor = Color.Black.copy(alpha = 0.5f),
                                 tint = Color.White,
                                 onClick = onClose,
@@ -917,11 +918,13 @@ private fun ProfileActions(
         ActionButton(
             onClick = onZapProfileClick,
             iconVector = PrimalIcons.FeedZaps,
+            contentDescription = stringResource(id = R.string.accessibility_profile_send_zap),
         )
 
         ActionButton(
             onClick = onMessageClick,
             iconVector = PrimalIcons.Message,
+            contentDescription = stringResource(id = R.string.accessibility_profile_messages),
         )
 
         if (!isActiveUser) {
