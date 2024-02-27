@@ -98,6 +98,7 @@ fun ExploreFeedScreen(
                 title = state.title,
                 navigationIcon = PrimalIcons.ArrowBack,
                 onNavigationIconClick = onClose,
+                navigationIconContentDescription = stringResource(id = R.string.accessibility_back_button),
                 actions = {
                     AppBarIcon(
                         icon = if (state.existsInUserFeeds) {

@@ -71,6 +71,7 @@ fun AppearanceSettingsScreen(
             PrimalTopAppBar(
                 title = "Appearance",
                 navigationIcon = PrimalIcons.ArrowBack,
+                navigationIconContentDescription = stringResource(id = R.string.accessibility_back_button),
                 onNavigationIconClick = onClose,
             )
         },

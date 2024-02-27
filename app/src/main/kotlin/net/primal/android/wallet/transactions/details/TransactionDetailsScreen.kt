@@ -140,6 +140,7 @@ fun TransactionDetailsScreen(
             PrimalTopAppBar(
                 title = state.txData.resolveTitle(),
                 navigationIcon = PrimalIcons.ArrowBack,
+                navigationIconContentDescription = stringResource(id = R.string.accessibility_back_button),
                 showDivider = showTopBarDivider,
                 onNavigationIconClick = onClose,
             )

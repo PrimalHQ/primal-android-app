@@ -69,6 +69,7 @@ fun AccountSettingsScreen(state: AccountSettingsContract.UiState, onClose: () ->
             PrimalTopAppBar(
                 title = stringResource(id = R.string.settings_keys_title),
                 navigationIcon = PrimalIcons.ArrowBack,
+                navigationIconContentDescription = stringResource(id = R.string.accessibility_back_button),
                 onNavigationIconClick = onClose,
             )
         },

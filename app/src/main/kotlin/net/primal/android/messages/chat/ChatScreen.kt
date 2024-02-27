@@ -140,6 +140,7 @@ fun ChatScreen(
                 subtitle = state.participantProfile?.internetIdentifier?.formatNip05Identifier(),
                 navigationIcon = PrimalIcons.ArrowBack,
                 onNavigationIconClick = onClose,
+                navigationIconContentDescription = stringResource(id = R.string.accessibility_back_button),
                 actions = {
                     Box(
                         modifier = Modifier

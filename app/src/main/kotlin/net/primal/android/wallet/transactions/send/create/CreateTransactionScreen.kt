@@ -55,6 +55,7 @@ fun CreateTransactionScreen(
                         DraftTxStatus.Failed -> stringResource(id = R.string.wallet_create_transaction_failed_title)
                     },
                     navigationIcon = PrimalIcons.ArrowBack,
+                    navigationIconContentDescription = stringResource(id = R.string.accessibility_back_button),
                     showDivider = false,
                     onNavigationIconClick = onClose,
                 )

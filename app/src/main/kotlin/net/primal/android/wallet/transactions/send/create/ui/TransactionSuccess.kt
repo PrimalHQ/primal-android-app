@@ -69,6 +69,7 @@ fun TransactionSuccess(
             title = stringResource(id = R.string.wallet_create_transaction_success_title),
             textColor = walletSuccessContentColor,
             navigationIcon = PrimalIcons.ArrowBack,
+            navigationIconContentDescription = stringResource(id = R.string.accessibility_back_button),
             showDivider = false,
             onNavigationIconClick = { closingSequence() },
             navigationIconTintColor = if (!isClosing) walletSuccessContentColor else AppTheme.colorScheme.onSurface,

@@ -70,6 +70,7 @@ fun NewConversationScreen(
                 title = stringResource(id = R.string.new_message_title),
                 navigationIcon = PrimalIcons.ArrowBack,
                 onNavigationIconClick = onClose,
+                navigationIconContentDescription = stringResource(id = R.string.accessibility_back_button),
                 footer = {
                     SearchBar(
                         query = state.searchQuery,

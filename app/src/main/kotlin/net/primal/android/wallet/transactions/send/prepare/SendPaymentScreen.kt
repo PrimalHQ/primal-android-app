@@ -112,6 +112,7 @@ fun SendPaymentScreen(
             PrimalTopAppBar(
                 title = stringResource(id = activeTab.data.labelResId),
                 navigationIcon = PrimalIcons.ArrowBack,
+                navigationIconContentDescription = stringResource(id = R.string.accessibility_back_button),
                 showDivider = activeTab != SendPaymentTab.Nostr,
                 onNavigationIconClick = {
                     closingScreen = true

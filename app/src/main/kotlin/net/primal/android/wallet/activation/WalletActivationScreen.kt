@@ -167,6 +167,7 @@ fun WalletActivationScreen(
                 },
                 showDivider = uiState.status != WalletActivationStatus.ActivationSuccess,
                 navigationIcon = PrimalIcons.ArrowBack,
+                navigationIconContentDescription = stringResource(id = R.string.accessibility_back_button),
                 navigationIconTintColor = when (uiState.status) {
                     WalletActivationStatus.ActivationSuccess -> walletSuccessContentColor
                     else -> LocalContentColor.current
