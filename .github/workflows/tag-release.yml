@@ -36,6 +36,10 @@ jobs:
         mv app/build/outputs/apk/aosp/altRelease/*apk primal-${{ github.ref_name }}.apk
         zip -j primal-${{ github.ref_name }}-mapping.zip app/build/outputs/mapping/aospAltRelease/mapping.txt
 
+        ./gradlew assembleAospAltRelease -P enablePrimalCrashReporter=true --no-daemon
+        mv app/build/outputs/apk/aosp/altRelease/*apk primal-${{ github.ref_name }}-crash-reporter.apk
+        zip -j primal-${{ github.ref_name }}-crash-reporter-mapping.zip app/build/outputs/mapping/aospAltRelease/mapping.txt
+
     - name: Upload APK artifacts to GitHub
       uses: actions/upload-artifact@v3
       with:
@@ -43,6 +47,8 @@ jobs:
         path: |
           primal-${{ github.ref_name }}.apk
           primal-${{ github.ref_name }}-mapping.zip
+          primal-${{ github.ref_name }}-crash-reporter.apk
+          primal-${{ github.ref_name }}-crash-reporter-mapping.zip
 
     - name: Publish AAB to Google Play
       run: ./gradlew publishGooglePlayReleaseBundle --track "alpha" --release-name "${{ github.ref_name }}" --stacktrace
