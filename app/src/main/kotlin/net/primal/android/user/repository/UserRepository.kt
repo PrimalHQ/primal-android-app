@@ -8,6 +8,7 @@ import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.core.utils.usernameUiFriendly
 import net.primal.android.db.PrimalDatabase
+import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.ext.asProfileDataPO
 import net.primal.android.nostr.model.content.ContentMetadata
@@ -84,7 +85,7 @@ class UserRepository @Inject constructor(
         accountsStore.clearAllAccounts()
     }
 
-    @Throws(UnsuccessfulFileUpload::class)
+    @Throws(UnsuccessfulFileUpload::class, NostrPublishException::class)
     suspend fun setProfileMetadata(userId: String, profileMetadata: ProfileMetadata) {
         val pictureUrl = if (profileMetadata.localPictureUri != null) {
             fileUploader.uploadFile(userId = userId, uri = profileMetadata.localPictureUri)
@@ -113,6 +114,7 @@ class UserRepository @Inject constructor(
         )
     }
 
+    @Throws(NostrPublishException::class, WssException::class)
     suspend fun setLightningAddress(userId: String, lightningAddress: String) {
         val userProfileResponse = usersApi.getUserProfile(userId = userId)
         val metadata = NostrJson.decodeFromStringOrNull<ContentMetadata>(userProfileResponse.metadata?.content)

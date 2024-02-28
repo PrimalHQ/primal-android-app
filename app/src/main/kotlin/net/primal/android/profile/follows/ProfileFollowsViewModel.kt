@@ -139,6 +139,10 @@ class ProfileFollowsViewModel @Inject constructor(
                 Timber.w(error)
                 setErrorState(error = UiState.FollowsError.MissingRelaysConfiguration(error))
                 updateStateProfileUnfollow(profileId)
+            } catch (error: ProfileRepository.FollowListNotFound) {
+                Timber.w(error)
+                setErrorState(error = UiState.FollowsError.FailedToFollowUser(error))
+                updateStateProfileUnfollow(profileId)
             }
         }
 
@@ -161,6 +165,10 @@ class ProfileFollowsViewModel @Inject constructor(
             } catch (error: MissingRelaysException) {
                 Timber.w(error)
                 setErrorState(error = UiState.FollowsError.MissingRelaysConfiguration(error))
+                updateStateProfileFollow(profileId)
+            } catch (error: ProfileRepository.FollowListNotFound) {
+                Timber.w(error)
+                setErrorState(error = UiState.FollowsError.FailedToUnfollowUser(error))
                 updateStateProfileFollow(profileId)
             }
         }

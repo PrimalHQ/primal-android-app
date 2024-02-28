@@ -7,7 +7,7 @@ import net.primal.android.core.ext.asMapByKey
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.explore.api.model.UsersResponse
 import net.primal.android.explore.domain.UserProfileSearchItem
-import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.ext.asProfileDataPO
 import net.primal.android.nostr.ext.asProfileStatsPO
 import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
@@ -54,21 +54,23 @@ class ProfileRepository @Inject constructor(
         }
     }
 
+    @Throws(FollowListNotFound::class, NostrPublishException::class)
     suspend fun follow(userId: String, followedUserId: String) {
         updateFollowList(userId = userId) {
             toMutableSet().apply { add(followedUserId) }
         }
     }
 
+    @Throws(FollowListNotFound::class, NostrPublishException::class)
     suspend fun unfollow(userId: String, unfollowedUserId: String) {
         updateFollowList(userId = userId) {
             toMutableSet().apply { remove(unfollowedUserId) }
         }
     }
 
+    @Throws(FollowListNotFound::class, NostrPublishException::class)
     private suspend fun updateFollowList(userId: String, reducer: Set<String>.() -> Set<String>) {
-        val userFollowList = userAccountFetcher.fetchUserFollowListOrNull(userId = userId)
-            ?: throw WssException("Follow Lists not found.")
+        val userFollowList = userAccountFetcher.fetchUserFollowListOrNull(userId = userId) ?: throw FollowListNotFound()
 
         userRepository.updateFollowList(userId, userFollowList)
 
@@ -79,6 +81,7 @@ class ProfileRepository @Inject constructor(
         )
     }
 
+    @Throws(NostrPublishException::class)
     suspend fun setFollowList(
         userId: String,
         contacts: Set<String>,
@@ -118,4 +121,6 @@ class ProfileRepository @Inject constructor(
         queryRemoteUsers {
             usersApi.getUserFollowing(userId = userId)
         }
+
+    class FollowListNotFound : Exception()
 }

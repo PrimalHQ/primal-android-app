@@ -5,6 +5,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.map
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.networking.relays.BOOTSTRAP_RELAYS
+import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.android.user.accounts.parseNip65Relays
 import net.primal.android.user.api.UsersApi
@@ -23,6 +24,7 @@ class RelayRepository @Inject constructor(
 
     fun findRelays(userId: String, kind: RelayKind) = primalDatabase.relays().findRelays(userId, kind)
 
+    @Throws(NostrPublishException::class)
     suspend fun bootstrapDefaultUserRelays(userId: String) {
         nostrPublisher.publishRelayList(userId, BOOTSTRAP_RELAYS)
         replaceUserRelays(userId, BOOTSTRAP_RELAYS)
@@ -49,6 +51,7 @@ class RelayRepository @Inject constructor(
         }
     }
 
+    @Throws(NostrPublishException::class)
     suspend fun addRelayAndPublishRelayList(userId: String, url: String) {
         val newRelay = RelayDO(url = url, read = true, write = true)
         updateRelayList(userId = userId) {
@@ -58,6 +61,7 @@ class RelayRepository @Inject constructor(
         }
     }
 
+    @Throws(NostrPublishException::class)
     suspend fun removeRelayAndPublishRelayList(userId: String, url: String) {
         updateRelayList(userId = userId) {
             this.toMutableList().apply {

@@ -4,6 +4,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import net.primal.android.core.files.FileUploader
+import net.primal.android.core.files.error.UnsuccessfulFileUpload
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.editor.domain.NoteAttachment
 import net.primal.android.networking.relays.errors.NostrPublishException
@@ -118,6 +119,7 @@ class PostRepository @Inject constructor(
         )
     }
 
+    @Throws(UnsuccessfulFileUpload::class)
     suspend fun uploadPostAttachment(attachment: NoteAttachment): String {
         val userId = activeAccountStore.activeUserId()
         return fileUploader.uploadFile(userId = userId, attachment.localUri)

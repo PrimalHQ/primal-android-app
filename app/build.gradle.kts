@@ -81,7 +81,7 @@ android {
                 project.properties["enablePrimalCrashReporter"] as String
             } else {
                 "false"
-            }
+            },
         )
     }
 

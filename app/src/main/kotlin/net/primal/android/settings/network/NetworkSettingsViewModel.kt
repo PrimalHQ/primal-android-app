@@ -120,7 +120,11 @@ class NetworkSettingsViewModel @Inject constructor(
     private fun restoreDefaultRelays() =
         viewModelScope.launch {
             changeRelayList { userId ->
-                relayRepository.bootstrapDefaultUserRelays(userId = userId)
+                try {
+                    relayRepository.bootstrapDefaultUserRelays(userId = userId)
+                } catch (error: NostrPublishException) {
+                    Timber.w(error)
+                }
                 ensureRelayPoolUpdatedAndConnected()
             }
         }

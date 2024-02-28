@@ -15,6 +15,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.networking.relays.errors.MissingRelaysException
+import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.domain.WalletPreference
@@ -111,6 +112,10 @@ class WalletActivationViewModel @Inject constructor(
                     withContext(coroutineDispatcher.io()) {
                         try {
                             userRepository.setLightningAddress(userId = userId, lightningAddress = it)
+                        } catch (error: NostrPublishException) {
+                            Timber.w(error)
+                        } catch (error: WssException) {
+                            Timber.w(error)
                         } catch (error: MissingRelaysException) {
                             Timber.w(error)
                         }

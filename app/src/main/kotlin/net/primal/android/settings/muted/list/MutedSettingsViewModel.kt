@@ -21,6 +21,7 @@ import net.primal.android.settings.muted.list.MutedSettingsContract.UiState
 import net.primal.android.settings.muted.list.model.MutedUserUi
 import net.primal.android.settings.muted.repository.MutedUserRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
+import timber.log.Timber
 
 @HiltViewModel
 class MutedSettingsViewModel @Inject constructor(
@@ -62,10 +63,14 @@ class MutedSettingsViewModel @Inject constructor(
 
     private fun fetchLatestMuteList() =
         viewModelScope.launch {
-            withContext(dispatcherProvider.io()) {
-                mutedUserRepository.fetchAndPersistMuteList(
-                    userId = activeAccountStore.activeUserId(),
-                )
+            try {
+                withContext(dispatcherProvider.io()) {
+                    mutedUserRepository.fetchAndPersistMuteList(
+                        userId = activeAccountStore.activeUserId(),
+                    )
+                }
+            } catch (error: WssException) {
+                Timber.w(error)
             }
         }
 
