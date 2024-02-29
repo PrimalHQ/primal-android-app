@@ -1086,7 +1086,7 @@ private fun UserPublicKey(
             Image(
                 imageVector = Icons.Outlined.ContentCopy,
                 colorFilter = ColorFilter.tint(color = AppTheme.colorScheme.primary),
-                contentDescription = null,
+                contentDescription = stringResource(id = R.string.accessibility_copy_content),
             )
         }
     }
