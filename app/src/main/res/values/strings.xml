@@ -497,6 +497,7 @@
     <string name="qrcode_scanner_cancel_button">Cancel</string>
 
     <string name="accessibility_back_button">Back</string>
+    <string name="accessibility_qr_code">QR Code</string>
     <string name="accessibility_profile_image">Profile image</string>
     <string name="accessibility_profile_messages">Messages</string>
     <string name="accessibility_profile_send_zap">Send zap</string>
