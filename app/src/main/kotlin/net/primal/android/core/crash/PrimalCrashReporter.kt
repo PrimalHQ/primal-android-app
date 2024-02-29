@@ -2,8 +2,7 @@ package net.primal.android.core.crash
 
 import java.io.StringWriter
 import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import java.util.*
 import javax.inject.Inject
 import kotlin.system.exitProcess
 import kotlin.time.Duration.Companion.seconds
@@ -30,13 +29,13 @@ class PrimalCrashReporter @Inject constructor(
 
     fun init() {
         val defaultUncaughtExceptionHandler = Thread.getDefaultUncaughtExceptionHandler()
-        Thread.setDefaultUncaughtExceptionHandler { t, e ->
-            val errorReport = generateErrorReport(t, e)
+        Thread.setDefaultUncaughtExceptionHandler { thread, error ->
+            val errorReport = error.generateErrorReport(thread)
             scope.launch {
-                uploadCrashReport(report = errorReport)
+                uploadCrashReport(report = errorReport.prependCrashReportHeader())
 
                 if (defaultUncaughtExceptionHandler != null) {
-                    defaultUncaughtExceptionHandler.uncaughtException(t, e)
+                    defaultUncaughtExceptionHandler.uncaughtException(thread, error)
                 } else {
                     exitProcess(1)
                 }
@@ -44,22 +43,43 @@ class PrimalCrashReporter @Inject constructor(
         }
     }
 
-    private fun generateErrorReport(thread: Thread, throwable: Throwable): String {
+    fun log(throwable: Throwable? = null, message: String? = null) {
+        val errorReport = throwable?.generateErrorReport(thread = Thread.currentThread()) ?: ""
+        scope.launch {
+            uploadCrashReport(report = errorReport.prependLogReportHeader(message = message))
+        }
+    }
+
+    private fun String.prependCrashReportHeader(): String {
         return """
             # Primal Crash Reporter
+            $this
+        """.trimIndent()
+    }
+
+    private fun String.prependLogReportHeader(message: String? = null): String {
+        return """
+            # Primal Log Reporter
+            # ${message ?: ""}
+            $this
+        """.trimIndent()
+    }
+
+    private fun Throwable.generateErrorReport(thread: Thread): String {
+        return """
             # Application: ${BuildConfig.APPLICATION_ID}
             # Platform: android
             # Version: ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})
             # Date: ${SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date())}
                 
             Thread: ${thread.name}
-            Exception: ${throwable.javaClass.simpleName}
-            Message: ${throwable.message ?: ""}
+            Exception: ${this.javaClass.simpleName}
+            Message: ${this.message ?: ""}
                 
             Stack Trace:
-            ${throwable.stackTraceToString()}
+            ${this.stackTraceToString()}
             Caused by:
-            ${throwable.cause?.causeChainToString()}
+            ${this.cause?.causeChainToString()}
         """
             .trimIndent()
             .let { report -> report.split("\n").joinToString("\n") { it.trim() } }

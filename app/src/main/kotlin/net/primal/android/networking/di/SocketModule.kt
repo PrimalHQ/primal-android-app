@@ -8,6 +8,7 @@ import javax.inject.Singleton
 import net.primal.android.config.AppConfigProvider
 import net.primal.android.config.dynamic.AppConfigUpdater
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
+import net.primal.android.core.crash.PrimalCrashReporter
 import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.primal.PrimalServerType
 import okhttp3.OkHttpClient
@@ -24,12 +25,14 @@ object SocketModule {
         okHttpClient: OkHttpClient,
         appConfigProvider: AppConfigProvider,
         appConfigUpdater: AppConfigUpdater,
+        crashReporter: PrimalCrashReporter,
     ) = PrimalApiClient(
         okHttpClient = okHttpClient,
         serverType = PrimalServerType.Caching,
         appConfigProvider = appConfigProvider,
         appConfigUpdater = appConfigUpdater,
         dispatcherProvider = dispatchers,
+        crashReporter = crashReporter,
     )
 
     @Provides
@@ -40,12 +43,14 @@ object SocketModule {
         okHttpClient: OkHttpClient,
         appConfigProvider: AppConfigProvider,
         appConfigUpdater: AppConfigUpdater,
+        crashReporter: PrimalCrashReporter,
     ) = PrimalApiClient(
         okHttpClient = okHttpClient,
         serverType = PrimalServerType.Upload,
         appConfigProvider = appConfigProvider,
         appConfigUpdater = appConfigUpdater,
         dispatcherProvider = dispatchers,
+        crashReporter = crashReporter,
     )
 
     @Provides
@@ -56,11 +61,13 @@ object SocketModule {
         okHttpClient: OkHttpClient,
         appConfigProvider: AppConfigProvider,
         appConfigUpdater: AppConfigUpdater,
+        crashReporter: PrimalCrashReporter,
     ) = PrimalApiClient(
         okHttpClient = okHttpClient,
         serverType = PrimalServerType.Wallet,
         appConfigProvider = appConfigProvider,
         appConfigUpdater = appConfigUpdater,
         dispatcherProvider = dispatchers,
+        crashReporter = crashReporter,
     )
 }
