@@ -430,7 +430,7 @@ private fun NoteActionRow(maxItems: Int = 5, onPhotosImported: (List<Uri>) -> Un
         ) {
             Icon(
                 imageVector = PrimalIcons.ImportPhotoFromGallery,
-                contentDescription = null,
+                contentDescription = stringResource(id = R.string.accessibility_import_photo_from_gallery),
                 tint = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
             )
         }
