@@ -19,6 +19,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.buildAnnotatedString
@@ -36,6 +37,7 @@ import net.primal.android.core.compose.icons.primaliconpack.FeedRepostsFilled
 import net.primal.android.core.compose.icons.primaliconpack.FeedZaps
 import net.primal.android.core.compose.icons.primaliconpack.FeedZapsFilled
 import net.primal.android.theme.AppTheme
+import net.primal.android.R
 
 @Composable
 fun FeedNoteStatsRow(
@@ -60,6 +62,7 @@ fun FeedNoteStatsRow(
             onLongClick = onPostLongPressAction?.let {
                 { onPostLongPressAction(FeedPostAction.Reply) }
             },
+            iconContentDescription = stringResource(id = R.string.accessibility_replies_count),
         )
 
         SinglePostStat(
@@ -74,6 +77,7 @@ fun FeedNoteStatsRow(
             onLongClick = onPostLongPressAction?.let {
                 { onPostLongPressAction(FeedPostAction.Zap) }
             },
+            iconContentDescription = stringResource(id = R.string.accessibility_zaps_count),
         )
 
         SinglePostStat(
@@ -90,6 +94,7 @@ fun FeedNoteStatsRow(
             onLongClick = onPostLongPressAction?.let {
                 { onPostLongPressAction(FeedPostAction.Like) }
             },
+            iconContentDescription = stringResource(id = R.string.accessibility_likes_count),
         )
 
         SinglePostStat(
@@ -104,6 +109,7 @@ fun FeedNoteStatsRow(
             onLongClick = onPostLongPressAction?.let {
                 { onPostLongPressAction(FeedPostAction.Repost) }
             },
+            iconContentDescription = stringResource(id = R.string.accessibility_repost_count),
         )
     }
 }
@@ -118,6 +124,7 @@ private fun SinglePostStat(
     colorHighlight: Color,
     onClick: (() -> Unit)? = null,
     onLongClick: (() -> Unit)? = null,
+    iconContentDescription: String? = null,
 ) {
     val titleText = buildAnnotatedString {
         appendInlineContent("icon", "[icon]")
@@ -137,7 +144,7 @@ private fun SinglePostStat(
             ) {
                 Image(
                     imageVector = if (!highlighted) iconVector else iconVectorHighlight,
-                    contentDescription = null,
+                    contentDescription = iconContentDescription,
                     colorFilter = if (!highlighted) {
                         ColorFilter.tint(color = AppTheme.extraColorScheme.onSurfaceVariantAlt4)
                     } else {

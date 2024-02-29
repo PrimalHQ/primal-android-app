@@ -512,4 +512,8 @@
     <string name="accessibility_notification_settings">Notification settings</string>
     <string name="accessibility_delete_list_item">Delete list item</string>
     <string name="accessibility_connect_relay">Connect relay</string>
+    <string name="accessibility_replies_count">Replies count</string>
+    <string name="accessibility_zaps_count">Zaps count</string>
+    <string name="accessibility_likes_count">Likes count</string>
+    <string name="accessibility_repost_count">Repost count</string>
 </resources>
