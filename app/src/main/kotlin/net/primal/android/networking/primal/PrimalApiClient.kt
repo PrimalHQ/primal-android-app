@@ -6,7 +6,7 @@ import javax.inject.Inject
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CoroutineName
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.FlowPreview
@@ -100,16 +100,16 @@ class PrimalApiClient @Inject constructor(
         }
     }
 
-    private suspend fun <T> retrySendMessage(times: Int, block: suspend () -> T): T {
+    private suspend fun <T> retrySendMessage(times: Int, block: suspend (Int) -> T): T {
         repeat(times) {
             try {
-                return block()
+                return block(it)
             } catch (error: SocketSendMessageException) {
                 Timber.w(error, "PrimalApiClient.retry()")
                 delay(RETRY_DELAY_MILLIS)
             }
         }
-        return block()
+        return block(times)
     }
 
     @Throws(WssException::class)
@@ -123,17 +123,11 @@ class PrimalApiClient @Inject constructor(
                 try {
                     sendMessageOrThrow(subscriptionId = subscriptionId, data = message.toPrimalJsonObject())
                 } catch (error: SocketSendMessageException) {
-                    deferredQueryResult.cancel(
-                        CancellationException("Unable to send socket message for $subscriptionId."),
-                    )
+                    deferredQueryResult.cancel(CancellationException("Unable to send socket message."))
                     throw error
                 }
 
-                try {
-                    deferredQueryResult.await()
-                } catch (error: CancellationException) {
-                    throw error.cause ?: error
-                }
+                deferredQueryResult.await()
             }
         }
         val result = queryResult.getOrNull()
@@ -141,9 +135,18 @@ class PrimalApiClient @Inject constructor(
         return result ?: throw error
     }
 
+
+    private val asyncQueryExceptionHandler = CoroutineExceptionHandler { _, throwable ->
+        Timber.w(throwable, "Uncaught exception in asyncQueryCollection.")
+    }
+
     private fun asyncQueryCollection(subscriptionId: UUID): Deferred<PrimalQueryResult> {
-        return scope.async(SupervisorJob() + CoroutineName("$subscriptionId queryResult collector")) {
-            collectQueryResult(subscriptionId)
+        return scope.async(SupervisorJob() + asyncQueryExceptionHandler) {
+            try {
+                collectQueryResult(subscriptionId)
+            } catch (error: CancellationException) {
+                throw WssException(message = "Api query timed out.", cause = error)
+            }
         }
     }
 
