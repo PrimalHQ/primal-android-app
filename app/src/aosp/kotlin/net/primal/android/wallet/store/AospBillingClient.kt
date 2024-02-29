@@ -11,11 +11,11 @@ import net.primal.android.wallet.store.domain.SatsPurchaseQuote
 @Singleton
 class AospBillingClient : PrimalBillingClient {
 
-    private val _purchases = MutableSharedFlow<SatsPurchase>()
-    override val purchases: SharedFlow<SatsPurchase> = _purchases
+    override val purchases: SharedFlow<SatsPurchase> = MutableSharedFlow()
 
     override val minSatsInAppProduct: InAppProduct? = null
 
     override suspend fun launchMinSatsBillingFlow(quote: SatsPurchaseQuote, activity: Activity) = Unit
 
+    override suspend fun refreshMinSatsInAppProduct() = Unit
 }

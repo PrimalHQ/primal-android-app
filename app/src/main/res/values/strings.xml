@@ -398,7 +398,8 @@
     <string name="wallet_in_app_purchase_now_button">Purchase Now</string>
     <string name="wallet_in_app_purchase_pay_label">Pay</string>
     <string name="wallet_in_app_purchase_to_receive_label">To receive</string>
-    <string name="wallet_in_app_purchase_not_supported">Please check if you have Google Play Store installed on your device and you are logged in with your Google account.</string>
+    <string name="wallet_in_app_purchase_not_available">Unable to connect to Google Play Store services. Please try again.</string>
+    <string name="wallet_in_app_purchase_store_try_again">Try again</string>
     <string name="wallet_in_app_purchase_error_confirmation_failed">We were unable to confirm your purchase. Please reach out to Primal Support.</string>
     <string name="wallet_action_button_send">Send</string>
     <string name="wallet_action_button_scan">Scan</string>

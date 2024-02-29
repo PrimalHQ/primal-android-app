@@ -3,6 +3,7 @@ package net.primal.android.wallet.store.play
 import android.app.Activity
 import android.content.Context
 import com.android.billingclient.api.BillingClient
+import com.android.billingclient.api.BillingClient.BillingResponseCode
 import com.android.billingclient.api.BillingClientStateListener
 import com.android.billingclient.api.BillingFlowParams
 import com.android.billingclient.api.BillingResult
@@ -12,7 +13,6 @@ import com.android.billingclient.api.QueryProductDetailsParams
 import com.android.billingclient.api.queryProductDetails
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
-import javax.inject.Singleton
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -82,23 +82,18 @@ class PlayBillingClient @Inject constructor(
     @OptIn(ExperimentalCoroutinesApi::class)
     private suspend fun connectBillingClient(): Boolean {
         return try {
-            withTimeout(15.seconds) {
+            withTimeout(5.seconds) {
                 suspendCancellableCoroutine { continuation ->
                     billingClient.startConnection(
                         object : BillingClientStateListener {
-                            override fun onBillingServiceDisconnected() {
+                            override fun onBillingSetupFinished(billinResult: BillingResult) {
                                 continuation.resume(
-                                    value = false,
+                                    value = billinResult.responseCode == BillingResponseCode.OK,
                                     onCancellation = { Timber.e(it) },
                                 )
                             }
 
-                            override fun onBillingSetupFinished(p0: BillingResult) {
-                                continuation.resume(
-                                    value = true,
-                                    onCancellation = { Timber.e(it) },
-                                )
-                            }
+                            override fun onBillingServiceDisconnected()  = Unit
                         },
                     )
                 }
@@ -144,6 +139,11 @@ class PlayBillingClient @Inject constructor(
 
         purchaseQuote = quote
         billingClient.launchBillingFlow(activity, billingFlowParams)
+    }
+
+    override suspend fun refreshMinSatsInAppProduct() {
+        val initialized = ensureBillingClientInitialized()
+        if (initialized) initializeProducts()
     }
 
     override fun onPurchasesUpdated(billingResult: BillingResult, purchases: MutableList<Purchase>?) {

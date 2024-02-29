@@ -11,9 +11,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -66,7 +68,7 @@ fun InAppPurchaseBuyBottomSheet(onDismiss: () -> Unit) {
         }
     }
 
-    LaunchedEffect(viewModel, onDismiss) {
+    LaunchedEffect(viewModel) {
         viewModel.effects.collect {
             when (it) {
                 InAppPurchaseBuyContract.SideEffect.PurchaseConfirmed -> onDismiss()
@@ -113,7 +115,11 @@ fun InAppPurchaseBuyBottomSheet(
                 },
             )
         } else {
-            InAppPurchaseNotSupportedNotice()
+            InAppPurchaseNotAvailableNotice(
+                onRefresh = {
+                    eventPublisher(InAppPurchaseBuyContract.UiEvent.RefreshQuote)
+                },
+            )
         }
     }
 }
@@ -214,20 +220,30 @@ private fun CurrencyText(
 }
 
 @Composable
-private fun InAppPurchaseNotSupportedNotice() {
+private fun InAppPurchaseNotAvailableNotice(onRefresh: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 16.dp, bottom = 32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
     ) {
         Text(
-            modifier = Modifier.fillMaxWidth(fraction = 0.8f),
-            text = stringResource(id = R.string.wallet_in_app_purchase_not_supported),
+            modifier = Modifier
+                .wrapContentSize()
+                .padding(horizontal = 32.dp),
+            text = stringResource(id = R.string.wallet_in_app_purchase_not_available),
             textAlign = TextAlign.Center,
             style = AppTheme.typography.bodyLarge,
             color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
         )
+
+        TextButton(
+            modifier = Modifier.padding(vertical = 8.dp),
+            onClick = onRefresh,
+        ) {
+            Text(text = stringResource(id = R.string.wallet_in_app_purchase_store_try_again).uppercase())
+        }
     }
 }
 

@@ -13,4 +13,6 @@ interface PrimalBillingClient {
     val minSatsInAppProduct: InAppProduct?
 
     suspend fun launchMinSatsBillingFlow(quote: SatsPurchaseQuote, activity: Activity)
+
+    suspend fun refreshMinSatsInAppProduct()
 }
