@@ -96,6 +96,7 @@ fun WalletSettingsScreen(
             PrimalTopAppBar(
                 title = stringResource(id = R.string.settings_wallet_title),
                 navigationIcon = PrimalIcons.ArrowBack,
+                navigationIconContentDescription = stringResource(id = R.string.accessibility_back_button),
                 onNavigationIconClick = onClose,
             )
         },
@@ -177,7 +178,12 @@ fun WalletSettingsScreen(
                                     supportText = "$maxBalanceInSats sats",
                                     trailingContent = {
                                         IconButton(onClick = { maxWalletBalanceShown = true }) {
-                                            Icon(imageVector = Icons.Outlined.Info, contentDescription = null)
+                                            Icon(
+                                                imageVector = Icons.Outlined.Info,
+                                                contentDescription = stringResource(
+                                                    id = R.string.accessibility_info,
+                                                ),
+                                            )
                                         }
                                     },
                                     onClick = { maxWalletBalanceShown = true },

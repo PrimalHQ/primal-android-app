@@ -142,6 +142,7 @@ fun NoteEditorScreen(
                 title = "",
                 navigationIcon = Icons.Outlined.Close,
                 onNavigationIconClick = onClose,
+                navigationIconContentDescription = stringResource(id = R.string.accessibility_close),
                 showDivider = true,
                 actions = {
                     val text = when {

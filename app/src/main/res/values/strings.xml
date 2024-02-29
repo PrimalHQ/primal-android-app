@@ -516,4 +516,6 @@
     <string name="accessibility_zaps_count">Zaps count</string>
     <string name="accessibility_likes_count">Likes count</string>
     <string name="accessibility_repost_count">Repost count</string>
+    <string name="accessibility_close">Close</string>
+    <string name="accessibility_info">Info</string>
 </resources>

@@ -98,6 +98,7 @@ fun CreateAccountScreen(
                     } else {
                         PrimalIcons.ArrowBack
                     },
+                    navigationIconContentDescription = stringResource(id = R.string.accessibility_back_button),
                     onNavigationIconClick = {
                         if (state.currentStep == CreateAccountStep.NEW_ACCOUNT) {
                             onClose()
