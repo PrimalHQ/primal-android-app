@@ -246,7 +246,7 @@ fun FeedScreen(
                 content = {
                     Icon(
                         imageVector = Icons.Outlined.Add,
-                        contentDescription = null,
+                        contentDescription = stringResource(id = R.string.accessibility_new_post),
                         tint = Color.White,
                     )
                 },

@@ -520,4 +520,6 @@
     <string name="accessibility_info">Info</string>
     <string name="accessibility_import_photo_from_gallery">Import photo from gallery</string>
     <string name="accessibility_refresh">Refresh</string>
+    <string name="accessibility_new_direct_message">New direct message</string>
+    <string name="accessibility_new_post">New post</string>
 </resources>
