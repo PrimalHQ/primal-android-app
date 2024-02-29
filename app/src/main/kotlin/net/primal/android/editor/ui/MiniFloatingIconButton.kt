@@ -20,6 +20,7 @@ fun MiniFloatingIconButton(
     modifier: Modifier,
     imageVector: ImageVector,
     onClick: () -> Unit,
+    floatingButtonContentDescription: String? = null,
 ) {
     Box(
         modifier = modifier
@@ -33,7 +34,7 @@ fun MiniFloatingIconButton(
         Icon(
             modifier = Modifier.size(24.dp),
             imageVector = imageVector,
-            contentDescription = null,
+            contentDescription = floatingButtonContentDescription,
             tint = Color.White,
         )
     }
