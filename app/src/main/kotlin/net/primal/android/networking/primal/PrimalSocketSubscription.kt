@@ -1,6 +1,7 @@
 package net.primal.android.networking.primal
 
 import java.util.*
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.transform
@@ -39,6 +40,8 @@ class PrimalSocketSubscription<T> private constructor(
                     try {
                         subscribe()
                     } catch (error: WssException) {
+                        Timber.w(error)
+                    } catch (error: CancellationException) {
                         Timber.w(error)
                     }
                 }

@@ -2,6 +2,7 @@ package net.primal.android.networking.relays
 
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -16,6 +17,7 @@ import net.primal.android.user.accounts.active.ActiveUserAccountState
 import net.primal.android.user.domain.Relay
 import net.primal.android.user.domain.RelayKind
 import net.primal.android.user.domain.mapToRelayDO
+import timber.log.Timber
 
 @Singleton
 class RelaysSocketManager @Inject constructor(
@@ -63,10 +65,14 @@ class RelaysSocketManager @Inject constructor(
 
     private fun observeRelays(userId: String): Job =
         scope.launch {
-            primalDatabase.relays().observeRelays(userId = userId).collect { relays ->
-                val userRelays = relays.filter { it.kind == RelayKind.UserRelay }.map { it.mapToRelayDO() }
-                val nwcRelays = relays.filter { it.kind == RelayKind.NwcRelay }.map { it.mapToRelayDO() }
-                updateRelayPools(regularRelays = userRelays, walletRelays = nwcRelays)
+            try {
+                primalDatabase.relays().observeRelays(userId = userId).collect { relays ->
+                    val userRelays = relays.filter { it.kind == RelayKind.UserRelay }.map { it.mapToRelayDO() }
+                    val nwcRelays = relays.filter { it.kind == RelayKind.NwcRelay }.map { it.mapToRelayDO() }
+                    updateRelayPools(regularRelays = userRelays, walletRelays = nwcRelays)
+                }
+            } catch (error: CancellationException) {
+                Timber.w(error)
             }
         }
 
