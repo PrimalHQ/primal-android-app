@@ -296,7 +296,7 @@ private fun NewRelayOutlinedTextField(
             tint = Color.White,
             enabled = addRelayEnabled,
             onClick = onAddRelayConfirmed,
-            contentDescription = stringResource(id = R.string.accessibility_connect_relay),
+            appBarIconContentDescription = stringResource(id = R.string.accessibility_connect_relay),
         )
     }
 }

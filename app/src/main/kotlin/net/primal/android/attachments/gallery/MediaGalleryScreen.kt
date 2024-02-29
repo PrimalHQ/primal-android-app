@@ -189,7 +189,7 @@ private fun GalleryDropdownMenu(onSaveClick: () -> Unit) {
     AppBarIcon(
         icon = PrimalIcons.More,
         onClick = { menuVisible = true },
-        contentDescription = stringResource(id = R.string.accessibility_media_drop_down),
+        appBarIconContentDescription = stringResource(id = R.string.accessibility_media_drop_down),
     )
 
     DropdownPrimalMenu(

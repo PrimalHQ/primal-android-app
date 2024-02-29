@@ -106,7 +106,7 @@ fun ExploreFeedScreen(
                         } else {
                             PrimalIcons.UserFeedAdd
                         },
-                        contentDescription = if (state.existsInUserFeeds) {
+                        appBarIconContentDescription = if (state.existsInUserFeeds) {
                             stringResource(id = R.string.accessibility_remove_feed)
                         } else {
                             stringResource(id = R.string.accessibility_add_feed)

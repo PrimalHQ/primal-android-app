@@ -176,7 +176,7 @@ fun NotificationsScreen(
                     AppBarIcon(
                         icon = PrimalIcons.Settings,
                         onClick = onNotificationSettings,
-                        contentDescription = stringResource(id = R.string.accessibility_notification_settings),
+                        appBarIconContentDescription = stringResource(id = R.string.accessibility_notification_settings),
                     )
                 },
             )

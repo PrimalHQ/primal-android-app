@@ -86,7 +86,7 @@ fun PrimalTopAppBar(
                             onNavigationIconClick()
                         },
                         tint = navigationIconTintColor,
-                        contentDescription = navigationIconContentDescription,
+                        appBarIconContentDescription = navigationIconContentDescription,
                     )
                 }
             },

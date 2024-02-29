@@ -34,7 +34,7 @@ fun AppBarIcon(
     tint: Color = LocalContentColor.current,
     enabledBackgroundColor: Color = Color.Unspecified,
     disabledBackgroundColor: Color = AppTheme.colorScheme.outline,
-    contentDescription: String? = null,
+    appBarIconContentDescription: String? = null,
 ) {
     IconButton(
         modifier = modifier
@@ -48,7 +48,7 @@ fun AppBarIcon(
         Icon(
             modifier = Modifier.size(24.dp),
             imageVector = icon,
-            contentDescription = contentDescription,
+            contentDescription = appBarIconContentDescription,
             tint = tint,
         )
     }

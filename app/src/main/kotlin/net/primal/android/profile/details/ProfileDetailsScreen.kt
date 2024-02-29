@@ -345,7 +345,7 @@ fun ProfileDetailsScreen(
                         navigationIcon = {
                             AppBarIcon(
                                 icon = PrimalIcons.ArrowBack,
-                                contentDescription = stringResource(id = R.string.accessibility_back_button),
+                                appBarIconContentDescription = stringResource(id = R.string.accessibility_back_button),
                                 enabledBackgroundColor = Color.Black.copy(alpha = 0.5f),
                                 tint = Color.White,
                                 onClick = onClose,
@@ -554,7 +554,7 @@ private fun ProfileDropdownMenu(
     AppBarIcon(
         icon = PrimalIcons.More,
         onClick = { menuVisible = true },
-        contentDescription = stringResource(id = R.string.accessibility_profile_drop_down),
+        appBarIconContentDescription = stringResource(id = R.string.accessibility_profile_drop_down),
     )
 
     DropdownPrimalMenu(
