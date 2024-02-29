@@ -264,7 +264,7 @@ private fun DrawerFooter(onThemeSwitch: () -> Unit) {
         IconButton(
             onClick = onThemeSwitch,
         ) {
-            Icon(imageVector = iconVector, contentDescription = null)
+            Icon(imageVector = iconVector, contentDescription = stringResource(id = R.string.accessibility_toggle_between_dark_and_light_mode))
         }
     }
 }

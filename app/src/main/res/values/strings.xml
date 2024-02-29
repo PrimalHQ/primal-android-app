@@ -522,4 +522,5 @@
     <string name="accessibility_refresh">Refresh</string>
     <string name="accessibility_new_direct_message">New direct message</string>
     <string name="accessibility_new_post">New post</string>
+    <string name="accessibility_toggle_between_dark_and_light_mode">Toggle between dark and light mode</string>
 </resources>
