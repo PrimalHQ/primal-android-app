@@ -184,7 +184,7 @@ private fun ThemeBox(
             Image(
                 modifier = Modifier.align(alignment = Alignment.Center),
                 painter = painterResource(id = primalTheme.accent.logoId),
-                contentDescription = null,
+                contentDescription = primalTheme.name,
             )
 
             if (selected) {
