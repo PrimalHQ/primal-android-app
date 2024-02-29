@@ -51,18 +51,11 @@ class PrimalCrashReporter @Inject constructor(
     }
 
     private fun String.prependCrashReportHeader(): String {
-        return """
-            # Primal Crash Reporter
-            $this
-        """.trimIndent()
+        return "# Primal Crash Reporter\n$this"
     }
 
     private fun String.prependLogReportHeader(message: String? = null): String {
-        return """
-            # Primal Log Reporter
-            # ${message ?: ""}
-            $this
-        """.trimIndent()
+        return "# Primal Log Reporter\n# ${message ?: ""}\n$this"
     }
 
     private fun Throwable.generateErrorReport(thread: Thread): String {
