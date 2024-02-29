@@ -13,7 +13,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import net.primal.android.R
 import net.primal.android.theme.AppTheme
 
 @Composable
@@ -30,7 +32,7 @@ fun DeleteListItemImage(modifier: Modifier = Modifier, isRemovable: Boolean = tr
 
         Image(
             imageVector = Icons.Outlined.RemoveCircle,
-            contentDescription = null,
+            contentDescription = stringResource(id = R.string.accessibility_delete_list_item),
             colorFilter = ColorFilter.tint(
                 color = if (isRemovable) {
                     AppTheme.colorScheme.error

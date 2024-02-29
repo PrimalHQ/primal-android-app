@@ -554,6 +554,7 @@ private fun ProfileDropdownMenu(
     AppBarIcon(
         icon = PrimalIcons.More,
         onClick = { menuVisible = true },
+        contentDescription = stringResource(id = R.string.accessibility_profile_drop_down),
     )
 
     DropdownPrimalMenu(

@@ -161,6 +161,7 @@ fun FeedScreen(
                     AppBarIcon(
                         icon = PrimalIcons.FeedPicker,
                         onClick = onFeedsClick,
+                        contentDescription = stringResource(id = R.string.accessibility_feed_picker),
                     )
                 },
                 scrollBehavior = it,

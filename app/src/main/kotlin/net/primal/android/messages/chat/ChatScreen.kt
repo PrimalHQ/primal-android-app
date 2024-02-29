@@ -471,6 +471,8 @@ private fun MessageOutlinedTextField(
         AppBarIcon(
             modifier = Modifier.padding(bottom = 4.dp, start = 8.dp),
             icon = if (sending) Icons.Outlined.HourglassBottom else Icons.Outlined.ArrowUpward,
+            contentDescription = if (sending) stringResource(id = R.string.accessibility_message_being_sent) else stringResource(
+                id = R.string.accessibility_send_message),
             enabledBackgroundColor = AppTheme.colorScheme.primary,
             tint = Color.White,
             enabled = sendEnabled,
