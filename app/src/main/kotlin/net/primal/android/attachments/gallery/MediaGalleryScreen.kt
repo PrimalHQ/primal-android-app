@@ -132,7 +132,11 @@ fun MediaGalleryScreen(
             CenterAlignedTopAppBar(
                 title = {},
                 navigationIcon = {
-                    AppBarIcon(icon = PrimalIcons.ArrowBack, onClick = onClose)
+                    AppBarIcon(
+                        icon = PrimalIcons.ArrowBack,
+                        onClick = onClose,
+                        appBarIconContentDescription = stringResource(id = R.string.accessibility_back_button),
+                    )
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                     containerColor = AppTheme.colorScheme.surface.copy(alpha = 0.2f),
