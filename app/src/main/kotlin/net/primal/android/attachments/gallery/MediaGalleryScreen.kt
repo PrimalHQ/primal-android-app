@@ -311,7 +311,7 @@ private fun AttachmentLoadingError() {
     ) {
         Icon(
             imageVector = Icons.Filled.Warning,
-            contentDescription = null,
+            contentDescription = stringResource(id = R.string.accessibility_warning),
             modifier = Modifier.size(48.dp),
         )
     }
