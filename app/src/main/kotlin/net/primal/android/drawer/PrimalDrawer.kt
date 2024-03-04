@@ -162,7 +162,10 @@ private fun DrawerHeader(userAccount: UserAccount?) {
             onClick = {
             },
         ) {
-            Icon(imageVector = PrimalIcons.QrCode, contentDescription = stringResource(id = R.string.accessibility_qr_code))
+            Icon(
+                imageVector = PrimalIcons.QrCode,
+                contentDescription = stringResource(id = R.string.accessibility_qr_code),
+            )
         }
 
         Text(
@@ -264,7 +267,10 @@ private fun DrawerFooter(onThemeSwitch: () -> Unit) {
         IconButton(
             onClick = onThemeSwitch,
         ) {
-            Icon(imageVector = iconVector, contentDescription = stringResource(id = R.string.accessibility_toggle_between_dark_and_light_mode))
+            Icon(
+                imageVector = iconVector,
+                contentDescription = stringResource(id = R.string.accessibility_toggle_between_dark_and_light_mode),
+            )
         }
     }
 }

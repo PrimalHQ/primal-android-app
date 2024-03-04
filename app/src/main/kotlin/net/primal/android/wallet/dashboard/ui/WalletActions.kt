@@ -1,6 +1,5 @@
 package net.primal.android.wallet.dashboard.ui
 
-import android.accounts.AuthenticatorDescription
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

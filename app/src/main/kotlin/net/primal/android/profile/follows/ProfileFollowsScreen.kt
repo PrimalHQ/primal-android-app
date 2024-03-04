@@ -80,7 +80,7 @@ private fun ProfileFollowsScreen(
                 navigationIcon = PrimalIcons.ArrowBack,
                 onNavigationIconClick = onClose,
                 navigationIconContentDescription = stringResource(id = R.string.accessibility_back_button),
-                )
+            )
         },
         content = { paddingValues ->
             FollowsLazyColumn(
