@@ -1,6 +1,8 @@
 package net.primal.android.navigation
 
 import android.net.Uri
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
@@ -414,7 +416,11 @@ private fun NavGraphBuilder.splash(route: String) =
     }
 
 private fun NavGraphBuilder.welcome(route: String, navController: NavController) =
-    composable(route = route) {
+    composable(
+        route = route,
+        enterTransition = { slideInHorizontally(initialOffsetX = { -it }) },
+        exitTransition = { slideOutHorizontally(targetOffsetX = { -it }) },
+    ) {
         LockToOrientationPortrait()
         PrimalTheme(PrimalTheme.Sunset) {
             WelcomeScreen(
@@ -425,7 +431,11 @@ private fun NavGraphBuilder.welcome(route: String, navController: NavController)
     }
 
 private fun NavGraphBuilder.login(route: String, navController: NavController) =
-    composable(route = route) {
+    composable(
+        route = route,
+        enterTransition = { slideInHorizontally(initialOffsetX = { it }) },
+        exitTransition = { slideOutHorizontally(targetOffsetX = { it }) },
+    ) {
         val viewModel: LoginViewModel = hiltViewModel(it)
         PrimalTheme(PrimalTheme.Sunset) {
             LoginScreen(
@@ -437,7 +447,11 @@ private fun NavGraphBuilder.login(route: String, navController: NavController) =
     }
 
 private fun NavGraphBuilder.createAccount(route: String, navController: NavController) =
-    composable(route = route) {
+    composable(
+        route = route,
+        enterTransition = { slideInHorizontally(initialOffsetX = { it }) },
+        exitTransition = { slideOutHorizontally(targetOffsetX = { it }) },
+    ) {
         val viewModel: CreateAccountViewModel = hiltViewModel(it)
         PrimalTheme(PrimalTheme.Sunset) {
             CreateAccountScreen(

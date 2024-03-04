@@ -118,12 +118,8 @@ fun MediaGalleryScreen(
             }
         },
         actionLabel = stringResource(id = R.string.media_gallery_retry_save),
-        onErrorDismiss = {
-            eventPublisher(MediaGalleryContract.UiEvent.DismissError)
-        },
-        onActionPerformed = {
-            currentImage()?.let { eventPublisher(MediaGalleryContract.UiEvent.SaveMedia(it.url)) }
-        },
+        onErrorDismiss = { eventPublisher(MediaGalleryContract.UiEvent.DismissError) },
+        onActionPerformed = { currentImage()?.let { eventPublisher(MediaGalleryContract.UiEvent.SaveMedia(it.url)) } },
     )
 
     Scaffold(

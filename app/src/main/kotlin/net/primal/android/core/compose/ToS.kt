@@ -2,12 +2,16 @@ package net.primal.android.core.compose
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.sp
 import net.primal.android.R
 import net.primal.android.core.ext.openUriSafely
 import net.primal.android.theme.AppTheme
@@ -19,8 +23,14 @@ private const val PRIMAL_TOS_URL = "https://www.primal.net/terms"
 private const val PRIMAL_PRIVACY_POLICY_URL = "https://www.primal.net/privacy"
 
 @Composable
-fun ToSAndPrivacyPolicyText(modifier: Modifier = Modifier, tosPrefix: String) {
-    val linkSpanStyle = SpanStyle(color = AppTheme.colorScheme.primary)
+fun ToSAndPrivacyPolicyText(
+    tosPrefix: String,
+    modifier: Modifier = Modifier,
+    fontSize: TextUnit = 14.sp,
+    color: Color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
+    linksColor: Color = AppTheme.colorScheme.primary,
+) {
+    val linkSpanStyle = SpanStyle(color = linksColor, textDecoration = TextDecoration.Underline)
     val annotatedString = buildAnnotatedString {
         append(tosPrefix)
         append("\n")
@@ -36,7 +46,6 @@ fun ToSAndPrivacyPolicyText(modifier: Modifier = Modifier, tosPrefix: String) {
         withStyle(style = linkSpanStyle) {
             append(stringResource(id = R.string.legal_privacy_policy_hint_highlighted_word))
         }
-        append(".")
         pop()
     }
 
@@ -45,7 +54,8 @@ fun ToSAndPrivacyPolicyText(modifier: Modifier = Modifier, tosPrefix: String) {
         modifier = modifier,
         text = annotatedString,
         style = AppTheme.typography.bodySmall.copy(
-            color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
+            color = color,
+            fontSize = fontSize,
             textAlign = TextAlign.Center,
         ),
         onClick = { position, offset ->

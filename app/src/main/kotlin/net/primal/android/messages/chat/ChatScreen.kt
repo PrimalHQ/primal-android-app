@@ -185,12 +185,8 @@ fun ChatScreen(
                     sendEnabled = state.newMessageText.isNotBlank() && !state.sending,
                     sending = state.sending,
                     participantUsername = participantUsername,
-                    onSend = {
-                        eventPublisher(ChatContract.UiEvent.SendMessage)
-                    },
-                    onValueChange = {
-                        eventPublisher(ChatContract.UiEvent.UpdateNewMessage(text = it))
-                    },
+                    onSend = { eventPublisher(ChatContract.UiEvent.SendMessage) },
+                    onValueChange = { eventPublisher(ChatContract.UiEvent.UpdateNewMessage(text = it)) },
                 )
             }
         },

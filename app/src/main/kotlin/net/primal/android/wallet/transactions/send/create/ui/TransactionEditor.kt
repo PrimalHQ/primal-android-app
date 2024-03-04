@@ -47,7 +47,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.math.BigDecimal
@@ -56,10 +55,13 @@ import net.primal.android.R
 import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.PrimalLoadingSpinner
+import net.primal.android.core.compose.UiDensityMode
 import net.primal.android.core.compose.button.PrimalLoadingButton
+import net.primal.android.core.compose.detectUiDensityModeFromMaxHeight
 import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.WalletBitcoinPayment
+import net.primal.android.core.compose.isCompactOrLower
 import net.primal.android.core.compose.numericpad.PrimalNumericPad
 import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.dashboard.ui.BtcAmountText
@@ -98,7 +100,7 @@ fun TransactionEditor(
     }
 
     val density = LocalDensity.current
-    var uiMode by remember { mutableStateOf<UiMode?>(null) }
+    var uiMode by remember { mutableStateOf<UiDensityMode?>(null) }
 
     val layoutDirection = LocalLayoutDirection.current
     Column(
@@ -114,7 +116,7 @@ fun TransactionEditor(
                     if (uiMode == null) {
                         uiMode = it.height
                             .toDp()
-                            .toUiMode()
+                            .detectUiDensityModeFromMaxHeight()
                     }
                 }
             },
@@ -124,7 +126,7 @@ fun TransactionEditor(
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             TransactionHeaderColumn(
                 modifier = Modifier.fillMaxWidth(),
-                uiMode = uiMode ?: UiMode.Normal,
+                uiMode = uiMode ?: UiDensityMode.Normal,
                 state = state,
                 keyboardVisible = keyboardVisible,
                 onAmountClick = {
@@ -159,11 +161,11 @@ fun TransactionEditor(
         }
 
         var minAmountAlertVisible by remember { mutableStateOf(false) }
-        val actionsRowHidden = (uiMode == UiMode.Compact || uiMode == UiMode.Unsupported) && keyboardVisible
+        val actionsRowHidden = uiMode.isCompactOrLower() && keyboardVisible
         if (!actionsRowHidden) {
             TransactionActionsRow(
                 state = state,
-                uiMode = uiMode ?: UiMode.Normal,
+                uiMode = uiMode ?: UiDensityMode.Normal,
                 keyboardVisible = keyboardVisible,
                 isNumericPadOn = isNumericPadOn,
                 onCancelClick = onCancelClick,
@@ -185,22 +187,6 @@ fun TransactionEditor(
         if (minAmountAlertVisible) {
             MinTxAmountAlertDialog(onDismissRequest = { minAmountAlertVisible = false })
         }
-    }
-}
-
-private enum class UiMode {
-    Normal,
-    Comfortable,
-    Compact,
-    Unsupported,
-}
-
-private fun Dp.toUiMode(): UiMode {
-    return when {
-        this > 730.dp -> UiMode.Normal
-        this < 730.dp && this > 680.dp -> UiMode.Comfortable
-        this < 680.dp && this > 580.dp -> UiMode.Compact
-        else -> UiMode.Unsupported
     }
 }
 
@@ -269,7 +255,7 @@ private fun TransactionMainContent(
 @Composable
 private fun TransactionActionsRow(
     state: CreateTransactionContract.UiState,
-    uiMode: UiMode,
+    uiMode: UiDensityMode,
     keyboardVisible: Boolean,
     isNumericPadOn: Boolean,
     onCancelClick: () -> Unit,
@@ -283,8 +269,8 @@ private fun TransactionActionsRow(
                     0.dp
                 } else {
                     when (uiMode) {
-                        UiMode.Normal -> 32.dp
-                        UiMode.Comfortable -> 8.dp
+                        UiDensityMode.Normal -> 32.dp
+                        UiDensityMode.Comfortable -> 8.dp
                         else -> 4.dp
                     }
                 },
@@ -325,7 +311,7 @@ private fun TransactionActionsRow(
 @Composable
 private fun TransactionHeaderColumn(
     modifier: Modifier,
-    uiMode: UiMode,
+    uiMode: UiDensityMode,
     state: CreateTransactionContract.UiState,
     keyboardVisible: Boolean,
     onAmountClick: () -> Unit,
@@ -335,7 +321,7 @@ private fun TransactionHeaderColumn(
             4.dp
         } else {
             when (uiMode) {
-                UiMode.Normal, UiMode.Comfortable -> 16.dp
+                UiDensityMode.Normal, UiDensityMode.Comfortable -> 16.dp
                 else -> 4.dp
             }
         },
@@ -344,9 +330,9 @@ private fun TransactionHeaderColumn(
     val avatarSize = animateDpAsState(
         targetValue = if (keyboardVisible) {
             when (uiMode) {
-                UiMode.Normal -> 64.dp
-                UiMode.Comfortable -> 48.dp
-                UiMode.Compact -> 40.dp
+                UiDensityMode.Normal -> 64.dp
+                UiDensityMode.Comfortable -> 48.dp
+                UiDensityMode.Compact -> 40.dp
                 else -> 0.dp
             }
         } else {
@@ -360,8 +346,8 @@ private fun TransactionHeaderColumn(
             0.dp
         } else {
             when (uiMode) {
-                UiMode.Normal -> 32.dp
-                UiMode.Comfortable -> 24.dp
+                UiDensityMode.Normal -> 32.dp
+                UiDensityMode.Comfortable -> 24.dp
                 else -> 8.dp
             }
         },
@@ -372,8 +358,8 @@ private fun TransactionHeaderColumn(
             16.dp
         } else {
             when (uiMode) {
-                UiMode.Normal -> 48.dp
-                UiMode.Comfortable -> 32.dp
+                UiDensityMode.Normal -> 48.dp
+                UiDensityMode.Comfortable -> 32.dp
                 else -> 24.dp
             }
         },
@@ -439,15 +425,15 @@ private fun TransactionHeaderColumn(
             modifier = Modifier
                 .padding(
                     start = when (uiMode) {
-                        UiMode.Normal -> 32.dp
-                        UiMode.Comfortable -> 26.dp
+                        UiDensityMode.Normal -> 32.dp
+                        UiDensityMode.Comfortable -> 26.dp
                         else -> 18.dp
                     },
                 )
                 .height(
                     when (uiMode) {
-                        UiMode.Normal -> 72.dp
-                        UiMode.Comfortable -> 64.dp
+                        UiDensityMode.Normal -> 72.dp
+                        UiDensityMode.Comfortable -> 64.dp
                         else -> 56.dp
                     },
                 )
