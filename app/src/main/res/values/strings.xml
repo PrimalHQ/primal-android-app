@@ -17,10 +17,8 @@
     <string name="app_error_muting_user">Unable to mute user. Please try again.</string>
     <string name="app_error_unmuting_user">Unable to unmute user. Please try again.</string>
 
-    <string name="welcome_sign_in_button_title">Sign in</string>
-    <string name="welcome_sign_in_button_subtitle">Already have a Nostr account? Sign with your Nostr key.</string>
-    <string name="welcome_create_account_button_title">Create account</string>
-    <string name="welcome_create_account_button_subtitle">Your new Nostr account will be up and running in a minute.</string>
+    <string name="welcome_sign_in_button_title">Sign In</string>
+    <string name="welcome_create_account_button_title">Create Account</string>
     <string name="welcome_tos_prefix">By proceeding you accept our</string>
 
     <string name="legal_tos_hint_highlighted_word">Terms of Service</string>
