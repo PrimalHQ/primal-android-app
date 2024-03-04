@@ -71,7 +71,6 @@ class SubscriptionsManagerTest {
             appConfigProvider = appConfigProvider,
             appConfigUpdater = appConfigUpdater,
             dispatcherProvider = coroutinesTestRule.dispatcherProvider,
-            crashReporter = mockk(relaxed = true),
         )
     }
 

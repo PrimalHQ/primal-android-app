@@ -41,7 +41,6 @@ class PrimalApiClientTest {
             appConfigProvider = fakeAppConfigProvider,
             appConfigUpdater = appConfigUpdater,
             dispatcherProvider = coroutinesTestRule.dispatcherProvider,
-            crashReporter = mockk(relaxed = true),
         )
     }
 

@@ -6,7 +6,6 @@ import javax.inject.Inject
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.FlowPreview
@@ -24,11 +23,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.JsonObject
-import net.primal.android.BuildConfig
 import net.primal.android.config.AppConfigProvider
 import net.primal.android.config.dynamic.AppConfigUpdater
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
-import net.primal.android.core.crash.PrimalCrashReporter
 import net.primal.android.networking.UserAgentProvider
 import net.primal.android.networking.sockets.NostrIncomingMessage
 import net.primal.android.networking.sockets.NostrSocketClient
@@ -45,7 +42,6 @@ class PrimalApiClient @Inject constructor(
     private val serverType: PrimalServerType,
     private val appConfigProvider: AppConfigProvider,
     private val appConfigUpdater: AppConfigUpdater,
-    private val crashReporter: PrimalCrashReporter,
 ) {
 
     private val scope = CoroutineScope(dispatcherProvider.io())
@@ -138,18 +134,8 @@ class PrimalApiClient @Inject constructor(
         return result ?: throw error
     }
 
-    private val asyncQueryExceptionHandler = CoroutineExceptionHandler { coroutineContext, throwable ->
-        Timber.w(throwable, "Uncaught exception in asyncQueryCollection.")
-        if (BuildConfig.FEATURE_PRIMAL_CRASH_REPORTER) {
-            crashReporter.log(
-                throwable = throwable,
-                message = "Uncaught exception in PrimalApiClient.asyncQueryCollection. Context = $coroutineContext",
-            )
-        }
-    }
-
     private fun asyncQueryCollection(subscriptionId: UUID): Deferred<PrimalQueryResult> {
-        return scope.async(SupervisorJob() + asyncQueryExceptionHandler) {
+        return scope.async(SupervisorJob()) {
             try {
                 collectQueryResult(subscriptionId)
             } catch (error: CancellationException) {
