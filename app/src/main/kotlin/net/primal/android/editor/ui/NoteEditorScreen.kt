@@ -56,6 +56,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -282,6 +283,7 @@ fun NoteEditorScreen(
                                 },
                                 textStyle = AppTheme.typography.bodyMedium.copy(
                                     lineHeight = 20.sp,
+                                    fontFamily = FontFamily.SansSerif,
                                 ),
                                 colors = PrimalDefaults.outlinedTextFieldColors(
                                     focusedContainerColor = Color.Transparent,
