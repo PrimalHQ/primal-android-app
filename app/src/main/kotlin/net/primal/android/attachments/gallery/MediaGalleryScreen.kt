@@ -132,7 +132,11 @@ fun MediaGalleryScreen(
             CenterAlignedTopAppBar(
                 title = {},
                 navigationIcon = {
-                    AppBarIcon(icon = PrimalIcons.ArrowBack, onClick = onClose)
+                    AppBarIcon(
+                        icon = PrimalIcons.ArrowBack,
+                        onClick = onClose,
+                        appBarIconContentDescription = stringResource(id = R.string.accessibility_back_button),
+                    )
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                     containerColor = AppTheme.colorScheme.surface.copy(alpha = 0.2f),
@@ -189,6 +193,7 @@ private fun GalleryDropdownMenu(onSaveClick: () -> Unit) {
     AppBarIcon(
         icon = PrimalIcons.More,
         onClick = { menuVisible = true },
+        appBarIconContentDescription = stringResource(id = R.string.accessibility_media_drop_down),
     )
 
     DropdownPrimalMenu(
@@ -306,7 +311,7 @@ private fun AttachmentLoadingError() {
     ) {
         Icon(
             imageVector = Icons.Filled.Warning,
-            contentDescription = null,
+            contentDescription = stringResource(id = R.string.accessibility_warning),
             modifier = Modifier.size(48.dp),
         )
     }

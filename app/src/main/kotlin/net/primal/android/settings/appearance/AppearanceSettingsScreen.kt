@@ -71,6 +71,7 @@ fun AppearanceSettingsScreen(
             PrimalTopAppBar(
                 title = "Appearance",
                 navigationIcon = PrimalIcons.ArrowBack,
+                navigationIconContentDescription = stringResource(id = R.string.accessibility_back_button),
                 onNavigationIconClick = onClose,
             )
         },
@@ -183,7 +184,7 @@ private fun ThemeBox(
             Image(
                 modifier = Modifier.align(alignment = Alignment.Center),
                 painter = painterResource(id = primalTheme.accent.logoId),
-                contentDescription = null,
+                contentDescription = primalTheme.name,
             )
 
             if (selected) {

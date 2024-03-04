@@ -45,6 +45,7 @@ fun PrimalTopAppBar(
     textColor: Color = LocalContentColor.current,
     navigationIcon: ImageVector? = null,
     navigationIconTintColor: Color = LocalContentColor.current,
+    navigationIconContentDescription: String? = null,
     autoCloseKeyboardOnNavigationIconClick: Boolean = true,
     avatarCdnImage: CdnImage? = null,
     actions: (@Composable RowScope.() -> Unit)? = null,
@@ -85,6 +86,7 @@ fun PrimalTopAppBar(
                             onNavigationIconClick()
                         },
                         tint = navigationIconTintColor,
+                        appBarIconContentDescription = navigationIconContentDescription,
                     )
                 }
             },

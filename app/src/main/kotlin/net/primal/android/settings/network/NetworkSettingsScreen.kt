@@ -127,6 +127,7 @@ fun NetworkSettingsScreen(
             PrimalTopAppBar(
                 title = stringResource(id = R.string.settings_network_title),
                 navigationIcon = PrimalIcons.ArrowBack,
+                navigationIconContentDescription = stringResource(id = R.string.accessibility_back_button),
                 onNavigationIconClick = onClose,
             )
         },
@@ -295,6 +296,7 @@ private fun NewRelayOutlinedTextField(
             tint = Color.White,
             enabled = addRelayEnabled,
             onClick = onAddRelayConfirmed,
+            appBarIconContentDescription = stringResource(id = R.string.accessibility_connect_relay),
         )
     }
 }

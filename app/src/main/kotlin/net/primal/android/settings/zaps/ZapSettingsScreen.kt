@@ -106,6 +106,7 @@ fun ZapSettingsScreen(
                 title = stringResource(id = R.string.settings_zaps_title),
                 navigationIcon = PrimalIcons.ArrowBack,
                 onNavigationIconClick = backSequence,
+                navigationIconContentDescription = stringResource(id = R.string.accessibility_back_button),
             )
         },
         content = { paddingValues ->

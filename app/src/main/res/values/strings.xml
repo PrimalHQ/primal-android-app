@@ -495,4 +495,34 @@
     <string name="qrcode_scanner_permission_rationale">Primal needs access to your camera to scan QR codes.</string>
     <string name="qrcode_scanner_grant_permission_button">Allow access</string>
     <string name="qrcode_scanner_cancel_button">Cancel</string>
+
+    <string name="accessibility_back_button">Back</string>
+    <string name="accessibility_qr_code">QR Code</string>
+    <string name="accessibility_profile_image">Profile image</string>
+    <string name="accessibility_profile_messages">Messages</string>
+    <string name="accessibility_send_message">Send the message</string>
+    <string name="accessibility_message_being_sent">Message is being sent</string>
+    <string name="accessibility_profile_send_zap">Send zap</string>
+    <string name="accessibility_note_drop_down">Note drop-down</string>
+    <string name="accessibility_profile_drop_down">Profile drop-down</string>
+    <string name="accessibility_media_drop_down">Media drop-down</string>
+    <string name="accessibility_feed_picker">Feed picker</string>
+    <string name="accessibility_add_feed">Add feed</string>
+    <string name="accessibility_remove_feed">Remove feed</string>
+    <string name="accessibility_notification_settings">Notification settings</string>
+    <string name="accessibility_delete_list_item">Delete list item</string>
+    <string name="accessibility_connect_relay">Connect relay</string>
+    <string name="accessibility_replies_count">Replies count</string>
+    <string name="accessibility_zaps_count">Zaps count</string>
+    <string name="accessibility_likes_count">Likes count</string>
+    <string name="accessibility_repost_count">Repost count</string>
+    <string name="accessibility_close">Close</string>
+    <string name="accessibility_info">Info</string>
+    <string name="accessibility_import_photo_from_gallery">Import photo from gallery</string>
+    <string name="accessibility_refresh">Refresh</string>
+    <string name="accessibility_new_direct_message">New direct message</string>
+    <string name="accessibility_new_post">New post</string>
+    <string name="accessibility_toggle_between_dark_and_light_mode">Toggle between dark and light mode</string>
+    <string name="accessibility_copy_content">Copy content</string>
+    <string name="accessibility_warning">Warning</string>
 </resources>

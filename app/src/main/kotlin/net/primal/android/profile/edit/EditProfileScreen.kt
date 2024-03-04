@@ -75,6 +75,7 @@ fun EditProfileScreen(
             PrimalTopAppBar(
                 title = stringResource(id = R.string.profile_edit_profile_title),
                 navigationIcon = PrimalIcons.ArrowBack,
+                navigationIconContentDescription = stringResource(id = R.string.accessibility_back_button),
                 onNavigationIconClick = {
                     onClose()
                 },

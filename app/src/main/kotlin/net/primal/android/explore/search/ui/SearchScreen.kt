@@ -88,7 +88,8 @@ fun SearchScreen(
                     AppBarIcon(
                         icon = PrimalIcons.ArrowBack,
                         onClick = onClose,
-                    )
+                        appBarIconContentDescription = stringResource(id = R.string.accessibility_back_button),
+                        )
                 },
                 title = {
                     SearchTextField(

@@ -90,6 +90,7 @@ fun LoginScreen(
                 title = stringResource(id = R.string.login_title),
                 navigationIcon = PrimalIcons.ArrowBack,
                 onNavigationIconClick = onClose,
+                navigationIconContentDescription = stringResource(id = R.string.accessibility_back_button),
             )
         },
         content = { paddingValues ->

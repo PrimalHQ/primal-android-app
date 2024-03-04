@@ -1,5 +1,6 @@
 package net.primal.android.wallet.dashboard.ui
 
+import android.accounts.AuthenticatorDescription
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -69,7 +70,7 @@ private fun WalletActionButton(
             Icon(
                 modifier = Modifier.size(24.dp),
                 imageVector = icon,
-                contentDescription = null,
+                contentDescription = text,
             )
         }
 

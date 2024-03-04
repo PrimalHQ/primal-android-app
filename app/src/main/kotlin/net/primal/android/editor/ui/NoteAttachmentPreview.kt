@@ -11,12 +11,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import coil.compose.SubcomposeAsyncImage
 import java.util.UUID
 import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.editor.domain.NoteAttachment
 import net.primal.android.theme.AppTheme
+import net.primal.android.R
 
 @Composable
 fun NoteAttachmentPreview(
@@ -41,6 +43,7 @@ fun NoteAttachmentPreview(
             modifier = Modifier.align(Alignment.TopEnd),
             imageVector = Icons.Outlined.Close,
             onClick = { onDiscard(attachment.id) },
+            floatingButtonContentDescription = stringResource(id = R.string.accessibility_close),
         )
 
         if (attachment.remoteUrl == null) {
@@ -50,6 +53,7 @@ fun NoteAttachmentPreview(
                 MiniFloatingIconButton(
                     modifier = Modifier.align(Alignment.Center),
                     imageVector = Icons.Outlined.Refresh,
+                    floatingButtonContentDescription = stringResource(id = R.string.accessibility_refresh),
                     onClick = { onRetryUpload(attachment.id) },
                 )
             }

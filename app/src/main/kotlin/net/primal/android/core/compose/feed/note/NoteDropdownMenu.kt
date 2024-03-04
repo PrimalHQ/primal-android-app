@@ -58,7 +58,7 @@ fun NoteDropdownMenuIcon(
         Icon(
             modifier = Modifier.wrapContentSize(align = Alignment.TopEnd),
             imageVector = PrimalIcons.More,
-            contentDescription = null,
+            contentDescription = stringResource(id = R.string.accessibility_note_drop_down),
         )
 
         DropdownPrimalMenu(

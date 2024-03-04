@@ -161,6 +161,7 @@ fun FeedScreen(
                     AppBarIcon(
                         icon = PrimalIcons.FeedPicker,
                         onClick = onFeedsClick,
+                        appBarIconContentDescription = stringResource(id = R.string.accessibility_feed_picker),
                     )
                 },
                 scrollBehavior = it,
@@ -245,7 +246,7 @@ fun FeedScreen(
                 content = {
                     Icon(
                         imageVector = Icons.Outlined.Add,
-                        contentDescription = null,
+                        contentDescription = stringResource(id = R.string.accessibility_new_post),
                         tint = Color.White,
                     )
                 },

@@ -225,7 +225,7 @@ fun PrimalNavigationBarLightningBolt(
                 Icon(
                     modifier = Modifier.size(32.dp),
                     imageVector = imageVector,
-                    contentDescription = null,
+                    contentDescription = stringResource(id = R.string.primary_destination_wallet_label),
                     tint = tint,
                 )
             }

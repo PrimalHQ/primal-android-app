@@ -212,6 +212,7 @@ fun ThreadScreen(
                 modifier = Modifier.onSizeChanged { topBarMaxHeightPx = it.height },
                 title = stringResource(id = R.string.thread_title),
                 navigationIcon = PrimalIcons.ArrowBack,
+                navigationIconContentDescription = stringResource(id = R.string.accessibility_back_button),
                 onNavigationIconClick = onClose,
                 showDivider = true,
             )

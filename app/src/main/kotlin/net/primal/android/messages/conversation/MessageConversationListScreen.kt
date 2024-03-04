@@ -198,7 +198,7 @@ fun MessageListScreen(
                 content = {
                     Icon(
                         imageVector = PrimalIcons.NewDM,
-                        contentDescription = null,
+                        contentDescription = stringResource(id = R.string.accessibility_new_direct_message),
                         tint = Color.White,
                     )
                 },

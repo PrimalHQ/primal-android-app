@@ -143,6 +143,7 @@ fun ReceivePaymentScreen(
                     ReceivePaymentTab.Bitcoin -> stringResource(id = R.string.wallet_receive_btc_transaction_title)
                 },
                 navigationIcon = PrimalIcons.ArrowBack,
+                navigationIconContentDescription = stringResource(id = R.string.accessibility_back_button),
                 showDivider = false,
                 onNavigationIconClick = {
                     if (state.editMode) {

@@ -13,6 +13,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
+import net.primal.android.R
+import androidx.compose.ui.res.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -27,6 +29,7 @@ fun DemoSecondaryScreen(
                 navigationIcon = PrimalIcons.ArrowBack,
                 onNavigationIconClick = onClose,
                 title = title,
+                navigationIconContentDescription = stringResource(id = R.string.accessibility_back_button),
             )
         },
         content = { paddingValues ->
