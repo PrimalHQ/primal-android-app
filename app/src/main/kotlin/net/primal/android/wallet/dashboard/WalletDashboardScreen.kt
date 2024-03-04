@@ -42,6 +42,7 @@ import kotlinx.coroutines.launch
 import net.primal.android.LocalPrimalTheme
 import net.primal.android.R
 import net.primal.android.core.compose.AppBarIcon
+import net.primal.android.core.compose.InvisibleAppBarIcon
 import net.primal.android.core.compose.NavigationBarFullHeightDp
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.PrimalTopLevelDestination
@@ -187,6 +188,8 @@ fun WalletDashboardScreen(
                                 inAppPurchaseVisible = true
                             },
                         )
+                    } else {
+                        InvisibleAppBarIcon()
                     }
                 },
                 scrollBehavior = scrollBehaviour,
