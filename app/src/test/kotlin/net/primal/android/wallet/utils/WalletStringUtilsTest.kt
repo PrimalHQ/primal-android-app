@@ -89,6 +89,11 @@ class WalletStringUtilsTest {
     }
 
     @Test
+    fun isBitcoinAddress_returnsTrueForCorrectLongBtcAddress() {
+        "BC1QEPMVA76NVJVZFW2PLYKA37WEUW6VY2UE8E406T3YN900KAVEH86QWSUDXQ".isBitcoinAddress() shouldBe true
+    }
+
+    @Test
     fun isBitcoinAddress_returnsFalseForInvalidBtcAddress() {
         "bc1invalidbitcoinaddress".isBitcoinAddress() shouldBe false
     }

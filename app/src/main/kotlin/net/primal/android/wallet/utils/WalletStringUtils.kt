@@ -1,8 +1,9 @@
 package net.primal.android.wallet.utils
 
 import android.util.Patterns
-import java.util.regex.Pattern
 import net.primal.android.navigation.asUrlDecoded
+import org.bitcoinj.core.Address
+import org.bitcoinj.params.MainNetParams
 
 fun String.isLnInvoice() = startsWith(prefix = "lnbc", ignoreCase = true)
 
@@ -21,16 +22,13 @@ fun String.isBitcoinAddressUri() =
     startsWith(prefix = "bitcoin:", ignoreCase = true) &&
         this.split(":").lastOrNull()?.split("?")?.firstOrNull().isBitcoinAddress()
 
-private val btcAddressPattern = Pattern.compile(
-    "^(bc1|[13])[a-zA-HJ-NP-Z0-9]{25,39}\$",
-    Pattern.CASE_INSENSITIVE,
-)
-
 fun String?.isBitcoinAddress(): Boolean {
-    return when (this) {
-        null -> false
-        else -> btcAddressPattern.matcher(this).matches()
+    if (this == null) return false
+
+    val result = runCatching {
+        Address.fromString(MainNetParams.get(), this)
     }
+    return result.getOrNull() != null
 }
 
 fun String.parseBitcoinPaymentInstructions(): BitcoinPaymentInstruction? {
