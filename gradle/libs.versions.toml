@@ -1,7 +1,7 @@
 [versions]
 accompanist = "0.32.0"
 activity-compose = "1.8.2"
-agp = "8.2.2"
+agp = "8.3.0"
 appcompat = "1.6.1"
 camera = "1.3.1"
 compose-bom = "2024.02.01"
