@@ -98,6 +98,7 @@ class NotificationsRemoteMediator(
 
         val response = try {
             withContext(Dispatchers.IO) {
+                ensureLastSeenTimestamp()
                 notificationsApi.getNotifications(body = requestBody)
             }
         } catch (error: WssException) {
@@ -106,7 +107,6 @@ class NotificationsRemoteMediator(
         }
 
         lastRequests[loadType] = requestBody
-        ensureLastSeenTimestamp()
 
         val userProfileStats = response.primalUserProfileStats.mapNotNullAsProfileStatsPO()
         val notifications = response.primalNotifications.mapNotNullAsNotificationPO()
