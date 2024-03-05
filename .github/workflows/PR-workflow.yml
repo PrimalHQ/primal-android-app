@@ -3,7 +3,7 @@ name: Build and test PR against main
 on:
   pull_request:
     branches: [ $default-branch ]
-  types: [opened, synchronize]
+    types: [opened, synchronize]
 
 jobs:
   build:
