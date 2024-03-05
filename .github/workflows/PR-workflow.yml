@@ -7,6 +7,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        flavor: [Aosp, Google]
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
@@ -16,5 +19,11 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
         cache: gradle
-    - name: Run check
-      run: ./gradlew check --no-daemon
+    - name: Check detekt
+      run: ./gradlew detekt
+    - name: Check lint
+      run: ./gradlew lint
+    - name: Run tests on ${{ matrix.flavor }} flavour
+      run: ./gradlew test${{ matrix.flavor }}DebugUnitTest
+    - name: Assemble ${{ matrix.flavor }} debug build
+      run: ./gradlew assemble${{ matrix.flavor }}Debug
