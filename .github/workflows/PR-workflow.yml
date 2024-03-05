@@ -3,7 +3,7 @@ name: Build and test PR against main
 on:
   pull_request:
     branches: [ $default-branch ]
-  workflow_dispatch:
+  types: [opened, synchronize]
 
 jobs:
   build:
@@ -17,5 +17,5 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
         cache: gradle
-    - name: Build apks, or do whatever
-      run: ./gradlew build --no-daemon
+    - name: Run check
+      run: ./gradlew check --no-daemon
