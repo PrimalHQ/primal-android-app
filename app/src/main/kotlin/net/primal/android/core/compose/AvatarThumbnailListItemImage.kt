@@ -32,7 +32,9 @@ fun AvatarThumbnail(
     avatarSize: Dp = 48.dp,
     hasBorder: Boolean = false,
     borderColor: Color = AppTheme.colorScheme.primary,
+    backgroundColor: Color = AppTheme.extraColorScheme.surfaceVariantAlt1,
     onClick: (() -> Unit)? = null,
+    defaultAvatar: @Composable () -> Unit = { DefaultAvatarThumbnailPlaceholderListItemImage() },
 ) {
     val variant = avatarCdnImage?.variants?.minByOrNull { it.width }
     val imageSource = variant?.mediaUrl ?: avatarCdnImage?.sourceUrl
@@ -42,7 +44,9 @@ fun AvatarThumbnail(
         source = imageSource,
         hasBorder = hasBorder,
         borderColor = borderColor,
+        backgroundColor = backgroundColor,
         onClick = onClick,
+        defaultAvatar = defaultAvatar,
     )
 }
 
@@ -53,7 +57,9 @@ private fun AvatarThumbnailListItemImage(
     avatarSize: Dp = 48.dp,
     hasBorder: Boolean = false,
     borderColor: Color = AppTheme.colorScheme.primary,
+    backgroundColor: Color = AppTheme.extraColorScheme.surfaceVariantAlt1,
     onClick: (() -> Unit)? = null,
+    defaultAvatar: @Composable () -> Unit,
 ) {
     SubcomposeAsyncImage(
         model = source,
@@ -70,10 +76,10 @@ private fun AvatarThumbnailListItemImage(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(color = AppTheme.extraColorScheme.surfaceVariantAlt1),
+                    .background(color = backgroundColor),
             )
         },
-        error = { DefaultAvatarThumbnailPlaceholderListItemImage() },
+        error = { defaultAvatar() },
     )
 }
 

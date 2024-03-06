@@ -21,6 +21,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -62,6 +63,7 @@ import net.primal.android.core.compose.detectUiDensityModeFromMaxHeight
 import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
+import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 import net.primal.android.core.compose.isCompactOrLower
 import net.primal.android.core.utils.isValidNostrPrivateKey
 import net.primal.android.core.utils.isValidNostrPublicKey
@@ -75,6 +77,7 @@ fun LoginScreen(
     onClose: () -> Unit,
     onLoginSuccess: (String) -> Unit,
 ) {
+    val keyboardController = LocalSoftwareKeyboardController.current
     LaunchedEffect(viewModel, onLoginSuccess) {
         viewModel.effect.collect {
             when (it) {
@@ -89,7 +92,10 @@ fun LoginScreen(
     LoginScreen(
         state = uiState.value,
         eventPublisher = { viewModel.setEvent(it) },
-        onClose = onClose,
+        onClose = {
+            keyboardController?.hide()
+            onClose()
+        },
     )
 }
 
@@ -202,8 +208,10 @@ fun LoginContent(
                                     AvatarThumbnail(
                                         avatarCdnImage = profileDetails.avatarCdnImage,
                                         avatarSize = 100.dp,
-                                        hasBorder = true,
+                                        hasBorder = profileDetails.avatarCdnImage != null,
                                         borderColor = Color.White,
+                                        backgroundColor = defaultAvatarBackground,
+                                        defaultAvatar = { DefaultAvatar() },
                                     )
 
                                     Spacer(modifier = Modifier.height(16.dp))
@@ -370,6 +378,26 @@ fun LoginContent(
                 },
             )
         }
+    }
+}
+
+private val defaultAvatarBackground = Color(0xFF7E382C)
+private val defaultAvatarForeground = Color(0xFFFDB7AB)
+
+@Composable
+private fun DefaultAvatar() {
+    Box(
+        modifier = Modifier
+            .background(color = defaultAvatarBackground)
+            .fillMaxSize(),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            imageVector = PrimalIcons.AvatarDefault,
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize(),
+            tint = defaultAvatarForeground,
+        )
     }
 }
 
