@@ -78,7 +78,6 @@ import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.thread.ThreadScreen
 import net.primal.android.thread.ThreadViewModel
-import timber.log.Timber
 
 private fun NavController.navigateToWelcome() =
     navigate(
@@ -428,14 +427,18 @@ private fun NavGraphBuilder.welcome(route: String, navController: NavController)
     composable(
         route = route,
         enterTransition = {
-            Timber.e("Enter initialState = ${this.initialState.destination}")
-            Timber.e("Enter targetState = ${this.targetState.destination}")
-            slideInHorizontally(initialOffsetX = { -it })
+            if (initialState.destination.route in listOf("login", "create_account")) {
+                slideInHorizontally(initialOffsetX = { -it })
+            } else {
+                null
+            }
         },
         exitTransition = {
-            Timber.e("Exit initialState = ${this.initialState.destination}")
-            Timber.e("Exit targetState = ${this.targetState.destination}")
-            slideOutHorizontally(targetOffsetX = { -it })
+            if (targetState.destination.route in listOf("login", "create_account")) {
+                slideOutHorizontally(targetOffsetX = { -it })
+            } else {
+                null
+            }
         },
     ) {
         LockToOrientationPortrait()
@@ -453,14 +456,18 @@ private fun NavGraphBuilder.login(route: String, navController: NavController) =
     composable(
         route = route,
         enterTransition = {
-            Timber.e("Enter initialState = ${this.initialState.destination}")
-            Timber.e("Enter targetState = ${this.targetState.destination}")
-            slideInHorizontally(initialOffsetX = { it })
+            if (initialState.destination.route == "welcome") {
+                slideInHorizontally(initialOffsetX = { it })
+            } else {
+                null
+            }
         },
         exitTransition = {
-            Timber.e("Exit initialState = ${this.initialState.destination}")
-            Timber.e("Exit targetState = ${this.targetState.destination}")
-            slideOutHorizontally(targetOffsetX = { it })
+            if (targetState.destination.route == "welcome") {
+                slideOutHorizontally(targetOffsetX = { it })
+            } else {
+                null
+            }
         },
     ) {
         val viewModel: LoginViewModel = hiltViewModel(it)
@@ -478,8 +485,20 @@ private fun NavGraphBuilder.login(route: String, navController: NavController) =
 private fun NavGraphBuilder.createAccount(route: String, navController: NavController) =
     composable(
         route = route,
-        enterTransition = { slideInHorizontally(initialOffsetX = { it }) },
-        exitTransition = { slideOutHorizontally(targetOffsetX = { it }) },
+        enterTransition = {
+            if (initialState.destination.route == "welcome") {
+                slideInHorizontally(initialOffsetX = { it })
+            } else {
+                null
+            }
+        },
+        exitTransition = {
+            if (targetState.destination.route == "welcome") {
+                slideOutHorizontally(targetOffsetX = { it })
+            } else {
+                null
+            }
+        },
     ) {
         val viewModel: CreateAccountViewModel = hiltViewModel(it)
         PrimalTheme(PrimalTheme.Sunset) {
@@ -502,8 +521,8 @@ private fun NavGraphBuilder.feed(
     arguments = arguments,
 ) { navBackEntry ->
     val viewModel = hiltViewModel<FeedViewModel>(navBackEntry)
-    AdjustSystemColors(primalTheme = LocalPrimalTheme.current)
     LockToOrientationPortrait()
+    AdjustSystemColors(primalTheme = LocalPrimalTheme.current)
     FeedScreen(
         viewModel = viewModel,
         onFeedsClick = { navController.navigateToFeedList() },
