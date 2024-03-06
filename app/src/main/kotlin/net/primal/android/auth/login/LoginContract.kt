@@ -1,9 +1,14 @@
 package net.primal.android.auth.login
 
+import net.primal.android.core.compose.profile.model.ProfileDetailsUi
+
 interface LoginContract {
 
     data class UiState(
         val loading: Boolean = false,
+        val loginInput: String = "",
+        val profileDetails: ProfileDetailsUi? = null,
+        val fetchingProfileDetails: Boolean = false,
         val error: LoginError? = null,
     ) {
         sealed class LoginError {
@@ -12,7 +17,8 @@ interface LoginContract {
     }
 
     sealed class UiEvent {
-        data class LoginEvent(val nostrKey: String) : UiEvent()
+        data object LoginRequestEvent : UiEvent()
+        data class UpdateLoginInput(val newInput: String) : UiEvent()
     }
 
     sealed class SideEffect {

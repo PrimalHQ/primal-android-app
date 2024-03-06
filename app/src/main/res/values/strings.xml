@@ -51,13 +51,13 @@
     <string name="create_input_header_nip_05">Verified Nostr address (NIP 05)</string>
     <string name="create_account_required_hint">required</string>
 
-    <string name="login_title">Sign in</string>
+    <string name="login_title">Sign In</string>
     <string name="login_description">Enter your Nostr key to sign in:</string>
-    <string name="login_button_continue">Continue</string>
-    <string name="login_button_paste_key">Paste your key</string>
-    <string name="login_invalid_nsec_key">Please enter a valid Nostr key</string>
-    <string name="login_cant_login_with_public_key">Signing in with an npub is not supported yet. Please sign in with your nsec key.</string>
-    <string name="login_valid_nsec_key">Valid key confirmed</string>
+    <string name="login_button_sign_in">Sign In</string>
+    <string name="login_button_paste_your_key">Paste Your Key</string>
+    <string name="login_button_paste_new_key">Paste New Key</string>
+    <string name="login_enter_nsec_key">Enter your Nostr key to sign in:</string>
+    <string name="login_invalid_nsec_key">Please enter a valid Nostr key,\nstarting with “nsec”:</string>
 
     <string name="logout_title">Sign out</string>
     <string name="logout_description">Do you really want to sign out?</string>
