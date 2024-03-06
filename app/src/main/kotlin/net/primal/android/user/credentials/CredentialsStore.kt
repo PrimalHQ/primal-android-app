@@ -9,14 +9,9 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.runBlocking
-import net.primal.android.crypto.Bech32
-import net.primal.android.crypto.CryptoUtils
-import net.primal.android.crypto.hexToNsecHrp
-import net.primal.android.crypto.toHex
-import net.primal.android.crypto.toNpub
+import net.primal.android.crypto.bech32ToHexOrThrow
+import net.primal.android.crypto.extractKeyPairFromPrivateKeyOrThrow
 import net.primal.android.user.domain.Credential
-import org.spongycastle.util.encoders.DecoderException
-import timber.log.Timber
 
 @Singleton
 class CredentialsStore @Inject constructor(
@@ -43,29 +38,12 @@ class CredentialsStore @Inject constructor(
     }
 
     suspend fun save(nostrKey: String): String {
-        val (nsec, pubkey) = nostrKey.extractKeysOrThrow()
-        addCredential(Credential(nsec = nsec, npub = pubkey.toNpub()))
-        return pubkey.toHex()
-    }
-
-    private fun String.extractKeysOrThrow(): Pair<String, ByteArray> {
-        return try {
-            val nsec = if (startsWith("nsec")) this else this.hexToNsecHrp()
-            val decoded = Bech32.decodeBytes(nsec)
-            val pubkey = CryptoUtils.publicKeyCreate(decoded.second)
-            nsec to pubkey
-        } catch (error: IllegalArgumentException) {
-            Timber.w(error)
-            throw InvalidNostrKeyException()
-        } catch (error: DecoderException) {
-            Timber.w(error)
-            throw InvalidNostrKeyException()
-        }
+        val (nsec, pubkey) = nostrKey.extractKeyPairFromPrivateKeyOrThrow()
+        addCredential(Credential(nsec = nsec, npub = pubkey))
+        return pubkey.bech32ToHexOrThrow()
     }
 
     fun findOrThrow(npub: String): Credential =
         credentials.value.find { it.npub == npub }
             ?: throw IllegalArgumentException("Credential not found for $npub.")
-
-    inner class InvalidNostrKeyException : RuntimeException()
 }

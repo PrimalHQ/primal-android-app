@@ -18,9 +18,14 @@ import net.primal.android.auth.AuthRepository
 import net.primal.android.auth.login.LoginContract.SideEffect
 import net.primal.android.auth.login.LoginContract.UiEvent
 import net.primal.android.auth.login.LoginContract.UiState
+import net.primal.android.core.compose.profile.model.asProfileDetailsUi
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
+import net.primal.android.core.utils.isValidNostrPrivateKey
+import net.primal.android.crypto.bech32ToHexOrThrow
+import net.primal.android.crypto.extractKeyPairFromPrivateKeyOrThrow
 import net.primal.android.feed.repository.FeedRepository
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.settings.muted.repository.MutedUserRepository
 import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.user.repository.UserRepository
@@ -32,6 +37,7 @@ class LoginViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
     private val authRepository: AuthRepository,
     private val userRepository: UserRepository,
+    private val profileRepository: ProfileRepository,
     private val mutedUserRepository: MutedUserRepository,
     private val feedRepository: FeedRepository,
 ) : ViewModel() {
@@ -62,7 +68,8 @@ class LoginViewModel @Inject constructor(
         viewModelScope.launch {
             events.collect {
                 when (it) {
-                    is UiEvent.LoginEvent -> login(nostrKey = it.nostrKey)
+                    is UiEvent.LoginRequestEvent -> login(nostrKey = _state.value.loginInput)
+                    is UiEvent.UpdateLoginInput -> changeLoginInput(input = it.newInput)
                 }
             }
         }
@@ -94,6 +101,33 @@ class LoginViewModel @Inject constructor(
             delay(2.seconds)
             if (state.value.error == error) {
                 setState { copy(error = null) }
+            }
+        }
+    }
+
+    private fun changeLoginInput(input: String) {
+        setState { copy(loginInput = input) }
+        viewModelScope.launch {
+            when {
+                input.isValidNostrPrivateKey() -> {
+                    setState { copy(fetchingProfileDetails = true) }
+                    val (_, npub) = input.extractKeyPairFromPrivateKeyOrThrow()
+                    val userId = npub.bech32ToHexOrThrow()
+                    val profile = withContext(dispatcherProvider.io()) {
+                        try {
+                            profileRepository.requestProfileUpdate(profileId = userId)
+                            profileRepository.findProfileDataOrNull(profileId = userId)
+                        } catch (error: WssException) {
+                            Timber.w(error)
+                            null
+                        }
+                    }
+                    setState { copy(fetchingProfileDetails = false, profileDetails = profile?.asProfileDetailsUi()) }
+                }
+
+                else -> {
+                    setState { copy(fetchingProfileDetails = false, profileDetails = null) }
+                }
             }
         }
     }

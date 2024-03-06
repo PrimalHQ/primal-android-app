@@ -5,6 +5,7 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
@@ -25,6 +26,7 @@ import com.google.accompanist.navigation.material.rememberBottomSheetNavigator
 import java.net.URLEncoder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import net.primal.android.LocalPrimalTheme
 import net.primal.android.attachments.gallery.MediaGalleryScreen
 import net.primal.android.attachments.gallery.MediaGalleryViewModel
 import net.primal.android.auth.create.CreateAccountViewModel
@@ -34,6 +36,8 @@ import net.primal.android.auth.login.LoginViewModel
 import net.primal.android.auth.logout.LogoutScreen
 import net.primal.android.auth.logout.LogoutViewModel
 import net.primal.android.auth.welcome.WelcomeScreen
+import net.primal.android.core.compose.AdjustSystemColors
+import net.primal.android.core.compose.ApplySystemBarColors
 import net.primal.android.core.compose.LockToOrientationPortrait
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.compose.findActivity
@@ -74,6 +78,7 @@ import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.thread.ThreadScreen
 import net.primal.android.thread.ThreadViewModel
+import timber.log.Timber
 
 private fun NavController.navigateToWelcome() =
     navigate(
@@ -412,38 +417,62 @@ fun PrimalAppNavigation() {
 
 private fun NavGraphBuilder.splash(route: String) =
     composable(route = route) {
+        ApplySystemBarColors(
+            statusBarColor = Color.Transparent,
+            navigationBarColor = Color.Transparent,
+        )
         SplashScreen()
     }
 
 private fun NavGraphBuilder.welcome(route: String, navController: NavController) =
     composable(
         route = route,
-        enterTransition = { slideInHorizontally(initialOffsetX = { -it }) },
-        exitTransition = { slideOutHorizontally(targetOffsetX = { -it }) },
+        enterTransition = {
+            Timber.e("Enter initialState = ${this.initialState.destination}")
+            Timber.e("Enter targetState = ${this.targetState.destination}")
+            slideInHorizontally(initialOffsetX = { -it })
+        },
+        exitTransition = {
+            Timber.e("Exit initialState = ${this.initialState.destination}")
+            Timber.e("Exit targetState = ${this.targetState.destination}")
+            slideOutHorizontally(targetOffsetX = { -it })
+        },
     ) {
         LockToOrientationPortrait()
-        PrimalTheme(PrimalTheme.Sunset) {
-            WelcomeScreen(
-                onSignInClick = { navController.navigateToLogin() },
-                onCreateAccountClick = { navController.navigateToCreate() },
-            )
-        }
+        ApplySystemBarColors(
+            statusBarColor = Color.Transparent,
+            navigationBarColor = Color.Transparent,
+        )
+        WelcomeScreen(
+            onSignInClick = { navController.navigateToLogin() },
+            onCreateAccountClick = { navController.navigateToCreate() },
+        )
     }
 
 private fun NavGraphBuilder.login(route: String, navController: NavController) =
     composable(
         route = route,
-        enterTransition = { slideInHorizontally(initialOffsetX = { it }) },
-        exitTransition = { slideOutHorizontally(targetOffsetX = { it }) },
+        enterTransition = {
+            Timber.e("Enter initialState = ${this.initialState.destination}")
+            Timber.e("Enter targetState = ${this.targetState.destination}")
+            slideInHorizontally(initialOffsetX = { it })
+        },
+        exitTransition = {
+            Timber.e("Exit initialState = ${this.initialState.destination}")
+            Timber.e("Exit targetState = ${this.targetState.destination}")
+            slideOutHorizontally(targetOffsetX = { it })
+        },
     ) {
         val viewModel: LoginViewModel = hiltViewModel(it)
-        PrimalTheme(PrimalTheme.Sunset) {
-            LoginScreen(
-                viewModel = viewModel,
-                onLoginSuccess = { pubkey -> navController.navigateToFeed(pubkey) },
-                onClose = { navController.popBackStack() },
-            )
-        }
+        ApplySystemBarColors(
+            statusBarColor = Color.Transparent,
+            navigationBarColor = Color.Transparent,
+        )
+        LoginScreen(
+            viewModel = viewModel,
+            onLoginSuccess = { pubkey -> navController.navigateToFeed(pubkey) },
+            onClose = { navController.popBackStack() },
+        )
     }
 
 private fun NavGraphBuilder.createAccount(route: String, navController: NavController) =
@@ -473,6 +502,7 @@ private fun NavGraphBuilder.feed(
     arguments = arguments,
 ) { navBackEntry ->
     val viewModel = hiltViewModel<FeedViewModel>(navBackEntry)
+    AdjustSystemColors(primalTheme = LocalPrimalTheme.current)
     LockToOrientationPortrait()
     FeedScreen(
         viewModel = viewModel,

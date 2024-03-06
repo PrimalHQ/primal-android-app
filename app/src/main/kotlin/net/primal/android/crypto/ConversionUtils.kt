@@ -1,6 +1,8 @@
 package net.primal.android.crypto
 
+import org.spongycastle.util.encoders.DecoderException
 import org.spongycastle.util.encoders.Hex
+import timber.log.Timber
 
 fun String.hexToNoteHrp() =
     Bech32.encodeBytes(
@@ -59,3 +61,20 @@ fun String.bechToBytesOrThrow(hrp: String? = null): ByteArray {
     }
     return decodedForm.second
 }
+
+fun String.extractKeyPairFromPrivateKeyOrThrow(): Pair<String, String> {
+    return try {
+        val nsec = if (startsWith("nsec")) this else this.hexToNsecHrp()
+        val decoded = Bech32.decodeBytes(nsec)
+        val pubkey = CryptoUtils.publicKeyCreate(decoded.second)
+        nsec to pubkey.toNpub()
+    } catch (error: IllegalArgumentException) {
+        Timber.w(error)
+        throw InvalidNostrPrivateKeyException()
+    } catch (error: DecoderException) {
+        Timber.w(error)
+        throw InvalidNostrPrivateKeyException()
+    }
+}
+
+class InvalidNostrPrivateKeyException : RuntimeException()
