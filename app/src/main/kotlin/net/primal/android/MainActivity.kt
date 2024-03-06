@@ -39,7 +39,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val userTheme = themeStore.userThemeState.collectAsState()
-            val primalTheme = userTheme.value ?: initDefaultTheme()
+            val primalTheme = userTheme.value ?: defaultPrimalTheme()
 
             PrimalTheme(
                 primalTheme = primalTheme,
@@ -52,15 +52,6 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-    }
-
-    @Composable
-    private fun initDefaultTheme(): PrimalTheme {
-        val defaultTheme = defaultPrimalTheme()
-        LaunchedEffect(Unit) {
-            themeStore.setUserTheme(theme = defaultTheme.themeName)
-        }
-        return defaultTheme
     }
 
     private fun observeThemeChanges() =
