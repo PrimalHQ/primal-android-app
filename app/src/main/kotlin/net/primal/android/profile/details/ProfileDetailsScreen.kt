@@ -52,7 +52,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -97,7 +96,6 @@ import kotlinx.coroutines.withContext
 import net.primal.android.LocalPrimalTheme
 import net.primal.android.R
 import net.primal.android.attachments.domain.findNearestOrNull
-import net.primal.android.core.compose.AdjustTemporarilySystemBarColors
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.IconText
@@ -159,8 +157,6 @@ fun ProfileDetailsScreen(
     onGoToWallet: () -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
-
-    AdjustTemporarilySystemBarColors(statusBarColor = Color.Transparent)
 
     DisposableLifecycleObserverEffect(viewModel) {
         when (it) {
@@ -459,7 +455,7 @@ private fun ProfileTopCoverBar(
     avatarPadding: Dp = 0.dp,
 ) {
     val coverBlur = AppTheme.colorScheme.surface.copy(alpha = coverAlpha)
-    val maxCollapsed by remember { derivedStateOf { coverAlpha == MAX_COVER_TRANSPARENCY } }
+    val maxCollapsed = coverAlpha == MAX_COVER_TRANSPARENCY
     BoxWithConstraints(
         modifier = Modifier.fillMaxWidth(),
         contentAlignment = Alignment.TopCenter,

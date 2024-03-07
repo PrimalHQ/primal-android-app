@@ -22,18 +22,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import net.primal.android.R
-import net.primal.android.core.compose.AdjustTemporarilySystemBarColors
 import net.primal.android.discuss.list.model.FeedUi
 import net.primal.android.theme.AppTheme
 
 @Composable
 fun FeedListScreen(viewModel: FeedListViewModel, onFeedSelected: (String) -> Unit) {
     val uiState = viewModel.state.collectAsState()
-
-    AdjustTemporarilySystemBarColors(
-        navigationBarColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
-    )
-
     FeedListScreen(
         state = uiState.value,
         onFeedClick = { onFeedSelected(it.directive) },

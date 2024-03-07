@@ -5,7 +5,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -115,7 +114,6 @@ fun PrimalDrawerScaffold(
                 bottomBar = {
                     PrimalNavigationBarLightningBolt(
                         modifier = Modifier
-                            .navigationBarsPadding()
                             .then(if (bottomBarInitialHeight == 0.dp) bottomBarMeasureHeightModifier else Modifier)
                             .then(
                                 if (bottomBarInitialHeight > 0.dp) {

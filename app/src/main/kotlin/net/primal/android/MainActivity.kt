@@ -4,7 +4,6 @@ import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
@@ -16,6 +15,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
+import net.primal.android.core.compose.ApplyEdgeToEdge
 import net.primal.android.navigation.PrimalAppNavigation
 import net.primal.android.theme.PrimalRippleTheme
 import net.primal.android.theme.PrimalTheme
@@ -31,7 +31,6 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
-        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         observeThemeChanges()
 
@@ -46,6 +45,7 @@ class MainActivity : ComponentActivity() {
                     LocalPrimalTheme provides primalTheme,
                     LocalRippleTheme provides PrimalRippleTheme,
                 ) {
+                    ApplyEdgeToEdge()
                     PrimalAppNavigation()
                 }
             }
