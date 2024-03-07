@@ -32,7 +32,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -51,7 +50,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.text.isDigitsOnly
 import net.primal.android.R
-import net.primal.android.core.compose.AdjustTemporarilySystemBarColors
 import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.feed.model.ZappingState
@@ -62,7 +60,7 @@ import net.primal.android.nostr.model.primal.content.DEFAULT_ZAP_CONFIG
 import net.primal.android.settings.zaps.PRESETS_COUNT
 import net.primal.android.theme.AppTheme
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ZapBottomSheet(
     receiverName: String,
@@ -80,9 +78,6 @@ fun ZapBottomSheet(
     val keyboardController = LocalSoftwareKeyboardController.current
     val keyboardVisible by keyboardVisibilityAsState()
 
-    AdjustTemporarilySystemBarColors(
-        navigationBarColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
-    )
     ModalBottomSheet(
         containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
         tonalElevation = 0.dp,

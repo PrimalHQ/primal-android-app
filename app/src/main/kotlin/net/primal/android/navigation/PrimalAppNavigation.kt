@@ -5,7 +5,6 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
@@ -26,7 +25,6 @@ import com.google.accompanist.navigation.material.rememberBottomSheetNavigator
 import java.net.URLEncoder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import net.primal.android.LocalPrimalTheme
 import net.primal.android.attachments.gallery.MediaGalleryScreen
 import net.primal.android.attachments.gallery.MediaGalleryViewModel
 import net.primal.android.auth.create.CreateAccountViewModel
@@ -36,8 +34,7 @@ import net.primal.android.auth.login.LoginViewModel
 import net.primal.android.auth.logout.LogoutScreen
 import net.primal.android.auth.logout.LogoutViewModel
 import net.primal.android.auth.welcome.WelcomeScreen
-import net.primal.android.core.compose.AdjustSystemColors
-import net.primal.android.core.compose.ApplySystemBarColors
+import net.primal.android.core.compose.ApplyEdgeToEdge
 import net.primal.android.core.compose.LockToOrientationPortrait
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.compose.findActivity
@@ -416,10 +413,6 @@ fun PrimalAppNavigation() {
 
 private fun NavGraphBuilder.splash(route: String) =
     composable(route = route) {
-        ApplySystemBarColors(
-            statusBarColor = Color.Transparent,
-            navigationBarColor = Color.Transparent,
-        )
         SplashScreen()
     }
 
@@ -442,14 +435,13 @@ private fun NavGraphBuilder.welcome(route: String, navController: NavController)
         },
     ) {
         LockToOrientationPortrait()
-        ApplySystemBarColors(
-            statusBarColor = Color.Transparent,
-            navigationBarColor = Color.Transparent,
-        )
-        WelcomeScreen(
-            onSignInClick = { navController.navigateToLogin() },
-            onCreateAccountClick = { navController.navigateToCreate() },
-        )
+        PrimalTheme(PrimalTheme.Sunset) {
+            ApplyEdgeToEdge(isDarkTheme = true)
+            WelcomeScreen(
+                onSignInClick = { navController.navigateToLogin() },
+                onCreateAccountClick = { navController.navigateToCreate() },
+            )
+        }
     }
 
 private fun NavGraphBuilder.login(route: String, navController: NavController) =
@@ -471,15 +463,15 @@ private fun NavGraphBuilder.login(route: String, navController: NavController) =
         },
     ) {
         val viewModel: LoginViewModel = hiltViewModel(it)
-        ApplySystemBarColors(
-            statusBarColor = Color.Transparent,
-            navigationBarColor = Color.Transparent,
-        )
-        LoginScreen(
-            viewModel = viewModel,
-            onLoginSuccess = { pubkey -> navController.navigateToFeed(pubkey) },
-            onClose = { navController.popBackStack() },
-        )
+        LockToOrientationPortrait()
+        PrimalTheme(PrimalTheme.Sunset) {
+            ApplyEdgeToEdge(isDarkTheme = true)
+            LoginScreen(
+                viewModel = viewModel,
+                onLoginSuccess = { pubkey -> navController.navigateToFeed(pubkey) },
+                onClose = { navController.popBackStack() },
+            )
+        }
     }
 
 private fun NavGraphBuilder.createAccount(route: String, navController: NavController) =
@@ -501,7 +493,9 @@ private fun NavGraphBuilder.createAccount(route: String, navController: NavContr
         },
     ) {
         val viewModel: CreateAccountViewModel = hiltViewModel(it)
+        LockToOrientationPortrait()
         PrimalTheme(PrimalTheme.Sunset) {
+            ApplyEdgeToEdge(isDarkTheme = true)
             CreateAccountScreen(
                 viewModel = viewModel,
                 onCreateSuccess = { pubkey -> navController.navigateToFeed(pubkey) },
@@ -522,7 +516,7 @@ private fun NavGraphBuilder.feed(
 ) { navBackEntry ->
     val viewModel = hiltViewModel<FeedViewModel>(navBackEntry)
     LockToOrientationPortrait()
-    AdjustSystemColors(primalTheme = LocalPrimalTheme.current)
+    ApplyEdgeToEdge()
     FeedScreen(
         viewModel = viewModel,
         onFeedsClick = { navController.navigateToFeedList() },

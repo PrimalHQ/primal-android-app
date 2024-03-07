@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
@@ -115,120 +116,129 @@ fun PrimalNavigationBarLightningBolt(
     )
 
     Surface(color = Color.Transparent) {
-        Box(
-            modifier = modifier.height(NavigationBarFullHeightDp),
-            contentAlignment = Alignment.BottomCenter,
-        ) {
-            Spacer(
-                modifier = Modifier
-                    .size(NavigationBarBoltCircleSizeDp)
-                    .border(
-                        width = NavigationBarBorderWidthDp,
-                        color = AppTheme.colorScheme.outline,
-                        shape = CircleShape,
-                    ),
-            )
-
-            Column {
-                PrimalDivider(thickness = NavigationBarBorderWidthDp)
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(color = NavigationBarDefaults.containerColor)
-                        .height(NavigationBarVisibleHeightDp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceEvenly,
-                ) {
-                    NavItemDestination(
-                        destination = PrimalTopLevelDestination.Home,
-                        activeDestination = activeDestination,
-                        onTopLevelDestinationChanged = onTopLevelDestinationChanged,
-                        onActiveDestinationClick = onActiveDestinationClick,
-                        badgesMap = badgesMap,
-                    )
-
-                    NavItemDestination(
-                        destination = PrimalTopLevelDestination.Explore,
-                        activeDestination = activeDestination,
-                        onTopLevelDestinationChanged = onTopLevelDestinationChanged,
-                        onActiveDestinationClick = onActiveDestinationClick,
-                        badgesMap = badgesMap,
-                    )
-
-                    Box(
-                        modifier = Modifier.weight(1f),
-                    ) {}
-
-                    NavItemDestination(
-                        destination = PrimalTopLevelDestination.Notifications,
-                        activeDestination = activeDestination,
-                        onTopLevelDestinationChanged = onTopLevelDestinationChanged,
-                        onActiveDestinationClick = onActiveDestinationClick,
-                        badgesMap = badgesMap,
-                    )
-
-                    NavItemDestination(
-                        destination = PrimalTopLevelDestination.Messages,
-                        activeDestination = activeDestination,
-                        onTopLevelDestinationChanged = onTopLevelDestinationChanged,
-                        onActiveDestinationClick = onActiveDestinationClick,
-                        badgesMap = badgesMap,
-                    )
-                }
-            }
-
-            Spacer(
-                modifier = Modifier
-                    .size(NavigationBarBoltCircleSizeDp - NavigationBarBorderWidthDp)
-                    .background(
-                        color = AppTheme.colorScheme.surface,
-                        shape = CircleShape,
-                    ),
-            )
-
+        Column {
             Box(
-                modifier = Modifier
-                    .size(NavigationBarBoltCircleSizeDp - NavigationBarBoltBorderSpaceDp)
-                    .background(
-                        color = if (activeDestination == PrimalTopLevelDestination.Wallet) {
-                            if (LocalPrimalTheme.current.isDarkTheme) BoltLightColor else BoltDarkColor
-                        } else {
-                            AppTheme.extraColorScheme.surfaceVariantAlt1
-                        },
-                        shape = CircleShape,
-                    )
-                    .clip(CircleShape)
-                    .clickable {
-                        clickDebounce.processEvent {
-                            if (activeDestination == PrimalTopLevelDestination.Wallet) {
-                                onActiveDestinationClick?.invoke()
-                            } else {
-                                onTopLevelDestinationChanged(PrimalTopLevelDestination.Wallet)
-                            }
-                        }
-                    },
-                contentAlignment = Alignment.Center,
+                modifier = modifier.height(NavigationBarFullHeightDp),
+                contentAlignment = Alignment.BottomCenter,
             ) {
-                val selected = activeDestination == PrimalTopLevelDestination.Wallet
-                val imageVector = if (selected) {
-                    PrimalTopLevelDestination.Wallet.imageVectorSelected()
-                } else {
-                    PrimalTopLevelDestination.Wallet.imageVector()
-                }
-
-                val tint = if (selected) {
-                    if (LocalPrimalTheme.current.isDarkTheme) BoltDarkColor else BoltLightColor
-                } else {
-                    AppTheme.extraColorScheme.onSurfaceVariantAlt3
-                }
-
-                Icon(
-                    modifier = Modifier.size(32.dp),
-                    imageVector = imageVector,
-                    contentDescription = stringResource(id = R.string.primary_destination_wallet_label),
-                    tint = tint,
+                Spacer(
+                    modifier = Modifier
+                        .size(NavigationBarBoltCircleSizeDp)
+                        .border(
+                            width = NavigationBarBorderWidthDp,
+                            color = AppTheme.colorScheme.outline,
+                            shape = CircleShape,
+                        ),
                 )
+
+                Column {
+                    PrimalDivider(thickness = NavigationBarBorderWidthDp)
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(color = NavigationBarDefaults.containerColor)
+                            .height(NavigationBarVisibleHeightDp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                    ) {
+                        NavItemDestination(
+                            destination = PrimalTopLevelDestination.Home,
+                            activeDestination = activeDestination,
+                            onTopLevelDestinationChanged = onTopLevelDestinationChanged,
+                            onActiveDestinationClick = onActiveDestinationClick,
+                            badgesMap = badgesMap,
+                        )
+
+                        NavItemDestination(
+                            destination = PrimalTopLevelDestination.Explore,
+                            activeDestination = activeDestination,
+                            onTopLevelDestinationChanged = onTopLevelDestinationChanged,
+                            onActiveDestinationClick = onActiveDestinationClick,
+                            badgesMap = badgesMap,
+                        )
+
+                        Box(
+                            modifier = Modifier.weight(1f),
+                        ) {}
+
+                        NavItemDestination(
+                            destination = PrimalTopLevelDestination.Notifications,
+                            activeDestination = activeDestination,
+                            onTopLevelDestinationChanged = onTopLevelDestinationChanged,
+                            onActiveDestinationClick = onActiveDestinationClick,
+                            badgesMap = badgesMap,
+                        )
+
+                        NavItemDestination(
+                            destination = PrimalTopLevelDestination.Messages,
+                            activeDestination = activeDestination,
+                            onTopLevelDestinationChanged = onTopLevelDestinationChanged,
+                            onActiveDestinationClick = onActiveDestinationClick,
+                            badgesMap = badgesMap,
+                        )
+                    }
+                }
+
+                Spacer(
+                    modifier = Modifier
+                        .size(NavigationBarBoltCircleSizeDp - NavigationBarBorderWidthDp)
+                        .background(
+                            color = AppTheme.colorScheme.surface,
+                            shape = CircleShape,
+                        ),
+                )
+
+                Box(
+                    modifier = Modifier
+                        .size(NavigationBarBoltCircleSizeDp - NavigationBarBoltBorderSpaceDp)
+                        .background(
+                            color = if (activeDestination == PrimalTopLevelDestination.Wallet) {
+                                if (LocalPrimalTheme.current.isDarkTheme) BoltLightColor else BoltDarkColor
+                            } else {
+                                AppTheme.extraColorScheme.surfaceVariantAlt1
+                            },
+                            shape = CircleShape,
+                        )
+                        .clip(CircleShape)
+                        .clickable {
+                            clickDebounce.processEvent {
+                                if (activeDestination == PrimalTopLevelDestination.Wallet) {
+                                    onActiveDestinationClick?.invoke()
+                                } else {
+                                    onTopLevelDestinationChanged(PrimalTopLevelDestination.Wallet)
+                                }
+                            }
+                        },
+                    contentAlignment = Alignment.Center,
+                ) {
+                    val selected = activeDestination == PrimalTopLevelDestination.Wallet
+                    val imageVector = if (selected) {
+                        PrimalTopLevelDestination.Wallet.imageVectorSelected()
+                    } else {
+                        PrimalTopLevelDestination.Wallet.imageVector()
+                    }
+
+                    val tint = if (selected) {
+                        if (LocalPrimalTheme.current.isDarkTheme) BoltDarkColor else BoltLightColor
+                    } else {
+                        AppTheme.extraColorScheme.onSurfaceVariantAlt3
+                    }
+
+                    Icon(
+                        modifier = Modifier.size(32.dp),
+                        imageVector = imageVector,
+                        contentDescription = stringResource(id = R.string.primary_destination_wallet_label),
+                        tint = tint,
+                    )
+                }
             }
+
+            Spacer(
+                modifier = Modifier
+                    .background(color = NavigationBarDefaults.containerColor)
+                    .fillMaxWidth()
+                    .navigationBarsPadding(),
+            )
         }
     }
 }
