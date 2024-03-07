@@ -1,6 +1,7 @@
 package net.primal.android.wallet.activation
 
 import android.util.Patterns
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
@@ -23,6 +24,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -78,13 +80,15 @@ import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.decodeFromStream
+import net.primal.android.LocalPrimalTheme
 import net.primal.android.R
-import net.primal.android.core.compose.AdjustTemporarilySystemBarColors
+import net.primal.android.core.compose.ApplyEdgeToEdge
 import net.primal.android.core.compose.DatePickerModalBottomSheet
 import net.primal.android.core.compose.OtpTextField
 import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.ToSAndPrivacyPolicyText
+import net.primal.android.core.compose.applyEdgeToEdge
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -157,13 +161,16 @@ fun WalletActivationScreen(
                     WalletActivationStatus.ActivationSuccess -> TopAppBarDefaults.centerAlignedTopAppBarColors(
                         containerColor = walletSuccessColor,
                         scrolledContainerColor = walletSuccessColor,
-                        titleContentColor = walletSuccessContentColor,
                     )
 
                     else -> TopAppBarDefaults.centerAlignedTopAppBarColors(
                         containerColor = AppTheme.colorScheme.surface,
                         scrolledContainerColor = AppTheme.colorScheme.surface,
                     )
+                },
+                textColor = when (uiState.status) {
+                    WalletActivationStatus.ActivationSuccess -> walletSuccessContentColor
+                    else -> LocalContentColor.current
                 },
                 showDivider = uiState.status != WalletActivationStatus.ActivationSuccess,
                 navigationIcon = PrimalIcons.ArrowBack,
@@ -178,7 +185,7 @@ fun WalletActivationScreen(
         content = { paddingValues ->
             AnimatedContent(
                 targetState = uiState.status,
-                modifier = Modifier.padding(paddingValues),
+                modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center,
                 transitionSpec = {
                     fadeIn(animationSpec = tween(STEP_ANIMATION_DURATION))
@@ -189,6 +196,7 @@ fun WalletActivationScreen(
                 content = { status ->
                     when (status) {
                         WalletActivationStatus.PendingData -> WalletActivationDataInput(
+                            modifier = Modifier.padding(paddingValues),
                             data = uiState.data,
                             working = uiState.working,
                             error = uiState.error,
@@ -201,6 +209,7 @@ fun WalletActivationScreen(
                         )
 
                         WalletActivationStatus.PendingCodeConfirmation -> WalletCodeActivationInput(
+                            modifier = Modifier.padding(paddingValues),
                             working = uiState.working,
                             error = uiState.error,
                             email = uiState.data.email,
@@ -210,6 +219,7 @@ fun WalletActivationScreen(
                         )
 
                         WalletActivationStatus.ActivationSuccess -> WalletActivationSuccess(
+                            modifier = Modifier.fillMaxSize(),
                             lightningAddress = uiState.activatedLightningAddress.orEmpty(),
                             onDone = onClose,
                         )
@@ -224,6 +234,7 @@ private const val STEP_ANIMATION_DURATION = 256
 
 @Composable
 private fun StepContainerWithActionButton(
+    modifier: Modifier = Modifier,
     onActionClick: () -> Unit,
     actionButtonText: String,
     actionButtonEnabled: Boolean,
@@ -233,7 +244,7 @@ private fun StepContainerWithActionButton(
     containerContent: @Composable ColumnScope.() -> Unit,
 ) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .verticalScroll(state = rememberScrollState()),
         verticalArrangement = Arrangement.SpaceEvenly,
@@ -272,6 +283,7 @@ private const val MAX_DATE_OF_BIRTH = 1900
 @ExperimentalComposeUiApi
 @Composable
 private fun WalletActivationDataInput(
+    modifier: Modifier = Modifier,
     data: WalletActivationData,
     working: Boolean,
     error: Throwable?,
@@ -364,6 +376,7 @@ private fun WalletActivationDataInput(
     )
 
     StepContainerWithActionButton(
+        modifier = modifier,
         actionButtonText = stringResource(id = R.string.wallet_activation_next_button),
         actionButtonEnabled = activationDataSnapshot().isValid(availableStates),
         actionButtonLoading = working,
@@ -521,6 +534,7 @@ private fun WalletActivationData.isValid(availableStates: List<State>?): Boolean
 @ExperimentalComposeUiApi
 @Composable
 private fun WalletCodeActivationInput(
+    modifier: Modifier = Modifier,
     working: Boolean,
     error: Throwable?,
     email: String,
@@ -533,6 +547,7 @@ private fun WalletCodeActivationInput(
     val keyboardController = LocalSoftwareKeyboardController.current
 
     StepContainerWithActionButton(
+        modifier = modifier,
         actionButtonText = stringResource(id = R.string.wallet_activation_finish_button),
         actionButtonEnabled = code.isCodeValid(),
         actionButtonLoading = working,
@@ -623,19 +638,35 @@ private const val CODE_LENGTH = 6
 private fun String.isCodeValid() = this.isDigitsOnly() && this.length == CODE_LENGTH
 
 @Composable
-private fun WalletActivationSuccess(lightningAddress: String, onDone: () -> Unit) {
-    AdjustTemporarilySystemBarColors(statusBarColor = walletSuccessColor, navigationBarColor = walletSuccessColor)
+private fun WalletActivationSuccess(
+    modifier: Modifier = Modifier,
+    lightningAddress: String,
+    onDone: () -> Unit,
+) {
+    ApplyEdgeToEdge(isDarkTheme = true)
+
+    val context = LocalContext.current
+    val primalTheme = LocalPrimalTheme.current
+    fun closingSequence() {
+        onDone()
+        (context as ComponentActivity).applyEdgeToEdge(isDarkTheme = primalTheme.isDarkTheme)
+    }
+
+    BackHandler {
+        closingSequence()
+    }
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(color = walletSuccessColor),
+        modifier = modifier
+            .background(color = walletSuccessColor)
+            .navigationBarsPadding(),
         verticalArrangement = Arrangement.SpaceAround,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .weight(1f)
                 .wrapContentHeight(),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -673,10 +704,12 @@ private fun WalletActivationSuccess(lightningAddress: String, onDone: () -> Unit
         }
 
         PrimalLoadingButton(
-            modifier = Modifier.width(200.dp),
+            modifier = Modifier
+                .width(200.dp)
+                .padding(bottom = 32.dp),
             text = stringResource(id = R.string.wallet_activation_done_button),
             containerColor = walletSuccessDimColor,
-            onClick = onDone,
+            onClick = { closingSequence() },
         )
     }
 }

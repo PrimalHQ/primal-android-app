@@ -40,7 +40,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.R
-import net.primal.android.core.compose.AdjustTemporarilySystemBarColors
 import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.findActivity
@@ -98,9 +97,6 @@ fun InAppPurchaseBuyBottomSheet(
     val activity = LocalContext.current.findActivity()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
-    AdjustTemporarilySystemBarColors(
-        navigationBarColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
-    )
     ModalBottomSheet(
         containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
         sheetState = sheetState,
