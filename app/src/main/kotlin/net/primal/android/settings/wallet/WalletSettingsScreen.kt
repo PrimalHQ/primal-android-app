@@ -14,7 +14,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowForwardIos
+import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -368,7 +368,7 @@ private fun NostrProfileLightingAddressSection(lightningAddress: String?, onEdit
             headlineText = stringResource(id = R.string.settings_wallet_ln_address),
             supportText = lightningAddress,
             trailingContent = {
-                Icon(imageVector = Icons.Default.ArrowForwardIos, contentDescription = null)
+                Icon(imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos, contentDescription = null)
             },
             onClick = onEditProfileClick,
         )
