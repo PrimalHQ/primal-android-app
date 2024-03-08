@@ -719,17 +719,25 @@ private fun UserProfileDetails(
         }
 
         if (state.profileDetails?.website?.isNotEmpty() == true) {
+
+            // add protocol if user website is missing it
+            // use http protocol since many websites redirect to https if available
+            val websiteWithProtocol = if (state.profileDetails.website.startsWith("http", true))
+                state.profileDetails.website
+            else
+                "http://" + state.profileDetails.website
+
             UserWebsiteText(
                 website = state.profileDetails.website,
                 onClick = {
                     try {
-                        localUriHandler.openUri(state.profileDetails.website)
+                        localUriHandler.openUri(websiteWithProtocol)
                     } catch (error: ActivityNotFoundException) {
                         Timber.w(error)
                         uiScope.launch {
                             Toast.makeText(
                                 context,
-                                "App not found that could open ${state.profileDetails.website}.",
+                                "App not found that could open ${websiteWithProtocol}.",
                                 Toast.LENGTH_SHORT,
                             ).show()
                         }
