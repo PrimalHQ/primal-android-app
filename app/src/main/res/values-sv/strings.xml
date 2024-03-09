@@ -1,0 +1,525 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Primal</string>
+    <string name="nsec">nsec</string>
+    <string name="npub">npub</string>
+
+    <string name="app_info">Information</string>
+    <string name="app_generic_error">Något gick fel. Försök igen.</string>
+    <string name="app_missing_relays_config">Inga reläer hittades. Konfigurera ditt nätverk.</string>
+    <string name="app_error_loading_prev_page">Kunde inte ladda nyare innehåll för tillfället.</string>
+    <string name="app_error_loading_next_page">Kunde inte ladda äldre innehåll för tillfället.</string>
+    <string name="app_failed_to_upload_image">Misslyckades med att ladda upp bild. Försök igen.</string>
+    <string name="app_error_adding_to_feed">Kunde inte lägga till vald feed i dina feeds. Försök igen.</string>
+    <string name="app_error_removing_feed">Kunde inte ta bort vald feed från dina feeds. Försök igen.</string>
+    <string name="app_added_to_user_feeds">Lagt till i dina hemfeeds</string>
+    <string name="app_removed_from_user_feeds">Borttagen från dina hemfeeds</string>
+    <string name="app_error_muting_user">Kunde inte tysta användaren. Försök igen.</string>
+    <string name="app_error_unmuting_user">Kunde inte avtysta användaren. Försök igen.</string>
+
+    <string name="welcome_sign_in_button_title">Logga in</string>
+    <string name="welcome_create_account_button_title">Skapa konto</string>
+    <string name="welcome_tos_prefix">Genom att fortsätta godkänner du våra</string>
+
+    <string name="legal_tos_hint_highlighted_word">Användarvillkor</string>
+    <string name="legal_privacy_policy_hint_highlighted_word">Integritetspolicy</string>
+
+    <string name="create_title_new_account">Nytt konto</string>
+    <string name="create_title_profile_preview">Profilförhandsgranskning</string>
+    <string name="create_title_nostr_account_created">Nostr-konto skapat</string>
+    <string name="create_title_people_to_follow">Personer att följa</string>
+    <string name="create_set_banner">ställ in banner</string>
+    <string name="create_change_banner">ändra banner</string>
+    <string name="create_set_avatar">ställ in avatar</string>
+    <string name="create_change_avatar">ändra avatar</string>
+    <string name="create_action_next">Nästa</string>
+    <string name="create_action_create_nostr_account">Skapa Nostr-konto</string>
+    <string name="create_action_find_people_to_follow">Hitta personer att följa</string>
+    <string name="create_action_finish">Avsluta</string>
+    <string name="create_success_subtitle">Ditt Nostr-konto har skapats!</string>
+    <string name="create_finish_subtitle">Din Nostr-nyckel är säkert lagrad på din telefon. Du kan komma åt den i appens inställningar.</string>
+    <string name="create_recommended_follow">Följ</string>
+    <string name="create_recommended_unfollow">Sluta följa</string>
+    <string name="create_recommended_follow_all">Följ alla</string>
+    <string name="create_recommended_unfollow_all">Sluta följa alla</string>
+    <string name="create_subtitle_profile_preview">Vi kommer att använda denna information för att skapa ditt Nostr-konto. Om du vill göra ändringar kan du alltid göra det i dina profilinställningar.</string>
+    <string name="create_input_header_display_name">Visningsnamn</string>
+    <string name="create_input_header_handle">Användarnamn</string>
+    <string name="create_input_header_website">Webbplats</string>
+    <string name="create_input_header_about_me">Om mig</string>
+    <string name="create_input_header_bitcoin_lightning_address">Bitcoin blixtadress</string>
+    <string name="create_input_header_nip_05">Verifierad Nostr-adress (NIP 05)</string>
+    <string name="create_account_required_hint">obligatoriskt</string>
+
+    <string name="login_title">Logga in</string>
+    <string name="login_description">Ange din Nostr-nyckel för att logga in:</string>
+    <string name="login_button_continue">Fortsätt</string>
+    <string name="login_button_paste_key">Klistra in din nyckel</string>
+    <string name="login_invalid_nsec_key">Ange en giltig Nostr-nyckel</string>
+    <string name="login_cant_login_with_public_key">Inloggning med en npub stöds ännu inte. Logga in med din nsec-nyckel.</string>
+    <string name="login_valid_nsec_key">Giltig nyckel bekräftad</string>
+
+    <string name="logout_title">Logga ut</string>
+    <string name="logout_description">Vill du verkligen logga ut?</string>
+    <string name="logout_cancel_button">Avbryt</string>
+    <string name="logout_button">Logga ut</string>
+
+    <string name="primary_destination_feed_label">Feed</string>
+    <string name="primary_destination_read_label">Läs</string>
+    <string name="primary_destination_explore_label">Utforska</string>
+    <string name="primary_destination_wallet_label">Plånbok</string>
+    <string name="primary_destination_messages_label">Meddelanden</string>
+    <string name="primary_destination_notifications_label">Aviseringar</string>
+
+    <string name="drawer_destination_profile">Profil</string>
+    <string name="drawer_destination_settings">Inställningar</string>
+    <string name="drawer_destination_sign_out">Logga ut</string>
+    <string name="drawer_followers_suffix">Följare</string>
+    <string name="drawer_following_suffix">Följer</string>
+
+    <string name="feed_reposted_suffix">ompublicerad</string>
+    <string name="feed_see_more">Se mer…</string>
+
+    <string name="timestamp_since_just_now">nu</string>
+    <string name="timestamp_since_minutes">%1$sm</string>
+    <string name="timestamp_since_hours">%1$st</string>
+    <string name="timestamp_since_days">%1$sd</string>
+    <string name="timestamp_since_weeks">%1$sv</string>
+    <string name="timestamp_since_months">%1$smo</string>
+    <string name="timestamp_since_years">%1$sår</string>
+    <plurals name="timestamp_since_minutes">
+        <item quantity="one">%1$s minut sedan</item>
+        <item quantity="other">%1$s minuter sedan</item>
+    </plurals>
+    <plurals name="timestamp_since_hours">
+        <item quantity="one">%1$s timme sedan</item>
+        <item quantity="other">%1$s timmar sedan</item>
+    </plurals>
+    <plurals name="timestamp_since_days">
+        <item quantity="one">%1$s dag sedan</item>
+        <item quantity="other">%1$s dagar sedan</item>
+    </plurals>
+    <plurals name="timestamp_since_weeks">
+        <item quantity="one">%1$s vecka sedan</item>
+        <item quantity="other">%1$s veckor sedan</item>
+    </plurals>
+    <plurals name="timestamp_since_months">
+        <item quantity="one">%1$s månad sedan</item>
+        <item quantity="other">%1$s månader sedan</item>
+    </plurals>
+    <plurals name="timestamp_since_years">
+        <item quantity="one">%1$s år sedan</item>
+        <item quantity="other">%1$s år sedan</item>
+    </plurals>
+
+    <string name="feed_list_title">Mina Nostr-feeds</string>
+    <string name="feed_no_content">Det finns inget innehåll i den här feeden.</string>
+    <string name="feed_error_loading">Kunde inte ladda innehåll för denna feed. Försök igen.</string>
+    <string name="feed_refresh_button">Uppdatera</string>
+
+    <string name="feed_new_posts_notice_general">publicerade</string>
+    <string name="feed_new_posts_notice_100plus">100+ nya anteckningar</string>
+    <plurals name="feed_new_posts_notice">
+        <item quantity="one">%1$s nya anteckningar</item>
+        <item quantity="other">%1$s nya anteckningar</item>
+    </plurals>
+
+    <string name="feed_context_share_note">Dela anteckning</string>
+    <string name="feed_context_copy_note_link">Kopiera anteckningslänk</string>
+    <string name="feed_context_copy_note_text">Kopiera anteckningstext</string>
+    <string name="feed_context_copy_note_id">Kopiera antecknings-ID</string>
+    <string name="feed_context_copy_raw_data">Kopiera rådata</string>
+    <string name="feed_context_copy_user_id">Kopiera användar-ID</string>
+    <string name="feed_context_report_user">Rapportera användare</string>
+    <string name="feed_context_mute_user">Tysta användare</string>
+    <string name="feed_context_copied_toast">Kopierad!</string>
+
+    <string name="post_repost_button_confirmation">Republish Anteckning</string>
+    <string name="post_quote_button_confirmation">Citera anteckning</string>
+
+    <string name="note_editor_post_publish_button">Publicera</string>
+    <string name="note_editor_reply_publish_button">Svara</string>
+    <string name="note_editor_post_publishing_button">Publicerar…</string>
+    <string name="note_editor_reply_publishing_button">Svarar…</string>
+    <string name="note_editor_uploading_attachments">Laddar upp…</string>
+    <string name="note_editor_content_placeholder">Skriv din post här…</string>
+    <string name="note_editor_nostr_publish_error">Kunde inte publicera din anteckning på Nostr. Försök igen snart.</string>
+
+    <string name="post_action_missing_lightning_address">Det går inte att zappa den här användaren eftersom de inte har en blixtadress inställd.</string>
+    <string name="post_action_invalid_zap_request">Det går inte att zappa. Kontrollera din plånboksanslutning och försök igen.</string>
+    <string name="post_action_zap_failed">Det går inte att zappa. Försök igen.</string>
+    <string name="post_action_like_failed">Det går inte att gilla. Försök igen.</string>
+    <string name="post_action_repost_failed">Det går inte att reposta. Försök igen.</string>
+    <string name="post_action_reply_failed">Det går inte att svara. Försök igen.</string>
+
+    <string name="thread_title">Tråd</string>
+    <string name="thread_reply_to">Svara till %1$s</string>
+    <string name="thread_replying_to">Svarar till %1$s</string>
+    <string name="thread_publish_button">Svara</string>
+    <string name="thread_publishing_button">Svarar…</string>
+    <string name="thread_reply_nostr_publish_error">Kunde inte publicera din anteckning på Nostr. Försök igen snart.</string>
+
+    <string name="explore_search_nostr">Sök Nostr</string>
+    <string name="explore_enter_query">Ange text att söka efter</string>
+    <string name="explore_trending_hashtags_no_content">Trendande hashtags kommer att visas här.</string>
+
+    <string name="search_followers_text">Följare</string>
+
+    <string name="wallet_title">Plånbok</string>
+
+    <string name="notifications_title">Aviseringar</string>
+    <string name="notifications_no_content">Dina aviseringar kommer att visas här.</string>
+    <string name="notifications_initial_loading_error">Kunde inte ladda aviseringar. Försök igen.</string>
+    <plurals name="notification_list_item_and_others">
+        <item quantity="one">och %1$s annan</item>
+        <item quantity="other">och %1$s andra</item>
+    </plurals>
+    <string name="notification_list_item_followed_you">följde dig</string>
+    <string name="notification_list_item_unfollowed_you">slutade följa dig</string>
+    <string name="notification_list_item_zapped_your_post">zappade din anteckning</string>
+    <string name="notification_list_item_zapped_your_post_for_total_amount">zappade din anteckning för totalt %1$s sats</string>
+    <string name="notification_list_item_liked_your_post">gillade din anteckning</string>
+    <string name="notification_list_item_reposted_your_post">republishade din anteckning</string>
+    <string name="notification_list_item_replied_to_your_post">svarade på din anteckning</string>
+    <string name="notification_list_item_mentioned_you_in_post">nämnde dig i en anteckning</string>
+    <string name="notification_list_item_mentioned_your_post">nämnde din anteckning</string>
+    <string name="notification_list_item_post_you_were_mentioned_in_was_zapped">zappade en anteckning du nämndes i</string>
+    <string name="notification_list_item_post_you_were_mentioned_in_was_zapped_for">zappade en anteckning du nämndes i för %1$s sats</string>
+    <string name="notification_list_item_post_you_were_mentioned_in_was_zapped_for_total_amount">zappade en anteckning du nämndes i för totalt %1$s sats</string>
+    <string name="notification_list_item_post_you_were_mentioned_in_was_liked">gillade en anteckning du nämndes i</string>
+    <string name="notification_list_item_post_you_were_mentioned_in_was_reposted">republishade en anteckning du nämndes i</string>
+    <string name="notification_list_item_post_you_were_mentioned_in_was_replied_to">svarade på en anteckning du nämndes i</string>
+    <string name="notification_list_item_post_where_you_post_was_mentioned_was_zapped">zappade en anteckning din anteckning nämndes i</string>
+    <string name="notification_list_item_post_where_you_post_was_mentioned_was_zapped_for">zappade en anteckning din anteckning nämndes i för %1$s sats</string>
+    <string name="notification_list_item_post_where_you_post_was_mentioned_was_zapped_for_total_amount">zappade en anteckning din anteckning nämndes i för totalt %1$s sats</string>
+    <string name="notification_list_item_post_where_you_post_was_mentioned_was_liked">gillade en anteckning din anteckning nämndes i</string>
+    <string name="notification_list_item_post_where_you_post_was_mentioned_was_reposted">republishade en anteckning din anteckning nämndes i</string>
+    <string name="notification_list_item_post_where_you_post_was_mentioned_was_replied_to">svarade på en anteckning din anteckning nämndes i</string>
+    <string name="notification_list_button_jump_to_start">Nya aviseringar</string>
+
+    <string name="messages_title">Meddelanden</string>
+    <string name="messages_follows_tab_title">Följer</string>
+    <string name="messages_other_tab_title">Andra</string>
+    <string name="messages_mark_all_read_button">Markera alla lästa</string>
+    <string name="messages_no_conversations">Dina konversationer kommer att visas här.</string>
+    <string name="messages_no_chat">Dina meddelanden kommer att visas här.</string>
+    <string name="messages_conversations_initial_loading_error">Kunde inte ladda konversationer. Försök igen.</string>
+    <string name="messages_chat_initial_loading_error">Kunde inte ladda meddelanden. Försök igen.</string>
+
+    <string name="chat_message_hint">Meddelande %1$s</string>
+    <string name="chat_nostr_publish_error">Kunde inte skicka ditt meddelande. Försök igen snart.</string>
+    <string name="chat_message_user_snippet_prefix">Du:</string>
+
+    <string name="new_message_title">Nytt meddelande</string>
+    <string name="new_message_search_hint">Sök användare</string>
+
+    <string name="media_gallery_context_save">Spara</string>
+    <string name="media_gallery_toast_photo_saved">Bilden sparad.</string>
+    <string name="media_gallery_retry_save">Försök igen</string>
+    <string name="media_gallery_error_photo_not_saved">Det går inte att spara bilden. Försök igen.</string>
+
+    <string name="settings_title">Inställningar</string>
+
+    <string name="settings_keys_title">Konto</string>
+    <string name="settings_keys_copy_public_key">Kopiera offentlig nyckel</string>
+    <string name="settings_keys_public_key_hint">Alla på Nostr kan hitta dig via din offentliga nyckel. Dela fritt var som helst.</string>
+    <string name="settings_keys_public_key_title">Din offentliga nyckel</string>
+    <string name="settings_keys_copy_private_key">Kopiera privat nyckel</string>
+    <string name="settings_keys_private_key_hint">Den här nyckeln kontrollerar helt ditt Nostr-konto. Dela den inte med någon. Kopiera endast den här nyckeln för att lagra den säkert eller för att logga in på en annan Nostr-app.</string>
+    <string name="settings_keys_private_key_title">Din privata nyckel</string>
+    <string name="settings_keys_show_key">Visa nyckel</string>
+    <string name="settings_keys_hide_key">Dölj nyckel</string>
+    <string name="settings_keys_key_copied">Nyckel kopierad</string>
+
+    <string name="settings_wallet_title">Plånbok</string>
+    <string name="settings_wallet_connected_title">Plånbok ansluten</string>
+    <string name="settings_wallet_use_primal_wallet">Använd Primal-plånbok</string>
+    <string name="settings_wallet_use_primal_wallet_hint">Du kan alternativt ansluta till en extern blixtplånbok via Nostr Wallet Connect</string>
+    <string name="settings_wallet_nwc_header_not_connected">Anslut en plånbok</string>
+    <string name="settings_wallet_nwc_header_connected">Plånbok ansluten</string>
+    <string name="settings_wallet_nwc_connect_alby_wallet">Anslut Alby-plånbok</string>
+    <string name="settings_wallet_nwc_connect_mutiny_wallet">Anslut Mutiny-plånbok</string>
+    <string name="settings_wallet_nwc_connect_other_wallet">Anslut annan plånbok</string>
+    <string name="settings_wallet_nwc_disconnect_wallet_button">Koppla ifrån plånbok</string>
+    <string name="settings_wallet_nwc_profile_lightning_address">Din Nostr Blixtadress:</string>
+    <string name="settings_wallet_nwc_profile_lightning_address_hint">Du kan ändra din Nostr Blixtadress (för att ta emot zaps) i dina</string>
+    <string name="settings_wallet_nwc_profile_lightning_address_hint_suffix">profilinställningar</string>
+    <string name="settings_wallet_max_wallet_balance">Maximalt plånbokssaldo</string>
+    <string name="settings_wallet_max_wallet_balance_hint">Primal Wallet är en transaktionsplånbok, utformad för hantering av små belopp. Vi rekommenderar eget förvar för större belopp.</string>
+    <string name="settings_wallet_hide_transactions_below">Dölj transaktioner under</string>
+    <string name="settings_wallet_hide_transactions_below_hint">Du kan välja att dölja små transaktioner för att undvika skräppost i din transaktionslista.</string>
+    <string name="settings_wallet_hide_transactions_below_edit_title">Redigera belopp</string>
+    <string name="settings_wallet_ln_address">Nostr Lightning-adress</string>
+    <string name="settings_wallet_start_in_wallet">Starta i plånboken</string>
+    <string name="settings_wallet_start_in_wallet_hint">Öppna plånboken när Primal startar</string>
+    <string name="settings_wallet_save">Spara</string>
+
+    <string name="settings_notifications_title">Aviseringar</string>
+    <string name="settings_notifications_error_update_settings">Kunde inte uppdatera aviseringinställningar.</string>
+    <string name="settings_notifications_error_fetch_settings">Kunde inte hämta senaste aviseringinställningar.</string>
+    <string name="settings_notifications_section_core">Kärnaviseringar</string>
+    <string name="settings_notifications_section_note_you_were_mentioned_in">En anteckning du nämndes i var</string>
+    <string name="settings_notifications_section_note_your_note_was_mentioned_in">En anteckning din anteckning nämndes i var</string>
+    <string name="settings_notifications_new_user_followed_you_text">ny användare började följa dig</string>
+    <string name="settings_notifications_your_post_was_zapped_text">din post blev zappad</string>
+    <string name="settings_notifications_your_post_was_liked_text">din post gillades</string>
+    <string name="settings_notifications_your_post_was_reposted_text">din post delades igen</string>
+    <string name="settings_notifications_your_post_was_replied_to_text">din post besvarades</string>
+    <string name="settings_notifications_you_were_mentioned_text">du nämndes</string>
+    <string name="settings_notifications_your_post_was_mentioned_text">din post nämndes</string>
+    <string name="settings_notifications_post_you_were_mentioned_in_was_zapped_text">zappad</string>
+    <string name="settings_notifications_post_you_were_mentioned_in_was_liked_text">gillad</string>
+    <string name="settings_notifications_post_you_were_mentioned_in_was_reposted_text">delad igen</string>
+    <string name="settings_notifications_post_you_were_mentioned_in_was_replied_to_text">besvarad</string>
+    <string name="settings_notifications_post_your_post_was_mentioned_in_was_zapped_text">zappad</string>
+    <string name="settings_notifications_post_your_post_was_mentioned_in_was_liked_text">gillad</string>
+    <string name="settings_notifications_post_your_post_was_mentioned_in_was_reposted_text">delad igen</string>
+    <string name="settings_notifications_post_your_post_was_mentioned_in_was_replied_to_text">besvarad</string>
+
+    <string name="settings_appearance_title">Utseende</string>
+    <string name="settings_appearance_theme_section_title">Tema</string>
+
+    <string name="settings_network_title">Nätverk</string>
+    <string name="settings_network_restore_default_relays_text_button">Återställ standardreläer</string>
+    <string name="settings_network_restore_default_relays_title">Återställ standarder</string>
+    <string name="settings_network_restore_default_relays_description">Är du säker på att du vill återställa standardreläerna?</string>
+    <string name="settings_network_delete_relay_title">Bekräfta borttagning</string>
+    <string name="settings_network_delete_relay_description">Är du säker på att du vill ta bort reläet <b>%1$s</b>?</string>
+    <string name="settings_network_relays_section">Reläer</string>
+    <string name="settings_network_my_relays_section">Mina reläer</string>
+    <string name="settings_network_caching_service_section">Cachetjänst</string>
+    <string name="settings_network_connect_to_relay_section">Anslut till relä</string>
+    <string name="settings_network_dialog_confirm">Bekräfta</string>
+    <string name="settings_network_dialog_dismiss">Avfärda</string>
+    <string name="settings_network_add_relay_error">Kunde inte lägga till relä. Försök igen om några ögonblick.</string>
+
+    <string name="settings_feeds_title">Flöden</string>
+    <string name="settings_feeds_list_title">Dina Nostr-flöden</string>
+    <string name="settings_feeds_restore_default_title">Återställ standarder</string>
+    <string name="settings_feeds_remove_feed_prompt_title">Ta bort flöde?</string>
+    <string name="settings_feeds_remove_feed_prompt_text">Är du säker på att du vill ta bort %1$s?</string>
+    <string name="settings_feeds_restore_defaults_prompt_title">Återställ standarder?</string>
+    <string name="settings_feeds_restore_defaults_prompt_text">Är du säker på att du vill återställa dina flöden till standardvärden?</string>
+    <string name="settings_feeds_dialog_confirm">Bekräfta</string>
+    <string name="settings_feeds_dialog_dismiss">Avfärda</string>
+
+    <string name="settings_zaps_title">Zaps</string>
+    <string name="settings_zaps_description">Enkelknappszaps skickar standardbeloppet och meddelandet. Konfigurera anpassade zap-förinställningar nedan:</string>
+    <string name="settings_zaps_editor_emoji">Emoji</string>
+    <string name="settings_zaps_editor_message">Meddelande</string>
+    <string name="settings_zaps_editor_value">Värde</string>
+    <string name="settings_zaps_editor_save">Spara</string>
+
+    <string name="settings_muted_accounts_title">Tystade konton</string>
+    <string name="settings_muted_accounts_unmute_button">Avblockera</string>
+    <string name="settings_muted_accounts_no_content">Dina tystade konton visas här.</string>
+
+    <string name="settings_version_title">Version</string>
+
+    <string name="profile_following_stat">följer</string>
+    <string name="profile_followers_stat">följare</string>
+    <string name="profile_notes_stat">anteckningar</string>
+    <string name="profile_replies_stat">svar</string>
+    <string name="profile_follow_button">Följ</string>
+    <string name="profile_unfollow_button">Sluta följa</string>
+    <string name="profile_edit_profile_button">Redigera profil</string>
+    <string name="profile_error_unable_to_follow">Kunde inte följa profil. Försök igen.</string>
+    <string name="profile_error_unable_to_unfollow">Kunde inte sluta följa profil. Försök igen.</string>
+    <string name="profile_failed_to_publish_metadata">Kunde inte publicera redigerad metadata. Försök igen.</string>
+    <string name="profile_save_profile_button">Spara profil</string>
+    <string name="profile_edit_profile_title">Redigera profil</string>
+    <string name="profile_context_add_user_feed">Lägg till användarflöde</string>
+    <string name="profile_context_share_profile">Dela användarprofil</string>
+    <string name="profile_context_remove_user_feed">Ta bort användarflöde</string>
+    <string name="profile_user_feed_title">%1$s:s flöde</string>
+    <string name="profile_user_is_muted">%1$s är tystad.</string>
+
+    <string name="profile_followers_title">%1$s:s följare</string>
+    <string name="profile_following_title">%1$s:s följande</string>
+    <string name="profile_followers_no_content">Dina följare visas här.</string>
+    <string name="profile_following_no_content">Dina följande visas här.</string>
+
+    <string name="context_menu_mute_user">Tysta användare</string>
+    <string name="context_menu_unmute_user">Avblockera användare</string>
+
+    <string name="zap_bottom_sheet_comment_placeholder">Lägg till en kommentar…</string>
+    <string name="zap_bottom_sheet_custom_amount_placeholder">Anpassat belopp…</string>
+    <string name="zap_bottom_sheet_zap_button">Zap</string>
+
+    <string name="zap_warning_bottom_sheet_enable_wallet_text">För att zappa personer på Nostr behöver du aktivera din Primal-plånbok eller ansluta den externa plånboken.</string>
+    <string name="zap_warning_bottom_sheet_activate_wallet_text">För att zappa personer på Nostr behöver du aktivera din plånbok och få lite satoshis.</string>
+    <string name="zap_warning_bottom_sheet_no_sats_to_zap">Otillräckligt med satoshis för att zappa, du behöver få lite satoshis innan du kan zappa.</string>
+    <string name="zap_warning_bottom_sheet_go_to_wallet_button">Gå till plånbok</string>
+
+    <string name="wallet_dashboard_activate_notice_hint">Du behöver aktivera din plånbok</string>
+    <string name="wallet_dashboard_activate_button">Aktivera plånbok nu</string>
+    <string name="wallet_dashboard_enable_wallet_notice_hint">Extern plånbok är för närvarande aktiverad via Nostr Wallet Connect</string>
+    <string name="wallet_dashboard_enable_wallet_button">Aktivera Primal-plånbok</string>
+    <string name="wallet_dashboard_no_transactions_hint">Du behöver satoshis för att zappa personer på Nostr</string>
+    <string name="wallet_dashboard_low_sats_hint">Du har lågt med satoshis</string>
+    <string name="wallet_dashboard_buy_sats_button">Köp satoshis nu</string>
+
+    <string name="wallet_tos_prefix">Genom att trycka på \"Nästa\" godkänner du</string>
+    <string name="wallet_activation_title">Aktivera plånbok</string>
+    <string name="wallet_activation_pending_data_hint">Att aktivera din plånbok är enkelt!\nVi behöver bara några detaljer nedan:</string>
+    <string name="wallet_activation_pending_code_subtitle">Kontrollera din e-post</string>
+    <string name="wallet_activation_pending_code_hint">Din aktiveringskod skickades till <b>%1$s</b>. Du kanske behöver kontrollera din skräppostmapp.</string>
+    <string name="wallet_activation_error_invalid_code">Felaktig kod. Försök igen.</string>
+    <string name="wallet_activation_success_title">Framgång</string>
+    <string name="wallet_activation_success_description">Din plånbok har aktiverats. Din nya Nostr Lightning-adress är:</string>
+    <string name="wallet_activation_first_name">Förnamn</string>
+    <string name="wallet_activation_last_name">Efternamn</string>
+    <string name="wallet_activation_email_address">E-postadress</string>
+    <string name="wallet_activation_date_of_birth">Födelsedatum</string>
+    <string name="wallet_activation_state">Stat</string>
+    <string name="wallet_activation_country_of_residence">Bostadsland</string>
+    <string name="wallet_activation_next_button">Nästa</string>
+    <string name="wallet_activation_finish_button">Slutför</string>
+    <string name="wallet_activation_done_button">Klar</string>
+    <string name="wallet_activation_country_picker_title">Välj land</string>
+    <string name="wallet_activation_state_picker_title">Välj stat</string>
+    <string name="wallet_activation_error_dialog_title">Varning</string>
+    <string name="wallet_sats_suffix">sats</string>
+    <string name="wallet_transaction_list_item_received">Mottagen</string>
+    <string name="wallet_transaction_list_item_sent">Skickad</string>
+    <string name="wallet_transaction_list_item_zap_received">Mottagen zap</string>
+    <string name="wallet_transaction_list_item_zap_sent">Skickad zap</string>
+    <string name="wallet_transaction_list_item_payment_received">Betalning mottagen</string>
+    <string name="wallet_transaction_list_item_payment_sent">Betalning skickad</string>
+    <string name="wallet_transaction_list_item_bitcoin">Bitcoin</string>
+    <string name="wallet_transaction_list_item_lightning">Lightning</string>
+    <string name="wallet_transaction_list_item_bitcoin_pending">Inkommande on-chain betalning</string>
+    <string name="wallet_transactions_today">Idag</string>
+    <string name="wallet_transactions_yesterday">Igår</string>
+    <string name="wallet_transactions_pending">Pågående</string>
+    <string name="wallet_in_app_purchase_now_button">Köp nu</string>
+    <string name="wallet_in_app_purchase_pay_label">Betala</string>
+    <string name="wallet_in_app_purchase_to_receive_label">För att ta emot</string>
+    <string name="wallet_in_app_purchase_not_available">Det går inte att ansluta till Google Play Store-tjänster. Försök igen.</string>
+    <string name="wallet_in_app_purchase_store_try_again">Försök igen</string>
+    <string name="wallet_in_app_purchase_error_confirmation_failed">Vi kunde inte bekräfta ditt köp. Kontakta Primal Support.</string>
+    <string name="wallet_action_button_send">Skicka</string>
+    <string name="wallet_action_button_scan">Skanna</string>
+    <string name="wallet_action_button_receive">Ta emot</string>
+
+    <string name="wallet_send_payment_nostr_title">Nostr Mottagare</string>
+    <string name="wallet_send_payment_scan_qr_code_title">Skanna</string>
+    <string name="wallet_send_payment_keyboard_title">Tangentbord</string>
+    <string name="wallet_send_payment_scan_image_title">Skanna bild</string>
+    <string name="wallet_send_payment_text_description">Skriv eller klistra in mottagarens lightning-adress eller en faktura.</string>
+    <string name="wallet_send_payment_text_paste_from_keyboard">Klistra in från urklipp</string>
+    <string name="wallet_send_payment_text_next">Nästa</string>
+    <string name="wallet_send_payment_nostr_user_generic">Användare</string>
+    <string name="wallet_send_payment_error_nostr_user_without_lightning_address">Kan inte genomföra betalning. %1$s har inte angett en lightning-adress.</string>
+    <string name="wallet_send_payment_error_unable_to_parse_text">Ange en giltig lightning-adress eller en faktura.</string>
+    <string name="wallet_send_payment_this_user_chunk">Denna användare</string>
+
+    <string name="wallet_create_transaction_draft_title">Skickar till</string>
+    <string name="wallet_create_transaction_send_button">Skicka</string>
+    <string name="wallet_create_transaction_cancel_numeric_pad_button">Avbryt</string>
+    <string name="wallet_create_transaction_next_numeric_pad_button">Nästa</string>
+    <string name="wallet_create_transaction_note_hint">Lägg till meddelande</string>
+    <string name="wallet_create_transaction_note_hint_with_recipient">Lägg till meddelande till %1$s</string>
+    <string name="wallet_create_transaction_note_to_self">Lägg till en anteckning för dig själv</string>
+    <string name="wallet_create_transaction_sending_title">Skickar…</string>
+    <string name="wallet_create_transaction_sending_headline">Skickar</string>
+    <string name="wallet_create_transaction_transaction_description_lite">%1$s sats</string>
+    <string name="wallet_create_transaction_transaction_description">%1$s sats till\n%2$s</string>
+    <string name="wallet_create_transaction_success_title">Lyckades</string>
+    <string name="wallet_create_transaction_success_headline">Betalning skickad</string>
+    <string name="wallet_create_transaction_failed_title">Betalning misslyckades</string>
+    <string name="wallet_create_transaction_failed_headline">Kunde inte skicka</string>
+    <string name="wallet_create_transaction_done_button">Klar</string>
+    <string name="wallet_create_transaction_close_button">Stäng</string>
+    <string name="wallet_create_transaction_bitcoin_address">Bitcoin-adress</string>
+    <string name="wallet_create_transaction_mining_fee">Gravgift</string>
+    <string name="wallet_create_transaction_mining_fees_not_fetched">---</string>
+    <string name="wallet_create_transaction_min_tx_amount_title">Varning</string>
+    <string name="wallet_create_transaction_min_tx_amount_text">Beloppet är för litet för en on-chain-transaktion.</string>
+    <string name="wallet_create_transaction_min_tx_amount_for_selected_fee_tier_error">%1$s är minimalt belopp för %2$s nivån.</string>
+
+    <string name="wallet_create_transaction_mining_fee_selector_title">Gravgift</string>
+    <string name="wallet_create_transaction_mining_fee_selector_approx_label_prefix">Ungefär.</string>
+    <string name="wallet_create_transaction_mining_fee_selector_about_text_button">Om gravgifter</string>
+    <string name="wallet_create_transaction_mining_fee_selector_about_title">Om gravgifter</string>
+    <string name="wallet_create_transaction_mining_fee_selector_about_text">Bitcoin gravgifter är små betalningar som användare gör för att kompensera nätverket av datorer som behandlar och verifierar Bitcoin-transaktioner. Dessa avgifter hjälper till att prioritera din transaktion för att säkerställa att den läggs till i blockkedjan snabbt. De stödjer också den övergripande säkerheten och underhållet av Bitcoin-nätverket.</string>
+
+    <string name="wallet_receive_lightning_transaction_title">Ta emot via Lightning</string>
+    <string name="wallet_receive_btc_transaction_title">Ta emot On-chain</string>
+    <string name="wallet_receive_transaction_title">Ta emot</string>
+    <string name="wallet_receive_transaction_receiving_to">Ta emot till:</string>
+    <string name="wallet_receive_transaction_comment">Kommentar:</string>
+    <string name="wallet_receive_transaction_copy_button">Kopiera</string>
+    <string name="wallet_receive_transaction_add_details_button">Lägg till detaljer</string>
+    <string name="wallet_receive_transaction_edit_details_button">Redigera detaljer</string>
+    <string name="wallet_receive_transaction_comment_hint">Lägg till en kommentar</string>
+    <string name="wallet_receive_transaction_cancel_numeric_pad_button">Avbryt</string>
+    <string name="wallet_receive_transaction_apply_numeric_pad_button">Använd</string>
+    <string name="wallet_receive_transaction_invoice_creation_error">Det går inte att lägga till detaljer. Försök igen om några ögonblick.</string>
+
+    <string name="wallet_transaction_details_title_zap_received">Zap Mottagen</string>
+    <string name="wallet_transaction_details_title_zap_sent">Zap Skickad</string>
+    <string name="wallet_transaction_details_title_payment_pending">Betalning pågår</string>
+    <string name="wallet_transaction_details_title_payment_received">Betalning mottagen</string>
+    <string name="wallet_transaction_details_title_payment_sent">Betalning skickad</string>
+    <string name="wallet_transaction_details_sent_to">Skickad till</string>
+    <string name="wallet_transaction_details_received_from">Mottagen från</string>
+    <string name="wallet_transaction_details_zapped_note">Zappad anteckning</string>
+    <string name="wallet_transaction_details_date_item">Datum</string>
+    <string name="wallet_transaction_details_status_item">Status</string>
+    <string name="wallet_transaction_details_type_item">Transaktionstyp</string>
+    <string name="wallet_transaction_details_currents_usd_item">Aktuellt USD-värde</string>
+    <string name="wallet_transaction_details_original_usd_item">Ursprungligt USD-värde</string>
+    <string name="wallet_transaction_details_fee_item">Transaktionsavgift</string>
+    <string name="wallet_transaction_details_mining_fee_item">Gravgift</string>
+    <string name="wallet_transaction_details_details_item">Detaljer</string>
+    <string name="wallet_transaction_details_invoice_item">Faktura</string>
+    <string name="wallet_transaction_details_expand_collapse_hint">Transaktionsdetaljer</string>
+    <string name="wallet_transaction_details_type_nostr_zap">Nostr Zap</string>
+    <string name="wallet_transaction_details_type_in_app_purchase">In-app köp</string>
+    <string name="wallet_transaction_details_type_bitcoin_payment">Bitcoin-betalning</string>
+    <string name="wallet_transaction_details_type_on_chain_payment">On-chain betalning</string>
+    <string name="wallet_transaction_details_type_lightning_payment">Lightning-betalning</string>
+    <string name="wallet_transaction_details_view_on_blockchain">Visa på blockkedjan</string>
+    <string name="wallet_transaction_details_status_created">Pågående</string>
+    <string name="wallet_transaction_details_status_processing">Pågående</string>
+    <string name="wallet_transaction_details_status_succeeded">Betald</string>
+    <string name="wallet_transaction_details_status_succeeded_confirmed">Bekräftad</string>
+    <string name="wallet_transaction_details_status_failed">Misslyckades</string>
+    <string name="wallet_transaction_details_status_canceled">Avbruten</string>
+
+    <string name="qrcode_scanner_permission_title">Tillåtelse krävs</string>
+    <string name="qrcode_scanner_permission_rationale">Primal behöver åtkomst till din kamera för att skanna QR-koder.</string>
+    <string name="qrcode_scanner_grant_permission_button">Tillåt åtkomst</string>
+    <string name="qrcode_scanner_cancel_button">Avbryt</string>
+
+    <string name="accessibility_back_button">Tillbaka</string>
+    <string name="accessibility_qr_code">QR-kod</string>
+    <string name="accessibility_profile_image">Profilbild</string>
+    <string name="accessibility_profile_messages">Meddelanden</string>
+    <string name="accessibility_send_message">Skicka meddelandet</string>
+    <string name="accessibility_message_being_sent">Meddelandet skickas</string>
+    <string name="accessibility_profile_send_zap">Skicka zap</string>
+    <string name="accessibility_note_drop_down">Anteckningsrullgardinsmeny</string>
+    <string name="accessibility_profile_drop_down">Profilrullgardinsmeny</string>
+    <string name="accessibility_media_drop_down">Mediarullgardinsmeny</string>
+    <string name="accessibility_feed_picker">Flödesväljare</string>
+    <string name="accessibility_add_feed">Lägg till flöde</string>
+    <string name="accessibility_remove_feed">Ta bort flöde</string>
+    <string name="accessibility_notification_settings">Meddelandeinställningar</string>
+    <string name="accessibility_delete_list_item">Ta bort listobjekt</string>
+    <string name="accessibility_connect_relay">Anslut relä</string>
+    <string name="accessibility_replies_count">Svarantal</string>
+    <string name="accessibility_zaps_count">Zapantal</string>
+    <string name="accessibility_likes_count">Gillaantal</string>
+    <string name="accessibility_repost_count">Ompublicera antal</string>
+    <string name="accessibility_close">Stäng</string>
+    <string name="accessibility_info">Info</string>
+    <string name="accessibility_import_photo_from_gallery">Importera foto från galleriet</string>
+    <string name="accessibility_refresh">Uppdatera</string>
+    <string name="accessibility_new_direct_message">Nytt direktmeddelande</string>
+    <string name="accessibility_new_post">Nytt inlägg</string>
+    <string name="accessibility_toggle_between_dark_and_light_mode">Växla mellan mörkt och ljust läge</string>
+    <string name="accessibility_copy_content">Kopiera innehåll</string>
+    <string name="accessibility_warning">Varning</string>
+</resources>
