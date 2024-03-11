@@ -107,16 +107,7 @@ fun ZapBottomSheet(
                     }?.message ?: selectedZapComment
                 },
             )
-            OutlinedTextField(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp),
-                singleLine = true,
-                colors = PrimalDefaults.outlinedTextFieldColors(
-                    unfocusedBorderColor = Color.Transparent,
-                    focusedBorderColor = Color.Transparent,
-                ),
-                shape = RoundedCornerShape(8.dp),
+            ZapCustomAmountOutlinedTextField(
                 value = customZapAmount,
                 onValueChange = {
                     when {
@@ -125,44 +116,11 @@ fun ZapBottomSheet(
                     }
                     selectedZapAmount = customZapAmount.toLongOrNull() ?: zapConfig.first().amount
                 },
-                textStyle = AppTheme.typography.bodyMedium,
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Number,
-                    imeAction = ImeAction.Done,
-                ),
-                placeholder = {
-                    Text(
-                        modifier = Modifier.fillMaxWidth(),
-                        text = stringResource(id = R.string.zap_bottom_sheet_custom_amount_placeholder),
-                        textAlign = TextAlign.Left,
-                        style = AppTheme.typography.bodyMedium,
-                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
-                    )
-                },
             )
             Spacer(modifier = Modifier.height(16.dp))
-            OutlinedTextField(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp),
-                singleLine = true,
-                colors = PrimalDefaults.outlinedTextFieldColors(
-                    unfocusedBorderColor = Color.Transparent,
-                    focusedBorderColor = Color.Transparent,
-                ),
-                shape = RoundedCornerShape(8.dp),
+            ZapCommentOutlinedTextField(
                 value = selectedZapComment,
                 onValueChange = { selectedZapComment = it },
-                textStyle = AppTheme.typography.bodyMedium,
-                placeholder = {
-                    Text(
-                        modifier = Modifier.fillMaxWidth(),
-                        text = stringResource(id = R.string.zap_bottom_sheet_comment_placeholder),
-                        textAlign = TextAlign.Left,
-                        style = AppTheme.typography.bodyMedium,
-                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
-                    )
-                },
             )
             Spacer(modifier = Modifier.height(16.dp))
             if (!keyboardVisible) {
@@ -184,13 +142,73 @@ fun ZapBottomSheet(
 }
 
 @Composable
+private fun ZapCommentOutlinedTextField(value: String, onValueChange: (String) -> Unit) {
+    OutlinedTextField(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp),
+        singleLine = true,
+        colors = PrimalDefaults.outlinedTextFieldColors(
+            unfocusedBorderColor = Color.Transparent,
+            focusedBorderColor = Color.Transparent,
+        ),
+        shape = RoundedCornerShape(8.dp),
+        value = value,
+        onValueChange = onValueChange,
+        textStyle = AppTheme.typography.bodyMedium,
+        placeholder = {
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                text = stringResource(id = R.string.zap_bottom_sheet_comment_placeholder),
+                textAlign = TextAlign.Left,
+                style = AppTheme.typography.bodyMedium,
+                color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
+            )
+        },
+    )
+}
+
+@Composable
+private fun ZapCustomAmountOutlinedTextField(value: String, onValueChange: (String) -> Unit) {
+    OutlinedTextField(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp),
+        singleLine = true,
+        colors = PrimalDefaults.outlinedTextFieldColors(
+            unfocusedBorderColor = Color.Transparent,
+            focusedBorderColor = Color.Transparent,
+        ),
+        shape = RoundedCornerShape(8.dp),
+        value = value,
+        onValueChange = onValueChange,
+        textStyle = AppTheme.typography.bodyMedium,
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Number,
+            imeAction = ImeAction.Done,
+        ),
+        placeholder = {
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                text = stringResource(id = R.string.zap_bottom_sheet_custom_amount_placeholder),
+                textAlign = TextAlign.Left,
+                style = AppTheme.typography.bodyMedium,
+                color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
+            )
+        },
+    )
+}
+
+private const val ZAP_OPTIONS_COLUMNS_COUNT = 3
+
+@Composable
 private fun ZapOptions(
     zapConfig: List<ContentZapConfigItem>,
     selectedZapAmount: Long,
     onSelectedZapAmountChange: (Long) -> Unit,
 ) {
     LazyVerticalGrid(
-        columns = GridCells.Fixed(3),
+        columns = GridCells.Fixed(ZAP_OPTIONS_COLUMNS_COUNT),
         contentPadding = PaddingValues(12.dp),
     ) {
         items(zapConfig) {
