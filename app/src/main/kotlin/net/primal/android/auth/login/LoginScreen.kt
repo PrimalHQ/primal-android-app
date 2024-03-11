@@ -65,6 +65,7 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 import net.primal.android.core.compose.isCompactOrLower
+import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.core.utils.isValidNostrPrivateKey
 import net.primal.android.core.utils.isValidNostrPublicKey
 import net.primal.android.theme.AppTheme
@@ -167,8 +168,6 @@ fun LoginContent(
     val clipboardManager = LocalClipboardManager.current
     val keyboardVisible by keyboardVisibilityAsState()
 
-    val isValidNsec = state.loginInput.isValidNostrPrivateKey()
-
     fun pasteFromClipboard() {
         val clipboardText = clipboardManager.getText()?.text.orEmpty().trim()
         if (clipboardText.isValidNostrPrivateKey() || clipboardText.isValidNostrPublicKey()) {
@@ -189,164 +188,13 @@ fun LoginContent(
                 .fillMaxSize(),
             verticalArrangement = Arrangement.Center,
         ) {
-            Column(
-                verticalArrangement = Arrangement.SpaceBetween,
-            ) {
-                AnimatedContent(
-                    modifier = Modifier.weight(ONE_HALF),
-                    targetState = state.profileDetails,
-                    label = "LoginHeader",
-                ) { profileDetails ->
-                    when {
-                        profileDetails != null && !state.fetchingProfileDetails -> {
-                            Column(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.Bottom,
-                            ) {
-                                if (!(uiMode.isCompactOrLower() && keyboardVisible)) {
-                                    AvatarThumbnail(
-                                        avatarCdnImage = profileDetails.avatarCdnImage,
-                                        avatarSize = 100.dp,
-                                        hasBorder = profileDetails.avatarCdnImage != null,
-                                        borderColor = Color.White,
-                                        backgroundColor = defaultAvatarBackground,
-                                        defaultAvatar = { DefaultAvatar() },
-                                    )
-
-                                    Spacer(modifier = Modifier.height(16.dp))
-                                }
-
-                                Text(
-                                    modifier = Modifier.padding(bottom = 4.dp),
-                                    text = profileDetails.userDisplayName,
-                                    style = AppTheme.typography.bodyLarge.copy(
-                                        fontSize = 24.sp,
-                                        fontWeight = FontWeight.Bold,
-                                    ),
-                                    color = Color.White,
-                                )
-
-                                Text(
-                                    text = profileDetails.internetIdentifier ?: "",
-                                    style = AppTheme.typography.bodyLarge,
-                                    color = Color.White,
-                                )
-
-                                Spacer(modifier = Modifier.height(32.dp))
-                            }
-                        }
-
-                        else -> {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(72.dp),
-                                contentAlignment = Alignment.BottomCenter,
-                            ) {
-                                Text(
-                                    modifier = Modifier
-                                        .padding(vertical = 16.dp, horizontal = 32.dp)
-                                        .fillMaxWidth(),
-                                    text = when {
-                                        state.loginInput.isEmpty() -> stringResource(id = R.string.login_enter_nsec_key)
-                                        else -> stringResource(id = R.string.login_invalid_nsec_key)
-                                    },
-                                    textAlign = TextAlign.Center,
-                                    style = AppTheme.typography.bodyMedium,
-                                    color = Color.White,
-                                    fontWeight = FontWeight.SemiBold,
-                                )
-                            }
-                        }
-                    }
-                }
-
-                val shape = if (keyboardVisible) AppTheme.shapes.medium else AppTheme.shapes.extraLarge
-                Box(
-                    modifier = Modifier.weight(ONE_HALF),
-                    contentAlignment = Alignment.TopCenter,
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .background(color = Color.White, shape = shape)
-                            .padding(all = 2.dp),
-                        verticalAlignment = Alignment.Top,
-                    ) {
-                        OutlinedTextField(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .then(if (!keyboardVisible) Modifier.height(56.dp) else Modifier),
-                            value = if (keyboardVisible) state.loginInput else "",
-                            onValueChange = { input -> onLoginInputChanged(input.trim()) },
-                            placeholder = {
-                                Text(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    text = when {
-                                        state.loginInput.isEmpty() -> stringResource(id = R.string.nsec)
-                                        else -> "••••••••••••••••••••••••••••••••••••••"
-                                    },
-                                    textAlign = TextAlign.Center,
-                                    style = AppTheme.typography.bodyLarge.copy(
-                                        fontSize = if (state.loginInput.isEmpty()) 16.sp else 28.sp,
-                                        fontWeight = FontWeight.SemiBold,
-                                    ),
-                                    color = if (state.loginInput.isEmpty()) {
-                                        AppTheme.extraColorScheme.onSurfaceVariantAlt4
-                                    } else {
-                                        Color.Black
-                                    },
-                                )
-                            },
-                            isError = state.loginInput.isNotEmpty() && !isValidNsec,
-                            keyboardOptions = KeyboardOptions(
-                                imeAction = if (isValidNsec) ImeAction.Go else ImeAction.Default,
-                                keyboardType = KeyboardType.Password,
-                            ),
-                            keyboardActions = KeyboardActions(
-                                onGo = {
-                                    if (isValidNsec) {
-                                        keyboardController?.hide()
-                                        onLoginClick()
-                                    }
-                                },
-                            ),
-                            visualTransformation = if (keyboardVisible) {
-                                VisualTransformation.None
-                            } else {
-                                PasswordVisualTransformation()
-                            },
-                            textStyle = AppTheme.typography.titleLarge.copy(
-                                fontSize = if (keyboardVisible) 16.sp else 28.sp,
-                                lineHeight = if (keyboardVisible) 16.sp else 28.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                color = Color.Black,
-                            ),
-                            colors = PrimalDefaults.outlinedTextFieldColors(
-                                cursorColor = if (keyboardVisible) AppTheme.colorScheme.primary else Color.White,
-                                focusedContainerColor = Color.White,
-                                focusedBorderColor = when {
-                                    state.loginInput.isEmpty() -> Color.White
-                                    else -> AppTheme.extraColorScheme.successBright
-                                },
-                                unfocusedContainerColor = Color.White,
-                                unfocusedBorderColor = when {
-                                    state.loginInput.isEmpty() -> Color.White
-                                    else -> AppTheme.extraColorScheme.successBright
-                                },
-                                disabledContainerColor = Color.White,
-                                disabledBorderColor = when {
-                                    state.loginInput.isEmpty() -> Color.White
-                                    else -> AppTheme.extraColorScheme.successBright
-                                },
-                                errorContainerColor = Color.White,
-                                errorBorderColor = AppTheme.colorScheme.error,
-                            ),
-                            shape = shape,
-                        )
-                    }
-                }
-            }
+            LoginInputFieldContent(
+                state = state,
+                uiMode = uiMode,
+                keyboardVisible = keyboardVisible,
+                onLoginInputChanged = onLoginInputChanged,
+                onLoginClick = onLoginClick,
+            )
         }
 
         Column(
@@ -356,6 +204,7 @@ fun LoginContent(
                 .wrapContentHeight(align = Alignment.Bottom),
             verticalArrangement = Arrangement.Bottom,
         ) {
+            val isValidNsec = state.loginInput.isValidNostrPrivateKey()
             OnboardingButton(
                 text = when {
                     isValidNsec -> stringResource(id = R.string.login_button_sign_in)
@@ -378,6 +227,219 @@ fun LoginContent(
                 },
             )
         }
+    }
+}
+
+@Composable
+private fun LoginInputFieldContent(
+    state: LoginContract.UiState,
+    uiMode: UiDensityMode,
+    keyboardVisible: Boolean,
+    onLoginInputChanged: (String) -> Unit,
+    onLoginClick: () -> Unit,
+) {
+    Column(
+        verticalArrangement = Arrangement.SpaceBetween,
+    ) {
+        AnimatedContent(
+            modifier = Modifier.weight(ONE_HALF),
+            targetState = state.profileDetails,
+            label = "LoginHeader",
+        ) { profileDetails ->
+            when {
+                profileDetails != null && !state.fetchingProfileDetails -> {
+                    ProfileDetailsColumn(
+                        modifier = Modifier.fillMaxWidth(),
+                        uiMode = uiMode,
+                        keyboardVisible = keyboardVisible,
+                        profileDetails = profileDetails,
+                    )
+                }
+
+                else -> {
+                    EnterYourKeyNotice(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(72.dp),
+                        loginInput = state.loginInput,
+                    )
+                }
+            }
+        }
+
+        Box(
+            modifier = Modifier.weight(ONE_HALF),
+            contentAlignment = Alignment.TopCenter,
+        ) {
+            LoginInputField(
+                loginInput = state.loginInput,
+                keyboardVisible = keyboardVisible,
+                onLoginInputChanged = onLoginInputChanged,
+                onLoginClick = onLoginClick,
+            )
+        }
+    }
+}
+
+@Composable
+private fun LoginInputField(
+    modifier: Modifier = Modifier,
+    loginInput: String,
+    keyboardVisible: Boolean,
+    onLoginInputChanged: (String) -> Unit,
+    onLoginClick: () -> Unit,
+) {
+    val isValidNsec = loginInput.isValidNostrPrivateKey()
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val shape = if (keyboardVisible) AppTheme.shapes.medium else AppTheme.shapes.extraLarge
+    Row(
+        modifier = modifier
+            .background(color = Color.White, shape = shape)
+            .padding(all = 2.dp),
+        verticalAlignment = Alignment.Top,
+    ) {
+        OutlinedTextField(
+            modifier = Modifier
+                .fillMaxWidth()
+                .then(if (!keyboardVisible) Modifier.height(56.dp) else Modifier),
+            value = if (keyboardVisible) loginInput else "",
+            onValueChange = { input -> onLoginInputChanged(input.trim()) },
+            placeholder = {
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = when {
+                        loginInput.isEmpty() -> stringResource(id = R.string.nsec)
+                        else -> "••••••••••••••••••••••••••••••••••••••"
+                    },
+                    textAlign = TextAlign.Center,
+                    style = AppTheme.typography.bodyLarge.copy(
+                        fontSize = if (loginInput.isEmpty()) 16.sp else 28.sp,
+                        fontWeight = FontWeight.SemiBold,
+                    ),
+                    color = if (loginInput.isEmpty()) {
+                        AppTheme.extraColorScheme.onSurfaceVariantAlt4
+                    } else {
+                        Color.Black
+                    },
+                )
+            },
+            isError = loginInput.isNotEmpty() && !isValidNsec,
+            keyboardOptions = KeyboardOptions(
+                imeAction = if (isValidNsec) ImeAction.Go else ImeAction.Default,
+                keyboardType = KeyboardType.Password,
+            ),
+            keyboardActions = KeyboardActions(
+                onGo = {
+                    if (isValidNsec) {
+                        keyboardController?.hide()
+                        onLoginClick()
+                    }
+                },
+            ),
+            visualTransformation = if (keyboardVisible) {
+                VisualTransformation.None
+            } else {
+                PasswordVisualTransformation()
+            },
+            textStyle = AppTheme.typography.titleLarge.copy(
+                fontSize = if (keyboardVisible) 16.sp else 28.sp,
+                lineHeight = if (keyboardVisible) 16.sp else 28.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = Color.Black,
+            ),
+            colors = loginTextFieldColors(keyboardVisible, loginInput),
+            shape = shape,
+        )
+    }
+}
+
+@Composable
+private fun loginTextFieldColors(keyboardVisible: Boolean, loginInput: String) =
+    PrimalDefaults.outlinedTextFieldColors(
+        cursorColor = if (keyboardVisible) AppTheme.colorScheme.primary else Color.White,
+        focusedContainerColor = Color.White,
+        focusedBorderColor = when {
+            loginInput.isEmpty() -> Color.White
+            else -> AppTheme.extraColorScheme.successBright
+        },
+        unfocusedContainerColor = Color.White,
+        unfocusedBorderColor = when {
+            loginInput.isEmpty() -> Color.White
+            else -> AppTheme.extraColorScheme.successBright
+        },
+        disabledContainerColor = Color.White,
+        disabledBorderColor = when {
+            loginInput.isEmpty() -> Color.White
+            else -> AppTheme.extraColorScheme.successBright
+        },
+        errorContainerColor = Color.White,
+        errorBorderColor = AppTheme.colorScheme.error,
+    )
+
+@Composable
+private fun EnterYourKeyNotice(modifier: Modifier = Modifier, loginInput: String) {
+    Box(
+        modifier = modifier,
+        contentAlignment = Alignment.BottomCenter,
+    ) {
+        Text(
+            modifier = Modifier
+                .padding(vertical = 16.dp, horizontal = 32.dp)
+                .fillMaxWidth(),
+            text = when {
+                loginInput.isEmpty() -> stringResource(id = R.string.login_enter_nsec_key)
+                else -> stringResource(id = R.string.login_invalid_nsec_key)
+            },
+            textAlign = TextAlign.Center,
+            style = AppTheme.typography.bodyMedium,
+            color = Color.White,
+            fontWeight = FontWeight.SemiBold,
+        )
+    }
+}
+
+@Composable
+private fun ProfileDetailsColumn(
+    modifier: Modifier = Modifier,
+    uiMode: UiDensityMode,
+    keyboardVisible: Boolean,
+    profileDetails: ProfileDetailsUi,
+) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Bottom,
+    ) {
+        if (!(uiMode.isCompactOrLower() && keyboardVisible)) {
+            AvatarThumbnail(
+                avatarCdnImage = profileDetails.avatarCdnImage,
+                avatarSize = 100.dp,
+                hasBorder = profileDetails.avatarCdnImage != null,
+                borderColor = Color.White,
+                backgroundColor = defaultAvatarBackground,
+                defaultAvatar = { DefaultAvatar() },
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        Text(
+            modifier = Modifier.padding(bottom = 4.dp),
+            text = profileDetails.userDisplayName,
+            style = AppTheme.typography.bodyLarge.copy(
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+            ),
+            color = Color.White,
+        )
+
+        Text(
+            text = profileDetails.internetIdentifier ?: "",
+            style = AppTheme.typography.bodyLarge,
+            color = Color.White,
+        )
+
+        Spacer(modifier = Modifier.height(32.dp))
     }
 }
 
