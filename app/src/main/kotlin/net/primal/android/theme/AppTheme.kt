@@ -7,7 +7,6 @@ import androidx.compose.material3.Shapes
 import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
-import net.primal.android.core.compose.AdjustSystemColors
 import net.primal.android.theme.colors.ExtraColorScheme
 import net.primal.android.theme.colors.ExtraColorSchemeProvider
 import net.primal.android.theme.colors.LocalExtraColors
@@ -21,7 +20,6 @@ fun defaultPrimalTheme(): PrimalTheme {
 
 @Composable
 fun PrimalTheme(primalTheme: PrimalTheme, content: @Composable () -> Unit) {
-    AdjustSystemColors(primalTheme = primalTheme)
     ExtraColorSchemeProvider(extraColorScheme = primalTheme.extraColorScheme) {
         MaterialTheme(
             colorScheme = primalTheme.colorScheme,

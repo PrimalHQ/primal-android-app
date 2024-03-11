@@ -59,8 +59,8 @@ android {
         applicationId = "net.primal.android"
         minSdk = 26
         targetSdk = 34
-        versionCode = 98
-        versionName = "0.95.4"
+        versionCode = 100
+        versionName = "0.96.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -214,6 +214,7 @@ dependencies {
     implementation(libs.lifecycle.runtime.ktx)
     implementation(libs.activity.compose)
     implementation(libs.androidx.lifecycle.process)
+    implementation(libs.androidx.activity.ktx)
     runtimeOnly(libs.androidx.appcompat)
 
     implementation(platform(libs.compose.bom))
@@ -229,9 +230,6 @@ dependencies {
 
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.emoji2.emojipicker)
-    implementation("com.google.guava:guava:33.0.0-android")
-    implementation("com.wajahatkarim:flippable:1.5.4")
-    implementation("org.bitcoinj:bitcoinj-core:0.16.2")
 
     implementation(libs.navigation.material)
 
@@ -259,6 +257,7 @@ dependencies {
 
     implementation(libs.retrofit.serialization.converter)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.guava)
 
     implementation(libs.coil)
     implementation(libs.coil.compose)
@@ -267,9 +266,11 @@ dependencies {
     implementation(libs.telephoto.zoomable.image.coil)
 
     implementation(libs.lottie.compose)
+    implementation(libs.flippable)
 
     implementation(libs.timber)
 
+    implementation(libs.bitcoinj.core)
     implementation(libs.secp256k1.kmp.jvm)
     implementation(libs.secp256k1.kmp.jni.android)
     testImplementation(libs.secp256k1.kmp.jni.jvm)

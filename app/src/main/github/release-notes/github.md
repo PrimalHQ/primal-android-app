@@ -1,7 +1,5 @@
 ## Changes
-- Stability improvements across the app.
-- Improved btc address validation.
-- Improved ui performance when uploading photos.
-- Improved edge-cases handling of Google's in-app purchase flow.
-- Implemented opening note1 and npub1 directly from search query.
-- Implemented fixed top bar on threads screens.
+- New welcome screen;
+- New login screen;
+- App now follows dark theme system settings until user manually changes theme;
+- Implemented new api for edge to edge screen support - improved screen transitions with full screen colors;

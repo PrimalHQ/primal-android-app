@@ -13,6 +13,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import net.primal.android.crypto.Bech32
 import net.primal.android.crypto.CryptoUtils
+import net.primal.android.crypto.InvalidNostrPrivateKeyException
 import net.primal.android.crypto.toHex
 import net.primal.android.crypto.toNpub
 import net.primal.android.security.NoEncryption
@@ -52,7 +53,7 @@ class CredentialsStoreTest {
     @Test
     fun `saving invalid input should throw InvalidNostrKeyException`() = runTest {
         val credentialsStore = CredentialsStore(persistence = persistence)
-        shouldThrow<CredentialsStore.InvalidNostrKeyException> {
+        shouldThrow<InvalidNostrPrivateKeyException> {
             credentialsStore.save(nostrKey = "invalid nsec")
         }
     }

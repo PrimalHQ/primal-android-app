@@ -5,6 +5,7 @@ import dagger.assisted.AssistedInject
 import java.time.Instant
 import kotlin.time.Duration
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.nostr.notary.NostrSignUnauthorized
 import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.user.repository.RelayRepository
 import net.primal.android.user.repository.UserRepository
@@ -41,6 +42,10 @@ class UserDataUpdater @AssistedInject constructor(
         settingsRepository.ensureZapConfig(userId = userId)
         relayRepository.fetchAndUpdateUserRelays(userId = userId)
         userRepository.fetchAndUpdateUserAccount(userId = userId)
-        walletRepository.fetchUserWalletInfoAndUpdateUserAccount(userId = userId)
+        try {
+            walletRepository.fetchUserWalletInfoAndUpdateUserAccount(userId = userId)
+        } catch (error: NostrSignUnauthorized) {
+            Timber.w(error)
+        }
     }
 }

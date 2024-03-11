@@ -1,10 +1,12 @@
 [versions]
 accompanist = "0.32.0"
 activity-compose = "1.8.2"
+activity-ktx = "1.9.0-alpha03"
 agp = "8.3.0"
 appcompat = "1.6.1"
-camera = "1.3.1"
-compose-bom = "2024.02.01"
+bitcoinj-core = "0.16.2"
+camera = "1.3.2"
+compose-bom = "2024.02.02"
 compose-lottie = "5.2.0"
 compose-navigation = "2.7.7"
 constraintlayout = "2.1.4"
@@ -18,6 +20,8 @@ datastore = "1.0.0"
 detekt = "1.23.3"
 emoji2-emojipicker = "1.4.0"
 espresso-core = "3.5.1"
+flippable = "1.5.4"
+guava = "33.0.0-android"
 hilt = "1.2.0"
 junit = "4.13.2"
 junit-android-runner = "1.1.5"
@@ -29,18 +33,18 @@ kotest = "5.6.2"
 ksp = "1.9.22-1.0.17"
 ktlint_compose_rules = "0.3.3"
 lifecycle = "2.7.0"
-material-icons = "1.6.2"
+material-icons = "1.6.3"
 media3-exoplayer = "1.2.1"
 mockk = "1.13.9"
 okhttp = "4.12.0"
 paging = "3.2.1"
 play-publishing = "3.8.4"
-play-billing = "6.1.0"
+play-billing = "6.2.0"
 qrcode-generator = "1.6.2"
 retrofit = "2.9.0"
 roboelectric = "4.10.3"
 room = "2.6.1"
-security-app-authenticator = "1.0.0-alpha03"
+security-app-authenticator = "1.0.0-beta01"
 security-crypto = "1.1.0-alpha06"
 security-identity-credential = "1.0.0-alpha03"
 secp256k1-kmp = "0.13.0"
@@ -60,6 +64,7 @@ androidx-lifecycle-process = { group = "androidx.lifecycle", name = "lifecycle-p
 activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activity-compose" }
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "material-icons" }
+androidx-activity-ktx = { module = "androidx.activity:activity-ktx", version.ref = "activity-ktx" }
 
 # Play
 play-billing = { module = "com.android.billingclient:billing", version.ref = "play-billing" }
@@ -84,6 +89,7 @@ constraintlayout = { module = "androidx.constraintlayout:constraintlayout", vers
 compose-constraintlayout = { module = "androidx.constraintlayout:constraintlayout-compose", version.ref = "constraintlayout-compose" }
 
 androidx-emoji2-emojipicker = { group = "androidx.emoji2", name = "emoji2-emojipicker", version.ref = "emoji2-emojipicker" }
+flippable = { module = "com.wajahatkarim:flippable", version.ref = "flippable" }
 
 lottie-compose = { module = "com.airbnb.android:lottie-compose", version.ref = "compose-lottie" }
 navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "compose-navigation" }
@@ -112,6 +118,7 @@ retrofit-serialization-converter = { module = "com.jakewharton.retrofit:retrofit
 url-detector = { module = "io.github.url-detector:url-detector", version.ref = "url-detector" }
 
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization-json" }
+guava = { module = "com.google.guava:guava", version.ref = "guava" }
 
 # Database libs
 room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
@@ -144,6 +151,7 @@ secp256k1-kmp-jvm = { module = "fr.acinq.secp256k1:secp256k1-kmp-jvm", version.r
 secp256k1-kmp-jni-android = { module = "fr.acinq.secp256k1:secp256k1-kmp-jni-android", version.ref = "secp256k1-kmp" }
 secp256k1-kmp-jni-jvm = { module = "fr.acinq.secp256k1:secp256k1-kmp-jni-jvm", version.ref = "secp256k1-kmp" }
 spongycastle-core = { module = "com.madgag.spongycastle:core", version.ref = "spongycastle" }
+bitcoinj-core = { module = "org.bitcoinj:bitcoinj-core", version.ref = "bitcoinj-core" }
 
 androidx-security-crypto = { module = "androidx.security:security-crypto", version.ref = "security-crypto" }
 androidx-security-app-authenticator = { module = "androidx.security:security-app-authenticator", version.ref = "security-app-authenticator" }

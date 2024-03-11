@@ -16,7 +16,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import net.primal.android.R
-import net.primal.android.core.compose.AdjustTemporarilySystemBarColors
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.feed.model.ZappingState
 import net.primal.android.theme.AppTheme
@@ -30,10 +29,6 @@ fun UnableToZapBottomSheet(
     onGoToWallet: () -> Unit,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-
-    AdjustTemporarilySystemBarColors(
-        navigationBarColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
-    )
 
     ModalBottomSheet(
         containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
