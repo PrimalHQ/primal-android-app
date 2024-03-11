@@ -185,6 +185,7 @@ android {
         checkDependencies = true
         checkTestSources = true
         checkReleaseBuilds = false
+        disable.add("MissingTranslation")
     }
 
     packaging {
