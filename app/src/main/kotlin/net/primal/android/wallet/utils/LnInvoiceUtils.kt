@@ -72,7 +72,7 @@ object LnInvoiceUtils {
     private fun decodeUnlimitedLength(invoice: String): Boolean {
         var lower = false
         var upper = false
-        for (i in 0 until invoice.length) {
+        for (i in invoice.indices) {
             val c = invoice[i]
             if (c.code < 33 || c.code > 126) {
                 throw AddressFormatException(
@@ -95,12 +95,12 @@ object LnInvoiceUtils {
         val values = ByteArray(dataPartLength)
         for (i in 0 until dataPartLength) {
             val c = invoice[i + pos + 1]
-            if (CHARSET_REV.get(c.code).toInt() == -1) {
+            if (CHARSET_REV[c.code].toInt() == -1) {
                 throw AddressFormatException(
                     "Invalid character: " + c + ", pos: " + (i + pos + 1),
                 )
             }
-            values[i] = CHARSET_REV.get(c.code)
+            values[i] = CHARSET_REV[c.code]
         }
         val hrp = invoice.substring(0, pos).lowercase(Locale.ROOT)
         if (!verifyChecksum(hrp, values)) throw AddressFormatException("Invalid Checksum")
