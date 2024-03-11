@@ -53,11 +53,7 @@
 
     <string name="login_title">Logga in</string>
     <string name="login_description">Ange din Nostr-nyckel för att logga in:</string>
-    <string name="login_button_continue">Fortsätt</string>
-    <string name="login_button_paste_key">Klistra in din nyckel</string>
     <string name="login_invalid_nsec_key">Ange en giltig Nostr-nyckel</string>
-    <string name="login_cant_login_with_public_key">Inloggning med en npub stöds ännu inte. Logga in med din nsec-nyckel.</string>
-    <string name="login_valid_nsec_key">Giltig nyckel bekräftad</string>
 
     <string name="logout_title">Logga ut</string>
     <string name="logout_description">Vill du verkligen logga ut?</string>
@@ -522,4 +518,9 @@
     <string name="accessibility_toggle_between_dark_and_light_mode">Växla mellan mörkt och ljust läge</string>
     <string name="accessibility_copy_content">Kopiera innehåll</string>
     <string name="accessibility_warning">Varning</string>
+
+    <string name="login_button_sign_in">Logga in</string>
+    <string name="login_button_paste_your_key">Klistra in din nyckel</string>
+    <string name="login_button_paste_new_key">Klistra in ny nyckel</string>
+    <string name="login_enter_nsec_key">Ange din Nostr-nyckel för att logga in:</string>
 </resources>
