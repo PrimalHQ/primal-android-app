@@ -668,6 +668,8 @@ private fun UserProfileDetails(
     val context = LocalContext.current
     val uiScope = rememberCoroutineScope()
     val keyCopiedText = stringResource(id = R.string.settings_keys_key_copied)
+    val protocolPrefix = "http"
+    val protocolPrefixReplacement = "https://"
 
     Column(
         modifier = Modifier
@@ -715,13 +717,11 @@ private fun UserProfileDetails(
         }
 
         if (state.profileDetails?.website?.isNotEmpty() == true) {
-
-            // add protocol if user website is missing it
-            // use http protocol since many websites redirect to https if available
-            val websiteWithProtocol = if (state.profileDetails.website.startsWith("http", true))
+            val websiteWithProtocol = if (state.profileDetails.website.startsWith(protocolPrefix, true)) {
                 state.profileDetails.website
-            else
-                "http://" + state.profileDetails.website
+            } else {
+                protocolPrefixReplacement + state.profileDetails.website
+            }
 
             UserWebsiteText(
                 website = state.profileDetails.website,
@@ -733,7 +733,7 @@ private fun UserProfileDetails(
                         uiScope.launch {
                             Toast.makeText(
                                 context,
-                                "App not found that could open ${websiteWithProtocol}.",
+                                "App not found that could open $websiteWithProtocol.",
                                 Toast.LENGTH_SHORT,
                             ).show()
                         }
