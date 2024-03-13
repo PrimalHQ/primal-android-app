@@ -27,12 +27,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import net.primal.android.attachments.gallery.MediaGalleryScreen
 import net.primal.android.attachments.gallery.MediaGalleryViewModel
-import net.primal.android.auth.create.CreateAccountViewModel
-import net.primal.android.auth.create.ui.CreateAccountScreen
 import net.primal.android.auth.login.LoginScreen
 import net.primal.android.auth.login.LoginViewModel
 import net.primal.android.auth.logout.LogoutScreen
 import net.primal.android.auth.logout.LogoutViewModel
+import net.primal.android.auth.onboarding.OnboardingScreen
+import net.primal.android.auth.onboarding.OnboardingViewModel
 import net.primal.android.auth.welcome.WelcomeScreen
 import net.primal.android.core.compose.ApplyEdgeToEdge
 import net.primal.android.core.compose.LockToOrientationPortrait
@@ -84,7 +84,7 @@ private fun NavController.navigateToWelcome() =
 
 private fun NavController.navigateToLogin() = navigate(route = "login")
 
-private fun NavController.navigateToCreate() = navigate(route = "create_account")
+private fun NavController.navigateToOnboarding() = navigate(route = "onboarding")
 
 private fun NavController.navigateToLogout() = navigate(route = "logout")
 
@@ -115,7 +115,7 @@ private val NavController.topLevelNavOptions: NavOptions
         }
     }
 
-private fun NavController.navigateToFeed(directive: String) =
+fun NavController.navigateToFeed(directive: String) =
     navigate(
         route = "feed?directive=${directive.asUrlEncoded()}",
         navOptions = navOptions { clearBackStack() },
@@ -247,7 +247,7 @@ fun PrimalAppNavigation() {
 
             login(route = "login", navController = navController)
 
-            createAccount(route = "create_account", navController = navController)
+            onboarding(route = "onboarding", navController = navController)
 
             logout(route = "logout", navController = navController)
 
@@ -420,14 +420,14 @@ private fun NavGraphBuilder.welcome(route: String, navController: NavController)
     composable(
         route = route,
         enterTransition = {
-            if (initialState.destination.route in listOf("login", "create_account")) {
+            if (initialState.destination.route in listOf("login", "onboarding")) {
                 slideInHorizontally(initialOffsetX = { -it })
             } else {
                 null
             }
         },
         exitTransition = {
-            if (targetState.destination.route in listOf("login", "create_account")) {
+            if (targetState.destination.route in listOf("login", "onboarding")) {
                 slideOutHorizontally(targetOffsetX = { -it })
             } else {
                 null
@@ -439,7 +439,7 @@ private fun NavGraphBuilder.welcome(route: String, navController: NavController)
             ApplyEdgeToEdge(isDarkTheme = true)
             WelcomeScreen(
                 onSignInClick = { navController.navigateToLogin() },
-                onCreateAccountClick = { navController.navigateToCreate() },
+                onCreateAccountClick = { navController.navigateToOnboarding() },
             )
         }
     }
@@ -474,7 +474,7 @@ private fun NavGraphBuilder.login(route: String, navController: NavController) =
         }
     }
 
-private fun NavGraphBuilder.createAccount(route: String, navController: NavController) =
+private fun NavGraphBuilder.onboarding(route: String, navController: NavController) =
     composable(
         route = route,
         enterTransition = {
@@ -492,13 +492,13 @@ private fun NavGraphBuilder.createAccount(route: String, navController: NavContr
             }
         },
     ) {
-        val viewModel: CreateAccountViewModel = hiltViewModel(it)
+        val viewModel: OnboardingViewModel = hiltViewModel(it)
         LockToOrientationPortrait()
         PrimalTheme(PrimalTheme.Sunset) {
             ApplyEdgeToEdge(isDarkTheme = true)
-            CreateAccountScreen(
+            OnboardingScreen(
                 viewModel = viewModel,
-                onCreateSuccess = { pubkey -> navController.navigateToFeed(pubkey) },
+                onOnboarded = { userId -> navController.navigateToFeed(directive = userId) },
                 onClose = { navController.popBackStack() },
             )
         }

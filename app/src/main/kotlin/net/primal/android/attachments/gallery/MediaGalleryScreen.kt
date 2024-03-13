@@ -170,7 +170,7 @@ fun MediaGalleryScreen(
                             .height(32.dp)
                             .fillMaxWidth()
                             .align(Alignment.BottomCenter),
-                        imagesCount = imagesCount,
+                        pagesCount = imagesCount,
                         currentPage = pagerState.currentPage,
                     )
                 }

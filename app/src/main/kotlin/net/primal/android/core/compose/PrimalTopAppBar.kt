@@ -88,6 +88,8 @@ fun PrimalTopAppBar(
                         tint = navigationIconTintColor,
                         appBarIconContentDescription = navigationIconContentDescription,
                     )
+                } else {
+                    InvisibleAppBarIcon()
                 }
             },
             title = {

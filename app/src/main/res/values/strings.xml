@@ -50,6 +50,33 @@
     <string name="create_input_header_bitcoin_lightning_address">Bitcoin lightning address</string>
     <string name="create_input_header_nip_05">Verified Nostr address (NIP 05)</string>
     <string name="create_account_required_hint">required</string>
+    
+    <string name="onboarding_title_create_account">Create Account</string>
+    <string name="onboarding_title_your_interests">Your Interests</string>
+    <string name="onboarding_title_account_preview">Account Preview</string>
+    <string name="onboarding_title_wallet_activation">Wallet Activation</string>
+    <string name="onboarding_title_success">Success</string>
+    <string name="onboarding_button_next">Next</string>
+    <string name="onboarding_button_create_account_now">Create Account Now</string>
+    <string name="onboarding_button_activate_wallet">Activate Wallet</string>
+    <string name="onboarding_button_label_i_will_do_this_later">I\'ll do this later</string>
+    <string name="onboarding_profile_details_hint">Create a public profile on Nostr. Choose any Display Name and say something about yourself. You can easily change these things later.</string>
+    <string name="onboarding_profile_details_display_name_hint">Display Name</string>
+    <string name="onboarding_profile_details_about_you_hint">About You</string>
+    <string name="onboarding_profile_details_add_photo">Add Photo</string>
+    <string name="onboarding_profile_details_change_photo">Change Photo</string>
+    <string name="onboarding_profile_interests_hint">Tells us about your interests and we will create your initial follow list:</string>
+    <plurals name="onboarding_profile_interests_selection_count">
+        <item quantity="zero">0 interests selected</item>
+        <item quantity="one">1 interest selected</item>
+        <item quantity="other">%1$s interests selected</item>
+    </plurals>
+    <string name="onboarding_profile_preview_hint">We will use this info to create your Nostr account. If you wish to make any changes, you can always do so in your profile settings.</string>
+    <string name="onboarding_profile_preview_change_banner">Change Banner</string>
+    <string name="onboarding_profile_success_hint">Now you are ready to\nactivate your Primal Wallet.</string>
+    <string name="onboarding_profile_success_description">Account created!\nYour Nostr key is available in your app settings.</string>
+    <string name="onboarding_profile_create_error_image_upload">Unable to upload photo. Please try again.</string>
+    <string name="onboarding_profile_create_error_failed_to_create">Something went wrong while creating your account. Please try again.</string>
 
     <string name="login_title">Sign In</string>
     <string name="login_description">Enter your Nostr key to sign in:</string>

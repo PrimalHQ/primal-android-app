@@ -2,11 +2,9 @@ package net.primal.android.auth.login
 
 import android.widget.Toast
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,13 +13,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -33,7 +29,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -53,8 +48,11 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import net.primal.android.R
+import net.primal.android.auth.compose.ColumnWithBackground
+import net.primal.android.auth.compose.DefaultOnboardingAvatar
 import net.primal.android.auth.compose.ONE_HALF
 import net.primal.android.auth.compose.OnboardingButton
+import net.primal.android.auth.compose.defaultOnboardingAvatarBackground
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.PrimalDefaults
@@ -63,7 +61,6 @@ import net.primal.android.core.compose.detectUiDensityModeFromMaxHeight
 import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
-import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 import net.primal.android.core.compose.isCompactOrLower
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.core.utils.isValidNostrPrivateKey
@@ -107,52 +104,38 @@ fun LoginScreen(
     eventPublisher: (LoginContract.UiEvent) -> Unit,
     onClose: () -> Unit,
 ) {
-    BoxWithConstraints {
-        val uiMode = this.maxHeight.detectUiDensityModeFromMaxHeight()
+    ColumnWithBackground(
+        backgroundPainter = painterResource(id = R.drawable.onboarding_spot2),
+    ) { size ->
+        val uiMode = size.height.detectUiDensityModeFromMaxHeight()
 
-        Image(
-            modifier = Modifier.fillMaxSize(),
-            painter = painterResource(id = R.drawable.onboarding_spot2),
-            contentScale = ContentScale.FillBounds,
-            alignment = Alignment.Center,
-            contentDescription = null,
+        CenterAlignedTopAppBar(
+            colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                containerColor = Color.Transparent,
+                titleContentColor = Color.White,
+                navigationIconContentColor = Color.White,
+            ),
+            title = {
+                Text(text = stringResource(id = R.string.login_title))
+            },
+            navigationIcon = {
+                AppBarIcon(
+                    icon = PrimalIcons.ArrowBack,
+                    onClick = onClose,
+                )
+            },
         )
 
-        Column(
+        LoginContent(
             modifier = Modifier
                 .fillMaxSize()
-                .systemBarsPadding(),
-        ) {
-            CenterAlignedTopAppBar(
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = Color.Transparent,
-                    titleContentColor = Color.White,
-                    navigationIconContentColor = Color.White,
-                ),
-                title = {
-                    Text(text = stringResource(id = R.string.login_title))
-                },
-                navigationIcon = {
-                    AppBarIcon(
-                        icon = PrimalIcons.ArrowBack,
-                        onClick = {
-                            onClose()
-                        },
-                    )
-                },
-            )
-
-            LoginContent(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .imePadding()
-                    .padding(horizontal = 32.dp),
-                state = state,
-                uiMode = uiMode,
-                onLoginInputChanged = { eventPublisher(LoginContract.UiEvent.UpdateLoginInput(newInput = it)) },
-                onLoginClick = { eventPublisher(LoginContract.UiEvent.LoginRequestEvent) },
-            )
-        }
+                .imePadding()
+                .padding(horizontal = 32.dp),
+            state = state,
+            uiMode = uiMode,
+            onLoginInputChanged = { eventPublisher(LoginContract.UiEvent.UpdateLoginInput(newInput = it)) },
+            onLoginClick = { eventPublisher(LoginContract.UiEvent.LoginRequestEvent) },
+        )
     }
 }
 
@@ -416,8 +399,8 @@ private fun ProfileDetailsColumn(
                 avatarSize = 100.dp,
                 hasBorder = profileDetails.avatarCdnImage != null,
                 borderColor = Color.White,
-                backgroundColor = defaultAvatarBackground,
-                defaultAvatar = { DefaultAvatar() },
+                backgroundColor = defaultOnboardingAvatarBackground,
+                defaultAvatar = { DefaultOnboardingAvatar() },
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -440,26 +423,6 @@ private fun ProfileDetailsColumn(
         )
 
         Spacer(modifier = Modifier.height(32.dp))
-    }
-}
-
-private val defaultAvatarBackground = Color(0xFF7E382C)
-private val defaultAvatarForeground = Color(0xFFFDB7AB)
-
-@Composable
-private fun DefaultAvatar() {
-    Box(
-        modifier = Modifier
-            .background(color = defaultAvatarBackground)
-            .fillMaxSize(),
-        contentAlignment = Alignment.Center,
-    ) {
-        Icon(
-            imageVector = PrimalIcons.AvatarDefault,
-            contentDescription = null,
-            modifier = Modifier.fillMaxSize(),
-            tint = defaultAvatarForeground,
-        )
     }
 }
 
