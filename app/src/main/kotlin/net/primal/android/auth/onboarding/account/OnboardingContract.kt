@@ -1,7 +1,7 @@
-package net.primal.android.auth.onboarding
+package net.primal.android.auth.onboarding.account
 
 import android.net.Uri
-import net.primal.android.auth.onboarding.api.Suggestion
+import net.primal.android.auth.onboarding.account.api.Suggestion
 
 interface OnboardingContract {
 

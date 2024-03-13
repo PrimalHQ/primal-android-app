@@ -1,4 +1,4 @@
-package net.primal.android.auth.onboarding.ui
+package net.primal.android.auth.onboarding.account.ui
 
 import android.net.Uri
 import androidx.activity.compose.BackHandler
@@ -54,8 +54,10 @@ import coil.request.ImageRequest
 import net.primal.android.R
 import net.primal.android.auth.compose.ColumnWithBackground
 import net.primal.android.auth.compose.ONE_HALF
-import net.primal.android.auth.onboarding.OnboardingContract
-import net.primal.android.auth.onboarding.OnboardingStep
+import net.primal.android.auth.compose.OnboardingBottomBar
+import net.primal.android.auth.compose.onboardingTextHintTypography
+import net.primal.android.auth.onboarding.account.OnboardingContract
+import net.primal.android.auth.onboarding.account.OnboardingStep
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -70,7 +72,8 @@ fun OnboardingProfilePreviewScreen(
     state: OnboardingContract.UiState,
     eventPublisher: (OnboardingContract.UiEvent) -> Unit,
     onBack: () -> Unit,
-    onOnboarded: (String) -> Unit,
+    onOnboarded: () -> Unit,
+    onActivateWallet: () -> Unit,
 ) {
     BackHandler(enabled = state.userId != null) {}
 
@@ -138,11 +141,8 @@ fun OnboardingProfilePreviewScreen(
             ProfilePreviewBottomBar(
                 isAccountCreated = state.userId != null,
                 isWorking = state.working,
-                onWalletActivationClick = {},
-                onFinishOnboardingClick = {
-                    checkNotNull(state.userId)
-                    onOnboarded(state.userId)
-                },
+                onWalletActivationClick = onActivateWallet,
+                onFinishOnboardingClick = onOnboarded,
                 onCreateAccountClick = {
                     eventPublisher(OnboardingContract.UiEvent.CreateNostrProfile)
                 },
@@ -162,7 +162,7 @@ private fun ProfilePreviewBottomBar(
     onFinishOnboardingClick: () -> Unit,
     onCreateAccountClick: () -> Unit,
 ) {
-    OnboardingStepBottomBar(
+    OnboardingBottomBar(
         buttonText = if (isAccountCreated) {
             stringResource(id = R.string.onboarding_button_activate_wallet)
         } else {
@@ -571,6 +571,7 @@ private fun PreviewOnboardingProfilePreviewScreen() {
                 eventPublisher = {},
                 onBack = {},
                 onOnboarded = {},
+                onActivateWallet = {},
             )
         }
     }
@@ -596,6 +597,7 @@ private fun PreviewOnboardingProfileSuccessScreen() {
                 eventPublisher = {},
                 onBack = {},
                 onOnboarded = {},
+                onActivateWallet = {},
             )
         }
     }

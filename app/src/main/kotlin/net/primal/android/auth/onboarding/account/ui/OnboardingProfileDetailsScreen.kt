@@ -1,4 +1,4 @@
-package net.primal.android.auth.onboarding.ui
+package net.primal.android.auth.onboarding.account.ui
 
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -53,9 +53,11 @@ import coil.request.ImageRequest
 import net.primal.android.R
 import net.primal.android.auth.compose.DefaultOnboardingAvatar
 import net.primal.android.auth.compose.ONE_HALF
+import net.primal.android.auth.compose.OnboardingBottomBar
 import net.primal.android.auth.compose.defaultOnboardingAvatarBackground
-import net.primal.android.auth.onboarding.OnboardingContract
-import net.primal.android.auth.onboarding.OnboardingStep
+import net.primal.android.auth.compose.onboardingTextHintTypography
+import net.primal.android.auth.onboarding.account.OnboardingContract
+import net.primal.android.auth.onboarding.account.OnboardingStep
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -118,7 +120,7 @@ fun OnboardingProfileDetailsScreen(
             }
         },
         bottomBar = {
-            OnboardingStepBottomBar(
+            OnboardingBottomBar(
                 buttonText = stringResource(id = R.string.onboarding_button_next),
                 buttonEnabled = state.profileDisplayName.isNotEmpty() && state.profileAboutYou.isNotEmpty(),
                 onButtonClick = { eventPublisher(OnboardingContract.UiEvent.RequestNextStep) },

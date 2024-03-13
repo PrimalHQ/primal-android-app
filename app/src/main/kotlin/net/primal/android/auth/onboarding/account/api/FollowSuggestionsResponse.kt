@@ -1,4 +1,4 @@
-package net.primal.android.auth.onboarding.api
+package net.primal.android.auth.onboarding.account.api
 
 import kotlinx.serialization.Serializable
 import net.primal.android.nostr.model.NostrEvent

@@ -13,12 +13,12 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import net.primal.android.auth.AuthRepository
 import net.primal.android.auth.create.CreateAccountContract.SideEffect
 import net.primal.android.auth.create.CreateAccountContract.UiEvent
 import net.primal.android.auth.create.CreateAccountContract.UiState
 import net.primal.android.auth.create.api.RecommendedFollowsApi
 import net.primal.android.auth.create.ui.RecommendedFollow
+import net.primal.android.auth.repository.AuthRepository
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.files.error.UnsuccessfulFileUpload
 import net.primal.android.core.serialization.json.NostrJson

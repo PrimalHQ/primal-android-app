@@ -31,8 +31,9 @@ import net.primal.android.auth.login.LoginScreen
 import net.primal.android.auth.login.LoginViewModel
 import net.primal.android.auth.logout.LogoutScreen
 import net.primal.android.auth.logout.LogoutViewModel
-import net.primal.android.auth.onboarding.OnboardingScreen
-import net.primal.android.auth.onboarding.OnboardingViewModel
+import net.primal.android.auth.onboarding.account.OnboardingViewModel
+import net.primal.android.auth.onboarding.account.ui.OnboardingScreen
+import net.primal.android.auth.onboarding.wallet.OnboardingWalletActivation
 import net.primal.android.auth.welcome.WelcomeScreen
 import net.primal.android.core.compose.ApplyEdgeToEdge
 import net.primal.android.core.compose.LockToOrientationPortrait
@@ -75,6 +76,7 @@ import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.thread.ThreadScreen
 import net.primal.android.thread.ThreadViewModel
+import net.primal.android.wallet.activation.WalletActivationViewModel
 
 private fun NavController.navigateToWelcome() =
     navigate(
@@ -85,6 +87,8 @@ private fun NavController.navigateToWelcome() =
 private fun NavController.navigateToLogin() = navigate(route = "login")
 
 private fun NavController.navigateToOnboarding() = navigate(route = "onboarding")
+
+private fun NavController.navigateToWalletOnboarding() = navigate(route = "onboardingWallet")
 
 private fun NavController.navigateToLogout() = navigate(route = "logout")
 
@@ -115,9 +119,12 @@ private val NavController.topLevelNavOptions: NavOptions
         }
     }
 
-fun NavController.navigateToFeed(directive: String) =
+fun NavController.navigateToFeed(directive: String? = null) =
     navigate(
-        route = "feed?directive=${directive.asUrlEncoded()}",
+        route = when (directive) {
+            null -> "feed"
+            else -> "feed?directive=${directive.asUrlEncoded()}"
+        },
         navOptions = navOptions { clearBackStack() },
     )
 
@@ -248,6 +255,8 @@ fun PrimalAppNavigation() {
             login(route = "login", navController = navController)
 
             onboarding(route = "onboarding", navController = navController)
+
+            onboardingWalletActivation(route = "onboardingWallet", navController)
 
             logout(route = "logout", navController = navController)
 
@@ -420,17 +429,15 @@ private fun NavGraphBuilder.welcome(route: String, navController: NavController)
     composable(
         route = route,
         enterTransition = {
-            if (initialState.destination.route in listOf("login", "onboarding")) {
-                slideInHorizontally(initialOffsetX = { -it })
-            } else {
-                null
+            when (initialState.destination.route) {
+                "login", "onboarding" -> slideInHorizontally(initialOffsetX = { -it })
+                else -> null
             }
         },
         exitTransition = {
-            if (targetState.destination.route in listOf("login", "onboarding")) {
-                slideOutHorizontally(targetOffsetX = { -it })
-            } else {
-                null
+            when (targetState.destination.route) {
+                "login", "onboarding" -> slideOutHorizontally(targetOffsetX = { -it })
+                else -> null
             }
         },
     ) {
@@ -448,17 +455,15 @@ private fun NavGraphBuilder.login(route: String, navController: NavController) =
     composable(
         route = route,
         enterTransition = {
-            if (initialState.destination.route == "welcome") {
-                slideInHorizontally(initialOffsetX = { it })
-            } else {
-                null
+            when (initialState.destination.route) {
+                "welcome" -> slideInHorizontally(initialOffsetX = { it })
+                else -> null
             }
         },
         exitTransition = {
-            if (targetState.destination.route == "welcome") {
-                slideOutHorizontally(targetOffsetX = { it })
-            } else {
-                null
+            when (targetState.destination.route) {
+                "welcome" -> slideOutHorizontally(targetOffsetX = { it })
+                else -> null
             }
         },
     ) {
@@ -468,7 +473,7 @@ private fun NavGraphBuilder.login(route: String, navController: NavController) =
             ApplyEdgeToEdge(isDarkTheme = true)
             LoginScreen(
                 viewModel = viewModel,
-                onLoginSuccess = { pubkey -> navController.navigateToFeed(pubkey) },
+                onLoginSuccess = { feedDirective -> navController.navigateToFeed(feedDirective) },
                 onClose = { navController.popBackStack() },
             )
         }
@@ -478,17 +483,16 @@ private fun NavGraphBuilder.onboarding(route: String, navController: NavControll
     composable(
         route = route,
         enterTransition = {
-            if (initialState.destination.route == "welcome") {
-                slideInHorizontally(initialOffsetX = { it })
-            } else {
-                null
+            when (initialState.destination.route) {
+                "welcome" -> slideInHorizontally(initialOffsetX = { it })
+                else -> null
             }
         },
         exitTransition = {
-            if (targetState.destination.route == "welcome") {
-                slideOutHorizontally(targetOffsetX = { it })
-            } else {
-                null
+            when (targetState.destination.route) {
+                "welcome" -> slideOutHorizontally(targetOffsetX = { it })
+                "onboardingWallet" -> slideOutHorizontally(targetOffsetX = { -it })
+                else -> null
             }
         },
     ) {
@@ -498,8 +502,24 @@ private fun NavGraphBuilder.onboarding(route: String, navController: NavControll
             ApplyEdgeToEdge(isDarkTheme = true)
             OnboardingScreen(
                 viewModel = viewModel,
-                onOnboarded = { userId -> navController.navigateToFeed(directive = userId) },
                 onClose = { navController.popBackStack() },
+                onOnboarded = { navController.navigateToFeed() },
+                onActivateWallet = { navController.navigateToWalletOnboarding() },
+            )
+        }
+    }
+
+private fun NavGraphBuilder.onboardingWalletActivation(route: String, navController: NavController) =
+    composable(
+        route = route,
+        enterTransition = { slideInHorizontally(initialOffsetX = { it }) },
+    ) {
+        val viewModel = hiltViewModel<WalletActivationViewModel>()
+        PrimalTheme(PrimalTheme.Sunset) {
+            ApplyEdgeToEdge()
+            OnboardingWalletActivation(
+                viewModel = viewModel,
+                onDoneOrDismiss = { navController.navigateToFeed() },
             )
         }
     }

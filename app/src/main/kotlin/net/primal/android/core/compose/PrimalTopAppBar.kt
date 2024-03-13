@@ -39,13 +39,13 @@ import net.primal.android.theme.AppTheme
 @Composable
 fun PrimalTopAppBar(
     title: String,
-    onNavigationIconClick: () -> Unit,
     modifier: Modifier = Modifier,
     subtitle: String? = null,
     textColor: Color = LocalContentColor.current,
     navigationIcon: ImageVector? = null,
     navigationIconTintColor: Color = LocalContentColor.current,
     navigationIconContentDescription: String? = null,
+    onNavigationIconClick: (() -> Unit)? = null,
     autoCloseKeyboardOnNavigationIconClick: Boolean = true,
     avatarCdnImage: CdnImage? = null,
     actions: (@Composable RowScope.() -> Unit)? = null,
@@ -80,10 +80,12 @@ fun PrimalTopAppBar(
                     AppBarIcon(
                         icon = navigationIcon,
                         onClick = {
-                            if (autoCloseKeyboardOnNavigationIconClick) {
-                                keyboardController?.hide()
+                            if (onNavigationIconClick != null) {
+                                if (autoCloseKeyboardOnNavigationIconClick) {
+                                    keyboardController?.hide()
+                                }
+                                onNavigationIconClick()
                             }
-                            onNavigationIconClick()
                         },
                         tint = navigationIconTintColor,
                         appBarIconContentDescription = navigationIconContentDescription,

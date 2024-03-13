@@ -1,7 +1,6 @@
-package net.primal.android.auth.login
+package net.primal.android.auth.repository
 
 import javax.inject.Inject
-import net.primal.android.auth.AuthRepository
 import net.primal.android.feed.repository.FeedRepository
 import net.primal.android.settings.muted.repository.MutedUserRepository
 import net.primal.android.settings.repository.SettingsRepository

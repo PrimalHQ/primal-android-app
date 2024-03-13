@@ -1,4 +1,4 @@
-package net.primal.android.auth.onboarding
+package net.primal.android.auth.onboarding.account.ui
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
@@ -9,17 +9,20 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.res.painterResource
+import net.primal.android.R
 import net.primal.android.auth.compose.ColumnWithBackground
-import net.primal.android.auth.onboarding.ui.OnboardingProfileDetailsScreen
-import net.primal.android.auth.onboarding.ui.OnboardingProfileInterestsScreen
-import net.primal.android.auth.onboarding.ui.OnboardingProfilePreviewScreen
-import net.primal.android.auth.onboarding.ui.backgroundPainter
+import net.primal.android.auth.onboarding.account.OnboardingContract
+import net.primal.android.auth.onboarding.account.OnboardingStep
+import net.primal.android.auth.onboarding.account.OnboardingViewModel
 
 @Composable
 fun OnboardingScreen(
     viewModel: OnboardingViewModel,
     onClose: () -> Unit,
-    onOnboarded: (String) -> Unit,
+    onOnboarded: () -> Unit,
+    onActivateWallet: () -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
 
@@ -37,6 +40,7 @@ fun OnboardingScreen(
         eventPublisher = { viewModel.setEvent(it) },
         onBack = { handleBackEvent() },
         onOnboarded = onOnboarded,
+        onActivateWallet = onActivateWallet,
     )
 }
 
@@ -46,7 +50,8 @@ private fun OnboardingScreen(
     state: OnboardingContract.UiState,
     eventPublisher: (OnboardingContract.UiEvent) -> Unit,
     onBack: () -> Unit,
-    onOnboarded: (String) -> Unit,
+    onOnboarded: () -> Unit,
+    onActivateWallet: () -> Unit,
 ) {
     AnimatedContent(
         targetState = state.currentStep,
@@ -79,9 +84,18 @@ private fun OnboardingScreen(
                     eventPublisher = eventPublisher,
                     onBack = onBack,
                     onOnboarded = onOnboarded,
+                    onActivateWallet = onActivateWallet,
                 )
-                OnboardingStep.WalletActivation -> Unit
             }
         }
+    }
+}
+
+@Composable
+private fun OnboardingStep.backgroundPainter(): Painter {
+    return when (this) {
+        OnboardingStep.Details -> painterResource(id = R.drawable.onboarding_spot2)
+        OnboardingStep.Interests -> painterResource(id = R.drawable.onboarding_spot3)
+        OnboardingStep.Preview -> painterResource(id = R.drawable.onboarding_spot4)
     }
 }

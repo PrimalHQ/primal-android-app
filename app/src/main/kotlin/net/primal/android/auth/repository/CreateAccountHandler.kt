@@ -1,10 +1,9 @@
-package net.primal.android.auth.onboarding
+package net.primal.android.auth.repository
 
 import java.io.IOException
 import javax.inject.Inject
 import kotlinx.coroutines.withContext
-import net.primal.android.auth.AuthRepository
-import net.primal.android.auth.onboarding.api.Suggestion
+import net.primal.android.auth.onboarding.account.api.Suggestion
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException

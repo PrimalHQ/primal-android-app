@@ -1,4 +1,4 @@
-package net.primal.android.auth
+package net.primal.android.auth.repository
 
 import javax.inject.Inject
 import javax.inject.Singleton

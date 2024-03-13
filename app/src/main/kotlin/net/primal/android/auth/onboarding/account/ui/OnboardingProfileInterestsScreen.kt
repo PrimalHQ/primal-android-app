@@ -1,4 +1,4 @@
-package net.primal.android.auth.onboarding.ui
+package net.primal.android.auth.onboarding.account.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,9 +24,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import net.primal.android.R
-import net.primal.android.auth.onboarding.OnboardingContract
-import net.primal.android.auth.onboarding.OnboardingStep
-import net.primal.android.auth.onboarding.api.Suggestion
+import net.primal.android.auth.compose.OnboardingBottomBar
+import net.primal.android.auth.compose.onboardingTextHintTypography
+import net.primal.android.auth.onboarding.account.OnboardingContract
+import net.primal.android.auth.onboarding.account.OnboardingStep
+import net.primal.android.auth.onboarding.account.api.Suggestion
 import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -103,7 +105,7 @@ fun OnboardingProfileInterestsScreen(
             }
         },
         bottomBar = {
-            OnboardingStepBottomBar(
+            OnboardingBottomBar(
                 buttonText = stringResource(id = R.string.onboarding_button_next),
                 buttonEnabled = state.suggestions.isNotEmpty(),
                 onButtonClick = { eventPublisher(OnboardingContract.UiEvent.RequestNextStep) },

@@ -17,6 +17,7 @@ import kotlinx.coroutines.withContext
 import net.primal.android.auth.login.LoginContract.SideEffect
 import net.primal.android.auth.login.LoginContract.UiEvent
 import net.primal.android.auth.login.LoginContract.UiState
+import net.primal.android.auth.repository.LoginHandler
 import net.primal.android.core.compose.profile.model.asProfileDetailsUi
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.utils.isValidNostrPrivateKey

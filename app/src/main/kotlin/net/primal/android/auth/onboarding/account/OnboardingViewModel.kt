@@ -1,4 +1,4 @@
-package net.primal.android.auth.onboarding
+package net.primal.android.auth.onboarding.account
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,9 +12,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import net.primal.android.auth.onboarding.OnboardingContract.UiEvent
-import net.primal.android.auth.onboarding.OnboardingContract.UiState
-import net.primal.android.auth.onboarding.api.OnboardingApi
+import net.primal.android.auth.onboarding.account.OnboardingContract.UiEvent
+import net.primal.android.auth.onboarding.account.OnboardingContract.UiState
+import net.primal.android.auth.onboarding.account.api.OnboardingApi
+import net.primal.android.auth.repository.CreateAccountHandler
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.files.error.UnsuccessfulFileUpload
 import net.primal.android.profile.domain.ProfileMetadata

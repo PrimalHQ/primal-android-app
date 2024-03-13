@@ -6,7 +6,8 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
-import net.primal.android.auth.AuthRepository
+import net.primal.android.auth.repository.AuthRepository
+import net.primal.android.auth.repository.LoginHandler
 import net.primal.android.feed.db.Feed
 import net.primal.android.feed.repository.FeedRepository
 import net.primal.android.settings.muted.repository.MutedUserRepository
