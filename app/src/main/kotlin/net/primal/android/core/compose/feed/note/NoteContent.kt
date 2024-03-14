@@ -201,10 +201,10 @@ fun renderContentAsAnnotatedString(
         .removeUrls(urls = mediaAttachments.map { it.url })
         .removeUrls(urls = if (!shouldKeepNostrNoteUris) mentionedPosts.map { it.uri } else emptyList())
         .removeUrls(urls = if (shouldDeleteLinks) linkAttachments.map { it.url } else emptyList())
-        .ellipsize(expanded = expanded, ellipsizeText = seeMoreText)
         .replaceNostrProfileUrisWithHandles(resources = mentionedUsers)
         .clearParsedPrimalLinks()
         .trim()
+        .ellipsize(expanded = expanded, ellipsizeText = seeMoreText)
 
     return buildAnnotatedString {
         append(refinedContent)
