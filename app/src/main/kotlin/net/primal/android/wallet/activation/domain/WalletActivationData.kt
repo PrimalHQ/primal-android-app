@@ -1,4 +1,4 @@
-package net.primal.android.wallet.activation
+package net.primal.android.wallet.activation.domain
 
 import net.primal.android.wallet.activation.regions.Region
 

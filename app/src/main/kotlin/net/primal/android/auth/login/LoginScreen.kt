@@ -50,7 +50,6 @@ import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.auth.compose.ColumnWithBackground
 import net.primal.android.auth.compose.DefaultOnboardingAvatar
-import net.primal.android.auth.compose.ONE_HALF
 import net.primal.android.auth.compose.OnboardingButton
 import net.primal.android.auth.compose.defaultOnboardingAvatarBackground
 import net.primal.android.core.compose.AppBarIcon
@@ -225,7 +224,7 @@ private fun LoginInputFieldContent(
         verticalArrangement = Arrangement.SpaceBetween,
     ) {
         AnimatedContent(
-            modifier = Modifier.weight(ONE_HALF),
+            modifier = Modifier.weight(weight = 0.5f),
             targetState = state.profileDetails,
             label = "LoginHeader",
         ) { profileDetails ->
@@ -251,7 +250,7 @@ private fun LoginInputFieldContent(
         }
 
         Box(
-            modifier = Modifier.weight(ONE_HALF),
+            modifier = Modifier.weight(weight = 0.5f),
             contentAlignment = Alignment.TopCenter,
         ) {
             LoginInputField(

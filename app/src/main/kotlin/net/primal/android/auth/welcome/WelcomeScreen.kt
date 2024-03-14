@@ -23,10 +23,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.R
 import net.primal.android.auth.compose.ColumnWithBackground
-import net.primal.android.auth.compose.MAX_COMPONENT_WIDTH
-import net.primal.android.auth.compose.ONE_HALF
 import net.primal.android.auth.compose.OnboardingButton
-import net.primal.android.auth.compose.TWO_FIFTHS
+import net.primal.android.core.compose.MAX_COMPONENT_WIDTH
+import net.primal.android.core.compose.ONE_HALF
+import net.primal.android.core.compose.TWO_FIFTHS
 import net.primal.android.core.compose.ToSAndPrivacyPolicyText
 import net.primal.android.core.compose.UiDensityMode
 import net.primal.android.core.compose.detectUiDensityModeFromMaxHeight

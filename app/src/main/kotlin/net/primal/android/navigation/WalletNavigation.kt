@@ -13,8 +13,8 @@ import net.primal.android.core.compose.LockToOrientationPortrait
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.drawer.DrawerScreenDestination
-import net.primal.android.wallet.activation.WalletActivationScreen
 import net.primal.android.wallet.activation.WalletActivationViewModel
+import net.primal.android.wallet.activation.ui.WalletActivationScreen
 import net.primal.android.wallet.dashboard.WalletDashboardScreen
 import net.primal.android.wallet.dashboard.WalletDashboardViewModel
 import net.primal.android.wallet.domain.DraftTx

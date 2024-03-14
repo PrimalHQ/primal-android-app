@@ -1,3 +1,6 @@
+package net.primal.android.wallet.activation.regions
+
+val WalletRegionJson = """
 {
   "countries": [
     [
@@ -984,5 +987,4 @@
     ]
   ]
 }
-
-
+""".trimIndent()

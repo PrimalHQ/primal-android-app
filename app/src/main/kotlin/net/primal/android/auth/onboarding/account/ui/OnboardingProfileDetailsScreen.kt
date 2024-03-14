@@ -52,7 +52,6 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import net.primal.android.R
 import net.primal.android.auth.compose.DefaultOnboardingAvatar
-import net.primal.android.auth.compose.ONE_HALF
 import net.primal.android.auth.compose.OnboardingBottomBar
 import net.primal.android.auth.compose.defaultOnboardingAvatarBackground
 import net.primal.android.auth.compose.onboardingTextHintTypography
@@ -98,7 +97,7 @@ fun OnboardingProfileDetailsScreen(
                 ProfileDetailsAvatarColumn(
                     modifier = Modifier
                         .fillMaxSize()
-                        .weight(ONE_HALF),
+                        .weight(weight = 0.5f),
                     avatarUri = state.avatarUri,
                     onAvatarUriChanged = {
                         eventPublisher(OnboardingContract.UiEvent.ProfileAvatarUriChanged(it))
@@ -107,7 +106,7 @@ fun OnboardingProfileDetailsScreen(
                 ProfileDetailsFormColumn(
                     modifier = Modifier
                         .fillMaxSize()
-                        .weight(ONE_HALF),
+                        .weight(weight = 0.5f),
                     displayName = state.profileDisplayName,
                     onDisplayNameChanged = {
                         eventPublisher(OnboardingContract.UiEvent.ProfileDisplayNameUpdated(it))

@@ -8,26 +8,6 @@ data class Regions(
     val states: List<List<String>>,
 )
 
-fun Regions.toListOfCountries(): List<Country> {
-    return countries.map { country ->
-        val countryName = country[0]
-        val countryCode = country[1]
-        Country(
-            name = countryName,
-            code = countryCode,
-            states = states.mapNotNull { state ->
-                val stateName = state[0]
-                val stateCode = state[1]
-                if (stateCode.startsWith(countryCode)) {
-                    State(name = stateName, code = stateCode)
-                } else {
-                    null
-                }
-            },
-        )
-    }
-}
-
 sealed class Region(
     open val name: String,
     open val code: String,

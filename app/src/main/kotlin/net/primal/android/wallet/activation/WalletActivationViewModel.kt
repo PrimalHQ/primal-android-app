@@ -1,5 +1,6 @@
 package net.primal.android.wallet.activation
 
+import android.util.Patterns
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -14,6 +15,7 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
+import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
@@ -22,6 +24,13 @@ import net.primal.android.user.domain.WalletPreference
 import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.activation.WalletActivationContract.UiEvent
 import net.primal.android.wallet.activation.WalletActivationContract.UiState
+import net.primal.android.wallet.activation.domain.WalletActivationData
+import net.primal.android.wallet.activation.domain.WalletActivationStatus
+import net.primal.android.wallet.activation.regions.Country
+import net.primal.android.wallet.activation.regions.Region
+import net.primal.android.wallet.activation.regions.Regions
+import net.primal.android.wallet.activation.regions.State
+import net.primal.android.wallet.activation.regions.WalletRegionJson
 import net.primal.android.wallet.api.model.GetActivationCodeRequestBody
 import net.primal.android.wallet.api.model.WalletActivationDetails
 import net.primal.android.wallet.repository.WalletRepository
@@ -44,23 +53,72 @@ class WalletActivationViewModel @Inject constructor(
 
     init {
         subscribeToEvents()
+        loadAllCountries()
     }
 
     private fun subscribeToEvents() =
         viewModelScope.launch {
             events.collect {
                 when (it) {
-                    is UiEvent.ActivationDataChanged -> setState { copy(data = it.data, error = null) }
-                    is UiEvent.Activate -> onActivateWallet(code = it.code)
-                    is UiEvent.ActivationRequest -> onActivationRequest(data = it.data)
+                    is UiEvent.ActivationDataChanged -> {
+                        val availableStates = it.data.country.mapToAvailableStates()
+                        setState {
+                            copy(
+                                data = it.data,
+                                isDataValid = it.data.isValid(availableStates),
+                                availableStates = availableStates,
+                                error = null,
+                            )
+                        }
+                    }
+
+                    is UiEvent.OtpCodeChanged -> setState { copy(otpCode = it.code, error = null) }
+                    is UiEvent.Activate -> onActivateWallet(code = _uiState.value.otpCode)
+                    is UiEvent.ActivationRequest -> onActivationRequest()
                     UiEvent.ClearErrorMessage -> setState { copy(error = null) }
                     UiEvent.RequestBackToDataInput -> setState { copy(status = WalletActivationStatus.PendingData) }
                 }
             }
         }
 
-    private fun onActivationRequest(data: WalletActivationData) =
+    private fun loadAllCountries() =
         viewModelScope.launch {
+            val allCountries = NostrJson.decodeFromString<Regions>(WalletRegionJson).mapToListOfCountries()
+            setState { copy(allCountries = allCountries) }
+        }
+
+    private fun Regions.mapToListOfCountries(): List<Country> {
+        return countries.map { country ->
+            val countryName = country[0]
+            val countryCode = country[1]
+            Country(
+                name = countryName,
+                code = countryCode,
+                states = states.mapNotNull { state ->
+                    val stateName = state[0]
+                    val stateCode = state[1]
+                    if (stateCode.startsWith(countryCode)) {
+                        State(name = stateName, code = stateCode)
+                    } else {
+                        null
+                    }
+                },
+            )
+        }
+    }
+
+    private fun Region?.mapToAvailableStates(): List<State> {
+        return _uiState.value.allCountries.find { it.code == this?.code }?.states ?: emptyList()
+    }
+
+    private fun WalletActivationData.isValid(availableStates: List<State>): Boolean {
+        return firstName.isNotBlank() && lastName.isNotBlank() && Patterns.EMAIL_ADDRESS.matcher(email).matches() &&
+            dateOfBirth != null && country != null && (availableStates.isEmpty() || state != null)
+    }
+
+    private fun onActivationRequest() =
+        viewModelScope.launch {
+            val data = _uiState.value.data
             setState { copy(working = true) }
             try {
                 val userId = activeAccountStore.activeUserId()

@@ -53,7 +53,6 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import net.primal.android.R
 import net.primal.android.auth.compose.ColumnWithBackground
-import net.primal.android.auth.compose.ONE_HALF
 import net.primal.android.auth.compose.OnboardingBottomBar
 import net.primal.android.auth.compose.onboardingTextHintTypography
 import net.primal.android.auth.onboarding.account.OnboardingContract
@@ -213,7 +212,7 @@ private fun ProfileAccountPreviewContent(
         modifier = modifier,
     ) {
         Column(
-            modifier = Modifier.weight(ONE_HALF),
+            modifier = Modifier.weight(weight = 0.5f),
             verticalArrangement = Arrangement.Bottom,
         ) {
             ProfilePreviewBox(
@@ -235,7 +234,7 @@ private fun ProfileAccountPreviewContent(
         }
 
         Column(
-            modifier = Modifier.weight(ONE_HALF),
+            modifier = Modifier.weight(weight = 0.5f),
             verticalArrangement = Arrangement.Center,
         ) {
             Text(
@@ -431,7 +430,7 @@ private fun ProfileAccountCreatedContent(modifier: Modifier = Modifier, state: O
         modifier = modifier,
     ) {
         Column(
-            modifier = Modifier.weight(ONE_HALF),
+            modifier = Modifier.weight(weight = 0.5f),
             verticalArrangement = Arrangement.Bottom,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
@@ -444,7 +443,7 @@ private fun ProfileAccountCreatedContent(modifier: Modifier = Modifier, state: O
         }
 
         Column(
-            modifier = Modifier.weight(ONE_HALF),
+            modifier = Modifier.weight(weight = 0.5f),
             verticalArrangement = Arrangement.Center,
         ) {
             Text(
