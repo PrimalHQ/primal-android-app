@@ -37,7 +37,16 @@ class AppearanceSettingsViewModel @Inject constructor(
 
     private fun initThemes() =
         viewModelScope.launch {
-            setState { copy(themes = PrimalTheme.values().toList()) }
+            setState {
+                copy(
+                    themes = listOf(
+                        PrimalTheme.Sunset,
+                        PrimalTheme.Midnight,
+                        PrimalTheme.Sunrise,
+                        PrimalTheme.Ice,
+                    ),
+                )
+            }
         }
 
     private fun observeActiveThemeStore() =
