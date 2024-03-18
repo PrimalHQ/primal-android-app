@@ -74,7 +74,8 @@ fun OnboardingProfilePreviewScreen(
     onOnboarded: () -> Unit,
     onActivateWallet: () -> Unit,
 ) {
-    BackHandler(enabled = state.userId != null) {}
+    val canGoBack = state.userId == null && !state.working
+    BackHandler(enabled = !canGoBack) {}
 
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
@@ -104,7 +105,7 @@ fun OnboardingProfilePreviewScreen(
                 title = state.resolveAppBarTitle(),
                 textColor = Color.White,
                 showDivider = false,
-                navigationIcon = if (state.userId == null) PrimalIcons.ArrowBack else null,
+                navigationIcon = if (canGoBack) PrimalIcons.ArrowBack else null,
                 navigationIconTintColor = Color.White,
                 onNavigationIconClick = onBack,
             )
@@ -220,6 +221,7 @@ private fun ProfileAccountPreviewContent(
                     .padding(horizontal = 32.dp)
                     .padding(bottom = 16.dp)
                     .fillMaxWidth(),
+                working = state.working,
                 bannerUri = state.bannerUri,
                 onBannerUriChanged = {
                     eventPublisher(OnboardingContract.UiEvent.ProfileBannerUriChanged(it))
@@ -252,6 +254,7 @@ private fun ProfileAccountPreviewContent(
 @Composable
 private fun ProfilePreviewBox(
     modifier: Modifier = Modifier,
+    working: Boolean,
     bannerUri: Uri?,
     onBannerUriChanged: (Uri?) -> Unit,
     avatarUri: Uri?,
@@ -269,9 +272,13 @@ private fun ProfilePreviewBox(
         onBannerUriChanged(uri)
     }
 
+    fun pickBanner() = bannerPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+
     val avatarPicker = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
         onAvatarUriChanged(uri)
     }
+
+    fun pickAvatar() = avatarPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
 
     Box(
         modifier = modifier.background(color = Color.White, shape = shape),
@@ -280,9 +287,7 @@ private fun ProfilePreviewBox(
             BannerBox(
                 modifier = Modifier
                     .height(bannerHeight)
-                    .clickable {
-                        bannerPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-                    },
+                    .clickable(enabled = !working, onClick = { pickBanner() }),
                 shape = bannerShape,
                 bannerUri = bannerUri,
             )
@@ -294,9 +299,7 @@ private fun ProfilePreviewBox(
                 horizontalArrangement = Arrangement.End,
             ) {
                 Text(
-                    modifier = Modifier.clickable {
-                        bannerPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-                    },
+                    modifier = Modifier.clickable(enabled = !working, onClick = { pickBanner() }),
                     text = stringResource(id = R.string.onboarding_profile_preview_change_banner).lowercase(),
                     style = AppTheme.typography.bodyMedium,
                     fontWeight = FontWeight.SemiBold,
@@ -335,9 +338,8 @@ private fun ProfilePreviewBox(
             modifier = Modifier
                 .padding(start = 16.dp, top = bannerHeight - avatarSize * 2 / 5)
                 .size(size = avatarSize)
-                .clickable {
-                    avatarPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-                },
+                .clip(CircleShape)
+                .clickable(enabled = !working, onClick = { pickAvatar() }),
             avatarUri = avatarUri,
         )
     }
@@ -356,9 +358,9 @@ private fun PreviewAvatarBox(modifier: Modifier = Modifier, avatarUri: Uri?) {
             when (it) {
                 null -> {
                     Icon(
+                        modifier = Modifier.fillMaxSize(),
                         imageVector = PrimalIcons.AvatarDefault,
                         contentDescription = null,
-                        modifier = Modifier.fillMaxSize(),
                     )
                 }
 
