@@ -67,8 +67,8 @@ import net.primal.android.notifications.list.NotificationsViewModel
 import net.primal.android.profile.details.ProfileDetailsScreen
 import net.primal.android.profile.details.ProfileDetailsViewModel
 import net.primal.android.profile.domain.ProfileFollowsType
-import net.primal.android.profile.edit.EditProfileScreen
 import net.primal.android.profile.edit.EditProfileViewModel
+import net.primal.android.profile.edit.ui.EditProfileScreen
 import net.primal.android.profile.follows.ProfileFollowsScreen
 import net.primal.android.profile.follows.ProfileFollowsViewModel
 import net.primal.android.theme.AppTheme

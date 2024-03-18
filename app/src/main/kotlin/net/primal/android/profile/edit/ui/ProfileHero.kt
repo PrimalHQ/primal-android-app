@@ -1,4 +1,4 @@
-package net.primal.android.core.compose.profile
+package net.primal.android.profile.edit.ui
 
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -44,65 +44,22 @@ fun ProfileHero(
     onBannerUriChange: (Uri?) -> Unit,
     onAvatarUriChange: (Uri?) -> Unit,
 ) {
-    val avatarPickMedia =
-        rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-            onAvatarUriChange(uri)
-        }
-    val bannerPickMedia =
-        rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-            onBannerUriChange(uri)
-        }
-
     Box(
         modifier = Modifier
             .fillMaxSize()
             .height(179.dp),
     ) {
-        if (bannerUri != null) {
-            val model = ImageRequest.Builder(LocalContext.current).data(bannerUri).build()
-            AsyncImage(
-                model = model,
-                contentDescription = null,
-                contentScale = ContentScale.FillWidth,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(124.dp),
-            )
-        } else {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(124.dp)
-                    .background(
-                        color = AppTheme.extraColorScheme.surfaceVariantAlt3,
-                    ),
-            )
-        }
+        BannerBox(bannerUri = bannerUri)
 
-        Box(
+        AvatarBox(
             modifier = Modifier
                 .padding(horizontal = 16.dp)
                 .size(size = 108.dp)
                 .clip(shape = CircleShape)
                 .background(color = Color.Black)
                 .align(Alignment.BottomStart),
-        ) {
-            if (avatarUri != null) {
-                val model = ImageRequest.Builder(LocalContext.current).data(avatarUri).build()
-
-                AsyncImage(
-                    model = model,
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                )
-            } else {
-                Image(
-                    painter = painterResource(id = R.drawable.default_avatar),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                )
-            }
-        }
+            avatarUri = avatarUri,
+        )
 
         Row(
             modifier = Modifier
@@ -114,10 +71,21 @@ fun ProfileHero(
             horizontalArrangement = Arrangement.End,
             verticalAlignment = Alignment.CenterVertically,
         ) {
+            val avatarPickMedia =
+                rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+                    onAvatarUriChange(uri)
+                }
+            val bannerPickMedia =
+                rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+                    onBannerUriChange(uri)
+                }
+
             Text(
-                text = stringResource(
-                    id = if (avatarUri != null) R.string.create_change_avatar else R.string.create_set_avatar,
-                ),
+                text = if (avatarUri != null) {
+                    stringResource(id = R.string.profile_editor_change_avatar)
+                } else {
+                    stringResource(id = R.string.profile_editor_set_avatar)
+                },
                 fontSize = 16.sp,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.clickable {
@@ -135,9 +103,11 @@ fun ProfileHero(
             )
             Spacer(modifier = Modifier.width(6.dp))
             Text(
-                text = stringResource(
-                    id = if (bannerUri != null) R.string.create_change_banner else R.string.create_set_banner,
-                ),
+                text = if (bannerUri != null) {
+                    stringResource(id = R.string.profile_editor_change_banner)
+                } else {
+                    stringResource(id = R.string.profile_editor_set_banner)
+                },
                 fontSize = 16.sp,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.clickable {
@@ -148,5 +118,50 @@ fun ProfileHero(
                 color = AppTheme.colorScheme.secondary,
             )
         }
+    }
+}
+
+@Composable
+private fun AvatarBox(modifier: Modifier, avatarUri: Uri?) {
+    Box(modifier = modifier) {
+        if (avatarUri != null) {
+            val model = ImageRequest.Builder(LocalContext.current).data(avatarUri).build()
+
+            AsyncImage(
+                model = model,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+            )
+        } else {
+            Image(
+                painter = painterResource(id = R.drawable.default_avatar),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+            )
+        }
+    }
+}
+
+@Composable
+private fun BannerBox(bannerUri: Uri?) {
+    if (bannerUri != null) {
+        val model = ImageRequest.Builder(LocalContext.current).data(bannerUri).build()
+        AsyncImage(
+            model = model,
+            contentDescription = null,
+            contentScale = ContentScale.FillWidth,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(124.dp),
+        )
+    } else {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(124.dp)
+                .background(
+                    color = AppTheme.extraColorScheme.surfaceVariantAlt3,
+                ),
+        )
     }
 }

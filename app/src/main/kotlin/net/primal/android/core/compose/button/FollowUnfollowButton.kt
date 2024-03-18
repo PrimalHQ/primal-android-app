@@ -35,9 +35,9 @@ fun FollowUnfollowButton(
         onClick = onClick,
     ) {
         val text = if (isFollowed) {
-            stringResource(id = R.string.create_recommended_unfollow)
+            stringResource(id = R.string.profile_unfollow)
         } else {
-            stringResource(id = R.string.create_recommended_follow)
+            stringResource(id = R.string.profile_follow)
         }
         Text(text = text.lowercase())
     }

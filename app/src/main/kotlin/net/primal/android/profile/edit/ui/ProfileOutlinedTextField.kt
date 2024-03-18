@@ -1,4 +1,4 @@
-package net.primal.android.core.compose.profile
+package net.primal.android.profile.edit.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -70,7 +70,7 @@ fun PrimalOutlinedTextField(
                             ),
                         ) {
                             append(" ")
-                            append(stringResource(id = R.string.create_account_required_hint))
+                            append(stringResource(id = R.string.profile_editor_required_field_hint))
                         }
                     },
                 )

@@ -24,33 +24,6 @@
     <string name="legal_tos_hint_highlighted_word">Terms of Service</string>
     <string name="legal_privacy_policy_hint_highlighted_word">Privacy Policy</string>
 
-    <string name="create_title_new_account">New Account</string>
-    <string name="create_title_profile_preview">Profile Preview</string>
-    <string name="create_title_nostr_account_created">Nostr Account Created</string>
-    <string name="create_title_people_to_follow">People to Follow</string>
-    <string name="create_set_banner">set banner</string>
-    <string name="create_change_banner">change banner</string>
-    <string name="create_set_avatar">set avatar</string>
-    <string name="create_change_avatar">change avatar</string>
-    <string name="create_action_next">Next</string>
-    <string name="create_action_create_nostr_account">Create Nostr Account</string>
-    <string name="create_action_find_people_to_follow">Find people to follow</string>
-    <string name="create_action_finish">Finish</string>
-    <string name="create_success_subtitle">Your Nostr account has been created!</string>
-    <string name="create_finish_subtitle">Your Nostr key is safely stored on your phone. You can access it in app settings.</string>
-    <string name="create_recommended_follow">Follow</string>
-    <string name="create_recommended_unfollow">Unfollow</string>
-    <string name="create_recommended_follow_all">Follow all</string>
-    <string name="create_recommended_unfollow_all">Unfollow all</string>
-    <string name="create_subtitle_profile_preview">We will use this info to create your Nostr account. If you wish to make any changes, you can always do so in your profile settings.</string>
-    <string name="create_input_header_display_name">Display name</string>
-    <string name="create_input_header_handle">Username</string>
-    <string name="create_input_header_website">Website</string>
-    <string name="create_input_header_about_me">About me</string>
-    <string name="create_input_header_bitcoin_lightning_address">Bitcoin lightning address</string>
-    <string name="create_input_header_nip_05">Verified Nostr address (NIP 05)</string>
-    <string name="create_account_required_hint">required</string>
-    
     <string name="onboarding_title_create_account">Create Account</string>
     <string name="onboarding_title_your_interests">Your Interests</string>
     <string name="onboarding_title_account_preview">Account Preview</string>
@@ -360,6 +333,21 @@
     <string name="profile_context_remove_user_feed">Remove user feed</string>
     <string name="profile_user_feed_title">%1$s\'s feed</string>
     <string name="profile_user_is_muted">%1$s is muted.</string>
+
+    <string name="profile_follow">Follow</string>
+    <string name="profile_unfollow">Unfollow</string>
+
+    <string name="profile_editor_set_banner">set banner</string>
+    <string name="profile_editor_change_banner">change banner</string>
+    <string name="profile_editor_set_avatar">set avatar</string>
+    <string name="profile_editor_change_avatar">change avatar</string>
+    <string name="profile_editor_input_header_display_name">Display name</string>
+    <string name="profile_editor_input_header_handle">Username</string>
+    <string name="profile_editor_input_header_website">Website</string>
+    <string name="profile_editor_input_header_about_me">About me</string>
+    <string name="profile_editor_input_header_bitcoin_lightning_address">Bitcoin lightning address</string>
+    <string name="profile_editor_input_header_nip_05">Verified Nostr address (NIP 05)</string>
+    <string name="profile_editor_required_field_hint">required</string>
 
     <string name="profile_followers_title">%1$s\'s followers</string>
     <string name="profile_following_title">%1$s\'s following</string>

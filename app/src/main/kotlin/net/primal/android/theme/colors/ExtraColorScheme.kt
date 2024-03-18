@@ -16,6 +16,7 @@ fun ExtraColorSchemeProvider(extraColorScheme: ExtraColorScheme, content: @Compo
 }
 
 @Stable
+@SuppressWarnings("LongParameterList")
 class ExtraColorScheme(
     onBrand: Color,
     surfaceVariantAlt1: Color,
@@ -114,6 +115,7 @@ class ExtraColorScheme(
         )
 }
 
+@SuppressWarnings("LongParameterList")
 fun extraColorScheme(
     onBrand: Color,
     surfaceVariantAlt1: Color,
