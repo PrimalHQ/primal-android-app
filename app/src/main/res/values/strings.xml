@@ -388,11 +388,12 @@
 
     <string name="wallet_tos_prefix">By tapping \"Next\" you agree to the</string>
     <string name="wallet_activation_title">Activate Wallet</string>
-    <string name="wallet_activation_pending_data_hint">Activating your wallet is easy!\nWe just need a few details below:</string>
+    <string name="wallet_activation_pending_data_hint">Activating your wallet is easy!\nWe just need a few details below. This info will not be shared publicly.</string>
     <string name="wallet_activation_pending_code_subtitle">Check Your Email</string>
     <string name="wallet_activation_pending_code_hint">Your activation code was sent to <b>%1$s</b>. You may need to check your Junk or Spam folder.</string>
     <string name="wallet_activation_error_invalid_code">Incorrect code. Please try again.</string>
     <string name="wallet_activation_success_title">Success</string>
+    <string name="wallet_activation_success_description_short">Your wallet has been activated.</string>
     <string name="wallet_activation_success_description">Your wallet has been activated. Your new Nostr lightning address is:</string>
     <string name="wallet_activation_first_name">First name</string>
     <string name="wallet_activation_last_name">Last name</string>

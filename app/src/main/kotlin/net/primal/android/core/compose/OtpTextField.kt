@@ -2,8 +2,10 @@ package net.primal.android.core.compose
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -12,6 +14,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
@@ -52,7 +55,11 @@ fun OtpTextField(
             },
         ),
         decorationBox = {
-            Row(horizontalArrangement = Arrangement.Center) {
+            Row(
+                modifier = Modifier.height(56.dp),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
                 repeat(otpCount) {
                     CharText(index = it, text = otpText)
                     Spacer(modifier = Modifier.width(8.dp))
@@ -69,18 +76,22 @@ private fun CharText(index: Int, text: String) {
         index > text.length -> ""
         else -> text[index].toString()
     }
-    Text(
+    Box(
         modifier = Modifier
             .width(44.dp)
-            .height(56.dp)
+            .fillMaxHeight()
             .background(
                 color = AppTheme.extraColorScheme.surfaceVariantAlt1,
                 shape = AppTheme.shapes.large,
             )
             .padding(horizontal = 2.dp)
             .padding(top = 8.dp),
-        text = char,
-        style = AppTheme.typography.headlineLarge,
-        textAlign = TextAlign.Center,
-    )
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = char,
+            style = AppTheme.typography.headlineLarge,
+            textAlign = TextAlign.Center,
+        )
+    }
 }

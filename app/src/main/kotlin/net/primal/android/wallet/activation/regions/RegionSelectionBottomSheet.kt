@@ -3,11 +3,14 @@ package net.primal.android.wallet.activation.regions
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
@@ -17,7 +20,8 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import net.primal.android.theme.AppTheme
@@ -30,15 +34,24 @@ fun RegionSelectionBottomSheet(
     onRegionClick: (Region) -> Unit,
     onDismissRequest: () -> Unit,
     skipPartiallyExpanded: Boolean = true,
+    scrimColor: Color = BottomSheetDefaults.ScrimColor,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = skipPartiallyExpanded)
 
     ModalBottomSheet(
+        modifier = Modifier.padding(top = 32.dp),
         containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
         tonalElevation = 0.dp,
-        shape = RectangleShape,
+        shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp, bottomStart = 0.dp, bottomEnd = 0.dp),
         onDismissRequest = onDismissRequest,
         sheetState = sheetState,
+        scrimColor = scrimColor,
+        windowInsets = WindowInsets(
+            left = 0,
+            top = BottomSheetDefaults.windowInsets.getTop(LocalDensity.current),
+            right = 0,
+            bottom = 0,
+        ),
     ) {
         Surface(
             color = AppTheme.extraColorScheme.surfaceVariantAlt2,

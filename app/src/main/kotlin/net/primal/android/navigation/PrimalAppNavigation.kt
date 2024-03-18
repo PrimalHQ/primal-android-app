@@ -516,7 +516,7 @@ private fun NavGraphBuilder.onboardingWalletActivation(route: String, navControl
     ) {
         val viewModel = hiltViewModel<WalletActivationViewModel>()
         PrimalTheme(PrimalTheme.Sunset) {
-            ApplyEdgeToEdge()
+            ApplyEdgeToEdge(isDarkTheme = true)
             OnboardingWalletActivation(
                 viewModel = viewModel,
                 onDoneOrDismiss = { navController.navigateToFeed() },

@@ -3,6 +3,8 @@ package net.primal.android.wallet.activation.ui
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Spring.StiffnessHigh
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.interaction.Interaction
@@ -12,12 +14,14 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SelectableDates
@@ -25,6 +29,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,12 +37,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import java.time.Duration
 import java.time.Instant
@@ -45,12 +52,15 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import net.primal.android.LocalPrimalTheme
 import net.primal.android.R
 import net.primal.android.core.compose.DatePickerModalBottomSheet
 import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.WalletPrimalActivation
 import net.primal.android.theme.AppTheme
+import net.primal.android.theme.PrimalTheme
+import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.wallet.activation.domain.WalletActivationData
 import net.primal.android.wallet.activation.regions.Country
 import net.primal.android.wallet.activation.regions.RegionSelectionBottomSheet
@@ -66,38 +76,49 @@ fun WalletActivationForm(
     data: WalletActivationData,
     onDataChange: (WalletActivationData) -> Unit,
     colors: TextFieldColors = PrimalDefaults.outlinedTextFieldColors(),
+    bottomSheetTheme: PrimalTheme = LocalPrimalTheme.current,
+    bottomSheetScrimColor: Color = BottomSheetDefaults.ScrimColor,
 ) {
     var datePickerVisible by remember { mutableStateOf(false) }
     if (datePickerVisible) {
-        WalletDatePicker(
-            value = data.dateOfBirth,
-            onValueChange = { onDataChange(data.copy(dateOfBirth = it)) },
-            onDismiss = { datePickerVisible = false },
-        )
+        PrimalTheme(primalTheme = bottomSheetTheme) {
+            WalletDatePicker(
+                value = data.dateOfBirth,
+                onValueChange = { onDataChange(data.copy(dateOfBirth = it)) },
+                onDismiss = { datePickerVisible = false },
+                scrimColor = bottomSheetScrimColor,
+            )
+        }
     }
 
     var countrySelectionVisible by remember { mutableStateOf(false) }
     if (countrySelectionVisible) {
-        RegionSelectionBottomSheet(
-            regions = allCountries,
-            title = stringResource(id = R.string.wallet_activation_country_picker_title),
-            onRegionClick = {
-                onDataChange(data.copy(country = it))
-            },
-            onDismissRequest = { countrySelectionVisible = false },
-        )
+        PrimalTheme(primalTheme = bottomSheetTheme) {
+            RegionSelectionBottomSheet(
+                regions = allCountries,
+                title = stringResource(id = R.string.wallet_activation_country_picker_title),
+                onRegionClick = {
+                    onDataChange(data.copy(country = it))
+                },
+                onDismissRequest = { countrySelectionVisible = false },
+                scrimColor = bottomSheetScrimColor,
+            )
+        }
     }
 
     var stateSelectionVisible by remember { mutableStateOf(false) }
     if (stateSelectionVisible) {
-        RegionSelectionBottomSheet(
-            regions = allCountries.find { it.code == data.country?.code }?.states ?: emptyList(),
-            title = stringResource(id = R.string.wallet_activation_state_picker_title),
-            onRegionClick = {
-                onDataChange(data.copy(state = it))
-            },
-            onDismissRequest = { stateSelectionVisible = false },
-        )
+        PrimalTheme(primalTheme = bottomSheetTheme) {
+            RegionSelectionBottomSheet(
+                regions = allCountries.find { it.code == data.country?.code }?.states ?: emptyList(),
+                title = stringResource(id = R.string.wallet_activation_state_picker_title),
+                onRegionClick = {
+                    onDataChange(data.copy(state = it))
+                },
+                onDismissRequest = { stateSelectionVisible = false },
+                scrimColor = bottomSheetScrimColor,
+            )
+        }
     }
 
     Column(
@@ -245,7 +266,7 @@ private fun WalletActivationFormHeader(iconVisible: Boolean = true, textVisible:
     ) {
         AnimatedVisibility(
             visible = iconVisible,
-            enter = slideInVertically(initialOffsetY = { -it }),
+            enter = slideInVertically(initialOffsetY = { -it }, animationSpec = spring(stiffness = StiffnessHigh)),
             exit = ExitTransition.None,
         ) {
             Image(
@@ -260,7 +281,7 @@ private fun WalletActivationFormHeader(iconVisible: Boolean = true, textVisible:
             Text(
                 modifier = Modifier
                     .fillMaxWidth(fraction = 0.8f)
-                    .padding(bottom = 32.dp, top = if (iconVisible) 32.dp else 0.dp),
+                    .padding(bottom = 32.dp, top = 16.dp),
                 text = stringResource(id = R.string.wallet_activation_pending_data_hint),
                 textAlign = TextAlign.Center,
                 color = AppTheme.colorScheme.onSurface,
@@ -282,6 +303,7 @@ private fun WalletDatePicker(
     value: Long?,
     onValueChange: (Long?) -> Unit,
     onDismiss: () -> Unit,
+    scrimColor: Color = BottomSheetDefaults.ScrimColor,
 ) {
     val maxDate = Instant.now().minus(
         Duration.ofDays(MIN_AGE_FOR_WALLET * 365L) +
@@ -304,6 +326,7 @@ private fun WalletDatePicker(
     DatePickerModalBottomSheet(
         state = datePickerState,
         onDismissRequest = onDismiss,
+        scrimColor = scrimColor,
     )
 }
 
@@ -371,4 +394,24 @@ private fun WalletOutlinedTextField(
         },
         interactionSource = interactionSource,
     )
+}
+
+@ExperimentalMaterial3Api
+@Preview(showBackground = true)
+@Composable
+private fun PreviewWalletActivationForm() {
+    val primalTheme = PrimalTheme.Sunrise
+    PrimalTheme(primalTheme = primalTheme) {
+        CompositionLocalProvider(
+            LocalPrimalTheme provides primalTheme,
+        ) {
+            WalletActivationForm(
+                modifier = Modifier.fillMaxSize(),
+                allCountries = emptyList(),
+                availableStates = emptyList(),
+                data = WalletActivationData(),
+                onDataChange = {},
+            )
+        }
+    }
 }

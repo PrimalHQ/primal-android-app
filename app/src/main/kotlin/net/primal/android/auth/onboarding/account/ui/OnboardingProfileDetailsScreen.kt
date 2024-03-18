@@ -227,7 +227,7 @@ private fun ProfileDetailsFormColumn(
             ),
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         OnboardingOutlinedTextField(
             value = aboutYou,

@@ -15,12 +15,14 @@ fun ApplyEdgeToEdge(
     navigationBarColor: Color = Color.Transparent,
     isDarkTheme: Boolean = LocalPrimalTheme.current.isDarkTheme,
 ) {
-    val componentActivity = (LocalContext.current as ComponentActivity)
-    componentActivity.applyEdgeToEdge(
-        statusBarColor = statusBarColor,
-        navigationBarColor = navigationBarColor,
-        isDarkTheme = isDarkTheme,
-    )
+    val context = LocalContext.current
+    if (context is ComponentActivity) {
+        context.applyEdgeToEdge(
+            statusBarColor = statusBarColor,
+            navigationBarColor = navigationBarColor,
+            isDarkTheme = isDarkTheme,
+        )
+    }
 }
 
 fun ComponentActivity.applyEdgeToEdge(

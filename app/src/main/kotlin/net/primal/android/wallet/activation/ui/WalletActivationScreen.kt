@@ -4,24 +4,25 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
@@ -35,27 +36,28 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
-import androidx.core.text.isDigitsOnly
+import java.io.IOException
 import net.primal.android.LocalPrimalTheme
 import net.primal.android.R
 import net.primal.android.core.compose.ApplyEdgeToEdge
-import net.primal.android.core.compose.OtpTextField
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.ToSAndPrivacyPolicyText
 import net.primal.android.core.compose.applyEdgeToEdge
@@ -63,7 +65,6 @@ import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
-import net.primal.android.core.compose.icons.primaliconpack.WalletPrimalActivation
 import net.primal.android.core.compose.icons.primaliconpack.WalletSuccess
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
@@ -85,7 +86,7 @@ fun WalletActivationScreen(viewModel: WalletActivationViewModel, onClose: () -> 
     val uiState = viewModel.uiState.collectAsState()
 
     BackHandler(
-        enabled = uiState.value.status == WalletActivationStatus.PendingCodeConfirmation,
+        enabled = uiState.value.status == WalletActivationStatus.PendingOtpVerification,
     ) {
         viewModel.setEvent(UiEvent.RequestBackToDataInput)
     }
@@ -98,7 +99,7 @@ fun WalletActivationScreen(viewModel: WalletActivationViewModel, onClose: () -> 
         onClose = {
             keyboardController?.hide()
             when (uiState.value.status) {
-                WalletActivationStatus.PendingCodeConfirmation -> viewModel.setEvent(UiEvent.RequestBackToDataInput)
+                WalletActivationStatus.PendingOtpVerification -> viewModel.setEvent(UiEvent.RequestBackToDataInput)
                 else -> onClose()
             }
         },
@@ -183,7 +184,7 @@ private fun WalletActivationScreen(
                 },
                 success = {
                     WalletActivationSuccess(
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier.padding(paddingValues),
                         lightningAddress = state.activatedLightningAddress.orEmpty(),
                         onDone = onClose,
                     )
@@ -215,7 +216,7 @@ fun WalletActivationScreenContent(
         content = { status ->
             when (status) {
                 WalletActivationStatus.PendingData -> pendingDataContent()
-                WalletActivationStatus.PendingCodeConfirmation -> pendingOtpValidation()
+                WalletActivationStatus.PendingOtpVerification -> pendingOtpValidation()
                 WalletActivationStatus.ActivationSuccess -> success()
             }
         },
@@ -232,30 +233,50 @@ private fun StepContainerWithActionButton(
     actionButtonEnabled: Boolean,
     actionButtonLoading: Boolean = false,
     actionButtonVisible: Boolean = true,
+    actionButtonContainerColor: Color = AppTheme.colorScheme.primary,
+    actionButtonContentColor: Color = Color.White,
     tosAndPrivacyPolicyVisible: Boolean = false,
-    containerContent: @Composable ColumnScope.() -> Unit,
+    containerContent: @Composable () -> Unit,
 ) {
     Column(
-        modifier = modifier
-            .fillMaxSize()
-            .verticalScroll(state = rememberScrollState()),
-        verticalArrangement = Arrangement.SpaceEvenly,
+        modifier = modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        containerContent()
+        Box(
+            modifier = Modifier.weight(1.0f),
+            contentAlignment = Alignment.Center,
+        ) {
+            containerContent()
+        }
 
-        if (actionButtonVisible) {
-            PrimalLoadingButton(
-                modifier = Modifier.fillMaxWidth(fraction = 0.8f),
-                enabled = actionButtonEnabled && !actionButtonLoading,
-                loading = actionButtonLoading,
-                onClick = onActionClick,
-                text = actionButtonText,
-            )
+        AnimatedVisibility(
+            visible = actionButtonVisible,
+            label = "ActionButtonVisibilityAnimation",
+            enter = slideInVertically(
+                initialOffsetY = { it },
+                animationSpec = spring(stiffness = Spring.StiffnessHigh),
+            ),
+            exit = ExitTransition.None,
+        ) {
+            Column(
+                modifier = Modifier.padding(bottom = 16.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                PrimalLoadingButton(
+                    modifier = Modifier.fillMaxWidth(fraction = 0.8f),
+                    enabled = actionButtonEnabled && !actionButtonLoading,
+                    loading = actionButtonLoading,
+                    onClick = onActionClick,
+                    text = actionButtonText,
+                    containerColor = actionButtonContainerColor,
+                    contentColor = actionButtonContentColor,
+                )
 
-            if (tosAndPrivacyPolicyVisible) {
                 ToSAndPrivacyPolicyText(
                     modifier = Modifier
+                        .alpha(if (tosAndPrivacyPolicyVisible) 1.0f else 0.0f)
                         .widthIn(0.dp, 360.dp)
                         .fillMaxWidth()
                         .padding(horizontal = 32.dp)
@@ -289,18 +310,21 @@ private fun WalletActivationDataInput(
         onErrorDismiss = onErrorDismiss,
     )
 
+    val isKeyboardVisible by keyboardVisibilityAsState()
     StepContainerWithActionButton(
         modifier = modifier,
         actionButtonText = stringResource(id = R.string.wallet_activation_next_button),
         actionButtonEnabled = isDataValid,
         actionButtonLoading = working,
+        actionButtonVisible = !isKeyboardVisible,
         tosAndPrivacyPolicyVisible = true,
         onActionClick = onActivationCodeRequest,
     ) {
         WalletActivationForm(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.verticalScroll(state = rememberScrollState()),
             allCountries = allCountries,
             availableStates = availableStates,
+            isHeaderIconVisible = !isKeyboardVisible,
             data = data,
             onDataChange = onDataChange,
         )
@@ -336,98 +360,15 @@ fun WalletCodeActivationInput(
             code = code,
             onCodeChanged = onCodeChanged,
             onCodeConfirmed = onCodeConfirmed,
-            error = error,
-        )
-    }
-}
-
-@Composable
-fun WalletOtpVerification(
-    modifier: Modifier,
-    email: String,
-    code: String,
-    onCodeChanged: (String) -> Unit,
-    onCodeConfirmed: () -> Unit,
-    error: Throwable?,
-) {
-    val isKeyboardVisible by keyboardVisibilityAsState()
-    val keyboardController = LocalSoftwareKeyboardController.current
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        AnimatedVisibility(visible = !isKeyboardVisible) {
-            Image(
-                modifier = Modifier.padding(vertical = 16.dp),
-                imageVector = PrimalIcons.WalletPrimalActivation,
-                contentDescription = null,
-                colorFilter = ColorFilter.tint(color = AppTheme.colorScheme.onSurface),
-            )
-        }
-
-        Text(
-            modifier = Modifier
-                .fillMaxWidth(fraction = 0.8f)
-                .padding(top = 32.dp),
-            text = stringResource(id = R.string.wallet_activation_pending_code_subtitle),
-            textAlign = TextAlign.Center,
-            color = AppTheme.colorScheme.onSurface,
-            style = AppTheme.typography.titleLarge,
-        )
-
-        val textHint = stringResource(id = R.string.wallet_activation_pending_code_hint, email)
-        val textHintAnnotation = buildAnnotatedString {
-            append(textHint)
-            val startIndex = textHint.indexOf(email)
-            if (startIndex >= 0) {
-                val endIndex = startIndex + email.length
-                addStyle(
-                    style = SpanStyle(fontWeight = FontWeight.Bold),
-                    start = startIndex,
-                    end = endIndex,
+            errorContent = {
+                WalletErrorText(
+                    error = error,
+                    fallbackMessage = stringResource(id = R.string.wallet_activation_error_invalid_code),
                 )
-            }
-        }
-
-        Text(
-            modifier = Modifier
-                .fillMaxWidth(fraction = 0.8f)
-                .padding(top = 16.dp, bottom = 32.dp),
-            text = textHintAnnotation,
-            textAlign = TextAlign.Center,
-            color = AppTheme.colorScheme.onSurface,
-            style = AppTheme.typography.bodyMedium,
-        )
-
-        OtpTextField(
-            modifier = Modifier.fillMaxWidth(fraction = 0.8f),
-            otpText = code,
-            onOtpTextChange = {
-                if (it.isDigitsOnly()) {
-                    onCodeChanged(it.trim())
-                }
-            },
-            onCodeConfirmed = {
-                if (code.isOtpCodeValid()) {
-                    keyboardController?.hide()
-                    onCodeConfirmed()
-                }
             },
         )
-
-        WalletErrorText(
-            error = error,
-            fallbackMessage = stringResource(id = R.string.wallet_activation_error_invalid_code),
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
     }
 }
-
-private const val CODE_LENGTH = 6
-
-fun String.isOtpCodeValid() = this.isDigitsOnly() && this.length == CODE_LENGTH
 
 @Composable
 private fun WalletActivationSuccess(
@@ -441,31 +382,32 @@ private fun WalletActivationSuccess(
     val primalTheme = LocalPrimalTheme.current
     fun closingSequence() {
         onDone()
-        (context as ComponentActivity).applyEdgeToEdge(isDarkTheme = primalTheme.isDarkTheme)
+        if (context is ComponentActivity) {
+            context.applyEdgeToEdge(isDarkTheme = primalTheme.isDarkTheme)
+        }
     }
 
-    BackHandler {
-        closingSequence()
-    }
+    BackHandler { closingSequence() }
 
-    Column(
+    StepContainerWithActionButton(
         modifier = modifier
             .background(color = walletSuccessColor)
             .navigationBarsPadding(),
-        verticalArrangement = Arrangement.SpaceAround,
-        horizontalAlignment = Alignment.CenterHorizontally,
+        onActionClick = { closingSequence() },
+        actionButtonText = stringResource(id = R.string.wallet_activation_done_button),
+        actionButtonEnabled = true,
+        actionButtonContainerColor = walletSuccessDimColor,
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f)
                 .wrapContentHeight(),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Image(
                 modifier = Modifier
-                    .size(160.dp)
+                    .size(200.dp)
                     .padding(vertical = 16.dp),
                 imageVector = PrimalIcons.WalletSuccess,
                 contentDescription = null,
@@ -494,15 +436,6 @@ private fun WalletActivationSuccess(
                 ),
             )
         }
-
-        PrimalLoadingButton(
-            modifier = Modifier
-                .width(200.dp)
-                .padding(bottom = 32.dp),
-            text = stringResource(id = R.string.wallet_activation_done_button),
-            containerColor = walletSuccessDimColor,
-            onClick = { closingSequence() },
-        )
     }
 }
 
@@ -554,46 +487,55 @@ private fun WalletActivationErrorHandler(
     }
 }
 
-@ExperimentalComposeUiApi
-@Preview
-@Composable
-private fun PreviewWalletActivationDataInput() {
-    PrimalTheme(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
-        Surface {
-            WalletActivationDataInput(
+private class UiStateProvider : PreviewParameterProvider<WalletActivationContract.UiState> {
+    override val values: Sequence<WalletActivationContract.UiState>
+        get() = sequenceOf(
+            WalletActivationContract.UiState(
+                status = WalletActivationStatus.PendingData,
                 data = WalletActivationData(
                     firstName = "alex",
                     lastName = "alex",
                     email = "alex@primal.net",
                     country = Country(name = "Serbia", code = "RS", states = emptyList()),
                 ),
-                allCountries = emptyList(),
-                availableStates = emptyList(),
                 isDataValid = true,
-                working = false,
-                error = null,
-                onErrorDismiss = { },
-                onDataChange = { },
-                onActivationCodeRequest = { },
-            )
-        }
-    }
+            ),
+            WalletActivationContract.UiState(
+                status = WalletActivationStatus.PendingOtpVerification,
+                data = WalletActivationData(
+                    firstName = "alex",
+                    lastName = "alex",
+                    email = "alex@primal.net",
+                    country = Country(name = "Serbia", code = "RS", states = emptyList()),
+                ),
+                otpCode = "124",
+                error = IOException(),
+            ),
+            WalletActivationContract.UiState(
+                status = WalletActivationStatus.ActivationSuccess,
+            ),
+        )
 }
 
+@ExperimentalMaterial3Api
 @ExperimentalComposeUiApi
 @Preview
 @Composable
-private fun PreviewWalletCodeActivationInput() {
-    PrimalTheme(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
-        Surface {
-            WalletCodeActivationInput(
-                working = false,
-                error = null,
-                email = "alex@primal.net",
-                code = "124",
-                onCodeChanged = { },
-                onCodeConfirmed = { },
-            )
+private fun PreviewWalletActivationScreen(
+    @PreviewParameter(provider = UiStateProvider::class) uiState: WalletActivationContract.UiState,
+) {
+    val primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset
+    PrimalTheme(primalTheme = primalTheme) {
+        CompositionLocalProvider(
+            LocalPrimalTheme provides primalTheme,
+        ) {
+            Surface {
+                WalletActivationScreen(
+                    state = uiState,
+                    eventPublisher = {},
+                    onClose = {},
+                )
+            }
         }
     }
 }

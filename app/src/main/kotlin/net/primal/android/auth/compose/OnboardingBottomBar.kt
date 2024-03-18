@@ -23,7 +23,8 @@ fun OnboardingBottomBar(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 16.dp, horizontal = 32.dp),
+            .padding(horizontal = 32.dp)
+            .padding(top = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         OnboardingButton(

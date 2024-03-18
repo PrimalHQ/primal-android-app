@@ -137,7 +137,7 @@ class WalletActivationViewModel @Inject constructor(
                         ),
                     ),
                 )
-                setState { copy(status = WalletActivationStatus.PendingCodeConfirmation) }
+                setState { copy(status = WalletActivationStatus.PendingOtpVerification) }
             } catch (error: WssException) {
                 Timber.w(error)
                 setState { copy(error = error) }
