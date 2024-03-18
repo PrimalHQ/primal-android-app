@@ -60,7 +60,7 @@
     <string name="login_invalid_nsec_key">Please enter a valid Nostr key,\nstarting with “nsec”:</string>
 
     <string name="logout_title">Sign out</string>
-    <string name="logout_description">Do you really want to sign out?</string>
+    <string name="logout_description">If you didn\'t save your private key, it will be irretrievably lost. Do you really want to sign out?</string>
     <string name="logout_cancel_button">Cancel</string>
     <string name="logout_button">Sign out</string>
 
