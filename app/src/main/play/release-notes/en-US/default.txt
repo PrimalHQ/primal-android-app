@@ -1,4 +1,5 @@
 ## Changes
+- Wallet activation in onboarding;
 - New create account screen;
 - New welcome screen;
 - New login screen;
