@@ -1,6 +1,7 @@
 package net.primal.android.auth.login
 
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -103,6 +104,7 @@ fun LoginScreen(
     eventPublisher: (LoginContract.UiEvent) -> Unit,
     onClose: () -> Unit,
 ) {
+    BackHandler(enabled = state.loading) { }
     ColumnWithBackground(
         backgroundPainter = painterResource(id = R.drawable.onboarding_spot2),
     ) { size ->
@@ -118,10 +120,12 @@ fun LoginScreen(
                 Text(text = stringResource(id = R.string.login_title))
             },
             navigationIcon = {
-                AppBarIcon(
-                    icon = PrimalIcons.ArrowBack,
-                    onClick = onClose,
-                )
+                if (!state.loading) {
+                    AppBarIcon(
+                        icon = PrimalIcons.ArrowBack,
+                        onClick = onClose,
+                    )
+                }
             },
         )
 
