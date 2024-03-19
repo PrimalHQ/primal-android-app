@@ -114,10 +114,12 @@ class OnboardingViewModel @Inject constructor(
             try {
                 setState { copy(working = true) }
                 val uiState = state.value
-                val userId = createAccountHandler.createNostrAccount(
-                    profileMetadata = uiState.asProfileMetadata(),
-                    interests = uiState.suggestions,
-                )
+                val userId = withContext(dispatcherProvider.io()) {
+                    createAccountHandler.createNostrAccount(
+                        profileMetadata = uiState.asProfileMetadata(),
+                        interests = uiState.suggestions,
+                    )
+                }
                 setState { copy(userId = userId) }
             } catch (error: UnsuccessfulFileUpload) {
                 Timber.w(error)

@@ -16,9 +16,18 @@ class LoginHandler @Inject constructor(
 
     suspend fun loginAndReturnDefaultFeed(nostrKey: String): String {
         val userId = authRepository.login(nostrKey = nostrKey)
-        userRepository.fetchAndUpdateUserAccount(userId = userId)
-        settingsRepository.fetchAndPersistAppSettings(userId = userId)
-        mutedUserRepository.fetchAndPersistMuteList(userId = userId)
+        val postLoginResult = runCatching {
+            userRepository.fetchAndUpdateUserAccount(userId = userId)
+            settingsRepository.fetchAndPersistAppSettings(userId = userId)
+            mutedUserRepository.fetchAndPersistMuteList(userId = userId)
+        }
+
+        val exception = postLoginResult.exceptionOrNull()
+        if (exception != null) {
+            authRepository.logout()
+            throw exception
+        }
+
         val defaultFeed = feedRepository.defaultFeed()
         return defaultFeed?.directive ?: userId
     }

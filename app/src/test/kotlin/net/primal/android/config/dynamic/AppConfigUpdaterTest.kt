@@ -10,9 +10,10 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import net.primal.android.config.api.ApiConfigResponse
 import net.primal.android.config.api.WellKnownApi
+import net.primal.android.config.domain.DEFAULT_APP_CONFIG
 import net.primal.android.config.store.AppConfigDataStore
-import net.primal.android.config.store.FakeAppConfigStore
 import net.primal.android.core.coroutines.CoroutinesTestRule
+import net.primal.android.test.FakeDataStore
 import org.junit.Rule
 import org.junit.Test
 import retrofit2.Response
@@ -71,7 +72,7 @@ class AppConfigUpdaterTest {
             )
         }
 
-        val appConfigPersistence = FakeAppConfigStore()
+        val appConfigPersistence = FakeDataStore(initialValue = DEFAULT_APP_CONFIG)
 
         val appConfigUpdater = AppConfigUpdater(
             dispatcherProvider = coroutinesTestRule.dispatcherProvider,
@@ -85,8 +86,8 @@ class AppConfigUpdaterTest {
         appConfigUpdater.updateAppConfigOrFailSilently()
         advanceUntilIdle()
 
-        appConfigPersistence.latestAppConfig.cacheUrl shouldBe expectedTestCacheUrl
-        appConfigPersistence.latestAppConfig.uploadUrl shouldBe expectedTestUploadUrl
-        appConfigPersistence.latestAppConfig.walletUrl shouldBe expectedTestWalletUrl
+        appConfigPersistence.latestData.cacheUrl shouldBe expectedTestCacheUrl
+        appConfigPersistence.latestData.uploadUrl shouldBe expectedTestUploadUrl
+        appConfigPersistence.latestData.walletUrl shouldBe expectedTestWalletUrl
     }
 }

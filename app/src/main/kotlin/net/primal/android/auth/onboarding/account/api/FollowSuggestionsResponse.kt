@@ -1,5 +1,6 @@
 package net.primal.android.auth.onboarding.account.api
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import net.primal.android.nostr.model.NostrEvent
 
@@ -13,4 +14,7 @@ data class FollowSuggestionsResponse(
 data class Suggestion(val group: String, val members: List<SuggestionMember>)
 
 @Serializable
-data class SuggestionMember(val name: String, val pubkey: String)
+data class SuggestionMember(
+    val name: String,
+    @SerialName("pubkey") val userId: String,
+)
