@@ -11,11 +11,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import net.primal.android.R
 import net.primal.android.auth.compose.ColumnWithBackground
 import net.primal.android.auth.onboarding.account.OnboardingContract
 import net.primal.android.auth.onboarding.account.OnboardingStep
 import net.primal.android.auth.onboarding.account.OnboardingViewModel
+import net.primal.android.auth.onboarding.account.api.Suggestion
+import net.primal.android.theme.PrimalTheme
+import net.primal.android.theme.domain.PrimalTheme
 
 @Composable
 fun OnboardingScreen(
@@ -97,5 +103,58 @@ private fun OnboardingStep.backgroundPainter(): Painter {
         OnboardingStep.Details -> painterResource(id = R.drawable.onboarding_spot2)
         OnboardingStep.Interests -> painterResource(id = R.drawable.onboarding_spot3)
         OnboardingStep.Preview -> painterResource(id = R.drawable.onboarding_spot4)
+    }
+}
+
+private class UiStateProvider(
+    override val values: Sequence<OnboardingContract.UiState> = sequenceOf(
+        OnboardingContract.UiState(
+            currentStep = OnboardingStep.Details,
+        ),
+        OnboardingContract.UiState(
+            currentStep = OnboardingStep.Interests,
+            allSuggestions = listOf(
+                Suggestion(group = "art", members = emptyList()),
+                Suggestion(group = "bitcoin", members = emptyList()),
+                Suggestion(group = "memes", members = emptyList()),
+                Suggestion(group = "primal", members = emptyList()),
+                Suggestion(group = "android", members = emptyList()),
+                Suggestion(group = "nostr", members = emptyList()),
+                Suggestion(group = "developers", members = emptyList()),
+                Suggestion(group = "designers", members = emptyList()),
+                Suggestion(group = "human rights", members = emptyList()),
+            ),
+            suggestions = listOf(
+                Suggestion(group = "bitcoin", members = emptyList()),
+                Suggestion(group = "memes", members = emptyList()),
+            )
+        ),
+        OnboardingContract.UiState(
+            currentStep = OnboardingStep.Preview,
+            profileDisplayName = "Alex",
+            profileAboutYou = "Primal Lead Android Developer",
+        ),
+        OnboardingContract.UiState(
+            currentStep = OnboardingStep.Preview,
+            profileDisplayName = "Alex",
+            profileAboutYou = "Primal Lead Android Developer",
+            userId = "bc10",
+        ),
+    ),
+) : PreviewParameterProvider<OnboardingContract.UiState>
+
+@Preview
+@Composable
+private fun PreviewOnboarding(
+    @PreviewParameter(provider = UiStateProvider::class) uiState: OnboardingContract.UiState,
+) {
+    PrimalTheme(primalTheme = PrimalTheme.Sunset) {
+        OnboardingScreen(
+            state = uiState,
+            eventPublisher = {},
+            onBack = {},
+            onOnboarded = {},
+            onActivateWallet = {},
+        )
     }
 }
