@@ -5,7 +5,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -53,14 +52,21 @@ fun NoteMediaAttachmentsHorizontalPager(
         }
 
         if (imagesCount > 1) {
-            HorizontalPagerIndicator(
+            Box(
                 modifier = Modifier
-                    .height(32.dp)
-                    .fillMaxWidth()
-                    .align(Alignment.BottomCenter),
-                pagesCount = imagesCount,
-                currentPage = pagerState.currentPage,
-            )
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 8.dp)
+                    .background(color = Color.Black.copy(alpha = 0.21f), shape = AppTheme.shapes.large)
+                    .padding(horizontal = 8.dp),
+            ) {
+                HorizontalPagerIndicator(
+                    modifier = Modifier.padding(vertical = 4.dp),
+                    pagesCount = imagesCount,
+                    currentPage = pagerState.currentPage,
+                    predecessorsColor = Color.White,
+                    successorsColor = Color.White,
+                )
+            }
         }
     }
 }

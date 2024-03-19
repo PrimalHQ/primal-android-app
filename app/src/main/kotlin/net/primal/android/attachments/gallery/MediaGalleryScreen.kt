@@ -1,6 +1,7 @@
 package net.primal.android.attachments.gallery
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.os.Build
 import android.widget.Toast
@@ -9,13 +10,12 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerDefaults
 import androidx.compose.foundation.pager.PagerState
@@ -40,6 +40,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -93,6 +94,7 @@ fun MediaGalleryScreen(viewModel: MediaGalleryViewModel, onClose: () -> Unit) {
     )
 }
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun MediaGalleryScreen(
@@ -101,8 +103,7 @@ fun MediaGalleryScreen(
     eventPublisher: (MediaGalleryContract.UiEvent) -> Unit,
 ) {
     val imageAttachments = state.attachments
-    val imagesCount = imageAttachments.size
-    val pagerState = rememberPagerState { imagesCount }
+    val pagerState = rememberPagerState { imageAttachments.size }
 
     fun currentImage() = imageAttachments.getOrNull(pagerState.currentPage)
 
@@ -122,6 +123,8 @@ fun MediaGalleryScreen(
         onActionPerformed = { currentImage()?.let { eventPublisher(MediaGalleryContract.UiEvent.SaveMedia(it.url)) } },
     )
 
+    val containerColor = AppTheme.colorScheme.surface.copy(alpha = 0.21f)
+
     Scaffold(
         contentColor = AppTheme.colorScheme.background,
         topBar = {
@@ -135,8 +138,8 @@ fun MediaGalleryScreen(
                     )
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = AppTheme.colorScheme.surface.copy(alpha = 0.2f),
-                    scrolledContainerColor = AppTheme.colorScheme.surface.copy(alpha = 0.2f),
+                    containerColor = containerColor,
+                    scrolledContainerColor = containerColor,
                 ),
                 actions = {
                     GalleryDropdownMenu(
@@ -147,39 +150,57 @@ fun MediaGalleryScreen(
                 },
             )
         },
-        content = { paddingValues ->
-            Box(
-                modifier = Modifier
-                    .padding(paddingValues)
-                    .fillMaxSize()
-                    .systemBarsPadding(),
-                contentAlignment = Alignment.TopStart,
-            ) {
-                if (imageAttachments.isNotEmpty()) {
-                    AttachmentsHorizontalPager(
-                        modifier = Modifier.fillMaxSize(),
-                        imageAttachments = imageAttachments,
-                        pagerState = pagerState,
-                        initialIndex = state.initialAttachmentIndex,
-                    )
-                }
-
-                if (imagesCount > 1) {
-                    HorizontalPagerIndicator(
-                        modifier = Modifier
-                            .height(32.dp)
-                            .fillMaxWidth()
-                            .align(Alignment.BottomCenter),
-                        pagesCount = imagesCount,
-                        currentPage = pagerState.currentPage,
-                    )
-                }
-            }
+        content = {
+            MediaGalleryContent(
+                pagerState = pagerState,
+                initialAttachmentIndex = state.initialAttachmentIndex,
+                imageAttachments = imageAttachments,
+                pagerIndicatorContainerColor = containerColor,
+            )
         },
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState)
         },
     )
+}
+
+@ExperimentalFoundationApi
+@Composable
+private fun MediaGalleryContent(
+    pagerState: PagerState,
+    initialAttachmentIndex: Int,
+    imageAttachments: List<NoteAttachmentUi>,
+    pagerIndicatorContainerColor: Color,
+) {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.TopStart,
+    ) {
+        if (imageAttachments.isNotEmpty()) {
+            AttachmentsHorizontalPager(
+                modifier = Modifier.fillMaxSize(),
+                imageAttachments = imageAttachments,
+                pagerState = pagerState,
+                initialIndex = initialAttachmentIndex,
+            )
+        }
+
+        if (imageAttachments.size > 1) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 32.dp)
+                    .background(color = pagerIndicatorContainerColor, shape = AppTheme.shapes.large)
+                    .padding(horizontal = 16.dp),
+            ) {
+                HorizontalPagerIndicator(
+                    modifier = Modifier.height(32.dp),
+                    pagesCount = imageAttachments.size,
+                    currentPage = pagerState.currentPage,
+                )
+            }
+        }
+    }
 }
 
 @Composable
