@@ -21,31 +21,27 @@ import org.spongycastle.util.encoders.Hex
 
 object CryptoUtils {
 
-    data class Keypair(val privateKey: String, val pubKey: String)
-
     private val sha256: MessageDigest = MessageDigest.getInstance("SHA-256")
 
-    fun generateHexEncodedKeypair(): Keypair {
+    fun generateHexEncodedKeypair(): NostrKeyPair {
         val privateKeyByteArray = privateKeyCreate()
         val pubkeyByteArray = publicKeyCreate(privateKey = privateKeyByteArray)
-        return Keypair(privateKey = privateKeyByteArray.toHex(), pubKey = pubkeyByteArray.toHex())
+        return NostrKeyPair(
+            privateKey = privateKeyByteArray.toHex(),
+            pubKey = pubkeyByteArray.toHex(),
+        )
     }
 
-    fun privateKeyCreate(): ByteArray {
+    private fun privateKeyCreate(): ByteArray {
         val bytes = ByteArray(32)
         random.nextBytes(bytes)
         return bytes
     }
 
-    fun publicKeyCreate(privateKey: ByteArray) =
+    fun publicKeyCreate(privateKey: ByteArray): ByteArray =
         secp256k1.pubKeyCompress(secp256k1.pubkeyCreate(privateKey)).copyOfRange(1, 33)
 
-    fun sign(data: ByteArray, privateKey: ByteArray): ByteArray =
-        secp256k1.signSchnorr(
-            data,
-            privateKey,
-            null,
-        )
+    fun sign(data: ByteArray, privateKey: ByteArray): ByteArray = secp256k1.signSchnorr(data, privateKey, null)
 
     fun encrypt(
         msg: String,

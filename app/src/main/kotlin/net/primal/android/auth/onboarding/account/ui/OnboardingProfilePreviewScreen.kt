@@ -74,7 +74,7 @@ fun OnboardingProfilePreviewScreen(
     onOnboarded: () -> Unit,
     onActivateWallet: () -> Unit,
 ) {
-    val canGoBack = state.userId == null && !state.working
+    val canGoBack = !state.accountCreated && !state.working
     BackHandler(enabled = !canGoBack) {}
 
     val context = LocalContext.current
@@ -112,11 +112,11 @@ fun OnboardingProfilePreviewScreen(
         },
         content = { paddingValues ->
             AnimatedContent(
-                targetState = state.userId,
+                targetState = state.accountCreated,
                 label = "OnboardingProfilePreviewContent",
             ) {
                 when (it) {
-                    null -> {
+                    false -> {
                         ProfileAccountPreviewContent(
                             modifier = Modifier
                                 .fillMaxSize()
@@ -126,7 +126,7 @@ fun OnboardingProfilePreviewScreen(
                         )
                     }
 
-                    else -> {
+                    true -> {
                         ProfileAccountCreatedContent(
                             modifier = Modifier
                                 .fillMaxSize()
@@ -139,7 +139,7 @@ fun OnboardingProfilePreviewScreen(
         },
         bottomBar = {
             ProfilePreviewBottomBar(
-                isAccountCreated = state.userId != null,
+                isAccountCreated = state.accountCreated,
                 isWorking = state.working,
                 onWalletActivationClick = onActivateWallet,
                 onFinishOnboardingClick = onOnboarded,
@@ -196,7 +196,7 @@ private fun ProfilePreviewBottomBar(
 
 @Composable
 private fun OnboardingContract.UiState.resolveAppBarTitle(): String {
-    return if (userId != null) {
+    return if (accountCreated) {
         stringResource(id = R.string.onboarding_title_success)
     } else {
         stringResource(id = R.string.onboarding_title_account_preview)
@@ -588,7 +588,7 @@ private fun PreviewOnboardingProfileSuccessScreen() {
         ) {
             OnboardingProfilePreviewScreen(
                 state = OnboardingContract.UiState(
-                    userId = "b10a123",
+                    accountCreated = true,
                     avatarUri = null,
                     bannerUri = null,
                     profileDisplayName = "Preston",

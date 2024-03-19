@@ -18,8 +18,12 @@ class CreateAccountHandler @Inject constructor(
     private val settingsRepository: SettingsRepository,
 ) {
 
-    suspend fun createNostrAccount(profileMetadata: ProfileMetadata, interests: List<Suggestion>): String {
-        val userId = authRepository.createAccountAndLogin()
+    suspend fun createNostrAccount(
+        privateKey: String,
+        profileMetadata: ProfileMetadata,
+        interests: List<Suggestion>,
+    ) {
+        val userId = authRepository.login(nostrKey = privateKey)
 
         val postCreateAccountResult = runCatching {
             userRepository.setProfileMetadata(
@@ -40,8 +44,6 @@ class CreateAccountHandler @Inject constructor(
             Timber.w(exception)
             throw AccountCreationException(cause = exception)
         }
-
-        return userId
     }
 
     private fun List<Suggestion>.mapToContacts(): Set<String> {

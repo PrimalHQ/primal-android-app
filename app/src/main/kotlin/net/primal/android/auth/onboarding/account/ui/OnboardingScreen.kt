@@ -127,7 +127,7 @@ private class UiStateProvider(
             suggestions = listOf(
                 Suggestion(group = "bitcoin", members = emptyList()),
                 Suggestion(group = "memes", members = emptyList()),
-            )
+            ),
         ),
         OnboardingContract.UiState(
             currentStep = OnboardingStep.Preview,
@@ -138,7 +138,7 @@ private class UiStateProvider(
             currentStep = OnboardingStep.Preview,
             profileDisplayName = "Alex",
             profileAboutYou = "Primal Lead Android Developer",
-            userId = "bc10",
+            accountCreated = true,
         ),
     ),
 ) : PreviewParameterProvider<OnboardingContract.UiState>

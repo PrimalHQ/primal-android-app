@@ -18,6 +18,7 @@ import net.primal.android.auth.onboarding.account.api.OnboardingApi
 import net.primal.android.auth.repository.CreateAccountHandler
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.files.error.UnsuccessfulFileUpload
+import net.primal.android.crypto.CryptoUtils
 import net.primal.android.profile.domain.ProfileMetadata
 import timber.log.Timber
 
@@ -27,6 +28,8 @@ class OnboardingViewModel @Inject constructor(
     private val onboardingApi: OnboardingApi,
     private val createAccountHandler: CreateAccountHandler,
 ) : ViewModel() {
+
+    private val keyPair = CryptoUtils.generateHexEncodedKeypair()
 
     private val _state = MutableStateFlow(UiState())
     val state = _state.asStateFlow()
@@ -114,13 +117,14 @@ class OnboardingViewModel @Inject constructor(
             try {
                 setState { copy(working = true) }
                 val uiState = state.value
-                val userId = withContext(dispatcherProvider.io()) {
+                withContext(dispatcherProvider.io()) {
                     createAccountHandler.createNostrAccount(
+                        privateKey = keyPair.privateKey,
                         profileMetadata = uiState.asProfileMetadata(),
                         interests = uiState.suggestions,
                     )
                 }
-                setState { copy(userId = userId) }
+                setState { copy(accountCreated = true) }
             } catch (error: UnsuccessfulFileUpload) {
                 Timber.w(error)
                 setState { copy(error = UiState.OnboardingError.ImageUploadFailed(error)) }

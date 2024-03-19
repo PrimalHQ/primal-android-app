@@ -6,7 +6,7 @@ import javax.inject.Singleton
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
 import net.primal.android.crypto.CryptoUtils
-import net.primal.android.crypto.toNsec
+import net.primal.android.crypto.hexToNsecHrp
 
 @Singleton
 class PrimalDatabasePasswordProvider @Inject constructor(
@@ -24,8 +24,10 @@ class PrimalDatabasePasswordProvider @Inject constructor(
         }
 
     fun providePassword(): String {
-        return readPassword() ?: CryptoUtils.privateKeyCreate().toNsec().apply {
+        return readPassword() ?: generateRandomPassword().apply {
             updatePassword(this)
         }
     }
+
+    private fun generateRandomPassword() = CryptoUtils.generateHexEncodedKeypair().privateKey.hexToNsecHrp()
 }
