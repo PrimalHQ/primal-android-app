@@ -1,4 +1,8 @@
 ## Changes
+- Onboarding image uploading immediately;
+- Fixed media gallery; Improved dots visibility;
+- Disable going back on login and create account;
+- Revert auth data if login/create post operation fails;
 - Wallet activation in onboarding;
 - New create account screen;
 - New welcome screen;
