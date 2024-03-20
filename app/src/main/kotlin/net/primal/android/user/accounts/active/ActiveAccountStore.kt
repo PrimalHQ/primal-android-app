@@ -5,6 +5,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
@@ -30,9 +31,13 @@ class ActiveAccountStore @Inject constructor(
         initialValue = runBlocking { persistence.data.first() },
     )
 
-    val activeUserAccount = accountsStore.userAccounts.map { it.findActiveAccountOrEmpty() }
+    val activeUserAccount = accountsStore.userAccounts
+        .map { it.findActiveAccountOrEmpty() }
+        .distinctUntilChanged()
 
-    val activeAccountState = activeUserAccount.map { it.asActiveUserAccountState() }
+    val activeAccountState = activeUserAccount
+        .map { it.asActiveUserAccountState() }
+        .distinctUntilChanged()
 
     fun activeUserId() = activeUserId.value
 
