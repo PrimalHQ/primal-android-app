@@ -6,23 +6,30 @@ import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import net.primal.android.auth.onboarding.account.api.Suggestion
 import net.primal.android.auth.onboarding.account.api.SuggestionMember
+import net.primal.android.core.FakeDataStore
+import net.primal.android.core.coroutines.CoroutinesTestRule
 import net.primal.android.crypto.CryptoUtils
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.profile.domain.ProfileMetadata
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.settings.repository.SettingsRepository
-import net.primal.android.test.FakeDataStore
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.Credential
 import net.primal.android.user.repository.RelayRepository
 import net.primal.android.user.repository.UserRepository
+import org.junit.Rule
 import org.junit.Test
 
+@ExperimentalCoroutinesApi
 class CreateAccountHandlerTest {
+
+    @get:Rule
+    val coroutinesTestRule = CoroutinesTestRule()
 
     private fun createAccountHandler(
         authRepository: AuthRepository = mockk(relaxed = true),
@@ -196,6 +203,7 @@ class CreateAccountHandlerTest {
 
         val activeAccountPersistence = FakeDataStore(initialValue = "")
         val activeAccountStore = ActiveAccountStore(
+            dispatchers = coroutinesTestRule.dispatcherProvider,
             accountsStore = mockk(relaxed = true),
             persistence = activeAccountPersistence,
         )

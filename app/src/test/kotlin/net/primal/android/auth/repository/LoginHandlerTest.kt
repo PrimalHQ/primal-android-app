@@ -5,20 +5,27 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
+import net.primal.android.core.FakeDataStore
+import net.primal.android.core.coroutines.CoroutinesTestRule
 import net.primal.android.feed.db.Feed
 import net.primal.android.feed.repository.FeedRepository
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.settings.muted.repository.MutedUserRepository
 import net.primal.android.settings.repository.SettingsRepository
-import net.primal.android.test.FakeDataStore
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.Credential
 import net.primal.android.user.repository.UserRepository
+import org.junit.Rule
 import org.junit.Test
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class LoginHandlerTest {
+
+    @get:Rule
+    val coroutinesTestRule = CoroutinesTestRule()
 
     private fun createLoginHandler(
         settingsRepository: SettingsRepository = mockk(relaxed = true),
@@ -120,6 +127,7 @@ class LoginHandlerTest {
 
         val activeAccountPersistence = FakeDataStore(initialValue = "")
         val activeAccountStore = ActiveAccountStore(
+            dispatchers = coroutinesTestRule.dispatcherProvider,
             accountsStore = mockk(relaxed = true),
             persistence = activeAccountPersistence,
         )

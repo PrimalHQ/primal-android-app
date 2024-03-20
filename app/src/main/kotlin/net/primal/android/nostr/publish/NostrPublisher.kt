@@ -5,14 +5,12 @@ import kotlinx.serialization.json.JsonArray
 import net.primal.android.networking.primal.api.PrimalImportApi
 import net.primal.android.networking.relays.RelaysSocketManager
 import net.primal.android.networking.relays.errors.NostrPublishException
-import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.content.ContentMetadata
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.user.domain.NostrWalletConnect
 import net.primal.android.user.domain.Relay
 import net.primal.android.wallet.nwc.model.LightningPayResponse
-import timber.log.Timber
 
 class NostrPublisher @Inject constructor(
     private val relaysSocketManager: RelaysSocketManager,
@@ -21,13 +19,10 @@ class NostrPublisher @Inject constructor(
 ) {
 
     private suspend fun importEvent(event: NostrEvent): Boolean {
-        return try {
+        val result = runCatching {
             primalImportApi.importEvents(events = listOf(event))
-            true
-        } catch (error: WssException) {
-            Timber.w(error)
-            false
         }
+        return result.isSuccess
     }
 
     @Throws(NostrPublishException::class)

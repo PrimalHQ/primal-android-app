@@ -1,4 +1,4 @@
-package net.primal.android.test
+package net.primal.android.core
 
 import androidx.datastore.core.DataStore
 import kotlinx.coroutines.flow.Flow

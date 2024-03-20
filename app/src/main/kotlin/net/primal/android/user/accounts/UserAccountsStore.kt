@@ -4,20 +4,21 @@ import androidx.datastore.core.DataStore
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.user.domain.UserAccount
 
 @Singleton
 class UserAccountsStore @Inject constructor(
+    dispatchers: CoroutineDispatcherProvider,
     private val persistence: DataStore<List<UserAccount>>,
 ) {
-    private val scope = CoroutineScope(Dispatchers.IO)
+    private val scope = CoroutineScope(dispatchers.io())
 
     private val writeMutex = Mutex()
 

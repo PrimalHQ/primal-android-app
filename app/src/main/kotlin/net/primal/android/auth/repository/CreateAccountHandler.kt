@@ -24,16 +24,10 @@ class CreateAccountHandler @Inject constructor(
         interests: List<Suggestion>,
     ) {
         val userId = authRepository.login(nostrKey = privateKey)
-
         val postCreateAccountResult = runCatching {
-            userRepository.setProfileMetadata(
-                userId = userId,
-                profileMetadata = profileMetadata,
-            )
-            profileRepository.setFollowList(
-                userId = userId,
-                contacts = setOf(userId) + interests.mapToContacts(),
-            )
+            userRepository.setProfileMetadata(userId = userId, profileMetadata = profileMetadata)
+            val contacts = setOf(userId) + interests.mapToContacts()
+            profileRepository.setFollowList(userId = userId, contacts = contacts)
             relayRepository.bootstrapDefaultUserRelays(userId)
             settingsRepository.fetchAndPersistAppSettings(userId = userId)
         }

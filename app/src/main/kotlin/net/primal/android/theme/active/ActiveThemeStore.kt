@@ -4,22 +4,23 @@ import androidx.datastore.core.DataStore
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.runBlocking
+import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.theme.active.di.ActiveThemeDataStore
 import net.primal.android.theme.domain.PrimalTheme
 
 @Singleton
 class ActiveThemeStore @Inject constructor(
+    dispatchers: CoroutineDispatcherProvider,
     @ActiveThemeDataStore private val persistence: DataStore<String>,
 ) {
 
-    private val scope = CoroutineScope(Dispatchers.IO)
+    private val scope = CoroutineScope(dispatchers.io())
 
     val userThemeState: StateFlow<PrimalTheme?> = persistence.data
         .map { PrimalTheme.valueOf(themeName = it) }

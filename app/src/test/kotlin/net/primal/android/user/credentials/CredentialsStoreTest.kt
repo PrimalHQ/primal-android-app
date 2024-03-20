@@ -11,14 +11,14 @@ import io.kotest.matchers.equals.shouldBeEqual
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
+import net.primal.android.core.advanceUntilIdleAndDelay
+import net.primal.android.core.coroutines.CoroutinesTestRule
 import net.primal.android.crypto.Bech32
 import net.primal.android.crypto.CryptoUtils
 import net.primal.android.crypto.InvalidNostrPrivateKeyException
 import net.primal.android.crypto.toHex
 import net.primal.android.crypto.toNpub
 import net.primal.android.security.NoEncryption
-import net.primal.android.test.MainDispatcherRule
-import net.primal.android.test.advanceUntilIdleAndDelay
 import net.primal.android.user.domain.Credential
 import org.junit.Rule
 import org.junit.Test
@@ -33,7 +33,7 @@ class CredentialsStoreTest {
     }
 
     @get:Rule
-    val mainDispatcherRule = MainDispatcherRule()
+    val coroutinesTestRule = CoroutinesTestRule()
 
     private val expectedNsec = "nsec1es53y8wn6dcjfxdynetuh6apxjwpttl79xjrl7rtkwnampaqtctq02lrv5"
 

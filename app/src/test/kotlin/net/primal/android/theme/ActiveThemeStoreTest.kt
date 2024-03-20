@@ -12,9 +12,9 @@ import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
+import net.primal.android.core.advanceUntilIdleAndDelay
+import net.primal.android.core.coroutines.CoroutinesTestRule
 import net.primal.android.core.serialization.datastore.StringSerializer
-import net.primal.android.test.MainDispatcherRule
-import net.primal.android.test.advanceUntilIdleAndDelay
 import net.primal.android.theme.active.ActiveThemeStore
 import org.junit.Rule
 import org.junit.Test
@@ -29,7 +29,7 @@ class ActiveThemeStoreTest {
     }
 
     @get:Rule
-    val mainDispatcherRule = MainDispatcherRule()
+    val coroutinesTestRule = CoroutinesTestRule()
 
     private val testContext: Context = InstrumentationRegistry.getInstrumentation().targetContext
 
@@ -38,9 +38,16 @@ class ActiveThemeStoreTest {
         produceFile = { testContext.dataStoreFile(DATA_STORE_FILE) }
     )
 
+    private fun createActiveThemeStore() : ActiveThemeStore {
+        return ActiveThemeStore(
+            dispatchers = coroutinesTestRule.dispatcherProvider,
+            persistence = persistence,
+        )
+    }
+
     @Test
     fun `initialValue is null`() {
-        val activeThemeStore = ActiveThemeStore(persistence = persistence)
+        val activeThemeStore = createActiveThemeStore()
         val actual = activeThemeStore.userThemeState.value
         actual.shouldBeNull()
     }
@@ -48,7 +55,7 @@ class ActiveThemeStoreTest {
     @Test
     fun `setUserTheme stores the user theme`() = runTest {
         val expectedTheme = net.primal.android.theme.domain.PrimalTheme.Sunset
-        val activeThemeStore = ActiveThemeStore(persistence = persistence)
+        val activeThemeStore = createActiveThemeStore()
         activeThemeStore.setUserTheme(expectedTheme.themeName)
         advanceUntilIdleAndDelay()
 
@@ -60,7 +67,7 @@ class ActiveThemeStoreTest {
     @Test
     fun `userThemeState is null if unknown theme is saved`() = runTest {
         persistence.updateData { "PrimalFutureTheme" }
-        val activeThemeStore = ActiveThemeStore(persistence = persistence)
+        val activeThemeStore = createActiveThemeStore()
         advanceUntilIdle()
 
         val actual = activeThemeStore.userThemeState.value
@@ -71,7 +78,7 @@ class ActiveThemeStoreTest {
     fun `userThemeState corresponds to saved theme`() = runTest {
         val expectedTheme = net.primal.android.theme.domain.PrimalTheme.Sunrise
         persistence.updateData { expectedTheme.themeName }
-        val activeThemeStore = ActiveThemeStore(persistence = persistence)
+        val activeThemeStore = createActiveThemeStore()
         advanceUntilIdle()
 
         val actual = activeThemeStore.userThemeState.value

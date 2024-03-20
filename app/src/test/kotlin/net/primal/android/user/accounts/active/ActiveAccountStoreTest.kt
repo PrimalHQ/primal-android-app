@@ -11,11 +11,11 @@ import io.kotest.matchers.types.shouldBeInstanceOf
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.test.runTest
-import net.primal.android.security.NoEncryption
+import net.primal.android.core.advanceUntilIdleAndDelay
+import net.primal.android.core.coroutines.CoroutinesTestRule
 import net.primal.android.core.serialization.datastore.StringSerializer
+import net.primal.android.security.NoEncryption
 import net.primal.android.user.accounts.UserAccountsSerialization
-import net.primal.android.test.MainDispatcherRule
-import net.primal.android.test.advanceUntilIdleAndDelay
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.domain.UserAccount
 import org.junit.Rule
@@ -32,18 +32,18 @@ class ActiveAccountStoreTest {
     }
 
     @get:Rule
-    val mainDispatcherRule = MainDispatcherRule()
+    val coroutinesTestRule = CoroutinesTestRule()
 
     private val testContext: Context = InstrumentationRegistry.getInstrumentation().targetContext
 
     private val persistenceActiveAccount: DataStore<String> = DataStoreFactory.create(
         serializer = StringSerializer(),
-        produceFile = { testContext.dataStoreFile(DATA_STORE_FILE) }
+        produceFile = { testContext.dataStoreFile(DATA_STORE_FILE) },
     )
 
     private val persistenceAccounts: DataStore<List<UserAccount>> = DataStoreFactory.create(
         serializer = UserAccountsSerialization(encryption = NoEncryption()),
-        produceFile = { testContext.dataStoreFile(DATA_ACCOUNTS_FILE) }
+        produceFile = { testContext.dataStoreFile(DATA_ACCOUNTS_FILE) },
     )
 
     private val expectedPubkey = "pubkey"
@@ -61,16 +61,28 @@ class ActiveAccountStoreTest {
     }
 
     private suspend fun fakeAccountsStore(
-        accounts: List<UserAccount> = emptyList()
-    ) = UserAccountsStore(persistence = persistenceAccounts).apply {
+        accounts: List<UserAccount> = emptyList(),
+    ) = UserAccountsStore(
+        dispatchers = coroutinesTestRule.dispatcherProvider,
+        persistence = persistenceAccounts,
+    ).apply {
         accounts.forEach { upsertAccount(it) }
+    }
+
+    private fun fakeActiveAccountStore(
+        accountsStore: UserAccountsStore,
+    ): ActiveAccountStore {
+        return ActiveAccountStore(
+            dispatchers = coroutinesTestRule.dispatcherProvider,
+            persistence = persistenceActiveAccount,
+            accountsStore = accountsStore,
+        )
     }
 
     @Test
     fun `initial activeAccountState is NoUserAccount`() = runTest {
-        val activeAccountStore = ActiveAccountStore(
-            persistence = persistenceActiveAccount,
-            accountsStore = fakeAccountsStore()
+        val activeAccountStore = fakeActiveAccountStore(
+            accountsStore = fakeAccountsStore(),
         )
 
         val actual = activeAccountStore.activeAccountState.firstOrNull()
@@ -79,9 +91,8 @@ class ActiveAccountStoreTest {
 
     @Test
     fun `initial userAccount is empty UserAccount`() = runTest {
-        val activeAccountStore = ActiveAccountStore(
-            persistence = persistenceActiveAccount,
-            accountsStore = fakeAccountsStore()
+        val activeAccountStore = fakeActiveAccountStore(
+            accountsStore = fakeAccountsStore(),
         )
 
         val actual = activeAccountStore.activeUserAccount()
@@ -91,11 +102,10 @@ class ActiveAccountStoreTest {
     @Test
     fun `setActiveUserId stores active account to data store`() = runTest {
         val expectedUserAccount = buildUserAccount()
-        val activeAccountStore = ActiveAccountStore(
-            persistence = persistenceActiveAccount,
+        val activeAccountStore = fakeActiveAccountStore(
             accountsStore = fakeAccountsStore(
-                accounts = listOf(expectedUserAccount)
-            )
+                accounts = listOf(expectedUserAccount),
+            ),
         )
 
         activeAccountStore.setActiveUserId(expectedPubkey)
@@ -108,11 +118,10 @@ class ActiveAccountStoreTest {
     @Test
     fun `activeUserId returns user pubkey of the active user`() = runTest {
         val expectedUserAccount = buildUserAccount()
-        val activeAccountStore = ActiveAccountStore(
-            persistence = persistenceActiveAccount,
+        val activeAccountStore = fakeActiveAccountStore(
             accountsStore = fakeAccountsStore(
-                accounts = listOf(expectedUserAccount)
-            )
+                accounts = listOf(expectedUserAccount),
+            ),
         )
 
         activeAccountStore.setActiveUserId(expectedPubkey)
@@ -125,9 +134,8 @@ class ActiveAccountStoreTest {
     @Test
     fun `clearActiveUserAccount reverts to empty UserAccount`() = runTest {
         persistenceActiveAccount.updateData { expectedPubkey }
-        val activeAccountStore = ActiveAccountStore(
-            persistence = persistenceActiveAccount,
-            accountsStore = fakeAccountsStore()
+        val activeAccountStore = fakeActiveAccountStore(
+            accountsStore = fakeAccountsStore(),
         )
 
         activeAccountStore.clearActiveUserAccount()
@@ -140,11 +148,10 @@ class ActiveAccountStoreTest {
     @Test
     fun `clearActiveUserAccount reverts to NoUserAccount state`() = runTest {
         persistenceActiveAccount.updateData { expectedPubkey }
-        val activeAccountStore = ActiveAccountStore(
-            persistence = persistenceActiveAccount,
+        val activeAccountStore = fakeActiveAccountStore(
             accountsStore = fakeAccountsStore(
-                accounts = listOf(buildUserAccount())
-            )
+                accounts = listOf(buildUserAccount()),
+            ),
         )
 
         activeAccountStore.clearActiveUserAccount()
@@ -158,12 +165,11 @@ class ActiveAccountStoreTest {
     fun `updating account data triggers active account data to be updated`() = runTest {
         val existingAccount = buildUserAccount(
             pubkey = expectedPubkey,
-            authorDisplayName = "alex"
+            authorDisplayName = "alex",
         )
         persistenceActiveAccount.updateData { existingAccount.pubkey }
         val accountsStore = fakeAccountsStore(accounts = listOf(existingAccount))
-        val activeAccountStore = ActiveAccountStore(
-            persistence = persistenceActiveAccount,
+        val activeAccountStore = fakeActiveAccountStore(
             accountsStore = accountsStore,
         )
 

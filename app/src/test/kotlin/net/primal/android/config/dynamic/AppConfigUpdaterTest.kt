@@ -13,7 +13,7 @@ import net.primal.android.config.api.WellKnownApi
 import net.primal.android.config.domain.DEFAULT_APP_CONFIG
 import net.primal.android.config.store.AppConfigDataStore
 import net.primal.android.core.coroutines.CoroutinesTestRule
-import net.primal.android.test.FakeDataStore
+import net.primal.android.core.FakeDataStore
 import org.junit.Rule
 import org.junit.Test
 import retrofit2.Response

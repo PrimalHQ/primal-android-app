@@ -12,9 +12,9 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
+import net.primal.android.core.advanceUntilIdleAndDelay
+import net.primal.android.core.coroutines.CoroutinesTestRule
 import net.primal.android.security.NoEncryption
-import net.primal.android.test.MainDispatcherRule
-import net.primal.android.test.advanceUntilIdleAndDelay
 import net.primal.android.user.domain.UserAccount
 import org.junit.Rule
 import org.junit.Test
@@ -29,7 +29,7 @@ class UserAccountsStoreTest {
     }
 
     @get:Rule
-    val mainDispatcherRule = MainDispatcherRule()
+    val coroutinesTestRule = CoroutinesTestRule()
 
     private val testContext: Context = InstrumentationRegistry.getInstrumentation().targetContext
 
@@ -52,9 +52,18 @@ class UserAccountsStoreTest {
         )
     }
 
+    private fun createUserAccountStore(
+        persistence: DataStore<List<UserAccount>> = this.persistence,
+    ): UserAccountsStore {
+        return UserAccountsStore(
+            dispatchers = coroutinesTestRule.dispatcherProvider,
+            persistence = persistence,
+        )
+    }
+
     @Test
     fun `initial accounts are empty`() = runTest {
-        val accountsStore = UserAccountsStore(persistence)
+        val accountsStore = createUserAccountStore()
         val actual = accountsStore.userAccounts.value
         actual.shouldBeEmpty()
     }
@@ -62,7 +71,7 @@ class UserAccountsStoreTest {
     @Test
     fun `upsertAccount inserts given account to data store`() = runTest {
         val expectedAccount = buildUserAccount()
-        val accountsStore = UserAccountsStore(persistence)
+        val accountsStore = createUserAccountStore()
 
         accountsStore.upsertAccount(expectedAccount)
         advanceUntilIdleAndDelay()
@@ -77,7 +86,7 @@ class UserAccountsStoreTest {
     fun `upsertAccount updates account in data store`() = runTest {
         val existingAccount = buildUserAccount(expectedAuthorDisplayName = "alex")
         persistence.updateData { it.toMutableList().apply { add((existingAccount)) } }
-        val accountsStore = UserAccountsStore(persistence)
+        val accountsStore = createUserAccountStore()
 
         val expectedAccount = buildUserAccount(expectedAuthorDisplayName = "updated")
         accountsStore.upsertAccount(expectedAccount)
@@ -93,7 +102,7 @@ class UserAccountsStoreTest {
     fun `deleteAccount deletes given account from data store`() = runTest {
         val existingAccount = buildUserAccount()
         persistence.updateData { it.toMutableList().apply { add((existingAccount)) } }
-        val accountsStore = UserAccountsStore(persistence)
+        val accountsStore = createUserAccountStore()
 
         accountsStore.deleteAccount(pubkey = expectedPubkey)
         advanceUntilIdleAndDelay()
@@ -108,7 +117,7 @@ class UserAccountsStoreTest {
     fun `clearAllAccounts deletes all accounts from data store`() = runTest {
         val existingAccount = buildUserAccount()
         persistence.updateData { it.toMutableList().apply { add((existingAccount)) } }
-        val accountsStore = UserAccountsStore(persistence)
+        val accountsStore = createUserAccountStore()
 
         accountsStore.clearAllAccounts()
         advanceUntilIdleAndDelay()
@@ -121,7 +130,7 @@ class UserAccountsStoreTest {
     fun `findByIdOrNull finds account by id`() = runTest {
         val existingAccount = buildUserAccount()
         persistence.updateData { it.toMutableList().apply { add((existingAccount)) } }
-        val accountsStore = UserAccountsStore(persistence)
+        val accountsStore = createUserAccountStore()
 
         val actual = accountsStore.findByIdOrNull(userId = expectedPubkey)
         actual.shouldNotBeNull()
@@ -130,7 +139,7 @@ class UserAccountsStoreTest {
 
     @Test
     fun `findByIdOrNull returns null for not found id`() {
-        val accountsStore = UserAccountsStore(persistence)
+        val accountsStore = createUserAccountStore()
         val actual = accountsStore.findByIdOrNull(userId = "nonExisting")
         actual.shouldBeNull()
     }

@@ -164,11 +164,11 @@ class NostrNotary @Inject constructor(
         ).signOrThrow(hexPrivateKey = Hex.decode(nwc.keypair.privateKey))
     }
 
-    fun signImageUploadNostrEvent(userId: String, base64Content: String): NostrEvent {
+    fun signImageUploadNostrEvent(userId: String, content: String): NostrEvent {
         return NostrUnsignedEvent(
             pubKey = userId,
             kind = NostrEventKind.PrimalImageUploadRequest.value,
-            content = base64Content,
+            content = content,
             tags = emptyList(),
         ).signOrThrow(nsec = findNsecOrThrow(userId))
     }

@@ -1,4 +1,4 @@
-package net.primal.android.test
+package net.primal.android.core
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi

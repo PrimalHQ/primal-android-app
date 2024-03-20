@@ -87,17 +87,19 @@ class UserRepository @Inject constructor(
 
     @Throws(UnsuccessfulFileUpload::class, NostrPublishException::class)
     suspend fun setProfileMetadata(userId: String, profileMetadata: ProfileMetadata) {
-        val pictureUrl = if (profileMetadata.localPictureUri != null) {
-            fileUploader.uploadFile(userId = userId, uri = profileMetadata.localPictureUri)
-        } else {
-            profileMetadata.remotePictureUrl
-        }
+        val pictureUrl = profileMetadata.remotePictureUrl
+            ?: if (profileMetadata.localPictureUri != null) {
+                fileUploader.uploadFile(userId = userId, uri = profileMetadata.localPictureUri)
+            } else {
+                null
+            }
 
-        val bannerUrl = if (profileMetadata.localBannerUri != null) {
-            fileUploader.uploadFile(userId = userId, uri = profileMetadata.localBannerUri)
-        } else {
-            profileMetadata.remoteBannerUrl
-        }
+        val bannerUrl = profileMetadata.remoteBannerUrl
+            ?: if (profileMetadata.localBannerUri != null) {
+                fileUploader.uploadFile(userId = userId, uri = profileMetadata.localBannerUri)
+            } else {
+                null
+            }
 
         setUserProfileAndUpdateLocally(
             userId = userId,
