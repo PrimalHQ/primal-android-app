@@ -152,7 +152,7 @@ private fun InterestsContent(
                             modifier = Modifier.padding(horizontal = 2.dp),
                             text = it.group.lowercase(),
                             style = AppTheme.typography.bodyLarge,
-                            fontWeight = FontWeight.Medium,
+                            fontWeight = FontWeight.SemiBold,
                         )
                     },
                     onClick = { if (isSelected) onSuggestionUnselected(it) else onSuggestionSelected(it) },
