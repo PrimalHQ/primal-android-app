@@ -46,11 +46,11 @@ fun String.asEventIdTag(recommendedRelay: String? = null, marker: String? = null
         }
     }
 
-fun String.asPubkeyTag(recommendedRelay: String? = null): JsonArray =
+fun String.asPubkeyTag(optional: String? = null): JsonArray =
     buildJsonArray {
         add("p")
         add(this@asPubkeyTag)
-        if (recommendedRelay != null) add(recommendedRelay)
+        if (optional != null) add(optional)
     }
 
 fun String.asIdentifierTag(): JsonArray =

@@ -14,6 +14,7 @@ import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
 import net.primal.android.nostr.ext.mapAsProfileDataPO
 import net.primal.android.nostr.ext.takeContentAsPrimalUserFollowersCountsOrNull
 import net.primal.android.nostr.publish.NostrPublisher
+import net.primal.android.profile.report.ReportType
 import net.primal.android.user.accounts.UserAccountFetcher
 import net.primal.android.user.api.UsersApi
 import net.primal.android.user.domain.asUserAccountFromFollowListEvent
@@ -121,6 +122,21 @@ class ProfileRepository @Inject constructor(
         queryRemoteUsers {
             usersApi.getUserFollowing(userId = userId)
         }
+
+    @Throws(NostrPublishException::class)
+    suspend fun reportAbuse(
+        userId: String,
+        reportType: ReportType,
+        profileId: String,
+        noteId: String? = null,
+    ) {
+        nostrPublisher.publishReportAbuseEvent(
+            userId = userId,
+            reportType = reportType,
+            reportProfileId = profileId,
+            reportNoteId = noteId,
+        )
+    }
 
     class FollowListNotFound : Exception()
 }

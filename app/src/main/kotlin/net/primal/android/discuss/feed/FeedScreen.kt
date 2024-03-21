@@ -220,6 +220,15 @@ fun FeedScreen(
                     eventPublisher(FeedContract.UiEvent.MuteAction(it))
                 },
                 onMediaClick = onMediaClick,
+                onReportContentClick = { type, profileId, noteId ->
+                    eventPublisher(
+                        FeedContract.UiEvent.ReportAbuse(
+                            reportType = type,
+                            profileId = profileId,
+                            noteId = noteId,
+                        ),
+                    )
+                },
             )
         },
         floatingNewDataHost = {

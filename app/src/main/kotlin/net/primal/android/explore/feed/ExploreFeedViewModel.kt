@@ -100,6 +100,7 @@ class ExploreFeedViewModel @Inject constructor(
                     is UiEvent.RepostAction -> repostPost(it)
                     is UiEvent.ZapAction -> zapPost(it)
                     is UiEvent.MuteAction -> mute(it)
+                    is UiEvent.ReportAbuse -> reportAbuse(it)
                 }
             }
         }
@@ -234,6 +235,22 @@ class ExploreFeedViewModel @Inject constructor(
             } catch (error: NostrPublishException) {
                 Timber.w(error)
                 setErrorState(error = ExploreFeedError.FailedToMuteUser(error))
+            }
+        }
+
+    private fun reportAbuse(event: UiEvent.ReportAbuse) =
+        viewModelScope.launch {
+            try {
+                withContext(dispatcherProvider.io()) {
+                    profileRepository.reportAbuse(
+                        userId = activeAccountStore.activeUserId(),
+                        reportType = event.reportType,
+                        profileId = event.profileId,
+                        noteId = event.noteId,
+                    )
+                }
+            } catch (error: NostrPublishException) {
+                Timber.w(error)
             }
         }
 

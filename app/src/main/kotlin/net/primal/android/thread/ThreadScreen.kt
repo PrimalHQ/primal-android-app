@@ -330,6 +330,15 @@ fun ThreadScreen(
                             onMuteUserClick = {
                                 eventPublisher(ThreadContract.UiEvent.MuteAction(item.authorId))
                             },
+                            onReportContentClick = { reportType, profileId, noteId ->
+                                eventPublisher(
+                                    ThreadContract.UiEvent.ReportAbuse(
+                                        reportType = reportType,
+                                        profileId = profileId,
+                                        noteId = noteId,
+                                    ),
+                                )
+                            },
                         )
 
                         if (!connectedToNextNote) {

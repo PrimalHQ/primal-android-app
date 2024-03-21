@@ -80,6 +80,7 @@ class ThreadViewModel @Inject constructor(
                     is UiEvent.ZapAction -> zapPost(it)
                     is UiEvent.MuteAction -> mute(it)
                     UiEvent.UpdateConversation -> fetchRepliesFromNetwork()
+                    is UiEvent.ReportAbuse -> reportAbuse(it)
                 }
             }
         }
@@ -269,6 +270,22 @@ class ThreadViewModel @Inject constructor(
                 setErrorState(error = ThreadError.FailedToMuteUser(error))
             } catch (error: NostrPublishException) {
                 setErrorState(error = ThreadError.FailedToMuteUser(error))
+            }
+        }
+
+    private fun reportAbuse(event: UiEvent.ReportAbuse) =
+        viewModelScope.launch {
+            try {
+                withContext(dispatcherProvider.io()) {
+                    profileRepository.reportAbuse(
+                        userId = activeAccountStore.activeUserId(),
+                        reportType = event.reportType,
+                        profileId = event.profileId,
+                        noteId = event.noteId,
+                    )
+                }
+            } catch (error: NostrPublishException) {
+                Timber.w(error)
             }
         }
 

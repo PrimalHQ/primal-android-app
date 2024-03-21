@@ -112,6 +112,7 @@ import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWor
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.ContextMuteUser
+import net.primal.android.core.compose.icons.primaliconpack.ContextReportUser
 import net.primal.android.core.compose.icons.primaliconpack.ContextShare
 import net.primal.android.core.compose.icons.primaliconpack.FeedZaps
 import net.primal.android.core.compose.icons.primaliconpack.Key
@@ -133,6 +134,7 @@ import net.primal.android.crypto.hexToNpubHrp
 import net.primal.android.profile.details.ProfileDetailsContract.UiState.ProfileError
 import net.primal.android.profile.domain.ProfileFeedDirective
 import net.primal.android.profile.domain.ProfileFollowsType
+import net.primal.android.profile.report.ReportUserDialog
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
@@ -320,6 +322,15 @@ fun ProfileDetailsScreen(
                 onPostQuoteClick = {
                     onPostQuoteClick("\n\nnostr:${it.postId.hexToNoteHrp()}")
                 },
+                onReportContentClick = { type, profileId, noteId ->
+                    eventPublisher(
+                        ProfileDetailsContract.UiEvent.ReportAbuse(
+                            reportType = type,
+                            profileId = profileId,
+                            noteId = noteId,
+                        ),
+                    )
+                },
                 onHashtagClick = onHashtagClick,
                 onMediaClick = onMediaClick,
                 onGoToWallet = onGoToWallet,
@@ -456,6 +467,23 @@ private fun ProfileTopCoverBar(
 ) {
     val coverBlur = AppTheme.colorScheme.surface.copy(alpha = coverAlpha)
     val maxCollapsed = coverAlpha == MAX_COVER_TRANSPARENCY
+
+    var reportDialogVisible by remember { mutableStateOf(false) }
+    if (reportDialogVisible) {
+        ReportUserDialog(
+            onDismissRequest = { reportDialogVisible = false },
+            onReportClick = {
+                reportDialogVisible = false
+                eventPublisher(
+                    ProfileDetailsContract.UiEvent.ReportAbuse(
+                        reportType = it,
+                        profileId = state.profileId,
+                    ),
+                )
+            },
+        )
+    }
+
     BoxWithConstraints(
         modifier = Modifier.fillMaxWidth(),
         contentAlignment = Alignment.TopCenter,
@@ -500,6 +528,7 @@ private fun ProfileTopCoverBar(
                         uiScope = uiScope,
                         name = state.profileDetails?.authorDisplayName ?: "",
                         eventPublisher = eventPublisher,
+                        onReportClick = { reportDialogVisible = true },
                     )
                 },
             )
@@ -540,6 +569,7 @@ private fun ProfileDropdownMenu(
     uiScope: CoroutineScope,
     name: String,
     eventPublisher: (ProfileDetailsContract.UiEvent) -> Unit,
+    onReportClick: () -> Unit,
 ) {
     var menuVisible by remember { mutableStateOf(false) }
     val addedToUserFeedsMessage = stringResource(id = R.string.app_added_to_user_feeds)
@@ -624,6 +654,16 @@ private fun ProfileDropdownMenu(
                 tint = AppTheme.colorScheme.error,
                 onClick = {
                     eventPublisher(action)
+                    menuVisible = false
+                },
+            )
+
+            DropdownPrimalMenuItem(
+                trailingIconVector = PrimalIcons.ContextReportUser,
+                tint = AppTheme.colorScheme.error,
+                text = stringResource(id = R.string.context_menu_report_user),
+                onClick = {
+                    onReportClick()
                     menuVisible = false
                 },
             )

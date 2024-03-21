@@ -4,6 +4,7 @@ import androidx.paging.PagingData
 import kotlinx.coroutines.flow.Flow
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.feed.model.ZappingState
+import net.primal.android.profile.report.ReportType
 
 interface ExploreFeedContract {
     data class UiState(
@@ -42,5 +43,10 @@ interface ExploreFeedContract {
             val zapDescription: String?,
         ) : UiEvent()
         data class MuteAction(val profileId: String) : UiEvent()
+        data class ReportAbuse(
+            val reportType: ReportType,
+            val profileId: String,
+            val noteId: String,
+        ) : UiEvent()
     }
 }

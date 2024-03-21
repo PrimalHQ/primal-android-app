@@ -21,6 +21,7 @@ import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.feed.model.FeedPostsSyncStats
 import net.primal.android.core.compose.feed.model.ZappingState
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
+import net.primal.android.profile.report.OnReportContentClick
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -42,6 +43,7 @@ fun FeedNoteList(
     paddingValues: PaddingValues = PaddingValues(0.dp),
     onScrolledToTop: (() -> Unit)? = null,
     onMuteClick: ((String) -> Unit)? = null,
+    onReportContentClick: OnReportContentClick,
 ) {
     LaunchedEffect(feedListState, onScrolledToTop) {
         withContext(Dispatchers.IO) {
@@ -88,5 +90,6 @@ fun FeedNoteList(
         onMediaClick = onMediaClick,
         onGoToWallet = onGoToWallet,
         onMuteClick = onMuteClick,
+        onReportContentClick = onReportContentClick,
     )
 }

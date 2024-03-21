@@ -207,6 +207,7 @@ fun TransactionDetailsScreen(
                         onHashtagClick = onHashtagClick,
                         onMediaClick = onMediaClick,
                         onMuteUserClick = {},
+                        onReportContentClick = { _, _, _ -> },
                     )
 
                     Spacer(modifier = Modifier.height(32.dp))

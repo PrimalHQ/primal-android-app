@@ -8,6 +8,7 @@ import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.content.ContentMetadata
 import net.primal.android.nostr.notary.NostrNotary
+import net.primal.android.profile.report.ReportType
 import net.primal.android.user.domain.NostrWalletConnect
 import net.primal.android.user.domain.Relay
 import net.primal.android.wallet.nwc.model.LightningPayResponse
@@ -135,5 +136,22 @@ class NostrPublisher @Inject constructor(
             nwc = nwcData,
         )
         relaysSocketManager.publishNwcEvent(nostrEvent = walletPayNostrEvent)
+    }
+
+    @Throws(NostrPublishException::class)
+    suspend fun publishReportAbuseEvent(
+        userId: String,
+        reportType: ReportType,
+        reportProfileId: String,
+        reportNoteId: String?,
+    ) {
+        val signedNostrEvent = nostrNotary.signReportingEvent(
+            userId = userId,
+            reportType = reportType,
+            reportProfileId = reportProfileId,
+            reportNoteId = reportNoteId,
+        )
+        relaysSocketManager.publishEvent(signedNostrEvent)
+        importEvent(signedNostrEvent)
     }
 }

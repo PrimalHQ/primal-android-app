@@ -356,6 +356,13 @@
 
     <string name="context_menu_mute_user">Mute user</string>
     <string name="context_menu_unmute_user">Unmute user</string>
+    <string name="context_menu_report_user">Report user</string>
+    <string name="context_menu_report_content">Report content</string>
+
+    <string name="dialog_report_abuse_title">Report abuse</string>
+    <string name="dialog_report_abuse_description">All reports posted will be publicly visible.</string>
+    <string name="dialog_report_button_dismiss">Dismiss</string>
+    <string name="dialog_report_button_report">Report</string>
 
     <string name="zap_bottom_sheet_comment_placeholder">Add a comment…</string>
     <string name="zap_bottom_sheet_custom_amount_placeholder">Custom amount…</string>

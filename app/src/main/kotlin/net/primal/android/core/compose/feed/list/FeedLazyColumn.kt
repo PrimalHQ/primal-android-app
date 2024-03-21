@@ -38,6 +38,7 @@ import net.primal.android.core.compose.feed.note.FeedNoteCard
 import net.primal.android.core.compose.feed.zaps.UnableToZapBottomSheet
 import net.primal.android.core.compose.feed.zaps.ZapBottomSheet
 import net.primal.android.core.compose.isEmpty
+import net.primal.android.profile.report.OnReportContentClick
 import net.primal.android.wallet.zaps.canZap
 import timber.log.Timber
 
@@ -59,6 +60,7 @@ fun FeedLazyColumn(
     onHashtagClick: (String) -> Unit,
     onMediaClick: (String, String) -> Unit,
     onGoToWallet: () -> Unit,
+    onReportContentClick: OnReportContentClick,
     onMuteClick: ((String) -> Unit)? = null,
     shouldShowLoadingState: Boolean = true,
     shouldShowNoContentState: Boolean = true,
@@ -181,6 +183,7 @@ fun FeedLazyColumn(
                         onHashtagClick = onHashtagClick,
                         onMuteUserClick = { onMuteClick?.invoke(item.authorId) },
                         onMediaClick = onMediaClick,
+                        onReportContentClick = onReportContentClick,
                     )
 
                     PrimalDivider()

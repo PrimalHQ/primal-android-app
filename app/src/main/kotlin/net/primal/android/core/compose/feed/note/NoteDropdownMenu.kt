@@ -26,6 +26,7 @@ import net.primal.android.core.compose.icons.primaliconpack.ContextCopyNoteText
 import net.primal.android.core.compose.icons.primaliconpack.ContextCopyPublicKey
 import net.primal.android.core.compose.icons.primaliconpack.ContextCopyRawData
 import net.primal.android.core.compose.icons.primaliconpack.ContextMuteUser
+import net.primal.android.core.compose.icons.primaliconpack.ContextReportUser
 import net.primal.android.core.compose.icons.primaliconpack.ContextShare
 import net.primal.android.core.compose.icons.primaliconpack.More
 import net.primal.android.core.utils.copyText
@@ -43,6 +44,7 @@ fun NoteDropdownMenuIcon(
     noteRawData: String,
     authorId: String,
     onMuteUserClick: () -> Unit,
+    onReportContentClick: () -> Unit,
 ) {
     var menuVisible by remember { mutableStateOf(false) }
 
@@ -157,6 +159,15 @@ fun NoteDropdownMenuIcon(
                 text = stringResource(id = R.string.context_menu_mute_user),
                 onClick = {
                     onMuteUserClick()
+                    menuVisible = false
+                },
+            )
+            DropdownPrimalMenuItem(
+                trailingIconVector = PrimalIcons.ContextReportUser,
+                tint = AppTheme.colorScheme.error,
+                text = stringResource(id = R.string.context_menu_report_content),
+                onClick = {
+                    onReportContentClick()
                     menuVisible = false
                 },
             )

@@ -181,6 +181,15 @@ fun ExploreFeedScreen(
                     eventPublisher(ExploreFeedContract.UiEvent.MuteAction(profileId = it))
                 },
                 onMediaClick = onMediaClick,
+                onReportContentClick = { type, profileId, noteId ->
+                    eventPublisher(
+                        ExploreFeedContract.UiEvent.ReportAbuse(
+                            reportType = type,
+                            profileId = profileId,
+                            noteId = noteId,
+                        ),
+                    )
+                },
             )
         },
         snackbarHost = {

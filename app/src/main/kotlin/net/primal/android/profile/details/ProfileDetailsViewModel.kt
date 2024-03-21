@@ -102,6 +102,7 @@ class ProfileDetailsViewModel @Inject constructor(
                     is UiEvent.UnmuteAction -> unmute(it)
                     is UiEvent.ChangeProfileFeed -> changeFeed(it)
                     UiEvent.RequestProfileUpdate -> fetchLatestProfile()
+                    is UiEvent.ReportAbuse -> reportAbuse(it)
                 }
             }
         }
@@ -387,6 +388,22 @@ class ProfileDetailsViewModel @Inject constructor(
                         .map { it.map { feed -> feed.asFeedPostUi() } }
                         .cachedIn(viewModelScope),
                 )
+            }
+        }
+
+    private fun reportAbuse(event: UiEvent.ReportAbuse) =
+        viewModelScope.launch {
+            try {
+                withContext(dispatcherProvider.io()) {
+                    profileRepository.reportAbuse(
+                        userId = activeAccountStore.activeUserId(),
+                        reportType = event.reportType,
+                        profileId = event.profileId,
+                        noteId = event.noteId,
+                    )
+                }
+            } catch (error: NostrPublishException) {
+                Timber.w(error)
             }
         }
 

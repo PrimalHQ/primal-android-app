@@ -19,6 +19,7 @@ import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.model.content.ContentMetadata
 import net.primal.android.nostr.model.primal.content.ContentAppSettings
+import net.primal.android.profile.report.ReportType
 import net.primal.android.settings.api.model.AppSettingsDescription
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.NostrWalletConnect
@@ -221,6 +222,33 @@ class NostrNotary @Inject constructor(
                     }
                 }
             },
+        ).signOrThrow(nsec = findNsecOrThrow(pubkey = userId))
+    }
+
+    fun signReportingEvent(
+        userId: String,
+        content: String = "",
+        reportType: ReportType,
+        reportProfileId: String,
+        reportNoteId: String? = null,
+    ): NostrEvent {
+        val profileTag = buildJsonArray {
+            add("p")
+            add(reportProfileId)
+            if (reportNoteId == null) add(reportType.id)
+        }
+        val eventTag = reportNoteId?.let { noteId ->
+            buildJsonArray {
+                add("e")
+                add(noteId)
+                add(reportType.id)
+            }
+        }
+        return NostrUnsignedEvent(
+            pubKey = userId,
+            content = content,
+            kind = NostrEventKind.Reporting.value,
+            tags = listOfNotNull(profileTag, eventTag),
         ).signOrThrow(nsec = findNsecOrThrow(pubkey = userId))
     }
 }

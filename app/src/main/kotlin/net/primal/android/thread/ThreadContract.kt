@@ -2,6 +2,7 @@ package net.primal.android.thread
 
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.feed.model.ZappingState
+import net.primal.android.profile.report.ReportType
 
 interface ThreadContract {
 
@@ -48,5 +49,10 @@ interface ThreadContract {
             val replyToAuthorId: String,
         ) : UiEvent()
         data class MuteAction(val postAuthorId: String) : UiEvent()
+        data class ReportAbuse(
+            val reportType: ReportType,
+            val profileId: String,
+            val noteId: String,
+        ) : UiEvent()
     }
 }

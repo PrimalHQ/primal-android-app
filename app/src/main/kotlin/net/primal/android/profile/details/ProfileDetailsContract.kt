@@ -7,6 +7,7 @@ import net.primal.android.core.compose.feed.model.ZappingState
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.core.compose.profile.model.ProfileStatsUi
 import net.primal.android.profile.domain.ProfileFeedDirective
+import net.primal.android.profile.report.ReportType
 
 interface ProfileDetailsContract {
     data class UiState(
@@ -61,5 +62,10 @@ interface ProfileDetailsContract {
         data class UnmuteAction(val profileId: String) : UiEvent()
         data class ChangeProfileFeed(val profileDirective: ProfileFeedDirective) : UiEvent()
         data object RequestProfileUpdate : UiEvent()
+        data class ReportAbuse(
+            val reportType: ReportType,
+            val profileId: String,
+            val noteId: String? = null,
+        ) : UiEvent()
     }
 }

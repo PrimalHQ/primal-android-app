@@ -13,8 +13,12 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -29,9 +33,12 @@ import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.feed.model.FeedPostAction
 import net.primal.android.core.compose.feed.model.FeedPostStatsUi
 import net.primal.android.core.compose.feed.model.FeedPostUi
+import net.primal.android.profile.report.OnReportContentClick
+import net.primal.android.profile.report.ReportUserDialog
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FeedNoteCard(
     data: FeedPostUi,
@@ -54,8 +61,20 @@ fun FeedNoteCard(
     onHashtagClick: (String) -> Unit,
     onMediaClick: (String, String) -> Unit,
     onMuteUserClick: () -> Unit,
+    onReportContentClick: OnReportContentClick,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
+
+    var reportDialogVisible by remember { mutableStateOf(false) }
+    if (reportDialogVisible) {
+        ReportUserDialog(
+            onDismissRequest = { reportDialogVisible = false },
+            onReportClick = {
+                reportDialogVisible = false
+                onReportContentClick(it, data.authorId, data.postId)
+            },
+        )
+    }
 
     val notePaddingDp = 4.dp
     val avatarPaddingDp = 8.dp
@@ -91,6 +110,7 @@ fun FeedNoteCard(
                 noteRawData = data.rawNostrEventJson,
                 authorId = data.authorId,
                 onMuteUserClick = onMuteUserClick,
+                onReportContentClick = { reportDialogVisible = true },
             )
 
             Column {
@@ -214,6 +234,7 @@ fun PreviewFeedNoteListItemLightMultiLineHeader(
             onHashtagClick = {},
             onMuteUserClick = {},
             onMediaClick = { _, _ -> },
+            onReportContentClick = { _, _, _ -> },
         )
     }
 }
@@ -236,6 +257,7 @@ fun PreviewFeedNoteListItemLightMultiLineHeaderFullWidth(
             onHashtagClick = {},
             onMuteUserClick = {},
             onMediaClick = { _, _ -> },
+            onReportContentClick = { _, _, _ -> },
         )
     }
 }
@@ -258,6 +280,7 @@ fun PreviewFeedNoteListItemDarkSingleLineHeader(
             onHashtagClick = {},
             onMuteUserClick = {},
             onMediaClick = { _, _ -> },
+            onReportContentClick = { _, _, _ -> },
         )
     }
 }
@@ -280,6 +303,7 @@ fun PreviewFeedNoteListItemDarkSingleLineHeaderFullWidth(
             onHashtagClick = {},
             onMuteUserClick = {},
             onMediaClick = { _, _ -> },
+            onReportContentClick = { _, _, _ -> },
         )
     }
 }
@@ -304,6 +328,7 @@ fun PreviewFeedNoteListItemLightForcedContentIndentFullWidthSingleLineHeader(
             onHashtagClick = {},
             onMuteUserClick = {},
             onMediaClick = { _, _ -> },
+            onReportContentClick = { _, _, _ -> },
         )
     }
 }
@@ -328,6 +353,7 @@ fun PreviewFeedNoteListItemDarkForcedContentIndentSingleLineHeader(
             onHashtagClick = {},
             onMuteUserClick = {},
             onMediaClick = { _, _ -> },
+            onReportContentClick = { _, _, _ -> },
         )
     }
 }
