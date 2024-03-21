@@ -1,4 +1,5 @@
 ## Changes
+- Implement report abuse feature;
 - Onboarding image uploading immediately;
 - Fixed media gallery; Improved dots visibility;
 - Disable going back on login and create account;

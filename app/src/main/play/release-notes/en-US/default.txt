@@ -1,7 +1,5 @@
 ## Changes
-- Wallet activation in onboarding;
-- New create account screen;
-- New welcome screen;
-- New login screen;
+- Implemented report abuse feature;
+- Improved onboarding experience;
 - App now follows dark theme system settings until user manually changes theme;
-- Implemented new api for edge to edge screen support - improved screen transitions with full screen colors;
+- Improved full screen transitions;
