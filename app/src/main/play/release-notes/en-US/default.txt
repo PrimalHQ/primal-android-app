@@ -1,4 +1,5 @@
 ## Changes
+- Randomizing bootstrap onboarding relays;
 - Implemented report abuse feature;
 - Improved onboarding experience;
 - App now follows dark theme system settings until user manually changes theme;

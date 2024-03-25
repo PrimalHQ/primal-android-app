@@ -1,4 +1,5 @@
 ## Changes
+- Randomizing bootstrap onboarding relays;
 - Implement report abuse feature;
 - Onboarding image uploading immediately;
 - Fixed media gallery; Improved dots visibility;
