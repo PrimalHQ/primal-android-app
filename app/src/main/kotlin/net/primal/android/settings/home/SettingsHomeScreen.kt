@@ -1,6 +1,7 @@
 package net.primal.android.settings.home
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -18,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import net.primal.android.R
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
@@ -70,7 +72,6 @@ fun SettingsHomeScreen(
                     SettingsListItem(
                         title = it.title(),
                         onClick = { onSettingsSectionClick(it) },
-                        leadingIcon = it.leadingIcon(),
                         trailingIcon = Icons.AutoMirrored.Outlined.KeyboardArrowRight,
                     )
                     PrimalDivider()
@@ -95,7 +96,9 @@ private fun SettingsListItem(
     trailingIcon: ImageVector? = null,
 ) {
     ListItem(
-        modifier = Modifier.clickable { onClick() },
+        modifier = Modifier
+            .height(60.dp)
+            .clickable { onClick() },
         colors = ListItemDefaults.colors(
             containerColor = AppTheme.colorScheme.surfaceVariant,
         ),
@@ -136,25 +139,13 @@ private fun VersionListItem(versionName: String) {
         },
         supportingContent = {
             Text(
+                modifier = Modifier.padding(top = 8.dp),
                 text = versionName,
                 style = AppTheme.typography.titleLarge,
             )
         },
         leadingContent = { },
     )
-}
-
-private fun PrimalSettingsSection.leadingIcon(): ImageVector? {
-    return when (this) {
-        PrimalSettingsSection.Account -> null
-        PrimalSettingsSection.Network -> null
-        PrimalSettingsSection.Wallet -> null
-        PrimalSettingsSection.Appearance -> null
-        PrimalSettingsSection.Notifications -> null
-        PrimalSettingsSection.Feeds -> null
-        PrimalSettingsSection.Zaps -> null
-        PrimalSettingsSection.MutedAccounts -> null
-    }
 }
 
 @Composable
@@ -178,7 +169,7 @@ private fun PrimalSettingsSection.title(): String {
 @Preview
 @Composable
 fun PreviewSettingsHomeScreen() {
-    PrimalTheme(primalTheme = PrimalTheme.Sunset) {
+    PrimalTheme(primalTheme = PrimalTheme.Sunrise) {
         SettingsHomeScreen(
             state = SettingsHomeContract.UiState(version = "1.1"),
             onClose = { },
