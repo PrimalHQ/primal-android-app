@@ -121,7 +121,7 @@ class NetworkSettingsViewModel @Inject constructor(
         viewModelScope.launch {
             changeRelayList { userId ->
                 try {
-                    relayRepository.bootstrapDefaultUserRelays(userId = userId)
+                    relayRepository.bootstrapUserRelays(userId = userId)
                 } catch (error: NostrPublishException) {
                     Timber.w(error)
                 }

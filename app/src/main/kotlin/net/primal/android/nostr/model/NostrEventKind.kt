@@ -54,6 +54,7 @@ enum class NostrEventKind(val value: Int) {
     PrimalCdnResource(value = 10_000_119),
     PrimalImageUploadRequest(value = 10_000_120),
     PrimalImageUploadResponse(value = 10_000_121),
+    PrimalDefaultRelaysList(value = 10_000_124),
     PrimalLinkPreview(value = 10_000_128),
     PrimalNotificationsSummary2(value = 10_000_132),
     PrimalUserFollowersCounts(value = 10_000_133),

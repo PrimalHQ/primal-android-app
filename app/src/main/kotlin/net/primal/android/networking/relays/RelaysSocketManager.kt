@@ -25,7 +25,7 @@ class RelaysSocketManager @Inject constructor(
     private val primalDatabase: PrimalDatabase,
     private val userRelaysPool: RelayPool,
     private val nwcRelaysPool: RelayPool,
-    private val bootstrapRelays: RelayPool,
+    private val fallbackRelays: RelayPool,
 ) {
     private val scope = CoroutineScope(dispatchers.io())
     private val relayPoolsMutex = Mutex()
@@ -35,12 +35,12 @@ class RelaysSocketManager @Inject constructor(
     val userRelayPoolStatus = userRelaysPool.relayPoolStatus
 
     init {
-        initBootstrapRelaysPool()
+        initFallbackRelaysPool()
         observeActiveUserId()
     }
 
-    private fun initBootstrapRelaysPool() {
-        bootstrapRelays.changeRelays(BOOTSTRAP_RELAYS)
+    private fun initFallbackRelaysPool() {
+        fallbackRelays.changeRelays(FALLBACK_RELAYS)
     }
 
     private fun observeActiveUserId() =
@@ -99,7 +99,7 @@ class RelaysSocketManager @Inject constructor(
         if (userRelaysPool.hasRelays()) {
             userRelaysPool.publishEvent(nostrEvent)
         } else {
-            bootstrapRelays.publishEvent(nostrEvent)
+            fallbackRelays.publishEvent(nostrEvent)
         }
     }
 

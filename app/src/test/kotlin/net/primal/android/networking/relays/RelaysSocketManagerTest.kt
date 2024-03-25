@@ -66,7 +66,7 @@ class RelaysSocketManagerTest {
                 dispatchers = coroutinesTestRule.dispatcherProvider,
                 okHttpClient = mockk<OkHttpClient>(),
             ),
-            bootstrapRelays = RelayPool(
+            fallbackRelays = RelayPool(
                 dispatchers = coroutinesTestRule.dispatcherProvider,
                 okHttpClient = mockk<OkHttpClient>(),
             ),

@@ -4,14 +4,17 @@ import androidx.room.withTransaction
 import javax.inject.Inject
 import kotlinx.coroutines.flow.map
 import net.primal.android.db.PrimalDatabase
-import net.primal.android.networking.relays.BOOTSTRAP_RELAYS
+import net.primal.android.networking.relays.FALLBACK_RELAYS
 import net.primal.android.networking.relays.errors.NostrPublishException
+import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.android.user.accounts.parseNip65Relays
 import net.primal.android.user.api.UsersApi
 import net.primal.android.user.domain.Relay as RelayDO
 import net.primal.android.user.domain.RelayKind
 import net.primal.android.user.domain.mapToRelayPO
+import net.primal.android.user.domain.toRelay
+import timber.log.Timber
 
 class RelayRepository @Inject constructor(
     private val primalDatabase: PrimalDatabase,
@@ -25,9 +28,15 @@ class RelayRepository @Inject constructor(
     fun findRelays(userId: String, kind: RelayKind) = primalDatabase.relays().findRelays(userId, kind)
 
     @Throws(NostrPublishException::class)
-    suspend fun bootstrapDefaultUserRelays(userId: String) {
-        nostrPublisher.publishRelayList(userId, BOOTSTRAP_RELAYS)
-        replaceUserRelays(userId, BOOTSTRAP_RELAYS)
+    suspend fun bootstrapUserRelays(userId: String) {
+        val relays = try {
+            usersApi.getDefaultRelays().map { it.toRelay() }
+        } catch (error: WssException) {
+            Timber.w(error)
+            FALLBACK_RELAYS
+        }
+        replaceUserRelays(userId, relays)
+        nostrPublisher.publishRelayList(userId, relays)
     }
 
     private suspend fun fetchUserRelays(userId: String): List<RelayDO>? {

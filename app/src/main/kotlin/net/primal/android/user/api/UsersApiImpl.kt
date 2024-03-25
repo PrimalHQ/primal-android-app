@@ -8,6 +8,7 @@ import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.primal.PrimalCacheFilter
 import net.primal.android.networking.primal.PrimalVerb
+import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.user.api.model.FollowListRequestBody
 import net.primal.android.user.api.model.UserContactsResponse
@@ -114,5 +115,17 @@ class UsersApiImpl @Inject constructor(
         return UserRelaysResponse(
             cachedRelayListEvent = queryResult.findPrimalEvent(NostrEventKind.PrimalUserRelaysList),
         )
+    }
+
+    override suspend fun getDefaultRelays(): List<String> {
+        val queryResult = primalApiClient.query(
+            message = PrimalCacheFilter(primalVerb = PrimalVerb.DEFAULT_RELAYS),
+        )
+
+        val list = queryResult.findPrimalEvent(NostrEventKind.PrimalDefaultRelaysList)
+        val content = list?.content
+        if (content.isNullOrEmpty()) throw WssException("Invalid content.")
+
+        return NostrJson.decodeFromString<List<String>>(list.content)
     }
 }

@@ -29,4 +29,5 @@ enum class PrimalVerb(val identifier: String) {
     NEW_DMS_COUNT("directmsg_count_2"),
     WALLET("wallet"),
     WALLET_MONITOR("wallet_monitor_2"),
+    DEFAULT_RELAYS("get_default_relays"),
 }

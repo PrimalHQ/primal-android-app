@@ -19,4 +19,6 @@ interface UsersApi {
     suspend fun getUserFollowing(userId: String): UsersResponse
 
     suspend fun getUserRelays(userId: String): UserRelaysResponse
+
+    suspend fun getDefaultRelays(): List<String>
 }

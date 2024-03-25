@@ -3,7 +3,7 @@ package net.primal.android.wallet.zaps
 import javax.inject.Inject
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.feed.repository.PostStatsUpdater
-import net.primal.android.networking.relays.BOOTSTRAP_RELAYS
+import net.primal.android.networking.relays.FALLBACK_RELAYS
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.domain.RelayKind
@@ -37,7 +37,7 @@ class ZapHandler @Inject constructor(
         val userAccount = accountsStore.findByIdOrNull(userId = userId)
         val userRelays = relayRepository.findRelays(userId, RelayKind.UserRelay)
             .map { it.mapToRelayDO() }
-            .ifEmpty { BOOTSTRAP_RELAYS }
+            .ifEmpty { FALLBACK_RELAYS }
         val targetLnUrlDecoded = target.lnUrlDecoded()
         val nostrZapper = userAccount?.resolveZapper()
         val defaultZapOptions = userAccount?.appSettings?.zapDefault

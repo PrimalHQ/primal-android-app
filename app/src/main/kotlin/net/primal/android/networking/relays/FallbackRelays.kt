@@ -2,7 +2,7 @@ package net.primal.android.networking.relays
 
 import net.primal.android.user.domain.toRelay
 
-val BOOTSTRAP_RELAYS = listOf(
+val FALLBACK_RELAYS = listOf(
     "wss://relay.primal.net",
     "wss://relay.damus.io",
     "wss://relay.nostr.band",

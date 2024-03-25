@@ -167,7 +167,7 @@ class CreateAccountHandlerTest {
         )
 
         coVerify {
-            relayRepository.bootstrapDefaultUserRelays(
+            relayRepository.bootstrapUserRelays(
                 withArg { it shouldBe keyPair.pubKey },
             )
         }
