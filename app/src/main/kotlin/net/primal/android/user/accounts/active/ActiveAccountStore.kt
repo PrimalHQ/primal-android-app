@@ -25,7 +25,7 @@ class ActiveAccountStore @Inject constructor(
 
     private val scope = CoroutineScope(dispatchers.io())
 
-    private val activeUserId = persistence.data.stateIn(
+    val activeUserId = persistence.data.stateIn(
         scope = scope,
         started = SharingStarted.Eagerly,
         initialValue = runBlocking { persistence.data.first() },

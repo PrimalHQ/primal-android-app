@@ -13,7 +13,6 @@ import net.primal.android.db.PrimalDatabase
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.android.user.accounts.active.ActiveUserAccountState
 import net.primal.android.user.domain.Relay
 import net.primal.android.user.domain.RelayKind
 import net.primal.android.user.domain.mapToRelayDO
@@ -37,27 +36,26 @@ class RelaysSocketManager @Inject constructor(
 
     init {
         initBootstrapRelaysPool()
-        observeActiveAccount()
+        observeActiveUserId()
     }
 
     private fun initBootstrapRelaysPool() {
         bootstrapRelays.changeRelays(BOOTSTRAP_RELAYS)
     }
 
-    private fun observeActiveAccount() =
+    private fun observeActiveUserId() =
         scope.launch {
-            activeAccountStore.activeAccountState.collect { activeAccountState ->
-                when (activeAccountState) {
-                    is ActiveUserAccountState.ActiveUserAccount -> {
-                        val data = activeAccountState.data
-                        relaysObserverJob?.cancel()
-                        relaysObserverJob = observeRelays(data.pubkey)
-                    }
-
-                    ActiveUserAccountState.NoUserAccount -> {
+            activeAccountStore.activeUserId.collect { userId ->
+                when {
+                    userId.isEmpty() -> {
                         relaysObserverJob?.cancel()
                         relaysObserverJob = null
                         clearRelayPools()
+                    }
+
+                    else -> {
+                        relaysObserverJob?.cancel()
+                        relaysObserverJob = observeRelays(userId)
                     }
                 }
             }

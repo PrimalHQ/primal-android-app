@@ -1,12 +1,14 @@
 package net.primal.android.networking.relays
 
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
-import net.primal.android.core.coroutines.CoroutinesTestRule
 import net.primal.android.core.advanceUntilIdleAndDelay
+import net.primal.android.core.coroutines.CoroutinesTestRule
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
 import net.primal.android.user.domain.Relay
@@ -39,6 +41,7 @@ class RelaysSocketManagerTest {
                     .buildLocal(pubkey = expectedUserId),
             ),
         )
+        coEvery { activeUserId } returns MutableStateFlow(expectedUserId)
     }
 
     @Test
