@@ -27,13 +27,11 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -165,7 +163,6 @@ private fun WalletActivationScreen(
                         error = state.error,
                         onErrorDismiss = {
                             eventPublisher(UiEvent.ClearErrorMessage)
-                            onClose()
                         },
                         onDataChange = { eventPublisher(UiEvent.ActivationDataChanged(data = it)) },
                         onActivationCodeRequest = { eventPublisher(UiEvent.ActivationRequest) },
@@ -451,40 +448,6 @@ private fun WalletErrorText(error: Throwable?, fallbackMessage: String) {
         color = AppTheme.colorScheme.error,
         style = AppTheme.typography.bodyMedium,
     )
-}
-
-@Composable
-private fun WalletActivationErrorHandler(
-    error: Throwable?,
-    fallbackMessage: String,
-    onErrorDismiss: () -> Unit,
-) {
-    if (error != null) {
-        val text = (error.message ?: "").ifEmpty { fallbackMessage }
-        AlertDialog(
-            containerColor = AppTheme.colorScheme.surfaceVariant,
-            onDismissRequest = onErrorDismiss,
-            title = {
-                Text(
-                    text = stringResource(id = R.string.wallet_activation_error_dialog_title),
-                    style = AppTheme.typography.titleLarge,
-                )
-            },
-            text = {
-                Text(
-                    text = text,
-                    style = AppTheme.typography.bodyLarge,
-                )
-            },
-            confirmButton = {
-                TextButton(onClick = onErrorDismiss) {
-                    Text(
-                        text = stringResource(id = android.R.string.ok),
-                    )
-                }
-            },
-        )
-    }
 }
 
 private class UiStateProvider : PreviewParameterProvider<WalletActivationContract.UiState> {

@@ -56,6 +56,7 @@ import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.wallet.activation.WalletActivationContract
 import net.primal.android.wallet.activation.WalletActivationViewModel
 import net.primal.android.wallet.activation.domain.WalletActivationStatus
+import net.primal.android.wallet.activation.ui.WalletActivationErrorHandler
 import net.primal.android.wallet.activation.ui.WalletActivationForm
 import net.primal.android.wallet.activation.ui.WalletActivationScreenContent
 import net.primal.android.wallet.activation.ui.WalletOtpVerification
@@ -103,22 +104,13 @@ fun OnboardingWalletActivation(
                     modifier = Modifier.fillMaxSize(),
                     state = state,
                     pendingDataContent = {
-                        WalletActivationForm(
+                        WalletActivationFormContent(
                             modifier = Modifier
                                 .padding(paddingValues)
                                 .verticalScroll(state = rememberScrollState()),
-                            colors = walletOnboardingOutlinedTextColor(),
-                            allCountries = state.allCountries,
-                            availableStates = state.availableStates,
-                            isHeaderIconVisible = !isKeyboardVisible,
-                            data = state.data,
-                            onDataChange = {
-                                eventPublisher(
-                                    WalletActivationContract.UiEvent.ActivationDataChanged(it),
-                                )
-                            },
-                            bottomSheetTheme = PrimalTheme.Sunrise,
-                            bottomSheetScrimColor = Color.Transparent,
+                            state = state,
+                            eventPublisher = eventPublisher,
+                            isKeyboardVisible = isKeyboardVisible,
                         )
                     },
                     pendingOtpValidation = {
@@ -152,6 +144,39 @@ fun OnboardingWalletActivation(
             },
         )
     }
+}
+
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+private fun WalletActivationFormContent(
+    modifier: Modifier,
+    state: WalletActivationContract.UiState,
+    eventPublisher: (WalletActivationContract.UiEvent) -> Unit,
+    isKeyboardVisible: Boolean,
+) {
+    WalletActivationErrorHandler(
+        error = state.error,
+        fallbackMessage = stringResource(id = R.string.app_generic_error),
+        onErrorDismiss = {
+            eventPublisher(WalletActivationContract.UiEvent.ClearErrorMessage)
+        },
+    )
+
+    WalletActivationForm(
+        modifier = modifier,
+        colors = walletOnboardingOutlinedTextColor(),
+        allCountries = state.allCountries,
+        availableStates = state.availableStates,
+        isHeaderIconVisible = !isKeyboardVisible,
+        data = state.data,
+        onDataChange = {
+            eventPublisher(
+                WalletActivationContract.UiEvent.ActivationDataChanged(it),
+            )
+        },
+        bottomSheetTheme = PrimalTheme.Sunrise,
+        bottomSheetScrimColor = Color.Transparent,
+    )
 }
 
 @Composable
