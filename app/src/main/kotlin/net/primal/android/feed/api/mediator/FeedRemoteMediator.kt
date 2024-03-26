@@ -142,7 +142,7 @@ class FeedRemoteMediator(
             }
 
             val feedResponse = try {
-                retry(times = 3, delay = 500L) {
+                retry(times = 1, delay = 500L) {
                     val response = withContext(dispatcherProvider.io()) { feedApi.getFeed(body = requestBody) }
                     if (response.paging == null) throw WssException("PagingEvent not found.")
                     response
