@@ -48,6 +48,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.pulltorefresh.PullToRefreshContainer
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -68,6 +71,7 @@ import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -122,6 +126,7 @@ import net.primal.android.core.compose.icons.primaliconpack.More
 import net.primal.android.core.compose.icons.primaliconpack.UserFeedAdd
 import net.primal.android.core.compose.isEmpty
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
+import net.primal.android.core.compose.pulltorefresh.LaunchedPullToRefreshEndingEffect
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.copyText
@@ -276,10 +281,28 @@ fun ProfileDetailsScreen(
         }
     }
 
+    val pullToRefreshState = rememberPullToRefreshState(
+        positionalThreshold = PullToRefreshDefaults.PositionalThreshold.times(1.5f),
+    )
+
+    LaunchedEffect(pullToRefreshState.isRefreshing) {
+        if (pullToRefreshState.isRefreshing) {
+            pagingItems.refresh()
+            eventPublisher(ProfileDetailsContract.UiEvent.RequestProfileUpdate)
+        }
+    }
+
+    LaunchedPullToRefreshEndingEffect(
+        mediatorLoadStates = pagingItems.loadState.mediator,
+        pullToRefreshState = pullToRefreshState,
+    )
+
     Surface(
         modifier = Modifier.navigationBarsPadding(),
     ) {
-        Box {
+        Box(
+            modifier = Modifier.nestedScroll(pullToRefreshState.nestedScrollConnection),
+        ) {
             FeedLazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(0.dp),
@@ -438,6 +461,12 @@ fun ProfileDetailsScreen(
                         }
                     }
                 },
+            )
+
+            PullToRefreshContainer(
+                modifier = Modifier.align(Alignment.TopCenter),
+                state = pullToRefreshState,
+                contentColor = AppTheme.colorScheme.primary,
             )
 
             SnackbarHost(

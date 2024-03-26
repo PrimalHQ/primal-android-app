@@ -79,7 +79,6 @@ class ProfileDetailsViewModel @Inject constructor(
     fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
 
     init {
-        fetchLatestMuteList()
         observeEvents()
         observeProfileData()
         observeProfileStats()
@@ -101,7 +100,10 @@ class ProfileDetailsViewModel @Inject constructor(
                     is UiEvent.MuteAction -> mute(it)
                     is UiEvent.UnmuteAction -> unmute(it)
                     is UiEvent.ChangeProfileFeed -> changeFeed(it)
-                    UiEvent.RequestProfileUpdate -> fetchLatestProfile()
+                    UiEvent.RequestProfileUpdate -> {
+                        fetchLatestProfile()
+                        fetchLatestMuteList()
+                    }
                     is UiEvent.ReportAbuse -> reportAbuse(it)
                 }
             }
