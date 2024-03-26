@@ -281,6 +281,7 @@ fun ProfileDetailsScreen(
     ) {
         Box {
             FeedLazyColumn(
+                modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(0.dp),
                 pagingItems = if (!state.isProfileMuted) pagingItems else noPagingItems,
                 zappingState = state.zappingState,

@@ -1,12 +1,20 @@
 package net.primal.android.core.compose.feed.list
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.pulltorefresh.PullToRefreshContainer
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.paging.compose.LazyPagingItems
@@ -20,8 +28,10 @@ import kotlinx.coroutines.withContext
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.feed.model.FeedPostsSyncStats
 import net.primal.android.core.compose.feed.model.ZappingState
+import net.primal.android.core.compose.pulltorefresh.LaunchedPullToRefreshEndingEffect
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.profile.report.OnReportContentClick
+import net.primal.android.theme.AppTheme
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -74,22 +84,46 @@ fun FeedNoteList(
         }
     }
 
-    FeedLazyColumn(
-        pagingItems = pagingItems,
-        contentPadding = paddingValues,
-        listState = feedListState,
-        zappingState = zappingState,
-        onPostClick = onPostClick,
-        onProfileClick = onProfileClick,
-        onPostLikeClick = onPostLikeClick,
-        onZapClick = onZapClick,
-        onRepostClick = onRepostClick,
-        onPostReplyClick = onPostReplyClick,
-        onPostQuoteClick = onPostQuoteClick,
-        onHashtagClick = onHashtagClick,
-        onMediaClick = onMediaClick,
-        onGoToWallet = onGoToWallet,
-        onMuteClick = onMuteClick,
-        onReportContentClick = onReportContentClick,
+    val pullToRefreshState = rememberPullToRefreshState()
+
+    LaunchedEffect(pullToRefreshState.isRefreshing) {
+        if (pullToRefreshState.isRefreshing) {
+            pagingItems.refresh()
+        }
+    }
+
+    LaunchedPullToRefreshEndingEffect(
+        mediatorLoadStates = pagingItems.loadState.mediator,
+        pullToRefreshState = pullToRefreshState,
     )
+
+    Box(
+        modifier = Modifier.nestedScroll(pullToRefreshState.nestedScrollConnection),
+    ) {
+        FeedLazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = paddingValues,
+            pagingItems = pagingItems,
+            listState = feedListState,
+            zappingState = zappingState,
+            onPostClick = onPostClick,
+            onProfileClick = onProfileClick,
+            onPostLikeClick = onPostLikeClick,
+            onZapClick = onZapClick,
+            onRepostClick = onRepostClick,
+            onPostReplyClick = onPostReplyClick,
+            onPostQuoteClick = onPostQuoteClick,
+            onHashtagClick = onHashtagClick,
+            onMediaClick = onMediaClick,
+            onGoToWallet = onGoToWallet,
+            onMuteClick = onMuteClick,
+            onReportContentClick = onReportContentClick,
+        )
+
+        PullToRefreshContainer(
+            modifier = Modifier.padding(paddingValues).align(Alignment.TopCenter),
+            state = pullToRefreshState,
+            contentColor = AppTheme.colorScheme.primary,
+        )
+    }
 }

@@ -4,7 +4,6 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -46,6 +45,7 @@ import timber.log.Timber
 @ExperimentalFoundationApi
 @Composable
 fun FeedLazyColumn(
+    modifier: Modifier = Modifier,
     pagingItems: LazyPagingItems<FeedPostUi>,
     contentPadding: PaddingValues,
     listState: LazyListState,
@@ -107,7 +107,7 @@ fun FeedLazyColumn(
     }
 
     LazyColumn(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier,
         contentPadding = contentPadding,
         state = listState,
     ) {
