@@ -294,7 +294,7 @@ fun ProfileDetailsScreen(
 
     LaunchedPullToRefreshEndingEffect(
         mediatorLoadStates = pagingItems.loadState.mediator,
-        pullToRefreshState = pullToRefreshState,
+        onRefreshEnd = { pullToRefreshState.endRefresh() },
     )
 
     Surface(

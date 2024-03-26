@@ -13,6 +13,7 @@ interface ThreadContract {
         val conversation: List<FeedPostUi> = emptyList(),
         val highlightPostIndex: Int = 0,
         val zappingState: ZappingState = ZappingState(),
+        val fetching: Boolean = false,
         val error: ThreadError? = null,
     ) {
         sealed class ThreadError {

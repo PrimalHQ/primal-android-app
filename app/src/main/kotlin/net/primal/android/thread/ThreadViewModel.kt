@@ -145,12 +145,15 @@ class ThreadViewModel @Inject constructor(
 
     private fun fetchRepliesFromNetwork() =
         viewModelScope.launch {
+            setState { copy(fetching = true) }
             try {
                 withContext(dispatcherProvider.io()) {
                     feedRepository.fetchReplies(postId = postId)
                 }
             } catch (error: WssException) {
                 Timber.w(error)
+            } finally {
+                setState { copy(fetching = false) }
             }
         }
 
