@@ -13,6 +13,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import java.time.Instant
 import java.time.temporal.ChronoUnit
+import kotlin.time.Duration.Companion.minutes
 import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.feed.model.FeedPostStatsUi
 import net.primal.android.core.compose.feed.model.FeedPostUi
@@ -92,7 +93,7 @@ fun PreviewReferencedPostListItemLight() {
                 authorHandle = "user",
                 authorInternetIdentifier = "android@primal.net",
                 authorAvatarCdnImage = CdnImage("https://i.imgur.com/Z8dpmvc.png"),
-                timestamp = Instant.now().minus(30, ChronoUnit.MINUTES),
+                timestamp = Instant.now().minus(30.minutes.inWholeMinutes, ChronoUnit.MINUTES),
                 nostrUris = emptyList(),
                 stats = FeedPostStatsUi(
                     repliesCount = 11,
@@ -134,7 +135,7 @@ fun PreviewReferencedPostListItemDark() {
                 authorHandle = "user",
                 authorInternetIdentifier = "android@primal.net",
                 authorAvatarCdnImage = CdnImage("https://i.imgur.com/Z8dpmvc.png"),
-                timestamp = Instant.now().minus(30, ChronoUnit.MINUTES),
+                timestamp = Instant.now().minus(30.minutes.inWholeMinutes, ChronoUnit.MINUTES),
                 nostrUris = emptyList(),
                 stats = FeedPostStatsUi(
                     repliesCount = 11,

@@ -379,8 +379,8 @@ private fun ChatMessageListItem(
             NoteContent(
                 modifier = Modifier
                     .padding(
-                        start = if (chatMessage.isUserMessage) maxWidth.times(0.25f) else 16.dp,
-                        end = if (chatMessage.isUserMessage) 16.dp else maxWidth.times(0.25f),
+                        start = if (chatMessage.isUserMessage) maxWidth.times(other = 0.25f) else 16.dp,
+                        end = if (chatMessage.isUserMessage) 16.dp else maxWidth.times(other = 0.25f),
                     )
                     .padding(bottom = if (showTimestamp) 2.dp else 4.dp)
                     .background(color = backgroundColor, shape = backgroundShape)

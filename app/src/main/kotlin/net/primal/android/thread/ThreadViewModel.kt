@@ -124,7 +124,7 @@ class ThreadViewModel @Inject constructor(
         }
     }
 
-    private suspend fun delayShortlyToPropagateHighlightedPost() = delay(100)
+    private suspend fun delayShortlyToPropagateHighlightedPost() = delay(100.milliseconds)
 
     private suspend fun subscribeToConversationChanges() {
         feedRepository.observeConversation(postId = postId)

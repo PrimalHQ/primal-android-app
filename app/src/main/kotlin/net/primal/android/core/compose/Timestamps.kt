@@ -11,52 +11,52 @@ import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 import net.primal.android.R
 
+private const val MINUTE = 60
+private const val HOUR = MINUTE * 60
+private const val DAY = HOUR * 24
+private const val WEEK = DAY * 7
+private const val MONTH = DAY * 30
+private const val YEAR = DAY * 365
+
 @Composable
 fun Instant.asBeforeNowFormat(shortFormat: Boolean = true): String {
     val now = LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()
     val diff = ChronoUnit.SECONDS.between(this, now)
 
-    val minute = 60
-    val hour = minute * 60
-    val day = hour * 24
-    val week = day * 7
-    val month = day * 30
-    val year = day * 365
-
     return when {
-        diff < minute -> stringResource(R.string.timestamp_since_just_now)
+        diff < MINUTE -> stringResource(R.string.timestamp_since_just_now)
 
-        diff < hour -> (diff / minute).format(
+        diff < HOUR -> (diff / MINUTE).format(
             shortResId = R.string.timestamp_since_minutes,
             longResId = R.plurals.timestamp_since_minutes,
             shortFormat = shortFormat,
         )
 
-        diff < day -> (diff / hour).format(
+        diff < DAY -> (diff / HOUR).format(
             shortResId = R.string.timestamp_since_hours,
             longResId = R.plurals.timestamp_since_hours,
             shortFormat = shortFormat,
         )
 
-        diff < week -> (diff / day).format(
+        diff < WEEK -> (diff / DAY).format(
             shortResId = R.string.timestamp_since_days,
             longResId = R.plurals.timestamp_since_days,
             shortFormat = shortFormat,
         )
 
-        diff < month -> (diff / week).format(
+        diff < MONTH -> (diff / WEEK).format(
             shortResId = R.string.timestamp_since_weeks,
             longResId = R.plurals.timestamp_since_weeks,
             shortFormat = shortFormat,
         )
 
-        diff < year -> (diff / month).format(
+        diff < YEAR -> (diff / MONTH).format(
             shortResId = R.string.timestamp_since_months,
             longResId = R.plurals.timestamp_since_months,
             shortFormat = shortFormat,
         )
 
-        else -> (diff / year).format(
+        else -> (diff / YEAR).format(
             shortResId = R.string.timestamp_since_years,
             longResId = R.plurals.timestamp_since_years,
             shortFormat = shortFormat,

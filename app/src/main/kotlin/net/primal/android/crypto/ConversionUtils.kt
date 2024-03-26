@@ -35,21 +35,9 @@ fun String.urlToLnUrlHrp() =
 @Throws(IllegalArgumentException::class)
 fun String.bech32ToHexOrThrow() = Bech32.decodeBytes(bech32 = this).second.toHex()
 
-fun ByteArray.toNsec() = Bech32.encodeBytes(hrp = "nsec", this, Bech32.Encoding.Bech32)
-
 fun ByteArray.toNpub() = Bech32.encodeBytes(hrp = "npub", this, Bech32.Encoding.Bech32)
 
-fun ByteArray.toNote() = Bech32.encodeBytes(hrp = "note", this, Bech32.Encoding.Bech32)
-
 fun ByteArray.toHex() = String(Hex.encode(this))
-
-fun Int.toByteArray(): ByteArray {
-    val bytes = ByteArray(4)
-    (0..3).forEach {
-        bytes[3 - it] = ((this ushr (8 * it)) and 0xFFFF).toByte()
-    }
-    return bytes
-}
 
 @Throws(IllegalArgumentException::class)
 fun String.bechToBytesOrThrow(hrp: String? = null): ByteArray {

@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.delay
 import net.primal.android.R
 
@@ -31,7 +32,7 @@ fun ListNoContent(
     val visible = rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        delay(500L)
+        delay(500.milliseconds)
         visible.value = true
     }
 

@@ -67,9 +67,7 @@ fun PrimalDrawerScaffold(
     }
 
     val focusModeOn by remember(topAppBarState) {
-        derivedStateOf {
-            topAppBarState.collapsedFraction > 0.5f
-        }
+        derivedStateOf { topAppBarState.collapsedFraction > 0.5f }
     }
 
     ModalNavigationDrawer(
@@ -139,7 +137,10 @@ fun PrimalDrawerScaffold(
                             .graphicsLayer {
                                 this.alpha = (1 - topAppBarState.collapsedFraction) * 1.0f
                                 this.translationY = (bottomBarInitialHeight - bottomBarRealHeight).toPx()
-                                this.rotationZ = (bottomBarInitialHeight - bottomBarRealHeight).toPx().coerceIn(0f, 45f)
+                                this.rotationZ = (bottomBarInitialHeight - bottomBarRealHeight).toPx().coerceIn(
+                                    minimumValue = 0f,
+                                    maximumValue = 45f,
+                                )
                                 this.clip = false
                             },
                     ) {

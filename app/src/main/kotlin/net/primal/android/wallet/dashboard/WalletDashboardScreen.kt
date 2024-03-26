@@ -209,7 +209,7 @@ fun WalletDashboardScreen(
                                         .padding(vertical = 32.dp)
                                         .then(
                                             if (state.primalWallet?.kycLevel == WalletKycLevel.None) {
-                                                Modifier.graphicsLayer { alpha = 0.42f }
+                                                Modifier.graphicsLayer { alpha = DISABLED_WALLET_ALPHA }
                                             } else {
                                                 Modifier
                                             },
@@ -343,3 +343,5 @@ fun WalletDashboardScreen(
         },
     )
 }
+
+private const val DISABLED_WALLET_ALPHA = 0.42f

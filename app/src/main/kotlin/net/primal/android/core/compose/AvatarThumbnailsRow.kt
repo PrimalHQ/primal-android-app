@@ -58,21 +58,24 @@ fun AvatarThumbnailsRow(
                             hasBorder = hasAvatarBorder,
                             borderColor = avatarBorderColor,
                         )
-                        .background(color = Color(0xFFC8C8C8))
+                        .background(color = moreBackgroundColor)
                         .fillMaxSize(),
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
-                        text = "+${avatarsOverflowCount.coerceAtMost(99)}",
+                        text = "+${avatarsOverflowCount.coerceAtMost(maximumValue = 99)}",
                         fontSize = 12.sp,
                         style = AppTheme.typography.bodySmall,
-                        color = Color(0xFF111111),
+                        color = moreForegroundColor,
                     )
                 }
             }
         }
     }
 }
+
+private val moreBackgroundColor = Color(0xFFC8C8C8)
+private val moreForegroundColor = Color(0xFF111111)
 
 @Composable
 private fun AvatarSpacer(width: Dp, content: @Composable () -> Unit) {

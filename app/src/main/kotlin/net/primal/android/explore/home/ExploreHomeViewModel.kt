@@ -64,7 +64,7 @@ class ExploreHomeViewModel @Inject constructor(
             exploreRepository.observeTrendingHashtags()
                 .map { data -> data.map { it.asHashtagUi() } }
                 .collect {
-                    setState { copy(hashtags = it.chunked(3)) }
+                    setState { copy(hashtags = it.chunked(size = 3)) }
                 }
         }
 

@@ -6,6 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.delay
 import net.primal.android.scanner.PrimalCamera
 import net.primal.android.scanner.analysis.QrCodeResult
@@ -15,7 +16,7 @@ fun SendPaymentTabScan(isClosing: Boolean, onQrCodeDetected: (QrCodeResult) -> U
     var cameraVisible by remember { mutableStateOf(false) }
     if (!cameraVisible) {
         LaunchedEffect(Unit) {
-            delay(100L)
+            delay(100.milliseconds)
             cameraVisible = true
         }
     }

@@ -98,7 +98,7 @@ fun CameraQrCodeDetector(
             CameraOverlayContent(
                 modifier = Modifier.fillMaxSize(),
                 outsideColor = AppTheme.colorScheme.scrim.copy(alpha = 0.75f),
-                viewPortSize = maxWidth.times(0.7f),
+                viewPortSize = maxWidth.times(other = 0.7f),
             )
         }
     }
@@ -119,7 +119,7 @@ private fun CameraOverlayContent(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(0.45f, fill = true)
+                .weight(weight = 0.45f, fill = true)
                 .background(color = outsideColor),
         ) {
             headerContent()
@@ -130,7 +130,7 @@ private fun CameraOverlayContent(
         ) {
             Box(
                 modifier = Modifier
-                    .weight(1f, fill = true)
+                    .weight(weight = 1f, fill = true)
                     .height(viewPortSize)
                     .background(color = outsideColor),
             )
@@ -145,7 +145,7 @@ private fun CameraOverlayContent(
 
             Box(
                 modifier = Modifier
-                    .weight(1f, fill = true)
+                    .weight(weight = 1f, fill = true)
                     .height(viewPortSize)
                     .background(color = outsideColor),
             )
@@ -154,7 +154,7 @@ private fun CameraOverlayContent(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(0.55f, fill = true)
+                .weight(weight = 0.55f, fill = true)
                 .background(color = outsideColor),
         ) {
             footerContent()

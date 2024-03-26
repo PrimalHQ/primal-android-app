@@ -150,7 +150,7 @@ fun NotificationsSettingsBlock(
                     )
                     Text(
                         modifier = Modifier
-                            .fillMaxWidth(0.75f)
+                            .fillMaxWidth(fraction = 0.75f)
                             .padding(bottom = 5.dp),
                         text = notificationSwitchUi.notificationType.toTitle(),
                         fontWeight = FontWeight.W400,

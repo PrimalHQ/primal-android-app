@@ -542,8 +542,8 @@ private fun ReceivePaymentEditor(
         AnimatedVisibility(
             modifier = Modifier.fillMaxWidth(fraction = 0.8f),
             visible = !keyboardVisible,
-            enter = fadeIn(animationSpec = tween(220)) + scaleIn(),
-            exit = fadeOut(animationSpec = tween(90)) + scaleOut(),
+            enter = fadeIn(animationSpec = tween(durationMillis = 220)) + scaleIn(),
+            exit = fadeOut(animationSpec = tween(durationMillis = 90)) + scaleOut(),
         ) {
             Column(
                 verticalArrangement = Arrangement.Center,

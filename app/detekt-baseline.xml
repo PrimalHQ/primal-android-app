@@ -24,7 +24,6 @@
     <ID>DestructuringDeclarationWithTooManyEntries:PrimalDrawer.kt$val (avatarRef, usernameRef, iconRef, identifierRef, statsRef) = createRefs()</ID>
     <ID>EmptyFunctionBlock:PostStatsUpdaterTest.kt$PostStatsUpdaterTest${ }</ID>
     <ID>EmptyFunctionBlock:ProfileRepositoryTest.kt$ProfileRepositoryTest${ }</ID>
-    <ID>ForEachOnRange:ConversionUtils.kt$0..3</ID>
     <ID>ImplicitDefaultLocale:IntUtils.kt$String.format("%.1f", total)</ID>
     <ID>LongMethod:AccountSettingsScreen.kt$@Composable fun PrivateKeySection(nsec: String)</ID>
     <ID>LongMethod:AppearanceSettingsScreen.kt$@Composable private fun ThemeBox( primalTheme: PrimalTheme, state: AppearanceSettingsContract.UiState, eventPublisher: (AppearanceSettingsContract.UiEvent) -&gt; Unit, )</ID>
@@ -67,56 +66,20 @@
     <ID>LongParameterList:ProfileDetailsViewModel.kt$ProfileDetailsViewModel$( savedStateHandle: SavedStateHandle, private val dispatcherProvider: CoroutineDispatcherProvider, private val activeAccountStore: ActiveAccountStore, private val feedRepository: FeedRepository, private val profileRepository: ProfileRepository, private val postRepository: PostRepository, private val zapHandler: ZapHandler, private val settingsRepository: SettingsRepository, private val mutedUserRepository: MutedUserRepository, )</ID>
     <ID>LongParameterList:SubscriptionsManager.kt$SubscriptionsManager$( dispatcherProvider: CoroutineDispatcherProvider, private val activeAccountStore: ActiveAccountStore, private val userRepository: UserRepository, private val nostrNotary: NostrNotary, private val appConfigProvider: AppConfigProvider, @PrimalCacheApiClient private val cacheApiClient: PrimalApiClient, @PrimalWalletApiClient private val walletApiClient: PrimalApiClient, )</ID>
     <ID>LongParameterList:ThreadViewModel.kt$ThreadViewModel$( savedStateHandle: SavedStateHandle, private val dispatcherProvider: CoroutineDispatcherProvider, private val activeAccountStore: ActiveAccountStore, private val feedRepository: FeedRepository, private val postRepository: PostRepository, private val profileRepository: ProfileRepository, private val zapHandler: ZapHandler, private val mutedUserRepository: MutedUserRepository, )</ID>
-    <ID>MagicNumber:AvatarThumbnailsRow.kt$0xFF111111</ID>
-    <ID>MagicNumber:AvatarThumbnailsRow.kt$0xFFC8C8C8</ID>
-    <ID>MagicNumber:AvatarThumbnailsRow.kt$99</ID>
-    <ID>MagicNumber:CameraQrCodeDetector.kt$0.45f</ID>
-    <ID>MagicNumber:CameraQrCodeDetector.kt$0.55f</ID>
-    <ID>MagicNumber:CameraQrCodeDetector.kt$0.7f</ID>
-    <ID>MagicNumber:ChatScreen.kt$0.25f</ID>
-    <ID>MagicNumber:ConversionUtils.kt$0xFFFF</ID>
-    <ID>MagicNumber:ConversionUtils.kt$3</ID>
-    <ID>MagicNumber:ConversionUtils.kt$4</ID>
-    <ID>MagicNumber:ConversionUtils.kt$8</ID>
-    <ID>MagicNumber:ExploreHomeViewModel.kt$ExploreHomeViewModel$3</ID>
-    <ID>MagicNumber:Fading.kt$0.99f</ID>
     <ID>MagicNumber:FeedNoteList.kt$100</ID>
     <ID>MagicNumber:FeedNoteList.kt$30</ID>
     <ID>MagicNumber:FeedNoteList.kt$5</ID>
-    <ID>MagicNumber:FeedViewModel.kt$FeedViewModel$3</ID>
-    <ID>MagicNumber:IntUtils.kt$10</ID>
-    <ID>MagicNumber:IntUtils.kt$1000</ID>
-    <ID>MagicNumber:IntUtils.kt$1000.0</ID>
-    <ID>MagicNumber:IntUtils.kt$1000000.0</ID>
-    <ID>MagicNumber:IntUtils.kt$1000000000.0</ID>
-    <ID>MagicNumber:ListNoContent.kt$500L</ID>
     <ID>MagicNumber:Nip19TLV.kt$Nip19TLV$4</ID>
     <ID>MagicNumber:Nip19TLV.kt$Nip19TLV.Type.KIND$3</ID>
     <ID>MagicNumber:NostrIncomingMessageParser.kt$3</ID>
     <ID>MagicNumber:NostrResources.kt$3</ID>
     <ID>MagicNumber:NostrWalletConnectParser.kt$64</ID>
-    <ID>MagicNumber:NotificationsSettingsScreen.kt$0.75f</ID>
     <ID>MagicNumber:PrimalDrawer.kt$0.5f</ID>
     <ID>MagicNumber:PrimalDrawerScaffold.kt$0.5f</ID>
-    <ID>MagicNumber:PrimalDrawerScaffold.kt$45f</ID>
-    <ID>MagicNumber:QrCodeAnalyzer.kt$QrCodeAnalyzer$3</ID>
-    <ID>MagicNumber:ReceivePaymentScreen.kt$220</ID>
-    <ID>MagicNumber:ReceivePaymentScreen.kt$90</ID>
-    <ID>MagicNumber:ReferencedNoteCard.kt$30</ID>
-    <ID>MagicNumber:SendPaymentTabScan.kt$100L</ID>
-    <ID>MagicNumber:ThreadScreen.kt$3600</ID>
-    <ID>MagicNumber:ThreadViewModel.kt$ThreadViewModel$100</ID>
-    <ID>MagicNumber:Timestamps.kt$24</ID>
-    <ID>MagicNumber:Timestamps.kt$30</ID>
-    <ID>MagicNumber:Timestamps.kt$365</ID>
-    <ID>MagicNumber:Timestamps.kt$60</ID>
-    <ID>MagicNumber:Timestamps.kt$7</ID>
-    <ID>MagicNumber:ValidationUtils.kt$32</ID>
-    <ID>MagicNumber:WalletDashboardScreen.kt$0.42f</ID>
     <ID>MatchingDeclarationName:__PrimalIcons.kt$PrimalIcons</ID>
     <ID>NestedBlockDepth:FeedRemoteMediator.kt$FeedRemoteMediator$override suspend fun load(loadType: LoadType, state: PagingState&lt;Int, FeedPost&gt;): MediatorResult</ID>
     <ID>ReturnCount:FeedRemoteMediator.kt$FeedRemoteMediator$override suspend fun load(loadType: LoadType, state: PagingState&lt;Int, FeedPost&gt;): MediatorResult</ID>
-    <ID>ReturnCount:IntUtils.kt$fun Long.shortened(): String</ID>
+    <ID>ReturnCount:IntUtils.kt$@Suppress("MagicNumber") fun Long.shortened(): String</ID>
     <ID>ReturnCount:LnInvoiceUtils.kt$LnInvoiceUtils$private fun getAmount(invoice: String): BigDecimal</ID>
     <ID>ReturnCount:MessagesRemoteMediator.kt$MessagesRemoteMediator$override suspend fun load(loadType: LoadType, state: PagingState&lt;Int, DirectMessage&gt;): MediatorResult</ID>
     <ID>ReturnCount:NostrResources.kt$private fun String.nostrUriToBytes(): ByteArray?</ID>
@@ -129,7 +92,6 @@
     <ID>ThrowingExceptionsWithoutMessageOrCause:ThreadViewModel.kt$ThreadViewModel$IllegalStateException()</ID>
     <ID>ThrowsCount:LnInvoiceUtils.kt$LnInvoiceUtils$private fun decodeUnlimitedLength(invoice: String): Boolean</ID>
     <ID>TooGenericExceptionCaught:NostrIncomingMessageParser.kt$error: Exception</ID>
-    <ID>TooManyFunctions:ConversionUtils.kt$net.primal.android.crypto.ConversionUtils.kt</ID>
     <ID>TooManyFunctions:NostrNotary.kt$NostrNotary</ID>
     <ID>TooManyFunctions:NostrResources.kt$net.primal.android.nostr.ext.NostrResources.kt</ID>
     <ID>TooManyFunctions:ProfileRepository.kt$ProfileRepository</ID>

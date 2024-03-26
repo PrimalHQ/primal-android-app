@@ -19,6 +19,7 @@ class QrCodeAnalyzer(
         setupImageScanner()
     }
 
+    @Suppress("MagicNumber")
     private fun setupImageScanner() {
         imageScanner.setConfig(0, Config.X_DENSITY, 3)
         imageScanner.setConfig(0, Config.Y_DENSITY, 3)

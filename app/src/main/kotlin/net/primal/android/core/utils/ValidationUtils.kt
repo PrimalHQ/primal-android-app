@@ -41,7 +41,7 @@ private fun String.isValidNsec(): Boolean {
 
     return try {
         val decoded = Bech32.decodeBytes(this)
-        decoded.first == "nsec" && decoded.second.size == 32
+        decoded.first == "nsec" && decoded.second.size == KEY_BYTES_SIZE
     } catch (error: IllegalArgumentException) {
         Timber.w(error)
         false
@@ -49,6 +49,7 @@ private fun String.isValidNsec(): Boolean {
 }
 
 private const val NPUB_LENGTH = 63
+private const val KEY_BYTES_SIZE = 32
 
 private fun String.isValidNpub(): Boolean {
     if (!this.startsWith("npub")) return false

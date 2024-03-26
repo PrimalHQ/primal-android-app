@@ -100,7 +100,7 @@ class FeedViewModel @Inject constructor(
                 feedDirective = feedDirective,
                 since = Instant.now().epochSecond,
             ).collect { syncData ->
-                val limit = if (syncData.count <= 3) syncData.count else 3
+                val limit = if (syncData.count <= MAX_AVATARS) syncData.count else MAX_AVATARS
                 val newPosts = withContext(dispatcherProvider.io()) {
                     feedRepository.findNewestPosts(
                         feedDirective = feedDirective,
@@ -304,5 +304,9 @@ class FeedViewModel @Inject constructor(
                 setState { copy(error = null) }
             }
         }
+    }
+
+    companion object {
+        private const val MAX_AVATARS = 3
     }
 }

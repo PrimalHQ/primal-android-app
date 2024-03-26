@@ -60,6 +60,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import java.time.Instant
+import kotlin.time.Duration.Companion.seconds
 import net.primal.android.R
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.PrimalDefaults
@@ -691,7 +692,7 @@ fun ThreadScreenPreview() {
                         authorAvatarCdnImage = null,
                         attachments = emptyList(),
                         nostrUris = emptyList(),
-                        timestamp = Instant.now().minusSeconds(3600),
+                        timestamp = Instant.now().minusSeconds(3600.seconds.inWholeSeconds),
                         stats = FeedPostStatsUi(),
                         hashtags = listOf("#nostr"),
                         rawNostrEventJson = "raaaw",
