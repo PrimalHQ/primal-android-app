@@ -42,11 +42,7 @@ fun ByteArray.toHex() = String(Hex.encode(this))
 @Throws(IllegalArgumentException::class)
 fun String.bechToBytesOrThrow(hrp: String? = null): ByteArray {
     val decodedForm = Bech32.decodeBytes(this)
-    hrp?.also {
-        if (it != decodedForm.first) {
-            throw IllegalArgumentException("Expected $it but obtained ${decodedForm.first}")
-        }
-    }
+    hrp?.also { require(it == decodedForm.first) }
     return decodedForm.second
 }
 

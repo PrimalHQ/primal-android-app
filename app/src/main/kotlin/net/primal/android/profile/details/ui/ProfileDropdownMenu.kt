@@ -1,0 +1,169 @@
+package net.primal.android.profile.details.ui
+
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import kotlinx.coroutines.launch
+import net.primal.android.R
+import net.primal.android.core.compose.AppBarIcon
+import net.primal.android.core.compose.dropdown.DropdownPrimalMenu
+import net.primal.android.core.compose.dropdown.DropdownPrimalMenuItem
+import net.primal.android.core.compose.icons.PrimalIcons
+import net.primal.android.core.compose.icons.primaliconpack.ContextMuteUser
+import net.primal.android.core.compose.icons.primaliconpack.ContextReportUser
+import net.primal.android.core.compose.icons.primaliconpack.ContextShare
+import net.primal.android.core.compose.icons.primaliconpack.More
+import net.primal.android.core.compose.icons.primaliconpack.UserFeedAdd
+import net.primal.android.core.utils.resolvePrimalProfileLink
+import net.primal.android.core.utils.systemShareText
+import net.primal.android.profile.details.ProfileDetailsContract
+import net.primal.android.theme.AppTheme
+
+@Composable
+fun ProfileDropdownMenu(
+    profileId: String,
+    profileName: String,
+    isActiveUser: Boolean,
+    isProfileMuted: Boolean,
+    isProfileFeedInActiveUserFeeds: Boolean,
+    snackbarHostState: SnackbarHostState,
+    eventPublisher: (ProfileDetailsContract.UiEvent) -> Unit,
+    onReportClick: () -> Unit,
+) {
+    val context = LocalContext.current
+    var menuVisible by remember { mutableStateOf(false) }
+
+    AppBarIcon(
+        icon = PrimalIcons.More,
+        onClick = { menuVisible = true },
+        appBarIconContentDescription = stringResource(id = R.string.accessibility_profile_drop_down),
+    )
+
+    DropdownPrimalMenu(
+        expanded = menuVisible,
+        onDismissRequest = { menuVisible = false },
+    ) {
+        if (!isActiveUser) {
+            AddOrRemoveUserFeedMenuItem(
+                profileId = profileId,
+                profileName = profileName,
+                isProfileFeedInActiveUserFeeds = isProfileFeedInActiveUserFeeds,
+                snackbarHostState = snackbarHostState,
+                eventPublisher = eventPublisher,
+                onDismiss = { menuVisible = false },
+            )
+        }
+
+        DropdownPrimalMenuItem(
+            trailingIconVector = PrimalIcons.ContextShare,
+            text = stringResource(id = R.string.profile_context_share_profile),
+            onClick = {
+                systemShareText(context = context, text = resolvePrimalProfileLink(profileId = profileId))
+                menuVisible = false
+            },
+        )
+
+        if (!isActiveUser) {
+            MuteOrUnmuteProfileMenuItem(
+                profileId = profileId,
+                isProfileMuted = isProfileMuted,
+                eventPublisher = eventPublisher,
+                onDismiss = { menuVisible = false },
+            )
+
+            DropdownPrimalMenuItem(
+                trailingIconVector = PrimalIcons.ContextReportUser,
+                tint = AppTheme.colorScheme.error,
+                text = stringResource(id = R.string.context_menu_report_user),
+                onClick = {
+                    onReportClick()
+                    menuVisible = false
+                },
+            )
+        }
+    }
+}
+
+@Composable
+private fun MuteOrUnmuteProfileMenuItem(
+    profileId: String,
+    isProfileMuted: Boolean,
+    eventPublisher: (ProfileDetailsContract.UiEvent) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    DropdownPrimalMenuItem(
+        trailingIconVector = PrimalIcons.ContextMuteUser,
+        text = if (isProfileMuted) {
+            stringResource(id = R.string.context_menu_unmute_user)
+        } else {
+            stringResource(id = R.string.context_menu_mute_user)
+        },
+        tint = AppTheme.colorScheme.error,
+        onClick = {
+            eventPublisher(
+                if (isProfileMuted) {
+                    ProfileDetailsContract.UiEvent.UnmuteAction(profileId = profileId)
+                } else {
+                    ProfileDetailsContract.UiEvent.MuteAction(profileId = profileId)
+                },
+            )
+            onDismiss()
+        },
+    )
+}
+
+@Composable
+private fun AddOrRemoveUserFeedMenuItem(
+    profileId: String,
+    profileName: String,
+    isProfileFeedInActiveUserFeeds: Boolean,
+    snackbarHostState: SnackbarHostState,
+    eventPublisher: (ProfileDetailsContract.UiEvent) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val uiScope = rememberCoroutineScope()
+    val title = stringResource(id = R.string.profile_user_feed_title, profileName)
+    val addedToUserFeedsMessage = stringResource(id = R.string.app_added_to_user_feeds)
+    val removedFromUserFeedsMessage = stringResource(id = R.string.app_removed_from_user_feeds)
+
+    DropdownPrimalMenuItem(
+        trailingIconVector = PrimalIcons.UserFeedAdd,
+        text = if (isProfileFeedInActiveUserFeeds) {
+            stringResource(id = R.string.profile_context_remove_user_feed)
+        } else {
+            stringResource(id = R.string.profile_context_add_user_feed)
+        },
+        onClick = {
+            if (isProfileFeedInActiveUserFeeds) {
+                eventPublisher(ProfileDetailsContract.UiEvent.RemoveUserFeedAction(directive = profileId))
+                uiScope.launch {
+                    snackbarHostState.showSnackbar(
+                        message = removedFromUserFeedsMessage,
+                        duration = SnackbarDuration.Short,
+                    )
+                }
+            } else {
+                eventPublisher(
+                    ProfileDetailsContract.UiEvent.AddUserFeedAction(
+                        name = title,
+                        directive = profileId,
+                    ),
+                )
+                uiScope.launch {
+                    snackbarHostState.showSnackbar(
+                        message = addedToUserFeedsMessage,
+                        duration = SnackbarDuration.Short,
+                    )
+                }
+            }
+            onDismiss()
+        },
+    )
+}
