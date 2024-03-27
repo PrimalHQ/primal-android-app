@@ -35,11 +35,6 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.pow
 
-@Suppress("TopLevelPropertyNaming")
-private const val CrossfadeDurationMs = 100
-@Suppress("TopLevelPropertyNaming")
-private const val MaxProgressArc = 0.8f
-
 private val StrokeWidth = 2.5.dp
 private val ArcRadius = 5.5.dp
 private val SpinnerSize = 16.dp // (ArcRadius + PullRefreshIndicatorDefaults.StrokeWidth).times(2)
@@ -55,7 +50,7 @@ fun PrimalPullToRefreshIndicator(
 ) {
     Crossfade(
         targetState = state.isRefreshing,
-        animationSpec = tween(durationMillis = CrossfadeDurationMs),
+        animationSpec = tween(durationMillis = 100),
     ) { refreshing ->
         Box(
             modifier = modifier.fillMaxSize(),
@@ -78,10 +73,7 @@ fun PrimalPullToRefreshIndicator(
 }
 
 @Composable
-private fun CircularArrowProgressIndicator(
-    progress: () -> Float,
-    color: Color,
-) {
+private fun CircularArrowProgressIndicator(progress: () -> Float, color: Color) {
     val path = remember { Path().apply { fillType = PathFillType.EvenOdd } }
     Canvas(
         Modifier
@@ -89,7 +81,7 @@ private fun CircularArrowProgressIndicator(
                 progressBarRangeInfo =
                     ProgressBarRangeInfo(progress(), 0f..1f, 0)
             }
-            .size(SpinnerSize)
+            .size(SpinnerSize),
     ) {
         val values = ArrowValues(progress())
         rotate(degrees = values.rotation) {
@@ -105,7 +97,7 @@ private fun DrawScope.drawCircularIndicator(
     color: Color,
     values: ArrowValues,
     arcBounds: Rect,
-    strokeWidth: Dp
+    strokeWidth: Dp,
 ) {
     drawArc(
         color = color,
@@ -116,8 +108,8 @@ private fun DrawScope.drawCircularIndicator(
         size = arcBounds.size,
         style = Stroke(
             width = strokeWidth.toPx(),
-            cap = StrokeCap.Butt
-        )
+            cap = StrokeCap.Butt,
+        ),
     )
 }
 
@@ -126,7 +118,7 @@ private class ArrowValues(
     val rotation: Float,
     val startAngle: Float,
     val endAngle: Float,
-    val scale: Float
+    val scale: Float,
 )
 
 @Suppress("MagicNumber")
@@ -141,7 +133,8 @@ private fun ArrowValues(progress: Float): ArrowValues {
     val tensionPercent = linearTension - linearTension.pow(2) / 4
 
     // Calculations based on SwipeRefreshLayout specification.
-    val endTrim = adjustedPercent * MaxProgressArc
+    val maxProgressArc = 0.8f
+    val endTrim = adjustedPercent * maxProgressArc
     val rotation = (-0.25f + 0.4f * adjustedPercent + tensionPercent) * 0.5f
     val startAngle = rotation * 360
     val endAngle = (rotation + endTrim) * 360
@@ -162,7 +155,7 @@ private fun DrawScope.drawArrow(
     // Line to tip of arrow
     arrow.lineTo(
         x = ArrowWidth.toPx() * values.scale / 2,
-        y = ArrowHeight.toPx() * values.scale
+        y = ArrowHeight.toPx() * values.scale,
     )
     arrow.lineTo(x = ArrowWidth.toPx() * values.scale, y = 0f) // Line to right corner
 
@@ -171,8 +164,8 @@ private fun DrawScope.drawArrow(
     arrow.translate(
         Offset(
             x = radius + bounds.center.x - inset,
-            y = bounds.center.y - strokeWidth.toPx()
-        )
+            y = bounds.center.y - strokeWidth.toPx(),
+        ),
     )
     rotate(degrees = values.endAngle - strokeWidth.toPx()) {
         drawPath(path = arrow, color = color, style = Stroke(strokeWidth.toPx()))
