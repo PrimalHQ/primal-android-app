@@ -144,7 +144,6 @@ fun EditProfileContent(
                         eventPublisher(ProfileEditorContract.UiEvent.UsernameChangedEvent(it))
                     }
                 },
-                isRequired = true,
                 prefix = "@",
             )
             Spacer(modifier = Modifier.height(12.dp))
@@ -199,7 +198,7 @@ fun EditProfileContent(
         ) {
             PrimalLoadingButton(
                 text = stringResource(id = R.string.profile_save_profile_button),
-                enabled = !state.loading && state.username.isNotEmpty(),
+                enabled = !state.loading,
                 loading = state.loading,
                 onClick = {
                     keyboardController?.hide()
@@ -244,8 +243,8 @@ fun PreviewEditProfileScreen() {
     PrimalTheme(primalTheme = PrimalTheme.Sunset) {
         ProfileEditorScreen(
             state = ProfileEditorContract.UiState(
-                username = "Tralala Handle",
-                displayName = "Tralala Display Name",
+                username = "Random Handle",
+                displayName = "Random Display Name",
                 aboutMe = "About me",
                 website = "http://www.example.com",
                 lightningAddress = "tralala@getalby.com",
