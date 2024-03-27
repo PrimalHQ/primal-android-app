@@ -19,6 +19,8 @@ class ProfileDataExtTests {
         ownerId = ownerId,
         displayName = displayName,
         handle = name,
+        aboutHashtags = emptyList(),
+        aboutUris = emptyList(),
     )
 
     @Test
