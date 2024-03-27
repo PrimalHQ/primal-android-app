@@ -127,6 +127,7 @@ import net.primal.android.core.compose.icons.primaliconpack.UserFeedAdd
 import net.primal.android.core.compose.isEmpty
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.core.compose.pulltorefresh.LaunchedPullToRefreshEndingEffect
+import net.primal.android.core.compose.pulltorefresh.PrimalPullToRefreshIndicator
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.copyText
@@ -467,6 +468,7 @@ fun ProfileDetailsScreen(
                 modifier = Modifier.align(Alignment.TopCenter),
                 state = pullToRefreshState,
                 contentColor = AppTheme.colorScheme.primary,
+                indicator = { PrimalPullToRefreshIndicator(state = pullToRefreshState) },
             )
 
             SnackbarHost(

@@ -5,6 +5,7 @@ naming:
 style:
   MagicNumber:
     ignorePropertyDeclaration: true
+    ignoreCompanionObjectPropertyDeclaration: true
 
   UnusedPrivateMember:
     ignoreAnnotated: ['Preview']
@@ -18,3 +19,4 @@ complexity:
 
   LongParameterList:
     ignoreAnnotated: ['Composable']
+    ignoreDefaultParameters: true

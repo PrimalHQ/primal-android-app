@@ -29,6 +29,7 @@ import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.feed.model.FeedPostsSyncStats
 import net.primal.android.core.compose.feed.model.ZappingState
 import net.primal.android.core.compose.pulltorefresh.LaunchedPullToRefreshEndingEffect
+import net.primal.android.core.compose.pulltorefresh.PrimalPullToRefreshIndicator
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.profile.report.OnReportContentClick
 import net.primal.android.theme.AppTheme
@@ -124,6 +125,7 @@ fun FeedNoteList(
             modifier = Modifier.padding(paddingValues).align(Alignment.TopCenter),
             state = pullToRefreshState,
             contentColor = AppTheme.colorScheme.primary,
+            indicator = { PrimalPullToRefreshIndicator(state = pullToRefreshState) },
         )
     }
 }

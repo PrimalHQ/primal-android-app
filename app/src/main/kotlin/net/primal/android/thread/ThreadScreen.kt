@@ -79,6 +79,7 @@ import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromGallery
+import net.primal.android.core.compose.pulltorefresh.PrimalPullToRefreshIndicator
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.crypto.hexToNoteHrp
 import net.primal.android.profile.report.OnReportContentClick
@@ -379,6 +380,7 @@ private fun ThreadScreenContent(
                 .align(Alignment.TopCenter),
             state = pullToRefreshState,
             contentColor = AppTheme.colorScheme.primary,
+            indicator = { PrimalPullToRefreshIndicator(state = pullToRefreshState) },
         )
     }
 }
