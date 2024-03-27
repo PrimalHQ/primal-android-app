@@ -32,6 +32,7 @@ fun AvatarThumbnail(
     avatarSize: Dp = 48.dp,
     hasBorder: Boolean = false,
     borderColor: Color = AppTheme.colorScheme.primary,
+    borderSize: Dp = 2.dp,
     backgroundColor: Color = AppTheme.extraColorScheme.surfaceVariantAlt1,
     onClick: (() -> Unit)? = null,
     defaultAvatar: @Composable () -> Unit = { DefaultAvatarThumbnailPlaceholderListItemImage() },
@@ -44,6 +45,7 @@ fun AvatarThumbnail(
         source = imageSource,
         hasBorder = hasBorder,
         borderColor = borderColor,
+        borderSize = borderSize,
         backgroundColor = backgroundColor,
         onClick = onClick,
         defaultAvatar = defaultAvatar,
@@ -57,6 +59,7 @@ private fun AvatarThumbnailListItemImage(
     avatarSize: Dp = 48.dp,
     hasBorder: Boolean = false,
     borderColor: Color = AppTheme.colorScheme.primary,
+    borderSize: Dp = 2.dp,
     backgroundColor: Color = AppTheme.extraColorScheme.surfaceVariantAlt1,
     onClick: (() -> Unit)? = null,
     defaultAvatar: @Composable () -> Unit,
@@ -67,6 +70,7 @@ private fun AvatarThumbnailListItemImage(
             .adjustAvatarBackground(
                 size = avatarSize,
                 hasBorder = hasBorder,
+                borderSize = borderSize,
                 borderColor = borderColor,
             )
             .clickable(enabled = onClick != null, onClick = { onClick?.invoke() }),
@@ -86,13 +90,14 @@ private fun AvatarThumbnailListItemImage(
 fun Modifier.adjustAvatarBackground(
     size: Dp = 48.dp,
     hasBorder: Boolean = false,
+    borderSize: Dp = 2.dp,
     borderColor: Color,
 ): Modifier {
     return if (hasBorder) {
         this
-            .size(size + 2.dp)
+            .size(size + borderSize)
             .border(
-                width = 2.dp,
+                width = borderSize,
                 color = borderColor,
                 shape = CircleShape,
             )

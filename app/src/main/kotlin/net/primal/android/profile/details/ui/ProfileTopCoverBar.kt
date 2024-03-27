@@ -129,6 +129,8 @@ fun ProfileTopCoverBar(
                         end = avatarValues.avatarPadding * 7 / 8,
                     ),
                 avatarCdnImage = state.profileDetails?.avatarCdnImage,
+                hasBorder = true,
+                borderColor = Color.White,
             )
         }
     }

@@ -525,6 +525,7 @@
     <string name="accessibility_send_message">Send the message</string>
     <string name="accessibility_message_being_sent">Message is being sent</string>
     <string name="accessibility_profile_send_zap">Send zap</string>
+    <string name="accessibility_profile_qr_code">Show QR code</string>
     <string name="accessibility_note_drop_down">Note drop-down</string>
     <string name="accessibility_profile_drop_down">Profile drop-down</string>
     <string name="accessibility_media_drop_down">Media drop-down</string>

@@ -7,31 +7,21 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.ripple.rememberRipple
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -46,12 +36,9 @@ import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.ListLoading
 import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.NostrUserText
-import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.icons.PrimalIcons
-import net.primal.android.core.compose.icons.primaliconpack.FeedZaps
 import net.primal.android.core.compose.icons.primaliconpack.Key
-import net.primal.android.core.compose.icons.primaliconpack.Message
 import net.primal.android.core.compose.isEmpty
 import net.primal.android.core.ext.openUriSafely
 import net.primal.android.core.utils.asEllipsizedNpub
@@ -220,134 +207,6 @@ private fun ProfileHeaderDetails(
             followersCount = state.profileStats?.followersCount,
             onFollowersCountClick = { onFollowsClick(state.profileId, ProfileFollowsType.Followers) },
         )
-    }
-}
-
-@Composable
-private fun ProfileActions(
-    isFollowed: Boolean,
-    isActiveUser: Boolean,
-    onEditProfileClick: () -> Unit,
-    onMessageClick: () -> Unit,
-    onZapProfileClick: () -> Unit,
-    onFollow: () -> Unit,
-    onUnfollow: () -> Unit,
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(56.dp)
-            .padding(horizontal = 16.dp)
-            .padding(top = 16.dp)
-            .background(AppTheme.colorScheme.surfaceVariant),
-        horizontalArrangement = Arrangement.End,
-    ) {
-        ActionButton(
-            onClick = onZapProfileClick,
-            iconVector = PrimalIcons.FeedZaps,
-            contentDescription = stringResource(id = R.string.accessibility_profile_send_zap),
-        )
-
-        ActionButton(
-            onClick = onMessageClick,
-            iconVector = PrimalIcons.Message,
-            contentDescription = stringResource(id = R.string.accessibility_profile_messages),
-        )
-
-        if (!isActiveUser) {
-            when (isFollowed) {
-                true -> UnfollowButton(onClick = onUnfollow)
-                false -> FollowButton(onClick = onFollow)
-            }
-        } else {
-            Spacer(modifier = Modifier.width(8.dp))
-            EditProfileButton(
-                onClick = {
-                    onEditProfileClick()
-                },
-            )
-        }
-    }
-}
-
-@Composable
-private fun ActionButton(
-    iconVector: ImageVector,
-    onClick: () -> Unit,
-    contentDescription: String? = null,
-) {
-    IconButton(
-        modifier = Modifier
-            .padding(horizontal = 8.dp)
-            .size(36.dp),
-        onClick = onClick,
-        colors = IconButtonDefaults.iconButtonColors(
-            containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
-            contentColor = AppTheme.colorScheme.onSurface,
-        ),
-    ) {
-        Icon(
-            modifier = Modifier.padding(all = 2.dp),
-            imageVector = iconVector,
-            contentDescription = contentDescription,
-        )
-    }
-}
-
-@Composable
-private fun UnfollowButton(onClick: () -> Unit) {
-    ProfileButton(
-        text = stringResource(id = R.string.profile_unfollow_button).lowercase(),
-        containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
-        contentColor = AppTheme.colorScheme.onSurface,
-        onClick = onClick,
-    )
-}
-
-@Composable
-private fun EditProfileButton(onClick: () -> Unit) {
-    ProfileButton(
-        text = stringResource(id = R.string.profile_edit_profile_button).lowercase(),
-        containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
-        contentColor = AppTheme.colorScheme.onSurface,
-        onClick = onClick,
-    )
-}
-
-@Composable
-private fun FollowButton(onClick: () -> Unit) {
-    ProfileButton(
-        text = stringResource(id = R.string.profile_follow_button).lowercase(),
-        containerColor = AppTheme.colorScheme.onSurface,
-        contentColor = AppTheme.colorScheme.surface,
-        onClick = onClick,
-    )
-}
-
-@Composable
-private fun ProfileButton(
-    text: String,
-    containerColor: Color,
-    contentColor: Color,
-    onClick: () -> Unit,
-) {
-    PrimalFilledButton(
-        modifier = Modifier
-            .height(36.dp)
-            .wrapContentWidth()
-            .defaultMinSize(minWidth = 100.dp),
-        contentPadding = PaddingValues(
-            horizontal = 16.dp,
-            vertical = 0.dp,
-        ),
-        containerColor = containerColor,
-        contentColor = contentColor,
-        textStyle = AppTheme.typography.titleMedium.copy(
-            lineHeight = 18.sp,
-        ),
-        onClick = onClick,
-    ) {
-        Text(text = text)
     }
 }
 
