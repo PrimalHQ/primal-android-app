@@ -25,6 +25,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.Verified
 import net.primal.android.core.utils.isPrimalIdentifier
@@ -69,9 +70,10 @@ fun NostrUserText(
         annotatedStringSuffixBuilder?.invoke(this)
     }
 
+    val placeholderSize = internetIdentifierBadgeSize.value.sp
     val inlineContent = mapOf(
         "verifiedBadge" to InlineTextContent(
-            placeholder = Placeholder(style.fontSize, style.fontSize, internetIdentifierBadgeAlign),
+            placeholder = Placeholder(placeholderSize, placeholderSize, internetIdentifierBadgeAlign),
         ) {
             val surfaceColor = AppTheme.colorScheme.surface
             Image(

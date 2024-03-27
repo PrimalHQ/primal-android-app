@@ -35,6 +35,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.PlaceholderVerticalAlign
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.paging.LoadState
@@ -162,11 +164,16 @@ private fun ProfileHeaderDetails(
         NostrUserText(
             modifier = Modifier
                 .padding(horizontal = 16.dp)
-                .padding(top = 8.dp),
+                .padding(top = 12.dp, bottom = 4.dp),
             displayName = state.profileDetails?.authorDisplayName ?: state.profileId.asEllipsizedNpub(),
             internetIdentifier = state.profileDetails?.internetIdentifier,
-            internetIdentifierBadgeSize = 24.dp,
-            style = AppTheme.typography.titleLarge,
+            internetIdentifierBadgeSize = 20.dp,
+            internetIdentifierBadgeAlign = PlaceholderVerticalAlign.Bottom,
+            style = AppTheme.typography.titleLarge.copy(
+                fontSize = 20.sp,
+                lineHeight = 20.sp,
+                fontWeight = FontWeight.Bold,
+            ),
         )
 
         if (state.profileDetails?.internetIdentifier?.isNotEmpty() == true) {
@@ -198,23 +205,15 @@ private fun ProfileHeaderDetails(
         }
 
         ProfileTabs(
-            modifier = Modifier.padding(bottom = 8.dp),
+            modifier = Modifier.padding(bottom = 8.dp, top = 8.dp),
             feedDirective = state.profileDirective,
             notesCount = state.profileStats?.notesCount,
             onNotesCountClick = {
-                eventPublisher(
-                    ProfileDetailsContract.UiEvent.ChangeProfileFeed(
-                        profileDirective = ProfileFeedDirective.AuthoredNotes,
-                    ),
-                )
+                eventPublisher(ProfileDetailsContract.UiEvent.ChangeProfileFeed(ProfileFeedDirective.AuthoredNotes))
             },
             repliesCount = state.profileStats?.repliesCount,
             onRepliesCountClick = {
-                eventPublisher(
-                    ProfileDetailsContract.UiEvent.ChangeProfileFeed(
-                        profileDirective = ProfileFeedDirective.AuthoredReplies,
-                    ),
-                )
+                eventPublisher(ProfileDetailsContract.UiEvent.ChangeProfileFeed(ProfileFeedDirective.AuthoredReplies))
             },
             followingCount = state.profileStats?.followingCount,
             onFollowingCountClick = { onFollowsClick(state.profileId, ProfileFollowsType.Following) },
@@ -437,7 +436,9 @@ private fun UserInternetIdentifier(modifier: Modifier = Modifier, internetIdenti
     Text(
         modifier = modifier,
         text = internetIdentifier.formatNip05Identifier(),
-        style = AppTheme.typography.bodySmall,
+        style = AppTheme.typography.bodySmall.copy(
+            lineHeight = 16.sp,
+        ),
         color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
     )
 }

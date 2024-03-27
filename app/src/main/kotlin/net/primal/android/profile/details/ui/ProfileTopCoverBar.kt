@@ -29,6 +29,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.SubcomposeAsyncImage
@@ -183,7 +184,8 @@ private fun ProfileTopAppBar(
                     displayName = state.profileDetails?.authorDisplayName
                         ?: state.profileId.asEllipsizedNpub(),
                     internetIdentifier = state.profileDetails?.internetIdentifier,
-                    internetIdentifierBadgeSize = 24.dp,
+                    internetIdentifierBadgeSize = 20.dp,
+                    internetIdentifierBadgeAlign = PlaceholderVerticalAlign.Center,
                 )
             }
         },
