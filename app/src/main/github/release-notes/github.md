@@ -1,4 +1,8 @@
 ## Changes
+- Implement rendering links, hashtags and profiles in profile about section; 
+- Update profile header;
+- Implement lud16 validation in profile editor;
+- Set username field as optional in Profile Editor;
 - Pull to refresh: Feeds, Profile & Threads;
 - Randomizing bootstrap onboarding relays;
 - Implement report abuse feature;

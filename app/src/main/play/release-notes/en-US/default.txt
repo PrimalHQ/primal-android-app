@@ -1,4 +1,6 @@
 ## Changes
+- Profile screen improvements;
+- Profile editor improvements;
 - Pull to refresh: Feeds, Profile & Threads;
 - Randomizing bootstrap onboarding relays;
 - Implemented report abuse feature;
