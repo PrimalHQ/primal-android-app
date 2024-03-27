@@ -20,4 +20,6 @@ data class ProfileData(
     val bannerCdnImage: CdnImage? = null,
     val website: String? = null,
     val about: String? = null,
+    val aboutUris: List<String>,
+    val aboutHashtags: List<String>,
 )

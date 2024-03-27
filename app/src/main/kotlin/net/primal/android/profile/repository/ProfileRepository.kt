@@ -35,6 +35,9 @@ class ProfileRepository @Inject constructor(
     fun observeProfileData(profileId: String) =
         database.profiles().observeProfileData(profileId = profileId).filterNotNull()
 
+    fun observeProfilesData(profileIds: List<String>) =
+        database.profiles().observeProfilesData(profileIds = profileIds).filterNotNull()
+
     fun observeProfileStats(profileId: String) =
         database.profileStats().observeProfileStats(profileId = profileId).filterNotNull()
 

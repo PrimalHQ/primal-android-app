@@ -1,7 +1,6 @@
-package net.primal.android.profile.details
+package net.primal.android.profile.details.ui
 
-import android.content.ActivityNotFoundException
-import android.widget.Toast
+import android.content.Context
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -86,6 +85,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.paging.LoadState
 import androidx.paging.PagingData
+import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.SubcomposeAsyncImage
 import java.text.NumberFormat
@@ -107,6 +107,7 @@ import net.primal.android.core.compose.ListLoading
 import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.PrimalDivider
+import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.dropdown.DropdownPrimalMenu
 import net.primal.android.core.compose.dropdown.DropdownPrimalMenuItem
@@ -120,7 +121,6 @@ import net.primal.android.core.compose.icons.primaliconpack.ContextReportUser
 import net.primal.android.core.compose.icons.primaliconpack.ContextShare
 import net.primal.android.core.compose.icons.primaliconpack.FeedZaps
 import net.primal.android.core.compose.icons.primaliconpack.Key
-import net.primal.android.core.compose.icons.primaliconpack.Link
 import net.primal.android.core.compose.icons.primaliconpack.Message
 import net.primal.android.core.compose.icons.primaliconpack.More
 import net.primal.android.core.compose.icons.primaliconpack.UserFeedAdd
@@ -129,15 +129,17 @@ import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.core.compose.pulltorefresh.LaunchedPullToRefreshEndingEffect
 import net.primal.android.core.compose.pulltorefresh.PrimalPullToRefreshIndicator
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
+import net.primal.android.core.ext.openUriSafely
 import net.primal.android.core.utils.asEllipsizedNpub
-import net.primal.android.core.utils.copyText
 import net.primal.android.core.utils.formatNip05Identifier
 import net.primal.android.core.utils.resolvePrimalProfileLink
 import net.primal.android.core.utils.shortened
 import net.primal.android.core.utils.systemShareText
 import net.primal.android.crypto.hexToNoteHrp
 import net.primal.android.crypto.hexToNpubHrp
+import net.primal.android.profile.details.ProfileDetailsContract
 import net.primal.android.profile.details.ProfileDetailsContract.UiState.ProfileError
+import net.primal.android.profile.details.ProfileDetailsViewModel
 import net.primal.android.profile.domain.ProfileFeedDirective
 import net.primal.android.profile.domain.ProfileFollowsType
 import net.primal.android.profile.report.ReportUserDialog
@@ -146,7 +148,6 @@ import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.wallet.domain.DraftTx
 import net.primal.android.wallet.utils.isLightningAddress
-import timber.log.Timber
 
 @Composable
 fun ProfileDetailsScreen(
@@ -193,7 +194,7 @@ fun ProfileDetailsScreen(
 
 private const val MAX_COVER_TRANSPARENCY = 0.70f
 
-@Suppress("MagicNumber")
+@Suppress("CyclomaticComplexMethod")
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileDetailsScreen(
@@ -242,9 +243,11 @@ fun ProfileDetailsScreen(
     val uiScope = rememberCoroutineScope()
     val context = LocalContext.current
 
-    ErrorHandler(
+    SnackbarErrorHandler(
         error = state.error,
         snackbarHostState = snackbarHostState,
+        errorMessageResolver = { it.asHumanReadableText(context) },
+        onErrorDismiss = { eventPublisher(ProfileDetailsContract.UiEvent.DismissError) },
     )
 
     LaunchedEffect(listState) {
@@ -254,8 +257,7 @@ fun ProfileDetailsScreen(
                 .map { it.second }
                 .collect { scrollOffset ->
                     val newCoverHeight = maxCoverHeightPx - scrollOffset
-                    coverHeightPx.floatValue =
-                        newCoverHeight.coerceIn(minCoverHeightPx, maxCoverHeightPx)
+                    coverHeightPx.floatValue = newCoverHeight.coerceIn(minCoverHeightPx, maxCoverHeightPx)
 
                     val newAvatarSize = maxAvatarSizePx - (scrollOffset * 1f)
                     avatarSizePx.floatValue = newAvatarSize.coerceIn(0f, maxAvatarSizePx)
@@ -283,7 +285,7 @@ fun ProfileDetailsScreen(
     }
 
     val pullToRefreshState = rememberPullToRefreshState(
-        positionalThreshold = PullToRefreshDefaults.PositionalThreshold.times(1.5f),
+        positionalThreshold = PullToRefreshDefaults.PositionalThreshold.times(other = 1.5f),
     )
 
     LaunchedEffect(pullToRefreshState.isRefreshing) {
@@ -298,9 +300,7 @@ fun ProfileDetailsScreen(
         onRefreshEnd = { pullToRefreshState.endRefresh() },
     )
 
-    Surface(
-        modifier = Modifier.navigationBarsPadding(),
-    ) {
+    Surface(modifier = Modifier.navigationBarsPadding()) {
         Box(
             modifier = Modifier.nestedScroll(pullToRefreshState.nestedScrollConnection),
         ) {
@@ -370,10 +370,8 @@ fun ProfileDetailsScreen(
                         coverHeight = with(density) { coverHeightPx.floatValue.toDp() },
                         coverAlpha = coverTransparency.floatValue,
                         avatarSize = with(density) { avatarSizePx.floatValue.toDp() },
-                        avatarPadding = with(
-                            density,
-                        ) { (maxAvatarSizePx - avatarSizePx.floatValue).toDp() },
-                        avatarOffsetY = with(density) { (maxAvatarSizePx * 0.65f).toDp() },
+                        avatarPadding = with(density) { (maxAvatarSizePx - avatarSizePx.floatValue).toDp() },
+                        avatarOffsetY = with(density) { maxAvatarSizePx.times(other = 0.65f).toDp() },
                         navigationIcon = {
                             AppBarIcon(
                                 icon = PrimalIcons.ArrowBack,
@@ -401,66 +399,29 @@ fun ProfileDetailsScreen(
                     )
                 },
                 header = {
-                    UserProfileDetails(
+                    ProfileHeader(
                         state = state,
+                        pagingItems = pagingItems,
                         eventPublisher = eventPublisher,
                         onEditProfileClick = onEditProfileClick,
-                        onMessageClick = { onMessageClick(state.profileId) },
-                        onZapProfileClick = {
-                            val profileLud16 = state.profileDetails?.lightningAddress
-                            if (profileLud16?.isLightningAddress() == true) {
-                                onZapProfileClick(
-                                    DraftTx(targetUserId = state.profileId, targetLud16 = profileLud16),
+                        onMessageClick = onMessageClick,
+                        onZapProfileClick = onZapProfileClick,
+                        onUnableToZapProfile = {
+                            uiScope.launch {
+                                snackbarHostState.showSnackbar(
+                                    message = context.getString(
+                                        R.string.wallet_send_payment_error_nostr_user_without_lightning_address,
+                                        state.profileDetails?.authorDisplayName
+                                            ?: context.getString(R.string.wallet_send_payment_this_user_chunk),
+                                    ),
+                                    duration = SnackbarDuration.Short,
                                 )
-                            } else {
-                                uiScope.launch {
-                                    snackbarHostState.showSnackbar(
-                                        message = context.getString(
-                                            R.string.wallet_send_payment_error_nostr_user_without_lightning_address,
-                                            state.profileDetails?.authorDisplayName
-                                                ?: context.getString(R.string.wallet_send_payment_this_user_chunk),
-                                        ),
-                                        duration = SnackbarDuration.Short,
-                                    )
-                                }
                             }
                         },
-                        onFollow = { eventPublisher(ProfileDetailsContract.UiEvent.FollowAction(state.profileId)) },
-                        onUnfollow = { eventPublisher(ProfileDetailsContract.UiEvent.UnfollowAction(state.profileId)) },
                         onFollowsClick = onFollowsClick,
+                        onProfileClick = onProfileClick,
+                        onHashtagClick = onHashtagClick,
                     )
-
-                    if (state.isProfileMuted) {
-                        ProfileMutedNotice(
-                            profileName = state.profileDetails?.authorDisplayName
-                                ?: state.profileId.asEllipsizedNpub(),
-                            onUnmuteClick = {
-                                eventPublisher(
-                                    ProfileDetailsContract.UiEvent.UnmuteAction(state.profileId),
-                                )
-                            },
-                        )
-                    } else {
-                        if (pagingItems.isEmpty()) {
-                            when (pagingItems.loadState.refresh) {
-                                LoadState.Loading -> ListLoading(
-                                    modifier = Modifier
-                                        .padding(vertical = 64.dp)
-                                        .fillMaxWidth(),
-                                )
-
-                                is LoadState.NotLoading -> ListNoContent(
-                                    modifier = Modifier
-                                        .padding(vertical = 64.dp)
-                                        .fillMaxWidth(),
-                                    noContentText = stringResource(id = R.string.feed_no_content),
-                                    onRefresh = { pagingItems.refresh() },
-                                )
-
-                                is LoadState.Error -> Unit
-                            }
-                        }
-                    }
                 },
             )
 
@@ -477,6 +438,74 @@ fun ProfileDetailsScreen(
                     .align(Alignment.BottomStart)
                     .navigationBarsPadding(),
             )
+        }
+    }
+}
+
+@Composable
+private fun ProfileHeader(
+    state: ProfileDetailsContract.UiState,
+    pagingItems: LazyPagingItems<FeedPostUi>,
+    eventPublisher: (ProfileDetailsContract.UiEvent) -> Unit,
+    onEditProfileClick: () -> Unit,
+    onMessageClick: (String) -> Unit,
+    onZapProfileClick: (DraftTx) -> Unit,
+    onUnableToZapProfile: () -> Unit,
+    onFollowsClick: (String, ProfileFollowsType) -> Unit,
+    onProfileClick: (String) -> Unit,
+    onHashtagClick: (String) -> Unit,
+) {
+    UserProfileHeaderDetails(
+        state = state,
+        eventPublisher = eventPublisher,
+        onEditProfileClick = onEditProfileClick,
+        onMessageClick = { onMessageClick(state.profileId) },
+        onZapProfileClick = {
+            val profileLud16 = state.profileDetails?.lightningAddress
+            if (profileLud16?.isLightningAddress() == true) {
+                onZapProfileClick(
+                    DraftTx(targetUserId = state.profileId, targetLud16 = profileLud16),
+                )
+            } else {
+                onUnableToZapProfile()
+            }
+        },
+        onFollow = { eventPublisher(ProfileDetailsContract.UiEvent.FollowAction(state.profileId)) },
+        onUnfollow = { eventPublisher(ProfileDetailsContract.UiEvent.UnfollowAction(state.profileId)) },
+        onFollowsClick = onFollowsClick,
+        onProfileClick = onProfileClick,
+        onHashtagClick = onHashtagClick,
+    )
+
+    if (state.isProfileMuted) {
+        ProfileMutedNotice(
+            profileName = state.profileDetails?.authorDisplayName
+                ?: state.profileId.asEllipsizedNpub(),
+            onUnmuteClick = {
+                eventPublisher(
+                    ProfileDetailsContract.UiEvent.UnmuteAction(state.profileId),
+                )
+            },
+        )
+    } else {
+        if (pagingItems.isEmpty()) {
+            when (pagingItems.loadState.refresh) {
+                LoadState.Loading -> ListLoading(
+                    modifier = Modifier
+                        .padding(vertical = 64.dp)
+                        .fillMaxWidth(),
+                )
+
+                is LoadState.NotLoading -> ListNoContent(
+                    modifier = Modifier
+                        .padding(vertical = 64.dp)
+                        .fillMaxWidth(),
+                    noContentText = stringResource(id = R.string.feed_no_content),
+                    onRefresh = { pagingItems.refresh() },
+                )
+
+                is LoadState.Error -> Unit
+            }
         }
     }
 }
@@ -726,7 +755,7 @@ private fun CoverUnavailable() {
 }
 
 @Composable
-private fun UserProfileDetails(
+private fun UserProfileHeaderDetails(
     state: ProfileDetailsContract.UiState,
     eventPublisher: (ProfileDetailsContract.UiEvent) -> Unit,
     onEditProfileClick: () -> Unit,
@@ -735,13 +764,10 @@ private fun UserProfileDetails(
     onFollow: () -> Unit,
     onUnfollow: () -> Unit,
     onFollowsClick: (String, ProfileFollowsType) -> Unit,
+    onProfileClick: (String) -> Unit,
+    onHashtagClick: (String) -> Unit,
 ) {
     val localUriHandler = LocalUriHandler.current
-    val context = LocalContext.current
-    val uiScope = rememberCoroutineScope()
-    val keyCopiedText = stringResource(id = R.string.settings_keys_key_copied)
-    val protocolPrefix = "http"
-    val protocolPrefixReplacement = "https://"
 
     Column(
         modifier = Modifier
@@ -759,7 +785,9 @@ private fun UserProfileDetails(
         )
 
         NostrUserText(
-            modifier = Modifier.padding(horizontal = 16.dp),
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .padding(top = 8.dp),
             displayName = state.profileDetails?.authorDisplayName ?: state.profileId.asEllipsizedNpub(),
             internetIdentifier = state.profileDetails?.internetIdentifier,
             internetIdentifierBadgeSize = 24.dp,
@@ -768,49 +796,29 @@ private fun UserProfileDetails(
 
         if (state.profileDetails?.internetIdentifier?.isNotEmpty() == true) {
             UserInternetIdentifier(
-                modifier = Modifier
-                    .padding(horizontal = 16.dp)
-                    .padding(top = 4.dp),
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                 internetIdentifier = state.profileDetails.internetIdentifier,
             )
         }
 
-        UserPublicKey(
-            modifier = Modifier.padding(top = 8.dp, bottom = 4.dp),
-            pubkey = state.profileId,
-            onCopyClick = {
-                copyText(context = context, text = it)
-                uiScope.launch { Toast.makeText(context, keyCopiedText, Toast.LENGTH_SHORT).show() }
-            },
-        )
-
         if (state.profileDetails?.about?.isNotEmpty() == true) {
-            UserAbout(about = state.profileDetails.about)
+            ProfileAboutSection(
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                about = state.profileDetails.about,
+                aboutUris = state.profileDetails.aboutUris,
+                aboutHashtags = state.profileDetails.aboutHashtags,
+                referencedUsers = state.referencedProfilesData,
+                onProfileClick = onProfileClick,
+                onHashtagClick = onHashtagClick,
+                onUrlClick = { localUriHandler.openUriSafely(it) },
+            )
         }
 
         if (state.profileDetails?.website?.isNotEmpty() == true) {
-            val websiteWithProtocol = if (state.profileDetails.website.startsWith(protocolPrefix, true)) {
-                state.profileDetails.website
-            } else {
-                protocolPrefixReplacement + state.profileDetails.website
-            }
-
             UserWebsiteText(
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                 website = state.profileDetails.website,
-                onClick = {
-                    try {
-                        localUriHandler.openUri(websiteWithProtocol)
-                    } catch (error: ActivityNotFoundException) {
-                        Timber.w(error)
-                        uiScope.launch {
-                            Toast.makeText(
-                                context,
-                                "App not found that could open $websiteWithProtocol.",
-                                Toast.LENGTH_SHORT,
-                            ).show()
-                        }
-                    }
-                },
+                onClick = { localUriHandler.openUriSafely(state.profileDetails.website) },
             )
         }
 
@@ -1102,30 +1110,20 @@ private fun ProfileButton(
 }
 
 @Composable
-private fun UserAbout(about: String) {
-    Text(
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-        text = about,
-        color = AppTheme.colorScheme.onSurface,
-        style = AppTheme.typography.bodySmall,
-    )
-}
-
-@Composable
-private fun UserWebsiteText(website: String, onClick: () -> Unit) {
+private fun UserWebsiteText(
+    modifier: Modifier = Modifier,
+    website: String,
+    onClick: () -> Unit,
+) {
     IconText(
-        modifier = Modifier
-            .padding(horizontal = 16.dp)
-            .clickable { onClick() },
+        modifier = modifier.clickable { onClick() },
         text = website,
         style = AppTheme.typography.bodySmall,
         color = AppTheme.colorScheme.secondary,
-        leadingIcon = PrimalIcons.Link,
-        iconSize = 12.sp,
-        leadingIconTintColor = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
     )
 }
 
+@Suppress("UnusedPrivateMember")
 @Composable
 private fun UserPublicKey(
     modifier: Modifier = Modifier,
@@ -1191,62 +1189,51 @@ private fun ProfileMutedNotice(profileName: String, onUnmuteClick: () -> Unit) {
     }
 }
 
-@Composable
-private fun ErrorHandler(error: ProfileError?, snackbarHostState: SnackbarHostState) {
-    val context = LocalContext.current
-    LaunchedEffect(error ?: true) {
-        val errorMessage = when (error) {
-            is ProfileError.InvalidZapRequest -> context.getString(
-                R.string.post_action_invalid_zap_request,
-            )
+private fun ProfileError.asHumanReadableText(context: Context): String {
+    return when (this) {
+        is ProfileError.InvalidZapRequest -> context.getString(
+            R.string.post_action_invalid_zap_request,
+        )
 
-            is ProfileError.MissingLightningAddress -> context.getString(
-                R.string.post_action_missing_lightning_address,
-            )
+        is ProfileError.MissingLightningAddress -> context.getString(
+            R.string.post_action_missing_lightning_address,
+        )
 
-            is ProfileError.FailedToPublishZapEvent -> context.getString(
-                R.string.post_action_zap_failed,
-            )
+        is ProfileError.FailedToPublishZapEvent -> context.getString(
+            R.string.post_action_zap_failed,
+        )
 
-            is ProfileError.FailedToPublishLikeEvent -> context.getString(
-                R.string.post_action_like_failed,
-            )
+        is ProfileError.FailedToPublishLikeEvent -> context.getString(
+            R.string.post_action_like_failed,
+        )
 
-            is ProfileError.FailedToPublishRepostEvent -> context.getString(
-                R.string.post_action_repost_failed,
-            )
+        is ProfileError.FailedToPublishRepostEvent -> context.getString(
+            R.string.post_action_repost_failed,
+        )
 
-            is ProfileError.FailedToFollowProfile -> context.getString(
-                R.string.profile_error_unable_to_follow,
-            )
+        is ProfileError.FailedToFollowProfile -> context.getString(
+            R.string.profile_error_unable_to_follow,
+        )
 
-            is ProfileError.FailedToUnfollowProfile -> context.getString(
-                R.string.profile_error_unable_to_unfollow,
-            )
+        is ProfileError.FailedToUnfollowProfile -> context.getString(
+            R.string.profile_error_unable_to_unfollow,
+        )
 
-            is ProfileError.MissingRelaysConfiguration -> context.getString(
-                R.string.app_missing_relays_config,
-            )
+        is ProfileError.MissingRelaysConfiguration -> context.getString(
+            R.string.app_missing_relays_config,
+        )
 
-            is ProfileError.FailedToAddToFeed -> context.getString(
-                R.string.app_error_adding_to_feed,
-            )
+        is ProfileError.FailedToAddToFeed -> context.getString(
+            R.string.app_error_adding_to_feed,
+        )
 
-            is ProfileError.FailedToRemoveFeed -> context.getString(
-                R.string.app_error_removing_feed,
-            )
+        is ProfileError.FailedToRemoveFeed -> context.getString(
+            R.string.app_error_removing_feed,
+        )
 
-            is ProfileError.FailedToMuteProfile -> context.getString(R.string.app_error_muting_user)
-            is ProfileError.FailedToUnmuteProfile -> context.getString(
-                R.string.app_error_unmuting_user,
-            )
-
-            else -> return@LaunchedEffect
-        }
-
-        snackbarHostState.showSnackbar(
-            message = errorMessage,
-            duration = SnackbarDuration.Short,
+        is ProfileError.FailedToMuteProfile -> context.getString(R.string.app_error_muting_user)
+        is ProfileError.FailedToUnmuteProfile -> context.getString(
+            R.string.app_error_unmuting_user,
         )
     }
 }

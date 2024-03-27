@@ -18,6 +18,7 @@ interface ProfileDetailsContract {
         val isProfileFeedInActiveUserFeeds: Boolean,
         val profileDetails: ProfileDetailsUi? = null,
         val profileStats: ProfileStatsUi? = null,
+        val referencedProfilesData: Set<ProfileDetailsUi> = emptySet(),
         val zappingState: ZappingState = ZappingState(),
         val notes: Flow<PagingData<FeedPostUi>>,
         val profileDirective: ProfileFeedDirective = ProfileFeedDirective.AuthoredNotes,
@@ -67,5 +68,6 @@ interface ProfileDetailsContract {
             val profileId: String,
             val noteId: String? = null,
         ) : UiEvent()
+        data object DismissError : UiEvent()
     }
 }

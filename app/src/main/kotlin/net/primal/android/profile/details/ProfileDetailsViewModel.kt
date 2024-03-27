@@ -7,13 +7,14 @@ import androidx.paging.cachedIn
 import androidx.paging.map
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
-import kotlin.time.Duration.Companion.seconds
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.core.compose.feed.model.asFeedPostUi
@@ -26,6 +27,7 @@ import net.primal.android.navigation.profileId
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.nostr.ext.extractProfileId
 import net.primal.android.profile.details.ProfileDetailsContract.UiEvent
 import net.primal.android.profile.details.ProfileDetailsContract.UiState
 import net.primal.android.profile.details.ProfileDetailsContract.UiState.ProfileError
@@ -41,6 +43,7 @@ import net.primal.android.wallet.zaps.ZapHandler
 import net.primal.android.wallet.zaps.hasWallet
 import timber.log.Timber
 
+@Suppress("LongParameterList")
 @HiltViewModel
 class ProfileDetailsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
@@ -78,9 +81,12 @@ class ProfileDetailsViewModel @Inject constructor(
     private val events: MutableSharedFlow<UiEvent> = MutableSharedFlow()
     fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
 
+    private var referencedProfilesObserver: Job? = null
+
     init {
         observeEvents()
         observeProfileData()
+        observeReferencedProfilesData()
         observeProfileStats()
         observeActiveAccount()
         observeMutedAccount()
@@ -105,6 +111,7 @@ class ProfileDetailsViewModel @Inject constructor(
                         fetchLatestMuteList()
                     }
                     is UiEvent.ReportAbuse -> reportAbuse(it)
+                    UiEvent.DismissError -> setState { copy(error = null) }
                 }
             }
         }
@@ -139,12 +146,46 @@ class ProfileDetailsViewModel @Inject constructor(
 
     private fun observeProfileData() =
         viewModelScope.launch {
-            profileRepository.observeProfileData(profileId = profileId).collect {
-                setState {
-                    copy(profileDetails = it.asProfileDetailsUi())
+            profileRepository.observeProfileData(profileId = profileId)
+                .distinctUntilChanged()
+                .collect { profileData ->
+                    setState { copy(profileDetails = profileData.asProfileDetailsUi()) }
                 }
+        }
+
+    private fun observeReferencedProfilesData() =
+        viewModelScope.launch {
+            profileRepository.observeProfile(profileId)
+                .mapNotNull { profile ->
+                    profile.metadata?.aboutUris
+                        ?.mapNotNull { it.extractProfileId() }
+                        ?.filter { it != profileId }
+                }
+                .distinctUntilChanged()
+                .collect { profileIds ->
+                    launchReferencedProfilesObserver(profileIds = profileIds)
+                    requestProfileUpdates(profileIds = profileIds)
+                }
+        }
+
+    private suspend fun requestProfileUpdates(profileIds: List<String>) {
+        profileIds.forEach { profileId ->
+            try {
+                profileRepository.requestProfileUpdate(profileId = profileId)
+            } catch (error: WssException) {
+                Timber.w(error)
             }
         }
+    }
+
+    private fun launchReferencedProfilesObserver(profileIds: List<String>) {
+        referencedProfilesObserver?.cancel()
+        referencedProfilesObserver = viewModelScope.launch {
+            profileRepository.observeProfilesData(profileIds = profileIds).collect { profilesData ->
+                setState { copy(referencedProfilesData = profilesData.map { it.asProfileDetailsUi() }.toSet()) }
+            }
+        }
+    }
 
     private fun observeProfileStats() =
         viewModelScope.launch {
@@ -411,11 +452,5 @@ class ProfileDetailsViewModel @Inject constructor(
 
     private fun setErrorState(error: ProfileError) {
         setState { copy(error = error) }
-        viewModelScope.launch {
-            delay(2.seconds)
-            if (state.value.error == error) {
-                setState { copy(error = null) }
-            }
-        }
     }
 }

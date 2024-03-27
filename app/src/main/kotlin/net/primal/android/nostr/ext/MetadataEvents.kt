@@ -6,6 +6,8 @@ import net.primal.android.attachments.domain.CdnResource
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.core.serialization.json.toJsonObject
+import net.primal.android.core.utils.parseHashtags
+import net.primal.android.core.utils.parseUris
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.content.ContentMetadata
 import net.primal.android.profile.db.ProfileData
@@ -30,6 +32,8 @@ fun NostrEvent.asProfileDataPO(cdnResources: Map<String, CdnResource>): ProfileD
         lightningAddress = metadata?.lud16,
         lnUrlDecoded = metadata?.lud16?.parseAsLNUrlOrNull() ?: metadata?.lud06?.decodeLNUrlOrNull(),
         about = metadata?.about,
+        aboutUris = metadata?.about?.parseUris() ?: emptyList(),
+        aboutHashtags = metadata?.about?.parseHashtags() ?: emptyList(),
         displayName = metadata?.displayName,
         avatarCdnImage = metadata?.picture?.let {
             CdnImage(
