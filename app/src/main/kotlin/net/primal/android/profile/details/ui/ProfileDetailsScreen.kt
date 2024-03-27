@@ -106,6 +106,8 @@ fun ProfileDetailsScreen(
     )
 }
 
+private const val MAX_COVER_TRANSPARENCY = 0.70f
+
 @Suppress("LongMethod")
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable

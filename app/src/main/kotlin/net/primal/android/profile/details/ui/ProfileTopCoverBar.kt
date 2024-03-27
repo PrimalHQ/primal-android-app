@@ -41,8 +41,6 @@ import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.profile.details.ProfileDetailsContract
 import net.primal.android.theme.AppTheme
 
-const val MAX_COVER_TRANSPARENCY = 0.70f
-
 data class AvatarValues(
     val avatarSize: Dp,
     val avatarOffsetY: Dp = 0.dp,
@@ -66,7 +64,6 @@ fun ProfileTopCoverBar(
     avatarValues: AvatarValues,
 ) {
     val coverBlur = AppTheme.colorScheme.surface.copy(alpha = coverValues.coverAlpha)
-    val maxCollapsed = coverValues.coverAlpha == MAX_COVER_TRANSPARENCY
 
     BoxWithConstraints(
         modifier = Modifier.fillMaxWidth(),
@@ -94,19 +91,13 @@ fun ProfileTopCoverBar(
             contentScale = ContentScale.Crop,
         )
 
-        Column {
-            ProfileTopAppBar(
-                state = state,
-                onClose = onClose,
-                titleVisible = titleVisible,
-                snackbarHostState = snackbarHostState,
-                eventPublisher = eventPublisher,
-            )
-
-            if (maxCollapsed) {
-                PrimalDivider()
-            }
-        }
+        ProfileTopAppBar(
+            state = state,
+            onClose = onClose,
+            titleVisible = titleVisible,
+            snackbarHostState = snackbarHostState,
+            eventPublisher = eventPublisher,
+        )
 
         Box(
             modifier = Modifier
@@ -140,48 +131,54 @@ private fun ProfileTopAppBar(
     eventPublisher: (ProfileDetailsContract.UiEvent) -> Unit,
     onClose: () -> Unit,
 ) {
-    TopAppBar(
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = Color.Transparent,
-            scrolledContainerColor = Color.Transparent,
-        ),
-        navigationIcon = {
-            AppBarIcon(
-                icon = PrimalIcons.ArrowBack,
-                appBarIconContentDescription = stringResource(id = R.string.accessibility_back_button),
-                enabledBackgroundColor = Color.Black.copy(alpha = 0.5f),
-                tint = Color.White,
-                onClick = onClose,
-            )
-        },
-        title = {
-            AnimatedVisibility(
-                modifier = Modifier.padding(horizontal = 4.dp),
-                visible = titleVisible,
-                enter = fadeIn(),
-                exit = fadeOut(),
-            ) {
-                NostrUserText(
-                    displayName = state.profileDetails?.authorDisplayName
-                        ?: state.profileId.asEllipsizedNpub(),
-                    internetIdentifier = state.profileDetails?.internetIdentifier,
-                    internetIdentifierBadgeSize = 20.dp,
-                    internetIdentifierBadgeAlign = PlaceholderVerticalAlign.Center,
+    Column {
+        TopAppBar(
+            colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = Color.Transparent,
+                scrolledContainerColor = Color.Transparent,
+            ),
+            navigationIcon = {
+                AppBarIcon(
+                    icon = PrimalIcons.ArrowBack,
+                    appBarIconContentDescription = stringResource(id = R.string.accessibility_back_button),
+                    enabledBackgroundColor = Color.Black.copy(alpha = 0.5f),
+                    tint = Color.White,
+                    onClick = onClose,
                 )
-            }
-        },
-        actions = {
-            ProfileDropdownMenu(
-                profileId = state.profileId,
-                isActiveUser = state.isActiveUser,
-                isProfileMuted = state.isProfileMuted,
-                isProfileFeedInActiveUserFeeds = state.isProfileFeedInActiveUserFeeds,
-                snackbarHostState = snackbarHostState,
-                profileName = state.profileDetails?.authorDisplayName ?: "",
-                eventPublisher = eventPublisher,
-            )
-        },
-    )
+            },
+            title = {
+                AnimatedVisibility(
+                    modifier = Modifier.padding(horizontal = 4.dp),
+                    visible = titleVisible,
+                    enter = fadeIn(),
+                    exit = fadeOut(),
+                ) {
+                    NostrUserText(
+                        displayName = state.profileDetails?.authorDisplayName
+                            ?: state.profileId.asEllipsizedNpub(),
+                        internetIdentifier = state.profileDetails?.internetIdentifier,
+                        internetIdentifierBadgeSize = 20.dp,
+                        internetIdentifierBadgeAlign = PlaceholderVerticalAlign.Center,
+                    )
+                }
+            },
+            actions = {
+                ProfileDropdownMenu(
+                    profileId = state.profileId,
+                    isActiveUser = state.isActiveUser,
+                    isProfileMuted = state.isProfileMuted,
+                    isProfileFeedInActiveUserFeeds = state.isProfileFeedInActiveUserFeeds,
+                    snackbarHostState = snackbarHostState,
+                    profileName = state.profileDetails?.authorDisplayName ?: "",
+                    eventPublisher = eventPublisher,
+                )
+            },
+        )
+
+        if (titleVisible) {
+            PrimalDivider()
+        }
+    }
 }
 
 @Composable
