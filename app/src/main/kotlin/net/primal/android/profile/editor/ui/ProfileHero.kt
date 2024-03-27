@@ -1,4 +1,4 @@
-package net.primal.android.profile.edit.ui
+package net.primal.android.profile.editor.ui
 
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult

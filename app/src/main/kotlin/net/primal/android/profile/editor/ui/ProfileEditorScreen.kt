@@ -1,4 +1,4 @@
-package net.primal.android.profile.edit.ui
+package net.primal.android.profile.editor.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -37,23 +37,23 @@ import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.utils.isValidUsername
-import net.primal.android.profile.edit.EditProfileContract
-import net.primal.android.profile.edit.EditProfileViewModel
+import net.primal.android.profile.editor.ProfileEditorContract
+import net.primal.android.profile.editor.ProfileEditorViewModel
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
 
 @Composable
-fun EditProfileScreen(viewModel: EditProfileViewModel, onClose: () -> Unit) {
+fun ProfileEditorScreen(viewModel: ProfileEditorViewModel, onClose: () -> Unit) {
     LaunchedEffect(viewModel, onClose) {
         viewModel.effect.collect {
             when (it) {
-                is EditProfileContract.SideEffect.AccountSuccessfulyEdited -> onClose()
+                is ProfileEditorContract.SideEffect.AccountSuccessfulyEdited -> onClose()
             }
         }
     }
     val state = viewModel.state.collectAsState()
 
-    EditProfileScreen(
+    ProfileEditorScreen(
         state = state.value,
         eventPublisher = { viewModel.setEvent(it) },
         onClose = onClose,
@@ -62,9 +62,9 @@ fun EditProfileScreen(viewModel: EditProfileViewModel, onClose: () -> Unit) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditProfileScreen(
-    state: EditProfileContract.UiState,
-    eventPublisher: (EditProfileContract.UiEvent) -> Unit,
+fun ProfileEditorScreen(
+    state: ProfileEditorContract.UiState,
+    eventPublisher: (ProfileEditorContract.UiEvent) -> Unit,
     onClose: () -> Unit,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
@@ -97,8 +97,8 @@ fun EditProfileScreen(
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun EditProfileContent(
-    state: EditProfileContract.UiState,
-    eventPublisher: (EditProfileContract.UiEvent) -> Unit,
+    state: ProfileEditorContract.UiState,
+    eventPublisher: (ProfileEditorContract.UiEvent) -> Unit,
     paddingValues: PaddingValues,
     modifier: Modifier = Modifier,
 ) {
@@ -126,12 +126,12 @@ fun EditProfileContent(
                 bannerUri = state.remoteBannerUrl?.toUri() ?: state.localBannerUri,
                 onBannerUriChange = {
                     eventPublisher(
-                        EditProfileContract.UiEvent.BannerUriChangedEvent(bannerUri = it),
+                        ProfileEditorContract.UiEvent.BannerUriChangedEvent(bannerUri = it),
                     )
                 },
                 onAvatarUriChange = {
                     eventPublisher(
-                        EditProfileContract.UiEvent.AvatarUriChangedEvent(avatarUri = it),
+                        ProfileEditorContract.UiEvent.AvatarUriChangedEvent(avatarUri = it),
                     )
                 },
             )
@@ -141,7 +141,7 @@ fun EditProfileContent(
                 value = state.username,
                 onValueChange = {
                     if (it.isValidUsername()) {
-                        eventPublisher(EditProfileContract.UiEvent.UsernameChangedEvent(it))
+                        eventPublisher(ProfileEditorContract.UiEvent.UsernameChangedEvent(it))
                     }
                 },
                 isRequired = true,
@@ -152,7 +152,7 @@ fun EditProfileContent(
                 header = stringResource(id = R.string.profile_editor_input_header_display_name),
                 value = state.displayName,
                 onValueChange = {
-                    eventPublisher(EditProfileContract.UiEvent.DisplayNameChangedEvent(it))
+                    eventPublisher(ProfileEditorContract.UiEvent.DisplayNameChangedEvent(it))
                 },
             )
             Spacer(modifier = Modifier.height(12.dp))
@@ -160,7 +160,7 @@ fun EditProfileContent(
                 header = stringResource(id = R.string.profile_editor_input_header_website).uppercase(),
                 value = state.website,
                 onValueChange = {
-                    eventPublisher(EditProfileContract.UiEvent.WebsiteChangedEvent(it.trim()))
+                    eventPublisher(ProfileEditorContract.UiEvent.WebsiteChangedEvent(it.trim()))
                 },
             )
             Spacer(modifier = Modifier.height(12.dp))
@@ -169,7 +169,7 @@ fun EditProfileContent(
                 value = state.aboutMe,
                 isMultiline = true,
                 onValueChange = {
-                    eventPublisher(EditProfileContract.UiEvent.AboutMeChangedEvent(it))
+                    eventPublisher(ProfileEditorContract.UiEvent.AboutMeChangedEvent(it))
                 },
             )
             Spacer(modifier = Modifier.height(12.dp))
@@ -179,7 +179,7 @@ fun EditProfileContent(
                 ).uppercase(),
                 value = state.lightningAddress,
                 onValueChange = {
-                    eventPublisher(EditProfileContract.UiEvent.LightningAddressChangedEvent(it.trim()))
+                    eventPublisher(ProfileEditorContract.UiEvent.LightningAddressChangedEvent(it.trim()))
                 },
             )
             Spacer(modifier = Modifier.height(12.dp))
@@ -187,7 +187,7 @@ fun EditProfileContent(
                 header = stringResource(id = R.string.profile_editor_input_header_nip_05).uppercase(),
                 value = state.nip05Identifier,
                 onValueChange = {
-                    eventPublisher(EditProfileContract.UiEvent.Nip05IdentifierChangedEvent(it.trim()))
+                    eventPublisher(ProfileEditorContract.UiEvent.Nip05IdentifierChangedEvent(it.trim()))
                 },
             )
         }
@@ -203,7 +203,7 @@ fun EditProfileContent(
                 loading = state.loading,
                 onClick = {
                     keyboardController?.hide()
-                    eventPublisher(EditProfileContract.UiEvent.SaveProfileEvent)
+                    eventPublisher(ProfileEditorContract.UiEvent.SaveProfileEvent)
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -215,17 +215,17 @@ fun EditProfileContent(
 }
 
 @Composable
-private fun ErrorHandler(error: EditProfileContract.UiState.EditProfileError?, snackbarHostState: SnackbarHostState) {
+private fun ErrorHandler(error: ProfileEditorContract.UiState.EditProfileError?, snackbarHostState: SnackbarHostState) {
     val context = LocalContext.current
     LaunchedEffect(key1 = error ?: true) {
         val errorMessage = when (error) {
-            is EditProfileContract.UiState.EditProfileError.FailedToPublishMetadata -> context.getString(
+            is ProfileEditorContract.UiState.EditProfileError.FailedToPublishMetadata -> context.getString(
                 R.string.profile_failed_to_publish_metadata,
             )
-            is EditProfileContract.UiState.EditProfileError.MissingRelaysConfiguration -> context.getString(
+            is ProfileEditorContract.UiState.EditProfileError.MissingRelaysConfiguration -> context.getString(
                 R.string.app_missing_relays_config,
             )
-            is EditProfileContract.UiState.EditProfileError.FailedToUploadImage -> context.getString(
+            is ProfileEditorContract.UiState.EditProfileError.FailedToUploadImage -> context.getString(
                 R.string.app_failed_to_upload_image,
             )
             null -> return@LaunchedEffect
@@ -242,8 +242,8 @@ private fun ErrorHandler(error: EditProfileContract.UiState.EditProfileError?, s
 @Composable
 fun PreviewEditProfileScreen() {
     PrimalTheme(primalTheme = PrimalTheme.Sunset) {
-        EditProfileScreen(
-            state = EditProfileContract.UiState(
+        ProfileEditorScreen(
+            state = ProfileEditorContract.UiState(
                 username = "Tralala Handle",
                 displayName = "Tralala Display Name",
                 aboutMe = "About me",

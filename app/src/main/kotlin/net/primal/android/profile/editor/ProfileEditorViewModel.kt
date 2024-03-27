@@ -1,4 +1,4 @@
-package net.primal.android.profile.edit
+package net.primal.android.profile.editor
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -20,15 +20,15 @@ import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.profile.domain.ProfileMetadata
-import net.primal.android.profile.edit.EditProfileContract.UiEvent
-import net.primal.android.profile.edit.EditProfileContract.UiState.EditProfileError
+import net.primal.android.profile.editor.ProfileEditorContract.UiEvent
+import net.primal.android.profile.editor.ProfileEditorContract.UiState.EditProfileError
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.repository.UserRepository
 import timber.log.Timber
 
 @HiltViewModel
-class EditProfileViewModel @Inject constructor(
+class ProfileEditorViewModel @Inject constructor(
     activeAccountStore: ActiveAccountStore,
     private val dispatcherProvider: CoroutineDispatcherProvider,
     private val profileRepository: ProfileRepository,
@@ -37,15 +37,15 @@ class EditProfileViewModel @Inject constructor(
 
     private val profileId: String = activeAccountStore.activeUserId()
 
-    private val _state = MutableStateFlow(EditProfileContract.UiState())
+    private val _state = MutableStateFlow(ProfileEditorContract.UiState())
     val state = _state.asStateFlow()
-    private fun setState(reducer: EditProfileContract.UiState.() -> EditProfileContract.UiState) {
+    private fun setState(reducer: ProfileEditorContract.UiState.() -> ProfileEditorContract.UiState) {
         _state.getAndUpdate(reducer)
     }
 
-    private val _effect: Channel<EditProfileContract.SideEffect> = Channel()
+    private val _effect: Channel<ProfileEditorContract.SideEffect> = Channel()
     val effect = _effect.receiveAsFlow()
-    private fun setEffect(effect: EditProfileContract.SideEffect) =
+    private fun setEffect(effect: ProfileEditorContract.SideEffect) =
         viewModelScope.launch {
             _effect.send(effect)
         }
@@ -139,7 +139,7 @@ class EditProfileViewModel @Inject constructor(
                 withContext(dispatcherProvider.io()) {
                     userRepository.setProfileMetadata(userId = profileId, profileMetadata = profile)
                 }
-                setEffect(effect = EditProfileContract.SideEffect.AccountSuccessfulyEdited)
+                setEffect(effect = ProfileEditorContract.SideEffect.AccountSuccessfulyEdited)
             } catch (error: NostrPublishException) {
                 Timber.w(error)
                 setErrorState(error = EditProfileError.FailedToPublishMetadata(error))
@@ -165,7 +165,7 @@ class EditProfileViewModel @Inject constructor(
     }
 }
 
-fun EditProfileContract.UiState.toProfileMetadata(): ProfileMetadata {
+fun ProfileEditorContract.UiState.toProfileMetadata(): ProfileMetadata {
     return ProfileMetadata(
         displayName = this.displayName,
         username = this.username,

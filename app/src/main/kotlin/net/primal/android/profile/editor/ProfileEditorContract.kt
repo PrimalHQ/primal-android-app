@@ -1,8 +1,8 @@
-package net.primal.android.profile.edit
+package net.primal.android.profile.editor
 
 import android.net.Uri
 
-interface EditProfileContract {
+interface ProfileEditorContract {
     data class UiState(
         val loading: Boolean = false,
         val error: EditProfileError? = null,

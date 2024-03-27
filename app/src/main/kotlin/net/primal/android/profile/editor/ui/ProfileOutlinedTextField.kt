@@ -1,4 +1,4 @@
-package net.primal.android.profile.edit.ui
+package net.primal.android.profile.editor.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

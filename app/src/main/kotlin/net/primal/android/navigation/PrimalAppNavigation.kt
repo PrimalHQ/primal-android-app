@@ -67,8 +67,8 @@ import net.primal.android.notifications.list.NotificationsViewModel
 import net.primal.android.profile.details.ProfileDetailsScreen
 import net.primal.android.profile.details.ProfileDetailsViewModel
 import net.primal.android.profile.domain.ProfileFollowsType
-import net.primal.android.profile.edit.EditProfileViewModel
-import net.primal.android.profile.edit.ui.EditProfileScreen
+import net.primal.android.profile.editor.ProfileEditorViewModel
+import net.primal.android.profile.editor.ui.ProfileEditorScreen
 import net.primal.android.profile.follows.ProfileFollowsScreen
 import net.primal.android.profile.follows.ProfileFollowsViewModel
 import net.primal.android.theme.AppTheme
@@ -101,7 +101,7 @@ private fun NavController.navigateToNoteEditor(
     preFillFileUri: Uri? = null,
     replyToNoteId: String? = null,
 ) {
-    val route = "editor" +
+    val route = "noteEditor" +
         "?$NEW_POST_REPLY_TO_NOTE_ID=${replyToNoteId.orEmpty()}" +
         "&$NEW_POST_PRE_FILL_FILE_URI=${preFillFileUri?.toString().orEmpty().asUrlEncoded()}" +
         "&$NEW_POST_PRE_FILL_CONTENT=${preFillContent.orEmpty().asBase64Encoded()}"
@@ -168,7 +168,7 @@ fun NavController.navigateToProfile(profileId: String? = null) =
 fun NavController.navigateToProfileFollows(profileId: String, followsType: ProfileFollowsType) =
     navigate(route = "profile/$profileId/follows?$FOLLOWS_TYPE=$followsType")
 
-fun NavController.navigateToEditProfile() = navigate(route = "edit_profile")
+fun NavController.navigateToProfileEditor() = navigate(route = "profileEditor")
 
 private fun NavController.navigateToSettings() = navigate(route = "settings")
 
@@ -331,7 +331,7 @@ fun PrimalAppNavigation() {
             )
 
             noteEditor(
-                route = "editor" +
+                route = "noteEditor" +
                     "?$NEW_POST_REPLY_TO_NOTE_ID={$NEW_POST_REPLY_TO_NOTE_ID}" +
                     "&$NEW_POST_PRE_FILL_FILE_URI={$NEW_POST_PRE_FILL_FILE_URI}" +
                     "&$NEW_POST_PRE_FILL_CONTENT={$NEW_POST_PRE_FILL_CONTENT}",
@@ -406,7 +406,7 @@ fun PrimalAppNavigation() {
                 navController = navController,
             )
 
-            editProfile(route = "edit_profile", navController = navController)
+            profileEditor(route = "profileEditor", navController = navController)
 
             settingsNavigation(route = "settings", navController = navController)
 
@@ -806,7 +806,7 @@ private fun NavGraphBuilder.profile(
         onPostReplyClick = { postId -> navController.navigateToNoteEditor(replyToNoteId = postId) },
         onPostQuoteClick = { preFillContent -> navController.navigateToNoteEditor(preFillContent) },
         onProfileClick = { profileId -> navController.navigateToProfile(profileId = profileId) },
-        onEditProfileClick = { navController.navigateToEditProfile() },
+        onEditProfileClick = { navController.navigateToProfileEditor() },
         onMessageClick = { profileId -> navController.navigateToChat(profileId = profileId) },
         onZapProfileClick = { transaction -> navController.navigateToWalletCreateTransaction(transaction) },
         onHashtagClick = { hashtag -> navController.navigateToExploreFeed(query = hashtag) },
@@ -826,14 +826,13 @@ private fun NavGraphBuilder.profile(
     )
 }
 
-private fun NavGraphBuilder.editProfile(route: String, navController: NavController) =
+private fun NavGraphBuilder.profileEditor(route: String, navController: NavController) =
     composable(
         route = route,
     ) {
-        val viewModel = hiltViewModel<EditProfileViewModel>()
-
+        val viewModel = hiltViewModel<ProfileEditorViewModel>()
         LockToOrientationPortrait()
-        EditProfileScreen(viewModel = viewModel, onClose = { navController.navigateUp() })
+        ProfileEditorScreen(viewModel = viewModel, onClose = { navController.navigateUp() })
     }
 
 private fun NavGraphBuilder.profileFollows(
