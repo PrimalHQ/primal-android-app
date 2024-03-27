@@ -18,10 +18,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
@@ -43,7 +39,6 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.profile.details.ProfileDetailsContract
-import net.primal.android.profile.report.ReportUserDialog
 import net.primal.android.theme.AppTheme
 
 const val MAX_COVER_TRANSPARENCY = 0.70f
@@ -145,22 +140,6 @@ private fun ProfileTopAppBar(
     eventPublisher: (ProfileDetailsContract.UiEvent) -> Unit,
     onClose: () -> Unit,
 ) {
-    var reportDialogVisible by remember { mutableStateOf(false) }
-    if (reportDialogVisible) {
-        ReportUserDialog(
-            onDismissRequest = { reportDialogVisible = false },
-            onReportClick = {
-                reportDialogVisible = false
-                eventPublisher(
-                    ProfileDetailsContract.UiEvent.ReportAbuse(
-                        reportType = it,
-                        profileId = state.profileId,
-                    ),
-                )
-            },
-        )
-    }
-
     TopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = Color.Transparent,
@@ -200,7 +179,6 @@ private fun ProfileTopAppBar(
                 snackbarHostState = snackbarHostState,
                 profileName = state.profileDetails?.authorDisplayName ?: "",
                 eventPublisher = eventPublisher,
-                onReportClick = { reportDialogVisible = true },
             )
         },
     )
@@ -211,9 +189,7 @@ private fun CoverLoading() {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(
-                color = AppTheme.colorScheme.surface,
-            ),
+            .background(color = AppTheme.colorScheme.surface),
     )
 }
 
@@ -222,8 +198,6 @@ private fun CoverUnavailable() {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(
-                color = AppTheme.colorScheme.surface,
-            ),
+            .background(color = AppTheme.colorScheme.surface),
     )
 }

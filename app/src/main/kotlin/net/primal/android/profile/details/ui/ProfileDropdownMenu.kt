@@ -1,5 +1,6 @@
 package net.primal.android.profile.details.ui
 
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
@@ -24,8 +25,10 @@ import net.primal.android.core.compose.icons.primaliconpack.UserFeedAdd
 import net.primal.android.core.utils.resolvePrimalProfileLink
 import net.primal.android.core.utils.systemShareText
 import net.primal.android.profile.details.ProfileDetailsContract
+import net.primal.android.profile.report.ReportUserDialog
 import net.primal.android.theme.AppTheme
 
+@ExperimentalMaterial3Api
 @Composable
 fun ProfileDropdownMenu(
     profileId: String,
@@ -35,10 +38,25 @@ fun ProfileDropdownMenu(
     isProfileFeedInActiveUserFeeds: Boolean,
     snackbarHostState: SnackbarHostState,
     eventPublisher: (ProfileDetailsContract.UiEvent) -> Unit,
-    onReportClick: () -> Unit,
 ) {
     val context = LocalContext.current
     var menuVisible by remember { mutableStateOf(false) }
+
+    var reportDialogVisible by remember { mutableStateOf(false) }
+    if (reportDialogVisible) {
+        ReportUserDialog(
+            onDismissRequest = { reportDialogVisible = false },
+            onReportClick = {
+                reportDialogVisible = false
+                eventPublisher(
+                    ProfileDetailsContract.UiEvent.ReportAbuse(
+                        reportType = it,
+                        profileId = profileId,
+                    ),
+                )
+            },
+        )
+    }
 
     AppBarIcon(
         icon = PrimalIcons.More,
@@ -83,7 +101,7 @@ fun ProfileDropdownMenu(
                 tint = AppTheme.colorScheme.error,
                 text = stringResource(id = R.string.context_menu_report_user),
                 onClick = {
-                    onReportClick()
+                    reportDialogVisible = true
                     menuVisible = false
                 },
             )
