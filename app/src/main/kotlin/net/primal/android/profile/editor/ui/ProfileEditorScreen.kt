@@ -15,7 +15,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
@@ -23,7 +22,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -33,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import net.primal.android.R
 import net.primal.android.core.compose.PrimalTopAppBar
+import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
@@ -67,8 +66,35 @@ fun ProfileEditorScreen(
     eventPublisher: (ProfileEditorContract.UiEvent) -> Unit,
     onClose: () -> Unit,
 ) {
+    val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
-    ErrorHandler(error = state.error, snackbarHostState = snackbarHostState)
+
+    SnackbarErrorHandler(
+        error = state.error,
+        snackbarHostState = snackbarHostState,
+        errorMessageResolver = {
+            when (it) {
+                is ProfileEditorContract.UiState.EditProfileError.FailedToPublishMetadata ->
+                    context.getString(R.string.profile_failed_to_publish_metadata)
+
+                is ProfileEditorContract.UiState.EditProfileError.MissingRelaysConfiguration ->
+                    context.getString(R.string.app_missing_relays_config)
+
+                is ProfileEditorContract.UiState.EditProfileError.FailedToUploadImage ->
+                    context.getString(R.string.app_failed_to_upload_image)
+
+                is ProfileEditorContract.UiState.EditProfileError.InvalidLightningAddress -> {
+                    val parts = it.lud16.split("@")
+                    context.getString(
+                        R.string.app_invalid_lightning_address,
+                        parts[0],
+                        parts[1],
+                    )
+                }
+            }
+        },
+        onErrorDismiss = { eventPublisher(ProfileEditorContract.UiEvent.DismissError) },
+    )
 
     Scaffold(
         topBar = {
@@ -82,7 +108,7 @@ fun ProfileEditorScreen(
             )
         },
         content = { paddingValues ->
-            EditProfileContent(
+            ProfileEditorContent(
                 state = state,
                 eventPublisher = eventPublisher,
                 paddingValues = paddingValues,
@@ -94,9 +120,8 @@ fun ProfileEditorScreen(
     )
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun EditProfileContent(
+fun ProfileEditorContent(
     state: ProfileEditorContract.UiState,
     eventPublisher: (ProfileEditorContract.UiEvent) -> Unit,
     paddingValues: PaddingValues,
@@ -111,85 +136,14 @@ fun EditProfileContent(
             .padding(paddingValues = paddingValues),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Column(
+        ProfileEditorForm(
             modifier = Modifier
-                .verticalScroll(
-                    rememberScrollState(),
-                )
+                .verticalScroll(rememberScrollState())
                 .fillMaxHeight()
                 .weight(weight = 1f, fill = true),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Top,
-        ) {
-            ProfileHero(
-                avatarUri = state.remoteAvatarUrl?.toUri() ?: state.localAvatarUri,
-                bannerUri = state.remoteBannerUrl?.toUri() ?: state.localBannerUri,
-                onBannerUriChange = {
-                    eventPublisher(
-                        ProfileEditorContract.UiEvent.BannerUriChangedEvent(bannerUri = it),
-                    )
-                },
-                onAvatarUriChange = {
-                    eventPublisher(
-                        ProfileEditorContract.UiEvent.AvatarUriChangedEvent(avatarUri = it),
-                    )
-                },
-            )
-            Spacer(modifier = Modifier.height(32.dp))
-            PrimalOutlinedTextField(
-                header = stringResource(id = R.string.profile_editor_input_header_handle).uppercase(),
-                value = state.username,
-                onValueChange = {
-                    if (it.isValidUsername()) {
-                        eventPublisher(ProfileEditorContract.UiEvent.UsernameChangedEvent(it))
-                    }
-                },
-                prefix = "@",
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            PrimalOutlinedTextField(
-                header = stringResource(id = R.string.profile_editor_input_header_display_name),
-                value = state.displayName,
-                onValueChange = {
-                    eventPublisher(ProfileEditorContract.UiEvent.DisplayNameChangedEvent(it))
-                },
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            PrimalOutlinedTextField(
-                header = stringResource(id = R.string.profile_editor_input_header_website).uppercase(),
-                value = state.website,
-                onValueChange = {
-                    eventPublisher(ProfileEditorContract.UiEvent.WebsiteChangedEvent(it.trim()))
-                },
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            PrimalOutlinedTextField(
-                header = stringResource(id = R.string.profile_editor_input_header_about_me).uppercase(),
-                value = state.aboutMe,
-                isMultiline = true,
-                onValueChange = {
-                    eventPublisher(ProfileEditorContract.UiEvent.AboutMeChangedEvent(it))
-                },
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            PrimalOutlinedTextField(
-                header = stringResource(
-                    id = R.string.profile_editor_input_header_bitcoin_lightning_address,
-                ).uppercase(),
-                value = state.lightningAddress,
-                onValueChange = {
-                    eventPublisher(ProfileEditorContract.UiEvent.LightningAddressChangedEvent(it.trim()))
-                },
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            PrimalOutlinedTextField(
-                header = stringResource(id = R.string.profile_editor_input_header_nip_05).uppercase(),
-                value = state.nip05Identifier,
-                onValueChange = {
-                    eventPublisher(ProfileEditorContract.UiEvent.Nip05IdentifierChangedEvent(it.trim()))
-                },
-            )
-        }
+            state = state,
+            eventPublisher = eventPublisher,
+        )
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -214,25 +168,79 @@ fun EditProfileContent(
 }
 
 @Composable
-private fun ErrorHandler(error: ProfileEditorContract.UiState.EditProfileError?, snackbarHostState: SnackbarHostState) {
-    val context = LocalContext.current
-    LaunchedEffect(key1 = error ?: true) {
-        val errorMessage = when (error) {
-            is ProfileEditorContract.UiState.EditProfileError.FailedToPublishMetadata -> context.getString(
-                R.string.profile_failed_to_publish_metadata,
-            )
-            is ProfileEditorContract.UiState.EditProfileError.MissingRelaysConfiguration -> context.getString(
-                R.string.app_missing_relays_config,
-            )
-            is ProfileEditorContract.UiState.EditProfileError.FailedToUploadImage -> context.getString(
-                R.string.app_failed_to_upload_image,
-            )
-            null -> return@LaunchedEffect
-        }
-
-        snackbarHostState.showSnackbar(
-            message = errorMessage,
-            duration = SnackbarDuration.Short,
+private fun ProfileEditorForm(
+    modifier: Modifier,
+    state: ProfileEditorContract.UiState,
+    eventPublisher: (ProfileEditorContract.UiEvent) -> Unit,
+) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Top,
+    ) {
+        ProfileHero(
+            avatarUri = state.remoteAvatarUrl?.toUri() ?: state.localAvatarUri,
+            bannerUri = state.remoteBannerUrl?.toUri() ?: state.localBannerUri,
+            onBannerUriChange = {
+                eventPublisher(ProfileEditorContract.UiEvent.BannerUriChangedEvent(bannerUri = it))
+            },
+            onAvatarUriChange = {
+                eventPublisher(ProfileEditorContract.UiEvent.AvatarUriChangedEvent(avatarUri = it))
+            },
+        )
+        Spacer(modifier = Modifier.height(32.dp))
+        PrimalOutlinedTextField(
+            header = stringResource(id = R.string.profile_editor_input_header_handle).uppercase(),
+            value = state.username,
+            onValueChange = {
+                if (it.isValidUsername()) {
+                    eventPublisher(ProfileEditorContract.UiEvent.UsernameChangedEvent(it))
+                }
+            },
+            prefix = "@",
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+        PrimalOutlinedTextField(
+            header = stringResource(id = R.string.profile_editor_input_header_display_name),
+            value = state.displayName,
+            onValueChange = {
+                eventPublisher(ProfileEditorContract.UiEvent.DisplayNameChangedEvent(it))
+            },
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+        PrimalOutlinedTextField(
+            header = stringResource(id = R.string.profile_editor_input_header_website).uppercase(),
+            value = state.website,
+            onValueChange = {
+                eventPublisher(ProfileEditorContract.UiEvent.WebsiteChangedEvent(it.trim()))
+            },
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+        PrimalOutlinedTextField(
+            header = stringResource(id = R.string.profile_editor_input_header_about_me).uppercase(),
+            value = state.aboutMe,
+            isMultiline = true,
+            onValueChange = {
+                eventPublisher(ProfileEditorContract.UiEvent.AboutMeChangedEvent(it))
+            },
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+        PrimalOutlinedTextField(
+            header = stringResource(
+                id = R.string.profile_editor_input_header_bitcoin_lightning_address,
+            ).uppercase(),
+            value = state.lightningAddress,
+            onValueChange = {
+                eventPublisher(ProfileEditorContract.UiEvent.LightningAddressChangedEvent(it.trim()))
+            },
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+        PrimalOutlinedTextField(
+            header = stringResource(id = R.string.profile_editor_input_header_nip_05).uppercase(),
+            value = state.nip05Identifier,
+            onValueChange = {
+                eventPublisher(ProfileEditorContract.UiEvent.Nip05IdentifierChangedEvent(it.trim()))
+            },
         )
     }
 }

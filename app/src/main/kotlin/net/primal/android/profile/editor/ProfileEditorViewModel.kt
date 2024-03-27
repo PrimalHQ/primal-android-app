@@ -4,9 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
-import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,11 +18,15 @@ import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.profile.domain.ProfileMetadata
+import net.primal.android.profile.editor.ProfileEditorContract.SideEffect
 import net.primal.android.profile.editor.ProfileEditorContract.UiEvent
+import net.primal.android.profile.editor.ProfileEditorContract.UiState
 import net.primal.android.profile.editor.ProfileEditorContract.UiState.EditProfileError
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.repository.UserRepository
+import net.primal.android.wallet.nwc.InvalidLud16Exception
+import net.primal.android.wallet.nwc.LightningAddressChecker
 import timber.log.Timber
 
 @HiltViewModel
@@ -33,29 +35,21 @@ class ProfileEditorViewModel @Inject constructor(
     private val dispatcherProvider: CoroutineDispatcherProvider,
     private val profileRepository: ProfileRepository,
     private val userRepository: UserRepository,
+    private val lightningAddressChecker: LightningAddressChecker,
 ) : ViewModel() {
 
     private val profileId: String = activeAccountStore.activeUserId()
 
-    private val _state = MutableStateFlow(ProfileEditorContract.UiState())
+    private val _state = MutableStateFlow(UiState())
     val state = _state.asStateFlow()
-    private fun setState(reducer: ProfileEditorContract.UiState.() -> ProfileEditorContract.UiState) {
-        _state.getAndUpdate(reducer)
-    }
+    private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate(reducer)
 
-    private val _effect: Channel<ProfileEditorContract.SideEffect> = Channel()
+    private val _effect: Channel<SideEffect> = Channel()
     val effect = _effect.receiveAsFlow()
-    private fun setEffect(effect: ProfileEditorContract.SideEffect) =
-        viewModelScope.launch {
-            _effect.send(effect)
-        }
+    private fun setEffect(effect: SideEffect) = viewModelScope.launch { _effect.send(effect) }
 
     private val events: MutableSharedFlow<UiEvent> = MutableSharedFlow()
-    fun setEvent(event: UiEvent) {
-        viewModelScope.launch {
-            events.emit(event)
-        }
-    }
+    fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
 
     init {
         observeEvents()
@@ -100,6 +94,8 @@ class ProfileEditorViewModel @Inject constructor(
                     }
 
                     is UiEvent.SaveProfileEvent -> saveProfile()
+
+                    UiEvent.DismissError -> setState { copy(error = null) }
                 }
             }
         }
@@ -136,10 +132,14 @@ class ProfileEditorViewModel @Inject constructor(
             setState { copy(loading = true) }
             try {
                 val profile = state.value.toProfileMetadata()
+                val lud16 = profile.lightningAddress
                 withContext(dispatcherProvider.io()) {
+                    if (!lud16.isNullOrEmpty()) {
+                        lightningAddressChecker.validateLightningAddress(lud16 = lud16)
+                    }
                     userRepository.setProfileMetadata(userId = profileId, profileMetadata = profile)
                 }
-                setEffect(effect = ProfileEditorContract.SideEffect.AccountSuccessfulyEdited)
+                setEffect(effect = SideEffect.AccountSuccessfulyEdited)
             } catch (error: NostrPublishException) {
                 Timber.w(error)
                 setErrorState(error = EditProfileError.FailedToPublishMetadata(error))
@@ -149,6 +149,9 @@ class ProfileEditorViewModel @Inject constructor(
             } catch (error: UnsuccessfulFileUpload) {
                 Timber.w(error)
                 setErrorState(error = EditProfileError.FailedToUploadImage(error))
+            } catch (error: InvalidLud16Exception) {
+                Timber.w(error)
+                setErrorState(EditProfileError.InvalidLightningAddress(lud16 = error.lud16))
             } finally {
                 setState { copy(loading = false) }
             }
@@ -156,16 +159,10 @@ class ProfileEditorViewModel @Inject constructor(
 
     private fun setErrorState(error: EditProfileError) {
         setState { copy(error = error) }
-        viewModelScope.launch {
-            delay(2.seconds)
-            if (state.value.error == error) {
-                setState { copy(error = null) }
-            }
-        }
     }
 }
 
-fun ProfileEditorContract.UiState.toProfileMetadata(): ProfileMetadata {
+fun UiState.toProfileMetadata(): ProfileMetadata {
     return ProfileMetadata(
         displayName = this.displayName,
         username = this.username,

@@ -16,6 +16,7 @@
     <string name="app_removed_from_user_feeds">Removed from your home feeds</string>
     <string name="app_error_muting_user">Unable to mute user. Please try again.</string>
     <string name="app_error_unmuting_user">Unable to unmute user. Please try again.</string>
+    <string name="app_invalid_lightning_address">Invalid lightning address. User \'%1$s\' doesn\'t exist on %2$s.</string>
 
     <string name="welcome_sign_in_button_title">Sign In</string>
     <string name="welcome_create_account_button_title">Create Account</string>

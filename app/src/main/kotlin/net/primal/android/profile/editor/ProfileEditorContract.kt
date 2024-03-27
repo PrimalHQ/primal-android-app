@@ -21,6 +21,7 @@ interface ProfileEditorContract {
             data class MissingRelaysConfiguration(val cause: Throwable) : EditProfileError()
             data class FailedToPublishMetadata(val cause: Throwable) : EditProfileError()
             data class FailedToUploadImage(val cause: Throwable) : EditProfileError()
+            data class InvalidLightningAddress(val lud16: String) : EditProfileError()
         }
     }
 
@@ -34,6 +35,7 @@ interface ProfileEditorContract {
         data class AvatarUriChangedEvent(val avatarUri: Uri?) : UiEvent()
         data class BannerUriChangedEvent(val bannerUri: Uri?) : UiEvent()
         data object SaveProfileEvent : UiEvent()
+        data object DismissError : UiEvent()
     }
 
     sealed class SideEffect {
