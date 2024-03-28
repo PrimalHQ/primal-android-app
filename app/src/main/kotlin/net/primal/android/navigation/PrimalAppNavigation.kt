@@ -887,6 +887,7 @@ private fun NavGraphBuilder.profileQrCodeViewer(
     val viewModel = hiltViewModel<ProfileQrCodeViewerViewModel>()
     LockToOrientationPortrait()
     PrimalTheme(primalTheme = PrimalTheme.Sunset) {
+        ApplyEdgeToEdge(isDarkTheme = true)
         ProfileQrCodeViewerScreen(viewModel = viewModel, onClose = { navController.navigateUp() })
     }
 }
