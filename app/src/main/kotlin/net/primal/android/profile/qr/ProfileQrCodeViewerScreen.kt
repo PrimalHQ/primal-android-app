@@ -160,12 +160,12 @@ private fun ProfileQrCodeViewerContent(state: ProfileQrCodeViewerContract.UiStat
         Flippable(
             modifier = Modifier.size(280.dp),
             flipController = flipController,
-            flipOnTouch = state.profileDetails?.lightningAddress != null,
+            flipOnTouch = !state.profileDetails?.lightningAddress.isNullOrEmpty(),
             frontSide = {
-                QrCodeBox(qrCodeValue = state.profileId.hexToNpubHrp())
+                QrCodeBox(qrCodeValue = "nostr:${state.profileId.hexToNpubHrp()}")
             },
             backSide = {
-                QrCodeBox(qrCodeValue = state.profileDetails?.lightningAddress.orEmpty())
+                QrCodeBox(qrCodeValue = "lightning:${state.profileDetails?.lightningAddress.orEmpty()}")
             },
             onFlippedListener = {
                 qrCodeValueText = when (it) {
