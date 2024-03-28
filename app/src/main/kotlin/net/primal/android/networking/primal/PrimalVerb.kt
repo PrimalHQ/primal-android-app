@@ -30,4 +30,5 @@ enum class PrimalVerb(val identifier: String) {
     WALLET("wallet"),
     WALLET_MONITOR("wallet_monitor_2"),
     DEFAULT_RELAYS("get_default_relays"),
+    IS_USER_FOLLOWING("is_user_following"),
 }

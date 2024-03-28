@@ -64,10 +64,7 @@ class ProfileDetailsViewModel @Inject constructor(
     private val _state = MutableStateFlow(
         UiState(
             profileId = profileId,
-            isProfileFollowed = false,
-            isProfileMuted = false,
-            isActiveUser = false,
-            isProfileFeedInActiveUserFeeds = false,
+            isActiveUser = profileId == activeAccountStore.activeUserId(),
             notes = feedRepository.feedByDirective(
                 feedDirective = ProfileFeedDirective.AuthoredNotes.toPrimalDirective(),
             )
@@ -90,6 +87,7 @@ class ProfileDetailsViewModel @Inject constructor(
         observeProfileStats()
         observeActiveAccount()
         observeMutedAccount()
+        resolveFollowsMe()
     }
 
     private fun observeEvents() =
@@ -122,7 +120,6 @@ class ProfileDetailsViewModel @Inject constructor(
                 setState {
                     copy(
                         isProfileFollowed = it.following.contains(profileId),
-                        isActiveUser = it.pubkey == profileId,
                         isProfileFeedInActiveUserFeeds = it.appSettings?.feeds
                             ?.any { it.directive == profileId } ?: false,
                         zappingState = this.zappingState.copy(
@@ -195,6 +192,22 @@ class ProfileDetailsViewModel @Inject constructor(
                 }
             }
         }
+
+    private fun resolveFollowsMe() {
+        val activeUserId = activeAccountStore.activeUserId()
+        if (profileId != activeUserId) {
+            viewModelScope.launch {
+                try {
+                    val isFollowing = withContext(dispatcherProvider.io()) {
+                        profileRepository.isUserFollowing(userId = activeUserId, targetUserId = profileId)
+                    }
+                    setState { copy(isProfileFollowingMe = isFollowing) }
+                } catch (error: WssException) {
+                    Timber.w(error)
+                }
+            }
+        }
+    }
 
     private fun fetchLatestMuteList() =
         viewModelScope.launch {

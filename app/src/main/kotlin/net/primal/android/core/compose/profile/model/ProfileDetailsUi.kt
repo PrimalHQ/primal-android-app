@@ -9,14 +9,14 @@ data class ProfileDetailsUi(
     val pubkey: String,
     val authorDisplayName: String,
     val userDisplayName: String,
-    val coverCdnImage: CdnImage?,
-    val avatarCdnImage: CdnImage?,
-    val internetIdentifier: String?,
-    val lightningAddress: String?,
-    val about: String?,
+    val coverCdnImage: CdnImage? = null,
+    val avatarCdnImage: CdnImage? = null,
+    val internetIdentifier: String? = null,
+    val lightningAddress: String? = null,
+    val about: String? = null,
     val aboutHashtags: List<String> = emptyList(),
     val aboutUris: List<String> = emptyList(),
-    val website: String?,
+    val website: String? = null,
 )
 
 fun ProfileData.asProfileDetailsUi() =

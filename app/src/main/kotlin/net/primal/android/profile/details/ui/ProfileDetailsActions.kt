@@ -1,12 +1,10 @@
 package net.primal.android.profile.details.ui
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -35,6 +33,7 @@ import net.primal.android.theme.AppTheme
 
 @Composable
 fun ProfileActions(
+    modifier: Modifier,
     isFollowed: Boolean,
     isActiveUser: Boolean,
     onEditProfileClick: () -> Unit,
@@ -44,12 +43,7 @@ fun ProfileActions(
     onUnfollow: () -> Unit,
 ) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(56.dp)
-            .padding(horizontal = 14.dp)
-            .padding(top = 14.dp)
-            .background(AppTheme.colorScheme.surfaceVariant),
+        modifier = modifier,
         horizontalArrangement = Arrangement.End,
     ) {
         ActionButton(
@@ -61,13 +55,15 @@ fun ProfileActions(
 
         Spacer(modifier = Modifier.width(8.dp))
 
-        ActionButton(
-            onClick = onZapProfileClick,
-            iconVector = PrimalIcons.FeedZaps,
-            contentDescription = stringResource(id = R.string.accessibility_profile_send_zap),
-        )
+        if (!isActiveUser) {
+            ActionButton(
+                onClick = onZapProfileClick,
+                iconVector = PrimalIcons.FeedZaps,
+                contentDescription = stringResource(id = R.string.accessibility_profile_send_zap),
+            )
 
-        Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(8.dp))
+        }
 
         ActionButton(
             onClick = onMessageClick,

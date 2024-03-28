@@ -334,6 +334,7 @@
     <string name="profile_context_remove_user_feed">Remove user feed</string>
     <string name="profile_user_feed_title">%1$s\'s feed</string>
     <string name="profile_user_is_muted">%1$s is muted.</string>
+    <string name="profile_follows_you">Follows you</string>
 
     <string name="profile_follow">Follow</string>
     <string name="profile_unfollow">Unfollow</string>

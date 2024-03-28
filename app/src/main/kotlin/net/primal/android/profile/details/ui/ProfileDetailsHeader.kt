@@ -9,12 +9,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -27,10 +29,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
+import kotlinx.coroutines.flow.flowOf
 import net.primal.android.R
 import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.ListLoading
@@ -40,6 +44,7 @@ import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.Key
 import net.primal.android.core.compose.isEmpty
+import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.core.ext.openUriSafely
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.formatNip05Identifier
@@ -48,6 +53,7 @@ import net.primal.android.profile.details.ProfileDetailsContract
 import net.primal.android.profile.domain.ProfileFeedDirective
 import net.primal.android.profile.domain.ProfileFollowsType
 import net.primal.android.theme.AppTheme
+import net.primal.android.theme.PrimalTheme
 import net.primal.android.wallet.domain.DraftTx
 import net.primal.android.wallet.utils.isLightningAddress
 
@@ -139,6 +145,13 @@ private fun ProfileHeaderDetails(
             .background(color = AppTheme.colorScheme.surfaceVariant),
     ) {
         ProfileActions(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 4.dp)
+                .height(56.dp)
+                .padding(horizontal = 14.dp)
+                .padding(top = 14.dp)
+                .background(AppTheme.colorScheme.surfaceVariant),
             isFollowed = state.isProfileFollowed,
             isActiveUser = state.isActiveUser,
             onEditProfileClick = onEditProfileClick,
@@ -148,19 +161,10 @@ private fun ProfileHeaderDetails(
             onUnfollow = onUnfollow,
         )
 
-        NostrUserText(
-            modifier = Modifier
-                .padding(horizontal = 14.dp)
-                .padding(top = 12.dp, bottom = 3.dp),
+        UserDisplayName(
             displayName = state.profileDetails?.authorDisplayName ?: state.profileId.asEllipsizedNpub(),
             internetIdentifier = state.profileDetails?.internetIdentifier,
-            internetIdentifierBadgeSize = 20.dp,
-            internetIdentifierBadgeAlign = PlaceholderVerticalAlign.Center,
-            style = AppTheme.typography.titleLarge.copy(
-                fontSize = 22.sp,
-                lineHeight = 20.sp,
-                fontWeight = FontWeight.Bold,
-            ),
+            isProfileFollowingMe = state.isProfileFollowingMe,
         )
 
         if (state.profileDetails?.internetIdentifier?.isNotEmpty() == true) {
@@ -209,6 +213,54 @@ private fun ProfileHeaderDetails(
             followersCount = state.profileStats?.followersCount,
             onFollowersCountClick = { onFollowsClick(state.profileId, ProfileFollowsType.Followers) },
         )
+    }
+}
+
+@Composable
+private fun UserDisplayName(
+    modifier: Modifier = Modifier,
+    displayName: String,
+    internetIdentifier: String?,
+    isProfileFollowingMe: Boolean,
+) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        NostrUserText(
+            modifier = Modifier
+                .padding(start = 14.dp, end = 6.dp)
+                .padding(top = 12.dp, bottom = 3.dp),
+            displayName = displayName,
+            internetIdentifier = internetIdentifier,
+            internetIdentifierBadgeSize = 20.dp,
+            internetIdentifierBadgeAlign = PlaceholderVerticalAlign.Center,
+            style = AppTheme.typography.titleLarge.copy(
+                fontSize = 22.sp,
+                lineHeight = 20.sp,
+                fontWeight = FontWeight.Bold,
+            ),
+        )
+
+        if (isProfileFollowingMe) {
+            Box(
+                modifier = Modifier
+                    .padding(top = 6.dp)
+                    .height(24.dp)
+                    .background(
+                        color = AppTheme.extraColorScheme.surfaceVariantAlt1,
+                        shape = AppTheme.shapes.extraSmall,
+                    )
+                    .padding(horizontal = 6.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = stringResource(id = R.string.profile_follows_you).lowercase(),
+                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                    style = AppTheme.typography.bodySmall,
+                )
+            }
+        }
     }
 }
 
@@ -302,4 +354,36 @@ private fun UserInternetIdentifier(modifier: Modifier = Modifier, internetIdenti
         ),
         color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
     )
+}
+
+@Preview
+@Composable
+private fun PreviewProfileHeaderDetails() {
+    PrimalTheme(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunrise) {
+        Surface {
+            ProfileHeaderDetails(
+                state = ProfileDetailsContract.UiState(
+                    profileId = "88cc134b1a65f54ef48acc1df3665063d3ea45f04eab8af4646e561c5ae99079",
+                    isActiveUser = false,
+                    isProfileFollowingMe = true,
+                    profileDetails = ProfileDetailsUi(
+                        pubkey = "88cc134b1a65f54ef48acc1df3665063d3ea45f04eab8af4646e561c5ae99079",
+                        userDisplayName = "qauser",
+                        authorDisplayName = "qauser",
+                        internetIdentifier = "qa@primal.net",
+                    ),
+                    notes = flowOf(),
+                ),
+                eventPublisher = {},
+                onEditProfileClick = {},
+                onZapProfileClick = {},
+                onMessageClick = {},
+                onFollow = {},
+                onUnfollow = {},
+                onFollowsClick = { _, _ -> },
+                onProfileClick = {},
+                onHashtagClick = {},
+            )
+        }
+    }
 }

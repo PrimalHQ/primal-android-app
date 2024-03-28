@@ -12,10 +12,11 @@ import net.primal.android.profile.report.ReportType
 interface ProfileDetailsContract {
     data class UiState(
         val profileId: String,
-        val isProfileFollowed: Boolean,
-        val isProfileMuted: Boolean,
         val isActiveUser: Boolean,
-        val isProfileFeedInActiveUserFeeds: Boolean,
+        val isProfileFollowed: Boolean = false,
+        val isProfileFollowingMe: Boolean = false,
+        val isProfileMuted: Boolean = false,
+        val isProfileFeedInActiveUserFeeds: Boolean = false,
         val profileDetails: ProfileDetailsUi? = null,
         val profileStats: ProfileStatsUi? = null,
         val referencedProfilesData: Set<ProfileDetailsUi> = emptySet(),

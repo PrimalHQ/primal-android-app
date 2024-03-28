@@ -11,6 +11,7 @@ import net.primal.android.networking.primal.PrimalVerb
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.user.api.model.FollowListRequestBody
+import net.primal.android.user.api.model.IsUserFollowingRequestBody
 import net.primal.android.user.api.model.UserContactsResponse
 import net.primal.android.user.api.model.UserProfileResponse
 import net.primal.android.user.api.model.UserProfilesRequestBody
@@ -127,5 +128,23 @@ class UsersApiImpl @Inject constructor(
         if (content.isNullOrEmpty()) throw WssException("Invalid content.")
 
         return NostrJson.decodeFromString<List<String>>(list.content)
+    }
+
+    override suspend fun isUserFollowing(userId: String, targetUserId: String): Boolean {
+        val queryResult = primalApiClient.query(
+            message = PrimalCacheFilter(
+                primalVerb = PrimalVerb.IS_USER_FOLLOWING,
+                optionsJson = NostrJson.encodeToString(
+                    IsUserFollowingRequestBody(userId = userId, targetUserId = targetUserId),
+                ),
+            ),
+        )
+
+        val primalEvent = queryResult.findPrimalEvent(NostrEventKind.PrimalIsUserFollowing)
+            ?: throw WssException("No response")
+        val isUserFollowing = primalEvent.content.toBooleanStrictOrNull()
+            ?: throw WssException("Invalid response.")
+
+        return isUserFollowing
     }
 }

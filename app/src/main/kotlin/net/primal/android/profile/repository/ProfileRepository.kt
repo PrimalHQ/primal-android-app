@@ -141,5 +141,7 @@ class ProfileRepository @Inject constructor(
         )
     }
 
+    suspend fun isUserFollowing(userId: String, targetUserId: String) = usersApi.isUserFollowing(userId, targetUserId)
+
     class FollowListNotFound : Exception()
 }

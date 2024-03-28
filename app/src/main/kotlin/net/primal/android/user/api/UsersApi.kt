@@ -21,4 +21,6 @@ interface UsersApi {
     suspend fun getUserRelays(userId: String): UserRelaysResponse
 
     suspend fun getDefaultRelays(): List<String>
+
+    suspend fun isUserFollowing(userId: String, targetUserId: String): Boolean
 }
