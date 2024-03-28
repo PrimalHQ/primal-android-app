@@ -65,6 +65,7 @@ import net.primal.android.core.compose.icons.primaliconpack.Copy
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.ellipsizeMiddle
+import net.primal.android.core.utils.formatNip05Identifier
 import net.primal.android.crypto.hexToNpubHrp
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
@@ -140,7 +141,7 @@ private fun ProfileQrCodeViewerContent(state: ProfileQrCodeViewerContract.UiStat
 
         if (state.profileDetails?.internetIdentifier != null) {
             Text(
-                text = state.profileDetails.internetIdentifier,
+                text = state.profileDetails.internetIdentifier.formatNip05Identifier(),
                 color = Color.White,
                 style = AppTheme.typography.bodyLarge.copy(
                     fontSize = 18.sp,
