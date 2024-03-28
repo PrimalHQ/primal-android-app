@@ -179,12 +179,12 @@ private fun ProfileQrCodeViewerContent(state: ProfileQrCodeViewerContract.UiStat
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        UserPublicKey(
+        CopyText(
             modifier = Modifier.padding(horizontal = 32.dp),
             text = if (qrCodeValueText.isLightningAddress()) {
                 qrCodeValueText
             } else {
-                qrCodeValueText.ellipsizeMiddle(size = 8)
+                qrCodeValueText.ellipsizeMiddle(size = 12)
             },
             onCopyClick = {
                 clipboardManager.setText(AnnotatedString(text = qrCodeValueText))
@@ -240,13 +240,20 @@ private fun rememberQrCodeDrawable(text: String): Drawable {
 }
 
 @Composable
-private fun UserPublicKey(
+private fun CopyText(
     modifier: Modifier = Modifier,
     text: String,
     onCopyClick: () -> Unit,
 ) {
     Row(
-        modifier = modifier,
+        modifier = modifier
+            .clickable(
+                onClick = onCopyClick,
+                role = Role.Button,
+                interactionSource = remember { MutableInteractionSource() },
+                indication = rememberRipple(),
+            )
+            .padding(horizontal = 8.dp, vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
@@ -260,14 +267,7 @@ private fun UserPublicKey(
         )
 
         Box(
-            modifier = Modifier
-                .size(24.dp)
-                .clickable(
-                    onClick = onCopyClick,
-                    role = Role.Button,
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = rememberRipple(),
-                ),
+            modifier = Modifier.size(24.dp),
             contentAlignment = Alignment.Center,
         ) {
             Image(
