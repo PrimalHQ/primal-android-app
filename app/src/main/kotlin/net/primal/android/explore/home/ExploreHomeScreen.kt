@@ -65,6 +65,7 @@ fun ExploreHomeScreen(
     onSearchClick: () -> Unit,
     onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
+    onDrawerQrCodeClick: () -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
 
@@ -74,6 +75,7 @@ fun ExploreHomeScreen(
         onSearchClick = onSearchClick,
         onPrimaryDestinationChanged = onTopLevelDestinationChanged,
         onDrawerDestinationClick = onDrawerScreenClick,
+        onDrawerQrCodeClick = onDrawerQrCodeClick,
         eventPublisher = { viewModel.setEvent(it) },
     )
 }
@@ -86,6 +88,7 @@ fun ExploreHomeScreen(
     onSearchClick: () -> Unit,
     onPrimaryDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
+    onDrawerQrCodeClick: () -> Unit,
     eventPublisher: (UiEvent) -> Unit,
 ) {
     val uiScope = rememberCoroutineScope()
@@ -98,6 +101,7 @@ fun ExploreHomeScreen(
         onActiveDestinationClick = { uiScope.launch { listState.animateScrollToItem(0) } },
         onPrimaryDestinationChanged = onPrimaryDestinationChanged,
         onDrawerDestinationClick = onDrawerDestinationClick,
+        onDrawerQrCodeClick = onDrawerQrCodeClick,
         badges = state.badges,
         topBar = {
             ExploreTopAppBar(

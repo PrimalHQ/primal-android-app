@@ -51,7 +51,11 @@ import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.user.domain.UserAccount
 
 @Composable
-fun PrimalDrawer(drawerState: DrawerState, onDrawerDestinationClick: (DrawerScreenDestination) -> Unit) {
+fun PrimalDrawer(
+    drawerState: DrawerState,
+    onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
+    onQrCodeClick: () -> Unit,
+) {
     val uiScope = rememberCoroutineScope()
     val viewModel = hiltViewModel<PrimalDrawerViewModel>()
 
@@ -59,8 +63,10 @@ fun PrimalDrawer(drawerState: DrawerState, onDrawerDestinationClick: (DrawerScre
         uiScope.launch { drawerState.close() }
     }
 
+    val uiState = viewModel.state.collectAsState()
+
     PrimalDrawer(
-        viewModel = viewModel,
+        state = uiState.value,
         onDrawerDestinationClick = {
             when (it) {
                 DrawerScreenDestination.SignOut -> Unit
@@ -68,19 +74,8 @@ fun PrimalDrawer(drawerState: DrawerState, onDrawerDestinationClick: (DrawerScre
             }
             onDrawerDestinationClick(it)
         },
-    )
-}
-
-@Composable
-fun PrimalDrawer(viewModel: PrimalDrawerViewModel, onDrawerDestinationClick: (DrawerScreenDestination) -> Unit) {
-    val uiState = viewModel.state.collectAsState()
-
-    PrimalDrawer(
-        state = uiState.value,
-        onDrawerDestinationClick = onDrawerDestinationClick,
-        eventPublisher = {
-            viewModel.setEvent(it)
-        },
+        eventPublisher = { viewModel.setEvent(it) },
+        onQrCodeClick = onQrCodeClick,
     )
 }
 
@@ -89,6 +84,7 @@ fun PrimalDrawer(
     state: PrimalDrawerContract.UiState,
     eventPublisher: (PrimalDrawerContract.UiEvent) -> Unit,
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
+    onQrCodeClick: () -> Unit,
 ) {
     val isSystemInDarkTheme = isSystemInDarkTheme()
     Surface {
@@ -102,6 +98,7 @@ fun PrimalDrawer(
         ) {
             DrawerHeader(
                 userAccount = state.activeUserAccount,
+                onQrCodeClick = onQrCodeClick,
             )
 
             DrawerMenu(
@@ -125,7 +122,7 @@ fun PrimalDrawer(
 }
 
 @Composable
-private fun DrawerHeader(userAccount: UserAccount?) {
+private fun DrawerHeader(userAccount: UserAccount?, onQrCodeClick: () -> Unit) {
     val numberFormat = remember { NumberFormat.getNumberInstance() }
     ConstraintLayout(
         modifier = Modifier.fillMaxWidth(),
@@ -163,6 +160,7 @@ private fun DrawerHeader(userAccount: UserAccount?) {
             },
         ) {
             Icon(
+                modifier = Modifier.clickable { onQrCodeClick() },
                 imageVector = PrimalIcons.QrCode,
                 contentDescription = stringResource(id = R.string.accessibility_qr_code),
             )
@@ -300,6 +298,7 @@ fun PrimalDrawerPreview() {
             state = PrimalDrawerContract.UiState(),
             eventPublisher = {},
             onDrawerDestinationClick = {},
+            onQrCodeClick = {},
         )
     }
 }

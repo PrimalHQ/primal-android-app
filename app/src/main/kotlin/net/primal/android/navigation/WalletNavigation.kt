@@ -115,6 +115,7 @@ private fun NavGraphBuilder.dashboard(
         viewModel = viewModel,
         onPrimaryDestinationChanged = onTopLevelDestinationChanged,
         onDrawerDestinationClick = onDrawerDestinationClick,
+        onDrawerQrCodeClick = { navController.navigateToProfileQrCodeViewer() },
         onWalletActivateClick = { navController.navigateToWalletActivation() },
         onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
         onTransactionClick = { txId -> navController.navigateToTransactionDetails(txId) },

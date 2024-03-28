@@ -74,6 +74,7 @@ fun ProfileDetailsScreen(
     onEditProfileClick: () -> Unit,
     onMessageClick: (String) -> Unit,
     onZapProfileClick: (DraftTx) -> Unit,
+    onDrawerQrCodeClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
     onMediaClick: (String, String) -> Unit,
     onFollowsClick: (String, ProfileFollowsType) -> Unit,
@@ -98,6 +99,7 @@ fun ProfileDetailsScreen(
         onEditProfileClick = onEditProfileClick,
         onMessageClick = onMessageClick,
         onZapProfileClick = onZapProfileClick,
+        onDrawerQrCodeClick = onDrawerQrCodeClick,
         onHashtagClick = onHashtagClick,
         onMediaClick = onMediaClick,
         onGoToWallet = onGoToWallet,
@@ -121,6 +123,7 @@ fun ProfileDetailsScreen(
     onEditProfileClick: () -> Unit,
     onMessageClick: (String) -> Unit,
     onZapProfileClick: (DraftTx) -> Unit,
+    onDrawerQrCodeClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
     onMediaClick: (String, String) -> Unit,
     onGoToWallet: () -> Unit,
@@ -304,6 +307,7 @@ fun ProfileDetailsScreen(
                         onEditProfileClick = onEditProfileClick,
                         onMessageClick = onMessageClick,
                         onZapProfileClick = onZapProfileClick,
+                        onDrawerQrCodeClick = { onDrawerQrCodeClick(state.profileId) },
                         onUnableToZapProfile = {
                             uiScope.launch {
                                 snackbarHostState.showSnackbar(
@@ -414,6 +418,7 @@ private fun PreviewProfileScreen() {
                 onEditProfileClick = {},
                 onMessageClick = {},
                 onZapProfileClick = {},
+                onDrawerQrCodeClick = {},
                 onHashtagClick = {},
                 onMediaClick = { _, _ -> },
                 onFollowsClick = { _, _ -> },

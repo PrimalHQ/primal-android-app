@@ -71,6 +71,8 @@ import net.primal.android.profile.editor.ProfileEditorViewModel
 import net.primal.android.profile.editor.ui.ProfileEditorScreen
 import net.primal.android.profile.follows.ProfileFollowsScreen
 import net.primal.android.profile.follows.ProfileFollowsViewModel
+import net.primal.android.profile.qr.ProfileQrCodeViewerScreen
+import net.primal.android.profile.qr.ProfileQrCodeViewerViewModel
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
@@ -163,6 +165,12 @@ fun NavController.navigateToProfile(profileId: String? = null) =
     when {
         profileId != null -> navigate(route = "profile?$PROFILE_ID=$profileId")
         else -> navigate(route = "profile")
+    }
+
+fun NavController.navigateToProfileQrCodeViewer(profileId: String? = null) =
+    when {
+        profileId != null -> navigate(route = "profileQrCodeViewer?$PROFILE_ID=$profileId")
+        else -> navigate(route = "profileQrCodeViewer")
     }
 
 fun NavController.navigateToProfileFollows(profileId: String, followsType: ProfileFollowsType) =
@@ -408,6 +416,17 @@ fun PrimalAppNavigation() {
 
             profileEditor(route = "profileEditor", navController = navController)
 
+            profileQrCodeViewer(
+                route = "profileQrCodeViewer?$PROFILE_ID={$PROFILE_ID}",
+                arguments = listOf(
+                    navArgument(PROFILE_ID) {
+                        type = NavType.StringType
+                        nullable = true
+                    },
+                ),
+                navController = navController,
+            )
+
             settingsNavigation(route = "settings", navController = navController)
 
             walletNavigation(
@@ -554,6 +573,7 @@ private fun NavGraphBuilder.feed(
         onGoToWallet = { navController.navigateToWallet() },
         onTopLevelDestinationChanged = onTopLevelDestinationChanged,
         onDrawerScreenClick = onDrawerScreenClick,
+        onDrawerQrCodeClick = { navController.navigateToProfileQrCodeViewer() },
     )
 }
 
@@ -602,6 +622,7 @@ private fun NavGraphBuilder.explore(
         onSearchClick = { navController.navigateToSearch() },
         onTopLevelDestinationChanged = onTopLevelDestinationChanged,
         onDrawerScreenClick = onDrawerScreenClick,
+        onDrawerQrCodeClick = { navController.navigateToProfileQrCodeViewer() },
     )
 }
 
@@ -664,6 +685,7 @@ private fun NavGraphBuilder.messages(
         onDrawerScreenClick = onDrawerScreenClick,
         onConversationClick = { profileId -> navController.navigateToChat(profileId) },
         onNewMessageClick = { navController.navigateToNewMessage() },
+        onDrawerQrCodeClick = { navController.navigateToProfileQrCodeViewer() },
     )
 }
 
@@ -735,6 +757,7 @@ private fun NavGraphBuilder.notifications(
         onGoToWallet = { navController.navigateToWallet() },
         onTopLevelDestinationChanged = onTopLevelDestinationChanged,
         onDrawerScreenClick = onDrawerScreenClick,
+        onDrawerQrCodeClick = { navController.navigateToProfileQrCodeViewer() },
     )
 }
 
@@ -809,6 +832,7 @@ private fun NavGraphBuilder.profile(
         onEditProfileClick = { navController.navigateToProfileEditor() },
         onMessageClick = { profileId -> navController.navigateToChat(profileId = profileId) },
         onZapProfileClick = { transaction -> navController.navigateToWalletCreateTransaction(transaction) },
+        onDrawerQrCodeClick = { profileId -> navController.navigateToProfileQrCodeViewer(profileId) },
         onHashtagClick = { hashtag -> navController.navigateToExploreFeed(query = hashtag) },
         onFollowsClick = { profileId, followsType ->
             navController.navigateToProfileFollows(
@@ -850,6 +874,21 @@ private fun NavGraphBuilder.profileFollows(
         onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
         onClose = { navController.navigateUp() },
     )
+}
+
+private fun NavGraphBuilder.profileQrCodeViewer(
+    route: String,
+    navController: NavController,
+    arguments: List<NamedNavArgument>,
+) = composable(
+    route = route,
+    arguments = arguments,
+) {
+    val viewModel = hiltViewModel<ProfileQrCodeViewerViewModel>()
+    LockToOrientationPortrait()
+    PrimalTheme(primalTheme = PrimalTheme.Sunset) {
+        ProfileQrCodeViewerScreen(viewModel = viewModel, onClose = { navController.navigateUp() })
+    }
 }
 
 private fun NavGraphBuilder.logout(route: String, navController: NavController) =

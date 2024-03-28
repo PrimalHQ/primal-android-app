@@ -39,6 +39,7 @@ fun ProfileActions(
     onEditProfileClick: () -> Unit,
     onMessageClick: () -> Unit,
     onZapProfileClick: () -> Unit,
+    onDrawerQrCodeClick: () -> Unit,
     onFollow: () -> Unit,
     onUnfollow: () -> Unit,
 ) {
@@ -47,7 +48,7 @@ fun ProfileActions(
         horizontalArrangement = Arrangement.End,
     ) {
         ActionButton(
-            onClick = { },
+            onClick = onDrawerQrCodeClick,
             iconVector = PrimalIcons.QrCode,
             iconPadding = 11.dp,
             contentDescription = stringResource(id = R.string.accessibility_profile_qr_code),

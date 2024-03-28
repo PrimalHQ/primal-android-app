@@ -78,6 +78,7 @@ fun FeedScreen(
     onGoToWallet: () -> Unit,
     onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
+    onDrawerQrCodeClick: () -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
 
@@ -100,6 +101,7 @@ fun FeedScreen(
         onGoToWallet = onGoToWallet,
         onPrimaryDestinationChanged = onTopLevelDestinationChanged,
         onDrawerDestinationClick = onDrawerScreenClick,
+        onDrawerQrCodeClick = onDrawerQrCodeClick,
     )
 }
 
@@ -118,6 +120,7 @@ fun FeedScreen(
     onGoToWallet: () -> Unit,
     onPrimaryDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
+    onDrawerQrCodeClick: () -> Unit,
 ) {
     val uiScope = rememberCoroutineScope()
     val drawerState: DrawerState = rememberDrawerState(DrawerValue.Closed)
@@ -147,6 +150,7 @@ fun FeedScreen(
         onActiveDestinationClick = { uiScope.launch { feedListState.animateScrollToItem(0) } },
         onPrimaryDestinationChanged = onPrimaryDestinationChanged,
         onDrawerDestinationClick = onDrawerDestinationClick,
+        onDrawerQrCodeClick = onDrawerQrCodeClick,
         badges = state.badges,
         focusModeEnabled = focusModeEnabled,
         topBar = {
@@ -356,6 +360,7 @@ fun FeedScreenPreview() {
             onGoToWallet = {},
             onPrimaryDestinationChanged = {},
             onDrawerDestinationClick = {},
+            onDrawerQrCodeClick = {},
         )
     }
 }

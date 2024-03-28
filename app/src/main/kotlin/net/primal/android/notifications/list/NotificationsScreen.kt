@@ -81,6 +81,7 @@ fun NotificationsScreen(
     onGoToWallet: () -> Unit,
     onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
+    onDrawerQrCodeClick: () -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
 
@@ -104,6 +105,7 @@ fun NotificationsScreen(
         onNotificationSettings = onNotificationSettings,
         onPrimaryDestinationChanged = onTopLevelDestinationChanged,
         onDrawerDestinationClick = onDrawerScreenClick,
+        onDrawerQrCodeClick = onDrawerQrCodeClick,
         onGoToWallet = onGoToWallet,
         onPostQuoteClick = onPostQuoteClick,
         eventPublisher = { viewModel.setEvent(it) },
@@ -124,6 +126,7 @@ fun NotificationsScreen(
     onNotificationSettings: () -> Unit,
     onPrimaryDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
+    onDrawerQrCodeClick: () -> Unit,
     eventPublisher: (NotificationsContract.UiEvent) -> Unit,
 ) {
     val uiScope = rememberCoroutineScope()
@@ -162,6 +165,7 @@ fun NotificationsScreen(
         },
         onPrimaryDestinationChanged = onPrimaryDestinationChanged,
         onDrawerDestinationClick = onDrawerDestinationClick,
+        onDrawerQrCodeClick = onDrawerQrCodeClick,
         badges = state.badges,
         topBar = {
             PrimalTopAppBar(

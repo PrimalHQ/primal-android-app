@@ -95,6 +95,7 @@ fun MessageListScreen(
     viewModel: MessageConversationListViewModel,
     onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
+    onDrawerQrCodeClick: () -> Unit,
     onConversationClick: (String) -> Unit,
     onNewMessageClick: () -> Unit,
 ) {
@@ -114,6 +115,7 @@ fun MessageListScreen(
         state = uiState.value,
         onPrimaryDestinationChanged = onTopLevelDestinationChanged,
         onDrawerDestinationClick = onDrawerScreenClick,
+        onDrawerQrCodeClick = onDrawerQrCodeClick,
         eventPublisher = { viewModel.setEvent(it) },
         onConversationClick = onConversationClick,
         onNewMessageClick = onNewMessageClick,
@@ -126,6 +128,7 @@ fun MessageListScreen(
     state: MessageConversationListContract.UiState,
     onPrimaryDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
+    onDrawerQrCodeClick: () -> Unit,
     eventPublisher: (UiEvent) -> Unit,
     onConversationClick: (String) -> Unit,
     onNewMessageClick: () -> Unit,
@@ -149,6 +152,7 @@ fun MessageListScreen(
         onActiveDestinationClick = { uiScope.launch { listState.animateScrollToItem(0) } },
         onPrimaryDestinationChanged = onPrimaryDestinationChanged,
         onDrawerDestinationClick = onDrawerDestinationClick,
+        onDrawerQrCodeClick = onDrawerQrCodeClick,
         badges = state.badges,
         topBar = {
             PrimalTopAppBar(

@@ -40,6 +40,7 @@ fun PrimalDrawerScaffold(
     activeDestination: PrimalTopLevelDestination,
     onPrimaryDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
+    onDrawerQrCodeClick: () -> Unit,
     badges: Badges = Badges(),
     onActiveDestinationClick: () -> Unit = {},
     topBar: @Composable (TopAppBarScrollBehavior?) -> Unit = {},
@@ -77,6 +78,7 @@ fun PrimalDrawerScaffold(
             PrimalDrawer(
                 drawerState = drawerState,
                 onDrawerDestinationClick = onDrawerDestinationClick,
+                onQrCodeClick = onDrawerQrCodeClick,
             )
         },
         content = {

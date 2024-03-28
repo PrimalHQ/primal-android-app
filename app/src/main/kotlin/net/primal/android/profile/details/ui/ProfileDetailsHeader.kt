@@ -1,9 +1,7 @@
 package net.primal.android.profile.details.ui
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,22 +9,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ContentCopy
-import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -41,14 +31,11 @@ import net.primal.android.core.compose.ListLoading
 import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.feed.model.FeedPostUi
-import net.primal.android.core.compose.icons.PrimalIcons
-import net.primal.android.core.compose.icons.primaliconpack.Key
 import net.primal.android.core.compose.isEmpty
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.core.ext.openUriSafely
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.formatNip05Identifier
-import net.primal.android.crypto.hexToNpubHrp
 import net.primal.android.profile.details.ProfileDetailsContract
 import net.primal.android.profile.domain.ProfileFeedDirective
 import net.primal.android.profile.domain.ProfileFollowsType
@@ -65,6 +52,7 @@ fun ProfileDetailsHeader(
     onEditProfileClick: () -> Unit,
     onMessageClick: (String) -> Unit,
     onZapProfileClick: (DraftTx) -> Unit,
+    onDrawerQrCodeClick: () -> Unit,
     onUnableToZapProfile: () -> Unit,
     onFollowsClick: (String, ProfileFollowsType) -> Unit,
     onProfileClick: (String) -> Unit,
@@ -88,6 +76,7 @@ fun ProfileDetailsHeader(
             },
             onFollow = { eventPublisher(ProfileDetailsContract.UiEvent.FollowAction(state.profileId)) },
             onUnfollow = { eventPublisher(ProfileDetailsContract.UiEvent.UnfollowAction(state.profileId)) },
+            onDrawerQrCodeClick = onDrawerQrCodeClick,
             onFollowsClick = onFollowsClick,
             onProfileClick = onProfileClick,
             onHashtagClick = onHashtagClick,
@@ -129,6 +118,7 @@ private fun ProfileHeaderDetails(
     state: ProfileDetailsContract.UiState,
     eventPublisher: (ProfileDetailsContract.UiEvent) -> Unit,
     onEditProfileClick: () -> Unit,
+    onDrawerQrCodeClick: () -> Unit,
     onZapProfileClick: () -> Unit,
     onMessageClick: () -> Unit,
     onFollow: () -> Unit,
@@ -157,6 +147,7 @@ private fun ProfileHeaderDetails(
             onEditProfileClick = onEditProfileClick,
             onMessageClick = onMessageClick,
             onZapProfileClick = onZapProfileClick,
+            onDrawerQrCodeClick = onDrawerQrCodeClick,
             onFollow = onFollow,
             onUnfollow = onUnfollow,
         )
@@ -278,49 +269,6 @@ private fun UserWebsiteText(
     )
 }
 
-@Suppress("UnusedPrivateMember")
-@Composable
-private fun UserPublicKey(
-    modifier: Modifier = Modifier,
-    pubkey: String,
-    onCopyClick: (String) -> Unit,
-) {
-    Row(
-        modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        IconText(
-            modifier = Modifier
-                .padding(horizontal = 16.dp)
-                .wrapContentWidth(),
-            text = pubkey.asEllipsizedNpub(),
-            style = AppTheme.typography.bodySmall,
-            color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
-            leadingIconTintColor = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
-            leadingIcon = PrimalIcons.Key,
-            iconSize = 12.sp,
-        )
-
-        Box(
-            modifier = Modifier
-                .size(20.dp)
-                .clickable(
-                    onClick = { onCopyClick(pubkey.hexToNpubHrp()) },
-                    role = Role.Button,
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = rememberRipple(),
-                ),
-            contentAlignment = Alignment.Center,
-        ) {
-            Image(
-                imageVector = Icons.Outlined.ContentCopy,
-                colorFilter = ColorFilter.tint(color = AppTheme.colorScheme.primary),
-                contentDescription = stringResource(id = R.string.accessibility_copy_content),
-            )
-        }
-    }
-}
-
 @Composable
 private fun ProfileMutedNotice(profileName: String, onUnmuteClick: () -> Unit) {
     Column(
@@ -378,6 +326,7 @@ private fun PreviewProfileHeaderDetails() {
                 onEditProfileClick = {},
                 onZapProfileClick = {},
                 onMessageClick = {},
+                onDrawerQrCodeClick = {},
                 onFollow = {},
                 onUnfollow = {},
                 onFollowsClick = { _, _ -> },
