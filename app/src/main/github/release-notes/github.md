@@ -1,4 +1,5 @@
 ## Changes
+- Profile QR code viewer;
 - Implement rendering links, hashtags and profiles in profile about section; 
 - Update profile header;
 - Implement lud16 validation in profile editor;
