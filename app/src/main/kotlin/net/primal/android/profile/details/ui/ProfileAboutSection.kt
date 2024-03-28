@@ -38,7 +38,7 @@ fun ProfileAboutSection(
 
     PrimalClickableText(
         modifier = modifier,
-        style = AppTheme.typography.bodySmall.copy(
+        style = AppTheme.typography.bodyMedium.copy(
             color = AppTheme.colorScheme.onSurface,
         ),
         text = contentText,

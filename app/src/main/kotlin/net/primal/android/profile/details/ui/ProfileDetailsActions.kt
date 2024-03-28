@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -46,8 +47,8 @@ fun ProfileActions(
         modifier = Modifier
             .fillMaxWidth()
             .height(56.dp)
-            .padding(horizontal = 16.dp)
-            .padding(top = 16.dp)
+            .padding(horizontal = 14.dp)
+            .padding(top = 14.dp)
             .background(AppTheme.colorScheme.surfaceVariant),
         horizontalArrangement = Arrangement.End,
     ) {
@@ -71,6 +72,7 @@ fun ProfileActions(
         ActionButton(
             onClick = onMessageClick,
             iconVector = PrimalIcons.Message,
+            iconPadding = 3.dp,
             contentDescription = stringResource(id = R.string.accessibility_profile_messages),
         )
 
@@ -82,11 +84,7 @@ fun ProfileActions(
                 false -> FollowButton(onClick = onFollow)
             }
         } else {
-            EditProfileButton(
-                onClick = {
-                    onEditProfileClick()
-                },
-            )
+            EditProfileButton(onClick = { onEditProfileClick() })
         }
     }
 }
@@ -155,15 +153,17 @@ private fun ProfileButton(
         modifier = Modifier
             .height(40.dp)
             .wrapContentWidth()
-            .defaultMinSize(minWidth = 100.dp),
+            .defaultMinSize(minWidth = 108.dp),
         contentPadding = PaddingValues(
             horizontal = 16.dp,
             vertical = 0.dp,
         ),
         containerColor = containerColor,
         contentColor = contentColor,
-        textStyle = AppTheme.typography.titleMedium.copy(
+        textStyle = AppTheme.typography.bodyMedium.copy(
+            fontSize = 18.sp,
             lineHeight = 18.sp,
+            fontWeight = FontWeight.SemiBold,
         ),
         onClick = onClick,
     ) {

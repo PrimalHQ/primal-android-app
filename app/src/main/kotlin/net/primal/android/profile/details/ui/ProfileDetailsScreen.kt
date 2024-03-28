@@ -129,7 +129,7 @@ fun ProfileDetailsScreen(
 ) {
     val density = LocalDensity.current
 
-    val maxAvatarSizeDp = 80.dp
+    val maxAvatarSizeDp = 88.dp
     val maxAvatarSizePx = with(density) { maxAvatarSizeDp.roundToPx().toFloat() }
     val avatarSizePx = rememberSaveable { mutableFloatStateOf(maxAvatarSizePx) }
 

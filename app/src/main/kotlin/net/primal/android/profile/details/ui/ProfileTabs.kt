@@ -131,14 +131,16 @@ private fun CustomTab(
                     modifier = Modifier.fillMaxWidth(),
                     text = text,
                     textAlign = TextAlign.Center,
-                    style = AppTheme.typography.bodyLarge.copy(fontSize = 24.sp),
+                    style = AppTheme.typography.bodyLarge.copy(
+                        fontSize = 26.sp,
+                    ),
                     color = AppTheme.colorScheme.onPrimary,
                 )
 
                 Text(
                     modifier = Modifier.fillMaxWidth(),
                     text = label,
-                    style = AppTheme.typography.bodySmall,
+                    style = AppTheme.typography.bodyMedium,
                     textAlign = TextAlign.Center,
                     color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
                 )

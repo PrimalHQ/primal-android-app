@@ -150,14 +150,14 @@ private fun ProfileHeaderDetails(
 
         NostrUserText(
             modifier = Modifier
-                .padding(horizontal = 16.dp)
-                .padding(top = 12.dp, bottom = 4.dp),
+                .padding(horizontal = 14.dp)
+                .padding(top = 12.dp, bottom = 3.dp),
             displayName = state.profileDetails?.authorDisplayName ?: state.profileId.asEllipsizedNpub(),
             internetIdentifier = state.profileDetails?.internetIdentifier,
             internetIdentifierBadgeSize = 20.dp,
-            internetIdentifierBadgeAlign = PlaceholderVerticalAlign.Bottom,
+            internetIdentifierBadgeAlign = PlaceholderVerticalAlign.Center,
             style = AppTheme.typography.titleLarge.copy(
-                fontSize = 20.sp,
+                fontSize = 22.sp,
                 lineHeight = 20.sp,
                 fontWeight = FontWeight.Bold,
             ),
@@ -165,14 +165,14 @@ private fun ProfileHeaderDetails(
 
         if (state.profileDetails?.internetIdentifier?.isNotEmpty() == true) {
             UserInternetIdentifier(
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
                 internetIdentifier = state.profileDetails.internetIdentifier,
             )
         }
 
         if (state.profileDetails?.about?.isNotEmpty() == true) {
             ProfileAboutSection(
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
                 about = state.profileDetails.about,
                 aboutUris = state.profileDetails.aboutUris,
                 aboutHashtags = state.profileDetails.aboutHashtags,
@@ -185,7 +185,9 @@ private fun ProfileHeaderDetails(
 
         if (state.profileDetails?.website?.isNotEmpty() == true) {
             UserWebsiteText(
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                modifier = Modifier
+                    .padding(horizontal = 14.dp, vertical = 10.dp)
+                    .padding(bottom = 2.dp),
                 website = state.profileDetails.website,
                 onClick = { localUriHandler.openUriSafely(state.profileDetails.website) },
             )
@@ -219,7 +221,7 @@ private fun UserWebsiteText(
     IconText(
         modifier = modifier.clickable { onClick() },
         text = website,
-        style = AppTheme.typography.bodySmall,
+        style = AppTheme.typography.bodyMedium,
         color = AppTheme.colorScheme.secondary,
     )
 }
@@ -295,7 +297,7 @@ private fun UserInternetIdentifier(modifier: Modifier = Modifier, internetIdenti
     Text(
         modifier = modifier,
         text = internetIdentifier.formatNip05Identifier(),
-        style = AppTheme.typography.bodySmall.copy(
+        style = AppTheme.typography.bodyMedium.copy(
             lineHeight = 16.sp,
         ),
         color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
