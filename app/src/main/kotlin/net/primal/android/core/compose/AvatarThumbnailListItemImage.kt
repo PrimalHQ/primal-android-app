@@ -110,10 +110,12 @@ fun Modifier.adjustAvatarBackground(
 }
 
 @Composable
-private fun DefaultAvatarThumbnailPlaceholderListItemImage() {
+fun DefaultAvatarThumbnailPlaceholderListItemImage(
+    backgroundColor: Color = AppTheme.extraColorScheme.surfaceVariantAlt1,
+) {
     Box(
         modifier = Modifier
-            .background(color = AppTheme.extraColorScheme.surfaceVariantAlt1)
+            .background(color = backgroundColor)
             .fillMaxSize(),
         contentAlignment = Alignment.Center,
     ) {

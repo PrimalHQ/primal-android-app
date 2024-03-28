@@ -57,6 +57,7 @@ import com.wajahatkarim.flippable.rememberFlipController
 import net.primal.android.R
 import net.primal.android.auth.compose.ColumnWithBackground
 import net.primal.android.core.compose.AvatarThumbnail
+import net.primal.android.core.compose.DefaultAvatarThumbnailPlaceholderListItemImage
 import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -124,6 +125,11 @@ private fun ProfileQrCodeViewerContent(state: ProfileQrCodeViewerContract.UiStat
             avatarCdnImage = state.profileDetails?.avatarCdnImage,
             hasBorder = true,
             borderColor = Color.White,
+            defaultAvatar = {
+                DefaultAvatarThumbnailPlaceholderListItemImage(
+                    backgroundColor = Color.White,
+                )
+            },
         )
 
         Spacer(modifier = Modifier.height(16.dp))
