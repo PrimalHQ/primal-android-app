@@ -6,6 +6,7 @@ import net.primal.android.core.compose.attachment.model.NoteAttachmentUi
 import net.primal.android.core.compose.attachment.model.asNoteAttachmentUi
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.authorNameUiFriendly
+import net.primal.android.core.utils.formatNip05Identifier
 import net.primal.android.core.utils.usernameUiFriendly
 import net.primal.android.feed.db.FeedPost
 
@@ -38,7 +39,7 @@ fun FeedPost.asFeedPostUi() =
         authorId = this.author?.ownerId ?: this.data.authorId,
         authorName = this.author?.authorNameUiFriendly() ?: this.data.authorId.asEllipsizedNpub(),
         authorHandle = this.author?.usernameUiFriendly() ?: this.data.authorId.asEllipsizedNpub(),
-        authorInternetIdentifier = this.author?.internetIdentifier,
+        authorInternetIdentifier = this.author?.internetIdentifier?.formatNip05Identifier(),
         authorAvatarCdnImage = this.author?.avatarCdnImage,
         timestamp = Instant.ofEpochSecond(this.data.createdAt),
         content = this.data.content,
