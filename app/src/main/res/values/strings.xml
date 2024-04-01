@@ -339,6 +339,9 @@
     <string name="profile_follow">Follow</string>
     <string name="profile_unfollow">Unfollow</string>
 
+    <string name="profile_qr_code_profile_tab">Profile</string>
+    <string name="profile_qr_code_lightning_tab">Lightning Address</string>
+
     <string name="profile_editor_set_banner">set banner</string>
     <string name="profile_editor_change_banner">change banner</string>
     <string name="profile_editor_set_avatar">set avatar</string>

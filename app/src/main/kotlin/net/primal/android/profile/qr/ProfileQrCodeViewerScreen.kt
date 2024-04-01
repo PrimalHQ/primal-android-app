@@ -1,19 +1,24 @@
 package net.primal.android.profile.qr
 
 import android.graphics.drawable.Drawable
+import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -24,6 +29,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -34,7 +40,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -42,6 +50,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.github.alexzhirkevich.customqrgenerator.QrData
@@ -68,9 +77,9 @@ import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.ellipsizeMiddle
 import net.primal.android.core.utils.formatNip05Identifier
 import net.primal.android.crypto.hexToNpubHrp
+import net.primal.android.nostr.ext.isNPub
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
-import net.primal.android.wallet.utils.isLightningAddress
 
 @Composable
 fun ProfileQrCodeViewerScreen(viewModel: ProfileQrCodeViewerViewModel, onClose: () -> Unit) {
@@ -157,47 +166,78 @@ private fun ProfileQrCodeViewerContent(state: ProfileQrCodeViewerContract.UiStat
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        val pubkey = state.profileId.hexToNpubHrp()
-        val lud16 = state.profileDetails?.lightningAddress.orEmpty()
-
-        val flipController = rememberFlipController()
-        var qrCodeValueText by remember { mutableStateOf(pubkey) }
-
-        Flippable(
-            modifier = Modifier.size(280.dp),
-            flipController = flipController,
-            flipOnTouch = !state.profileDetails?.lightningAddress.isNullOrEmpty(),
-            frontSide = {
-                QrCodeBox(qrCodeValue = "nostr:${state.profileId.hexToNpubHrp()}")
-            },
-            backSide = {
-                QrCodeBox(qrCodeValue = "lightning:${state.profileDetails?.lightningAddress.orEmpty()}")
-            },
-            onFlippedListener = {
-                qrCodeValueText = when (it) {
-                    FlippableState.INITIALIZED -> pubkey
-                    FlippableState.FRONT -> pubkey
-                    FlippableState.BACK -> lud16
-                }
-            },
+        var qrCodeValueText by remember { mutableStateOf(state.profileId.hexToNpubHrp()) }
+        QrCodeViewer(
+            profileId = state.profileId,
+            lightningAddress = state.profileDetails?.lightningAddress,
+            onQrCodeValueChanged = { qrCodeValueText = it },
         )
-
-        val clipboardManager = LocalClipboardManager.current
 
         Spacer(modifier = Modifier.height(32.dp))
 
         CopyText(
             modifier = Modifier.padding(horizontal = 32.dp),
-            text = if (qrCodeValueText.isLightningAddress()) {
-                qrCodeValueText
-            } else {
+            copyText = qrCodeValueText,
+            visibleText = if (qrCodeValueText.isNPub()) {
                 qrCodeValueText.ellipsizeMiddle(size = 12)
-            },
-            onCopyClick = {
-                clipboardManager.setText(AnnotatedString(text = qrCodeValueText))
+            } else {
+                qrCodeValueText
             },
         )
     }
+}
+
+@Composable
+private fun QrCodeViewer(
+    profileId: String,
+    lightningAddress: String?,
+    onQrCodeValueChanged: (String) -> Unit,
+) {
+    val pubkey = profileId.hexToNpubHrp()
+    val lud16 = lightningAddress.orEmpty()
+    var isProfileTabSelected by remember { mutableStateOf(true) }
+    val flipController = rememberFlipController()
+
+    if (lud16.isNotEmpty()) {
+        QrCodeTabs(
+            modifier = Modifier.wrapContentWidth(),
+            isProfileTabSelected = isProfileTabSelected,
+            onProfileTabClick = {
+                isProfileTabSelected = true
+                onQrCodeValueChanged(pubkey)
+                flipController.flipToFront()
+            },
+            onLightningTabClick = {
+                isProfileTabSelected = false
+                onQrCodeValueChanged(lud16)
+                flipController.flipToBack()
+            },
+            indicatorColor = Color.White,
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+    }
+
+    Flippable(
+        modifier = Modifier.size(280.dp),
+        flipController = flipController,
+        flipOnTouch = false,
+        frontSide = {
+            QrCodeBox(qrCodeValue = "nostr:${profileId.hexToNpubHrp()}")
+        },
+        backSide = {
+            QrCodeBox(qrCodeValue = "lightning:$lud16")
+        },
+        onFlippedListener = {
+            onQrCodeValueChanged(
+                when (it) {
+                    FlippableState.INITIALIZED -> pubkey
+                    FlippableState.FRONT -> pubkey
+                    FlippableState.BACK -> lud16
+                },
+            )
+        },
+    )
 }
 
 @Composable
@@ -241,7 +281,6 @@ private fun rememberQrCodeDrawable(text: String): Drawable {
                 frame = QrVectorFrameShape.RoundCorners(.21f)
             }
         }
-
         QrCodeDrawable(data, options)
     }
 }
@@ -249,13 +288,16 @@ private fun rememberQrCodeDrawable(text: String): Drawable {
 @Composable
 private fun CopyText(
     modifier: Modifier = Modifier,
-    text: String,
-    onCopyClick: () -> Unit,
+    copyText: String,
+    visibleText: String,
 ) {
+    val clipboardManager = LocalClipboardManager.current
     Row(
         modifier = modifier
             .clickable(
-                onClick = onCopyClick,
+                onClick = {
+                    clipboardManager.setText(AnnotatedString(text = copyText))
+                },
                 role = Role.Button,
                 interactionSource = remember { MutableInteractionSource() },
                 indication = rememberRipple(),
@@ -265,7 +307,7 @@ private fun CopyText(
     ) {
         Text(
             modifier = Modifier.wrapContentWidth(),
-            text = text,
+            text = visibleText,
             textAlign = TextAlign.Center,
             style = AppTheme.typography.bodyMedium.copy(
                 fontSize = 16.sp,
@@ -284,6 +326,106 @@ private fun CopyText(
             )
         }
     }
+}
+
+@Composable
+private fun QrCodeTabs(
+    modifier: Modifier = Modifier,
+    isProfileTabSelected: Boolean,
+    onProfileTabClick: () -> Unit,
+    onLightningTabClick: () -> Unit,
+    indicatorColor: Color = AppTheme.colorScheme.primary,
+) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        var profileTabWidth by remember { mutableIntStateOf(0) }
+        var lightningAddressTabWidth by remember { mutableIntStateOf(0) }
+        val tabsSpaceWidth = 16.dp
+
+        Column(
+            modifier = Modifier.wrapContentWidth(),
+        ) {
+            Row(
+                modifier = Modifier.wrapContentWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                QrCodeTab(
+                    text = stringResource(id = R.string.profile_qr_code_profile_tab).uppercase(),
+                    onSizeChanged = { size -> profileTabWidth = size.width },
+                    onClick = onProfileTabClick,
+                )
+
+                Spacer(modifier = Modifier.width(tabsSpaceWidth))
+
+                QrCodeTab(
+                    text = stringResource(id = R.string.profile_qr_code_lightning_tab).uppercase(),
+                    onSizeChanged = { size -> lightningAddressTabWidth = size.width },
+                    onClick = onLightningTabClick,
+                )
+            }
+
+            with(LocalDensity.current) {
+                Box(
+                    modifier = Modifier
+                        .height(4.dp)
+                        .width(
+                            animateIntAsState(
+                                targetValue = if (isProfileTabSelected) {
+                                    profileTabWidth
+                                } else {
+                                    lightningAddressTabWidth
+                                },
+                                label = "indicatorWidth",
+                            ).value.toDp(),
+                        )
+                        .offset(
+                            y = (-4).dp,
+                            x = animateIntAsState(
+                                targetValue = if (isProfileTabSelected) {
+                                    0
+                                } else {
+                                    profileTabWidth + tabsSpaceWidth
+                                        .toPx()
+                                        .toInt()
+                                },
+                                label = "indicatorOffsetX",
+                            ).value.toDp(),
+                        )
+                        .background(
+                            color = indicatorColor,
+                            shape = AppTheme.shapes.small,
+                        ),
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun QrCodeTab(
+    text: String,
+    onSizeChanged: (IntSize) -> Unit,
+    onClick: () -> Unit,
+) {
+    Text(
+        modifier = Modifier
+            .wrapContentWidth()
+            .onSizeChanged { onSizeChanged(it) }
+            .defaultMinSize(minHeight = 32.dp)
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+                onClick = onClick,
+                role = Role.Button,
+            ),
+        text = text,
+        style = AppTheme.typography.bodyMedium,
+        fontWeight = FontWeight.SemiBold,
+        color = AppTheme.colorScheme.onSurface,
+    )
 }
 
 @Preview

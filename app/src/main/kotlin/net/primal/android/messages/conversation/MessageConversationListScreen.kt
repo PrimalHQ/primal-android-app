@@ -381,13 +381,6 @@ private fun MessagesTabs(
         var otherTabWidth by remember { mutableIntStateOf(0) }
         val tabsSpaceWidth = 16.dp
 
-        val onFollowsClick = {
-            onFollowsTabClick()
-        }
-        val onOtherClick = {
-            onOtherTabClick()
-        }
-
         Column(
             modifier = Modifier.wrapContentWidth(),
         ) {
@@ -398,7 +391,7 @@ private fun MessagesTabs(
                 MessagesTab(
                     text = stringResource(id = R.string.messages_follows_tab_title).uppercase(),
                     onSizeChanged = { size -> followsTabWidth = size.width },
-                    onClick = onFollowsClick,
+                    onClick = onFollowsTabClick,
                 )
 
                 Spacer(modifier = Modifier.width(tabsSpaceWidth))
@@ -406,7 +399,7 @@ private fun MessagesTabs(
                 MessagesTab(
                     text = stringResource(id = R.string.messages_other_tab_title).uppercase(),
                     onSizeChanged = { size -> otherTabWidth = size.width },
-                    onClick = onOtherClick,
+                    onClick = onOtherTabClick,
                 )
             }
 
@@ -463,7 +456,7 @@ private fun MessagesTabs(
 }
 
 @Composable
-fun MessagesTab(
+private fun MessagesTab(
     text: String,
     onSizeChanged: (IntSize) -> Unit,
     onClick: () -> Unit,
