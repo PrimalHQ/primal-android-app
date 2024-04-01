@@ -14,6 +14,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -33,7 +34,7 @@ import net.primal.android.theme.PrimalTheme
 fun UserProfileListItem(
     data: UserProfileItemUi,
     onClick: (String) -> Unit,
-    showFollowUnfollow: Boolean = false,
+    followUnfollowVisibility: FollowUnfollowVisibility = FollowUnfollowVisibility.Gone,
     isFollowed: Boolean = false,
     onFollowUnfollowClick: (() -> Unit)? = null,
 ) {
@@ -88,14 +89,16 @@ fun UserProfileListItem(
                     }
                 }
 
-                if (showFollowUnfollow) {
+                if (followUnfollowVisibility != FollowUnfollowVisibility.Gone) {
                     Spacer(modifier = Modifier.width(8.dp))
+                    val isVisible = followUnfollowVisibility == FollowUnfollowVisibility.Visible
                     FollowUnfollowButton(
                         modifier = Modifier
+                            .alpha(alpha = if (isVisible) 1.0f else 0.0f)
                             .defaultMinSize(minWidth = 92.dp)
                             .height(36.dp),
                         isFollowed = isFollowed,
-                        onClick = { onFollowUnfollowClick?.invoke() },
+                        onClick = { if (isVisible) onFollowUnfollowClick?.invoke() },
                     )
                 }
             }
@@ -115,7 +118,7 @@ fun PreviewUserProfileListItemWithFollow() {
                     internetIdentifier = "alex@primal.net",
                     followersCount = 12345,
                 ),
-                showFollowUnfollow = true,
+                followUnfollowVisibility = FollowUnfollowVisibility.Visible,
                 isFollowed = false,
                 onClick = {},
             )
@@ -135,7 +138,7 @@ fun PreviewUserProfileListItemWithUnfollow() {
                     internetIdentifier = "alex@primal.net",
                     followersCount = 12345,
                 ),
-                showFollowUnfollow = true,
+                followUnfollowVisibility = FollowUnfollowVisibility.Visible,
                 isFollowed = true,
                 onClick = {},
             )
@@ -145,7 +148,7 @@ fun PreviewUserProfileListItemWithUnfollow() {
 
 @Preview
 @Composable
-fun PreviewUserProfileListItem() {
+fun PreviewUserProfileListItemWithInvisibleUnfollow() {
     PrimalTheme(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
         Surface {
             UserProfileListItem(
@@ -155,7 +158,27 @@ fun PreviewUserProfileListItem() {
                     internetIdentifier = "alex@primal.net",
                     followersCount = 12345,
                 ),
-                showFollowUnfollow = false,
+                followUnfollowVisibility = FollowUnfollowVisibility.Invisible,
+                isFollowed = true,
+                onClick = {},
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+fun PreviewUserProfileListItemWithGoneUnfollow() {
+    PrimalTheme(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
+        Surface {
+            UserProfileListItem(
+                data = UserProfileItemUi(
+                    profileId = "b10b0d5e5fae9c6c48a8c77f7e5abd42a79e9480e25a4094051d4ba4ce14456b",
+                    displayName = "alex",
+                    internetIdentifier = "alex@primal.net",
+                    followersCount = 12345,
+                ),
+                followUnfollowVisibility = FollowUnfollowVisibility.Gone,
                 isFollowed = true,
                 onClick = {},
             )

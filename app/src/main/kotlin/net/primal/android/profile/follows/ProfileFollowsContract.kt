@@ -5,6 +5,7 @@ import net.primal.android.profile.domain.ProfileFollowsType
 
 interface ProfileFollowsContract {
     data class UiState(
+        val userId: String,
         val followsType: ProfileFollowsType,
         val profileName: String? = null,
         val loading: Boolean = true,

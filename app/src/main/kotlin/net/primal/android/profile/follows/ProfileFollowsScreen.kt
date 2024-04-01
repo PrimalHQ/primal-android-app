@@ -24,6 +24,7 @@ import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
+import net.primal.android.explore.search.ui.FollowUnfollowVisibility
 import net.primal.android.explore.search.ui.UserProfileListItem
 import net.primal.android.profile.domain.ProfileFollowsType
 import net.primal.android.profile.follows.ProfileFollowsContract.UiState.FollowsError
@@ -121,7 +122,11 @@ private fun FollowsLazyColumn(
             UserProfileListItem(
                 data = user,
                 onClick = { profileId -> onProfileClick(profileId) },
-                showFollowUnfollow = true,
+                followUnfollowVisibility = if (user.profileId != state.userId) {
+                    FollowUnfollowVisibility.Visible
+                } else {
+                    FollowUnfollowVisibility.Invisible
+                },
                 isFollowed = state.userFollowing.contains(user.profileId),
                 onFollowUnfollowClick = {
                     if (state.userFollowing.contains(user.profileId)) {

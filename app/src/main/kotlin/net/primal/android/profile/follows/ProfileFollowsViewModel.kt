@@ -37,7 +37,12 @@ class ProfileFollowsViewModel @Inject constructor(
     private val profileId = savedStateHandle.profileIdOrThrow
     private val followsType = savedStateHandle.followsType.toFollowsTypeOrDefault()
 
-    private val _state = MutableStateFlow(UiState(followsType = followsType))
+    private val _state = MutableStateFlow(
+        UiState(
+            userId = activeAccountStore.activeUserId(),
+            followsType = followsType,
+        ),
+    )
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
 
