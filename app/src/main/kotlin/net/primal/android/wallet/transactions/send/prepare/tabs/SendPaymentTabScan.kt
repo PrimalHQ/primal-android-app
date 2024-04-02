@@ -9,7 +9,7 @@ import androidx.compose.runtime.setValue
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.delay
 import net.primal.android.scanner.PrimalCamera
-import net.primal.android.scanner.analysis.QrCodeResult
+import net.primal.android.scanner.domain.QrCodeResult
 
 @Composable
 fun SendPaymentTabScan(isClosing: Boolean, onQrCodeDetected: (QrCodeResult) -> Unit) {

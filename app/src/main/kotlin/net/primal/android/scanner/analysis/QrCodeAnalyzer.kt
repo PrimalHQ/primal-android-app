@@ -4,6 +4,8 @@ import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
 import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
+import net.primal.android.scanner.domain.QrCodeDataType
+import net.primal.android.scanner.domain.QrCodeResult
 import net.sourceforge.zbar.Config
 import net.sourceforge.zbar.Image
 import net.sourceforge.zbar.ImageScanner
@@ -33,9 +35,8 @@ class QrCodeAnalyzer(
             it.planes[0].buffer.toByteArray()
         }
 
-        // Alternative options might be:
-        // I420, YV12, NV12, UYVY, YUY2, BGR3, BGR4, YVU9, GREY, Y800, JPEG.
-        val barcode = Image(image.width, image.height, "GREY") // Y800
+        // Alternative options: GREY, Y800, JPEG.
+        val barcode = Image(image.width, image.height, "GREY")
         barcode.data = imageBytes
 
         imageScanner.scanImage(barcode)

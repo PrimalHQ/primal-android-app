@@ -31,7 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import java.util.concurrent.Executors
 import net.primal.android.scanner.analysis.QrCodeAnalyzer
-import net.primal.android.scanner.analysis.QrCodeResult
+import net.primal.android.scanner.domain.QrCodeResult
 import net.primal.android.theme.AppTheme
 
 @Composable
@@ -65,7 +65,7 @@ fun CameraQrCodeDetector(
         }
     }
 
-    LaunchedEffect(cameraSelector, cameraController, previewView) {
+    LaunchedEffect(cameraController, previewView, lifecycleOwner) {
         cameraController.unbind()
         cameraController.bindToLifecycle(lifecycleOwner)
         previewView.controller = cameraController

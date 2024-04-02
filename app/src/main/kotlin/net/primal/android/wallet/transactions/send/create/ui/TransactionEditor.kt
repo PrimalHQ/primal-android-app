@@ -527,7 +527,9 @@ private fun LightningNoteToRecipientTextField(
         )
     } else {
         Text(
-            modifier = Modifier.padding(horizontal = 32.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 32.dp),
             text = noteRecipientText.ifEmpty { state.transaction.lnInvoiceData?.description ?: "" },
             textAlign = TextAlign.Center,
             color = AppTheme.colorScheme.onSurface,

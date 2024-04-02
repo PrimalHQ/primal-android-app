@@ -44,43 +44,43 @@ class WalletStringUtilsTest {
 
     @Test
     fun isLightningAddressUri_returnTrueForCorrectLightningLud16Uri() {
-        "lightning:alex@primal.net".isLightningAddressUri() shouldBe true
+        "lightning:alex@primal.net".isLightningUri() shouldBe true
     }
 
     @Test
     fun isLightningAddressUri_returnTrueForCorrectLightningLnUrlUri() {
         "lightning:lnurl1dp68gurn8ghj7urjd9kkzmpwdejhgtewwajkcmpdddhx7amw9akxuatjd3cz7ctvv4uqjeypkv"
-            .isLightningAddressUri() shouldBe true
+            .isLightningUri() shouldBe true
     }
 
     @Test
     fun isLightningAddressUri_returnFalseForMissingProtocol() {
-        "alex@primal.net".isLightningAddressUri() shouldBe false
+        "alex@primal.net".isLightningUri() shouldBe false
     }
 
     @Test
     fun isLightningAddressUri_returnFalseForMissingLud16OrLnUrl() {
-        "lightning:somethingInvalid".isLightningAddressUri() shouldBe false
+        "lightning:somethingInvalid".isLightningUri() shouldBe false
     }
 
     @Test
     fun isLightningAddressUri_returnTrueForCorrectLightningInvoice() {
-        "lightning:$validLnInvoice".isLightningAddressUri() shouldBe true
+        "lightning:$validLnInvoice".isLightningUri() shouldBe true
     }
 
     @Test
     fun isBitcoinAddressUri_returnsTrueForCorrectBitcoinUri() {
-        "bitcoin:bc1q99ygnq68xrvqd9up7vgapnytwmss4am6ytessw".isBitcoinAddressUri() shouldBe true
+        "bitcoin:bc1q99ygnq68xrvqd9up7vgapnytwmss4am6ytessw".isBitcoinUri() shouldBe true
     }
 
     @Test
     fun isBitcoinAddressUri_returnsFalseForMissingProtocol() {
-        "bc1q99ygnq68xrvqd9up7vgapnytwmss4am6ytessw".isBitcoinAddressUri() shouldBe false
+        "bc1q99ygnq68xrvqd9up7vgapnytwmss4am6ytessw".isBitcoinUri() shouldBe false
     }
 
     @Test
     fun isBitcoinAddressUri_returnsFalseForInvalidBtcAddress() {
-        "bitcoin:butInvalidBtcAddress".isBitcoinAddressUri() shouldBe false
+        "bitcoin:butInvalidBtcAddress".isBitcoinUri() shouldBe false
     }
 
     @Test

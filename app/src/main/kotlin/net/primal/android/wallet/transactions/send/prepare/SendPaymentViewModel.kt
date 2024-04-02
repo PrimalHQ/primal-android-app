@@ -15,37 +15,26 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.utils.authorNameUiFriendly
-import net.primal.android.crypto.urlToLnUrlHrp
-import net.primal.android.navigation.asUrlDecoded
 import net.primal.android.navigation.sendPaymentTab
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.profile.repository.ProfileRepository
+import net.primal.android.scanner.analysis.WalletTextParser
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.android.wallet.api.parseAsLNUrlOrNull
 import net.primal.android.wallet.domain.DraftTx
-import net.primal.android.wallet.repository.WalletRepository
 import net.primal.android.wallet.transactions.send.prepare.SendPaymentContract.SideEffect
 import net.primal.android.wallet.transactions.send.prepare.SendPaymentContract.UiEvent
 import net.primal.android.wallet.transactions.send.prepare.SendPaymentContract.UiState
-import net.primal.android.wallet.transactions.send.prepare.domain.RecipientType
 import net.primal.android.wallet.transactions.send.prepare.tabs.SendPaymentTab
-import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
-import net.primal.android.wallet.utils.isBitcoinAddress
-import net.primal.android.wallet.utils.isBitcoinAddressUri
 import net.primal.android.wallet.utils.isLightningAddress
-import net.primal.android.wallet.utils.isLightningAddressUri
-import net.primal.android.wallet.utils.isLnInvoice
-import net.primal.android.wallet.utils.isLnUrl
-import net.primal.android.wallet.utils.parseBitcoinPaymentInstructions
 import timber.log.Timber
 
 @HiltViewModel
 class SendPaymentViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val dispatchers: CoroutineDispatcherProvider,
-    private val walletRepository: WalletRepository,
     private val activeAccountStore: ActiveAccountStore,
     private val profileRepository: ProfileRepository,
+    private val walletTextParser: WalletTextParser,
 ) : ViewModel() {
 
     private val requestedTab = savedStateHandle.sendPaymentTab ?: SendPaymentTab.Nostr
@@ -81,12 +70,11 @@ class SendPaymentViewModel @Inject constructor(
             setState { copy(parsing = true) }
             val userId = activeAccountStore.activeUserId()
             try {
-                when (text.parseRecipientType()) {
-                    RecipientType.LnInvoice -> handleLnInvoiceText(userId, text)
-                    RecipientType.LnUrl -> handleLnUrlText(userId, text)
-                    RecipientType.LnAddress -> handleLightningAddressText(userId, text)
-                    RecipientType.BitcoinAddress, RecipientType.BitcoinAddressUri -> handleBitcoinText(text = text)
-                    null -> Timber.w("Unknown text type. [text=$text]")
+                val draftTx = walletTextParser.parseText(userId = userId, text = text)
+                if (draftTx != null) {
+                    setEffect(SideEffect.DraftTransactionReady(draft = draftTx))
+                } else {
+                    Timber.w("Unable to parse text. [text=$text]")
                 }
             } catch (error: WssException) {
                 Timber.w(error)
@@ -94,107 +82,6 @@ class SendPaymentViewModel @Inject constructor(
             } finally {
                 setState { copy(parsing = false) }
             }
-        }
-
-    private suspend fun handleLnInvoiceText(userId: String, text: String) {
-        val response = withContext(dispatchers.io()) {
-            walletRepository.parseLnInvoice(userId = userId, lnbc = text)
-        }
-        setEffect(
-            SideEffect.DraftTransactionReady(
-                draft = DraftTx(
-                    targetUserId = response.userId,
-                    lnInvoice = text,
-                    lnInvoiceData = response.lnInvoiceData,
-                    amountSats = (response.lnInvoiceData.amountMilliSats / 1000).toString(),
-                    noteRecipient = response.comment.asUrlDecoded(),
-                ),
-            ),
-        )
-    }
-
-    private suspend fun handleLnUrlText(userId: String, text: String) {
-        val response = withContext(dispatchers.io()) {
-            walletRepository.parseLnUrl(userId = userId, lnurl = text)
-        }
-        setEffect(
-            SideEffect.DraftTransactionReady(
-                draft = DraftTx(
-                    minSendable = response.minSendable,
-                    maxSendable = response.maxSendable,
-                    targetUserId = response.targetPubkey,
-                    targetLud16 = response.targetLud16,
-                    targetLnUrl = text,
-                    noteRecipient = response.description,
-                ),
-            ),
-        )
-    }
-
-    private suspend fun handleLightningAddressText(userId: String, text: String) {
-        val lud16Value = if (text.isLightningAddressUri()) text.split(":").last() else text
-        val lnurl = lud16Value.parseAsLNUrlOrNull()?.urlToLnUrlHrp()
-        if (lnurl != null) {
-            val response = withContext(dispatchers.io()) {
-                walletRepository.parseLnUrl(userId = userId, lnurl = lnurl)
-            }
-            setEffect(
-                SideEffect.DraftTransactionReady(
-                    draft = DraftTx(
-                        minSendable = response.minSendable,
-                        maxSendable = response.maxSendable,
-                        targetUserId = response.targetPubkey,
-                        targetLud16 = lud16Value,
-                        targetLnUrl = lnurl,
-                        noteRecipient = response.description,
-                    ),
-                ),
-            )
-        }
-    }
-
-    private fun handleBitcoinText(text: String) {
-        val btcInstructions = text.parseBitcoinPaymentInstructions()
-        if (btcInstructions != null) {
-            setEffect(
-                SideEffect.DraftTransactionReady(
-                    draft = DraftTx(
-                        targetOnChainAddress = btcInstructions.address,
-                        onChainInvoice = if (btcInstructions.hasParams()) text else null,
-                        amountSats = btcInstructions.amount?.toSats()?.toString() ?: "0",
-                        noteRecipient = btcInstructions.label,
-                    ),
-                ),
-            )
-        }
-    }
-
-    private fun String.parseRecipientType(): RecipientType? {
-        return when {
-            isLnInvoice() -> RecipientType.LnInvoice
-            isLnUrl() -> RecipientType.LnUrl
-            isLightningAddress() -> RecipientType.LnAddress
-            isLightningAddressUri() -> {
-                val path = this.split(":").last()
-                path.parseLightningRecipientType()
-            }
-
-            isBitcoinAddress() -> RecipientType.BitcoinAddress
-            isBitcoinAddressUri() -> {
-                val parsedBitcoinUri = this.parseBitcoinPaymentInstructions()
-                return parsedBitcoinUri?.lightning?.parseLightningRecipientType() ?: RecipientType.BitcoinAddressUri
-            }
-
-            else -> null
-        }
-    }
-
-    private fun String.parseLightningRecipientType(): RecipientType? =
-        when {
-            this.isLightningAddress() -> RecipientType.LnAddress
-            this.isLnUrl() -> RecipientType.LnUrl
-            this.isLnInvoice() -> RecipientType.LnInvoice
-            else -> null
         }
 
     private fun processProfileData(profileId: String) =

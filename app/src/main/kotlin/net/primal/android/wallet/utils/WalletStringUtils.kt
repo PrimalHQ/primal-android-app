@@ -11,14 +11,14 @@ fun String.isLnUrl() = startsWith(prefix = "lnurl", ignoreCase = true)
 
 fun String.isLightningAddress() = Patterns.EMAIL_ADDRESS.matcher(this).matches()
 
-fun String.isLightningAddressUri(): Boolean {
+fun String.isLightningUri(): Boolean {
     val isPrefixCorrect = startsWith(prefix = "lightning:", ignoreCase = true)
     val path = this.split(":").last()
     val isPathCorrect = path.isLightningAddress() || path.isLnUrl() || path.isLnInvoice()
     return isPrefixCorrect && isPathCorrect
 }
 
-fun String.isBitcoinAddressUri() =
+fun String.isBitcoinUri() =
     startsWith(prefix = "bitcoin:", ignoreCase = true) &&
         this.split(":").lastOrNull()?.split("?")?.firstOrNull().isBitcoinAddress()
 
@@ -35,7 +35,7 @@ fun String.parseBitcoinPaymentInstructions(): BitcoinPaymentInstruction? {
     return when {
         isBitcoinAddress() -> BitcoinPaymentInstruction(address = this)
 
-        isBitcoinAddressUri() -> {
+        isBitcoinUri() -> {
             val path = this.split(":").lastOrNull()
             if (path?.isBitcoinAddress() == true) {
                 BitcoinPaymentInstruction(address = path)

@@ -71,8 +71,8 @@ import net.primal.android.profile.editor.ProfileEditorViewModel
 import net.primal.android.profile.editor.ui.ProfileEditorScreen
 import net.primal.android.profile.follows.ProfileFollowsScreen
 import net.primal.android.profile.follows.ProfileFollowsViewModel
-import net.primal.android.profile.qr.ProfileQrCodeViewerScreen
-import net.primal.android.profile.qr.ProfileQrCodeViewerViewModel
+import net.primal.android.profile.qr.ProfileQrCodeViewModel
+import net.primal.android.profile.qr.ui.ProfileQrCodeViewerScreen
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
@@ -884,11 +884,26 @@ private fun NavGraphBuilder.profileQrCodeViewer(
     route = route,
     arguments = arguments,
 ) {
-    val viewModel = hiltViewModel<ProfileQrCodeViewerViewModel>()
+    val viewModel = hiltViewModel<ProfileQrCodeViewModel>()
     LockToOrientationPortrait()
     PrimalTheme(primalTheme = PrimalTheme.Sunset) {
         ApplyEdgeToEdge(isDarkTheme = true)
-        ProfileQrCodeViewerScreen(viewModel = viewModel, onClose = { navController.navigateUp() })
+        ProfileQrCodeViewerScreen(
+            viewModel = viewModel,
+            onClose = { navController.navigateUp() },
+            onProfileScan = { profileId ->
+                navController.popBackStack()
+                navController.navigateToProfile(profileId)
+            },
+            onNoteScan = { noteId ->
+                navController.popBackStack()
+                navController.navigateToThread(noteId)
+            },
+            onDraftTxScan = { draftTx ->
+                navController.popBackStack()
+                navController.navigateToWalletCreateTransaction(draftTx)
+            },
+        )
     }
 }
 

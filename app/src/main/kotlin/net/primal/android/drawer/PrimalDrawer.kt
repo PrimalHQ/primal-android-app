@@ -75,7 +75,10 @@ fun PrimalDrawer(
             onDrawerDestinationClick(it)
         },
         eventPublisher = { viewModel.setEvent(it) },
-        onQrCodeClick = onQrCodeClick,
+        onQrCodeClick = {
+            uiScope.launch { drawerState.close() }
+            onQrCodeClick()
+        },
     )
 }
 
@@ -286,6 +289,7 @@ private fun DrawerScreenDestination.label(): String {
         DrawerScreenDestination.Settings -> stringResource(
             id = R.string.drawer_destination_settings,
         )
+
         DrawerScreenDestination.SignOut -> stringResource(id = R.string.drawer_destination_sign_out)
     }
 }

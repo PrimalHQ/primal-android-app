@@ -49,7 +49,7 @@ fun SendPaymentScreen(
 ) {
     val uiState = viewModel.state.collectAsState()
 
-    LaunchedEffect(viewModel) {
+    LaunchedEffect(viewModel, onCreateTransaction) {
         viewModel.effect.collect {
             when (it) {
                 is SendPaymentContract.SideEffect.DraftTransactionReady -> {

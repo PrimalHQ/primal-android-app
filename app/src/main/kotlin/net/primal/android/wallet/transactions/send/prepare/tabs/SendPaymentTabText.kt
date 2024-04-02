@@ -33,9 +33,9 @@ import net.primal.android.core.compose.icons.primaliconpack.Paste
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.wallet.utils.isBitcoinAddress
-import net.primal.android.wallet.utils.isBitcoinAddressUri
+import net.primal.android.wallet.utils.isBitcoinUri
 import net.primal.android.wallet.utils.isLightningAddress
-import net.primal.android.wallet.utils.isLightningAddressUri
+import net.primal.android.wallet.utils.isLightningUri
 import net.primal.android.wallet.utils.isLnInvoice
 import net.primal.android.wallet.utils.isLnUrl
 
@@ -111,8 +111,8 @@ fun SendPaymentTabText(parsing: Boolean, onTextConfirmed: (String) -> Unit) {
 }
 
 private fun String.hasValidPaymentInput(): Boolean {
-    return isLnInvoice() || isLnUrl() || isLightningAddress() || isLightningAddressUri() ||
-        isBitcoinAddress() || isBitcoinAddressUri()
+    return isLnInvoice() || isLnUrl() || isLightningAddress() || isLightningUri() ||
+        isBitcoinAddress() || isBitcoinUri()
 }
 
 @Preview
