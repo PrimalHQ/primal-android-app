@@ -35,13 +35,13 @@ fun JsonArray.hasRootMarker() = contains(JsonPrimitive("root"))
 
 fun JsonArray.hasAnyMarker() = hasRootMarker() || hasReplyMarker() || hasMentionMarker()
 
-fun String.asEventIdTag(recommendedRelay: String? = null, marker: String? = null): JsonArray =
+fun String.asEventIdTag(relayHint: String? = null, marker: String? = null): JsonArray =
     buildJsonArray {
         add("e")
         add(this@asEventIdTag)
-        if (recommendedRelay != null) add(recommendedRelay)
+        if (relayHint != null) add(relayHint)
         if (marker != null) {
-            if (recommendedRelay == null) add("")
+            if (relayHint == null) add("")
             add(marker)
         }
     }

@@ -3,6 +3,9 @@ package net.primal.android.feed.repository
 import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.jsonPrimitive
 import net.primal.android.core.files.FileUploader
 import net.primal.android.core.files.error.UnsuccessfulFileUpload
 import net.primal.android.db.PrimalDatabase
@@ -79,25 +82,41 @@ class PostRepository @Inject constructor(
             }
         }
 
-        val existingPubkeyTags = replyPostData?.tags?.filter { it.isPubKeyTag() }?.toSet() ?: setOf()
-        val replyAuthorPubkeyTag = replyToAuthorId?.asPubkeyTag()
-        val mentionPubkeyTags = content.parsePubkeyTags(marker = "mention").toSet()
-        val pubkeyTags = existingPubkeyTags + setOfNotNull(replyAuthorPubkeyTag) + mentionPubkeyTags
-
+        /* Note tags */
+        val mentionEventTags = content.parseEventTags(marker = "mention")
         val rootEventTag = rootPostId?.asEventIdTag(marker = "root")
         val replyEventTag = if (rootPostId != replyToPostId) {
             replyToPostId?.asEventIdTag(marker = "reply")
         } else {
             null
         }
-        val mentionEventTags = content.parseEventTags(marker = "mention")
         val eventTags = setOfNotNull(rootEventTag, replyEventTag) + mentionEventTags
 
+        val relayHintsMap = withContext(Dispatchers.IO) {
+            val tagNoteIds = eventTags.map { it.get(index = 1).jsonPrimitive.content }
+            val hints = database.eventHints().findById(eventIds = tagNoteIds)
+            hints.associate { it.eventId to it.relays.first() }
+        }
+        val noteTags = eventTags.map {
+            val noteId = it[1].jsonPrimitive.content
+            val relayHint = relayHintsMap.getOrDefault(key = noteId, defaultValue = "")
+            JsonArray(it.toMutableList().apply { this[2] = JsonPrimitive(relayHint) })
+        }
+
+        /* Pubkey tags */
+        val existingPubkeyTags = replyPostData?.tags?.filter { it.isPubKeyTag() }?.toSet() ?: setOf()
+        val replyAuthorPubkeyTag = replyToAuthorId?.asPubkeyTag()
+        val mentionPubkeyTags = content.parsePubkeyTags(marker = "mention").toSet()
+        val pubkeyTags = existingPubkeyTags + setOfNotNull(replyAuthorPubkeyTag) + mentionPubkeyTags
+
+        /* Hashtag tags */
         val hashtagTags = content.parseHashtagTags().toSet()
 
+        /* Image tags */
         val attachmentUrls = attachments.mapNotNull { it.remoteUrl }
         val imageTags = attachments.filter { it.isImageAttachment }.map { it.asImageTag() }
 
+        /* Content */
         val refinedContent = if (attachmentUrls.isEmpty()) {
             content
         } else {
@@ -115,7 +134,7 @@ class PostRepository @Inject constructor(
         return nostrPublisher.publishShortTextNote(
             userId = activeAccountStore.activeUserId(),
             content = refinedContent,
-            tags = pubkeyTags + eventTags + hashtagTags + imageTags,
+            tags = pubkeyTags + noteTags + hashtagTags + imageTags,
         )
     }
 

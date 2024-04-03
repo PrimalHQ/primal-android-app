@@ -15,7 +15,7 @@ class TagsTest {
         val expectedRecommendedRelay = ""
         val expectedMarker = "root"
         val actual = eventId.asEventIdTag(
-            recommendedRelay = expectedRecommendedRelay,
+            relayHint = expectedRecommendedRelay,
             marker = expectedMarker,
         )
         actual shouldBe instanceOf(JsonArray::class)

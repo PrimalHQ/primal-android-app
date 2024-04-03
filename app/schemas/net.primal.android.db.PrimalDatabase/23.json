@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 23,
-    "identityHash": "99bcb6210675c3aef8081e3aaff37c3c",
+    "identityHash": "80809bbb8599ae2db83c4a9caa3320c7",
     "entities": [
       {
         "tableName": "PostData",
@@ -92,7 +92,7 @@
       },
       {
         "tableName": "ProfileData",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ownerId` TEXT NOT NULL, `eventId` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `raw` TEXT NOT NULL, `handle` TEXT, `displayName` TEXT, `internetIdentifier` TEXT, `lightningAddress` TEXT, `lnUrlDecoded` TEXT, `avatarCdnImage` TEXT, `bannerCdnImage` TEXT, `website` TEXT, `about` TEXT, `aboutUris` TEXT NOT NULL, `aboutHashtags` TEXT NOT NULL, `relayHintUrl` TEXT, PRIMARY KEY(`ownerId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ownerId` TEXT NOT NULL, `eventId` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `raw` TEXT NOT NULL, `handle` TEXT, `displayName` TEXT, `internetIdentifier` TEXT, `lightningAddress` TEXT, `lnUrlDecoded` TEXT, `avatarCdnImage` TEXT, `bannerCdnImage` TEXT, `website` TEXT, `about` TEXT, `aboutUris` TEXT NOT NULL, `aboutHashtags` TEXT NOT NULL, PRIMARY KEY(`ownerId`))",
         "fields": [
           {
             "fieldPath": "ownerId",
@@ -183,12 +183,6 @@
             "columnName": "aboutHashtags",
             "affinity": "TEXT",
             "notNull": true
-          },
-          {
-            "fieldPath": "relayHintUrl",
-            "columnName": "relayHintUrl",
-            "affinity": "TEXT",
-            "notNull": false
           }
         ],
         "primaryKey": {
@@ -1304,7 +1298,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '99bcb6210675c3aef8081e3aaff37c3c')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '80809bbb8599ae2db83c4a9caa3320c7')"
     ]
   }
 }

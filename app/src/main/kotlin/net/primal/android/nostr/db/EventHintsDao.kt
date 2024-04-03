@@ -2,6 +2,7 @@ package net.primal.android.nostr.db
 
 import androidx.room.Dao
 import androidx.room.Insert
+import androidx.room.Query
 import androidx.room.Update
 
 @Dao
@@ -12,4 +13,10 @@ interface EventHintsDao {
 
     @Update
     suspend fun update(data: EventHints)
+
+    @Query("SELECT * FROM EventHints WHERE eventId = :eventId")
+    suspend fun findById(eventId: String): EventHints
+
+    @Query("SELECT * FROM EventHints WHERE eventId IN (:eventIds)")
+    suspend fun findById(eventIds: List<String>): List<EventHints>
 }
