@@ -60,6 +60,7 @@ fun FeedNoteCard(
     onPostLongClickAction: ((FeedPostAction) -> Unit)? = null,
     onHashtagClick: (String) -> Unit,
     onMediaClick: (String, String) -> Unit,
+    onBookmarkClick: () -> Unit,
     onMuteUserClick: () -> Unit,
     onReportContentClick: OnReportContentClick,
 ) {
@@ -100,6 +101,7 @@ fun FeedNoteCard(
             modifier = Modifier.padding(all = notePaddingDp),
             contentAlignment = Alignment.TopEnd,
         ) {
+            // TODO Handle reading isBookmarked state
             NoteDropdownMenuIcon(
                 modifier = Modifier
                     .size(overflowIconSizeDp)
@@ -109,6 +111,8 @@ fun FeedNoteCard(
                 noteContent = data.content,
                 noteRawData = data.rawNostrEventJson,
                 authorId = data.authorId,
+                isBookmarked = false,
+                onBookmarkClick = onBookmarkClick,
                 onMuteUserClick = onMuteUserClick,
                 onReportContentClick = { reportDialogVisible = true },
             )
@@ -235,6 +239,7 @@ fun PreviewFeedNoteListItemLightMultiLineHeader(
             onMuteUserClick = {},
             onMediaClick = { _, _ -> },
             onReportContentClick = { _, _, _ -> },
+            onBookmarkClick = {},
         )
     }
 }
@@ -258,6 +263,7 @@ fun PreviewFeedNoteListItemLightMultiLineHeaderFullWidth(
             onMuteUserClick = {},
             onMediaClick = { _, _ -> },
             onReportContentClick = { _, _, _ -> },
+            onBookmarkClick = {},
         )
     }
 }
@@ -281,6 +287,7 @@ fun PreviewFeedNoteListItemDarkSingleLineHeader(
             onMuteUserClick = {},
             onMediaClick = { _, _ -> },
             onReportContentClick = { _, _, _ -> },
+            onBookmarkClick = {},
         )
     }
 }
@@ -304,6 +311,7 @@ fun PreviewFeedNoteListItemDarkSingleLineHeaderFullWidth(
             onMuteUserClick = {},
             onMediaClick = { _, _ -> },
             onReportContentClick = { _, _, _ -> },
+            onBookmarkClick = {},
         )
     }
 }
@@ -329,6 +337,7 @@ fun PreviewFeedNoteListItemLightForcedContentIndentFullWidthSingleLineHeader(
             onMuteUserClick = {},
             onMediaClick = { _, _ -> },
             onReportContentClick = { _, _, _ -> },
+            onBookmarkClick = {},
         )
     }
 }
@@ -354,6 +363,7 @@ fun PreviewFeedNoteListItemDarkForcedContentIndentSingleLineHeader(
             onMuteUserClick = {},
             onMediaClick = { _, _ -> },
             onReportContentClick = { _, _, _ -> },
+            onBookmarkClick = {},
         )
     }
 }

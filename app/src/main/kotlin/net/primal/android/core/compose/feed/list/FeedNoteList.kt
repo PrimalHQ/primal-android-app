@@ -51,6 +51,7 @@ fun FeedNoteList(
     onHashtagClick: (String) -> Unit,
     onMediaClick: (String, String) -> Unit,
     onGoToWallet: () -> Unit,
+    onBookmarkClick: () -> Unit,
     paddingValues: PaddingValues = PaddingValues(0.dp),
     onScrolledToTop: (() -> Unit)? = null,
     onMuteClick: ((String) -> Unit)? = null,
@@ -119,6 +120,7 @@ fun FeedNoteList(
             onGoToWallet = onGoToWallet,
             onMuteClick = onMuteClick,
             onReportContentClick = onReportContentClick,
+            onBookmarkClick = onBookmarkClick,
         )
 
         PullToRefreshContainer(

@@ -363,6 +363,9 @@ private fun ThreadScreenContent(
             onHashtagClick = onHashtagClick,
             onMediaClick = onMediaClick,
             onMuteUserClick = { authorId -> eventPublisher(ThreadContract.UiEvent.MuteAction(authorId)) },
+            onBookmarkClick = {
+                // TODO Handle bookmark click
+            },
             onReportContentClick = { reportType, profileId, noteId ->
                 eventPublisher(
                     ThreadContract.UiEvent.ReportAbuse(
@@ -396,6 +399,7 @@ private fun ThreadLazyColumn(
     onPostLongClickAction: ((noteAction: FeedPostAction, note: FeedPostUi) -> Unit)? = null,
     onHashtagClick: (String) -> Unit,
     onMediaClick: (String, String) -> Unit,
+    onBookmarkClick: () -> Unit,
     onMuteUserClick: (authorId: String) -> Unit,
     onReportContentClick: OnReportContentClick,
 ) {
@@ -462,6 +466,7 @@ private fun ThreadLazyColumn(
                     onMediaClick = onMediaClick,
                     onMuteUserClick = { onMuteUserClick(item.authorId) },
                     onReportContentClick = onReportContentClick,
+                    onBookmarkClick = onBookmarkClick,
                 )
 
                 if (!connectedToNextNote) {

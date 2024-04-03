@@ -224,6 +224,9 @@ fun FeedScreen(
                     eventPublisher(FeedContract.UiEvent.MuteAction(it))
                 },
                 onMediaClick = onMediaClick,
+                onBookmarkClick = {
+                    // TODO Handle bookmark click
+                },
                 onReportContentClick = { type, profileId, noteId ->
                     eventPublisher(
                         FeedContract.UiEvent.ReportAbuse(

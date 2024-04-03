@@ -279,6 +279,9 @@ fun ProfileDetailsScreen(
                 onHashtagClick = onHashtagClick,
                 onMediaClick = onMediaClick,
                 onGoToWallet = onGoToWallet,
+                onBookmarkClick = {
+                    // TODO Handle bookmark click
+                },
                 shouldShowLoadingState = false,
                 shouldShowNoContentState = false,
                 stickyHeader = {
