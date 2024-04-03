@@ -14,5 +14,5 @@ data class FeedResponse(
     val primalEventUserStats: List<PrimalEvent>,
     val cdnResources: List<PrimalEvent>,
     val primalLinkPreviews: List<PrimalEvent>,
-    val primalRelayHints: PrimalEvent?,
+    val primalRelayHints: List<PrimalEvent>,
 )

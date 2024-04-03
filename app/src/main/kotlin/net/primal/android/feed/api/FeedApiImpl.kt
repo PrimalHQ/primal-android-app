@@ -40,7 +40,7 @@ class FeedApiImpl @Inject constructor(
             cdnResources = queryResult.filterPrimalEvents(NostrEventKind.PrimalCdnResource),
             primalLinkPreviews = queryResult.filterPrimalEvents(NostrEventKind.PrimalLinkPreview),
             referencedPosts = queryResult.filterPrimalEvents(NostrEventKind.PrimalReferencedEvent),
-            primalRelayHints = queryResult.findPrimalEvent(NostrEventKind.PrimalRelayHint),
+            primalRelayHints = queryResult.filterPrimalEvents(NostrEventKind.PrimalRelayHint),
         )
     }
 
@@ -64,7 +64,7 @@ class FeedApiImpl @Inject constructor(
             cdnResources = queryResult.filterPrimalEvents(NostrEventKind.PrimalCdnResource),
             primalLinkPreviews = queryResult.filterPrimalEvents(NostrEventKind.PrimalLinkPreview),
             referencedPosts = queryResult.filterPrimalEvents(NostrEventKind.PrimalReferencedEvent),
-            primalRelayHints = queryResult.findPrimalEvent(NostrEventKind.PrimalRelayHint),
+            primalRelayHints = queryResult.filterPrimalEvents(NostrEventKind.PrimalRelayHint),
         )
     }
 
@@ -88,7 +88,7 @@ class FeedApiImpl @Inject constructor(
             primalEventUserStats = queryResult.filterPrimalEvents(NostrEventKind.PrimalEventUserStats),
             primalLinkPreviews = queryResult.filterPrimalEvents(NostrEventKind.PrimalLinkPreview),
             cdnResources = queryResult.filterPrimalEvents(NostrEventKind.PrimalCdnResource),
-            primalRelayHints = queryResult.findPrimalEvent(NostrEventKind.PrimalRelayHint),
+            primalRelayHints = queryResult.filterPrimalEvents(NostrEventKind.PrimalRelayHint),
         )
     }
 }

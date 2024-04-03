@@ -73,7 +73,7 @@ class NotificationsApiImpl @Inject constructor(
             primalUserProfileStats = queryResult.filterPrimalEvents(NostrEventKind.PrimalUserProfileStats),
             primalLinkPreviews = queryResult.filterPrimalEvents(NostrEventKind.PrimalLinkPreview),
             primalNotifications = queryResult.filterPrimalEvents(NostrEventKind.PrimalNotification),
-            primalRelayHints = queryResult.findPrimalEvent(NostrEventKind.PrimalRelayHint),
+            primalRelayHints = queryResult.filterPrimalEvents(NostrEventKind.PrimalRelayHint),
         )
     }
 }
