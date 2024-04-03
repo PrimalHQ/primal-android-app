@@ -31,6 +31,8 @@ import net.primal.android.messages.db.DirectMessageDao
 import net.primal.android.messages.db.DirectMessageData
 import net.primal.android.messages.db.MessageConversationDao
 import net.primal.android.messages.db.MessageConversationData
+import net.primal.android.nostr.db.EventHints
+import net.primal.android.nostr.db.EventHintsDao
 import net.primal.android.notifications.db.NotificationDao
 import net.primal.android.notifications.db.NotificationData
 import net.primal.android.profile.db.PostUserStats
@@ -71,8 +73,9 @@ import net.primal.android.wallet.db.WalletTransactionData
         MessageConversationData::class,
         WalletTransactionData::class,
         Relay::class,
+        EventHints::class,
     ],
-    version = 22,
+    version = 23,
     exportSchema = true,
 )
 @TypeConverters(
@@ -122,4 +125,6 @@ abstract class PrimalDatabase : RoomDatabase() {
     abstract fun walletTransactions(): WalletTransactionDao
 
     abstract fun relays(): RelayDao
+
+    abstract fun eventHints(): EventHintsDao
 }

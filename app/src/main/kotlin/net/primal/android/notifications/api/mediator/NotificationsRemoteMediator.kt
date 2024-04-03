@@ -122,6 +122,7 @@ class NotificationsRemoteMediator(
                 primalEventUserStats = emptyList(),
                 cdnResources = response.cdnResources,
                 primalLinkPreviews = response.primalLinkPreviews,
+                primalRelayHints = response.primalRelayHints,
             ).persistToDatabaseAsTransaction(
                 userId = userId,
                 database = database,

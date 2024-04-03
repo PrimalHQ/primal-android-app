@@ -61,6 +61,7 @@ enum class NostrEventKind(val value: Int) {
     PrimalUserFollowersCounts(value = 10_000_133),
     PrimalDirectMessagesUnreadCount2(value = 10_000_134),
     PrimalUserRelaysList(value = 10_000_139),
+    PrimalRelayHint(value = 10_000_141),
     PrimalWalletOperation(value = 10_000_300),
     PrimalWalletBalance(value = 10_000_301),
     PrimalWalletDepositInvoice(value = 10_000_302),

@@ -7,8 +7,13 @@ import net.primal.android.core.utils.parseHashtags
 import net.primal.android.core.utils.parseUris
 import net.primal.android.feed.db.PostData
 import net.primal.android.nostr.model.NostrEvent
+import net.primal.android.nostr.model.primal.PrimalEvent
 
 fun List<NostrEvent>.mapAsPostDataPO(referencedPosts: List<PostData>) = map { it.asPost(referencedPosts) }
+
+fun List<PrimalEvent>.mapNotNullAsPostDataPO(referencedPosts: List<PostData> = emptyList()) =
+    this.mapNotNull { it.takeContentOrNull<NostrEvent>() }
+        .map { it.asPost(referencedPosts = referencedPosts) }
 
 fun NostrEvent.asPost(referencedPosts: List<PostData>): PostData {
     val replyToPostId = this.tags.find { it.hasReplyMarker() }?.getTagValueOrNull()

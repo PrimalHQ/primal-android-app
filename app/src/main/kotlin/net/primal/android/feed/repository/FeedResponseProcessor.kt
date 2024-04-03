@@ -1,10 +1,12 @@
 package net.primal.android.feed.repository
 
+import android.database.sqlite.SQLiteConstraintException
 import androidx.room.withTransaction
 import net.primal.android.attachments.ext.flatMapPostsAsNoteAttachmentPO
 import net.primal.android.core.ext.asMapByKey
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.feed.api.model.FeedResponse
+import net.primal.android.nostr.ext.flatMapAsEventHintsPO
 import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
 import net.primal.android.nostr.ext.flatMapNotNullAsLinkPreviewResource
 import net.primal.android.nostr.ext.flatMapNotNullAsVideoThumbnailsMap
@@ -15,11 +17,13 @@ import net.primal.android.nostr.ext.mapNotNullAsPostDataPO
 import net.primal.android.nostr.ext.mapNotNullAsPostStatsPO
 import net.primal.android.nostr.ext.mapNotNullAsPostUserStatsPO
 import net.primal.android.nostr.ext.mapNotNullAsRepostDataPO
+import timber.log.Timber
 
 suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String, database: PrimalDatabase) {
     val cdnResources = this.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
     val videoThumbnails = this.cdnResources.flatMapNotNullAsVideoThumbnailsMap()
     val linkPreviews = primalLinkPreviews.flatMapNotNullAsLinkPreviewResource().asMapByKey { it.url }
+    val eventHints = this.primalRelayHints.flatMapAsEventHintsPO()
 
     val referencedPostsWithoutReplyTo = referencedPosts.mapNotNullAsPostDataPO()
     val referencedPostsWithReplyTo = referencedPosts.mapNotNullAsPostDataPO(
@@ -58,5 +62,14 @@ suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String, database
         database.reposts().upsertAll(data = reposts)
         database.postStats().upsertAll(data = postStats)
         database.postUserStats().upsertAll(data = userPostStats)
+        val eventHintsDao = database.eventHints()
+        eventHints.forEach { eventHint ->
+            try {
+                eventHintsDao.insert(data = eventHint)
+            } catch (error: SQLiteConstraintException) {
+                Timber.w(error)
+                eventHintsDao.update(data = eventHint)
+            }
+        }
     }
 }

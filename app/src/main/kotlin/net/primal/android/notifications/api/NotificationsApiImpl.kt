@@ -68,19 +68,12 @@ class NotificationsApiImpl @Inject constructor(
             metadata = queryResult.filterNostrEvents(NostrEventKind.Metadata),
             notes = queryResult.filterNostrEvents(NostrEventKind.ShortTextNote),
             primalNoteStats = queryResult.filterPrimalEvents(NostrEventKind.PrimalEventStats),
-            cdnResources = queryResult.filterPrimalEvents(
-                NostrEventKind.PrimalCdnResource,
-            ),
-            primalReferencedNotes = queryResult.filterPrimalEvents(
-                NostrEventKind.PrimalReferencedEvent,
-            ),
-            primalUserProfileStats = queryResult.filterPrimalEvents(
-                NostrEventKind.PrimalUserProfileStats,
-            ),
-            primalLinkPreviews = queryResult.filterPrimalEvents(
-                NostrEventKind.PrimalLinkPreview,
-            ),
+            cdnResources = queryResult.filterPrimalEvents(NostrEventKind.PrimalCdnResource),
+            primalReferencedNotes = queryResult.filterPrimalEvents(NostrEventKind.PrimalReferencedEvent),
+            primalUserProfileStats = queryResult.filterPrimalEvents(NostrEventKind.PrimalUserProfileStats),
+            primalLinkPreviews = queryResult.filterPrimalEvents(NostrEventKind.PrimalLinkPreview),
             primalNotifications = queryResult.filterPrimalEvents(NostrEventKind.PrimalNotification),
+            primalRelayHints = queryResult.findPrimalEvent(NostrEventKind.PrimalRelayHint),
         )
     }
 }
