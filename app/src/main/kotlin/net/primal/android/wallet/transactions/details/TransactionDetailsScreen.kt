@@ -208,6 +208,7 @@ fun TransactionDetailsScreen(
                         onMediaClick = onMediaClick,
                         onMuteUserClick = {},
                         onReportContentClick = { _, _, _ -> },
+                        onBookmarkClick = {},
                     )
 
                     Spacer(modifier = Modifier.height(32.dp))

@@ -181,6 +181,9 @@ fun ExploreFeedScreen(
                     eventPublisher(ExploreFeedContract.UiEvent.MuteAction(profileId = it))
                 },
                 onMediaClick = onMediaClick,
+                onBookmarkClick = {
+                    // TODO Handle bookmark click
+                },
                 onReportContentClick = { type, profileId, noteId ->
                     eventPublisher(
                         ExploreFeedContract.UiEvent.ReportAbuse(
@@ -206,30 +209,39 @@ private fun ErrorHandler(error: ExploreFeedError?, snackbarHostState: SnackbarHo
             is ExploreFeedError.InvalidZapRequest -> context.getString(
                 R.string.post_action_invalid_zap_request,
             )
+
             is ExploreFeedError.MissingLightningAddress -> context.getString(
                 R.string.post_action_missing_lightning_address,
             )
+
             is ExploreFeedError.FailedToPublishZapEvent -> context.getString(
                 R.string.post_action_zap_failed,
             )
+
             is ExploreFeedError.FailedToPublishLikeEvent -> context.getString(
                 R.string.post_action_like_failed,
             )
+
             is ExploreFeedError.FailedToPublishRepostEvent -> context.getString(
                 R.string.post_action_repost_failed,
             )
+
             is ExploreFeedError.MissingRelaysConfiguration -> context.getString(
                 R.string.app_missing_relays_config,
             )
+
             is ExploreFeedError.FailedToAddToFeed -> context.getString(
                 R.string.app_error_adding_to_feed,
             )
+
             is ExploreFeedError.FailedToRemoveFeed -> context.getString(
                 R.string.app_error_removing_feed,
             )
+
             is ExploreFeedError.FailedToMuteUser -> context.getString(
                 R.string.app_error_muting_user,
             )
+
             null -> return@LaunchedEffect
         }
 

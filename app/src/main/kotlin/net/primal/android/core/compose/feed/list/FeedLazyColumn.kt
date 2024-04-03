@@ -62,6 +62,7 @@ fun FeedLazyColumn(
     onGoToWallet: () -> Unit,
     onReportContentClick: OnReportContentClick,
     onMuteClick: ((String) -> Unit)? = null,
+    onBookmarkClick: () -> Unit,
     shouldShowLoadingState: Boolean = true,
     shouldShowNoContentState: Boolean = true,
     showReplyTo: Boolean = true,
@@ -184,6 +185,7 @@ fun FeedLazyColumn(
                         onMuteUserClick = { onMuteClick?.invoke(item.authorId) },
                         onMediaClick = onMediaClick,
                         onReportContentClick = onReportContentClick,
+                        onBookmarkClick = onBookmarkClick,
                     )
 
                     PrimalDivider()

@@ -20,6 +20,7 @@ import net.primal.android.R
 import net.primal.android.core.compose.dropdown.DropdownPrimalMenu
 import net.primal.android.core.compose.dropdown.DropdownPrimalMenuItem
 import net.primal.android.core.compose.icons.PrimalIcons
+import net.primal.android.core.compose.icons.primaliconpack.ContextAddBookmark
 import net.primal.android.core.compose.icons.primaliconpack.ContextCopyNoteId
 import net.primal.android.core.compose.icons.primaliconpack.ContextCopyNoteLink
 import net.primal.android.core.compose.icons.primaliconpack.ContextCopyNoteText
@@ -43,6 +44,8 @@ fun NoteDropdownMenuIcon(
     noteContent: String,
     noteRawData: String,
     authorId: String,
+    isBookmarked: Boolean,
+    onBookmarkClick: () -> Unit,
     onMuteUserClick: () -> Unit,
     onReportContentClick: () -> Unit,
 ) {
@@ -92,6 +95,15 @@ fun NoteDropdownMenuIcon(
                         ).show()
                     }
                 },
+            )
+            DropdownPrimalMenuItem(
+                trailingIconVector = PrimalIcons.ContextAddBookmark,
+                text = if (isBookmarked) {
+                    stringResource(id = R.string.feed_context_remove_from_bookmark)
+                } else {
+                    stringResource(id = R.string.feed_context_add_to_bookmark)
+                },
+                onClick = onBookmarkClick,
             )
             DropdownPrimalMenuItem(
                 trailingIconVector = PrimalIcons.ContextCopyNoteText,
