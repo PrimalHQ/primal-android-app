@@ -1,10 +1,10 @@
 ## Changes
-- Profile QR code viewer;
-- Profile screen improvements;
-- Profile editor improvements;
-- Pull to refresh: Feeds, Profile & Threads;
-- Randomizing bootstrap onboarding relays;
-- Implemented report abuse feature;
-- Improved onboarding experience;
-- App now follows dark theme system settings until user manually changes theme;
-- Improved full screen transitions;
+- Implement Bookmarks screen;
+- Implement publishing reply to parent note's relay;
+- Add relay hints to 'e' tags when publishing a short note;
+- Implement Profile QR Code scanner;
+- Implement tabs on Profile QR Code viewer;
+- Fix lightning:lnbc not working on wallet scan;
+- Fix lnbc description misaligned in tx editor UI;
+- Fix nip05 formatting issue on some screens;
+- Remove unfollow yourself on profile follows screen;

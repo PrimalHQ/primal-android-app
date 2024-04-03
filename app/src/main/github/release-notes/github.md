@@ -1,19 +1,10 @@
 ## Changes
-- Profile QR code viewer;
-- Implement rendering links, hashtags and profiles in profile about section; 
-- Update profile header;
-- Implement lud16 validation in profile editor;
-- Set username field as optional in Profile Editor;
-- Pull to refresh: Feeds, Profile & Threads;
-- Randomizing bootstrap onboarding relays;
-- Implement report abuse feature;
-- Onboarding image uploading immediately;
-- Fixed media gallery; Improved dots visibility;
-- Disable going back on login and create account;
-- Revert auth data if login/create post operation fails;
-- Wallet activation in onboarding;
-- New create account screen;
-- New welcome screen;
-- New login screen;
-- App now follows dark theme system settings until user manually changes theme;
-- Implemented new api for edge to edge screen support - improved screen transitions with full screen colors;
+- Implement Bookmarks screen;
+- Implement publishing reply to parent note's relay;
+- Add relay hints to 'e' tags when publishing a short note;
+- Implement Profile QR Code scanner;
+- Implement tabs on Profile QR Code viewer;
+- Fix lightning:lnbc not working on wallet scan;
+- Fix lnbc description misaligned in tx editor UI;
+- Fix nip05 formatting issue on some screens;
+- Remove unfollow yourself on profile follows screen;
