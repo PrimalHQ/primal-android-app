@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import net.primal.android.core.compose.profile.model.asProfileDetailsUi
+import net.primal.android.crypto.bech32ToHexOrThrow
 import net.primal.android.navigation.profileId
 import net.primal.android.nostr.ext.extractNoteId
 import net.primal.android.nostr.ext.extractProfileId
@@ -74,14 +75,14 @@ class ProfileQrCodeViewModel @Inject constructor(
     private fun processQrCodeResult(result: QrCodeResult) =
         viewModelScope.launch {
             when (result.type) {
-                QrCodeDataType.NPUB -> processProfileId(profileId = result.value)
+                QrCodeDataType.NPUB -> processProfileId(profileId = result.value.bech32ToHexOrThrow())
 
                 QrCodeDataType.NPUB_URI,
                 QrCodeDataType.NPROFILE_URI,
                 QrCodeDataType.NPROFILE,
                 -> result.value.extractProfileId()?.let { processProfileId(profileId = it) }
 
-                QrCodeDataType.NOTE -> processNoteId(noteId = result.value)
+                QrCodeDataType.NOTE -> processNoteId(noteId = result.value.bech32ToHexOrThrow())
                 QrCodeDataType.NOTE_URI -> result.value.extractNoteId()?.let { processNoteId(noteId = it) }
 
                 QrCodeDataType.LNBC,
