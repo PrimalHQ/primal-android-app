@@ -1,6 +1,5 @@
 package net.primal.android.feed.repository
 
-import android.database.sqlite.SQLiteConstraintException
 import androidx.room.withTransaction
 import net.primal.android.attachments.ext.flatMapPostsAsNoteAttachmentPO
 import net.primal.android.core.ext.asMapByKey
@@ -17,7 +16,6 @@ import net.primal.android.nostr.ext.mapNotNullAsPostDataPO
 import net.primal.android.nostr.ext.mapNotNullAsPostStatsPO
 import net.primal.android.nostr.ext.mapNotNullAsPostUserStatsPO
 import net.primal.android.nostr.ext.mapNotNullAsRepostDataPO
-import timber.log.Timber
 
 suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String, database: PrimalDatabase) {
     val cdnResources = this.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
@@ -64,10 +62,8 @@ suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String, database
         database.postUserStats().upsertAll(data = userPostStats)
         val eventHintsDao = database.eventHints()
         eventHints.forEach { eventHint ->
-            try {
-                eventHintsDao.insert(data = eventHint)
-            } catch (error: SQLiteConstraintException) {
-                Timber.w(error)
+            val rowId = eventHintsDao.insert(data = eventHint)
+            if (rowId == -1L) {
                 eventHintsDao.update(data = eventHint)
             }
         }

@@ -2,14 +2,15 @@ package net.primal.android.nostr.db
 
 import androidx.room.Dao
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 
 @Dao
 interface EventHintsDao {
 
-    @Insert
-    suspend fun insert(data: EventHints)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insert(data: EventHints): Long
 
     @Update
     suspend fun update(data: EventHints)
