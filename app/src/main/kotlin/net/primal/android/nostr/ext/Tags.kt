@@ -33,8 +33,6 @@ fun JsonArray.hasReplyMarker() = contains(JsonPrimitive("reply"))
 
 fun JsonArray.hasRootMarker() = contains(JsonPrimitive("root"))
 
-fun JsonArray.hasAnyMarker() = hasRootMarker() || hasReplyMarker() || hasMentionMarker()
-
 fun String.asEventIdTag(relayHint: String? = null, marker: String? = null): JsonArray =
     buildJsonArray {
         add("e")

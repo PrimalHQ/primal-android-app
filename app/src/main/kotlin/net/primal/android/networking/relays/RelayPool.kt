@@ -1,6 +1,5 @@
 package net.primal.android.networking.relays
 
-import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.FlowPreview
@@ -29,7 +28,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import timber.log.Timber
 
-class RelayPool @Inject constructor(
+class RelayPool(
     private val dispatchers: CoroutineDispatcherProvider,
     private val okHttpClient: OkHttpClient,
 ) {

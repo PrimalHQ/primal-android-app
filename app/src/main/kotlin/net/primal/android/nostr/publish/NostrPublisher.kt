@@ -12,6 +12,7 @@ import net.primal.android.profile.report.ReportType
 import net.primal.android.user.domain.NostrWalletConnect
 import net.primal.android.user.domain.Relay
 import net.primal.android.wallet.nwc.model.LightningPayResponse
+import timber.log.Timber
 
 class NostrPublisher @Inject constructor(
     private val relaysSocketManager: RelaysSocketManager,
@@ -87,6 +88,7 @@ class NostrPublisher @Inject constructor(
         userId: String,
         content: String,
         tags: Set<JsonArray> = emptySet(),
+        outboxRelays: List<String> = emptyList(),
     ): Boolean {
         val noteEvent = nostrNotary.signShortTextNoteEvent(
             userId = userId,
@@ -94,6 +96,16 @@ class NostrPublisher @Inject constructor(
             noteContent = content,
         )
         relaysSocketManager.publishEvent(nostrEvent = noteEvent)
+        if (outboxRelays.isNotEmpty()) {
+            try {
+                relaysSocketManager.publishEvent(
+                    nostrEvent = noteEvent,
+                    relays = outboxRelays.map { Relay(url = it, read = false, write = true) },
+                )
+            } catch (error: NostrPublishException) {
+                Timber.w("Failed to publish to outbox relays.", error)
+            }
+        }
         return importEvent(noteEvent)
     }
 

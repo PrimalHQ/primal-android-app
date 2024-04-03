@@ -16,21 +16,24 @@ import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.domain.Relay
 import net.primal.android.user.domain.RelayKind
 import net.primal.android.user.domain.mapToRelayDO
+import okhttp3.OkHttpClient
 import timber.log.Timber
 
 @Singleton
 class RelaysSocketManager @Inject constructor(
-    dispatchers: CoroutineDispatcherProvider,
+    private val dispatchers: CoroutineDispatcherProvider,
     private val activeAccountStore: ActiveAccountStore,
     private val primalDatabase: PrimalDatabase,
-    private val userRelaysPool: RelayPool,
-    private val nwcRelaysPool: RelayPool,
-    private val fallbackRelays: RelayPool,
+    private val okHttpClient: OkHttpClient,
 ) {
     private val scope = CoroutineScope(dispatchers.io())
     private val relayPoolsMutex = Mutex()
 
     private var relaysObserverJob: Job? = null
+
+    private val userRelaysPool: RelayPool = RelayPool(dispatchers = dispatchers, okHttpClient = okHttpClient)
+    private val nwcRelaysPool: RelayPool = RelayPool(dispatchers = dispatchers, okHttpClient = okHttpClient)
+    private val fallbackRelays: RelayPool = RelayPool(dispatchers = dispatchers, okHttpClient = okHttpClient)
 
     val userRelayPoolStatus = userRelaysPool.relayPoolStatus
 
@@ -101,6 +104,15 @@ class RelaysSocketManager @Inject constructor(
         } else {
             fallbackRelays.publishEvent(nostrEvent)
         }
+    }
+
+    @Throws(NostrPublishException::class)
+    suspend fun publishEvent(nostrEvent: NostrEvent, relays: List<Relay>) {
+        val customPool = RelayPool(dispatchers = dispatchers, okHttpClient = okHttpClient)
+        customPool.changeRelays(relays = relays)
+        customPool.ensureAllRelaysConnected()
+        customPool.publishEvent(nostrEvent)
+        customPool.closePool()
     }
 
     @Throws(NostrPublishException::class)

@@ -131,10 +131,14 @@ class PostRepository @Inject constructor(
             }.toString()
         }
 
+        val outboxRelays = replyToPostId?.let { noteId ->
+            relayHintsMap[noteId]?.let { relayUrl -> listOf(relayUrl) }
+        } ?: emptyList()
         return nostrPublisher.publishShortTextNote(
             userId = activeAccountStore.activeUserId(),
             content = refinedContent,
             tags = pubkeyTags + noteTags + hashtagTags + imageTags,
+            outboxRelays = outboxRelays,
         )
     }
 

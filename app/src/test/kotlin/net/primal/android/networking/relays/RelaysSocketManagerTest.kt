@@ -58,18 +58,7 @@ class RelaysSocketManagerTest {
                 )
                 }
             },
-            userRelaysPool = RelayPool(
-                dispatchers = coroutinesTestRule.dispatcherProvider,
-                okHttpClient = mockk<OkHttpClient>(),
-            ),
-            nwcRelaysPool = RelayPool(
-                dispatchers = coroutinesTestRule.dispatcherProvider,
-                okHttpClient = mockk<OkHttpClient>(),
-            ),
-            fallbackRelays = RelayPool(
-                dispatchers = coroutinesTestRule.dispatcherProvider,
-                okHttpClient = mockk<OkHttpClient>(),
-            ),
+            okHttpClient = mockk<OkHttpClient>(),
         )
         advanceUntilIdleAndDelay()
     }
