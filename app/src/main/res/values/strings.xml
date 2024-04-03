@@ -73,6 +73,7 @@
     <string name="primary_destination_notifications_label">Notifications</string>
 
     <string name="drawer_destination_profile">Profile</string>
+    <string name="drawer_destination_bookmarks">Bookmarks</string>
     <string name="drawer_destination_settings">Settings</string>
     <string name="drawer_destination_sign_out">Sign Out</string>
     <string name="drawer_followers_suffix">Followers</string>
@@ -159,6 +160,8 @@
     <string name="thread_publish_button">Reply</string>
     <string name="thread_publishing_button">Replying…</string>
     <string name="thread_reply_nostr_publish_error">Unable to publish your note to Nostr. Please try again soon.</string>
+
+    <string name="bookmarks_title">Bookmarks</string>
 
     <string name="explore_search_nostr">Search Nostr</string>
     <string name="explore_enter_query">Enter text to search</string>

@@ -23,10 +23,10 @@ inline val SavedStateHandle.profileIdOrThrow: String
 const val FOLLOWS_TYPE = "followsType"
 inline val SavedStateHandle.followsType: String? get() = get(FOLLOWS_TYPE)
 
-const val SEARCH_QUERY = "searchQuery"
-inline val SavedStateHandle.searchQueryOrThrow: String
-    get() = get<String>(SEARCH_QUERY)?.asBase64Decoded()?.ifEmpty { null }
-        ?: throw IllegalArgumentException("Missing required searchQuery argument.")
+const val EXPLORE_FEED_DIRECTIVE = "exploreFeedDirective"
+inline val SavedStateHandle.exploreFeedDirectiveOrThrow: String
+    get() = get<String>(EXPLORE_FEED_DIRECTIVE)?.asBase64Decoded()?.ifEmpty { null }
+        ?: throw IllegalArgumentException("Missing required exploreFeedDirective argument.")
 
 const val NEW_POST_PRE_FILL_CONTENT = "preFillContent"
 inline val SavedStateHandle.newPostPreFillContent: String?

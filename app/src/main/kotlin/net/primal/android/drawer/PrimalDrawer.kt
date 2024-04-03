@@ -108,6 +108,7 @@ fun PrimalDrawer(
                 modifier = Modifier
                     .weight(1.0f)
                     .padding(vertical = 32.dp),
+                menuItems = state.menuItems,
                 onDrawerDestinationClick = onDrawerDestinationClick,
             )
 
@@ -230,14 +231,18 @@ private fun DrawerHeader(userAccount: UserAccount?, onQrCodeClick: () -> Unit) {
 }
 
 @Composable
-private fun DrawerMenu(modifier: Modifier, onDrawerDestinationClick: (DrawerScreenDestination) -> Unit) {
+private fun DrawerMenu(
+    modifier: Modifier,
+    menuItems: List<DrawerScreenDestination>,
+    onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
+) {
     LazyColumn(
         modifier = modifier,
         verticalArrangement = Arrangement.Top,
     ) {
         items(
-            items = DrawerScreenDestination.entries.toTypedArray(),
-            key = { it.name },
+            items = menuItems,
+            key = { it.toString() },
         ) {
             ListItem(
                 modifier = Modifier.clickable {
@@ -276,21 +281,20 @@ private fun DrawerFooter(onThemeSwitch: () -> Unit) {
     }
 }
 
-enum class DrawerScreenDestination {
-    Profile,
-    Settings,
-    SignOut,
+sealed class DrawerScreenDestination {
+    data object Profile : DrawerScreenDestination()
+    data class Bookmarks(val userId: String) : DrawerScreenDestination()
+    data object Settings : DrawerScreenDestination()
+    data object SignOut : DrawerScreenDestination()
 }
 
 @Composable
 private fun DrawerScreenDestination.label(): String {
     return when (this) {
-        DrawerScreenDestination.Profile -> stringResource(id = R.string.drawer_destination_profile)
-        DrawerScreenDestination.Settings -> stringResource(
-            id = R.string.drawer_destination_settings,
-        )
-
-        DrawerScreenDestination.SignOut -> stringResource(id = R.string.drawer_destination_sign_out)
+        DrawerScreenDestination.Profile -> stringResource(R.string.drawer_destination_profile)
+        is DrawerScreenDestination.Bookmarks -> stringResource(R.string.drawer_destination_bookmarks)
+        DrawerScreenDestination.Settings -> stringResource(R.string.drawer_destination_settings)
+        DrawerScreenDestination.SignOut -> stringResource(R.string.drawer_destination_sign_out)
     }
 }
 
@@ -299,7 +303,14 @@ private fun DrawerScreenDestination.label(): String {
 fun PrimalDrawerPreview() {
     PrimalTheme(primalTheme = PrimalTheme.Sunset) {
         PrimalDrawer(
-            state = PrimalDrawerContract.UiState(),
+            state = PrimalDrawerContract.UiState(
+                menuItems = listOf(
+                    DrawerScreenDestination.Profile,
+                    DrawerScreenDestination.Bookmarks(userId = "none"),
+                    DrawerScreenDestination.Settings,
+                    DrawerScreenDestination.SignOut,
+                ),
+            ),
             eventPublisher = {},
             onDrawerDestinationClick = {},
             onQrCodeClick = {},

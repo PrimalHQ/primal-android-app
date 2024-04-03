@@ -26,7 +26,7 @@ import net.primal.android.explore.feed.ExploreFeedContract.UiState
 import net.primal.android.explore.feed.ExploreFeedContract.UiState.ExploreFeedError
 import net.primal.android.feed.repository.FeedRepository
 import net.primal.android.feed.repository.PostRepository
-import net.primal.android.navigation.searchQueryOrThrow
+import net.primal.android.navigation.exploreFeedDirectiveOrThrow
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
@@ -55,12 +55,12 @@ class ExploreFeedViewModel @Inject constructor(
     private val mutedUserRepository: MutedUserRepository,
 ) : ViewModel() {
 
-    private val exploreQuery = "search;\"${savedStateHandle.searchQueryOrThrow}\""
+    private val exploreFeedDirective = savedStateHandle.exploreFeedDirectiveOrThrow
 
     private val _state = MutableStateFlow(
         UiState(
-            title = exploreQuery.removeSearchPrefix(),
-            posts = feedRepository.feedByDirective(feedDirective = exploreQuery)
+            title = exploreFeedDirective.resolveTitle(),
+            posts = feedRepository.feedByDirective(feedDirective = exploreFeedDirective)
                 .map { it.map { feed -> feed.asFeedPostUi() } }
                 .cachedIn(viewModelScope),
         ),
@@ -83,7 +83,7 @@ class ExploreFeedViewModel @Inject constructor(
 
     private fun observeContainsFeed() =
         viewModelScope.launch {
-            feedRepository.observeContainsFeed(directive = exploreQuery).collect {
+            feedRepository.observeContainsFeed(directive = exploreFeedDirective).collect {
                 setState {
                     copy(existsInUserFeeds = it)
                 }
@@ -129,7 +129,7 @@ class ExploreFeedViewModel @Inject constructor(
             settingsRepository.addAndPersistUserFeed(
                 userId = activeAccountStore.activeUserId(),
                 name = state.value.title,
-                directive = exploreQuery,
+                directive = exploreFeedDirective,
             )
         } catch (error: WssException) {
             Timber.w(error)
@@ -141,7 +141,7 @@ class ExploreFeedViewModel @Inject constructor(
         try {
             settingsRepository.removeAndPersistUserFeed(
                 userId = activeAccountStore.activeUserId(),
-                directive = exploreQuery,
+                directive = exploreFeedDirective,
             )
         } catch (error: WssException) {
             Timber.w(error)
@@ -261,6 +261,14 @@ class ExploreFeedViewModel @Inject constructor(
             if (state.value.error == error) {
                 setState { copy(error = null) }
             }
+        }
+    }
+
+    private fun String.resolveTitle(): String {
+        return when {
+            startsWith("search;") -> removeSearchPrefix()
+            startsWith("bookmarks;") -> "Bookmarks"
+            else -> "Feed"
         }
     }
 }

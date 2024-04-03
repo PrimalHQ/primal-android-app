@@ -21,7 +21,14 @@ class PrimalDrawerViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(
-        PrimalDrawerContract.UiState(),
+        PrimalDrawerContract.UiState(
+            menuItems = listOf(
+                DrawerScreenDestination.Profile,
+                DrawerScreenDestination.Bookmarks(userId = activeAccountStore.activeUserId()),
+                DrawerScreenDestination.Settings,
+                DrawerScreenDestination.SignOut,
+            ),
+        ),
     )
     val state = _state.asStateFlow()
     private fun setState(reducer: PrimalDrawerContract.UiState.() -> PrimalDrawerContract.UiState) {

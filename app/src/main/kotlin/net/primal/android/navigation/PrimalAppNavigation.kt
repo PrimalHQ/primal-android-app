@@ -192,7 +192,10 @@ fun NavController.navigateToMediaGallery(noteId: String, mediaUrl: String) =
     navigate(route = "media/$noteId?$MEDIA_URL=$mediaUrl")
 
 fun NavController.navigateToExploreFeed(query: String) =
-    navigate(route = "explore?$SEARCH_QUERY=${query.asBase64Encoded()}")
+    navigate(route = "explore?$EXPLORE_FEED_DIRECTIVE=${"search;$query".asBase64Encoded()}")
+
+private fun NavController.navigateToBookmarks(userId: String) =
+    navigate(route = "explore?$EXPLORE_FEED_DIRECTIVE=${"bookmarks;$userId".asBase64Encoded()}")
 
 @OptIn(ExperimentalMaterialNavigationApi::class)
 @Composable
@@ -213,6 +216,7 @@ fun PrimalAppNavigation() {
     val drawerDestinationHandler: (DrawerScreenDestination) -> Unit = {
         when (it) {
             DrawerScreenDestination.Profile -> navController.navigateToProfile()
+            is DrawerScreenDestination.Bookmarks -> navController.navigateToBookmarks(userId = it.userId)
             DrawerScreenDestination.Settings -> navController.navigateToSettings()
             DrawerScreenDestination.SignOut -> navController.navigateToLogout()
         }
@@ -289,9 +293,9 @@ fun PrimalAppNavigation() {
             )
 
             exploreFeed(
-                route = "explore?$SEARCH_QUERY={$SEARCH_QUERY}",
+                route = "explore?$EXPLORE_FEED_DIRECTIVE={$EXPLORE_FEED_DIRECTIVE}",
                 arguments = listOf(
-                    navArgument(SEARCH_QUERY) {
+                    navArgument(EXPLORE_FEED_DIRECTIVE) {
                         type = NavType.StringType
                         nullable = false
                     },
