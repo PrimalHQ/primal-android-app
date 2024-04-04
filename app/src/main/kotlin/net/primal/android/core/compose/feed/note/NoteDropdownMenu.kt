@@ -103,7 +103,21 @@ fun NoteDropdownMenuIcon(
                 } else {
                     stringResource(id = R.string.feed_context_add_to_bookmark)
                 },
-                onClick = onBookmarkClick,
+                onClick = {
+                    onBookmarkClick()
+                    menuVisible = false
+                    uiScope.launch {
+                        Toast.makeText(
+                            context,
+                            if (isBookmarked) {
+                                context.getString(R.string.feed_context_bookmark_removed)
+                            } else {
+                                context.getString(R.string.feed_context_bookmark_added)
+                            },
+                            Toast.LENGTH_SHORT,
+                        ).show()
+                    }
+                },
             )
             DropdownPrimalMenuItem(
                 trailingIconVector = PrimalIcons.ContextCopyNoteText,

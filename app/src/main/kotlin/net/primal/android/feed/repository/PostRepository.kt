@@ -11,6 +11,7 @@ import net.primal.android.core.files.error.UnsuccessfulFileUpload
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.editor.domain.NoteAttachment
 import net.primal.android.networking.relays.errors.NostrPublishException
+import net.primal.android.nostr.db.eventHintsUpserter
 import net.primal.android.nostr.ext.asEventIdTag
 import net.primal.android.nostr.ext.asImageTag
 import net.primal.android.nostr.ext.asPubkeyTag
@@ -19,7 +20,9 @@ import net.primal.android.nostr.ext.parseEventTags
 import net.primal.android.nostr.ext.parseHashtagTags
 import net.primal.android.nostr.ext.parsePubkeyTags
 import net.primal.android.nostr.publish.NostrPublisher
+import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.android.user.domain.PublicBookmark
 import timber.log.Timber
 
 class PostRepository @Inject constructor(
@@ -27,6 +30,7 @@ class PostRepository @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val fileUploader: FileUploader,
     private val nostrPublisher: NostrPublisher,
+    private val profileRepository: ProfileRepository,
 ) {
 
     @Throws(NostrPublishException::class)
@@ -146,5 +150,25 @@ class PostRepository @Inject constructor(
     suspend fun uploadPostAttachment(attachment: NoteAttachment): String {
         val userId = activeAccountStore.activeUserId()
         return fileUploader.uploadFile(userId = userId, attachment.localUri)
+    }
+
+    suspend fun isBookmarked(noteId: String): Boolean {
+        return database.eventHints().findById(eventId = noteId)?.isBookmarked == true
+    }
+
+    @Throws(ProfileRepository.BookmarksListNotFound::class, NostrPublishException::class)
+    suspend fun addToBookmarks(userId: String, noteId: String) {
+        profileRepository.addBookmark(userId = userId, bookmark = PublicBookmark(type = "e", value = noteId))
+        eventHintsUpserter(dao = database.eventHints(), eventId = noteId) {
+            copy(isBookmarked = true)
+        }
+    }
+
+    @Throws(ProfileRepository.BookmarksListNotFound::class, NostrPublishException::class)
+    suspend fun removeFromBookmarks(userId: String, noteId: String) {
+        profileRepository.removeBookmark(userId = userId, bookmark = PublicBookmark(type = "e", value = noteId))
+        eventHintsUpserter(dao = database.eventHints(), eventId = noteId) {
+            copy(isBookmarked = false)
+        }
     }
 }

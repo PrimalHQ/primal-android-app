@@ -28,6 +28,7 @@ data class FeedPostUi(
     val hashtags: List<String> = emptyList(),
     val rawNostrEventJson: String,
     val replyToAuthorHandle: String?,
+    val isBookmarked: Boolean = false,
 )
 
 fun FeedPost.asFeedPostUi() =
@@ -49,4 +50,5 @@ fun FeedPost.asFeedPostUi() =
         hashtags = this.data.hashtags,
         rawNostrEventJson = this.data.raw,
         replyToAuthorHandle = this.replyToAuthor?.usernameUiFriendly() ?: this.data.replyToAuthorId?.asEllipsizedNpub(),
+        isBookmarked = this.eventHints?.isBookmarked == true,
     )

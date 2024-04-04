@@ -158,6 +158,7 @@ class FeedViewModel @Inject constructor(
                     is UiEvent.ZapAction -> zapPost(it)
                     is UiEvent.MuteAction -> mute(it)
                     is UiEvent.ReportAbuse -> reportAbuse(it)
+                    is UiEvent.BookmarkAction -> handleBookmark(it)
                 }
             }
         }
@@ -293,6 +294,18 @@ class FeedViewModel @Inject constructor(
                 }
             } catch (error: NostrPublishException) {
                 Timber.w(error)
+            }
+        }
+
+    private fun handleBookmark(event: UiEvent.BookmarkAction) =
+        viewModelScope.launch {
+            val userId = activeAccountStore.activeUserId()
+            withContext(dispatcherProvider.io()) {
+                val isBookmarked = postRepository.isBookmarked(noteId = event.noteId)
+                when (isBookmarked) {
+                    true -> postRepository.removeFromBookmarks(userId = userId, noteId = event.noteId)
+                    false -> postRepository.addToBookmarks(userId = userId, noteId = event.noteId)
+                }
             }
         }
 

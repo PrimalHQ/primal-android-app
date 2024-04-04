@@ -101,7 +101,6 @@ fun FeedNoteCard(
             modifier = Modifier.padding(all = notePaddingDp),
             contentAlignment = Alignment.TopEnd,
         ) {
-            // TODO Handle reading isBookmarked state
             NoteDropdownMenuIcon(
                 modifier = Modifier
                     .size(overflowIconSizeDp)
@@ -111,7 +110,7 @@ fun FeedNoteCard(
                 noteContent = data.content,
                 noteRawData = data.rawNostrEventJson,
                 authorId = data.authorId,
-                isBookmarked = false,
+                isBookmarked = data.isBookmarked,
                 onBookmarkClick = onBookmarkClick,
                 onMuteUserClick = onMuteUserClick,
                 onReportContentClick = { reportDialogVisible = true },

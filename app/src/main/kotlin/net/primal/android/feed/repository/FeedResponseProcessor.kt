@@ -5,6 +5,7 @@ import net.primal.android.attachments.ext.flatMapPostsAsNoteAttachmentPO
 import net.primal.android.core.ext.asMapByKey
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.feed.api.model.FeedResponse
+import net.primal.android.nostr.db.eventHintsUpserter
 import net.primal.android.nostr.ext.flatMapAsEventHintsPO
 import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
 import net.primal.android.nostr.ext.flatMapNotNullAsLinkPreviewResource
@@ -60,12 +61,11 @@ suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String, database
         database.reposts().upsertAll(data = reposts)
         database.postStats().upsertAll(data = postStats)
         database.postUserStats().upsertAll(data = userPostStats)
+
         val eventHintsDao = database.eventHints()
-        eventHints.forEach { eventHint ->
-            val rowId = eventHintsDao.insert(data = eventHint)
-            if (rowId == -1L) {
-                eventHintsDao.update(data = eventHint)
-            }
+        val hintsMap = eventHints.associateBy { it.eventId }
+        eventHintsUpserter(dao = eventHintsDao, eventIds = eventHints.map { it.eventId }) {
+            copy(relays = hintsMap[this.eventId]?.relays ?: emptyList())
         }
     }
 }

@@ -1,5 +1,6 @@
 package net.primal.android.user.repository
 
+import androidx.room.withTransaction
 import javax.inject.Inject
 import net.primal.android.core.files.FileUploader
 import net.primal.android.core.files.error.UnsuccessfulFileUpload
@@ -10,6 +11,7 @@ import net.primal.android.core.utils.usernameUiFriendly
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.nostr.db.eventHintsUpserter
 import net.primal.android.nostr.ext.asProfileDataPO
 import net.primal.android.nostr.model.content.ContentMetadata
 import net.primal.android.nostr.publish.NostrPublisher
@@ -49,6 +51,17 @@ class UserRepository @Inject constructor(
         }
         val followList = userAccountFetcher.fetchUserFollowListOrNull(userId = userId)
         val bookmarksList = userAccountFetcher.fetchUserBookmarksListOrNull(userId = userId)
+
+        database.withTransaction {
+            val eventHintsDao = database.eventHints()
+            eventHintsDao.clearAllBookmarks()
+            bookmarksList?.bookmarks?.filter { it.type == "e" }?.map {
+                eventHintsUpserter(dao = eventHintsDao, eventId = it.value) {
+                    copy(isBookmarked = true)
+                }
+            }
+        }
+
         return accountsStore.getAndUpdateAccount(userId = userId) {
             copyIfNotNull(
                 profile = userProfile,
