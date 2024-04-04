@@ -129,7 +129,9 @@
     <string name="feed_context_share_note">Share note</string>
     <string name="feed_context_copy_note_link">Copy note link</string>
     <string name="feed_context_add_to_bookmark">Add to Bookmarks</string>
+    <string name="feed_context_bookmark_added">Note added to your bookmarks.</string>
     <string name="feed_context_remove_from_bookmark">Remove from Bookmarks</string>
+    <string name="feed_context_bookmark_removed">Note removed from your bookmarks.</string>
     <string name="feed_context_copy_note_text">Copy note text</string>
     <string name="feed_context_copy_note_id">Copy note id</string>
     <string name="feed_context_copy_raw_data">Copy raw data</string>

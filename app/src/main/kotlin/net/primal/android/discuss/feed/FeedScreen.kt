@@ -225,7 +225,7 @@ fun FeedScreen(
                 },
                 onMediaClick = onMediaClick,
                 onBookmarkClick = {
-                    // TODO Handle bookmark click
+                    eventPublisher(FeedContract.UiEvent.BookmarkAction(noteId = it))
                 },
                 onReportContentClick = { type, profileId, noteId ->
                     eventPublisher(
