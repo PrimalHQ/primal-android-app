@@ -364,7 +364,7 @@ private fun ThreadScreenContent(
             onMediaClick = onMediaClick,
             onMuteUserClick = { authorId -> eventPublisher(ThreadContract.UiEvent.MuteAction(authorId)) },
             onBookmarkClick = {
-                // TODO Handle bookmark click
+                eventPublisher(ThreadContract.UiEvent.BookmarkAction(it))
             },
             onReportContentClick = { reportType, profileId, noteId ->
                 eventPublisher(
@@ -399,7 +399,7 @@ private fun ThreadLazyColumn(
     onPostLongClickAction: ((noteAction: FeedPostAction, note: FeedPostUi) -> Unit)? = null,
     onHashtagClick: (String) -> Unit,
     onMediaClick: (String, String) -> Unit,
-    onBookmarkClick: () -> Unit,
+    onBookmarkClick: (noteId: String) -> Unit,
     onMuteUserClick: (authorId: String) -> Unit,
     onReportContentClick: OnReportContentClick,
 ) {
@@ -466,7 +466,7 @@ private fun ThreadLazyColumn(
                     onMediaClick = onMediaClick,
                     onMuteUserClick = { onMuteUserClick(item.authorId) },
                     onReportContentClick = onReportContentClick,
-                    onBookmarkClick = onBookmarkClick,
+                    onBookmarkClick = { onBookmarkClick(item.postId) },
                 )
 
                 if (!connectedToNextNote) {

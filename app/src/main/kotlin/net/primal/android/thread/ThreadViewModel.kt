@@ -81,6 +81,7 @@ class ThreadViewModel @Inject constructor(
                     is UiEvent.MuteAction -> mute(it)
                     UiEvent.UpdateConversation -> fetchRepliesFromNetwork()
                     is UiEvent.ReportAbuse -> reportAbuse(it)
+                    is UiEvent.BookmarkAction -> handleBookmark(it)
                 }
             }
         }
@@ -289,6 +290,18 @@ class ThreadViewModel @Inject constructor(
                 }
             } catch (error: NostrPublishException) {
                 Timber.w(error)
+            }
+        }
+
+    private fun handleBookmark(event: UiEvent.BookmarkAction) =
+        viewModelScope.launch {
+            val userId = activeAccountStore.activeUserId()
+            withContext(dispatcherProvider.io()) {
+                val isBookmarked = postRepository.isBookmarked(noteId = event.noteId)
+                when (isBookmarked) {
+                    true -> postRepository.removeFromBookmarks(userId = userId, noteId = event.noteId)
+                    false -> postRepository.addToBookmarks(userId = userId, noteId = event.noteId)
+                }
             }
         }
 

@@ -69,6 +69,7 @@ interface ProfileDetailsContract {
             val profileId: String,
             val noteId: String? = null,
         ) : UiEvent()
+        data class BookmarkAction(val noteId: String) : UiEvent()
         data object DismissError : UiEvent()
     }
 }
