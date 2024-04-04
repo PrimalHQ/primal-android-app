@@ -1,4 +1,6 @@
 ## Changes
+- Implement support for QR codes with light foreground; 
+- Implement add/remove bookmarks on notes;
 - Implement Bookmarks screen;
 - Implement publishing reply to parent note's relay;
 - Add relay hints to 'e' tags when publishing a short note;
