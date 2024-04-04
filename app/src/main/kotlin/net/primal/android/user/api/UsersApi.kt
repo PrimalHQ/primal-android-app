@@ -1,6 +1,7 @@
 package net.primal.android.user.api
 
 import net.primal.android.explore.api.model.UsersResponse
+import net.primal.android.user.api.model.BookmarksResponse
 import net.primal.android.user.api.model.UserContactsResponse
 import net.primal.android.user.api.model.UserProfileResponse
 import net.primal.android.user.api.model.UserProfilesResponse
@@ -23,4 +24,6 @@ interface UsersApi {
     suspend fun getDefaultRelays(): List<String>
 
     suspend fun isUserFollowing(userId: String, targetUserId: String): Boolean
+
+    suspend fun getUserBookmarksList(userId: String): BookmarksResponse
 }

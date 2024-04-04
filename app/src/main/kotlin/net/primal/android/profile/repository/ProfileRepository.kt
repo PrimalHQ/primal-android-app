@@ -17,6 +17,8 @@ import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.android.profile.report.ReportType
 import net.primal.android.user.accounts.UserAccountFetcher
 import net.primal.android.user.api.UsersApi
+import net.primal.android.user.domain.PublicBookmark
+import net.primal.android.user.domain.asUserAccountFromBookmarksListEvent
 import net.primal.android.user.domain.asUserAccountFromFollowListEvent
 import net.primal.android.user.repository.UserRepository
 
@@ -74,7 +76,8 @@ class ProfileRepository @Inject constructor(
 
     @Throws(FollowListNotFound::class, NostrPublishException::class)
     private suspend fun updateFollowList(userId: String, reducer: Set<String>.() -> Set<String>) {
-        val userFollowList = userAccountFetcher.fetchUserFollowListOrNull(userId = userId) ?: throw FollowListNotFound()
+        val userFollowList = userAccountFetcher.fetchUserFollowListOrNull(userId = userId)
+            ?: throw FollowListNotFound()
 
         userRepository.updateFollowList(userId, userFollowList)
 
@@ -99,6 +102,42 @@ class ProfileRepository @Inject constructor(
         userRepository.updateFollowList(
             userId = userId,
             contactsUserAccount = nostrEventResponse.asUserAccountFromFollowListEvent(),
+        )
+    }
+
+    @Throws(BookmarksListNotFound::class, NostrPublishException::class)
+    suspend fun addBookmark(userId: String, bookmark: PublicBookmark) {
+        updateBookmarksList(userId = userId) {
+            toMutableSet().apply { add(bookmark) }
+        }
+    }
+
+    @Throws(BookmarksListNotFound::class, NostrPublishException::class)
+    suspend fun removeBookmark(userId: String, bookmark: PublicBookmark) {
+        updateBookmarksList(userId = userId) {
+            toMutableSet().apply { remove(bookmark) }
+        }
+    }
+
+    @Throws(BookmarksListNotFound::class, NostrPublishException::class)
+    private suspend fun updateBookmarksList(userId: String, reducer: Set<PublicBookmark>.() -> Set<PublicBookmark>) {
+        val bookmarksList = userAccountFetcher.fetchUserBookmarksListOrNull(userId = userId)
+            ?: throw BookmarksListNotFound()
+
+        userRepository.updateBookmarksList(userId, bookmarksList)
+
+        setBookmarksList(userId = userId, bookmarks = bookmarksList.bookmarks.reducer())
+    }
+
+    @Throws(NostrPublishException::class)
+    suspend fun setBookmarksList(userId: String, bookmarks: Set<PublicBookmark>) {
+        val nostrEventResponse = nostrPublisher.publishUserBookmarksList(
+            userId = userId,
+            bookmarks = bookmarks,
+        )
+        userRepository.updateBookmarksList(
+            userId = userId,
+            bookmarksUserAccount = nostrEventResponse.asUserAccountFromBookmarksListEvent(),
         )
     }
 
@@ -144,4 +183,6 @@ class ProfileRepository @Inject constructor(
     suspend fun isUserFollowing(userId: String, targetUserId: String) = usersApi.isUserFollowing(userId, targetUserId)
 
     class FollowListNotFound : Exception()
+
+    class BookmarksListNotFound : Exception()
 }

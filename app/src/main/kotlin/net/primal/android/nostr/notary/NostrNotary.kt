@@ -23,6 +23,7 @@ import net.primal.android.profile.report.ReportType
 import net.primal.android.settings.api.model.AppSettingsDescription
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.NostrWalletConnect
+import net.primal.android.user.domain.PublicBookmark
 import net.primal.android.user.domain.Relay
 import net.primal.android.user.domain.toZapTag
 import net.primal.android.wallet.domain.ZapTarget
@@ -127,6 +128,21 @@ class NostrNotary @Inject constructor(
             pubKey = userId,
             kind = NostrEventKind.FollowList.value,
             content = content,
+            tags = tags,
+        ).signOrThrow(nsec = findNsecOrThrow(userId))
+    }
+
+    fun signBookmarksListNostrEvent(userId: String, bookmarks: Set<PublicBookmark>): NostrEvent {
+        val tags = bookmarks.map {
+            buildJsonArray {
+                add(it.type)
+                add(it.value)
+            }
+        }
+        return NostrUnsignedEvent(
+            pubKey = userId,
+            kind = NostrEventKind.BookmarksList.value,
+            content = "",
             tags = tags,
         ).signOrThrow(nsec = findNsecOrThrow(userId))
     }

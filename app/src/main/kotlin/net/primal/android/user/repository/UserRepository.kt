@@ -16,6 +16,7 @@ import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.android.profile.domain.ProfileMetadata
 import net.primal.android.user.accounts.UserAccountFetcher
 import net.primal.android.user.accounts.UserAccountsStore
+import net.primal.android.user.accounts.copyBookmarksListIfNotNull
 import net.primal.android.user.accounts.copyFollowListIfNotNull
 import net.primal.android.user.accounts.copyIfNotNull
 import net.primal.android.user.api.UsersApi
@@ -47,11 +48,13 @@ class UserRepository @Inject constructor(
             it.followersCount != null && it.followingCount != null && it.notesCount != null
         }
         val followList = userAccountFetcher.fetchUserFollowListOrNull(userId = userId)
+        val bookmarksList = userAccountFetcher.fetchUserBookmarksListOrNull(userId = userId)
         return accountsStore.getAndUpdateAccount(userId = userId) {
             copyIfNotNull(
                 profile = userProfile,
                 stats = userStats,
                 followList = followList,
+                bookmarksList = bookmarksList,
             )
         }
     }
@@ -60,6 +63,12 @@ class UserRepository @Inject constructor(
         accountsStore.getAndUpdateAccount(userId = userId) {
             copyFollowListIfNotNull(followList = contactsUserAccount)
                 .copy(followingCount = contactsUserAccount.following.size)
+        }
+    }
+
+    suspend fun updateBookmarksList(userId: String, bookmarksUserAccount: UserAccount) {
+        accountsStore.getAndUpdateAccount(userId = userId) {
+            copyBookmarksListIfNotNull(bookmarksList = bookmarksUserAccount)
         }
     }
 
