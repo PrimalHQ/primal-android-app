@@ -10,6 +10,7 @@ import net.primal.android.networking.primal.PrimalCacheFilter
 import net.primal.android.networking.primal.PrimalVerb
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.model.NostrEventKind
+import net.primal.android.user.api.model.BookmarksResponse
 import net.primal.android.user.api.model.FollowListRequestBody
 import net.primal.android.user.api.model.IsUserFollowingRequestBody
 import net.primal.android.user.api.model.UserContactsResponse
@@ -142,9 +143,19 @@ class UsersApiImpl @Inject constructor(
 
         val primalEvent = queryResult.findPrimalEvent(NostrEventKind.PrimalIsUserFollowing)
             ?: throw WssException("No response")
-        val isUserFollowing = primalEvent.content.toBooleanStrictOrNull()
+        return primalEvent.content.toBooleanStrictOrNull()
             ?: throw WssException("Invalid response.")
+    }
 
-        return isUserFollowing
+    override suspend fun getUserBookmarksList(userId: String): BookmarksResponse {
+        val queryResult = primalApiClient.query(
+            message = PrimalCacheFilter(
+                primalVerb = PrimalVerb.GET_BOOKMARKS_LIST,
+                optionsJson = NostrJson.encodeToString(UserRequestBody(pubkey = userId)),
+            ),
+        )
+        return BookmarksResponse(
+            bookmarksListEvent = queryResult.findNostrEvent(NostrEventKind.BookmarksList),
+        )
     }
 }

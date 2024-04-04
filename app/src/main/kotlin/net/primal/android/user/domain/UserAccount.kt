@@ -31,6 +31,7 @@ data class UserAccount(
     val appSettings: ContentAppSettings? = null,
     val following: Set<String> = emptySet(),
     val interests: List<String> = emptyList(),
+    val bookmarks: Set<PublicBookmark> = emptySet(),
     val followListEventContent: String? = null,
 ) {
     companion object {

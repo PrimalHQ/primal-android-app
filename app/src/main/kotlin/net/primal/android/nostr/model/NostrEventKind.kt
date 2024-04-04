@@ -25,6 +25,7 @@ enum class NostrEventKind(val value: Int) {
     MuteList(value = 10_000),
     PinList(value = 10_001),
     RelayListMetadata(value = 10_002),
+    BookmarksList(value = 10_003),
     WalletInfo(value = 13_194),
     ClientAuthentication(value = 22_242),
     WalletRequest(value = 23_194),

@@ -10,10 +10,12 @@ import net.primal.android.nostr.model.content.ContentMetadata
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.profile.report.ReportType
 import net.primal.android.user.domain.NostrWalletConnect
+import net.primal.android.user.domain.PublicBookmark
 import net.primal.android.user.domain.Relay
 import net.primal.android.wallet.nwc.model.LightningPayResponse
 import timber.log.Timber
 
+@Suppress("TooManyFunctions") // We need to clean this
 class NostrPublisher @Inject constructor(
     private val relaysSocketManager: RelaysSocketManager,
     private val nostrNotary: NostrNotary,
@@ -45,6 +47,17 @@ class NostrPublisher @Inject constructor(
             userId = userId,
             contacts = contacts,
             content = content,
+        )
+        relaysSocketManager.publishEvent(nostrEvent = signedNostrEvent)
+        importEvent(signedNostrEvent)
+        return signedNostrEvent
+    }
+
+    @Throws(NostrPublishException::class)
+    suspend fun publishUserBookmarksList(userId: String, bookmarks: Set<PublicBookmark>): NostrEvent {
+        val signedNostrEvent = nostrNotary.signBookmarksListNostrEvent(
+            userId = userId,
+            bookmarks = bookmarks,
         )
         relaysSocketManager.publishEvent(nostrEvent = signedNostrEvent)
         importEvent(signedNostrEvent)

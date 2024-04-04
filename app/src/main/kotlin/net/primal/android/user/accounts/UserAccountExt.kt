@@ -6,10 +6,12 @@ fun UserAccount.copyIfNotNull(
     profile: UserAccount?,
     stats: UserAccount?,
     followList: UserAccount?,
+    bookmarksList: UserAccount?,
 ): UserAccount =
     this.copyProfileIfNotNull(profile = profile)
         .copyStatsIfNotNull(stats = stats)
         .copyFollowListIfNotNull(followList = followList)
+        .copyBookmarksListIfNotNull(bookmarksList = bookmarksList)
 
 fun UserAccount.copyProfileIfNotNull(profile: UserAccount?): UserAccount {
     return if (profile != null) {
@@ -32,6 +34,14 @@ fun UserAccount.copyFollowListIfNotNull(followList: UserAccount?): UserAccount {
             interests = followList.interests,
             followListEventContent = followList.followListEventContent,
         )
+    } else {
+        this
+    }
+}
+
+fun UserAccount.copyBookmarksListIfNotNull(bookmarksList: UserAccount?): UserAccount {
+    return if (bookmarksList != null) {
+        copy(bookmarks = bookmarksList.bookmarks)
     } else {
         this
     }
