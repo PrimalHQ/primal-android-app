@@ -29,17 +29,35 @@ class QrCodeAnalyzer(
     }
 
     override fun analyze(image: ImageProxy) {
+        val width = image.width
+        val height = image.height
         val imageBytes = image.use {
             // The CameraX supports "ImageFormat.YUV_420_888" format by default.
             // We need to process only the first Y plane since the codes are black and white.
             it.planes[0].buffer.toByteArray()
         }
 
-        // Alternative options: GREY, Y800, JPEG.
-        val barcode = Image(image.width, image.height, "GREY")
-        barcode.data = imageBytes
+        val originalResult = scanBytes(bytes = imageBytes, width = width, height = height)
+        if (originalResult != null) {
+            onQrCodeDetected(originalResult)
+        } else {
+            val invertedResult = scanBytes(bytes = imageBytes.invertColors(), width = width, height = height)
+            if (invertedResult != null) {
+                onQrCodeDetected(invertedResult)
+            }
+        }
+    }
 
-        imageScanner.scanImage(barcode)
+    private fun scanBytes(
+        bytes: ByteArray,
+        width: Int,
+        height: Int,
+    ): QrCodeResult? {
+        // Alternative options: GREY, Y800, JPEG.
+        val barcode = Image(width, height, "GREY")
+        barcode.data = bytes
+
+        return imageScanner.scanImage(barcode)
             .takeIf { it != 0 }
             ?.let {
                 // In order to retrieve QR codes containing null bytes we need to
@@ -60,15 +78,23 @@ class QrCodeAnalyzer(
                 if (!dataBytes.isNullOrEmpty()) {
                     val dataType = QrCodeDataType.from(dataBytes)
                     if (dataType != null) {
-                        onQrCodeDetected(
-                            QrCodeResult(
-                                value = dataBytes,
-                                type = dataType,
-                            ),
-                        )
+                        QrCodeResult(value = dataBytes, type = dataType)
+                    } else {
+                        null
                     }
+                } else {
+                    null
                 }
             }
+    }
+
+    @Suppress("MagicNumber")
+    private fun ByteArray.invertColors(): ByteArray {
+        val invertedByteArray = ByteArray(this.size)
+        for (i in this.indices) {
+            invertedByteArray[i] = (255 - this[i].toInt()).toByte()
+        }
+        return invertedByteArray
     }
 
     private fun ByteBuffer.toByteArray(): ByteArray {
