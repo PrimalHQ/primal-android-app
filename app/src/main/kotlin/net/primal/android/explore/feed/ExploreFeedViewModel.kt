@@ -20,6 +20,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.core.compose.feed.model.asFeedPostUi
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
+import net.primal.android.core.ext.isBookmarkFeed
+import net.primal.android.core.ext.isSearchFeed
 import net.primal.android.core.ext.removeSearchPrefix
 import net.primal.android.explore.feed.ExploreFeedContract.UiEvent
 import net.primal.android.explore.feed.ExploreFeedContract.UiState
@@ -266,8 +268,8 @@ class ExploreFeedViewModel @Inject constructor(
 
     private fun String.resolveTitle(): String {
         return when {
-            startsWith("search;") -> removeSearchPrefix()
-            startsWith("bookmarks;") -> "Bookmarks"
+            this.isSearchFeed() -> removeSearchPrefix()
+            this.isBookmarkFeed() -> "Bookmarks"
             else -> "Feed"
         }
     }

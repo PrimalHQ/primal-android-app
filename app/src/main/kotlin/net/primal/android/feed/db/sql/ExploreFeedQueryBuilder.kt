@@ -1,6 +1,7 @@
 package net.primal.android.feed.db.sql
 
 import androidx.sqlite.db.SimpleSQLiteQuery
+import net.primal.android.core.ext.isBookmarkFeed
 import net.primal.android.core.ext.isMostZappedFeed
 import net.primal.android.core.ext.isPopularFeed
 import net.primal.android.core.ext.isTrendingFeed
@@ -43,6 +44,7 @@ class ExploreFeedQueryBuilder(
         feedDirective.isPopularFeed() -> "ORDER BY PostStats.score"
         feedDirective.isTrendingFeed() -> "ORDER BY PostStats.score24h"
         feedDirective.isMostZappedFeed() -> "ORDER BY PostStats.satsZapped"
+        feedDirective.isBookmarkFeed() -> "ORDER BY PostData.createdAt"
         else -> throw UnsupportedOperationException("Unsupported explore feed directive.")
     }
 
