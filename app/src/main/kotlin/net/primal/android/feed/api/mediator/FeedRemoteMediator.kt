@@ -14,6 +14,7 @@ import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
+import net.primal.android.core.ext.isBookmarkFeed
 import net.primal.android.core.ext.isChronologicalFeed
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.feed.api.FeedApi
@@ -78,6 +79,7 @@ class FeedRemoteMediator(
     private suspend fun shouldResetLocalCache() =
         when {
             feedDirective.isChronologicalFeed() -> shouldRefreshLatestFeed()
+            feedDirective.isBookmarkFeed() -> true
             else -> shouldRefreshNonLatestFeed(feedDirective)
         }
 
