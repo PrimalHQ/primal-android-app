@@ -62,6 +62,7 @@ class ExploreFeedViewModel @Inject constructor(
     private val _state = MutableStateFlow(
         UiState(
             title = exploreFeedDirective.resolveTitle(),
+            autoRefresh = !exploreFeedDirective.isBookmarkFeed(),
             posts = feedRepository.feedByDirective(feedDirective = exploreFeedDirective)
                 .map { it.map { feed -> feed.asFeedPostUi() } }
                 .cachedIn(viewModelScope),

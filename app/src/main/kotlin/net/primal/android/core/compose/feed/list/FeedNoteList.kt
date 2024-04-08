@@ -56,6 +56,7 @@ fun FeedNoteList(
     onScrolledToTop: (() -> Unit)? = null,
     onMuteClick: ((String) -> Unit)? = null,
     onReportContentClick: OnReportContentClick,
+    autoRefresh: Boolean = true,
 ) {
     LaunchedEffect(feedListState, onScrolledToTop) {
         withContext(Dispatchers.IO) {
@@ -68,13 +69,15 @@ fun FeedNoteList(
         }
     }
 
-    LaunchedEffect(pagingItems, syncStats) {
-        withContext(Dispatchers.IO) {
-            while (true) {
-                val syncInterval = 30 + Random.nextInt(-5, 5)
-                delay(syncInterval.seconds)
-                if (syncStats.postsCount < 100) {
-                    pagingItems.refresh()
+    if (autoRefresh) {
+        LaunchedEffect(pagingItems, syncStats) {
+            withContext(Dispatchers.IO) {
+                while (true) {
+                    val syncInterval = 30 + Random.nextInt(-5, 5)
+                    delay(syncInterval.seconds)
+                    if (syncStats.postsCount < 100) {
+                        pagingItems.refresh()
+                    }
                 }
             }
         }

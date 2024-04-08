@@ -9,6 +9,7 @@ import net.primal.android.profile.report.ReportType
 interface ExploreFeedContract {
     data class UiState(
         val title: String,
+        val autoRefresh: Boolean = true,
         val existsInUserFeeds: Boolean = false,
         val zappingState: ZappingState = ZappingState(),
         val posts: Flow<PagingData<FeedPostUi>>,
