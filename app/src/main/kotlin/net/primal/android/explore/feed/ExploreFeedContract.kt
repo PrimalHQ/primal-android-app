@@ -14,6 +14,7 @@ interface ExploreFeedContract {
         val canBeAddedInUserFeeds: Boolean = true,
         val zappingState: ZappingState = ZappingState(),
         val posts: Flow<PagingData<FeedPostUi>>,
+        val confirmBookmarkingNoteId: String? = null,
         val error: ExploreFeedError? = null,
     ) {
         sealed class ExploreFeedError {
@@ -50,6 +51,7 @@ interface ExploreFeedContract {
             val profileId: String,
             val noteId: String,
         ) : UiEvent()
-        data class BookmarkAction(val noteId: String, val firstBookmarkConfirmed: Boolean) : UiEvent()
+        data class BookmarkAction(val noteId: String, val forceUpdate: Boolean = false) : UiEvent()
+        data object DismissBookmarkConfirmation : UiEvent()
     }
 }

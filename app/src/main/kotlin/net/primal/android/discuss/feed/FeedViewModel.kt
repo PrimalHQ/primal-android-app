@@ -159,6 +159,7 @@ class FeedViewModel @Inject constructor(
                     is UiEvent.MuteAction -> mute(it)
                     is UiEvent.ReportAbuse -> reportAbuse(it)
                     is UiEvent.BookmarkAction -> handleBookmark(it)
+                    UiEvent.DismissBookmarkConfirmation -> setState { copy(confirmBookmarkingNoteId = null) }
                 }
             }
         }
@@ -302,17 +303,18 @@ class FeedViewModel @Inject constructor(
             val userId = activeAccountStore.activeUserId()
             withContext(dispatcherProvider.io()) {
                 try {
+                    setState { copy(confirmBookmarkingNoteId = null) }
                     val isBookmarked = postRepository.isBookmarked(noteId = event.noteId)
                     when (isBookmarked) {
                         true -> postRepository.removeFromBookmarks(
                             userId = userId,
-                            forceUpdate = event.firstBookmarkConfirmed,
+                            forceUpdate = event.forceUpdate,
                             noteId = event.noteId,
                         )
 
                         false -> postRepository.addToBookmarks(
                             userId = userId,
-                            forceUpdate = event.firstBookmarkConfirmed,
+                            forceUpdate = event.forceUpdate,
                             noteId = event.noteId,
                         )
                     }
@@ -320,6 +322,7 @@ class FeedViewModel @Inject constructor(
                     Timber.w(error)
                 } catch (error: ProfileRepository.BookmarksListNotFound) {
                     Timber.w(error)
+                    setState { copy(confirmBookmarkingNoteId = event.noteId) }
                 }
             }
         }

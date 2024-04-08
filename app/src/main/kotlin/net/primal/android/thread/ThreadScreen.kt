@@ -72,6 +72,7 @@ import net.primal.android.core.compose.feed.RepostOrQuoteBottomSheet
 import net.primal.android.core.compose.feed.model.FeedPostAction
 import net.primal.android.core.compose.feed.model.FeedPostStatsUi
 import net.primal.android.core.compose.feed.model.FeedPostUi
+import net.primal.android.core.compose.feed.note.ConfirmFirstBookmarkAlertDialog
 import net.primal.android.core.compose.feed.note.FeedNoteCard
 import net.primal.android.core.compose.feed.zaps.UnableToZapBottomSheet
 import net.primal.android.core.compose.feed.zaps.ZapBottomSheet
@@ -291,6 +292,22 @@ private fun ThreadScreenContent(
         }
     }
 
+    if (state.confirmBookmarkingNoteId != null) {
+        ConfirmFirstBookmarkAlertDialog(
+            onBookmarkConfirmed = {
+                eventPublisher(
+                    ThreadContract.UiEvent.BookmarkAction(
+                        noteId = state.confirmBookmarkingNoteId,
+                        forceUpdate = true,
+                    ),
+                )
+            },
+            onClose = {
+                eventPublisher(ThreadContract.UiEvent.DismissBookmarkConfirmation)
+            },
+        )
+    }
+
     val pullToRefreshState = rememberPullToRefreshState()
 
     LaunchedEffect(pullToRefreshState.isRefreshing) {
@@ -363,14 +380,7 @@ private fun ThreadScreenContent(
             onHashtagClick = onHashtagClick,
             onMediaClick = onMediaClick,
             onMuteUserClick = { authorId -> eventPublisher(ThreadContract.UiEvent.MuteAction(authorId)) },
-            onBookmarkClick = { noteId ->
-                eventPublisher(
-                    ThreadContract.UiEvent.BookmarkAction(
-                        noteId = noteId,
-                        firstBookmarkConfirmed = false,
-                    ),
-                )
-            },
+            onBookmarkClick = { noteId -> eventPublisher(ThreadContract.UiEvent.BookmarkAction(noteId = noteId)) },
             onReportContentClick = { reportType, profileId, noteId ->
                 eventPublisher(
                     ThreadContract.UiEvent.ReportAbuse(

@@ -112,6 +112,7 @@ class ProfileDetailsViewModel @Inject constructor(
                     is UiEvent.ReportAbuse -> reportAbuse(it)
                     UiEvent.DismissError -> setState { copy(error = null) }
                     is UiEvent.BookmarkAction -> handleBookmark(it)
+                    UiEvent.DismissBookmarkConfirmation -> setState { copy(confirmBookmarkingNoteId = null) }
                 }
             }
         }
@@ -470,17 +471,18 @@ class ProfileDetailsViewModel @Inject constructor(
             val userId = activeAccountStore.activeUserId()
             withContext(dispatcherProvider.io()) {
                 try {
+                    setState { copy(confirmBookmarkingNoteId = null) }
                     val isBookmarked = postRepository.isBookmarked(noteId = event.noteId)
                     when (isBookmarked) {
                         true -> postRepository.removeFromBookmarks(
                             userId = userId,
-                            forceUpdate = event.firstBookmarkConfirmed,
+                            forceUpdate = event.forceUpdate,
                             noteId = event.noteId,
                         )
 
                         false -> postRepository.addToBookmarks(
                             userId = userId,
-                            forceUpdate = event.firstBookmarkConfirmed,
+                            forceUpdate = event.forceUpdate,
                             noteId = event.noteId,
                         )
                     }
@@ -488,6 +490,7 @@ class ProfileDetailsViewModel @Inject constructor(
                     Timber.w(error)
                 } catch (error: ProfileRepository.BookmarksListNotFound) {
                     Timber.w(error)
+                    setState { copy(confirmBookmarkingNoteId = event.noteId) }
                 }
             }
         }

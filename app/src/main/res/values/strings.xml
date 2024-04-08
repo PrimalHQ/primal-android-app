@@ -374,6 +374,11 @@
     <string name="context_menu_report_user">Report user</string>
     <string name="context_menu_report_content">Report content</string>
 
+    <string name="context_confirm_bookmark_title">Saving first bookmark</string>
+    <string name="context_confirm_bookmark_text">You are about to save your first public bookmark. These bookmarks can be seen by other nostr users. Do you wish to continue?</string>
+    <string name="context_confirm_bookmark_positive">Save Bookmark</string>
+    <string name="context_confirm_bookmark_negative">No</string>
+
     <string name="dialog_report_abuse_title">Report abuse</string>
     <string name="dialog_report_abuse_description">All reports posted will be publicly visible.</string>
     <string name="dialog_report_button_dismiss">Dismiss</string>

@@ -14,6 +14,7 @@ interface ThreadContract {
         val highlightPostIndex: Int = 0,
         val zappingState: ZappingState = ZappingState(),
         val fetching: Boolean = false,
+        val confirmBookmarkingNoteId: String? = null,
         val error: ThreadError? = null,
     ) {
         sealed class ThreadError {
@@ -55,6 +56,7 @@ interface ThreadContract {
             val profileId: String,
             val noteId: String,
         ) : UiEvent()
-        data class BookmarkAction(val noteId: String, val firstBookmarkConfirmed: Boolean) : UiEvent()
+        data class BookmarkAction(val noteId: String, val forceUpdate: Boolean = false) : UiEvent()
+        data object DismissBookmarkConfirmation : UiEvent()
     }
 }

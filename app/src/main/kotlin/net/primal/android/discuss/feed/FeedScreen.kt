@@ -52,6 +52,7 @@ import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.compose.feed.list.FeedNoteList
 import net.primal.android.core.compose.feed.model.FeedPostsSyncStats
+import net.primal.android.core.compose.feed.note.ConfirmFirstBookmarkAlertDialog
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
@@ -139,6 +140,22 @@ fun FeedScreen(
         }
     }
 
+    if (state.confirmBookmarkingNoteId != null) {
+        ConfirmFirstBookmarkAlertDialog(
+            onBookmarkConfirmed = {
+                eventPublisher(
+                    FeedContract.UiEvent.BookmarkAction(
+                        noteId = state.confirmBookmarkingNoteId,
+                        forceUpdate = true,
+                    ),
+                )
+            },
+            onClose = {
+                eventPublisher(FeedContract.UiEvent.DismissBookmarkConfirmation)
+            },
+        )
+    }
+
     ErrorHandler(
         error = state.error,
         snackbarHostState = snackbarHostState,
@@ -211,22 +228,14 @@ fun FeedScreen(
                         ),
                     )
                 },
-                onPostQuoteClick = {
-                    onNewPostClick("\n\nnostr:${it.postId.hexToNoteHrp()}")
-                },
+                onPostQuoteClick = { onNewPostClick("\n\nnostr:${it.postId.hexToNoteHrp()}") },
                 onHashtagClick = onHashtagClick,
                 onGoToWallet = onGoToWallet,
                 paddingValues = paddingValues,
-                onScrolledToTop = {
-                    eventPublisher(FeedContract.UiEvent.FeedScrolledToTop)
-                },
-                onMuteClick = {
-                    eventPublisher(FeedContract.UiEvent.MuteAction(it))
-                },
+                onScrolledToTop = { eventPublisher(FeedContract.UiEvent.FeedScrolledToTop) },
+                onMuteClick = { eventPublisher(FeedContract.UiEvent.MuteAction(it)) },
                 onMediaClick = onMediaClick,
-                onBookmarkClick = {
-                    eventPublisher(FeedContract.UiEvent.BookmarkAction(noteId = it, firstBookmarkConfirmed = false))
-                },
+                onBookmarkClick = { eventPublisher(FeedContract.UiEvent.BookmarkAction(noteId = it)) },
                 onReportContentClick = { type, profileId, noteId ->
                     eventPublisher(
                         FeedContract.UiEvent.ReportAbuse(
