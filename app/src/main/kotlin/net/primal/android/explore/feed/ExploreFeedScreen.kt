@@ -20,6 +20,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.AppBarIcon
+import net.primal.android.core.compose.InvisibleAppBarIcon
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.feed.list.FeedNoteList
 import net.primal.android.core.compose.feed.model.FeedPostsSyncStats
@@ -81,10 +82,7 @@ fun ExploreFeedScreen(
     val feedPagingItems = state.posts.collectAsLazyPagingItems()
     val feedListState = feedPagingItems.rememberLazyListStatePagingWorkaround()
 
-    val uiScope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
-    val addedToUserFeedsMessage = stringResource(id = R.string.app_added_to_user_feeds)
-    val removedFromUserFeedsMessage = stringResource(id = R.string.app_removed_from_user_feeds)
 
     ErrorHandler(
         error = state.error,
@@ -100,19 +98,13 @@ fun ExploreFeedScreen(
                 onNavigationIconClick = onClose,
                 navigationIconContentDescription = stringResource(id = R.string.accessibility_back_button),
                 actions = {
-                    AppBarIcon(
-                        icon = if (state.existsInUserFeeds) {
-                            PrimalIcons.UserFeedRemove
-                        } else {
-                            PrimalIcons.UserFeedAdd
-                        },
-                        appBarIconContentDescription = if (state.existsInUserFeeds) {
-                            stringResource(id = R.string.accessibility_remove_feed)
-                        } else {
-                            stringResource(id = R.string.accessibility_add_feed)
-                        },
-                        onClick = {
-                            if (state.existsInUserFeeds) {
+                    if (state.canBeAddedInUserFeeds) {
+                        val uiScope = rememberCoroutineScope()
+                        val addedToUserFeedsMessage = stringResource(id = R.string.app_added_to_user_feeds)
+                        val removedFromUserFeedsMessage = stringResource(id = R.string.app_removed_from_user_feeds)
+                        AddRemoveUserFeedAppBarIcon(
+                            existsInUserFeeds = state.existsInUserFeeds,
+                            onRemoveFromUserFeedsClick = {
                                 eventPublisher(RemoveFromUserFeeds)
                                 uiScope.launch {
                                     snackbarHostState.showSnackbar(
@@ -120,7 +112,8 @@ fun ExploreFeedScreen(
                                         duration = SnackbarDuration.Short,
                                     )
                                 }
-                            } else {
+                            },
+                            onAddToUserFeedsClick = {
                                 eventPublisher(AddToUserFeeds)
                                 uiScope.launch {
                                     snackbarHostState.showSnackbar(
@@ -128,9 +121,11 @@ fun ExploreFeedScreen(
                                         duration = SnackbarDuration.Short,
                                     )
                                 }
-                            }
-                        },
-                    )
+                            },
+                        )
+                    } else {
+                        InvisibleAppBarIcon()
+                    }
                 },
                 scrollBehavior = scrollBehavior,
             )
@@ -198,6 +193,33 @@ fun ExploreFeedScreen(
         },
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState)
+        },
+    )
+}
+
+@Composable
+private fun AddRemoveUserFeedAppBarIcon(
+    existsInUserFeeds: Boolean,
+    onAddToUserFeedsClick: () -> Unit,
+    onRemoveFromUserFeedsClick: () -> Unit,
+) {
+    AppBarIcon(
+        icon = if (existsInUserFeeds) {
+            PrimalIcons.UserFeedRemove
+        } else {
+            PrimalIcons.UserFeedAdd
+        },
+        appBarIconContentDescription = if (existsInUserFeeds) {
+            stringResource(id = R.string.accessibility_remove_feed)
+        } else {
+            stringResource(id = R.string.accessibility_add_feed)
+        },
+        onClick = {
+            if (existsInUserFeeds) {
+                onRemoveFromUserFeedsClick()
+            } else {
+                onAddToUserFeedsClick()
+            }
         },
     )
 }

@@ -11,6 +11,7 @@ interface ExploreFeedContract {
         val title: String,
         val autoRefresh: Boolean = true,
         val existsInUserFeeds: Boolean = false,
+        val canBeAddedInUserFeeds: Boolean = true,
         val zappingState: ZappingState = ZappingState(),
         val posts: Flow<PagingData<FeedPostUi>>,
         val error: ExploreFeedError? = null,

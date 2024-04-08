@@ -65,6 +65,7 @@ class ExploreFeedViewModel @Inject constructor(
         UiState(
             title = exploreFeedDirective.resolveTitle(),
             autoRefresh = !exploreFeedDirective.isBookmarkFeed(),
+            canBeAddedInUserFeeds = !exploreFeedDirective.isBookmarkFeed(),
             posts = feedRepository.feedByDirective(feedDirective = exploreFeedDirective)
                 .map { it.map { feed -> feed.asFeedPostUi() } }
                 .cachedIn(viewModelScope),
