@@ -15,6 +15,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.paging.compose.LazyPagingItems
@@ -25,6 +26,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.withContext
+import net.primal.android.R
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.feed.model.FeedPostsSyncStats
 import net.primal.android.core.compose.feed.model.ZappingState
@@ -57,6 +59,7 @@ fun FeedNoteList(
     onMuteClick: ((String) -> Unit)? = null,
     onReportContentClick: OnReportContentClick,
     autoRefresh: Boolean = true,
+    noContentText: String = stringResource(id = R.string.feed_no_content),
 ) {
     LaunchedEffect(feedListState, onScrolledToTop) {
         withContext(Dispatchers.IO) {
@@ -124,6 +127,7 @@ fun FeedNoteList(
             onMuteClick = onMuteClick,
             onReportContentClick = onReportContentClick,
             onBookmarkClick = onBookmarkClick,
+            noContentText = noContentText,
         )
 
         PullToRefreshContainer(
