@@ -24,6 +24,7 @@ import net.primal.android.core.compose.InvisibleAppBarIcon
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.feed.list.FeedNoteList
 import net.primal.android.core.compose.feed.model.FeedPostsSyncStats
+import net.primal.android.core.compose.feed.note.ConfirmFirstBookmarkAlertDialog
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
@@ -83,6 +84,22 @@ fun ExploreFeedScreen(
     val feedListState = feedPagingItems.rememberLazyListStatePagingWorkaround()
 
     val snackbarHostState = remember { SnackbarHostState() }
+
+    if (state.confirmBookmarkingNoteId != null) {
+        ConfirmFirstBookmarkAlertDialog(
+            onBookmarkConfirmed = {
+                eventPublisher(
+                    ExploreFeedContract.UiEvent.BookmarkAction(
+                        noteId = state.confirmBookmarkingNoteId,
+                        forceUpdate = true,
+                    ),
+                )
+            },
+            onClose = {
+                eventPublisher(ExploreFeedContract.UiEvent.DismissBookmarkConfirmation)
+            },
+        )
+    }
 
     ErrorHandler(
         error = state.error,
@@ -172,18 +189,9 @@ fun ExploreFeedScreen(
                 },
                 onHashtagClick = onHashtagClick,
                 onGoToWallet = onGoToWallet,
-                onMuteClick = {
-                    eventPublisher(ExploreFeedContract.UiEvent.MuteAction(profileId = it))
-                },
+                onMuteClick = { eventPublisher(ExploreFeedContract.UiEvent.MuteAction(profileId = it)) },
                 onMediaClick = onMediaClick,
-                onBookmarkClick = {
-                    eventPublisher(
-                        ExploreFeedContract.UiEvent.BookmarkAction(
-                            noteId = it,
-                            firstBookmarkConfirmed = false,
-                        ),
-                    )
-                },
+                onBookmarkClick = { eventPublisher(ExploreFeedContract.UiEvent.BookmarkAction(noteId = it)) },
                 onReportContentClick = { type, profileId, noteId ->
                     eventPublisher(
                         ExploreFeedContract.UiEvent.ReportAbuse(

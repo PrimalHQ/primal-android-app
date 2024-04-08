@@ -23,6 +23,7 @@ interface ProfileDetailsContract {
         val zappingState: ZappingState = ZappingState(),
         val notes: Flow<PagingData<FeedPostUi>>,
         val profileDirective: ProfileFeedDirective = ProfileFeedDirective.AuthoredNotes,
+        val confirmBookmarkingNoteId: String? = null,
         val error: ProfileError? = null,
     ) {
         sealed class ProfileError {
@@ -70,6 +71,7 @@ interface ProfileDetailsContract {
             val noteId: String? = null,
         ) : UiEvent()
         data object DismissError : UiEvent()
-        data class BookmarkAction(val noteId: String, val firstBookmarkConfirmed: Boolean) : UiEvent()
+        data class BookmarkAction(val noteId: String, val forceUpdate: Boolean = false) : UiEvent()
+        data object DismissBookmarkConfirmation : UiEvent()
     }
 }

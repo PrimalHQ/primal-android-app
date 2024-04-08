@@ -48,6 +48,7 @@ import net.primal.android.R
 import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.feed.list.FeedLazyColumn
 import net.primal.android.core.compose.feed.model.FeedPostUi
+import net.primal.android.core.compose.feed.note.ConfirmFirstBookmarkAlertDialog
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.core.compose.pulltorefresh.LaunchedPullToRefreshEndingEffect
@@ -110,7 +111,7 @@ fun ProfileDetailsScreen(
 
 private const val MAX_COVER_TRANSPARENCY = 0.70f
 
-@Suppress("LongMethod")
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileDetailsScreen(
@@ -159,6 +160,22 @@ fun ProfileDetailsScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val uiScope = rememberCoroutineScope()
     val context = LocalContext.current
+
+    if (state.confirmBookmarkingNoteId != null) {
+        ConfirmFirstBookmarkAlertDialog(
+            onBookmarkConfirmed = {
+                eventPublisher(
+                    ProfileDetailsContract.UiEvent.BookmarkAction(
+                        noteId = state.confirmBookmarkingNoteId,
+                        forceUpdate = true,
+                    ),
+                )
+            },
+            onClose = {
+                eventPublisher(ProfileDetailsContract.UiEvent.DismissBookmarkConfirmation)
+            },
+        )
+    }
 
     SnackbarErrorHandler(
         error = state.error,
@@ -231,11 +248,7 @@ fun ProfileDetailsScreen(
                 zappingState = state.zappingState,
                 listState = listState,
                 onPostClick = onPostClick,
-                onProfileClick = {
-                    if (state.profileId != it) {
-                        onProfileClick(it)
-                    }
-                },
+                onProfileClick = { if (state.profileId != it) onProfileClick(it) },
                 onPostReplyClick = onPostReplyClick,
                 onZapClick = { post, zapAmount, zapDescription ->
                     eventPublisher(
@@ -264,9 +277,7 @@ fun ProfileDetailsScreen(
                         ),
                     )
                 },
-                onPostQuoteClick = {
-                    onPostQuoteClick("\n\nnostr:${it.postId.hexToNoteHrp()}")
-                },
+                onPostQuoteClick = { onPostQuoteClick("\n\nnostr:${it.postId.hexToNoteHrp()}") },
                 onReportContentClick = { type, profileId, noteId ->
                     eventPublisher(
                         ProfileDetailsContract.UiEvent.ReportAbuse(
@@ -279,14 +290,7 @@ fun ProfileDetailsScreen(
                 onHashtagClick = onHashtagClick,
                 onMediaClick = onMediaClick,
                 onGoToWallet = onGoToWallet,
-                onBookmarkClick = { noteId ->
-                    eventPublisher(
-                        ProfileDetailsContract.UiEvent.BookmarkAction(
-                            noteId = noteId,
-                            firstBookmarkConfirmed = false,
-                        ),
-                    )
-                },
+                onBookmarkClick = { eventPublisher(ProfileDetailsContract.UiEvent.BookmarkAction(noteId = it)) },
                 shouldShowLoadingState = false,
                 shouldShowNoContentState = false,
                 stickyHeader = {
