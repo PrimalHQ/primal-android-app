@@ -27,6 +27,7 @@ import net.primal.android.core.compose.icons.primaliconpack.ContextCopyNoteText
 import net.primal.android.core.compose.icons.primaliconpack.ContextCopyPublicKey
 import net.primal.android.core.compose.icons.primaliconpack.ContextCopyRawData
 import net.primal.android.core.compose.icons.primaliconpack.ContextMuteUser
+import net.primal.android.core.compose.icons.primaliconpack.ContextRemoveBookmark
 import net.primal.android.core.compose.icons.primaliconpack.ContextReportUser
 import net.primal.android.core.compose.icons.primaliconpack.ContextShare
 import net.primal.android.core.compose.icons.primaliconpack.More
@@ -97,7 +98,11 @@ fun NoteDropdownMenuIcon(
                 },
             )
             DropdownPrimalMenuItem(
-                trailingIconVector = PrimalIcons.ContextAddBookmark,
+                trailingIconVector = if (isBookmarked) {
+                    PrimalIcons.ContextRemoveBookmark
+                } else {
+                    PrimalIcons.ContextAddBookmark
+                },
                 text = if (isBookmarked) {
                     stringResource(id = R.string.feed_context_remove_from_bookmark)
                 } else {

@@ -5,6 +5,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 import net.primal.android.core.compose.icons.primaliconpack.AvatarNostrich
+import net.primal.android.core.compose.icons.primaliconpack.ContextRemoveBookmark
 import net.primal.android.core.compose.icons.primaliconpack.ConnectRelay
 import net.primal.android.core.compose.icons.primaliconpack.ContextAddBookmark
 import net.primal.android.core.compose.icons.primaliconpack.ContextBroadcast
@@ -153,6 +154,7 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             ContextBroadcast,
             ContextCopyNoteText,
             ContextAddBookmark,
+            ContextRemoveBookmark,
             ContextMuteUser,
             ContextShare,
             ImportPhotoFromCamera,
