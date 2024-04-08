@@ -8,7 +8,7 @@ import net.primal.android.profile.report.ReportType
 
 interface ExploreFeedContract {
     data class UiState(
-        val title: String,
+        val feedDirective: String,
         val autoRefresh: Boolean = true,
         val existsInUserFeeds: Boolean = false,
         val canBeAddedInUserFeeds: Boolean = true,
@@ -31,7 +31,7 @@ interface ExploreFeedContract {
     }
 
     sealed class UiEvent {
-        data object AddToUserFeeds : UiEvent()
+        data class AddToUserFeeds(val title: String) : UiEvent()
         data object RemoveFromUserFeeds : UiEvent()
         data class PostLikeAction(val postId: String, val postAuthorId: String) : UiEvent()
         data class RepostAction(

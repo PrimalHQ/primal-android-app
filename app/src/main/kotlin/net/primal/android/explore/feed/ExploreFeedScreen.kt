@@ -30,6 +30,9 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.UserFeedAdd
 import net.primal.android.core.compose.icons.primaliconpack.UserFeedRemove
+import net.primal.android.core.ext.isBookmarkFeed
+import net.primal.android.core.ext.isSearchFeed
+import net.primal.android.core.ext.removeSearchPrefix
 import net.primal.android.crypto.hexToNoteHrp
 import net.primal.android.explore.feed.ExploreFeedContract.UiEvent.AddToUserFeeds
 import net.primal.android.explore.feed.ExploreFeedContract.UiEvent.RemoveFromUserFeeds
@@ -83,6 +86,7 @@ fun ExploreFeedScreen(
     val feedPagingItems = state.posts.collectAsLazyPagingItems()
     val feedListState = feedPagingItems.rememberLazyListStatePagingWorkaround()
 
+    val feedTitle = state.extractTitle()
     val snackbarHostState = remember { SnackbarHostState() }
 
     if (state.confirmBookmarkingNoteId != null) {
@@ -110,7 +114,7 @@ fun ExploreFeedScreen(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             PrimalTopAppBar(
-                title = state.title,
+                title = feedTitle,
                 navigationIcon = PrimalIcons.ArrowBack,
                 onNavigationIconClick = onClose,
                 navigationIconContentDescription = stringResource(id = R.string.accessibility_back_button),
@@ -131,7 +135,7 @@ fun ExploreFeedScreen(
                                 }
                             },
                             onAddToUserFeedsClick = {
-                                eventPublisher(AddToUserFeeds)
+                                eventPublisher(AddToUserFeeds(title = feedTitle))
                                 uiScope.launch {
                                     snackbarHostState.showSnackbar(
                                         message = addedToUserFeedsMessage,
@@ -184,9 +188,7 @@ fun ExploreFeedScreen(
                         ),
                     )
                 },
-                onPostQuoteClick = {
-                    onPostQuoteClick("\n\nnostr:${it.postId.hexToNoteHrp()}")
-                },
+                onPostQuoteClick = { onPostQuoteClick("\n\nnostr:${it.postId.hexToNoteHrp()}") },
                 onHashtagClick = onHashtagClick,
                 onGoToWallet = onGoToWallet,
                 onMuteClick = { eventPublisher(ExploreFeedContract.UiEvent.MuteAction(profileId = it)) },
@@ -202,6 +204,10 @@ fun ExploreFeedScreen(
                     )
                 },
                 autoRefresh = state.autoRefresh,
+                noContentText = when {
+                    state.feedDirective.isBookmarkFeed() -> stringResource(id = R.string.bookmarks_no_content)
+                    else -> stringResource(id = R.string.feed_no_content)
+                },
             )
         },
         snackbarHost = {
@@ -209,6 +215,14 @@ fun ExploreFeedScreen(
         },
     )
 }
+
+@Composable
+private fun ExploreFeedContract.UiState.extractTitle() =
+    when {
+        feedDirective.isSearchFeed() -> feedDirective.removeSearchPrefix()
+        feedDirective.isBookmarkFeed() -> stringResource(id = R.string.bookmarks_title)
+        else -> stringResource(id = R.string.explore_fallback_title)
+    }
 
 @Composable
 private fun AddRemoveUserFeedAppBarIcon(

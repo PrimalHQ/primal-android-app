@@ -66,6 +66,7 @@ fun FeedLazyColumn(
     shouldShowLoadingState: Boolean = true,
     shouldShowNoContentState: Boolean = true,
     showReplyTo: Boolean = true,
+    noContentText: String = stringResource(id = R.string.feed_no_content),
     header: @Composable (LazyItemScope.() -> Unit)? = null,
     stickyHeader: @Composable (LazyItemScope.() -> Unit)? = null,
 ) {
@@ -212,7 +213,7 @@ fun FeedLazyColumn(
                         item(contentType = "NoContent") {
                             ListNoContent(
                                 modifier = Modifier.fillParentMaxSize(),
-                                noContentText = stringResource(id = R.string.feed_no_content),
+                                noContentText = noContentText,
                                 onRefresh = { pagingItems.refresh() },
                             )
                         }

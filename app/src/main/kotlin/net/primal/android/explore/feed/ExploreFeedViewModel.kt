@@ -23,8 +23,6 @@ import kotlinx.coroutines.withContext
 import net.primal.android.core.compose.feed.model.asFeedPostUi
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.ext.isBookmarkFeed
-import net.primal.android.core.ext.isSearchFeed
-import net.primal.android.core.ext.removeSearchPrefix
 import net.primal.android.explore.feed.ExploreFeedContract.UiEvent
 import net.primal.android.explore.feed.ExploreFeedContract.UiState
 import net.primal.android.explore.feed.ExploreFeedContract.UiState.ExploreFeedError
@@ -63,7 +61,7 @@ class ExploreFeedViewModel @Inject constructor(
 
     private val _state = MutableStateFlow(
         UiState(
-            title = exploreFeedDirective.resolveTitle(),
+            feedDirective = exploreFeedDirective,
             autoRefresh = !exploreFeedDirective.isBookmarkFeed(),
             canBeAddedInUserFeeds = !exploreFeedDirective.isBookmarkFeed(),
             posts = feedRepository.feedByDirective(feedDirective = exploreFeedDirective)
@@ -107,7 +105,7 @@ class ExploreFeedViewModel @Inject constructor(
         viewModelScope.launch {
             events.collect {
                 when (it) {
-                    UiEvent.AddToUserFeeds -> addToMyFeeds()
+                    is UiEvent.AddToUserFeeds -> addToMyFeeds(title = it.title)
                     UiEvent.RemoveFromUserFeeds -> removeFromMyFeeds()
                     is UiEvent.PostLikeAction -> likePost(it)
                     is UiEvent.RepostAction -> repostPost(it)
@@ -139,11 +137,11 @@ class ExploreFeedViewModel @Inject constructor(
                 }
         }
 
-    private suspend fun addToMyFeeds() {
+    private suspend fun addToMyFeeds(title: String) {
         try {
             settingsRepository.addAndPersistUserFeed(
                 userId = activeAccountStore.activeUserId(),
-                name = state.value.title,
+                name = title,
                 directive = exploreFeedDirective,
             )
         } catch (error: WssException) {
@@ -305,14 +303,6 @@ class ExploreFeedViewModel @Inject constructor(
             if (state.value.error == error) {
                 setState { copy(error = null) }
             }
-        }
-    }
-
-    private fun String.resolveTitle(): String {
-        return when {
-            this.isSearchFeed() -> removeSearchPrefix()
-            this.isBookmarkFeed() -> "Bookmarks"
-            else -> "Feed"
         }
     }
 }

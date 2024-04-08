@@ -166,10 +166,12 @@
     <string name="thread_reply_nostr_publish_error">Unable to publish your note to Nostr. Please try again soon.</string>
 
     <string name="bookmarks_title">Bookmarks</string>
+    <string name="bookmarks_no_content">You don\'t have any bookmarks.</string>
 
     <string name="explore_search_nostr">Search Nostr</string>
     <string name="explore_enter_query">Enter text to search</string>
     <string name="explore_trending_hashtags_no_content">Trending hashtags will appear here.</string>
+    <string name="explore_fallback_title">Feed</string>
 
     <string name="search_followers_text">Followers</string>
 
