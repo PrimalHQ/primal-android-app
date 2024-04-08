@@ -279,9 +279,7 @@ fun ProfileDetailsScreen(
                 onHashtagClick = onHashtagClick,
                 onMediaClick = onMediaClick,
                 onGoToWallet = onGoToWallet,
-                onBookmarkClick = {
-                    // TODO Handle bookmark click
-                },
+                onBookmarkClick = { noteId -> eventPublisher(ProfileDetailsContract.UiEvent.BookmarkAction(noteId)) },
                 shouldShowLoadingState = false,
                 shouldShowNoContentState = false,
                 stickyHeader = {
