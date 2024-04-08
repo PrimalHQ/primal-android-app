@@ -70,7 +70,7 @@ class SendPaymentViewModel @Inject constructor(
             setState { copy(parsing = true) }
             val userId = activeAccountStore.activeUserId()
             try {
-                val draftTx = walletTextParser.parseText(userId = userId, text = text)
+                val draftTx = walletTextParser.parseAndQueryText(userId = userId, text = text)
                 if (draftTx != null) {
                     setEffect(SideEffect.DraftTransactionReady(draft = draftTx))
                 } else {

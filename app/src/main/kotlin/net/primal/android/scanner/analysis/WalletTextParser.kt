@@ -22,7 +22,7 @@ class WalletTextParser @Inject constructor(
     private val walletRepository: WalletRepository,
 ) {
 
-    suspend fun parseText(userId: String, text: String): DraftTx? {
+    suspend fun parseAndQueryText(userId: String, text: String): DraftTx? {
         return when (text.parseRecipientType()) {
             WalletRecipientType.LnInvoice -> handleLnInvoiceText(userId, text)
 
