@@ -301,10 +301,25 @@ class FeedViewModel @Inject constructor(
         viewModelScope.launch {
             val userId = activeAccountStore.activeUserId()
             withContext(dispatcherProvider.io()) {
-                val isBookmarked = postRepository.isBookmarked(noteId = event.noteId)
-                when (isBookmarked) {
-                    true -> postRepository.removeFromBookmarks(userId = userId, noteId = event.noteId)
-                    false -> postRepository.addToBookmarks(userId = userId, noteId = event.noteId)
+                try {
+                    val isBookmarked = postRepository.isBookmarked(noteId = event.noteId)
+                    when (isBookmarked) {
+                        true -> postRepository.removeFromBookmarks(
+                            userId = userId,
+                            forceUpdate = event.firstBookmarkConfirmed,
+                            noteId = event.noteId,
+                        )
+
+                        false -> postRepository.addToBookmarks(
+                            userId = userId,
+                            forceUpdate = event.firstBookmarkConfirmed,
+                            noteId = event.noteId,
+                        )
+                    }
+                } catch (error: NostrPublishException) {
+                    Timber.w(error)
+                } catch (error: ProfileRepository.BookmarksListNotFound) {
+                    Timber.w(error)
                 }
             }
         }

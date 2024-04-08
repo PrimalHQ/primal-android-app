@@ -279,7 +279,14 @@ fun ProfileDetailsScreen(
                 onHashtagClick = onHashtagClick,
                 onMediaClick = onMediaClick,
                 onGoToWallet = onGoToWallet,
-                onBookmarkClick = { noteId -> eventPublisher(ProfileDetailsContract.UiEvent.BookmarkAction(noteId)) },
+                onBookmarkClick = { noteId ->
+                    eventPublisher(
+                        ProfileDetailsContract.UiEvent.BookmarkAction(
+                            noteId = noteId,
+                            firstBookmarkConfirmed = false,
+                        ),
+                    )
+                },
                 shouldShowLoadingState = false,
                 shouldShowNoContentState = false,
                 stickyHeader = {
@@ -350,33 +357,43 @@ private fun ProfileError.asHumanReadableText(context: Context): String {
         is ProfileError.InvalidZapRequest -> context.getString(
             R.string.post_action_invalid_zap_request,
         )
+
         is ProfileError.MissingLightningAddress -> context.getString(
             R.string.post_action_missing_lightning_address,
         )
+
         is ProfileError.FailedToPublishZapEvent -> context.getString(
             R.string.post_action_zap_failed,
         )
+
         is ProfileError.FailedToPublishLikeEvent -> context.getString(
             R.string.post_action_like_failed,
         )
+
         is ProfileError.FailedToPublishRepostEvent -> context.getString(
             R.string.post_action_repost_failed,
         )
+
         is ProfileError.FailedToFollowProfile -> context.getString(
             R.string.profile_error_unable_to_follow,
         )
+
         is ProfileError.FailedToUnfollowProfile -> context.getString(
             R.string.profile_error_unable_to_unfollow,
         )
+
         is ProfileError.MissingRelaysConfiguration -> context.getString(
             R.string.app_missing_relays_config,
         )
+
         is ProfileError.FailedToAddToFeed -> context.getString(
             R.string.app_error_adding_to_feed,
         )
+
         is ProfileError.FailedToRemoveFeed -> context.getString(
             R.string.app_error_removing_feed,
         )
+
         is ProfileError.FailedToMuteProfile -> context.getString(R.string.app_error_muting_user)
         is ProfileError.FailedToUnmuteProfile -> context.getString(
             R.string.app_error_unmuting_user,

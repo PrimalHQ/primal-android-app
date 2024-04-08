@@ -55,6 +55,6 @@ interface ThreadContract {
             val profileId: String,
             val noteId: String,
         ) : UiEvent()
-        data class BookmarkAction(val noteId: String) : UiEvent()
+        data class BookmarkAction(val noteId: String, val firstBookmarkConfirmed: Boolean) : UiEvent()
     }
 }

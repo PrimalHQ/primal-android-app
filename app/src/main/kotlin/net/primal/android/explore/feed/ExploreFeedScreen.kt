@@ -177,7 +177,12 @@ fun ExploreFeedScreen(
                 },
                 onMediaClick = onMediaClick,
                 onBookmarkClick = {
-                    eventPublisher(ExploreFeedContract.UiEvent.BookmarkAction(noteId = it))
+                    eventPublisher(
+                        ExploreFeedContract.UiEvent.BookmarkAction(
+                            noteId = it,
+                            firstBookmarkConfirmed = false,
+                        ),
+                    )
                 },
                 onReportContentClick = { type, profileId, noteId ->
                     eventPublisher(
