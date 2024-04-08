@@ -8,6 +8,7 @@ import androidx.paging.PagingSource
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.withContext
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.ext.isChronologicalFeed
 import net.primal.android.db.PrimalDatabase
@@ -79,6 +80,14 @@ class FeedRepository @Inject constructor(
                 )
             },
         )
+    }
+
+    suspend fun removeFeedDirective(feedDirective: String) {
+        withContext(dispatcherProvider.io()) {
+            database.feedPostsRemoteKeys().deleteByDirective(feedDirective)
+            database.feedsConnections().deleteConnectionsByDirective(feedDirective)
+            database.posts().deleteOrphanPosts()
+        }
     }
 
     @OptIn(ExperimentalPagingApi::class)

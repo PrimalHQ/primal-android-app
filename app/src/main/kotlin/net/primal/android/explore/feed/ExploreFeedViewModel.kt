@@ -8,7 +8,9 @@ import androidx.paging.map
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -82,6 +84,13 @@ class ExploreFeedViewModel @Inject constructor(
         observeContainsFeed()
         observeEvents()
         observeActiveAccount()
+    }
+
+    @OptIn(DelicateCoroutinesApi::class)
+    override fun onCleared() {
+        GlobalScope.launch(dispatcherProvider.io()) {
+            feedRepository.removeFeedDirective(feedDirective = exploreFeedDirective)
+        }
     }
 
     private fun observeContainsFeed() =
