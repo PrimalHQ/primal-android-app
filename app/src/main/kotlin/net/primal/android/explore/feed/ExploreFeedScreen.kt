@@ -193,6 +193,7 @@ fun ExploreFeedScreen(
                         ),
                     )
                 },
+                autoRefresh = state.autoRefresh,
             )
         },
         snackbarHost = {
