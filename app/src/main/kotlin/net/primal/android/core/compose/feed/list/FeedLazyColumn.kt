@@ -37,6 +37,7 @@ import net.primal.android.core.compose.feed.note.FeedNoteCard
 import net.primal.android.core.compose.feed.zaps.UnableToZapBottomSheet
 import net.primal.android.core.compose.feed.zaps.ZapBottomSheet
 import net.primal.android.core.compose.isEmpty
+import net.primal.android.core.compose.isNotEmpty
 import net.primal.android.profile.report.OnReportContentClick
 import net.primal.android.wallet.zaps.canZap
 import timber.log.Timber
@@ -255,8 +256,10 @@ fun FeedLazyColumn(
             else -> Unit
         }
 
-        item(contentType = "Footer") {
-            Spacer(modifier = Modifier.height(64.dp))
+        if (pagingItems.isNotEmpty()) {
+            item(contentType = "Footer") {
+                Spacer(modifier = Modifier.height(64.dp))
+            }
         }
     }
 }

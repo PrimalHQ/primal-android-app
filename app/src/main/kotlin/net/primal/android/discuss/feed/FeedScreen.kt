@@ -57,6 +57,7 @@ import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWor
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 import net.primal.android.core.compose.icons.primaliconpack.FeedPicker
+import net.primal.android.core.compose.isNotEmpty
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.crypto.hexToNoteHrp
 import net.primal.android.discuss.feed.FeedContract.UiState.FeedError
@@ -169,7 +170,7 @@ fun FeedScreen(
         onDrawerDestinationClick = onDrawerDestinationClick,
         onDrawerQrCodeClick = onDrawerQrCodeClick,
         badges = state.badges,
-        focusModeEnabled = focusModeEnabled,
+        focusModeEnabled = focusModeEnabled && feedPagingItems.isNotEmpty(),
         topBar = {
             PrimalTopAppBar(
                 title = state.feedTitle,
