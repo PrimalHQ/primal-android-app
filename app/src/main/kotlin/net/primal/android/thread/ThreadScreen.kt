@@ -363,7 +363,14 @@ private fun ThreadScreenContent(
             onHashtagClick = onHashtagClick,
             onMediaClick = onMediaClick,
             onMuteUserClick = { authorId -> eventPublisher(ThreadContract.UiEvent.MuteAction(authorId)) },
-            onBookmarkClick = { noteId -> eventPublisher(ThreadContract.UiEvent.BookmarkAction(noteId)) },
+            onBookmarkClick = { noteId ->
+                eventPublisher(
+                    ThreadContract.UiEvent.BookmarkAction(
+                        noteId = noteId,
+                        firstBookmarkConfirmed = false,
+                    ),
+                )
+            },
             onReportContentClick = { reportType, profileId, noteId ->
                 eventPublisher(
                     ThreadContract.UiEvent.ReportAbuse(

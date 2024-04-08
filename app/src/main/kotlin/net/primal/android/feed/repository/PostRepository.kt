@@ -157,16 +157,32 @@ class PostRepository @Inject constructor(
     }
 
     @Throws(ProfileRepository.BookmarksListNotFound::class, NostrPublishException::class)
-    suspend fun addToBookmarks(userId: String, noteId: String) {
-        profileRepository.addBookmark(userId = userId, bookmark = PublicBookmark(type = "e", value = noteId))
+    suspend fun addToBookmarks(
+        userId: String,
+        noteId: String,
+        forceUpdate: Boolean,
+    ) {
+        profileRepository.addBookmark(
+            userId = userId,
+            bookmark = PublicBookmark(type = "e", value = noteId),
+            forceUpdate = forceUpdate,
+        )
         eventHintsUpserter(dao = database.eventHints(), eventId = noteId) {
             copy(isBookmarked = true)
         }
     }
 
     @Throws(ProfileRepository.BookmarksListNotFound::class, NostrPublishException::class)
-    suspend fun removeFromBookmarks(userId: String, noteId: String) {
-        profileRepository.removeBookmark(userId = userId, bookmark = PublicBookmark(type = "e", value = noteId))
+    suspend fun removeFromBookmarks(
+        userId: String,
+        noteId: String,
+        forceUpdate: Boolean,
+    ) {
+        profileRepository.removeBookmark(
+            userId = userId,
+            bookmark = PublicBookmark(type = "e", value = noteId),
+            forceUpdate = forceUpdate,
+        )
         eventHintsUpserter(dao = database.eventHints(), eventId = noteId) {
             copy(isBookmarked = false)
         }

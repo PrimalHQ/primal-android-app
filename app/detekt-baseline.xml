@@ -84,6 +84,7 @@
     <ID>ThrowingExceptionsWithoutMessageOrCause:ThreadViewModel.kt$ThreadViewModel$IllegalStateException()</ID>
     <ID>ThrowsCount:LnInvoiceUtils.kt$LnInvoiceUtils$private fun decodeUnlimitedLength(invoice: String): Boolean</ID>
     <ID>TooGenericExceptionCaught:NostrIncomingMessageParser.kt$error: Exception</ID>
+    <ID>TooManyFunctions:FeedRepository.kt$FeedRepository</ID>
     <ID>TooManyFunctions:NostrNotary.kt$NostrNotary</ID>
     <ID>TooManyFunctions:NostrResources.kt$net.primal.android.nostr.ext.NostrResources.kt</ID>
     <ID>TooManyFunctions:ProfileRepository.kt$ProfileRepository</ID>

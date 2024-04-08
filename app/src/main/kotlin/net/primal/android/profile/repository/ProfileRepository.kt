@@ -18,6 +18,7 @@ import net.primal.android.profile.report.ReportType
 import net.primal.android.user.accounts.UserAccountFetcher
 import net.primal.android.user.api.UsersApi
 import net.primal.android.user.domain.PublicBookmark
+import net.primal.android.user.domain.UserAccount
 import net.primal.android.user.domain.asUserAccountFromBookmarksListEvent
 import net.primal.android.user.domain.asUserAccountFromFollowListEvent
 import net.primal.android.user.repository.UserRepository
@@ -106,23 +107,35 @@ class ProfileRepository @Inject constructor(
     }
 
     @Throws(BookmarksListNotFound::class, NostrPublishException::class)
-    suspend fun addBookmark(userId: String, bookmark: PublicBookmark) {
-        updateBookmarksList(userId = userId) {
+    suspend fun addBookmark(
+        userId: String,
+        forceUpdate: Boolean,
+        bookmark: PublicBookmark,
+    ) {
+        updateBookmarksList(userId = userId, forceUpdate = forceUpdate) {
             toMutableSet().apply { add(bookmark) }
         }
     }
 
     @Throws(BookmarksListNotFound::class, NostrPublishException::class)
-    suspend fun removeBookmark(userId: String, bookmark: PublicBookmark) {
-        updateBookmarksList(userId = userId) {
+    suspend fun removeBookmark(
+        userId: String,
+        forceUpdate: Boolean,
+        bookmark: PublicBookmark,
+    ) {
+        updateBookmarksList(userId = userId, forceUpdate = forceUpdate) {
             toMutableSet().apply { remove(bookmark) }
         }
     }
 
     @Throws(BookmarksListNotFound::class, NostrPublishException::class)
-    private suspend fun updateBookmarksList(userId: String, reducer: Set<PublicBookmark>.() -> Set<PublicBookmark>) {
+    private suspend fun updateBookmarksList(
+        userId: String,
+        forceUpdate: Boolean,
+        reducer: Set<PublicBookmark>.() -> Set<PublicBookmark>,
+    ) {
         val bookmarksList = userAccountFetcher.fetchUserBookmarksListOrNull(userId = userId)
-            ?: throw BookmarksListNotFound()
+            ?: if (forceUpdate) UserAccount.EMPTY else throw BookmarksListNotFound()
 
         userRepository.updateBookmarksList(userId, bookmarksList)
 

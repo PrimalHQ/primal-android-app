@@ -18,6 +18,7 @@ interface FeedContract {
         val posts: Flow<PagingData<FeedPostUi>>,
         val syncStats: FeedPostsSyncStats = FeedPostsSyncStats(),
         val badges: Badges = Badges(),
+        val confirmFirstBookmark: Boolean = false,
         val error: FeedError? = null,
     ) {
         sealed class FeedError {
@@ -55,6 +56,6 @@ interface FeedContract {
             val noteId: String,
         ) : UiEvent()
 
-        data class BookmarkAction(val noteId: String) : UiEvent()
+        data class BookmarkAction(val noteId: String, val firstBookmarkConfirmed: Boolean) : UiEvent()
     }
 }
