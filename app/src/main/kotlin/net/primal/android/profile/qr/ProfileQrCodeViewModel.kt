@@ -16,6 +16,7 @@ import kotlinx.coroutines.launch
 import net.primal.android.core.compose.profile.model.asProfileDetailsUi
 import net.primal.android.crypto.bech32ToHexOrThrow
 import net.primal.android.navigation.profileId
+import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.ext.extractNoteId
 import net.primal.android.nostr.ext.extractProfileId
 import net.primal.android.profile.qr.ProfileQrCodeContract.SideEffect
@@ -95,11 +96,18 @@ class ProfileQrCodeViewModel @Inject constructor(
         }
 
     private suspend fun processWalletText(text: String) {
-        val draftTx = walletTextParser.parseText(userId = activeAccountStore.activeUserId(), text = text)
-        if (draftTx != null) {
-            setEffect(SideEffect.WalletTxDetected(draftTx = draftTx))
-        } else {
-            Timber.w("Unable to parse text. [text = $text]")
+        try {
+            val draftTx = walletTextParser.parseAndQueryText(
+                userId = activeAccountStore.activeUserId(),
+                text = text,
+            )
+            if (draftTx != null) {
+                setEffect(SideEffect.WalletTxDetected(draftTx = draftTx))
+            } else {
+                Timber.w("Unable to parse text. [text = $text]")
+            }
+        } catch (error: WssException) {
+            Timber.w(error)
         }
     }
 
