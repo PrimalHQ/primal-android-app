@@ -91,23 +91,6 @@ class FeedRemoteMediator(
     override suspend fun load(loadType: LoadType, state: PagingState<Int, FeedPost>): MediatorResult {
         Timber.i("feed_directive $feedDirective load called ($loadType)")
         return try {
-            if (loadType == LoadType.REFRESH) {
-                if (state.hasFeedPosts()) {
-                    if (shouldResetLocalCache()) {
-                        withContext(dispatcherProvider.io()) {
-                            database.withTransaction {
-                                database.feedPostsRemoteKeys().deleteByDirective(feedDirective)
-                                database.feedsConnections().deleteConnectionsByDirective(feedDirective)
-                                database.posts().deleteOrphanPosts()
-                            }
-                        }
-                    } else {
-                        Timber.w("feed_directive $feedDirective load exit 1")
-                        return MediatorResult.Success(endOfPaginationReached = false)
-                    }
-                }
-            }
-
             val remoteKey = try {
                 when (loadType) {
                     LoadType.REFRESH -> null
@@ -134,10 +117,27 @@ class FeedRemoteMediator(
             )
 
             lastRequests[loadType]?.let { (lastRequest, lastRequestAt) ->
-                if (lastRequest == requestBody && (Instant.now().epochSecond - lastRequestAt) < LAST_REQUEST_EXPIRY) {
+                if (lastRequest == requestBody && lastRequestAt.isRequestCacheExpired()) {
                     Timber.e("feed_directive $feedDirective paging exiting because of repeating request body.")
                     Timber.w("feed_directive $feedDirective load exit 4")
                     return MediatorResult.Success(endOfPaginationReached = true)
+                }
+            }
+
+            if (loadType == LoadType.REFRESH) {
+                if (state.hasFeedPosts()) {
+                    if (shouldResetLocalCache()) {
+                        withContext(dispatcherProvider.io()) {
+                            database.withTransaction {
+                                database.feedPostsRemoteKeys().deleteByDirective(feedDirective)
+                                database.feedsConnections().deleteConnectionsByDirective(feedDirective)
+                                database.posts().deleteOrphanPosts()
+                            }
+                        }
+                    } else {
+                        Timber.w("feed_directive $feedDirective load exit 1")
+                        return MediatorResult.Success(endOfPaginationReached = false)
+                    }
                 }
             }
 
@@ -205,6 +205,8 @@ class FeedRemoteMediator(
             MediatorResult.Error(error)
         }
     }
+
+    private fun Long.isRequestCacheExpired() = (Instant.now().epochSecond - this) < LAST_REQUEST_EXPIRY
 
     private fun buildFeedRequestBody(
         loadType: LoadType,
