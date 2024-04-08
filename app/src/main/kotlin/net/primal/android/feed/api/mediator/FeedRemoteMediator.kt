@@ -128,15 +128,7 @@ class FeedRemoteMediator(
 
             if (loadType == LoadType.REFRESH) {
                 if (state.hasFeedPosts()) {
-                    if (shouldResetLocalCache()) {
-                        withContext(dispatcherProvider.io()) {
-                            database.withTransaction {
-                                database.feedPostsRemoteKeys().deleteByDirective(feedDirective)
-                                database.feedsConnections().deleteConnectionsByDirective(feedDirective)
-                                database.posts().deleteOrphanPosts()
-                            }
-                        }
-                    } else {
+                    if (!shouldResetLocalCache()) {
                         Timber.w("feed_directive $feedDirective load exit 1")
                         return MediatorResult.Success(endOfPaginationReached = false)
                     }
@@ -187,11 +179,20 @@ class FeedRemoteMediator(
                 }
             }
 
+            val shouldDeleteLocalData = loadType == LoadType.REFRESH && state.hasFeedPosts() && shouldResetLocalCache()
             withContext(dispatcherProvider.io()) {
-                feedResponse.persistToDatabaseAsTransaction(userId = userId, database = database)
-                val feedEvents = feedResponse.posts + feedResponse.reposts
-                feedEvents.processRemoteKeys(pagingEvent)
-                feedEvents.processFeedConnections()
+                database.withTransaction {
+                    if (shouldDeleteLocalData) {
+                        database.feedPostsRemoteKeys().deleteByDirective(feedDirective)
+                        database.feedsConnections().deleteConnectionsByDirective(feedDirective)
+                        database.posts().deleteOrphanPosts()
+                    }
+
+                    feedResponse.persistToDatabaseAsTransaction(userId = userId, database = database)
+                    val feedEvents = feedResponse.posts + feedResponse.reposts
+                    feedEvents.processRemoteKeys(pagingEvent)
+                    feedEvents.processFeedConnections()
+                }
             }
 
             lastRequests[loadType] = requestBody to Instant.now().epochSecond
