@@ -90,6 +90,7 @@ class ProfileDetailsViewModel @Inject constructor(
         resolveFollowsMe()
     }
 
+    @Suppress("CyclomaticComplexMethod")
     private fun observeEvents() =
         viewModelScope.launch {
             events.collect {
@@ -110,6 +111,7 @@ class ProfileDetailsViewModel @Inject constructor(
                     }
                     is UiEvent.ReportAbuse -> reportAbuse(it)
                     UiEvent.DismissError -> setState { copy(error = null) }
+                    is UiEvent.BookmarkAction -> handleBookmark(it)
                 }
             }
         }
@@ -460,6 +462,18 @@ class ProfileDetailsViewModel @Inject constructor(
                 }
             } catch (error: NostrPublishException) {
                 Timber.w(error)
+            }
+        }
+
+    private fun handleBookmark(event: UiEvent.BookmarkAction) =
+        viewModelScope.launch {
+            val userId = activeAccountStore.activeUserId()
+            withContext(dispatcherProvider.io()) {
+                val isBookmarked = postRepository.isBookmarked(noteId = event.noteId)
+                when (isBookmarked) {
+                    true -> postRepository.removeFromBookmarks(userId = userId, noteId = event.noteId)
+                    false -> postRepository.addToBookmarks(userId = userId, noteId = event.noteId)
+                }
             }
         }
 

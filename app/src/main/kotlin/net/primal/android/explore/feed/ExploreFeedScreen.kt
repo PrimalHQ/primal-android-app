@@ -182,7 +182,7 @@ fun ExploreFeedScreen(
                 },
                 onMediaClick = onMediaClick,
                 onBookmarkClick = {
-                    // TODO Handle bookmark click
+                    eventPublisher(ExploreFeedContract.UiEvent.BookmarkAction(noteId = it))
                 },
                 onReportContentClick = { type, profileId, noteId ->
                     eventPublisher(
