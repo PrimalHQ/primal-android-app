@@ -288,6 +288,8 @@
 
     <string name="settings_appearance_title">Appearance</string>
     <string name="settings_appearance_theme_section_title">Theme</string>
+    <string name="settings_appearance_auto_adjust_dark_mode">Auto adjust dark theme</string>
+    <string name="settings_appearance_auto_adjust_dark_mode_hint">Automatically set dark theme based on your device Display settings.</string>
 
     <string name="settings_network_title">Network</string>
     <string name="settings_network_restore_default_relays_text_button">Restore Defaults Relays</string>

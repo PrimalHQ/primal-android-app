@@ -53,6 +53,7 @@ import net.primal.android.core.compose.PrimalSwitch
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
+import net.primal.android.core.compose.settings.SettingsItem
 import net.primal.android.settings.wallet.WalletSettingsContract.UiEvent
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
@@ -249,43 +250,6 @@ private fun ExternalWalletListItem(preferPrimalWallet: Boolean, onExternalWallet
             )
         },
     )
-}
-
-@Composable
-private fun SettingsItem(
-    headlineText: String,
-    supportText: String? = null,
-    trailingContent: @Composable (() -> Unit)? = null,
-    onClick: (() -> Unit)? = null,
-) {
-    Column {
-        ListItem(
-            modifier = Modifier.clickable(
-                enabled = onClick != null,
-                onClick = { onClick?.invoke() },
-            ),
-            headlineContent = {
-                Text(
-                    modifier = Modifier.padding(bottom = 4.dp),
-                    text = headlineText,
-                    style = AppTheme.typography.bodyLarge,
-                    color = AppTheme.colorScheme.onPrimary,
-                )
-            },
-            supportingContent = if (supportText != null) {
-                {
-                    Text(
-                        text = supportText,
-                        style = AppTheme.typography.bodySmall,
-                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
-                    )
-                }
-            } else {
-                null
-            },
-            trailingContent = trailingContent,
-        )
-    }
 }
 
 @Composable

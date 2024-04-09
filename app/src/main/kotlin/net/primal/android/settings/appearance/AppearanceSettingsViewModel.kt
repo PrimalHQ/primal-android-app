@@ -7,7 +7,6 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.theme.active.ActiveThemeStore
@@ -51,8 +50,8 @@ class AppearanceSettingsViewModel @Inject constructor(
 
     private fun observeActiveThemeStore() =
         viewModelScope.launch {
-            activeThemeStore.userThemeState.filterNotNull().collect {
-                setState { copy(selectedThemeName = it.themeName) }
+            activeThemeStore.userThemeState.collect {
+                setState { copy(selectedThemeName = it?.themeName) }
             }
         }
 
@@ -60,9 +59,19 @@ class AppearanceSettingsViewModel @Inject constructor(
         viewModelScope.launch {
             events.collect { event ->
                 when (event) {
-                    is AppearanceSettingsContract.UiEvent.SelectedThemeChanged -> selectedThemeChanged(
-                        themeName = event.themeName,
-                    )
+                    is AppearanceSettingsContract.UiEvent.SelectedThemeChanged ->
+                        selectedThemeChanged(themeName = event.themeName)
+
+                    is AppearanceSettingsContract.UiEvent.ToggleAutoAdjustDarkTheme -> {
+                        if (event.enabled) {
+                            selectedThemeChanged(themeName = "")
+                        } else {
+                            when (event.isSystemInDarkTheme) {
+                                true -> selectedThemeChanged(themeName = PrimalTheme.Sunset.themeName)
+                                false -> selectedThemeChanged(themeName = PrimalTheme.Sunrise.themeName)
+                            }
+                        }
+                    }
                 }
             }
         }

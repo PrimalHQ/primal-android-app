@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -39,10 +40,12 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.R
-import net.primal.android.core.compose.PrimalDivider
+import net.primal.android.core.compose.PrimalSwitch
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
+import net.primal.android.core.compose.settings.SettingsItem
+import net.primal.android.settings.appearance.AppearanceSettingsContract.UiEvent
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
@@ -50,7 +53,6 @@ import net.primal.android.theme.domain.PrimalTheme
 @Composable
 fun AppearanceSettingsScreen(viewModel: AppearanceSettingsViewModel, onClose: () -> Unit) {
     val uiState = viewModel.state.collectAsState()
-
     AppearanceSettingsScreen(
         state = uiState.value,
         onClose = onClose,
@@ -63,13 +65,14 @@ fun AppearanceSettingsScreen(viewModel: AppearanceSettingsViewModel, onClose: ()
 fun AppearanceSettingsScreen(
     state: AppearanceSettingsContract.UiState,
     onClose: () -> Unit,
-    eventPublisher: (AppearanceSettingsContract.UiEvent) -> Unit,
+    eventPublisher: (UiEvent) -> Unit,
 ) {
+    val isSystemInDarkTheme = isSystemInDarkTheme()
     Scaffold(
         modifier = Modifier,
         topBar = {
             PrimalTopAppBar(
-                title = "Appearance",
+                title = stringResource(id = R.string.settings_appearance_title),
                 navigationIcon = PrimalIcons.ArrowBack,
                 navigationIconContentDescription = stringResource(id = R.string.accessibility_back_button),
                 onNavigationIconClick = onClose,
@@ -80,13 +83,38 @@ fun AppearanceSettingsScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
-                    .padding(horizontal = 16.dp, vertical = 16.dp)
                     .imePadding(),
                 verticalArrangement = Arrangement.Top,
                 horizontalAlignment = Alignment.Start,
             ) {
-                ThemeSection(state = state, eventPublisher = eventPublisher)
-                PrimalDivider()
+                ThemeSection(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 16.dp),
+                    themes = state.themes,
+                    selectedThemeName = state.selectedThemeName,
+                    onThemeChange = {
+                        eventPublisher(UiEvent.SelectedThemeChanged(themeName = it))
+                    },
+                )
+
+                SettingsItem(
+                    headlineText = stringResource(id = R.string.settings_appearance_auto_adjust_dark_mode),
+                    supportText = stringResource(id = R.string.settings_appearance_auto_adjust_dark_mode_hint),
+                    trailingContent = {
+                        PrimalSwitch(
+                            checked = state.selectedThemeName.isNullOrEmpty(),
+                            onCheckedChange = {
+                                eventPublisher(
+                                    UiEvent.ToggleAutoAdjustDarkTheme(
+                                        enabled = it,
+                                        isSystemInDarkTheme = isSystemInDarkTheme,
+                                    ),
+                                )
+                            },
+                        )
+                    },
+                )
             }
         },
     )
@@ -94,18 +122,18 @@ fun AppearanceSettingsScreen(
 
 @Composable
 private fun ThemeSection(
-    state: AppearanceSettingsContract.UiState,
-    eventPublisher: (AppearanceSettingsContract.UiEvent) -> Unit,
+    modifier: Modifier = Modifier,
+    themes: List<PrimalTheme>,
+    selectedThemeName: String?,
+    onThemeChange: (String) -> Unit,
 ) {
     Column(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier,
         horizontalAlignment = Alignment.Start,
         verticalArrangement = Arrangement.Center,
     ) {
         Text(
-            text = stringResource(
-                id = R.string.settings_appearance_theme_section_title,
-            ).uppercase(),
+            text = stringResource(id = R.string.settings_appearance_theme_section_title).uppercase(),
             fontWeight = FontWeight.W500,
             fontSize = 14.sp,
             lineHeight = 16.sp,
@@ -116,28 +144,27 @@ private fun ThemeSection(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            state.themes.forEach { primalTheme ->
+            themes.forEach { primalTheme ->
                 ThemeBox(
                     primalTheme = primalTheme,
-                    state = state,
-                    eventPublisher = eventPublisher,
+                    selectedThemeName = selectedThemeName,
+                    onThemeChange = onThemeChange,
                 )
             }
         }
-        Spacer(modifier = Modifier.height(20.dp))
     }
 }
 
 @Composable
 private fun ThemeBox(
     primalTheme: PrimalTheme,
-    state: AppearanceSettingsContract.UiState,
-    eventPublisher: (AppearanceSettingsContract.UiEvent) -> Unit,
+    selectedThemeName: String?,
+    onThemeChange: (String) -> Unit,
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        val selected = primalTheme.themeName == state.selectedThemeName
+        val selected = primalTheme.themeName == selectedThemeName
         val borderBrush = if (selected) {
             Brush.linearGradient(
                 colors = listOf(
@@ -171,13 +198,7 @@ private fun ThemeBox(
                     brush = borderBrush,
                     shape = AppTheme.shapes.small,
                 )
-                .clickable {
-                    eventPublisher(
-                        AppearanceSettingsContract.UiEvent.SelectedThemeChanged(
-                            themeName = primalTheme.themeName,
-                        ),
-                    )
-                }
+                .clickable { onThemeChange(primalTheme.themeName) }
                 .background(color = if (primalTheme.isDarkTheme) Color.Black else Color.White)
                 .size(72.dp),
         ) {
@@ -221,10 +242,10 @@ private fun ThemeBox(
 class AppearanceSettingsUiStateProvider :
     PreviewParameterProvider<AppearanceSettingsContract.UiState> {
     override val values: Sequence<AppearanceSettingsContract.UiState>
-        get() = PrimalTheme.values().map {
+        get() = PrimalTheme.entries.map {
             return@map AppearanceSettingsContract.UiState(
                 selectedThemeName = it.themeName,
-                themes = PrimalTheme.values().toList(),
+                themes = PrimalTheme.entries,
             )
         }.asSequence()
 }
@@ -235,6 +256,7 @@ fun PreviewAppearanceSettingsScreen(
     @PreviewParameter(AppearanceSettingsUiStateProvider::class)
     state: AppearanceSettingsContract.UiState,
 ) {
+    checkNotNull(state.selectedThemeName)
     PrimalTheme(primalTheme = PrimalTheme.valueOf(themeName = state.selectedThemeName)!!) {
         AppearanceSettingsScreen(
             state = state,
