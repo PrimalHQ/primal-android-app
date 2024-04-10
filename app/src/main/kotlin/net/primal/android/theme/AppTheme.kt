@@ -10,12 +10,21 @@ import androidx.compose.runtime.ReadOnlyComposable
 import net.primal.android.theme.colors.ExtraColorScheme
 import net.primal.android.theme.colors.ExtraColorSchemeProvider
 import net.primal.android.theme.colors.LocalExtraColors
+import net.primal.android.theme.domain.PrimalAccent
 import net.primal.android.theme.domain.PrimalTheme
 
 @ReadOnlyComposable
 @Composable
-fun defaultPrimalTheme(): PrimalTheme {
-    return if (isSystemInDarkTheme()) PrimalTheme.Sunset else PrimalTheme.Sunrise
+fun defaultPrimalTheme(currentTheme: PrimalTheme): PrimalTheme {
+    return findThemeOrDefault(isDark = isSystemInDarkTheme(), accent = currentTheme.accent)
+}
+
+fun findThemeOrDefault(isDark: Boolean, accent: PrimalAccent): PrimalTheme {
+    return PrimalTheme.entries.filter { it.isDarkTheme == isDark }.find { it.accent == accent }
+        ?: when (isDark) {
+            true -> PrimalTheme.Sunset
+            false -> PrimalTheme.Sunrise
+        }
 }
 
 @Composable

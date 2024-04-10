@@ -8,9 +8,10 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
+import net.primal.android.LocalPrimalTheme
 import net.primal.android.core.compose.LockToOrientationPortrait
 import net.primal.android.settings.appearance.AppearanceSettingsScreen
-import net.primal.android.settings.appearance.AppearanceSettingsViewModel
+import net.primal.android.settings.appearance.di.appearanceSettingsViewModel
 import net.primal.android.settings.feeds.FeedsSettingsScreen
 import net.primal.android.settings.feeds.FeedsSettingsViewModel
 import net.primal.android.settings.home.PrimalSettingsSection
@@ -152,7 +153,7 @@ private fun NavGraphBuilder.appearance(route: String, navController: NavControll
     composable(
         route = route,
     ) {
-        val viewModel = hiltViewModel<AppearanceSettingsViewModel>()
+        val viewModel = appearanceSettingsViewModel(primalTheme = LocalPrimalTheme.current)
         LockToOrientationPortrait()
         AppearanceSettingsScreen(viewModel = viewModel, onClose = { navController.navigateUp() })
     }

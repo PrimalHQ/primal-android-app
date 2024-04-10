@@ -2,8 +2,8 @@ package net.primal.android.settings.appearance
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -11,9 +11,10 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.theme.active.ActiveThemeStore
 import net.primal.android.theme.domain.PrimalTheme
+import net.primal.android.theme.findThemeOrDefault
 
-@HiltViewModel
-class AppearanceSettingsViewModel @Inject constructor(
+class AppearanceSettingsViewModel @AssistedInject constructor(
+    @Assisted private var lastUserPickedPrimalTheme: PrimalTheme,
     private val activeThemeStore: ActiveThemeStore,
 ) : ViewModel() {
     private val _state = MutableStateFlow(AppearanceSettingsContract.UiState())
@@ -66,10 +67,9 @@ class AppearanceSettingsViewModel @Inject constructor(
                         if (event.enabled) {
                             selectedThemeChanged(themeName = "")
                         } else {
-                            when (event.isSystemInDarkTheme) {
-                                true -> selectedThemeChanged(themeName = PrimalTheme.Sunset.themeName)
-                                false -> selectedThemeChanged(themeName = PrimalTheme.Sunrise.themeName)
-                            }
+                            val accent = (lastUserPickedPrimalTheme ?: PrimalTheme.Sunset).accent
+                            val newTheme = findThemeOrDefault(isDark = event.isSystemInDarkTheme, accent = accent)
+                            selectedThemeChanged(themeName = newTheme.themeName)
                         }
                     }
                 }
@@ -78,5 +78,9 @@ class AppearanceSettingsViewModel @Inject constructor(
 
     private suspend fun selectedThemeChanged(themeName: String) {
         activeThemeStore.setUserTheme(theme = themeName)
+        val theme = PrimalTheme.valueOf(themeName = themeName)
+        if (theme != null) {
+            lastUserPickedPrimalTheme = theme
+        }
     }
 }

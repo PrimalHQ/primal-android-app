@@ -29,14 +29,17 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var themeStore: ActiveThemeStore
 
+    lateinit var primalTheme: PrimalTheme
+
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
         observeThemeChanges()
+        primalTheme = savedInstanceState.restoreOrDefaultPrimalTheme()
 
         setContent {
             val userTheme = themeStore.userThemeState.collectAsState()
-            val primalTheme = userTheme.value ?: defaultPrimalTheme()
+            primalTheme = userTheme.value ?: defaultPrimalTheme(currentTheme = primalTheme)
 
             PrimalTheme(
                 primalTheme = primalTheme,
@@ -48,6 +51,21 @@ class MainActivity : ComponentActivity() {
                     ApplyEdgeToEdge()
                     PrimalAppNavigation()
                 }
+            }
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putString("primalTheme", primalTheme.themeName)
+        super.onSaveInstanceState(outState)
+    }
+
+    private fun Bundle?.restoreOrDefaultPrimalTheme(): PrimalTheme {
+        return when (this) {
+            null -> PrimalTheme.Sunset
+            else -> {
+                val themeName = this.getString("primalTheme", PrimalTheme.Sunset.themeName)
+                PrimalTheme.valueOf(themeName = themeName) ?: PrimalTheme.Sunset
             }
         }
     }
