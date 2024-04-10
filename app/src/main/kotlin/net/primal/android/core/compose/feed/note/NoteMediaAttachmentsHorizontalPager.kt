@@ -40,15 +40,23 @@ fun NoteMediaAttachmentsHorizontalPager(
         val imagesCount = mediaAttachments.size
 
         val pagerState = rememberPagerState { imagesCount }
-        HorizontalPager(state = pagerState) {
-            val attachment = mediaAttachments[it]
+
+        if (imagesCount == 1) {
+            val attachment = mediaAttachments.first()
             NoteMediaAttachment(
                 attachment = attachment,
                 imageSizeDp = imageSizeDp,
-                onClick = {
-                    onAttachmentClick(attachment, attachment.url)
-                },
+                onClick = { onAttachmentClick(attachment, attachment.url) },
             )
+        } else {
+            HorizontalPager(state = pagerState) {
+                val attachment = mediaAttachments[it]
+                NoteMediaAttachment(
+                    attachment = attachment,
+                    imageSizeDp = imageSizeDp,
+                    onClick = { onAttachmentClick(attachment, attachment.url) },
+                )
+            }
         }
 
         if (imagesCount > 1) {
