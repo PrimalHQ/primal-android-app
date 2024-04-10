@@ -25,7 +25,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.common.MediaItem
-import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
 import net.primal.android.core.compose.attachment.model.NoteAttachmentUi
@@ -50,19 +49,7 @@ fun NoteAttachmentVideoPreview(
         exoPlayer.setMediaItem(mediaSource)
         exoPlayer.prepare()
         exoPlayer.playWhenReady = true
-        exoPlayer.addListener(
-            object : Player.Listener {
-                override fun onPlaybackStateChanged(playbackState: Int) {
-                    when (playbackState) {
-                        Player.STATE_ENDED -> {
-                            exoPlayer.seekTo(0)
-                        }
-
-                        else -> Unit
-                    }
-                }
-            },
-        )
+        exoPlayer.repeatMode = ExoPlayer.REPEAT_MODE_ALL
         exoPlayer.volume = if (isMuted) 0.0f else 1.0f
     }
 
