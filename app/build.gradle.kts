@@ -264,6 +264,8 @@ dependencies {
     implementation(libs.coil.svg)
     implementation(libs.telephoto.zoomable.image)
     implementation(libs.telephoto.zoomable.image.coil)
+    implementation(libs.media3.exoplayer.core)
+    implementation(libs.media3.exoplayer.ui)
 
     implementation(libs.lottie.compose)
     implementation(libs.flippable)

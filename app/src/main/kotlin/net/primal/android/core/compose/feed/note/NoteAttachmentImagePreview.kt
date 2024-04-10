@@ -10,17 +10,35 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.SubcomposeAsyncImage
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.fade
 import com.google.accompanist.placeholder.material.placeholder
+import net.primal.android.attachments.domain.NoteAttachmentType
+import net.primal.android.attachments.domain.findNearestOrNull
+import net.primal.android.core.compose.attachment.model.NoteAttachmentUi
 import net.primal.android.theme.AppTheme
 
 @Composable
-fun NoteImagePreview(source: Any?, modifier: Modifier = Modifier) {
+fun NoteAttachmentImagePreview(
+    attachment: NoteAttachmentUi,
+    maxWidth: Dp,
+    modifier: Modifier = Modifier,
+) {
+    val imageSource = when (attachment.type) {
+        NoteAttachmentType.Image -> {
+            val maxWidthPx = with(LocalDensity.current) { maxWidth.roundToPx() }
+            val variant = attachment.variants.findNearestOrNull(maxWidthPx = maxWidthPx)
+            variant?.mediaUrl ?: attachment.url
+        }
+        else -> attachment.thumbnailUrl
+    }
+
     SubcomposeAsyncImage(
-        model = source,
+        model = imageSource,
         modifier = modifier,
         contentDescription = null,
         contentScale = ContentScale.Crop,
