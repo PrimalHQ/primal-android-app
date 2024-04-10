@@ -67,7 +67,7 @@ class AppearanceSettingsViewModel @AssistedInject constructor(
                         if (event.enabled) {
                             selectedThemeChanged(themeName = "")
                         } else {
-                            val accent = (lastUserPickedPrimalTheme ?: PrimalTheme.Sunset).accent
+                            val accent = lastUserPickedPrimalTheme.accent
                             val newTheme = findThemeOrDefault(isDark = event.isSystemInDarkTheme, accent = accent)
                             selectedThemeChanged(themeName = newTheme.themeName)
                         }
