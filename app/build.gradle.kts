@@ -165,7 +165,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.10"
+        kotlinCompilerExtensionVersion = "1.5.11"
     }
 
     compileOptions {
@@ -254,8 +254,8 @@ dependencies {
 
     implementation(libs.retrofit)
     implementation(libs.retrofit.converter.scalars)
-
     implementation(libs.retrofit.serialization.converter)
+
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.guava)
 
