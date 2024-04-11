@@ -225,6 +225,8 @@
 
     <string name="media_gallery_context_save">Save</string>
     <string name="media_gallery_toast_photo_saved">Photo saved.</string>
+    <string name="media_gallery_toast_video_saved">Video saved.</string>
+    <string name="media_gallery_toast_file_saved">File saved.</string>
     <string name="media_gallery_retry_save">Retry</string>
     <string name="media_gallery_error_photo_not_saved">Unable to save photo. Please try again.</string>
 

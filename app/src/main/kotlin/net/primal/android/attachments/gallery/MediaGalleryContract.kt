@@ -1,5 +1,6 @@
 package net.primal.android.attachments.gallery
 
+import net.primal.android.attachments.domain.NoteAttachmentType
 import net.primal.android.core.compose.attachment.model.NoteAttachmentUi
 
 interface MediaGalleryContract {
@@ -17,11 +18,11 @@ interface MediaGalleryContract {
     }
 
     sealed class UiEvent {
-        data class SaveMedia(val remoteUrl: String) : UiEvent()
+        data class SaveMedia(val attachment: NoteAttachmentUi) : UiEvent()
         data object DismissError : UiEvent()
     }
 
     sealed class SideEffect {
-        data object MediaSaved : SideEffect()
+        data class MediaSaved(val type: NoteAttachmentType) : SideEffect()
     }
 }

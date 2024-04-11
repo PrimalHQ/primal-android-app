@@ -17,6 +17,7 @@ import net.primal.android.attachments.domain.NoteAttachmentType
 import net.primal.android.attachments.gallery.MediaGalleryContract.UiEvent
 import net.primal.android.attachments.gallery.MediaGalleryContract.UiState
 import net.primal.android.attachments.repository.AttachmentsRepository
+import net.primal.android.core.compose.attachment.model.NoteAttachmentUi
 import net.primal.android.core.compose.attachment.model.asNoteAttachmentUi
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.files.MediaDownloader
@@ -59,7 +60,7 @@ class MediaGalleryViewModel @Inject constructor(
         viewModelScope.launch {
             events.collect {
                 when (it) {
-                    is UiEvent.SaveMedia -> saveMedia(remoteUrl = it.remoteUrl)
+                    is UiEvent.SaveMedia -> saveMedia(attachment = it.attachment)
                     UiEvent.DismissError -> setState { copy(error = null) }
                 }
             }
@@ -83,12 +84,12 @@ class MediaGalleryViewModel @Inject constructor(
             }
         }
 
-    private fun saveMedia(remoteUrl: String) =
+    private fun saveMedia(attachment: NoteAttachmentUi) =
         viewModelScope.launch {
             withContext(dispatcherProvider.io()) {
                 try {
-                    mediaDownloader.downloadToMediaGallery(url = remoteUrl)
-                    setEffect(MediaGalleryContract.SideEffect.MediaSaved)
+                    mediaDownloader.downloadToMediaGallery(url = attachment.url)
+                    setEffect(MediaGalleryContract.SideEffect.MediaSaved(type = attachment.type))
                 } catch (error: UnsuccessfulFileDownload) {
                     Timber.w(error)
                     setState { copy(error = UiState.MediaGalleryError.FailedToSaveMedia(error)) }

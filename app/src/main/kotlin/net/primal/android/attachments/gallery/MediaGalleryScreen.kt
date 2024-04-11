@@ -82,12 +82,13 @@ fun MediaGalleryScreen(viewModel: MediaGalleryViewModel, onClose: () -> Unit) {
     LaunchedEffect(viewModel) {
         viewModel.effects.collect {
             when (it) {
-                MediaGalleryContract.SideEffect.MediaSaved -> uiScope.launch {
-                    Toast.makeText(
-                        context,
-                        context.getString(R.string.media_gallery_toast_photo_saved),
-                        Toast.LENGTH_SHORT,
-                    ).show()
+                is MediaGalleryContract.SideEffect.MediaSaved -> uiScope.launch {
+                    val message = when (it.type) {
+                        NoteAttachmentType.Image -> context.getString(R.string.media_gallery_toast_photo_saved)
+                        NoteAttachmentType.Video -> context.getString(R.string.media_gallery_toast_video_saved)
+                        else -> context.getString(R.string.media_gallery_toast_file_saved)
+                    }
+                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -126,7 +127,7 @@ fun MediaGalleryScreen(
         },
         actionLabel = stringResource(id = R.string.media_gallery_retry_save),
         onErrorDismiss = { eventPublisher(MediaGalleryContract.UiEvent.DismissError) },
-        onActionPerformed = { currentImage()?.let { eventPublisher(MediaGalleryContract.UiEvent.SaveMedia(it.url)) } },
+        onActionPerformed = { currentImage()?.let { eventPublisher(MediaGalleryContract.UiEvent.SaveMedia(it)) } },
     )
 
     val containerColor = AppTheme.colorScheme.surface.copy(alpha = 0.21f)
@@ -150,7 +151,7 @@ fun MediaGalleryScreen(
                 actions = {
                     GalleryDropdownMenu(
                         onSaveClick = {
-                            currentImage()?.let { eventPublisher(MediaGalleryContract.UiEvent.SaveMedia(it.url)) }
+                            currentImage()?.let { eventPublisher(MediaGalleryContract.UiEvent.SaveMedia(it)) }
                         },
                     )
                 },
@@ -286,6 +287,7 @@ private fun AttachmentsHorizontalPager(
                 NoteAttachmentType.Image -> {
                     ImageScreen(attachment = attachment)
                 }
+
                 NoteAttachmentType.Video -> {
                     VideoScreen(
                         positionMs = initialPositionMs,
