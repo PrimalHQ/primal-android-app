@@ -30,6 +30,7 @@ import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.feed.model.toNoteContentUi
 import net.primal.android.core.compose.feed.note.FeedNoteStatsRow
 import net.primal.android.core.compose.feed.note.NoteContent
+import net.primal.android.core.compose.feed.note.events.MediaClickEvent
 import net.primal.android.core.compose.notifications.toImagePainter
 import net.primal.android.core.ext.openUriSafely
 import net.primal.android.core.utils.shortened
@@ -43,7 +44,7 @@ fun NotificationListItem(
     onProfileClick: (String) -> Unit,
     onNoteClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
-    onMediaClick: (String, String) -> Unit,
+    onMediaClick: (MediaClickEvent) -> Unit,
     onReplyClick: (String) -> Unit,
     onPostLikeClick: (FeedPostUi) -> Unit,
     onRepostClick: (FeedPostUi) -> Unit,
@@ -109,7 +110,7 @@ private fun NotificationListItem(
     onProfileClick: (String) -> Unit,
     onPostClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
-    onMediaClick: (String, String) -> Unit,
+    onMediaClick: (MediaClickEvent) -> Unit,
     onPostAction: (FeedPostAction) -> Unit,
     onPostLongPressAction: (FeedPostAction) -> Unit,
 ) {

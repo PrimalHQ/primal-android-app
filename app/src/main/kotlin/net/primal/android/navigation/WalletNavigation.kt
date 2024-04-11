@@ -193,10 +193,10 @@ private fun NavGraphBuilder.transactionDetails(
         onPostClick = { noteId -> navController.navigateToThread(noteId) },
         onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
         onHashtagClick = { hashtag -> navController.navigateToExploreFeed(query = hashtag) },
-        onMediaClick = { noteId, mediaUrl ->
+        onMediaClick = {
             navController.navigateToMediaGallery(
-                noteId = noteId,
-                mediaUrl = mediaUrl,
+                noteId = it.noteId,
+                mediaUrl = it.mediaUrl,
             )
         },
     )

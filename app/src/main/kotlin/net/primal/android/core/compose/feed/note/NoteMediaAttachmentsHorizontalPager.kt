@@ -20,12 +20,13 @@ import androidx.compose.ui.unit.dp
 import net.primal.android.attachments.domain.NoteAttachmentType
 import net.primal.android.core.compose.HorizontalPagerIndicator
 import net.primal.android.core.compose.attachment.model.NoteAttachmentUi
+import net.primal.android.core.compose.feed.note.events.MediaClickEvent
 import net.primal.android.theme.AppTheme
 
 @ExperimentalFoundationApi
 @Composable
 fun NoteMediaAttachmentsHorizontalPager(
-    onAttachmentClick: (NoteAttachmentUi, String) -> Unit,
+    onMediaClick: (MediaClickEvent) -> Unit,
     mediaAttachments: List<NoteAttachmentUi> = emptyList(),
 ) {
     BoxWithConstraints {
@@ -39,7 +40,16 @@ fun NoteMediaAttachmentsHorizontalPager(
             NoteMediaAttachment(
                 attachment = attachment,
                 imageSizeDp = imageSizeDp,
-                onClick = { onAttachmentClick(attachment, attachment.url) },
+                onClick = { positionMs ->
+                    onMediaClick(
+                        MediaClickEvent(
+                            noteId = attachment.noteId,
+                            noteAttachmentType = attachment.type,
+                            mediaUrl = attachment.url,
+                            positionMs = positionMs,
+                        ),
+                    )
+                },
             )
         } else {
             HorizontalPager(state = pagerState) {
@@ -47,7 +57,16 @@ fun NoteMediaAttachmentsHorizontalPager(
                 NoteMediaAttachment(
                     attachment = attachment,
                     imageSizeDp = imageSizeDp,
-                    onClick = { onAttachmentClick(attachment, attachment.url) },
+                    onClick = { positionMs ->
+                        onMediaClick(
+                            MediaClickEvent(
+                                noteId = attachment.noteId,
+                                noteAttachmentType = attachment.type,
+                                mediaUrl = attachment.url,
+                                positionMs = positionMs,
+                            ),
+                        )
+                    },
                 )
             }
         }
@@ -76,7 +95,7 @@ fun NoteMediaAttachmentsHorizontalPager(
 private fun NoteMediaAttachment(
     attachment: NoteAttachmentUi,
     imageSizeDp: DpSize,
-    onClick: () -> Unit,
+    onClick: (positionMs: Long) -> Unit,
 ) {
     BoxWithConstraints(
         modifier = Modifier
@@ -89,7 +108,7 @@ private fun NoteMediaAttachment(
                 NoteAttachmentVideoPreview(
                     attachment = attachment,
                     onVideoClick = { positionMs ->
-                        // Open media gallery
+                        onClick(positionMs)
                     },
                     modifier = Modifier
                         .width(imageSizeDp.width)
@@ -104,7 +123,7 @@ private fun NoteMediaAttachment(
                     modifier = Modifier
                         .width(imageSizeDp.width)
                         .height(imageSizeDp.height)
-                        .clickable(onClick = onClick),
+                        .clickable { onClick(0L) },
                 )
             }
         }

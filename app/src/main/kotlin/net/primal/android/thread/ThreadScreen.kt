@@ -74,6 +74,7 @@ import net.primal.android.core.compose.feed.model.FeedPostStatsUi
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.feed.note.ConfirmFirstBookmarkAlertDialog
 import net.primal.android.core.compose.feed.note.FeedNoteCard
+import net.primal.android.core.compose.feed.note.events.MediaClickEvent
 import net.primal.android.core.compose.feed.zaps.UnableToZapBottomSheet
 import net.primal.android.core.compose.feed.zaps.ZapBottomSheet
 import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
@@ -99,7 +100,7 @@ fun ThreadScreen(
     onPostQuoteClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
-    onMediaClick: (String, String) -> Unit,
+    onMediaClick: (MediaClickEvent) -> Unit,
     onGoToWallet: () -> Unit,
     onReplyInNoteEditor: (String, Uri?, String) -> Unit,
 ) {
@@ -140,7 +141,7 @@ fun ThreadScreen(
     onPostQuoteClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
-    onMediaClick: (String, String) -> Unit,
+    onMediaClick: (MediaClickEvent) -> Unit,
     onGoToWallet: () -> Unit,
     onReplyInNoteEditor: (String, Uri?, String) -> Unit,
     eventPublisher: (ThreadContract.UiEvent) -> Unit,
@@ -232,7 +233,7 @@ private fun ThreadScreenContent(
     onProfileClick: (String) -> Unit,
     onPostReplyClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
-    onMediaClick: (String, String) -> Unit,
+    onMediaClick: (MediaClickEvent) -> Unit,
     onPostQuoteClick: (String) -> Unit,
     onGoToWallet: () -> Unit,
     eventPublisher: (ThreadContract.UiEvent) -> Unit,
@@ -413,7 +414,7 @@ private fun ThreadLazyColumn(
     onPostAction: ((noteAction: FeedPostAction, note: FeedPostUi) -> Unit)? = null,
     onPostLongClickAction: ((noteAction: FeedPostAction, note: FeedPostUi) -> Unit)? = null,
     onHashtagClick: (String) -> Unit,
-    onMediaClick: (String, String) -> Unit,
+    onMediaClick: (MediaClickEvent) -> Unit,
     onBookmarkClick: (String) -> Unit,
     onMuteUserClick: (authorId: String) -> Unit,
     onReportContentClick: OnReportContentClick,
@@ -745,7 +746,7 @@ fun ThreadScreenPreview() {
             onPostQuoteClick = {},
             onProfileClick = {},
             onHashtagClick = {},
-            onMediaClick = { _, _ -> },
+            onMediaClick = {},
             onGoToWallet = {},
             onReplyInNoteEditor = { _, _, _ -> },
             eventPublisher = {},

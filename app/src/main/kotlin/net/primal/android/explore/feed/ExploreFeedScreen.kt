@@ -25,6 +25,7 @@ import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.feed.list.FeedNoteList
 import net.primal.android.core.compose.feed.model.FeedPostsSyncStats
 import net.primal.android.core.compose.feed.note.ConfirmFirstBookmarkAlertDialog
+import net.primal.android.core.compose.feed.note.events.MediaClickEvent
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
@@ -48,7 +49,7 @@ fun ExploreFeedScreen(
     onPostQuoteClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
-    onMediaClick: (String, String) -> Unit,
+    onMediaClick: (MediaClickEvent) -> Unit,
     onGoToWallet: () -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
@@ -77,7 +78,7 @@ fun ExploreFeedScreen(
     onPostQuoteClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
-    onMediaClick: (String, String) -> Unit,
+    onMediaClick: (MediaClickEvent) -> Unit,
     onGoToWallet: () -> Unit,
     eventPublisher: (ExploreFeedContract.UiEvent) -> Unit,
 ) {

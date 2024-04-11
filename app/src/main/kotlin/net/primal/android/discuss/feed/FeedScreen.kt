@@ -53,6 +53,7 @@ import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.compose.feed.list.FeedNoteList
 import net.primal.android.core.compose.feed.model.FeedPostsSyncStats
 import net.primal.android.core.compose.feed.note.ConfirmFirstBookmarkAlertDialog
+import net.primal.android.core.compose.feed.note.events.MediaClickEvent
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
@@ -76,7 +77,7 @@ fun FeedScreen(
     onPostReplyClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
-    onMediaClick: (String, String) -> Unit,
+    onMediaClick: (MediaClickEvent) -> Unit,
     onGoToWallet: () -> Unit,
     onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
@@ -118,7 +119,7 @@ fun FeedScreen(
     onPostReplyClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
-    onMediaClick: (String, String) -> Unit,
+    onMediaClick: (MediaClickEvent) -> Unit,
     onGoToWallet: () -> Unit,
     onPrimaryDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
@@ -369,7 +370,7 @@ fun FeedScreenPreview() {
             onPostReplyClick = {},
             onProfileClick = {},
             onHashtagClick = {},
-            onMediaClick = { _, _ -> },
+            onMediaClick = {},
             onGoToWallet = {},
             onPrimaryDestinationChanged = {},
             onDrawerDestinationClick = {},

@@ -6,14 +6,14 @@ import androidx.compose.runtime.Composable
 import net.primal.android.attachments.domain.NoteAttachmentType
 import net.primal.android.core.compose.attachment.model.NoteAttachmentUi
 import net.primal.android.core.compose.attachment.model.isMediaAttachment
+import net.primal.android.core.compose.feed.note.events.MediaClickEvent
 
 @ExperimentalFoundationApi
 @Composable
 fun NoteAttachments(
-    noteId: String,
     attachments: List<NoteAttachmentUi>,
-    onUrlClick: (String) -> Unit,
-    onMediaClick: (String, String) -> Unit,
+    onUrlClick: (mediaUrl: String) -> Unit,
+    onMediaClick: (MediaClickEvent) -> Unit,
 ) {
     val mediaAttachments = attachments.filter { it.isMediaAttachment() }
     val linkAttachments = attachments.filterNot { it.isMediaAttachment() }
@@ -21,10 +21,10 @@ fun NoteAttachments(
         mediaAttachments.isNotEmpty() -> {
             NoteMediaAttachmentsHorizontalPager(
                 mediaAttachments = mediaAttachments,
-                onAttachmentClick = { attachment, mediaUrl ->
-                    when (attachment.type) {
-                        NoteAttachmentType.Image -> onMediaClick(noteId, mediaUrl)
-                        else -> onUrlClick(mediaUrl)
+                onMediaClick = {
+                    when (it.noteAttachmentType) {
+                        NoteAttachmentType.Image, NoteAttachmentType.Video -> onMediaClick(it)
+                        else -> onUrlClick(it.mediaUrl)
                     }
                 },
             )

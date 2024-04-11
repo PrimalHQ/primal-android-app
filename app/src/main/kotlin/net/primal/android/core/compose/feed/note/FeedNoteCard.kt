@@ -33,6 +33,7 @@ import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.feed.model.FeedPostAction
 import net.primal.android.core.compose.feed.model.FeedPostStatsUi
 import net.primal.android.core.compose.feed.model.FeedPostUi
+import net.primal.android.core.compose.feed.note.events.MediaClickEvent
 import net.primal.android.profile.report.OnReportContentClick
 import net.primal.android.profile.report.ReportUserDialog
 import net.primal.android.theme.PrimalTheme
@@ -59,7 +60,7 @@ fun FeedNoteCard(
     onPostAction: ((FeedPostAction) -> Unit)? = null,
     onPostLongClickAction: ((FeedPostAction) -> Unit)? = null,
     onHashtagClick: (String) -> Unit,
-    onMediaClick: (String, String) -> Unit,
+    onMediaClick: (MediaClickEvent) -> Unit,
     onBookmarkClick: () -> Unit,
     onMuteUserClick: () -> Unit,
     onReportContentClick: OnReportContentClick,
@@ -236,7 +237,7 @@ fun PreviewFeedNoteListItemLightMultiLineHeader(
             onPostLongClickAction = {},
             onHashtagClick = {},
             onMuteUserClick = {},
-            onMediaClick = { _, _ -> },
+            onMediaClick = {},
             onReportContentClick = { _, _, _ -> },
             onBookmarkClick = {},
         )
@@ -260,7 +261,7 @@ fun PreviewFeedNoteListItemLightMultiLineHeaderFullWidth(
             onPostLongClickAction = {},
             onHashtagClick = {},
             onMuteUserClick = {},
-            onMediaClick = { _, _ -> },
+            onMediaClick = {},
             onReportContentClick = { _, _, _ -> },
             onBookmarkClick = {},
         )
@@ -284,7 +285,7 @@ fun PreviewFeedNoteListItemDarkSingleLineHeader(
             onPostLongClickAction = {},
             onHashtagClick = {},
             onMuteUserClick = {},
-            onMediaClick = { _, _ -> },
+            onMediaClick = {},
             onReportContentClick = { _, _, _ -> },
             onBookmarkClick = {},
         )
@@ -308,7 +309,7 @@ fun PreviewFeedNoteListItemDarkSingleLineHeaderFullWidth(
             onPostLongClickAction = {},
             onHashtagClick = {},
             onMuteUserClick = {},
-            onMediaClick = { _, _ -> },
+            onMediaClick = {},
             onReportContentClick = { _, _, _ -> },
             onBookmarkClick = {},
         )
@@ -334,7 +335,7 @@ fun PreviewFeedNoteListItemLightForcedContentIndentFullWidthSingleLineHeader(
             onPostLongClickAction = {},
             onHashtagClick = {},
             onMuteUserClick = {},
-            onMediaClick = { _, _ -> },
+            onMediaClick = {},
             onReportContentClick = { _, _, _ -> },
             onBookmarkClick = {},
         )
@@ -360,7 +361,7 @@ fun PreviewFeedNoteListItemDarkForcedContentIndentSingleLineHeader(
             onPostLongClickAction = {},
             onHashtagClick = {},
             onMuteUserClick = {},
-            onMediaClick = { _, _ -> },
+            onMediaClick = {},
             onReportContentClick = { _, _, _ -> },
             onBookmarkClick = {},
         )

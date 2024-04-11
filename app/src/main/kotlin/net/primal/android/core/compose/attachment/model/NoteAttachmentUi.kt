@@ -5,6 +5,7 @@ import net.primal.android.attachments.domain.CdnResourceVariant
 import net.primal.android.attachments.domain.NoteAttachmentType
 
 data class NoteAttachmentUi(
+    val noteId: String,
     val url: String,
     val type: NoteAttachmentType,
     val mimeType: String? = null,
@@ -17,6 +18,7 @@ data class NoteAttachmentUi(
 
 fun NoteAttachment.asNoteAttachmentUi() =
     NoteAttachmentUi(
+        noteId = this.eventId,
         url = this.url,
         mimeType = this.mimeType,
         type = this.type,

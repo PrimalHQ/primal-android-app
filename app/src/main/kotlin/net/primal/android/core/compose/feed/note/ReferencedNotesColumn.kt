@@ -13,6 +13,7 @@ import net.primal.android.core.compose.feed.model.FeedPostStatsUi
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.feed.model.NoteNostrUriUi
 import net.primal.android.core.compose.feed.model.asNoteNostrUriUi
+import net.primal.android.core.compose.feed.note.events.MediaClickEvent
 import net.primal.android.core.utils.parseHashtags
 
 @Composable
@@ -21,7 +22,7 @@ fun ReferencedNotesColumn(
     expanded: Boolean,
     containerColor: Color,
     onPostClick: (String) -> Unit,
-    onMediaClick: (String, String) -> Unit,
+    onMediaClick: (MediaClickEvent) -> Unit,
 ) {
     val displayableNotes = if (postResources.isNotEmpty()) {
         if (expanded) postResources else postResources.subList(0, 1)

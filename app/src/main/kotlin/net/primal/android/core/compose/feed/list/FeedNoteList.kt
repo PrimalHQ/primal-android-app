@@ -30,6 +30,7 @@ import net.primal.android.R
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.feed.model.FeedPostsSyncStats
 import net.primal.android.core.compose.feed.model.ZappingState
+import net.primal.android.core.compose.feed.note.events.MediaClickEvent
 import net.primal.android.core.compose.pulltorefresh.LaunchedPullToRefreshEndingEffect
 import net.primal.android.core.compose.pulltorefresh.PrimalPullToRefreshIndicator
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
@@ -51,7 +52,7 @@ fun FeedNoteList(
     onPostReplyClick: (String) -> Unit,
     onPostQuoteClick: (FeedPostUi) -> Unit,
     onHashtagClick: (String) -> Unit,
-    onMediaClick: (String, String) -> Unit,
+    onMediaClick: (MediaClickEvent) -> Unit,
     onGoToWallet: () -> Unit,
     onBookmarkClick: (noteId: String) -> Unit,
     paddingValues: PaddingValues = PaddingValues(0.dp),

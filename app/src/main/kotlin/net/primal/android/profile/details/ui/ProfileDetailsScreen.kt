@@ -49,6 +49,7 @@ import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.feed.list.FeedLazyColumn
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.feed.note.ConfirmFirstBookmarkAlertDialog
+import net.primal.android.core.compose.feed.note.events.MediaClickEvent
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.core.compose.pulltorefresh.LaunchedPullToRefreshEndingEffect
@@ -77,7 +78,7 @@ fun ProfileDetailsScreen(
     onZapProfileClick: (DraftTx) -> Unit,
     onDrawerQrCodeClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
-    onMediaClick: (String, String) -> Unit,
+    onMediaClick: (MediaClickEvent) -> Unit,
     onFollowsClick: (String, ProfileFollowsType) -> Unit,
     onGoToWallet: () -> Unit,
 ) {
@@ -126,7 +127,7 @@ fun ProfileDetailsScreen(
     onZapProfileClick: (DraftTx) -> Unit,
     onDrawerQrCodeClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
-    onMediaClick: (String, String) -> Unit,
+    onMediaClick: (MediaClickEvent) -> Unit,
     onGoToWallet: () -> Unit,
     onFollowsClick: (String, ProfileFollowsType) -> Unit,
     eventPublisher: (ProfileDetailsContract.UiEvent) -> Unit,
@@ -442,7 +443,7 @@ private fun PreviewProfileScreen() {
                 onZapProfileClick = {},
                 onDrawerQrCodeClick = {},
                 onHashtagClick = {},
-                onMediaClick = { _, _ -> },
+                onMediaClick = {},
                 onFollowsClick = { _, _ -> },
                 onGoToWallet = {},
                 eventPublisher = {},

@@ -34,6 +34,7 @@ import net.primal.android.core.compose.feed.model.FeedPostAction
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.feed.model.ZappingState
 import net.primal.android.core.compose.feed.note.FeedNoteCard
+import net.primal.android.core.compose.feed.note.events.MediaClickEvent
 import net.primal.android.core.compose.feed.zaps.UnableToZapBottomSheet
 import net.primal.android.core.compose.feed.zaps.ZapBottomSheet
 import net.primal.android.core.compose.isEmpty
@@ -59,7 +60,7 @@ fun FeedLazyColumn(
     onPostReplyClick: (String) -> Unit,
     onPostQuoteClick: (FeedPostUi) -> Unit,
     onHashtagClick: (String) -> Unit,
-    onMediaClick: (String, String) -> Unit,
+    onMediaClick: (MediaClickEvent) -> Unit,
     onGoToWallet: () -> Unit,
     onReportContentClick: OnReportContentClick,
     onMuteClick: ((String) -> Unit)? = null,

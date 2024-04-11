@@ -19,6 +19,7 @@ import net.primal.android.core.compose.PrimalClickableText
 import net.primal.android.core.compose.attachment.model.isMediaAttachment
 import net.primal.android.core.compose.feed.model.NoteContentUi
 import net.primal.android.core.compose.feed.model.NoteNostrUriUi
+import net.primal.android.core.compose.feed.note.events.MediaClickEvent
 import net.primal.android.core.utils.HashtagMatcher
 import net.primal.android.feed.db.ReferencedPost
 import net.primal.android.feed.db.ReferencedUser
@@ -116,7 +117,7 @@ fun NoteContent(
     onClick: (Offset) -> Unit,
     onUrlClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
-    onMediaClick: (String, String) -> Unit,
+    onMediaClick: (MediaClickEvent) -> Unit,
     highlightColor: Color = AppTheme.colorScheme.secondary,
     contentColor: Color = AppTheme.colorScheme.onSurface,
     referencedNoteContainerColor: Color = AppTheme.extraColorScheme.surfaceVariantAlt1,
@@ -159,7 +160,6 @@ fun NoteContent(
 
         if (data.attachments.isNotEmpty()) {
             NoteAttachments(
-                noteId = data.noteId,
                 attachments = data.attachments,
                 onUrlClick = onUrlClick,
                 onMediaClick = onMediaClick,
@@ -303,7 +303,7 @@ fun PreviewPostContent() {
                 onClick = {},
                 onUrlClick = {},
                 onHashtagClick = {},
-                onMediaClick = { _, _ -> },
+                onMediaClick = {},
             )
         }
     }
@@ -370,7 +370,7 @@ fun PreviewPostContentWithReferencedPost() {
                 onClick = {},
                 onUrlClick = {},
                 onHashtagClick = {},
-                onMediaClick = { _, _ -> },
+                onMediaClick = {},
             )
         }
     }

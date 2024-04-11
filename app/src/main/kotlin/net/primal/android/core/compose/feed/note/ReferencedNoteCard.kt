@@ -18,6 +18,7 @@ import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.feed.model.FeedPostStatsUi
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.feed.model.toNoteContentUi
+import net.primal.android.core.compose.feed.note.events.MediaClickEvent
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
@@ -27,7 +28,7 @@ fun ReferencedNoteCard(
     modifier: Modifier = Modifier,
     data: FeedPostUi,
     onPostClick: (String) -> Unit,
-    onMediaClick: (String, String) -> Unit,
+    onMediaClick: (MediaClickEvent) -> Unit,
     colors: CardColors = CardDefaults.cardColors(
         containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
     ),
@@ -107,7 +108,7 @@ fun PreviewReferencedPostListItemLight() {
                 replyToAuthorHandle = "alex",
             ),
             onPostClick = {},
-            onMediaClick = { _, _ -> },
+            onMediaClick = {},
         )
     }
 }
@@ -149,7 +150,7 @@ fun PreviewReferencedPostListItemDark() {
                 replyToAuthorHandle = null,
             ),
             onPostClick = {},
-            onMediaClick = { _, _ -> },
+            onMediaClick = {},
         )
     }
 }

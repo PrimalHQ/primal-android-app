@@ -66,7 +66,10 @@ class MediaGalleryViewModel @Inject constructor(
     private fun loadAttachments() =
         viewModelScope.launch {
             val attachments = withContext(dispatcherProvider.io()) {
-                repository.loadAttachments(noteId = noteId, types = listOf(NoteAttachmentType.Image))
+                repository.loadAttachments(
+                    noteId = noteId,
+                    types = listOf(NoteAttachmentType.Image, NoteAttachmentType.Video),
+                )
             }
             setState {
                 copy(

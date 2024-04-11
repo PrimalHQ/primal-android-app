@@ -21,6 +21,7 @@ import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.feed.model.FeedPostAction
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.feed.model.toNoteContentUi
+import net.primal.android.core.compose.feed.note.events.MediaClickEvent
 import net.primal.android.core.ext.openUriSafely
 
 @Composable
@@ -37,7 +38,7 @@ fun FeedNote(
     expanded: Boolean,
     onPostClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
-    onMediaClick: (String, String) -> Unit,
+    onMediaClick: (MediaClickEvent) -> Unit,
     onPostAction: ((FeedPostAction) -> Unit)?,
     onPostLongClickAction: ((FeedPostAction) -> Unit)?,
 ) {

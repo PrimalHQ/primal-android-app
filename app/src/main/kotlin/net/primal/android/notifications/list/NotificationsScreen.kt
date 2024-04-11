@@ -51,6 +51,7 @@ import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.compose.feed.RepostOrQuoteBottomSheet
 import net.primal.android.core.compose.feed.model.FeedPostUi
+import net.primal.android.core.compose.feed.note.events.MediaClickEvent
 import net.primal.android.core.compose.feed.zaps.UnableToZapBottomSheet
 import net.primal.android.core.compose.feed.zaps.ZapBottomSheet
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
@@ -76,7 +77,7 @@ fun NotificationsScreen(
     onNoteReplyClick: (String) -> Unit,
     onPostQuoteClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
-    onMediaClick: (String, String) -> Unit,
+    onMediaClick: (MediaClickEvent) -> Unit,
     onNotificationSettings: () -> Unit,
     onGoToWallet: () -> Unit,
     onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
@@ -120,7 +121,7 @@ fun NotificationsScreen(
     onNoteClick: (String) -> Unit,
     onNoteReplyClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
-    onMediaClick: (String, String) -> Unit,
+    onMediaClick: (MediaClickEvent) -> Unit,
     onGoToWallet: () -> Unit,
     onPostQuoteClick: (String) -> Unit,
     onNotificationSettings: () -> Unit,
@@ -259,7 +260,7 @@ private fun NotificationsList(
     onNoteClick: (String) -> Unit,
     onNoteReplyClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
-    onMediaClick: (String, String) -> Unit,
+    onMediaClick: (MediaClickEvent) -> Unit,
     onGoToWallet: () -> Unit,
     onPostLikeClick: (FeedPostUi) -> Unit,
     onRepostClick: (FeedPostUi) -> Unit,
