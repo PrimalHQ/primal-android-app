@@ -197,6 +197,7 @@ private fun NavGraphBuilder.transactionDetails(
             navController.navigateToMediaGallery(
                 noteId = it.noteId,
                 mediaUrl = it.mediaUrl,
+                mediaPositionMs = it.positionMs,
             )
         },
     )

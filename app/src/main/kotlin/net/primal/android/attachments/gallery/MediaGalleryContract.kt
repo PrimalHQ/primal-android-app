@@ -7,6 +7,7 @@ interface MediaGalleryContract {
         val noteId: String,
         val loading: Boolean = true,
         val initialAttachmentIndex: Int = 0,
+        val initialPositionMs: Long = 0,
         val error: MediaGalleryError? = null,
         val attachments: List<NoteAttachmentUi> = emptyList(),
     ) {

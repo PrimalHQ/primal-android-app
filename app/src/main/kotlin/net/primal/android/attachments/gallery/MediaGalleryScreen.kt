@@ -31,6 +31,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -44,7 +45,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
+import androidx.media3.common.MediaItem
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.ui.PlayerView
 import coil.imageLoader
 import coil.memory.MemoryCache
 import coil.request.ErrorResult
@@ -56,6 +61,7 @@ import me.saket.telephoto.zoomable.coil.ZoomableAsyncImage
 import me.saket.telephoto.zoomable.rememberZoomableImageState
 import me.saket.telephoto.zoomable.rememberZoomableState
 import net.primal.android.R
+import net.primal.android.attachments.domain.NoteAttachmentType
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.HorizontalPagerIndicator
 import net.primal.android.core.compose.SnackbarErrorHandler
@@ -154,6 +160,7 @@ fun MediaGalleryScreen(
             MediaGalleryContent(
                 pagerState = pagerState,
                 initialAttachmentIndex = state.initialAttachmentIndex,
+                initialPositionMs = state.initialPositionMs,
                 imageAttachments = imageAttachments,
                 pagerIndicatorContainerColor = containerColor,
             )
@@ -169,6 +176,7 @@ fun MediaGalleryScreen(
 private fun MediaGalleryContent(
     pagerState: PagerState,
     initialAttachmentIndex: Int,
+    initialPositionMs: Long,
     imageAttachments: List<NoteAttachmentUi>,
     pagerIndicatorContainerColor: Color,
 ) {
@@ -182,6 +190,7 @@ private fun MediaGalleryContent(
                 imageAttachments = imageAttachments,
                 pagerState = pagerState,
                 initialIndex = initialAttachmentIndex,
+                initialPositionMs = initialPositionMs,
             )
         }
 
@@ -260,9 +269,8 @@ private fun AttachmentsHorizontalPager(
     pagerState: PagerState,
     imageAttachments: List<NoteAttachmentUi>,
     initialIndex: Int = 0,
+    initialPositionMs: Long = 0,
 ) {
-    val zoomSpec = ZoomSpec(maxZoomFactor = 2.5f)
-
     HorizontalPager(
         modifier = modifier,
         state = pagerState,
@@ -273,50 +281,68 @@ private fun AttachmentsHorizontalPager(
         ),
     ) { index ->
         val attachment = imageAttachments[index]
-        val imageUrl = attachment.url
         Box(modifier = Modifier.fillMaxSize()) {
-            var error by remember { mutableStateOf<ErrorResult?>(null) }
-            val loadingImageListener = remember {
-                object : ImageRequest.Listener {
-                    override fun onSuccess(request: ImageRequest, result: SuccessResult) {
-                        error = null
-                    }
-
-                    override fun onError(request: ImageRequest, result: ErrorResult) {
-                        error = result
-                    }
+            when (attachment.type) {
+                NoteAttachmentType.Image -> {
+                    ImageScreen(attachment = attachment)
                 }
-            }
-
-            val imageLoader = LocalContext.current.imageLoader
-            val keys = attachment.variants.orEmpty()
-                .sortedBy { it.width }
-                .mapNotNull {
-                    val cacheKey = MemoryCache.Key(it.mediaUrl)
-                    if (imageLoader.memoryCache?.keys?.contains(cacheKey) == true) cacheKey else null
+                NoteAttachmentType.Video -> {
+                    VideoScreen(
+                        positionMs = initialPositionMs,
+                        attachment = attachment,
+                    )
                 }
 
-            ZoomableAsyncImage(
-                modifier = modifier,
-                state = rememberZoomableImageState(rememberZoomableState(zoomSpec = zoomSpec)),
-                imageLoader = imageLoader,
-                model = ImageRequest.Builder(LocalContext.current)
-                    .data(imageUrl)
-                    .placeholderMemoryCacheKey(keys.lastOrNull())
-                    .listener(loadingImageListener)
-                    .crossfade(IMAGE_CROSSFADE_DURATION)
-                    .build(),
-                contentDescription = null,
-            )
-
-            if (error != null) {
-                AttachmentLoadingError()
+                else -> Unit // Not supported
             }
         }
     }
 
     LaunchedEffect(initialIndex) {
         pagerState.scrollToPage(initialIndex)
+    }
+}
+
+@Composable
+private fun ImageScreen(attachment: NoteAttachmentUi, modifier: Modifier = Modifier) {
+    val zoomSpec = ZoomSpec(maxZoomFactor = 2.5f)
+
+    var error by remember { mutableStateOf<ErrorResult?>(null) }
+    val loadingImageListener = remember {
+        object : ImageRequest.Listener {
+            override fun onSuccess(request: ImageRequest, result: SuccessResult) {
+                error = null
+            }
+
+            override fun onError(request: ImageRequest, result: ErrorResult) {
+                error = result
+            }
+        }
+    }
+
+    val imageLoader = LocalContext.current.imageLoader
+    val keys = attachment.variants.orEmpty()
+        .sortedBy { it.width }
+        .mapNotNull {
+            val cacheKey = MemoryCache.Key(it.mediaUrl)
+            if (imageLoader.memoryCache?.keys?.contains(cacheKey) == true) cacheKey else null
+        }
+
+    ZoomableAsyncImage(
+        modifier = modifier,
+        state = rememberZoomableImageState(rememberZoomableState(zoomSpec = zoomSpec)),
+        imageLoader = imageLoader,
+        model = ImageRequest.Builder(LocalContext.current)
+            .data(attachment.url)
+            .placeholderMemoryCacheKey(keys.lastOrNull())
+            .listener(loadingImageListener)
+            .crossfade(durationMillis = 300)
+            .build(),
+        contentDescription = null,
+    )
+
+    if (error != null) {
+        AttachmentLoadingError()
     }
 }
 
@@ -334,4 +360,42 @@ private fun AttachmentLoadingError() {
     }
 }
 
-private const val IMAGE_CROSSFADE_DURATION = 300
+@Composable
+fun VideoScreen(
+    modifier: Modifier = Modifier,
+    positionMs: Long,
+    attachment: NoteAttachmentUi,
+) {
+    val context = LocalContext.current
+
+    val exoPlayer = remember { ExoPlayer.Builder(context).build() }
+    val mediaSource = remember(attachment.url) { MediaItem.fromUri(attachment.url) }
+
+    LaunchedEffect(mediaSource) {
+        exoPlayer.setMediaItem(mediaSource)
+        exoPlayer.prepare()
+        exoPlayer.seekTo(positionMs)
+        exoPlayer.playWhenReady = true
+        exoPlayer.repeatMode = ExoPlayer.REPEAT_MODE_ALL
+        exoPlayer.volume = 1.0f
+    }
+
+    DisposableEffect(mediaSource) {
+        onDispose { exoPlayer.release() }
+    }
+
+    Box(
+        modifier = modifier,
+        contentAlignment = Alignment.BottomEnd,
+    ) {
+        AndroidView(
+            modifier = Modifier.fillMaxSize(),
+            factory = {
+                PlayerView(it).apply {
+                    player = exoPlayer
+                    useController = true
+                }
+            },
+        )
+    }
+}

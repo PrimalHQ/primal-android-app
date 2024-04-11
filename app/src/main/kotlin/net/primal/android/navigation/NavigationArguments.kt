@@ -46,6 +46,9 @@ inline val SavedStateHandle.nwcUrl: String? get() = get(NWC_URL)
 const val MEDIA_URL = "mediaUrl"
 inline val SavedStateHandle.mediaUrl: String? get() = get(MEDIA_URL)
 
+const val MEDIA_POSITION_MS = "mediaPositionMs"
+inline val SavedStateHandle.mediaPositionMs: Long get() = get(MEDIA_POSITION_MS) ?: 0L
+
 const val SEND_PAYMENT_TAB = "sendPaymentTab"
 inline val SavedStateHandle.sendPaymentTab: SendPaymentTab?
     get() = get<String?>(SEND_PAYMENT_TAB)?.let {

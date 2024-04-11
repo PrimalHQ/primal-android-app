@@ -22,6 +22,7 @@ import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.files.MediaDownloader
 import net.primal.android.core.files.error.UnableToSaveContent
 import net.primal.android.core.files.error.UnsuccessfulFileDownload
+import net.primal.android.navigation.mediaPositionMs
 import net.primal.android.navigation.mediaUrl
 import net.primal.android.navigation.noteIdOrThrow
 import timber.log.Timber
@@ -36,6 +37,7 @@ class MediaGalleryViewModel @Inject constructor(
 
     private val noteId = savedStateHandle.noteIdOrThrow
     private val initialMediaUrl = savedStateHandle.mediaUrl
+    private val initialPositionMs = savedStateHandle.mediaPositionMs
 
     private val _state = MutableStateFlow(UiState(noteId = noteId))
     val state = _state.asStateFlow()
@@ -76,6 +78,7 @@ class MediaGalleryViewModel @Inject constructor(
                     loading = false,
                     attachments = attachments.map { it.asNoteAttachmentUi() },
                     initialAttachmentIndex = attachments.indexOfFirst { it.url == initialMediaUrl },
+                    initialPositionMs = this@MediaGalleryViewModel.initialPositionMs,
                 )
             }
         }

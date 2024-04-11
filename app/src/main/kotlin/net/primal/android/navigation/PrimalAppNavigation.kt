@@ -188,8 +188,15 @@ private fun NavController.navigateToWalletSettings(nwcUrl: String? = null) =
 
 fun NavController.navigateToThread(noteId: String) = navigate(route = "thread/$noteId")
 
-fun NavController.navigateToMediaGallery(noteId: String, mediaUrl: String) =
-    navigate(route = "media/$noteId?$MEDIA_URL=$mediaUrl")
+fun NavController.navigateToMediaGallery(
+    noteId: String,
+    mediaUrl: String,
+    mediaPositionMs: Long = 0,
+) = navigate(
+    route = "media/$noteId" +
+        "?$MEDIA_URL=$mediaUrl" +
+        "&$MEDIA_POSITION_MS=$mediaPositionMs",
+)
 
 fun NavController.navigateToExploreFeed(query: String) =
     navigate(route = "explore?$EXPLORE_FEED_DIRECTIVE=${"search;$query".asBase64Encoded()}")
@@ -378,7 +385,9 @@ fun PrimalAppNavigation() {
             )
 
             media(
-                route = "media/{$NOTE_ID}?$MEDIA_URL={$MEDIA_URL}",
+                route = "media/{$NOTE_ID}" +
+                    "?$MEDIA_URL={$MEDIA_URL}" +
+                    "&$MEDIA_POSITION_MS={$MEDIA_POSITION_MS}",
                 arguments = listOf(
                     navArgument(NOTE_ID) {
                         type = NavType.StringType
@@ -387,6 +396,11 @@ fun PrimalAppNavigation() {
                         type = NavType.StringType
                         nullable = true
                         defaultValue = null
+                    },
+                    navArgument(MEDIA_POSITION_MS) {
+                        type = NavType.LongType
+                        nullable = false
+                        defaultValue = 0
                     },
                 ),
                 navController = navController,
@@ -572,6 +586,7 @@ private fun NavGraphBuilder.feed(
             navController.navigateToMediaGallery(
                 noteId = it.noteId,
                 mediaUrl = it.mediaUrl,
+                mediaPositionMs = it.positionMs,
             )
         },
         onGoToWallet = { navController.navigateToWallet() },
@@ -652,6 +667,7 @@ private fun NavGraphBuilder.exploreFeed(
             navController.navigateToMediaGallery(
                 noteId = it.noteId,
                 mediaUrl = it.mediaUrl,
+                mediaPositionMs = it.positionMs,
             )
         },
         onGoToWallet = { navController.navigateToWallet() },
@@ -713,6 +729,7 @@ private fun NavGraphBuilder.chat(
             navController.navigateToMediaGallery(
                 noteId = it.noteId,
                 mediaUrl = it.mediaUrl,
+                mediaPositionMs = it.positionMs,
             )
         },
     )
@@ -754,6 +771,7 @@ private fun NavGraphBuilder.notifications(
             navController.navigateToMediaGallery(
                 noteId = it.noteId,
                 mediaUrl = it.mediaUrl,
+                mediaPositionMs = it.positionMs,
             )
         },
         onPostQuoteClick = { preFillContent -> navController.navigateToNoteEditor(preFillContent) },
@@ -787,6 +805,7 @@ private fun NavGraphBuilder.thread(
             navController.navigateToMediaGallery(
                 noteId = it.noteId,
                 mediaUrl = it.mediaUrl,
+                mediaPositionMs = it.positionMs,
             )
         },
         onGoToWallet = { navController.navigateToWallet() },
@@ -848,6 +867,7 @@ private fun NavGraphBuilder.profile(
             navController.navigateToMediaGallery(
                 noteId = it.noteId,
                 mediaUrl = it.mediaUrl,
+                mediaPositionMs = it.positionMs,
             )
         },
         onGoToWallet = { navController.navigateToWallet() },
