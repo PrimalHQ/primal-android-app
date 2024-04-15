@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.media3.common.MediaItem
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
 import coil.imageLoader
@@ -183,7 +184,7 @@ private fun MediaGalleryContent(
 ) {
     Box(
         modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.TopStart,
+        contentAlignment = Alignment.Center,
     ) {
         if (imageAttachments.isNotEmpty()) {
             AttachmentsHorizontalPager(
@@ -285,7 +286,10 @@ private fun AttachmentsHorizontalPager(
         Box(modifier = Modifier.fillMaxSize()) {
             when (attachment.type) {
                 NoteAttachmentType.Image -> {
-                    ImageScreen(attachment = attachment)
+                    ImageScreen(
+                        modifier = Modifier.fillMaxSize(),
+                        attachment = attachment,
+                    )
                 }
 
                 NoteAttachmentType.Video -> {
@@ -362,6 +366,7 @@ private fun AttachmentLoadingError() {
     }
 }
 
+@androidx.annotation.OptIn(UnstableApi::class)
 @Composable
 fun VideoScreen(
     modifier: Modifier = Modifier,
@@ -396,6 +401,9 @@ fun VideoScreen(
                 PlayerView(it).apply {
                     player = exoPlayer
                     useController = true
+                    setShowNextButton(false)
+                    setShowPreviousButton(false)
+                    controllerShowTimeoutMs = 1000
                 }
             },
         )
