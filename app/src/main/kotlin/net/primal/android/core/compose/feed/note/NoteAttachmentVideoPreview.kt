@@ -51,7 +51,7 @@ fun NoteAttachmentVideoPreview(
     LaunchedEffect(mediaSource) {
         exoPlayer.setMediaItem(mediaSource)
         exoPlayer.prepare()
-        exoPlayer.playWhenReady = false
+        exoPlayer.playWhenReady = true
         exoPlayer.repeatMode = ExoPlayer.REPEAT_MODE_ALL
         exoPlayer.volume = if (isMuted) 0.0f else 1.0f
     }
