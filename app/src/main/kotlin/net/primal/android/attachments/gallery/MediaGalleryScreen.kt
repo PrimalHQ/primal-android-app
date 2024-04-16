@@ -56,6 +56,7 @@ import coil.memory.MemoryCache
 import coil.request.ErrorResult
 import coil.request.ImageRequest
 import coil.request.SuccessResult
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.launch
 import me.saket.telephoto.zoomable.ZoomSpec
 import me.saket.telephoto.zoomable.coil.ZoomableAsyncImage
@@ -406,7 +407,7 @@ fun VideoScreen(
                     useController = true
                     setShowNextButton(false)
                     setShowPreviousButton(false)
-                    controllerShowTimeoutMs = 1000
+                    controllerShowTimeoutMs = 1.seconds.inWholeMilliseconds.toInt()
                 }
             },
         )
