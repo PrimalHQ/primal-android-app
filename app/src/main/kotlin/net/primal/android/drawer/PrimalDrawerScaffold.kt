@@ -15,7 +15,7 @@ import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
-import androidx.compose.material3.rememberTopAppBarState
+import androidx.compose.material3.TopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -52,7 +52,14 @@ fun PrimalDrawerScaffold(
 ) {
     val localDensity = LocalDensity.current
 
-    val topAppBarState = rememberTopAppBarState()
+    // Required for popEnter scaleIn enter transition
+    val topAppBarState = remember {
+        TopAppBarState(
+            initialHeightOffsetLimit = -Float.MAX_VALUE,
+            initialHeightOffset = 0f,
+            initialContentOffset = 0f,
+        )
+    }
     val topAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(topAppBarState)
 
     var bottomBarInitialHeight by remember { mutableStateOf(0.dp) }

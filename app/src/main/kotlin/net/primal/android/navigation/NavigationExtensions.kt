@@ -24,3 +24,16 @@ fun String?.asBase64Decoded(): String? {
         else -> String(Base64.getDecoder().decode(this.toByteArray()))
     }
 }
+
+fun String?.isMainScreenRoute(): Boolean {
+    return when (this) {
+        "feed?$FEED_DIRECTIVE={$FEED_DIRECTIVE}",
+        "explore",
+        "walletDashboard",
+        "notifications",
+        "messages",
+        -> true
+
+        else -> false
+    }
+}

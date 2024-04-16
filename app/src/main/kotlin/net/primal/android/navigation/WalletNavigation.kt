@@ -28,20 +28,20 @@ import net.primal.android.wallet.transactions.send.prepare.SendPaymentScreen
 import net.primal.android.wallet.transactions.send.prepare.SendPaymentViewModel
 import net.primal.android.wallet.transactions.send.prepare.tabs.SendPaymentTab
 
-private fun NavController.navigateToWalletActivation() = navigate(route = "activation")
+private fun NavController.navigateToWalletActivation() = navigate(route = "walletActivation")
 
 private fun NavController.navigateToWalletSendPayment(tab: SendPaymentTab) =
-    navigate(route = "send?$SEND_PAYMENT_TAB=$tab")
+    navigate(route = "walletSend?$SEND_PAYMENT_TAB=$tab")
 
 fun NavController.navigateToWalletCreateTransaction(draftTransaction: DraftTx) =
     navigate(
-        route = "transaction/create?$DRAFT_TRANSACTION=" +
+        route = "walletTransaction/create?$DRAFT_TRANSACTION=" +
             NostrJson.encodeToString(draftTransaction).asBase64Encoded(),
     )
 
-private fun NavController.navigateToWalletReceive() = navigate(route = "receive")
+private fun NavController.navigateToWalletReceive() = navigate(route = "walletReceive")
 
-private fun NavController.navigateToTransactionDetails(txId: String) = navigate(route = "transaction/$txId")
+private fun NavController.navigateToTransactionDetails(txId: String) = navigate(route = "walletTransaction/$txId")
 
 fun NavGraphBuilder.walletNavigation(
     route: String,
@@ -50,22 +50,22 @@ fun NavGraphBuilder.walletNavigation(
     onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
 ) = navigation(
     route = route,
-    startDestination = "dashboard",
+    startDestination = "walletDashboard",
 ) {
     dashboard(
-        route = "dashboard",
+        route = "walletDashboard",
         onTopLevelDestinationChanged = onTopLevelDestinationChanged,
         onDrawerDestinationClick = onDrawerScreenClick,
         navController = navController,
     )
 
     activation(
-        route = "activation",
+        route = "walletActivation",
         navController = navController,
     )
 
     send(
-        route = "send?$SEND_PAYMENT_TAB={$SEND_PAYMENT_TAB}",
+        route = "walletSend?$SEND_PAYMENT_TAB={$SEND_PAYMENT_TAB}",
         arguments = listOf(
             navArgument(SEND_PAYMENT_TAB) {
                 type = NavType.StringType
@@ -76,7 +76,7 @@ fun NavGraphBuilder.walletNavigation(
     )
 
     createTransaction(
-        route = "transaction/create?$DRAFT_TRANSACTION={$DRAFT_TRANSACTION}",
+        route = "walletTransaction/create?$DRAFT_TRANSACTION={$DRAFT_TRANSACTION}",
         arguments = listOf(
             navArgument(DRAFT_TRANSACTION) {
                 type = NavType.StringType
@@ -87,12 +87,12 @@ fun NavGraphBuilder.walletNavigation(
     )
 
     receive(
-        route = "receive",
+        route = "walletReceive",
         navController = navController,
     )
 
     transactionDetails(
-        route = "transaction/{$TRANSACTION_ID}",
+        route = "walletTransaction/{$TRANSACTION_ID}",
         arguments = listOf(
             navArgument(TRANSACTION_ID) {
                 type = NavType.StringType
@@ -107,7 +107,28 @@ private fun NavGraphBuilder.dashboard(
     onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
     navController: NavController,
-) = composable(route = route) {
+) = composable(
+    route = route,
+    enterTransition = { null },
+    exitTransition = {
+        when {
+            targetState.destination.route.isMainScreenRoute() -> null
+            else -> primalScaleOut
+        }
+    },
+    popEnterTransition = {
+        when {
+            initialState.destination.route.isMainScreenRoute() -> null
+            else -> primalScaleIn
+        }
+    },
+    popExitTransition = {
+        when {
+            targetState.destination.route.isMainScreenRoute() -> null
+            else -> primalScaleOut
+        }
+    },
+) {
     val viewModel = hiltViewModel<WalletDashboardViewModel>(it)
 
     LockToOrientationPortrait()
@@ -126,7 +147,13 @@ private fun NavGraphBuilder.dashboard(
 }
 
 private fun NavGraphBuilder.activation(route: String, navController: NavController) =
-    composable(route = route) {
+    composable(
+        route = route,
+        enterTransition = { primalSlideInHorizontally },
+        exitTransition = { primalScaleOut },
+        popEnterTransition = { primalScaleIn },
+        popExitTransition = { primalSlideOutHorizontally },
+    ) {
         val viewModel = hiltViewModel<WalletActivationViewModel>(it)
 
         LockToOrientationPortrait()
@@ -140,7 +167,14 @@ private fun NavGraphBuilder.send(
     route: String,
     arguments: List<NamedNavArgument>,
     navController: NavController,
-) = composable(route = route, arguments = arguments) {
+) = composable(
+    route = route,
+    arguments = arguments,
+    enterTransition = { primalSlideInHorizontally },
+    exitTransition = { primalScaleOut },
+    popEnterTransition = { primalScaleIn },
+    popExitTransition = { primalSlideOutHorizontally },
+) {
     val viewModel = hiltViewModel<SendPaymentViewModel>(it)
 
     LockToOrientationPortrait()
@@ -158,7 +192,14 @@ private fun NavGraphBuilder.createTransaction(
     route: String,
     arguments: List<NamedNavArgument>,
     navController: NavController,
-) = composable(route = route, arguments = arguments) {
+) = composable(
+    route = route,
+    arguments = arguments,
+    enterTransition = { primalSlideInHorizontally },
+    exitTransition = { primalScaleOut },
+    popEnterTransition = { primalScaleIn },
+    popExitTransition = { primalSlideOutHorizontally },
+) {
     val viewModel = hiltViewModel<CreateTransactionViewModel>()
 
     LockToOrientationPortrait()
@@ -169,7 +210,13 @@ private fun NavGraphBuilder.createTransaction(
 }
 
 private fun NavGraphBuilder.receive(route: String, navController: NavController) =
-    composable(route = route) {
+    composable(
+        route = route,
+        enterTransition = { primalSlideInHorizontally },
+        exitTransition = { primalScaleOut },
+        popEnterTransition = { primalScaleIn },
+        popExitTransition = { primalSlideOutHorizontally },
+    ) {
         val viewModel = hiltViewModel<ReceivePaymentViewModel>()
 
         LockToOrientationPortrait()
@@ -183,7 +230,14 @@ private fun NavGraphBuilder.transactionDetails(
     route: String,
     navController: NavController,
     arguments: List<NamedNavArgument>,
-) = composable(route = route, arguments = arguments) {
+) = composable(
+    route = route,
+    arguments = arguments,
+    enterTransition = { primalSlideInHorizontally },
+    exitTransition = { primalScaleOut },
+    popEnterTransition = { primalScaleIn },
+    popExitTransition = { primalSlideOutHorizontally },
+) {
     val viewModel = hiltViewModel<TransactionDetailsViewModel>()
 
     LockToOrientationPortrait()
