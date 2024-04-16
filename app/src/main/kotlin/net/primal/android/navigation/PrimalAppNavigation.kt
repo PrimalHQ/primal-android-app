@@ -2,6 +2,7 @@ package net.primal.android.navigation
 
 import android.net.Uri
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
@@ -921,10 +922,10 @@ private fun NavGraphBuilder.media(
 ) = composable(
     route = route,
     arguments = arguments,
-    enterTransition = { primalSlideInHorizontally },
+    enterTransition = { fadeIn() },
     exitTransition = { primalScaleOut },
     popEnterTransition = { primalScaleIn },
-    popExitTransition = { primalSlideOutHorizontally },
+    popExitTransition = { primalScaleOut },
 ) { navBackEntry ->
     val viewModel = hiltViewModel<MediaGalleryViewModel>(navBackEntry)
     MediaGalleryScreen(
