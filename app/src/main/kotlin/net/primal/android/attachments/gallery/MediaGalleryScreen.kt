@@ -376,7 +376,10 @@ fun VideoScreen(
     val context = LocalContext.current
 
     val exoPlayer = remember { ExoPlayer.Builder(context).build() }
-    val mediaSource = remember(attachment.url) { MediaItem.fromUri(attachment.url) }
+    val mediaSource = remember(attachment) {
+        val mediaUrl = attachment.variants?.firstOrNull()?.mediaUrl ?: attachment.url
+        MediaItem.fromUri(mediaUrl)
+    }
 
     LaunchedEffect(mediaSource) {
         exoPlayer.setMediaItem(mediaSource)

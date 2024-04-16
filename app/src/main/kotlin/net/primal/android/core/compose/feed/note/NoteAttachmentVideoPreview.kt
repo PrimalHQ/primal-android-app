@@ -43,12 +43,15 @@ fun NoteAttachmentVideoPreview(
 
     var isMuted by remember { mutableStateOf(true) }
     val exoPlayer = remember { ExoPlayer.Builder(context).build() }
-    val mediaSource = remember(attachment.url) { MediaItem.fromUri(attachment.url) }
+    val mediaSource = remember(attachment) {
+        val mediaUrl = attachment.variants?.firstOrNull()?.mediaUrl ?: attachment.url
+        MediaItem.fromUri(mediaUrl)
+    }
 
     LaunchedEffect(mediaSource) {
         exoPlayer.setMediaItem(mediaSource)
         exoPlayer.prepare()
-        exoPlayer.playWhenReady = true
+        exoPlayer.playWhenReady = false
         exoPlayer.repeatMode = ExoPlayer.REPEAT_MODE_ALL
         exoPlayer.volume = if (isMuted) 0.0f else 1.0f
     }
