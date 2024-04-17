@@ -91,10 +91,10 @@ private fun NavGraphBuilder.home(
     onSettingsSectionClick: (PrimalSettingsSection) -> Unit,
 ) = composable(
     route = route,
-    enterTransition = { primalSlideInHorizontally },
+    enterTransition = { primalSlideInHorizontallyFromEnd },
     exitTransition = { primalScaleOut },
     popEnterTransition = { primalScaleIn },
-    popExitTransition = { primalSlideOutHorizontally },
+    popExitTransition = { primalSlideOutHorizontallyToEnd },
 ) {
     val viewModel = hiltViewModel<SettingsHomeViewModel>(it)
     LockToOrientationPortrait()
@@ -108,10 +108,10 @@ private fun NavGraphBuilder.home(
 private fun NavGraphBuilder.keys(route: String, navController: NavController) =
     composable(
         route = route,
-        enterTransition = { primalSlideInHorizontally },
+        enterTransition = { primalSlideInHorizontallyFromEnd },
         exitTransition = { primalScaleOut },
         popEnterTransition = { primalScaleIn },
-        popExitTransition = { primalSlideOutHorizontally },
+        popExitTransition = { primalSlideOutHorizontallyToEnd },
     ) {
         val viewModel = hiltViewModel<AccountSettingsViewModel>(it)
         LockToOrientationPortrait()
@@ -124,10 +124,10 @@ private fun NavGraphBuilder.keys(route: String, navController: NavController) =
 private fun NavGraphBuilder.network(route: String, navController: NavController) =
     composable(
         route = route,
-        enterTransition = { primalSlideInHorizontally },
+        enterTransition = { primalSlideInHorizontallyFromEnd },
         exitTransition = { primalScaleOut },
         popEnterTransition = { primalScaleIn },
-        popExitTransition = { primalSlideOutHorizontally },
+        popExitTransition = { primalSlideOutHorizontallyToEnd },
     ) {
         val viewModel = hiltViewModel<NetworkSettingsViewModel>(it)
         LockToOrientationPortrait()
@@ -144,10 +144,10 @@ private fun NavGraphBuilder.wallet(
 ) = composable(
     route = route,
     arguments = arguments,
-    enterTransition = { primalSlideInHorizontally },
+    enterTransition = { primalSlideInHorizontallyFromEnd },
     exitTransition = { primalScaleOut },
     popEnterTransition = { primalScaleIn },
-    popExitTransition = { primalSlideOutHorizontally },
+    popExitTransition = { primalSlideOutHorizontallyToEnd },
 ) { navBackEntry ->
     val viewModel = hiltViewModel<WalletSettingsViewModel>(navBackEntry)
     LockToOrientationPortrait()
@@ -161,10 +161,10 @@ private fun NavGraphBuilder.wallet(
 private fun NavGraphBuilder.notifications(route: String, navController: NavController) =
     composable(
         route = route,
-        enterTransition = { primalSlideInHorizontally },
+        enterTransition = { primalSlideInHorizontallyFromEnd },
         exitTransition = { primalScaleOut },
         popEnterTransition = { primalScaleIn },
-        popExitTransition = { primalSlideOutHorizontally },
+        popExitTransition = { primalSlideOutHorizontallyToEnd },
     ) { navBackEntry ->
         val viewModel = hiltViewModel<NotificationsSettingsViewModel>(navBackEntry)
         LockToOrientationPortrait()
@@ -177,10 +177,10 @@ private fun NavGraphBuilder.notifications(route: String, navController: NavContr
 private fun NavGraphBuilder.appearance(route: String, navController: NavController) =
     composable(
         route = route,
-        enterTransition = { primalSlideInHorizontally },
+        enterTransition = { primalSlideInHorizontallyFromEnd },
         exitTransition = { primalScaleOut },
         popEnterTransition = { primalScaleIn },
-        popExitTransition = { primalSlideOutHorizontally },
+        popExitTransition = { primalSlideOutHorizontallyToEnd },
     ) {
         val viewModel = appearanceSettingsViewModel(primalTheme = LocalPrimalTheme.current)
         LockToOrientationPortrait()
@@ -190,10 +190,10 @@ private fun NavGraphBuilder.appearance(route: String, navController: NavControll
 private fun NavGraphBuilder.contentDisplay(route: String, navController: NavController) =
     composable(
         route = route,
-        enterTransition = { primalSlideInHorizontally },
+        enterTransition = { primalSlideInHorizontallyFromEnd },
         exitTransition = { primalScaleOut },
         popEnterTransition = { primalScaleIn },
-        popExitTransition = { primalSlideOutHorizontally },
+        popExitTransition = { primalSlideOutHorizontallyToEnd },
     ) {
         val viewModel = hiltViewModel<ContentDisplaySettingViewModel>(it)
         LockToOrientationPortrait()
@@ -206,10 +206,10 @@ private fun NavGraphBuilder.contentDisplay(route: String, navController: NavCont
 private fun NavGraphBuilder.feeds(route: String, navController: NavController) =
     composable(
         route = route,
-        enterTransition = { primalSlideInHorizontally },
+        enterTransition = { primalSlideInHorizontallyFromEnd },
         exitTransition = { primalScaleOut },
         popEnterTransition = { primalScaleIn },
-        popExitTransition = { primalSlideOutHorizontally },
+        popExitTransition = { primalSlideOutHorizontallyToEnd },
     ) {
         val viewModel = hiltViewModel<FeedsSettingsViewModel>()
         LockToOrientationPortrait()
@@ -219,10 +219,10 @@ private fun NavGraphBuilder.feeds(route: String, navController: NavController) =
 private fun NavGraphBuilder.zaps(route: String, navController: NavController) =
     composable(
         route = route,
-        enterTransition = { primalSlideInHorizontally },
+        enterTransition = { primalSlideInHorizontallyFromEnd },
         exitTransition = { primalScaleOut },
         popEnterTransition = { primalScaleIn },
-        popExitTransition = { primalSlideOutHorizontally },
+        popExitTransition = { primalSlideOutHorizontallyToEnd },
     ) {
         val viewModel = hiltViewModel<ZapSettingsViewModel>(it)
         LockToOrientationPortrait()
@@ -235,10 +235,10 @@ private fun NavGraphBuilder.zaps(route: String, navController: NavController) =
 private fun NavGraphBuilder.mutedAccounts(route: String, navController: NavController) =
     composable(
         route = route,
-        enterTransition = { primalSlideInHorizontally },
+        enterTransition = { primalSlideInHorizontallyFromEnd },
         exitTransition = { primalScaleOut },
         popEnterTransition = { primalScaleIn },
-        popExitTransition = { primalSlideOutHorizontally },
+        popExitTransition = { primalSlideOutHorizontallyToEnd },
     ) {
         val viewModel = hiltViewModel<MutedSettingsViewModel>(it)
         LockToOrientationPortrait()

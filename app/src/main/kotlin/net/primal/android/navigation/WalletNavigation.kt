@@ -149,10 +149,10 @@ private fun NavGraphBuilder.dashboard(
 private fun NavGraphBuilder.activation(route: String, navController: NavController) =
     composable(
         route = route,
-        enterTransition = { primalSlideInHorizontally },
+        enterTransition = { primalSlideInHorizontallyFromEnd },
         exitTransition = { primalScaleOut },
         popEnterTransition = { primalScaleIn },
-        popExitTransition = { primalSlideOutHorizontally },
+        popExitTransition = { primalSlideOutHorizontallyToEnd },
     ) {
         val viewModel = hiltViewModel<WalletActivationViewModel>(it)
 
@@ -170,10 +170,10 @@ private fun NavGraphBuilder.send(
 ) = composable(
     route = route,
     arguments = arguments,
-    enterTransition = { primalSlideInHorizontally },
+    enterTransition = { primalSlideInHorizontallyFromEnd },
     exitTransition = { primalScaleOut },
     popEnterTransition = { primalScaleIn },
-    popExitTransition = { primalSlideOutHorizontally },
+    popExitTransition = { primalSlideOutHorizontallyToEnd },
 ) {
     val viewModel = hiltViewModel<SendPaymentViewModel>(it)
 
@@ -195,10 +195,10 @@ private fun NavGraphBuilder.createTransaction(
 ) = composable(
     route = route,
     arguments = arguments,
-    enterTransition = { primalSlideInHorizontally },
+    enterTransition = { primalSlideInHorizontallyFromEnd },
     exitTransition = { primalScaleOut },
     popEnterTransition = { primalScaleIn },
-    popExitTransition = { primalSlideOutHorizontally },
+    popExitTransition = { primalSlideOutHorizontallyToEnd },
 ) {
     val viewModel = hiltViewModel<CreateTransactionViewModel>()
 
@@ -212,10 +212,10 @@ private fun NavGraphBuilder.createTransaction(
 private fun NavGraphBuilder.receive(route: String, navController: NavController) =
     composable(
         route = route,
-        enterTransition = { primalSlideInHorizontally },
+        enterTransition = { primalSlideInHorizontallyFromEnd },
         exitTransition = { primalScaleOut },
         popEnterTransition = { primalScaleIn },
-        popExitTransition = { primalSlideOutHorizontally },
+        popExitTransition = { primalSlideOutHorizontallyToEnd },
     ) {
         val viewModel = hiltViewModel<ReceivePaymentViewModel>()
 
@@ -233,10 +233,10 @@ private fun NavGraphBuilder.transactionDetails(
 ) = composable(
     route = route,
     arguments = arguments,
-    enterTransition = { primalSlideInHorizontally },
+    enterTransition = { primalSlideInHorizontallyFromEnd },
     exitTransition = { primalScaleOut },
     popEnterTransition = { primalScaleIn },
-    popExitTransition = { primalSlideOutHorizontally },
+    popExitTransition = { primalSlideOutHorizontallyToEnd },
 ) {
     val viewModel = hiltViewModel<TransactionDetailsViewModel>()
 

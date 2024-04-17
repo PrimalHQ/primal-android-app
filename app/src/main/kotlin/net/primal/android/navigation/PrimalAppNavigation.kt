@@ -2,7 +2,6 @@ package net.primal.android.navigation
 
 import android.net.Uri
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
@@ -690,10 +689,10 @@ private fun NavGraphBuilder.exploreFeed(
 ) = composable(
     route = route,
     arguments = arguments,
-    enterTransition = { primalSlideInHorizontally },
+    enterTransition = { primalSlideInHorizontallyFromEnd },
     exitTransition = { primalScaleOut },
     popEnterTransition = { primalScaleIn },
-    popExitTransition = { primalSlideOutHorizontally },
+    popExitTransition = { primalSlideOutHorizontallyToEnd },
 ) {
     val viewModel = hiltViewModel<ExploreFeedViewModel>(it)
     LockToOrientationPortrait()
@@ -719,10 +718,10 @@ private fun NavGraphBuilder.exploreFeed(
 private fun NavGraphBuilder.search(route: String, navController: NavController) =
     composable(
         route = route,
-        enterTransition = { primalSlideInHorizontally },
+        enterTransition = { primalSlideInHorizontallyFromEnd },
         exitTransition = { primalScaleOut },
         popEnterTransition = { primalScaleIn },
-        popExitTransition = { primalSlideOutHorizontally },
+        popExitTransition = { primalSlideOutHorizontallyToEnd },
     ) {
         val viewModel = hiltViewModel<SearchViewModel>(it)
         LockToOrientationPortrait()
@@ -781,10 +780,10 @@ private fun NavGraphBuilder.chat(
 ) = composable(
     route = route,
     arguments = arguments,
-    enterTransition = { primalSlideInHorizontally },
+    enterTransition = { primalSlideInHorizontallyFromEnd },
     exitTransition = { primalScaleOut },
     popEnterTransition = { primalScaleIn },
-    popExitTransition = { primalSlideOutHorizontally },
+    popExitTransition = { primalSlideOutHorizontallyToEnd },
 ) { navBackEntry ->
     val viewModel = hiltViewModel<ChatViewModel>(navBackEntry)
     LockToOrientationPortrait()
@@ -807,10 +806,10 @@ private fun NavGraphBuilder.chat(
 private fun NavGraphBuilder.newMessage(route: String, navController: NavController) =
     composable(
         route = route,
-        enterTransition = { primalSlideInHorizontally },
+        enterTransition = { primalSlideInHorizontallyFromEnd },
         exitTransition = { primalScaleOut },
         popEnterTransition = { primalScaleIn },
-        popExitTransition = { primalSlideOutHorizontally },
+        popExitTransition = { primalSlideOutHorizontallyToEnd },
     ) { navBackEntry ->
         val viewModel = hiltViewModel<SearchViewModel>(navBackEntry)
         LockToOrientationPortrait()
@@ -882,10 +881,10 @@ private fun NavGraphBuilder.thread(
 ) = composable(
     route = route,
     arguments = arguments,
-    enterTransition = { primalSlideInHorizontally },
+    enterTransition = { primalSlideInHorizontallyFromEnd },
     exitTransition = { primalScaleOut },
     popEnterTransition = { primalScaleIn },
-    popExitTransition = { primalSlideOutHorizontally },
+    popExitTransition = { primalSlideOutHorizontallyToEnd },
 ) { navBackEntry ->
     val viewModel = hiltViewModel<ThreadViewModel>(navBackEntry)
     LockToOrientationPortrait()
@@ -922,10 +921,10 @@ private fun NavGraphBuilder.media(
 ) = composable(
     route = route,
     arguments = arguments,
-    enterTransition = { fadeIn() },
-    exitTransition = { primalScaleOut },
+    enterTransition = { primalSlideInVerticallyFromBottom },
+    exitTransition = { primalSlideOutVerticallyToBottom },
     popEnterTransition = { primalScaleIn },
-    popExitTransition = { primalScaleOut },
+    popExitTransition = { primalSlideOutVerticallyToBottom },
 ) { navBackEntry ->
     val viewModel = hiltViewModel<MediaGalleryViewModel>(navBackEntry)
     MediaGalleryScreen(
@@ -941,10 +940,10 @@ private fun NavGraphBuilder.profile(
 ) = composable(
     route = route,
     arguments = arguments,
-    enterTransition = { primalSlideInHorizontally },
+    enterTransition = { primalSlideInHorizontallyFromEnd },
     exitTransition = { primalScaleOut },
     popEnterTransition = { primalScaleIn },
-    popExitTransition = { primalSlideOutHorizontally },
+    popExitTransition = { primalSlideOutHorizontallyToEnd },
 ) {
     val viewModel = hiltViewModel<ProfileDetailsViewModel>(it)
 
@@ -981,10 +980,10 @@ private fun NavGraphBuilder.profile(
 private fun NavGraphBuilder.profileEditor(route: String, navController: NavController) =
     composable(
         route = route,
-        enterTransition = { primalSlideInHorizontally },
+        enterTransition = { primalSlideInHorizontallyFromEnd },
         exitTransition = { primalScaleOut },
         popEnterTransition = { primalScaleIn },
-        popExitTransition = { primalSlideOutHorizontally },
+        popExitTransition = { primalSlideOutHorizontallyToEnd },
     ) {
         val viewModel = hiltViewModel<ProfileEditorViewModel>()
         LockToOrientationPortrait()
@@ -998,10 +997,10 @@ private fun NavGraphBuilder.profileFollows(
 ) = composable(
     route = route,
     arguments = arguments,
-    enterTransition = { primalSlideInHorizontally },
+    enterTransition = { primalSlideInHorizontallyFromEnd },
     exitTransition = { primalScaleOut },
     popEnterTransition = { primalScaleIn },
-    popExitTransition = { primalSlideOutHorizontally },
+    popExitTransition = { primalSlideOutHorizontallyToEnd },
 ) {
     val viewModel = hiltViewModel<ProfileFollowsViewModel>(it)
     LockToOrientationPortrait()
@@ -1019,10 +1018,10 @@ private fun NavGraphBuilder.profileQrCodeViewer(
 ) = composable(
     route = route,
     arguments = arguments,
-    enterTransition = { primalSlideInHorizontally },
+    enterTransition = { primalSlideInHorizontallyFromEnd },
     exitTransition = { primalScaleOut },
     popEnterTransition = { primalScaleIn },
-    popExitTransition = { primalSlideOutHorizontally },
+    popExitTransition = { primalSlideOutHorizontallyToEnd },
 ) {
     val viewModel = hiltViewModel<ProfileQrCodeViewModel>()
     LockToOrientationPortrait()
