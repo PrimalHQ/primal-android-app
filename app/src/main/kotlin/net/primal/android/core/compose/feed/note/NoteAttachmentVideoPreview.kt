@@ -30,6 +30,7 @@ import androidx.media3.ui.PlayerView
 import net.primal.android.core.compose.attachment.model.NoteAttachmentUi
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.Mute
+import net.primal.android.core.compose.icons.primaliconpack.Play
 import net.primal.android.core.compose.icons.primaliconpack.Unmute
 import net.primal.android.theme.AppTheme
 
@@ -41,7 +42,9 @@ fun NoteAttachmentVideoPreview(
 ) {
     val context = LocalContext.current
 
-    var isMuted by remember { mutableStateOf(true) }
+    val autoPlay = false
+
+    var isMuted by remember { mutableStateOf(autoPlay) }
     val exoPlayer = remember { ExoPlayer.Builder(context).build() }
     val mediaSource = remember(attachment) {
         val mediaUrl = attachment.variants?.firstOrNull()?.mediaUrl ?: attachment.url
@@ -51,7 +54,7 @@ fun NoteAttachmentVideoPreview(
     LaunchedEffect(mediaSource) {
         exoPlayer.setMediaItem(mediaSource)
         exoPlayer.prepare()
-        exoPlayer.playWhenReady = true
+        exoPlayer.playWhenReady = autoPlay
         exoPlayer.repeatMode = ExoPlayer.REPEAT_MODE_ALL
         exoPlayer.volume = if (isMuted) 0.0f else 1.0f
     }
@@ -64,38 +67,49 @@ fun NoteAttachmentVideoPreview(
         modifier = modifier.clip(AppTheme.shapes.medium),
         contentAlignment = Alignment.BottomEnd,
     ) {
-        AndroidView(
-            modifier = Modifier
-                .fillMaxSize()
-                .clickable { onVideoClick(exoPlayer.currentPosition) },
-            factory = {
-                PlayerView(it).apply {
-                    player = exoPlayer
-                    useController = false
-                }
-            },
-        )
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center,
+        ) {
+            AndroidView(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clickable { onVideoClick(exoPlayer.currentPosition) },
+                factory = {
+                    PlayerView(it).apply {
+                        player = exoPlayer
+                        useController = false
+                    }
+                },
+            )
 
-        AudioButton(
-            modifier = Modifier
-                .padding(all = 8.dp)
-                .size(32.dp),
-            imageVector = if (isMuted) PrimalIcons.Unmute else PrimalIcons.Mute,
-            onClick = {
-                if (isMuted) {
-                    exoPlayer.volume = 1.0f
-                    isMuted = false
-                } else {
-                    exoPlayer.volume = 0.0f
-                    isMuted = true
-                }
-            },
-        )
+            PlayButton(
+                onClick = { onVideoClick(0L) },
+            )
+        }
+
+        if (autoPlay) {
+            AudioButton(
+                modifier = Modifier
+                    .padding(all = 8.dp)
+                    .size(32.dp),
+                imageVector = if (isMuted) PrimalIcons.Unmute else PrimalIcons.Mute,
+                onClick = {
+                    if (isMuted) {
+                        exoPlayer.volume = 1.0f
+                        isMuted = false
+                    } else {
+                        exoPlayer.volume = 0.0f
+                        isMuted = true
+                    }
+                },
+            )
+        }
     }
 }
 
 @Composable
-fun AudioButton(
+private fun AudioButton(
     modifier: Modifier,
     imageVector: ImageVector,
     onClick: () -> Unit,
@@ -110,6 +124,27 @@ fun AudioButton(
         Icon(
             modifier = Modifier.padding(all = padding),
             imageVector = imageVector,
+            contentDescription = null,
+            tint = Color.White,
+        )
+    }
+}
+
+@Composable
+private fun PlayButton(onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .size(64.dp)
+            .background(color = Color.Black.copy(alpha = 0.42f), shape = CircleShape)
+            .clickable { onClick() }
+            .clip(CircleShape),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            modifier = Modifier
+                .size(32.dp)
+                .padding(start = 6.dp),
+            imageVector = PrimalIcons.Play,
             contentDescription = null,
             tint = Color.White,
         )
