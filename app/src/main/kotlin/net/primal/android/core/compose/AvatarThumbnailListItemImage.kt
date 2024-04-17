@@ -15,14 +15,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.SubcomposeAsyncImage
+import coil.imageLoader
 import net.primal.android.R
 import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
+import net.primal.android.core.images.NoGifsCoilImageLoader
 import net.primal.android.theme.AppTheme
 
 @Composable
@@ -52,6 +55,7 @@ fun AvatarThumbnail(
     )
 }
 
+
 @Composable
 private fun AvatarThumbnailListItemImage(
     source: Any?,
@@ -64,8 +68,17 @@ private fun AvatarThumbnailListItemImage(
     onClick: (() -> Unit)? = null,
     defaultAvatar: @Composable () -> Unit,
 ) {
+    val animatedAvatars = false
+    val context = LocalContext.current
+    val imageLoader = if (animatedAvatars) {
+        context.imageLoader
+    } else {
+        NoGifsCoilImageLoader.noGifsImageLoader(context)
+    }
+
     SubcomposeAsyncImage(
         model = source,
+        imageLoader = imageLoader,
         modifier = modifier
             .adjustAvatarBackground(
                 size = avatarSize,

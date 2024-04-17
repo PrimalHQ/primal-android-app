@@ -83,9 +83,11 @@ fun NoteAttachmentVideoPreview(
                 },
             )
 
-            PlayButton(
-                onClick = { onVideoClick(0L) },
-            )
+            if (!autoPlay) {
+                PlayButton(
+                    onClick = { onVideoClick(0L) },
+                )
+            }
         }
 
         if (autoPlay) {
