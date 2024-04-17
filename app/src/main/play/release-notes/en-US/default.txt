@@ -1,1 +1,1 @@
-Bookmarks, Profile QR code viewer and scanner, Outbox support and other fixes.
+Fix for sync broken changes.
