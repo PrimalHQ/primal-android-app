@@ -47,6 +47,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
 import androidx.media3.common.MediaItem
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
@@ -73,6 +74,7 @@ import net.primal.android.core.compose.dropdown.DropdownPrimalMenuItem
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.More
+import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.theme.AppTheme
 
 @Composable
@@ -297,6 +299,7 @@ private fun AttachmentsHorizontalPager(
                     VideoScreen(
                         positionMs = initialPositionMs,
                         attachment = attachment,
+                        isPageVisible = pagerState.currentPage == index,
                     )
                 }
 
@@ -373,6 +376,7 @@ fun VideoScreen(
     modifier: Modifier = Modifier,
     positionMs: Long,
     attachment: NoteAttachmentUi,
+    isPageVisible: Boolean,
 ) {
     val context = LocalContext.current
 
@@ -389,6 +393,18 @@ fun VideoScreen(
         exoPlayer.playWhenReady = true
         exoPlayer.repeatMode = ExoPlayer.REPEAT_MODE_ALL
         exoPlayer.volume = 1.0f
+    }
+
+    LaunchedEffect(isPageVisible) {
+        if (!isPageVisible) {
+            exoPlayer.pause()
+        }
+    }
+
+    DisposableLifecycleObserverEffect(mediaSource) {
+        if (it == Lifecycle.Event.ON_PAUSE) {
+            exoPlayer.pause()
+        }
     }
 
     DisposableEffect(mediaSource) {
