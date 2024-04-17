@@ -134,7 +134,7 @@ fun FeedScreen(
     val snackbarHostState = remember { SnackbarHostState() }
 
     val haptic = LocalHapticFeedback.current
-    var focusModeEnabled by rememberSaveable { mutableStateOf(true) }
+    var focusModeEnabled by rememberSaveable { mutableStateOf(false) }
 
     val canScrollUp by remember(feedListState) {
         derivedStateOf {

@@ -38,8 +38,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -139,6 +141,8 @@ fun MessageListScreen(
     val conversations = state.conversations.collectAsLazyPagingItems()
     val listState = conversations.rememberLazyListStatePagingWorkaround()
 
+    val focusModeEnabled by rememberSaveable { mutableStateOf(false) }
+
     val firstConversationId = if (conversations.isNotEmpty()) conversations[0]?.participantId else null
     LaunchedEffect(firstConversationId) {
         if (listState.firstVisibleItemIndex <= 1) {
@@ -154,6 +158,7 @@ fun MessageListScreen(
         onDrawerDestinationClick = onDrawerDestinationClick,
         onDrawerQrCodeClick = onDrawerQrCodeClick,
         badges = state.badges,
+        focusModeEnabled = focusModeEnabled && conversations.isNotEmpty(),
         topBar = {
             PrimalTopAppBar(
                 title = stringResource(id = R.string.messages_title),

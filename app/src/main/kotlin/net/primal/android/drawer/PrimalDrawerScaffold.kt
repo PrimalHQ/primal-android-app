@@ -36,6 +36,7 @@ import net.primal.android.user.domain.Badges
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PrimalDrawerScaffold(
+    modifier: Modifier = Modifier,
     drawerState: DrawerState,
     activeDestination: PrimalTopLevelDestination,
     onPrimaryDestinationChanged: (PrimalTopLevelDestination) -> Unit,
@@ -79,7 +80,7 @@ fun PrimalDrawerScaffold(
     }
 
     ModalNavigationDrawer(
-        modifier = Modifier,
+        modifier = modifier,
         drawerState = drawerState,
         drawerContent = {
             PrimalDrawer(

@@ -55,7 +55,6 @@ fun AvatarThumbnail(
     )
 }
 
-
 @Composable
 private fun AvatarThumbnailListItemImage(
     source: Any?,

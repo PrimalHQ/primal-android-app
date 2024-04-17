@@ -31,7 +31,6 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.UserFeedAdd
 import net.primal.android.core.compose.icons.primaliconpack.UserFeedRemove
-import net.primal.android.core.compose.isNotEmpty
 import net.primal.android.core.ext.isBookmarkFeed
 import net.primal.android.core.ext.isSearchFeed
 import net.primal.android.core.ext.removeSearchPrefix
@@ -110,11 +109,7 @@ fun ExploreFeedScreen(
     )
 
     val topAppBarState = rememberTopAppBarState()
-    val scrollBehavior = if (feedPagingItems.isNotEmpty()) {
-        TopAppBarDefaults.enterAlwaysScrollBehavior(topAppBarState)
-    } else {
-        TopAppBarDefaults.pinnedScrollBehavior(topAppBarState)
-    }
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(topAppBarState)
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
