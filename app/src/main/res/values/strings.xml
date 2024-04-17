@@ -293,6 +293,14 @@
     <string name="settings_appearance_auto_adjust_dark_mode">Auto adjust dark theme</string>
     <string name="settings_appearance_auto_adjust_dark_mode_hint">Automatically set dark theme based on your device Display settings.</string>
 
+    <string name="settings_content_display_title">Content Display</string>
+    <string name="settings_content_display_auto_play_videos">Auto play videos</string>
+    <string name="settings_content_display_auto_play_videos_hint">Start playing videos automatically as you scroll the feed. Turn this off to use less network data.</string>
+    <string name="settings_content_display_animated_avatars">Show animated avatars</string>
+    <string name="settings_content_display_animated_avatars_hint">Switch off to disable animated avatars in feeds. Profile will continue to show the full version.</string>
+    <string name="settings_content_display_full_screen_feed_display">Full screen feed display</string>
+    <string name="settings_content_display_full_screen_feed_display_hint">Maximize screen real estate by hiding app header &amp; footer as you scroll down the feed.</string>
+
     <string name="settings_network_title">Network</string>
     <string name="settings_network_restore_default_relays_text_button">Restore Defaults Relays</string>
     <string name="settings_network_restore_default_relays_title">Restore Defaults</string>

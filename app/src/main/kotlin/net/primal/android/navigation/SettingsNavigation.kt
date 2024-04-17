@@ -12,6 +12,8 @@ import net.primal.android.LocalPrimalTheme
 import net.primal.android.core.compose.LockToOrientationPortrait
 import net.primal.android.settings.appearance.AppearanceSettingsScreen
 import net.primal.android.settings.appearance.di.appearanceSettingsViewModel
+import net.primal.android.settings.content.ContentDisplaySettingScreen
+import net.primal.android.settings.content.ContentDisplaySettingViewModel
 import net.primal.android.settings.feeds.FeedsSettingsScreen
 import net.primal.android.settings.feeds.FeedsSettingsViewModel
 import net.primal.android.settings.home.PrimalSettingsSection
@@ -34,6 +36,7 @@ private fun NavController.navigateToAccountSettings() = navigate(route = "accoun
 private fun NavController.navigateToNetworkSettings() = navigate(route = "network")
 private fun NavController.navigateToWalletSettings() = navigate(route = "wallet_settings")
 private fun NavController.navigateToAppearanceSettings() = navigate(route = "appearance_settings")
+private fun NavController.navigateToContentDisplaySettings() = navigate(route = "content_display")
 fun NavController.navigateToNotificationsSettings() = navigate(route = "notifications_settings")
 private fun NavController.navigateToFeedsSettings() = navigate(route = "feeds_settings")
 private fun NavController.navigateToZapsSettings() = navigate(route = "zaps_settings")
@@ -53,6 +56,7 @@ fun NavGraphBuilder.settingsNavigation(route: String, navController: NavControll
                     PrimalSettingsSection.Network -> navController.navigateToNetworkSettings()
                     PrimalSettingsSection.Wallet -> navController.navigateToWalletSettings()
                     PrimalSettingsSection.Appearance -> navController.navigateToAppearanceSettings()
+                    PrimalSettingsSection.ContentDisplay -> navController.navigateToContentDisplaySettings()
                     PrimalSettingsSection.Notifications -> navController.navigateToNotificationsSettings()
                     PrimalSettingsSection.Feeds -> navController.navigateToFeedsSettings()
                     PrimalSettingsSection.Zaps -> navController.navigateToZapsSettings()
@@ -74,6 +78,7 @@ fun NavGraphBuilder.settingsNavigation(route: String, navController: NavControll
         )
         network(route = "network", navController = navController)
         appearance(route = "appearance_settings", navController = navController)
+        contentDisplay(route = "content_display", navController = navController)
         mutedAccounts(route = "muted_accounts_settings", navController = navController)
         notifications(route = "notifications_settings", navController = navController)
         feeds(route = "feeds_settings", navController = navController)
@@ -180,6 +185,22 @@ private fun NavGraphBuilder.appearance(route: String, navController: NavControll
         val viewModel = appearanceSettingsViewModel(primalTheme = LocalPrimalTheme.current)
         LockToOrientationPortrait()
         AppearanceSettingsScreen(viewModel = viewModel, onClose = { navController.navigateUp() })
+    }
+
+private fun NavGraphBuilder.contentDisplay(route: String, navController: NavController) =
+    composable(
+        route = route,
+        enterTransition = { primalSlideInHorizontally },
+        exitTransition = { primalScaleOut },
+        popEnterTransition = { primalScaleIn },
+        popExitTransition = { primalSlideOutHorizontally },
+    ) {
+        val viewModel = hiltViewModel<ContentDisplaySettingViewModel>(it)
+        LockToOrientationPortrait()
+        ContentDisplaySettingScreen(
+            viewModel = viewModel,
+            onClose = { navController.navigateUp() },
+        )
     }
 
 private fun NavGraphBuilder.feeds(route: String, navController: NavController) =
