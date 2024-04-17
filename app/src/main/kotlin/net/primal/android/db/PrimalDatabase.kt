@@ -75,7 +75,7 @@ import net.primal.android.wallet.db.WalletTransactionData
         Relay::class,
         EventHints::class,
     ],
-    version = 24,
+    version = 25,
     exportSchema = true,
 )
 @TypeConverters(
