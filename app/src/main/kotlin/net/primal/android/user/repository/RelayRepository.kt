@@ -12,6 +12,7 @@ import net.primal.android.user.accounts.parseNip65Relays
 import net.primal.android.user.api.UsersApi
 import net.primal.android.user.domain.Relay as RelayDO
 import net.primal.android.user.domain.RelayKind
+import net.primal.android.user.domain.cleanWebSocketUrl
 import net.primal.android.user.domain.mapToRelayPO
 import net.primal.android.user.domain.toRelay
 import timber.log.Timber
@@ -74,7 +75,7 @@ class RelayRepository @Inject constructor(
     suspend fun removeRelayAndPublishRelayList(userId: String, url: String) {
         updateRelayList(userId = userId) {
             this.toMutableList().apply {
-                removeIf { it.url == url }
+                removeIf { it.url == url.cleanWebSocketUrl() }
             }
         }
     }

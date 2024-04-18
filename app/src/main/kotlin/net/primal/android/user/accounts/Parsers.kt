@@ -29,9 +29,9 @@ fun String.parseKind3Relays(): List<Relay> {
     return relays
 }
 
-fun List<JsonArray>?.parseNip65Relays(): List<Relay> {
-    return this?.filter { it.firstOrNull()?.jsonPrimitive?.content == "r" }
-        ?.mapNotNull {
+fun List<JsonArray>.parseNip65Relays(): List<Relay> {
+    return this.filter { it.firstOrNull()?.jsonPrimitive?.content == "r" }
+        .mapNotNull {
             it.getOrNull(1)?.jsonPrimitive?.content?.let { url ->
                 val permission = it.getOrNull(2)?.jsonPrimitive?.content?.lowercase()
                 Relay(
@@ -40,7 +40,7 @@ fun List<JsonArray>?.parseNip65Relays(): List<Relay> {
                     write = permission == null || permission == "write",
                 )
             }
-        } ?: emptyList()
+        }
 }
 
 fun List<JsonArray>.parseFollowings(): Set<String> {

@@ -6,13 +6,22 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.add
+import kotlinx.serialization.json.buildJsonArray
 import net.primal.android.core.coroutines.CoroutinesTestRule
 import net.primal.android.db.PrimalDatabase
+import net.primal.android.nostr.model.NostrEventKind
+import net.primal.android.nostr.model.primal.PrimalEvent
 import net.primal.android.nostr.publish.NostrPublisher
+import net.primal.android.user.api.model.UserRelaysResponse
+import net.primal.android.user.domain.Relay
 import net.primal.android.user.domain.RelayKind
+import net.primal.android.user.domain.cleanWebSocketUrl
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -41,15 +50,27 @@ class RelayRepositoryTest {
         myDatabase.close()
     }
 
+    private fun buildPrimalUserRelaysListEvent(relays: List<String>): PrimalEvent {
+        return PrimalEvent(
+            kind = NostrEventKind.PrimalUserRelaysList.value,
+            tags = mutableListOf<JsonArray>().apply {
+                relays.forEach {
+                    add(
+                        buildJsonArray {
+                            add("r")
+                            add(it)
+                        },
+                    )
+                }
+            },
+        )
+    }
+
     @Test
     fun bootstrapDefaultUserRelays_replaceUserRelaysInDatabase() = runTest {
         val userId = "random"
         val expectedRelays = listOf("wss://relay.primal.net", "wss://relay.damus.io")
-        val nostrPublisher = NostrPublisher(
-            relaysSocketManager = mockk(relaxed = true),
-            nostrNotary = mockk(relaxed = true),
-            primalImportApi = mockk(relaxed = true),
-        )
+        val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
         val repository = RelayRepository(
             nostrPublisher = nostrPublisher,
             usersApi = mockk(relaxed = true) {
@@ -62,5 +83,75 @@ class RelayRepositoryTest {
 
         val actualRelays = myDatabase.relays().findRelays(userId = userId, kind = RelayKind.UserRelay)
         actualRelays.map { it.url }.sorted() shouldBe expectedRelays.sorted()
+    }
+
+    @Test
+    fun removeRelayAndPublishRelayList_removesRelayFromDatabase() = runTest {
+        val userId = "random"
+        val relays = listOf("wss://relay.primal.net", "wss://nostr1.current.fyi/")
+        val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
+        val repository = RelayRepository(
+            nostrPublisher = nostrPublisher,
+            usersApi = mockk(relaxed = true) {
+                coEvery { getUserRelays(userId) } returns UserRelaysResponse(
+                    cachedRelayListEvent = buildPrimalUserRelaysListEvent(relays = relays),
+                )
+            },
+            primalDatabase = myDatabase,
+        )
+
+        repository.removeRelayAndPublishRelayList(userId = userId, url = relays.first())
+        val expectedRelays = relays.drop(1).map { it.cleanWebSocketUrl() }.sorted()
+
+        val actualRelays = myDatabase.relays().findRelays(userId = userId, kind = RelayKind.UserRelay)
+        actualRelays.map { it.url }.sorted() shouldBe expectedRelays
+    }
+
+    @Test
+    fun removeRelayAndPublishRelayList_removesEvenIfRelayUrlIsNotCleaned() = runTest {
+        val userId = "random"
+        val relays = listOf("wss://nostr1.current.fyi", "wss://relay.primal.net")
+        val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
+        val repository = RelayRepository(
+            nostrPublisher = nostrPublisher,
+            usersApi = mockk(relaxed = true) {
+                coEvery { getUserRelays(userId) } returns UserRelaysResponse(
+                    cachedRelayListEvent = buildPrimalUserRelaysListEvent(relays = relays),
+                )
+            },
+            primalDatabase = myDatabase,
+        )
+
+        repository.removeRelayAndPublishRelayList(userId = userId, url = "wss://nostr1.current.fyi/")
+        val expectedRelays = relays.drop(1).map { it.cleanWebSocketUrl() }.sorted()
+
+        val actualRelays = myDatabase.relays().findRelays(userId = userId, kind = RelayKind.UserRelay)
+        actualRelays.map { it.url }.sorted() shouldBe expectedRelays
+    }
+
+    @Test
+    fun removeRelayAndPublishRelayList_callsPublishWithNewRelayList() = runTest {
+        val userId = "random"
+        val relays = listOf("wss://relay.primal.net", "wss://nostr1.current.fyi/")
+        val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
+        val repository = RelayRepository(
+            nostrPublisher = nostrPublisher,
+            usersApi = mockk(relaxed = true) {
+                coEvery { getUserRelays(userId) } returns UserRelaysResponse(
+                    cachedRelayListEvent = buildPrimalUserRelaysListEvent(relays = relays),
+                )
+            },
+            primalDatabase = myDatabase,
+        )
+
+        repository.removeRelayAndPublishRelayList(userId = userId, url = relays.first())
+        val expectedRelays = relays.drop(1).map { Relay(url = it, read = true, write = true) }
+
+        coVerify {
+            nostrPublisher.publishRelayList(
+                withArg { it shouldBe userId },
+                withArg { it shouldBe expectedRelays },
+            )
+        }
     }
 }
