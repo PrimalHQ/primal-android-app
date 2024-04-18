@@ -1,6 +1,7 @@
 package net.primal.android.networking.relays
 
-import kotlin.time.Duration.Companion.seconds
+import androidx.annotation.VisibleForTesting
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -33,12 +34,17 @@ class RelayPool(
     private val okHttpClient: OkHttpClient,
 ) {
 
+    companion object {
+        const val PUBLISH_TIMEOUT = 30_000
+    }
+
     private val scope = CoroutineScope(dispatchers.io())
 
     var relays: List<Relay> = emptyList()
         private set
 
-    private var socketClients = listOf<NostrSocketClient>()
+    @VisibleForTesting
+    var socketClients = listOf<NostrSocketClient>()
 
     private val _relayPoolStatus = MutableStateFlow(mapOf<String, Boolean>())
     val relayPoolStatus = _relayPoolStatus.asStateFlow()
@@ -142,8 +148,16 @@ class RelayPool(
             }
         }
 
-        responseFlow.timeout(30.seconds)
+        var responseCount = 0
+        responseFlow.timeout(PUBLISH_TIMEOUT.milliseconds)
             .catch { throw NostrPublishException(cause = it) }
+            .transform {
+                emit(it)
+                responseCount++
+                if (relayConnections.size == responseCount && !it.isSuccessful()) {
+                    throw NostrPublishException(cause = null)
+                }
+            }
             .first { it.isSuccessful() }
     }
 
@@ -158,7 +172,7 @@ class RelayPool(
                     else -> throw IllegalStateException("$it is not allowed")
                 }
             }
-            .timeout(30.seconds)
+            .timeout(PUBLISH_TIMEOUT.milliseconds)
             .first()
     }
 
