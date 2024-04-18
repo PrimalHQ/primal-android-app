@@ -149,7 +149,7 @@ class NostrPublisher @Inject constructor(
     @Throws(NostrPublishException::class)
     suspend fun publishRelayList(userId: String, relays: List<Relay>): NostrEvent {
         val signedNostrEvent = nostrNotary.signRelayListMetadata(userId = userId, relays = relays)
-        relaysSocketManager.publishEvent(signedNostrEvent)
+        relaysSocketManager.publishEvent(nostrEvent = signedNostrEvent, relays = relays)
         importEvent(signedNostrEvent)
         return signedNostrEvent
     }
