@@ -63,7 +63,7 @@ fun NoteImageLoadingPlaceholder() {
 }
 
 @Composable
-private fun NoteImageErrorImage() {
+fun NoteImageErrorImage() {
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center,

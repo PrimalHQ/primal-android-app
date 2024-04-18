@@ -107,9 +107,7 @@ private fun NoteMediaAttachment(
             NoteAttachmentType.Video -> {
                 NoteAttachmentVideoPreview(
                     attachment = attachment,
-                    onVideoClick = { positionMs ->
-                        onClick(positionMs)
-                    },
+                    onVideoClick = { positionMs -> onClick(positionMs) },
                     modifier = Modifier
                         .width(imageSizeDp.width)
                         .height(imageSizeDp.height),

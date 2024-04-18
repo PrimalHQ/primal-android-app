@@ -263,6 +263,7 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.coil.svg)
     implementation(libs.coil.gif)
+    implementation(libs.coil.video)
     implementation(libs.telephoto.zoomable.image)
     implementation(libs.telephoto.zoomable.image.coil)
     implementation(libs.media3.exoplayer.core)
