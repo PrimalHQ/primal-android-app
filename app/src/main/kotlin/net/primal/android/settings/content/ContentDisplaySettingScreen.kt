@@ -22,6 +22,7 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.settings.SettingsItem
 import net.primal.android.settings.content.ContentDisplaySettingsContract.UiEvent
+import net.primal.android.user.domain.ContentDisplaySettings
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -67,11 +68,15 @@ private fun ContentDisplaySettingsScreen(
                     supportText = stringResource(id = R.string.settings_content_display_auto_play_videos_hint),
                     trailingContent = {
                         PrimalSwitch(
-                            checked = state.autoPlayVideos == AUTO_PLAY_ALWAYS,
+                            checked = state.autoPlayVideos == ContentDisplaySettings.AUTO_PLAY_VIDEO_ALWAYS,
                             onCheckedChange = {
                                 eventPublisher(
                                     UiEvent.UpdateAutoPlayVideos(
-                                        code = if (it) AUTO_PLAY_ALWAYS else AUTO_PLAY_NEVER,
+                                        code = if (it) {
+                                            ContentDisplaySettings.AUTO_PLAY_VIDEO_ALWAYS
+                                        } else {
+                                            ContentDisplaySettings.AUTO_PLAY_VIDEO_NEVER
+                                        },
                                     ),
                                 )
                             },

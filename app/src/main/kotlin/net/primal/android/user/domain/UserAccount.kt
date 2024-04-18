@@ -29,6 +29,7 @@ data class UserAccount(
         else -> WalletPreference.Undefined
     },
     val appSettings: ContentAppSettings? = null,
+    val contentDisplaySettings: ContentDisplaySettings = ContentDisplaySettings(),
     val following: Set<String> = emptySet(),
     val interests: List<String> = emptyList(),
     val bookmarks: Set<PublicBookmark> = emptySet(),

@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.SubcomposeAsyncImage
 import coil.imageLoader
+import net.primal.android.LocalContentDisplaySettings
 import net.primal.android.R
 import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -67,7 +68,7 @@ private fun AvatarThumbnailListItemImage(
     onClick: (() -> Unit)? = null,
     defaultAvatar: @Composable () -> Unit,
 ) {
-    val animatedAvatars = false
+    val animatedAvatars = LocalContentDisplaySettings.current.showAnimatedAvatars
     val context = LocalContext.current
     val imageLoader = if (animatedAvatars) {
         context.imageLoader

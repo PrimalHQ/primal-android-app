@@ -23,6 +23,7 @@ import net.primal.android.user.accounts.copyFollowListIfNotNull
 import net.primal.android.user.accounts.copyIfNotNull
 import net.primal.android.user.api.UsersApi
 import net.primal.android.user.db.Relay
+import net.primal.android.user.domain.ContentDisplaySettings
 import net.primal.android.user.domain.NostrWalletConnect
 import net.primal.android.user.domain.RelayKind
 import net.primal.android.user.domain.UserAccount
@@ -199,6 +200,15 @@ class UserRepository @Inject constructor(
     suspend fun updatePrimalWalletSettings(userId: String, reducer: WalletSettings.() -> WalletSettings) {
         accountsStore.getAndUpdateAccount(userId = userId) {
             copy(primalWalletSettings = this.primalWalletSettings.reducer())
+        }
+    }
+
+    suspend fun updateContentDisplaySettings(
+        userId: String,
+        reducer: ContentDisplaySettings.() -> ContentDisplaySettings,
+    ) {
+        accountsStore.getAndUpdateAccount(userId = userId) {
+            copy(contentDisplaySettings = this.contentDisplaySettings.reducer())
         }
     }
 }

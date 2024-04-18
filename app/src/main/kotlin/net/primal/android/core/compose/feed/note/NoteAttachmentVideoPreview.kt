@@ -27,12 +27,14 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
+import net.primal.android.LocalContentDisplaySettings
 import net.primal.android.core.compose.attachment.model.NoteAttachmentUi
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.Mute
 import net.primal.android.core.compose.icons.primaliconpack.Play
 import net.primal.android.core.compose.icons.primaliconpack.Unmute
 import net.primal.android.theme.AppTheme
+import net.primal.android.user.domain.ContentDisplaySettings
 
 @Composable
 fun NoteAttachmentVideoPreview(
@@ -41,8 +43,7 @@ fun NoteAttachmentVideoPreview(
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
-
-    val autoPlay = false
+    val autoPlay = LocalContentDisplaySettings.current.autoPlayVideos == ContentDisplaySettings.AUTO_PLAY_VIDEO_ALWAYS
 
     var isMuted by remember { mutableStateOf(autoPlay) }
     val exoPlayer = remember { ExoPlayer.Builder(context).build() }

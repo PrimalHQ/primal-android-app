@@ -1,11 +1,13 @@
 package net.primal.android.settings.content
 
+import net.primal.android.user.domain.ContentDisplaySettings
+
 interface ContentDisplaySettingsContract {
 
     data class UiState(
-        val autoPlayVideos: Int = AUTO_PLAY_ALWAYS,
-        val showAnimatedAvatars: Boolean = true,
-        val focusMode: Boolean = false,
+        val autoPlayVideos: Int = ContentDisplaySettings.AUTO_PLAY_VIDEO_NEVER,
+        val showAnimatedAvatars: Boolean = false,
+        val focusMode: Boolean = true,
     )
 
     sealed class UiEvent {
@@ -14,7 +16,3 @@ interface ContentDisplaySettingsContract {
         data class UpdateShowFocusMode(val enabled: Boolean) : UiEvent()
     }
 }
-
-const val AUTO_PLAY_ALWAYS = 1
-const val AUTO_PLAY_ONLY_ON_WIFI = 2
-const val AUTO_PLAY_NEVER = 3

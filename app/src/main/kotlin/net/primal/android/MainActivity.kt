@@ -14,6 +14,7 @@ import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import net.primal.android.core.compose.ApplyEdgeToEdge
 import net.primal.android.navigation.PrimalAppNavigation
@@ -22,12 +23,17 @@ import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.active.ActiveThemeStore
 import net.primal.android.theme.defaultPrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
+import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.android.user.domain.ContentDisplaySettings
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     @Inject
     lateinit var themeStore: ActiveThemeStore
+
+    @Inject
+    lateinit var activeAccountStore: ActiveAccountStore
 
     lateinit var primalTheme: PrimalTheme
 
@@ -41,12 +47,17 @@ class MainActivity : ComponentActivity() {
             val userTheme = themeStore.userThemeState.collectAsState()
             primalTheme = userTheme.value ?: defaultPrimalTheme(currentTheme = primalTheme)
 
+            val contentDisplaySettings = activeAccountStore.activeUserAccount
+                .map { it.contentDisplaySettings }
+                .collectAsState(initial = ContentDisplaySettings())
+
             PrimalTheme(
                 primalTheme = primalTheme,
             ) {
                 CompositionLocalProvider(
                     LocalPrimalTheme provides primalTheme,
                     LocalRippleTheme provides PrimalRippleTheme,
+                    LocalContentDisplaySettings provides contentDisplaySettings.value,
                 ) {
                     ApplyEdgeToEdge()
                     PrimalAppNavigation()
@@ -85,4 +96,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-val LocalPrimalTheme = compositionLocalOf<PrimalTheme> { error("No PrimalTheme Provided") }
+val LocalPrimalTheme = compositionLocalOf<PrimalTheme> { error("No PrimalTheme provided.") }
+
+val LocalContentDisplaySettings =
+    compositionLocalOf<ContentDisplaySettings> { error("No ContentDisplay settins provided.") }

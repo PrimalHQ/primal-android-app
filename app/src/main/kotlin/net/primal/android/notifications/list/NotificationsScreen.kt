@@ -27,7 +27,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,6 +41,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
 import kotlinx.coroutines.launch
+import net.primal.android.LocalContentDisplaySettings
 import net.primal.android.R
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.ListLoading
@@ -138,7 +138,6 @@ fun NotificationsScreen(
     val seenNotificationsPagingItems = state.seenNotifications.collectAsLazyPagingItems()
     val notificationsListState = seenNotificationsPagingItems.rememberLazyListStatePagingWorkaround()
 
-    val focusModeEnabled by rememberSaveable { mutableStateOf(false) }
     val canScrollUp by remember(notificationsListState) {
         derivedStateOf {
             notificationsListState.firstVisibleItemIndex > 0
@@ -170,7 +169,7 @@ fun NotificationsScreen(
         onDrawerDestinationClick = onDrawerDestinationClick,
         onDrawerQrCodeClick = onDrawerQrCodeClick,
         badges = state.badges,
-        focusModeEnabled = focusModeEnabled,
+        focusModeEnabled = LocalContentDisplaySettings.current.focusModeEnabled,
         topBar = {
             PrimalTopAppBar(
                 title = stringResource(id = R.string.notifications_title),
