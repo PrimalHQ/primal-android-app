@@ -42,12 +42,13 @@ class RelayRepository @Inject constructor(
 
     private suspend fun fetchUserRelays(userId: String): List<RelayDO>? {
         val response = usersApi.getUserRelays(userId)
-        return response.cachedRelayListEvent?.tags?.parseNip65Relays()
+        val cachedNip65Event = response.cachedRelayListEvent ?: return null
+        return cachedNip65Event.tags.parseNip65Relays()
     }
 
     suspend fun fetchAndUpdateUserRelays(userId: String) {
         val relayList = fetchUserRelays(userId)
-        if (!relayList.isNullOrEmpty()) replaceUserRelays(userId, relayList)
+        if (relayList != null) replaceUserRelays(userId, relayList)
     }
 
     private suspend fun replaceUserRelays(userId: String, relays: List<RelayDO>) {

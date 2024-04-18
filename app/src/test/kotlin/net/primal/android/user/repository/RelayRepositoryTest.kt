@@ -154,4 +154,65 @@ class RelayRepositoryTest {
             )
         }
     }
+
+    @Test
+    fun fetchAndUpdateUserRelays_clearsUserRelaysIfCachedNip65HasEmptyTags() = runTest {
+        val userId = "random"
+        val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
+        val repository = RelayRepository(
+            nostrPublisher = nostrPublisher,
+            usersApi = mockk(relaxed = true) {
+                coEvery { getUserRelays(userId) } returns UserRelaysResponse(
+                    cachedRelayListEvent = buildPrimalUserRelaysListEvent(relays = emptyList()),
+                )
+            },
+            primalDatabase = myDatabase,
+        )
+
+        myDatabase.relays().upsertAll(
+            relays = listOf(
+                net.primal.android.user.db.Relay(
+                    userId = userId,
+                    kind = RelayKind.UserRelay,
+                    read = true,
+                    url = "wss://relay.primal.net",
+                    write = true,
+                ),
+            ),
+        )
+
+        repository.fetchAndUpdateUserRelays(userId = userId)
+
+        val actualRelays = myDatabase.relays().findRelays(userId = userId, kind = RelayKind.UserRelay)
+        actualRelays shouldBe emptyList()
+    }
+
+    @Test
+    fun fetchAndUpdateUserRelays_ignoresFetchIfCachedNip65IsMissing() = runTest {
+        val userId = "random"
+        val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
+        val repository = RelayRepository(
+            nostrPublisher = nostrPublisher,
+            usersApi = mockk(relaxed = true) {
+                coEvery { getUserRelays(userId) } returns UserRelaysResponse(cachedRelayListEvent = null)
+            },
+            primalDatabase = myDatabase,
+        )
+
+        val expectedRelays = listOf(
+            net.primal.android.user.db.Relay(
+                userId = userId,
+                kind = RelayKind.UserRelay,
+                read = true,
+                url = "wss://relay.primal.net",
+                write = true,
+            ),
+        )
+        myDatabase.relays().upsertAll(relays = expectedRelays)
+
+        repository.fetchAndUpdateUserRelays(userId = userId)
+
+        val actualRelays = myDatabase.relays().findRelays(userId = userId, kind = RelayKind.UserRelay)
+        actualRelays shouldBe expectedRelays
+    }
 }
