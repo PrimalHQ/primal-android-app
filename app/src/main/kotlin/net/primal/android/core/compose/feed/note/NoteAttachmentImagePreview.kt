@@ -43,7 +43,18 @@ fun NoteAttachmentImagePreview(
         contentDescription = null,
         contentScale = ContentScale.Crop,
         loading = { NoteImageLoadingPlaceholder() },
-        error = { NoteImageErrorImage() },
+        error = {
+            SubcomposeAsyncImage(
+                model = attachment.url,
+                modifier = modifier,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                loading = { NoteImageLoadingPlaceholder() },
+                error = {
+                    NoteImageErrorImage()
+                },
+            )
+        },
     )
 }
 
