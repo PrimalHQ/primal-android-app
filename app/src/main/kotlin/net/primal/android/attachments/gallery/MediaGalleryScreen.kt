@@ -72,6 +72,7 @@ import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.attachment.model.NoteAttachmentUi
 import net.primal.android.core.compose.dropdown.DropdownPrimalMenu
 import net.primal.android.core.compose.dropdown.DropdownPrimalMenuItem
+import net.primal.android.core.compose.foundation.KeepScreenOn
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.More
@@ -387,6 +388,7 @@ fun VideoScreen(
         MediaItem.fromUri(mediaUrl)
     }
 
+    KeepScreenOn()
     LaunchedEffect(mediaSource) {
         exoPlayer.setMediaItem(mediaSource)
         exoPlayer.prepare()
@@ -417,7 +419,9 @@ fun VideoScreen(
         contentAlignment = Alignment.BottomEnd,
     ) {
         AndroidView(
-            modifier = Modifier.fillMaxSize().navigationBarsPadding(),
+            modifier = Modifier
+                .fillMaxSize()
+                .navigationBarsPadding(),
             factory = {
                 PlayerView(it).apply {
                     player = exoPlayer
