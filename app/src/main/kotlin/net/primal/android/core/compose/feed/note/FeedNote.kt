@@ -36,6 +36,7 @@ fun FeedNote(
     showReplyTo: Boolean,
     forceContentIndent: Boolean,
     expanded: Boolean,
+    textSelectable: Boolean,
     onPostClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
     onMediaClick: (MediaClickEvent) -> Unit,
@@ -90,6 +91,7 @@ fun FeedNote(
                     .padding(top = if (fullWidthContent || !headerSingleLine) 10.dp else 2.dp),
                 data = data.toNoteContentUi(),
                 expanded = expanded,
+                textSelectable = textSelectable,
                 onClick = {
                     launchRippleEffect(it)
                     onPostClick(data.postId)

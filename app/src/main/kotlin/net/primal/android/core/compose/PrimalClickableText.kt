@@ -3,6 +3,7 @@ package net.primal.android.core.compose
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.InlineTextContent
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -19,6 +20,7 @@ fun PrimalClickableText(
     text: AnnotatedString,
     modifier: Modifier = Modifier,
     style: TextStyle = TextStyle.Default,
+    textSelectable: Boolean = false,
     softWrap: Boolean = true,
     overflow: TextOverflow = TextOverflow.Clip,
     maxLines: Int = Int.MAX_VALUE,
@@ -35,17 +37,27 @@ fun PrimalClickableText(
         }
     }
 
-    BasicText(
-        text = text,
-        modifier = modifier.then(pressIndicator),
-        style = style,
-        softWrap = softWrap,
-        overflow = overflow,
-        maxLines = maxLines,
-        onTextLayout = {
-            layoutResult.value = it
-            onTextLayout(it)
-        },
-        inlineContent = inlineContent,
-    )
+    val textContent: @Composable () -> Unit = {
+        BasicText(
+            text = text,
+            modifier = modifier.then(pressIndicator),
+            style = style,
+            softWrap = softWrap,
+            overflow = overflow,
+            maxLines = maxLines,
+            onTextLayout = {
+                layoutResult.value = it
+                onTextLayout(it)
+            },
+            inlineContent = inlineContent,
+        )
+    }
+
+    if (textSelectable) {
+        SelectionContainer {
+            textContent()
+        }
+    } else {
+        textContent()
+    }
 }

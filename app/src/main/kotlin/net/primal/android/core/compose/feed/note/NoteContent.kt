@@ -118,6 +118,7 @@ fun NoteContent(
     onUrlClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
     onMediaClick: (MediaClickEvent) -> Unit,
+    textSelectable: Boolean = false,
     highlightColor: Color = AppTheme.colorScheme.secondary,
     contentColor: Color = AppTheme.colorScheme.onSurface,
     referencedNoteContainerColor: Color = AppTheme.extraColorScheme.surfaceVariantAlt1,
@@ -142,6 +143,7 @@ fun NoteContent(
                     lineHeight = 20.sp,
                 ),
                 text = contentText,
+                textSelectable = textSelectable,
                 onClick = { position, offset ->
                     contentText.getStringAnnotations(
                         start = position,

@@ -464,6 +464,7 @@ private fun ThreadLazyColumn(
                     shape = RectangleShape,
                     cardPadding = PaddingValues(all = 0.dp),
                     expanded = true,
+                    textSelectable = highlightPost,
                     fullWidthContent = highlightPost,
                     headerSingleLine = !highlightPost,
                     forceContentIndent = shouldIndentContent,
