@@ -36,6 +36,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -50,6 +51,8 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
+import androidx.media3.common.Player.Listener
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
@@ -299,6 +302,9 @@ private fun AttachmentsHorizontalPager(
 
                 NoteAttachmentType.Video -> {
                     VideoScreen(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .navigationBarsPadding(),
                         positionMs = initialPositionMs,
                         attachment = attachment,
                         isPageVisible = pagerState.currentPage == index,
@@ -383,13 +389,20 @@ fun VideoScreen(
     val context = LocalContext.current
 
     val exoPlayer = remember { ExoPlayer.Builder(context).build() }
-    val mediaSource = remember(attachment) {
-        val mediaUrl = attachment.variants?.firstOrNull()?.mediaUrl ?: attachment.url
-        MediaItem.fromUri(mediaUrl)
-    }
+    val mediaUrl = attachment.variants?.firstOrNull()?.mediaUrl ?: attachment.url
+    val mediaSource = MediaItem.fromUri(mediaUrl)
+    var playerState by remember { mutableIntStateOf(Player.STATE_IDLE) }
 
     KeepScreenOn()
+
     LaunchedEffect(mediaSource) {
+        exoPlayer.addListener(
+            object : Listener {
+                override fun onPlaybackStateChanged(playbackState: Int) {
+                    playerState = playbackState
+                }
+            },
+        )
         exoPlayer.setMediaItem(mediaSource)
         exoPlayer.prepare()
         exoPlayer.seekTo(positionMs)
@@ -416,19 +429,16 @@ fun VideoScreen(
 
     Box(
         modifier = modifier,
-        contentAlignment = Alignment.BottomEnd,
+        contentAlignment = Alignment.Center,
     ) {
         AndroidView(
-            modifier = Modifier
-                .fillMaxSize()
-                .navigationBarsPadding(),
             factory = {
                 PlayerView(it).apply {
-                    player = exoPlayer
-                    useController = true
                     setShowNextButton(false)
                     setShowPreviousButton(false)
                     controllerShowTimeoutMs = 1.seconds.inWholeMilliseconds.toInt()
+                    useController = true
+                    player = exoPlayer
                 }
             },
         )

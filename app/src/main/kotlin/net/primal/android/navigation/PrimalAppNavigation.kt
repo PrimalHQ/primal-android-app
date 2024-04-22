@@ -590,8 +590,8 @@ private fun NavGraphBuilder.feed(
     arguments = arguments,
 ) { navBackEntry ->
     val viewModel = hiltViewModel<FeedViewModel>(navBackEntry)
-    LockToOrientationPortrait()
     ApplyEdgeToEdge()
+    LockToOrientationPortrait()
     FeedScreen(
         viewModel = viewModel,
         onFeedsClick = { navController.navigateToFeedList() },
@@ -623,6 +623,7 @@ private fun NavGraphBuilder.noteEditor(
     arguments = arguments,
 ) {
     val viewModel = hiltViewModel<NoteEditorViewModel>(it)
+    ApplyEdgeToEdge()
     LockToOrientationPortrait()
     NoteEditorScreen(
         viewModel = viewModel,
@@ -671,6 +672,7 @@ private fun NavGraphBuilder.explore(
     },
 ) {
     val viewModel = hiltViewModel<ExploreHomeViewModel>(it)
+    ApplyEdgeToEdge()
     LockToOrientationPortrait()
     ExploreHomeScreen(
         viewModel = viewModel,
@@ -695,6 +697,7 @@ private fun NavGraphBuilder.exploreFeed(
     popExitTransition = { primalSlideOutHorizontallyToEnd },
 ) {
     val viewModel = hiltViewModel<ExploreFeedViewModel>(it)
+    ApplyEdgeToEdge()
     LockToOrientationPortrait()
     ExploreFeedScreen(
         viewModel = viewModel,
@@ -724,6 +727,7 @@ private fun NavGraphBuilder.search(route: String, navController: NavController) 
         popExitTransition = { primalSlideOutHorizontallyToEnd },
     ) {
         val viewModel = hiltViewModel<SearchViewModel>(it)
+        ApplyEdgeToEdge()
         LockToOrientationPortrait()
         SearchScreen(
             viewModel = viewModel,
@@ -762,6 +766,7 @@ private fun NavGraphBuilder.messages(
     },
 ) { navBackEntry ->
     val viewModel = hiltViewModel<MessageConversationListViewModel>(navBackEntry)
+    ApplyEdgeToEdge()
     LockToOrientationPortrait()
     MessageListScreen(
         viewModel = viewModel,
@@ -786,6 +791,7 @@ private fun NavGraphBuilder.chat(
     popExitTransition = { primalSlideOutHorizontallyToEnd },
 ) { navBackEntry ->
     val viewModel = hiltViewModel<ChatViewModel>(navBackEntry)
+    ApplyEdgeToEdge()
     LockToOrientationPortrait()
     ChatScreen(
         viewModel = viewModel,
@@ -812,6 +818,7 @@ private fun NavGraphBuilder.newMessage(route: String, navController: NavControll
         popExitTransition = { primalSlideOutHorizontallyToEnd },
     ) { navBackEntry ->
         val viewModel = hiltViewModel<SearchViewModel>(navBackEntry)
+        ApplyEdgeToEdge()
         LockToOrientationPortrait()
         NewConversationScreen(
             viewModel = viewModel,
@@ -851,6 +858,7 @@ private fun NavGraphBuilder.notifications(
     },
 ) { navBackEntry ->
     val viewModel = hiltViewModel<NotificationsViewModel>(navBackEntry)
+    ApplyEdgeToEdge()
     LockToOrientationPortrait()
     NotificationsScreen(
         viewModel = viewModel,
@@ -887,6 +895,7 @@ private fun NavGraphBuilder.thread(
     popExitTransition = { primalSlideOutHorizontallyToEnd },
 ) { navBackEntry ->
     val viewModel = hiltViewModel<ThreadViewModel>(navBackEntry)
+    ApplyEdgeToEdge()
     LockToOrientationPortrait()
     ThreadScreen(
         viewModel = viewModel,
@@ -927,10 +936,13 @@ private fun NavGraphBuilder.media(
     popExitTransition = { primalSlideOutVerticallyToBottom },
 ) { navBackEntry ->
     val viewModel = hiltViewModel<MediaGalleryViewModel>(navBackEntry)
-    MediaGalleryScreen(
-        onClose = { navController.navigateUp() },
-        viewModel = viewModel,
-    )
+    PrimalTheme(primalTheme = PrimalTheme.Sunset) {
+        ApplyEdgeToEdge(isDarkTheme = true)
+        MediaGalleryScreen(
+            onClose = { navController.navigateUp() },
+            viewModel = viewModel,
+        )
+    }
 }
 
 private fun NavGraphBuilder.profile(
@@ -947,6 +959,7 @@ private fun NavGraphBuilder.profile(
 ) {
     val viewModel = hiltViewModel<ProfileDetailsViewModel>(it)
 
+    ApplyEdgeToEdge()
     LockToOrientationPortrait()
     ProfileDetailsScreen(
         viewModel = viewModel,
@@ -986,6 +999,7 @@ private fun NavGraphBuilder.profileEditor(route: String, navController: NavContr
         popExitTransition = { primalSlideOutHorizontallyToEnd },
     ) {
         val viewModel = hiltViewModel<ProfileEditorViewModel>()
+        ApplyEdgeToEdge()
         LockToOrientationPortrait()
         ProfileEditorScreen(viewModel = viewModel, onClose = { navController.navigateUp() })
     }
@@ -1003,6 +1017,7 @@ private fun NavGraphBuilder.profileFollows(
     popExitTransition = { primalSlideOutHorizontallyToEnd },
 ) {
     val viewModel = hiltViewModel<ProfileFollowsViewModel>(it)
+    ApplyEdgeToEdge()
     LockToOrientationPortrait()
     ProfileFollowsScreen(
         viewModel = viewModel,
