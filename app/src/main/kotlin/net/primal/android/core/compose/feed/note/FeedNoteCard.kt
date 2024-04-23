@@ -65,6 +65,7 @@ fun FeedNoteCard(
     onBookmarkClick: () -> Unit,
     onMuteUserClick: () -> Unit,
     onReportContentClick: OnReportContentClick,
+    contentFooter: @Composable () -> Unit = {},
 ) {
     val interactionSource = remember { MutableInteractionSource() }
 
@@ -155,6 +156,7 @@ fun FeedNoteCard(
                     onMediaClick = onMediaClick,
                     onPostAction = onPostAction,
                     onPostLongClickAction = onPostLongClickAction,
+                    contentFooter = contentFooter,
                 )
             }
         }

@@ -6,11 +6,16 @@ import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.feed.api.model.FeedRequestBody
 import net.primal.android.feed.api.model.FeedResponse
+import net.primal.android.feed.api.model.NoteActionsRequestBody
+import net.primal.android.feed.api.model.NoteActionsResponse
+import net.primal.android.feed.api.model.NoteZapsRequestBody
+import net.primal.android.feed.api.model.NoteZapsResponse
 import net.primal.android.feed.api.model.NotesRequestBody
 import net.primal.android.feed.api.model.ThreadRequestBody
 import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.primal.PrimalCacheFilter
+import net.primal.android.networking.primal.PrimalVerb
 import net.primal.android.networking.primal.PrimalVerb.FEED_DIRECTIVE
 import net.primal.android.networking.primal.PrimalVerb.NOTES
 import net.primal.android.networking.primal.PrimalVerb.THREAD_VIEW
@@ -89,6 +94,41 @@ class FeedApiImpl @Inject constructor(
             primalLinkPreviews = queryResult.filterPrimalEvents(NostrEventKind.PrimalLinkPreview),
             cdnResources = queryResult.filterPrimalEvents(NostrEventKind.PrimalCdnResource),
             primalRelayHints = queryResult.filterPrimalEvents(NostrEventKind.PrimalRelayHint),
+        )
+    }
+
+    override suspend fun getNoteZaps(body: NoteZapsRequestBody): NoteZapsResponse {
+        val queryResult = primalApiClient.query(
+            message = PrimalCacheFilter(
+                primalVerb = PrimalVerb.EVENT_ZAPS,
+                optionsJson = NostrJson.encodeToString(body),
+            ),
+        )
+
+        return NoteZapsResponse(
+            paging = queryResult.findPrimalEvent(NostrEventKind.PrimalPaging).let {
+                NostrJson.decodeFromStringOrNull(it?.content)
+            },
+            profiles = queryResult.filterNostrEvents(NostrEventKind.Metadata),
+            zaps = queryResult.filterNostrEvents(NostrEventKind.Zap),
+            userScores = queryResult.findPrimalEvent(NostrEventKind.PrimalUserScores),
+            cdnResources = queryResult.filterPrimalEvents(NostrEventKind.PrimalCdnResource),
+        )
+    }
+
+    override suspend fun getNoteActions(body: NoteActionsRequestBody): NoteActionsResponse {
+        val queryResult = primalApiClient.query(
+            message = PrimalCacheFilter(
+                primalVerb = PrimalVerb.EVENT_ACTIONS,
+                optionsJson = NostrJson.encodeToString(body),
+            ),
+        )
+
+        return NoteActionsResponse(
+            profiles = queryResult.filterNostrEvents(NostrEventKind.Metadata),
+            userScores = queryResult.findPrimalEvent(NostrEventKind.PrimalUserScores),
+            userFollowersCount = queryResult.findPrimalEvent(NostrEventKind.PrimalUserFollowersCounts),
+            cdnResources = queryResult.filterPrimalEvents(NostrEventKind.PrimalCdnResource),
         )
     }
 }

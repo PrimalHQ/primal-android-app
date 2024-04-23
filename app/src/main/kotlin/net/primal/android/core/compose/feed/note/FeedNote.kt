@@ -42,6 +42,7 @@ fun FeedNote(
     onMediaClick: (MediaClickEvent) -> Unit,
     onPostAction: ((FeedPostAction) -> Unit)?,
     onPostLongClickAction: ((FeedPostAction) -> Unit)?,
+    contentFooter: @Composable () -> Unit = {},
 ) {
     val localUriHandler = LocalUriHandler.current
     val uiScope = rememberCoroutineScope()
@@ -104,6 +105,8 @@ fun FeedNote(
                 onHashtagClick = onHashtagClick,
                 onMediaClick = onMediaClick,
             )
+
+            contentFooter()
 
             FeedNoteStatsRow(
                 modifier = Modifier

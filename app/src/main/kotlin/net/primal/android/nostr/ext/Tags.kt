@@ -19,6 +19,20 @@ fun List<JsonArray>.findFirstProfileId(): String? {
     return postAuthorTag?.getTagValueOrNull()
 }
 
+fun List<JsonArray>.findFirstZapRequest(): String? {
+    val zapRequestTag = firstOrNull { it.isDescriptionTag() }
+    return zapRequestTag?.getTagValueOrNull()
+}
+
+fun List<JsonArray>.findFirstZapAmount(): String? {
+    val zapRequestTag = firstOrNull { it.isAmountTag() }
+    return zapRequestTag?.getTagValueOrNull()
+}
+
+fun JsonArray.isDescriptionTag() = getOrNull(0)?.jsonPrimitive?.content == "description"
+
+fun JsonArray.isAmountTag() = getOrNull(0)?.jsonPrimitive?.content == "amount"
+
 fun JsonArray.isEventIdTag() = getOrNull(0)?.jsonPrimitive?.content == "e"
 
 fun JsonArray.isPubKeyTag() = getOrNull(0)?.jsonPrimitive?.content == "p"

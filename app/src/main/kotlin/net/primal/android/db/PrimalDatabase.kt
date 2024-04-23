@@ -21,6 +21,8 @@ import net.primal.android.feed.db.FeedPostRemoteKey
 import net.primal.android.feed.db.FeedPostRemoteKeyDao
 import net.primal.android.feed.db.FeedPostSync
 import net.primal.android.feed.db.FeedPostSyncDao
+import net.primal.android.feed.db.NoteZapDao
+import net.primal.android.feed.db.NoteZapData
 import net.primal.android.feed.db.PostDao
 import net.primal.android.feed.db.PostData
 import net.primal.android.feed.db.PostStats
@@ -59,6 +61,7 @@ import net.primal.android.wallet.db.WalletTransactionData
         PostStats::class,
         NoteNostrUri::class,
         NoteAttachment::class,
+        NoteZapData::class,
         Feed::class,
         FeedPostDataCrossRef::class,
         FeedPostRemoteKey::class,
@@ -75,7 +78,7 @@ import net.primal.android.wallet.db.WalletTransactionData
         Relay::class,
         EventHints::class,
     ],
-    version = 25,
+    version = 26,
     exportSchema = true,
 )
 @TypeConverters(
@@ -127,4 +130,6 @@ abstract class PrimalDatabase : RoomDatabase() {
     abstract fun relays(): RelayDao
 
     abstract fun eventHints(): EventHintsDao
+
+    abstract fun noteZaps(): NoteZapDao
 }

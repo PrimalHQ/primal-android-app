@@ -1,8 +1,11 @@
 package net.primal.android.core.utils
 
+import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
+
 fun Int.shortened(): String = toLong().shortened()
 
-@Suppress("MagicNumber")
+@Suppress("MagicNumber", "ImplicitDefaultLocale")
 fun Long.shortened(): String {
     if (this < 1000) {
         return this.toString()
@@ -28,4 +31,10 @@ fun Long.shortened(): String {
     }
 
     return "1T+"
+}
+
+fun String.toFormattedNumberString(): String {
+    val symbols: DecimalFormatSymbols = DecimalFormatSymbols.getInstance()
+    val formatter = DecimalFormat("###,###", symbols)
+    return formatter.format(this.toFloat())
 }

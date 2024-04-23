@@ -29,6 +29,7 @@ import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.settings.muted.repository.MutedUserRepository
 import net.primal.android.thread.ThreadContract.UiEvent
 import net.primal.android.thread.ThreadContract.UiState.ThreadError
+import net.primal.android.thread.ui.asNoteZapUiModel
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
 import net.primal.android.wallet.domain.ZapTarget
@@ -66,6 +67,7 @@ class ThreadViewModel @Inject constructor(
     init {
         observeEvents()
         observeConversation()
+        observeTopZappers()
         observeActiveAccount()
     }
 
@@ -79,7 +81,7 @@ class ThreadViewModel @Inject constructor(
                     is UiEvent.UpdateReply -> updateReply(it)
                     is UiEvent.ZapAction -> zapPost(it)
                     is UiEvent.MuteAction -> mute(it)
-                    UiEvent.UpdateConversation -> fetchRepliesFromNetwork()
+                    UiEvent.UpdateConversation -> fetchData()
                     is UiEvent.ReportAbuse -> reportAbuse(it)
                     is UiEvent.BookmarkAction -> handleBookmark(it)
                     UiEvent.DismissBookmarkConfirmation -> setState { copy(confirmBookmarkingNoteId = null) }
@@ -92,6 +94,18 @@ class ThreadViewModel @Inject constructor(
             loadHighlightedPost()
             delayShortlyToPropagateHighlightedPost()
             subscribeToConversationChanges()
+        }
+
+    private fun observeTopZappers() =
+        viewModelScope.launch {
+            postRepository.observeTopZappers(postId = postId).collect {
+                setState {
+                    copy(
+                        topZap = it.firstOrNull()?.asNoteZapUiModel() ?: this.topZap,
+                        otherZaps = it.drop(n = 1).map { it.asNoteZapUiModel() },
+                    )
+                }
+            }
         }
 
     private fun observeActiveAccount() =
@@ -145,7 +159,12 @@ class ThreadViewModel @Inject constructor(
             }
     }
 
-    private fun fetchRepliesFromNetwork() =
+    private fun fetchData() {
+        fetchNoteReplies()
+        fetchTopNoteZaps()
+    }
+
+    private fun fetchNoteReplies() =
         viewModelScope.launch {
             setState { copy(fetching = true) }
             try {
@@ -156,6 +175,17 @@ class ThreadViewModel @Inject constructor(
                 Timber.w(error)
             } finally {
                 setState { copy(fetching = false) }
+            }
+        }
+
+    private fun fetchTopNoteZaps() =
+        viewModelScope.launch {
+            try {
+                withContext(dispatcherProvider.io()) {
+                    feedRepository.fetchNoteZaps(postId = postId)
+                }
+            } catch (error: WssException) {
+                Timber.w(error)
             }
         }
 
@@ -245,7 +275,7 @@ class ThreadViewModel @Inject constructor(
                 )
 
                 if (publishedAndImported) {
-                    fetchRepliesFromNetwork()
+                    fetchNoteReplies()
                 } else {
                     scheduleFetchReplies()
                 }
@@ -326,7 +356,7 @@ class ThreadViewModel @Inject constructor(
     private fun scheduleFetchReplies() =
         viewModelScope.launch {
             delay(750.milliseconds)
-            fetchRepliesFromNetwork()
+            fetchNoteReplies()
         }
 
     private fun setErrorState(error: ThreadError) {

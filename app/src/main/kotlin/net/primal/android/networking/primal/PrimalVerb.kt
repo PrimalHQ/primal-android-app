@@ -32,4 +32,6 @@ enum class PrimalVerb(val identifier: String) {
     DEFAULT_RELAYS("get_default_relays"),
     IS_USER_FOLLOWING("is_user_following"),
     GET_BOOKMARKS_LIST("get_bookmarks"),
+    EVENT_ZAPS("event_zaps_by_satszapped"),
+    EVENT_ACTIONS("event_actions"),
 }

@@ -187,4 +187,6 @@ class PostRepository @Inject constructor(
             copy(isBookmarked = false)
         }
     }
+
+    fun observeTopZappers(postId: String) = database.noteZaps().observeTopZappers(noteId = postId)
 }

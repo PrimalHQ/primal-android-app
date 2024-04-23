@@ -7,9 +7,13 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ContextualFlowRow
+import androidx.compose.foundation.layout.ContextualFlowRowOverflow
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -19,9 +23,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.OpenInFull
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -63,6 +70,7 @@ import java.time.Instant
 import kotlin.time.Duration.Companion.seconds
 import net.primal.android.R
 import net.primal.android.core.compose.AppBarIcon
+import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
@@ -81,14 +89,17 @@ import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromGallery
+import net.primal.android.core.compose.icons.primaliconpack.More
 import net.primal.android.core.compose.pulltorefresh.PrimalPullToRefreshIndicator
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
+import net.primal.android.core.utils.toFormattedNumberString
 import net.primal.android.crypto.hexToNoteHrp
 import net.primal.android.profile.report.OnReportContentClick
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.thread.ThreadContract.UiState.ThreadError
+import net.primal.android.thread.ui.NoteZapUiModel
 import net.primal.android.wallet.zaps.canZap
 
 @Composable
@@ -404,6 +415,7 @@ private fun ThreadScreenContent(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun ThreadLazyColumn(
     paddingValues: PaddingValues,
@@ -453,9 +465,7 @@ private fun ThreadLazyColumn(
                     if (highlighted) {
                         highlightPostHeightPx = it.height
                     } else if (isReply) {
-                        repliesHeightPx = repliesHeightPx.toMutableMap().apply {
-                            this[index] = it.height
-                        }
+                        repliesHeightPx = repliesHeightPx.toMutableMap().apply { this[index] = it.height }
                     }
                 },
             ) {
@@ -484,6 +494,11 @@ private fun ThreadLazyColumn(
                     onMuteUserClick = { onMuteUserClick(item.authorId) },
                     onReportContentClick = onReportContentClick,
                     onBookmarkClick = { onBookmarkClick(item.postId) },
+                    contentFooter = {
+                        if (highlighted && (state.topZap != null || state.otherZaps.isNotEmpty())) {
+                            TopZapsSection(topZap = state.topZap, otherZaps = state.otherZaps)
+                        }
+                    },
                 )
 
                 if (!connectedToNextNote) {
@@ -494,12 +509,86 @@ private fun ThreadLazyColumn(
 
         if (state.conversation.isNotEmpty()) {
             item(key = "extraSpacing") {
-                Spacer(
-                    modifier = Modifier.height(
-                        height = extraSpacing.coerceAtLeast(50.dp),
-                    ),
-                )
+                Spacer(modifier = Modifier.height(height = extraSpacing.coerceAtLeast(50.dp)))
             }
+        }
+    }
+}
+
+@Composable
+@OptIn(ExperimentalLayoutApi::class)
+private fun TopZapsSection(topZap: NoteZapUiModel?, otherZaps: List<NoteZapUiModel>) {
+    Column(
+        modifier = Modifier.padding(horizontal = 10.dp),
+    ) {
+        Spacer(modifier = Modifier.height(12.dp))
+
+        if (topZap != null) {
+            NoteZapListItem(noteZap = topZap, showMessage = true)
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+
+        if (otherZaps.isNotEmpty()) {
+            ContextualFlowRow(
+                itemCount = otherZaps.size,
+                maxLines = 1,
+                verticalArrangement = Arrangement.Center,
+                overflow = ContextualFlowRowOverflow.expandIndicator {
+                    Icon(
+                        modifier = Modifier
+                            .background(
+                                color = AppTheme.extraColorScheme.surfaceVariantAlt1,
+                                shape = CircleShape,
+                            )
+                            .size(26.dp)
+                            .padding(horizontal = 4.dp),
+                        imageVector = PrimalIcons.More,
+                        contentDescription = null,
+                    )
+                },
+            ) {
+                val zap = otherZaps[it]
+                NoteZapListItem(noteZap = zap, showMessage = false)
+                Spacer(modifier = Modifier.width(6.dp))
+            }
+
+            Spacer(modifier = Modifier.height(6.dp))
+        }
+    }
+}
+
+@Composable
+private fun NoteZapListItem(noteZap: NoteZapUiModel, showMessage: Boolean = false) {
+    Row(
+        modifier = Modifier
+            .height(26.dp)
+            .background(
+                color = AppTheme.extraColorScheme.surfaceVariantAlt1,
+                shape = AppTheme.shapes.extraLarge,
+            ),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        AvatarThumbnail(
+            modifier = Modifier.padding(start = 2.dp),
+            avatarCdnImage = noteZap.avatarCdnImage,
+            avatarSize = 24.dp,
+        )
+
+        Text(
+            modifier = Modifier.padding(horizontal = 8.dp),
+            text = noteZap.amountInMillisats.dropLast(n = 3).toFormattedNumberString(),
+            style = AppTheme.typography.bodySmall,
+            color = AppTheme.colorScheme.onSurface,
+            fontWeight = FontWeight.SemiBold,
+        )
+
+        if (showMessage && noteZap.message.isNotEmpty()) {
+            Text(
+                modifier = Modifier.padding(end = 8.dp),
+                text = noteZap.message,
+                color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+                style = AppTheme.typography.bodySmall,
+            )
         }
     }
 }
