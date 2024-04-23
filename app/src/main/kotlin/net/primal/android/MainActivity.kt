@@ -8,6 +8,7 @@ import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.produceState
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
@@ -47,9 +48,11 @@ class MainActivity : ComponentActivity() {
             val userTheme = themeStore.userThemeState.collectAsState()
             primalTheme = userTheme.value ?: defaultPrimalTheme(currentTheme = primalTheme)
 
-            val contentDisplaySettings = activeAccountStore.activeUserAccount
-                .map { it.contentDisplaySettings }
-                .collectAsState(initial = ContentDisplaySettings())
+            val contentDisplaySettings = produceState(initialValue = ContentDisplaySettings()) {
+                activeAccountStore.activeUserAccount
+                    .map { it.contentDisplaySettings }
+                    .collect { value = it }
+            }
 
             PrimalTheme(
                 primalTheme = primalTheme,
