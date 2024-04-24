@@ -514,6 +514,8 @@ private fun ThreadLazyColumn(
     }
 }
 
+const val MaxOtherZaps = 4
+
 @Composable
 private fun TopZapsSection(topZap: NoteZapUiModel?, otherZaps: List<NoteZapUiModel>) {
     Column(
@@ -528,24 +530,26 @@ private fun TopZapsSection(topZap: NoteZapUiModel?, otherZaps: List<NoteZapUiMod
 
         if (otherZaps.isNotEmpty()) {
             Row {
-                otherZaps.take(n = 4).forEach {
+                otherZaps.take(MaxOtherZaps).forEach {
                     key(it.id) {
                         NoteZapListItem(noteZap = it, showMessage = false)
                         Spacer(modifier = Modifier.width(6.dp))
                     }
                 }
 
-                Icon(
-                    modifier = Modifier
-                        .background(
-                            color = AppTheme.extraColorScheme.surfaceVariantAlt1,
-                            shape = CircleShape,
-                        )
-                        .size(26.dp)
-                        .padding(horizontal = 4.dp),
-                    imageVector = PrimalIcons.More,
-                    contentDescription = null,
-                )
+                if (otherZaps.size > MaxOtherZaps) {
+                    Icon(
+                        modifier = Modifier
+                            .background(
+                                color = AppTheme.extraColorScheme.surfaceVariantAlt1,
+                                shape = CircleShape,
+                            )
+                            .size(26.dp)
+                            .padding(horizontal = 4.dp),
+                        imageVector = PrimalIcons.More,
+                        contentDescription = null,
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(6.dp))
