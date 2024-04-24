@@ -2,6 +2,9 @@ naming:
   FunctionNaming:
     ignoreAnnotated: ['Composable']
 
+  TopLevelPropertyNaming:
+    active: false
+
 style:
   MagicNumber:
     ignorePropertyDeclaration: true
