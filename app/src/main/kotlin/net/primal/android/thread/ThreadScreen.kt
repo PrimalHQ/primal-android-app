@@ -625,6 +625,8 @@ private fun NoteZapListItem(
             Text(
                 modifier = Modifier.padding(end = 8.dp),
                 text = noteZap.message,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
                 color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
                 style = AppTheme.typography.bodySmall,
             )
