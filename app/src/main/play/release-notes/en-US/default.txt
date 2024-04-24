@@ -1,5 +1,5 @@
 ## Changes
-- Top zaps on threads screen.
+- Implemented top zaps on threads screen and note zaps screen.
 - Improvements with network screen.
 - Implemented Content Display settings.
 - New screen transitions.
