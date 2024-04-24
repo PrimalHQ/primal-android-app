@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 26,
-    "identityHash": "d9630a496b9fc7f4ca2a984270d5cfc8",
+    "identityHash": "87d14cb5b8ca1d2ccd520e5076ef555f",
     "entities": [
       {
         "tableName": "PostData",
@@ -498,7 +498,7 @@
       },
       {
         "tableName": "NoteZapData",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`zapSenderId` TEXT NOT NULL, `zapReceiverId` TEXT NOT NULL, `noteId` TEXT NOT NULL, `zappedAt` INTEGER NOT NULL, `amountInMillisats` TEXT NOT NULL, `message` TEXT NOT NULL, PRIMARY KEY(`zapSenderId`, `noteId`, `zappedAt`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`zapSenderId` TEXT NOT NULL, `zapReceiverId` TEXT NOT NULL, `noteId` TEXT NOT NULL, `zapRequestAt` INTEGER NOT NULL, `zapReceiptAt` INTEGER NOT NULL, `amountInBtc` REAL NOT NULL, `message` TEXT, PRIMARY KEY(`zapSenderId`, `noteId`, `zapRequestAt`))",
         "fields": [
           {
             "fieldPath": "zapSenderId",
@@ -519,22 +519,28 @@
             "notNull": true
           },
           {
-            "fieldPath": "zappedAt",
-            "columnName": "zappedAt",
+            "fieldPath": "zapRequestAt",
+            "columnName": "zapRequestAt",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "amountInMillisats",
-            "columnName": "amountInMillisats",
-            "affinity": "TEXT",
+            "fieldPath": "zapReceiptAt",
+            "columnName": "zapReceiptAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "amountInBtc",
+            "columnName": "amountInBtc",
+            "affinity": "REAL",
             "notNull": true
           },
           {
             "fieldPath": "message",
             "columnName": "message",
             "affinity": "TEXT",
-            "notNull": true
+            "notNull": false
           }
         ],
         "primaryKey": {
@@ -542,7 +548,7 @@
           "columnNames": [
             "zapSenderId",
             "noteId",
-            "zappedAt"
+            "zapRequestAt"
           ]
         },
         "indices": [],
@@ -1356,7 +1362,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'd9630a496b9fc7f4ca2a984270d5cfc8')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '87d14cb5b8ca1d2ccd520e5076ef555f')"
     ]
   }
 }

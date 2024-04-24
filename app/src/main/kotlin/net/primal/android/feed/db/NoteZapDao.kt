@@ -14,6 +14,6 @@ interface NoteZapDao {
     fun upsertAll(data: List<NoteZapData>)
 
     @Transaction
-    @Query("SELECT * FROM NoteZapData WHERE noteId = :noteId ORDER BY CAST(amountInMillisats AS REAL) DESC LIMIT 10")
+    @Query("SELECT * FROM NoteZapData WHERE noteId = :noteId ORDER BY CAST(amountInBtc AS REAL) DESC LIMIT 10")
     fun observeTopZappers(noteId: String): Flow<List<NoteZap>>
 }

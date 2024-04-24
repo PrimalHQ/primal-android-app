@@ -13,6 +13,8 @@ object CurrencyConversionUtils {
 
     fun Long.toBtc() = this.toULong().toBtc()
 
+    fun BigDecimal.toBtc() = this.toLong().toBtc()
+
     fun String.toSats(): ULong = this.toBigDecimal().toSats()
 
     fun BigDecimal.toSats(): ULong = multiply(BTC_IN_SATS.toBigDecimal()).toLong().toULong()

@@ -29,6 +29,13 @@ fun List<JsonArray>.findFirstZapAmount(): String? {
     return zapRequestTag?.getTagValueOrNull()
 }
 
+fun List<JsonArray>.findFirstBolt11(): String? {
+    val zapRequestTag = firstOrNull { it.isBolt11Tag() }
+    return zapRequestTag?.getTagValueOrNull()
+}
+
+fun JsonArray.isBolt11Tag() = getOrNull(0)?.jsonPrimitive?.content == "bolt11"
+
 fun JsonArray.isDescriptionTag() = getOrNull(0)?.jsonPrimitive?.content == "description"
 
 fun JsonArray.isAmountTag() = getOrNull(0)?.jsonPrimitive?.content == "amount"

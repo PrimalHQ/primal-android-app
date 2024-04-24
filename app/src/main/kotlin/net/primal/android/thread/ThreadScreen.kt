@@ -65,6 +65,7 @@ import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
+import java.text.NumberFormat
 import java.time.Instant
 import kotlin.time.Duration.Companion.seconds
 import net.primal.android.R
@@ -91,7 +92,6 @@ import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromGalle
 import net.primal.android.core.compose.icons.primaliconpack.More
 import net.primal.android.core.compose.pulltorefresh.PrimalPullToRefreshIndicator
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
-import net.primal.android.core.utils.toFormattedNumberString
 import net.primal.android.crypto.hexToNoteHrp
 import net.primal.android.profile.report.OnReportContentClick
 import net.primal.android.theme.AppTheme
@@ -555,6 +555,7 @@ private fun TopZapsSection(topZap: NoteZapUiModel?, otherZaps: List<NoteZapUiMod
 
 @Composable
 private fun NoteZapListItem(noteZap: NoteZapUiModel, showMessage: Boolean = false) {
+    val numberFormat = NumberFormat.getNumberInstance()
     Row(
         modifier = Modifier
             .height(26.dp)
@@ -572,13 +573,13 @@ private fun NoteZapListItem(noteZap: NoteZapUiModel, showMessage: Boolean = fals
 
         Text(
             modifier = Modifier.padding(horizontal = 8.dp),
-            text = noteZap.amountInMillisats.dropLast(n = 3).toFormattedNumberString(),
+            text = numberFormat.format(noteZap.amountInSats.toLong()),
             style = AppTheme.typography.bodySmall,
             color = AppTheme.colorScheme.onSurface,
             fontWeight = FontWeight.SemiBold,
         )
 
-        if (showMessage && noteZap.message.isNotEmpty()) {
+        if (showMessage && !noteZap.message.isNullOrEmpty()) {
             Text(
                 modifier = Modifier.padding(end = 8.dp),
                 text = noteZap.message,
