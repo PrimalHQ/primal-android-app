@@ -49,7 +49,6 @@ security-crypto = "1.1.0-alpha06"
 security-identity-credential = "1.0.0-alpha03"
 secp256k1-kmp = "0.15.0"
 spongycastle = "1.58.0.0"
-spotless = "6.25.0"
 sqlcipher-android = "4.5.3"
 telephoto = "0.7.1"
 timber = "5.0.1"
@@ -80,11 +79,7 @@ compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-mani
 compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 compose-animation = { group = "androidx.compose.animation", name = "animation" }
 compose-material3 = { group = "androidx.compose.material3", name = "material3" }
-compose-systemuicontroller = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "accompanist" }
-compose-swiperefresh = { module = "com.google.accompanist:accompanist-swiperefresh", version.ref = "accompanist" }
 compose-placeholdermaterial = { module = "com.google.accompanist:accompanist-placeholder-material", version.ref = "accompanist" }
-compose-pager = { module = "com.google.accompanist:accompanist-pager", version.ref = "accompanist" }
-compose-pager-indicators = { module = "com.google.accompanist:accompanist-pager-indicators", version.ref = "accompanist" }
 constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version.ref = "constraintlayout" }
 compose-constraintlayout = { module = "androidx.constraintlayout:constraintlayout-compose", version.ref = "constraintlayout-compose" }
 
@@ -187,5 +182,4 @@ hilt = { id = "com.google.dagger.hilt.android", version.ref = "dagger" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 play-publishing = { id = "com.github.triplet.play", version.ref = "play-publishing" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
-spotless = { id = "com.diffplug.spotless", version.ref = "spotless"}
 ktlint-wrapper-plugin = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint-wrapper-plugin" }
