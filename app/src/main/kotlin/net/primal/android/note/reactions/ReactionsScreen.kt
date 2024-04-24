@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -99,6 +100,9 @@ private fun NoteZapListItem(data: NoteZapUiModel, onProfileClick: (profileId: St
     Column {
         ListItem(
             modifier = Modifier.clickable { onProfileClick(data.zapperId) },
+            colors = ListItemDefaults.colors(
+                containerColor = AppTheme.colorScheme.surfaceVariant,
+            ),
             leadingContent = {
                 AvatarThumbnail(
                     avatarCdnImage = data.zapperAvatarCdnImage,
