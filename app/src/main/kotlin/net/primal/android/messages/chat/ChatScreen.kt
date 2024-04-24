@@ -134,7 +134,6 @@ fun ChatScreen(
         ?: state.participantId.asEllipsizedNpub()
 
     Scaffold(
-        modifier = Modifier.navigationBarsPadding(),
         topBar = {
             PrimalTopAppBar(
                 title = participantUsername,
@@ -173,7 +172,9 @@ fun ChatScreen(
         },
         bottomBar = {
             Column(
-                modifier = Modifier.background(color = AppTheme.colorScheme.surface),
+                modifier = Modifier
+                    .background(color = AppTheme.colorScheme.surface)
+                    .navigationBarsPadding(),
             ) {
                 PrimalDivider()
                 MessageOutlinedTextField(

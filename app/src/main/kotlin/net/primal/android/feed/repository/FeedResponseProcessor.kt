@@ -13,9 +13,9 @@ import net.primal.android.nostr.ext.flatMapNotNullAsVideoThumbnailsMap
 import net.primal.android.nostr.ext.flatMapPostsAsNoteNostrUriPO
 import net.primal.android.nostr.ext.mapAsPostDataPO
 import net.primal.android.nostr.ext.mapAsProfileDataPO
-import net.primal.android.nostr.ext.mapNotNullAsPostDataPO
 import net.primal.android.nostr.ext.mapNotNullAsNoteStatsPO
 import net.primal.android.nostr.ext.mapNotNullAsNoteUserStatsPO
+import net.primal.android.nostr.ext.mapNotNullAsPostDataPO
 import net.primal.android.nostr.ext.mapNotNullAsRepostDataPO
 
 suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String, database: PrimalDatabase) {

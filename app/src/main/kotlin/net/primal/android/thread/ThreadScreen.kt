@@ -170,9 +170,7 @@ fun ThreadScreen(
     var topBarMaxHeightPx by remember { mutableIntStateOf(0) }
     var bottomBarMaxHeightPx by remember { mutableIntStateOf(0) }
     Scaffold(
-        modifier = Modifier
-            .navigationBarsPadding()
-            .imePadding(),
+        modifier = Modifier.imePadding(),
         topBar = {
             PrimalTopAppBar(
                 modifier = Modifier.onSizeChanged { topBarMaxHeightPx = it.height },
@@ -210,6 +208,7 @@ fun ThreadScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 4.dp)
+                        .navigationBarsPadding()
                         .onSizeChanged { bottomBarMaxHeightPx = it.height },
                     publishingReply = state.publishingReply,
                     replyToAuthorName = replyToPost.authorName,

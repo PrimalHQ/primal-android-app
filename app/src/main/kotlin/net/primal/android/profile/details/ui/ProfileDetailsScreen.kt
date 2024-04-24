@@ -238,12 +238,12 @@ fun ProfileDetailsScreen(
         onRefreshEnd = { pullToRefreshState.endRefresh() },
     )
 
-    Surface(modifier = Modifier.navigationBarsPadding()) {
+    Surface {
         Box(
             modifier = Modifier.nestedScroll(pullToRefreshState.nestedScrollConnection),
         ) {
             FeedLazyColumn(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize().navigationBarsPadding(),
                 contentPadding = PaddingValues(0.dp),
                 pagingItems = if (!state.isProfileMuted) pagingItems else noPagingItems,
                 zappingState = state.zappingState,
