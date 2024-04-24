@@ -1,4 +1,4 @@
-package net.primal.android.feed.db
+package net.primal.android.note.db
 
 import androidx.room.Embedded
 import androidx.room.Relation

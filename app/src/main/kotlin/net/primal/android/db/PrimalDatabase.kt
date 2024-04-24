@@ -21,12 +21,8 @@ import net.primal.android.feed.db.FeedPostRemoteKey
 import net.primal.android.feed.db.FeedPostRemoteKeyDao
 import net.primal.android.feed.db.FeedPostSync
 import net.primal.android.feed.db.FeedPostSyncDao
-import net.primal.android.feed.db.NoteZapDao
-import net.primal.android.feed.db.NoteZapData
 import net.primal.android.feed.db.PostDao
 import net.primal.android.feed.db.PostData
-import net.primal.android.feed.db.PostStats
-import net.primal.android.feed.db.PostStatsDao
 import net.primal.android.feed.db.RepostDao
 import net.primal.android.feed.db.RepostData
 import net.primal.android.messages.db.DirectMessageDao
@@ -35,10 +31,14 @@ import net.primal.android.messages.db.MessageConversationDao
 import net.primal.android.messages.db.MessageConversationData
 import net.primal.android.nostr.db.EventHints
 import net.primal.android.nostr.db.EventHintsDao
+import net.primal.android.note.db.NoteStats
+import net.primal.android.note.db.NoteStatsDao
+import net.primal.android.note.db.NoteUserStats
+import net.primal.android.note.db.NoteUserStatsDao
+import net.primal.android.note.db.NoteZapDao
+import net.primal.android.note.db.NoteZapData
 import net.primal.android.notifications.db.NotificationDao
 import net.primal.android.notifications.db.NotificationData
-import net.primal.android.profile.db.PostUserStats
-import net.primal.android.profile.db.PostUserStatsDao
 import net.primal.android.profile.db.ProfileData
 import net.primal.android.profile.db.ProfileDataDao
 import net.primal.android.profile.db.ProfileStats
@@ -58,7 +58,7 @@ import net.primal.android.wallet.db.WalletTransactionData
         PostData::class,
         ProfileData::class,
         RepostData::class,
-        PostStats::class,
+        NoteStats::class,
         NoteNostrUri::class,
         NoteAttachment::class,
         NoteZapData::class,
@@ -67,7 +67,7 @@ import net.primal.android.wallet.db.WalletTransactionData
         FeedPostRemoteKey::class,
         FeedPostSync::class,
         ThreadConversationCrossRef::class,
-        PostUserStats::class,
+        NoteUserStats::class,
         ProfileStats::class,
         TrendingHashtag::class,
         NotificationData::class,
@@ -78,7 +78,7 @@ import net.primal.android.wallet.db.WalletTransactionData
         Relay::class,
         EventHints::class,
     ],
-    version = 26,
+    version = 27,
     exportSchema = true,
 )
 @TypeConverters(
@@ -93,7 +93,7 @@ abstract class PrimalDatabase : RoomDatabase() {
 
     abstract fun reposts(): RepostDao
 
-    abstract fun postStats(): PostStatsDao
+    abstract fun postStats(): NoteStatsDao
 
     abstract fun attachments(): AttachmentDao
 
@@ -111,7 +111,7 @@ abstract class PrimalDatabase : RoomDatabase() {
 
     abstract fun threadConversations(): ThreadConversationDao
 
-    abstract fun postUserStats(): PostUserStatsDao
+    abstract fun postUserStats(): NoteUserStatsDao
 
     abstract fun trendingHashtags(): TrendingHashtagDao
 

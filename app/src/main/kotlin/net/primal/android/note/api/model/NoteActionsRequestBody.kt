@@ -1,4 +1,4 @@
-package net.primal.android.feed.api.model
+package net.primal.android.note.api.model
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

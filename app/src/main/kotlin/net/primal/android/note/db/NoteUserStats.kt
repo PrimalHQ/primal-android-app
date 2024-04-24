@@ -1,4 +1,4 @@
-package net.primal.android.profile.db
+package net.primal.android.note.db
 
 import androidx.room.Entity
 import androidx.room.Index
@@ -13,7 +13,7 @@ import androidx.room.Index
         Index(value = ["userId"]),
     ],
 )
-data class PostUserStats(
+data class NoteUserStats(
     val postId: String,
     val userId: String,
     val replied: Boolean = false,

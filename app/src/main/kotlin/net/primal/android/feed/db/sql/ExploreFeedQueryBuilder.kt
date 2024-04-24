@@ -23,27 +23,27 @@ class ExploreFeedQueryBuilder(
                 PostData.hashtags,
                 NULL AS repostId,
                 NULL AS repostAuthorId,
-                PostUserStats.liked AS userLiked,
-                PostUserStats.replied AS userReplied,
-                PostUserStats.reposted AS userReposted,
-                PostUserStats.zapped AS userZapped,
+                NoteUserStats.liked AS userLiked,
+                NoteUserStats.replied AS userReplied,
+                NoteUserStats.reposted AS userReposted,
+                NoteUserStats.zapped AS userZapped,
                 NULL AS feedCreatedAt,
                 CASE WHEN MutedUserData.userId IS NOT NULL THEN 1 ELSE 0 END AS isMuted,
                 PostData.replyToPostId,
                 PostData.replyToAuthorId
             FROM PostData
             INNER JOIN FeedPostDataCrossRef ON FeedPostDataCrossRef.eventId = PostData.postId
-            INNER JOIN PostStats ON PostData.postId = PostStats.postId
-            LEFT JOIN PostUserStats ON PostUserStats.postId = PostData.postId AND PostUserStats.userId = ?
+            INNER JOIN NoteStats ON PostData.postId = NoteStats.postId
+            LEFT JOIN NoteUserStats ON NoteUserStats.postId = PostData.postId AND NoteUserStats.userId = ?
             LEFT JOIN MutedUserData ON MutedUserData.userId = PostData.authorId
             WHERE FeedPostDataCrossRef.feedDirective = ? AND isMuted = 0
         """
     }
 
     private val orderByClause = when {
-        feedDirective.isPopularFeed() -> "ORDER BY PostStats.score"
-        feedDirective.isTrendingFeed() -> "ORDER BY PostStats.score24h"
-        feedDirective.isMostZappedFeed() -> "ORDER BY PostStats.satsZapped"
+        feedDirective.isPopularFeed() -> "ORDER BY NoteStats.score"
+        feedDirective.isTrendingFeed() -> "ORDER BY NoteStats.score24h"
+        feedDirective.isMostZappedFeed() -> "ORDER BY NoteStats.satsZapped"
         feedDirective.isBookmarkFeed() -> "ORDER BY PostData.createdAt"
         else -> throw UnsupportedOperationException("Unsupported explore feed directive.")
     }

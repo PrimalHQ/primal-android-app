@@ -26,11 +26,11 @@ import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.core.utils.usernameUiFriendly
-import net.primal.android.feed.repository.PostRepository
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.notary.NostrSignUnauthorized
+import net.primal.android.note.repository.NoteRepository
 import net.primal.android.notifications.db.Notification
 import net.primal.android.notifications.list.NotificationsContract.UiEvent
 import net.primal.android.notifications.list.NotificationsContract.UiEvent.NotificationsSeen
@@ -60,7 +60,7 @@ class NotificationsViewModel @Inject constructor(
     private val dispatcherProvider: CoroutineDispatcherProvider,
     private val activeAccountStore: ActiveAccountStore,
     private val notificationsRepository: NotificationRepository,
-    private val postRepository: PostRepository,
+    private val noteRepository: NoteRepository,
     private val profileRepository: ProfileRepository,
     private val zapHandler: ZapHandler,
     private val subscriptionsManager: SubscriptionsManager,
@@ -176,7 +176,7 @@ class NotificationsViewModel @Inject constructor(
     private fun likePost(postLikeAction: PostLikeAction) =
         viewModelScope.launch {
             try {
-                postRepository.likePost(
+                noteRepository.likePost(
                     postId = postLikeAction.postId,
                     postAuthorId = postLikeAction.postAuthorId,
                 )
@@ -190,7 +190,7 @@ class NotificationsViewModel @Inject constructor(
     private fun repostPost(repostAction: RepostAction) =
         viewModelScope.launch {
             try {
-                postRepository.repostPost(
+                noteRepository.repostPost(
                     postId = repostAction.postId,
                     postAuthorId = repostAction.postAuthorId,
                     postRawNostrEvent = repostAction.postNostrEvent,
@@ -277,7 +277,7 @@ class NotificationsViewModel @Inject constructor(
             attachments = this.actionPostNoteAttachments.map { it.asNoteAttachmentUi() },
             nostrUris = this.actionPostNostrUris.map { it.asNoteNostrUriUi() },
             stats = FeedPostStatsUi.from(
-                postStats = this.actionPostStats,
+                noteStats = this.actionNoteStats,
                 userStats = this.actionPostUserStats,
             ),
             hashtags = this.actionPost.hashtags,

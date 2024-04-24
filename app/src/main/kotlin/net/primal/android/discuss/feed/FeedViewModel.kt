@@ -27,11 +27,11 @@ import net.primal.android.discuss.feed.FeedContract.UiEvent
 import net.primal.android.discuss.feed.FeedContract.UiState
 import net.primal.android.discuss.feed.FeedContract.UiState.FeedError
 import net.primal.android.feed.repository.FeedRepository
-import net.primal.android.feed.repository.PostRepository
 import net.primal.android.navigation.feedDirective
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.note.repository.NoteRepository
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.settings.muted.repository.MutedUserRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
@@ -50,7 +50,7 @@ class FeedViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val dispatcherProvider: CoroutineDispatcherProvider,
     private val feedRepository: FeedRepository,
-    private val postRepository: PostRepository,
+    private val noteRepository: NoteRepository,
     private val activeAccountStore: ActiveAccountStore,
     private val userDataSyncerFactory: UserDataUpdaterFactory,
     private val appConfigUpdater: AppConfigUpdater,
@@ -195,7 +195,7 @@ class FeedViewModel @Inject constructor(
     private fun likePost(postLikeAction: UiEvent.PostLikeAction) =
         viewModelScope.launch {
             try {
-                postRepository.likePost(
+                noteRepository.likePost(
                     postId = postLikeAction.postId,
                     postAuthorId = postLikeAction.postAuthorId,
                 )
@@ -211,7 +211,7 @@ class FeedViewModel @Inject constructor(
     private fun repostPost(repostAction: UiEvent.RepostAction) =
         viewModelScope.launch {
             try {
-                postRepository.repostPost(
+                noteRepository.repostPost(
                     postId = repostAction.postId,
                     postAuthorId = repostAction.postAuthorId,
                     postRawNostrEvent = repostAction.postNostrEvent,
@@ -304,15 +304,15 @@ class FeedViewModel @Inject constructor(
             withContext(dispatcherProvider.io()) {
                 try {
                     setState { copy(confirmBookmarkingNoteId = null) }
-                    val isBookmarked = postRepository.isBookmarked(noteId = event.noteId)
+                    val isBookmarked = noteRepository.isBookmarked(noteId = event.noteId)
                     when (isBookmarked) {
-                        true -> postRepository.removeFromBookmarks(
+                        true -> noteRepository.removeFromBookmarks(
                             userId = userId,
                             forceUpdate = event.forceUpdate,
                             noteId = event.noteId,
                         )
 
-                        false -> postRepository.addToBookmarks(
+                        false -> noteRepository.addToBookmarks(
                             userId = userId,
                             forceUpdate = event.forceUpdate,
                             noteId = event.noteId,

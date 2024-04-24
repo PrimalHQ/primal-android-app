@@ -5,8 +5,8 @@ import androidx.room.Relation
 import net.primal.android.attachments.db.NoteAttachment
 import net.primal.android.attachments.db.NoteNostrUri
 import net.primal.android.feed.db.PostData
-import net.primal.android.feed.db.PostStats
-import net.primal.android.profile.db.PostUserStats
+import net.primal.android.note.db.NoteStats
+import net.primal.android.note.db.NoteUserStats
 import net.primal.android.profile.db.ProfileData
 
 data class Notification(
@@ -20,10 +20,10 @@ data class Notification(
     val actionPost: PostData? = null,
 
     @Relation(entityColumn = "postId", parentColumn = "actionPostId")
-    val actionPostStats: PostStats? = null,
+    val actionNoteStats: NoteStats? = null,
 
     @Relation(entityColumn = "postId", parentColumn = "actionPostId")
-    val actionPostUserStats: PostUserStats? = null,
+    val actionPostUserStats: NoteUserStats? = null,
 
     @Relation(entityColumn = "eventId", parentColumn = "actionPostId")
     val actionPostNoteAttachments: List<NoteAttachment> = emptyList(),

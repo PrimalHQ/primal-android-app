@@ -2,7 +2,8 @@ package net.primal.android.feed.repository
 
 import org.junit.Test
 
-class PostStatsUpdaterTest {
+@Suppress("EmptyFunctionBlock")
+class NoteStatsUpdaterTest {
 
     @Test
     fun `increaseLikeStats updates like stats in database`() {

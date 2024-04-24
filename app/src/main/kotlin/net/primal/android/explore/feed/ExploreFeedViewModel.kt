@@ -27,11 +27,11 @@ import net.primal.android.explore.feed.ExploreFeedContract.UiEvent
 import net.primal.android.explore.feed.ExploreFeedContract.UiState
 import net.primal.android.explore.feed.ExploreFeedContract.UiState.ExploreFeedError
 import net.primal.android.feed.repository.FeedRepository
-import net.primal.android.feed.repository.PostRepository
 import net.primal.android.navigation.exploreFeedDirectiveOrThrow
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.note.repository.NoteRepository
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.settings.muted.repository.MutedUserRepository
 import net.primal.android.settings.repository.SettingsRepository
@@ -50,7 +50,7 @@ class ExploreFeedViewModel @Inject constructor(
     private val dispatcherProvider: CoroutineDispatcherProvider,
     private val activeAccountStore: ActiveAccountStore,
     private val feedRepository: FeedRepository,
-    private val postRepository: PostRepository,
+    private val postRepository: NoteRepository,
     private val profileRepository: ProfileRepository,
     private val zapHandler: ZapHandler,
     private val settingsRepository: SettingsRepository,

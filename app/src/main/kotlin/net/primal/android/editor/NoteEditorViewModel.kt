@@ -29,13 +29,13 @@ import net.primal.android.editor.NoteEditorContract.UiEvent
 import net.primal.android.editor.NoteEditorContract.UiState
 import net.primal.android.editor.domain.NoteAttachment
 import net.primal.android.feed.repository.FeedRepository
-import net.primal.android.feed.repository.PostRepository
 import net.primal.android.navigation.newPostPreFillContent
 import net.primal.android.navigation.newPostPreFillFileUri
 import net.primal.android.navigation.replyToNoteId
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.note.repository.NoteRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
 import timber.log.Timber
@@ -47,7 +47,7 @@ class NoteEditorViewModel @Inject constructor(
     private val fileAnalyser: FileAnalyser,
     private val activeAccountStore: ActiveAccountStore,
     private val feedRepository: FeedRepository,
-    private val postRepository: PostRepository,
+    private val noteRepository: NoteRepository,
 ) : ViewModel() {
 
     private val argReplyToNoteId = savedStateHandle.replyToNoteId
@@ -137,7 +137,7 @@ class NoteEditorViewModel @Inject constructor(
             try {
                 val rootPost = _state.value.conversation.firstOrNull()
                 val replyToPost = _state.value.conversation.lastOrNull()
-                postRepository.publishShortTextNote(
+                noteRepository.publishShortTextNote(
                     content = event.content,
                     attachments = _state.value.attachments,
                     rootPostId = rootPost?.postId,
@@ -175,7 +175,7 @@ class NoteEditorViewModel @Inject constructor(
             updateNoteAttachmentState(attachment = attachment.copy(uploadError = null))
 
             val remoteUrl = withContext(dispatcherProvider.io()) {
-                postRepository.uploadPostAttachment(attachment)
+                noteRepository.uploadPostAttachment(attachment)
             }
             updateNoteAttachmentState(attachment = attachment.copy(remoteUrl = remoteUrl))
 

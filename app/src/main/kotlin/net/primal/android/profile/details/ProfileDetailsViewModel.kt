@@ -22,12 +22,12 @@ import net.primal.android.core.compose.profile.model.asProfileDetailsUi
 import net.primal.android.core.compose.profile.model.asProfileStatsUi
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.feed.repository.FeedRepository
-import net.primal.android.feed.repository.PostRepository
 import net.primal.android.navigation.profileId
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.ext.extractProfileId
+import net.primal.android.note.repository.NoteRepository
 import net.primal.android.profile.details.ProfileDetailsContract.UiEvent
 import net.primal.android.profile.details.ProfileDetailsContract.UiState
 import net.primal.android.profile.details.ProfileDetailsContract.UiState.ProfileError
@@ -51,7 +51,7 @@ class ProfileDetailsViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val feedRepository: FeedRepository,
     private val profileRepository: ProfileRepository,
-    private val postRepository: PostRepository,
+    private val noteRepository: NoteRepository,
     private val zapHandler: ZapHandler,
     private val settingsRepository: SettingsRepository,
     private val mutedUserRepository: MutedUserRepository,
@@ -239,7 +239,7 @@ class ProfileDetailsViewModel @Inject constructor(
     private fun likePost(postLikeAction: UiEvent.PostLikeAction) =
         viewModelScope.launch {
             try {
-                postRepository.likePost(
+                noteRepository.likePost(
                     postId = postLikeAction.postId,
                     postAuthorId = postLikeAction.postAuthorId,
                 )
@@ -255,7 +255,7 @@ class ProfileDetailsViewModel @Inject constructor(
     private fun repostPost(repostAction: UiEvent.RepostAction) =
         viewModelScope.launch {
             try {
-                postRepository.repostPost(
+                noteRepository.repostPost(
                     postId = repostAction.postId,
                     postAuthorId = repostAction.postAuthorId,
                     postRawNostrEvent = repostAction.postNostrEvent,
@@ -472,15 +472,15 @@ class ProfileDetailsViewModel @Inject constructor(
             withContext(dispatcherProvider.io()) {
                 try {
                     setState { copy(confirmBookmarkingNoteId = null) }
-                    val isBookmarked = postRepository.isBookmarked(noteId = event.noteId)
+                    val isBookmarked = noteRepository.isBookmarked(noteId = event.noteId)
                     when (isBookmarked) {
-                        true -> postRepository.removeFromBookmarks(
+                        true -> noteRepository.removeFromBookmarks(
                             userId = userId,
                             forceUpdate = event.forceUpdate,
                             noteId = event.noteId,
                         )
 
-                        false -> postRepository.addToBookmarks(
+                        false -> noteRepository.addToBookmarks(
                             userId = userId,
                             forceUpdate = event.forceUpdate,
                             noteId = event.noteId,

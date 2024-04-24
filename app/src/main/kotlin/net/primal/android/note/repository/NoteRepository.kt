@@ -1,11 +1,18 @@
-package net.primal.android.feed.repository
+package net.primal.android.note.repository
 
+import androidx.paging.ExperimentalPagingApi
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import androidx.paging.PagingSource
 import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonPrimitive
+import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.files.FileUploader
 import net.primal.android.core.files.error.UnsuccessfulFileUpload
 import net.primal.android.db.PrimalDatabase
@@ -20,23 +27,29 @@ import net.primal.android.nostr.ext.parseEventTags
 import net.primal.android.nostr.ext.parseHashtagTags
 import net.primal.android.nostr.ext.parsePubkeyTags
 import net.primal.android.nostr.publish.NostrPublisher
+import net.primal.android.note.api.NoteApi
+import net.primal.android.note.api.model.NoteZapsRequestBody
+import net.primal.android.note.db.NoteZap
+import net.primal.android.note.reactions.mediator.NoteZapsMediator
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.domain.PublicBookmark
 import timber.log.Timber
 
-class PostRepository @Inject constructor(
-    private val database: PrimalDatabase,
+class NoteRepository @Inject constructor(
+    private val dispatcherProvider: CoroutineDispatcherProvider,
     private val activeAccountStore: ActiveAccountStore,
     private val fileUploader: FileUploader,
     private val nostrPublisher: NostrPublisher,
     private val profileRepository: ProfileRepository,
+    private val noteApi: NoteApi,
+    private val database: PrimalDatabase,
 ) {
 
     @Throws(NostrPublishException::class)
     suspend fun likePost(postId: String, postAuthorId: String) {
         val userId = activeAccountStore.activeUserId()
-        val statsUpdater = PostStatsUpdater(
+        val statsUpdater = NoteStatsUpdater(
             postId = postId,
             userId = userId,
             postAuthorId = postAuthorId,
@@ -60,7 +73,7 @@ class PostRepository @Inject constructor(
         postRawNostrEvent: String,
     ) {
         val userId = activeAccountStore.activeUserId()
-        val statsUpdater = PostStatsUpdater(
+        val statsUpdater = NoteStatsUpdater(
             postId = postId,
             userId = userId,
             postAuthorId = postAuthorId,
@@ -198,5 +211,38 @@ class PostRepository @Inject constructor(
         }
     }
 
-    fun observeTopZappers(postId: String) = database.noteZaps().observeTopZappers(noteId = postId)
+    fun observeTopZappers(postId: String) = database.noteZaps().observeTopZaps(noteId = postId)
+
+    suspend fun fetchTopNoteZaps(noteId: String) {
+        val userId = activeAccountStore.activeUserId()
+        val response = noteApi.getNoteZaps(NoteZapsRequestBody(noteId = noteId, userId = userId, limit = 15))
+        withContext(dispatcherProvider.io()) {
+            response.persistToDatabaseAsTransaction(database = database)
+        }
+    }
+
+    fun pagedNoteZaps(noteId: String): Flow<PagingData<NoteZap>> {
+        return createPager(noteId = noteId) {
+            database.noteZaps().pagedNoteZaps(noteId = noteId)
+        }.flow
+    }
+
+    @OptIn(ExperimentalPagingApi::class)
+    private fun createPager(noteId: String, pagingSourceFactory: () -> PagingSource<Int, NoteZap>) =
+        Pager(
+            config = PagingConfig(
+                pageSize = 50,
+                prefetchDistance = 50,
+                initialLoadSize = 150,
+                enablePlaceholders = true,
+            ),
+            remoteMediator = NoteZapsMediator(
+                noteId = noteId,
+                userId = activeAccountStore.activeUserId(),
+                dispatcherProvider = dispatcherProvider,
+                noteApi = noteApi,
+                database = database,
+            ),
+            pagingSourceFactory = pagingSourceFactory,
+        )
 }

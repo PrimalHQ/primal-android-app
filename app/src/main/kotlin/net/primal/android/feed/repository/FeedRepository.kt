@@ -5,26 +5,20 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.PagingSource
-import androidx.room.withTransaction
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.withContext
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
-import net.primal.android.core.ext.asMapByKey
 import net.primal.android.core.ext.isChronologicalFeed
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.feed.api.FeedApi
 import net.primal.android.feed.api.mediator.FeedRemoteMediator
-import net.primal.android.feed.api.model.NoteZapsRequestBody
 import net.primal.android.feed.api.model.ThreadRequestBody
 import net.primal.android.feed.db.FeedPost
 import net.primal.android.feed.db.sql.ChronologicalFeedQueryBuilder
 import net.primal.android.feed.db.sql.ExploreFeedQueryBuilder
 import net.primal.android.feed.db.sql.FeedQueryBuilder
-import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
-import net.primal.android.nostr.ext.mapAsNoteZapDO
-import net.primal.android.nostr.ext.mapAsProfileDataPO
 import net.primal.android.thread.db.ThreadConversationCrossRef
 import net.primal.android.user.accounts.active.ActiveAccountStore
 
@@ -87,23 +81,6 @@ class FeedRepository @Inject constructor(
                     )
                 },
             )
-        }
-    }
-
-    suspend fun fetchNoteZaps(postId: String) {
-        val userId = activeAccountStore.activeUserId()
-        val response = feedApi.getNoteZaps(
-            NoteZapsRequestBody(postId = postId, userPubKey = userId, limit = 10),
-        )
-
-        val noteZaps = response.zaps.mapAsNoteZapDO()
-        val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
-        val profiles = response.profiles.mapAsProfileDataPO(cdnResources = cdnResources)
-        withContext(dispatcherProvider.io()) {
-            database.withTransaction {
-                database.profiles().upsertAll(data = profiles)
-                database.noteZaps().upsertAll(data = noteZaps)
-            }
         }
     }
 

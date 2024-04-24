@@ -9,10 +9,10 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -95,26 +95,27 @@ import net.primal.android.core.compose.icons.primaliconpack.More
 import net.primal.android.core.compose.pulltorefresh.PrimalPullToRefreshIndicator
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.crypto.hexToNoteHrp
+import net.primal.android.note.ui.NoteZapUiModel
 import net.primal.android.profile.report.OnReportContentClick
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.thread.ThreadContract.UiState.ThreadError
-import net.primal.android.thread.ui.NoteZapUiModel
 import net.primal.android.wallet.zaps.canZap
 
 @Composable
 fun ThreadScreen(
     viewModel: ThreadViewModel,
     onClose: () -> Unit,
-    onPostClick: (String) -> Unit,
+    onPostClick: (noteId: String) -> Unit,
     onPostReplyClick: (String) -> Unit,
     onPostQuoteClick: (String) -> Unit,
-    onProfileClick: (String) -> Unit,
+    onProfileClick: (profileId: String) -> Unit,
     onHashtagClick: (String) -> Unit,
     onMediaClick: (MediaClickEvent) -> Unit,
     onGoToWallet: () -> Unit,
     onReplyInNoteEditor: (String, Uri?, String) -> Unit,
+    onReactionsClick: (noteId: String) -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
 
@@ -139,6 +140,7 @@ fun ThreadScreen(
         onMediaClick = onMediaClick,
         onGoToWallet = onGoToWallet,
         onReplyInNoteEditor = onReplyInNoteEditor,
+        onReactionsClick = onReactionsClick,
         eventPublisher = { viewModel.setEvent(it) },
     )
 }
@@ -156,6 +158,7 @@ fun ThreadScreen(
     onMediaClick: (MediaClickEvent) -> Unit,
     onGoToWallet: () -> Unit,
     onReplyInNoteEditor: (String, Uri?, String) -> Unit,
+    onReactionsClick: (noteId: String) -> Unit,
     eventPublisher: (ThreadContract.UiEvent) -> Unit,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
@@ -192,6 +195,7 @@ fun ThreadScreen(
                 onMediaClick = onMediaClick,
                 onPostQuoteClick = onPostQuoteClick,
                 onGoToWallet = onGoToWallet,
+                onReactionsClick = onReactionsClick,
                 eventPublisher = eventPublisher,
             )
         },
@@ -248,6 +252,7 @@ private fun ThreadScreenContent(
     onMediaClick: (MediaClickEvent) -> Unit,
     onPostQuoteClick: (String) -> Unit,
     onGoToWallet: () -> Unit,
+    onReactionsClick: (noteId: String) -> Unit,
     eventPublisher: (ThreadContract.UiEvent) -> Unit,
 ) {
     var repostQuotePostConfirmation by remember { mutableStateOf<FeedPostUi?>(null) }
@@ -403,6 +408,7 @@ private fun ThreadScreenContent(
                     ),
                 )
             },
+            onReactionsClick = onReactionsClick,
         )
 
         PullToRefreshContainer(
@@ -416,7 +422,6 @@ private fun ThreadScreenContent(
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun ThreadLazyColumn(
     paddingValues: PaddingValues,
@@ -430,6 +435,7 @@ private fun ThreadLazyColumn(
     onMediaClick: (MediaClickEvent) -> Unit,
     onBookmarkClick: (String) -> Unit,
     onMuteUserClick: (authorId: String) -> Unit,
+    onReactionsClick: (noteId: String) -> Unit,
     onReportContentClick: OnReportContentClick,
 ) {
     var threadListMaxHeightPx by remember { mutableIntStateOf(0) }
@@ -445,6 +451,7 @@ private fun ThreadLazyColumn(
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
+            .navigationBarsPadding()
             .onSizeChanged { threadListMaxHeightPx = it.height },
         contentPadding = paddingValues,
     ) {
@@ -453,14 +460,8 @@ private fun ThreadLazyColumn(
             key = { _, item -> item.postId },
             contentType = { index, _ -> if (index == state.highlightPostIndex) "root" else "reply" },
         ) { index, item ->
-            val highlightPost = index == state.highlightPostIndex
-            val shouldIndentContent = index != state.highlightPostIndex
-            val highlighted = index == state.highlightPostIndex
-            val connectedToPreviousNote = state.highlightPostIndex > 0 &&
-                index in 1 until state.highlightPostIndex + 1
-            val connectedToNextNote = index in 0 until state.highlightPostIndex
             val isReply = index > state.highlightPostIndex
-
+            val highlighted = index == state.highlightPostIndex
             Column(
                 modifier = Modifier.onSizeChanged {
                     if (highlighted) {
@@ -475,12 +476,12 @@ private fun ThreadLazyColumn(
                     shape = RectangleShape,
                     cardPadding = PaddingValues(all = 0.dp),
                     expanded = true,
-                    textSelectable = highlightPost,
-                    fullWidthContent = highlightPost,
-                    headerSingleLine = !highlightPost,
-                    forceContentIndent = shouldIndentContent,
-                    drawLineAboveAvatar = connectedToPreviousNote,
-                    drawLineBelowAvatar = connectedToNextNote,
+                    textSelectable = highlighted,
+                    fullWidthContent = highlighted,
+                    headerSingleLine = !highlighted,
+                    forceContentIndent = index != state.highlightPostIndex,
+                    drawLineAboveAvatar = isConnectedBackward(index, state.highlightPostIndex),
+                    drawLineBelowAvatar = isConnectedForward(index, state.highlightPostIndex),
                     showReplyTo = false,
                     onPostClick = { postId ->
                         if (state.highlightPostId != postId) {
@@ -497,12 +498,16 @@ private fun ThreadLazyColumn(
                     onBookmarkClick = { onBookmarkClick(item.postId) },
                     contentFooter = {
                         if (highlighted && (state.topZap != null || state.otherZaps.isNotEmpty())) {
-                            TopZapsSection(topZap = state.topZap, otherZaps = state.otherZaps)
+                            TopZapsSection(
+                                topZap = state.topZap,
+                                otherZaps = state.otherZaps,
+                                onClick = { onReactionsClick(item.postId) },
+                            )
                         }
                     },
                 )
 
-                if (!connectedToNextNote) {
+                if (!isConnectedForward(index, state.highlightPostIndex)) {
                     PrimalDivider()
                 }
             }
@@ -516,19 +521,35 @@ private fun ThreadLazyColumn(
     }
 }
 
+private fun isConnectedBackward(index: Int, highlightIndex: Int): Boolean {
+    return highlightIndex > 0 && index in 1 until highlightIndex + 1
+}
+
+private fun isConnectedForward(index: Int, highlightIndex: Int): Boolean {
+    return index in 0 until highlightIndex
+}
+
 const val MaxOtherZaps = 4
 
 @Composable
-private fun TopZapsSection(topZap: NoteZapUiModel?, otherZaps: List<NoteZapUiModel>) {
+private fun TopZapsSection(
+    topZap: NoteZapUiModel?,
+    otherZaps: List<NoteZapUiModel>,
+    onClick: () -> Unit,
+) {
     Column(
         modifier = Modifier
-            .padding(horizontal = 10.dp)
-            .animateContentSize(),
+            .animateContentSize()
+            .padding(horizontal = 10.dp),
     ) {
         Spacer(modifier = Modifier.height(12.dp))
 
         if (topZap != null) {
-            NoteZapListItem(noteZap = topZap, showMessage = true)
+            NoteZapListItem(
+                noteZap = topZap,
+                showMessage = true,
+                onClick = onClick,
+            )
             Spacer(modifier = Modifier.height(8.dp))
         }
 
@@ -536,7 +557,11 @@ private fun TopZapsSection(topZap: NoteZapUiModel?, otherZaps: List<NoteZapUiMod
             Row {
                 otherZaps.take(MaxOtherZaps).forEach {
                     key(it.id) {
-                        NoteZapListItem(noteZap = it, showMessage = false)
+                        NoteZapListItem(
+                            noteZap = it,
+                            showMessage = false,
+                            onClick = onClick,
+                        )
                         Spacer(modifier = Modifier.width(6.dp))
                     }
                 }
@@ -549,7 +574,8 @@ private fun TopZapsSection(topZap: NoteZapUiModel?, otherZaps: List<NoteZapUiMod
                                 shape = CircleShape,
                             )
                             .size(26.dp)
-                            .padding(horizontal = 4.dp),
+                            .padding(horizontal = 4.dp)
+                            .clickable { onClick() },
                         imageVector = PrimalIcons.More,
                         contentDescription = null,
                     )
@@ -562,7 +588,11 @@ private fun TopZapsSection(topZap: NoteZapUiModel?, otherZaps: List<NoteZapUiMod
 }
 
 @Composable
-private fun NoteZapListItem(noteZap: NoteZapUiModel, showMessage: Boolean = false) {
+private fun NoteZapListItem(
+    noteZap: NoteZapUiModel,
+    showMessage: Boolean = false,
+    onClick: () -> Unit,
+) {
     val numberFormat = NumberFormat.getNumberInstance()
     Row(
         modifier = Modifier
@@ -571,13 +601,15 @@ private fun NoteZapListItem(noteZap: NoteZapUiModel, showMessage: Boolean = fals
             .background(
                 color = AppTheme.extraColorScheme.surfaceVariantAlt1,
                 shape = AppTheme.shapes.extraLarge,
-            ),
+            )
+            .clickable { onClick() },
         verticalAlignment = Alignment.CenterVertically,
     ) {
         AvatarThumbnail(
             modifier = Modifier.padding(start = 2.dp),
-            avatarCdnImage = noteZap.avatarCdnImage,
+            avatarCdnImage = noteZap.zapperAvatarCdnImage,
             avatarSize = 24.dp,
+            onClick = onClick,
         )
 
         Text(
@@ -847,6 +879,7 @@ fun ThreadScreenPreview() {
             onMediaClick = {},
             onGoToWallet = {},
             onReplyInNoteEditor = { _, _, _ -> },
+            onReactionsClick = {},
             eventPublisher = {},
         )
     }

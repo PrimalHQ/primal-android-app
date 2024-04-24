@@ -1,5 +1,6 @@
-package net.primal.android.feed.db
+package net.primal.android.note.db
 
+import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -31,6 +32,21 @@ interface NoteZapDao {
     fun upsertAll(data: List<NoteZapData>)
 
     @Transaction
-    @Query("SELECT * FROM NoteZapData WHERE noteId = :noteId ORDER BY CAST(amountInBtc AS REAL) DESC LIMIT 10")
-    fun observeTopZappers(noteId: String): Flow<List<NoteZap>>
+    @Query(
+        """
+            SELECT * FROM NoteZapData WHERE noteId = :noteId
+            ORDER BY CAST(amountInBtc AS REAL) DESC, zapReceiptAt ASC
+            LIMIT 10
+        """,
+    )
+    fun observeTopZaps(noteId: String): Flow<List<NoteZap>>
+
+    @Transaction
+    @Query(
+        """
+            SELECT * FROM NoteZapData WHERE noteId = :noteId
+            ORDER BY CAST(amountInBtc AS REAL) DESC, zapReceiptAt ASC
+        """,
+    )
+    fun pagedNoteZaps(noteId: String): PagingSource<Int, NoteZap>
 }

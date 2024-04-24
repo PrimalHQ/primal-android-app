@@ -6,22 +6,22 @@ import androidx.room.Query
 import androidx.room.RawQuery
 import androidx.room.Transaction
 import androidx.sqlite.db.SupportSQLiteQuery
-import net.primal.android.profile.db.PostUserStats
+import net.primal.android.note.db.NoteUserStats
 import net.primal.android.settings.muted.db.MutedUserData
 
 @Dao
 interface FeedPostDao {
 
     @Transaction
-    @RawQuery(observedEntities = [FeedPost::class, MutedUserData::class, PostUserStats::class])
+    @RawQuery(observedEntities = [FeedPost::class, MutedUserData::class, NoteUserStats::class])
     fun feedQuery(query: SupportSQLiteQuery): PagingSource<Int, FeedPost>
 
     @Transaction
-    @RawQuery(observedEntities = [FeedPost::class, MutedUserData::class, PostUserStats::class])
+    @RawQuery(observedEntities = [FeedPost::class, MutedUserData::class, NoteUserStats::class])
     fun newestFeedPosts(query: SupportSQLiteQuery): List<FeedPost>
 
     @Transaction
-    @RawQuery(observedEntities = [FeedPost::class, MutedUserData::class, PostUserStats::class])
+    @RawQuery(observedEntities = [FeedPost::class, MutedUserData::class, NoteUserStats::class])
     fun oldestFeedPosts(query: SupportSQLiteQuery): List<FeedPost>
 
     @Transaction

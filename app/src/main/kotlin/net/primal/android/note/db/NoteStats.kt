@@ -1,10 +1,10 @@
-package net.primal.android.feed.db
+package net.primal.android.note.db
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity
-data class PostStats(
+data class NoteStats(
     @PrimaryKey
     val postId: String,
     val likes: Long = 0,

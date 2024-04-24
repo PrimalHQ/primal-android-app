@@ -64,6 +64,8 @@ import net.primal.android.navigation.deeplinking.ext.handleDeeplink
 import net.primal.android.navigation.splash.SplashContract
 import net.primal.android.navigation.splash.SplashScreen
 import net.primal.android.navigation.splash.SplashViewModel
+import net.primal.android.note.reactions.ReactionsScreen
+import net.primal.android.note.reactions.ReactionsViewModel
 import net.primal.android.notifications.list.NotificationsScreen
 import net.primal.android.notifications.list.NotificationsViewModel
 import net.primal.android.profile.details.ProfileDetailsViewModel
@@ -189,6 +191,8 @@ private fun NavController.navigateToWalletSettings(nwcUrl: String? = null) =
     }
 
 fun NavController.navigateToThread(noteId: String) = navigate(route = "thread/$noteId")
+
+fun NavController.navigateToNoteReactions(noteId: String) = navigate(route = "reactions/$noteId")
 
 fun NavController.navigateToMediaGallery(
     noteId: String,
@@ -378,6 +382,16 @@ fun PrimalAppNavigation() {
 
             thread(
                 route = "thread/{$NOTE_ID}",
+                arguments = listOf(
+                    navArgument(NOTE_ID) {
+                        type = NavType.StringType
+                    },
+                ),
+                navController = navController,
+            )
+
+            noteReactions(
+                route = "reactions/{$NOTE_ID}",
                 arguments = listOf(
                     navArgument(NOTE_ID) {
                         type = NavType.StringType
@@ -920,6 +934,29 @@ private fun NavGraphBuilder.thread(
                 preFillFileUri = uri,
             )
         },
+        onReactionsClick = { noteId -> navController.navigateToNoteReactions(noteId = noteId) },
+    )
+}
+
+private fun NavGraphBuilder.noteReactions(
+    route: String,
+    arguments: List<NamedNavArgument>,
+    navController: NavController,
+) = composable(
+    route = route,
+    arguments = arguments,
+    enterTransition = { primalSlideInHorizontallyFromEnd },
+    exitTransition = { primalScaleOut },
+    popEnterTransition = { primalScaleIn },
+    popExitTransition = { primalSlideOutHorizontallyToEnd },
+) { navBackEntry ->
+    val viewModel = hiltViewModel<ReactionsViewModel>(navBackEntry)
+    ApplyEdgeToEdge()
+    LockToOrientationPortrait()
+    ReactionsScreen(
+        viewModel = viewModel,
+        onClose = { navController.navigateUp() },
+        onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
     )
 }
 

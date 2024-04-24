@@ -20,16 +20,16 @@ import kotlinx.coroutines.withContext
 import net.primal.android.core.compose.feed.model.asFeedPostUi
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.feed.repository.FeedRepository
-import net.primal.android.feed.repository.PostRepository
 import net.primal.android.navigation.noteIdOrThrow
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.note.repository.NoteRepository
+import net.primal.android.note.ui.asNoteZapUiModel
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.settings.muted.repository.MutedUserRepository
 import net.primal.android.thread.ThreadContract.UiEvent
 import net.primal.android.thread.ThreadContract.UiState.ThreadError
-import net.primal.android.thread.ui.asNoteZapUiModel
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
 import net.primal.android.wallet.domain.ZapTarget
@@ -45,7 +45,7 @@ class ThreadViewModel @Inject constructor(
     private val dispatcherProvider: CoroutineDispatcherProvider,
     private val activeAccountStore: ActiveAccountStore,
     private val feedRepository: FeedRepository,
-    private val postRepository: PostRepository,
+    private val noteRepository: NoteRepository,
     private val profileRepository: ProfileRepository,
     private val zapHandler: ZapHandler,
     private val mutedUserRepository: MutedUserRepository,
@@ -98,7 +98,7 @@ class ThreadViewModel @Inject constructor(
 
     private fun observeTopZappers() =
         viewModelScope.launch {
-            postRepository.observeTopZappers(postId = postId).collect {
+            noteRepository.observeTopZappers(postId = postId).collect {
                 setState {
                     copy(
                         topZap = it.firstOrNull()?.asNoteZapUiModel() ?: this.topZap,
@@ -182,7 +182,7 @@ class ThreadViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 withContext(dispatcherProvider.io()) {
-                    feedRepository.fetchNoteZaps(postId = postId)
+                    noteRepository.fetchTopNoteZaps(noteId = postId)
                 }
             } catch (error: WssException) {
                 Timber.w(error)
@@ -192,7 +192,7 @@ class ThreadViewModel @Inject constructor(
     private fun likePost(postLikeAction: UiEvent.PostLikeAction) =
         viewModelScope.launch {
             try {
-                postRepository.likePost(
+                noteRepository.likePost(
                     postId = postLikeAction.postId,
                     postAuthorId = postLikeAction.postAuthorId,
                 )
@@ -208,7 +208,7 @@ class ThreadViewModel @Inject constructor(
     private fun repostPost(repostAction: UiEvent.RepostAction) =
         viewModelScope.launch {
             try {
-                postRepository.repostPost(
+                noteRepository.repostPost(
                     postId = repostAction.postId,
                     postAuthorId = repostAction.postAuthorId,
                     postRawNostrEvent = repostAction.postNostrEvent,
@@ -266,7 +266,7 @@ class ThreadViewModel @Inject constructor(
         viewModelScope.launch {
             setState { copy(publishingReply = true) }
             try {
-                val publishedAndImported = postRepository.publishShortTextNote(
+                val publishedAndImported = noteRepository.publishShortTextNote(
                     content = state.value.replyText,
                     attachments = emptyList(),
                     rootPostId = replyToAction.rootPostId,
@@ -330,15 +330,15 @@ class ThreadViewModel @Inject constructor(
             withContext(dispatcherProvider.io()) {
                 try {
                     setState { copy(confirmBookmarkingNoteId = null) }
-                    val isBookmarked = postRepository.isBookmarked(noteId = event.noteId)
+                    val isBookmarked = noteRepository.isBookmarked(noteId = event.noteId)
                     when (isBookmarked) {
-                        true -> postRepository.removeFromBookmarks(
+                        true -> noteRepository.removeFromBookmarks(
                             userId = userId,
                             forceUpdate = event.forceUpdate,
                             noteId = event.noteId,
                         )
 
-                        false -> postRepository.addToBookmarks(
+                        false -> noteRepository.addToBookmarks(
                             userId = userId,
                             forceUpdate = event.forceUpdate,
                             noteId = event.noteId,

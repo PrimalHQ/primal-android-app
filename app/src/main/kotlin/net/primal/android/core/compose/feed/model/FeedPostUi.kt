@@ -46,7 +46,7 @@ fun FeedPost.asFeedPostUi() =
         content = this.data.content,
         attachments = this.attachments.map { it.asNoteAttachmentUi() },
         nostrUris = this.nostrUris.map { it.asNoteNostrUriUi() },
-        stats = FeedPostStatsUi.from(postStats = this.postStats, userStats = this.userStats),
+        stats = FeedPostStatsUi.from(noteStats = this.noteStats, userStats = this.userStats),
         hashtags = this.data.hashtags,
         rawNostrEventJson = this.data.raw,
         replyToAuthorHandle = this.replyToAuthor?.usernameUiFriendly() ?: this.data.replyToAuthorId?.asEllipsizedNpub(),

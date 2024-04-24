@@ -2,6 +2,7 @@ package net.primal.android.profile.repository
 
 import org.junit.Test
 
+@Suppress("EmptyFunctionBlock")
 class ProfileRepositoryTest {
 
     @Test
