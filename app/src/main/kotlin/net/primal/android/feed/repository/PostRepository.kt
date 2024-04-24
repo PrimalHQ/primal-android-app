@@ -36,7 +36,12 @@ class PostRepository @Inject constructor(
     @Throws(NostrPublishException::class)
     suspend fun likePost(postId: String, postAuthorId: String) {
         val userId = activeAccountStore.activeUserId()
-        val statsUpdater = PostStatsUpdater(postId = postId, userId = userId, database = database)
+        val statsUpdater = PostStatsUpdater(
+            postId = postId,
+            userId = userId,
+            postAuthorId = postAuthorId,
+            database = database,
+        )
 
         try {
             statsUpdater.increaseLikeStats()
@@ -55,7 +60,12 @@ class PostRepository @Inject constructor(
         postRawNostrEvent: String,
     ) {
         val userId = activeAccountStore.activeUserId()
-        val statsUpdater = PostStatsUpdater(postId = postId, userId = userId, database = database)
+        val statsUpdater = PostStatsUpdater(
+            postId = postId,
+            userId = userId,
+            postAuthorId = postAuthorId,
+            database = database,
+        )
 
         try {
             statsUpdater.increaseRepostStats()

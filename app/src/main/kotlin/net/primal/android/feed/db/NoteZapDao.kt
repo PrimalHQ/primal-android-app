@@ -10,6 +10,23 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface NoteZapDao {
 
+    @Insert
+    fun insert(data: NoteZapData)
+
+    @Query(
+        """
+            DELETE FROM NoteZapData 
+            WHERE zapSenderId = :senderId AND zapReceiverId = :receiverId AND noteId = :noteId 
+                AND (zapRequestAt = :timestamp OR zapReceiptAt = :timestamp)
+        """,
+    )
+    fun delete(
+        senderId: String,
+        receiverId: String,
+        noteId: String,
+        timestamp: Long,
+    )
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun upsertAll(data: List<NoteZapData>)
 

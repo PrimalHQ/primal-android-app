@@ -1,15 +1,21 @@
 package net.primal.android.feed.repository
 
 import androidx.room.withTransaction
+import kotlin.time.Duration.Companion.milliseconds
 import net.primal.android.db.PrimalDatabase
+import net.primal.android.feed.db.NoteZapData
 import net.primal.android.feed.db.PostStats
 import net.primal.android.profile.db.PostUserStats
+import net.primal.android.wallet.utils.CurrencyConversionUtils.toBtc
 
 class PostStatsUpdater(
     val postId: String,
     val userId: String,
+    val postAuthorId: String,
     val database: PrimalDatabase,
 ) {
+
+    private val timestamp: Long = System.currentTimeMillis().milliseconds.inWholeSeconds
 
     private val postStats: PostStats by lazy {
         database.postStats().find(postId = postId)
@@ -33,7 +39,7 @@ class PostStatsUpdater(
             database.postUserStats().upsert(data = postUserStats.copy(reposted = true))
         }
 
-    suspend fun increaseZapStats(amountInSats: Int) =
+    suspend fun increaseZapStats(amountInSats: Int, zapComment: String) =
         database.withTransaction {
             database.postStats().upsert(
                 data = postStats.copy(
@@ -42,11 +48,29 @@ class PostStatsUpdater(
                 ),
             )
             database.postUserStats().upsert(data = postUserStats.copy(zapped = true))
+
+            database.noteZaps().insert(
+                data = NoteZapData(
+                    zapSenderId = userId,
+                    zapReceiverId = postAuthorId,
+                    noteId = postId,
+                    zapRequestAt = timestamp,
+                    zapReceiptAt = timestamp,
+                    amountInBtc = amountInSats.toBtc(),
+                    message = zapComment,
+                ),
+            )
         }
 
     suspend fun revertStats() =
         database.withTransaction {
             database.postStats().upsert(data = postStats)
             database.postUserStats().upsert(data = postUserStats)
+            database.noteZaps().delete(
+                noteId = postId,
+                senderId = userId,
+                receiverId = postAuthorId,
+                timestamp = timestamp,
+            )
         }
 }

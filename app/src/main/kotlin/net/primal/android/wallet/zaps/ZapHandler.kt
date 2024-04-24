@@ -49,7 +49,11 @@ class ZapHandler @Inject constructor(
         val statsUpdater = target.buildPostStatsUpdaterIfApplicable(userId)
 
         try {
-            statsUpdater?.increaseZapStats(amountInSats = zapAmountInSats.toInt())
+            statsUpdater?.increaseZapStats(
+                amountInSats = zapAmountInSats.toInt(),
+                zapComment = zapComment,
+            )
+
             val userZapRequestEvent = notary.signZapRequestNostrEvent(
                 userId = userId,
                 comment = zapComment,
@@ -96,8 +100,9 @@ class ZapHandler @Inject constructor(
     private fun ZapTarget.buildPostStatsUpdaterIfApplicable(userId: String) =
         when (this) {
             is ZapTarget.Note -> PostStatsUpdater(
-                postId = this.id,
                 userId = userId,
+                postId = this.id,
+                postAuthorId = this.authorPubkey,
                 database = database,
             )
 
