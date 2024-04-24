@@ -225,7 +225,6 @@ dependencies {
     implementation(libs.compose.ui.tooling.preview)
     implementation(libs.compose.material3)
     implementation(libs.compose.placeholdermaterial)
-    implementation("androidx.compose.foundation:foundation-layout:1.7.0-alpha07")
 
     implementation(libs.compose.constraintlayout)
     implementation(libs.constraintlayout)

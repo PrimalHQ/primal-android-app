@@ -284,7 +284,7 @@ private fun AttachmentsHorizontalPager(
     HorizontalPager(
         modifier = modifier,
         state = pagerState,
-        beyondViewportPageCount = 1,
+        beyondBoundsPageCount = 1,
         flingBehavior = PagerDefaults.flingBehavior(
             state = pagerState,
             snapAnimationSpec = spring(stiffness = Spring.StiffnessLow),

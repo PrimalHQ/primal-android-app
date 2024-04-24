@@ -221,7 +221,6 @@ private fun ProfileDetailsFormColumn(
             onValueChange = onDisplayNameChanged,
             placeholderText = stringResource(id = R.string.onboarding_profile_details_display_name_hint),
             keyboardOptions = KeyboardOptions.Default.copy(
-                autoCorrectEnabled = false,
                 keyboardType = KeyboardType.Text,
                 capitalization = KeyboardCapitalization.Words,
                 imeAction = ImeAction.Next,
@@ -235,7 +234,6 @@ private fun ProfileDetailsFormColumn(
             onValueChange = onAboutYouChanged,
             placeholderText = stringResource(id = R.string.onboarding_profile_details_about_you_hint),
             keyboardOptions = KeyboardOptions.Default.copy(
-                autoCorrectEnabled = true,
                 keyboardType = KeyboardType.Text,
                 capitalization = KeyboardCapitalization.Sentences,
                 imeAction = ImeAction.Done,

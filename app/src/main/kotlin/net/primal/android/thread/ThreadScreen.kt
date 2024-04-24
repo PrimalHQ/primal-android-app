@@ -11,8 +11,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ContextualFlowRow
-import androidx.compose.foundation.layout.ContextualFlowRowOverflow
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -47,6 +45,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -516,7 +515,6 @@ private fun ThreadLazyColumn(
 }
 
 @Composable
-@OptIn(ExperimentalLayoutApi::class)
 private fun TopZapsSection(topZap: NoteZapUiModel?, otherZaps: List<NoteZapUiModel>) {
     Column(
         modifier = Modifier.padding(horizontal = 10.dp),
@@ -529,27 +527,25 @@ private fun TopZapsSection(topZap: NoteZapUiModel?, otherZaps: List<NoteZapUiMod
         }
 
         if (otherZaps.isNotEmpty()) {
-            ContextualFlowRow(
-                itemCount = otherZaps.size,
-                maxLines = 1,
-                verticalArrangement = Arrangement.Center,
-                overflow = ContextualFlowRowOverflow.expandIndicator {
-                    Icon(
-                        modifier = Modifier
-                            .background(
-                                color = AppTheme.extraColorScheme.surfaceVariantAlt1,
-                                shape = CircleShape,
-                            )
-                            .size(26.dp)
-                            .padding(horizontal = 4.dp),
-                        imageVector = PrimalIcons.More,
-                        contentDescription = null,
-                    )
-                },
-            ) {
-                val zap = otherZaps[it]
-                NoteZapListItem(noteZap = zap, showMessage = false)
-                Spacer(modifier = Modifier.width(6.dp))
+            Row {
+                otherZaps.take(n = 4).forEach {
+                    key(it.id) {
+                        NoteZapListItem(noteZap = it, showMessage = false)
+                        Spacer(modifier = Modifier.width(6.dp))
+                    }
+                }
+
+                Icon(
+                    modifier = Modifier
+                        .background(
+                            color = AppTheme.extraColorScheme.surfaceVariantAlt1,
+                            shape = CircleShape,
+                        )
+                        .size(26.dp)
+                        .padding(horizontal = 4.dp),
+                    imageVector = PrimalIcons.More,
+                    contentDescription = null,
+                )
             }
 
             Spacer(modifier = Modifier.height(6.dp))
