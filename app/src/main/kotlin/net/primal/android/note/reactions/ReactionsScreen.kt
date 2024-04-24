@@ -25,6 +25,7 @@ import androidx.paging.compose.itemKey
 import net.primal.android.R
 import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.NostrUserText
+import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -95,48 +96,51 @@ private fun ReactionsScreen(
 
 @Composable
 private fun NoteZapListItem(data: NoteZapUiModel, onProfileClick: (profileId: String) -> Unit) {
-    ListItem(
-        modifier = Modifier.clickable { onProfileClick(data.zapperId) },
-        leadingContent = {
-            AvatarThumbnail(
-                avatarCdnImage = data.zapperAvatarCdnImage,
-                avatarSize = 42.dp,
-                onClick = { onProfileClick(data.zapperId) },
-            )
-        },
-        headlineContent = {
-            NostrUserText(displayName = data.zapperName, internetIdentifier = data.zapperInternetIdentifier)
-        },
-        supportingContent = {
-            if (!data.message.isNullOrEmpty()) {
-                Text(
-                    text = data.message,
-                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+    Column {
+        ListItem(
+            modifier = Modifier.clickable { onProfileClick(data.zapperId) },
+            leadingContent = {
+                AvatarThumbnail(
+                    avatarCdnImage = data.zapperAvatarCdnImage,
+                    avatarSize = 42.dp,
+                    onClick = { onProfileClick(data.zapperId) },
                 )
-            }
-        },
-        trailingContent = {
-            Column(
-                modifier = Modifier.width(38.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Image(
-                    modifier = Modifier
-                        .padding(bottom = 4.dp)
-                        .size(18.dp),
-                    imageVector = PrimalIcons.FeedZaps,
-                    contentDescription = null,
-                    colorFilter = ColorFilter.tint(color = AppTheme.extraColorScheme.onSurfaceVariantAlt2),
-                )
+            },
+            headlineContent = {
+                NostrUserText(displayName = data.zapperName, internetIdentifier = data.zapperInternetIdentifier)
+            },
+            supportingContent = {
+                if (!data.message.isNullOrEmpty()) {
+                    Text(
+                        text = data.message,
+                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                    )
+                }
+            },
+            trailingContent = {
+                Column(
+                    modifier = Modifier.width(38.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Image(
+                        modifier = Modifier
+                            .padding(bottom = 4.dp)
+                            .size(18.dp),
+                        imageVector = PrimalIcons.FeedZaps,
+                        contentDescription = null,
+                        colorFilter = ColorFilter.tint(color = AppTheme.extraColorScheme.onSurfaceVariantAlt2),
+                    )
 
-                Text(
-                    modifier = Modifier.padding(vertical = 4.dp),
-                    text = data.amountInSats.toLong().shortened(),
-                    style = AppTheme.typography.bodySmall,
-                    fontWeight = FontWeight.SemiBold,
-                    color = AppTheme.colorScheme.onSurface,
-                )
-            }
-        },
-    )
+                    Text(
+                        modifier = Modifier.padding(vertical = 4.dp),
+                        text = data.amountInSats.toLong().shortened(),
+                        style = AppTheme.typography.bodySmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = AppTheme.colorScheme.onSurface,
+                    )
+                }
+            },
+        )
+        PrimalDivider()
+    }
 }
