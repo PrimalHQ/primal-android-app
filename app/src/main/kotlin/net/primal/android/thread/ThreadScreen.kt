@@ -5,6 +5,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
@@ -60,6 +61,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
@@ -519,7 +521,9 @@ const val MaxOtherZaps = 4
 @Composable
 private fun TopZapsSection(topZap: NoteZapUiModel?, otherZaps: List<NoteZapUiModel>) {
     Column(
-        modifier = Modifier.padding(horizontal = 10.dp),
+        modifier = Modifier
+            .padding(horizontal = 10.dp)
+            .animateContentSize(),
     ) {
         Spacer(modifier = Modifier.height(12.dp))
 
@@ -563,6 +567,7 @@ private fun NoteZapListItem(noteZap: NoteZapUiModel, showMessage: Boolean = fals
     Row(
         modifier = Modifier
             .height(26.dp)
+            .animateContentSize()
             .background(
                 color = AppTheme.extraColorScheme.surfaceVariantAlt1,
                 shape = AppTheme.shapes.extraLarge,
@@ -578,6 +583,8 @@ private fun NoteZapListItem(noteZap: NoteZapUiModel, showMessage: Boolean = fals
         Text(
             modifier = Modifier.padding(horizontal = 8.dp),
             text = numberFormat.format(noteZap.amountInSats.toLong()),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
             style = AppTheme.typography.bodySmall,
             color = AppTheme.colorScheme.onSurface,
             fontWeight = FontWeight.SemiBold,
