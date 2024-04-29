@@ -208,8 +208,8 @@ fun ThreadScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 4.dp)
-                        .navigationBarsPadding()
-                        .onSizeChanged { bottomBarMaxHeightPx = it.height },
+                        .onSizeChanged { bottomBarMaxHeightPx = it.height }
+                        .navigationBarsPadding(),
                     publishingReply = state.publishingReply,
                     replyToAuthorName = replyToPost.authorName,
                     replyToAuthorHandle = replyToPost.authorHandle,
