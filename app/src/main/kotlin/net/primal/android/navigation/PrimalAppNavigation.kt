@@ -787,6 +787,7 @@ private fun NavGraphBuilder.messages(
         onTopLevelDestinationChanged = onTopLevelDestinationChanged,
         onDrawerScreenClick = onDrawerScreenClick,
         onConversationClick = { profileId -> navController.navigateToChat(profileId) },
+        onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
         onNewMessageClick = { navController.navigateToNewMessage() },
         onDrawerQrCodeClick = { navController.navigateToProfileQrCodeViewer() },
     )

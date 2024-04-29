@@ -99,6 +99,7 @@ fun MessageListScreen(
     onDrawerQrCodeClick: () -> Unit,
     onConversationClick: (String) -> Unit,
     onNewMessageClick: () -> Unit,
+    onProfileClick: (profileId: String) -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
 
@@ -120,6 +121,7 @@ fun MessageListScreen(
         eventPublisher = { viewModel.setEvent(it) },
         onConversationClick = onConversationClick,
         onNewMessageClick = onNewMessageClick,
+        onProfileClick = onProfileClick,
     )
 }
 
@@ -133,6 +135,7 @@ fun MessageListScreen(
     eventPublisher: (UiEvent) -> Unit,
     onConversationClick: (String) -> Unit,
     onNewMessageClick: () -> Unit,
+    onProfileClick: (profileId: String) -> Unit,
 ) {
     val uiScope = rememberCoroutineScope()
     val drawerState: DrawerState = rememberDrawerState(DrawerValue.Closed)
@@ -190,6 +193,7 @@ fun MessageListScreen(
                 state = listState,
                 contentPadding = paddingValues,
                 onConversationClick = onConversationClick,
+                onProfileClick = onProfileClick,
             )
         },
         floatingActionButton = {
@@ -220,6 +224,7 @@ private fun ConversationsList(
     state: LazyListState = rememberLazyListState(),
     contentPadding: PaddingValues = PaddingValues(0.dp),
     onConversationClick: (String) -> Unit,
+    onProfileClick: (profileId: String) -> Unit,
 ) {
     LazyColumn(
         modifier = modifier,
@@ -237,6 +242,7 @@ private fun ConversationsList(
                     ConversationListItem(
                         conversation = conversation,
                         onConversationClick = onConversationClick,
+                        onProfileClick = onProfileClick,
                     )
                     PrimalDivider()
                 }
@@ -282,7 +288,11 @@ private fun ConversationsList(
 }
 
 @Composable
-private fun ConversationListItem(conversation: MessageConversationUi, onConversationClick: (String) -> Unit) {
+private fun ConversationListItem(
+    conversation: MessageConversationUi,
+    onConversationClick: (String) -> Unit,
+    onProfileClick: (profileId: String) -> Unit,
+) {
     ListItem(
         modifier = Modifier.clickable {
             onConversationClick(conversation.participantId)
@@ -291,7 +301,10 @@ private fun ConversationListItem(conversation: MessageConversationUi, onConversa
             containerColor = AppTheme.colorScheme.surfaceVariant,
         ),
         leadingContent = {
-            AvatarThumbnail(avatarCdnImage = conversation.participantAvatarCdnImage)
+            AvatarThumbnail(
+                avatarCdnImage = conversation.participantAvatarCdnImage,
+                onClick = { onProfileClick(conversation.participantId) },
+            )
         },
         headlineContent = {
             Row {
