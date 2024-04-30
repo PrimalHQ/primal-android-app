@@ -8,11 +8,13 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import java.util.*
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.getAndUpdate
@@ -21,6 +23,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.core.compose.feed.model.asFeedPostUi
+import net.primal.android.core.compose.profile.model.mapAsUserProfileUi
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.files.FileAnalyser
 import net.primal.android.core.files.error.UnsuccessfulFileUpload
@@ -28,6 +31,7 @@ import net.primal.android.editor.NoteEditorContract.SideEffect
 import net.primal.android.editor.NoteEditorContract.UiEvent
 import net.primal.android.editor.NoteEditorContract.UiState
 import net.primal.android.editor.domain.NoteAttachment
+import net.primal.android.explore.repository.ExploreRepository
 import net.primal.android.feed.repository.FeedRepository
 import net.primal.android.navigation.newPostPreFillContent
 import net.primal.android.navigation.newPostPreFillFileUri
@@ -48,6 +52,7 @@ class NoteEditorViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val feedRepository: FeedRepository,
     private val noteRepository: NoteRepository,
+    private val exploreRepository: ExploreRepository,
 ) : ViewModel() {
 
     private val argReplyToNoteId = savedStateHandle.replyToNoteId
@@ -68,6 +73,7 @@ class NoteEditorViewModel @Inject constructor(
     init {
         subscribeToEvents()
         subscribeToActiveAccount()
+        observeDebouncedQueryChanges()
 
         if (argReplyToNoteId != null) {
             fetchRepliesFromNetwork(argReplyToNoteId)
@@ -77,6 +83,8 @@ class NoteEditorViewModel @Inject constructor(
         if (argPreFillFileUri != null) {
             importPhotos(listOf(argPreFillFileUri))
         }
+
+        fetchRecommendedUsers()
     }
 
     private fun subscribeToEvents() =
@@ -87,6 +95,13 @@ class NoteEditorViewModel @Inject constructor(
                     is UiEvent.ImportLocalFiles -> importPhotos(it.uris)
                     is UiEvent.DiscardNoteAttachment -> discardAttachment(it.attachmentId)
                     is UiEvent.RetryUpload -> retryAttachmentUpload(it.attachmentId)
+                    is UiEvent.SearchUsers -> setState { copy(userTaggingQuery = it.query) }
+                    is UiEvent.ToggleSearchUsers -> setState {
+                        copy(
+                            userTaggingQuery = if (it.enabled) "" else null,
+                            users = if (it.enabled) this.users else emptyList(),
+                        )
+                    }
                 }
             }
         }
@@ -242,4 +257,40 @@ class NoteEditorViewModel @Inject constructor(
             }
         }
     }
+
+    @OptIn(FlowPreview::class)
+    private fun observeDebouncedQueryChanges() =
+        viewModelScope.launch {
+            events.filterIsInstance<UiEvent.SearchUsers>()
+                .debounce(0.42.seconds)
+                .collect {
+                    searchUserTagging(query = it.query)
+                }
+        }
+
+    private fun fetchRecommendedUsers() =
+        viewModelScope.launch {
+            try {
+                val recommendedUsers = withContext(dispatcherProvider.io()) { exploreRepository.getRecommendedUsers() }
+                setState { copy(recommendedUsers = recommendedUsers.map { it.mapAsUserProfileUi() }) }
+            } catch (error: WssException) {
+                Timber.w(error)
+            }
+        }
+
+    private fun searchUserTagging(query: String) =
+        viewModelScope.launch {
+            if (query.isNotEmpty()) {
+                try {
+                    val result = withContext(dispatcherProvider.io()) {
+                        exploreRepository.searchUsers(query = query, limit = 10)
+                    }
+                    setState { copy(users = result.map { it.mapAsUserProfileUi() }) }
+                } catch (error: WssException) {
+                    Timber.w(error)
+                }
+            } else {
+                setState { copy(users = emptyList()) }
+            }
+        }
 }

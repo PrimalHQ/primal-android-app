@@ -49,9 +49,9 @@ class ExploreRepository @Inject constructor(
         }.sortedByDescending { it.score }
     }
 
-    suspend fun searchUsers(query: String) =
+    suspend fun searchUsers(query: String, limit: Int = 20) =
         queryRemoteUsers {
-            exploreApi.searchUsers(SearchUsersRequestBody(query = query, limit = 20))
+            exploreApi.searchUsers(SearchUsersRequestBody(query = query, limit = limit))
         }
 
     suspend fun getRecommendedUsers() =

@@ -146,7 +146,7 @@ fun SearchScreen(
                 ) {
                     UserProfileListItem(
                         data = it,
-                        onClick = { profileId -> onProfileClick(profileId) },
+                        onClick = { item -> onProfileClick(item.profileId) },
                     )
                 }
             }

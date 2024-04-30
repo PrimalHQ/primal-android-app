@@ -4,7 +4,9 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -12,6 +14,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
@@ -29,7 +32,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
@@ -56,7 +59,9 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.util.*
@@ -74,11 +79,15 @@ import net.primal.android.core.compose.feed.note.NoteContent
 import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromGallery
+import net.primal.android.core.compose.note.NoteOutlinedTextField
+import net.primal.android.core.compose.note.TaggedUser
+import net.primal.android.core.compose.note.asAnnotatedStringWithTaggedUsers
 import net.primal.android.editor.NoteEditorContract
 import net.primal.android.editor.NoteEditorContract.UiEvent
 import net.primal.android.editor.NoteEditorContract.UiState.NewPostError
 import net.primal.android.editor.NoteEditorViewModel
 import net.primal.android.editor.domain.NoteAttachment
+import net.primal.android.explore.search.ui.UserProfileListItem
 import net.primal.android.theme.AppTheme
 
 @Composable
@@ -107,7 +116,11 @@ fun NoteEditorScreen(
     onClose: () -> Unit,
     eventPublisher: (UiEvent) -> Unit,
 ) {
-    var content by rememberSaveable { mutableStateOf(state.preFillContent ?: "") }
+    var taggedUsers by rememberSaveable { mutableStateOf<List<TaggedUser>>(emptyList()) }
+
+    var content by rememberSaveable(stateSaver = TextFieldValue.Saver) {
+        mutableStateOf(value = TextFieldValue(text = state.preFillContent ?: ""))
+    }
 
     val focusRequester = remember { FocusRequester() }
     val snackbarHostState = remember { SnackbarHostState() }
@@ -134,9 +147,7 @@ fun NoteEditorScreen(
     }
 
     Scaffold(
-        modifier = Modifier
-            .imePadding()
-            .navigationBarsPadding(),
+        modifier = Modifier.imePadding(),
         topBar = {
             PrimalTopAppBar(
                 title = "",
@@ -176,9 +187,9 @@ fun NoteEditorScreen(
                         ),
                         enabled = !state.publishing && !state.uploadingAttachments &&
                             state.attachments.none { it.uploadError != null } &&
-                            (content.isNotBlank() || state.attachments.isNotEmpty()),
+                            (content.text.isNotBlank() || state.attachments.isNotEmpty()),
                         onClick = {
-                            eventPublisher(UiEvent.PublishPost(content = content))
+                            eventPublisher(UiEvent.PublishPost(content = content.text))
                         },
                     )
                 },
@@ -206,6 +217,7 @@ fun NoteEditorScreen(
 
             LazyColumn(
                 modifier = Modifier
+                    .background(color = AppTheme.colorScheme.surfaceVariant)
                     .fillMaxSize()
                     .padding(paddingValues)
                     .onSizeChanged { noteEditorMaxHeightPx = it.height },
@@ -261,7 +273,7 @@ fun NoteEditorScreen(
                                 avatarCdnImage = state.activeAccountAvatarCdnImage,
                             )
 
-                            OutlinedTextField(
+                            NoteOutlinedTextField(
                                 modifier = Modifier
                                     .offset(x = (-8).dp)
                                     .fillMaxWidth()
@@ -270,6 +282,7 @@ fun NoteEditorScreen(
                                     .onSizeChanged { replyNoteHeightPx = it.height },
                                 value = content,
                                 onValueChange = { content = it },
+                                taggedUsers = taggedUsers,
                                 enabled = !state.publishing,
                                 placeholder = {
                                     Text(
@@ -292,6 +305,12 @@ fun NoteEditorScreen(
                                     disabledBorderColor = Color.Transparent,
                                     errorBorderColor = Color.Transparent,
                                 ),
+                                onUserTaggingModeChanged = {
+                                    eventPublisher(UiEvent.ToggleSearchUsers(enabled = it))
+                                },
+                                onUserTagSearch = {
+                                    eventPublisher(UiEvent.SearchUsers(query = it))
+                                },
                             )
                         }
                     }
@@ -315,13 +334,75 @@ fun NoteEditorScreen(
             }
         },
         bottomBar = {
-            Column {
+            Column(
+                modifier = Modifier
+                    .background(color = AppTheme.colorScheme.surface)
+                    .navigationBarsPadding(),
+            ) {
                 HorizontalDivider(color = AppTheme.extraColorScheme.surfaceVariantAlt1)
-                NoteActionRow(
-                    onPhotosImported = { photoUris ->
-                        eventPublisher(UiEvent.ImportLocalFiles(uris = photoUris))
-                    },
-                )
+                Box {
+                    NoteActionRow(
+                        onPhotosImported = { photoUris ->
+                            eventPublisher(UiEvent.ImportLocalFiles(uris = photoUris))
+                        },
+                    )
+
+                    if (state.userTaggingQuery != null) {
+                        val users = state.users.ifEmpty {
+                            if (state.userTaggingQuery.isEmpty()) {
+                                state.recommendedUsers
+                            } else {
+                                emptyList()
+                            }
+                        }
+                        val highlightColor = AppTheme.colorScheme.secondary
+                        LazyColumn(
+                            modifier = Modifier.heightIn(min = 0.dp, max = 288.dp),
+                        ) {
+                            items(items = users) {
+                                UserProfileListItem(
+                                    data = it,
+                                    colors = ListItemDefaults.colors(
+                                        containerColor = AppTheme.colorScheme.surface,
+                                    ),
+                                    onClick = { item ->
+                                        val taggedUser = TaggedUser(
+                                            userId = item.profileId,
+                                            userHandle = item.displayName,
+                                        )
+
+                                        val cursorPosition = content.selection.start
+                                        val textUntilCursor = content.text.substring(
+                                            startIndex = 0,
+                                            endIndex = cursorPosition,
+                                        )
+                                        val lastIndexOfUserTaggingSign = textUntilCursor.lastIndexOf("@")
+                                        val query = state.userTaggingQuery.ifEmpty { "" }
+                                        val endOfQueryIndex = lastIndexOfUserTaggingSign + 1 + query.length
+
+                                        taggedUsers = taggedUsers.toMutableList().apply { add(taggedUser) }
+                                        val newText = content.text.substring(0, lastIndexOfUserTaggingSign) +
+                                            taggedUser.displayUsername +
+                                            content.text.substring(startIndex = endOfQueryIndex)
+
+                                        val newCursorPosition =
+                                            lastIndexOfUserTaggingSign + 1 + taggedUser.displayUsername.length
+
+                                        content = content.copy(
+                                            annotatedString = newText.asAnnotatedStringWithTaggedUsers(
+                                                taggedUsers = taggedUsers,
+                                                highlightColor = highlightColor,
+                                            ),
+                                            selection = TextRange(start = newCursorPosition, end = newCursorPosition),
+                                        )
+
+                                        eventPublisher(UiEvent.ToggleSearchUsers(enabled = false))
+                                    },
+                                )
+                            }
+                        }
+                    }
+                }
             }
         },
     )

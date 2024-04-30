@@ -121,7 +121,7 @@ private fun FollowsLazyColumn(
         ) { user ->
             UserProfileListItem(
                 data = user,
-                onClick = { profileId -> onProfileClick(profileId) },
+                onClick = { item -> onProfileClick(item.profileId) },
                 followUnfollowVisibility = if (user.profileId != state.userId) {
                     FollowUnfollowVisibility.Visible
                 } else {

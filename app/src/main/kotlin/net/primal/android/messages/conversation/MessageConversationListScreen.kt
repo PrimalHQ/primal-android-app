@@ -297,9 +297,7 @@ private fun ConversationListItem(
         modifier = Modifier.clickable {
             onConversationClick(conversation.participantId)
         },
-        colors = ListItemDefaults.colors(
-            containerColor = AppTheme.colorScheme.surfaceVariant,
-        ),
+        colors = ListItemDefaults.colors(containerColor = AppTheme.colorScheme.surfaceVariant),
         leadingContent = {
             AvatarThumbnail(
                 avatarCdnImage = conversation.participantAvatarCdnImage,

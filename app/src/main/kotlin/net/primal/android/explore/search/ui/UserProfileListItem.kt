@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemColors
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -33,20 +34,21 @@ import net.primal.android.theme.PrimalTheme
 @Composable
 fun UserProfileListItem(
     data: UserProfileItemUi,
-    onClick: (String) -> Unit,
+    onClick: (UserProfileItemUi) -> Unit,
     followUnfollowVisibility: FollowUnfollowVisibility = FollowUnfollowVisibility.Gone,
+    colors: ListItemColors = ListItemDefaults.colors(
+        containerColor = AppTheme.colorScheme.surfaceVariant,
+    ),
     isFollowed: Boolean = false,
     onFollowUnfollowClick: (() -> Unit)? = null,
 ) {
     ListItem(
-        modifier = Modifier.clickable { onClick(data.profileId) },
-        colors = ListItemDefaults.colors(
-            containerColor = AppTheme.colorScheme.surfaceVariant,
-        ),
+        modifier = Modifier.clickable { onClick(data) },
+        colors = colors,
         leadingContent = {
             AvatarThumbnail(
                 avatarCdnImage = data.avatarCdnImage,
-                onClick = { onClick(data.profileId) },
+                onClick = { onClick(data) },
             )
         },
         headlineContent = {

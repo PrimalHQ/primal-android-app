@@ -4,6 +4,7 @@ import android.net.Uri
 import java.util.*
 import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.feed.model.FeedPostUi
+import net.primal.android.core.compose.profile.model.UserProfileItemUi
 import net.primal.android.editor.domain.NoteAttachment
 
 interface NoteEditorContract {
@@ -16,6 +17,9 @@ interface NoteEditorContract {
         val activeAccountAvatarCdnImage: CdnImage? = null,
         val uploadingAttachments: Boolean = false,
         val attachments: List<NoteAttachment> = emptyList(),
+        val userTaggingQuery: String? = null,
+        val users: List<UserProfileItemUi> = emptyList(),
+        val recommendedUsers: List<UserProfileItemUi> = emptyList(),
     ) {
         val isReply: Boolean get() = conversation.isNotEmpty()
         val replyToNote: FeedPostUi? = conversation.lastOrNull()
@@ -31,6 +35,8 @@ interface NoteEditorContract {
         data class ImportLocalFiles(val uris: List<Uri>) : UiEvent()
         data class DiscardNoteAttachment(val attachmentId: UUID) : UiEvent()
         data class RetryUpload(val attachmentId: UUID) : UiEvent()
+        data class SearchUsers(val query: String) : UiEvent()
+        data class ToggleSearchUsers(val enabled: Boolean) : UiEvent()
     }
 
     sealed class SideEffect {

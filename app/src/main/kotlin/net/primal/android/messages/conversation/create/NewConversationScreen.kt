@@ -19,7 +19,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -53,7 +52,7 @@ fun NewConversationScreen(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NewConversationScreen(
     state: SearchContract.UiState,
@@ -99,9 +98,9 @@ fun NewConversationScreen(
                 ) {
                     UserProfileListItem(
                         data = it,
-                        onClick = { profileId ->
+                        onClick = { item ->
                             keyboardController?.hide()
-                            onProfileClick(profileId)
+                            onProfileClick(item.profileId)
                         },
                     )
                 }

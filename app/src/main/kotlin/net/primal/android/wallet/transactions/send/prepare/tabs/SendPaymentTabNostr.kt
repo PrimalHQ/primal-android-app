@@ -5,7 +5,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.hilt.navigation.compose.hiltViewModel
 import net.primal.android.core.compose.PrimalDivider
@@ -14,7 +13,6 @@ import net.primal.android.explore.search.SearchViewModel
 import net.primal.android.explore.search.ui.UserProfileListItem
 import net.primal.android.messages.conversation.create.SearchBar
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun SendPaymentTabNostr(onProfileClick: (String) -> Unit) {
     val viewModel = hiltViewModel<SearchViewModel>()
@@ -48,9 +46,9 @@ fun SendPaymentTabNostr(onProfileClick: (String) -> Unit) {
             ) {
                 UserProfileListItem(
                     data = it,
-                    onClick = { profileId ->
+                    onClick = { item ->
                         keyboardController?.hide()
-                        onProfileClick(profileId)
+                        onProfileClick(item.profileId)
                     },
                 )
             }
