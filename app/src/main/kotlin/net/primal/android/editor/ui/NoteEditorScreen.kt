@@ -33,7 +33,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
@@ -46,7 +45,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
@@ -60,9 +58,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.util.*
@@ -80,15 +76,11 @@ import net.primal.android.core.compose.feed.note.NoteContent
 import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromGallery
-import net.primal.android.core.compose.note.NoteOutlinedTextField
-import net.primal.android.core.compose.note.TaggedUser
-import net.primal.android.core.compose.note.asAnnotatedStringWithTaggedUsers
 import net.primal.android.editor.NoteEditorContract
 import net.primal.android.editor.NoteEditorContract.UiEvent
 import net.primal.android.editor.NoteEditorContract.UiState.NewPostError
 import net.primal.android.editor.NoteEditorViewModel
 import net.primal.android.editor.domain.NoteAttachment
-import net.primal.android.explore.search.ui.UserProfileListItem
 import net.primal.android.theme.AppTheme
 
 @Composable
@@ -117,16 +109,10 @@ fun NoteEditorScreen(
     onClose: () -> Unit,
     eventPublisher: (UiEvent) -> Unit,
 ) {
-    var taggedUsers by rememberSaveable { mutableStateOf<List<TaggedUser>>(emptyList()) }
-
-    var content by rememberSaveable(stateSaver = TextFieldValue.Saver) {
-        mutableStateOf(value = TextFieldValue(text = state.preFillContent ?: ""))
-    }
-
     val focusRequester = remember { FocusRequester() }
     val snackbarHostState = remember { SnackbarHostState() }
     val outlineColor = AppTheme.colorScheme.outline
-    val userTagHighlightColor = AppTheme.colorScheme.secondary
+    val userMentionHighlightColor = AppTheme.colorScheme.secondary
 
     val editorListState = rememberLazyListState()
     val keyboardVisible = keyboardVisibilityAsState()
@@ -168,6 +154,7 @@ fun NoteEditorScreen(
                         state.uploadingAttachments -> stringResource(
                             id = R.string.note_editor_uploading_attachments,
                         )
+
                         else -> if (state.isReply) {
                             stringResource(id = R.string.note_editor_reply_publish_button)
                         } else {
@@ -183,21 +170,11 @@ fun NoteEditorScreen(
                         text = text,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Normal,
-                        contentPadding = PaddingValues(
-                            horizontal = 24.dp,
-                            vertical = 0.dp,
-                        ),
+                        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 0.dp),
                         enabled = !state.publishing && !state.uploadingAttachments &&
                             state.attachments.none { it.uploadError != null } &&
-                            (content.text.isNotBlank() || state.attachments.isNotEmpty()),
-                        onClick = {
-                            eventPublisher(
-                                UiEvent.PublishPost(
-                                    content = content.text,
-                                    taggedUsers = taggedUsers,
-                                ),
-                            )
-                        },
+                            (state.content.text.isNotBlank() || state.attachments.isNotEmpty()),
+                        onClick = { eventPublisher(UiEvent.PublishNote) },
                     )
                 },
             )
@@ -287,9 +264,9 @@ fun NoteEditorScreen(
                                     .wrapContentHeight()
                                     .focusRequester(focusRequester)
                                     .onSizeChanged { replyNoteHeightPx = it.height },
-                                value = content,
-                                onValueChange = { content = it },
-                                taggedUsers = taggedUsers,
+                                value = state.content,
+                                onValueChange = { eventPublisher(UiEvent.UpdateContent(content = it)) },
+                                taggedUsers = state.taggedUsers,
                                 enabled = !state.publishing,
                                 placeholder = {
                                     Text(
@@ -351,94 +328,42 @@ fun NoteEditorScreen(
                     NoteActionRow(
                         onPhotosImported = { photoUris -> eventPublisher(UiEvent.ImportLocalFiles(uris = photoUris)) },
                         onUserTag = {
-                            content = content.appendUserTagAtSignAtCursorPosition(
-                                taggedUsers = taggedUsers,
-                                highlightColor = userTagHighlightColor,
+                            eventPublisher(
+                                UiEvent.UpdateContent(
+                                    content = state.content.appendUserTagAtSignAtCursorPosition(
+                                        taggedUsers = state.taggedUsers,
+                                        highlightColor = userMentionHighlightColor,
+                                    ),
+                                ),
                             )
                             eventPublisher(UiEvent.ToggleSearchUsers(enabled = true))
                         },
                     )
 
                     if (state.userTaggingQuery != null) {
-                        val users = state.users.ifEmpty {
-                            if (state.userTaggingQuery.isEmpty()) {
-                                state.recommendedUsers
-                            } else {
-                                emptyList()
-                            }
-                        }
-                        LazyColumn(
+                        NoteTagUserLazyColumn(
                             modifier = Modifier.heightIn(min = 0.dp, max = 288.dp),
-                        ) {
-                            items(items = users) {
-                                UserProfileListItem(
-                                    data = it,
-                                    colors = ListItemDefaults.colors(
-                                        containerColor = AppTheme.colorScheme.surface,
-                                    ),
-                                    onClick = { item ->
-                                        val taggedUser = TaggedUser(
-                                            userId = item.profileId,
-                                            userHandle = item.displayName,
-                                        )
-
-                                        val cursorPosition = content.selection.start
-                                        val textUntilCursor = content.text.substring(
-                                            startIndex = 0,
-                                            endIndex = cursorPosition,
-                                        )
-                                        val lastIndexOfUserTaggingSign = textUntilCursor.lastIndexOf("@")
-                                        val query = state.userTaggingQuery.ifEmpty { "" }
-                                        val endOfQueryIndex = lastIndexOfUserTaggingSign + 1 + query.length
-
-                                        taggedUsers = taggedUsers.toMutableList().apply { add(taggedUser) }
-                                        val newText = content.text.substring(0, lastIndexOfUserTaggingSign) +
-                                            taggedUser.displayUsername +
-                                            content.text.substring(startIndex = endOfQueryIndex)
-
-                                        val newCursorPosition =
-                                            lastIndexOfUserTaggingSign + 1 + taggedUser.displayUsername.length
-
-                                        content = content.copy(
-                                            annotatedString = newText.asAnnotatedStringWithTaggedUsers(
-                                                taggedUsers = taggedUsers,
-                                                highlightColor = userTagHighlightColor,
-                                            ),
-                                            selection = TextRange(start = newCursorPosition, end = newCursorPosition),
-                                        )
-
-                                        eventPublisher(UiEvent.ToggleSearchUsers(enabled = false))
-                                    },
-                                )
-                            }
-                        }
+                            content = state.content,
+                            taggedUsers = state.taggedUsers,
+                            users = state.users.ifEmpty {
+                                if (state.userTaggingQuery.isEmpty()) {
+                                    state.recommendedUsers
+                                } else {
+                                    emptyList()
+                                }
+                            },
+                            userTaggingQuery = state.userTaggingQuery,
+                            userTagHighlightColor = userMentionHighlightColor,
+                            onUserClick = { newContent, newTaggedUsers ->
+                                eventPublisher(UiEvent.UpdateContent(content = newContent))
+                                eventPublisher(UiEvent.TagUser(taggedUser = newTaggedUsers.last()))
+                                eventPublisher(UiEvent.ToggleSearchUsers(enabled = false))
+                            },
+                        )
                     }
                 }
             }
         },
-    )
-}
-
-private fun TextFieldValue.appendUserTagAtSignAtCursorPosition(
-    taggedUsers: List<TaggedUser>,
-    highlightColor: Color,
-): TextFieldValue {
-    val text = this.text
-    val selection = this.selection
-
-    val newText = if (selection.length > 0) {
-        text.replaceRange(startIndex = selection.start, endIndex = selection.end, "@")
-    } else {
-        text.substring(0, selection.start) + "@" + text.substring(selection.start)
-    }
-    val newSelectionStart = selection.start + 1
-
-    return this.copy(
-        annotatedString = newText.asAnnotatedStringWithTaggedUsers(
-            taggedUsers = taggedUsers,
-            highlightColor = highlightColor,
-        ),
-        selection = TextRange(start = newSelectionStart, end = newSelectionStart),
     )
 }
 

@@ -1,6 +1,7 @@
 package net.primal.android.editor
 
 import android.net.Uri
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -23,7 +24,6 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.core.compose.feed.model.asFeedPostUi
-import net.primal.android.core.compose.note.TaggedUser
 import net.primal.android.core.compose.profile.model.mapAsUserProfileUi
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.files.FileAnalyser
@@ -33,6 +33,7 @@ import net.primal.android.editor.NoteEditorContract.SideEffect
 import net.primal.android.editor.NoteEditorContract.UiEvent
 import net.primal.android.editor.NoteEditorContract.UiState
 import net.primal.android.editor.domain.NoteAttachment
+import net.primal.android.editor.domain.NoteTaggedUser
 import net.primal.android.explore.repository.ExploreRepository
 import net.primal.android.feed.repository.FeedRepository
 import net.primal.android.navigation.newPostPreFillContent
@@ -61,7 +62,7 @@ class NoteEditorViewModel @Inject constructor(
     private val argPreFillFileUri = savedStateHandle.newPostPreFillFileUri?.let { Uri.parse(it) }
     private val argPreFillContent = savedStateHandle.newPostPreFillContent
 
-    private val _state = MutableStateFlow(UiState(preFillContent = argPreFillContent))
+    private val _state = MutableStateFlow(UiState(content = TextFieldValue(text = argPreFillContent ?: "")))
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
 
@@ -91,17 +92,24 @@ class NoteEditorViewModel @Inject constructor(
 
     private fun subscribeToEvents() =
         viewModelScope.launch {
-            events.collect {
-                when (it) {
-                    is UiEvent.PublishPost -> publishPost(it)
-                    is UiEvent.ImportLocalFiles -> importPhotos(it.uris)
-                    is UiEvent.DiscardNoteAttachment -> discardAttachment(it.attachmentId)
-                    is UiEvent.RetryUpload -> retryAttachmentUpload(it.attachmentId)
-                    is UiEvent.SearchUsers -> setState { copy(userTaggingQuery = it.query) }
+            events.collect { event ->
+                when (event) {
+                    is UiEvent.UpdateContent -> setState { copy(content = event.content) }
+                    is UiEvent.PublishNote -> publishPost()
+                    is UiEvent.ImportLocalFiles -> importPhotos(event.uris)
+                    is UiEvent.DiscardNoteAttachment -> discardAttachment(event.attachmentId)
+                    is UiEvent.RetryUpload -> retryAttachmentUpload(event.attachmentId)
+                    is UiEvent.SearchUsers -> setState { copy(userTaggingQuery = event.query) }
                     is UiEvent.ToggleSearchUsers -> setState {
                         copy(
-                            userTaggingQuery = if (it.enabled) "" else null,
-                            users = if (it.enabled) this.users else emptyList(),
+                            userTaggingQuery = if (event.enabled) "" else null,
+                            users = if (event.enabled) this.users else emptyList(),
+                        )
+                    }
+
+                    is UiEvent.TagUser -> setState {
+                        copy(
+                            taggedUsers = this.taggedUsers.toMutableList().apply { add(event.taggedUser) },
                         )
                     }
                 }
@@ -148,14 +156,16 @@ class NoteEditorViewModel @Inject constructor(
             }
         }
 
-    private fun publishPost(event: UiEvent.PublishPost) =
+    private fun publishPost() =
         viewModelScope.launch {
             setState { copy(publishing = true) }
             try {
                 val rootPost = _state.value.conversation.firstOrNull()
                 val replyToPost = _state.value.conversation.lastOrNull()
                 noteRepository.publishShortTextNote(
-                    content = event.content.replaceUserMentionsWithUserIds(users = event.taggedUsers),
+                    content = _state.value.content.text.replaceUserMentionsWithUserIds(
+                        users = _state.value.taggedUsers,
+                    ),
                     attachments = _state.value.attachments,
                     rootPostId = rootPost?.postId,
                     replyToPostId = replyToPost?.postId,
@@ -173,7 +183,7 @@ class NoteEditorViewModel @Inject constructor(
             }
         }
 
-    private fun String.replaceUserMentionsWithUserIds(users: List<TaggedUser>): String {
+    private fun String.replaceUserMentionsWithUserIds(users: List<NoteTaggedUser>): String {
         var content = this
         users.forEach { user ->
             content = content.replace(

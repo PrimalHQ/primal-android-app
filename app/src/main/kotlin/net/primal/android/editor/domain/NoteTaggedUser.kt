@@ -1,6 +1,6 @@
-package net.primal.android.core.compose.note
+package net.primal.android.editor.domain
 
-data class TaggedUser(
+data class NoteTaggedUser(
     val userId: String,
     val userHandle: String,
 ) {

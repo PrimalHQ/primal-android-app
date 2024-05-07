@@ -1,4 +1,4 @@
-package net.primal.android.core.compose.note
+package net.primal.android.editor.ui
 
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.text.KeyboardActions
@@ -14,18 +14,20 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import net.primal.android.core.utils.HashtagMatcher
+import net.primal.android.editor.domain.NoteTaggedUser
 import net.primal.android.theme.AppTheme
 
 @Composable
 fun NoteOutlinedTextField(
     value: TextFieldValue,
     onValueChange: (TextFieldValue) -> Unit,
-    taggedUsers: List<TaggedUser>,
+    taggedUsers: List<NoteTaggedUser>,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     readOnly: Boolean = false,
@@ -114,7 +116,7 @@ fun String.hasStopCharacter(): Boolean {
     }
 }
 
-fun String.asAnnotatedStringWithTaggedUsers(taggedUsers: List<TaggedUser>, highlightColor: Color): AnnotatedString {
+fun String.asAnnotatedStringWithTaggedUsers(taggedUsers: List<NoteTaggedUser>, highlightColor: Color): AnnotatedString {
     val text = this
     return buildAnnotatedString {
         append(text)
@@ -133,4 +135,27 @@ fun String.asAnnotatedStringWithTaggedUsers(taggedUsers: List<TaggedUser>, highl
                 )
             }
     }
+}
+
+fun TextFieldValue.appendUserTagAtSignAtCursorPosition(
+    taggedUsers: List<NoteTaggedUser>,
+    highlightColor: Color,
+): TextFieldValue {
+    val text = this.text
+    val selection = this.selection
+
+    val newText = if (selection.length > 0) {
+        text.replaceRange(startIndex = selection.start, endIndex = selection.end, "@")
+    } else {
+        text.substring(0, selection.start) + "@" + text.substring(selection.start)
+    }
+    val newSelectionStart = selection.start + 1
+
+    return this.copy(
+        annotatedString = newText.asAnnotatedStringWithTaggedUsers(
+            taggedUsers = taggedUsers,
+            highlightColor = highlightColor,
+        ),
+        selection = TextRange(start = newSelectionStart, end = newSelectionStart),
+    )
 }
