@@ -23,10 +23,12 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.core.compose.feed.model.asFeedPostUi
+import net.primal.android.core.compose.note.TaggedUser
 import net.primal.android.core.compose.profile.model.mapAsUserProfileUi
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.files.FileAnalyser
 import net.primal.android.core.files.error.UnsuccessfulFileUpload
+import net.primal.android.crypto.hexToNpubHrp
 import net.primal.android.editor.NoteEditorContract.SideEffect
 import net.primal.android.editor.NoteEditorContract.UiEvent
 import net.primal.android.editor.NoteEditorContract.UiState
@@ -153,7 +155,7 @@ class NoteEditorViewModel @Inject constructor(
                 val rootPost = _state.value.conversation.firstOrNull()
                 val replyToPost = _state.value.conversation.lastOrNull()
                 noteRepository.publishShortTextNote(
-                    content = event.content,
+                    content = event.content.replaceUserMentionsWithUserIds(users = event.taggedUsers),
                     attachments = _state.value.attachments,
                     rootPostId = rootPost?.postId,
                     replyToPostId = replyToPost?.postId,
@@ -170,6 +172,17 @@ class NoteEditorViewModel @Inject constructor(
                 setState { copy(publishing = false) }
             }
         }
+
+    private fun String.replaceUserMentionsWithUserIds(users: List<TaggedUser>): String {
+        var content = this
+        users.forEach { user ->
+            content = content.replace(
+                oldValue = user.displayUsername,
+                newValue = "nostr:${user.userId.hexToNpubHrp()}",
+            )
+        }
+        return content
+    }
 
     private fun importPhotos(uris: List<Uri>) =
         viewModelScope.launch {

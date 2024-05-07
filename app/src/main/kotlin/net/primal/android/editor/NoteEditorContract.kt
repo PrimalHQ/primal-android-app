@@ -4,6 +4,7 @@ import android.net.Uri
 import java.util.*
 import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.feed.model.FeedPostUi
+import net.primal.android.core.compose.note.TaggedUser
 import net.primal.android.core.compose.profile.model.UserProfileItemUi
 import net.primal.android.editor.domain.NoteAttachment
 
@@ -31,7 +32,10 @@ interface NoteEditorContract {
     }
 
     sealed class UiEvent {
-        data class PublishPost(val content: String) : UiEvent()
+        data class PublishPost(
+            val content: String,
+            val taggedUsers: List<TaggedUser>,
+        ) : UiEvent()
         data class ImportLocalFiles(val uris: List<Uri>) : UiEvent()
         data class DiscardNoteAttachment(val attachmentId: UUID) : UiEvent()
         data class RetryUpload(val attachmentId: UUID) : UiEvent()

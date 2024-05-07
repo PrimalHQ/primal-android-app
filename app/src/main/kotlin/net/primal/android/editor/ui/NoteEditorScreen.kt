@@ -189,7 +189,12 @@ fun NoteEditorScreen(
                             state.attachments.none { it.uploadError != null } &&
                             (content.text.isNotBlank() || state.attachments.isNotEmpty()),
                         onClick = {
-                            eventPublisher(UiEvent.PublishPost(content = content.text))
+                            eventPublisher(
+                                UiEvent.PublishPost(
+                                    content = content.text,
+                                    taggedUsers = taggedUsers,
+                                ),
+                            )
                         },
                     )
                 },
@@ -526,9 +531,11 @@ private fun NewPostPublishErrorHandler(error: NewPostError?, snackbarHostState: 
             is NewPostError.MissingRelaysConfiguration -> context.getString(
                 R.string.app_missing_relays_config,
             )
+
             is NewPostError.PublishError -> context.getString(
                 R.string.note_editor_nostr_publish_error,
             )
+
             else -> null
         }
 
