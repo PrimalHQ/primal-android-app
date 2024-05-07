@@ -27,6 +27,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AlternateEmail
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -125,6 +126,7 @@ fun NoteEditorScreen(
     val focusRequester = remember { FocusRequester() }
     val snackbarHostState = remember { SnackbarHostState() }
     val outlineColor = AppTheme.colorScheme.outline
+    val userTagHighlightColor = AppTheme.colorScheme.secondary
 
     val editorListState = rememberLazyListState()
     val keyboardVisible = keyboardVisibilityAsState()
@@ -347,8 +349,13 @@ fun NoteEditorScreen(
                 HorizontalDivider(color = AppTheme.extraColorScheme.surfaceVariantAlt1)
                 Box {
                     NoteActionRow(
-                        onPhotosImported = { photoUris ->
-                            eventPublisher(UiEvent.ImportLocalFiles(uris = photoUris))
+                        onPhotosImported = { photoUris -> eventPublisher(UiEvent.ImportLocalFiles(uris = photoUris)) },
+                        onUserTag = {
+                            content = content.appendUserTagAtSignAtCursorPosition(
+                                taggedUsers = taggedUsers,
+                                highlightColor = userTagHighlightColor,
+                            )
+                            eventPublisher(UiEvent.ToggleSearchUsers(enabled = true))
                         },
                     )
 
@@ -360,7 +367,6 @@ fun NoteEditorScreen(
                                 emptyList()
                             }
                         }
-                        val highlightColor = AppTheme.colorScheme.secondary
                         LazyColumn(
                             modifier = Modifier.heightIn(min = 0.dp, max = 288.dp),
                         ) {
@@ -396,7 +402,7 @@ fun NoteEditorScreen(
                                         content = content.copy(
                                             annotatedString = newText.asAnnotatedStringWithTaggedUsers(
                                                 taggedUsers = taggedUsers,
-                                                highlightColor = highlightColor,
+                                                highlightColor = userTagHighlightColor,
                                             ),
                                             selection = TextRange(start = newCursorPosition, end = newCursorPosition),
                                         )
@@ -410,6 +416,29 @@ fun NoteEditorScreen(
                 }
             }
         },
+    )
+}
+
+private fun TextFieldValue.appendUserTagAtSignAtCursorPosition(
+    taggedUsers: List<TaggedUser>,
+    highlightColor: Color,
+): TextFieldValue {
+    val text = this.text
+    val selection = this.selection
+
+    val newText = if (selection.length > 0) {
+        text.replaceRange(startIndex = selection.start, endIndex = selection.end, "@")
+    } else {
+        text.substring(0, selection.start) + "@" + text.substring(selection.start)
+    }
+    val newSelectionStart = selection.start + 1
+
+    return this.copy(
+        annotatedString = newText.asAnnotatedStringWithTaggedUsers(
+            taggedUsers = taggedUsers,
+            highlightColor = highlightColor,
+        ),
+        selection = TextRange(start = newSelectionStart, end = newSelectionStart),
     )
 }
 
@@ -497,7 +526,11 @@ private fun ReplyToNote(replyToNote: FeedPostUi, connectionLineColor: Color) {
 }
 
 @Composable
-private fun NoteActionRow(maxItems: Int = 5, onPhotosImported: (List<Uri>) -> Unit) {
+private fun NoteActionRow(
+    maxItems: Int = 5,
+    onPhotosImported: (List<Uri>) -> Unit,
+    onUserTag: () -> Unit,
+) {
     val multiplePhotosImportLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.PickMultipleVisualMedia(maxItems = maxItems),
     ) { uris -> onPhotosImported(uris) }
@@ -517,6 +550,16 @@ private fun NoteActionRow(maxItems: Int = 5, onPhotosImported: (List<Uri>) -> Un
             Icon(
                 imageVector = PrimalIcons.ImportPhotoFromGallery,
                 contentDescription = stringResource(id = R.string.accessibility_import_photo_from_gallery),
+                tint = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+            )
+        }
+
+        IconButton(
+            onClick = onUserTag,
+        ) {
+            Icon(
+                imageVector = Icons.Default.AlternateEmail,
+                contentDescription = stringResource(id = R.string.accessibility_tag_user),
                 tint = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
             )
         }
