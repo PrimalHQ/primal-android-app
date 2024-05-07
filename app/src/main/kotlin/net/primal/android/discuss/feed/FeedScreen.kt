@@ -34,6 +34,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
@@ -68,7 +69,7 @@ import net.primal.android.theme.domain.PrimalTheme
 fun FeedScreen(
     viewModel: FeedViewModel,
     onFeedsClick: () -> Unit,
-    onNewPostClick: (String?) -> Unit,
+    onNewPostClick: (content: TextFieldValue?) -> Unit,
     onPostClick: (String) -> Unit,
     onPostReplyClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
@@ -110,7 +111,7 @@ fun FeedScreen(
     state: FeedContract.UiState,
     eventPublisher: (FeedContract.UiEvent) -> Unit,
     onFeedsClick: () -> Unit,
-    onNewPostClick: (String?) -> Unit,
+    onNewPostClick: (content: TextFieldValue?) -> Unit,
     onPostClick: (String) -> Unit,
     onPostReplyClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
@@ -219,7 +220,7 @@ fun FeedScreen(
                         ),
                     )
                 },
-                onPostQuoteClick = { onNewPostClick("\n\nnostr:${it.postId.hexToNoteHrp()}") },
+                onPostQuoteClick = { onNewPostClick(TextFieldValue(text = "\n\nnostr:${it.postId.hexToNoteHrp()}")) },
                 onHashtagClick = onHashtagClick,
                 onGoToWallet = onGoToWallet,
                 paddingValues = paddingValues,

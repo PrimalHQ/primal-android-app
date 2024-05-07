@@ -15,7 +15,7 @@ interface NoteEditorContract {
         val content: TextFieldValue,
         val conversation: List<FeedPostUi> = emptyList(),
         val publishing: Boolean = false,
-        val error: NewPostError? = null,
+        val error: NoteEditorError? = null,
         val activeAccountAvatarCdnImage: CdnImage? = null,
         val uploadingAttachments: Boolean = false,
         val attachments: List<NoteAttachment> = emptyList(),
@@ -27,9 +27,9 @@ interface NoteEditorContract {
         val isReply: Boolean get() = conversation.isNotEmpty()
         val replyToNote: FeedPostUi? = conversation.lastOrNull()
 
-        sealed class NewPostError {
-            data class PublishError(val cause: Throwable?) : NewPostError()
-            data class MissingRelaysConfiguration(val cause: Throwable) : NewPostError()
+        sealed class NoteEditorError {
+            data class PublishError(val cause: Throwable?) : NoteEditorError()
+            data class MissingRelaysConfiguration(val cause: Throwable) : NoteEditorError()
         }
     }
 

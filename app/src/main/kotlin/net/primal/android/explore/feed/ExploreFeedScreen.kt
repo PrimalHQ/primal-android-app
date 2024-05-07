@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.paging.compose.collectAsLazyPagingItems
 import kotlinx.coroutines.launch
 import net.primal.android.R
@@ -45,7 +46,7 @@ fun ExploreFeedScreen(
     onClose: () -> Unit,
     onPostClick: (String) -> Unit,
     onPostReplyClick: (String) -> Unit,
-    onPostQuoteClick: (String) -> Unit,
+    onPostQuoteClick: (content: TextFieldValue) -> Unit,
     onProfileClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
     onMediaClick: (MediaClickEvent) -> Unit,
@@ -74,7 +75,7 @@ fun ExploreFeedScreen(
     onClose: () -> Unit,
     onPostClick: (String) -> Unit,
     onPostReplyClick: (String) -> Unit,
-    onPostQuoteClick: (String) -> Unit,
+    onPostQuoteClick: (content: TextFieldValue) -> Unit,
     onProfileClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
     onMediaClick: (MediaClickEvent) -> Unit,
@@ -189,7 +190,7 @@ fun ExploreFeedScreen(
                         ),
                     )
                 },
-                onPostQuoteClick = { onPostQuoteClick("\n\nnostr:${it.postId.hexToNoteHrp()}") },
+                onPostQuoteClick = { onPostQuoteClick(TextFieldValue(text = "\n\nnostr:${it.postId.hexToNoteHrp()}")) },
                 onHashtagClick = onHashtagClick,
                 onGoToWallet = onGoToWallet,
                 onMuteClick = { eventPublisher(ExploreFeedContract.UiEvent.MuteAction(profileId = it)) },

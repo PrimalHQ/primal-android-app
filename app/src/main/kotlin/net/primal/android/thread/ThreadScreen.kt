@@ -13,6 +13,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -24,21 +25,21 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AlternateEmail
 import androidx.compose.material.icons.outlined.OpenInFull
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshContainer
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -53,6 +54,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onSizeChanged
@@ -61,6 +63,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.coerceAtLeast
@@ -95,6 +98,11 @@ import net.primal.android.core.compose.icons.primaliconpack.More
 import net.primal.android.core.compose.pulltorefresh.PrimalPullToRefreshIndicator
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.crypto.hexToNoteHrp
+import net.primal.android.editor.NoteEditorContract
+import net.primal.android.editor.di.noteEditorViewModel
+import net.primal.android.editor.ui.NoteOutlinedTextField
+import net.primal.android.editor.ui.NoteTagUserLazyColumn
+import net.primal.android.editor.ui.appendUserTagAtSignAtCursorPosition
 import net.primal.android.note.ui.NoteZapUiModel
 import net.primal.android.profile.report.OnReportContentClick
 import net.primal.android.theme.AppTheme
@@ -109,15 +117,15 @@ fun ThreadScreen(
     onClose: () -> Unit,
     onPostClick: (noteId: String) -> Unit,
     onPostReplyClick: (String) -> Unit,
-    onPostQuoteClick: (String) -> Unit,
+    onPostQuoteClick: (content: TextFieldValue) -> Unit,
     onProfileClick: (profileId: String) -> Unit,
     onHashtagClick: (String) -> Unit,
     onMediaClick: (MediaClickEvent) -> Unit,
     onGoToWallet: () -> Unit,
-    onReplyInNoteEditor: (String, Uri?, String) -> Unit,
+    onReplyInNoteEditor: (replyToNoteId: String, mediaUri: Uri?, content: TextFieldValue) -> Unit,
     onReactionsClick: (noteId: String) -> Unit,
 ) {
-    val uiState = viewModel.state.collectAsState()
+    val uiState by viewModel.state.collectAsState()
 
     DisposableLifecycleObserverEffect(viewModel) {
         when (it) {
@@ -130,7 +138,7 @@ fun ThreadScreen(
     }
 
     ThreadScreen(
-        state = uiState.value,
+        state = uiState,
         onClose = onClose,
         onPostClick = onPostClick,
         onPostReplyClick = onPostReplyClick,
@@ -152,18 +160,27 @@ fun ThreadScreen(
     onClose: () -> Unit,
     onPostClick: (String) -> Unit,
     onPostReplyClick: (String) -> Unit,
-    onPostQuoteClick: (String) -> Unit,
+    onPostQuoteClick: (content: TextFieldValue) -> Unit,
     onProfileClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
     onMediaClick: (MediaClickEvent) -> Unit,
     onGoToWallet: () -> Unit,
-    onReplyInNoteEditor: (String, Uri?, String) -> Unit,
+    onReplyInNoteEditor: (replyToNoteId: String, mediaUri: Uri?, content: TextFieldValue) -> Unit,
     onReactionsClick: (noteId: String) -> Unit,
     eventPublisher: (ThreadContract.UiEvent) -> Unit,
 ) {
+    val noteEditorViewModel = noteEditorViewModel(replyNoteId = state.highlightPostId)
+    val replyState by noteEditorViewModel.state.collectAsState()
+    val userTagHighlightColor = AppTheme.colorScheme.secondary
     val snackbarHostState = remember { SnackbarHostState() }
-    ErrorHandler(
+
+    ThreadErrorHandler(
         error = state.error,
+        snackbarHostState = snackbarHostState,
+    )
+
+    NoteEditorErrorHandler(
+        error = replyState.error,
         snackbarHostState = snackbarHostState,
     )
 
@@ -182,56 +199,84 @@ fun ThreadScreen(
             )
         },
         content = { paddingValues ->
-            ThreadScreenContent(
-                paddingValues = paddingValues,
-                state = state,
-                scaffoldBarsMaxHeightPx = bottomBarMaxHeightPx + topBarMaxHeightPx,
-                onPostClick = onPostClick,
-                onProfileClick = onProfileClick,
-                onPostReplyClick = onPostReplyClick,
-                onHashtagClick = onHashtagClick,
-                onMediaClick = onMediaClick,
-                onPostQuoteClick = onPostQuoteClick,
-                onGoToWallet = onGoToWallet,
-                onReactionsClick = onReactionsClick,
-                eventPublisher = eventPublisher,
-            )
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.BottomCenter,
+            ) {
+                ThreadConversationLazyColumn(
+                    paddingValues = paddingValues,
+                    state = state,
+                    scaffoldBarsMaxHeightPx = bottomBarMaxHeightPx + topBarMaxHeightPx,
+                    onPostClick = onPostClick,
+                    onProfileClick = onProfileClick,
+                    onPostReplyClick = onPostReplyClick,
+                    onHashtagClick = onHashtagClick,
+                    onMediaClick = onMediaClick,
+                    onPostQuoteClick = onPostQuoteClick,
+                    onGoToWallet = onGoToWallet,
+                    onReactionsClick = onReactionsClick,
+                    eventPublisher = eventPublisher,
+                )
+
+                val mentionQuery = replyState.userTaggingQuery
+                if (mentionQuery != null) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .wrapContentHeight()
+                            .padding(paddingValues),
+                    ) {
+                        PrimalDivider()
+                        NoteTagUserLazyColumn(
+                            modifier = Modifier.wrapContentHeight(),
+                            content = replyState.content,
+                            taggedUsers = replyState.taggedUsers,
+                            users = replyState.users.ifEmpty {
+                                if (mentionQuery.isEmpty()) {
+                                    replyState.recommendedUsers
+                                } else {
+                                    emptyList()
+                                }
+                            },
+                            userTaggingQuery = mentionQuery,
+                            userTagHighlightColor = userTagHighlightColor,
+                            onUserClick = { newContent, newTaggedUsers ->
+                                noteEditorViewModel.setEvent(
+                                    NoteEditorContract.UiEvent.UpdateContent(content = newContent),
+                                )
+                                noteEditorViewModel.setEvent(
+                                    NoteEditorContract.UiEvent.TagUser(taggedUser = newTaggedUsers.last()),
+                                )
+                                noteEditorViewModel.setEvent(
+                                    NoteEditorContract.UiEvent.ToggleSearchUsers(enabled = false),
+                                )
+                            },
+                        )
+                    }
+                }
+            }
         },
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState)
         },
         bottomBar = {
-            val rootPost = state.conversation.firstOrNull()
             val replyToPost = state.conversation.getOrNull(state.highlightPostIndex)
-            if (rootPost != null && replyToPost != null) {
+            if (replyToPost != null) {
                 ReplyToBottomBar(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 4.dp)
                         .onSizeChanged { bottomBarMaxHeightPx = it.height }
                         .navigationBarsPadding(),
-                    publishingReply = state.publishingReply,
-                    replyToAuthorName = replyToPost.authorName,
-                    replyToAuthorHandle = replyToPost.authorHandle,
-                    replyTextProvider = { state.replyText },
-                    onPublishReplyClick = {
-                        eventPublisher(
-                            ThreadContract.UiEvent.ReplyToAction(
-                                rootPostId = rootPost.postId,
-                                replyToPostId = replyToPost.postId,
-                                replyToAuthorId = replyToPost.authorId,
-                            ),
-                        )
-                    },
-                    onReplyUpdated = { content ->
-                        eventPublisher(ThreadContract.UiEvent.UpdateReply(newReply = content))
-                    },
+                    replyState = replyState,
+                    replyToPost = replyToPost,
+                    userTagHighlightColor = userTagHighlightColor,
                     onPhotoImported = { photoUri ->
-                        onReplyInNoteEditor(state.highlightPostId, photoUri, state.replyText)
+                        onReplyInNoteEditor(state.highlightPostId, photoUri, replyState.content)
                     },
                     onExpand = {
-                        onReplyInNoteEditor(state.highlightPostId, null, state.replyText)
+                        onReplyInNoteEditor(state.highlightPostId, null, replyState.content)
                     },
+                    replyEventPublisher = { noteEditorViewModel.setEvent(it) },
                 )
             }
         },
@@ -240,7 +285,7 @@ fun ThreadScreen(
 
 @ExperimentalMaterial3Api
 @Composable
-private fun ThreadScreenContent(
+private fun ThreadConversationLazyColumn(
     paddingValues: PaddingValues,
     state: ThreadContract.UiState,
     scaffoldBarsMaxHeightPx: Int,
@@ -249,7 +294,7 @@ private fun ThreadScreenContent(
     onPostReplyClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
     onMediaClick: (MediaClickEvent) -> Unit,
-    onPostQuoteClick: (String) -> Unit,
+    onPostQuoteClick: (content: TextFieldValue) -> Unit,
     onGoToWallet: () -> Unit,
     onReactionsClick: (noteId: String) -> Unit,
     eventPublisher: (ThreadContract.UiEvent) -> Unit,
@@ -269,7 +314,7 @@ private fun ThreadScreenContent(
                     )
                 },
                 onPostQuoteClick = {
-                    onPostQuoteClick("\n\nnostr:${post.postId.hexToNoteHrp()}")
+                    onPostQuoteClick(TextFieldValue(text = "\n\nnostr:${post.postId.hexToNoteHrp()}"))
                 },
             )
         }
@@ -637,103 +682,129 @@ private fun NoteZapListItem(
 @Composable
 fun ReplyToBottomBar(
     modifier: Modifier,
-    publishingReply: Boolean,
-    replyToAuthorName: String,
-    replyToAuthorHandle: String,
-    replyTextProvider: () -> String,
-    onPublishReplyClick: () -> Unit,
-    onReplyUpdated: (String) -> Unit,
+    replyState: NoteEditorContract.UiState,
+    replyToPost: FeedPostUi,
     onPhotoImported: (Uri) -> Unit,
     onExpand: () -> Unit,
+    replyEventPublisher: (NoteEditorContract.UiEvent) -> Unit,
+    userTagHighlightColor: Color,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val isKeyboardVisible by keyboardVisibilityAsState()
 
-    Surface(
-        modifier = modifier,
-        color = AppTheme.colorScheme.surface,
+    Column(
+        modifier = modifier.background(color = AppTheme.colorScheme.surface),
+        verticalArrangement = Arrangement.Bottom,
     ) {
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            PrimalDivider()
+        PrimalDivider()
 
-            AnimatedVisibility(visible = isKeyboardVisible) {
-                ReplyingToText(
-                    modifier = Modifier
-                        .padding(horizontal = 16.dp)
-                        .padding(top = 8.dp),
-                    replyToUsername = replyToAuthorHandle,
-                )
-            }
-
-            OutlinedTextField(
+        AnimatedVisibility(visible = isKeyboardVisible) {
+            ReplyingToText(
                 modifier = Modifier
-                    .fillMaxWidth()
                     .padding(horizontal = 16.dp)
-                    .padding(top = 8.dp)
-                    .imePadding(),
-                value = replyTextProvider(),
-                onValueChange = { onReplyUpdated(it) },
-                maxLines = 10,
-                enabled = !publishingReply,
-                placeholder = {
-                    AnimatedVisibility(
-                        visible = !isKeyboardVisible,
-                        exit = fadeOut(),
-                        enter = fadeIn(),
-                    ) {
-                        Text(
-                            text = stringResource(
-                                id = R.string.thread_reply_to,
-                                replyToAuthorName,
-                            ),
-                            maxLines = 1,
-                            color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
-                            style = AppTheme.typography.bodyMedium,
-                        )
-                    }
-                },
-                trailingIcon = {
-                    AnimatedVisibility(visible = isKeyboardVisible) {
-                        AppBarIcon(
-                            icon = Icons.Outlined.OpenInFull,
-                            onClick = {
-                                onExpand()
-                                keyboardController?.hide()
-                            },
-                            tint = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-                        )
-                    }
-                },
-                textStyle = AppTheme.typography.bodyMedium,
-                colors = PrimalDefaults.outlinedTextFieldColors(),
-                shape = AppTheme.shapes.extraLarge,
+                    .padding(top = 8.dp),
+                replyToUsername = replyToPost.authorHandle,
             )
+        }
 
-            AnimatedVisibility(visible = isKeyboardVisible) {
-                ReplyToOptions(
-                    publishingReply = publishingReply,
-                    replyTextProvider = replyTextProvider,
-                    onPublishReplyClick = onPublishReplyClick,
-                    onPhotoImported = onPhotoImported,
+        NoteOutlinedTextField(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+                .padding(top = 8.dp)
+                .imePadding(),
+            value = replyState.content,
+            onValueChange = { replyEventPublisher(NoteEditorContract.UiEvent.UpdateContent(content = it)) },
+            maxLines = 10,
+            enabled = !replyState.publishing,
+            placeholder = {
+                ReplyTextFieldPlaceholder(
+                    isKeyboardVisible = isKeyboardVisible,
+                    replyToPost = replyToPost,
                 )
-            }
+            },
+            trailingIcon = {
+                AnimatedVisibility(visible = isKeyboardVisible) {
+                    AppBarIcon(
+                        icon = Icons.Outlined.OpenInFull,
+                        onClick = {
+                            onExpand()
+                            keyboardController?.hide()
+                        },
+                        tint = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                    )
+                }
+            },
+            textStyle = AppTheme.typography.bodyMedium,
+            colors = PrimalDefaults.outlinedTextFieldColors(),
+            shape = AppTheme.shapes.extraLarge,
+            taggedUsers = replyState.taggedUsers,
+            onUserTaggingModeChanged = {
+                replyEventPublisher(NoteEditorContract.UiEvent.ToggleSearchUsers(enabled = it))
+            },
+            onUserTagSearch = {
+                replyEventPublisher(NoteEditorContract.UiEvent.SearchUsers(query = it))
+            },
+        )
+
+        AnimatedVisibility(visible = isKeyboardVisible) {
+            ReplyToOptions(
+                replying = replyState.publishing,
+                replyEnabled = !replyState.publishing && replyState.content.text.isNotBlank(),
+                onPublishReplyClick = { replyEventPublisher(NoteEditorContract.UiEvent.PublishNote) },
+                onPhotoImported = onPhotoImported,
+                onUserTag = {
+                    replyEventPublisher(
+                        NoteEditorContract.UiEvent.UpdateContent(
+                            content = replyState.content.appendUserTagAtSignAtCursorPosition(
+                                taggedUsers = replyState.taggedUsers,
+                                highlightColor = userTagHighlightColor,
+                            ),
+                        ),
+                    )
+                    replyEventPublisher(NoteEditorContract.UiEvent.ToggleSearchUsers(enabled = true))
+                },
+            )
         }
     }
 }
 
 @Composable
+private fun ColumnScope.ReplyTextFieldPlaceholder(
+    isKeyboardVisible: Boolean,
+    replyToPost: FeedPostUi,
+) {
+    AnimatedVisibility(
+        visible = !isKeyboardVisible,
+        exit = fadeOut(),
+        enter = fadeIn(),
+    ) {
+        Text(
+            text = stringResource(
+                id = R.string.thread_reply_to,
+                replyToPost.authorName,
+            ),
+            maxLines = 1,
+            color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
+            style = AppTheme.typography.bodyMedium,
+        )
+    }
+}
+
+@Composable
 private fun ReplyToOptions(
-    publishingReply: Boolean,
-    replyTextProvider: () -> String,
+    replying: Boolean,
+    replyEnabled: Boolean,
     onPublishReplyClick: () -> Unit,
     onPhotoImported: (Uri) -> Unit,
+    onUserTag: () -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val photoImportLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.PickVisualMedia(),
-    ) { uri -> if (uri != null) onPhotoImported.invoke(uri) }
+        contract = ActivityResultContracts.PickVisualMedia(),
+    ) { uri ->
+        if (uri != null) onPhotoImported.invoke(uri)
+    }
 
     Row(
         modifier = Modifier
@@ -750,7 +821,7 @@ private fun ReplyToOptions(
                 onClick = {
                     photoImportLauncher.launch(
                         PickVisualMediaRequest(
-                            ActivityResultContracts.PickVisualMedia.ImageOnly,
+                            mediaType = ActivityResultContracts.PickVisualMedia.ImageOnly,
                         ),
                     )
                 },
@@ -761,18 +832,28 @@ private fun ReplyToOptions(
                     tint = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
                 )
             }
+
+            IconButton(
+                onClick = onUserTag,
+            ) {
+                Icon(
+                    imageVector = Icons.Default.AlternateEmail,
+                    contentDescription = stringResource(id = R.string.accessibility_tag_user),
+                    tint = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                )
+            }
         }
 
         PrimalLoadingButton(
             modifier = Modifier
                 .wrapContentWidth()
                 .height(34.dp),
-            text = if (publishingReply) {
+            text = if (replying) {
                 stringResource(id = R.string.thread_publishing_button)
             } else {
                 stringResource(id = R.string.thread_publish_button)
             },
-            enabled = !publishingReply && replyTextProvider().isNotBlank(),
+            enabled = replyEnabled,
             fontSize = 14.sp,
             fontWeight = FontWeight.Normal,
             onClick = {
@@ -784,7 +865,7 @@ private fun ReplyToOptions(
 }
 
 @Composable
-private fun ErrorHandler(error: ThreadError?, snackbarHostState: SnackbarHostState) {
+private fun ThreadErrorHandler(error: ThreadError?, snackbarHostState: SnackbarHostState) {
     val context = LocalContext.current
     LaunchedEffect(error ?: true) {
         val errorMessage = when (error) {
@@ -808,15 +889,37 @@ private fun ErrorHandler(error: ThreadError?, snackbarHostState: SnackbarHostSta
                 R.string.post_action_repost_failed,
             )
 
-            is ThreadError.FailedToPublishReplyEvent -> context.getString(
-                R.string.post_action_reply_failed,
-            )
-
             is ThreadError.MissingRelaysConfiguration -> context.getString(
                 R.string.app_missing_relays_config,
             )
 
             is ThreadError.FailedToMuteUser -> context.getString(R.string.app_error_muting_user)
+            null -> return@LaunchedEffect
+        }
+
+        snackbarHostState.showSnackbar(
+            message = errorMessage,
+            duration = SnackbarDuration.Short,
+        )
+    }
+}
+
+@Composable
+private fun NoteEditorErrorHandler(
+    error: NoteEditorContract.UiState.NoteEditorError?,
+    snackbarHostState: SnackbarHostState,
+) {
+    val context = LocalContext.current
+    LaunchedEffect(error) {
+        val errorMessage = when (error) {
+            is NoteEditorContract.UiState.NoteEditorError.MissingRelaysConfiguration -> context.getString(
+                R.string.app_missing_relays_config,
+            )
+
+            is NoteEditorContract.UiState.NoteEditorError.PublishError -> context.getString(
+                R.string.post_action_reply_failed,
+            )
+
             null -> return@LaunchedEffect
         }
 

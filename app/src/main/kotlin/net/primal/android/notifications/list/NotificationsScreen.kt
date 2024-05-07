@@ -33,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.paging.LoadState
@@ -76,7 +77,7 @@ fun NotificationsScreen(
     onProfileClick: (String) -> Unit,
     onNoteClick: (String) -> Unit,
     onNoteReplyClick: (String) -> Unit,
-    onPostQuoteClick: (String) -> Unit,
+    onPostQuoteClick: (content: TextFieldValue) -> Unit,
     onHashtagClick: (String) -> Unit,
     onMediaClick: (MediaClickEvent) -> Unit,
     onNotificationSettings: () -> Unit,
@@ -124,7 +125,7 @@ fun NotificationsScreen(
     onHashtagClick: (String) -> Unit,
     onMediaClick: (MediaClickEvent) -> Unit,
     onGoToWallet: () -> Unit,
-    onPostQuoteClick: (String) -> Unit,
+    onPostQuoteClick: (content: TextFieldValue) -> Unit,
     onNotificationSettings: () -> Unit,
     onPrimaryDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
@@ -233,7 +234,7 @@ fun NotificationsScreen(
                     )
                 },
                 onPostQuoteClick = {
-                    onPostQuoteClick("\n\nnostr:${it.postId.hexToNoteHrp()}")
+                    onPostQuoteClick(TextFieldValue(text = "\n\nnostr:${it.postId.hexToNoteHrp()}"))
                 },
             )
         },

@@ -31,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
@@ -71,7 +72,7 @@ fun ProfileDetailsScreen(
     onClose: () -> Unit,
     onPostClick: (String) -> Unit,
     onPostReplyClick: (String) -> Unit,
-    onPostQuoteClick: (String) -> Unit,
+    onPostQuoteClick: (content: TextFieldValue) -> Unit,
     onProfileClick: (String) -> Unit,
     onEditProfileClick: () -> Unit,
     onMessageClick: (String) -> Unit,
@@ -120,7 +121,7 @@ fun ProfileDetailsScreen(
     onClose: () -> Unit,
     onPostClick: (String) -> Unit,
     onPostReplyClick: (String) -> Unit,
-    onPostQuoteClick: (String) -> Unit,
+    onPostQuoteClick: (content: TextFieldValue) -> Unit,
     onProfileClick: (String) -> Unit,
     onEditProfileClick: () -> Unit,
     onMessageClick: (String) -> Unit,
@@ -278,7 +279,7 @@ fun ProfileDetailsScreen(
                         ),
                     )
                 },
-                onPostQuoteClick = { onPostQuoteClick("\n\nnostr:${it.postId.hexToNoteHrp()}") },
+                onPostQuoteClick = { onPostQuoteClick(TextFieldValue(text = "\n\nnostr:${it.postId.hexToNoteHrp()}")) },
                 onReportContentClick = { type, profileId, noteId ->
                     eventPublisher(
                         ProfileDetailsContract.UiEvent.ReportAbuse(

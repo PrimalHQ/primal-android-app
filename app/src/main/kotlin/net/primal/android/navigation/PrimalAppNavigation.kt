@@ -8,6 +8,8 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavController
@@ -46,7 +48,7 @@ import net.primal.android.discuss.feed.FeedViewModel
 import net.primal.android.discuss.list.FeedListScreen
 import net.primal.android.discuss.list.FeedListViewModel
 import net.primal.android.drawer.DrawerScreenDestination
-import net.primal.android.editor.NoteEditorViewModel
+import net.primal.android.editor.di.noteEditorViewModel
 import net.primal.android.editor.ui.NoteEditorScreen
 import net.primal.android.explore.feed.ExploreFeedScreen
 import net.primal.android.explore.feed.ExploreFeedViewModel
@@ -103,14 +105,16 @@ private fun NavController.navigateToFeedList() = navigate(route = "feed/list")
 private fun NavController.navigateToSearch() = navigate(route = "search")
 
 private fun NavController.navigateToNoteEditor(
-    preFillContent: String? = null,
+    preFillContent: TextFieldValue? = null,
     preFillFileUri: Uri? = null,
     replyToNoteId: String? = null,
 ) {
     val route = "noteEditor" +
         "?$NEW_POST_REPLY_TO_NOTE_ID=${replyToNoteId.orEmpty()}" +
         "&$NEW_POST_PRE_FILL_FILE_URI=${preFillFileUri?.toString().orEmpty().asUrlEncoded()}" +
-        "&$NEW_POST_PRE_FILL_CONTENT=${preFillContent.orEmpty().asBase64Encoded()}"
+        "&$NEW_POST_PRE_FILL_CONTENT=${preFillContent?.text.orEmpty().asBase64Encoded()}" +
+        "&$NEW_POST_PRE_FILL_CONTENT_SELECTION_START=${preFillContent?.selection?.start ?: 0}" +
+        "&$NEW_POST_PRE_FILL_CONTENT_SELECTION_END=${preFillContent?.selection?.end ?: 0}"
     navigate(route = route)
 }
 
@@ -359,7 +363,9 @@ fun PrimalAppNavigation() {
                 route = "noteEditor" +
                     "?$NEW_POST_REPLY_TO_NOTE_ID={$NEW_POST_REPLY_TO_NOTE_ID}" +
                     "&$NEW_POST_PRE_FILL_FILE_URI={$NEW_POST_PRE_FILL_FILE_URI}" +
-                    "&$NEW_POST_PRE_FILL_CONTENT={$NEW_POST_PRE_FILL_CONTENT}",
+                    "&$NEW_POST_PRE_FILL_CONTENT={$NEW_POST_PRE_FILL_CONTENT}" +
+                    "&$NEW_POST_PRE_FILL_CONTENT_SELECTION_START={$NEW_POST_PRE_FILL_CONTENT_SELECTION_START}" +
+                    "&$NEW_POST_PRE_FILL_CONTENT_SELECTION_END={$NEW_POST_PRE_FILL_CONTENT_SELECTION_END}",
                 arguments = listOf(
                     navArgument(NEW_POST_REPLY_TO_NOTE_ID) {
                         type = NavType.StringType
@@ -375,6 +381,14 @@ fun PrimalAppNavigation() {
                         type = NavType.StringType
                         nullable = true
                         defaultValue = null
+                    },
+                    navArgument(NEW_POST_PRE_FILL_CONTENT_SELECTION_START) {
+                        type = NavType.IntType
+                        defaultValue = 0
+                    },
+                    navArgument(NEW_POST_PRE_FILL_CONTENT_SELECTION_END) {
+                        type = NavType.IntType
+                        defaultValue = 0
                     },
                 ),
                 navController = navController,
@@ -636,7 +650,16 @@ private fun NavGraphBuilder.noteEditor(
     route = route,
     arguments = arguments,
 ) {
-    val viewModel = hiltViewModel<NoteEditorViewModel>(it)
+    val viewModel = noteEditorViewModel(
+        replyNoteId = it.arguments?.getString(NEW_POST_REPLY_TO_NOTE_ID),
+        content = TextFieldValue(
+            text = it.arguments?.getString(NEW_POST_PRE_FILL_CONTENT)?.asBase64Decoded() ?: "",
+            selection = TextRange(
+                start = it.arguments?.getInt(NEW_POST_PRE_FILL_CONTENT_SELECTION_START) ?: 0,
+                end = it.arguments?.getInt(NEW_POST_PRE_FILL_CONTENT_SELECTION_END) ?: 0,
+            ),
+        ),
+    )
     ApplyEdgeToEdge()
     LockToOrientationPortrait()
     NoteEditorScreen(
@@ -650,7 +673,7 @@ private fun NavGraphBuilder.feedList(route: String, navController: NavController
     bottomSheet(
         route = route,
     ) {
-        val viewModel = hiltViewModel<FeedListViewModel>(it)
+        val viewModel = hiltViewModel<FeedListViewModel>(viewModelStoreOwner = it)
         LockToOrientationPortrait()
         FeedListScreen(
             viewModel = viewModel,

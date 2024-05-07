@@ -51,9 +51,9 @@ class ThreadViewModel @Inject constructor(
     private val mutedUserRepository: MutedUserRepository,
 ) : ViewModel() {
 
-    private val postId = savedStateHandle.noteIdOrThrow
+    private val highlightPostId = savedStateHandle.noteIdOrThrow
 
-    private val _state = MutableStateFlow(ThreadContract.UiState(highlightPostId = postId))
+    private val _state = MutableStateFlow(ThreadContract.UiState(highlightPostId = highlightPostId))
     val state = _state.asStateFlow()
     private fun setState(reducer: ThreadContract.UiState.() -> ThreadContract.UiState) {
         _state.getAndUpdate { it.reducer() }
@@ -77,8 +77,6 @@ class ThreadViewModel @Inject constructor(
                 when (it) {
                     is UiEvent.PostLikeAction -> likePost(it)
                     is UiEvent.RepostAction -> repostPost(it)
-                    is UiEvent.ReplyToAction -> publishReply(it)
-                    is UiEvent.UpdateReply -> updateReply(it)
                     is UiEvent.ZapAction -> zapPost(it)
                     is UiEvent.MuteAction -> mute(it)
                     UiEvent.UpdateConversation -> fetchData()
@@ -98,7 +96,7 @@ class ThreadViewModel @Inject constructor(
 
     private fun observeTopZappers() =
         viewModelScope.launch {
-            noteRepository.observeTopZappers(postId = postId).collect {
+            noteRepository.observeTopZappers(postId = highlightPostId).collect {
                 setState {
                     copy(
                         topZap = it.firstOrNull()?.asNoteZapUiModel() ?: this.topZap,
@@ -128,12 +126,12 @@ class ThreadViewModel @Inject constructor(
         }
 
     private suspend fun loadHighlightedPost() {
-        val rootPost = withContext(dispatcherProvider.io()) { feedRepository.findPostById(postId = postId) }
+        val rootPost = withContext(dispatcherProvider.io()) { feedRepository.findPostById(postId = highlightPostId) }
         if (rootPost != null) {
             setState {
                 copy(
                     conversation = listOf(rootPost.asFeedPostUi()),
-                    highlightPostId = postId,
+                    highlightPostId = this@ThreadViewModel.highlightPostId,
                     highlightPostIndex = 0,
                 )
             }
@@ -143,11 +141,11 @@ class ThreadViewModel @Inject constructor(
     private suspend fun delayShortlyToPropagateHighlightedPost() = delay(100.milliseconds)
 
     private suspend fun subscribeToConversationChanges() {
-        feedRepository.observeConversation(postId = postId)
+        feedRepository.observeConversation(postId = highlightPostId)
             .filter { it.isNotEmpty() }
             .map { posts -> posts.map { it.asFeedPostUi() } }
             .collect { conversation ->
-                val highlightPostIndex = conversation.indexOfFirst { it.postId == postId }
+                val highlightPostIndex = conversation.indexOfFirst { it.postId == highlightPostId }
                 val thread = conversation.subList(0, highlightPostIndex + 1)
                 val replies = conversation.subList(highlightPostIndex + 1, conversation.size)
                 setState {
@@ -169,7 +167,7 @@ class ThreadViewModel @Inject constructor(
             setState { copy(fetching = true) }
             try {
                 withContext(dispatcherProvider.io()) {
-                    feedRepository.fetchReplies(postId = postId)
+                    feedRepository.fetchReplies(postId = highlightPostId)
                 }
             } catch (error: WssException) {
                 Timber.w(error)
@@ -182,7 +180,7 @@ class ThreadViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 withContext(dispatcherProvider.io()) {
-                    noteRepository.fetchTopNoteZaps(noteId = postId)
+                    noteRepository.fetchTopNoteZaps(noteId = highlightPostId)
                 }
             } catch (error: WssException) {
                 Timber.w(error)
@@ -258,40 +256,6 @@ class ThreadViewModel @Inject constructor(
             }
         }
 
-    private fun updateReply(updateReplyEvent: UiEvent.UpdateReply) {
-        setState { copy(replyText = updateReplyEvent.newReply) }
-    }
-
-    private fun publishReply(replyToAction: UiEvent.ReplyToAction) =
-        viewModelScope.launch {
-            setState { copy(publishingReply = true) }
-            try {
-                val publishedAndImported = noteRepository.publishShortTextNote(
-                    content = state.value.replyText,
-                    attachments = emptyList(),
-                    rootPostId = replyToAction.rootPostId,
-                    replyToPostId = replyToAction.replyToPostId,
-                    replyToAuthorId = replyToAction.replyToAuthorId,
-                )
-
-                if (publishedAndImported) {
-                    fetchNoteReplies()
-                } else {
-                    scheduleFetchReplies()
-                }
-
-                setState { copy(replyText = "") }
-            } catch (error: NostrPublishException) {
-                Timber.w(error)
-                setErrorState(error = ThreadError.FailedToPublishReplyEvent(error))
-            } catch (error: MissingRelaysException) {
-                Timber.w(error)
-                setErrorState(error = ThreadError.MissingRelaysConfiguration(error))
-            } finally {
-                setState { copy(publishingReply = false) }
-            }
-        }
-
     private fun mute(action: UiEvent.MuteAction) =
         viewModelScope.launch {
             try {
@@ -351,12 +315,6 @@ class ThreadViewModel @Inject constructor(
                     setState { copy(confirmBookmarkingNoteId = event.noteId) }
                 }
             }
-        }
-
-    private fun scheduleFetchReplies() =
-        viewModelScope.launch {
-            delay(750.milliseconds)
-            fetchNoteReplies()
         }
 
     private fun setErrorState(error: ThreadError) {

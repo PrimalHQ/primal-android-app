@@ -29,16 +29,10 @@ inline val SavedStateHandle.exploreFeedDirectiveOrThrow: String
         ?: throw IllegalArgumentException("Missing required exploreFeedDirective argument.")
 
 const val NEW_POST_PRE_FILL_CONTENT = "preFillContent"
-inline val SavedStateHandle.newPostPreFillContent: String?
-    get() = get<String>(NEW_POST_PRE_FILL_CONTENT)?.asBase64Decoded()?.ifEmpty { null }
-
+const val NEW_POST_PRE_FILL_CONTENT_SELECTION_START = "preFillContentSelectionStart"
+const val NEW_POST_PRE_FILL_CONTENT_SELECTION_END = "preFillContentSelectionEnd"
 const val NEW_POST_PRE_FILL_FILE_URI = "preFillFileUri"
-inline val SavedStateHandle.newPostPreFillFileUri: String?
-    get() = get<String?>(NEW_POST_PRE_FILL_FILE_URI)?.asUrlDecoded()?.ifEmpty { null }
-
 const val NEW_POST_REPLY_TO_NOTE_ID = "replyToNoteId"
-inline val SavedStateHandle.replyToNoteId: String?
-    get() = get<String?>(NEW_POST_REPLY_TO_NOTE_ID)?.ifEmpty { null }
 
 const val NWC_URL = "nwcUrl"
 inline val SavedStateHandle.nwcUrl: String? get() = get(NWC_URL)

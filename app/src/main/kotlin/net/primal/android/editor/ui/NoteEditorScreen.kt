@@ -78,7 +78,7 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromGallery
 import net.primal.android.editor.NoteEditorContract
 import net.primal.android.editor.NoteEditorContract.UiEvent
-import net.primal.android.editor.NoteEditorContract.UiState.NewPostError
+import net.primal.android.editor.NoteEditorContract.UiState.NoteEditorError
 import net.primal.android.editor.NoteEditorViewModel
 import net.primal.android.editor.domain.NoteAttachment
 import net.primal.android.theme.AppTheme
@@ -492,15 +492,15 @@ private fun NoteActionRow(
 }
 
 @Composable
-private fun NewPostPublishErrorHandler(error: NewPostError?, snackbarHostState: SnackbarHostState) {
+private fun NewPostPublishErrorHandler(error: NoteEditorError?, snackbarHostState: SnackbarHostState) {
     val context = LocalContext.current
     LaunchedEffect(error ?: true) {
         val errorMessage = when (error) {
-            is NewPostError.MissingRelaysConfiguration -> context.getString(
+            is NoteEditorError.MissingRelaysConfiguration -> context.getString(
                 R.string.app_missing_relays_config,
             )
 
-            is NewPostError.PublishError -> context.getString(
+            is NoteEditorError.PublishError -> context.getString(
                 R.string.note_editor_nostr_publish_error,
             )
 

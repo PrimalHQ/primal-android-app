@@ -2,12 +2,12 @@ package net.primal.android.editor
 
 import android.net.Uri
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedInject
 import java.util.*
-import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.channels.Channel
@@ -36,9 +36,6 @@ import net.primal.android.editor.domain.NoteAttachment
 import net.primal.android.editor.domain.NoteTaggedUser
 import net.primal.android.explore.repository.ExploreRepository
 import net.primal.android.feed.repository.FeedRepository
-import net.primal.android.navigation.newPostPreFillContent
-import net.primal.android.navigation.newPostPreFillFileUri
-import net.primal.android.navigation.replyToNoteId
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
@@ -47,9 +44,10 @@ import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
 import timber.log.Timber
 
-@HiltViewModel
-class NoteEditorViewModel @Inject constructor(
-    savedStateHandle: SavedStateHandle,
+class NoteEditorViewModel @AssistedInject constructor(
+    @Assisted content: TextFieldValue,
+    @Assisted mediaUri: Uri?,
+    @Assisted private val replyToNoteId: String?,
     private val dispatcherProvider: CoroutineDispatcherProvider,
     private val fileAnalyser: FileAnalyser,
     private val activeAccountStore: ActiveAccountStore,
@@ -58,11 +56,7 @@ class NoteEditorViewModel @Inject constructor(
     private val exploreRepository: ExploreRepository,
 ) : ViewModel() {
 
-    private val argReplyToNoteId = savedStateHandle.replyToNoteId
-    private val argPreFillFileUri = savedStateHandle.newPostPreFillFileUri?.let { Uri.parse(it) }
-    private val argPreFillContent = savedStateHandle.newPostPreFillContent
-
-    private val _state = MutableStateFlow(UiState(content = TextFieldValue(text = argPreFillContent ?: "")))
+    private val _state = MutableStateFlow(UiState(content = content))
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
 
@@ -78,13 +72,13 @@ class NoteEditorViewModel @Inject constructor(
         subscribeToActiveAccount()
         observeDebouncedQueryChanges()
 
-        if (argReplyToNoteId != null) {
-            fetchRepliesFromNetwork(argReplyToNoteId)
-            observeConversation(argReplyToNoteId)
+        replyToNoteId?.let {
+            fetchRepliesFromNetwork(it)
+            observeConversation(it)
         }
 
-        if (argPreFillFileUri != null) {
-            importPhotos(listOf(argPreFillFileUri))
+        mediaUri?.let {
+            importPhotos(listOf(it))
         }
 
         fetchRecommendedUsers()
@@ -162,7 +156,7 @@ class NoteEditorViewModel @Inject constructor(
             try {
                 val rootPost = _state.value.conversation.firstOrNull()
                 val replyToPost = _state.value.conversation.lastOrNull()
-                noteRepository.publishShortTextNote(
+                val publishedAndImported = noteRepository.publishShortTextNote(
                     content = _state.value.content.text.replaceUserMentionsWithUserIds(
                         users = _state.value.taggedUsers,
                     ),
@@ -171,16 +165,39 @@ class NoteEditorViewModel @Inject constructor(
                     replyToPostId = replyToPost?.postId,
                     replyToAuthorId = replyToPost?.authorId,
                 )
+
+                if (replyToNoteId != null) {
+                    if (publishedAndImported) {
+                        fetchNoteReplies()
+                    } else {
+                        scheduleFetchReplies()
+                    }
+                }
+
+                resetState()
+
                 sendEffect(SideEffect.PostPublished)
             } catch (error: NostrPublishException) {
                 Timber.w(error)
-                setErrorState(error = UiState.NewPostError.PublishError(cause = error.cause))
+                setErrorState(error = UiState.NoteEditorError.PublishError(cause = error.cause))
             } catch (error: MissingRelaysException) {
                 Timber.w(error)
-                setErrorState(error = UiState.NewPostError.MissingRelaysConfiguration(cause = error))
+                setErrorState(error = UiState.NoteEditorError.MissingRelaysConfiguration(cause = error))
             } finally {
                 setState { copy(publishing = false) }
             }
+        }
+
+    private fun fetchNoteReplies() {
+        if (replyToNoteId != null) {
+            fetchRepliesFromNetwork(replyToNoteId)
+        }
+    }
+
+    private fun scheduleFetchReplies() =
+        viewModelScope.launch {
+            delay(750.milliseconds)
+            fetchNoteReplies()
         }
 
     private fun String.replaceUserMentionsWithUserIds(users: List<NoteTaggedUser>): String {
@@ -192,6 +209,17 @@ class NoteEditorViewModel @Inject constructor(
             )
         }
         return content
+    }
+
+    private fun resetState() {
+        setState {
+            copy(
+                content = TextFieldValue(),
+                attachments = emptyList(),
+                users = emptyList(),
+                userTaggingQuery = null,
+            )
+        }
     }
 
     private fun importPhotos(uris: List<Uri>) =
@@ -271,7 +299,7 @@ class NoteEditorViewModel @Inject constructor(
         setState { copy(uploadingAttachments = attachmentsInUpload > 0) }
     }
 
-    private fun setErrorState(error: UiState.NewPostError) {
+    private fun setErrorState(error: UiState.NoteEditorError) {
         setState { copy(error = error) }
         viewModelScope.launch {
             delay(2.seconds)
