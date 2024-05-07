@@ -770,10 +770,7 @@ fun ReplyToBottomBar(
 }
 
 @Composable
-private fun ColumnScope.ReplyTextFieldPlaceholder(
-    isKeyboardVisible: Boolean,
-    replyToPost: FeedPostUi,
-) {
+private fun ColumnScope.ReplyTextFieldPlaceholder(isKeyboardVisible: Boolean, replyToPost: FeedPostUi) {
     AnimatedVisibility(
         visible = !isKeyboardVisible,
         exit = fadeOut(),

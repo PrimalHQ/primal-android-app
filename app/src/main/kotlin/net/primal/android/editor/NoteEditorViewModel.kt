@@ -72,13 +72,13 @@ class NoteEditorViewModel @AssistedInject constructor(
         subscribeToActiveAccount()
         observeDebouncedQueryChanges()
 
-        replyToNoteId?.let {
-            fetchRepliesFromNetwork(it)
-            observeConversation(it)
+        if (!replyToNoteId.isNullOrEmpty()) {
+            fetchRepliesFromNetwork(replyToNoteId)
+            observeConversation(replyToNoteId)
         }
 
-        mediaUri?.let {
-            importPhotos(listOf(it))
+        if (mediaUri != null) {
+            importPhotos(listOf(mediaUri))
         }
 
         fetchRecommendedUsers()
