@@ -5,7 +5,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import net.primal.android.core.compose.profile.model.UserProfileItemUi
@@ -21,7 +20,6 @@ fun NoteTagUserLazyColumn(
     users: List<UserProfileItemUi>,
     onUserClick: (content: TextFieldValue, taggedUsers: List<NoteTaggedUser>) -> Unit,
     userTaggingQuery: String,
-    userTagHighlightColor: Color,
 ) {
     LazyColumn(
         modifier = modifier,
@@ -49,10 +47,7 @@ fun NoteTagUserLazyColumn(
                         content.text.substring(startIndex = endOfQueryIndex)
 
                     val newContent = content.copy(
-                        annotatedString = newText.asAnnotatedStringWithTaggedUsers(
-                            taggedUsers = newTaggedUsers,
-                            highlightColor = userTagHighlightColor,
-                        ),
+                        text = newText,
                         selection = TextRange(start = newCursorPosition, end = newCursorPosition),
                     )
 

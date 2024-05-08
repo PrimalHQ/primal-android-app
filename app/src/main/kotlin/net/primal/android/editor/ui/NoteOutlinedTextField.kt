@@ -14,7 +14,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.TextFieldValue
@@ -55,7 +54,12 @@ fun NoteOutlinedTextField(
 ) {
     OutlinedTextField(
         modifier = modifier,
-        value = value,
+        value = value.copy(
+            annotatedString = value.text.asAnnotatedStringWithTaggedUsers(
+                taggedUsers = taggedUsers,
+                highlightColor = taggedUserColor,
+            ),
+        ),
         onValueChange = {
             val cursorPosition = it.selection.start
             val textUntilCursor = it.text.substring(startIndex = 0, endIndex = cursorPosition)
@@ -75,14 +79,7 @@ fun NoteOutlinedTextField(
                 onUserTaggingModeChanged(false)
             }
 
-            onValueChange(
-                it.copy(
-                    annotatedString = it.text.asAnnotatedStringWithTaggedUsers(
-                        taggedUsers = taggedUsers,
-                        highlightColor = taggedUserColor,
-                    ),
-                ),
-            )
+            onValueChange(it.copy(text = it.text))
         },
         enabled = enabled,
         readOnly = readOnly,
@@ -107,7 +104,7 @@ fun NoteOutlinedTextField(
     )
 }
 
-fun String.hasStopCharacter(): Boolean {
+private fun String.hasStopCharacter(): Boolean {
     return when {
         contains(' ') -> true
         contains('\n') -> true
@@ -116,7 +113,10 @@ fun String.hasStopCharacter(): Boolean {
     }
 }
 
-fun String.asAnnotatedStringWithTaggedUsers(taggedUsers: List<NoteTaggedUser>, highlightColor: Color): AnnotatedString {
+private fun String.asAnnotatedStringWithTaggedUsers(
+    taggedUsers: List<NoteTaggedUser>,
+    highlightColor: Color,
+): AnnotatedString {
     val text = this
     return buildAnnotatedString {
         append(text)
@@ -135,27 +135,4 @@ fun String.asAnnotatedStringWithTaggedUsers(taggedUsers: List<NoteTaggedUser>, h
                 )
             }
     }
-}
-
-fun TextFieldValue.appendUserTagAtSignAtCursorPosition(
-    taggedUsers: List<NoteTaggedUser>,
-    highlightColor: Color,
-): TextFieldValue {
-    val text = this.text
-    val selection = this.selection
-
-    val newText = if (selection.length > 0) {
-        text.replaceRange(startIndex = selection.start, endIndex = selection.end, "@")
-    } else {
-        text.substring(0, selection.start) + "@" + text.substring(selection.start)
-    }
-    val newSelectionStart = selection.start + 1
-
-    return this.copy(
-        annotatedString = newText.asAnnotatedStringWithTaggedUsers(
-            taggedUsers = taggedUsers,
-            highlightColor = highlightColor,
-        ),
-        selection = TextRange(start = newSelectionStart, end = newSelectionStart),
-    )
 }

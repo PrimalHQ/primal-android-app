@@ -1,6 +1,7 @@
 package net.primal.android.editor
 
 import android.net.Uri
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -33,6 +34,7 @@ import net.primal.android.editor.NoteEditorContract.SideEffect
 import net.primal.android.editor.NoteEditorContract.UiEvent
 import net.primal.android.editor.NoteEditorContract.UiState
 import net.primal.android.editor.domain.NoteAttachment
+import net.primal.android.editor.domain.NoteEditorArgs
 import net.primal.android.editor.domain.NoteTaggedUser
 import net.primal.android.explore.repository.ExploreRepository
 import net.primal.android.feed.repository.FeedRepository
@@ -45,9 +47,7 @@ import net.primal.android.user.accounts.active.ActiveUserAccountState
 import timber.log.Timber
 
 class NoteEditorViewModel @AssistedInject constructor(
-    @Assisted content: TextFieldValue,
-    @Assisted mediaUri: Uri?,
-    @Assisted private val replyToNoteId: String?,
+    @Assisted private val args: NoteEditorArgs,
     private val dispatcherProvider: CoroutineDispatcherProvider,
     private val fileAnalyser: FileAnalyser,
     private val activeAccountStore: ActiveAccountStore,
@@ -56,7 +56,20 @@ class NoteEditorViewModel @AssistedInject constructor(
     private val exploreRepository: ExploreRepository,
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(UiState(content = content))
+    private val replyToNoteId = args.replyToNoteId
+
+    private val _state = MutableStateFlow(
+        UiState(
+            content = TextFieldValue(
+                text = args.content,
+                selection = TextRange(
+                    start = args.contentSelectionStart,
+                    end = args.contentSelectionEnd,
+                ),
+            ),
+            taggedUsers = args.taggedUsers,
+        ),
+    )
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
 
@@ -77,8 +90,8 @@ class NoteEditorViewModel @AssistedInject constructor(
             observeConversation(replyToNoteId)
         }
 
-        if (mediaUri != null) {
-            importPhotos(listOf(mediaUri))
+        if (args.mediaUris.isNotEmpty()) {
+            importPhotos(args.mediaUris.mapNotNull { Uri.parse(it) })
         }
 
         fetchRecommendedUsers()
@@ -105,6 +118,10 @@ class NoteEditorViewModel @AssistedInject constructor(
                         copy(
                             taggedUsers = this.taggedUsers.toMutableList().apply { add(event.taggedUser) },
                         )
+                    }
+
+                    UiEvent.AppendUserTagAtSign -> setState {
+                        copy(content = this.content.appendUserTagAtSignAtCursorPosition())
                     }
                 }
             }
@@ -344,4 +361,21 @@ class NoteEditorViewModel @AssistedInject constructor(
                 setState { copy(users = emptyList()) }
             }
         }
+
+    private fun TextFieldValue.appendUserTagAtSignAtCursorPosition(): TextFieldValue {
+        val text = this.text
+        val selection = this.selection
+
+        val newText = if (selection.length > 0) {
+            text.replaceRange(startIndex = selection.start, endIndex = selection.end, "@")
+        } else {
+            text.substring(0, selection.start) + "@" + text.substring(selection.start)
+        }
+        val newSelectionStart = selection.start + 1
+
+        return this.copy(
+            text = newText,
+            selection = TextRange(start = newSelectionStart, end = newSelectionStart),
+        )
+    }
 }

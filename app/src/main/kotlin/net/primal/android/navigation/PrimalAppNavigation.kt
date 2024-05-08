@@ -1,6 +1,5 @@
 package net.primal.android.navigation
 
-import android.net.Uri
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
@@ -8,8 +7,6 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.TextRange
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavController
@@ -49,6 +46,8 @@ import net.primal.android.discuss.list.FeedListScreen
 import net.primal.android.discuss.list.FeedListViewModel
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.editor.di.noteEditorViewModel
+import net.primal.android.editor.domain.NoteEditorArgs
+import net.primal.android.editor.domain.NoteEditorArgs.Companion.asNoteEditorArgs
 import net.primal.android.editor.ui.NoteEditorScreen
 import net.primal.android.explore.feed.ExploreFeedScreen
 import net.primal.android.explore.feed.ExploreFeedViewModel
@@ -104,18 +103,8 @@ private fun NavController.navigateToFeedList() = navigate(route = "feed/list")
 
 private fun NavController.navigateToSearch() = navigate(route = "search")
 
-private fun NavController.navigateToNoteEditor(
-    preFillContent: TextFieldValue? = null,
-    preFillFileUri: Uri? = null,
-    replyToNoteId: String? = null,
-) {
-    val route = "noteEditor" +
-        "?$NEW_POST_REPLY_TO_NOTE_ID=${replyToNoteId.orEmpty()}" +
-        "&$NEW_POST_PRE_FILL_FILE_URI=${preFillFileUri?.toString().orEmpty().asUrlEncoded()}" +
-        "&$NEW_POST_PRE_FILL_CONTENT=${preFillContent?.text.orEmpty().asBase64Encoded()}" +
-        "&$NEW_POST_PRE_FILL_CONTENT_SELECTION_START=${preFillContent?.selection?.start ?: 0}" +
-        "&$NEW_POST_PRE_FILL_CONTENT_SELECTION_END=${preFillContent?.selection?.end ?: 0}"
-    navigate(route = route)
+private fun NavController.navigateToNoteEditor(args: NoteEditorArgs? = null) {
+    navigate(route = "noteEditor?$NOTE_EDITOR_ARGS=${args?.toJson()?.asBase64Encoded()}")
 }
 
 private val NavController.topLevelNavOptions: NavOptions
@@ -360,35 +349,12 @@ fun PrimalAppNavigation() {
             )
 
             noteEditor(
-                route = "noteEditor" +
-                    "?$NEW_POST_REPLY_TO_NOTE_ID={$NEW_POST_REPLY_TO_NOTE_ID}" +
-                    "&$NEW_POST_PRE_FILL_FILE_URI={$NEW_POST_PRE_FILL_FILE_URI}" +
-                    "&$NEW_POST_PRE_FILL_CONTENT={$NEW_POST_PRE_FILL_CONTENT}" +
-                    "&$NEW_POST_PRE_FILL_CONTENT_SELECTION_START={$NEW_POST_PRE_FILL_CONTENT_SELECTION_START}" +
-                    "&$NEW_POST_PRE_FILL_CONTENT_SELECTION_END={$NEW_POST_PRE_FILL_CONTENT_SELECTION_END}",
+                route = "noteEditor?$NOTE_EDITOR_ARGS={$NOTE_EDITOR_ARGS}",
                 arguments = listOf(
-                    navArgument(NEW_POST_REPLY_TO_NOTE_ID) {
+                    navArgument(NOTE_EDITOR_ARGS) {
                         type = NavType.StringType
                         nullable = true
                         defaultValue = null
-                    },
-                    navArgument(NEW_POST_PRE_FILL_FILE_URI) {
-                        type = NavType.StringType
-                        nullable = true
-                        defaultValue = null
-                    },
-                    navArgument(NEW_POST_PRE_FILL_CONTENT) {
-                        type = NavType.StringType
-                        nullable = true
-                        defaultValue = null
-                    },
-                    navArgument(NEW_POST_PRE_FILL_CONTENT_SELECTION_START) {
-                        type = NavType.IntType
-                        defaultValue = 0
-                    },
-                    navArgument(NEW_POST_PRE_FILL_CONTENT_SELECTION_END) {
-                        type = NavType.IntType
-                        defaultValue = 0
                     },
                 ),
                 navController = navController,
@@ -623,9 +589,9 @@ private fun NavGraphBuilder.feed(
     FeedScreen(
         viewModel = viewModel,
         onFeedsClick = { navController.navigateToFeedList() },
-        onNewPostClick = { preFillContent -> navController.navigateToNoteEditor(preFillContent) },
+        onNewPostClick = { preFillContent -> navController.navigateToNoteEditor(preFillContent?.asNoteEditorArgs()) },
         onPostClick = { postId -> navController.navigateToThread(noteId = postId) },
-        onPostReplyClick = { postId -> navController.navigateToNoteEditor(replyToNoteId = postId) },
+        onPostReplyClick = { postId -> navController.navigateToNoteEditor(NoteEditorArgs(replyToNoteId = postId)) },
         onProfileClick = { profileId -> navController.navigateToProfile(profileId = profileId) },
         onHashtagClick = { hashtag -> navController.navigateToExploreFeed(query = hashtag) },
         onMediaClick = {
@@ -651,14 +617,9 @@ private fun NavGraphBuilder.noteEditor(
     arguments = arguments,
 ) {
     val viewModel = noteEditorViewModel(
-        replyNoteId = it.arguments?.getString(NEW_POST_REPLY_TO_NOTE_ID),
-        content = TextFieldValue(
-            text = it.arguments?.getString(NEW_POST_PRE_FILL_CONTENT)?.asBase64Decoded() ?: "",
-            selection = TextRange(
-                start = it.arguments?.getInt(NEW_POST_PRE_FILL_CONTENT_SELECTION_START) ?: 0,
-                end = it.arguments?.getInt(NEW_POST_PRE_FILL_CONTENT_SELECTION_END) ?: 0,
-            ),
-        ),
+        args = it.arguments?.getString(NOTE_EDITOR_ARGS)
+            ?.asBase64Decoded()
+            ?.asNoteEditorArgs(),
     )
     ApplyEdgeToEdge()
     LockToOrientationPortrait()
@@ -740,8 +701,8 @@ private fun NavGraphBuilder.exploreFeed(
         viewModel = viewModel,
         onClose = { navController.navigateUp() },
         onPostClick = { postId -> navController.navigateToThread(postId) },
-        onPostReplyClick = { postId -> navController.navigateToNoteEditor(replyToNoteId = postId) },
-        onPostQuoteClick = { preFillContent -> navController.navigateToNoteEditor(preFillContent) },
+        onPostReplyClick = { postId -> navController.navigateToNoteEditor(NoteEditorArgs(replyToNoteId = postId)) },
+        onPostQuoteClick = { preFillContent -> navController.navigateToNoteEditor(preFillContent.asNoteEditorArgs()) },
         onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
         onHashtagClick = { hashtag -> navController.navigateToExploreFeed(query = hashtag) },
         onMediaClick = {
@@ -902,7 +863,7 @@ private fun NavGraphBuilder.notifications(
         viewModel = viewModel,
         onProfileClick = { navController.navigateToProfile(profileId = it) },
         onNoteClick = { navController.navigateToThread(noteId = it) },
-        onNoteReplyClick = { noteId -> navController.navigateToNoteEditor(replyToNoteId = noteId) },
+        onNoteReplyClick = { noteId -> navController.navigateToNoteEditor(NoteEditorArgs(replyToNoteId = noteId)) },
         onHashtagClick = { navController.navigateToExploreFeed(query = it) },
         onMediaClick = {
             navController.navigateToMediaGallery(
@@ -911,7 +872,7 @@ private fun NavGraphBuilder.notifications(
                 mediaPositionMs = it.positionMs,
             )
         },
-        onPostQuoteClick = { preFillContent -> navController.navigateToNoteEditor(preFillContent) },
+        onPostQuoteClick = { preFillContent -> navController.navigateToNoteEditor(preFillContent.asNoteEditorArgs()) },
         onNotificationSettings = { navController.navigateToNotificationsSettings() },
         onGoToWallet = { navController.navigateToWallet() },
         onTopLevelDestinationChanged = onTopLevelDestinationChanged,
@@ -939,8 +900,8 @@ private fun NavGraphBuilder.thread(
         viewModel = viewModel,
         onClose = { navController.navigateUp() },
         onPostClick = { postId -> navController.navigateToThread(postId) },
-        onPostReplyClick = { postId -> navController.navigateToNoteEditor(replyToNoteId = postId) },
-        onPostQuoteClick = { preFillContent -> navController.navigateToNoteEditor(preFillContent) },
+        onPostReplyClick = { postId -> navController.navigateToNoteEditor(NoteEditorArgs(replyToNoteId = postId)) },
+        onPostQuoteClick = { preFillContent -> navController.navigateToNoteEditor(preFillContent.asNoteEditorArgs()) },
         onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
         onHashtagClick = { hashtag -> navController.navigateToExploreFeed(query = hashtag) },
         onMediaClick = {
@@ -951,13 +912,7 @@ private fun NavGraphBuilder.thread(
             )
         },
         onGoToWallet = { navController.navigateToWallet() },
-        onReplyInNoteEditor = { replyToId, uri, text ->
-            navController.navigateToNoteEditor(
-                replyToNoteId = replyToId,
-                preFillContent = text,
-                preFillFileUri = uri,
-            )
-        },
+        onExpandReply = { event -> navController.navigateToNoteEditor(event) },
         onReactionsClick = { noteId -> navController.navigateToNoteReactions(noteId = noteId) },
     )
 }
@@ -1026,8 +981,8 @@ private fun NavGraphBuilder.profile(
         viewModel = viewModel,
         onClose = { navController.navigateUp() },
         onPostClick = { postId -> navController.navigateToThread(noteId = postId) },
-        onPostReplyClick = { postId -> navController.navigateToNoteEditor(replyToNoteId = postId) },
-        onPostQuoteClick = { preFillContent -> navController.navigateToNoteEditor(preFillContent) },
+        onPostReplyClick = { postId -> navController.navigateToNoteEditor(NoteEditorArgs(replyToNoteId = postId)) },
+        onPostQuoteClick = { preFillContent -> navController.navigateToNoteEditor(preFillContent.asNoteEditorArgs()) },
         onProfileClick = { profileId -> navController.navigateToProfile(profileId = profileId) },
         onEditProfileClick = { navController.navigateToProfileEditor() },
         onMessageClick = { profileId -> navController.navigateToChat(profileId = profileId) },

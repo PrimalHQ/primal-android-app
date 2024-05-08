@@ -54,7 +54,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onSizeChanged
@@ -100,9 +99,9 @@ import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.crypto.hexToNoteHrp
 import net.primal.android.editor.NoteEditorContract
 import net.primal.android.editor.di.noteEditorViewModel
+import net.primal.android.editor.domain.NoteEditorArgs
 import net.primal.android.editor.ui.NoteOutlinedTextField
 import net.primal.android.editor.ui.NoteTagUserLazyColumn
-import net.primal.android.editor.ui.appendUserTagAtSignAtCursorPosition
 import net.primal.android.note.ui.NoteZapUiModel
 import net.primal.android.profile.report.OnReportContentClick
 import net.primal.android.theme.AppTheme
@@ -122,7 +121,7 @@ fun ThreadScreen(
     onHashtagClick: (String) -> Unit,
     onMediaClick: (MediaClickEvent) -> Unit,
     onGoToWallet: () -> Unit,
-    onReplyInNoteEditor: (replyToNoteId: String, mediaUri: Uri?, content: TextFieldValue) -> Unit,
+    onExpandReply: (args: NoteEditorArgs) -> Unit,
     onReactionsClick: (noteId: String) -> Unit,
 ) {
     val uiState by viewModel.state.collectAsState()
@@ -147,7 +146,7 @@ fun ThreadScreen(
         onHashtagClick = onHashtagClick,
         onMediaClick = onMediaClick,
         onGoToWallet = onGoToWallet,
-        onReplyInNoteEditor = onReplyInNoteEditor,
+        onExpandReply = onExpandReply,
         onReactionsClick = onReactionsClick,
         eventPublisher = { viewModel.setEvent(it) },
     )
@@ -165,13 +164,12 @@ fun ThreadScreen(
     onHashtagClick: (String) -> Unit,
     onMediaClick: (MediaClickEvent) -> Unit,
     onGoToWallet: () -> Unit,
-    onReplyInNoteEditor: (replyToNoteId: String, mediaUri: Uri?, content: TextFieldValue) -> Unit,
+    onExpandReply: (args: NoteEditorArgs) -> Unit,
     onReactionsClick: (noteId: String) -> Unit,
     eventPublisher: (ThreadContract.UiEvent) -> Unit,
 ) {
-    val noteEditorViewModel = noteEditorViewModel(replyNoteId = state.highlightPostId)
+    val noteEditorViewModel = noteEditorViewModel(args = NoteEditorArgs(replyToNoteId = state.highlightPostId))
     val replyState by noteEditorViewModel.state.collectAsState()
-    val userTagHighlightColor = AppTheme.colorScheme.secondary
     val snackbarHostState = remember { SnackbarHostState() }
 
     ThreadErrorHandler(
@@ -239,7 +237,6 @@ fun ThreadScreen(
                                 }
                             },
                             userTaggingQuery = mentionQuery,
-                            userTagHighlightColor = userTagHighlightColor,
                             onUserClick = { newContent, newTaggedUsers ->
                                 noteEditorViewModel.setEvent(
                                     NoteEditorContract.UiEvent.UpdateContent(content = newContent),
@@ -269,12 +266,17 @@ fun ThreadScreen(
                         .navigationBarsPadding(),
                     replyState = replyState,
                     replyToPost = replyToPost,
-                    userTagHighlightColor = userTagHighlightColor,
-                    onPhotoImported = { photoUri ->
-                        onReplyInNoteEditor(state.highlightPostId, photoUri, replyState.content)
-                    },
-                    onExpand = {
-                        onReplyInNoteEditor(state.highlightPostId, null, replyState.content)
+                    onExpandReply = { mediaUris ->
+                        onExpandReply(
+                            NoteEditorArgs(
+                                replyToNoteId = state.highlightPostId,
+                                mediaUris = mediaUris.map { it.toString() },
+                                content = replyState.content.text,
+                                contentSelectionStart = replyState.content.selection.start,
+                                contentSelectionEnd = replyState.content.selection.end,
+                                taggedUsers = replyState.taggedUsers,
+                            ),
+                        )
                     },
                     replyEventPublisher = { noteEditorViewModel.setEvent(it) },
                 )
@@ -684,10 +686,8 @@ fun ReplyToBottomBar(
     modifier: Modifier,
     replyState: NoteEditorContract.UiState,
     replyToPost: FeedPostUi,
-    onPhotoImported: (Uri) -> Unit,
-    onExpand: () -> Unit,
+    onExpandReply: (mediaUris: List<Uri>) -> Unit,
     replyEventPublisher: (NoteEditorContract.UiEvent) -> Unit,
-    userTagHighlightColor: Color,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val isKeyboardVisible by keyboardVisibilityAsState()
@@ -728,7 +728,7 @@ fun ReplyToBottomBar(
                     AppBarIcon(
                         icon = Icons.Outlined.OpenInFull,
                         onClick = {
-                            onExpand()
+                            onExpandReply(emptyList())
                             keyboardController?.hide()
                         },
                         tint = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
@@ -752,16 +752,9 @@ fun ReplyToBottomBar(
                 replying = replyState.publishing,
                 replyEnabled = !replyState.publishing && replyState.content.text.isNotBlank(),
                 onPublishReplyClick = { replyEventPublisher(NoteEditorContract.UiEvent.PublishNote) },
-                onPhotoImported = onPhotoImported,
+                onPhotoImported = { onExpandReply(listOf(it)) },
                 onUserTag = {
-                    replyEventPublisher(
-                        NoteEditorContract.UiEvent.UpdateContent(
-                            content = replyState.content.appendUserTagAtSignAtCursorPosition(
-                                taggedUsers = replyState.taggedUsers,
-                                highlightColor = userTagHighlightColor,
-                            ),
-                        ),
-                    )
+                    replyEventPublisher(NoteEditorContract.UiEvent.AppendUserTagAtSign)
                     replyEventPublisher(NoteEditorContract.UiEvent.ToggleSearchUsers(enabled = true))
                 },
             )
@@ -979,7 +972,7 @@ fun ThreadScreenPreview() {
             onHashtagClick = {},
             onMediaClick = {},
             onGoToWallet = {},
-            onReplyInNoteEditor = { _, _, _ -> },
+            onExpandReply = {},
             onReactionsClick = {},
             eventPublisher = {},
         )

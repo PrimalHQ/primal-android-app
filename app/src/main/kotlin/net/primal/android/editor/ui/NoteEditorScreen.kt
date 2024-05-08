@@ -112,7 +112,6 @@ fun NoteEditorScreen(
     val focusRequester = remember { FocusRequester() }
     val snackbarHostState = remember { SnackbarHostState() }
     val outlineColor = AppTheme.colorScheme.outline
-    val userMentionHighlightColor = AppTheme.colorScheme.secondary
 
     val editorListState = rememberLazyListState()
     val keyboardVisible = keyboardVisibilityAsState()
@@ -318,14 +317,7 @@ fun NoteEditorScreen(
                     NoteActionRow(
                         onPhotosImported = { photoUris -> eventPublisher(UiEvent.ImportLocalFiles(uris = photoUris)) },
                         onUserTag = {
-                            eventPublisher(
-                                UiEvent.UpdateContent(
-                                    content = state.content.appendUserTagAtSignAtCursorPosition(
-                                        taggedUsers = state.taggedUsers,
-                                        highlightColor = userMentionHighlightColor,
-                                    ),
-                                ),
-                            )
+                            eventPublisher(UiEvent.AppendUserTagAtSign)
                             eventPublisher(UiEvent.ToggleSearchUsers(enabled = true))
                         },
                     )
@@ -343,7 +335,6 @@ fun NoteEditorScreen(
                                 }
                             },
                             userTaggingQuery = state.userTaggingQuery,
-                            userTagHighlightColor = userMentionHighlightColor,
                             onUserClick = { newContent, newTaggedUsers ->
                                 eventPublisher(UiEvent.UpdateContent(content = newContent))
                                 eventPublisher(UiEvent.TagUser(taggedUser = newTaggedUsers.last()))

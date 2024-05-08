@@ -35,6 +35,7 @@ interface NoteEditorContract {
 
     sealed class UiEvent {
         data class UpdateContent(val content: TextFieldValue) : UiEvent()
+        data object AppendUserTagAtSign : UiEvent()
         data object PublishNote : UiEvent()
         data class ImportLocalFiles(val uris: List<Uri>) : UiEvent()
         data class DiscardNoteAttachment(val attachmentId: UUID) : UiEvent()
