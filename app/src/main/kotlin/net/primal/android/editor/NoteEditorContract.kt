@@ -12,7 +12,7 @@ import net.primal.android.editor.domain.NoteTaggedUser
 interface NoteEditorContract {
 
     data class UiState(
-        val content: TextFieldValue,
+        val content: TextFieldValue = TextFieldValue(),
         val conversation: List<FeedPostUi> = emptyList(),
         val publishing: Boolean = false,
         val error: NoteEditorError? = null,

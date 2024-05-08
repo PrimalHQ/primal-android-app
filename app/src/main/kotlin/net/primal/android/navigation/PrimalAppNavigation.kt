@@ -912,7 +912,7 @@ private fun NavGraphBuilder.thread(
             )
         },
         onGoToWallet = { navController.navigateToWallet() },
-        onExpandReply = { event -> navController.navigateToNoteEditor(event) },
+        onExpandReply = { args -> navController.navigateToNoteEditor(args) },
         onReactionsClick = { noteId -> navController.navigateToNoteReactions(noteId = noteId) },
     )
 }

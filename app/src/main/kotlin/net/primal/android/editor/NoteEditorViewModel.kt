@@ -58,18 +58,7 @@ class NoteEditorViewModel @AssistedInject constructor(
 
     private val replyToNoteId = args.replyToNoteId
 
-    private val _state = MutableStateFlow(
-        UiState(
-            content = TextFieldValue(
-                text = args.content,
-                selection = TextRange(
-                    start = args.contentSelectionStart,
-                    end = args.contentSelectionEnd,
-                ),
-            ),
-            taggedUsers = args.taggedUsers,
-        ),
-    )
+    private val _state = MutableStateFlow(UiState())
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
 
@@ -81,20 +70,37 @@ class NoteEditorViewModel @AssistedInject constructor(
     private fun sendEffect(effect: SideEffect) = viewModelScope.launch { _effect.send(effect) }
 
     init {
+        handleArgs()
         subscribeToEvents()
         subscribeToActiveAccount()
         observeDebouncedQueryChanges()
-
-        if (!replyToNoteId.isNullOrEmpty()) {
-            fetchRepliesFromNetwork(replyToNoteId)
-            observeConversation(replyToNoteId)
-        }
-
-        if (args.mediaUris.isNotEmpty()) {
-            importPhotos(args.mediaUris.mapNotNull { Uri.parse(it) })
-        }
-
         fetchRecommendedUsers()
+    }
+
+    private fun handleArgs() {
+        viewModelScope.launch {
+            setState {
+                copy(
+                    content = TextFieldValue(
+                        text = args.content,
+                        selection = TextRange(
+                            start = args.contentSelectionStart,
+                            end = args.contentSelectionEnd,
+                        ),
+                    ),
+                    taggedUsers = args.taggedUsers,
+                )
+            }
+
+            if (!replyToNoteId.isNullOrEmpty()) {
+                fetchRepliesFromNetwork(replyToNoteId)
+                observeConversation(replyToNoteId)
+            }
+
+            if (args.mediaUris.isNotEmpty()) {
+                importPhotos(args.mediaUris.mapNotNull { Uri.parse(it) })
+            }
+        }
     }
 
     private fun subscribeToEvents() =
