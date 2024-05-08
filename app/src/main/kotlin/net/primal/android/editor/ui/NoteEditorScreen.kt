@@ -277,18 +277,8 @@ fun NoteEditorScreen(
                                         style = AppTheme.typography.bodyMedium,
                                     )
                                 },
-                                textStyle = AppTheme.typography.bodyMedium.copy(
-                                    lineHeight = 20.sp,
-                                ),
-                                colors = PrimalDefaults.outlinedTextFieldColors(
-                                    focusedContainerColor = Color.Transparent,
-                                    unfocusedContainerColor = Color.Transparent,
-                                    disabledContainerColor = Color.Transparent,
-                                    focusedBorderColor = Color.Transparent,
-                                    unfocusedBorderColor = Color.Transparent,
-                                    disabledBorderColor = Color.Transparent,
-                                    errorBorderColor = Color.Transparent,
-                                ),
+                                textStyle = AppTheme.typography.bodyMedium.copy(lineHeight = 20.sp),
+                                colors = PrimalDefaults.transparentOutlinedTextFieldColors(),
                                 onUserTaggingModeChanged = {
                                     eventPublisher(UiEvent.ToggleSearchUsers(enabled = it))
                                 },

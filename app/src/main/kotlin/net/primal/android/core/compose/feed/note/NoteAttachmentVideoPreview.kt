@@ -3,6 +3,7 @@ package net.primal.android.core.compose.feed.note
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -160,18 +161,7 @@ private fun VideoThumbnailImagePreview(
             contentDescription = null,
             contentScale = ContentScale.Crop,
             loading = { NoteImageLoadingPlaceholder() },
-            error = {
-                SubcomposeAsyncImage(
-                    model = mediaUrl,
-                    modifier = modifier,
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    loading = { NoteImageLoadingPlaceholder() },
-                    error = {
-                        NoteImageErrorImage()
-                    },
-                )
-            },
+            error = { NoteVideoThumbnailErrorImage() },
         )
 
         PlayButton(
@@ -199,4 +189,13 @@ private fun PlayButton(onClick: () -> Unit) {
             tint = Color.White,
         )
     }
+}
+
+@Composable
+fun NoteVideoThumbnailErrorImage() {
+    Spacer(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color = AppTheme.colorScheme.surface),
+    )
 }

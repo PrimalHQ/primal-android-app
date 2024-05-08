@@ -31,4 +31,16 @@ object PrimalDefaults {
             disabledBorderColor = disabledBorderColor,
             cursorColor = cursorColor,
         )
+
+    @Composable
+    fun transparentOutlinedTextFieldColors(): TextFieldColors =
+        outlinedTextFieldColors(
+            focusedContainerColor = Color.Transparent,
+            unfocusedContainerColor = Color.Transparent,
+            disabledContainerColor = Color.Transparent,
+            focusedBorderColor = Color.Transparent,
+            unfocusedBorderColor = Color.Transparent,
+            disabledBorderColor = Color.Transparent,
+            errorBorderColor = Color.Transparent,
+        )
 }
