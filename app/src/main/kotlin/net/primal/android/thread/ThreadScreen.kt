@@ -758,13 +758,23 @@ fun ReplyToBottomBar(
             },
         )
 
+        val photoImportLauncher = rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.PickMultipleVisualMedia(maxItems = 5),
+        ) { uris -> onExpandReply(uris) }
+
         AnimatedVisibility(visible = isKeyboardVisible) {
             ReplyToOptions(
                 replying = replyState.publishing,
                 replyEnabled = !replyState.publishing && replyState.content.text.isNotBlank(),
                 onPublishReplyClick = { replyEventPublisher(NoteEditorContract.UiEvent.PublishNote) },
-                onPhotoImported = { onExpandReply(listOf(it)) },
-                onUserTag = {
+                onPhotoImportClick = {
+                    photoImportLauncher.launch(
+                        PickVisualMediaRequest(
+                            mediaType = ActivityResultContracts.PickVisualMedia.ImageOnly,
+                        ),
+                    )
+                },
+                onUserTagClick = {
                     replyEventPublisher(NoteEditorContract.UiEvent.AppendUserTagAtSign)
                     replyEventPublisher(NoteEditorContract.UiEvent.ToggleSearchUsers(enabled = true))
                 },
@@ -797,15 +807,10 @@ private fun ReplyToOptions(
     replying: Boolean,
     replyEnabled: Boolean,
     onPublishReplyClick: () -> Unit,
-    onPhotoImported: (Uri) -> Unit,
-    onUserTag: () -> Unit,
+    onPhotoImportClick: () -> Unit,
+    onUserTagClick: () -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
-    val photoImportLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.PickVisualMedia(),
-    ) { uri ->
-        if (uri != null) onPhotoImported.invoke(uri)
-    }
 
     Row(
         modifier = Modifier
@@ -818,15 +823,7 @@ private fun ReplyToOptions(
         Row(
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
         ) {
-            IconButton(
-                onClick = {
-                    photoImportLauncher.launch(
-                        PickVisualMediaRequest(
-                            mediaType = ActivityResultContracts.PickVisualMedia.ImageOnly,
-                        ),
-                    )
-                },
-            ) {
+            IconButton(onClick = onPhotoImportClick) {
                 Icon(
                     imageVector = PrimalIcons.ImportPhotoFromGallery,
                     contentDescription = null,
@@ -834,9 +831,7 @@ private fun ReplyToOptions(
                 )
             }
 
-            IconButton(
-                onClick = onUserTag,
-            ) {
+            IconButton(onClick = onUserTagClick) {
                 Icon(
                     imageVector = Icons.Default.AlternateEmail,
                     contentDescription = stringResource(id = R.string.accessibility_tag_user),
