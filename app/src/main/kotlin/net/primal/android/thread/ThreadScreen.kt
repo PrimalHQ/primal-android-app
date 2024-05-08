@@ -51,6 +51,7 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -71,7 +72,10 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import java.text.NumberFormat
 import java.time.Instant
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.AvatarThumbnail
@@ -257,6 +261,7 @@ fun ThreadScreen(
             SnackbarHost(hostState = snackbarHostState)
         },
         bottomBar = {
+            val uiScope = rememberCoroutineScope()
             val replyToPost = state.conversation.getOrNull(state.highlightPostIndex)
             if (replyToPost != null) {
                 ReplyToBottomBar(
@@ -277,6 +282,12 @@ fun ThreadScreen(
                                 taggedUsers = replyState.taggedUsers,
                             ),
                         )
+                        uiScope.launch {
+                            delay(250.milliseconds)
+                            noteEditorViewModel.setEvent(
+                                NoteEditorContract.UiEvent.UpdateContent(content = TextFieldValue()),
+                            )
+                        }
                     },
                     replyEventPublisher = { noteEditorViewModel.setEvent(it) },
                 )
