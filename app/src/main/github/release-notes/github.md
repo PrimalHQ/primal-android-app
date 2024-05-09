@@ -1,5 +1,8 @@
 ## Changes
 - Implemented user tagging in new notes and replies.
+- Implemented recent users.
+- Implemented connect other wallet.
 
 ## Fixes
 - Fixed opening profile screen from DM conversations on avatar tap.
+- Fixed image uploading on replies not working.
