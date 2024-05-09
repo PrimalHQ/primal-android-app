@@ -268,9 +268,9 @@
     <string name="settings_wallet_start_in_wallet_hint">Open the wallet when Primal starts</string>
     <string name="settings_wallet_save">Save</string>
 
-    <string name="settings_wallet_nwc_qr_code_scan_title">Scan QR Code</string>
-    <string name="settings_wallet_nwc_qr_code_scan_hint">Scan QR code to connect external wallet</string>
-    <string name="settings_wallet_nwc_qr_code_scan_paste">Paste from clipboard</string>
+    <string name="settings_wallet_nwc_qr_code_scan_title">Connect NWC Wallet</string>
+    <string name="settings_wallet_nwc_qr_code_scan_hint">Scan the NWC\nconnection QR code</string>
+    <string name="settings_wallet_nwc_qr_code_scan_paste">Paste Connection String</string>
 
     <string name="settings_notifications_title">Notifications</string>
     <string name="settings_notifications_error_update_settings">Unable to update notification settings.</string>
