@@ -8,7 +8,7 @@ interface ExploreApi {
 
     suspend fun getTrendingHashtags(): List<HashtagScore>
 
-    suspend fun getRecommendedUsers(): UsersResponse
+    suspend fun getPopularUsers(): UsersResponse
 
     suspend fun searchUsers(body: SearchUsersRequestBody): UsersResponse
 }

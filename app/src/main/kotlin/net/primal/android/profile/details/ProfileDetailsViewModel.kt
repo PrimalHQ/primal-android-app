@@ -59,12 +59,14 @@ class ProfileDetailsViewModel @Inject constructor(
 
     private val profileId: String = savedStateHandle.profileId ?: activeAccountStore.activeUserId()
 
+    private val isActiveUser = profileId == activeAccountStore.activeUserId()
+
     private fun ProfileFeedDirective.toPrimalDirective() = "${this.prefix};$profileId"
 
     private val _state = MutableStateFlow(
         UiState(
             profileId = profileId,
-            isActiveUser = profileId == activeAccountStore.activeUserId(),
+            isActiveUser = isActiveUser,
             notes = feedRepository.feedByDirective(
                 feedDirective = ProfileFeedDirective.AuthoredNotes.toPrimalDirective(),
             )
@@ -88,6 +90,17 @@ class ProfileDetailsViewModel @Inject constructor(
         observeActiveAccount()
         observeMutedAccount()
         resolveFollowsMe()
+        markProfileInteraction()
+    }
+
+    private fun markProfileInteraction() {
+        if (!isActiveUser) {
+            viewModelScope.launch {
+                withContext(dispatcherProvider.io()) {
+                    profileRepository.markAsInteracted(profileId = profileId)
+                }
+            }
+        }
     }
 
     @Suppress("CyclomaticComplexMethod")

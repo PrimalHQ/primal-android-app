@@ -49,6 +49,7 @@ fun SendPaymentTabNostr(onProfileClick: (String) -> Unit) {
                     onClick = { item ->
                         keyboardController?.hide()
                         onProfileClick(item.profileId)
+                        viewModel.setEvent(SearchContract.UiEvent.ProfileSelected(profileId = item.profileId))
                     },
                 )
             }

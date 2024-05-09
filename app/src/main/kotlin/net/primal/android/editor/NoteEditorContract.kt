@@ -22,11 +22,12 @@ interface NoteEditorContract {
         val taggedUsers: List<NoteTaggedUser> = emptyList(),
         val userTaggingQuery: String? = null,
         val users: List<UserProfileItemUi> = emptyList(),
-        val recommendedUsers: List<UserProfileItemUi> = emptyList(),
+        val recentUsers: List<UserProfileItemUi> = emptyList(),
+        val popularUsers: List<UserProfileItemUi> = emptyList(),
     ) {
         val isReply: Boolean get() = conversation.isNotEmpty()
         val replyToNote: FeedPostUi? = conversation.lastOrNull()
-
+        val recommendedUsers: List<UserProfileItemUi> get() = recentUsers + popularUsers
         sealed class NoteEditorError {
             data class PublishError(val cause: Throwable?) : NoteEditorError()
             data class MissingRelaysConfiguration(val cause: Throwable) : NoteEditorError()

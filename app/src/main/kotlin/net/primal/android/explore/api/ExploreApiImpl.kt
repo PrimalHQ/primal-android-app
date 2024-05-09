@@ -41,7 +41,7 @@ class ExploreApiImpl @Inject constructor(
         return result
     }
 
-    override suspend fun getRecommendedUsers(): UsersResponse {
+    override suspend fun getPopularUsers(): UsersResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(primalVerb = RECOMMENDED_USERS),
         )

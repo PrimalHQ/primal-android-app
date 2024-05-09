@@ -1,6 +1,7 @@
 package net.primal.android.profile.repository
 
 import androidx.room.withTransaction
+import java.time.Instant
 import javax.inject.Inject
 import kotlinx.coroutines.flow.filterNotNull
 import net.primal.android.core.ext.asMapByKey
@@ -14,6 +15,7 @@ import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
 import net.primal.android.nostr.ext.mapAsProfileDataPO
 import net.primal.android.nostr.ext.takeContentAsPrimalUserFollowersCountsOrNull
 import net.primal.android.nostr.publish.NostrPublisher
+import net.primal.android.profile.db.ProfileInteraction
 import net.primal.android.profile.report.ReportType
 import net.primal.android.user.accounts.UserAccountFetcher
 import net.primal.android.user.api.UsersApi
@@ -194,6 +196,15 @@ class ProfileRepository @Inject constructor(
     }
 
     suspend fun isUserFollowing(userId: String, targetUserId: String) = usersApi.isUserFollowing(userId, targetUserId)
+
+    fun markAsInteracted(profileId: String) {
+        database.profileInteractions().insertOrUpdate(
+            ProfileInteraction(
+                profileId = profileId,
+                lastInteractionAt = Instant.now().epochSecond,
+            ),
+        )
+    }
 
     class FollowListNotFound : Exception()
 

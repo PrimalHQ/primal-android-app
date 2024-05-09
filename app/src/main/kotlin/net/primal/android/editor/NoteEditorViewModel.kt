@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.getAndUpdate
@@ -42,6 +43,7 @@ import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.note.repository.NoteRepository
+import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
 import timber.log.Timber
@@ -54,6 +56,7 @@ class NoteEditorViewModel @AssistedInject constructor(
     private val feedRepository: FeedRepository,
     private val noteRepository: NoteRepository,
     private val exploreRepository: ExploreRepository,
+    private val profileRepository: ProfileRepository,
 ) : ViewModel() {
 
     private val replyToNoteId = args.replyToNoteId
@@ -74,7 +77,8 @@ class NoteEditorViewModel @AssistedInject constructor(
         subscribeToEvents()
         subscribeToActiveAccount()
         observeDebouncedQueryChanges()
-        fetchRecommendedUsers()
+        observeRecentUsers()
+        fetchPopularUsers()
     }
 
     private fun handleArgs() {
@@ -120,10 +124,13 @@ class NoteEditorViewModel @AssistedInject constructor(
                         )
                     }
 
-                    is UiEvent.TagUser -> setState {
-                        copy(
-                            taggedUsers = this.taggedUsers.toMutableList().apply { add(event.taggedUser) },
-                        )
+                    is UiEvent.TagUser -> {
+                        setState {
+                            copy(
+                                taggedUsers = this.taggedUsers.toMutableList().apply { add(event.taggedUser) },
+                            )
+                        }
+                        markProfileInteraction(profileId = event.taggedUser.userId)
                     }
 
                     UiEvent.AppendUserTagAtSign -> setState {
@@ -342,11 +349,21 @@ class NoteEditorViewModel @AssistedInject constructor(
                 }
         }
 
-    private fun fetchRecommendedUsers() =
+    private fun observeRecentUsers() {
+        viewModelScope.launch {
+            exploreRepository.observeRecentUsers()
+                .distinctUntilChanged()
+                .collect {
+                    setState { copy(recentUsers = it.map { it.mapAsUserProfileUi() }) }
+                }
+        }
+    }
+
+    private fun fetchPopularUsers() =
         viewModelScope.launch {
             try {
-                val recommendedUsers = withContext(dispatcherProvider.io()) { exploreRepository.getRecommendedUsers() }
-                setState { copy(recommendedUsers = recommendedUsers.map { it.mapAsUserProfileUi() }) }
+                val popularUsers = withContext(dispatcherProvider.io()) { exploreRepository.fetchPopularUsers() }
+                setState { copy(popularUsers = popularUsers.map { it.mapAsUserProfileUi() }) }
             } catch (error: WssException) {
                 Timber.w(error)
             }
@@ -383,5 +400,13 @@ class NoteEditorViewModel @AssistedInject constructor(
             text = newText,
             selection = TextRange(start = newSelectionStart, end = newSelectionStart),
         )
+    }
+
+    private fun markProfileInteraction(profileId: String) {
+        viewModelScope.launch {
+            withContext(dispatcherProvider.io()) {
+                profileRepository.markAsInteracted(profileId = profileId)
+            }
+        }
     }
 }

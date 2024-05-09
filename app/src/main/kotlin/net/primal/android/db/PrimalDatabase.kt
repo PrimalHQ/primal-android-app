@@ -41,6 +41,8 @@ import net.primal.android.notifications.db.NotificationDao
 import net.primal.android.notifications.db.NotificationData
 import net.primal.android.profile.db.ProfileData
 import net.primal.android.profile.db.ProfileDataDao
+import net.primal.android.profile.db.ProfileInteraction
+import net.primal.android.profile.db.ProfileInteractionDao
 import net.primal.android.profile.db.ProfileStats
 import net.primal.android.profile.db.ProfileStatsDao
 import net.primal.android.settings.muted.db.MutedUserDao
@@ -77,8 +79,9 @@ import net.primal.android.wallet.db.WalletTransactionData
         WalletTransactionData::class,
         Relay::class,
         EventHints::class,
+        ProfileInteraction::class,
     ],
-    version = 27,
+    version = 28,
     exportSchema = true,
 )
 @TypeConverters(
@@ -132,4 +135,6 @@ abstract class PrimalDatabase : RoomDatabase() {
     abstract fun eventHints(): EventHintsDao
 
     abstract fun noteZaps(): NoteZapDao
+
+    abstract fun profileInteractions(): ProfileInteractionDao
 }

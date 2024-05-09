@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
@@ -20,12 +21,14 @@ import net.primal.android.explore.repository.ExploreRepository
 import net.primal.android.explore.search.SearchContract.UiEvent
 import net.primal.android.explore.search.SearchContract.UiState
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.profile.repository.ProfileRepository
 import timber.log.Timber
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
     private val dispatcherProvider: CoroutineDispatcherProvider,
     private val exploreRepository: ExploreRepository,
+    private val profileRepository: ProfileRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(UiState())
@@ -38,6 +41,7 @@ class SearchViewModel @Inject constructor(
     init {
         observeEvents()
         observeDebouncedQueryChanges()
+        observeRecentUsers()
         fetchRecommendedUsers()
     }
 
@@ -45,9 +49,8 @@ class SearchViewModel @Inject constructor(
         viewModelScope.launch {
             events.collect {
                 when (it) {
-                    is UiEvent.SearchQueryUpdated -> setState {
-                        copy(searching = true, searchQuery = it.query)
-                    }
+                    is UiEvent.SearchQueryUpdated -> setState { copy(searching = true, searchQuery = it.query) }
+                    is UiEvent.ProfileSelected -> markProfileInteraction(profileId = it.profileId)
                 }
             }
         }
@@ -75,13 +78,31 @@ class SearchViewModel @Inject constructor(
             }
         }
 
+    private fun observeRecentUsers() {
+        viewModelScope.launch {
+            exploreRepository.observeRecentUsers()
+                .distinctUntilChanged()
+                .collect {
+                    setState { copy(recentUsers = it.map { it.mapAsUserProfileUi() }) }
+                }
+        }
+    }
+
     private fun fetchRecommendedUsers() =
         viewModelScope.launch {
             try {
-                val recommendedUsers = withContext(dispatcherProvider.io()) { exploreRepository.getRecommendedUsers() }
-                setState { copy(recommendedUsers = recommendedUsers.map { it.mapAsUserProfileUi() }) }
+                val popularUsers = withContext(dispatcherProvider.io()) { exploreRepository.fetchPopularUsers() }
+                setState { copy(popularUsers = popularUsers.map { it.mapAsUserProfileUi() }) }
             } catch (error: WssException) {
                 Timber.w(error)
             }
         }
+
+    private fun markProfileInteraction(profileId: String) {
+        viewModelScope.launch {
+            withContext(dispatcherProvider.io()) {
+                profileRepository.markAsInteracted(profileId = profileId)
+            }
+        }
+    }
 }
