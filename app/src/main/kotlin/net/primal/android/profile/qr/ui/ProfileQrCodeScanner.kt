@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -29,23 +28,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
-import net.primal.android.R
 import net.primal.android.core.compose.foundation.KeepScreenOn
 import net.primal.android.scanner.CameraQrCodeDetector2
 import net.primal.android.scanner.MissingCameraPermissionContent
 import net.primal.android.scanner.domain.QrCodeResult
 import net.primal.android.scanner.missingCameraPermissionColors
-import net.primal.android.theme.AppTheme
 
 @Composable
 fun ProfileQrCodeScanner(
     paddingValues: PaddingValues,
     cameraVisible: Boolean,
     onQrCodeDetected: (QrCodeResult) -> Unit,
+    hint: @Composable () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -64,16 +60,8 @@ fun ProfileQrCodeScanner(
         if (hasCameraPermission) {
             if (cameraVisible) {
                 ProfileQrCodeCameraBox(onQrCodeDetected)
-
                 Spacer(modifier = Modifier.height(32.dp))
-
-                Text(
-                    modifier = Modifier.padding(horizontal = 64.dp),
-                    text = stringResource(id = R.string.profile_qr_code_scan_qr_code_hint),
-                    color = Color.White,
-                    textAlign = TextAlign.Center,
-                    style = AppTheme.typography.bodyLarge,
-                )
+                hint()
             }
         } else {
             MissingCameraPermissionContent(

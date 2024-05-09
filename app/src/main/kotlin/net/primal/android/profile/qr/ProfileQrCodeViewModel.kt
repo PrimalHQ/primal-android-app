@@ -92,6 +92,8 @@ class ProfileQrCodeViewModel @Inject constructor(
                 QrCodeDataType.BITCOIN_URI,
                 QrCodeDataType.BITCOIN_ADDRESS,
                 -> processWalletText(text = result.value)
+
+                else -> Unit
             }
         }
 

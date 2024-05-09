@@ -38,4 +38,13 @@ fun String.parseNWCUrl(): NostrWalletConnect {
     )
 }
 
+fun String.isNwcUrl(): Boolean {
+    return try {
+        this.parseNWCUrl()
+        true
+    } catch (error: NWCParseException) {
+        false
+    }
+}
+
 class NWCParseException : RuntimeException()

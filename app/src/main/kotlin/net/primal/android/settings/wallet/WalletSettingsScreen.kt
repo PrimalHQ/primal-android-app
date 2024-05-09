@@ -68,6 +68,7 @@ fun WalletSettingsScreen(
     viewModel: WalletSettingsViewModel,
     onClose: () -> Unit,
     onEditProfileClick: () -> Unit,
+    onOtherConnectClick: () -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
 
@@ -75,6 +76,7 @@ fun WalletSettingsScreen(
         state = uiState.value,
         onClose = onClose,
         onEditProfileClick = onEditProfileClick,
+        onOtherConnectClick = onOtherConnectClick,
         eventPublisher = { viewModel.setEvent(it) },
     )
 }
@@ -85,10 +87,10 @@ fun WalletSettingsScreen(
     state: WalletSettingsContract.UiState,
     onClose: () -> Unit,
     onEditProfileClick: () -> Unit,
+    onOtherConnectClick: () -> Unit,
     eventPublisher: (UiEvent) -> Unit,
 ) {
     val scrollState = rememberScrollState()
-    val numberFormat = remember { NumberFormat.getNumberInstance() }
     val primalWalletPreferred = state.walletPreference != WalletPreference.NostrWalletConnect
 
     Scaffold(
@@ -129,74 +131,10 @@ fun WalletSettingsScreen(
                 AnimatedContent(targetState = primalWalletPreferred, label = "WalletSettingsContent") {
                     when (it) {
                         true -> {
-                            Column {
-//                                Spacer(modifier = Modifier.height(8.dp))
-//
-//                                SettingsItem(
-//                                    headlineText = stringResource(id = R.string.settings_wallet_start_in_wallet),
-//                                    supportText = stringResource(id = R.string.settings_wallet_start_in_wallet_hint),
-//                                    trailingContent = {
-//                                        PrimalSwitch(
-//                                            checked = false,
-//                                            onCheckedChange = {
-//                                            },
-//                                        )
-//                                    },
-//                                    onClick = {
-//                                    },
-//                                )
-
-                                Spacer(modifier = Modifier.height(8.dp))
-
-                                var spamThresholdAmountEditorDialog by remember { mutableStateOf(false) }
-                                val spamThresholdAmountInSats = state.spamThresholdAmountInSats?.let {
-                                    numberFormat.format(it)
-                                } ?: "1"
-                                SettingsItem(
-                                    headlineText = stringResource(
-                                        id = R.string.settings_wallet_hide_transactions_below,
-                                    ),
-                                    supportText = "$spamThresholdAmountInSats sats",
-                                    onClick = { spamThresholdAmountEditorDialog = true },
-                                )
-
-                                if (spamThresholdAmountEditorDialog) {
-                                    SpamThresholdAmountEditorDialog(
-                                        onDialogDismiss = { spamThresholdAmountEditorDialog = false },
-                                        onEditAmount = {
-                                            eventPublisher(UiEvent.UpdateMinTransactionAmount(amountInSats = it))
-                                        },
-                                    )
-                                }
-
-                                Spacer(modifier = Modifier.height(8.dp))
-
-                                var maxWalletBalanceShown by remember { mutableStateOf(false) }
-                                val maxBalanceInSats =
-                                    numberFormat.format((state.maxWalletBalanceInBtc ?: "0.01").toSats().toLong())
-                                SettingsItem(
-                                    headlineText = stringResource(id = R.string.settings_wallet_max_wallet_balance),
-                                    supportText = "$maxBalanceInSats sats",
-                                    trailingContent = {
-                                        IconButton(onClick = { maxWalletBalanceShown = true }) {
-                                            Icon(
-                                                imageVector = Icons.Outlined.Info,
-                                                contentDescription = stringResource(
-                                                    id = R.string.accessibility_info,
-                                                ),
-                                            )
-                                        }
-                                    },
-                                    onClick = { maxWalletBalanceShown = true },
-                                )
-
-                                if (maxWalletBalanceShown) {
-                                    MaxWalletBalanceDialog(
-                                        text = stringResource(id = R.string.settings_wallet_max_wallet_balance_hint),
-                                        onDialogDismiss = { maxWalletBalanceShown = false },
-                                    )
-                                }
-                            }
+                            PrimalWalletSettings(
+                                state = state,
+                                eventPublisher = eventPublisher,
+                            )
                         }
 
                         false -> {
@@ -205,6 +143,7 @@ fun WalletSettingsScreen(
                                 onExternalWalletDisconnect = {
                                     eventPublisher(UiEvent.DisconnectWallet)
                                 },
+                                onOtherConnectClick = onOtherConnectClick,
                             )
                         }
                     }
@@ -219,6 +158,79 @@ fun WalletSettingsScreen(
             }
         },
     )
+}
+
+@Composable
+private fun PrimalWalletSettings(state: WalletSettingsContract.UiState, eventPublisher: (UiEvent) -> Unit) {
+    val numberFormat = remember { NumberFormat.getNumberInstance() }
+    Column {
+//        Spacer(modifier = Modifier.height(8.dp))
+//
+//        SettingsItem(
+//            headlineText = stringResource(id = R.string.settings_wallet_start_in_wallet),
+//            supportText = stringResource(id = R.string.settings_wallet_start_in_wallet_hint),
+//            trailingContent = {
+//                PrimalSwitch(
+//                    checked = false,
+//                    onCheckedChange = {
+//                    },
+//                )
+//            },
+//            onClick = {
+//            },
+//        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        var spamThresholdAmountEditorDialog by remember { mutableStateOf(false) }
+        val spamThresholdAmountInSats = state.spamThresholdAmountInSats?.let {
+            numberFormat.format(it)
+        } ?: "1"
+        SettingsItem(
+            headlineText = stringResource(
+                id = R.string.settings_wallet_hide_transactions_below,
+            ),
+            supportText = "$spamThresholdAmountInSats sats",
+            onClick = { spamThresholdAmountEditorDialog = true },
+        )
+
+        if (spamThresholdAmountEditorDialog) {
+            SpamThresholdAmountEditorDialog(
+                onDialogDismiss = { spamThresholdAmountEditorDialog = false },
+                onEditAmount = {
+                    eventPublisher(UiEvent.UpdateMinTransactionAmount(amountInSats = it))
+                },
+            )
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        var maxWalletBalanceShown by remember { mutableStateOf(false) }
+        val maxBalanceInSats =
+            numberFormat.format((state.maxWalletBalanceInBtc ?: "0.01").toSats().toLong())
+        SettingsItem(
+            headlineText = stringResource(id = R.string.settings_wallet_max_wallet_balance),
+            supportText = "$maxBalanceInSats sats",
+            trailingContent = {
+                IconButton(onClick = { maxWalletBalanceShown = true }) {
+                    Icon(
+                        imageVector = Icons.Outlined.Info,
+                        contentDescription = stringResource(
+                            id = R.string.accessibility_info,
+                        ),
+                    )
+                }
+            },
+            onClick = { maxWalletBalanceShown = true },
+        )
+
+        if (maxWalletBalanceShown) {
+            MaxWalletBalanceDialog(
+                text = stringResource(id = R.string.settings_wallet_max_wallet_balance_hint),
+                onDialogDismiss = { maxWalletBalanceShown = false },
+            )
+        }
+    }
 }
 
 @Composable
@@ -412,6 +424,7 @@ private fun PreviewSettingsWalletScreen(
             state = state,
             onClose = {},
             onEditProfileClick = {},
+            onOtherConnectClick = {},
             eventPublisher = {},
         )
     }

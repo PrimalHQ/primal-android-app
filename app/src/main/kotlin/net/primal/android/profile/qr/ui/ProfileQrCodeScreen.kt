@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -22,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import net.primal.android.R
@@ -34,6 +36,7 @@ import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.profile.qr.ProfileQrCodeContract
 import net.primal.android.profile.qr.ProfileQrCodeViewModel
+import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.wallet.domain.DraftTx
 
@@ -118,6 +121,9 @@ private fun ProfileQrCodeViewerScreen(
                                 onQrCodeDetected = {
                                     eventPublisher(ProfileQrCodeContract.UiEvent.ProcessQrCodeResult(it))
                                 },
+                                hint = {
+                                    ScanningHint(modifier = Modifier.padding(horizontal = 64.dp))
+                                },
                             )
                         }
                     }
@@ -143,6 +149,17 @@ private fun ProfileQrCodeViewerScreen(
             },
         )
     }
+}
+
+@Composable
+private fun ScanningHint(modifier: Modifier) {
+    Text(
+        modifier = modifier,
+        text = stringResource(id = R.string.profile_qr_code_scan_qr_code_hint),
+        color = Color.White,
+        textAlign = TextAlign.Center,
+        style = AppTheme.typography.bodyLarge,
+    )
 }
 
 val profileQrCodeButtonBackgroundColor = Color(0xFF4B002D)

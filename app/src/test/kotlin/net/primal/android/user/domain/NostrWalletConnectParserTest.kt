@@ -18,7 +18,7 @@ class NostrWalletConnectParserTest {
             "?relay=wss://relay.getalby.com/v1&secret=$expectedSecret&lud16=nikola@getalby.com"
 
     @Test
-    fun `parseNWCUrl parses nostr wallet`() {
+    fun parseNWCUrl_parsesNostrWallet() {
         val actual = functioningNostrWalletConnectUrl.parseNWCUrl()
 
         actual.pubkey shouldBe expectedPubkey
@@ -29,9 +29,19 @@ class NostrWalletConnectParserTest {
     }
 
     @Test
-    fun `parseNWCUrl throws NWCParseException for invalid url`() {
+    fun parseNWCUrl_throwsNWCParseExceptionForInvalidUrl() {
         shouldThrow<NWCParseException> {
             "nostr+walletconnect://invalidNwcUrl".parseNWCUrl()
         }
+    }
+
+    @Test
+    fun isNwcUrl_returnsFalseForInvalidUrl() {
+        "nostr+walletconnect://invalidNwcUrl".isNwcUrl() shouldBe false
+    }
+
+    @Test
+    fun isNwcUrl_returnsTrueForValidUrl() {
+        functioningNostrWalletConnectUrl.isNwcUrl() shouldBe true
     }
 }

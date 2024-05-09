@@ -42,7 +42,11 @@ import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.user.domain.NostrWalletConnect
 
 @Composable
-fun ExternalWalletSettings(nwcWallet: NostrWalletConnect?, onExternalWalletDisconnect: () -> Unit) {
+fun ExternalWalletSettings(
+    nwcWallet: NostrWalletConnect?,
+    onExternalWalletDisconnect: () -> Unit,
+    onOtherConnectClick: () -> Unit,
+) {
     Column(
         modifier = Modifier.animateContentSize(),
     ) {
@@ -51,6 +55,7 @@ fun ExternalWalletSettings(nwcWallet: NostrWalletConnect?, onExternalWalletDisco
         ExternalWalletSection(
             nwcWallet = nwcWallet,
             onExternalWalletDisconnect = onExternalWalletDisconnect,
+            onOtherConnectClick = onOtherConnectClick,
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -58,7 +63,11 @@ fun ExternalWalletSettings(nwcWallet: NostrWalletConnect?, onExternalWalletDisco
 }
 
 @Composable
-private fun ExternalWalletSection(nwcWallet: NostrWalletConnect?, onExternalWalletDisconnect: () -> Unit) {
+private fun ExternalWalletSection(
+    nwcWallet: NostrWalletConnect?,
+    onExternalWalletDisconnect: () -> Unit,
+    onOtherConnectClick: () -> Unit,
+) {
     SectionTitle(
         title = if (nwcWallet != null) {
             stringResource(id = R.string.settings_wallet_nwc_header_connected)
@@ -95,6 +104,7 @@ private fun ExternalWalletSection(nwcWallet: NostrWalletConnect?, onExternalWall
                         "?callbackUri=primal&name=Primal-Android",
                 )
             },
+            onOtherConnectClick = onOtherConnectClick,
         )
     }
 }
@@ -167,6 +177,7 @@ private fun ExternalWalletDisconnected(
     modifier: Modifier = Modifier,
     onAlbyConnectClick: () -> Unit,
     onMutinyConnectClick: () -> Unit,
+    onOtherConnectClick: () -> Unit,
 ) {
     Column(
         modifier = modifier,
@@ -187,6 +198,15 @@ private fun ExternalWalletDisconnected(
                 .fillMaxWidth()
                 .height(56.dp),
             onClick = onMutinyConnectClick,
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        ConnectOtherWalletButton(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp),
+            onClick = onOtherConnectClick,
         )
     }
 }
@@ -233,6 +253,22 @@ fun ConnectMutinyWalletButton(modifier: Modifier = Modifier, onClick: (() -> Uni
     }
 }
 
+@Composable
+fun ConnectOtherWalletButton(modifier: Modifier = Modifier, onClick: (() -> Unit)?) {
+    PrimalFilledButton(
+        modifier = modifier,
+        containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
+        onClick = onClick,
+    ) {
+        IconText(
+            text = stringResource(id = R.string.settings_wallet_nwc_connect_other_wallet),
+            style = AppTheme.typography.bodyLarge,
+            fontWeight = FontWeight.Medium,
+            color = AppTheme.colorScheme.onSurface,
+        )
+    }
+}
+
 @Preview
 @Composable
 private fun PreviewExternalWalletSettings(
@@ -245,6 +281,7 @@ private fun PreviewExternalWalletSettings(
                 ExternalWalletSettings(
                     nwcWallet = state.wallet,
                     onExternalWalletDisconnect = {},
+                    onOtherConnectClick = {},
                 )
             }
         }

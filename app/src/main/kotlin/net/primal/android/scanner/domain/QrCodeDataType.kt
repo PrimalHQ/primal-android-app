@@ -6,6 +6,7 @@ import net.primal.android.nostr.ext.isNPub
 import net.primal.android.nostr.ext.isNPubUri
 import net.primal.android.nostr.ext.isNote
 import net.primal.android.nostr.ext.isNoteUri
+import net.primal.android.user.domain.isNwcUrl
 import net.primal.android.wallet.utils.isBitcoinAddress
 import net.primal.android.wallet.utils.isBitcoinUri
 import net.primal.android.wallet.utils.isLightningUri
@@ -24,6 +25,7 @@ enum class QrCodeDataType(val validator: (String) -> Boolean) {
     LNURL(validator = { it.isLnUrl() }),
     BITCOIN_URI(validator = { it.isBitcoinUri() }),
     BITCOIN_ADDRESS(validator = { it.isBitcoinAddress() }),
+    NWC_URL(validator = { it.isNwcUrl() }),
     ;
 
     companion object {

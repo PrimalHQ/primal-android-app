@@ -29,12 +29,15 @@ import net.primal.android.settings.notifications.NotificationsSettingsScreen
 import net.primal.android.settings.notifications.NotificationsSettingsViewModel
 import net.primal.android.settings.wallet.WalletSettingsScreen
 import net.primal.android.settings.wallet.WalletSettingsViewModel
+import net.primal.android.settings.wallet.nwc.NwcQrCodeScannerScreen
+import net.primal.android.settings.wallet.nwc.NwcQrCodeScannerViewModel
 import net.primal.android.settings.zaps.ZapSettingsScreen
 import net.primal.android.settings.zaps.ZapSettingsViewModel
 
 private fun NavController.navigateToAccountSettings() = navigate(route = "account_settings")
 private fun NavController.navigateToNetworkSettings() = navigate(route = "network")
 private fun NavController.navigateToWalletSettings() = navigate(route = "wallet_settings")
+private fun NavController.navigateToWalletScanNwcUrl() = navigate(route = "wallet_settings/scanNwcUrl")
 private fun NavController.navigateToAppearanceSettings() = navigate(route = "appearance_settings")
 private fun NavController.navigateToContentDisplaySettings() = navigate(route = "content_display")
 fun NavController.navigateToNotificationsSettings() = navigate(route = "notifications_settings")
@@ -76,6 +79,7 @@ fun NavGraphBuilder.settingsNavigation(route: String, navController: NavControll
             ),
             navController = navController,
         )
+        scanNwcUrl(route = "wallet_settings/scanNwcUrl", navController = navController)
         network(route = "network", navController = navController)
         appearance(route = "appearance_settings", navController = navController)
         contentDisplay(route = "content_display", navController = navController)
@@ -155,8 +159,25 @@ private fun NavGraphBuilder.wallet(
         viewModel = viewModel,
         onClose = { navController.navigateUp() },
         onEditProfileClick = { navController.navigateToProfileEditor() },
+        onOtherConnectClick = { navController.navigateToWalletScanNwcUrl() },
     )
 }
+
+private fun NavGraphBuilder.scanNwcUrl(route: String, navController: NavController) =
+    composable(
+        route = route,
+        enterTransition = { primalSlideInHorizontallyFromEnd },
+        exitTransition = { primalScaleOut },
+        popEnterTransition = { primalScaleIn },
+        popExitTransition = { primalSlideOutHorizontallyToEnd },
+    ) {
+        val viewModel = hiltViewModel<NwcQrCodeScannerViewModel>()
+        LockToOrientationPortrait()
+        NwcQrCodeScannerScreen(
+            viewModel = viewModel,
+            onClose = { navController.popBackStack() },
+        )
+    }
 
 private fun NavGraphBuilder.notifications(route: String, navController: NavController) =
     composable(
