@@ -89,7 +89,7 @@ fun FeedNote(
                 modifier = Modifier
                     .padding(horizontal = if (fullWidthContent) 10.dp else 8.dp)
                     .padding(start = if (forceContentIndent && fullWidthContent) avatarSizeDp + 6.dp else 0.dp)
-                    .padding(top = if (fullWidthContent || !headerSingleLine) 10.dp else 2.dp),
+                    .padding(top = if (fullWidthContent || !headerSingleLine) 10.dp else 5.dp),
                 data = data.toNoteContentUi(),
                 expanded = expanded,
                 textSelectable = textSelectable,
