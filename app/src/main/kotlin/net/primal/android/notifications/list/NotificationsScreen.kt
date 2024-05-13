@@ -463,7 +463,6 @@ private fun NewNotificationsButton(onClick: () -> Unit) {
         Text(
             modifier = Modifier
                 .padding(start = 12.dp, end = 16.dp)
-                .padding(bottom = 4.dp)
                 .wrapContentHeight(),
             text = stringResource(id = R.string.notification_list_button_jump_to_start),
             style = AppTheme.typography.bodySmall,

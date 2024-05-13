@@ -297,7 +297,6 @@ private fun NewPostsButton(syncStats: FeedPostsSyncStats, onClick: () -> Unit) {
         Text(
             modifier = Modifier
                 .padding(start = 12.dp, end = 16.dp)
-                .padding(bottom = 4.dp)
                 .wrapContentHeight(),
             text = stringResource(id = R.string.feed_new_posts_notice_general),
             style = AppTheme.typography.bodySmall,
