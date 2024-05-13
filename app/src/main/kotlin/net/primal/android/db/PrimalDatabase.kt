@@ -81,7 +81,7 @@ import net.primal.android.wallet.db.WalletTransactionData
         EventHints::class,
         ProfileInteraction::class,
     ],
-    version = 29,
+    version = 28,
     exportSchema = true,
 )
 @TypeConverters(
