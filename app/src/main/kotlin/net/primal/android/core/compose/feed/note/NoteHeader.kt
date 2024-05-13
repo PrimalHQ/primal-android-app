@@ -3,9 +3,7 @@ package net.primal.android.core.compose.feed.note
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -114,8 +112,12 @@ fun FeedNoteHeader(
             }
 
             if (!replyToAuthor.isNullOrEmpty()) {
-                ReplyingToText(modifier = Modifier.fillMaxWidth(), replyToUsername = replyToAuthor)
-                Spacer(modifier = Modifier.height(4.dp))
+                ReplyingToText(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 4.dp),
+                    replyToUsername = replyToAuthor,
+                )
             }
         }
     }
