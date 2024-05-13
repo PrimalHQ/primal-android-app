@@ -107,7 +107,7 @@ fun FeedNoteCard(
             NoteDropdownMenuIcon(
                 modifier = Modifier
                     .size(overflowIconSizeDp)
-                    .padding(all = 8.dp)
+                    .padding(top = if (data.repostAuthorName != null) 4.dp else 6.dp)
                     .clip(CircleShape),
                 noteId = data.postId,
                 noteContent = data.content,

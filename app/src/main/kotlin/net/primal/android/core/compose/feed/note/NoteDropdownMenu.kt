@@ -2,7 +2,9 @@ package net.primal.android.core.compose.feed.note
 
 import android.widget.Toast
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
@@ -15,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.dropdown.DropdownPrimalMenu
@@ -57,12 +60,16 @@ fun NoteDropdownMenuIcon(
     val copyConfirmationText = stringResource(id = R.string.feed_context_copied_toast)
 
     Box(
-        modifier = modifier.clickable {
-            menuVisible = true
-        },
+        modifier = modifier.clickable(
+            interactionSource = remember { MutableInteractionSource() },
+            indication = null,
+            onClick = { menuVisible = true },
+        ),
     ) {
         Icon(
-            modifier = Modifier.wrapContentSize(align = Alignment.TopEnd),
+            modifier = Modifier
+                .padding(start = 14.dp, end = 8.dp)
+                .wrapContentSize(align = Alignment.TopEnd),
             imageVector = PrimalIcons.More,
             contentDescription = stringResource(id = R.string.accessibility_note_drop_down),
         )
