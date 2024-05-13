@@ -18,6 +18,7 @@ import net.primal.android.core.utils.parseHashtags
 
 @Composable
 fun ReferencedNotesColumn(
+    modifier: Modifier = Modifier,
     postResources: List<NoteNostrUriUi>,
     expanded: Boolean,
     containerColor: Color,
@@ -30,7 +31,7 @@ fun ReferencedNotesColumn(
         emptyList()
     }
 
-    Column {
+    Column(modifier = modifier) {
         displayableNotes.forEach { nostrResourceUi ->
             val data = nostrResourceUi.referencedPost
             checkNotNull(data)

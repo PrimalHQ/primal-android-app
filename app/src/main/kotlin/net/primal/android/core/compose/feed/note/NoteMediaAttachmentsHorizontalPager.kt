@@ -26,10 +26,11 @@ import net.primal.android.theme.AppTheme
 @ExperimentalFoundationApi
 @Composable
 fun NoteMediaAttachmentsHorizontalPager(
+    modifier: Modifier = Modifier,
     onMediaClick: (MediaClickEvent) -> Unit,
     mediaAttachments: List<NoteAttachmentUi> = emptyList(),
 ) {
-    BoxWithConstraints {
+    BoxWithConstraints(modifier = modifier) {
         val imageSizeDp = findImageSize(attachment = mediaAttachments.first())
         val imagesCount = mediaAttachments.size
 

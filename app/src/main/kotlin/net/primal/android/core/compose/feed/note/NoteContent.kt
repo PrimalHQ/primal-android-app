@@ -2,6 +2,7 @@ package net.primal.android.core.compose.feed.note
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -13,6 +14,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.R
 import net.primal.android.core.compose.PrimalClickableText
@@ -162,6 +164,7 @@ fun NoteContent(
 
         if (data.attachments.isNotEmpty()) {
             NoteAttachments(
+                modifier = Modifier.padding(top = if (contentText.isEmpty()) 4.dp else 6.dp),
                 attachments = data.attachments,
                 onUrlClick = onUrlClick,
                 onMediaClick = onMediaClick,
@@ -171,6 +174,7 @@ fun NoteContent(
         val referencedPostResources = data.nostrUris.filterMentionedPosts()
         if (referencedPostResources.isNotEmpty()) {
             ReferencedNotesColumn(
+                modifier = Modifier.padding(top = 4.dp),
                 postResources = referencedPostResources,
                 expanded = expanded,
                 containerColor = referencedNoteContainerColor,
