@@ -19,7 +19,7 @@ import net.primal.android.auth.onboarding.account.OnboardingContract.UiState
 import net.primal.android.auth.onboarding.account.api.OnboardingApi
 import net.primal.android.auth.repository.CreateAccountHandler
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
-import net.primal.android.core.files.FileUploader
+import net.primal.android.core.files.ChunkedFileUploader
 import net.primal.android.core.files.error.UnsuccessfulFileUpload
 import net.primal.android.crypto.CryptoUtils
 import net.primal.android.networking.sockets.errors.WssException
@@ -31,7 +31,7 @@ class OnboardingViewModel @Inject constructor(
     private val dispatcherProvider: CoroutineDispatcherProvider,
     private val onboardingApi: OnboardingApi,
     private val createAccountHandler: CreateAccountHandler,
-    private val fileUploader: FileUploader,
+    private val fileUploader: ChunkedFileUploader,
 ) : ViewModel() {
 
     private val keyPair = CryptoUtils.generateHexEncodedKeypair()

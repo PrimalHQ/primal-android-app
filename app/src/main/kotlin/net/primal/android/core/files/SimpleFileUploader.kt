@@ -28,7 +28,7 @@ import net.primal.android.nostr.notary.signOrThrow
 import timber.log.Timber
 
 @Singleton
-class FileUploader @Inject constructor(
+class SimpleFileUploader @Inject constructor(
     private val contentResolver: ContentResolver,
     private val nostrNotary: NostrNotary,
     @PrimalUploadApiClient private val primalUploadClient: PrimalApiClient,
@@ -42,14 +42,14 @@ class FileUploader @Inject constructor(
         val userId = keyPair.pubKey
         val uploadImageNostrEvent = NostrUnsignedEvent(
             pubKey = userId,
-            kind = NostrEventKind.PrimalImageUploadRequest.value,
+            kind = NostrEventKind.PrimalSimpleUploadRequest.value,
             content = imageAsBase64.asNostrContent(),
         ).signOrThrow(keyPair.privateKey.hexToNsecHrp())
 
         val queryResult = uploadFileOrThrow(uploadImageNostrEvent)
 
         return queryResult
-            .findPrimalEvent(NostrEventKind.PrimalImageUploadResponse)
+            .findPrimalEvent(NostrEventKind.PrimalUploadResponse)
             ?.content ?: throw UnsuccessfulFileUpload(cause = null)
     }
 
@@ -66,7 +66,7 @@ class FileUploader @Inject constructor(
         val queryResult = uploadFileOrThrow(uploadImageNostrEvent)
 
         return queryResult
-            .findPrimalEvent(NostrEventKind.PrimalImageUploadResponse)
+            .findPrimalEvent(NostrEventKind.PrimalUploadResponse)
             ?.content ?: throw UnsuccessfulFileUpload(cause = null)
     }
 

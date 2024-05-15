@@ -45,6 +45,10 @@ class NostrNotary @Inject constructor(
         }
     }
 
+    fun signNostrEvent(userId: String, event: NostrUnsignedEvent): NostrEvent {
+        return event.signOrThrow(nsec = findNsecOrThrow(userId))
+    }
+
     fun signMetadataNostrEvent(
         userId: String,
         tags: List<JsonArray> = emptyList(),
@@ -184,7 +188,7 @@ class NostrNotary @Inject constructor(
     fun signImageUploadNostrEvent(userId: String, content: String): NostrEvent {
         return NostrUnsignedEvent(
             pubKey = userId,
-            kind = NostrEventKind.PrimalImageUploadRequest.value,
+            kind = NostrEventKind.PrimalSimpleUploadRequest.value,
             content = content,
             tags = emptyList(),
         ).signOrThrow(nsec = findNsecOrThrow(userId))

@@ -21,6 +21,8 @@ enum class PrimalVerb(val identifier: String) {
     SET_LAST_SEEN_NOTIFICATIONS("set_notifications_seen"),
     NEW_NOTIFICATIONS_COUNT("notification_counts_2"),
     UPLOAD("upload"),
+    UPLOAD_CHUNK("upload_chunk"),
+    UPLOAD_COMPLETE("upload_complete"),
     MUTE_LIST("mutelist"),
     GET_DM_CONTACTS("get_directmsg_contacts"),
     GET_DMS("get_directmsgs"),

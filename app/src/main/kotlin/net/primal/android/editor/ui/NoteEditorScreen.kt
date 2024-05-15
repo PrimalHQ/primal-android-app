@@ -447,7 +447,7 @@ private fun NoteActionRow(
             onClick = {
                 multiplePhotosImportLauncher.launch(
                     PickVisualMediaRequest(
-                        ActivityResultContracts.PickVisualMedia.ImageOnly,
+                        ActivityResultContracts.PickVisualMedia.ImageAndVideo,
                     ),
                 )
             },
