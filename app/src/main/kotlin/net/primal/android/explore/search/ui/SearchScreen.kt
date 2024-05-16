@@ -155,11 +155,12 @@ fun SearchScreen(
 }
 
 private const val KEYBOARD_HIDE_DELAY = 150L
+
 private fun String.takeAsNoteHexId(): String? {
     return if (isNote() || isNoteUri()) {
         try {
             bech32ToHexOrThrow()
-        } catch (error: IllegalArgumentException) {
+        } catch (error: Exception) {
             Timber.w(error)
             null
         }
@@ -172,7 +173,7 @@ private fun String.takeAsProfileHexId(): String? {
     return if (isNPub() || isNPubUri()) {
         try {
             bech32ToHexOrThrow()
-        } catch (error: IllegalArgumentException) {
+        } catch (error: Exception) {
             Timber.w(error)
             null
         }
