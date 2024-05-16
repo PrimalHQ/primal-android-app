@@ -1,1 +1,1 @@
-Implemented user tagging, recent users and connect other wallet, along with few stability fixes.
+Implemented video upload.
