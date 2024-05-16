@@ -13,10 +13,10 @@ import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonPrimitive
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
-import net.primal.android.core.files.ChunkedFileUploader
-import net.primal.android.core.files.error.UnsuccessfulFileUpload
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.editor.domain.NoteAttachment
+import net.primal.android.networking.primal.upload.PrimalFileUploader
+import net.primal.android.networking.primal.upload.UnsuccessfulFileUpload
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.db.eventHintsUpserter
 import net.primal.android.nostr.ext.asEventIdTag
@@ -39,7 +39,7 @@ import timber.log.Timber
 class NoteRepository @Inject constructor(
     private val dispatcherProvider: CoroutineDispatcherProvider,
     private val activeAccountStore: ActiveAccountStore,
-    private val fileUploader: ChunkedFileUploader,
+    private val fileUploader: PrimalFileUploader,
     private val nostrPublisher: NostrPublisher,
     private val profileRepository: ProfileRepository,
     private val noteApi: NoteApi,

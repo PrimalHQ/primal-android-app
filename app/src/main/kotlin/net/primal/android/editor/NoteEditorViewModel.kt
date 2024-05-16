@@ -29,7 +29,6 @@ import net.primal.android.core.compose.feed.model.asFeedPostUi
 import net.primal.android.core.compose.profile.model.mapAsUserProfileUi
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.files.FileAnalyser
-import net.primal.android.core.files.error.UnsuccessfulFileUpload
 import net.primal.android.crypto.hexToNpubHrp
 import net.primal.android.editor.NoteEditorContract.SideEffect
 import net.primal.android.editor.NoteEditorContract.UiEvent
@@ -39,6 +38,7 @@ import net.primal.android.editor.domain.NoteEditorArgs
 import net.primal.android.editor.domain.NoteTaggedUser
 import net.primal.android.explore.repository.ExploreRepository
 import net.primal.android.feed.repository.FeedRepository
+import net.primal.android.networking.primal.upload.UnsuccessfulFileUpload
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException

@@ -1,4 +1,4 @@
-package net.primal.android.core.files.model
+package net.primal.android.networking.primal.upload.api.model
 
 import android.util.Base64
 import kotlinx.serialization.encodeToString

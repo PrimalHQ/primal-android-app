@@ -1,4 +1,4 @@
-package net.primal.android.core.files.api
+package net.primal.android.networking.primal.upload.api
 
 import net.primal.android.nostr.model.NostrEvent
 

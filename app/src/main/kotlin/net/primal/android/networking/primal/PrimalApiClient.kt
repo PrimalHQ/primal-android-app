@@ -2,7 +2,6 @@ package net.primal.android.networking.primal
 
 import androidx.annotation.VisibleForTesting
 import java.util.*
-import javax.inject.Inject
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CancellationException
@@ -36,7 +35,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import timber.log.Timber
 
-class PrimalApiClient @Inject constructor(
+class PrimalApiClient(
     private val dispatcherProvider: CoroutineDispatcherProvider,
     private val okHttpClient: OkHttpClient,
     private val serverType: PrimalServerType,

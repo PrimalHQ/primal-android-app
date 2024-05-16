@@ -1,4 +1,4 @@
-package net.primal.android.core.files
+package net.primal.android.networking.primal.upload
 
 import android.content.ContentResolver
 import android.net.Uri
@@ -9,7 +9,6 @@ import java.io.InputStream
 import java.security.MessageDigest
 import java.util.*
 import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.buffer
@@ -19,19 +18,18 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.withIndex
 import kotlinx.coroutines.withContext
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
-import net.primal.android.core.files.api.UploadApi
-import net.primal.android.core.files.error.UnsuccessfulFileUpload
-import net.primal.android.core.files.model.chunkUploadRequest
-import net.primal.android.core.files.model.completeUploadRequest
 import net.primal.android.crypto.NostrKeyPair
 import net.primal.android.crypto.hexToNsecHrp
+import net.primal.android.networking.primal.upload.api.UploadApi
+import net.primal.android.networking.primal.upload.api.UploadApiConnectionsPool
+import net.primal.android.networking.primal.upload.api.model.chunkUploadRequest
+import net.primal.android.networking.primal.upload.api.model.completeUploadRequest
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.nostr.notary.NostrUnsignedEvent
 import net.primal.android.nostr.notary.signOrThrow
 
-@Singleton
-class ChunkedFileUploader @Inject constructor(
+class PrimalFileUploader @Inject constructor(
     private val contentResolver: ContentResolver,
     private val dispatchers: CoroutineDispatcherProvider,
     private val uploadApi: UploadApi,
@@ -39,7 +37,6 @@ class ChunkedFileUploader @Inject constructor(
 ) {
 
     companion object {
-        private const val PARALLEL_UPLOADS = 5
         private const val KB = 1024
         private const val MB = 1024 * KB
     }
@@ -74,6 +71,7 @@ class ChunkedFileUploader @Inject constructor(
             try {
                 val fileSizeInBytes = uri.readFileSizeInBytes()
                 val chunkSize = calculateChunkSize(fileSizeInBytes)
+
                 contentResolver.openInputStream(uri).use { inputStream ->
                     if (inputStream == null) throw FileNotFoundException()
                     inputStream.toChunkedFlow(fileSizeInBytes = fileSizeInBytes, chunkSize = chunkSize)
@@ -81,7 +79,7 @@ class ChunkedFileUploader @Inject constructor(
                         .map {
                             val offset = it.index * chunkSize
                             fileDigest.update(it.value, 0, it.value.size)
-                            async(dispatchers.io()) {
+                            async(context = dispatchers.io()) {
                                 uploadApi.uploadChunk(
                                     signNostrEvent(
                                         chunkUploadRequest(
@@ -95,8 +93,10 @@ class ChunkedFileUploader @Inject constructor(
                                 )
                             }
                         }
-                        .buffer(capacity = PARALLEL_UPLOADS)
-                        .collect { deferred -> deferred.await() }
+                        .buffer(capacity = UploadApiConnectionsPool.POOL_SIZE)
+                        .collect { deferred ->
+                            deferred.await()
+                        }
                 }
 
                 val hash = fileDigest.digestAsString()

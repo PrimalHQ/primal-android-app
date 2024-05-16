@@ -1,23 +1,23 @@
-package net.primal.android.core.files.api
+package net.primal.android.networking.primal.upload.api
 
 import java.io.IOException
 import java.net.UnknownHostException
 import javax.inject.Inject
 import kotlinx.serialization.encodeToString
-import net.primal.android.core.files.error.UnsuccessfulFileUpload
-import net.primal.android.core.files.model.UploadChunkRequest
 import net.primal.android.core.serialization.json.NostrJsonEncodeDefaults
 import net.primal.android.networking.di.PrimalUploadApiClient
 import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.primal.PrimalCacheFilter
 import net.primal.android.networking.primal.PrimalQueryResult
 import net.primal.android.networking.primal.PrimalVerb
+import net.primal.android.networking.primal.upload.UnsuccessfulFileUpload
+import net.primal.android.networking.primal.upload.api.model.UploadChunkRequest
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.NostrEventKind
 import timber.log.Timber
 
-class UploadApiImpl @Inject constructor(
+class UploadApiSingleConnection @Inject constructor(
     @PrimalUploadApiClient private val primalUploadClient: PrimalApiClient,
 ) : UploadApi {
 

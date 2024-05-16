@@ -1,3 +1,3 @@
-package net.primal.android.core.files.error
+package net.primal.android.networking.primal.upload
 
 class UnsuccessfulFileUpload(cause: Throwable?) : RuntimeException()

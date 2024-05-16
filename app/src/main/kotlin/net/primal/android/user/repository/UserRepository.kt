@@ -2,13 +2,13 @@ package net.primal.android.user.repository
 
 import androidx.room.withTransaction
 import javax.inject.Inject
-import net.primal.android.core.files.ChunkedFileUploader
-import net.primal.android.core.files.error.UnsuccessfulFileUpload
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.core.utils.usernameUiFriendly
 import net.primal.android.db.PrimalDatabase
+import net.primal.android.networking.primal.upload.PrimalFileUploader
+import net.primal.android.networking.primal.upload.UnsuccessfulFileUpload
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.db.eventHintsUpserter
@@ -34,7 +34,7 @@ class UserRepository @Inject constructor(
     private val database: PrimalDatabase,
     private val userAccountFetcher: UserAccountFetcher,
     private val accountsStore: UserAccountsStore,
-    private val fileUploader: ChunkedFileUploader,
+    private val fileUploader: PrimalFileUploader,
     private val usersApi: UsersApi,
     private val nostrPublisher: NostrPublisher,
 ) {
