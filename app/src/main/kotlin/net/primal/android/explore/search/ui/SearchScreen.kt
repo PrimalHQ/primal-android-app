@@ -47,7 +47,6 @@ import net.primal.android.nostr.ext.isNPubUri
 import net.primal.android.nostr.ext.isNote
 import net.primal.android.nostr.ext.isNoteUri
 import net.primal.android.theme.AppTheme
-import timber.log.Timber
 
 @Composable
 fun SearchScreen(
@@ -158,12 +157,10 @@ private const val KEYBOARD_HIDE_DELAY = 150L
 
 private fun String.takeAsNoteHexId(): String? {
     return if (isNote() || isNoteUri()) {
-        try {
+        val result = runCatching {
             bech32ToHexOrThrow()
-        } catch (error: Exception) {
-            Timber.w(error)
-            null
         }
+        result.getOrNull()
     } else {
         null
     }
@@ -171,12 +168,10 @@ private fun String.takeAsNoteHexId(): String? {
 
 private fun String.takeAsProfileHexId(): String? {
     return if (isNPub() || isNPubUri()) {
-        try {
+        val result = runCatching {
             bech32ToHexOrThrow()
-        } catch (error: Exception) {
-            Timber.w(error)
-            null
         }
+        result.getOrNull()
     } else {
         null
     }
