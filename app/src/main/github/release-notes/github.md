@@ -1,2 +1,3 @@
 ## Features
-- Video uploads.
+- Video uploads;
+- Add image tags to notes;

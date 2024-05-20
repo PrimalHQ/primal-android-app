@@ -1,1 +1,1 @@
-Implemented video upload.
+Implemented video upload and added image tags to notes.
