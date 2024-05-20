@@ -116,7 +116,7 @@ class PrimalFileUploader @Inject constructor(
     ): String {
         val fileDigest = MessageDigest.getInstance("SHA-256")
         return withContext(dispatchers.io()) {
-            try {
+            val uploadResult = runCatching {
                 uploadsMap[uploadId] = UploadStatus.Uploading
                 val fileSizeInBytes = uri.readFileSizeInBytes()
                 val chunkSize = calculateChunkSize(fileSizeInBytes)
@@ -161,9 +161,14 @@ class PrimalFileUploader @Inject constructor(
                 )
                 uploadsMap[uploadId] = UploadStatus.UploadCompleted
                 remoteUrl
-            } catch (error: IOException) {
+            }
+
+            val remoteUrl = uploadResult.getOrNull()
+            if (remoteUrl != null) {
+                remoteUrl
+            } else {
                 uploadsMap[uploadId] = UploadStatus.UploadFailed
-                throw UnsuccessfulFileUpload(cause = error)
+                throw UnsuccessfulFileUpload(cause = uploadResult.exceptionOrNull())
             }
         }
     }

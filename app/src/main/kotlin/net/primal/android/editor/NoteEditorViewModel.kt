@@ -281,29 +281,29 @@ class NoteEditorViewModel @AssistedInject constructor(
     }
 
     private suspend fun uploadAttachment(attachment: NoteAttachment, uploadId: UUID) {
+        var updatedAttachment = attachment
         try {
             setState { copy(uploadingAttachments = true) }
-            updateNoteAttachmentState(attachment = attachment.copy(uploadError = null))
+            updatedAttachment = updatedAttachment.copy(uploadError = null)
+            updateNoteAttachmentState(attachment = updatedAttachment)
 
             val remoteUrl = withContext(dispatcherProvider.io()) {
                 attachmentRepository.uploadNoteAttachment(attachment = attachment, uploadId = uploadId)
             }
-            updateNoteAttachmentState(attachment = attachment.copy(remoteUrl = remoteUrl))
+            updatedAttachment = updatedAttachment.copy(remoteUrl = remoteUrl)
+            updateNoteAttachmentState(attachment = updatedAttachment)
 
-            if (attachment.isImageAttachment) {
-                val (mimeType, dimensions) = fileAnalyser.extractImageTypeAndDimensions(
-                    attachment.localUri,
+            val (mimeType, dimensions) = fileAnalyser.extractImageTypeAndDimensions(attachment.localUri)
+            if (mimeType != null && dimensions != null) {
+                updatedAttachment = updatedAttachment.copy(
+                    mimeType = mimeType,
+                    otherRelevantInfo = dimensions,
                 )
-                updateNoteAttachmentState(
-                    attachment = attachment.copy(
-                        mimeType = mimeType,
-                        otherRelevantInfo = dimensions,
-                    ),
-                )
+                updateNoteAttachmentState(updatedAttachment)
             }
         } catch (error: UnsuccessfulFileUpload) {
             Timber.w(error)
-            updateNoteAttachmentState(attachment = attachment.copy(uploadError = error))
+            updateNoteAttachmentState(attachment = updatedAttachment.copy(uploadError = error))
         }
     }
 
@@ -342,10 +342,11 @@ class NoteEditorViewModel @AssistedInject constructor(
 
     private fun retryAttachmentUpload(attachmentId: UUID) =
         viewModelScope.launch {
-            _state.value.attachments.firstOrNull { it.id == attachmentId }?.let {
+            val noteAttachment = _state.value.attachments.firstOrNull { it.id == attachmentId }
+            if (noteAttachment != null) {
                 val uploadId = UUID.randomUUID()
                 val job = viewModelScope.launch {
-                    uploadAttachment(attachment = it, uploadId = uploadId)
+                    uploadAttachment(attachment = noteAttachment, uploadId = uploadId)
                 }
                 attachmentUploads[attachmentId] = UploadJob(job = job, id = uploadId)
                 job.join()
