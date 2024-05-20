@@ -22,8 +22,10 @@ import net.primal.android.crypto.NostrKeyPair
 import net.primal.android.crypto.hexToNsecHrp
 import net.primal.android.networking.primal.upload.api.UploadApi
 import net.primal.android.networking.primal.upload.api.UploadApiConnectionsPool
+import net.primal.android.networking.primal.upload.api.model.cancelUploadRequest
 import net.primal.android.networking.primal.upload.api.model.chunkUploadRequest
 import net.primal.android.networking.primal.upload.api.model.completeUploadRequest
+import net.primal.android.networking.primal.upload.domain.UploadStatus
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.nostr.notary.NostrUnsignedEvent
@@ -41,34 +43,81 @@ class PrimalFileUploader @Inject constructor(
         private const val MB = 1024 * KB
     }
 
+    private val uploadsMap = mutableMapOf<UUID, UploadStatus>()
+
     @Throws(UnsuccessfulFileUpload::class)
-    suspend fun uploadFile(keyPair: NostrKeyPair, uri: Uri): String {
+    suspend fun uploadFile(
+        uri: Uri,
+        keyPair: NostrKeyPair,
+        uploadId: UUID = UUID.randomUUID(),
+    ): String {
         val userId = keyPair.pubKey
         return uploadFileOrThrow(
             uri = uri,
             userId = userId,
+            uploadId = uploadId,
             signNostrEvent = { it.signOrThrow(keyPair.privateKey.hexToNsecHrp()) },
         )
     }
 
     @Throws(UnsuccessfulFileUpload::class)
-    suspend fun uploadFile(userId: String, uri: Uri): String {
+    suspend fun uploadFile(
+        uri: Uri,
+        userId: String,
+        uploadId: UUID = UUID.randomUUID(),
+    ): String {
         return uploadFileOrThrow(
             uri = uri,
             userId = userId,
+            uploadId = uploadId,
             signNostrEvent = { nostrNotary.signNostrEvent(userId = userId, event = it) },
         )
+    }
+
+    suspend fun cancelUpload(keyPair: NostrKeyPair, uploadId: UUID) {
+        val userId = keyPair.pubKey
+        return cancelUploadOrThrow(
+            userId = userId,
+            uploadId = uploadId,
+            signNostrEvent = { it.signOrThrow(keyPair.privateKey.hexToNsecHrp()) },
+        )
+    }
+
+    suspend fun cancelUpload(userId: String, uploadId: UUID) {
+        cancelUploadOrThrow(
+            userId = userId,
+            uploadId = uploadId,
+            signNostrEvent = { nostrNotary.signNostrEvent(userId = userId, event = it) },
+        )
+    }
+
+    private suspend fun cancelUploadOrThrow(
+        userId: String,
+        uploadId: UUID = UUID.randomUUID(),
+        signNostrEvent: (NostrUnsignedEvent) -> NostrEvent,
+    ) {
+        if (uploadsMap[uploadId] !is UploadStatus.UploadCompleted) {
+            uploadApi.cancelUpload(
+                signNostrEvent(
+                    cancelUploadRequest(
+                        userId = userId,
+                        uploadId = uploadId.toString(),
+                    ),
+                ),
+            )
+        }
     }
 
     private suspend fun uploadFileOrThrow(
         uri: Uri,
         userId: String,
+        uploadId: UUID = UUID.randomUUID(),
         signNostrEvent: (NostrUnsignedEvent) -> NostrEvent,
     ): String {
-        val uploadId = UUID.randomUUID().toString()
         val fileDigest = MessageDigest.getInstance("SHA-256")
         return withContext(dispatchers.io()) {
             try {
+                uploadsMap[uploadId] = UploadStatus.Uploading
                 val fileSizeInBytes = uri.readFileSizeInBytes()
                 val chunkSize = calculateChunkSize(fileSizeInBytes)
 
@@ -84,7 +133,7 @@ class PrimalFileUploader @Inject constructor(
                                     signNostrEvent(
                                         chunkUploadRequest(
                                             userId = userId,
-                                            uploadId = uploadId,
+                                            uploadId = uploadId.toString(),
                                             fileSizeInBytes = fileSizeInBytes,
                                             offsetInBytes = offset,
                                             data = it.value,
@@ -100,17 +149,20 @@ class PrimalFileUploader @Inject constructor(
                 }
 
                 val hash = fileDigest.digestAsString()
-                uploadApi.completeUpload(
+                val remoteUrl = uploadApi.completeUpload(
                     signNostrEvent(
                         completeUploadRequest(
                             userId = userId,
-                            uploadId = uploadId,
+                            uploadId = uploadId.toString(),
                             fileSizeInBytes = fileSizeInBytes,
                             hash = hash,
                         ),
                     ),
                 )
+                uploadsMap[uploadId] = UploadStatus.UploadCompleted
+                remoteUrl
             } catch (error: IOException) {
+                uploadsMap[uploadId] = UploadStatus.UploadFailed
                 throw UnsuccessfulFileUpload(cause = error)
             }
         }

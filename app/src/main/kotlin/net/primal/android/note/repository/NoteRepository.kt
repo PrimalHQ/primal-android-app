@@ -172,7 +172,7 @@ class NoteRepository @Inject constructor(
     @Throws(UnsuccessfulFileUpload::class)
     suspend fun uploadPostAttachment(attachment: NoteAttachment): String {
         val userId = activeAccountStore.activeUserId()
-        return fileUploader.uploadFile(userId = userId, attachment.localUri)
+        return fileUploader.uploadFile(uri = attachment.localUri, userId = userId)
     }
 
     suspend fun isBookmarked(noteId: String): Boolean {

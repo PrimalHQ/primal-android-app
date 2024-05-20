@@ -5,8 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.io.IOException
+import java.util.*
 import javax.inject.Inject
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,6 +22,7 @@ import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.crypto.CryptoUtils
 import net.primal.android.networking.primal.upload.PrimalFileUploader
 import net.primal.android.networking.primal.upload.UnsuccessfulFileUpload
+import net.primal.android.networking.primal.upload.domain.UploadJob
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.profile.domain.ProfileMetadata
 import timber.log.Timber
@@ -36,8 +37,8 @@ class OnboardingViewModel @Inject constructor(
 
     private val keyPair = CryptoUtils.generateHexEncodedKeypair()
 
-    private var avatarUploadJob: Job? = null
-    private var bannerUploadJob: Job? = null
+    private var avatarUploadJob: UploadJob? = null
+    private var bannerUploadJob: UploadJob? = null
 
     private val _state = MutableStateFlow(UiState())
     val state = _state.asStateFlow()
@@ -128,8 +129,8 @@ class OnboardingViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 setState { copy(working = true) }
-                avatarUploadJob?.join()
-                bannerUploadJob?.join()
+                avatarUploadJob?.job?.join()
+                bannerUploadJob?.job?.join()
                 val uiState = state.value
                 withContext(dispatcherProvider.io()) {
                     createAccountHandler.createNostrAccount(
@@ -152,9 +153,11 @@ class OnboardingViewModel @Inject constructor(
 
     private fun updateAvatarPhoto(avatarUri: Uri?) {
         setState { copy(avatarUri = avatarUri) }
-        avatarUploadJob?.cancel()
+        avatarUploadJob.cancel()
+        avatarUploadJob = null
         if (avatarUri != null) {
-            avatarUploadJob = viewModelScope.launch {
+            val uploadId = UUID.randomUUID()
+            val job = viewModelScope.launch {
                 try {
                     val remoteAvatarUrl = withContext(dispatcherProvider.io()) {
                         fileUploader.uploadFile(keyPair = keyPair, uri = avatarUri)
@@ -166,14 +169,17 @@ class OnboardingViewModel @Inject constructor(
                     Timber.w(error)
                 }
             }
+            avatarUploadJob = UploadJob(job = job, id = uploadId)
         }
     }
 
     private fun updateBannerPhoto(bannerUri: Uri?) {
         setState { copy(bannerUri = bannerUri) }
-        bannerUploadJob?.cancel()
+        bannerUploadJob.cancel()
+        bannerUploadJob = null
         if (bannerUri != null) {
-            bannerUploadJob = viewModelScope.launch {
+            val uploadId = UUID.randomUUID()
+            val job = viewModelScope.launch {
                 try {
                     val remoteBannerUrl = withContext(dispatcherProvider.io()) {
                         fileUploader.uploadFile(keyPair = keyPair, uri = bannerUri)
@@ -185,6 +191,7 @@ class OnboardingViewModel @Inject constructor(
                     Timber.w(error)
                 }
             }
+            bannerUploadJob = UploadJob(job = job, id = uploadId)
         }
     }
 
@@ -202,6 +209,17 @@ class OnboardingViewModel @Inject constructor(
             localBannerUri = this.bannerUri,
             remoteBannerUrl = this.bannerRemoteUrl ?: DEFAULT_BANNER_URL,
         )
+
+    private fun UploadJob?.cancel() {
+        if (this == null) return
+
+        viewModelScope.launch {
+            this@cancel.job.cancel()
+            runCatching {
+                fileUploader.cancelUpload(keyPair = keyPair, uploadId = this@cancel.id)
+            }
+        }
+    }
 
     companion object {
         private const val DELAY = 300L
