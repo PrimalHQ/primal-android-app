@@ -10,6 +10,7 @@ import dagger.assisted.AssistedInject
 import java.util.*
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
@@ -25,6 +26,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import net.primal.android.attachments.repository.AttachmentsRepository
 import net.primal.android.core.compose.feed.model.asFeedPostUi
 import net.primal.android.core.compose.profile.model.mapAsUserProfileUi
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
@@ -39,6 +41,7 @@ import net.primal.android.editor.domain.NoteTaggedUser
 import net.primal.android.explore.repository.ExploreRepository
 import net.primal.android.feed.repository.FeedRepository
 import net.primal.android.networking.primal.upload.UnsuccessfulFileUpload
+import net.primal.android.networking.primal.upload.domain.UploadJob
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
@@ -55,6 +58,7 @@ class NoteEditorViewModel @AssistedInject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val feedRepository: FeedRepository,
     private val noteRepository: NoteRepository,
+    private val attachmentRepository: AttachmentsRepository,
     private val exploreRepository: ExploreRepository,
     private val profileRepository: ProfileRepository,
 ) : ViewModel() {
@@ -71,6 +75,8 @@ class NoteEditorViewModel @AssistedInject constructor(
     private val _effect: Channel<SideEffect> = Channel()
     val effect = _effect.receiveAsFlow()
     private fun sendEffect(effect: SideEffect) = viewModelScope.launch { _effect.send(effect) }
+
+    private val attachmentUploads = mutableMapOf<UUID, UploadJob>()
 
     init {
         handleArgs()
@@ -252,26 +258,35 @@ class NoteEditorViewModel @AssistedInject constructor(
         }
     }
 
-    private fun importPhotos(uris: List<Uri>) =
-        viewModelScope.launch {
-            val newAttachments = uris.map { NoteAttachment(localUri = it) }
-            setState { copy(attachments = attachments + newAttachments) }
-            uploadAttachments(attachments = newAttachments)
-        }
+    private fun importPhotos(uris: List<Uri>) {
+        val newAttachments = uris.map { NoteAttachment(localUri = it) }
+        setState { copy(attachments = attachments + newAttachments) }
 
-    private fun uploadAttachments(attachments: List<NoteAttachment>) =
         viewModelScope.launch {
-            attachments.forEach { uploadAttachment(attachment = it) }
+            newAttachments
+                .map {
+                    val uploadId = UUID.randomUUID()
+                    val job = viewModelScope.launch(start = CoroutineStart.LAZY) {
+                        uploadAttachment(attachment = it, uploadId = uploadId)
+                    }
+                    val uploadJob = UploadJob(job = job, id = uploadId)
+                    attachmentUploads[it.id] = uploadJob
+                    uploadJob
+                }.forEach {
+                    it.job.start()
+                    it.job.join()
+                }
             checkUploadQueueAndDisableFlagIfCompleted()
         }
+    }
 
-    private suspend fun uploadAttachment(attachment: NoteAttachment) {
+    private suspend fun uploadAttachment(attachment: NoteAttachment, uploadId: UUID) {
         try {
             setState { copy(uploadingAttachments = true) }
             updateNoteAttachmentState(attachment = attachment.copy(uploadError = null))
 
             val remoteUrl = withContext(dispatcherProvider.io()) {
-                noteRepository.uploadPostAttachment(attachment)
+                attachmentRepository.uploadNoteAttachment(attachment = attachment, uploadId = uploadId)
             }
             updateNoteAttachmentState(attachment = attachment.copy(remoteUrl = remoteUrl))
 
@@ -303,6 +318,7 @@ class NoteEditorViewModel @AssistedInject constructor(
 
     private fun discardAttachment(attachmentId: UUID) =
         viewModelScope.launch {
+            attachmentUploads[attachmentId]?.cancel()
             setState {
                 val attachments = this.attachments.toMutableList()
                 attachments.removeIf { it.id == attachmentId }
@@ -313,10 +329,26 @@ class NoteEditorViewModel @AssistedInject constructor(
             }
         }
 
+    private fun UploadJob?.cancel() {
+        if (this == null) return
+
+        viewModelScope.launch {
+            this@cancel.job.cancel()
+            runCatching {
+                attachmentRepository.cancelNoteAttachmentUpload(uploadId = this@cancel.id)
+            }
+        }
+    }
+
     private fun retryAttachmentUpload(attachmentId: UUID) =
         viewModelScope.launch {
             _state.value.attachments.firstOrNull { it.id == attachmentId }?.let {
-                uploadAttachment(it)
+                val uploadId = UUID.randomUUID()
+                val job = viewModelScope.launch {
+                    uploadAttachment(attachment = it, uploadId = uploadId)
+                }
+                attachmentUploads[attachmentId] = UploadJob(job = job, id = uploadId)
+                job.join()
                 checkUploadQueueAndDisableFlagIfCompleted()
             }
         }

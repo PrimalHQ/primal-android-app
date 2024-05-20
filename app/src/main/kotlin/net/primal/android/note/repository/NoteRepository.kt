@@ -5,6 +5,7 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.PagingSource
+import java.util.*
 import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -15,8 +16,6 @@ import kotlinx.serialization.json.jsonPrimitive
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.editor.domain.NoteAttachment
-import net.primal.android.networking.primal.upload.PrimalFileUploader
-import net.primal.android.networking.primal.upload.UnsuccessfulFileUpload
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.db.eventHintsUpserter
 import net.primal.android.nostr.ext.asEventIdTag
@@ -39,7 +38,6 @@ import timber.log.Timber
 class NoteRepository @Inject constructor(
     private val dispatcherProvider: CoroutineDispatcherProvider,
     private val activeAccountStore: ActiveAccountStore,
-    private val fileUploader: PrimalFileUploader,
     private val nostrPublisher: NostrPublisher,
     private val profileRepository: ProfileRepository,
     private val noteApi: NoteApi,
@@ -167,12 +165,6 @@ class NoteRepository @Inject constructor(
             tags = pubkeyTags + noteTags + hashtagTags + imageTags,
             outboxRelays = outboxRelays,
         )
-    }
-
-    @Throws(UnsuccessfulFileUpload::class)
-    suspend fun uploadPostAttachment(attachment: NoteAttachment): String {
-        val userId = activeAccountStore.activeUserId()
-        return fileUploader.uploadFile(uri = attachment.localUri, userId = userId)
     }
 
     suspend fun isBookmarked(noteId: String): Boolean {
