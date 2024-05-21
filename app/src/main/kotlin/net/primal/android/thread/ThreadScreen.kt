@@ -759,8 +759,8 @@ fun ReplyToBottomBar(
         )
 
         val photoImportLauncher = rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.PickMultipleVisualMedia(maxItems = 5),
-        ) { uris -> onExpandReply(uris) }
+            contract = ActivityResultContracts.PickVisualMedia(),
+        ) { uri -> if (uri != null) onExpandReply(listOf(uri)) }
 
         AnimatedVisibility(visible = isKeyboardVisible) {
             ReplyToOptions(

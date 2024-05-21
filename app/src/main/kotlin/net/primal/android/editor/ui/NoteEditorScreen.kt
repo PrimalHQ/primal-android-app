@@ -431,14 +431,10 @@ private fun ReplyToNote(replyToNote: FeedPostUi, connectionLineColor: Color) {
 }
 
 @Composable
-private fun NoteActionRow(
-    maxItems: Int = 5,
-    onPhotosImported: (List<Uri>) -> Unit,
-    onUserTag: () -> Unit,
-) {
+private fun NoteActionRow(onPhotosImported: (List<Uri>) -> Unit, onUserTag: () -> Unit) {
     val multiplePhotosImportLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.PickMultipleVisualMedia(maxItems = maxItems),
-    ) { uris -> onPhotosImported(uris) }
+        ActivityResultContracts.PickVisualMedia(),
+    ) { uri -> if (uri != null) onPhotosImported(listOf(uri)) }
 
     Row(
         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
