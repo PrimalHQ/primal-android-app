@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -15,7 +16,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import net.primal.android.LocalContentDisplaySettings
 import net.primal.android.R
 import net.primal.android.core.compose.PrimalClickableText
 import net.primal.android.core.compose.attachment.model.isMediaAttachment
@@ -28,6 +29,7 @@ import net.primal.android.feed.db.ReferencedUser
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
+import net.primal.android.user.domain.ContentDisplaySettings
 
 private const val PROFILE_ID_ANNOTATION_TAG = "profileId"
 private const val URL_ANNOTATION_TAG = "url"
@@ -125,6 +127,7 @@ fun NoteContent(
     contentColor: Color = AppTheme.colorScheme.onSurface,
     referencedNoteContainerColor: Color = AppTheme.extraColorScheme.surfaceVariantAlt1,
 ) {
+    val displaySettings = LocalContentDisplaySettings.current
     val seeMoreText = stringResource(id = R.string.feed_see_more)
     val contentText = remember {
         renderContentAsAnnotatedString(
@@ -142,7 +145,8 @@ fun NoteContent(
             PrimalClickableText(
                 style = AppTheme.typography.bodyMedium.copy(
                     color = contentColor,
-                    lineHeight = 20.sp,
+                    fontSize = displaySettings.noteAppearance.bodyFontSize,
+                    lineHeight = displaySettings.noteAppearance.bodyLineHeight,
                 ),
                 text = contentText,
                 textSelectable = textSelectable,
@@ -281,36 +285,38 @@ fun renderContentAsAnnotatedString(
 @Preview
 @Composable
 fun PreviewPostContent() {
-    PrimalTheme(primalTheme = PrimalTheme.Sunset) {
-        Surface {
-            NoteContent(
-                data = NoteContentUi(
-                    noteId = "",
-                    content = """
+    CompositionLocalProvider(LocalContentDisplaySettings provides ContentDisplaySettings()) {
+        PrimalTheme(primalTheme = PrimalTheme.Sunset) {
+            Surface {
+                NoteContent(
+                    data = NoteContentUi(
+                        noteId = "",
+                        content = """
                         Unfortunately the days of using pseudonyms in metaspace are numbered. #nostr 
                         nostr:referencedUser
-                    """.trimIndent(),
-                    attachments = emptyList(),
-                    nostrUris = listOf(
-                        NoteNostrUriUi(
-                            uri = "nostr:referencedUser",
-                            referencedPost = null,
-                            referencedUser = ReferencedUser(
-                                userId = "nostr:referencedUser",
-                                handle = "alex",
+                        """.trimIndent(),
+                        attachments = emptyList(),
+                        nostrUris = listOf(
+                            NoteNostrUriUi(
+                                uri = "nostr:referencedUser",
+                                referencedPost = null,
+                                referencedUser = ReferencedUser(
+                                    userId = "nostr:referencedUser",
+                                    handle = "alex",
+                                ),
                             ),
                         ),
+                        hashtags = listOf("#nostr"),
                     ),
-                    hashtags = listOf("#nostr"),
-                ),
-                expanded = false,
-                onProfileClick = {},
-                onPostClick = {},
-                onClick = {},
-                onUrlClick = {},
-                onHashtagClick = {},
-                onMediaClick = {},
-            )
+                    expanded = false,
+                    onProfileClick = {},
+                    onPostClick = {},
+                    onClick = {},
+                    onUrlClick = {},
+                    onHashtagClick = {},
+                    onMediaClick = {},
+                )
+            }
         }
     }
 }
@@ -318,12 +324,13 @@ fun PreviewPostContent() {
 @Preview
 @Composable
 fun PreviewPostContentWithReferencedPost() {
-    PrimalTheme(primalTheme = PrimalTheme.Sunset) {
-        Surface {
-            NoteContent(
-                data = NoteContentUi(
-                    noteId = "",
-                    content = """
+    CompositionLocalProvider(LocalContentDisplaySettings provides ContentDisplaySettings()) {
+        PrimalTheme(primalTheme = PrimalTheme.Sunset) {
+            Surface {
+                NoteContent(
+                    data = NoteContentUi(
+                        noteId = "",
+                        content = """
                         Unfortunately the days of using pseudonyms in metaspace are numbered. #nostr
                         
                         nostr:referencedPost
@@ -331,53 +338,54 @@ fun PreviewPostContentWithReferencedPost() {
                         Or maybe not.
                         
                         nostr:referenced2Post
-                    """.trimIndent(),
-                    attachments = emptyList(),
-                    nostrUris = listOf(
-                        NoteNostrUriUi(
-                            uri = "nostr:referencedPost",
-                            referencedPost = ReferencedPost(
-                                postId = "postId",
-                                createdAt = 0,
-                                content = "This is referenced post.",
-                                authorId = "authorId",
-                                authorName = "primal",
-                                authorAvatarCdnImage = null,
-                                authorInternetIdentifier = "hi@primal.net",
-                                authorLightningAddress = "h@getalby.com",
-                                attachments = emptyList(),
-                                nostrUris = emptyList(),
+                        """.trimIndent(),
+                        attachments = emptyList(),
+                        nostrUris = listOf(
+                            NoteNostrUriUi(
+                                uri = "nostr:referencedPost",
+                                referencedPost = ReferencedPost(
+                                    postId = "postId",
+                                    createdAt = 0,
+                                    content = "This is referenced post.",
+                                    authorId = "authorId",
+                                    authorName = "primal",
+                                    authorAvatarCdnImage = null,
+                                    authorInternetIdentifier = "hi@primal.net",
+                                    authorLightningAddress = "h@getalby.com",
+                                    attachments = emptyList(),
+                                    nostrUris = emptyList(),
 
+                                ),
+                                referencedUser = null,
                             ),
-                            referencedUser = null,
-                        ),
-                        NoteNostrUriUi(
-                            uri = "nostr:referenced2Post",
-                            referencedPost = ReferencedPost(
-                                postId = "postId",
-                                createdAt = 0,
-                                content = "This is referenced post #2.",
-                                authorId = "authorId",
-                                authorName = "primal",
-                                authorAvatarCdnImage = null,
-                                authorInternetIdentifier = "hi@primal.net",
-                                authorLightningAddress = "h@getalby.com",
-                                attachments = emptyList(),
-                                nostrUris = emptyList(),
+                            NoteNostrUriUi(
+                                uri = "nostr:referenced2Post",
+                                referencedPost = ReferencedPost(
+                                    postId = "postId",
+                                    createdAt = 0,
+                                    content = "This is referenced post #2.",
+                                    authorId = "authorId",
+                                    authorName = "primal",
+                                    authorAvatarCdnImage = null,
+                                    authorInternetIdentifier = "hi@primal.net",
+                                    authorLightningAddress = "h@getalby.com",
+                                    attachments = emptyList(),
+                                    nostrUris = emptyList(),
+                                ),
+                                referencedUser = null,
                             ),
-                            referencedUser = null,
                         ),
+                        hashtags = listOf("#nostr"),
                     ),
-                    hashtags = listOf("#nostr"),
-                ),
-                expanded = false,
-                onProfileClick = {},
-                onPostClick = {},
-                onClick = {},
-                onUrlClick = {},
-                onHashtagClick = {},
-                onMediaClick = {},
-            )
+                    expanded = false,
+                    onProfileClick = {},
+                    onPostClick = {},
+                    onClick = {},
+                    onUrlClick = {},
+                    onHashtagClick = {},
+                    onMediaClick = {},
+                )
+            }
         }
     }
 }

@@ -1,11 +1,10 @@
 package net.primal.android.core.compose
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 
@@ -35,8 +34,8 @@ fun WrappedContentWithSuffix(wrappedContent: @Composable () -> Unit, suffixFixed
                     top.linkTo(mainRef.top)
                     bottom.linkTo(mainRef.bottom)
                     height = Dimension.fillToConstraints
-                }
-                .padding(top = 2.dp),
+                },
+            contentAlignment = Alignment.Center,
         ) {
             suffixFixedContent()
         }

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.AnnotatedString
@@ -19,8 +20,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import java.time.Instant
 import kotlin.time.Duration.Companion.seconds
+import net.primal.android.LocalContentDisplaySettings
 import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.NostrUserText
@@ -31,6 +34,7 @@ import net.primal.android.core.utils.formatNip05Identifier
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
+import net.primal.android.user.domain.ContentDisplaySettings
 
 @Composable
 fun FeedNoteHeader(
@@ -47,6 +51,11 @@ fun FeedNoteHeader(
     labelStyle: TextStyle? = null,
     onAuthorAvatarClick: (() -> Unit)? = null,
 ) {
+    val displaySettings = LocalContentDisplaySettings.current
+    val topRowTextStyle = AppTheme.typography.bodyMedium.copy(
+        fontSize = displaySettings.noteAppearance.usernameSize,
+        lineHeight = displaySettings.noteAppearance.usernameSize,
+    )
     Row(
         modifier = modifier,
         horizontalArrangement = Arrangement.Start,
@@ -70,7 +79,7 @@ fun FeedNoteHeader(
                         text = identifier,
                         spanStyle = SpanStyle(
                             color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-                            fontStyle = AppTheme.typography.bodySmall.fontStyle,
+                            fontSize = displaySettings.noteAppearance.usernameSize,
                         ),
                     ),
                 )
@@ -84,7 +93,8 @@ fun FeedNoteHeader(
                         annotatedStringSuffixBuilder = {
                             append(suffixText)
                         },
-                        style = AppTheme.typography.bodyMedium,
+                        style = topRowTextStyle,
+                        internetIdentifierBadgeSize = topRowTextStyle.fontSize.value.dp,
                         overflow = TextOverflow.Ellipsis,
                     )
                 },
@@ -94,7 +104,8 @@ fun FeedNoteHeader(
                             text = " • ${postTimestamp.asBeforeNowFormat()}",
                             textAlign = TextAlign.Center,
                             maxLines = 1,
-                            style = AppTheme.typography.bodySmall,
+                            style = topRowTextStyle,
+                            fontSize = (displaySettings.noteAppearance.usernameSize.value).sp,
                             color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
                         )
                     }
@@ -106,7 +117,7 @@ fun FeedNoteHeader(
                     text = label,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    style = labelStyle ?: AppTheme.typography.bodySmall,
+                    style = labelStyle ?: topRowTextStyle,
                     color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
                 )
             }
@@ -126,17 +137,19 @@ fun FeedNoteHeader(
 @Preview
 @Composable
 fun PreviewLightNoteHeader() {
-    PrimalTheme(
-        primalTheme = PrimalTheme.Sunrise,
-    ) {
-        Surface {
-            FeedNoteHeader(
-                modifier = Modifier.fillMaxWidth(),
-                authorDisplayName = "Donald Duck",
-                postTimestamp = Instant.now().minusSeconds(3600.seconds.inWholeSeconds),
-                authorInternetIdentifier = "donald@the.duck",
-                onAuthorAvatarClick = {},
-            )
+    CompositionLocalProvider(LocalContentDisplaySettings provides ContentDisplaySettings()) {
+        PrimalTheme(
+            primalTheme = PrimalTheme.Sunrise,
+        ) {
+            Surface {
+                FeedNoteHeader(
+                    modifier = Modifier.fillMaxWidth(),
+                    authorDisplayName = "Donald Duck",
+                    postTimestamp = Instant.now().minusSeconds(3600.seconds.inWholeSeconds),
+                    authorInternetIdentifier = "donald@the.duck",
+                    onAuthorAvatarClick = {},
+                )
+            }
         }
     }
 }
@@ -144,19 +157,21 @@ fun PreviewLightNoteHeader() {
 @Preview
 @Composable
 fun PreviewLightSingleNoteHeader() {
-    PrimalTheme(
-        primalTheme = PrimalTheme.Sunrise,
-    ) {
-        Surface {
-            FeedNoteHeader(
-                modifier = Modifier.fillMaxWidth(),
-                authorDisplayName = "Donald Duck",
-                postTimestamp = Instant.now().minusSeconds(3600.seconds.inWholeSeconds),
-                singleLine = true,
-                authorInternetIdentifier = "donald@the.duck",
-                onAuthorAvatarClick = {},
-                replyToAuthor = "alex",
-            )
+    CompositionLocalProvider(LocalContentDisplaySettings provides ContentDisplaySettings()) {
+        PrimalTheme(
+            primalTheme = PrimalTheme.Sunrise,
+        ) {
+            Surface {
+                FeedNoteHeader(
+                    modifier = Modifier.fillMaxWidth(),
+                    authorDisplayName = "Donald Duck",
+                    postTimestamp = Instant.now().minusSeconds(3600.seconds.inWholeSeconds),
+                    singleLine = true,
+                    authorInternetIdentifier = "donald@the.duck",
+                    onAuthorAvatarClick = {},
+                    replyToAuthor = "alex",
+                )
+            }
         }
     }
 }
@@ -164,18 +179,20 @@ fun PreviewLightSingleNoteHeader() {
 @Preview
 @Composable
 fun PreviewDarkNoteHeader() {
-    PrimalTheme(
-        primalTheme = PrimalTheme.Sunset,
-    ) {
-        Surface {
-            FeedNoteHeader(
-                modifier = Modifier.fillMaxWidth(),
-                authorDisplayName = "Donald Duck",
-                postTimestamp = Instant.now().minusSeconds(3600.seconds.inWholeSeconds),
-                authorAvatarVisible = false,
-                authorInternetIdentifier = "donald@the.duck",
-                onAuthorAvatarClick = {},
-            )
+    CompositionLocalProvider(LocalContentDisplaySettings provides ContentDisplaySettings()) {
+        PrimalTheme(
+            primalTheme = PrimalTheme.Sunset,
+        ) {
+            Surface {
+                FeedNoteHeader(
+                    modifier = Modifier.fillMaxWidth(),
+                    authorDisplayName = "Donald Duck",
+                    postTimestamp = Instant.now().minusSeconds(3600.seconds.inWholeSeconds),
+                    authorAvatarVisible = false,
+                    authorInternetIdentifier = "donald@the.duck",
+                    onAuthorAvatarClick = {},
+                )
+            }
         }
     }
 }
@@ -183,20 +200,22 @@ fun PreviewDarkNoteHeader() {
 @Preview
 @Composable
 fun PreviewDarkSingleLineNoAvatarNoteHeader() {
-    PrimalTheme(
-        primalTheme = PrimalTheme.Sunset,
-    ) {
-        Surface {
-            FeedNoteHeader(
-                modifier = Modifier.fillMaxWidth(),
-                authorDisplayName = "Donald Duck",
-                postTimestamp = Instant.now().minusSeconds(3600.seconds.inWholeSeconds),
-                singleLine = true,
-                authorAvatarVisible = false,
-                authorInternetIdentifier = "donald@the.duck",
-                onAuthorAvatarClick = {},
-                replyToAuthor = "alex",
-            )
+    CompositionLocalProvider(LocalContentDisplaySettings provides ContentDisplaySettings()) {
+        PrimalTheme(
+            primalTheme = PrimalTheme.Sunset,
+        ) {
+            Surface {
+                FeedNoteHeader(
+                    modifier = Modifier.fillMaxWidth(),
+                    authorDisplayName = "Donald Duck",
+                    postTimestamp = Instant.now().minusSeconds(3600.seconds.inWholeSeconds),
+                    singleLine = true,
+                    authorAvatarVisible = false,
+                    authorInternetIdentifier = "donald@the.duck",
+                    onAuthorAvatarClick = {},
+                    replyToAuthor = "alex",
+                )
+            }
         }
     }
 }

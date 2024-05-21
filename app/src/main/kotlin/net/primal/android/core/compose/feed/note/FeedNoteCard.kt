@@ -29,6 +29,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import java.time.Instant
 import java.time.temporal.ChronoUnit
+import net.primal.android.LocalContentDisplaySettings
 import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.feed.model.FeedPostAction
 import net.primal.android.core.compose.feed.model.FeedPostStatsUi
@@ -80,9 +81,10 @@ fun FeedNoteCard(
         )
     }
 
+    val displaySettings = LocalContentDisplaySettings.current
     val notePaddingDp = 4.dp
     val avatarPaddingDp = 8.dp
-    val avatarSizeDp = if (fullWidthNote) 30.dp else 42.dp
+    val avatarSizeDp = if (fullWidthNote) 30.dp else displaySettings.noteAppearance.avatarSize
     val overflowIconSizeDp = 40.dp
 
     NoteSurfaceCard(
