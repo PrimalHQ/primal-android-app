@@ -14,8 +14,8 @@ import net.primal.android.core.compose.feed.note.events.MediaClickEvent
 fun NoteAttachments(
     modifier: Modifier = Modifier,
     attachments: List<NoteAttachmentUi>,
-    onUrlClick: (mediaUrl: String) -> Unit,
-    onMediaClick: (MediaClickEvent) -> Unit,
+    onUrlClick: ((mediaUrl: String) -> Unit)? = null,
+    onMediaClick: ((MediaClickEvent) -> Unit)? = null,
 ) {
     val mediaAttachments = attachments.filter { it.isMediaAttachment() }
     val linkAttachments = attachments.filterNot { it.isMediaAttachment() }
@@ -26,8 +26,8 @@ fun NoteAttachments(
                 mediaAttachments = mediaAttachments,
                 onMediaClick = {
                     when (it.noteAttachmentType) {
-                        NoteAttachmentType.Image, NoteAttachmentType.Video -> onMediaClick(it)
-                        else -> onUrlClick(it.mediaUrl)
+                        NoteAttachmentType.Image, NoteAttachmentType.Video -> onMediaClick?.invoke(it)
+                        else -> onUrlClick?.invoke(it.mediaUrl)
                     }
                 },
             )
@@ -44,7 +44,11 @@ fun NoteAttachments(
                         description = attachment.description,
                         thumbnailUrl = attachment.thumbnailUrl,
                         thumbnailImageSize = thumbnailImageSizeDp,
-                        onClick = { onUrlClick(attachment.url) },
+                        onClick = if (onUrlClick != null) {
+                            { onUrlClick.invoke(attachment.url) }
+                        } else {
+                            null
+                        },
                     )
                 }
             }

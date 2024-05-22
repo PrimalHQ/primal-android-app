@@ -26,22 +26,22 @@ import net.primal.android.core.ext.openUriSafely
 
 @Composable
 fun FeedNote(
+    data: FeedPostUi,
     fullWidthContent: Boolean,
     avatarSizeDp: Dp,
     avatarPaddingValues: PaddingValues,
     notePaddingValues: PaddingValues,
-    data: FeedPostUi,
-    onProfileClick: (String) -> Unit,
     headerSingleLine: Boolean,
     showReplyTo: Boolean,
     forceContentIndent: Boolean,
     expanded: Boolean,
     textSelectable: Boolean,
-    onPostClick: (String) -> Unit,
-    onHashtagClick: (String) -> Unit,
-    onMediaClick: (MediaClickEvent) -> Unit,
-    onPostAction: ((FeedPostAction) -> Unit)?,
-    onPostLongClickAction: ((FeedPostAction) -> Unit)?,
+    onPostClick: ((String) -> Unit)? = null,
+    onProfileClick: ((String) -> Unit)? = null,
+    onHashtagClick: ((String) -> Unit)? = null,
+    onMediaClick: ((MediaClickEvent) -> Unit)? = null,
+    onPostAction: ((FeedPostAction) -> Unit)? = null,
+    onPostLongClickAction: ((FeedPostAction) -> Unit)? = null,
     contentFooter: @Composable () -> Unit = {},
 ) {
     val localUriHandler = LocalUriHandler.current
@@ -54,7 +54,11 @@ fun FeedNote(
                 modifier = Modifier.padding(avatarPaddingValues),
                 avatarSize = avatarSizeDp,
                 avatarCdnImage = data.authorAvatarCdnImage,
-                onClick = { onProfileClick(data.authorId) },
+                onClick = if (onProfileClick != null) {
+                    { onProfileClick.invoke(data.authorId) }
+                } else {
+                    null
+                },
             )
         }
 
@@ -73,7 +77,11 @@ fun FeedNote(
                 authorAvatarCdnImage = data.authorAvatarCdnImage,
                 authorInternetIdentifier = data.authorInternetIdentifier,
                 replyToAuthor = if (showReplyTo) data.replyToAuthorHandle else null,
-                onAuthorAvatarClick = { onProfileClick(data.authorId) },
+                onAuthorAvatarClick = if (onProfileClick != null) {
+                    { onProfileClick(data.authorId) }
+                } else {
+                    null
+                },
             )
 
             val postAuthorGuessHeight = with(LocalDensity.current) { 128.dp.toPx() }
@@ -93,9 +101,13 @@ fun FeedNote(
                 data = data.toNoteContentUi(),
                 expanded = expanded,
                 textSelectable = textSelectable,
-                onClick = {
-                    launchRippleEffect(it)
-                    onPostClick(data.postId)
+                onClick = if (onPostClick != null) {
+                    {
+                        launchRippleEffect(it)
+                        onPostClick.invoke(data.postId)
+                    }
+                } else {
+                    null
                 },
                 onProfileClick = onProfileClick,
                 onPostClick = onPostClick,

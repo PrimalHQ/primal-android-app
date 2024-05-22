@@ -22,8 +22,8 @@ fun ReferencedNotesColumn(
     postResources: List<NoteNostrUriUi>,
     expanded: Boolean,
     containerColor: Color,
-    onPostClick: (String) -> Unit,
-    onMediaClick: (MediaClickEvent) -> Unit,
+    onPostClick: ((noteId: String) -> Unit)? = null,
+    onMediaClick: ((MediaClickEvent) -> Unit)? = null,
 ) {
     val displayableNotes = if (postResources.isNotEmpty()) {
         if (expanded) postResources else postResources.subList(0, 1)

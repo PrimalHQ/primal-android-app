@@ -27,8 +27,8 @@ import net.primal.android.theme.domain.PrimalTheme
 fun ReferencedNoteCard(
     modifier: Modifier = Modifier,
     data: FeedPostUi,
-    onPostClick: (String) -> Unit,
-    onMediaClick: (MediaClickEvent) -> Unit,
+    onPostClick: ((String) -> Unit)? = null,
+    onMediaClick: ((MediaClickEvent) -> Unit)? = null,
     colors: CardColors = CardDefaults.cardColors(
         containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
     ),
@@ -36,9 +36,10 @@ fun ReferencedNoteCard(
     NoteSurfaceCard(
         modifier = modifier
             .wrapContentHeight()
-            .clickable {
-                onPostClick(data.postId)
-            },
+            .clickable(
+                enabled = onPostClick != null,
+                onClick = { onPostClick?.invoke(data.postId) },
+            ),
         colors = colors,
     ) {
         FeedNoteHeader(
@@ -59,11 +60,11 @@ fun ReferencedNoteCard(
                 .padding(top = 4.dp),
             data = data.toNoteContentUi(),
             expanded = false,
-            onClick = { onPostClick(data.postId) },
-            onProfileClick = { onPostClick(data.postId) },
-            onPostClick = { postId -> onPostClick(postId) },
-            onUrlClick = { onPostClick(data.postId) },
-            onHashtagClick = { onPostClick(data.postId) },
+            onClick = { onPostClick?.invoke(data.postId) },
+            onProfileClick = { onPostClick?.invoke(data.postId) },
+            onPostClick = { postId -> onPostClick?.invoke(postId) },
+            onUrlClick = { onPostClick?.invoke(data.postId) },
+            onHashtagClick = { onPostClick?.invoke(data.postId) },
             onMediaClick = onMediaClick,
         )
 

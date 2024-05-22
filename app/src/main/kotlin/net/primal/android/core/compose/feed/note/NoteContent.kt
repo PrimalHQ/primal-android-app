@@ -116,16 +116,16 @@ fun NoteContent(
     modifier: Modifier = Modifier,
     data: NoteContentUi,
     expanded: Boolean,
-    onProfileClick: (String) -> Unit,
-    onPostClick: (String) -> Unit,
-    onClick: (Offset) -> Unit,
-    onUrlClick: (String) -> Unit,
-    onHashtagClick: (String) -> Unit,
-    onMediaClick: (MediaClickEvent) -> Unit,
     textSelectable: Boolean = false,
     highlightColor: Color = AppTheme.colorScheme.secondary,
     contentColor: Color = AppTheme.colorScheme.onSurface,
     referencedNoteContainerColor: Color = AppTheme.extraColorScheme.surfaceVariantAlt1,
+    onProfileClick: ((String) -> Unit)? = null,
+    onPostClick: ((String) -> Unit)? = null,
+    onClick: ((Offset) -> Unit)? = null,
+    onUrlClick: ((String) -> Unit)? = null,
+    onHashtagClick: ((String) -> Unit)? = null,
+    onMediaClick: ((MediaClickEvent) -> Unit)? = null,
 ) {
     val displaySettings = LocalContentDisplaySettings.current
     val seeMoreText = stringResource(id = R.string.feed_see_more)
@@ -156,12 +156,13 @@ fun NoteContent(
                         end = position,
                     ).firstOrNull()?.let { annotation ->
                         when (annotation.tag) {
-                            PROFILE_ID_ANNOTATION_TAG -> onProfileClick(annotation.item)
-                            URL_ANNOTATION_TAG -> onUrlClick(annotation.item)
-                            NOTE_ANNOTATION_TAG -> onPostClick(annotation.item)
-                            HASHTAG_ANNOTATION_TAG -> onHashtagClick(annotation.item)
+                            PROFILE_ID_ANNOTATION_TAG -> onProfileClick?.invoke(annotation.item)
+                            URL_ANNOTATION_TAG -> onUrlClick?.invoke(annotation.item)
+                            NOTE_ANNOTATION_TAG -> onPostClick?.invoke(annotation.item)
+                            HASHTAG_ANNOTATION_TAG -> onHashtagClick?.invoke(annotation.item)
+                            else -> Unit
                         }
-                    } ?: onClick(offset)
+                    } ?: onClick?.invoke(offset)
                 },
             )
         }

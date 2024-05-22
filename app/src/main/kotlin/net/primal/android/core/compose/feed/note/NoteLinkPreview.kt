@@ -28,7 +28,7 @@ fun NoteLinkPreview(
     description: String?,
     thumbnailUrl: String?,
     thumbnailImageSize: DpSize,
-    onClick: () -> Unit,
+    onClick: (() -> Unit)? = null,
 ) {
     Column(
         modifier = Modifier
@@ -42,7 +42,7 @@ fun NoteLinkPreview(
                 color = AppTheme.colorScheme.outline,
                 shape = AppTheme.shapes.small,
             )
-            .clickable(onClick = onClick),
+            .clickable(enabled = onClick != null, onClick = { onClick?.invoke() }),
     ) {
         if (thumbnailUrl != null) {
             SubcomposeAsyncImage(

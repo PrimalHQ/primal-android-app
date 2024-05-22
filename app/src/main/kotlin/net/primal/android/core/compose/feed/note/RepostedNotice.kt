@@ -27,7 +27,7 @@ import net.primal.android.theme.AppTheme
 fun RepostedNotice(
     modifier: Modifier,
     repostedByAuthor: String,
-    onRepostAuthorClick: () -> Unit,
+    onRepostAuthorClick: (() -> Unit)? = null,
 ) {
     Box(
         modifier = modifier,
@@ -51,7 +51,7 @@ fun RepostedNotice(
             },
             style = AppTheme.typography.bodyMedium,
             onClick = { _, _ ->
-                onRepostAuthorClick()
+                onRepostAuthorClick?.invoke()
             },
             inlineContent = mapOf(
                 "icon" to InlineTextContent(

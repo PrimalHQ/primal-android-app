@@ -45,6 +45,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -55,10 +57,17 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import java.time.Instant
+import kotlin.time.Duration.Companion.minutes
 import net.primal.android.LocalContentDisplaySettings
 import net.primal.android.R
+import net.primal.android.attachments.domain.CdnImage
+import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalSwitch
 import net.primal.android.core.compose.PrimalTopAppBar
+import net.primal.android.core.compose.feed.model.FeedPostStatsUi
+import net.primal.android.core.compose.feed.model.FeedPostUi
+import net.primal.android.core.compose.feed.note.FeedNoteCard
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.settings.SettingsItem
@@ -135,6 +144,8 @@ fun AppearanceSettingsScreen(
                     },
                 )
 
+                PrimalDivider(modifier = Modifier.padding(horizontal = 8.dp))
+
                 FontSizeSection(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -142,6 +153,12 @@ fun AppearanceSettingsScreen(
                     onNoteAppearanceChanged = {
                         eventPublisher(UiEvent.ChangeNoteAppearance(noteAppearance = it))
                     },
+                )
+
+                PrimalDivider(modifier = Modifier.padding(horizontal = 8.dp))
+
+                NotePreviewSection(
+                    modifier = Modifier.fillMaxWidth(),
                 )
             }
         },
@@ -271,6 +288,7 @@ private fun ThemeBox(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun FontSizeSection(modifier: Modifier, onNoteAppearanceChanged: (NoteAppearance) -> Unit) {
+    val haptic = LocalHapticFeedback.current
     val contentDisplaySettings = LocalContentDisplaySettings.current
     Column(
         modifier = modifier,
@@ -283,7 +301,8 @@ private fun FontSizeSection(modifier: Modifier, onNoteAppearanceChanged: (NoteAp
             fontSize = 14.sp,
             lineHeight = 16.sp,
         )
-        Spacer(modifier = Modifier.height(12.dp))
+
+        Spacer(modifier = Modifier.height(4.dp))
 
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -299,7 +318,10 @@ private fun FontSizeSection(modifier: Modifier, onNoteAppearanceChanged: (NoteAp
                     .weight(1f)
                     .padding(horizontal = 16.dp),
                 initialNoteAppearance = contentDisplaySettings.noteAppearance,
-                onNoteAppearanceChanged = onNoteAppearanceChanged,
+                onNoteAppearanceChanged = {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onNoteAppearanceChanged(it)
+                },
             )
             Icon(
                 modifier = Modifier.size(26.dp),
@@ -444,6 +466,54 @@ private fun DrawScope.drawTrack(tickFractions: FloatArray, color: Color) {
         )
     }
 }
+
+@Composable
+private fun NotePreviewSection(modifier: Modifier) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        Text(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp),
+            text = stringResource(id = R.string.settings_appearance_note_preview_section_title).uppercase(),
+            fontWeight = FontWeight.W500,
+            fontSize = 14.sp,
+            lineHeight = 16.sp,
+        )
+
+        FeedNoteCard(
+            modifier = Modifier.padding(horizontal = 4.dp),
+            data = NotePreviewTemplate,
+            noteOptionsMenuEnabled = false,
+        )
+    }
+}
+
+private val NotePreviewTemplate = FeedPostUi(
+    postId = "random",
+    authorId = "author",
+    authorHandle = "",
+    authorName = "preston",
+    authorInternetIdentifier = "preston@primal.net",
+    authorAvatarCdnImage = CdnImage(
+        sourceUrl = "https://primal.b-cdn.net/media-cache?s=o&a=1&u=https%3A%2F%2Fi.imgur.com%2FXf8iV9G.gif",
+    ),
+    content = "Welcome to #Nostr! A magical place where you can speak " +
+        "freely and truly own your account, content, and followers. ✨",
+    hashtags = listOf("#Nostr"),
+    stats = FeedPostStatsUi(
+        repliesCount = 21,
+        satsZapped = 441,
+        userZapped = true,
+        likesCount = 63,
+        userLiked = true,
+        repostsCount = 42,
+        userReposted = true,
+    ),
+    timestamp = Instant.now().minusSeconds(18.minutes.inWholeSeconds),
+    rawNostrEventJson = "",
+)
 
 class AppearanceSettingsUiStateProvider :
     PreviewParameterProvider<AppearanceSettingsContract.UiState> {

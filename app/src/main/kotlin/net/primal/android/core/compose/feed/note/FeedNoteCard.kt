@@ -57,15 +57,16 @@ fun FeedNoteCard(
     expanded: Boolean = false,
     textSelectable: Boolean = false,
     showReplyTo: Boolean = true,
-    onPostClick: (String) -> Unit,
-    onProfileClick: (String) -> Unit,
+    noteOptionsMenuEnabled: Boolean = true,
+    onPostClick: ((String) -> Unit)? = null,
+    onProfileClick: ((String) -> Unit)? = null,
     onPostAction: ((FeedPostAction) -> Unit)? = null,
     onPostLongClickAction: ((FeedPostAction) -> Unit)? = null,
-    onHashtagClick: (String) -> Unit,
-    onMediaClick: (MediaClickEvent) -> Unit,
-    onBookmarkClick: () -> Unit,
-    onMuteUserClick: () -> Unit,
-    onReportContentClick: OnReportContentClick,
+    onHashtagClick: ((String) -> Unit)? = null,
+    onMediaClick: ((MediaClickEvent) -> Unit)? = null,
+    onBookmarkClick: (() -> Unit)? = null,
+    onMuteUserClick: (() -> Unit)? = null,
+    onReportContentClick: OnReportContentClick? = null,
     contentFooter: @Composable () -> Unit = {},
 ) {
     val interactionSource = remember { MutableInteractionSource() }
@@ -76,7 +77,7 @@ fun FeedNoteCard(
             onDismissRequest = { reportDialogVisible = false },
             onReportClick = {
                 reportDialogVisible = false
-                onReportContentClick(it, data.authorId, data.postId)
+                onReportContentClick?.invoke(it, data.authorId, data.postId)
             },
         )
     }
@@ -92,9 +93,10 @@ fun FeedNoteCard(
             .wrapContentHeight()
             .padding(cardPadding)
             .clickable(
+                enabled = onPostClick != null,
                 interactionSource = interactionSource,
                 indication = rememberRipple(),
-                onClick = { onPostClick(data.postId) },
+                onClick = { onPostClick?.invoke(data.postId) },
             ),
         shape = shape,
         colors = colors,
@@ -116,6 +118,7 @@ fun FeedNoteCard(
                 noteRawData = data.rawNostrEventJson,
                 authorId = data.authorId,
                 isBookmarked = data.isBookmarked,
+                enabled = noteOptionsMenuEnabled,
                 onBookmarkClick = onBookmarkClick,
                 onMuteUserClick = onMuteUserClick,
                 onReportContentClick = { reportDialogVisible = true },
@@ -129,15 +132,16 @@ fun FeedNoteCard(
                             .padding(horizontal = avatarPaddingDp)
                             .padding(top = 4.dp),
                         repostedByAuthor = data.repostAuthorName,
-                        onRepostAuthorClick = {
-                            if (data.repostAuthorId != null) {
-                                onProfileClick(data.repostAuthorId)
-                            }
+                        onRepostAuthorClick = if (data.repostAuthorId != null && onProfileClick != null) {
+                            { onProfileClick.invoke(data.repostAuthorId) }
+                        } else {
+                            null
                         },
                     )
                 }
 
                 FeedNote(
+                    data = data,
                     fullWidthContent = fullWidthContent,
                     avatarSizeDp = avatarSizeDp,
                     avatarPaddingValues = PaddingValues(start = avatarPaddingDp, top = avatarPaddingDp),
@@ -146,7 +150,6 @@ fun FeedNoteCard(
                         top = avatarPaddingDp,
                         end = overflowIconSizeDp - 8.dp,
                     ),
-                    data = data,
                     headerSingleLine = headerSingleLine,
                     showReplyTo = showReplyTo,
                     forceContentIndent = forceContentIndent,

@@ -49,9 +49,10 @@ fun NoteDropdownMenuIcon(
     noteRawData: String,
     authorId: String,
     isBookmarked: Boolean,
-    onBookmarkClick: () -> Unit,
-    onMuteUserClick: () -> Unit,
-    onReportContentClick: () -> Unit,
+    enabled: Boolean = true,
+    onBookmarkClick: (() -> Unit)? = null,
+    onMuteUserClick: (() -> Unit)? = null,
+    onReportContentClick: (() -> Unit)? = null,
 ) {
     var menuVisible by remember { mutableStateOf(false) }
 
@@ -61,6 +62,7 @@ fun NoteDropdownMenuIcon(
 
     Box(
         modifier = modifier.clickable(
+            enabled = enabled,
             interactionSource = remember { MutableInteractionSource() },
             indication = null,
             onClick = { menuVisible = true },
@@ -116,7 +118,7 @@ fun NoteDropdownMenuIcon(
                     stringResource(id = R.string.feed_context_add_to_bookmark)
                 },
                 onClick = {
-                    onBookmarkClick()
+                    onBookmarkClick?.invoke()
                     menuVisible = false
                 },
             )
@@ -185,7 +187,7 @@ fun NoteDropdownMenuIcon(
                 tint = AppTheme.colorScheme.error,
                 text = stringResource(id = R.string.context_menu_mute_user),
                 onClick = {
-                    onMuteUserClick()
+                    onMuteUserClick?.invoke()
                     menuVisible = false
                 },
             )
@@ -194,7 +196,7 @@ fun NoteDropdownMenuIcon(
                 tint = AppTheme.colorScheme.error,
                 text = stringResource(id = R.string.context_menu_report_content),
                 onClick = {
-                    onReportContentClick()
+                    onReportContentClick?.invoke()
                     menuVisible = false
                 },
             )
