@@ -57,7 +57,7 @@ fun NostrUserText(
                 text = displayName,
                 spanStyle = SpanStyle(
                     color = displayNameColor,
-                    fontStyle = AppTheme.typography.bodyMedium.fontStyle,
+                    fontStyle = style.fontStyle,
                     fontWeight = FontWeight.Bold,
                 ),
             ),
