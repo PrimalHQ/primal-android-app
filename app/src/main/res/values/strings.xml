@@ -298,6 +298,7 @@
     <string name="settings_appearance_theme_section_title">Theme</string>
     <string name="settings_appearance_auto_adjust_dark_mode">Auto adjust dark theme</string>
     <string name="settings_appearance_auto_adjust_dark_mode_hint">Automatically set dark theme based on your device Display settings.</string>
+    <string name="settings_appearance_font_section_title">Font</string>
 
     <string name="settings_content_display_title">Content Display</string>
     <string name="settings_content_display_auto_play_videos">Auto play videos</string>

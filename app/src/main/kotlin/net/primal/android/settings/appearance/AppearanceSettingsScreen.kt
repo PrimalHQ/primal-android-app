@@ -1,9 +1,11 @@
 package net.primal.android.settings.appearance
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,17 +21,30 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.FormatSize
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
+import androidx.compose.material3.SliderState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.lerp
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -37,8 +52,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import net.primal.android.LocalContentDisplaySettings
 import net.primal.android.R
 import net.primal.android.core.compose.PrimalSwitch
 import net.primal.android.core.compose.PrimalTopAppBar
@@ -49,6 +66,8 @@ import net.primal.android.settings.appearance.AppearanceSettingsContract.UiEvent
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
+import net.primal.android.user.domain.ContentDisplaySettings
+import net.primal.android.user.domain.NoteAppearance
 
 @Composable
 fun AppearanceSettingsScreen(viewModel: AppearanceSettingsViewModel, onClose: () -> Unit) {
@@ -94,7 +113,7 @@ fun AppearanceSettingsScreen(
                     themes = state.themes,
                     selectedThemeName = state.selectedThemeName,
                     onThemeChange = {
-                        eventPublisher(UiEvent.SelectedThemeChanged(themeName = it))
+                        eventPublisher(UiEvent.ChangeTheme(themeName = it))
                     },
                 )
 
@@ -113,6 +132,15 @@ fun AppearanceSettingsScreen(
                                 )
                             },
                         )
+                    },
+                )
+
+                FontSizeSection(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 16.dp),
+                    onNoteAppearanceChanged = {
+                        eventPublisher(UiEvent.ChangeNoteAppearance(noteAppearance = it))
                     },
                 )
             }
@@ -229,12 +257,190 @@ private fun ThemeBox(
         }
 
         Text(
+            modifier = Modifier.padding(top = 8.dp),
             text = primalTheme.themeName,
             fontWeight = FontWeight.W400,
             fontSize = 16.sp,
             lineHeight = 16.sp,
             textAlign = TextAlign.Center,
             color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun FontSizeSection(modifier: Modifier, onNoteAppearanceChanged: (NoteAppearance) -> Unit) {
+    val contentDisplaySettings = LocalContentDisplaySettings.current
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        Text(
+            text = stringResource(id = R.string.settings_appearance_font_section_title).uppercase(),
+            fontWeight = FontWeight.W500,
+            fontSize = 14.sp,
+            lineHeight = 16.sp,
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                modifier = Modifier.size(22.dp),
+                imageVector = Icons.Default.FormatSize,
+                contentDescription = null,
+                tint = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+            )
+            FontSizeSlider(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 16.dp),
+                initialNoteAppearance = contentDisplaySettings.noteAppearance,
+                onNoteAppearanceChanged = onNoteAppearanceChanged,
+            )
+            Icon(
+                modifier = Modifier.size(26.dp),
+                imageVector = Icons.Default.FormatSize,
+                contentDescription = null,
+                tint = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+            )
+        }
+    }
+}
+
+@ExperimentalMaterial3Api
+@Composable
+private fun FontSizeSlider(
+    modifier: Modifier,
+    initialNoteAppearance: NoteAppearance,
+    onNoteAppearanceChanged: (NoteAppearance) -> Unit,
+) {
+    val state by remember {
+        mutableStateOf(
+            SliderState(
+                value = initialNoteAppearance.asFloat(),
+                steps = 2,
+            ),
+        )
+    }
+
+    LaunchedEffect(state.value) {
+        val noteAppearance = state.value.toNoteAppearance()
+        onNoteAppearanceChanged(noteAppearance)
+    }
+
+    val interactionSource = remember { MutableInteractionSource() }
+    val colors = SliderDefaults.colors(
+        activeTrackColor = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
+        inactiveTrackColor = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
+    )
+
+    Slider(
+        modifier = modifier,
+        state = state,
+        colors = colors,
+        interactionSource = interactionSource,
+        thumb = {
+            SliderDefaults.Thumb(
+                interactionSource = interactionSource,
+                colors = colors,
+                enabled = true,
+            )
+        },
+        track = { FontSizeTrack() },
+    )
+}
+
+private val TrackHeight = 1.dp
+private val TickSize = 6.dp
+private const val FractionSmallFontSize = 0.00f
+private const val FractionDefaultFontSize = 0.33f
+private const val FractionLargeFontSize = 0.66f
+private const val FractionExtraLargeFontSize = 1.00f
+private const val FractionThresholdValue = 0.10f
+
+@Composable
+@ExperimentalMaterial3Api
+private fun FontSizeTrack() {
+    val trackColor = AppTheme.extraColorScheme.onSurfaceVariantAlt4
+    Canvas(modifier = Modifier.fillMaxWidth()) {
+        drawTrack(
+            tickFractions = floatArrayOf(
+                FractionSmallFontSize,
+                FractionDefaultFontSize,
+                FractionLargeFontSize,
+                FractionExtraLargeFontSize,
+            ),
+            color = trackColor,
+        )
+    }
+}
+
+private fun NoteAppearance.asFloat(): Float {
+    return when (this) {
+        NoteAppearance.Small -> FractionSmallFontSize
+        NoteAppearance.Default -> FractionDefaultFontSize
+        NoteAppearance.Large -> FractionLargeFontSize
+        NoteAppearance.ExtraLarge -> FractionExtraLargeFontSize
+    }
+}
+
+private fun Float.aroundFraction(range: Float = FractionThresholdValue): ClosedFloatingPointRange<Float> {
+    return (this - range)..(this + range)
+}
+
+private fun Float.toNoteAppearance(): NoteAppearance {
+    return when (this) {
+        in FractionSmallFontSize.aroundFraction() -> NoteAppearance.Small
+        in FractionDefaultFontSize.aroundFraction() -> NoteAppearance.Default
+        in FractionLargeFontSize.aroundFraction() -> NoteAppearance.Large
+        else -> NoteAppearance.ExtraLarge
+    }
+}
+
+private fun DrawScope.drawTrack(tickFractions: FloatArray, color: Color) {
+    val isRtl = layoutDirection == LayoutDirection.Rtl
+    val sliderLeft = Offset(0f, center.y)
+    val sliderRight = Offset(size.width, center.y)
+    val sliderStart = if (isRtl) sliderRight else sliderLeft
+    val sliderEnd = if (isRtl) sliderLeft else sliderRight
+    val tickSize = TickSize.toPx()
+    val trackStrokeWidth = TrackHeight.toPx()
+    drawLine(
+        color,
+        sliderStart,
+        sliderEnd,
+        trackStrokeWidth,
+        StrokeCap.Round,
+    )
+    val sliderValueEnd = Offset(
+        sliderStart.x +
+            (sliderEnd.x - sliderStart.x) * 1.0f,
+        center.y,
+    )
+
+    val sliderValueStart = Offset(
+        sliderStart.x +
+            (sliderEnd.x - sliderStart.x) * 0.0f,
+        center.y,
+    )
+
+    drawLine(
+        color,
+        sliderValueStart,
+        sliderValueEnd,
+        trackStrokeWidth,
+        StrokeCap.Round,
+    )
+
+    for (tick in tickFractions) {
+        drawCircle(
+            color = color,
+            center = Offset(lerp(sliderStart, sliderEnd, tick).x, center.y),
+            radius = tickSize / 2f,
         )
     }
 }
@@ -256,12 +462,16 @@ fun PreviewAppearanceSettingsScreen(
     @PreviewParameter(AppearanceSettingsUiStateProvider::class)
     state: AppearanceSettingsContract.UiState,
 ) {
-    checkNotNull(state.selectedThemeName)
-    PrimalTheme(primalTheme = PrimalTheme.valueOf(themeName = state.selectedThemeName)!!) {
-        AppearanceSettingsScreen(
-            state = state,
-            onClose = {},
-            eventPublisher = {},
-        )
+    CompositionLocalProvider(
+        LocalContentDisplaySettings provides ContentDisplaySettings(),
+    ) {
+        checkNotNull(state.selectedThemeName)
+        PrimalTheme(primalTheme = PrimalTheme.valueOf(themeName = state.selectedThemeName)!!) {
+            AppearanceSettingsScreen(
+                state = state,
+                onClose = {},
+                eventPublisher = {},
+            )
+        }
     }
 }

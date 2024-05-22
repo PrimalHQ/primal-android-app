@@ -12,10 +12,15 @@ import kotlinx.coroutines.launch
 import net.primal.android.theme.active.ActiveThemeStore
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.theme.findThemeOrDefault
+import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.android.user.domain.NoteAppearance
+import net.primal.android.user.repository.UserRepository
 
 class AppearanceSettingsViewModel @AssistedInject constructor(
     @Assisted private var lastUserPickedPrimalTheme: PrimalTheme,
     private val activeThemeStore: ActiveThemeStore,
+    private val activeAccountStore: ActiveAccountStore,
+    private val userRepository: UserRepository,
 ) : ViewModel() {
     private val _state = MutableStateFlow(AppearanceSettingsContract.UiState())
     val state = _state.asStateFlow()
@@ -60,27 +65,39 @@ class AppearanceSettingsViewModel @AssistedInject constructor(
         viewModelScope.launch {
             events.collect { event ->
                 when (event) {
-                    is AppearanceSettingsContract.UiEvent.SelectedThemeChanged ->
-                        selectedThemeChanged(themeName = event.themeName)
+                    is AppearanceSettingsContract.UiEvent.ChangeTheme ->
+                        setTheme(themeName = event.themeName)
 
                     is AppearanceSettingsContract.UiEvent.ToggleAutoAdjustDarkTheme -> {
                         if (event.enabled) {
-                            selectedThemeChanged(themeName = "")
+                            setTheme(themeName = "")
                         } else {
                             val accent = lastUserPickedPrimalTheme.accent
                             val newTheme = findThemeOrDefault(isDark = event.isSystemInDarkTheme, accent = accent)
-                            selectedThemeChanged(themeName = newTheme.themeName)
+                            setTheme(themeName = newTheme.themeName)
                         }
+                    }
+
+                    is AppearanceSettingsContract.UiEvent.ChangeNoteAppearance -> {
+                        setNoteAppearance(noteAppearance = event.noteAppearance)
                     }
                 }
             }
         }
 
-    private suspend fun selectedThemeChanged(themeName: String) {
+    private suspend fun setTheme(themeName: String) {
         activeThemeStore.setUserTheme(theme = themeName)
         val theme = PrimalTheme.valueOf(themeName = themeName)
         if (theme != null) {
             lastUserPickedPrimalTheme = theme
+        }
+    }
+
+    private fun setNoteAppearance(noteAppearance: NoteAppearance) {
+        viewModelScope.launch {
+            userRepository.updateContentDisplaySettings(userId = activeAccountStore.activeUserId()) {
+                copy(noteAppearance = noteAppearance)
+            }
         }
     }
 }

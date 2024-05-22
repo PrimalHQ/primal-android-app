@@ -1,6 +1,7 @@
 package net.primal.android.settings.appearance
 
 import net.primal.android.theme.domain.PrimalTheme
+import net.primal.android.user.domain.NoteAppearance
 
 interface AppearanceSettingsContract {
     data class UiState(
@@ -9,7 +10,8 @@ interface AppearanceSettingsContract {
     )
 
     sealed class UiEvent {
-        data class SelectedThemeChanged(val themeName: String) : UiEvent()
+        data class ChangeTheme(val themeName: String) : UiEvent()
         data class ToggleAutoAdjustDarkTheme(val enabled: Boolean, val isSystemInDarkTheme: Boolean) : UiEvent()
+        data class ChangeNoteAppearance(val noteAppearance: NoteAppearance) : UiEvent()
     }
 }
