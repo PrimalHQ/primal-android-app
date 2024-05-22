@@ -35,6 +35,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -349,9 +350,15 @@ private fun FontSizeSlider(
         )
     }
 
+    var initialValueChange by remember { mutableStateOf(true) }
+
     LaunchedEffect(state.value) {
-        val noteAppearance = state.value.toNoteAppearance()
-        onNoteAppearanceChanged(noteAppearance)
+        if (!initialValueChange) {
+            val noteAppearance = state.value.toNoteAppearance()
+            onNoteAppearanceChanged(noteAppearance)
+        } else {
+            initialValueChange = false
+        }
     }
 
     val interactionSource = remember { MutableInteractionSource() }
