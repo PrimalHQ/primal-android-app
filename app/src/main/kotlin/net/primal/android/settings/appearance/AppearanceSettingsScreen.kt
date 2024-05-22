@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.FormatSize
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
@@ -70,6 +69,7 @@ import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.feed.note.FeedNoteCard
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
+import net.primal.android.core.compose.icons.primaliconpack.FontSize
 import net.primal.android.core.compose.settings.SettingsItem
 import net.primal.android.settings.appearance.AppearanceSettingsContract.UiEvent
 import net.primal.android.theme.AppTheme
@@ -309,7 +309,7 @@ private fun FontSizeSection(modifier: Modifier, onNoteAppearanceChanged: (NoteAp
         ) {
             Icon(
                 modifier = Modifier.size(22.dp),
-                imageVector = Icons.Default.FormatSize,
+                imageVector = PrimalIcons.FontSize,
                 contentDescription = null,
                 tint = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
             )
@@ -325,7 +325,7 @@ private fun FontSizeSection(modifier: Modifier, onNoteAppearanceChanged: (NoteAp
             )
             Icon(
                 modifier = Modifier.size(26.dp),
-                imageVector = Icons.Default.FormatSize,
+                imageVector = PrimalIcons.FontSize,
                 contentDescription = null,
                 tint = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
             )
