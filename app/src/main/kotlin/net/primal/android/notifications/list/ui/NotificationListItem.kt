@@ -3,12 +3,9 @@ package net.primal.android.notifications.list.ui
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Text
@@ -22,6 +19,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.PlaceholderVerticalAlign
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -151,72 +149,67 @@ private fun NotificationListItem(
                 },
             ),
     ) {
-        Box(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 2.dp),
+        Column(
+            modifier = Modifier.padding(horizontal = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Image(
-                    modifier = Modifier
-                        .padding(top = 10.dp)
-                        .size(32.dp),
-                    painter = imagePainter,
-                    contentDescription = null,
-                )
+            Image(
+                modifier = Modifier
+                    .padding(top = 12.dp)
+                    .size(32.dp),
+                painter = imagePainter,
+                contentDescription = null,
+            )
 
-                val extraStat = notifications.extractExtraStat()
-                if (extraStat != null && extraStat > 0) {
-                    Text(
-                        modifier = Modifier.padding(vertical = 4.dp),
-                        text = extraStat.shortened(),
-                        style = AppTheme.typography.bodySmall,
-                        color = firstNotification.extraStatColor(),
-                    )
-                }
+            val extraStat = notifications.extractExtraStat()
+            if (extraStat != null && extraStat > 0) {
+                Text(
+                    modifier = Modifier.padding(top = 8.dp),
+                    text = extraStat.shortened(),
+                    style = AppTheme.typography.bodySmall,
+                    fontWeight = FontWeight.SemiBold,
+                    color = firstNotification.extraStatColor(),
+                )
             }
         }
 
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 10.dp),
+        val actionPost = firstNotification.actionPost
+        Column(
+            modifier = Modifier.fillMaxWidth(),
         ) {
-            val actionPost = firstNotification.actionPost
-            Column {
-                NotificationHeader(
-                    notifications = notifications,
-                    suffixText = suffixText,
+            NotificationHeader(
+                modifier = Modifier
+                    .padding(top = 12.dp, bottom = 12.dp)
+                    .padding(end = 20.dp),
+                notifications = notifications,
+                suffixText = suffixText,
+                onProfileClick = onProfileClick,
+            )
+
+            val localUriHandler = LocalUriHandler.current
+
+            if (actionPost != null) {
+                NoteContent(
+                    modifier = Modifier.padding(end = 16.dp),
+                    data = actionPost.toNoteContentUi(),
+                    expanded = false,
+                    onClick = { onPostClick?.invoke(actionPost.postId) },
                     onProfileClick = onProfileClick,
+                    onPostClick = onPostClick,
+                    onUrlClick = { localUriHandler.openUriSafely(it) },
+                    onHashtagClick = onHashtagClick,
+                    onMediaClick = onMediaClick,
                 )
 
-                val localUriHandler = LocalUriHandler.current
-
-                if (actionPost != null) {
-                    NoteContent(
-                        modifier = Modifier.padding(top = 8.dp, end = 16.dp),
-                        data = actionPost.toNoteContentUi(),
-                        expanded = false,
-                        onClick = { onPostClick?.invoke(actionPost.postId) },
-                        onProfileClick = onProfileClick,
-                        onPostClick = onPostClick,
-                        onUrlClick = { localUriHandler.openUriSafely(it) },
-                        onHashtagClick = onHashtagClick,
-                        onMediaClick = onMediaClick,
-                    )
-
-                    FeedNoteStatsRow(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 16.dp)
-                            .padding(end = 16.dp),
-                        postStats = actionPost.stats,
-                        onPostAction = onPostAction,
-                        onPostLongPressAction = onPostLongPressAction,
-                    )
-                } else {
-                    Spacer(modifier = Modifier.height(8.dp))
-                }
+                FeedNoteStatsRow(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 16.dp)
+                        .padding(end = 16.dp),
+                    postStats = actionPost.stats,
+                    onPostAction = onPostAction,
+                    onPostLongPressAction = onPostLongPressAction,
+                )
             }
         }
     }
@@ -244,6 +237,7 @@ private fun List<NotificationUi>.extractExtraStat() =
 
 @Composable
 private fun NotificationHeader(
+    modifier: Modifier,
     notifications: List<NotificationUi>,
     suffixText: String,
     onProfileClick: ((String) -> Unit)? = null,
@@ -252,6 +246,7 @@ private fun NotificationHeader(
     val lastNotification = notifications.last()
 
     WrappedContentWithSuffix(
+        modifier = modifier,
         wrappedContent = {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -294,7 +289,6 @@ private fun NotificationHeader(
         },
         suffixFixedContent = {
             Text(
-                modifier = Modifier.padding(end = 20.dp),
                 text = lastNotification.createdAt.asBeforeNowFormat(),
                 textAlign = TextAlign.Center,
                 maxLines = 1,

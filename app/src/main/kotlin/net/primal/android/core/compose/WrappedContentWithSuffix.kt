@@ -9,9 +9,13 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 
 @Composable
-fun WrappedContentWithSuffix(wrappedContent: @Composable () -> Unit, suffixFixedContent: @Composable () -> Unit) {
+fun WrappedContentWithSuffix(
+    modifier: Modifier = Modifier,
+    wrappedContent: @Composable () -> Unit,
+    suffixFixedContent: @Composable () -> Unit,
+) {
     ConstraintLayout(
-        modifier = Modifier.wrapContentWidth(),
+        modifier = modifier.wrapContentWidth(),
     ) {
         val (mainRef, endRef) = createRefs()
 
