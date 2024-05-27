@@ -23,6 +23,7 @@ import net.primal.android.core.compose.attachment.model.isMediaAttachment
 import net.primal.android.core.compose.feed.model.NoteContentUi
 import net.primal.android.core.compose.feed.model.NoteNostrUriUi
 import net.primal.android.core.compose.feed.note.events.MediaClickEvent
+import net.primal.android.core.utils.HashtagMatch
 import net.primal.android.core.utils.HashtagMatcher
 import net.primal.android.feed.db.ReferencedPost
 import net.primal.android.feed.db.ReferencedUser
@@ -35,10 +36,16 @@ private const val PROFILE_ID_ANNOTATION_TAG = "profileId"
 private const val URL_ANNOTATION_TAG = "url"
 private const val NOTE_ANNOTATION_TAG = "note"
 private const val HASHTAG_ANNOTATION_TAG = "hashtag"
+private const val NOSTR_ADDRESS_ANNOTATION_TAG = "naddr"
 
 private fun List<NoteNostrUriUi>.filterMentionedPosts() = filter { it.referencedPost != null }
 
 private fun List<NoteNostrUriUi>.filterMentionedUsers() = filter { it.referencedUser != null }
+
+private fun List<NoteNostrUriUi>.filterUnhandledNostrAddressUris() =
+    filter {
+        it.uri.contains("naddr") && it.referencedUser == null && it.referencedPost == null
+    }
 
 private fun String.removeUrls(urls: List<String>): String {
     var newContent = this
@@ -160,6 +167,12 @@ fun NoteContent(
                             URL_ANNOTATION_TAG -> onUrlClick?.invoke(annotation.item)
                             NOTE_ANNOTATION_TAG -> onPostClick?.invoke(annotation.item)
                             HASHTAG_ANNOTATION_TAG -> onHashtagClick?.invoke(annotation.item)
+                            NOSTR_ADDRESS_ANNOTATION_TAG -> {
+                                annotation.item.split(":").lastOrNull()?.let { address ->
+                                    onUrlClick?.invoke("https://highlighter.com/a/$address")
+                                }
+                            }
+
                             else -> Unit
                         }
                     } ?: onClick?.invoke(offset)
@@ -201,6 +214,7 @@ fun renderContentAsAnnotatedString(
     val linkAttachments = data.attachments.filterNot { it.isMediaAttachment() }
     val mentionedPosts = data.nostrUris.filterMentionedPosts()
     val mentionedUsers = data.nostrUris.filterMentionedUsers()
+    val unhandledNostrAddressUris = data.nostrUris.filterUnhandledNostrAddressUris()
 
     val shouldDeleteLinks = mediaAttachments.isEmpty() && linkAttachments.size == 1 &&
         linkAttachments.first().let { singleLink ->
@@ -228,58 +242,119 @@ fun renderContentAsAnnotatedString(
             )
         }
 
-        data.attachments.filterNot { it.isMediaAttachment() }.map { it.url }.forEach {
-            val startIndex = refinedContent.indexOf(it)
-            if (startIndex >= 0) {
-                val endIndex = startIndex + it.length
-                addStyle(
-                    style = SpanStyle(color = highlightColor),
-                    start = startIndex,
-                    end = endIndex,
-                )
-                addStringAnnotation(
-                    tag = URL_ANNOTATION_TAG,
-                    annotation = it,
-                    start = startIndex,
-                    end = endIndex,
-                )
-            }
+        unhandledNostrAddressUris.forEach {
+            addNostrAddressAnnotation(
+                nostrUri = it,
+                content = refinedContent,
+                highlightColor = highlightColor,
+            )
         }
+
+        data.attachments
+            .filterNot { it.isMediaAttachment() }
+            .map { it.url }
+            .forEach {
+                addUrlAnnotation(refinedContent, it, highlightColor)
+            }
 
         mentionedUsers.forEach {
             checkNotNull(it.referencedUser)
-            val displayHandle = it.referencedUser.displayUsername
-            val startIndex = refinedContent.indexOf(displayHandle)
-            if (startIndex >= 0) {
-                val endIndex = startIndex + displayHandle.length
-                addStyle(
-                    style = SpanStyle(color = highlightColor),
-                    start = startIndex,
-                    end = endIndex,
-                )
-                addStringAnnotation(
-                    tag = PROFILE_ID_ANNOTATION_TAG,
-                    annotation = it.referencedUser.userId,
-                    start = startIndex,
-                    end = endIndex,
-                )
-            }
+            addProfileAnnotation(
+                referencedUser = it.referencedUser,
+                content = refinedContent,
+                highlightColor = highlightColor,
+            )
         }
 
-        HashtagMatcher(content = refinedContent, hashtags = data.hashtags).matches()
+        HashtagMatcher(content = refinedContent, hashtags = data.hashtags)
+            .matches()
             .forEach {
-                addStyle(
-                    style = SpanStyle(color = highlightColor),
-                    start = it.startIndex,
-                    end = it.endIndex,
-                )
-                addStringAnnotation(
-                    tag = HASHTAG_ANNOTATION_TAG,
-                    annotation = it.value,
-                    start = it.startIndex,
-                    end = it.endIndex,
+                addHashtagAnnotation(
+                    hashtagMatch = it,
+                    highlightColor = highlightColor,
                 )
             }
+    }
+}
+
+private fun AnnotatedString.Builder.addHashtagAnnotation(highlightColor: Color, hashtagMatch: HashtagMatch) {
+    addStyle(
+        style = SpanStyle(color = highlightColor),
+        start = hashtagMatch.startIndex,
+        end = hashtagMatch.endIndex,
+    )
+    addStringAnnotation(
+        tag = HASHTAG_ANNOTATION_TAG,
+        annotation = hashtagMatch.value,
+        start = hashtagMatch.startIndex,
+        end = hashtagMatch.endIndex,
+    )
+}
+
+private fun AnnotatedString.Builder.addProfileAnnotation(
+    referencedUser: ReferencedUser,
+    content: String,
+    highlightColor: Color,
+) {
+    val displayHandle = referencedUser.displayUsername
+    val startIndex = content.indexOf(displayHandle)
+    if (startIndex >= 0) {
+        val endIndex = startIndex + displayHandle.length
+        addStyle(
+            style = SpanStyle(color = highlightColor),
+            start = startIndex,
+            end = endIndex,
+        )
+        addStringAnnotation(
+            tag = PROFILE_ID_ANNOTATION_TAG,
+            annotation = referencedUser.userId,
+            start = startIndex,
+            end = endIndex,
+        )
+    }
+}
+
+private fun AnnotatedString.Builder.addUrlAnnotation(
+    url: String,
+    content: String,
+    highlightColor: Color,
+) {
+    val startIndex = content.indexOf(url)
+    if (startIndex >= 0) {
+        val endIndex = startIndex + url.length
+        addStyle(
+            style = SpanStyle(color = highlightColor),
+            start = startIndex,
+            end = endIndex,
+        )
+        addStringAnnotation(
+            tag = URL_ANNOTATION_TAG,
+            annotation = url,
+            start = startIndex,
+            end = endIndex,
+        )
+    }
+}
+
+private fun AnnotatedString.Builder.addNostrAddressAnnotation(
+    nostrUri: NoteNostrUriUi,
+    content: String,
+    highlightColor: Color,
+) {
+    val startIndex = content.indexOf(nostrUri.uri)
+    if (startIndex >= 0) {
+        val endIndex = startIndex + nostrUri.uri.length
+        addStyle(
+            style = SpanStyle(color = highlightColor),
+            start = startIndex,
+            end = endIndex,
+        )
+        addStringAnnotation(
+            tag = NOSTR_ADDRESS_ANNOTATION_TAG,
+            annotation = nostrUri.uri,
+            start = startIndex,
+            end = endIndex,
+        )
     }
 }
 
