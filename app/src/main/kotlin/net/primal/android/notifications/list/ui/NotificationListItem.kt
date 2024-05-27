@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -21,11 +22,22 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.PlaceholderVerticalAlign
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
+import java.time.Instant
+import net.primal.android.LocalContentDisplaySettings
+import net.primal.android.LocalPrimalTheme
 import net.primal.android.R
 import net.primal.android.core.compose.AvatarThumbnailsRow
 import net.primal.android.core.compose.NostrUserText
+import net.primal.android.core.compose.WrappedContentWithSuffix
+import net.primal.android.core.compose.asBeforeNowFormat
 import net.primal.android.core.compose.feed.model.FeedPostAction
+import net.primal.android.core.compose.feed.model.FeedPostStatsUi
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.feed.model.toNoteContentUi
 import net.primal.android.core.compose.feed.note.FeedNoteStatsRow
@@ -36,20 +48,23 @@ import net.primal.android.core.ext.openUriSafely
 import net.primal.android.core.utils.shortened
 import net.primal.android.notifications.domain.NotificationType
 import net.primal.android.theme.AppTheme
+import net.primal.android.theme.PrimalTheme
+import net.primal.android.theme.domain.PrimalTheme.Sunset
+import net.primal.android.user.domain.ContentDisplaySettings
 
 @Composable
 fun NotificationListItem(
     notifications: List<NotificationUi>,
     type: NotificationType,
-    onProfileClick: (String) -> Unit,
-    onNoteClick: (String) -> Unit,
-    onHashtagClick: (String) -> Unit,
-    onMediaClick: (MediaClickEvent) -> Unit,
-    onReplyClick: (String) -> Unit,
-    onPostLikeClick: (FeedPostUi) -> Unit,
-    onRepostClick: (FeedPostUi) -> Unit,
-    onDefaultZapClick: (FeedPostUi) -> Unit,
-    onZapOptionsClick: (FeedPostUi) -> Unit,
+    onProfileClick: ((String) -> Unit)? = null,
+    onNoteClick: ((String) -> Unit)? = null,
+    onHashtagClick: ((String) -> Unit)? = null,
+    onMediaClick: ((MediaClickEvent) -> Unit)? = null,
+    onReplyClick: ((String) -> Unit)? = null,
+    onPostLikeClick: ((FeedPostUi) -> Unit)? = null,
+    onRepostClick: ((FeedPostUi) -> Unit)? = null,
+    onDefaultZapClick: ((FeedPostUi) -> Unit)? = null,
+    onZapOptionsClick: ((FeedPostUi) -> Unit)? = null,
 ) {
     notifications.map { it.actionUserSatsZapped }
 
@@ -72,13 +87,14 @@ fun NotificationListItem(
         imagePainter = type.toImagePainter(),
         suffixText = type.toSuffixText(
             usersZappedCount = notifications.size,
-            totalSatsZapped = when (notifications.size) {
-                1 -> when (type) {
-                    NotificationType.YOUR_POST_WAS_ZAPPED -> postTotalSatsZapped?.shortened()
-                    else -> activeUsersTotalSatsZapped?.shortened()
+            totalSatsZapped = if (notifications.size == 1) {
+                if (type == NotificationType.YOUR_POST_WAS_ZAPPED) {
+                    postTotalSatsZapped?.shortened()
+                } else {
+                    activeUsersTotalSatsZapped?.shortened()
                 }
-
-                else -> postTotalSatsZapped?.shortened()
+            } else {
+                postTotalSatsZapped?.shortened()
             },
         ),
         onProfileClick = onProfileClick,
@@ -86,17 +102,18 @@ fun NotificationListItem(
         onHashtagClick = onHashtagClick,
         onMediaClick = onMediaClick,
         onPostAction = { postAction ->
-            when (postAction) {
-                FeedPostAction.Reply -> postData?.postId?.let(onReplyClick)
-                FeedPostAction.Zap -> postData?.let(onDefaultZapClick)
-                FeedPostAction.Like -> postData?.let(onPostLikeClick)
-                FeedPostAction.Repost -> postData?.let(onRepostClick)
+            if (postData != null) {
+                when (postAction) {
+                    FeedPostAction.Reply -> if (onReplyClick != null) onReplyClick(postData.postId)
+                    FeedPostAction.Zap -> onDefaultZapClick?.invoke(postData)
+                    FeedPostAction.Like -> onPostLikeClick?.invoke(postData)
+                    FeedPostAction.Repost -> onRepostClick?.invoke(postData)
+                }
             }
         },
         onPostLongPressAction = { postAction ->
-            when (postAction) {
-                FeedPostAction.Zap -> postData?.let(onZapOptionsClick)
-                else -> Unit
+            if (postData != null && postAction == FeedPostAction.Zap) {
+                onZapOptionsClick?.invoke(postData)
             }
         },
     )
@@ -107,12 +124,12 @@ private fun NotificationListItem(
     notifications: List<NotificationUi>,
     imagePainter: Painter,
     suffixText: String,
-    onProfileClick: (String) -> Unit,
-    onPostClick: (String) -> Unit,
-    onHashtagClick: (String) -> Unit,
-    onMediaClick: (MediaClickEvent) -> Unit,
-    onPostAction: (FeedPostAction) -> Unit,
-    onPostLongPressAction: (FeedPostAction) -> Unit,
+    onProfileClick: ((String) -> Unit)? = null,
+    onPostClick: ((String) -> Unit)? = null,
+    onHashtagClick: ((String) -> Unit)? = null,
+    onMediaClick: ((MediaClickEvent) -> Unit)? = null,
+    onPostAction: ((FeedPostAction) -> Unit)? = null,
+    onPostLongPressAction: ((FeedPostAction) -> Unit)? = null,
 ) {
     val firstNotification = notifications.first()
 
@@ -122,54 +139,39 @@ private fun NotificationListItem(
             .clickable(
                 enabled = notifications.size == 1 || firstNotification.actionPost != null,
                 onClick = {
-                    when (notifications.size) {
-                        1 -> when (firstNotification.notificationType) {
-                            NotificationType.NEW_USER_FOLLOWED_YOU -> {
-                                firstNotification.actionUserId?.let(onProfileClick)
-                            }
-
-                            else -> firstNotification.actionPost?.postId?.let(onPostClick)
+                    if (notifications.size == 1) {
+                        if (firstNotification.notificationType == NotificationType.NEW_USER_FOLLOWED_YOU) {
+                            firstNotification.actionUserId?.let { onProfileClick?.invoke(it) }
+                        } else {
+                            firstNotification.actionPost?.postId?.let { onPostClick?.invoke(it) }
                         }
-
-                        else -> firstNotification.actionPost?.postId?.let(onPostClick)
+                    } else {
+                        firstNotification.actionPost?.postId?.let { onPostClick?.invoke(it) }
                     }
                 },
             ),
     ) {
         Box(
-            modifier = Modifier.padding(all = 16.dp),
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 2.dp),
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Image(
                     modifier = Modifier
-                        .padding(top = 2.dp)
-                        .size(28.dp),
+                        .padding(top = 10.dp)
+                        .size(32.dp),
                     painter = imagePainter,
                     contentDescription = null,
                 )
 
-                val extraStat = when (firstNotification.notificationType) {
-                    NotificationType.YOUR_POST_WAS_ZAPPED -> notifications.mapNotNull { it.actionUserSatsZapped }.sum()
-                    NotificationType.YOUR_POST_WAS_LIKED -> firstNotification.actionPost?.stats?.likesCount
-                    NotificationType.YOUR_POST_WAS_REPOSTED -> firstNotification.actionPost?.stats?.repostsCount
-                    NotificationType.YOUR_POST_WAS_REPLIED_TO -> firstNotification.actionPost?.stats?.repliesCount
-                    else -> null
-                }
-
+                val extraStat = notifications.extractExtraStat()
                 if (extraStat != null && extraStat > 0) {
                     Text(
                         modifier = Modifier.padding(vertical = 4.dp),
                         text = extraStat.shortened(),
                         style = AppTheme.typography.bodySmall,
-                        color = when (firstNotification.notificationType) {
-                            NotificationType.YOUR_POST_WAS_ZAPPED -> AppTheme.extraColorScheme.zapped
-                            NotificationType.YOUR_POST_WAS_LIKED -> AppTheme.extraColorScheme.liked
-                            NotificationType.YOUR_POST_WAS_REPOSTED -> AppTheme.extraColorScheme.reposted
-                            NotificationType.YOUR_POST_WAS_REPLIED_TO -> AppTheme.extraColorScheme.replied
-                            else -> Color.Unspecified
-                        },
+                        color = firstNotification.extraStatColor(),
                     )
                 }
             }
@@ -178,58 +180,28 @@ private fun NotificationListItem(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 16.dp),
+                .padding(top = 10.dp),
         ) {
             val actionPost = firstNotification.actionPost
-
             Column {
-                AvatarThumbnailsRow(
-                    avatarCdnImages = notifications.map { it.actionUserAvatarCdnImage },
-                    overlapAvatars = false,
-                    hasAvatarBorder = false,
-                    onClick = { index ->
-                        notifications.getOrNull(index)?.actionUserId?.let(onProfileClick)
-                    },
-                )
-
-                val andOthersText = pluralStringResource(
-                    R.plurals.notification_list_item_and_others,
-                    notifications.size - 1,
-                    notifications.size - 1,
-                )
-                NostrUserText(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp)
-                        .padding(end = 16.dp),
-                    style = AppTheme.typography.bodyLarge.copy(
-                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
-                    ),
-                    maxLines = 2,
-                    displayName = firstNotification.actionUserDisplayName ?: "undefined",
-                    displayNameColor = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
-                    internetIdentifier = firstNotification.actionUserInternetIdentifier,
-                    internetIdentifierBadgeSize = 14.dp,
-                    internetIdentifierBadgeAlign = PlaceholderVerticalAlign.TextCenter,
-                    annotatedStringSuffixBuilder = {
-                        val appendText = if (notifications.size > 1) andOthersText else suffixText
-                        if (firstNotification.actionUserInternetIdentifier.isNullOrEmpty()) append(' ')
-                        append(appendText)
-                    },
+                NotificationHeader(
+                    notifications = notifications,
+                    suffixText = suffixText,
+                    onProfileClick = onProfileClick,
                 )
 
                 val localUriHandler = LocalUriHandler.current
 
                 if (actionPost != null) {
                     NoteContent(
-                        modifier = Modifier.padding(end = 16.dp),
+                        modifier = Modifier.padding(top = 8.dp, end = 16.dp),
                         data = actionPost.toNoteContentUi(),
                         expanded = false,
-                        onClick = { onPostClick(actionPost.postId) },
+                        onClick = { onPostClick?.invoke(actionPost.postId) },
                         onProfileClick = onProfileClick,
                         onPostClick = onPostClick,
                         onUrlClick = { localUriHandler.openUriSafely(it) },
-                        onHashtagClick = { onHashtagClick(it) },
+                        onHashtagClick = onHashtagClick,
                         onMediaClick = onMediaClick,
                     )
 
@@ -248,6 +220,89 @@ private fun NotificationListItem(
             }
         }
     }
+}
+
+@Composable
+private fun NotificationUi.extraStatColor() =
+    when (this.notificationType) {
+        NotificationType.YOUR_POST_WAS_ZAPPED -> AppTheme.extraColorScheme.zapped
+        NotificationType.YOUR_POST_WAS_LIKED -> AppTheme.extraColorScheme.liked
+        NotificationType.YOUR_POST_WAS_REPOSTED -> AppTheme.extraColorScheme.reposted
+        NotificationType.YOUR_POST_WAS_REPLIED_TO -> AppTheme.extraColorScheme.replied
+        else -> Color.Unspecified
+    }
+
+@Composable
+private fun List<NotificationUi>.extractExtraStat() =
+    when (first().notificationType) {
+        NotificationType.YOUR_POST_WAS_ZAPPED -> this.mapNotNull { it.actionUserSatsZapped }.sum()
+        NotificationType.YOUR_POST_WAS_LIKED -> first().actionPost?.stats?.likesCount
+        NotificationType.YOUR_POST_WAS_REPOSTED -> first().actionPost?.stats?.repostsCount
+        NotificationType.YOUR_POST_WAS_REPLIED_TO -> first().actionPost?.stats?.repliesCount
+        else -> null
+    }
+
+@Composable
+private fun NotificationHeader(
+    notifications: List<NotificationUi>,
+    suffixText: String,
+    onProfileClick: ((String) -> Unit)? = null,
+) {
+    val firstNotification = notifications.first()
+    val lastNotification = notifications.last()
+
+    WrappedContentWithSuffix(
+        wrappedContent = {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                AvatarThumbnailsRow(
+                    avatarCdnImages = notifications.map { it.actionUserAvatarCdnImage },
+                    overlapAvatars = false,
+                    hasAvatarBorder = false,
+                    onClick = { index ->
+                        notifications.getOrNull(index)?.actionUserId?.let { onProfileClick?.invoke(it) }
+                    },
+                )
+
+                val andOthersText = pluralStringResource(
+                    R.plurals.notification_list_item_and_others,
+                    notifications.size - 1,
+                    notifications.size - 1,
+                )
+                NostrUserText(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 8.dp, end = 8.dp, top = 4.dp),
+                    style = AppTheme.typography.bodyMedium.copy(
+                        color = AppTheme.colorScheme.onSurface,
+                    ),
+                    maxLines = 2,
+                    displayName = firstNotification.actionUserDisplayName ?: "undefined",
+                    displayNameColor = AppTheme.colorScheme.onSurface,
+                    internetIdentifier = firstNotification.actionUserInternetIdentifier,
+                    internetIdentifierBadgeSize = 14.dp,
+                    internetIdentifierBadgeAlign = PlaceholderVerticalAlign.TextCenter,
+                    overflow = TextOverflow.Ellipsis,
+                    annotatedStringSuffixBuilder = {
+                        val appendText = if (notifications.size > 1) andOthersText else suffixText
+                        if (firstNotification.actionUserInternetIdentifier.isNullOrEmpty()) append(' ')
+                        append(appendText)
+                    },
+                )
+            }
+        },
+        suffixFixedContent = {
+            Text(
+                modifier = Modifier.padding(end = 20.dp),
+                text = lastNotification.createdAt.asBeforeNowFormat(),
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                style = AppTheme.typography.bodySmall,
+                color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
+            )
+        },
+    )
 }
 
 @Composable
@@ -353,3 +408,162 @@ private fun NotificationType.toSuffixText(usersZappedCount: Int = 0, totalSatsZa
             id = R.string.notification_list_item_post_where_you_post_was_mentioned_was_replied_to,
         )
     }
+
+private val PreviewExamplePost = FeedPostUi(
+    authorHandle = "alex",
+    authorId = "",
+    authorName = "Alex",
+    content = "This is an example of #Nostr note.",
+    hashtags = listOf("#Nostr"),
+    postId = "",
+    rawNostrEventJson = "",
+    stats = FeedPostStatsUi(),
+    timestamp = Instant.now(),
+)
+
+private class NotificationsParameterProvider : PreviewParameterProvider<List<NotificationUi>> {
+    override val values: Sequence<List<NotificationUi>>
+        get() = sequenceOf(
+            listOf(
+                NotificationUi(
+                    ownerId = "",
+                    notificationType = NotificationType.NEW_USER_FOLLOWED_YOU,
+                    createdAt = Instant.now(),
+                    actionUserDisplayName = "alex",
+                    actionUserInternetIdentifier = "alex@primal.net",
+                    actionUserId = "",
+                ),
+            ),
+            listOf(
+                NotificationUi(
+                    ownerId = "",
+                    notificationType = NotificationType.NEW_USER_FOLLOWED_YOU,
+                    createdAt = Instant.now(),
+                    actionUserDisplayName = "miljan",
+                    actionUserInternetIdentifier = "miljan@primal.net",
+                    actionUserId = "",
+                ),
+                NotificationUi(
+                    ownerId = "",
+                    notificationType = NotificationType.NEW_USER_FOLLOWED_YOU,
+                    createdAt = Instant.now(),
+                    actionUserDisplayName = "Alex",
+                    actionUserInternetIdentifier = "alex@primal.net",
+                    actionUserId = "",
+                ),
+            ),
+            listOf(
+                NotificationUi(
+                    ownerId = "",
+                    notificationType = NotificationType.YOUR_POST_WAS_ZAPPED,
+                    createdAt = Instant.now(),
+                    actionUserDisplayName = "Satoshi",
+                    actionUserInternetIdentifier = "satoshi@primal.net",
+                    actionUserId = "",
+                    actionPost = PreviewExamplePost,
+                    actionUserSatsZapped = 2121,
+                ),
+            ),
+            listOf(
+                NotificationUi(
+                    ownerId = "",
+                    notificationType = NotificationType.YOUR_POST_WAS_ZAPPED,
+                    createdAt = Instant.now(),
+                    actionUserDisplayName = "Satoshi Nakamoto",
+                    actionUserInternetIdentifier = "satoshi@primal.net",
+                    actionUserId = "",
+                    actionPost = PreviewExamplePost,
+                    actionUserSatsZapped = 2121,
+                ),
+                NotificationUi(
+                    ownerId = "",
+                    notificationType = NotificationType.YOUR_POST_WAS_ZAPPED,
+                    createdAt = Instant.now(),
+                    actionUserDisplayName = "Satoshi Nakamoto",
+                    actionUserInternetIdentifier = "satoshi@primal.net",
+                    actionUserId = "",
+                    actionPost = PreviewExamplePost,
+                    actionUserSatsZapped = 2121,
+                ),
+            ),
+            listOf(
+                NotificationUi(
+                    ownerId = "",
+                    notificationType = NotificationType.YOUR_POST_WAS_LIKED,
+                    createdAt = Instant.now(),
+                    actionUserDisplayName = "Satoshi",
+                    actionUserInternetIdentifier = "satoshi@primal.net",
+                    actionUserId = "",
+                    actionPost = PreviewExamplePost,
+                    actionUserSatsZapped = 2121,
+                ),
+            ),
+            listOf(
+                NotificationUi(
+                    ownerId = "",
+                    notificationType = NotificationType.YOUR_POST_WAS_REPOSTED,
+                    createdAt = Instant.now(),
+                    actionUserDisplayName = "Satoshi",
+                    actionUserInternetIdentifier = "satoshi@primal.net",
+                    actionUserId = "",
+                    actionPost = PreviewExamplePost,
+                    actionUserSatsZapped = 2121,
+                ),
+            ),
+            listOf(
+                NotificationUi(
+                    ownerId = "",
+                    notificationType = NotificationType.YOUR_POST_WAS_REPLIED_TO,
+                    createdAt = Instant.now(),
+                    actionUserDisplayName = "Satoshi Nakamoto",
+                    actionUserInternetIdentifier = "satoshi@primal.net",
+                    actionUserId = "",
+                    actionPost = PreviewExamplePost,
+                    actionUserSatsZapped = 2121,
+                ),
+            ),
+            listOf(
+                NotificationUi(
+                    ownerId = "",
+                    notificationType = NotificationType.YOU_WERE_MENTIONED_IN_POST,
+                    createdAt = Instant.now(),
+                    actionUserDisplayName = "Satoshi Nakamoto",
+                    actionUserInternetIdentifier = "satoshi@primal.net",
+                    actionUserId = "",
+                    actionPost = PreviewExamplePost,
+                    actionUserSatsZapped = 2121,
+                ),
+            ),
+            listOf(
+                NotificationUi(
+                    ownerId = "",
+                    notificationType = NotificationType.YOUR_POST_WAS_MENTIONED_IN_POST,
+                    createdAt = Instant.now(),
+                    actionUserDisplayName = "Satoshi Nakamoto",
+                    actionUserInternetIdentifier = "satoshi@primal.net",
+                    actionUserId = "",
+                    actionPost = PreviewExamplePost,
+                    actionUserSatsZapped = 2121,
+                ),
+            ),
+        )
+}
+
+@Preview
+@Composable
+private fun PreviewNotificationsListItem(
+    @PreviewParameter(NotificationsParameterProvider::class)
+    notifications: List<NotificationUi>,
+) {
+    CompositionLocalProvider(
+        LocalPrimalTheme provides Sunset,
+        LocalContentDisplaySettings provides ContentDisplaySettings(),
+    ) {
+        PrimalTheme(primalTheme = Sunset) {
+            NotificationListItem(
+                notifications = notifications,
+                type = notifications.first().notificationType,
+            )
+        }
+    }
+}
