@@ -36,6 +36,15 @@ fun String.isNostrUri(): Boolean {
         uri.startsWith(NEVENT) || uri.startsWith(NPROFILE)
 }
 
+fun String.cleanNostrUris(): String =
+    this
+        .replace("@$NOSTR", NOSTR)
+        .replace("@$NPUB", NPUB)
+        .replace("@$NOTE", NOTE)
+        .replace("@$NEVENT", NEVENT)
+        .replace("@$NADDR", NADDR)
+        .replace("@$NPROFILE", NPROFILE)
+
 fun String.isNote() = lowercase().startsWith(NOTE)
 
 fun String.isNPub() = lowercase().startsWith(NPUB)

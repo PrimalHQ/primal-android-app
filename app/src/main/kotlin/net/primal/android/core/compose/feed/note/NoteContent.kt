@@ -27,6 +27,7 @@ import net.primal.android.core.utils.HashtagMatch
 import net.primal.android.core.utils.HashtagMatcher
 import net.primal.android.feed.db.ReferencedPost
 import net.primal.android.feed.db.ReferencedUser
+import net.primal.android.nostr.ext.cleanNostrUris
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
@@ -223,6 +224,7 @@ fun renderContentAsAnnotatedString(
         }
 
     val refinedContent = data.content
+        .cleanNostrUris()
         .removeUrls(urls = mediaAttachments.map { it.url })
         .removeUrls(urls = if (!shouldKeepNostrNoteUris) mentionedPosts.map { it.uri } else emptyList())
         .removeUrls(urls = if (shouldDeleteLinks) linkAttachments.map { it.url } else emptyList())
@@ -430,7 +432,6 @@ fun PreviewPostContentWithReferencedPost() {
                                     authorLightningAddress = "h@getalby.com",
                                     attachments = emptyList(),
                                     nostrUris = emptyList(),
-
                                 ),
                                 referencedUser = null,
                             ),
