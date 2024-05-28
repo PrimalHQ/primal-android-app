@@ -320,6 +320,7 @@ private fun NotificationsList(
             NotificationListItem(
                 notifications = it,
                 type = it.first().notificationType,
+                isSeen = false,
                 onProfileClick = onProfileClick,
                 onNoteClick = onNoteClick,
                 onReplyClick = onNoteClick,
@@ -360,6 +361,7 @@ private fun NotificationsList(
                     NotificationListItem(
                         notifications = listOf(item),
                         type = item.notificationType,
+                        isSeen = true,
                         onProfileClick = onProfileClick,
                         onNoteClick = onNoteClick,
                         onReplyClick = onNoteReplyClick,

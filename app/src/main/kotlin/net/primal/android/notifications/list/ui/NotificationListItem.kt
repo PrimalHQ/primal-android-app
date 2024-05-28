@@ -4,10 +4,14 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -54,6 +58,7 @@ import net.primal.android.user.domain.ContentDisplaySettings
 fun NotificationListItem(
     notifications: List<NotificationUi>,
     type: NotificationType,
+    isSeen: Boolean,
     onProfileClick: ((String) -> Unit)? = null,
     onNoteClick: ((String) -> Unit)? = null,
     onHashtagClick: ((String) -> Unit)? = null,
@@ -82,6 +87,7 @@ fun NotificationListItem(
 
     NotificationListItem(
         notifications = notifications,
+        isSeen = isSeen,
         imagePainter = type.toImagePainter(),
         suffixText = type.toSuffixText(
             usersZappedCount = notifications.size,
@@ -120,6 +126,7 @@ fun NotificationListItem(
 @Composable
 private fun NotificationListItem(
     notifications: List<NotificationUi>,
+    isSeen: Boolean,
     imagePainter: Painter,
     suffixText: String,
     onProfileClick: ((String) -> Unit)? = null,
@@ -149,68 +156,112 @@ private fun NotificationListItem(
                 },
             ),
     ) {
-        Column(
-            modifier = Modifier.padding(horizontal = 16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Image(
-                modifier = Modifier
-                    .padding(top = 12.dp)
-                    .size(32.dp),
-                painter = imagePainter,
-                contentDescription = null,
-            )
+        NotificationIconAndExtraStats(
+            icon = imagePainter,
+            notifications = notifications,
+        )
 
-            val extraStat = notifications.extractExtraStat()
-            if (extraStat != null && extraStat > 0) {
-                Text(
-                    modifier = Modifier.padding(top = 8.dp),
-                    text = extraStat.shortened(),
-                    style = AppTheme.typography.bodySmall,
-                    fontWeight = FontWeight.SemiBold,
-                    color = firstNotification.extraStatColor(),
-                )
-            }
-        }
+        NotificationContent(
+            notifications = notifications,
+            isSeen = isSeen,
+            suffixText = suffixText,
+            onProfileClick = onProfileClick,
+            onPostClick = onPostClick,
+            onHashtagClick = onHashtagClick,
+            onMediaClick = onMediaClick,
+            onPostAction = onPostAction,
+            onPostLongPressAction = onPostLongPressAction,
+        )
+    }
+}
 
-        val actionPost = firstNotification.actionPost
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-        ) {
+@Composable
+private fun NotificationContent(
+    notifications: List<NotificationUi>,
+    isSeen: Boolean,
+    suffixText: String,
+    onProfileClick: ((String) -> Unit)?,
+    onPostClick: ((String) -> Unit)?,
+    onHashtagClick: ((String) -> Unit)?,
+    onMediaClick: ((MediaClickEvent) -> Unit)?,
+    onPostAction: ((FeedPostAction) -> Unit)?,
+    onPostLongPressAction: ((FeedPostAction) -> Unit)?,
+) {
+    val firstNotification = notifications.first()
+    val actionPost = firstNotification.actionPost
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        if (notifications.size == 1) {
             NotificationHeader(
-                modifier = Modifier
-                    .padding(top = 12.dp, bottom = 12.dp)
-                    .padding(end = 20.dp),
-                notifications = notifications,
+                modifier = Modifier.padding(top = 12.dp, bottom = 12.dp, end = 12.dp),
+                notification = notifications.first(),
                 suffixText = suffixText,
+                isSeen = isSeen,
                 onProfileClick = onProfileClick,
             )
+        } else {
+            NotificationsGroupHeader(
+                modifier = Modifier.padding(top = 12.dp, bottom = 12.dp, end = 12.dp),
+                notifications = notifications,
+                suffixText = suffixText,
+                isSeen = isSeen,
+                onProfileClick = onProfileClick,
+            )
+        }
 
-            val localUriHandler = LocalUriHandler.current
+        val localUriHandler = LocalUriHandler.current
 
-            if (actionPost != null) {
-                NoteContent(
-                    modifier = Modifier.padding(end = 16.dp),
-                    data = actionPost.toNoteContentUi(),
-                    expanded = false,
-                    onClick = { onPostClick?.invoke(actionPost.postId) },
-                    onProfileClick = onProfileClick,
-                    onPostClick = onPostClick,
-                    onUrlClick = { localUriHandler.openUriSafely(it) },
-                    onHashtagClick = onHashtagClick,
-                    onMediaClick = onMediaClick,
-                )
+        if (actionPost != null) {
+            NoteContent(
+                modifier = Modifier.padding(end = 16.dp),
+                data = actionPost.toNoteContentUi(),
+                expanded = false,
+                onClick = { onPostClick?.invoke(actionPost.postId) },
+                onProfileClick = onProfileClick,
+                onPostClick = onPostClick,
+                onUrlClick = { localUriHandler.openUriSafely(it) },
+                onHashtagClick = onHashtagClick,
+                onMediaClick = onMediaClick,
+            )
 
-                FeedNoteStatsRow(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 16.dp)
-                        .padding(end = 16.dp),
-                    postStats = actionPost.stats,
-                    onPostAction = onPostAction,
-                    onPostLongPressAction = onPostLongPressAction,
-                )
-            }
+            FeedNoteStatsRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 16.dp)
+                    .padding(end = 16.dp),
+                postStats = actionPost.stats,
+                onPostAction = onPostAction,
+                onPostLongPressAction = onPostLongPressAction,
+            )
+        }
+    }
+}
+
+@Composable
+private fun NotificationIconAndExtraStats(icon: Painter, notifications: List<NotificationUi>) {
+    val firstNotification = notifications.first()
+    Column(
+        modifier = Modifier.padding(horizontal = 16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Image(
+            modifier = Modifier
+                .padding(top = 12.dp)
+                .size(32.dp),
+            painter = icon,
+            contentDescription = null,
+        )
+
+        val extraStat = notifications.extractExtraStat()
+        if (extraStat != null && extraStat > 0) {
+            Text(
+                modifier = Modifier.padding(top = 8.dp),
+                text = extraStat.shortened(),
+                style = AppTheme.typography.bodySmall,
+                fontWeight = FontWeight.SemiBold,
+                color = firstNotification.extraStatColor(),
+            )
         }
     }
 }
@@ -238,20 +289,65 @@ private fun List<NotificationUi>.extractExtraStat() =
 @Composable
 private fun NotificationHeader(
     modifier: Modifier,
-    notifications: List<NotificationUi>,
+    notification: NotificationUi,
     suffixText: String,
+    isSeen: Boolean,
     onProfileClick: ((String) -> Unit)? = null,
 ) {
-    val firstNotification = notifications.first()
-    val lastNotification = notifications.last()
-
     WrappedContentWithSuffix(
         modifier = modifier,
         wrappedContent = {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                HeaderContent(
+                    notifications = listOf(notification),
+                    titlePaddingValues = PaddingValues(start = 8.dp, end = 8.dp, top = 4.dp),
+                    suffixText = suffixText,
+                    onProfileClick = onProfileClick,
+                )
+            }
+        },
+        suffixFixedContent = {
+            BadgedBox(
+                modifier = Modifier.fillMaxHeight(),
+                badge = {
+                    if (!isSeen) {
+                        Badge(
+                            modifier = Modifier.align(Alignment.TopEnd),
+                            containerColor = AppTheme.colorScheme.primary,
+                        )
+                    }
+                },
             ) {
+                Text(
+                    modifier = Modifier.padding(end = 8.dp),
+                    text = notification.createdAt.asBeforeNowFormat(),
+                    textAlign = TextAlign.Center,
+                    maxLines = 1,
+                    style = AppTheme.typography.bodySmall,
+                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
+                )
+            }
+        },
+    )
+}
+
+@Composable
+private fun NotificationsGroupHeader(
+    modifier: Modifier,
+    notifications: List<NotificationUi>,
+    suffixText: String,
+    isSeen: Boolean,
+    onProfileClick: ((String) -> Unit)? = null,
+) {
+    val lastNotification = notifications.last()
+
+    Column(
+        modifier = modifier,
+    ) {
+        WrappedContentWithSuffix(
+            wrappedContent = {
                 AvatarThumbnailsRow(
+                    modifier = Modifier.fillMaxWidth(),
                     avatarCdnImages = notifications.map { it.actionUserAvatarCdnImage },
                     overlapAvatars = false,
                     hasAvatarBorder = false,
@@ -259,42 +355,86 @@ private fun NotificationHeader(
                         notifications.getOrNull(index)?.actionUserId?.let { onProfileClick?.invoke(it) }
                     },
                 )
-
-                val andOthersText = pluralStringResource(
-                    R.plurals.notification_list_item_and_others,
-                    notifications.size - 1,
-                    notifications.size - 1,
-                )
-                NostrUserText(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 8.dp, end = 8.dp, top = 4.dp),
-                    style = AppTheme.typography.bodyMedium.copy(
-                        color = AppTheme.colorScheme.onSurface,
-                    ),
-                    maxLines = 2,
-                    displayName = firstNotification.actionUserDisplayName ?: "undefined",
-                    displayNameColor = AppTheme.colorScheme.onSurface,
-                    internetIdentifier = firstNotification.actionUserInternetIdentifier,
-                    internetIdentifierBadgeSize = 14.dp,
-                    internetIdentifierBadgeAlign = PlaceholderVerticalAlign.TextCenter,
-                    overflow = TextOverflow.Ellipsis,
-                    annotatedStringSuffixBuilder = {
-                        val appendText = if (notifications.size > 1) andOthersText else suffixText
-                        if (firstNotification.actionUserInternetIdentifier.isNullOrEmpty()) append(' ')
-                        append(appendText)
+            },
+            suffixFixedContent = {
+                BadgedBox(
+                    modifier = Modifier.fillMaxHeight(),
+                    badge = {
+                        if (!isSeen) {
+                            Badge(
+                                modifier = Modifier.align(Alignment.TopEnd),
+                                containerColor = AppTheme.colorScheme.primary,
+                            )
+                        }
                     },
-                )
-            }
-        },
-        suffixFixedContent = {
-            Text(
-                text = lastNotification.createdAt.asBeforeNowFormat(),
-                textAlign = TextAlign.Center,
-                maxLines = 1,
-                style = AppTheme.typography.bodySmall,
-                color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
-            )
+                ) {
+                    Text(
+                        modifier = Modifier.padding(end = 8.dp),
+                        text = lastNotification.createdAt.asBeforeNowFormat(),
+                        textAlign = TextAlign.Center,
+                        maxLines = 1,
+                        style = AppTheme.typography.bodySmall,
+                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
+                    )
+                }
+            },
+        )
+
+        HeaderContent(
+            notifications = notifications,
+            titlePaddingValues = PaddingValues(end = 8.dp, top = 8.dp),
+            suffixText = suffixText,
+            showAvatars = false,
+            onProfileClick = onProfileClick,
+        )
+    }
+}
+
+@Composable
+private fun HeaderContent(
+    notifications: List<NotificationUi>,
+    titlePaddingValues: PaddingValues,
+    suffixText: String,
+    showAvatars: Boolean = true,
+    onProfileClick: ((String) -> Unit)? = null,
+) {
+    val firstNotification = notifications.first()
+
+    if (showAvatars) {
+        AvatarThumbnailsRow(
+            avatarCdnImages = notifications.map { it.actionUserAvatarCdnImage },
+            overlapAvatars = false,
+            hasAvatarBorder = false,
+            onClick = { index ->
+                notifications.getOrNull(index)?.actionUserId?.let { onProfileClick?.invoke(it) }
+            },
+        )
+    }
+
+    val andOthersText = pluralStringResource(
+        R.plurals.notification_list_item_and_others,
+        notifications.size - 1,
+        notifications.size - 1,
+    )
+
+    NostrUserText(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(titlePaddingValues),
+        style = AppTheme.typography.bodyMedium.copy(
+            color = AppTheme.colorScheme.onSurface,
+        ),
+        maxLines = 2,
+        displayName = firstNotification.actionUserDisplayName ?: "undefined",
+        displayNameColor = AppTheme.colorScheme.onSurface,
+        internetIdentifier = firstNotification.actionUserInternetIdentifier,
+        internetIdentifierBadgeSize = 14.dp,
+        internetIdentifierBadgeAlign = PlaceholderVerticalAlign.TextCenter,
+        overflow = TextOverflow.Ellipsis,
+        annotatedStringSuffixBuilder = {
+            val appendText = if (notifications.size > 1) andOthersText else suffixText
+            if (firstNotification.actionUserInternetIdentifier.isNullOrEmpty()) append(' ')
+            append(appendText)
         },
     )
 }
@@ -545,7 +685,7 @@ private class NotificationsParameterProvider : PreviewParameterProvider<List<Not
 
 @Preview
 @Composable
-private fun PreviewNotificationsListItem(
+private fun PreviewUnseenNotificationsListItem(
     @PreviewParameter(NotificationsParameterProvider::class)
     notifications: List<NotificationUi>,
 ) {
@@ -557,6 +697,27 @@ private fun PreviewNotificationsListItem(
             NotificationListItem(
                 notifications = notifications,
                 type = notifications.first().notificationType,
+                isSeen = false,
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun PreviewSeenNotificationsListItem(
+    @PreviewParameter(NotificationsParameterProvider::class)
+    notifications: List<NotificationUi>,
+) {
+    CompositionLocalProvider(
+        LocalPrimalTheme provides Sunset,
+        LocalContentDisplaySettings provides ContentDisplaySettings(),
+    ) {
+        PrimalTheme(primalTheme = Sunset) {
+            NotificationListItem(
+                notifications = notifications,
+                type = notifications.first().notificationType,
+                isSeen = true,
             )
         }
     }
