@@ -256,7 +256,11 @@ fun renderContentAsAnnotatedString(
             .filterNot { it.isMediaAttachment() }
             .map { it.url }
             .forEach {
-                addUrlAnnotation(refinedContent, it, highlightColor)
+                addUrlAnnotation(
+                    url = it,
+                    content = refinedContent,
+                    highlightColor = highlightColor,
+                )
             }
 
         mentionedUsers.forEach {
