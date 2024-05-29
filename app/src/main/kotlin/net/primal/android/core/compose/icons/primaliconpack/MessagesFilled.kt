@@ -11,27 +11,27 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 import net.primal.android.core.compose.icons.PrimalIcons
 
-public val PrimalIcons.NavMessagesFilled: ImageVector
+public val PrimalIcons.MessagesFilled: ImageVector
     get() {
-        if (_navmessagesfilled != null) {
-            return _navmessagesfilled!!
+        if (_messagesfilled != null) {
+            return _messagesfilled!!
         }
-        _navmessagesfilled = Builder(name = "Navmessagesfilled", defaultWidth = 24.0.dp,
-                defaultHeight = 24.0.dp, viewportWidth = 24.0f, viewportHeight = 24.0f).apply {
+        _messagesfilled = Builder(name = "Messagesfilled", defaultWidth = 24.0.dp, defaultHeight =
+                24.0.dp, viewportWidth = 24.0f, viewportHeight = 24.0f).apply {
             path(fill = SolidColor(Color(0xFFffffff)), stroke = null, strokeLineWidth = 0.0f,
                     strokeLineCap = Butt, strokeLineJoin = Miter, strokeLineMiter = 4.0f,
                     pathFillType = NonZero) {
-                moveTo(0.3983f, 6.6935f)
-                curveTo(0.2332f, 6.5719f, 0.0f, 6.6898f, 0.0f, 6.8948f)
+                moveTo(0.3987f, 6.295f)
+                curveTo(0.2337f, 6.1729f, 0.0f, 6.2907f, 0.0f, 6.4959f)
                 verticalLineTo(18.0f)
                 curveTo(0.0f, 20.2091f, 1.7909f, 22.0f, 4.0f, 22.0f)
                 horizontalLineTo(20.0f)
                 curveTo(22.2091f, 22.0f, 24.0f, 20.2091f, 24.0f, 18.0f)
-                verticalLineTo(6.8948f)
-                curveTo(24.0f, 6.6898f, 23.7668f, 6.5719f, 23.6017f, 6.6935f)
-                lineTo(13.1864f, 14.368f)
-                curveTo(12.4809f, 14.8878f, 11.5191f, 14.8878f, 10.8136f, 14.368f)
-                lineTo(0.3983f, 6.6935f)
+                verticalLineTo(6.4959f)
+                curveTo(24.0f, 6.2907f, 23.7663f, 6.1729f, 23.6013f, 6.295f)
+                lineTo(13.1864f, 14.0f)
+                curveTo(12.4809f, 14.5199f, 11.5191f, 14.5199f, 10.8136f, 14.0f)
+                lineTo(0.3987f, 6.295f)
                 close()
             }
             path(fill = SolidColor(Color(0xFFffffff)), stroke = null, strokeLineWidth = 0.0f,
@@ -50,7 +50,7 @@ public val PrimalIcons.NavMessagesFilled: ImageVector
             }
         }
         .build()
-        return _navmessagesfilled!!
+        return _messagesfilled!!
     }
 
-private var _navmessagesfilled: ImageVector? = null
+private var _messagesfilled: ImageVector? = null

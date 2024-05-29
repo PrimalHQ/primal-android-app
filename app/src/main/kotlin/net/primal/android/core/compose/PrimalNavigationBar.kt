@@ -40,16 +40,16 @@ import net.primal.android.LocalPrimalTheme
 import net.primal.android.R
 import net.primal.android.core.compose.foundation.ClickDebounce
 import net.primal.android.core.compose.icons.PrimalIcons
-import net.primal.android.core.compose.icons.primaliconpack.NavHome
-import net.primal.android.core.compose.icons.primaliconpack.NavHomeFilled
-import net.primal.android.core.compose.icons.primaliconpack.NavMessages
-import net.primal.android.core.compose.icons.primaliconpack.NavMessagesFilled
-import net.primal.android.core.compose.icons.primaliconpack.NavNotifications
-import net.primal.android.core.compose.icons.primaliconpack.NavNotificationsFilled
-import net.primal.android.core.compose.icons.primaliconpack.NavSearch
-import net.primal.android.core.compose.icons.primaliconpack.NavSearchFilled
+import net.primal.android.core.compose.icons.primaliconpack.Home
+import net.primal.android.core.compose.icons.primaliconpack.HomeFilled
+import net.primal.android.core.compose.icons.primaliconpack.Messages
+import net.primal.android.core.compose.icons.primaliconpack.MessagesFilled
 import net.primal.android.core.compose.icons.primaliconpack.NavWalletBolt
 import net.primal.android.core.compose.icons.primaliconpack.NavWalletBoltFilled
+import net.primal.android.core.compose.icons.primaliconpack.Notifications
+import net.primal.android.core.compose.icons.primaliconpack.NotificationsFilled
+import net.primal.android.core.compose.icons.primaliconpack.Search
+import net.primal.android.core.compose.icons.primaliconpack.SearchFilled
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.user.domain.Badges
@@ -313,21 +313,21 @@ enum class PrimalTopLevelDestination {
 
 private fun PrimalTopLevelDestination.imageVector(): ImageVector {
     return when (this) {
-        PrimalTopLevelDestination.Home -> PrimalIcons.NavHome
-        PrimalTopLevelDestination.Explore -> PrimalIcons.NavSearch
+        PrimalTopLevelDestination.Home -> PrimalIcons.Home
+        PrimalTopLevelDestination.Explore -> PrimalIcons.Search
         PrimalTopLevelDestination.Wallet -> PrimalIcons.NavWalletBolt
-        PrimalTopLevelDestination.Messages -> PrimalIcons.NavMessages
-        PrimalTopLevelDestination.Notifications -> PrimalIcons.NavNotifications
+        PrimalTopLevelDestination.Messages -> PrimalIcons.Messages
+        PrimalTopLevelDestination.Notifications -> PrimalIcons.Notifications
     }
 }
 
 private fun PrimalTopLevelDestination.imageVectorSelected(): ImageVector {
     return when (this) {
-        PrimalTopLevelDestination.Home -> PrimalIcons.NavHomeFilled
-        PrimalTopLevelDestination.Explore -> PrimalIcons.NavSearchFilled
+        PrimalTopLevelDestination.Home -> PrimalIcons.HomeFilled
+        PrimalTopLevelDestination.Explore -> PrimalIcons.SearchFilled
         PrimalTopLevelDestination.Wallet -> PrimalIcons.NavWalletBoltFilled
-        PrimalTopLevelDestination.Messages -> PrimalIcons.NavMessagesFilled
-        PrimalTopLevelDestination.Notifications -> PrimalIcons.NavNotificationsFilled
+        PrimalTopLevelDestination.Messages -> PrimalIcons.MessagesFilled
+        PrimalTopLevelDestination.Notifications -> PrimalIcons.NotificationsFilled
     }
 }
 

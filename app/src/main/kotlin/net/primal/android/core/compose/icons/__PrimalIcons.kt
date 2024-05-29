@@ -5,6 +5,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 import net.primal.android.core.compose.icons.primaliconpack.AvatarNostrich
+import net.primal.android.core.compose.icons.primaliconpack.Bookmarks
+import net.primal.android.core.compose.icons.primaliconpack.BookmarksFilled
 import net.primal.android.core.compose.icons.primaliconpack.ConnectRelay
 import net.primal.android.core.compose.icons.primaliconpack.ContextAddBookmark
 import net.primal.android.core.compose.icons.primaliconpack.ContextBroadcast
@@ -24,11 +26,14 @@ import net.primal.android.core.compose.icons.primaliconpack.Delete
 import net.primal.android.core.compose.icons.primaliconpack.Directory
 import net.primal.android.core.compose.icons.primaliconpack.Discuss
 import net.primal.android.core.compose.icons.primaliconpack.Download
+import net.primal.android.core.compose.icons.primaliconpack.Downloads
+import net.primal.android.core.compose.icons.primaliconpack.DownloadsFilled
 import net.primal.android.core.compose.icons.primaliconpack.Edit
 import net.primal.android.core.compose.icons.primaliconpack.Explore
 import net.primal.android.core.compose.icons.primaliconpack.FeedLikes
 import net.primal.android.core.compose.icons.primaliconpack.FeedLikesFilled
 import net.primal.android.core.compose.icons.primaliconpack.FeedPicker
+import net.primal.android.core.compose.icons.primaliconpack.FeedPickerFilled
 import net.primal.android.core.compose.icons.primaliconpack.FeedReplies
 import net.primal.android.core.compose.icons.primaliconpack.FeedRepliesFilled
 import net.primal.android.core.compose.icons.primaliconpack.FeedReposts
@@ -38,6 +43,7 @@ import net.primal.android.core.compose.icons.primaliconpack.FeedZapsFilled
 import net.primal.android.core.compose.icons.primaliconpack.FontSize
 import net.primal.android.core.compose.icons.primaliconpack.Help
 import net.primal.android.core.compose.icons.primaliconpack.Home
+import net.primal.android.core.compose.icons.primaliconpack.HomeFilled
 import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromCamera
 import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromGallery
 import net.primal.android.core.compose.icons.primaliconpack.Key
@@ -45,25 +51,21 @@ import net.primal.android.core.compose.icons.primaliconpack.Keyboard
 import net.primal.android.core.compose.icons.primaliconpack.LightMode
 import net.primal.android.core.compose.icons.primaliconpack.LightningBolt
 import net.primal.android.core.compose.icons.primaliconpack.Link
+import net.primal.android.core.compose.icons.primaliconpack.LongRead
+import net.primal.android.core.compose.icons.primaliconpack.LongReadFilled
 import net.primal.android.core.compose.icons.primaliconpack.Message
 import net.primal.android.core.compose.icons.primaliconpack.Messages
+import net.primal.android.core.compose.icons.primaliconpack.MessagesFilled
 import net.primal.android.core.compose.icons.primaliconpack.More
 import net.primal.android.core.compose.icons.primaliconpack.Mute
 import net.primal.android.core.compose.icons.primaliconpack.MuteUser
-import net.primal.android.core.compose.icons.primaliconpack.NavHome
-import net.primal.android.core.compose.icons.primaliconpack.NavHomeFilled
-import net.primal.android.core.compose.icons.primaliconpack.NavMessages
-import net.primal.android.core.compose.icons.primaliconpack.NavMessagesFilled
-import net.primal.android.core.compose.icons.primaliconpack.NavNotifications
-import net.primal.android.core.compose.icons.primaliconpack.NavNotificationsFilled
-import net.primal.android.core.compose.icons.primaliconpack.NavSearch
-import net.primal.android.core.compose.icons.primaliconpack.NavSearchFilled
 import net.primal.android.core.compose.icons.primaliconpack.NavWallet
 import net.primal.android.core.compose.icons.primaliconpack.NavWalletBolt
 import net.primal.android.core.compose.icons.primaliconpack.NavWalletBoltFilled
 import net.primal.android.core.compose.icons.primaliconpack.NavWalletFilled
 import net.primal.android.core.compose.icons.primaliconpack.NewDM
 import net.primal.android.core.compose.icons.primaliconpack.Notifications
+import net.primal.android.core.compose.icons.primaliconpack.NotificationsFilled
 import net.primal.android.core.compose.icons.primaliconpack.Notrich
 import net.primal.android.core.compose.icons.primaliconpack.Paste
 import net.primal.android.core.compose.icons.primaliconpack.PhotoFromGallery
@@ -74,8 +76,10 @@ import net.primal.android.core.compose.icons.primaliconpack.Read
 import net.primal.android.core.compose.icons.primaliconpack.Report
 import net.primal.android.core.compose.icons.primaliconpack.Repost
 import net.primal.android.core.compose.icons.primaliconpack.Search
+import net.primal.android.core.compose.icons.primaliconpack.SearchFilled
 import net.primal.android.core.compose.icons.primaliconpack.Send
 import net.primal.android.core.compose.icons.primaliconpack.Settings
+import net.primal.android.core.compose.icons.primaliconpack.SettingsFilled
 import net.primal.android.core.compose.icons.primaliconpack.Share
 import net.primal.android.core.compose.icons.primaliconpack.Subtract
 import net.primal.android.core.compose.icons.primaliconpack.Unmute
@@ -107,10 +111,12 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             AvatarDefault,
             AvatarNostrich,
             Search,
+            SearchFilled,
             Home,
             FeedRepostsFilled,
             FeedLikesFilled,
             FeedPicker,
+            FeedPickerFilled,
             FeedZaps,
             FeedZapsFilled,
             FeedLikes,
@@ -160,14 +166,6 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             ContextShare,
             ImportPhotoFromCamera,
             ImportPhotoFromGallery,
-            NavHomeFilled,
-            NavHome,
-            NavMessagesFilled,
-            NavMessages,
-            NavNotificationsFilled,
-            NavNotifications,
-            NavSearchFilled,
-            NavSearch,
             NavWalletFilled,
             NavWallet,
             NavWalletBolt,
@@ -195,6 +193,20 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             Subtract,
             ConnectRelay,
             FontSize,
+            Home,
+            HomeFilled,
+            Downloads,
+            DownloadsFilled,
+            Messages,
+            MessagesFilled,
+            LongRead,
+            LongReadFilled,
+            Notifications,
+            NotificationsFilled,
+            Bookmarks,
+            BookmarksFilled,
+            Settings,
+            SettingsFilled,
         )
         return __PrimalIcons!!
     }

@@ -1,9 +1,7 @@
-@file:Suppress("MagicNumber")
-
 package net.primal.android.core.compose.icons.primaliconpack
 
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.PathFillType.Companion.NonZero
+import androidx.compose.ui.graphics.PathFillType.Companion.EvenOdd
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.StrokeCap.Companion.Butt
 import androidx.compose.ui.graphics.StrokeJoin.Companion.Miter
@@ -22,40 +20,34 @@ public val PrimalIcons.Home: ImageVector
                 viewportWidth = 24.0f, viewportHeight = 24.0f).apply {
             path(fill = SolidColor(Color(0xFFAAAAAA)), stroke = null, strokeLineWidth = 0.0f,
                     strokeLineCap = Butt, strokeLineJoin = Miter, strokeLineMiter = 4.0f,
-                    pathFillType = NonZero) {
-                moveTo(12.8823f, 0.4053f)
-                curveTo(12.3564f, 0.0228f, 11.6438f, 0.0228f, 11.1178f, 0.4053f)
-                lineTo(0.4119f, 8.1914f)
-                curveTo(-0.0348f, 8.5163f, -0.1335f, 9.1417f, 0.1913f, 9.5884f)
-                curveTo(0.5162f, 10.035f, 1.1416f, 10.1337f, 1.5882f, 9.8089f)
-                lineTo(11.1178f, 2.8783f)
-                curveTo(11.6438f, 2.4958f, 12.3564f, 2.4958f, 12.8823f, 2.8783f)
-                lineTo(22.4119f, 9.8089f)
-                curveTo(22.8586f, 10.1337f, 23.484f, 10.035f, 23.8088f, 9.5884f)
-                curveTo(24.1336f, 9.1417f, 24.0349f, 8.5163f, 23.5882f, 8.1914f)
-                lineTo(12.8823f, 0.4053f)
+                    pathFillType = EvenOdd) {
+                moveTo(11.5486f, 1.401f)
+                curveTo(11.8159f, 1.1997f, 12.1841f, 1.1997f, 12.4513f, 1.401f)
+                lineTo(23.4376f, 9.6784f)
+                curveTo(23.7747f, 9.9323f, 23.8528f, 10.4278f, 23.604f, 10.7822f)
+                curveTo(23.3589f, 11.1314f, 22.8938f, 11.2045f, 22.5622f, 10.9547f)
+                lineTo(20.7929f, 9.6216f)
+                lineTo(19.75f, 20.7362f)
+                verticalLineTo(20.7479f)
+                curveTo(19.75f, 21.7144f, 18.9665f, 22.4979f, 18.0f, 22.4979f)
+                horizontalLineTo(6.0001f)
+                curveTo(5.0336f, 22.4979f, 4.2501f, 21.7144f, 4.2501f, 20.7479f)
+                verticalLineTo(20.7362f)
+                lineTo(3.2071f, 9.6216f)
+                lineTo(1.4378f, 10.9547f)
+                curveTo(1.1062f, 11.2045f, 0.6411f, 11.1314f, 0.3959f, 10.7822f)
+                curveTo(0.1471f, 10.4278f, 0.2253f, 9.9323f, 0.5623f, 9.6784f)
+                lineTo(11.5486f, 1.401f)
                 close()
-            }
-            path(fill = SolidColor(Color(0xFFAAAAAA)), stroke = null, strokeLineWidth = 0.0f,
-                    strokeLineCap = Butt, strokeLineJoin = Miter, strokeLineMiter = 4.0f,
-                    pathFillType = NonZero) {
-                moveTo(4.4f, 10.7f)
-                curveTo(4.1482f, 10.8889f, 4.0f, 11.1852f, 4.0f, 11.5f)
-                verticalLineTo(21.0f)
-                curveTo(4.0f, 22.1046f, 4.8954f, 23.0f, 6.0f, 23.0f)
-                horizontalLineTo(18.0f)
-                curveTo(19.1046f, 23.0f, 20.0f, 22.1046f, 20.0f, 21.0f)
-                verticalLineTo(11.5f)
-                curveTo(20.0f, 11.1852f, 19.8518f, 10.8889f, 19.6f, 10.7f)
-                lineTo(18.4f, 9.8f)
-                curveTo(18.2352f, 9.6764f, 18.0f, 9.794f, 18.0f, 10.0f)
-                verticalLineTo(20.0f)
-                curveTo(18.0f, 20.5523f, 17.5523f, 21.0f, 17.0f, 21.0f)
-                horizontalLineTo(7.0f)
-                curveTo(6.4477f, 21.0f, 6.0f, 20.5523f, 6.0f, 20.0f)
-                verticalLineTo(10.0f)
-                curveTo(6.0f, 9.794f, 5.7648f, 9.6764f, 5.6f, 9.8f)
-                lineTo(4.4f, 10.7f)
+                moveTo(12.7521f, 3.5635f)
+                curveTo(12.3068f, 3.228f, 11.6931f, 3.228f, 11.2478f, 3.5635f)
+                lineTo(4.7386f, 8.4677f)
+                lineTo(5.7501f, 19.6879f)
+                curveTo(5.7565f, 20.3728f, 6.3137f, 20.926f, 7.0001f, 20.926f)
+                horizontalLineTo(17.0f)
+                curveTo(17.6864f, 20.926f, 18.2435f, 20.3728f, 18.2499f, 19.6879f)
+                lineTo(19.2614f, 8.4678f)
+                lineTo(12.7521f, 3.5635f)
                 close()
             }
         }

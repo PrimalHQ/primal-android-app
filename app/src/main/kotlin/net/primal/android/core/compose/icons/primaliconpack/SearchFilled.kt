@@ -1,5 +1,3 @@
-@file:Suppress("MagicNumber")
-
 package net.primal.android.core.compose.icons.primaliconpack
 
 import androidx.compose.ui.graphics.Color
@@ -13,14 +11,14 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 import net.primal.android.core.compose.icons.PrimalIcons
 
-public val PrimalIcons.NavSearch: ImageVector
+public val PrimalIcons.SearchFilled: ImageVector
     get() {
-        if (_navsearch != null) {
-            return _navsearch!!
+        if (_searchfilled != null) {
+            return _searchfilled!!
         }
-        _navsearch = Builder(name = "Navsearch", defaultWidth = 24.0.dp, defaultHeight = 24.0.dp,
-                viewportWidth = 24.0f, viewportHeight = 24.0f).apply {
-            path(fill = SolidColor(Color(0xFFAAAAAA)), stroke = null, strokeLineWidth = 0.0f,
+        _searchfilled = Builder(name = "Searchfilled", defaultWidth = 24.0.dp, defaultHeight =
+                24.0.dp, viewportWidth = 24.0f, viewportHeight = 24.0f).apply {
+            path(fill = SolidColor(Color(0xFFffffff)), stroke = null, strokeLineWidth = 0.0f,
                     strokeLineCap = Butt, strokeLineJoin = Miter, strokeLineMiter = 4.0f,
                     pathFillType = EvenOdd) {
                 moveTo(14.7563f, 17.4146f)
@@ -43,7 +41,7 @@ public val PrimalIcons.NavSearch: ImageVector
             }
         }
         .build()
-        return _navsearch!!
+        return _searchfilled!!
     }
 
-private var _navsearch: ImageVector? = null
+private var _searchfilled: ImageVector? = null
