@@ -294,10 +294,10 @@ class NoteEditorViewModel @AssistedInject constructor(
             updateNoteAttachmentState(attachment = updatedAttachment)
 
             val (mimeType, dimensions) = fileAnalyser.extractImageTypeAndDimensions(attachment.localUri)
-            if (mimeType != null && dimensions != null) {
+            if (mimeType != null || dimensions != null) {
                 updatedAttachment = updatedAttachment.copy(
                     mimeType = mimeType,
-                    otherRelevantInfo = dimensions,
+                    dimensionInPixels = dimensions,
                 )
                 updateNoteAttachmentState(updatedAttachment)
             }

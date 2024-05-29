@@ -1,12 +1,19 @@
 package net.primal.android.nostr.ext
 
+import android.net.Uri
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.instanceOf
 import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonPrimitive
+import net.primal.android.editor.domain.NoteAttachment
 import org.junit.Test
+import org.junit.runner.RunWith
 
+@RunWith(AndroidJUnit4::class)
 class TagsTest {
 
     @Test
@@ -51,8 +58,8 @@ class TagsTest {
     @Test
     fun `parseEventTags returns tags for nostrnevent`() {
         val content = "nostr:nevent1qqs0ejzkvqdlqaej8k7edamkvzcnjv77u6npmp2qhdpv" +
-                "swyjvcplafqpp4mhxue69uhkummn9ekx7mqzyrhxagf6h8l9cjngatumrg60uq2" +
-                "2v66qz979pm32v985ek54ndh8gqcyqqqqqqgpldx8x"
+            "swyjvcplafqpp4mhxue69uhkummn9ekx7mqzyrhxagf6h8l9cjngatumrg60uq2" +
+            "2v66qz979pm32v985ek54ndh8gqcyqqqqqqgpldx8x"
         val actual = content.parseEventTags().firstOrNull()
         actual.shouldNotBeNull()
         actual[0].jsonPrimitive.content shouldBe "e"
@@ -93,8 +100,8 @@ class TagsTest {
     @Test
     fun `parsePubkeyTags returns tags for nostrnprofile`() {
         val content = "nostr:nprofile1qqsrhuxx8l9ex335q7he0f09aej04zpazpl" +
-                "0ne2cgukyawd24mayt8gpp4mhxue69uhhytnc9e3k7mgpz4mhxue69uh" +
-                "kg6nzv9ejuumpv34kytnrdaksjlyr9p"
+            "0ne2cgukyawd24mayt8gpp4mhxue69uhhytnc9e3k7mgpz4mhxue69uh" +
+            "kg6nzv9ejuumpv34kytnrdaksjlyr9p"
         val actual = content.parsePubkeyTags().firstOrNull()
         actual.shouldNotBeNull()
         actual[0].jsonPrimitive.content shouldBe "p"
@@ -105,7 +112,7 @@ class TagsTest {
     @Test
     fun `parsePubkeyTags returns tags for nprofile`() {
         val content = "nprofile1qqsrhuxx8l9ex335q7he0f09aej04zpazpl0ne2cgukyawd24mayt" +
-                "8gpp4mhxue69uhhytnc9e3k7mgpz4mhxue69uhkg6nzv9ejuumpv34kytnrdaksjlyr9p"
+            "8gpp4mhxue69uhhytnc9e3k7mgpz4mhxue69uhkg6nzv9ejuumpv34kytnrdaksjlyr9p"
         val actual = content.parsePubkeyTags().firstOrNull()
         actual.shouldNotBeNull()
         actual[0].jsonPrimitive.content shouldBe "p"
@@ -131,4 +138,55 @@ class TagsTest {
         actual[1].jsonPrimitive.content shouldBe "7e7e9c42a91bfef19fa929e5fda1b72e0ebc1a4c1141673e2794234d86addf4e"
     }
 
+    private fun createNoteAttachment(
+        uri: Uri = Uri.EMPTY,
+        remoteUrl: String? = "https://uploads.primal.net/image.jpg",
+        mimeType: String? = null,
+        originalHash: String? = null,
+        uploadedHash: String? = null,
+        sizeInBytes: Int? = null,
+        dimensionInPixels: String? = null,
+        uploadError: Throwable? = null,
+    ): NoteAttachment {
+        return NoteAttachment(
+            localUri = uri,
+            remoteUrl = remoteUrl,
+            mimeType = mimeType,
+            originalHash = originalHash,
+            uploadedHash = uploadedHash,
+            sizeInBytes = sizeInBytes,
+            dimensionInPixels = dimensionInPixels,
+            uploadError = uploadError,
+        )
+    }
+
+    @Test
+    fun createsIMetaTag_withMimeTypeIfAvailable() {
+        createNoteAttachment(mimeType = "image/jpeg").asIMetaTag()
+            .shouldContain(JsonPrimitive("m image/jpeg"))
+    }
+
+    @Test
+    fun createsIMetaTag_withDimensionsIfAvailable() {
+        createNoteAttachment(dimensionInPixels = "100x200").asIMetaTag()
+            .shouldContain(JsonPrimitive("dim 100x200"))
+    }
+
+    @Test
+    fun createsIMetaTag_withSizeInBytesIfAvailable() {
+        createNoteAttachment(sizeInBytes = 6425281).asIMetaTag()
+            .shouldContain(JsonPrimitive("size 6425281"))
+    }
+
+    @Test
+    fun createsIMetaTag_withOriginalHashIfAvailable() {
+        createNoteAttachment(originalHash = "original").asIMetaTag()
+            .shouldContain(JsonPrimitive("ox original"))
+    }
+
+    @Test
+    fun createsIMetaTag_withUploadedHashIfAvailable() {
+        createNoteAttachment(uploadedHash = "uploaded").asIMetaTag()
+            .shouldContain(JsonPrimitive("x uploaded"))
+    }
 }

@@ -19,7 +19,7 @@ import net.primal.android.editor.domain.NoteAttachment
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.db.eventHintsUpserter
 import net.primal.android.nostr.ext.asEventIdTag
-import net.primal.android.nostr.ext.asImageTag
+import net.primal.android.nostr.ext.asIMetaTag
 import net.primal.android.nostr.ext.asPubkeyTag
 import net.primal.android.nostr.ext.isPubKeyTag
 import net.primal.android.nostr.ext.parseEventTags
@@ -137,9 +137,9 @@ class NoteRepository @Inject constructor(
         /* Hashtag tags */
         val hashtagTags = content.parseHashtagTags().toSet()
 
-        /* Image tags */
+        /* iMeta tags */
         val attachmentUrls = attachments.mapNotNull { it.remoteUrl }
-        val imageTags = attachments.filter { it.isImageAttachment }.map { it.asImageTag() }
+        val iMetaTags = attachments.filter { it.isImageAttachment }.map { it.asIMetaTag() }
 
         /* Content */
         val refinedContent = if (attachmentUrls.isEmpty()) {
@@ -162,7 +162,7 @@ class NoteRepository @Inject constructor(
         return nostrPublisher.publishShortTextNote(
             userId = activeAccountStore.activeUserId(),
             content = refinedContent,
-            tags = pubkeyTags + noteTags + hashtagTags + imageTags,
+            tags = pubkeyTags + noteTags + hashtagTags + iMetaTags,
             outboxRelays = outboxRelays,
         )
     }

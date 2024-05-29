@@ -78,12 +78,18 @@ fun String.asIdentifierTag(): JsonArray =
         add(this@asIdentifierTag)
     }
 
-fun NoteAttachment.asImageTag(): JsonArray =
-    buildJsonArray {
-        add("image")
-        add(this@asImageTag.remoteUrl)
-        if (this@asImageTag.otherRelevantInfo != null) add(this@asImageTag.otherRelevantInfo)
+fun NoteAttachment.asIMetaTag(): JsonArray {
+    require(this.remoteUrl != null)
+    return buildJsonArray {
+        add("imeta")
+        add("url ${this@asIMetaTag.remoteUrl}")
+        this@asIMetaTag.mimeType?.let { add("m $it") }
+        this@asIMetaTag.uploadedHash?.let { add("x $it") }
+        this@asIMetaTag.originalHash?.let { add("ox $it") }
+        this@asIMetaTag.sizeInBytes?.let { add("size $it") }
+        this@asIMetaTag.dimensionInPixels?.let { add("dim $it") }
     }
+}
 
 fun String.parseEventTags(marker: String? = null): List<JsonArray> {
     val nostrUris = parseNostrUris()
