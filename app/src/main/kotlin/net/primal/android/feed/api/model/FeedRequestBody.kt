@@ -11,4 +11,5 @@ data class FeedRequestBody(
     @SerialName("limit") val limit: Int? = null,
     @SerialName("until") val until: Long? = null,
     @SerialName("since") val since: Long? = null,
+    @SerialName("order") val order: String? = null,
 )
