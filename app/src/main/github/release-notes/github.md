@@ -1,6 +1,7 @@
 ## Features
 - Video uploads;
 - Adjust note font size;
-- Add image tags to notes;
+- NIP-92 support with image dimensions and mime-type;
 - Notifications facelift;
 - Clickable nostr:naddr links;
+- Implemented invoice rendering in notes (feed & chat);

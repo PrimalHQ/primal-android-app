@@ -1,1 +1,1 @@
-Video uploads, adjust note font size and add image tags to notes. Notifications facelift & clickable nostr:naddr links.
+Video uploads, adjust note font size, NIP-92 support, notifications facelift, clickable nostr:naddr links & invoice rendering in notes.
