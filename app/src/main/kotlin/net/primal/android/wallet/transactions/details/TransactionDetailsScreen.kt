@@ -82,6 +82,7 @@ import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.feed.note.FeedNoteCard
 import net.primal.android.core.compose.feed.note.FeedNoteHeader
+import net.primal.android.core.compose.feed.note.events.InvoicePayClickEvent
 import net.primal.android.core.compose.feed.note.events.MediaClickEvent
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
@@ -111,6 +112,7 @@ fun TransactionDetailsScreen(
     onProfileClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
     onMediaClick: (MediaClickEvent) -> Unit,
+    onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
 ) {
     val uiState = viewModel.state.collectAsState()
 
@@ -121,6 +123,7 @@ fun TransactionDetailsScreen(
         onProfileClick = onProfileClick,
         onHashtagClick = onHashtagClick,
         onMediaClick = onMediaClick,
+        onPayInvoiceClick = onPayInvoiceClick,
     )
 }
 
@@ -133,6 +136,7 @@ fun TransactionDetailsScreen(
     onProfileClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
     onMediaClick: (MediaClickEvent) -> Unit,
+    onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
 ) {
     val scrollState = rememberScrollState()
     val showTopBarDivider by remember { derivedStateOf { scrollState.value > 0 } }
@@ -207,6 +211,7 @@ fun TransactionDetailsScreen(
                         onProfileClick = onProfileClick,
                         onHashtagClick = onHashtagClick,
                         onMediaClick = onMediaClick,
+                        onPayInvoiceClick = onPayInvoiceClick,
                         onMuteUserClick = {},
                         onReportContentClick = { _, _, _ -> },
                         onBookmarkClick = {},

@@ -18,6 +18,7 @@ import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.feed.model.FeedPostStatsUi
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.feed.model.toNoteContentUi
+import net.primal.android.core.compose.feed.note.events.InvoicePayClickEvent
 import net.primal.android.core.compose.feed.note.events.MediaClickEvent
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
@@ -29,6 +30,7 @@ fun ReferencedNoteCard(
     data: FeedPostUi,
     onPostClick: ((String) -> Unit)? = null,
     onMediaClick: ((MediaClickEvent) -> Unit)? = null,
+    onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
     colors: CardColors = CardDefaults.cardColors(
         containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
     ),
@@ -66,6 +68,7 @@ fun ReferencedNoteCard(
             onUrlClick = { onPostClick?.invoke(data.postId) },
             onHashtagClick = { onPostClick?.invoke(data.postId) },
             onMediaClick = onMediaClick,
+            onPayInvoiceClick = onPayInvoiceClick,
         )
 
         Spacer(modifier = Modifier.height(12.dp))

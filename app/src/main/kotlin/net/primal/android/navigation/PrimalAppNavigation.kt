@@ -604,6 +604,9 @@ private fun NavGraphBuilder.feed(
                 mediaPositionMs = it.positionMs,
             )
         },
+        onPayInvoiceClick = {
+            navController.navigateToWalletCreateTransaction(lnbc = it.lnbc)
+        },
         onGoToWallet = { navController.navigateToWallet() },
         onTopLevelDestinationChanged = onTopLevelDestinationChanged,
         onDrawerScreenClick = onDrawerScreenClick,
@@ -715,6 +718,9 @@ private fun NavGraphBuilder.exploreFeed(
                 mediaPositionMs = it.positionMs,
             )
         },
+        onPayInvoiceClick = {
+            navController.navigateToWalletCreateTransaction(lnbc = it.lnbc)
+        },
         onGoToWallet = { navController.navigateToWallet() },
     )
 }
@@ -808,6 +814,9 @@ private fun NavGraphBuilder.chat(
                 mediaPositionMs = it.positionMs,
             )
         },
+        onPayInvoiceClick = {
+            navController.navigateToWalletCreateTransaction(lnbc = it.lnbc)
+        },
     )
 }
 
@@ -875,6 +884,9 @@ private fun NavGraphBuilder.notifications(
                 mediaPositionMs = it.positionMs,
             )
         },
+        onPayInvoiceClick = {
+            navController.navigateToWalletCreateTransaction(lnbc = it.lnbc)
+        },
         onPostQuoteClick = { preFillContent -> navController.navigateToNoteEditor(preFillContent.asNoteEditorArgs()) },
         onNotificationSettings = { navController.navigateToNotificationsSettings() },
         onGoToWallet = { navController.navigateToWallet() },
@@ -913,6 +925,9 @@ private fun NavGraphBuilder.thread(
                 mediaUrl = it.mediaUrl,
                 mediaPositionMs = it.positionMs,
             )
+        },
+        onPayInvoiceClick = {
+            navController.navigateToWalletCreateTransaction(lnbc = it.lnbc)
         },
         onGoToWallet = { navController.navigateToWallet() },
         onExpandReply = { args -> navController.navigateToNoteEditor(args) },
@@ -1004,6 +1019,9 @@ private fun NavGraphBuilder.profile(
                 mediaUrl = it.mediaUrl,
                 mediaPositionMs = it.positionMs,
             )
+        },
+        onPayInvoiceClick = {
+            navController.navigateToWalletCreateTransaction(lnbc = it.lnbc)
         },
         onGoToWallet = { navController.navigateToWallet() },
     )

@@ -34,6 +34,7 @@ import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.feed.model.FeedPostAction
 import net.primal.android.core.compose.feed.model.FeedPostStatsUi
 import net.primal.android.core.compose.feed.model.FeedPostUi
+import net.primal.android.core.compose.feed.note.events.InvoicePayClickEvent
 import net.primal.android.core.compose.feed.note.events.MediaClickEvent
 import net.primal.android.profile.report.OnReportContentClick
 import net.primal.android.profile.report.ReportUserDialog
@@ -64,6 +65,7 @@ fun FeedNoteCard(
     onPostLongClickAction: ((FeedPostAction) -> Unit)? = null,
     onHashtagClick: ((String) -> Unit)? = null,
     onMediaClick: ((MediaClickEvent) -> Unit)? = null,
+    onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
     onBookmarkClick: (() -> Unit)? = null,
     onMuteUserClick: (() -> Unit)? = null,
     onReportContentClick: OnReportContentClick? = null,
@@ -161,6 +163,7 @@ fun FeedNoteCard(
                     onMediaClick = onMediaClick,
                     onPostAction = onPostAction,
                     onPostLongClickAction = onPostLongClickAction,
+                    onPayInvoiceClick = onPayInvoiceClick,
                     contentFooter = contentFooter,
                 )
             }

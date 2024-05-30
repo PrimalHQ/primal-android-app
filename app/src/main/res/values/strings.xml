@@ -114,6 +114,38 @@
         <item quantity="other">%1$s years ago</item>
     </plurals>
 
+    <string name="timestamp_in_less_than_a_minute">in less than a minute</string>
+    <string name="timestamp_in_minutes">in %1$sm</string>
+    <string name="timestamp_in_hours">in %1$sh</string>
+    <string name="timestamp_in_days">in %1$sd</string>
+    <string name="timestamp_in_weeks">in %1$sw</string>
+    <string name="timestamp_in_months">in %1$smo</string>
+    <string name="timestamp_in_years">in %1$sy</string>
+    <plurals name="timestamp_in_minutes">
+        <item quantity="one">in a minute</item>
+        <item quantity="other">in %1$s minutes</item>
+    </plurals>
+    <plurals name="timestamp_in_hours">
+        <item quantity="one">in an hour</item>
+        <item quantity="other">in %1$s hours</item>
+    </plurals>
+    <plurals name="timestamp_in_days">
+        <item quantity="one">in a day</item>
+        <item quantity="other">in %1$s days</item>
+    </plurals>
+    <plurals name="timestamp_in_weeks">
+        <item quantity="one">in a week</item>
+        <item quantity="other">in %1$s weeks</item>
+    </plurals>
+    <plurals name="timestamp_in_months">
+        <item quantity="one">in a month</item>
+        <item quantity="other">in %1$s months</item>
+    </plurals>
+    <plurals name="timestamp_in_years">
+        <item quantity="one">in a year</item>
+        <item quantity="other">in %1$s years</item>
+    </plurals>
+
     <string name="feed_list_title">My Nostr Feeds</string>
     <string name="feed_no_content">There is no content in this feed.</string>
     <string name="feed_error_loading">Unable to load content for this feed. Please try again.</string>
@@ -139,6 +171,11 @@
     <string name="feed_context_report_user">Report user</string>
     <string name="feed_context_mute_user">Mute user</string>
     <string name="feed_context_copied_toast">Copied!</string>
+
+    <string name="feed_lightning_invoice_title">Lightning Invoice</string>
+    <string name="feed_lightning_invoice_pay_button">Pay</string>
+    <string name="feed_lightning_invoice_expires_in">Expires: %1$s</string>
+    <string name="feed_lightning_invoice_expired">This invoice has expired</string>
 
     <string name="post_repost_button_confirmation">Repost Note</string>
     <string name="post_quote_button_confirmation">Quote Note</string>

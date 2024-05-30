@@ -14,9 +14,11 @@ import kotlinx.coroutines.withContext
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.navigation.draftTransaction
+import net.primal.android.navigation.lnbc
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.profile.db.ProfileData
 import net.primal.android.profile.repository.ProfileRepository
+import net.primal.android.scanner.analysis.WalletTextParser
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.api.model.MiningFeeTier
 import net.primal.android.wallet.api.model.WithdrawRequestBody
@@ -38,11 +40,12 @@ class CreateTransactionViewModel @Inject constructor(
     private val activeUserStore: ActiveAccountStore,
     private val profileRepository: ProfileRepository,
     private val walletRepository: WalletRepository,
+    private val walletTextParser: WalletTextParser,
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(
-        UiState(transaction = savedStateHandle.draftTransaction),
-    )
+    private val argLnbc = savedStateHandle.lnbc
+
+    private val _state = MutableStateFlow(UiState(transaction = savedStateHandle.draftTransaction))
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
 
@@ -51,9 +54,18 @@ class CreateTransactionViewModel @Inject constructor(
 
     init {
         subscribeToEvents()
-        observeProfileData()
-        fetchProfileData()
         updateMiningFees()
+
+        if (argLnbc != null) {
+            viewModelScope.launch {
+                parseInvoiceAndUpdateState(text = argLnbc)
+                observeProfileData()
+                fetchProfileData()
+            }
+        } else {
+            observeProfileData()
+            fetchProfileData()
+        }
     }
 
     private fun subscribeToEvents() =
@@ -124,6 +136,7 @@ class CreateTransactionViewModel @Inject constructor(
                                     lastTierIndex != null && lastTierIndex < tiers.size -> lastTierIndex
                                     else -> 0
                                 }
+
                                 else -> null
                             },
                         )
@@ -145,6 +158,24 @@ class CreateTransactionViewModel @Inject constructor(
             feeInBtc = this.estimatedFee.amount,
             minAmountInBtc = this.minimumAmount?.amount,
         )
+    }
+
+    private suspend fun parseInvoiceAndUpdateState(text: String) {
+        setState { copy(parsingInvoice = true) }
+        val userId = activeUserStore.activeUserId()
+        try {
+            val draftTx = walletTextParser.parseAndQueryText(userId = userId, text = text)
+            if (draftTx != null) {
+                setState { copy(transaction = draftTx) }
+            } else {
+                Timber.w("Unable to parse text. [text=$text]")
+            }
+        } catch (error: WssException) {
+            Timber.w(error)
+            setState { copy(error = error) }
+        } finally {
+            setState { copy(parsingInvoice = false) }
+        }
     }
 
     private fun observeProfileData() =

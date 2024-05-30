@@ -8,6 +8,7 @@ interface CreateTransactionContract {
 
     data class UiState(
         val transaction: DraftTx,
+        val parsingInvoice: Boolean = false,
         val fetchingMiningFees: Boolean = false,
         val miningFeeTiers: List<MiningFeeUi> = emptyList(),
         val selectedFeeTierIndex: Int? = null,

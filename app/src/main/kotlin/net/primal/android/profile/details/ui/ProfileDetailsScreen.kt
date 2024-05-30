@@ -50,6 +50,7 @@ import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.feed.list.FeedLazyColumn
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.feed.note.ConfirmFirstBookmarkAlertDialog
+import net.primal.android.core.compose.feed.note.events.InvoicePayClickEvent
 import net.primal.android.core.compose.feed.note.events.MediaClickEvent
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
@@ -80,6 +81,7 @@ fun ProfileDetailsScreen(
     onDrawerQrCodeClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
     onMediaClick: (MediaClickEvent) -> Unit,
+    onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
     onFollowsClick: (String, ProfileFollowsType) -> Unit,
     onGoToWallet: () -> Unit,
 ) {
@@ -105,6 +107,7 @@ fun ProfileDetailsScreen(
         onDrawerQrCodeClick = onDrawerQrCodeClick,
         onHashtagClick = onHashtagClick,
         onMediaClick = onMediaClick,
+        onPayInvoiceClick = onPayInvoiceClick,
         onGoToWallet = onGoToWallet,
         onFollowsClick = onFollowsClick,
         eventPublisher = { viewModel.setEvent(it) },
@@ -129,6 +132,7 @@ fun ProfileDetailsScreen(
     onDrawerQrCodeClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
     onMediaClick: (MediaClickEvent) -> Unit,
+    onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
     onGoToWallet: () -> Unit,
     onFollowsClick: (String, ProfileFollowsType) -> Unit,
     eventPublisher: (ProfileDetailsContract.UiEvent) -> Unit,
@@ -291,6 +295,7 @@ fun ProfileDetailsScreen(
                 },
                 onHashtagClick = onHashtagClick,
                 onMediaClick = onMediaClick,
+                onPayInvoiceClick = onPayInvoiceClick,
                 onGoToWallet = onGoToWallet,
                 onBookmarkClick = { eventPublisher(ProfileDetailsContract.UiEvent.BookmarkAction(noteId = it)) },
                 shouldShowLoadingState = false,

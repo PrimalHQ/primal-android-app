@@ -426,6 +426,7 @@ private fun ReplyToNote(replyToNote: FeedPostUi, connectionLineColor: Color) {
             onUrlClick = {},
             onHashtagClick = {},
             onMediaClick = {},
+            onPayInvoiceClick = {},
         )
     }
 }

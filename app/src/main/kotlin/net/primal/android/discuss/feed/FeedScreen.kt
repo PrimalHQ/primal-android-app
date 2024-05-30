@@ -50,6 +50,7 @@ import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.compose.feed.list.FeedNoteList
 import net.primal.android.core.compose.feed.model.FeedPostsSyncStats
 import net.primal.android.core.compose.feed.note.ConfirmFirstBookmarkAlertDialog
+import net.primal.android.core.compose.feed.note.events.InvoicePayClickEvent
 import net.primal.android.core.compose.feed.note.events.MediaClickEvent
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -75,6 +76,7 @@ fun FeedScreen(
     onProfileClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
     onMediaClick: (MediaClickEvent) -> Unit,
+    onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
     onGoToWallet: () -> Unit,
     onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
@@ -98,6 +100,7 @@ fun FeedScreen(
         onProfileClick = onProfileClick,
         onHashtagClick = onHashtagClick,
         onMediaClick = onMediaClick,
+        onPayInvoiceClick = onPayInvoiceClick,
         onGoToWallet = onGoToWallet,
         onPrimaryDestinationChanged = onTopLevelDestinationChanged,
         onDrawerDestinationClick = onDrawerScreenClick,
@@ -117,6 +120,7 @@ fun FeedScreen(
     onProfileClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
     onMediaClick: (MediaClickEvent) -> Unit,
+    onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
     onGoToWallet: () -> Unit,
     onPrimaryDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
@@ -227,6 +231,7 @@ fun FeedScreen(
                 onScrolledToTop = { eventPublisher(FeedContract.UiEvent.FeedScrolledToTop) },
                 onMuteClick = { eventPublisher(FeedContract.UiEvent.MuteAction(it)) },
                 onMediaClick = onMediaClick,
+                onPayInvoiceClick = onPayInvoiceClick,
                 onBookmarkClick = { eventPublisher(FeedContract.UiEvent.BookmarkAction(noteId = it)) },
                 onReportContentClick = { type, profileId, noteId ->
                     eventPublisher(

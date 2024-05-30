@@ -30,6 +30,7 @@ import net.primal.android.R
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.feed.model.FeedPostsSyncStats
 import net.primal.android.core.compose.feed.model.ZappingState
+import net.primal.android.core.compose.feed.note.events.InvoicePayClickEvent
 import net.primal.android.core.compose.feed.note.events.MediaClickEvent
 import net.primal.android.core.compose.pulltorefresh.LaunchedPullToRefreshEndingEffect
 import net.primal.android.core.compose.pulltorefresh.PrimalPullToRefreshIndicator
@@ -53,6 +54,7 @@ fun FeedNoteList(
     onPostQuoteClick: (FeedPostUi) -> Unit,
     onHashtagClick: (String) -> Unit,
     onMediaClick: (MediaClickEvent) -> Unit,
+    onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
     onGoToWallet: () -> Unit,
     onBookmarkClick: (noteId: String) -> Unit,
     paddingValues: PaddingValues = PaddingValues(0.dp),
@@ -124,6 +126,7 @@ fun FeedNoteList(
             onPostQuoteClick = onPostQuoteClick,
             onHashtagClick = onHashtagClick,
             onMediaClick = onMediaClick,
+            onPayInvoiceClick = onPayInvoiceClick,
             onGoToWallet = onGoToWallet,
             onMuteClick = onMuteClick,
             onReportContentClick = onReportContentClick,

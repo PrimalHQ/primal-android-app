@@ -2,6 +2,7 @@ package net.primal.android.core.utils
 
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
+import java.util.*
 
 fun Int.shortened(): String = toLong().shortened()
 
@@ -20,7 +21,7 @@ fun Long.shortened(): String {
     for ((shorten, multiplier) in multipliers) {
         val total = this.toDouble() / multiplier
         if (total < 10) {
-            val formatted = String.format("%.1f", total)
+            val formatted = String.format(Locale.getDefault(), "%.1f", total)
             val splitString = formatted.split(".0")
             val string = if (splitString.size > 1) splitString[0] else formatted
             return "$string$shorten"

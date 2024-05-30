@@ -63,6 +63,7 @@ import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.asBeforeNowFormat
 import net.primal.android.core.compose.feed.model.toNoteContentUi
 import net.primal.android.core.compose.feed.note.NoteContent
+import net.primal.android.core.compose.feed.note.events.InvoicePayClickEvent
 import net.primal.android.core.compose.feed.note.events.MediaClickEvent
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -83,6 +84,7 @@ fun ChatScreen(
     onNoteClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
     onMediaClick: (MediaClickEvent) -> Unit,
+    onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
 ) {
     val state = viewModel.state.collectAsState()
 
@@ -102,6 +104,7 @@ fun ChatScreen(
         onNoteClick = onNoteClick,
         onHashtagClick = onHashtagClick,
         onMediaClick = onMediaClick,
+        onPayInvoiceClick = onPayInvoiceClick,
         eventPublisher = { viewModel.setEvent(it) },
     )
 }
@@ -115,6 +118,7 @@ fun ChatScreen(
     onNoteClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
     onMediaClick: (MediaClickEvent) -> Unit,
+    onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
     eventPublisher: (ChatContract.UiEvent) -> Unit,
 ) {
     val messagesPagingItems = state.messages.collectAsLazyPagingItems()
@@ -168,6 +172,7 @@ fun ChatScreen(
                 onNoteClick = onNoteClick,
                 onHashtagClick = onHashtagClick,
                 onMediaClick = onMediaClick,
+                onPayInvoiceClick = onPayInvoiceClick,
             )
         },
         bottomBar = {
@@ -208,6 +213,7 @@ private fun ChatList(
     onNoteClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
     onMediaClick: (MediaClickEvent) -> Unit,
+    onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
 ) {
     val localUriHandler = LocalUriHandler.current
 
@@ -258,6 +264,7 @@ private fun ChatList(
                         },
                         onHashtagClick = onHashtagClick,
                         onMediaClick = onMediaClick,
+                        onPayInvoiceClick = onPayInvoiceClick,
                     )
                 }
 
@@ -319,6 +326,7 @@ private fun ChatMessageListItem(
     onUrlClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
     onMediaClick: (MediaClickEvent) -> Unit,
+    onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
 ) {
     val timeDiffBetweenThisAndNextMessage = (nextMessage?.timestamp ?: Instant.MAX).epochSecond -
         chatMessage.timestamp.epochSecond
@@ -412,6 +420,7 @@ private fun ChatMessageListItem(
                 } else {
                     AppTheme.extraColorScheme.surfaceVariantAlt2
                 },
+                onPayInvoiceClick = onPayInvoiceClick,
             )
         }
 

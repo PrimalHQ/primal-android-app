@@ -90,6 +90,7 @@ import net.primal.android.core.compose.feed.model.FeedPostStatsUi
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.feed.note.ConfirmFirstBookmarkAlertDialog
 import net.primal.android.core.compose.feed.note.FeedNoteCard
+import net.primal.android.core.compose.feed.note.events.InvoicePayClickEvent
 import net.primal.android.core.compose.feed.note.events.MediaClickEvent
 import net.primal.android.core.compose.feed.zaps.UnableToZapBottomSheet
 import net.primal.android.core.compose.feed.zaps.ZapBottomSheet
@@ -124,6 +125,7 @@ fun ThreadScreen(
     onProfileClick: (profileId: String) -> Unit,
     onHashtagClick: (String) -> Unit,
     onMediaClick: (MediaClickEvent) -> Unit,
+    onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
     onGoToWallet: () -> Unit,
     onExpandReply: (args: NoteEditorArgs) -> Unit,
     onReactionsClick: (noteId: String) -> Unit,
@@ -149,6 +151,7 @@ fun ThreadScreen(
         onProfileClick = onProfileClick,
         onHashtagClick = onHashtagClick,
         onMediaClick = onMediaClick,
+        onPayInvoiceClick = onPayInvoiceClick,
         onGoToWallet = onGoToWallet,
         onExpandReply = onExpandReply,
         onReactionsClick = onReactionsClick,
@@ -167,6 +170,7 @@ fun ThreadScreen(
     onProfileClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
     onMediaClick: (MediaClickEvent) -> Unit,
+    onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
     onGoToWallet: () -> Unit,
     onExpandReply: (args: NoteEditorArgs) -> Unit,
     onReactionsClick: (noteId: String) -> Unit,
@@ -214,6 +218,7 @@ fun ThreadScreen(
                     onPostReplyClick = onPostReplyClick,
                     onHashtagClick = onHashtagClick,
                     onMediaClick = onMediaClick,
+                    onPayInvoiceClick = onPayInvoiceClick,
                     onPostQuoteClick = onPostQuoteClick,
                     onGoToWallet = onGoToWallet,
                     onReactionsClick = onReactionsClick,
@@ -308,6 +313,7 @@ private fun ThreadConversationLazyColumn(
     onHashtagClick: (String) -> Unit,
     onMediaClick: (MediaClickEvent) -> Unit,
     onPostQuoteClick: (content: TextFieldValue) -> Unit,
+    onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
     onGoToWallet: () -> Unit,
     onReactionsClick: (noteId: String) -> Unit,
     eventPublisher: (ThreadContract.UiEvent) -> Unit,
@@ -454,6 +460,7 @@ private fun ThreadConversationLazyColumn(
             },
             onHashtagClick = onHashtagClick,
             onMediaClick = onMediaClick,
+            onPayInvoiceClick = onPayInvoiceClick,
             onMuteUserClick = { authorId -> eventPublisher(ThreadContract.UiEvent.MuteAction(authorId)) },
             onBookmarkClick = { noteId -> eventPublisher(ThreadContract.UiEvent.BookmarkAction(noteId = noteId)) },
             onReportContentClick = { reportType, profileId, noteId ->
@@ -488,6 +495,7 @@ private fun ThreadLazyColumn(
     onProfileClick: (String) -> Unit,
     onPostAction: ((noteAction: FeedPostAction, note: FeedPostUi) -> Unit)? = null,
     onPostLongClickAction: ((noteAction: FeedPostAction, note: FeedPostUi) -> Unit)? = null,
+    onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
     onHashtagClick: (String) -> Unit,
     onMediaClick: (MediaClickEvent) -> Unit,
     onBookmarkClick: (String) -> Unit,
@@ -531,7 +539,6 @@ private fun ThreadLazyColumn(
                 FeedNoteCard(
                     data = item,
                     shape = RectangleShape,
-                    cardPadding = PaddingValues(all = 0.dp),
                     expanded = true,
                     textSelectable = highlighted,
                     fullWidthContent = highlighted,
@@ -553,6 +560,7 @@ private fun ThreadLazyColumn(
                     onMuteUserClick = { onMuteUserClick(item.authorId) },
                     onReportContentClick = onReportContentClick,
                     onBookmarkClick = { onBookmarkClick(item.postId) },
+                    onPayInvoiceClick = onPayInvoiceClick,
                     contentFooter = {
                         if (highlighted && (state.topZap != null || state.otherZaps.isNotEmpty())) {
                             TopZapsSection(

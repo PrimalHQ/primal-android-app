@@ -65,6 +65,52 @@ fun Instant.asBeforeNowFormat(shortFormat: Boolean = true): String {
 }
 
 @Composable
+fun Instant.asFromNowFormat(shortFormat: Boolean = false): String {
+    val now = LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()
+    val diff = ChronoUnit.SECONDS.between(now, this)
+
+    return when {
+        diff < MINUTE -> stringResource(id = R.string.timestamp_in_less_than_a_minute)
+
+        diff < HOUR -> (diff / MINUTE).format(
+            shortResId = R.string.timestamp_in_minutes,
+            longResId = R.plurals.timestamp_in_minutes,
+            shortFormat = shortFormat,
+        )
+
+        diff < DAY -> (diff / HOUR).format(
+            shortResId = R.string.timestamp_in_hours,
+            longResId = R.plurals.timestamp_in_hours,
+            shortFormat = shortFormat,
+        )
+
+        diff < WEEK -> (diff / DAY).format(
+            shortResId = R.string.timestamp_in_days,
+            longResId = R.plurals.timestamp_in_days,
+            shortFormat = shortFormat,
+        )
+
+        diff < MONTH -> (diff / WEEK).format(
+            shortResId = R.string.timestamp_in_weeks,
+            longResId = R.plurals.timestamp_in_weeks,
+            shortFormat = shortFormat,
+        )
+
+        diff < YEAR -> (diff / MONTH).format(
+            shortResId = R.string.timestamp_in_months,
+            longResId = R.plurals.timestamp_in_months,
+            shortFormat = shortFormat,
+        )
+
+        else -> (diff / YEAR).format(
+            shortResId = R.string.timestamp_in_years,
+            longResId = R.plurals.timestamp_in_years,
+            shortFormat = shortFormat,
+        )
+    }
+}
+
+@Composable
 private fun Long.format(
     @StringRes shortResId: Int,
     @PluralsRes longResId: Int,

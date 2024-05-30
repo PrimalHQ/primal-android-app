@@ -149,6 +149,7 @@ secp256k1-kmp-jni-android = { module = "fr.acinq.secp256k1:secp256k1-kmp-jni-and
 secp256k1-kmp-jni-jvm = { module = "fr.acinq.secp256k1:secp256k1-kmp-jni-jvm", version.ref = "secp256k1-kmp" }
 spongycastle-core = { module = "com.madgag.spongycastle:core", version.ref = "spongycastle" }
 bitcoinj-core = { module = "org.bitcoinj:bitcoinj-core", version.ref = "bitcoinj-core" }
+lightning-kmp = { module = "fr.acinq.lightning:lightning-kmp", version = "1.6.1" }
 
 androidx-security-crypto = { module = "androidx.security:security-crypto", version.ref = "security-crypto" }
 androidx-security-app-authenticator = { module = "androidx.security:security-app-authenticator", version.ref = "security-app-authenticator" }

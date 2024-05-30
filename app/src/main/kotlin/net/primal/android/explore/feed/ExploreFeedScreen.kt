@@ -26,6 +26,7 @@ import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.feed.list.FeedNoteList
 import net.primal.android.core.compose.feed.model.FeedPostsSyncStats
 import net.primal.android.core.compose.feed.note.ConfirmFirstBookmarkAlertDialog
+import net.primal.android.core.compose.feed.note.events.InvoicePayClickEvent
 import net.primal.android.core.compose.feed.note.events.MediaClickEvent
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -50,6 +51,7 @@ fun ExploreFeedScreen(
     onProfileClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
     onMediaClick: (MediaClickEvent) -> Unit,
+    onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
     onGoToWallet: () -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
@@ -63,6 +65,7 @@ fun ExploreFeedScreen(
         onPostQuoteClick = onPostQuoteClick,
         onHashtagClick = onHashtagClick,
         onMediaClick = onMediaClick,
+        onPayInvoiceClick = onPayInvoiceClick,
         onGoToWallet = onGoToWallet,
         eventPublisher = { viewModel.setEvent(it) },
     )
@@ -79,6 +82,7 @@ fun ExploreFeedScreen(
     onProfileClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
     onMediaClick: (MediaClickEvent) -> Unit,
+    onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
     onGoToWallet: () -> Unit,
     eventPublisher: (ExploreFeedContract.UiEvent) -> Unit,
 ) {
@@ -195,6 +199,7 @@ fun ExploreFeedScreen(
                 onGoToWallet = onGoToWallet,
                 onMuteClick = { eventPublisher(ExploreFeedContract.UiEvent.MuteAction(profileId = it)) },
                 onMediaClick = onMediaClick,
+                onPayInvoiceClick = onPayInvoiceClick,
                 onBookmarkClick = { eventPublisher(ExploreFeedContract.UiEvent.BookmarkAction(noteId = it)) },
                 onReportContentClick = { type, profileId, noteId ->
                     eventPublisher(

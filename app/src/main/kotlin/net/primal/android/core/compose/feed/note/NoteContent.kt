@@ -22,6 +22,7 @@ import net.primal.android.core.compose.PrimalClickableText
 import net.primal.android.core.compose.attachment.model.isMediaAttachment
 import net.primal.android.core.compose.feed.model.NoteContentUi
 import net.primal.android.core.compose.feed.model.NoteNostrUriUi
+import net.primal.android.core.compose.feed.note.events.InvoicePayClickEvent
 import net.primal.android.core.compose.feed.note.events.MediaClickEvent
 import net.primal.android.core.utils.HashtagMatch
 import net.primal.android.core.utils.HashtagMatcher
@@ -48,9 +49,9 @@ private fun List<NoteNostrUriUi>.filterUnhandledNostrAddressUris() =
         it.uri.contains("naddr") && it.referencedUser == null && it.referencedPost == null
     }
 
-private fun String.removeUrls(urls: List<String>): String {
+private fun String.remove(texts: List<String>): String {
     var newContent = this
-    urls.forEach {
+    texts.forEach {
         newContent = newContent.replace(it, "")
     }
     return newContent
@@ -134,6 +135,7 @@ fun NoteContent(
     onUrlClick: ((String) -> Unit)? = null,
     onHashtagClick: ((String) -> Unit)? = null,
     onMediaClick: ((MediaClickEvent) -> Unit)? = null,
+    onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
 ) {
     val displaySettings = LocalContentDisplaySettings.current
     val seeMoreText = stringResource(id = R.string.feed_see_more)
@@ -159,25 +161,26 @@ fun NoteContent(
                 text = contentText,
                 textSelectable = textSelectable,
                 onClick = { position, offset ->
-                    contentText.getStringAnnotations(
+                    val annotation = contentText.getStringAnnotations(
                         start = position,
                         end = position,
-                    ).firstOrNull()?.let { annotation ->
-                        when (annotation.tag) {
-                            PROFILE_ID_ANNOTATION_TAG -> onProfileClick?.invoke(annotation.item)
-                            URL_ANNOTATION_TAG -> onUrlClick?.invoke(annotation.item)
-                            NOTE_ANNOTATION_TAG -> onPostClick?.invoke(annotation.item)
-                            HASHTAG_ANNOTATION_TAG -> onHashtagClick?.invoke(annotation.item)
-                            NOSTR_ADDRESS_ANNOTATION_TAG -> {
-                                annotation.item.split(":").lastOrNull()?.let { address ->
-                                    onUrlClick?.invoke("https://highlighter.com/a/$address")
-                                }
-                            }
+                    ).firstOrNull()
 
-                            else -> Unit
-                        }
-                    } ?: onClick?.invoke(offset)
+                    annotation?.handleAnnotationClick(
+                        onProfileClick = onProfileClick,
+                        onUrlClick = onUrlClick,
+                        onPostClick = onPostClick,
+                        onHashtagClick = onHashtagClick,
+                    ) ?: onClick?.invoke(offset)
                 },
+            )
+        }
+
+        if (data.invoices.isNotEmpty()) {
+            NoteLightningInvoice(
+                modifier = Modifier.padding(top = if (contentText.isEmpty()) 4.dp else 6.dp),
+                invoice = data.invoices.first(),
+                onPayClick = { lnbc -> onPayInvoiceClick?.invoke(InvoicePayClickEvent(lnbc = lnbc)) },
             )
         }
 
@@ -199,9 +202,29 @@ fun NoteContent(
                 containerColor = referencedNoteContainerColor,
                 onPostClick = onPostClick,
                 onMediaClick = onMediaClick,
+                onPayInvoiceClick = onPayInvoiceClick,
             )
         }
     }
+}
+
+private fun AnnotatedString.Range<String>.handleAnnotationClick(
+    onProfileClick: ((String) -> Unit)?,
+    onUrlClick: ((String) -> Unit)?,
+    onPostClick: ((String) -> Unit)?,
+    onHashtagClick: ((String) -> Unit)?,
+) = when (this.tag) {
+    PROFILE_ID_ANNOTATION_TAG -> onProfileClick?.invoke(this.item)
+    URL_ANNOTATION_TAG -> onUrlClick?.invoke(this.item)
+    NOTE_ANNOTATION_TAG -> onPostClick?.invoke(this.item)
+    HASHTAG_ANNOTATION_TAG -> onHashtagClick?.invoke(this.item)
+    NOSTR_ADDRESS_ANNOTATION_TAG -> {
+        this.item.split(":").lastOrNull()?.let { address ->
+            onUrlClick?.invoke("https://highlighter.com/a/$address")
+        }
+    }
+
+    else -> Unit
 }
 
 fun renderContentAsAnnotatedString(
@@ -225,9 +248,10 @@ fun renderContentAsAnnotatedString(
 
     val refinedContent = data.content
         .cleanNostrUris()
-        .removeUrls(urls = mediaAttachments.map { it.url })
-        .removeUrls(urls = if (!shouldKeepNostrNoteUris) mentionedPosts.map { it.uri } else emptyList())
-        .removeUrls(urls = if (shouldDeleteLinks) linkAttachments.map { it.url } else emptyList())
+        .remove(texts = mediaAttachments.map { it.url })
+        .remove(texts = if (!shouldKeepNostrNoteUris) mentionedPosts.map { it.uri } else emptyList())
+        .remove(texts = if (shouldDeleteLinks) linkAttachments.map { it.url } else emptyList())
+        .remove(texts = data.invoices)
         .replaceNostrProfileUrisWithHandles(resources = mentionedUsers)
         .clearParsedPrimalLinks()
         .trim()
@@ -397,6 +421,7 @@ fun PreviewPostContent() {
                     onUrlClick = {},
                     onHashtagClick = {},
                     onMediaClick = {},
+                    onPayInvoiceClick = {},
                 )
             }
         }
@@ -457,6 +482,13 @@ fun PreviewPostContentWithReferencedPost() {
                             ),
                         ),
                         hashtags = listOf("#nostr"),
+                        invoices = listOf(
+                            "lnbc888550n1pnp6fz9pp5als09l5nfj9pkqk7mpj6cz6075nd4v95ljz0p65n8zkz03p75t3" +
+                                "sdp9wdshgueqvehhygr3v9q8qunfd4skctnwv46r5cqzzsxqrrs0fppqyyu34ypjxgclynk64hz2r6" +
+                                "ddudpaf5mesp5c8mv8xdu67pra93m3j9aw9mxh08gk09upmjsdpspjxcgcrfjyc0s9qyyssqng6uu0" +
+                                "z84h7wlcrlyqywl6jlfd4630k4yd056d3q9h9rg9tzmza5adpzjn489fees4vq0armdskuqgxxvug3" +
+                                "et34cqdxj6ldu8lkd2cqcvx5am",
+                        ),
                     ),
                     expanded = false,
                     onProfileClick = {},
@@ -465,6 +497,7 @@ fun PreviewPostContentWithReferencedPost() {
                     onUrlClick = {},
                     onHashtagClick = {},
                     onMediaClick = {},
+                    onPayInvoiceClick = {},
                 )
             }
         }

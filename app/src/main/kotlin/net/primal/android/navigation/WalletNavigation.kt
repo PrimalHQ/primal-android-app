@@ -33,11 +33,19 @@ private fun NavController.navigateToWalletActivation() = navigate(route = "walle
 private fun NavController.navigateToWalletSendPayment(tab: SendPaymentTab) =
     navigate(route = "walletSend?$SEND_PAYMENT_TAB=$tab")
 
-fun NavController.navigateToWalletCreateTransaction(draftTransaction: DraftTx) =
+fun NavController.navigateToWalletCreateTransaction(draftTransaction: DraftTx? = null, lnbc: String? = null) {
+    require(draftTransaction != null || lnbc != null)
+    val tx = draftTransaction ?: DraftTx(lnInvoice = lnbc)
     navigate(
-        route = "walletTransaction/create?$DRAFT_TRANSACTION=" +
-            NostrJson.encodeToString(draftTransaction).asBase64Encoded(),
+        route = "walletTransaction/create" +
+            "?$DRAFT_TRANSACTION=${NostrJson.encodeToString(tx).asBase64Encoded()}" +
+            if (lnbc != null) {
+                "&lnbc=$lnbc"
+            } else {
+                ""
+            },
     )
+}
 
 private fun NavController.navigateToWalletReceive() = navigate(route = "walletReceive")
 
@@ -76,9 +84,13 @@ fun NavGraphBuilder.walletNavigation(
     )
 
     createTransaction(
-        route = "walletTransaction/create?$DRAFT_TRANSACTION={$DRAFT_TRANSACTION}",
+        route = "walletTransaction/create?$DRAFT_TRANSACTION={$DRAFT_TRANSACTION}&$LNBC={$LNBC}",
         arguments = listOf(
             navArgument(DRAFT_TRANSACTION) {
+                type = NavType.StringType
+                nullable = true
+            },
+            navArgument(LNBC) {
                 type = NavType.StringType
                 nullable = true
             },
@@ -253,6 +265,9 @@ private fun NavGraphBuilder.transactionDetails(
                 mediaUrl = it.mediaUrl,
                 mediaPositionMs = it.positionMs,
             )
+        },
+        onPayInvoiceClick = {
+            navController.navigateToWalletCreateTransaction(lnbc = it.lnbc)
         },
     )
 }

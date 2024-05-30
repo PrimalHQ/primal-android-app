@@ -53,6 +53,7 @@ import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.compose.feed.RepostOrQuoteBottomSheet
 import net.primal.android.core.compose.feed.model.FeedPostUi
+import net.primal.android.core.compose.feed.note.events.InvoicePayClickEvent
 import net.primal.android.core.compose.feed.note.events.MediaClickEvent
 import net.primal.android.core.compose.feed.zaps.UnableToZapBottomSheet
 import net.primal.android.core.compose.feed.zaps.ZapBottomSheet
@@ -80,6 +81,7 @@ fun NotificationsScreen(
     onPostQuoteClick: (content: TextFieldValue) -> Unit,
     onHashtagClick: (String) -> Unit,
     onMediaClick: (MediaClickEvent) -> Unit,
+    onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
     onNotificationSettings: () -> Unit,
     onGoToWallet: () -> Unit,
     onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
@@ -105,6 +107,7 @@ fun NotificationsScreen(
         onNoteReplyClick = onNoteReplyClick,
         onHashtagClick = onHashtagClick,
         onMediaClick = onMediaClick,
+        onPayInvoiceClick = onPayInvoiceClick,
         onNotificationSettings = onNotificationSettings,
         onPrimaryDestinationChanged = onTopLevelDestinationChanged,
         onDrawerDestinationClick = onDrawerScreenClick,
@@ -124,6 +127,7 @@ fun NotificationsScreen(
     onNoteReplyClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
     onMediaClick: (MediaClickEvent) -> Unit,
+    onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
     onGoToWallet: () -> Unit,
     onPostQuoteClick: (content: TextFieldValue) -> Unit,
     onNotificationSettings: () -> Unit,
@@ -204,6 +208,7 @@ fun NotificationsScreen(
                 onNoteClick = onNoteClick,
                 onHashtagClick = onHashtagClick,
                 onMediaClick = onMediaClick,
+                onPayInvoiceClick = onPayInvoiceClick,
                 onGoToWallet = onGoToWallet,
                 onNoteReplyClick = onNoteReplyClick,
                 onPostLikeClick = {
@@ -264,6 +269,7 @@ private fun NotificationsList(
     onNoteReplyClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
     onMediaClick: (MediaClickEvent) -> Unit,
+    onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
     onGoToWallet: () -> Unit,
     onPostLikeClick: (FeedPostUi) -> Unit,
     onRepostClick: (FeedPostUi) -> Unit,
@@ -326,6 +332,7 @@ private fun NotificationsList(
                 onReplyClick = onNoteClick,
                 onHashtagClick = onHashtagClick,
                 onMediaClick = onMediaClick,
+                onPayInvoiceClick = onPayInvoiceClick,
                 onPostLikeClick = onPostLikeClick,
                 onDefaultZapClick = { postData ->
                     if (state.zappingState.canZap()) {

@@ -34,6 +34,7 @@ import net.primal.android.core.compose.feed.model.FeedPostAction
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.feed.model.ZappingState
 import net.primal.android.core.compose.feed.note.FeedNoteCard
+import net.primal.android.core.compose.feed.note.events.InvoicePayClickEvent
 import net.primal.android.core.compose.feed.note.events.MediaClickEvent
 import net.primal.android.core.compose.feed.zaps.UnableToZapBottomSheet
 import net.primal.android.core.compose.feed.zaps.ZapBottomSheet
@@ -61,6 +62,7 @@ fun FeedLazyColumn(
     onPostQuoteClick: (FeedPostUi) -> Unit,
     onHashtagClick: (String) -> Unit,
     onMediaClick: (MediaClickEvent) -> Unit,
+    onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
     onGoToWallet: () -> Unit,
     onReportContentClick: OnReportContentClick,
     onMuteClick: ((String) -> Unit)? = null,
@@ -189,6 +191,7 @@ fun FeedLazyColumn(
                         onMediaClick = onMediaClick,
                         onReportContentClick = onReportContentClick,
                         onBookmarkClick = { onBookmarkClick(item.postId) },
+                        onPayInvoiceClick = onPayInvoiceClick,
                     )
 
                     PrimalDivider()

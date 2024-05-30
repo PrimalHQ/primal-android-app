@@ -13,6 +13,7 @@ import net.primal.android.core.compose.feed.model.FeedPostStatsUi
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.feed.model.NoteNostrUriUi
 import net.primal.android.core.compose.feed.model.asNoteNostrUriUi
+import net.primal.android.core.compose.feed.note.events.InvoicePayClickEvent
 import net.primal.android.core.compose.feed.note.events.MediaClickEvent
 import net.primal.android.core.utils.parseHashtags
 
@@ -24,6 +25,7 @@ fun ReferencedNotesColumn(
     containerColor: Color,
     onPostClick: ((noteId: String) -> Unit)? = null,
     onMediaClick: ((MediaClickEvent) -> Unit)? = null,
+    onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
 ) {
     val displayableNotes = if (postResources.isNotEmpty()) {
         if (expanded) postResources else postResources.subList(0, 1)
@@ -58,6 +60,7 @@ fun ReferencedNotesColumn(
                 ),
                 onPostClick = onPostClick,
                 onMediaClick = onMediaClick,
+                onPayInvoiceClick = onPayInvoiceClick,
                 colors = CardDefaults.cardColors(containerColor = containerColor),
             )
         }

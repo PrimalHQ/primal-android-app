@@ -44,6 +44,7 @@ import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.feed.model.toNoteContentUi
 import net.primal.android.core.compose.feed.note.FeedNoteStatsRow
 import net.primal.android.core.compose.feed.note.NoteContent
+import net.primal.android.core.compose.feed.note.events.InvoicePayClickEvent
 import net.primal.android.core.compose.feed.note.events.MediaClickEvent
 import net.primal.android.core.compose.notifications.toImagePainter
 import net.primal.android.core.ext.openUriSafely
@@ -63,6 +64,7 @@ fun NotificationListItem(
     onNoteClick: ((String) -> Unit)? = null,
     onHashtagClick: ((String) -> Unit)? = null,
     onMediaClick: ((MediaClickEvent) -> Unit)? = null,
+    onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
     onReplyClick: ((String) -> Unit)? = null,
     onPostLikeClick: ((FeedPostUi) -> Unit)? = null,
     onRepostClick: ((FeedPostUi) -> Unit)? = null,
@@ -105,6 +107,7 @@ fun NotificationListItem(
         onPostClick = onNoteClick,
         onHashtagClick = onHashtagClick,
         onMediaClick = onMediaClick,
+        onPayInvoiceClick = onPayInvoiceClick,
         onPostAction = { postAction ->
             if (postData != null) {
                 when (postAction) {
@@ -133,6 +136,7 @@ private fun NotificationListItem(
     onPostClick: ((String) -> Unit)? = null,
     onHashtagClick: ((String) -> Unit)? = null,
     onMediaClick: ((MediaClickEvent) -> Unit)? = null,
+    onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
     onPostAction: ((FeedPostAction) -> Unit)? = null,
     onPostLongPressAction: ((FeedPostAction) -> Unit)? = null,
 ) {
@@ -171,6 +175,7 @@ private fun NotificationListItem(
             onMediaClick = onMediaClick,
             onPostAction = onPostAction,
             onPostLongPressAction = onPostLongPressAction,
+            onPayInvoiceClick = onPayInvoiceClick,
         )
     }
 }
@@ -186,6 +191,7 @@ private fun NotificationContent(
     onMediaClick: ((MediaClickEvent) -> Unit)?,
     onPostAction: ((FeedPostAction) -> Unit)?,
     onPostLongPressAction: ((FeedPostAction) -> Unit)?,
+    onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
 ) {
     val firstNotification = notifications.first()
     val actionPost = firstNotification.actionPost
@@ -223,6 +229,7 @@ private fun NotificationContent(
                 onUrlClick = { localUriHandler.openUriSafely(it) },
                 onHashtagClick = onHashtagClick,
                 onMediaClick = onMediaClick,
+                onPayInvoiceClick = onPayInvoiceClick,
             )
 
             FeedNoteStatsRow(

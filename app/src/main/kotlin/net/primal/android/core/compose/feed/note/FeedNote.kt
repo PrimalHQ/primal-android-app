@@ -21,6 +21,7 @@ import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.feed.model.FeedPostAction
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.feed.model.toNoteContentUi
+import net.primal.android.core.compose.feed.note.events.InvoicePayClickEvent
 import net.primal.android.core.compose.feed.note.events.MediaClickEvent
 import net.primal.android.core.ext.openUriSafely
 
@@ -42,6 +43,7 @@ fun FeedNote(
     onMediaClick: ((MediaClickEvent) -> Unit)? = null,
     onPostAction: ((FeedPostAction) -> Unit)? = null,
     onPostLongClickAction: ((FeedPostAction) -> Unit)? = null,
+    onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
     contentFooter: @Composable () -> Unit = {},
 ) {
     val localUriHandler = LocalUriHandler.current
@@ -116,6 +118,7 @@ fun FeedNote(
                 },
                 onHashtagClick = onHashtagClick,
                 onMediaClick = onMediaClick,
+                onPayInvoiceClick = onPayInvoiceClick,
             )
 
             contentFooter()

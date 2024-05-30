@@ -52,6 +52,9 @@ inline val SavedStateHandle.draftTransaction: DraftTx
             NostrJson.decodeFromString(it)
         } ?: throw IllegalArgumentException("Missing draft transaction.")
 
+const val LNBC = "lnbc"
+inline val SavedStateHandle.lnbc: String? get() = get<String>(LNBC)
+
 const val TRANSACTION_ID = "transactionId"
 inline val SavedStateHandle.transactionIdOrThrow: String
     get() = get(TRANSACTION_ID) ?: throw IllegalArgumentException("Missing required transactionId argument.")

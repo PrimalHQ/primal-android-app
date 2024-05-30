@@ -275,6 +275,7 @@ dependencies {
 
     implementation(libs.timber)
 
+    implementation(libs.lightning.kmp)
     implementation(libs.bitcoinj.core)
     implementation(libs.secp256k1.kmp.jvm)
     implementation(libs.secp256k1.kmp.jni.android)
