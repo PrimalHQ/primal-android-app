@@ -1,5 +1,6 @@
 package net.primal.android.core.compose.feed.model
 
+import fr.acinq.lightning.payment.Bolt11Invoice
 import net.primal.android.core.compose.attachment.model.NoteAttachmentUi
 import net.primal.android.messages.chat.model.ChatMessageUi
 import net.primal.android.wallet.utils.LnInvoiceUtils
@@ -15,7 +16,7 @@ data class NoteContentUi(
 
 fun FeedPostUi.toNoteContentUi(): NoteContentUi {
     val invoices = mutableListOf<String>()
-    LnInvoiceUtils.findInvoice(this.content)?.let { lnbc -> invoices.add(lnbc) }
+    this.content.extractValidInvoiceOrNull()?.let { lnbc -> invoices.add(lnbc) }
     return NoteContentUi(
         noteId = this.postId,
         content = this.content,
@@ -28,7 +29,7 @@ fun FeedPostUi.toNoteContentUi(): NoteContentUi {
 
 fun ChatMessageUi.toNoteContentUi(): NoteContentUi {
     val invoices = mutableListOf<String>()
-    LnInvoiceUtils.findInvoice(this.content)?.let { lnbc -> invoices.add(lnbc) }
+    this.content.extractValidInvoiceOrNull()?.let { lnbc -> invoices.add(lnbc) }
     return NoteContentUi(
         noteId = this.messageId,
         content = this.content,
@@ -37,4 +38,10 @@ fun ChatMessageUi.toNoteContentUi(): NoteContentUi {
         hashtags = this.hashtags,
         invoices = invoices,
     )
+}
+
+private fun String.extractValidInvoiceOrNull(): String? {
+    return LnInvoiceUtils.findInvoice(this)?.let { lnbc ->
+        if (Bolt11Invoice.read(lnbc).isSuccess) lnbc else null
+    }
 }

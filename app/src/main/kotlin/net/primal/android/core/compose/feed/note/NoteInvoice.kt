@@ -45,12 +45,15 @@ fun NoteLightningInvoice(
     val numberFormat = remember { NumberFormat.getNumberInstance() }
     val clipboardManager = LocalClipboardManager.current
 
-    val bolt11 = remember(invoice) { Bolt11Invoice.read(invoice).get() }
-    val amount = numberFormat.format(bolt11.amount?.msat?.div(other = 1_000L))
-    val description = bolt11.description.asUrlDecoded()
-    val isExpired = bolt11.isExpired(currentTimestampSeconds = Instant.now().epochSecond)
-    val expiryIn = bolt11.expirySeconds
-    val expireInstant = (bolt11.timestampSeconds + (expiryIn ?: 0)).let(Instant::ofEpochSecond)
+    val bolt11: Bolt11Invoice? = remember(invoice) {
+        val readTry = Bolt11Invoice.read(invoice)
+        if (readTry.isSuccess) readTry.get() else null
+    }
+    val amount = bolt11?.amount?.msat?.div(other = 1_000L)?.let(numberFormat::format)
+    val description = bolt11?.description.asUrlDecoded()
+    val isExpired = bolt11?.isExpired(currentTimestampSeconds = Instant.now().epochSecond)
+    val expiryIn = bolt11?.expirySeconds
+    val expireInstant = bolt11?.timestampSeconds?.let { (it + (expiryIn ?: 0)).let(Instant::ofEpochSecond) }
 
     Column(
         modifier = modifier
@@ -88,7 +91,7 @@ fun NoteLightningInvoice(
             modifier = Modifier.defaultMinSize(minHeight = 28.dp),
             verticalAlignment = Alignment.Bottom,
         ) {
-            if (isExpired) {
+            if (isExpired == true) {
                 Text(
                     modifier = Modifier.weight(1f),
                     text = stringResource(id = R.string.feed_lightning_invoice_expired),
@@ -96,17 +99,19 @@ fun NoteLightningInvoice(
                     style = AppTheme.typography.bodyMedium,
                 )
             } else {
-                if (expireInstant != null) {
-                    Text(
-                        modifier = Modifier.weight(1f),
-                        text = stringResource(
+                Text(
+                    modifier = Modifier.weight(1f),
+                    text = if (expireInstant != null) {
+                        stringResource(
                             id = R.string.feed_lightning_invoice_expires_in,
                             expireInstant.asFromNowFormat(),
-                        ),
-                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-                        style = AppTheme.typography.bodyMedium,
-                    )
-                }
+                        )
+                    } else {
+                        ""
+                    },
+                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                    style = AppTheme.typography.bodyMedium,
+                )
                 PrimalLoadingButton(
                     modifier = Modifier
                         .height(36.dp)
