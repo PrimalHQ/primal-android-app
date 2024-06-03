@@ -1,5 +1,6 @@
 package net.primal.android.profile.editor
 
+import android.util.Patterns
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -132,8 +133,16 @@ class ProfileEditorViewModel @Inject constructor(
             setState { copy(loading = true) }
             try {
                 val profile = state.value.toProfileMetadata()
-                val lud16 = profile.lightningAddress
+                val nip05 = profile.nostrVerification
+                if (!nip05.isNullOrEmpty()) {
+                    if (!Patterns.EMAIL_ADDRESS.matcher(nip05).matches()) {
+                        setErrorState(EditProfileError.InvalidNostrVerificationAddress(nip05 = nip05))
+                        return@launch
+                    }
+                }
+
                 withContext(dispatcherProvider.io()) {
+                    val lud16 = profile.lightningAddress
                     if (!lud16.isNullOrEmpty()) {
                         lightningAddressChecker.validateLightningAddress(lud16 = lud16)
                     }

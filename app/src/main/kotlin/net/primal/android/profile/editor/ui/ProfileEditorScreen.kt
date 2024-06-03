@@ -91,6 +91,10 @@ fun ProfileEditorScreen(
                         parts[1],
                     )
                 }
+
+                is ProfileEditorContract.UiState.EditProfileError.InvalidNostrVerificationAddress -> {
+                    context.getString(R.string.app_invalid_nip05_address)
+                }
             }
         },
         onErrorDismiss = { eventPublisher(ProfileEditorContract.UiEvent.DismissError) },

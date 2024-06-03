@@ -22,6 +22,7 @@ interface ProfileEditorContract {
             data class FailedToPublishMetadata(val cause: Throwable) : EditProfileError()
             data class FailedToUploadImage(val cause: Throwable) : EditProfileError()
             data class InvalidLightningAddress(val lud16: String) : EditProfileError()
+            data class InvalidNostrVerificationAddress(val nip05: String) : EditProfileError()
         }
     }
 
