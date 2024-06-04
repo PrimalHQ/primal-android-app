@@ -5,3 +5,4 @@
 - Notifications facelift;
 - Clickable nostr:naddr links;
 - Implemented invoice rendering in notes (feed & chat);
+- Fixed feed gaps;
