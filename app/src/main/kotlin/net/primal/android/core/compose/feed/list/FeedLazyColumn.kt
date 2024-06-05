@@ -24,6 +24,7 @@ import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
+import net.primal.android.BuildConfig
 import net.primal.android.R
 import net.primal.android.core.compose.ListLoading
 import net.primal.android.core.compose.ListLoadingError
@@ -129,17 +130,20 @@ fun FeedLazyColumn(
             }
         }
 
-        when (val prependMediatorLoadState = pagingItems.loadState.mediator?.prepend) {
-            is LoadState.Error -> {
-                item(contentType = "PrependError") {
-                    val error = prependMediatorLoadState.error
-                    Timber.w(error)
-                    ListLoadingError(
-                        text = stringResource(R.string.app_error_loading_prev_page) + "\n${error.message}",
-                    )
+        if (BuildConfig.FEATURE_PRIMAL_CRASH_REPORTER) {
+            when (val prependMediatorLoadState = pagingItems.loadState.mediator?.prepend) {
+                is LoadState.Error -> {
+                    item(contentType = "PrependError") {
+                        val error = prependMediatorLoadState.error
+                        Timber.w(error)
+                        ListLoadingError(
+                            text = stringResource(R.string.app_error_loading_prev_page) + "\n${error.message}",
+                        )
+                    }
                 }
+
+                else -> Unit
             }
-            else -> Unit
         }
 
         items(
@@ -231,7 +235,7 @@ fun FeedLazyColumn(
                     item(contentType = "RefreshError") {
                         ListNoContent(
                             modifier = Modifier.fillParentMaxSize(),
-                            noContentText = stringResource(id = R.string.feed_error_loading) + "\n${error.message}",
+                            noContentText = stringResource(id = R.string.feed_error_loading),
                             onRefresh = { pagingItems.refresh() },
                         )
                     }
@@ -249,12 +253,14 @@ fun FeedLazyColumn(
                 )
             }
 
-            is LoadState.Error -> item(contentType = "AppendError") {
-                val error = appendMediatorLoadState.error
-                Timber.w(error)
-                ListLoadingError(
-                    text = stringResource(R.string.app_error_loading_next_page) + "\n${error.message}",
-                )
+            is LoadState.Error -> if (BuildConfig.FEATURE_PRIMAL_CRASH_REPORTER) {
+                item(contentType = "AppendError") {
+                    val error = appendMediatorLoadState.error
+                    Timber.w(error)
+                    ListLoadingError(
+                        text = stringResource(R.string.app_error_loading_next_page) + "\n${error.message}",
+                    )
+                }
             }
 
             else -> Unit
