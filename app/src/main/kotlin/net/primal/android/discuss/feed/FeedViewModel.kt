@@ -8,6 +8,7 @@ import androidx.paging.map
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.Instant
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
@@ -16,6 +17,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.config.dynamic.AppConfigUpdater
@@ -99,27 +101,33 @@ class FeedViewModel @Inject constructor(
             feedRepository.observeNewFeedPostsSyncUpdates(
                 feedDirective = feedDirective,
                 since = Instant.now().epochSecond,
-            ).collect { syncData ->
-                val limit = if (syncData.count <= MAX_AVATARS) syncData.count else MAX_AVATARS
-                val newPosts = withContext(dispatcherProvider.io()) {
-                    feedRepository.findNewestPosts(
-                        feedDirective = feedDirective,
-                        limit = syncData.count,
-                    )
-                        .filter { it.author?.avatarCdnImage != null }
-                        .distinctBy { it.author?.ownerId }
-                        .take(limit)
+            )
+                .onEach {
+                    // Delaying to give time to feed to render new items, otherwise
+                    // sync stats are not shown because feed can't scroll up
+                    delay(500.milliseconds)
                 }
-                setState {
-                    copy(
-                        syncStats = FeedPostsSyncStats(
-                            postsCount = this.syncStats.postsCount + syncData.count,
-                            postIds = this.syncStats.postIds + syncData.postIds,
-                            avatarCdnImages = newPosts.mapNotNull { it.author?.avatarCdnImage },
-                        ),
-                    )
+                .collect { syncData ->
+                    val limit = if (syncData.count <= MAX_AVATARS) syncData.count else MAX_AVATARS
+                    val newPosts = withContext(dispatcherProvider.io()) {
+                        feedRepository.findNewestPosts(
+                            feedDirective = feedDirective,
+                            limit = syncData.count,
+                        )
+                            .filter { it.author?.avatarCdnImage != null }
+                            .distinctBy { it.author?.ownerId }
+                            .take(limit)
+                    }
+                    setState {
+                        copy(
+                            syncStats = FeedPostsSyncStats(
+                                postsCount = this.syncStats.postsCount + syncData.count,
+                                postIds = this.syncStats.postIds + syncData.postIds,
+                                avatarCdnImages = newPosts.mapNotNull { it.author?.avatarCdnImage },
+                            ),
+                        )
+                    }
                 }
-            }
         }
 
     private fun subscribeToActiveAccount() =
