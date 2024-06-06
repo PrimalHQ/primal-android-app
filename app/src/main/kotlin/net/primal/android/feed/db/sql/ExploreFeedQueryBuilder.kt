@@ -2,9 +2,11 @@ package net.primal.android.feed.db.sql
 
 import androidx.sqlite.db.SimpleSQLiteQuery
 import net.primal.android.core.ext.isBookmarkFeed
-import net.primal.android.core.ext.isMostZappedFeed
-import net.primal.android.core.ext.isPopularFeed
-import net.primal.android.core.ext.isTrendingFeed
+import net.primal.android.core.ext.isExploreLatestFeed
+import net.primal.android.core.ext.isExploreMostZapped4hFeed
+import net.primal.android.core.ext.isExploreMostZappedFeed
+import net.primal.android.core.ext.isExplorePopularFeed
+import net.primal.android.core.ext.isExploreTrendingFeed
 
 class ExploreFeedQueryBuilder(
     private val feedDirective: String,
@@ -41,9 +43,11 @@ class ExploreFeedQueryBuilder(
     }
 
     private val orderByClause = when {
-        feedDirective.isPopularFeed() -> "ORDER BY NoteStats.score"
-        feedDirective.isTrendingFeed() -> "ORDER BY NoteStats.score24h"
-        feedDirective.isMostZappedFeed() -> "ORDER BY NoteStats.satsZapped"
+        feedDirective.isExplorePopularFeed() -> "ORDER BY NoteStats.score"
+        feedDirective.isExploreTrendingFeed() -> "ORDER BY NoteStats.score24h"
+        feedDirective.isExploreLatestFeed() -> "ORDER BY feedCreatedAt DESC"
+        feedDirective.isExploreMostZapped4hFeed() -> "ORDER BY NoteStats.satsZapped"
+        feedDirective.isExploreMostZappedFeed() -> "ORDER BY NoteStats.satsZapped"
         feedDirective.isBookmarkFeed() -> "ORDER BY PostData.createdAt"
         else -> throw UnsupportedOperationException("Unsupported explore feed directive.")
     }

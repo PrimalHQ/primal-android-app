@@ -13,6 +13,7 @@ interface FeedContract {
     data class UiState(
         val feedPostsCount: Int = 0,
         val feedTitle: String = "",
+        val feedAutoRefresh: Boolean = false,
         val activeAccountAvatarCdnImage: CdnImage? = null,
         val zappingState: ZappingState = ZappingState(),
         val posts: Flow<PagingData<FeedPostUi>>,

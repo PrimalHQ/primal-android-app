@@ -2,7 +2,7 @@ package net.primal.android.feed.db.sql
 
 import androidx.sqlite.db.SimpleSQLiteQuery
 
-class ChronologicalFeedQueryBuilder(
+class ChronologicalFeedWithRepostsQueryBuilder(
     private val feedDirective: String,
     private val userPubkey: String,
 ) : FeedQueryBuilder {

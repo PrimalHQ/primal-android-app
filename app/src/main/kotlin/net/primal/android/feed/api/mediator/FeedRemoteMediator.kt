@@ -15,8 +15,9 @@ import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
+import net.primal.android.core.ext.hasReposts
+import net.primal.android.core.ext.hasUpwardsPagination
 import net.primal.android.core.ext.isBookmarkFeed
-import net.primal.android.core.ext.isChronologicalFeed
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.feed.api.FeedApi
 import net.primal.android.feed.api.model.FeedRequestBody
@@ -25,7 +26,7 @@ import net.primal.android.feed.db.FeedPost
 import net.primal.android.feed.db.FeedPostDataCrossRef
 import net.primal.android.feed.db.FeedPostRemoteKey
 import net.primal.android.feed.db.FeedPostSync
-import net.primal.android.feed.db.sql.ChronologicalFeedQueryBuilder
+import net.primal.android.feed.db.sql.ChronologicalFeedWithRepostsQueryBuilder
 import net.primal.android.feed.db.sql.ExploreFeedQueryBuilder
 import net.primal.android.feed.db.sql.FeedQueryBuilder
 import net.primal.android.feed.repository.persistToDatabaseAsTransaction
@@ -46,7 +47,7 @@ class FeedRemoteMediator(
 ) : RemoteMediator<Int, FeedPost>() {
 
     private val feedQueryBuilder: FeedQueryBuilder = when {
-        feedDirective.isChronologicalFeed() -> ChronologicalFeedQueryBuilder(
+        feedDirective.hasReposts() -> ChronologicalFeedWithRepostsQueryBuilder(
             feedDirective = feedDirective,
             userPubkey = userId,
         )
@@ -79,7 +80,7 @@ class FeedRemoteMediator(
 
     private suspend fun shouldResetLocalCache() =
         when {
-            feedDirective.isChronologicalFeed() -> shouldRefreshLatestFeed()
+            feedDirective.hasUpwardsPagination() -> shouldRefreshLatestFeed()
             feedDirective.isBookmarkFeed() -> true
             else -> shouldRefreshNonLatestFeed(feedDirective)
         }

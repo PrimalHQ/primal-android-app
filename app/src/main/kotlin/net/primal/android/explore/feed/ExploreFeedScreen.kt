@@ -210,7 +210,6 @@ fun ExploreFeedScreen(
                         ),
                     )
                 },
-                autoRefresh = state.autoRefresh,
                 noContentText = when {
                     state.feedDirective.isBookmarkFeed() -> stringResource(id = R.string.bookmarks_no_content)
                     else -> stringResource(id = R.string.feed_no_content)

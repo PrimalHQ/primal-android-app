@@ -24,6 +24,7 @@ import net.primal.android.config.dynamic.AppConfigUpdater
 import net.primal.android.core.compose.feed.model.FeedPostsSyncStats
 import net.primal.android.core.compose.feed.model.asFeedPostUi
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
+import net.primal.android.core.ext.hasUpwardsPagination
 import net.primal.android.core.utils.ellipsizeMiddle
 import net.primal.android.discuss.feed.FeedContract.UiEvent
 import net.primal.android.discuss.feed.FeedContract.UiState
@@ -68,6 +69,7 @@ class FeedViewModel @Inject constructor(
 
     private val _state = MutableStateFlow(
         UiState(
+            feedAutoRefresh = feedDirective.hasUpwardsPagination(),
             posts = feedRepository.feedByDirective(feedDirective = feedDirective)
                 .map { it.map { feed -> feed.asFeedPostUi() } }
                 .cachedIn(viewModelScope),

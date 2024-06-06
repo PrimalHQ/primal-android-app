@@ -62,7 +62,6 @@ class ExploreFeedViewModel @Inject constructor(
     private val _state = MutableStateFlow(
         UiState(
             feedDirective = exploreFeedDirective,
-            autoRefresh = !exploreFeedDirective.isBookmarkFeed(),
             canBeAddedInUserFeeds = !exploreFeedDirective.isBookmarkFeed(),
             posts = feedRepository.feedByDirective(feedDirective = exploreFeedDirective)
                 .map { it.map { feed -> feed.asFeedPostUi() } }

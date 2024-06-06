@@ -61,7 +61,7 @@ fun FeedNoteList(
     onScrolledToTop: (() -> Unit)? = null,
     onMuteClick: ((String) -> Unit)? = null,
     onReportContentClick: OnReportContentClick,
-    autoRefresh: Boolean = true,
+    autoRefresh: Boolean = false,
     noContentText: String = stringResource(id = R.string.feed_no_content),
 ) {
     LaunchedEffect(feedListState, onScrolledToTop) {

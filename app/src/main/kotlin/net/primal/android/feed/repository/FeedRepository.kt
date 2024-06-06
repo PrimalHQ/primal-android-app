@@ -10,13 +10,13 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.withContext
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
-import net.primal.android.core.ext.isChronologicalFeed
+import net.primal.android.core.ext.hasReposts
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.feed.api.FeedApi
 import net.primal.android.feed.api.mediator.FeedRemoteMediator
 import net.primal.android.feed.api.model.ThreadRequestBody
 import net.primal.android.feed.db.FeedPost
-import net.primal.android.feed.db.sql.ChronologicalFeedQueryBuilder
+import net.primal.android.feed.db.sql.ChronologicalFeedWithRepostsQueryBuilder
 import net.primal.android.feed.db.sql.ExploreFeedQueryBuilder
 import net.primal.android.feed.db.sql.FeedQueryBuilder
 import net.primal.android.thread.db.ThreadConversationCrossRef
@@ -113,7 +113,7 @@ class FeedRepository @Inject constructor(
 
     private fun feedQueryBuilder(feedDirective: String): FeedQueryBuilder =
         when {
-            feedDirective.isChronologicalFeed() -> ChronologicalFeedQueryBuilder(
+            feedDirective.hasReposts() -> ChronologicalFeedWithRepostsQueryBuilder(
                 feedDirective = feedDirective,
                 userPubkey = activeAccountStore.activeUserId(),
             )
