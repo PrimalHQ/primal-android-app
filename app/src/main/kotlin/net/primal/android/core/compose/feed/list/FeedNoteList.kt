@@ -22,10 +22,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.R
@@ -33,12 +38,11 @@ import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.feed.model.ZappingState
 import net.primal.android.core.compose.feed.note.events.InvoicePayClickEvent
 import net.primal.android.core.compose.feed.note.events.MediaClickEvent
-import net.primal.android.core.compose.pulltorefresh.LaunchedPullToRefreshEndingEffect
 import net.primal.android.core.compose.pulltorefresh.PrimalPullToRefreshIndicator
 import net.primal.android.profile.report.OnReportContentClick
 import net.primal.android.theme.AppTheme
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class, FlowPreview::class)
 @Composable
 fun FeedNoteList(
     feedListState: LazyListState,
@@ -73,29 +77,40 @@ fun FeedNoteList(
         }
     }
 
+    var isMediatorRefreshing by remember { mutableStateOf<Boolean?>(null) }
+    LaunchedEffect(pagingItems) {
+        snapshotFlow { pagingItems.loadState }
+            .mapNotNull { it.mediator }
+            .debounce(0.21.seconds)
+            .collect { loadState ->
+                val isRefreshing = loadState.refresh == LoadState.Loading || loadState.prepend == LoadState.Loading
+                if (!isRefreshing) {
+                    isMediatorRefreshing = false
+                }
+            }
+    }
+
     val uiScope = rememberCoroutineScope()
     val pullToRefreshState = rememberPullToRefreshState()
-
     var pullToRefreshing by remember { mutableStateOf(false) }
 
-    LaunchedEffect(pullToRefreshState.isRefreshing) {
-        if (pullToRefreshState.isRefreshing) {
+    if (pullToRefreshState.isRefreshing) {
+        LaunchedEffect(true) {
             pagingItems.refresh()
             pullToRefreshing = true
+            isMediatorRefreshing = true
         }
     }
 
-    if (pullToRefreshing) {
-        LaunchedPullToRefreshEndingEffect(
-            mediatorLoadStates = pagingItems.loadState.mediator,
-            onRefreshEnd = {
+    if (isMediatorRefreshing == false && pullToRefreshing) {
+        LaunchedEffect(true) {
+            uiScope.launch {
+                feedListState.scrollToItem(index = 0)
+                onScrolledToTop?.invoke()
                 pullToRefreshState.endRefresh()
-                uiScope.launch {
-                    feedListState.scrollToItem(index = 0)
-                    onScrolledToTop?.invoke()
-                }
-            },
-        )
+                pullToRefreshing = false
+            }
+        }
     }
 
     Box(
