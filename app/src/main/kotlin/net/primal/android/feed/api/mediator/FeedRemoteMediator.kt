@@ -25,14 +25,12 @@ import net.primal.android.feed.api.model.FeedResponse
 import net.primal.android.feed.db.FeedPost
 import net.primal.android.feed.db.FeedPostDataCrossRef
 import net.primal.android.feed.db.FeedPostRemoteKey
-import net.primal.android.feed.db.FeedPostSync
 import net.primal.android.feed.db.sql.ChronologicalFeedWithRepostsQueryBuilder
 import net.primal.android.feed.db.sql.ExploreFeedQueryBuilder
 import net.primal.android.feed.db.sql.FeedQueryBuilder
 import net.primal.android.feed.repository.persistToDatabaseAsTransaction
 import net.primal.android.networking.sockets.errors.NostrNoticeException
 import net.primal.android.networking.sockets.errors.WssException
-import net.primal.android.nostr.ext.findFirstEventId
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.primal.content.ContentPrimalPaging
 import timber.log.Timber
@@ -95,11 +93,12 @@ class FeedRemoteMediator(
     @Suppress("CyclomaticComplexMethod")
     override suspend fun load(loadType: LoadType, state: PagingState<Int, FeedPost>): MediatorResult {
         Timber.i("feed_directive $feedDirective load called ($loadType)")
-        return try {
-            if (loadType == LoadType.REFRESH && state.hasFeedPosts() && !shouldResetLocalCache()) {
-                throw UnnecessaryRefreshSync()
-            }
+        if (loadType == LoadType.PREPEND && !feedDirective.hasUpwardsPagination()) {
+            Timber.w("feed_directive $feedDirective load exit 9")
+            return MediatorResult.Success(endOfPaginationReached = true)
+        }
 
+        return try {
             val remoteKey = when (loadType) {
                 LoadType.PREPEND -> findFirstFeedPostRemoteKey(state = state)
                 LoadType.APPEND -> findLastFeedPostRemoteKey(state = state)
@@ -152,16 +151,13 @@ class FeedRemoteMediator(
         val pageSize = pagingState.config.pageSize
         val (request, response) = when (loadType) {
             LoadType.REFRESH -> syncRefresh(pageSize = pageSize)
-            LoadType.PREPEND -> syncPrepend(remoteKey = remoteKey)
+            LoadType.PREPEND -> syncPrepend(remoteKey = remoteKey, pageSize = pageSize)
             LoadType.APPEND -> syncAppend(remoteKey = remoteKey, pageSize = pageSize)
         }
 
         val pagingEvent = response.paging
-        val shouldDeleteLocalData = loadType == LoadType.REFRESH &&
-            pagingState.hasFeedPosts() && shouldResetLocalCache()
-
         database.withTransaction {
-            if (shouldDeleteLocalData) {
+            if (loadType == LoadType.REFRESH) {
                 database.feedPostsRemoteKeys().deleteByDirective(feedDirective)
                 database.feedsConnections().deleteConnectionsByDirective(feedDirective)
                 database.posts().deleteOrphanPosts()
@@ -171,10 +167,6 @@ class FeedRemoteMediator(
             val feedEvents = response.posts + response.reposts
             feedEvents.processRemoteKeys(pagingEvent)
             feedEvents.processFeedConnections()
-        }
-
-        if (loadType == LoadType.PREPEND) {
-            response.processSyncCount()
         }
 
         lastRequests[loadType] = request to Instant.now().epochSecond
@@ -194,13 +186,12 @@ class FeedRemoteMediator(
         return requestBody to response
     }
 
-    private suspend fun syncPrepend(remoteKey: FeedPostRemoteKey?): Pair<FeedRequestBody, FeedResponse> {
+    private suspend fun syncPrepend(remoteKey: FeedPostRemoteKey?, pageSize: Int): Pair<FeedRequestBody, FeedResponse> {
         val requestBody = FeedRequestBody(
             directive = feedDirective,
             userPubKey = userId,
-            limit = 500,
+            limit = pageSize,
             since = remoteKey?.untilId,
-            until = Instant.now().epochSecond,
             order = "asc",
         )
 
@@ -240,36 +231,6 @@ class FeedRemoteMediator(
         }
 
         return requestBody to feedResponse
-    }
-
-    private suspend fun FeedResponse.processSyncCount() {
-        val prependSyncCount = this.posts.size + this.reposts.size
-
-        val repostedNoteIds = this.reposts
-            .sortedByDescending { it.createdAt }
-            .mapNotNull { it.tags.findFirstEventId() }
-
-        val noteIds = this.posts
-            .sortedByDescending { it.createdAt }
-            .map { it.id }
-
-        // Prepend syncs always include and the last known item
-        if (prependSyncCount > 1) {
-            withContext(dispatcherProvider.io()) {
-                database.withTransaction {
-                    val actualCount = prependSyncCount - 1
-                    val postIds = repostedNoteIds + noteIds
-                    database.feedPostsSync().upsert(
-                        data = FeedPostSync(
-                            timestamp = Instant.now().epochSecond,
-                            feedDirective = feedDirective,
-                            count = actualCount,
-                            postIds = postIds,
-                        ),
-                    )
-                }
-            }
-        }
     }
 
     private suspend fun List<NostrEvent>.processRemoteKeys(pagingEvent: ContentPrimalPaging?) {
@@ -370,8 +331,6 @@ class FeedRemoteMediator(
                 .newestFeedPosts(query = feedQueryBuilder.newestFeedPostsQuery(limit = 1))
                 .firstOrNull()
         }
-
-    private fun PagingState<Int, FeedPost>.hasFeedPosts() = firstItemOrNull() != null || lastItemOrNull() != null
 
     private inner class NoSuchFeedPostException : RuntimeException()
 
