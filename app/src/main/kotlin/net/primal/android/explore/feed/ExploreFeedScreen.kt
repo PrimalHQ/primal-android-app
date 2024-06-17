@@ -24,7 +24,6 @@ import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.InvisibleAppBarIcon
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.feed.list.FeedNoteList
-import net.primal.android.core.compose.feed.model.FeedPostsSyncStats
 import net.primal.android.core.compose.feed.note.ConfirmFirstBookmarkAlertDialog
 import net.primal.android.core.compose.feed.note.events.InvoicePayClickEvent
 import net.primal.android.core.compose.feed.note.events.MediaClickEvent
@@ -162,7 +161,6 @@ fun ExploreFeedScreen(
                 feedListState = feedListState,
                 pagingItems = feedPagingItems,
                 zappingState = state.zappingState,
-                syncStats = FeedPostsSyncStats(),
                 paddingValues = paddingValues,
                 onPostClick = onPostClick,
                 onProfileClick = onProfileClick,

@@ -6,8 +6,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.NonRestartableComposable
 import androidx.paging.LoadState
 import androidx.paging.LoadStates
-import kotlin.time.Duration.Companion.seconds
-import kotlinx.coroutines.delay
 
 @Composable
 @NonRestartableComposable
@@ -18,7 +16,6 @@ fun LaunchedPullToRefreshEndingEffect(mediatorLoadStates: LoadStates?, onRefresh
         val prepend = mediatorLoadStates?.prepend
         val append = mediatorLoadStates?.append
         if (refresh != LoadState.Loading && prepend != LoadState.Loading && append != LoadState.Loading) {
-            delay(0.21.seconds)
             onRefreshEnd()
         }
     }

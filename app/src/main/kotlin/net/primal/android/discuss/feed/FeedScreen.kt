@@ -193,8 +193,6 @@ fun FeedScreen(
                 pagingItems = feedPagingItems,
                 feedListState = feedListState,
                 zappingState = state.zappingState,
-                syncStats = state.syncStats,
-                autoRefresh = state.feedAutoRefresh,
                 onPostClick = onPostClick,
                 onProfileClick = onProfileClick,
                 onPostReplyClick = onPostReplyClick,

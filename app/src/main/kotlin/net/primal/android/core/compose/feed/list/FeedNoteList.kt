@@ -11,30 +11,30 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshContainer
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.Lifecycle
 import androidx.paging.compose.LazyPagingItems
-import kotlin.random.Random
-import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.R
 import net.primal.android.core.compose.feed.model.FeedPostUi
-import net.primal.android.core.compose.feed.model.FeedPostsSyncStats
 import net.primal.android.core.compose.feed.model.ZappingState
 import net.primal.android.core.compose.feed.note.events.InvoicePayClickEvent
 import net.primal.android.core.compose.feed.note.events.MediaClickEvent
 import net.primal.android.core.compose.pulltorefresh.LaunchedPullToRefreshEndingEffect
 import net.primal.android.core.compose.pulltorefresh.PrimalPullToRefreshIndicator
-import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.profile.report.OnReportContentClick
 import net.primal.android.theme.AppTheme
 
@@ -44,7 +44,6 @@ fun FeedNoteList(
     feedListState: LazyListState,
     pagingItems: LazyPagingItems<FeedPostUi>,
     zappingState: ZappingState,
-    syncStats: FeedPostsSyncStats = FeedPostsSyncStats(),
     onPostClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
     onPostLikeClick: (FeedPostUi) -> Unit,
@@ -61,7 +60,6 @@ fun FeedNoteList(
     onScrolledToTop: (() -> Unit)? = null,
     onMuteClick: ((String) -> Unit)? = null,
     onReportContentClick: OnReportContentClick,
-    autoRefresh: Boolean = false,
     noContentText: String = stringResource(id = R.string.feed_no_content),
 ) {
     LaunchedEffect(feedListState, onScrolledToTop) {
@@ -75,38 +73,30 @@ fun FeedNoteList(
         }
     }
 
-    if (autoRefresh) {
-        LaunchedEffect(pagingItems, syncStats) {
-            withContext(Dispatchers.IO) {
-                while (true) {
-                    val syncInterval = 30 + Random.nextInt(-5, 5)
-                    delay(syncInterval.seconds)
-                    if (syncStats.postsCount < 100) {
-                        pagingItems.refresh()
-                    }
-                }
-            }
-        }
-    }
-
-    DisposableLifecycleObserverEffect(pagingItems) {
-        if (it == Lifecycle.Event.ON_RESUME) {
-            pagingItems.refresh()
-        }
-    }
-
+    val uiScope = rememberCoroutineScope()
     val pullToRefreshState = rememberPullToRefreshState()
+
+    var pullToRefreshing by remember { mutableStateOf(false) }
 
     LaunchedEffect(pullToRefreshState.isRefreshing) {
         if (pullToRefreshState.isRefreshing) {
             pagingItems.refresh()
+            pullToRefreshing = true
         }
     }
 
-    LaunchedPullToRefreshEndingEffect(
-        mediatorLoadStates = pagingItems.loadState.mediator,
-        onRefreshEnd = { pullToRefreshState.endRefresh() },
-    )
+    if (pullToRefreshing) {
+        LaunchedPullToRefreshEndingEffect(
+            mediatorLoadStates = pagingItems.loadState.mediator,
+            onRefreshEnd = {
+                pullToRefreshState.endRefresh()
+                uiScope.launch {
+                    feedListState.scrollToItem(index = 0)
+                    onScrolledToTop?.invoke()
+                }
+            },
+        )
+    }
 
     Box(
         modifier = Modifier.nestedScroll(pullToRefreshState.nestedScrollConnection),
@@ -135,7 +125,9 @@ fun FeedNoteList(
         )
 
         PullToRefreshContainer(
-            modifier = Modifier.padding(paddingValues).align(Alignment.TopCenter),
+            modifier = Modifier
+                .padding(paddingValues)
+                .align(Alignment.TopCenter),
             state = pullToRefreshState,
             contentColor = AppTheme.colorScheme.primary,
             indicator = { PrimalPullToRefreshIndicator(state = pullToRefreshState) },
