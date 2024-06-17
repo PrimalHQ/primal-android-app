@@ -1,8 +1,6 @@
 package net.primal.android.feed.db.sql
 
 import androidx.sqlite.db.SimpleSQLiteQuery
-import net.primal.android.core.ext.isBookmarkFeed
-import net.primal.android.core.ext.isExploreLatestFeed
 import net.primal.android.core.ext.isExploreMostZapped4hFeed
 import net.primal.android.core.ext.isExploreMostZappedFeed
 import net.primal.android.core.ext.isExplorePopularFeed
@@ -45,11 +43,9 @@ class ExploreFeedQueryBuilder(
     private val orderByClause = when {
         feedDirective.isExplorePopularFeed() -> "ORDER BY NoteStats.score"
         feedDirective.isExploreTrendingFeed() -> "ORDER BY NoteStats.score24h"
-        feedDirective.isExploreLatestFeed() -> "ORDER BY feedCreatedAt DESC"
         feedDirective.isExploreMostZapped4hFeed() -> "ORDER BY NoteStats.satsZapped"
         feedDirective.isExploreMostZappedFeed() -> "ORDER BY NoteStats.satsZapped"
-        feedDirective.isBookmarkFeed() -> "ORDER BY PostData.createdAt"
-        else -> throw UnsupportedOperationException("Unsupported explore feed directive.")
+        else -> "ORDER BY PostData.createdAt"
     }
 
     override fun feedQuery(): SimpleSQLiteQuery {
