@@ -24,10 +24,12 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -39,8 +41,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.paging.compose.collectAsLazyPagingItems
+import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import net.primal.android.LocalContentDisplaySettings
 import net.primal.android.R
 import net.primal.android.core.compose.AppBarIcon
@@ -85,8 +93,17 @@ fun FeedScreen(
     val uiState = viewModel.state.collectAsState()
 
     DisposableLifecycleObserverEffect(viewModel) {
-        if (it == Lifecycle.Event.ON_START) {
-            viewModel.setEvent(FeedContract.UiEvent.RequestUserDataUpdate)
+        when (it) {
+            Lifecycle.Event.ON_START -> {
+                viewModel.setEvent(FeedContract.UiEvent.RequestUserDataUpdate)
+                viewModel.setEvent(FeedContract.UiEvent.StartPolling)
+            }
+
+            Lifecycle.Event.ON_STOP -> {
+                viewModel.setEvent(FeedContract.UiEvent.StopPolling)
+            }
+
+            else -> Unit
         }
     }
 
@@ -129,14 +146,27 @@ fun FeedScreen(
     val uiScope = rememberCoroutineScope()
     val drawerState: DrawerState = rememberDrawerState(DrawerValue.Closed)
 
-    val feedPagingItems = state.posts.collectAsLazyPagingItems()
-    val feedListState = feedPagingItems.rememberLazyListStatePagingWorkaround()
+    val pagingItems = state.posts.collectAsLazyPagingItems()
+    val feedListState = pagingItems.rememberLazyListStatePagingWorkaround()
 
     val snackbarHostState = remember { SnackbarHostState() }
 
-    val canScrollUp by remember(feedListState) {
-        derivedStateOf {
-            feedListState.firstVisibleItemIndex > 0
+    LaunchedEffect(feedListState, pagingItems) {
+        withContext(Dispatchers.IO) {
+            snapshotFlow { feedListState.firstVisibleItemIndex to pagingItems.itemCount }
+                .distinctUntilChanged()
+                .filter { (_, size) -> size > 0 }
+                .collect { (index, _) ->
+                    val firstVisibleNote = pagingItems.peek(index)
+                    if (firstVisibleNote != null) {
+                        eventPublisher(
+                            FeedContract.UiEvent.UpdateCurrentTopVisibleNote(
+                                noteId = firstVisibleNote.postId,
+                                repostId = firstVisibleNote.repostId,
+                            ),
+                        )
+                    }
+                }
         }
     }
 
@@ -169,7 +199,7 @@ fun FeedScreen(
         onDrawerDestinationClick = onDrawerDestinationClick,
         onDrawerQrCodeClick = onDrawerQrCodeClick,
         badges = state.badges,
-        focusModeEnabled = LocalContentDisplaySettings.current.focusModeEnabled && feedPagingItems.isNotEmpty(),
+        focusModeEnabled = LocalContentDisplaySettings.current.focusModeEnabled && pagingItems.isNotEmpty(),
         topBar = {
             PrimalTopAppBar(
                 title = state.feedTitle,
@@ -190,7 +220,7 @@ fun FeedScreen(
         },
         content = { paddingValues ->
             FeedNoteList(
-                pagingItems = feedPagingItems,
+                pagingItems = pagingItems,
                 feedListState = feedListState,
                 zappingState = state.zappingState,
                 onPostClick = onPostClick,
@@ -244,15 +274,20 @@ fun FeedScreen(
             )
         },
         floatingNewDataHost = {
-            if (canScrollUp && state.syncStats.postsCount > 0) {
-                NewPostsButton(
-                    syncStats = state.syncStats,
-                    onClick = {
-                        uiScope.launch {
-                            feedListState.animateScrollToItem(0)
-                        }
-                    },
-                )
+            if (state.syncStats.latestNoteIds.isNotEmpty() && pagingItems.isNotEmpty()) {
+                var doneDelaying by remember { mutableStateOf(false) }
+                LaunchedEffect(true) {
+                    delay(0.21.seconds)
+                    doneDelaying = true
+                }
+                if (doneDelaying) {
+                    NewPostsButton(
+                        syncStats = state.syncStats,
+                        onClick = {
+                            eventPublisher(FeedContract.UiEvent.ShowLatestNotes)
+                        },
+                    )
+                }
             }
         },
         floatingActionButton = {
@@ -294,7 +329,7 @@ private fun NewPostsButton(syncStats: FeedPostsSyncStats, onClick: () -> Unit) {
     ) {
         AvatarThumbnailsRow(
             modifier = Modifier.padding(start = 6.dp),
-            avatarCdnImages = syncStats.avatarCdnImages,
+            avatarCdnImages = syncStats.latestAvatarCdnImages,
             onClick = { onClick() },
         )
 

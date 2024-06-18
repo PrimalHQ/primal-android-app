@@ -19,8 +19,6 @@ import net.primal.android.feed.db.FeedPostDataCrossRef
 import net.primal.android.feed.db.FeedPostDataCrossRefDao
 import net.primal.android.feed.db.FeedPostRemoteKey
 import net.primal.android.feed.db.FeedPostRemoteKeyDao
-import net.primal.android.feed.db.FeedPostSync
-import net.primal.android.feed.db.FeedPostSyncDao
 import net.primal.android.feed.db.PostDao
 import net.primal.android.feed.db.PostData
 import net.primal.android.feed.db.RepostDao
@@ -67,7 +65,6 @@ import net.primal.android.wallet.db.WalletTransactionData
         Feed::class,
         FeedPostDataCrossRef::class,
         FeedPostRemoteKey::class,
-        FeedPostSync::class,
         ThreadConversationCrossRef::class,
         NoteUserStats::class,
         ProfileStats::class,
@@ -81,7 +78,7 @@ import net.primal.android.wallet.db.WalletTransactionData
         EventHints::class,
         ProfileInteraction::class,
     ],
-    version = 28,
+    version = 29,
     exportSchema = true,
 )
 @TypeConverters(
@@ -107,8 +104,6 @@ abstract class PrimalDatabase : RoomDatabase() {
     abstract fun feedPosts(): FeedPostDao
 
     abstract fun feedPostsRemoteKeys(): FeedPostRemoteKeyDao
-
-    abstract fun feedPostsSync(): FeedPostSyncDao
 
     abstract fun conversationConnections(): ThreadConversationCrossRefDao
 

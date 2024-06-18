@@ -7,13 +7,14 @@ import androidx.paging.PagingData
 import androidx.paging.PagingSource
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.withContext
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.ext.hasReposts
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.feed.api.FeedApi
 import net.primal.android.feed.api.mediator.FeedRemoteMediator
+import net.primal.android.feed.api.model.FeedRequestBody
+import net.primal.android.feed.api.model.FeedResponse
 import net.primal.android.feed.api.model.ThreadRequestBody
 import net.primal.android.feed.db.FeedPost
 import net.primal.android.feed.db.sql.ChronologicalFeedWithRepostsQueryBuilder
@@ -45,17 +46,14 @@ class FeedRepository @Inject constructor(
         }.flow
     }
 
-    fun findNewestPosts(feedDirective: String, limit: Int) =
-        database.feedPosts().newestFeedPosts(
-            query = feedQueryBuilder(
-                feedDirective = feedDirective,
-            ).newestFeedPostsQuery(limit = limit),
-        )
-
-    fun observeNewFeedPostsSyncUpdates(feedDirective: String, since: Long) =
-        database.feedPostsSync()
-            .observeFeedDirective(feedDirective = feedDirective, since = since)
-            .filterNotNull()
+    suspend fun findNewestPosts(feedDirective: String, limit: Int) =
+        withContext(dispatcherProvider.io()) {
+            database.feedPosts().newestFeedPosts(
+                query = feedQueryBuilder(
+                    feedDirective = feedDirective,
+                ).newestFeedPostsQuery(limit = limit),
+            )
+        }
 
     fun findPostById(postId: String): FeedPost? = database.feedPosts().findPostById(postId = postId)
 
@@ -92,13 +90,46 @@ class FeedRepository @Inject constructor(
         }
     }
 
+    suspend fun replaceFeedDirective(
+        userId: String,
+        feedDirective: String,
+        response: FeedResponse,
+    ) {
+        withContext(dispatcherProvider.io()) {
+            FeedProcessor(
+                feedDirective = feedDirective,
+                database = database,
+            ).processAndPersistToDatabase(
+                userId = userId,
+                response = response,
+                clearFeed = true,
+            )
+        }
+    }
+
+    suspend fun fetchLatestNotes(
+        userId: String,
+        feedDirective: String,
+        since: Long? = null,
+    ) = withContext(dispatcherProvider.io()) {
+        feedApi.getFeed(
+            body = FeedRequestBody(
+                directive = feedDirective,
+                userPubKey = userId,
+                since = since,
+                order = "desc",
+                limit = PAGE_SIZE,
+            ),
+        )
+    }
+
     @OptIn(ExperimentalPagingApi::class)
     private fun createPager(feedDirective: String, pagingSourceFactory: () -> PagingSource<Int, FeedPost>) =
         Pager(
             config = PagingConfig(
-                pageSize = 25,
-                prefetchDistance = 50,
-                initialLoadSize = 125,
+                pageSize = PAGE_SIZE,
+                prefetchDistance = PAGE_SIZE * 2,
+                initialLoadSize = PAGE_SIZE * 5,
                 enablePlaceholders = true,
             ),
             remoteMediator = FeedRemoteMediator(
@@ -123,4 +154,8 @@ class FeedRepository @Inject constructor(
                 userPubkey = activeAccountStore.activeUserId(),
             )
         }
+
+    companion object {
+        private const val PAGE_SIZE = 25
+    }
 }

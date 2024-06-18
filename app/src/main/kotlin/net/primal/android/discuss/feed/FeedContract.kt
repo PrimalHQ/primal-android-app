@@ -20,6 +20,7 @@ interface FeedContract {
         val syncStats: FeedPostsSyncStats = FeedPostsSyncStats(),
         val badges: Badges = Badges(),
         val confirmBookmarkingNoteId: String? = null,
+        val topVisibleNote: Pair<String, String?>? = null,
         val error: FeedError? = null,
     ) {
         sealed class FeedError {
@@ -36,6 +37,10 @@ interface FeedContract {
     sealed class UiEvent {
         data object FeedScrolledToTop : UiEvent()
         data object RequestUserDataUpdate : UiEvent()
+        data object StartPolling : UiEvent()
+        data object StopPolling : UiEvent()
+        data object ShowLatestNotes : UiEvent()
+        data class UpdateCurrentTopVisibleNote(val noteId: String, val repostId: String? = null) : UiEvent()
         data class PostLikeAction(val postId: String, val postAuthorId: String) : UiEvent()
         data class RepostAction(
             val postId: String,

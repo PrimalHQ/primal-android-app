@@ -6,34 +6,43 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
 import androidx.paging.map
 import dagger.hilt.android.lifecycle.HiltViewModel
-import java.time.Instant
 import javax.inject.Inject
-import kotlin.time.Duration.Companion.milliseconds
+import kotlin.random.Random
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.config.dynamic.AppConfigUpdater
 import net.primal.android.core.compose.feed.model.FeedPostsSyncStats
 import net.primal.android.core.compose.feed.model.asFeedPostUi
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
+import net.primal.android.core.ext.asMapByKey
 import net.primal.android.core.ext.hasUpwardsPagination
+import net.primal.android.core.serialization.json.NostrJson
+import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.core.utils.ellipsizeMiddle
 import net.primal.android.discuss.feed.FeedContract.UiEvent
 import net.primal.android.discuss.feed.FeedContract.UiState
 import net.primal.android.discuss.feed.FeedContract.UiState.FeedError
+import net.primal.android.feed.api.model.FeedResponse
+import net.primal.android.feed.db.FeedPost
 import net.primal.android.feed.repository.FeedRepository
 import net.primal.android.navigation.feedDirective
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.nostr.ext.findFirstEventId
+import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
+import net.primal.android.nostr.ext.mapAsProfileDataPO
+import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.note.repository.NoteRepository
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.settings.muted.repository.MutedUserRepository
@@ -67,12 +76,15 @@ class FeedViewModel @Inject constructor(
 
     private var userDataUpdater: UserDataUpdater? = null
 
+    private fun buildFeedByDirective() =
+        feedRepository.feedByDirective(feedDirective = feedDirective)
+            .map { it.map { feed -> feed.asFeedPostUi() } }
+            .cachedIn(viewModelScope)
+
     private val _state = MutableStateFlow(
         UiState(
             feedAutoRefresh = feedDirective.hasUpwardsPagination(),
-            posts = feedRepository.feedByDirective(feedDirective = feedDirective)
-                .map { it.map { feed -> feed.asFeedPostUi() } }
-                .cachedIn(viewModelScope),
+            posts = buildFeedByDirective(),
         ),
     )
     val state = _state.asStateFlow()
@@ -81,10 +93,13 @@ class FeedViewModel @Inject constructor(
     private val events: MutableSharedFlow<UiEvent> = MutableSharedFlow()
     fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
 
+    private var latestFeedResponse: FeedResponse? = null
+
+    private var pollingJob: Job? = null
+
     init {
         subscribeToFeedTitle()
         subscribeToEvents()
-        subscribeToFeedSyncUpdates()
         subscribeToActiveAccount()
         subscribeToBadgesUpdates()
     }
@@ -96,40 +111,6 @@ class FeedViewModel @Inject constructor(
                     copy(feedTitle = it?.name ?: feedDirective.ellipsizeMiddle(size = 8))
                 }
             }
-        }
-
-    private fun subscribeToFeedSyncUpdates() =
-        viewModelScope.launch {
-            feedRepository.observeNewFeedPostsSyncUpdates(
-                feedDirective = feedDirective,
-                since = Instant.now().epochSecond,
-            )
-                .onEach {
-                    // Delaying to give time to feed to render new items, otherwise
-                    // sync stats are not shown because feed can't scroll up
-                    delay(500.milliseconds)
-                }
-                .collect { syncData ->
-                    val limit = if (syncData.count <= MAX_AVATARS) syncData.count else MAX_AVATARS
-                    val newPosts = withContext(dispatcherProvider.io()) {
-                        feedRepository.findNewestPosts(
-                            feedDirective = feedDirective,
-                            limit = syncData.count,
-                        )
-                            .filter { it.author?.avatarCdnImage != null }
-                            .distinctBy { it.author?.ownerId }
-                            .take(limit)
-                    }
-                    setState {
-                        copy(
-                            syncStats = FeedPostsSyncStats(
-                                postsCount = this.syncStats.postsCount + syncData.count,
-                                postIds = this.syncStats.postIds + syncData.postIds,
-                                avatarCdnImages = newPosts.mapNotNull { it.author?.avatarCdnImage },
-                            ),
-                        )
-                    }
-                }
         }
 
     private fun subscribeToActiveAccount() =
@@ -157,12 +138,26 @@ class FeedViewModel @Inject constructor(
             }
         }
 
+    @Suppress("CyclomaticComplexMethod")
     private fun subscribeToEvents() =
         viewModelScope.launch {
             events.collect {
                 when (it) {
-                    UiEvent.FeedScrolledToTop -> clearSyncStats()
+                    UiEvent.FeedScrolledToTop -> handleScrolledToTop()
                     UiEvent.RequestUserDataUpdate -> updateUserData()
+                    UiEvent.StartPolling -> {
+                        if (feedDirective.hasUpwardsPagination()) {
+                            startPolling()
+                        }
+                    }
+
+                    UiEvent.StopPolling -> stopPolling()
+                    UiEvent.ShowLatestNotes -> showLatestNotes()
+
+                    is UiEvent.UpdateCurrentTopVisibleNote -> setState {
+                        copy(topVisibleNote = it.noteId to it.repostId)
+                    }
+
                     is UiEvent.PostLikeAction -> likePost(it)
                     is UiEvent.RepostAction -> repostPost(it)
                     is UiEvent.ZapAction -> zapPost(it)
@@ -183,22 +178,123 @@ class FeedViewModel @Inject constructor(
             }
         }
 
-    private fun clearSyncStats() {
-        setState {
-            copy(
-                syncStats = this.syncStats.copy(
-                    postIds = emptyList(),
-                    postsCount = 0,
-                ),
-            )
-        }
-    }
-
     private fun updateUserData() =
         viewModelScope.launch {
             withContext(dispatcherProvider.io()) {
                 userDataUpdater?.updateUserDataWithDebounce(30.minutes)
                 appConfigUpdater.updateAppConfigWithDebounce(30.minutes)
+            }
+        }
+
+    private fun startPolling() {
+        pollingJob = viewModelScope.launch {
+            withContext(dispatcherProvider.io()) {
+                while (isActive) {
+                    try {
+                        fetchLatestNotes()
+                    } catch (error: WssException) {
+                        Timber.e(error)
+                    }
+                    val pollInterval = POLL_INTERVAL + Random.nextInt(from = -5, until = 5)
+                    delay(pollInterval.seconds)
+                }
+            }
+        }
+    }
+
+    private fun stopPolling() {
+        pollingJob?.cancel()
+    }
+
+    private fun handleScrolledToTop() =
+        viewModelScope.launch {
+            if (_state.value.syncStats.isTopVisibleNoteTheLatestNote()) {
+                setState { copy(syncStats = FeedPostsSyncStats()) }
+            }
+        }
+
+    private fun FeedPostsSyncStats.isTopVisibleNoteTheLatestNote(): Boolean {
+        val topVisibleNote = _state.value.topVisibleNote
+        val topNoteId = topVisibleNote?.first
+
+        val newestNoteId = this.latestNoteIds.firstOrNull()
+        return newestNoteId == topNoteId
+    }
+
+    private fun fetchLatestNotes() =
+        viewModelScope.launch {
+            val feedResponse = feedRepository.fetchLatestNotes(
+                userId = activeAccountStore.activeUserId(),
+                feedDirective = feedDirective,
+            )
+
+            latestFeedResponse = feedResponse
+            feedResponse.processSyncCount(
+                newestLocalNote = feedRepository
+                    .findNewestPosts(feedDirective = feedDirective, limit = 1)
+                    .firstOrNull(),
+            )
+        }
+
+    private fun FeedResponse.processSyncCount(newestLocalNote: FeedPost? = null) {
+        val allReferencedNotes = this.referencedPosts.mapNotNull {
+            NostrJson.decodeFromStringOrNull<NostrEvent>(it.content)
+        }
+
+        val repostedNotes = this.reposts
+            .mapNotNull { repostEvent ->
+                val noteId = repostEvent.tags.findFirstEventId()
+                allReferencedNotes.find { noteId == it.id }?.let {
+                    repostEvent.createdAt to it
+                }
+            }
+
+        val notes = this.posts
+            .map { it.createdAt to it }
+
+        val allNotes = (repostedNotes + notes)
+            .asSequence()
+            .sortedByDescending { it.first }
+            .filter { it.first >= (newestLocalNote?.data?.feedCreatedAt ?: 0) }
+            .distinctBy { it.second.id }
+            .filter { it.second.id != newestLocalNote?.data?.postId }
+            .map { it.second }
+            .toMutableSet()
+
+        val cdnResources = this.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
+        val profiles = this.metadata.mapAsProfileDataPO(cdnResources = cdnResources)
+        val avatarCdnImages = allNotes
+            .mapNotNull { note -> profiles.find { it.ownerId == note.pubKey }?.avatarCdnImage }
+            .distinct()
+
+        val limit = if (avatarCdnImages.count() <= MAX_AVATARS) avatarCdnImages.count() else MAX_AVATARS
+
+        val newSyncStats = FeedPostsSyncStats(
+            latestNoteIds = allNotes.map { it.id },
+            latestAvatarCdnImages = avatarCdnImages.take(limit),
+        )
+
+        if (newSyncStats.isTopVisibleNoteTheLatestNote()) {
+            setState { copy(syncStats = FeedPostsSyncStats()) }
+        } else {
+            setState { copy(syncStats = newSyncStats) }
+        }
+    }
+
+    private fun showLatestNotes() =
+        viewModelScope.launch {
+            latestFeedResponse?.let {
+                feedRepository.replaceFeedDirective(
+                    userId = activeAccountStore.activeUserId(),
+                    feedDirective = feedDirective,
+                    response = it,
+                )
+            }
+            setState {
+                copy(
+                    posts = buildFeedByDirective(),
+                    syncStats = FeedPostsSyncStats(),
+                )
             }
         }
 
@@ -349,5 +445,6 @@ class FeedViewModel @Inject constructor(
 
     companion object {
         private const val MAX_AVATARS = 3
+        private const val POLL_INTERVAL = 30 // seconds
     }
 }
