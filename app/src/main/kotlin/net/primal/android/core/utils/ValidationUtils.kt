@@ -1,5 +1,6 @@
 package net.primal.android.core.utils
 
+import android.util.Patterns
 import net.primal.android.crypto.Bech32
 import net.primal.android.crypto.hexToNpubHrp
 import net.primal.android.crypto.hexToNsecHrp
@@ -64,3 +65,7 @@ private fun String.isValidNpub(): Boolean {
 }
 
 fun String.isValidUsername(): Boolean = all { it.isLetterOrDigit() }
+
+fun String.isValidEmail(): Boolean {
+    return Patterns.EMAIL_ADDRESS.matcher(this).matches()
+}

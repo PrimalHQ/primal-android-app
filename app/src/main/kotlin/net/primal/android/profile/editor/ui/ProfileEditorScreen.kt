@@ -35,6 +35,7 @@ import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
+import net.primal.android.core.utils.isValidEmail
 import net.primal.android.core.utils.isValidUsername
 import net.primal.android.profile.editor.ProfileEditorContract
 import net.primal.android.profile.editor.ProfileEditorViewModel
@@ -84,12 +85,17 @@ fun ProfileEditorScreen(
                     context.getString(R.string.app_failed_to_upload_image)
 
                 is ProfileEditorContract.UiState.EditProfileError.InvalidLightningAddress -> {
-                    val parts = it.lud16.split("@")
-                    context.getString(
-                        R.string.app_invalid_lightning_address,
-                        parts[0],
-                        parts[1],
-                    )
+                    val isValidLud16Format = it.lud16.isValidEmail()
+                    val lud16Parts = it.lud16.split("@")
+                    if (isValidLud16Format && lud16Parts.size == 2) {
+                        context.getString(
+                            R.string.app_invalid_lud16_address_user_not_found,
+                            lud16Parts[0],
+                            lud16Parts[1],
+                        )
+                    } else {
+                        context.getString(R.string.app_invalid_lud16_address)
+                    }
                 }
 
                 is ProfileEditorContract.UiState.EditProfileError.InvalidNostrVerificationAddress -> {
