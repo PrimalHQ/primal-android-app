@@ -10,6 +10,7 @@ import javax.inject.Inject
 import kotlin.random.Random
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -189,14 +190,16 @@ class FeedViewModel @Inject constructor(
     private fun startPolling() {
         pollingJob = viewModelScope.launch {
             withContext(dispatcherProvider.io()) {
-                while (isActive) {
-                    try {
+                try {
+                    while (isActive) {
                         fetchLatestNotes()
-                    } catch (error: WssException) {
-                        Timber.e(error)
+                        val pollInterval = POLL_INTERVAL + Random.nextInt(from = -5, until = 5)
+                        delay(pollInterval.seconds)
                     }
-                    val pollInterval = POLL_INTERVAL + Random.nextInt(from = -5, until = 5)
-                    delay(pollInterval.seconds)
+                } catch (error: WssException) {
+                    Timber.e(error)
+                } catch (error: CancellationException) {
+                    Timber.e(error)
                 }
             }
         }
