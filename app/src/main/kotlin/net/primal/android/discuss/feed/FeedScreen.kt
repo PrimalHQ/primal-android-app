@@ -345,6 +345,7 @@ private fun NewPostsButton(syncStats: FeedPostsSyncStats, onClick: () -> Unit) {
 }
 
 @Composable
+@Deprecated("Replace with SnackbarErrorHandler")
 private fun ErrorHandler(error: FeedError?, snackbarHostState: SnackbarHostState) {
     val context = LocalContext.current
     LaunchedEffect(error ?: true) {

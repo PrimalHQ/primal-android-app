@@ -20,7 +20,7 @@ import net.primal.android.feed.db.FeedPost
 import net.primal.android.feed.db.sql.ChronologicalFeedWithRepostsQueryBuilder
 import net.primal.android.feed.db.sql.ExploreFeedQueryBuilder
 import net.primal.android.feed.db.sql.FeedQueryBuilder
-import net.primal.android.thread.db.ThreadConversationCrossRef
+import net.primal.android.thread.notes.db.ThreadConversationCrossRef
 import net.primal.android.user.accounts.active.ActiveAccountStore
 
 class FeedRepository @Inject constructor(

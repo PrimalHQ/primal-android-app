@@ -20,6 +20,10 @@ inline val SavedStateHandle.profileId: String? get() = get(PROFILE_ID)
 inline val SavedStateHandle.profileIdOrThrow: String
     get() = get(PROFILE_ID) ?: throw IllegalArgumentException("Missing required profileId argument")
 
+const val NADDR = "naddr"
+inline val SavedStateHandle.naddrOrThrow: String
+    get() = get(NADDR) ?: throw IllegalArgumentException("Missing required naddr argument.")
+
 const val FOLLOWS_TYPE = "followsType"
 inline val SavedStateHandle.followsType: String? get() = get(FOLLOWS_TYPE)
 
