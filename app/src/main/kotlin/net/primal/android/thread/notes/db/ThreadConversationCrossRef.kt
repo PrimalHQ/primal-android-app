@@ -1,4 +1,4 @@
-package net.primal.android.thread.db
+package net.primal.android.thread.notes.db
 
 import androidx.room.Entity
 import androidx.room.Index

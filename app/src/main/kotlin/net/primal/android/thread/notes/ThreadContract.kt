@@ -1,4 +1,4 @@
-package net.primal.android.thread
+package net.primal.android.thread.notes
 
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.feed.model.ZappingState

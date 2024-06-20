@@ -301,7 +301,7 @@ private fun WalletActivationDataInput(
     onDataChange: (WalletActivationData) -> Unit,
     onActivationCodeRequest: () -> Unit,
 ) {
-    WalletActivationErrorHandler(
+    WalletActivationDialogErrorHandler(
         error = error,
         fallbackMessage = stringResource(id = R.string.app_generic_error),
         onErrorDismiss = onErrorDismiss,

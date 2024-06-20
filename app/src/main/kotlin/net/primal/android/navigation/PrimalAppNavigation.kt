@@ -84,8 +84,10 @@ import net.primal.android.profile.qr.ui.ProfileQrCodeViewerScreen
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
-import net.primal.android.thread.ThreadScreen
-import net.primal.android.thread.ThreadViewModel
+import net.primal.android.thread.blogs.LongFormThreadScreen
+import net.primal.android.thread.blogs.LongFormThreadViewModel
+import net.primal.android.thread.notes.ThreadScreen
+import net.primal.android.thread.notes.ThreadViewModel
 import net.primal.android.wallet.activation.WalletActivationViewModel
 
 private fun NavController.navigateToWelcome() =
@@ -187,6 +189,8 @@ private fun NavController.navigateToWalletSettings(nwcUrl: String? = null) =
     }
 
 fun NavController.navigateToThread(noteId: String) = navigate(route = "thread/$noteId")
+
+fun NavController.navigateToLongFormThread(naddr: String) = navigate(route = "longFormThread/$naddr")
 
 fun NavController.navigateToNoteReactions(noteId: String) = navigate(route = "reactions/$noteId")
 
@@ -367,6 +371,16 @@ fun PrimalAppNavigation() {
                 route = "thread/{$NOTE_ID}",
                 arguments = listOf(
                     navArgument(NOTE_ID) {
+                        type = NavType.StringType
+                    },
+                ),
+                navController = navController,
+            )
+
+            longFormThread(
+                route = "longFormThread/{$NADDR}",
+                arguments = listOf(
+                    navArgument(NADDR) {
                         type = NavType.StringType
                     },
                 ),
@@ -741,6 +755,7 @@ private fun NavGraphBuilder.search(route: String, navController: NavController) 
             onClose = { navController.navigateUp() },
             onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
             onNoteClick = { noteId -> navController.navigateToThread(noteId) },
+            onNaddrClick = { naddr -> navController.navigateToLongFormThread(naddr) },
             onSearchContent = { query -> navController.navigateToExploreFeed(query) },
         )
     }
@@ -931,6 +946,44 @@ private fun NavGraphBuilder.thread(
         },
         onGoToWallet = { navController.navigateToWallet() },
         onExpandReply = { args -> navController.navigateToNoteEditor(args) },
+        onReactionsClick = { noteId -> navController.navigateToNoteReactions(noteId = noteId) },
+    )
+}
+
+private fun NavGraphBuilder.longFormThread(
+    route: String,
+    arguments: List<NamedNavArgument>,
+    navController: NavController,
+) = composable(
+    route = route,
+    arguments = arguments,
+    enterTransition = { primalSlideInHorizontallyFromEnd },
+    exitTransition = { primalScaleOut },
+    popEnterTransition = { primalScaleIn },
+    popExitTransition = { primalSlideOutHorizontallyToEnd },
+) { navBackEntry ->
+    val viewModel = hiltViewModel<LongFormThreadViewModel>(navBackEntry)
+    ApplyEdgeToEdge()
+    LockToOrientationPortrait()
+    LongFormThreadScreen(
+        viewModel = viewModel,
+        onClose = { navController.navigateUp() },
+        onNoteClick = { postId -> navController.navigateToThread(postId) },
+        onNoteReplyClick = { postId -> navController.navigateToNoteEditor(NoteEditorArgs(replyToNoteId = postId)) },
+        onNoteQuoteClick = { preFillContent -> navController.navigateToNoteEditor(preFillContent.asNoteEditorArgs()) },
+        onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
+        onHashtagClick = { hashtag -> navController.navigateToExploreFeed(query = hashtag) },
+        onMediaClick = {
+            navController.navigateToMediaGallery(
+                noteId = it.noteId,
+                mediaUrl = it.mediaUrl,
+                mediaPositionMs = it.positionMs,
+            )
+        },
+        onPayInvoiceClick = {
+            navController.navigateToWalletCreateTransaction(lnbc = it.lnbc)
+        },
+        onGoToWallet = { navController.navigateToWallet() },
         onReactionsClick = { noteId -> navController.navigateToNoteReactions(noteId = noteId) },
     )
 }

@@ -51,6 +51,8 @@ fun String.isNPub() = lowercase().startsWith(NPUB)
 
 fun String.isNProfile() = lowercase().startsWith(NPROFILE)
 
+fun String.isNAddr() = lowercase().startsWith(NADDR)
+
 fun String.isNoteUri() = lowercase().startsWith(NOSTR + NOTE)
 
 fun String.isNEventUri() = lowercase().startsWith(NOSTR + NEVENT)
@@ -58,6 +60,8 @@ fun String.isNEventUri() = lowercase().startsWith(NOSTR + NEVENT)
 fun String.isNPubUri() = lowercase().startsWith(NOSTR + NPUB)
 
 fun String.isNProfileUri() = lowercase().startsWith(NOSTR + NPROFILE)
+
+fun String.isNAddrUri() = lowercase().startsWith(NOSTR + NADDR)
 
 fun String.parseNostrUris(): List<String> {
     return nostrUriRegexPattern.toRegex().findAll(this).map { matchResult ->

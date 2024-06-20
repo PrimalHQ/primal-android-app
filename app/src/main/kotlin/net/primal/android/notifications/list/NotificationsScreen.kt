@@ -481,6 +481,7 @@ private fun NewNotificationsButton(onClick: () -> Unit) {
 }
 
 @Composable
+@Deprecated("Replace with SnackbarErrorHandler")
 private fun ErrorHandler(
     error: NotificationsContract.UiState.NotificationsError?,
     snackbarHostState: SnackbarHostState,

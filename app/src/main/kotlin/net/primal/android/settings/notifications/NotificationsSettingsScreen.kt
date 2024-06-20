@@ -262,6 +262,7 @@ private fun NotificationType.toTitle(): String =
     }
 
 @Composable
+@Deprecated("Replace with SnackbarErrorHandler")
 fun LaunchedErrorHandler(viewModel: NotificationsSettingsViewModel) {
     val context = LocalContext.current
     val uiScope = rememberCoroutineScope()

@@ -492,6 +492,7 @@ private fun MessageOutlinedTextField(
 }
 
 @Composable
+@Deprecated("Replace with SnackbarErrorHandler")
 private fun ChatErrorHandler(error: ChatContract.UiState.ChatError?, snackbarHostState: SnackbarHostState) {
     val context = LocalContext.current
     LaunchedEffect(error ?: true) {

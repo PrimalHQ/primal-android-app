@@ -38,8 +38,8 @@ import net.primal.android.theme.AppTheme
 @ExperimentalMaterial3Api
 @Composable
 fun PrimalTopAppBar(
-    title: String,
     modifier: Modifier = Modifier,
+    title: String = "",
     subtitle: String? = null,
     textColor: Color = LocalContentColor.current,
     navigationIcon: ImageVector? = null,

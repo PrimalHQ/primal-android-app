@@ -56,7 +56,7 @@ import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.wallet.activation.WalletActivationContract
 import net.primal.android.wallet.activation.WalletActivationViewModel
 import net.primal.android.wallet.activation.domain.WalletActivationStatus
-import net.primal.android.wallet.activation.ui.WalletActivationErrorHandler
+import net.primal.android.wallet.activation.ui.WalletActivationDialogErrorHandler
 import net.primal.android.wallet.activation.ui.WalletActivationForm
 import net.primal.android.wallet.activation.ui.WalletActivationScreenContent
 import net.primal.android.wallet.activation.ui.WalletOtpVerification
@@ -154,7 +154,7 @@ private fun WalletActivationFormContent(
     eventPublisher: (WalletActivationContract.UiEvent) -> Unit,
     isKeyboardVisible: Boolean,
 ) {
-    WalletActivationErrorHandler(
+    WalletActivationDialogErrorHandler(
         error = state.error,
         fallbackMessage = stringResource(id = R.string.app_generic_error),
         onErrorDismiss = {

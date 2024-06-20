@@ -203,6 +203,8 @@
     <string name="thread_publish_button">Reply</string>
     <string name="thread_publishing_button">Replying…</string>
     <string name="thread_reply_nostr_publish_error">Unable to publish your note to Nostr. Please try again soon.</string>
+
+    <string name="long_form_thread_invalid_naddr">Unable to load content. The address is invalid.</string>
     
     <string name="note_reactions_title">Note Zaps</string>
 
