@@ -256,6 +256,7 @@ private fun AddRemoveUserFeedAppBarIcon(
 }
 
 @Composable
+@Deprecated("Replace with SnackbarErrorHandler")
 private fun ErrorHandler(error: ExploreFeedError?, snackbarHostState: SnackbarHostState) {
     val context = LocalContext.current
     LaunchedEffect(error ?: true) {

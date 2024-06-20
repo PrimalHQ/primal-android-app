@@ -1,4 +1,4 @@
-package net.primal.android.thread
+package net.primal.android.thread.notes
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -28,8 +28,9 @@ import net.primal.android.note.repository.NoteRepository
 import net.primal.android.note.ui.asNoteZapUiModel
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.settings.muted.repository.MutedUserRepository
-import net.primal.android.thread.ThreadContract.UiEvent
-import net.primal.android.thread.ThreadContract.UiState.ThreadError
+import net.primal.android.thread.notes.ThreadContract.UiEvent
+import net.primal.android.thread.notes.ThreadContract.UiState
+import net.primal.android.thread.notes.ThreadContract.UiState.ThreadError
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
 import net.primal.android.wallet.domain.ZapTarget
@@ -53,16 +54,12 @@ class ThreadViewModel @Inject constructor(
 
     private val highlightPostId = savedStateHandle.noteIdOrThrow
 
-    private val _state = MutableStateFlow(ThreadContract.UiState(highlightPostId = highlightPostId))
+    private val _state = MutableStateFlow(UiState(highlightPostId = highlightPostId))
     val state = _state.asStateFlow()
-    private fun setState(reducer: ThreadContract.UiState.() -> ThreadContract.UiState) {
-        _state.getAndUpdate { it.reducer() }
-    }
+    private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
 
     private val events: MutableSharedFlow<UiEvent> = MutableSharedFlow()
-    fun setEvent(event: UiEvent) {
-        viewModelScope.launch { events.emit(event) }
-    }
+    fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
 
     init {
         observeEvents()
