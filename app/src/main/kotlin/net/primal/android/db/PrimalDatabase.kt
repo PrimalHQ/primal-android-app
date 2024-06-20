@@ -45,9 +45,9 @@ import net.primal.android.profile.db.ProfileStats
 import net.primal.android.profile.db.ProfileStatsDao
 import net.primal.android.settings.muted.db.MutedUserDao
 import net.primal.android.settings.muted.db.MutedUserData
-import net.primal.android.thread.db.ThreadConversationCrossRef
-import net.primal.android.thread.db.ThreadConversationCrossRefDao
-import net.primal.android.thread.db.ThreadConversationDao
+import net.primal.android.thread.notes.db.ThreadConversationCrossRef
+import net.primal.android.thread.notes.db.ThreadConversationCrossRefDao
+import net.primal.android.thread.notes.db.ThreadConversationDao
 import net.primal.android.user.db.Relay
 import net.primal.android.user.db.RelayDao
 import net.primal.android.wallet.db.WalletTransactionDao

@@ -9,7 +9,7 @@ import net.primal.android.R
 import net.primal.android.theme.AppTheme
 
 @Composable
-fun WalletActivationErrorHandler(
+fun WalletActivationDialogErrorHandler(
     error: Throwable?,
     fallbackMessage: String,
     onErrorDismiss: () -> Unit,

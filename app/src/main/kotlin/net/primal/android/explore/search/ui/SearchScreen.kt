@@ -42,10 +42,13 @@ import net.primal.android.core.compose.icons.primaliconpack.Search
 import net.primal.android.crypto.bech32ToHexOrThrow
 import net.primal.android.explore.search.SearchContract
 import net.primal.android.explore.search.SearchViewModel
+import net.primal.android.nostr.ext.isNAddr
+import net.primal.android.nostr.ext.isNAddrUri
 import net.primal.android.nostr.ext.isNPub
 import net.primal.android.nostr.ext.isNPubUri
 import net.primal.android.nostr.ext.isNote
 import net.primal.android.nostr.ext.isNoteUri
+import net.primal.android.nostr.utils.Nip19TLV
 import net.primal.android.theme.AppTheme
 
 @Composable
@@ -54,6 +57,7 @@ fun SearchScreen(
     onClose: () -> Unit,
     onProfileClick: (String) -> Unit,
     onNoteClick: (String) -> Unit,
+    onNaddrClick: (String) -> Unit,
     onSearchContent: (String) -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
@@ -63,6 +67,7 @@ fun SearchScreen(
         onClose = onClose,
         onProfileClick = onProfileClick,
         onNoteClick = onNoteClick,
+        onNaddrClick = onNaddrClick,
         onSearchContent = onSearchContent,
     )
 }
@@ -75,6 +80,7 @@ fun SearchScreen(
     onClose: () -> Unit,
     onProfileClick: (String) -> Unit,
     onNoteClick: (String) -> Unit,
+    onNaddrClick: (String) -> Unit,
     onSearchContent: (String) -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -117,12 +123,14 @@ fun SearchScreen(
                                 val query = state.searchQuery
                                 val noteId = query.takeAsNoteHexId()
                                 val profileId = query.takeAsProfileHexId()
+                                val naddr = query.takeAsNaddr()
                                 when {
                                     noteId != null -> {
                                         delay(KEYBOARD_HIDE_DELAY)
                                         onNoteClick(noteId)
                                     }
                                     profileId != null -> onProfileClick(profileId)
+                                    naddr != null -> onNaddrClick(naddr)
                                     else -> onSearchContent(query)
                                 }
                             }
@@ -172,6 +180,21 @@ private fun String.takeAsProfileHexId(): String? {
             bech32ToHexOrThrow()
         }
         result.getOrNull()
+    } else {
+        null
+    }
+}
+
+private fun String.takeAsNaddr(): String? {
+    return if (isNAddr() || isNAddrUri()) {
+        val result = runCatching {
+            Nip19TLV.parseAsNaddr(this)
+        }
+        if (result.getOrNull() != null) {
+            this
+        } else {
+            null
+        }
     } else {
         null
     }

@@ -508,6 +508,7 @@ private fun NoteActionRow(onPhotosImported: (List<Uri>) -> Unit, onUserTag: () -
 }
 
 @Composable
+@Deprecated("Replace with SnackbarErrorHandler")
 private fun NewPostPublishErrorHandler(error: NoteEditorError?, snackbarHostState: SnackbarHostState) {
     val context = LocalContext.current
     LaunchedEffect(error ?: true) {

@@ -430,6 +430,7 @@ private fun ProfileDetailsColumn(
 }
 
 @Composable
+@Deprecated("Replace with SnackbarErrorHandler")
 fun LaunchedErrorHandler(viewModel: LoginViewModel) {
     val genericMessage = stringResource(id = R.string.app_generic_error)
     val context = LocalContext.current

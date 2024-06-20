@@ -1,4 +1,4 @@
-package net.primal.android.thread
+package net.primal.android.thread.notes
 
 import android.net.Uri
 import androidx.compose.animation.AnimatedVisibility
@@ -112,7 +112,7 @@ import net.primal.android.profile.report.OnReportContentClick
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
-import net.primal.android.thread.ThreadContract.UiState.ThreadError
+import net.primal.android.thread.notes.ThreadContract.UiState.ThreadError
 import net.primal.android.wallet.zaps.canZap
 
 @Composable
@@ -868,6 +868,7 @@ private fun ReplyToOptions(
 }
 
 @Composable
+@Deprecated("Replace with SnackbarErrorHandler")
 private fun ThreadErrorHandler(error: ThreadError?, snackbarHostState: SnackbarHostState) {
     val context = LocalContext.current
     LaunchedEffect(error ?: true) {
@@ -908,6 +909,7 @@ private fun ThreadErrorHandler(error: ThreadError?, snackbarHostState: SnackbarH
 }
 
 @Composable
+@Deprecated("Replace with SnackbarErrorHandler")
 private fun NoteEditorErrorHandler(
     error: NoteEditorContract.UiState.NoteEditorError?,
     snackbarHostState: SnackbarHostState,
