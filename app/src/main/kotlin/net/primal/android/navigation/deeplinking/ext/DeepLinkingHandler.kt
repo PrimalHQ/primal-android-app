@@ -3,6 +3,8 @@ package net.primal.android.navigation.deeplinking.ext
 import net.primal.android.core.utils.isValidNostrPublicKey
 import net.primal.android.crypto.bech32ToHexOrThrow
 import net.primal.android.navigation.deeplinking.DeepLink
+import net.primal.android.user.domain.NWCParseException
+import net.primal.android.user.domain.isNwcUrl
 import net.primal.android.user.domain.parseNWCUrl
 
 private const val PRIMAL_SCHEMA = "primal://"
@@ -23,8 +25,8 @@ fun String?.handleDeeplink(): DeepLink? {
 }
 
 private fun String.canHandleNostrWalletConnectSchema(): Boolean {
-    return this.startsWith(NOSTR_WALLET_CONNECT_SCHEMA) or
-        this.startsWith(NOSTR_WALLET_CONNECT_ALT_SCHEMA)
+    return (this.startsWith(NOSTR_WALLET_CONNECT_SCHEMA) || this.startsWith(NOSTR_WALLET_CONNECT_ALT_SCHEMA)) &&
+        this.isNwcUrl()
 }
 
 private fun String.canHandlePrimalSchema(): Boolean = startsWith(PRIMAL_SCHEMA)
@@ -55,7 +57,10 @@ private fun String.handlePrimalSchema(): DeepLink? {
     }
 }
 
-private fun String.handleNostrWalletConnectSchema(): DeepLink =
-    DeepLink.NostrWalletConnect(
-        this.parseNWCUrl(),
-    )
+private fun String.handleNostrWalletConnectSchema(): DeepLink? {
+    return try {
+        DeepLink.NostrWalletConnect(nwc = this.parseNWCUrl())
+    } catch (error: NWCParseException) {
+        null
+    }
+}
