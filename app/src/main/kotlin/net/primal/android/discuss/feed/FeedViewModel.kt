@@ -10,7 +10,6 @@ import javax.inject.Inject
 import kotlin.random.Random
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -189,18 +188,14 @@ class FeedViewModel @Inject constructor(
 
     private fun startPolling() {
         pollingJob = viewModelScope.launch {
-            withContext(dispatcherProvider.io()) {
-                try {
-                    while (isActive) {
-                        fetchLatestNotes()
-                        val pollInterval = POLL_INTERVAL + Random.nextInt(from = -5, until = 5)
-                        delay(pollInterval.seconds)
-                    }
-                } catch (error: WssException) {
-                    Timber.e(error)
-                } catch (error: CancellationException) {
-                    Timber.e(error)
+            try {
+                while (isActive) {
+                    fetchLatestNotes()
+                    val pollInterval = POLL_INTERVAL + Random.nextInt(from = -5, until = 5)
+                    delay(pollInterval.seconds)
                 }
+            } catch (error: WssException) {
+                Timber.e(error)
             }
         }
     }
@@ -224,20 +219,19 @@ class FeedViewModel @Inject constructor(
         return newestNoteId == topNoteId
     }
 
-    private fun fetchLatestNotes() =
-        viewModelScope.launch {
-            val feedResponse = feedRepository.fetchLatestNotes(
-                userId = activeAccountStore.activeUserId(),
-                feedDirective = feedDirective,
-            )
+    private suspend fun fetchLatestNotes() {
+        val feedResponse = feedRepository.fetchLatestNotes(
+            userId = activeAccountStore.activeUserId(),
+            feedDirective = feedDirective,
+        )
 
-            latestFeedResponse = feedResponse
-            feedResponse.processSyncCount(
-                newestLocalNote = feedRepository
-                    .findNewestPosts(feedDirective = feedDirective, limit = 1)
-                    .firstOrNull(),
-            )
-        }
+        latestFeedResponse = feedResponse
+        feedResponse.processSyncCount(
+            newestLocalNote = feedRepository
+                .findNewestPosts(feedDirective = feedDirective, limit = 1)
+                .firstOrNull(),
+        )
+    }
 
     private fun FeedResponse.processSyncCount(newestLocalNote: FeedPost? = null) {
         val allReferencedNotes = this.referencedPosts.mapNotNull {

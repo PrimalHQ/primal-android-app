@@ -193,7 +193,7 @@ class PrimalApiClient(
             )
         }
 
-        val events = messages.filterIsInstance(NostrIncomingMessage.EventMessage::class.java)
+        val events = messages.filterIsInstance<NostrIncomingMessage.EventMessage>()
 
         val nostrEvents = events.mapNotNull { it.nostrEvent }
         val primalEvents = events.mapNotNull { it.primalEvent }
