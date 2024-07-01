@@ -7,7 +7,6 @@ import androidx.paging.PagingData
 import androidx.paging.PagingSource
 import java.util.*
 import javax.inject.Inject
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonArray
@@ -102,7 +101,7 @@ class NoteRepository @Inject constructor(
         replyToAuthorId: String? = null,
     ): Boolean {
         val replyPostData = replyToPostId?.let {
-            withContext(Dispatchers.IO) {
+            withContext(dispatcherProvider.io()) {
                 database.posts().findByPostId(postId = it)
             }
         }
@@ -117,7 +116,7 @@ class NoteRepository @Inject constructor(
         }
         val eventTags = setOfNotNull(rootEventTag, replyEventTag) + mentionEventTags
 
-        val relayHintsMap = withContext(Dispatchers.IO) {
+        val relayHintsMap = withContext(dispatcherProvider.io()) {
             val tagNoteIds = eventTags.map { it.get(index = 1).jsonPrimitive.content }
             val hints = database.eventHints().findById(eventIds = tagNoteIds)
             hints.associate { it.eventId to it.relays.first() }
