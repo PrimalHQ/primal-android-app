@@ -629,4 +629,5 @@
     <string name="accessibility_toggle_between_dark_and_light_mode">Toggle between dark and light mode</string>
     <string name="accessibility_copy_content">Copy content</string>
     <string name="accessibility_warning">Warning</string>
+    <string name="accessibility_feed_reorder_drag_handle">Drag feed to change order</string>
 </resources>

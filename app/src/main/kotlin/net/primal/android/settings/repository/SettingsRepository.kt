@@ -2,7 +2,9 @@ package net.primal.android.settings.repository
 
 import androidx.room.withTransaction
 import javax.inject.Inject
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonObject
+import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.db.PrimalDatabase
@@ -18,6 +20,7 @@ import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.domain.UserAccount
 
 class SettingsRepository @Inject constructor(
+    private val dispatcherProvider: CoroutineDispatcherProvider,
     private val settingsApi: SettingsApi,
     private val database: PrimalDatabase,
     private val accountsStore: UserAccountsStore,
@@ -33,7 +36,7 @@ class SettingsRepository @Inject constructor(
     }
 
     suspend fun updateAndPersistZapDefault(userId: String, zapDefault: ContentZapDefault) {
-        updateAndPersistAppSettings(userId = userId) {
+        fetchAndUpdateAndPublishAppSettings(userId = userId) {
             copy(zapDefault = zapDefault)
         }
     }
@@ -43,7 +46,7 @@ class SettingsRepository @Inject constructor(
         presetIndex: Int,
         zapPreset: ContentZapConfigItem,
     ) {
-        updateAndPersistAppSettings(userId = userId) {
+        fetchAndUpdateAndPublishAppSettings(userId = userId) {
             copy(
                 zapsConfig = this.zapsConfig.toMutableList().apply {
                     this[presetIndex] = zapPreset
@@ -53,7 +56,7 @@ class SettingsRepository @Inject constructor(
     }
 
     suspend fun updateAndPersistNotifications(userId: String, notifications: JsonObject) {
-        updateAndPersistAppSettings(userId = userId) {
+        fetchAndUpdateAndPublishAppSettings(userId = userId) {
             copy(notifications = notifications)
         }
     }
@@ -63,7 +66,7 @@ class SettingsRepository @Inject constructor(
         name: String,
         directive: String,
     ) {
-        updateAndPersistAppSettings(userId = userId) {
+        fetchAndUpdateAndPublishAppSettings(userId = userId) {
             copy(
                 feeds = feeds.toMutableList().apply {
                     add(ContentFeedData(name = name, directive = directive))
@@ -73,7 +76,7 @@ class SettingsRepository @Inject constructor(
     }
 
     suspend fun removeAndPersistUserFeed(userId: String, directive: String) {
-        updateAndPersistAppSettings(userId = userId) {
+        updateAndPublishAppSettings(userId = userId) {
             copy(
                 feeds = feeds.toMutableList().apply {
                     removeAll { it.directive == directive }
@@ -82,15 +85,27 @@ class SettingsRepository @Inject constructor(
         }
     }
 
+    suspend fun reorderAndPersistUserFeeds(userId: String, newOrder: List<ContentFeedData>) {
+        updateAndPublishAppSettings(userId = userId) {
+            val feedsMap = this.feeds.associateBy { it.stableId() }
+            val newFeedOrder = newOrder.mapNotNull { feedsMap[it.stableId()] }
+            copy(feeds = newFeedOrder)
+        }
+    }
+
+    private fun ContentFeedData.stableId() = Pair(this.name, this.directive)
+
     private suspend fun updateAndPersistFeeds(userId: String, feeds: List<ContentFeedData>) {
-        updateAndPersistAppSettings(userId = userId) {
+        fetchAndUpdateAndPublishAppSettings(userId = userId) {
             copy(feeds = feeds)
         }
     }
 
-    suspend fun restoreDefaultFeeds(userId: String) {
-        val remoteDefaultAppSettings = fetchDefaultAppSettings(userId = userId) ?: return
-        updateAndPersistFeeds(userId = userId, feeds = remoteDefaultAppSettings.feeds)
+    suspend fun restoreDefaultUserFeeds(userId: String) {
+        withContext(dispatcherProvider.io()) {
+            val remoteDefaultAppSettings = fetchDefaultAppSettings(userId = userId) ?: return@withContext
+            updateAndPersistFeeds(userId = userId, feeds = remoteDefaultAppSettings.feeds)
+        }
     }
 
     @Suppress("MagicNumber")
@@ -98,14 +113,16 @@ class SettingsRepository @Inject constructor(
         val userSettings = accountsStore.findByIdOrNull(userId)?.appSettings
         if (userSettings?.zapDefault != null && userSettings.zapsConfig.isNotEmpty()) return
 
-        val defaultSettings = fetchDefaultAppSettings(userId = userId)
+        val defaultSettings = withContext(dispatcherProvider.io()) {
+            fetchDefaultAppSettings(userId = userId)
+        }
         val defaultZapDefault = defaultSettings?.zapDefault ?: DEFAULT_ZAP_DEFAULT
         val defaultZapsConfig = defaultSettings?.zapsConfig ?: DEFAULT_ZAP_CONFIG
 
         val existingZapDefaultValue = userSettings?.defaultZapAmount
         val existingZapsConfigValues = userSettings?.zapOptions
 
-        updateAndPersistAppSettings(userId = userId) {
+        fetchAndUpdateAndPublishAppSettings(userId = userId) {
             this.copy(
                 zapDefault = defaultZapDefault.copy(
                     amount = existingZapDefaultValue?.toLong() ?: defaultZapDefault.amount,
@@ -126,13 +143,29 @@ class SettingsRepository @Inject constructor(
         }
     }
 
-    private suspend fun updateAndPersistAppSettings(
+    private suspend fun fetchAndUpdateAndPublishAppSettings(
         userId: String,
         reducer: ContentAppSettings.() -> ContentAppSettings,
     ) {
-        val remoteAppSettings = fetchAppSettings(userId = userId) ?: return
-        val localAppSettings = persistAppSettingsLocally(userId = userId, appSettings = remoteAppSettings)
-        val newAppSettings = localAppSettings.reducer()
+        withContext(dispatcherProvider.io()) {
+            val remoteAppSettings = fetchAppSettings(userId = userId) ?: return@withContext
+            persistAppSettingsLocally(userId = userId, appSettings = remoteAppSettings)
+            updateAndPublishAppSettings(userId = userId, reducer = reducer)
+        }
+    }
+
+    private suspend fun updateAndPublishAppSettings(
+        userId: String,
+        reducer: ContentAppSettings.() -> ContentAppSettings,
+    ) {
+        withContext(dispatcherProvider.io()) {
+            val localAppSettings = accountsStore.findByIdOrNull(userId = userId)?.appSettings ?: return@withContext
+            val newAppSettings = localAppSettings.reducer()
+            publishAppSettings(userId = userId, newAppSettings = newAppSettings)
+        }
+    }
+
+    private suspend fun publishAppSettings(userId: String, newAppSettings: ContentAppSettings) {
         settingsApi.setAppSettings(userId = userId, appSettings = newAppSettings)
         persistAppSettingsLocally(userId = userId, appSettings = newAppSettings)
     }

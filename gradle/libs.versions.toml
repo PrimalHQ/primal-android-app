@@ -41,6 +41,7 @@ paging = "3.3.0"
 play-publishing = "3.8.4"
 play-billing = "7.0.0"
 qrcode-generator = "1.6.2"
+reorderable = "2.1.1"
 retrofit = "2.11.0"
 roboelectric = "4.12.1"
 room = "2.6.1"
@@ -85,6 +86,7 @@ compose-constraintlayout = { module = "androidx.constraintlayout:constraintlayou
 
 androidx-emoji2-emojipicker = { group = "androidx.emoji2", name = "emoji2-emojipicker", version.ref = "emoji2-emojipicker" }
 flippable = { module = "com.wajahatkarim:flippable", version.ref = "flippable" }
+reorderable = { module = "sh.calvin.reorderable:reorderable", version.ref = "reorderable" }
 
 lottie-compose = { module = "com.airbnb.android:lottie-compose", version.ref = "compose-lottie" }
 navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "compose-navigation" }

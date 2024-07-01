@@ -272,6 +272,7 @@ dependencies {
 
     implementation(libs.lottie.compose)
     implementation(libs.flippable)
+    implementation(libs.reorderable)
 
     implementation(libs.timber)
 

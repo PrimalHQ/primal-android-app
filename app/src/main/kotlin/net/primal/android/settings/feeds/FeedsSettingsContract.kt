@@ -8,13 +8,14 @@ interface FeedsSettingsContract {
         val error: SettingsFeedsError? = null,
     ) {
         sealed class SettingsFeedsError {
-            data class FailedToRemoveFeed(val throwable: Throwable) : SettingsFeedsError()
             data class FailedToRestoreDefaultFeeds(val throwable: Throwable) : SettingsFeedsError()
         }
     }
 
     sealed class UiEvent {
-        data class FeedRemoved(val directive: String) : UiEvent()
+        data class FeedRemoved(val name: String, val directive: String) : UiEvent()
+        data class FeedReordered(val feeds: List<Feed>) : UiEvent()
         data object RestoreDefaultFeeds : UiEvent()
+        data object PersistFeeds : UiEvent()
     }
 }
