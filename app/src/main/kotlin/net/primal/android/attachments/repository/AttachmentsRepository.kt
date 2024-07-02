@@ -7,6 +7,7 @@ import net.primal.android.attachments.domain.NoteAttachmentType
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.networking.primal.upload.PrimalFileUploader
 import net.primal.android.networking.primal.upload.UnsuccessfulFileUpload
+import net.primal.android.networking.primal.upload.domain.UploadResult
 import net.primal.android.user.accounts.active.ActiveAccountStore
 
 class AttachmentsRepository @Inject constructor(
@@ -24,7 +25,7 @@ class AttachmentsRepository @Inject constructor(
         attachment: net.primal.android.editor.domain.NoteAttachment,
         uploadId: UUID,
         onProgress: ((uploadedBytes: Int, totalBytes: Int) -> Unit)? = null,
-    ): String {
+    ): UploadResult {
         val userId = activeAccountStore.activeUserId()
         return fileUploader.uploadFile(
             uri = attachment.localUri,

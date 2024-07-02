@@ -159,10 +159,10 @@ class OnboardingViewModel @Inject constructor(
             val uploadId = UUID.randomUUID()
             val job = viewModelScope.launch {
                 try {
-                    val remoteAvatarUrl = withContext(dispatcherProvider.io()) {
+                    val uploadResult = withContext(dispatcherProvider.io()) {
                         fileUploader.uploadFile(keyPair = keyPair, uri = avatarUri)
                     }
-                    setState { copy(avatarRemoteUrl = remoteAvatarUrl) }
+                    setState { copy(avatarRemoteUrl = uploadResult.remoteUrl) }
                 } catch (error: UnsuccessfulFileUpload) {
                     Timber.w(error)
                 } catch (error: WssException) {
@@ -181,10 +181,10 @@ class OnboardingViewModel @Inject constructor(
             val uploadId = UUID.randomUUID()
             val job = viewModelScope.launch {
                 try {
-                    val remoteBannerUrl = withContext(dispatcherProvider.io()) {
+                    val uploadResult = withContext(dispatcherProvider.io()) {
                         fileUploader.uploadFile(keyPair = keyPair, uri = bannerUri)
                     }
-                    setState { copy(bannerRemoteUrl = remoteBannerUrl) }
+                    setState { copy(bannerRemoteUrl = uploadResult.remoteUrl) }
                 } catch (error: UnsuccessfulFileUpload) {
                     Timber.w(error)
                 } catch (error: WssException) {

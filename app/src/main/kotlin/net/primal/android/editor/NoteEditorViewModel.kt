@@ -287,7 +287,7 @@ class NoteEditorViewModel @AssistedInject constructor(
             updatedAttachment = updatedAttachment.copy(uploadError = null)
             updateNoteAttachmentState(attachment = updatedAttachment)
 
-            val remoteUrl = withContext(dispatcherProvider.io()) {
+            val uploadResult = withContext(dispatcherProvider.io()) {
                 attachmentRepository.uploadNoteAttachment(
                     attachment = attachment,
                     uploadId = uploadId,
@@ -301,7 +301,11 @@ class NoteEditorViewModel @AssistedInject constructor(
                 )
             }
 
-            updatedAttachment = updatedAttachment.copy(remoteUrl = remoteUrl)
+            updatedAttachment = updatedAttachment.copy(
+                remoteUrl = uploadResult.remoteUrl,
+                originalHash = uploadResult.originalHash,
+                originalSizeInBytes = uploadResult.originalFileSize,
+            )
             updateNoteAttachmentState(attachment = updatedAttachment)
 
             val (mimeType, dimensions) = fileAnalyser.extractImageTypeAndDimensions(attachment.localUri)

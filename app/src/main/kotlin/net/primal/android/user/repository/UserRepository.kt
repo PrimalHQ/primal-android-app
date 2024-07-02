@@ -112,14 +112,14 @@ class UserRepository @Inject constructor(
     suspend fun setProfileMetadata(userId: String, profileMetadata: ProfileMetadata) {
         val pictureUrl = profileMetadata.remotePictureUrl
             ?: if (profileMetadata.localPictureUri != null) {
-                fileUploader.uploadFile(userId = userId, uri = profileMetadata.localPictureUri)
+                fileUploader.uploadFile(userId = userId, uri = profileMetadata.localPictureUri).remoteUrl
             } else {
                 null
             }
 
         val bannerUrl = profileMetadata.remoteBannerUrl
             ?: if (profileMetadata.localBannerUri != null) {
-                fileUploader.uploadFile(userId = userId, uri = profileMetadata.localBannerUri)
+                fileUploader.uploadFile(userId = userId, uri = profileMetadata.localBannerUri).remoteUrl
             } else {
                 null
             }

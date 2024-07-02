@@ -25,6 +25,7 @@ import net.primal.android.networking.primal.upload.api.UploadApiConnectionsPool
 import net.primal.android.networking.primal.upload.api.model.cancelUploadRequest
 import net.primal.android.networking.primal.upload.api.model.chunkUploadRequest
 import net.primal.android.networking.primal.upload.api.model.completeUploadRequest
+import net.primal.android.networking.primal.upload.domain.UploadResult
 import net.primal.android.networking.primal.upload.domain.UploadStatus
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.notary.NostrNotary
@@ -51,7 +52,7 @@ class PrimalFileUploader @Inject constructor(
         keyPair: NostrKeyPair,
         uploadId: UUID = UUID.randomUUID(),
         onProgress: ((uploadedBytes: Int, totalBytes: Int) -> Unit)? = null,
-    ): String {
+    ): UploadResult {
         val userId = keyPair.pubKey
         return uploadFileOrThrow(
             uri = uri,
@@ -70,7 +71,7 @@ class PrimalFileUploader @Inject constructor(
         userId: String,
         uploadId: UUID = UUID.randomUUID(),
         onProgress: ((uploadedBytes: Int, totalBytes: Int) -> Unit)? = null,
-    ): String {
+    ): UploadResult {
         return uploadFileOrThrow(
             uri = uri,
             userId = userId,
@@ -122,10 +123,10 @@ class PrimalFileUploader @Inject constructor(
         uploadId: UUID = UUID.randomUUID(),
         signNostrEvent: (NostrUnsignedEvent) -> NostrEvent,
         onProgress: (uploadedBytes: Int, totalBytes: Int) -> Unit,
-    ): String {
+    ): UploadResult {
         val fileDigest = MessageDigest.getInstance("SHA-256")
         return withContext(dispatchers.io()) {
-            val uploadResult = runCatching {
+            val uploadResultTask = runCatching {
                 uploadsMap[uploadId] = UploadStatus.Uploading
                 val fileSizeInBytes = uri.readFileSizeInBytes()
                 val chunkSize = calculateChunkSize(fileSizeInBytes)
@@ -172,15 +173,19 @@ class PrimalFileUploader @Inject constructor(
                     ),
                 )
                 uploadsMap[uploadId] = UploadStatus.UploadCompleted
-                remoteUrl
+                UploadResult(
+                    remoteUrl = remoteUrl,
+                    originalFileSize = fileSizeInBytes.toInt(),
+                    originalHash = hash,
+                )
             }
 
-            val remoteUrl = uploadResult.getOrNull()
-            if (remoteUrl != null) {
-                remoteUrl
+            val uploadResult = uploadResultTask.getOrNull()
+            if (uploadResult != null) {
+                uploadResult
             } else {
                 uploadsMap[uploadId] = UploadStatus.UploadFailed
-                throw UnsuccessfulFileUpload(cause = uploadResult.exceptionOrNull())
+                throw UnsuccessfulFileUpload(cause = uploadResultTask.exceptionOrNull())
             }
         }
     }
