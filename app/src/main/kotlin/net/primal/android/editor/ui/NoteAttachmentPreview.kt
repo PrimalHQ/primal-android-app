@@ -1,5 +1,6 @@
 package net.primal.android.editor.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.wrapContentWidth
@@ -10,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -26,6 +28,7 @@ fun NoteAttachmentPreview(
     onDiscard: (UUID) -> Unit,
     onRetryUpload: (UUID) -> Unit,
 ) {
+    val shape = AppTheme.shapes.medium
     Box(
         contentAlignment = Alignment.Center,
     ) {
@@ -34,10 +37,21 @@ fun NoteAttachmentPreview(
             modifier = Modifier
                 .fillMaxHeight()
                 .wrapContentWidth()
-                .clip(AppTheme.shapes.medium),
+                .clip(shape),
             contentDescription = null,
             contentScale = ContentScale.Crop,
         )
+
+        if (attachment.remoteUrl == null) {
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .background(
+                        color = Color.Black.copy(alpha = 0.5f),
+                        shape = shape,
+                    ),
+            )
+        }
 
         MiniFloatingIconButton(
             modifier = Modifier.align(Alignment.TopEnd),
