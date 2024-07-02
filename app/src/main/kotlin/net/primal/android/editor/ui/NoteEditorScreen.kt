@@ -59,6 +59,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.util.*
@@ -107,17 +108,12 @@ fun NoteEditorScreen(
     onClose: () -> Unit,
     eventPublisher: (UiEvent) -> Unit,
 ) {
-    val focusRequester = remember { FocusRequester() }
     val snackbarHostState = remember { SnackbarHostState() }
 
     NewPostPublishErrorHandler(
         error = state.error,
         snackbarHostState = snackbarHostState,
     )
-
-    LaunchedEffect(Unit) {
-        focusRequester.requestFocus()
-    }
 
     Scaffold(
         topBar = {
@@ -128,30 +124,12 @@ fun NoteEditorScreen(
                 navigationIconContentDescription = stringResource(id = R.string.accessibility_close),
                 showDivider = true,
                 actions = {
-                    val text = when {
-                        state.publishing -> if (state.isReply) {
-                            stringResource(id = R.string.note_editor_reply_publishing_button)
-                        } else {
-                            stringResource(id = R.string.note_editor_post_publishing_button)
-                        }
-
-                        state.uploadingAttachments -> stringResource(
-                            id = R.string.note_editor_uploading_attachments,
-                        )
-
-                        else -> if (state.isReply) {
-                            stringResource(id = R.string.note_editor_reply_publish_button)
-                        } else {
-                            stringResource(id = R.string.note_editor_post_publish_button)
-                        }
-                    }
-
                     PrimalLoadingButton(
                         modifier = Modifier
                             .padding(end = 8.dp)
                             .height(34.dp)
                             .wrapContentWidth(),
-                        text = text,
+                        text = state.resolvePublishNoteButtonText(),
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Normal,
                         contentPadding = PaddingValues(horizontal = 24.dp, vertical = 0.dp),
@@ -167,184 +145,255 @@ fun NoteEditorScreen(
             SnackbarHost(hostState = snackbarHostState)
         },
         content = { paddingValues ->
-            val outlineColor = AppTheme.colorScheme.outline
-            val editorListState = rememberLazyListState()
-
-            var noteEditorMaxHeightPx by remember { mutableIntStateOf(0) }
-            var replyNoteHeightPx by remember { mutableIntStateOf(0) }
-            val replyingToPaddingTop = 8.dp
-            var replyingToNoticeHeightPx by remember { mutableIntStateOf(0) }
-
-            val density = LocalDensity.current
-            var extraSpacing by remember { mutableStateOf(0.dp) }
-            extraSpacing = if (state.isReply) {
-                with(density) {
-                    val replyHeight = replyNoteHeightPx.toDp() + replyingToNoticeHeightPx.toDp() + replyingToPaddingTop
-                    val noteEditorMaxHeight = noteEditorMaxHeightPx.toDp()
-                    noteEditorMaxHeight - replyHeight - attachmentsHeightDp
-                }
-            } else {
-                0.dp
-            }
-
-            Box(
-                modifier = Modifier.fillMaxSize().imePadding(),
-                contentAlignment = Alignment.BottomCenter,
-            ) {
-                LazyColumn(
-                    modifier = Modifier
-                        .background(color = AppTheme.colorScheme.surfaceVariant)
-                        .fillMaxSize()
-                        .padding(paddingValues)
-                        .imePadding()
-                        .onSizeChanged { noteEditorMaxHeightPx = it.height },
-                    state = editorListState,
-                ) {
-                    items(
-                        items = state.conversation,
-                        key = { it.postId },
-                    ) {
-                        ReplyToNote(
-                            replyToNote = it,
-                            connectionLineColor = outlineColor,
-                        )
-                    }
-
-                    item("reply") {
-                        Column {
-                            if (state.isReply && state.replyToNote != null) {
-                                ReplyingToText(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(top = replyingToPaddingTop, start = avatarsColumnWidthDp, end = 16.dp)
-                                        .onSizeChanged { replyingToNoticeHeightPx = it.height },
-                                    replyToUsername = state.replyToNote.authorHandle,
-                                )
-                            }
-
-                            Row {
-                                AvatarThumbnail(
-                                    modifier = Modifier
-                                        .drawWithCache {
-                                            onDrawBehind {
-                                                if (state.isReply) {
-                                                    drawLine(
-                                                        color = outlineColor,
-                                                        start = Offset(
-                                                            x = connectionLineOffsetXDp.toPx(),
-                                                            y = (-32).dp.toPx(),
-                                                        ),
-                                                        end = Offset(
-                                                            x = connectionLineOffsetXDp.toPx(),
-                                                            y = size.height / 2,
-                                                        ),
-                                                        strokeWidth = 2.dp.toPx(),
-                                                        cap = StrokeCap.Square,
-                                                    )
-                                                }
-                                            }
-                                        }
-                                        .padding(start = 16.dp)
-                                        .padding(top = 8.dp),
-                                    avatarSize = avatarSizeDp,
-                                    avatarCdnImage = state.activeAccountAvatarCdnImage,
-                                )
-
-                                NoteOutlinedTextField(
-                                    modifier = Modifier
-                                        .offset(x = (-8).dp)
-                                        .fillMaxWidth()
-                                        .wrapContentHeight()
-                                        .focusRequester(focusRequester)
-                                        .onSizeChanged { replyNoteHeightPx = it.height },
-                                    value = state.content,
-                                    onValueChange = { eventPublisher(UiEvent.UpdateContent(content = it)) },
-                                    taggedUsers = state.taggedUsers,
-                                    enabled = !state.publishing,
-                                    placeholder = {
-                                        Text(
-                                            text = stringResource(
-                                                id = R.string.note_editor_content_placeholder,
-                                            ),
-                                            color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
-                                            style = AppTheme.typography.bodyMedium,
-                                        )
-                                    },
-                                    textStyle = AppTheme.typography.bodyMedium.copy(lineHeight = 20.sp),
-                                    colors = PrimalDefaults.transparentOutlinedTextFieldColors(),
-                                    onUserTaggingModeChanged = {
-                                        eventPublisher(UiEvent.ToggleSearchUsers(enabled = it))
-                                    },
-                                    onUserTagSearch = {
-                                        eventPublisher(UiEvent.SearchUsers(query = it))
-                                    },
-                                )
-                            }
-                        }
-                    }
-
-                    item(key = "attachments") {
-                        NoteAttachmentsLazyRow(
-                            attachments = state.attachments,
-                            onDiscard = {
-                                eventPublisher(UiEvent.DiscardNoteAttachment(attachmentId = it))
-                            },
-                            onRetryUpload = {
-                                eventPublisher(UiEvent.RetryUpload(attachmentId = it))
-                            },
-                        )
-                    }
-
-                    item(key = "extraSpacing") {
-                        Spacer(modifier = Modifier.height(extraSpacing))
-                    }
-                }
-
-                Column(
-                    modifier = Modifier
-                        .background(color = AppTheme.colorScheme.surface)
-                        .navigationBarsPadding(),
-                ) {
-                    HorizontalDivider(color = AppTheme.extraColorScheme.surfaceVariantAlt1)
-
-                    if (state.userTaggingQuery != null) {
-                        NoteTagUserLazyColumn(
-                            modifier = Modifier.heightIn(min = 0.dp, max = 288.dp),
-                            content = state.content,
-                            taggedUsers = state.taggedUsers,
-                            users = state.users.ifEmpty {
-                                if (state.userTaggingQuery.isEmpty()) {
-                                    state.recommendedUsers
-                                } else {
-                                    emptyList()
-                                }
-                            },
-                            userTaggingQuery = state.userTaggingQuery,
-                            onUserClick = { newContent, newTaggedUsers ->
-                                eventPublisher(UiEvent.UpdateContent(content = newContent))
-                                eventPublisher(UiEvent.TagUser(taggedUser = newTaggedUsers.last()))
-                                eventPublisher(UiEvent.ToggleSearchUsers(enabled = false))
-                            },
-                        )
-                    } else {
-                        Box {
-                            NoteActionRow(
-                                onPhotosImported = { photoUris ->
-                                    eventPublisher(
-                                        UiEvent.ImportLocalFiles(uris = photoUris),
-                                    )
-                                },
-                                onUserTag = {
-                                    eventPublisher(UiEvent.AppendUserTagAtSign)
-                                    eventPublisher(UiEvent.ToggleSearchUsers(enabled = true))
-                                },
-                            )
-                        }
-                    }
-                }
-            }
+            NoteEditorBox(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .imePadding(),
+                state = state,
+                eventPublisher = eventPublisher,
+                contentPadding = paddingValues,
+            )
         },
     )
+}
+
+@Composable
+private fun NoteEditorContract.UiState.resolvePublishNoteButtonText() =
+    when {
+        publishing -> if (isReply) {
+            stringResource(id = R.string.note_editor_reply_publishing_button)
+        } else {
+            stringResource(id = R.string.note_editor_post_publishing_button)
+        }
+
+        uploadingAttachments -> stringResource(id = R.string.note_editor_uploading_attachments)
+
+        else -> if (isReply) {
+            stringResource(id = R.string.note_editor_reply_publish_button)
+        } else {
+            stringResource(id = R.string.note_editor_post_publish_button)
+        }
+    }
+
+@Composable
+private fun NoteEditorBox(
+    state: NoteEditorContract.UiState,
+    eventPublisher: (UiEvent) -> Unit,
+    modifier: Modifier = Modifier,
+    contentPadding: PaddingValues,
+) {
+    val focusRequester = remember { FocusRequester() }
+    LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
+    }
+
+    val outlineColor = AppTheme.colorScheme.outline
+    val editorListState = rememberLazyListState()
+
+    var noteEditorMaxHeightPx by remember { mutableIntStateOf(0) }
+    var replyNoteHeightPx by remember { mutableIntStateOf(0) }
+    val replyingToPaddingTop = 8.dp
+    var replyingToNoticeHeightPx by remember { mutableIntStateOf(0) }
+
+    val density = LocalDensity.current
+    var extraSpacing by remember { mutableStateOf(0.dp) }
+    extraSpacing = if (state.isReply) {
+        with(density) {
+            val replyHeight = replyNoteHeightPx.toDp() + replyingToNoticeHeightPx.toDp() + replyingToPaddingTop
+            val noteEditorMaxHeight = noteEditorMaxHeightPx.toDp()
+            noteEditorMaxHeight - replyHeight - attachmentsHeightDp
+        }
+    } else {
+        0.dp
+    }
+
+    Box(
+        modifier = modifier,
+        contentAlignment = Alignment.BottomCenter,
+    ) {
+        LazyColumn(
+            modifier = Modifier
+                .background(color = AppTheme.colorScheme.surfaceVariant)
+                .fillMaxSize()
+                .padding(contentPadding)
+                .onSizeChanged { noteEditorMaxHeightPx = it.height },
+            state = editorListState,
+        ) {
+            items(
+                items = state.conversation,
+                key = { it.postId },
+            ) {
+                ReplyToNote(
+                    replyToNote = it,
+                    connectionLineColor = outlineColor,
+                )
+            }
+
+            item("reply") {
+                NoteEditor(
+                    state = state,
+                    replyingToPaddingTop = replyingToPaddingTop,
+                    outlineColor = outlineColor,
+                    focusRequester = focusRequester,
+                    eventPublisher = eventPublisher,
+                    onReplyToNoticeHeightChanged = { replyingToNoticeHeightPx = it },
+                    onReplyNoteHeightChanged = { replyNoteHeightPx = it },
+                )
+            }
+
+            item(key = "attachments") {
+                NoteAttachmentsLazyRow(
+                    attachments = state.attachments,
+                    onDiscard = {
+                        eventPublisher(UiEvent.DiscardNoteAttachment(attachmentId = it))
+                    },
+                    onRetryUpload = {
+                        eventPublisher(UiEvent.RetryUpload(attachmentId = it))
+                    },
+                )
+            }
+
+            item(key = "extraSpacing") {
+                Spacer(modifier = Modifier.height(extraSpacing))
+            }
+        }
+
+        NoteEditorFooter(
+            Modifier
+                .background(color = AppTheme.colorScheme.surface)
+                .navigationBarsPadding(),
+            state = state,
+            eventPublisher = eventPublisher,
+        )
+    }
+}
+
+@Composable
+private fun NoteEditor(
+    state: NoteEditorContract.UiState,
+    replyingToPaddingTop: Dp,
+    outlineColor: Color,
+    focusRequester: FocusRequester,
+    onReplyNoteHeightChanged: (Int) -> Unit,
+    onReplyToNoticeHeightChanged: (Int) -> Unit,
+    eventPublisher: (UiEvent) -> Unit,
+) {
+    Column {
+        if (state.isReply && state.replyToNote != null) {
+            ReplyingToText(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = replyingToPaddingTop, start = avatarsColumnWidthDp, end = 16.dp)
+                    .onSizeChanged { onReplyToNoticeHeightChanged(it.height) },
+                replyToUsername = state.replyToNote.authorHandle,
+            )
+        }
+
+        Row {
+            AvatarThumbnail(
+                modifier = Modifier
+                    .drawWithCache {
+                        onDrawBehind {
+                            if (state.isReply) {
+                                drawLine(
+                                    color = outlineColor,
+                                    start = Offset(
+                                        x = connectionLineOffsetXDp.toPx(),
+                                        y = (-32).dp.toPx(),
+                                    ),
+                                    end = Offset(
+                                        x = connectionLineOffsetXDp.toPx(),
+                                        y = size.height / 2,
+                                    ),
+                                    strokeWidth = 2.dp.toPx(),
+                                    cap = StrokeCap.Square,
+                                )
+                            }
+                        }
+                    }
+                    .padding(start = 16.dp)
+                    .padding(top = 8.dp),
+                avatarSize = avatarSizeDp,
+                avatarCdnImage = state.activeAccountAvatarCdnImage,
+            )
+
+            NoteOutlinedTextField(
+                modifier = Modifier
+                    .offset(x = (-8).dp)
+                    .fillMaxWidth()
+                    .wrapContentHeight()
+                    .focusRequester(focusRequester)
+                    .onSizeChanged { onReplyNoteHeightChanged(it.height) },
+                value = state.content,
+                onValueChange = { eventPublisher(UiEvent.UpdateContent(content = it)) },
+                taggedUsers = state.taggedUsers,
+                enabled = !state.publishing,
+                placeholder = {
+                    Text(
+                        text = stringResource(
+                            id = R.string.note_editor_content_placeholder,
+                        ),
+                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
+                        style = AppTheme.typography.bodyMedium,
+                    )
+                },
+                textStyle = AppTheme.typography.bodyMedium.copy(lineHeight = 20.sp),
+                colors = PrimalDefaults.transparentOutlinedTextFieldColors(),
+                onUserTaggingModeChanged = {
+                    eventPublisher(UiEvent.ToggleSearchUsers(enabled = it))
+                },
+                onUserTagSearch = {
+                    eventPublisher(UiEvent.SearchUsers(query = it))
+                },
+            )
+        }
+    }
+}
+
+@Composable
+private fun NoteEditorFooter(
+    modifier: Modifier,
+    state: NoteEditorContract.UiState,
+    eventPublisher: (UiEvent) -> Unit,
+) {
+    Column(modifier = modifier) {
+        HorizontalDivider(color = AppTheme.extraColorScheme.surfaceVariantAlt1)
+
+        if (state.userTaggingQuery != null) {
+            NoteTagUserLazyColumn(
+                modifier = Modifier.heightIn(min = 0.dp, max = 288.dp),
+                content = state.content,
+                taggedUsers = state.taggedUsers,
+                users = state.users.ifEmpty {
+                    if (state.userTaggingQuery.isEmpty()) {
+                        state.recommendedUsers
+                    } else {
+                        emptyList()
+                    }
+                },
+                userTaggingQuery = state.userTaggingQuery,
+                onUserClick = { newContent, newTaggedUsers ->
+                    eventPublisher(UiEvent.UpdateContent(content = newContent))
+                    eventPublisher(UiEvent.TagUser(taggedUser = newTaggedUsers.last()))
+                    eventPublisher(UiEvent.ToggleSearchUsers(enabled = false))
+                },
+            )
+        } else {
+            Box {
+                NoteActionRow(
+                    onPhotosImported = { photoUris ->
+                        eventPublisher(
+                            UiEvent.ImportLocalFiles(uris = photoUris),
+                        )
+                    },
+                    onUserTag = {
+                        eventPublisher(UiEvent.AppendUserTagAtSign)
+                        eventPublisher(UiEvent.ToggleSearchUsers(enabled = true))
+                    },
+                )
+            }
+        }
+    }
 }
 
 @Composable
