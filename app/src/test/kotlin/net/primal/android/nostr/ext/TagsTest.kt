@@ -154,7 +154,7 @@ class TagsTest {
             mimeType = mimeType,
             originalHash = originalHash,
             uploadedHash = uploadedHash,
-            sizeInBytes = sizeInBytes,
+            uploadedSizeInBytes = sizeInBytes,
             dimensionInPixels = dimensionInPixels,
             uploadError = uploadError,
         )

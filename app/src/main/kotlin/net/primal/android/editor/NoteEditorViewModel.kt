@@ -288,8 +288,19 @@ class NoteEditorViewModel @AssistedInject constructor(
             updateNoteAttachmentState(attachment = updatedAttachment)
 
             val remoteUrl = withContext(dispatcherProvider.io()) {
-                attachmentRepository.uploadNoteAttachment(attachment = attachment, uploadId = uploadId)
+                attachmentRepository.uploadNoteAttachment(
+                    attachment = attachment,
+                    uploadId = uploadId,
+                    onProgress = { uploadedBytes, totalBytes ->
+                        updatedAttachment = updatedAttachment.copy(
+                            originalUploadedInBytes = uploadedBytes,
+                            originalSizeInBytes = totalBytes,
+                        )
+                        updateNoteAttachmentState(attachment = updatedAttachment)
+                    },
+                )
             }
+
             updatedAttachment = updatedAttachment.copy(remoteUrl = remoteUrl)
             updateNoteAttachmentState(attachment = updatedAttachment)
 

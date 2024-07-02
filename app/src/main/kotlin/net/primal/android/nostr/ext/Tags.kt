@@ -86,7 +86,7 @@ fun NoteAttachment.asIMetaTag(): JsonArray {
         this@asIMetaTag.mimeType?.let { add("m $it") }
         this@asIMetaTag.uploadedHash?.let { add("x $it") }
         this@asIMetaTag.originalHash?.let { add("ox $it") }
-        this@asIMetaTag.sizeInBytes?.let { add("size $it") }
+        this@asIMetaTag.uploadedSizeInBytes?.let { add("size $it") }
         this@asIMetaTag.dimensionInPixels?.let { add("dim $it") }
     }
 }

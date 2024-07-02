@@ -7,18 +7,18 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Refresh
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import coil.compose.SubcomposeAsyncImage
-import java.util.UUID
+import java.util.*
 import net.primal.android.R
-import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.editor.domain.NoteAttachment
 import net.primal.android.theme.AppTheme
 
@@ -47,7 +47,7 @@ fun NoteAttachmentPreview(
                 modifier = Modifier
                     .matchParentSize()
                     .background(
-                        color = Color.Black.copy(alpha = 0.5f),
+                        color = Color.Black.copy(alpha = 0.7f),
                         shape = shape,
                     ),
             )
@@ -62,7 +62,22 @@ fun NoteAttachmentPreview(
 
         if (attachment.remoteUrl == null) {
             if (attachment.uploadError == null) {
-                PrimalLoadingSpinner(size = 48.dp)
+                val uploaded = attachment.originalUploadedInBytes?.toFloat()
+                val total = attachment.originalSizeInBytes?.toFloat()
+                if (uploaded != null && total != null && (uploaded / total) < 1) {
+                    CircularProgressIndicator(
+                        progress = { uploaded / total },
+                        color = AppTheme.colorScheme.secondary,
+                        trackColor = Color.Black,
+                        strokeCap = StrokeCap.Round,
+                    )
+                } else {
+                    CircularProgressIndicator(
+                        color = AppTheme.colorScheme.secondary,
+                        trackColor = Color.Black,
+                        strokeCap = StrokeCap.Round,
+                    )
+                }
             } else {
                 MiniFloatingIconButton(
                     modifier = Modifier.align(Alignment.Center),

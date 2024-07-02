@@ -50,6 +50,7 @@ class PrimalFileUploader @Inject constructor(
         uri: Uri,
         keyPair: NostrKeyPair,
         uploadId: UUID = UUID.randomUUID(),
+        onProgress: ((uploadedBytes: Int, totalBytes: Int) -> Unit)? = null,
     ): String {
         val userId = keyPair.pubKey
         return uploadFileOrThrow(
@@ -57,6 +58,9 @@ class PrimalFileUploader @Inject constructor(
             userId = userId,
             uploadId = uploadId,
             signNostrEvent = { it.signOrThrow(keyPair.privateKey.hexToNsecHrp()) },
+            onProgress = { uploadedBytes, totalBytes ->
+                onProgress?.invoke(uploadedBytes, totalBytes)
+            },
         )
     }
 
@@ -65,12 +69,16 @@ class PrimalFileUploader @Inject constructor(
         uri: Uri,
         userId: String,
         uploadId: UUID = UUID.randomUUID(),
+        onProgress: ((uploadedBytes: Int, totalBytes: Int) -> Unit)? = null,
     ): String {
         return uploadFileOrThrow(
             uri = uri,
             userId = userId,
             uploadId = uploadId,
             signNostrEvent = { nostrNotary.signNostrEvent(userId = userId, event = it) },
+            onProgress = { uploadedBytes, totalBytes ->
+                onProgress?.invoke(uploadedBytes, totalBytes)
+            },
         )
     }
 
@@ -113,6 +121,7 @@ class PrimalFileUploader @Inject constructor(
         userId: String,
         uploadId: UUID = UUID.randomUUID(),
         signNostrEvent: (NostrUnsignedEvent) -> NostrEvent,
+        onProgress: (uploadedBytes: Int, totalBytes: Int) -> Unit,
     ): String {
         val fileDigest = MessageDigest.getInstance("SHA-256")
         return withContext(dispatchers.io()) {
@@ -120,7 +129,8 @@ class PrimalFileUploader @Inject constructor(
                 uploadsMap[uploadId] = UploadStatus.Uploading
                 val fileSizeInBytes = uri.readFileSizeInBytes()
                 val chunkSize = calculateChunkSize(fileSizeInBytes)
-
+                var uploadedChunks = 0
+                onProgress(0, fileSizeInBytes.toInt())
                 contentResolver.openInputStream(uri).use { inputStream ->
                     if (inputStream == null) throw FileNotFoundException()
                     inputStream.toChunkedFlow(fileSizeInBytes = fileSizeInBytes, chunkSize = chunkSize)
@@ -145,6 +155,8 @@ class PrimalFileUploader @Inject constructor(
                         .buffer(capacity = UploadApiConnectionsPool.POOL_SIZE)
                         .collect { deferred ->
                             deferred.await()
+                            val uploadedBytes = ++uploadedChunks * chunkSize
+                            onProgress(uploadedBytes, fileSizeInBytes.toInt())
                         }
                 }
 

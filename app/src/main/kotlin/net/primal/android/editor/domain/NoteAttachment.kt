@@ -10,7 +10,9 @@ data class NoteAttachment(
     val mimeType: String? = null,
     val originalHash: String? = null,
     val uploadedHash: String? = null,
-    val sizeInBytes: Int? = null,
+    val originalUploadedInBytes: Int? = null,
+    val originalSizeInBytes: Int? = null,
+    val uploadedSizeInBytes: Int? = null,
     val dimensionInPixels: String? = null,
     val uploadError: Throwable? = null,
 ) {
