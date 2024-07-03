@@ -1,5 +1,8 @@
 package net.primal.android.editor.ui
 
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -33,6 +36,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
@@ -54,6 +58,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -62,7 +67,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
+import java.io.File
+import java.text.SimpleDateFormat
 import java.util.*
+import net.primal.android.BuildConfig
 import net.primal.android.R
 import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.PrimalDefaults
@@ -74,6 +84,7 @@ import net.primal.android.core.compose.feed.model.toNoteContentUi
 import net.primal.android.core.compose.feed.note.FeedNoteHeader
 import net.primal.android.core.compose.feed.note.NoteContent
 import net.primal.android.core.compose.icons.PrimalIcons
+import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromCamera
 import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromGallery
 import net.primal.android.editor.NoteEditorContract
 import net.primal.android.editor.NoteEditorContract.UiEvent
@@ -482,32 +493,24 @@ private fun ReplyToNote(replyToNote: FeedPostUi, connectionLineColor: Color) {
 
 @Composable
 private fun NoteActionRow(onPhotosImported: (List<Uri>) -> Unit, onUserTag: () -> Unit) {
-    val multiplePhotosImportLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.PickVisualMedia(),
-    ) { uri -> if (uri != null) onPhotosImported(listOf(uri)) }
-
     Row(
         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
     ) {
-        IconButton(
-            onClick = {
-                multiplePhotosImportLauncher.launch(
-                    PickVisualMediaRequest(
-                        ActivityResultContracts.PickVisualMedia.ImageAndVideo,
-                    ),
-                )
-            },
-        ) {
-            Icon(
-                imageVector = PrimalIcons.ImportPhotoFromGallery,
-                contentDescription = stringResource(id = R.string.accessibility_import_photo_from_gallery),
-                tint = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-            )
-        }
+        ImportPhotosIconButton(
+            imageVector = PrimalIcons.ImportPhotoFromGallery,
+            contentDescription = stringResource(id = R.string.accessibility_import_photo_from_gallery),
+            tint = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+            onPhotosImported = onPhotosImported,
+        )
 
-        IconButton(
-            onClick = onUserTag,
-        ) {
+        TakePhotoIconButton(
+            imageVector = PrimalIcons.ImportPhotoFromCamera,
+            contentDescription = stringResource(id = R.string.accessibility_take_photo),
+            tint = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+            onPhotoTaken = { uri -> onPhotosImported(listOf(uri)) },
+        )
+
+        IconButton(onClick = onUserTag) {
             Icon(
                 imageVector = Icons.Default.AlternateEmail,
                 contentDescription = stringResource(id = R.string.accessibility_tag_user),
@@ -515,6 +518,91 @@ private fun NoteActionRow(onPhotosImported: (List<Uri>) -> Unit, onUserTag: () -
             )
         }
     }
+}
+
+@Composable
+private fun ImportPhotosIconButton(
+    imageVector: ImageVector,
+    contentDescription: String?,
+    tint: Color = LocalContentColor.current,
+    onPhotosImported: (List<Uri>) -> Unit,
+) {
+    val multiplePhotosImportLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.PickVisualMedia(),
+    ) { uri ->
+        if (uri != null) onPhotosImported(listOf(uri))
+    }
+
+    IconButton(
+        onClick = {
+            multiplePhotosImportLauncher.launch(
+                PickVisualMediaRequest(
+                    ActivityResultContracts.PickVisualMedia.ImageAndVideo,
+                ),
+            )
+        },
+    ) {
+        Icon(
+            imageVector = imageVector,
+            contentDescription = contentDescription,
+            tint = tint,
+        )
+    }
+}
+
+@Composable
+private fun TakePhotoIconButton(
+    imageVector: ImageVector,
+    contentDescription: String?,
+    tint: Color = LocalContentColor.current,
+    onPhotoTaken: (Uri) -> Unit,
+) {
+    val context = LocalContext.current
+    val file = context.createImageFile()
+    val uri = FileProvider.getUriForFile(
+        Objects.requireNonNull(context),
+        BuildConfig.APPLICATION_ID + ".provider",
+        file,
+    )
+
+    val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { caputred ->
+        if (caputred) {
+            onPhotoTaken(uri)
+        }
+    }
+
+    val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        if (granted) {
+            cameraLauncher.launch(uri)
+        }
+    }
+
+    IconButton(
+        onClick = {
+            val cameraPermissionResult = ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA)
+            if (cameraPermissionResult == PackageManager.PERMISSION_GRANTED) {
+                cameraLauncher.launch(uri)
+            } else {
+                permissionLauncher.launch(Manifest.permission.CAMERA)
+            }
+        },
+    ) {
+        Icon(
+            imageVector = imageVector,
+            contentDescription = contentDescription,
+            tint = tint,
+        )
+    }
+}
+
+private fun Context.createImageFile(): File {
+    val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+    val imageFileName = "JPEG_" + timeStamp + "_"
+    return File.createTempFile(
+        imageFileName,
+        ".jpg",
+        externalCacheDir,
+    )
 }
 
 @Composable

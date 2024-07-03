@@ -622,6 +622,7 @@
     <string name="accessibility_close">Close</string>
     <string name="accessibility_info">Info</string>
     <string name="accessibility_import_photo_from_gallery">Import photo from gallery</string>
+    <string name="accessibility_take_photo">Take photo with camera</string>
     <string name="accessibility_tag_user">Tag user</string>
     <string name="accessibility_refresh">Refresh</string>
     <string name="accessibility_new_direct_message">New direct message</string>
