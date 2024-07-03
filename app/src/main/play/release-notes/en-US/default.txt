@@ -1,1 +1,4 @@
-Reordering feeds and stability fixes.
+Reordering feeds.
+Stability fixes.
+Progress while uploading.
+Take photo.
