@@ -1,9 +1,6 @@
 package net.primal.android.thread
 
 import android.net.Uri
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.PickVisualMediaRequest
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.fadeIn
@@ -79,10 +76,12 @@ import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.AvatarThumbnail
+import net.primal.android.core.compose.ImportPhotosIconButton
 import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.ReplyingToText
+import net.primal.android.core.compose.TakePhotoIconButton
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.feed.RepostOrQuoteBottomSheet
 import net.primal.android.core.compose.feed.model.FeedPostAction
@@ -97,6 +96,7 @@ import net.primal.android.core.compose.feed.zaps.ZapBottomSheet
 import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
+import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromCamera
 import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromGallery
 import net.primal.android.core.compose.icons.primaliconpack.More
 import net.primal.android.core.compose.pulltorefresh.PrimalPullToRefreshIndicator
@@ -766,28 +766,23 @@ fun ReplyToBottomBar(
             },
         )
 
-        val photoImportLauncher = rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.PickVisualMedia(),
-        ) { uri -> if (uri != null) onExpandReply(listOf(uri)) }
-
-        AnimatedVisibility(visible = isKeyboardVisible) {
-            ReplyToOptions(
-                replying = replyState.publishing,
-                replyEnabled = !replyState.publishing && replyState.content.text.isNotBlank(),
-                onPublishReplyClick = { replyEventPublisher(NoteEditorContract.UiEvent.PublishNote) },
-                onPhotoImportClick = {
-                    photoImportLauncher.launch(
-                        PickVisualMediaRequest(
-                            mediaType = ActivityResultContracts.PickVisualMedia.ImageOnly,
-                        ),
-                    )
-                },
-                onUserTagClick = {
-                    replyEventPublisher(NoteEditorContract.UiEvent.AppendUserTagAtSign)
-                    replyEventPublisher(NoteEditorContract.UiEvent.ToggleSearchUsers(enabled = true))
-                },
-            )
-        }
+        ReplyToOptions(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 0.dp, end = 16.dp)
+                .padding(top = 0.dp, bottom = 4.dp)
+                .then(if (isKeyboardVisible) Modifier.wrapContentHeight() else Modifier.height(0.dp)),
+            replying = replyState.publishing,
+            replyEnabled = !replyState.publishing && replyState.content.text.isNotBlank(),
+            onPublishReplyClick = { replyEventPublisher(NoteEditorContract.UiEvent.PublishNote) },
+            onPhotosImported = { uris ->
+                onExpandReply(uris)
+            },
+            onUserTagClick = {
+                replyEventPublisher(NoteEditorContract.UiEvent.AppendUserTagAtSign)
+                replyEventPublisher(NoteEditorContract.UiEvent.ToggleSearchUsers(enabled = true))
+            },
+        )
     }
 }
 
@@ -812,32 +807,36 @@ private fun ColumnScope.ReplyTextFieldPlaceholder(isKeyboardVisible: Boolean, re
 
 @Composable
 private fun ReplyToOptions(
+    modifier: Modifier,
     replying: Boolean,
     replyEnabled: Boolean,
     onPublishReplyClick: () -> Unit,
-    onPhotoImportClick: () -> Unit,
+    onPhotosImported: (List<Uri>) -> Unit,
     onUserTagClick: () -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
 
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 0.dp, end = 16.dp)
-            .padding(top = 0.dp, bottom = 4.dp),
+        modifier = modifier,
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
         ) {
-            IconButton(onClick = onPhotoImportClick) {
-                Icon(
-                    imageVector = PrimalIcons.ImportPhotoFromGallery,
-                    contentDescription = null,
-                    tint = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-                )
-            }
+            ImportPhotosIconButton(
+                imageVector = PrimalIcons.ImportPhotoFromGallery,
+                contentDescription = stringResource(id = R.string.accessibility_import_photo_from_gallery),
+                tint = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                onPhotosImported = onPhotosImported,
+            )
+
+            TakePhotoIconButton(
+                imageVector = PrimalIcons.ImportPhotoFromCamera,
+                contentDescription = stringResource(id = R.string.accessibility_take_photo),
+                tint = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                onPhotoTaken = { uri -> onPhotosImported(listOf(uri)) },
+            )
 
             IconButton(onClick = onUserTagClick) {
                 Icon(

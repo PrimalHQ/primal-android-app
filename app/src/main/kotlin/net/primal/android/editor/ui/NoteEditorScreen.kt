@@ -1,12 +1,6 @@
 package net.primal.android.editor.ui
 
-import android.Manifest
-import android.content.Context
-import android.content.pm.PackageManager
 import android.net.Uri
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.PickVisualMediaRequest
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -36,7 +30,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
@@ -58,7 +51,6 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -67,17 +59,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat
-import androidx.core.content.FileProvider
-import java.io.File
-import java.text.SimpleDateFormat
 import java.util.*
-import net.primal.android.BuildConfig
 import net.primal.android.R
 import net.primal.android.core.compose.AvatarThumbnail
+import net.primal.android.core.compose.ImportPhotosIconButton
 import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.ReplyingToText
+import net.primal.android.core.compose.TakePhotoIconButton
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.feed.model.toNoteContentUi
@@ -390,19 +379,17 @@ private fun NoteEditorFooter(
                 },
             )
         } else {
-            Box {
-                NoteActionRow(
-                    onPhotosImported = { photoUris ->
-                        eventPublisher(
-                            UiEvent.ImportLocalFiles(uris = photoUris),
-                        )
-                    },
-                    onUserTag = {
-                        eventPublisher(UiEvent.AppendUserTagAtSign)
-                        eventPublisher(UiEvent.ToggleSearchUsers(enabled = true))
-                    },
-                )
-            }
+            NoteActionRow(
+                onPhotosImported = { photoUris ->
+                    eventPublisher(
+                        UiEvent.ImportLocalFiles(uris = photoUris),
+                    )
+                },
+                onUserTag = {
+                    eventPublisher(UiEvent.AppendUserTagAtSign)
+                    eventPublisher(UiEvent.ToggleSearchUsers(enabled = true))
+                },
+            )
         }
     }
 }
@@ -518,91 +505,6 @@ private fun NoteActionRow(onPhotosImported: (List<Uri>) -> Unit, onUserTag: () -
             )
         }
     }
-}
-
-@Composable
-private fun ImportPhotosIconButton(
-    imageVector: ImageVector,
-    contentDescription: String?,
-    tint: Color = LocalContentColor.current,
-    onPhotosImported: (List<Uri>) -> Unit,
-) {
-    val multiplePhotosImportLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.PickVisualMedia(),
-    ) { uri ->
-        if (uri != null) onPhotosImported(listOf(uri))
-    }
-
-    IconButton(
-        onClick = {
-            multiplePhotosImportLauncher.launch(
-                PickVisualMediaRequest(
-                    ActivityResultContracts.PickVisualMedia.ImageAndVideo,
-                ),
-            )
-        },
-    ) {
-        Icon(
-            imageVector = imageVector,
-            contentDescription = contentDescription,
-            tint = tint,
-        )
-    }
-}
-
-@Composable
-private fun TakePhotoIconButton(
-    imageVector: ImageVector,
-    contentDescription: String?,
-    tint: Color = LocalContentColor.current,
-    onPhotoTaken: (Uri) -> Unit,
-) {
-    val context = LocalContext.current
-    val file = context.createImageFile()
-    val uri = FileProvider.getUriForFile(
-        Objects.requireNonNull(context),
-        BuildConfig.APPLICATION_ID + ".provider",
-        file,
-    )
-
-    val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { caputred ->
-        if (caputred) {
-            onPhotoTaken(uri)
-        }
-    }
-
-    val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-        if (granted) {
-            cameraLauncher.launch(uri)
-        }
-    }
-
-    IconButton(
-        onClick = {
-            val cameraPermissionResult = ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA)
-            if (cameraPermissionResult == PackageManager.PERMISSION_GRANTED) {
-                cameraLauncher.launch(uri)
-            } else {
-                permissionLauncher.launch(Manifest.permission.CAMERA)
-            }
-        },
-    ) {
-        Icon(
-            imageVector = imageVector,
-            contentDescription = contentDescription,
-            tint = tint,
-        )
-    }
-}
-
-private fun Context.createImageFile(): File {
-    val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
-    val imageFileName = "JPEG_" + timeStamp + "_"
-    return File.createTempFile(
-        imageFileName,
-        ".jpg",
-        externalCacheDir,
-    )
 }
 
 @Composable
