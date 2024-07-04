@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
+import net.primal.android.config.store.AppConfigDataStore
 import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.relays.RelaysSocketManager
@@ -28,6 +29,7 @@ class NetworkSettingsViewModel @Inject constructor(
     private val relaysSocketManager: RelaysSocketManager,
     @PrimalCacheApiClient private val primalApiClient: PrimalApiClient,
     private val relayRepository: RelayRepository,
+    private val appConfigStore: AppConfigDataStore,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(UiState())
@@ -165,6 +167,7 @@ class NetworkSettingsViewModel @Inject constructor(
 
     private fun changeCachingService(url: String) =
         viewModelScope.launch {
-            Timber.i(url)
+            appConfigStore.overrideCacheUrl(url = url)
+            setState { copy(newCachingServiceUrl = "") }
         }
 }

@@ -26,7 +26,29 @@ class AppConfigDataStore @Inject constructor(
             initialValue = runBlocking { persistence.data.first() },
         )
 
-    suspend fun updateConfig(reducer: AppConfig.() -> AppConfig) {
-        persistence.updateData { it.reducer() }
+    suspend fun updateConfig(reducer: AppConfig.() -> AppConfig): AppConfig {
+        return persistence.updateData { currentAppConfig ->
+            val newAppConfig = currentAppConfig.reducer()
+            if (!currentAppConfig.cacheUrlOverride) {
+                newAppConfig
+            } else {
+                currentAppConfig.copy(
+                    uploadUrl = newAppConfig.uploadUrl,
+                    walletUrl = newAppConfig.walletUrl,
+                )
+            }
+        }
+    }
+
+    suspend fun overrideCacheUrl(url: String) {
+        persistence.updateData {
+            it.copy(cacheUrl = url, cacheUrlOverride = true)
+        }
+    }
+
+    suspend fun revertCacheUrlOverrideFlag() {
+        persistence.updateData {
+            it.copy(cacheUrlOverride = false)
+        }
     }
 }

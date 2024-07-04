@@ -71,6 +71,8 @@ class PrimalApiClient(
                         socketClient.close()
                     }
                     socketClient = buildAndInitializeSocketClient(apiUrl)
+                    socketClient.ensureSocketConnection()
+                    socketClientInitialized = true
                 }
             }
         }
@@ -92,10 +94,7 @@ class PrimalApiClient(
                     appConfigUpdater.updateAppConfigWithDebounce(1.minutes)
                 }
             },
-        ).apply {
-            socketClientInitialized = true
-            ensureSocketConnection()
-        }
+        )
     }
 
     private suspend fun <T> retrySendMessage(times: Int, block: suspend (Int) -> T): T {
