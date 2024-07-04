@@ -12,8 +12,8 @@ import net.primal.android.LocalPrimalTheme
 import net.primal.android.core.compose.LockToOrientationPortrait
 import net.primal.android.settings.appearance.AppearanceSettingsScreen
 import net.primal.android.settings.appearance.di.appearanceSettingsViewModel
-import net.primal.android.settings.content.ContentDisplaySettingScreen
-import net.primal.android.settings.content.ContentDisplaySettingViewModel
+import net.primal.android.settings.content.ContentDisplaySettingsScreen
+import net.primal.android.settings.content.ContentDisplaySettingsViewModel
 import net.primal.android.settings.feeds.FeedsSettingsScreen
 import net.primal.android.settings.feeds.FeedsSettingsViewModel
 import net.primal.android.settings.home.PrimalSettingsSection
@@ -216,9 +216,9 @@ private fun NavGraphBuilder.contentDisplay(route: String, navController: NavCont
         popEnterTransition = { primalScaleIn },
         popExitTransition = { primalSlideOutHorizontallyToEnd },
     ) {
-        val viewModel = hiltViewModel<ContentDisplaySettingViewModel>(it)
+        val viewModel = hiltViewModel<ContentDisplaySettingsViewModel>(it)
         LockToOrientationPortrait()
-        ContentDisplaySettingScreen(
+        ContentDisplaySettingsScreen(
             viewModel = viewModel,
             onClose = { navController.navigateUp() },
         )

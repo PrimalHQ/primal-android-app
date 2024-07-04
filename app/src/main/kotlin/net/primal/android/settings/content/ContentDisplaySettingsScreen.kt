@@ -26,7 +26,7 @@ import net.primal.android.user.domain.ContentDisplaySettings
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ContentDisplaySettingScreen(viewModel: ContentDisplaySettingViewModel, onClose: () -> Unit) {
+fun ContentDisplaySettingsScreen(viewModel: ContentDisplaySettingsViewModel, onClose: () -> Unit) {
     val uiState = viewModel.uiState.collectAsState()
 
     ContentDisplaySettingsScreen(

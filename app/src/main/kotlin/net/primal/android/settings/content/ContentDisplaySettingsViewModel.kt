@@ -15,7 +15,7 @@ import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.repository.UserRepository
 
 @HiltViewModel
-class ContentDisplaySettingViewModel @Inject constructor(
+class ContentDisplaySettingsViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val activeAccountStore: ActiveAccountStore,
 ) : ViewModel() {
