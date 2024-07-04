@@ -1,4 +1,4 @@
-package net.primal.android.config.dynamic
+package net.primal.android.config
 
 import java.time.Instant
 import javax.inject.Inject
@@ -13,7 +13,7 @@ import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import timber.log.Timber
 
 @Singleton
-class AppConfigUpdater @Inject constructor(
+class AppConfigHandler @Inject constructor(
     private val dispatcherProvider: CoroutineDispatcherProvider,
     private val appConfigStore: AppConfigDataStore,
     private val wellKnownApi: WellKnownApi,
@@ -33,7 +33,6 @@ class AppConfigUpdater @Inject constructor(
                 cacheUrl = response.cacheServers.firstOrNull() ?: this.cacheUrl,
                 uploadUrl = response.uploadServers.firstOrNull() ?: this.uploadUrl,
                 walletUrl = response.walletServers.firstOrNull() ?: this.walletUrl,
-
             )
         }
     }

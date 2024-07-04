@@ -22,8 +22,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.JsonObject
+import net.primal.android.config.AppConfigHandler
 import net.primal.android.config.AppConfigProvider
-import net.primal.android.config.dynamic.AppConfigUpdater
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.networking.UserAgentProvider
 import net.primal.android.networking.sockets.NostrIncomingMessage
@@ -40,7 +40,7 @@ class PrimalApiClient(
     private val okHttpClient: OkHttpClient,
     private val serverType: PrimalServerType,
     private val appConfigProvider: AppConfigProvider,
-    private val appConfigUpdater: AppConfigUpdater,
+    private val appConfigHandler: AppConfigHandler,
 ) {
 
     private val scope = CoroutineScope(dispatcherProvider.io())
@@ -91,7 +91,7 @@ class PrimalApiClient(
             onSocketConnectionClosed = { _, _ ->
                 scope.launch {
                     updateStatus { copy(connected = false) }
-                    appConfigUpdater.updateAppConfigWithDebounce(1.minutes)
+                    appConfigHandler.updateAppConfigWithDebounce(1.minutes)
                 }
             },
         )

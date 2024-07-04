@@ -1,15 +1,14 @@
-package net.primal.android.config.dynamic
+package net.primal.android.config
 
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import net.primal.android.config.AppConfigProvider
 import net.primal.android.config.store.AppConfigDataStore
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 
-class DynamicConfigProvider @Inject constructor(
+class DynamicAppConfigProvider @Inject constructor(
     dispatcherProvider: CoroutineDispatcherProvider,
     private val appConfigStore: AppConfigDataStore,
 ) : AppConfigProvider {

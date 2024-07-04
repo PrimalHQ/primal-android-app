@@ -9,6 +9,7 @@ import kotlin.time.Duration.Companion.minutes
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
+import net.primal.android.config.AppConfigHandler
 import net.primal.android.config.api.ApiConfigResponse
 import net.primal.android.config.api.WellKnownApi
 import net.primal.android.config.domain.DEFAULT_APP_CONFIG
@@ -20,7 +21,7 @@ import org.junit.Test
 import retrofit2.Response
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class AppConfigUpdaterTest {
+class AppConfigHandlerTest {
 
     @get:Rule
     val coroutinesTestRule = CoroutinesTestRule()
@@ -28,7 +29,7 @@ class AppConfigUpdaterTest {
     @Test
     fun whenUpdateWithDebounceIsCalledMultipleTimesWithinDebounceValue_fetchIsPerformedOnlyOnce() = runTest {
         val wellKnownApi = mockk<WellKnownApi>(relaxed = true)
-        val appConfigUpdater = AppConfigUpdater(
+        val appConfigHandler = AppConfigHandler(
             dispatcherProvider = coroutinesTestRule.dispatcherProvider,
             appConfigStore = mockk(relaxed = true),
             wellKnownApi = wellKnownApi,
@@ -36,9 +37,9 @@ class AppConfigUpdaterTest {
 
         val debounceTimeout = 1.minutes
 
-        appConfigUpdater.updateAppConfigWithDebounce(debounceTimeout)
-        appConfigUpdater.updateAppConfigWithDebounce(debounceTimeout)
-        appConfigUpdater.updateAppConfigWithDebounce(debounceTimeout)
+        appConfigHandler.updateAppConfigWithDebounce(debounceTimeout)
+        appConfigHandler.updateAppConfigWithDebounce(debounceTimeout)
+        appConfigHandler.updateAppConfigWithDebounce(debounceTimeout)
         advanceUntilIdle()
 
         coVerify(exactly = 1) {
@@ -51,13 +52,13 @@ class AppConfigUpdaterTest {
         val wellKnownApi = mockk<WellKnownApi>(relaxed = true) {
             coEvery { fetchApiConfig() } throws retrofit2.HttpException(mockk<Response<String>>(relaxed = true))
         }
-        val appConfigUpdater = AppConfigUpdater(
+        val appConfigHandler = AppConfigHandler(
             dispatcherProvider = coroutinesTestRule.dispatcherProvider,
             appConfigStore = mockk(relaxed = true),
             wellKnownApi = wellKnownApi,
         )
 
-        appConfigUpdater.updateAppConfigOrFailSilently()
+        appConfigHandler.updateAppConfigOrFailSilently()
     }
 
     @Test
@@ -75,7 +76,7 @@ class AppConfigUpdaterTest {
 
         val appConfigPersistence = FakeDataStore(initialValue = DEFAULT_APP_CONFIG)
 
-        val appConfigUpdater = AppConfigUpdater(
+        val appConfigHandler = AppConfigHandler(
             dispatcherProvider = coroutinesTestRule.dispatcherProvider,
             appConfigStore = AppConfigDataStore(
                 dispatcherProvider = coroutinesTestRule.dispatcherProvider,
@@ -84,7 +85,7 @@ class AppConfigUpdaterTest {
             wellKnownApi = wellKnownApi,
         )
 
-        appConfigUpdater.updateAppConfigOrFailSilently()
+        appConfigHandler.updateAppConfigOrFailSilently()
         advanceUntilIdle()
 
         appConfigPersistence.latestData.cacheUrl shouldBe expectedTestCacheUrl
@@ -95,7 +96,7 @@ class AppConfigUpdaterTest {
     @Test
     fun overrideCacheUrl_callsOverrideCacheUrlOnAppConfigStore_withCorrectUrl() = runTest {
         val appConfigStore = mockk<AppConfigDataStore>(relaxed = true)
-        val appConfigUpdater = AppConfigUpdater(
+        val appConfigHandler = AppConfigHandler(
             dispatcherProvider = coroutinesTestRule.dispatcherProvider,
             appConfigStore = appConfigStore,
             wellKnownApi = mockk<WellKnownApi>(relaxed = true),
@@ -103,7 +104,7 @@ class AppConfigUpdaterTest {
 
         val expectCacheOverrideUrl = "cacheOverride"
 
-        appConfigUpdater.overrideCacheUrl(url = expectCacheOverrideUrl)
+        appConfigHandler.overrideCacheUrl(url = expectCacheOverrideUrl)
         advanceUntilIdle()
 
         coVerify {
@@ -118,13 +119,13 @@ class AppConfigUpdaterTest {
     @Test
     fun restoreDefaultCacheUrl_callsRevertCacheUrlOverrideFlag() = runTest {
         val appConfigStore = mockk<AppConfigDataStore>(relaxed = true)
-        val appConfigUpdater = AppConfigUpdater(
+        val appConfigHandler = AppConfigHandler(
             dispatcherProvider = coroutinesTestRule.dispatcherProvider,
             appConfigStore = appConfigStore,
             wellKnownApi = mockk<WellKnownApi>(relaxed = true),
         )
         appConfigStore.overrideCacheUrl(url = "cacheOverride")
-        appConfigUpdater.restoreDefaultCacheUrl()
+        appConfigHandler.restoreDefaultCacheUrl()
         advanceUntilIdle()
 
         coVerify {
@@ -144,7 +145,7 @@ class AppConfigUpdaterTest {
         }
 
         val appConfigPersistence = FakeDataStore(initialValue = DEFAULT_APP_CONFIG)
-        val appConfigUpdater = AppConfigUpdater(
+        val appConfigHandler = AppConfigHandler(
             dispatcherProvider = coroutinesTestRule.dispatcherProvider,
             appConfigStore = AppConfigDataStore(
                 dispatcherProvider = coroutinesTestRule.dispatcherProvider,
@@ -153,7 +154,7 @@ class AppConfigUpdaterTest {
             wellKnownApi = wellKnownApi,
         )
 
-        appConfigUpdater.restoreDefaultCacheUrl()
+        appConfigHandler.restoreDefaultCacheUrl()
         advanceUntilIdle()
 
         appConfigPersistence.latestData.cacheUrl shouldBe expectedWellKnownCacheUrl
@@ -165,7 +166,7 @@ class AppConfigUpdaterTest {
             coEvery { fetchApiConfig() } throws IOException()
         }
         val appConfigPersistence = FakeDataStore(initialValue = DEFAULT_APP_CONFIG.copy(cacheUrl = "fake"))
-        val appConfigUpdater = AppConfigUpdater(
+        val appConfigHandler = AppConfigHandler(
             dispatcherProvider = coroutinesTestRule.dispatcherProvider,
             appConfigStore = AppConfigDataStore(
                 dispatcherProvider = coroutinesTestRule.dispatcherProvider,
@@ -174,7 +175,7 @@ class AppConfigUpdaterTest {
             wellKnownApi = wellKnownApi,
         )
 
-        appConfigUpdater.restoreDefaultCacheUrl()
+        appConfigHandler.restoreDefaultCacheUrl()
         advanceUntilIdle()
 
         appConfigPersistence.latestData.cacheUrl shouldBe DEFAULT_APP_CONFIG.cacheUrl

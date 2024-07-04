@@ -5,8 +5,8 @@ import java.net.UnknownHostException
 import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
 import kotlinx.serialization.encodeToString
+import net.primal.android.config.AppConfigHandler
 import net.primal.android.config.AppConfigProvider
-import net.primal.android.config.dynamic.AppConfigUpdater
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.serialization.json.NostrJsonEncodeDefaults
 import net.primal.android.networking.primal.PrimalApiClient
@@ -26,7 +26,7 @@ class UploadApiConnectionsPool @Inject constructor(
     private val dispatcherProvider: CoroutineDispatcherProvider,
     private val okHttpClient: OkHttpClient,
     private val appConfigProvider: AppConfigProvider,
-    private val appConfigUpdater: AppConfigUpdater,
+    private val appConfigHandler: AppConfigHandler,
 ) : UploadApi {
 
     companion object {
@@ -43,7 +43,7 @@ class UploadApiConnectionsPool @Inject constructor(
                     okHttpClient = okHttpClient,
                     serverType = PrimalServerType.Upload,
                     appConfigProvider = appConfigProvider,
-                    appConfigUpdater = appConfigUpdater,
+                    appConfigHandler = appConfigHandler,
                 ),
             )
         }

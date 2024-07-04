@@ -11,9 +11,9 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 import net.primal.android.config.AppConfigProvider
+import net.primal.android.config.DynamicAppConfigProvider
 import net.primal.android.config.api.WellKnownApi
 import net.primal.android.config.domain.AppConfig
-import net.primal.android.config.dynamic.DynamicConfigProvider
 import net.primal.android.config.store.AppConfigDataStore
 import net.primal.android.config.store.AppConfigSerialization
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
@@ -42,7 +42,7 @@ object AppConfigModule {
         appConfigDataStore: AppConfigDataStore,
         dispatcherProvider: CoroutineDispatcherProvider,
     ): AppConfigProvider =
-        DynamicConfigProvider(
+        DynamicAppConfigProvider(
             appConfigStore = appConfigDataStore,
             dispatcherProvider = dispatcherProvider,
         )

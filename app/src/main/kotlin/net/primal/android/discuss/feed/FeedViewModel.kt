@@ -20,7 +20,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import net.primal.android.config.dynamic.AppConfigUpdater
+import net.primal.android.config.AppConfigHandler
 import net.primal.android.core.compose.feed.model.FeedPostsSyncStats
 import net.primal.android.core.compose.feed.model.asFeedPostUi
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
@@ -65,7 +65,7 @@ class FeedViewModel @Inject constructor(
     private val noteRepository: NoteRepository,
     private val activeAccountStore: ActiveAccountStore,
     private val userDataSyncerFactory: UserDataUpdaterFactory,
-    private val appConfigUpdater: AppConfigUpdater,
+    private val appConfigHandler: AppConfigHandler,
     private val profileRepository: ProfileRepository,
     private val zapHandler: ZapHandler,
     private val subscriptionsManager: SubscriptionsManager,
@@ -182,7 +182,7 @@ class FeedViewModel @Inject constructor(
         viewModelScope.launch {
             withContext(dispatcherProvider.io()) {
                 userDataUpdater?.updateUserDataWithDebounce(30.minutes)
-                appConfigUpdater.updateAppConfigWithDebounce(30.minutes)
+                appConfigHandler.updateAppConfigWithDebounce(30.minutes)
             }
         }
 

@@ -5,8 +5,8 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
+import net.primal.android.config.AppConfigHandler
 import net.primal.android.config.AppConfigProvider
-import net.primal.android.config.dynamic.AppConfigUpdater
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.primal.PrimalServerType
@@ -23,12 +23,12 @@ object SocketModule {
         dispatchers: CoroutineDispatcherProvider,
         okHttpClient: OkHttpClient,
         appConfigProvider: AppConfigProvider,
-        appConfigUpdater: AppConfigUpdater,
+        appConfigHandler: AppConfigHandler,
     ) = PrimalApiClient(
         okHttpClient = okHttpClient,
         serverType = PrimalServerType.Caching,
         appConfigProvider = appConfigProvider,
-        appConfigUpdater = appConfigUpdater,
+        appConfigHandler = appConfigHandler,
         dispatcherProvider = dispatchers,
     )
 
@@ -39,12 +39,12 @@ object SocketModule {
         dispatchers: CoroutineDispatcherProvider,
         okHttpClient: OkHttpClient,
         appConfigProvider: AppConfigProvider,
-        appConfigUpdater: AppConfigUpdater,
+        appConfigHandler: AppConfigHandler,
     ) = PrimalApiClient(
         okHttpClient = okHttpClient,
         serverType = PrimalServerType.Upload,
         appConfigProvider = appConfigProvider,
-        appConfigUpdater = appConfigUpdater,
+        appConfigHandler = appConfigHandler,
         dispatcherProvider = dispatchers,
     )
 
@@ -55,12 +55,12 @@ object SocketModule {
         dispatchers: CoroutineDispatcherProvider,
         okHttpClient: OkHttpClient,
         appConfigProvider: AppConfigProvider,
-        appConfigUpdater: AppConfigUpdater,
+        appConfigHandler: AppConfigHandler,
     ) = PrimalApiClient(
         okHttpClient = okHttpClient,
         serverType = PrimalServerType.Wallet,
         appConfigProvider = appConfigProvider,
-        appConfigUpdater = appConfigUpdater,
+        appConfigHandler = appConfigHandler,
         dispatcherProvider = dispatchers,
     )
 }

@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
-import net.primal.android.config.dynamic.AppConfigUpdater
+import net.primal.android.config.AppConfigHandler
 import net.primal.android.navigation.splash.SplashContract.SideEffect
 import net.primal.android.settings.repository.asFeedPO
 import net.primal.android.user.accounts.active.ActiveAccountStore
@@ -18,7 +18,7 @@ import net.primal.android.user.accounts.active.ActiveUserAccountState
 @HiltViewModel
 class SplashViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
-    private val appConfigUpdater: AppConfigUpdater,
+    private val appConfigHandler: AppConfigHandler,
 ) : ViewModel() {
 
     private val _effect: Channel<SideEffect> = Channel()
@@ -36,7 +36,7 @@ class SplashViewModel @Inject constructor(
 
     private fun fetchLatestAppConfig() =
         viewModelScope.launch {
-            appConfigUpdater.updateAppConfigOrFailSilently()
+            appConfigHandler.updateAppConfigOrFailSilently()
         }
 
     private fun dispatchInitialScreen() =

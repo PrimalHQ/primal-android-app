@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.runTest
 import net.primal.android.config.AppConfigProvider
 import net.primal.android.config.FakeAppConfigProvider
-import net.primal.android.config.dynamic.AppConfigUpdater
+import net.primal.android.config.AppConfigHandler
 import net.primal.android.core.coroutines.CoroutinesTestRule
 import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.primal.PrimalServerType
@@ -63,13 +63,13 @@ class SubscriptionsManagerTest {
         okHttpClient: OkHttpClient = spyk(),
         serverType: PrimalServerType = PrimalServerType.Caching,
         appConfigProvider: AppConfigProvider = mockk(relaxed = true),
-        appConfigUpdater: AppConfigUpdater = mockk(relaxed = true),
+        appConfigHandler: AppConfigHandler = mockk(relaxed = true),
     ): PrimalApiClient {
         return PrimalApiClient(
             okHttpClient = okHttpClient,
             serverType = serverType,
             appConfigProvider = appConfigProvider,
-            appConfigUpdater = appConfigUpdater,
+            appConfigHandler = appConfigHandler,
             dispatcherProvider = coroutinesTestRule.dispatcherProvider,
         )
     }

@@ -11,7 +11,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import net.primal.android.config.FakeAppConfigProvider
-import net.primal.android.config.dynamic.AppConfigUpdater
+import net.primal.android.config.AppConfigHandler
 import net.primal.android.core.coroutines.CoroutinesTestRule
 import net.primal.android.networking.FakeWebSocketOkHttpClient
 import net.primal.android.networking.UserAgentProvider
@@ -33,13 +33,13 @@ class PrimalApiClientTest {
     private fun buildPrimalApiClient(
         okHttpClient: OkHttpClient = spyk(),
         serverType: PrimalServerType = PrimalServerType.Caching,
-        appConfigUpdater: AppConfigUpdater = mockk(relaxed = true),
+        appConfigHandler: AppConfigHandler = mockk(relaxed = true),
     ): PrimalApiClient {
         return PrimalApiClient(
             okHttpClient = okHttpClient,
             serverType = serverType,
             appConfigProvider = fakeAppConfigProvider,
-            appConfigUpdater = appConfigUpdater,
+            appConfigHandler = appConfigHandler,
             dispatcherProvider = coroutinesTestRule.dispatcherProvider,
         )
     }
@@ -87,15 +87,15 @@ class PrimalApiClientTest {
     @Test
     fun whenWebSocketConnectionFails_appConfigUpdateIsExecuted() = runTest {
         val fakeOkHttpClient = FakeWebSocketOkHttpClient()
-        val spyAppConfigUpdater = mockk<AppConfigUpdater>(relaxed = true)
-        buildPrimalApiClient(okHttpClient = fakeOkHttpClient, appConfigUpdater = spyAppConfigUpdater)
+        val spyAppConfigHandler = mockk<AppConfigHandler>(relaxed = true)
+        buildPrimalApiClient(okHttpClient = fakeOkHttpClient, appConfigHandler = spyAppConfigHandler)
         advanceUntilIdle()
 
         fakeOkHttpClient.failWebSocketConnection()
         advanceUntilIdle()
 
         coVerify(exactly = 1) {
-            spyAppConfigUpdater.updateAppConfigWithDebounce(any())
+            spyAppConfigHandler.updateAppConfigWithDebounce(any())
         }
     }
 
