@@ -4,8 +4,10 @@ interface NetworkSettingsContract {
     data class UiState(
         val relays: List<SocketDestinationUiState> = emptyList(),
         val cachingService: SocketDestinationUiState? = null,
-        val working: Boolean = false,
+        val updatingRelays: Boolean = false,
+        val updatingCachingService: Boolean = false,
         val newRelayUrl: String = "",
+        val newCachingServiceUrl: String = "",
         val error: NetworkSettingsError? = null,
     ) {
         sealed class NetworkSettingsError {
@@ -17,7 +19,9 @@ interface NetworkSettingsContract {
         data object RestoreDefaultRelays : UiEvent()
         data object DismissError : UiEvent()
         data class DeleteRelay(val url: String) : UiEvent()
-        data class ConfirmAddRelay(val url: String) : UiEvent()
+        data class ConfirmRelayInsert(val url: String) : UiEvent()
+        data class ConfirmCachingServiceChange(val url: String) : UiEvent()
         data class UpdateNewRelayUrl(val url: String) : UiEvent()
+        data class UpdateNewCachingServiceUrl(val url: String) : UiEvent()
     }
 }

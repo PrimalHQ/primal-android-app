@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -31,29 +32,33 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import net.primal.android.R
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.DeleteListItemImage
 import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.PrimalDivider
+import net.primal.android.core.compose.PrimalSwitch
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.ConnectRelay
+import net.primal.android.core.compose.settings.SettingsItem
 import net.primal.android.theme.AppTheme
+import net.primal.android.theme.PrimalTheme
 
 @Composable
 fun NetworkSettingsScreen(viewModel: NetworkSettingsViewModel, onClose: () -> Unit) {
@@ -139,8 +144,9 @@ fun NetworkSettingsScreen(
                     .imePadding(),
                 state = state,
                 eventsPublisher = eventsPublisher,
-                onRemoveClick = { confirmingRelayDeletionDialog = it },
-                onRestoreDefaultsClick = { confirmingRestoreDefaultRelaysDialog = true },
+                onRemoveRelayClick = { confirmingRelayDeletionDialog = it },
+                onRestoreDefaultsRelaysClick = { confirmingRestoreDefaultRelaysDialog = true },
+                onRestoreDefaultsCachingServiceClick = { true },
             )
         },
         snackbarHost = {
@@ -149,115 +155,210 @@ fun NetworkSettingsScreen(
     )
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun NetworkLazyColumn(
     modifier: Modifier,
-    eventsPublisher: (NetworkSettingsContract.UiEvent) -> Unit,
     state: NetworkSettingsContract.UiState,
-    onRemoveClick: (String) -> Unit,
-    onRestoreDefaultsClick: () -> Unit,
+    eventsPublisher: (NetworkSettingsContract.UiEvent) -> Unit,
+    onRemoveRelayClick: (String) -> Unit,
+    onRestoreDefaultsRelaysClick: () -> Unit,
+    onRestoreDefaultsCachingServiceClick: () -> Unit,
 ) {
-    val keyboardContract = LocalSoftwareKeyboardController.current
+    val keyboardController = LocalSoftwareKeyboardController.current
     LazyColumn(modifier = modifier) {
-        item {
+        enhancedPrivacyItem()
+
+        item { PrimalDivider() }
+
+        if (state.cachingService != null) {
+            cachingServiceSectionItems(
+                state = state,
+                onRestoreDefaultCachingService = onRestoreDefaultsCachingServiceClick,
+                keyboardController = keyboardController,
+                eventsPublisher = eventsPublisher,
+            )
+        }
+
+        item { PrimalDivider() }
+
+        relaysSectionItems(
+            state = state,
+            onRemoveRelayClick = onRemoveRelayClick,
+            onRestoreDefaultRelaysClick = onRestoreDefaultsRelaysClick,
+            keyboardController = keyboardController,
+            eventsPublisher = eventsPublisher,
+        )
+
+        item { Spacer(modifier = Modifier.height(32.dp)) }
+    }
+}
+
+private fun LazyListScope.enhancedPrivacyItem() {
+    item {
+        Column {
+            SettingsItem(
+                modifier = Modifier.padding(vertical = 8.dp),
+                headlineText = stringResource(id = R.string.settings_network_enhanced_privacy_title),
+                supportText = stringResource(id = R.string.settings_network_enhanced_privacy_description),
+                trailingContent = {
+                    PrimalSwitch(
+                        checked = false,
+                        onCheckedChange = {
+                        },
+                    )
+                },
+            )
+        }
+    }
+}
+
+private fun LazyListScope.relaysSectionItems(
+    state: NetworkSettingsContract.UiState,
+    onRemoveRelayClick: (String) -> Unit,
+    onRestoreDefaultRelaysClick: () -> Unit,
+    keyboardController: SoftwareKeyboardController?,
+    eventsPublisher: (NetworkSettingsContract.UiEvent) -> Unit,
+) {
+    item {
+        Column {
+            Spacer(modifier = Modifier.height(8.dp))
             TextSection(
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp),
                 text = stringResource(id = R.string.settings_network_relays_section).uppercase(),
             )
+            PrimalDivider()
         }
+    }
 
-        item {
-            Column(
-                modifier = Modifier.padding(horizontal = 16.dp),
-            ) {
-                TextSubSection(
-                    text = stringResource(id = R.string.settings_network_connect_to_relay_section).uppercase(),
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                NewRelayOutlinedTextField(
-                    modifier = Modifier.fillMaxWidth(),
-                    value = state.newRelayUrl,
-                    addRelayEnabled = !state.working && state.newRelayUrl.isValidRelayUrl(),
-                    onValueChange = { eventsPublisher(NetworkSettingsContract.UiEvent.UpdateNewRelayUrl(it)) },
-                    onAddRelayConfirmed = {
-                        keyboardContract?.hide()
-                        eventsPublisher(NetworkSettingsContract.UiEvent.ConfirmAddRelay(url = state.newRelayUrl))
-                    },
-                )
-            }
-        }
-
-        item {
-            TextSubSection(
-                modifier = Modifier
-                    .padding(horizontal = 16.dp)
-                    .padding(top = 16.dp),
-                text = stringResource(id = R.string.settings_network_my_relays_section).uppercase(),
+    items(items = state.relays, key = { it.url }) {
+        Column {
+            NetworkDestinationListItem(
+                destinationUrl = it.url,
+                connected = it.connected,
+                onRemoveClick = { onRemoveRelayClick(it.url) },
             )
+            PrimalDivider()
         }
+    }
 
-        items(items = state.relays, key = { it.url }) {
-            Column {
-                NetworkDestinationListItem(
-                    destinationUrl = it.url,
-                    connected = it.connected,
-                    onRemoveClick = { onRemoveClick(it.url) },
-                )
-                PrimalDivider()
-            }
-        }
+    item {
+        DecoratedRelayOutlinedTextField(
+            modifier = Modifier.padding(horizontal = 16.dp),
+            performingAction = state.updatingRelays,
+            relayValue = state.newRelayUrl,
+            onRelayValueChanged = {
+                eventsPublisher(NetworkSettingsContract.UiEvent.UpdateNewRelayUrl(it))
+            },
+            title = stringResource(id = R.string.settings_network_add_a_relay_section),
+            supportingActionText = stringResource(R.string.settings_network_restore_default_relays_text_button),
+            onSupportActionClick = onRestoreDefaultRelaysClick,
+            onActionClick = {
+                keyboardController?.hide()
+                eventsPublisher(NetworkSettingsContract.UiEvent.ConfirmRelayInsert(url = state.newRelayUrl))
+            },
+        )
+    }
+}
 
-        item {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 16.dp),
-                horizontalArrangement = Arrangement.End,
-            ) {
-                Text(
-                    modifier = Modifier.clickable { onRestoreDefaultsClick() },
-                    text = stringResource(R.string.settings_network_restore_default_relays_text_button).lowercase(),
-                    style = AppTheme.typography.bodyMedium,
-                    color = AppTheme.colorScheme.secondary,
-                )
-            }
-        }
+private fun LazyListScope.cachingServiceSectionItems(
+    state: NetworkSettingsContract.UiState,
+    onRestoreDefaultCachingService: () -> Unit,
+    keyboardController: SoftwareKeyboardController?,
+    eventsPublisher: (NetworkSettingsContract.UiEvent) -> Unit,
+) {
+    if (state.cachingService == null) return
 
-        if (state.cachingService != null) {
-            item {
-                CachingServiceSection(
-                    url = state.cachingService.url,
-                    connected = state.cachingService.connected,
+    item {
+        CachingServiceSection(
+            url = state.cachingService.url,
+            connected = state.cachingService.connected,
+        )
+    }
+
+    item {
+        DecoratedRelayOutlinedTextField(
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .padding(bottom = 8.dp),
+            performingAction = state.updatingCachingService,
+            relayValue = state.newCachingServiceUrl,
+            onRelayValueChanged = {
+                eventsPublisher(NetworkSettingsContract.UiEvent.UpdateNewCachingServiceUrl(it))
+            },
+            title = stringResource(id = R.string.settings_network_switch_caching_service),
+            supportingActionText = stringResource(R.string.settings_network_restore_default_caching_service),
+            onSupportActionClick = onRestoreDefaultCachingService,
+            onActionClick = {
+                keyboardController?.hide()
+                eventsPublisher(
+                    NetworkSettingsContract.UiEvent.ConfirmCachingServiceChange(url = state.newCachingServiceUrl),
                 )
-            }
-        }
+            },
+        )
     }
 }
 
 @Composable
 private fun CachingServiceSection(url: String, connected: Boolean) {
     Column {
+        Spacer(modifier = Modifier.height(24.dp))
         TextSection(
-            modifier = Modifier
-                .padding(horizontal = 16.dp)
-                .padding(top = 16.dp),
+            modifier = Modifier.padding(horizontal = 16.dp),
             text = stringResource(id = R.string.settings_network_caching_service_section).uppercase(),
         )
-
+        Spacer(modifier = Modifier.height(8.dp))
         NetworkDestinationListItem(destinationUrl = url, connected = connected)
-
-        Spacer(modifier = Modifier.height(64.dp))
     }
 }
 
 @Composable
-private fun NewRelayOutlinedTextField(
+private fun DecoratedRelayOutlinedTextField(
+    modifier: Modifier,
+    relayValue: String,
+    onRelayValueChanged: (String) -> Unit,
+    performingAction: Boolean,
+    title: String,
+    supportingActionText: String,
+    onActionClick: () -> Unit,
+    onSupportActionClick: () -> Unit,
+) {
+    Column(modifier = modifier) {
+        TextSubSection(
+            modifier = Modifier.padding(top = 16.dp, bottom = 8.dp),
+            text = title.uppercase(),
+        )
+        RelayOutlinedTextField(
+            modifier = Modifier.fillMaxWidth(),
+            value = relayValue,
+            buttonEnabled = !performingAction && relayValue.isValidRelayUrl(),
+            buttonContentDescription = stringResource(id = R.string.accessibility_connect_relay),
+            onValueChange = onRelayValueChanged,
+            onButtonClick = onActionClick,
+        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 16.dp),
+            horizontalArrangement = Arrangement.End,
+        ) {
+            Text(
+                modifier = Modifier.clickable { onSupportActionClick() },
+                text = supportingActionText.lowercase(),
+                style = AppTheme.typography.bodyMedium,
+                color = AppTheme.colorScheme.secondary,
+            )
+        }
+    }
+}
+
+@Composable
+private fun RelayOutlinedTextField(
     modifier: Modifier,
     value: String,
-    addRelayEnabled: Boolean,
     onValueChange: (String) -> Unit,
-    onAddRelayConfirmed: () -> Unit,
+    buttonEnabled: Boolean,
+    buttonContentDescription: String,
+    onButtonClick: () -> Unit,
 ) {
     Row(
         modifier = modifier,
@@ -285,7 +386,7 @@ private fun NewRelayOutlinedTextField(
                 imeAction = ImeAction.Go,
             ),
             keyboardActions = KeyboardActions(
-                onGo = { onAddRelayConfirmed() },
+                onGo = { onButtonClick() },
             ),
         )
 
@@ -294,9 +395,9 @@ private fun NewRelayOutlinedTextField(
             icon = PrimalIcons.ConnectRelay,
             enabledBackgroundColor = AppTheme.colorScheme.primary,
             tint = Color.White,
-            enabled = addRelayEnabled,
-            onClick = onAddRelayConfirmed,
-            appBarIconContentDescription = stringResource(id = R.string.accessibility_connect_relay),
+            enabled = buttonEnabled,
+            onClick = onButtonClick,
+            appBarIconContentDescription = buttonContentDescription,
         )
     }
 }
@@ -306,7 +407,7 @@ fun TextSection(text: String, modifier: Modifier = Modifier) {
     Text(
         modifier = modifier,
         text = text,
-        style = AppTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold),
+        style = AppTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold),
     )
 }
 
@@ -396,3 +497,26 @@ fun ConfirmActionAlertDialog(
 private fun String.isValidRelayUrl() =
     (startsWith("wss://") || startsWith("ws://")) &&
         !this.split("://").lastOrNull().isNullOrEmpty()
+
+@Composable
+@Preview
+private fun PreviewNetworksScreen() {
+    PrimalTheme(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
+        NetworkSettingsScreen(
+            state = NetworkSettingsContract.UiState(
+                relays = listOf(
+                    SocketDestinationUiState(
+                        url = "wss://primal.relay.net",
+                        connected = false,
+                    ),
+                ),
+                cachingService = SocketDestinationUiState(
+                    url = "wss://cache.primal.net/v1",
+                    connected = true,
+                ),
+            ),
+            onClose = {},
+            eventsPublisher = {},
+        )
+    }
+}

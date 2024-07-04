@@ -12,12 +12,13 @@ import net.primal.android.theme.AppTheme
 @Composable
 fun SettingsItem(
     headlineText: String,
+    modifier: Modifier = Modifier,
     supportText: String? = null,
     trailingContent: @Composable (() -> Unit)? = null,
     onClick: (() -> Unit)? = null,
 ) {
     ListItem(
-        modifier = Modifier.clickable(
+        modifier = modifier.clickable(
             enabled = onClick != null,
             onClick = { onClick?.invoke() },
         ),
@@ -32,6 +33,7 @@ fun SettingsItem(
         supportingContent = if (supportText != null) {
             {
                 Text(
+                    modifier = Modifier.padding(top = 4.dp),
                     text = supportText,
                     style = AppTheme.typography.bodySmall,
                     color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,

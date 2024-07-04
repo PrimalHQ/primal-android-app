@@ -69,9 +69,11 @@ class NetworkSettingsViewModel @Inject constructor(
             events.collect {
                 when (it) {
                     UiEvent.RestoreDefaultRelays -> restoreDefaultRelays()
-                    is UiEvent.DeleteRelay -> deleteRelay(it.url)
-                    is UiEvent.ConfirmAddRelay -> addRelay(it.url)
+                    is UiEvent.DeleteRelay -> deleteRelay(url = it.url)
+                    is UiEvent.ConfirmRelayInsert -> addRelay(url = it.url)
                     is UiEvent.UpdateNewRelayUrl -> setState { copy(newRelayUrl = it.url) }
+                    is UiEvent.ConfirmCachingServiceChange -> changeCachingService(url = it.url)
+                    is UiEvent.UpdateNewCachingServiceUrl -> setState { copy(newCachingServiceUrl = it.url) }
                     UiEvent.DismissError -> setState { copy(error = null) }
                 }
             }
@@ -147,7 +149,7 @@ class NetworkSettingsViewModel @Inject constructor(
 
     private suspend fun changeRelayList(block: suspend (String) -> Unit) {
         try {
-            setState { copy(working = true) }
+            setState { copy(updatingRelays = true) }
             val userId = activeAccountStore.activeUserId()
             block(userId)
         } catch (error: WssException) {
@@ -157,7 +159,12 @@ class NetworkSettingsViewModel @Inject constructor(
             Timber.w(error)
             setState { copy(error = UiState.NetworkSettingsError.FailedToAddRelay(error)) }
         } finally {
-            setState { copy(working = false) }
+            setState { copy(updatingRelays = false) }
         }
     }
+
+    private fun changeCachingService(url: String) =
+        viewModelScope.launch {
+            Timber.i(url)
+        }
 }
