@@ -7,6 +7,7 @@ import kotlin.time.Duration
 import kotlinx.coroutines.withContext
 import net.primal.android.config.api.ApiConfigResponse
 import net.primal.android.config.api.WellKnownApi
+import net.primal.android.config.domain.DEFAULT_APP_CONFIG
 import net.primal.android.config.store.AppConfigDataStore
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import timber.log.Timber
@@ -49,5 +50,16 @@ class AppConfigUpdater @Inject constructor(
         }
         result.exceptionOrNull()?.let { Timber.w(it) }
         return result.getOrNull()
+    }
+
+    suspend fun overrideCacheUrl(url: String) = appConfigStore.overrideCacheUrl(url = url)
+
+    suspend fun restoreDefaultCacheUrl() {
+        val response = fetchAppConfigOrNull()
+        val wellKnownCacheUrl = response?.cacheServers?.firstOrNull()
+        appConfigStore.revertCacheUrlOverrideFlag()
+        appConfigStore.updateConfig {
+            copy(cacheUrl = wellKnownCacheUrl ?: DEFAULT_APP_CONFIG.cacheUrl)
+        }
     }
 }

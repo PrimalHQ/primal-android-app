@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
-import net.primal.android.config.store.AppConfigDataStore
+import net.primal.android.config.dynamic.AppConfigUpdater
 import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.relays.RelaysSocketManager
@@ -29,7 +29,7 @@ class NetworkSettingsViewModel @Inject constructor(
     private val relaysSocketManager: RelaysSocketManager,
     @PrimalCacheApiClient private val primalApiClient: PrimalApiClient,
     private val relayRepository: RelayRepository,
-    private val appConfigStore: AppConfigDataStore,
+    private val appConfigUpdater: AppConfigUpdater,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(UiState())
@@ -71,6 +71,7 @@ class NetworkSettingsViewModel @Inject constructor(
             events.collect {
                 when (it) {
                     UiEvent.RestoreDefaultRelays -> restoreDefaultRelays()
+                    UiEvent.RestoreDefaultCachingService -> restoreDefaultCachingService()
                     is UiEvent.DeleteRelay -> deleteRelay(url = it.url)
                     is UiEvent.ConfirmRelayInsert -> addRelay(url = it.url)
                     is UiEvent.UpdateNewRelayUrl -> setState { copy(newRelayUrl = it.url) }
@@ -167,7 +168,12 @@ class NetworkSettingsViewModel @Inject constructor(
 
     private fun changeCachingService(url: String) =
         viewModelScope.launch {
-            appConfigStore.overrideCacheUrl(url = url)
+            appConfigUpdater.overrideCacheUrl(url = url)
             setState { copy(newCachingServiceUrl = "") }
+        }
+
+    private fun restoreDefaultCachingService() =
+        viewModelScope.launch {
+            appConfigUpdater.restoreDefaultCacheUrl()
         }
 }

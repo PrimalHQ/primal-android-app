@@ -78,40 +78,6 @@ fun NetworkSettingsScreen(
     onClose: () -> Unit,
     eventsPublisher: (NetworkSettingsContract.UiEvent) -> Unit,
 ) {
-    var confirmingRestoreDefaultRelaysDialog by remember { mutableStateOf(false) }
-    var confirmingRelayDeletionDialog by remember { mutableStateOf<String?>(null) }
-
-    if (confirmingRestoreDefaultRelaysDialog) {
-        ConfirmActionAlertDialog(
-            dialogTitle = stringResource(id = R.string.settings_network_restore_default_relays_title),
-            dialogText = stringResource(id = R.string.settings_network_restore_default_relays_description),
-            onDismissRequest = {
-                confirmingRestoreDefaultRelaysDialog = false
-            },
-            onConfirmation = {
-                confirmingRestoreDefaultRelaysDialog = false
-                eventsPublisher(NetworkSettingsContract.UiEvent.RestoreDefaultRelays)
-            },
-        )
-    }
-
-    confirmingRelayDeletionDialog?.let { relayUrl ->
-        ConfirmActionAlertDialog(
-            dialogTitle = stringResource(id = R.string.settings_network_delete_relay_title),
-            dialogText = stringResource(
-                id = R.string.settings_network_delete_relay_description,
-                relayUrl,
-            ),
-            onDismissRequest = {
-                confirmingRelayDeletionDialog = null
-            },
-            onConfirmation = {
-                confirmingRelayDeletionDialog = null
-                eventsPublisher(NetworkSettingsContract.UiEvent.DeleteRelay(url = relayUrl))
-            },
-        )
-    }
-
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
     SnackbarErrorHandler(
@@ -144,9 +110,6 @@ fun NetworkSettingsScreen(
                     .imePadding(),
                 state = state,
                 eventsPublisher = eventsPublisher,
-                onRemoveRelayClick = { confirmingRelayDeletionDialog = it },
-                onRestoreDefaultsRelaysClick = { confirmingRestoreDefaultRelaysDialog = true },
-                onRestoreDefaultsCachingServiceClick = { true },
             )
         },
         snackbarHost = {
@@ -160,10 +123,55 @@ private fun NetworkLazyColumn(
     modifier: Modifier,
     state: NetworkSettingsContract.UiState,
     eventsPublisher: (NetworkSettingsContract.UiEvent) -> Unit,
-    onRemoveRelayClick: (String) -> Unit,
-    onRestoreDefaultsRelaysClick: () -> Unit,
-    onRestoreDefaultsCachingServiceClick: () -> Unit,
 ) {
+    var confirmingRestoreCachingServiceDialog by remember { mutableStateOf(false) }
+    if (confirmingRestoreCachingServiceDialog) {
+        ConfirmActionAlertDialog(
+            dialogTitle = stringResource(id = R.string.settings_network_restore_default_caching_service_title),
+            dialogText = stringResource(id = R.string.settings_network_restore_default_caching_service_description),
+            onDismissRequest = {
+                confirmingRestoreCachingServiceDialog = false
+            },
+            onConfirmation = {
+                confirmingRestoreCachingServiceDialog = false
+                eventsPublisher(NetworkSettingsContract.UiEvent.RestoreDefaultCachingService)
+            },
+        )
+    }
+
+    var confirmingRestoreDefaultRelaysDialog by remember { mutableStateOf(false) }
+    if (confirmingRestoreDefaultRelaysDialog) {
+        ConfirmActionAlertDialog(
+            dialogTitle = stringResource(id = R.string.settings_network_restore_default_relays_title),
+            dialogText = stringResource(id = R.string.settings_network_restore_default_relays_description),
+            onDismissRequest = {
+                confirmingRestoreDefaultRelaysDialog = false
+            },
+            onConfirmation = {
+                confirmingRestoreDefaultRelaysDialog = false
+                eventsPublisher(NetworkSettingsContract.UiEvent.RestoreDefaultRelays)
+            },
+        )
+    }
+
+    var confirmingRelayDeletionDialog by remember { mutableStateOf<String?>(null) }
+    confirmingRelayDeletionDialog?.let { relayUrl ->
+        ConfirmActionAlertDialog(
+            dialogTitle = stringResource(id = R.string.settings_network_delete_relay_title),
+            dialogText = stringResource(
+                id = R.string.settings_network_delete_relay_description,
+                relayUrl,
+            ),
+            onDismissRequest = {
+                confirmingRelayDeletionDialog = null
+            },
+            onConfirmation = {
+                confirmingRelayDeletionDialog = null
+                eventsPublisher(NetworkSettingsContract.UiEvent.DeleteRelay(url = relayUrl))
+            },
+        )
+    }
+
     val keyboardController = LocalSoftwareKeyboardController.current
     LazyColumn(modifier = modifier) {
         enhancedPrivacyItem()
@@ -173,7 +181,7 @@ private fun NetworkLazyColumn(
         if (state.cachingService != null) {
             cachingServiceSectionItems(
                 state = state,
-                onRestoreDefaultCachingService = onRestoreDefaultsCachingServiceClick,
+                onRestoreDefaultCachingService = { confirmingRestoreCachingServiceDialog = true },
                 keyboardController = keyboardController,
                 eventsPublisher = eventsPublisher,
             )
@@ -183,8 +191,8 @@ private fun NetworkLazyColumn(
 
         relaysSectionItems(
             state = state,
-            onRemoveRelayClick = onRemoveRelayClick,
-            onRestoreDefaultRelaysClick = onRestoreDefaultsRelaysClick,
+            onRemoveRelayClick = { url -> confirmingRelayDeletionDialog = url },
+            onRestoreDefaultRelaysClick = { confirmingRestoreDefaultRelaysDialog = true },
             keyboardController = keyboardController,
             eventsPublisher = eventsPublisher,
         )
@@ -286,7 +294,9 @@ private fun LazyListScope.cachingServiceSectionItems(
                 eventsPublisher(NetworkSettingsContract.UiEvent.UpdateNewCachingServiceUrl(it))
             },
             title = stringResource(id = R.string.settings_network_switch_caching_service),
-            supportingActionText = stringResource(R.string.settings_network_restore_default_caching_service),
+            supportingActionText = stringResource(
+                R.string.settings_network_restore_default_caching_service_text_button,
+            ),
             onSupportActionClick = onRestoreDefaultCachingService,
             onActionClick = {
                 keyboardController?.hide()
