@@ -174,7 +174,12 @@ private fun NetworkLazyColumn(
 
     val keyboardController = LocalSoftwareKeyboardController.current
     LazyColumn(modifier = modifier) {
-        enhancedPrivacyItem()
+        enhancedPrivacyItem(
+            checked = state.cachingProxyEnabled,
+            onCheckedChanged = { enabled ->
+                eventsPublisher(NetworkSettingsContract.UiEvent.UpdateCachingProxyFlag(enabled = enabled))
+            },
+        )
 
         item { PrimalDivider() }
 
@@ -201,7 +206,7 @@ private fun NetworkLazyColumn(
     }
 }
 
-private fun LazyListScope.enhancedPrivacyItem() {
+private fun LazyListScope.enhancedPrivacyItem(checked: Boolean, onCheckedChanged: (Boolean) -> Unit) {
     item {
         Column {
             SettingsItem(
@@ -209,11 +214,7 @@ private fun LazyListScope.enhancedPrivacyItem() {
                 headlineText = stringResource(id = R.string.settings_network_enhanced_privacy_title),
                 supportText = stringResource(id = R.string.settings_network_enhanced_privacy_description),
                 trailingContent = {
-                    PrimalSwitch(
-                        checked = false,
-                        onCheckedChange = {
-                        },
-                    )
+                    PrimalSwitch(checked = checked, onCheckedChange = onCheckedChanged)
                 },
             )
         }

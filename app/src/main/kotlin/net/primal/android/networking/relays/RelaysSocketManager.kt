@@ -10,6 +10,8 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.db.PrimalDatabase
+import net.primal.android.networking.di.PrimalCacheApiClient
+import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.user.accounts.active.ActiveAccountStore
@@ -22,18 +24,26 @@ import timber.log.Timber
 @Singleton
 class RelaysSocketManager @Inject constructor(
     private val dispatchers: CoroutineDispatcherProvider,
+    private val okHttpClient: OkHttpClient,
+    @PrimalCacheApiClient private val primalApiClient: PrimalApiClient,
     private val activeAccountStore: ActiveAccountStore,
     private val primalDatabase: PrimalDatabase,
-    private val okHttpClient: OkHttpClient,
 ) {
     private val scope = CoroutineScope(dispatchers.io())
     private val relayPoolsMutex = Mutex()
 
     private var relaysObserverJob: Job? = null
 
-    private val userRelaysPool: RelayPool = RelayPool(dispatchers = dispatchers, okHttpClient = okHttpClient)
-    private val nwcRelaysPool: RelayPool = RelayPool(dispatchers = dispatchers, okHttpClient = okHttpClient)
-    private val fallbackRelays: RelayPool = RelayPool(dispatchers = dispatchers, okHttpClient = okHttpClient)
+    private fun buildRelayPool() =
+        RelayPool(
+            dispatchers = dispatchers,
+            okHttpClient = okHttpClient,
+            primalApiClient = primalApiClient,
+        )
+
+    private val userRelaysPool: RelayPool = buildRelayPool()
+    private val nwcRelaysPool: RelayPool = buildRelayPool()
+    private val fallbackRelaysPool: RelayPool = buildRelayPool()
 
     val userRelayPoolStatus = userRelaysPool.relayPoolStatus
 
@@ -42,9 +52,7 @@ class RelaysSocketManager @Inject constructor(
         observeActiveUserId()
     }
 
-    private fun initFallbackRelaysPool() {
-        fallbackRelays.changeRelays(FALLBACK_RELAYS)
-    }
+    private fun initFallbackRelaysPool() = fallbackRelaysPool.changeRelays(FALLBACK_RELAYS)
 
     private fun observeActiveUserId() =
         scope.launch {
@@ -63,6 +71,8 @@ class RelaysSocketManager @Inject constructor(
                 }
             }
         }
+
+    private suspend fun isCachingProxyEnabled() = activeAccountStore.activeUserAccount().cachingProxyEnabled
 
     private fun observeRelays(userId: String): Job =
         scope.launch {
@@ -100,18 +110,18 @@ class RelaysSocketManager @Inject constructor(
     @Throws(NostrPublishException::class)
     suspend fun publishEvent(nostrEvent: NostrEvent) {
         if (userRelaysPool.hasRelays()) {
-            userRelaysPool.publishEvent(nostrEvent)
+            userRelaysPool.publishEvent(nostrEvent = nostrEvent, cachingProxyEnabled = isCachingProxyEnabled())
         } else {
-            fallbackRelays.publishEvent(nostrEvent)
+            fallbackRelaysPool.publishEvent(nostrEvent = nostrEvent, cachingProxyEnabled = isCachingProxyEnabled())
         }
     }
 
     @Throws(NostrPublishException::class)
     suspend fun publishEvent(nostrEvent: NostrEvent, relays: List<Relay>) {
-        val customPool = RelayPool(dispatchers = dispatchers, okHttpClient = okHttpClient)
+        val customPool = buildRelayPool()
         customPool.changeRelays(relays = relays)
         customPool.ensureAllRelaysConnected()
-        customPool.publishEvent(nostrEvent)
+        customPool.publishEvent(nostrEvent = nostrEvent, cachingProxyEnabled = isCachingProxyEnabled())
         customPool.closePool()
     }
 
@@ -121,7 +131,7 @@ class RelaysSocketManager @Inject constructor(
             throw NostrPublishException(cause = IllegalStateException("nwc relay not found"))
         }
 
-        nwcRelaysPool.publishEvent(nostrEvent)
+        nwcRelaysPool.publishEvent(nostrEvent = nostrEvent, cachingProxyEnabled = isCachingProxyEnabled())
     }
 
     suspend fun ensureUserRelayPoolConnected() = userRelaysPool.ensureAllRelaysConnected()

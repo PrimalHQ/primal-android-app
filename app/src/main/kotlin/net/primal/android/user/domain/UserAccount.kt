@@ -34,6 +34,7 @@ data class UserAccount(
     val interests: List<String> = emptyList(),
     val bookmarks: Set<PublicBookmark> = emptySet(),
     val followListEventContent: String? = null,
+    val cachingProxyEnabled: Boolean = false,
 ) {
     companion object {
         val EMPTY = UserAccount(

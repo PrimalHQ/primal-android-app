@@ -211,4 +211,10 @@ class UserRepository @Inject constructor(
             copy(contentDisplaySettings = this.contentDisplaySettings.reducer())
         }
     }
+
+    suspend fun updateCachingProxyEnabled(userId: String, enabled: Boolean) {
+        accountsStore.getAndUpdateAccount(userId = userId) {
+            copy(cachingProxyEnabled = enabled)
+        }
+    }
 }

@@ -20,7 +20,6 @@ enum class PrimalVerb(val identifier: String) {
     GET_LAST_SEEN_NOTIFICATIONS("get_notifications_seen"),
     SET_LAST_SEEN_NOTIFICATIONS("set_notifications_seen"),
     NEW_NOTIFICATIONS_COUNT("notification_counts_2"),
-    UPLOAD("upload"),
     UPLOAD_CHUNK("upload_chunk"),
     UPLOAD_COMPLETE("upload_complete"),
     MUTE_LIST("mutelist"),
@@ -36,4 +35,5 @@ enum class PrimalVerb(val identifier: String) {
     GET_BOOKMARKS_LIST("get_bookmarks"),
     EVENT_ZAPS("event_zaps_by_satszapped"),
     EVENT_ACTIONS("event_actions"),
+    BROADCAST_EVENTS("broadcast_events"),
 }
