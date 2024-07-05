@@ -23,7 +23,7 @@ class AttachmentsRepository @Inject constructor(
     @Throws(UnsuccessfulFileUpload::class)
     suspend fun uploadNoteAttachment(
         attachment: net.primal.android.editor.domain.NoteAttachment,
-        uploadId: UUID,
+        uploadId: String,
         onProgress: ((uploadedBytes: Int, totalBytes: Int) -> Unit)? = null,
     ): UploadResult {
         val userId = activeAccountStore.activeUserId()
@@ -35,7 +35,7 @@ class AttachmentsRepository @Inject constructor(
         )
     }
 
-    suspend fun cancelNoteAttachmentUpload(uploadId: UUID) {
+    suspend fun cancelNoteAttachmentUpload(uploadId: String) {
         val userId = activeAccountStore.activeUserId()
         fileUploader.cancelUpload(userId = userId, uploadId = uploadId)
     }

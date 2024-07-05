@@ -40,6 +40,7 @@ import net.primal.android.editor.domain.NoteEditorArgs
 import net.primal.android.editor.domain.NoteTaggedUser
 import net.primal.android.explore.repository.ExploreRepository
 import net.primal.android.feed.repository.FeedRepository
+import net.primal.android.networking.primal.upload.PrimalFileUploader
 import net.primal.android.networking.primal.upload.UnsuccessfulFileUpload
 import net.primal.android.networking.primal.upload.domain.UploadJob
 import net.primal.android.networking.relays.errors.MissingRelaysException
@@ -265,7 +266,7 @@ class NoteEditorViewModel @AssistedInject constructor(
         viewModelScope.launch {
             newAttachments
                 .map {
-                    val uploadId = UUID.randomUUID()
+                    val uploadId = PrimalFileUploader.generateRandomUploadId()
                     val job = viewModelScope.launch(start = CoroutineStart.LAZY) {
                         uploadAttachment(attachment = it, uploadId = uploadId)
                     }
@@ -280,7 +281,7 @@ class NoteEditorViewModel @AssistedInject constructor(
         }
     }
 
-    private suspend fun uploadAttachment(attachment: NoteAttachment, uploadId: UUID) {
+    private suspend fun uploadAttachment(attachment: NoteAttachment, uploadId: String) {
         var updatedAttachment = attachment
         try {
             setState { copy(uploadingAttachments = true) }
@@ -359,7 +360,7 @@ class NoteEditorViewModel @AssistedInject constructor(
         viewModelScope.launch {
             val noteAttachment = _state.value.attachments.firstOrNull { it.id == attachmentId }
             if (noteAttachment != null) {
-                val uploadId = UUID.randomUUID()
+                val uploadId = PrimalFileUploader.generateRandomUploadId()
                 val job = viewModelScope.launch {
                     uploadAttachment(attachment = noteAttachment, uploadId = uploadId)
                 }

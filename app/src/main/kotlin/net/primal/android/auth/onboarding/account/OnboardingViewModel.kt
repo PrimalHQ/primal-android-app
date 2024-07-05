@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.io.IOException
-import java.util.*
 import javax.inject.Inject
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -156,7 +155,7 @@ class OnboardingViewModel @Inject constructor(
         avatarUploadJob.cancel()
         avatarUploadJob = null
         if (avatarUri != null) {
-            val uploadId = UUID.randomUUID()
+            val uploadId = PrimalFileUploader.generateRandomUploadId()
             val job = viewModelScope.launch {
                 try {
                     val uploadResult = withContext(dispatcherProvider.io()) {
@@ -178,7 +177,7 @@ class OnboardingViewModel @Inject constructor(
         bannerUploadJob.cancel()
         bannerUploadJob = null
         if (bannerUri != null) {
-            val uploadId = UUID.randomUUID()
+            val uploadId = PrimalFileUploader.generateRandomUploadId()
             val job = viewModelScope.launch {
                 try {
                     val uploadResult = withContext(dispatcherProvider.io()) {

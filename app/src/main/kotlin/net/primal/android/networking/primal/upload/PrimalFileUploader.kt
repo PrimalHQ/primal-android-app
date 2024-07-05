@@ -20,6 +20,7 @@ import kotlinx.coroutines.withContext
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.crypto.NostrKeyPair
 import net.primal.android.crypto.hexToNsecHrp
+import net.primal.android.networking.UserAgentProvider
 import net.primal.android.networking.primal.upload.api.UploadApi
 import net.primal.android.networking.primal.upload.api.UploadApiConnectionsPool
 import net.primal.android.networking.primal.upload.api.model.cancelUploadRequest
@@ -42,15 +43,16 @@ class PrimalFileUploader @Inject constructor(
     companion object {
         private const val KB = 1024
         private const val MB = 1024 * KB
+        fun generateRandomUploadId(): String = "${UUID.randomUUID()}-${UserAgentProvider.USER_AGENT}"
     }
 
-    private val uploadsMap = mutableMapOf<UUID, UploadStatus>()
+    private val uploadsMap = mutableMapOf<String, UploadStatus>()
 
     @Throws(UnsuccessfulFileUpload::class)
     suspend fun uploadFile(
         uri: Uri,
         keyPair: NostrKeyPair,
-        uploadId: UUID = UUID.randomUUID(),
+        uploadId: String = generateRandomUploadId(),
         onProgress: ((uploadedBytes: Int, totalBytes: Int) -> Unit)? = null,
     ): UploadResult {
         val userId = keyPair.pubKey
@@ -69,7 +71,7 @@ class PrimalFileUploader @Inject constructor(
     suspend fun uploadFile(
         uri: Uri,
         userId: String,
-        uploadId: UUID = UUID.randomUUID(),
+        uploadId: String = generateRandomUploadId(),
         onProgress: ((uploadedBytes: Int, totalBytes: Int) -> Unit)? = null,
     ): UploadResult {
         return uploadFileOrThrow(
@@ -83,7 +85,7 @@ class PrimalFileUploader @Inject constructor(
         )
     }
 
-    suspend fun cancelUpload(keyPair: NostrKeyPair, uploadId: UUID) {
+    suspend fun cancelUpload(keyPair: NostrKeyPair, uploadId: String) {
         val userId = keyPair.pubKey
         return cancelUploadOrThrow(
             userId = userId,
@@ -92,7 +94,7 @@ class PrimalFileUploader @Inject constructor(
         )
     }
 
-    suspend fun cancelUpload(userId: String, uploadId: UUID) {
+    suspend fun cancelUpload(userId: String, uploadId: String) {
         cancelUploadOrThrow(
             userId = userId,
             uploadId = uploadId,
@@ -102,7 +104,7 @@ class PrimalFileUploader @Inject constructor(
 
     private suspend fun cancelUploadOrThrow(
         userId: String,
-        uploadId: UUID = UUID.randomUUID(),
+        uploadId: String = generateRandomUploadId(),
         signNostrEvent: (NostrUnsignedEvent) -> NostrEvent,
     ) {
         if (uploadsMap[uploadId] !is UploadStatus.UploadCompleted) {
@@ -120,7 +122,7 @@ class PrimalFileUploader @Inject constructor(
     private suspend fun uploadFileOrThrow(
         uri: Uri,
         userId: String,
-        uploadId: UUID = UUID.randomUUID(),
+        uploadId: String = generateRandomUploadId(),
         signNostrEvent: (NostrUnsignedEvent) -> NostrEvent,
         onProgress: (uploadedBytes: Int, totalBytes: Int) -> Unit,
     ): UploadResult {
@@ -144,7 +146,7 @@ class PrimalFileUploader @Inject constructor(
                                     signNostrEvent(
                                         chunkUploadRequest(
                                             userId = userId,
-                                            uploadId = uploadId.toString(),
+                                            uploadId = uploadId,
                                             fileSizeInBytes = fileSizeInBytes,
                                             offsetInBytes = offset,
                                             data = it.value,
@@ -166,7 +168,7 @@ class PrimalFileUploader @Inject constructor(
                     signNostrEvent(
                         completeUploadRequest(
                             userId = userId,
-                            uploadId = uploadId.toString(),
+                            uploadId = uploadId,
                             fileSizeInBytes = fileSizeInBytes,
                             hash = hash,
                         ),
