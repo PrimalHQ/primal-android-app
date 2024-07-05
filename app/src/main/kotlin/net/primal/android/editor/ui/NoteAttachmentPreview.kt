@@ -66,7 +66,7 @@ fun NoteAttachmentPreview(
                 val total = attachment.originalSizeInBytes?.toFloat()
                 if (uploaded != null && total != null && (uploaded / total) < 1) {
                     CircularProgressIndicator(
-                        progress = { uploaded / total },
+                        progress = { (uploaded / total).coerceAtLeast(minimumValue = 0.05f) },
                         color = AppTheme.colorScheme.secondary,
                         trackColor = Color.Black,
                         strokeCap = StrokeCap.Round,
