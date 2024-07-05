@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.withIndex
 import kotlinx.coroutines.withContext
+import net.primal.android.BuildConfig
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.crypto.NostrKeyPair
 import net.primal.android.crypto.hexToNsecHrp
@@ -43,7 +44,11 @@ class PrimalFileUploader @Inject constructor(
     companion object {
         private const val KB = 1024
         private const val MB = 1024 * KB
-        fun generateRandomUploadId(): String = "${UUID.randomUUID()}-${UserAgentProvider.USER_AGENT}"
+
+        fun generateRandomUploadId(): String {
+            val uploadFriendlyVersionName = BuildConfig.VERSION_NAME.replace(".", "_")
+            return "${UUID.randomUUID()}-${UserAgentProvider.APP_NAME}-$uploadFriendlyVersionName"
+        }
     }
 
     private val uploadsMap = mutableMapOf<String, UploadStatus>()
