@@ -15,10 +15,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Set up JDK 17
-      uses: actions/setup-java@v3
+      uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: 'temurin'
@@ -41,7 +41,7 @@ jobs:
         zip -j primal-${{ github.ref_name }}-crash-reporter-mapping.zip app/build/outputs/mapping/aospAltRelease/mapping.txt
 
     - name: Upload APK artifacts to GitHub
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: primal-${{ github.ref_name }}
         path: |
@@ -51,7 +51,7 @@ jobs:
           primal-${{ github.ref_name }}-crash-reporter-mapping.zip
 
     - name: Publish AAB to Google Play
-      run: ./gradlew publishGooglePlayReleaseBundle --track "alpha" --release-name "${{ github.ref_name }}"
+      run: ./gradlew publishGooglePlayReleaseBundle --track "internal" --release-name "${{ github.ref_name }}"
 
   release:
    name: Create GitHub release
@@ -59,16 +59,16 @@ jobs:
    runs-on: ubuntu-latest
    steps:
    - name: Checkout code
-     uses: actions/checkout@v3
+     uses: actions/checkout@v4
 
    - name: Download artifacts
-     uses: actions/download-artifact@v1
+     uses: actions/download-artifact@v4
      with:
        name: primal-${{ github.ref_name }}
 
    - name: Create Release
      id: create_release
-     uses: softprops/action-gh-release@v1
+     uses: softprops/action-gh-release@v2
      env:
        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
      with:
