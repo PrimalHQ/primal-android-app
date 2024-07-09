@@ -1,4 +1,4 @@
-package net.primal.android.read.api
+package net.primal.android.articles.api
 
 import javax.inject.Inject
 import kotlinx.serialization.encodeToString
@@ -9,14 +9,14 @@ import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.primal.PrimalCacheFilter
 import net.primal.android.networking.primal.PrimalVerb
 import net.primal.android.nostr.model.NostrEventKind
-import net.primal.android.read.api.model.BlogThreadRequestBody
-import net.primal.android.read.api.model.BlogThreadResponse
+import net.primal.android.articles.api.model.ArticleDetailsRequestBody
+import net.primal.android.articles.api.model.ArticleDetailsResponse
 
-class ReadsApiImpl @Inject constructor(
+class ArticlesApiImpl @Inject constructor(
     @PrimalCacheApiClient private val primalApiClient: PrimalApiClient,
-) : ReadsApi {
+) : ArticlesApi {
 
-    override suspend fun getBlogThread(body: BlogThreadRequestBody): BlogThreadResponse {
+    override suspend fun getArticleDetails(body: ArticleDetailsRequestBody): ArticleDetailsResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.BLOG_THREAD_VIEW,
@@ -24,7 +24,7 @@ class ReadsApiImpl @Inject constructor(
             ),
         )
 
-        return BlogThreadResponse(
+        return ArticleDetailsResponse(
             paging = queryResult.findPrimalEvent(NostrEventKind.PrimalPaging).let {
                 NostrJson.decodeFromStringOrNull(it?.content)
             },

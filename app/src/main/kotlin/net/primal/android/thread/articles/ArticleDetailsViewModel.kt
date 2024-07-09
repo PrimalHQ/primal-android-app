@@ -1,4 +1,4 @@
-package net.primal.android.thread.blogs
+package net.primal.android.thread.articles
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -11,18 +11,20 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.navigation.naddrOrThrow
+import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.utils.Naddr
 import net.primal.android.nostr.utils.Nip19TLV
-import net.primal.android.read.ReadRepository
-import net.primal.android.thread.blogs.LongFormThreadContract.UiEvent
-import net.primal.android.thread.blogs.LongFormThreadContract.UiState
+import net.primal.android.articles.ArticlesRepository
+import net.primal.android.thread.articles.ArticleDetailsContract.UiEvent
+import net.primal.android.thread.articles.ArticleDetailsContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
+import timber.log.Timber
 
 @HiltViewModel
-class LongFormThreadViewModel @Inject constructor(
+class ArticleDetailsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val activeAccountStore: ActiveAccountStore,
-    private val readsRepository: ReadRepository,
+    private val readsRepository: ArticlesRepository,
 ) : ViewModel() {
 
     private val naddr = Nip19TLV.parseAsNaddr(savedStateHandle.naddrOrThrow)
@@ -51,13 +53,17 @@ class LongFormThreadViewModel @Inject constructor(
     private fun fetchData(naddr: Naddr?) =
         viewModelScope.launch {
             if (naddr == null) {
-                setState { copy(error = UiState.LongFormThreadError.InvalidNaddr) }
+                setState { copy(error = UiState.ArticleDetailsError.InvalidNaddr) }
             } else {
-                readsRepository.fetchBlogContentAndReplies(
-                    userId = activeAccountStore.activeUserId(),
-                    authorUserId = naddr.userId,
-                    identifier = naddr.identifier,
-                )
+                try {
+                    readsRepository.fetchBlogContentAndReplies(
+                        userId = activeAccountStore.activeUserId(),
+                        authorUserId = naddr.userId,
+                        identifier = naddr.identifier,
+                    )
+                } catch (error: WssException) {
+                    Timber.w(error)
+                }
             }
         }
 }
