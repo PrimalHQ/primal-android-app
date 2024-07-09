@@ -1,10 +1,10 @@
-package net.primal.android.read.api.model
+package net.primal.android.articles.api.model
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class BlogThreadRequestBody(
+data class ArticleDetailsRequestBody(
     @SerialName("user_pubkey") val userId: String,
     @SerialName("pubkey") val authorUserId: String,
     val identifier: String,

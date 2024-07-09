@@ -1,4 +1,4 @@
-package net.primal.android.read.api.model
+package net.primal.android.articles.api.model
 
 import kotlinx.serialization.Serializable
 import net.primal.android.nostr.model.NostrEvent
@@ -6,7 +6,7 @@ import net.primal.android.nostr.model.primal.PrimalEvent
 import net.primal.android.nostr.model.primal.content.ContentPrimalPaging
 
 @Serializable
-data class BlogThreadResponse(
+data class ArticleDetailsResponse(
     val paging: ContentPrimalPaging?,
     val metadata: List<NostrEvent>,
     val notes: List<NostrEvent>,

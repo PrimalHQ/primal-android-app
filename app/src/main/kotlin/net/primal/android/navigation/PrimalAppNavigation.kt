@@ -84,8 +84,8 @@ import net.primal.android.profile.qr.ui.ProfileQrCodeViewerScreen
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
-import net.primal.android.thread.blogs.LongFormThreadScreen
-import net.primal.android.thread.blogs.LongFormThreadViewModel
+import net.primal.android.thread.articles.ArticleDetailsScreen
+import net.primal.android.thread.articles.ArticleDetailsViewModel
 import net.primal.android.thread.notes.ThreadScreen
 import net.primal.android.thread.notes.ThreadViewModel
 import net.primal.android.wallet.activation.WalletActivationViewModel
@@ -190,7 +190,7 @@ private fun NavController.navigateToWalletSettings(nwcUrl: String? = null) =
 
 fun NavController.navigateToThread(noteId: String) = navigate(route = "thread/$noteId")
 
-fun NavController.navigateToLongFormThread(naddr: String) = navigate(route = "longFormThread/$naddr")
+fun NavController.navigateToArticleDetails(naddr: String) = navigate(route = "article/$naddr")
 
 fun NavController.navigateToNoteReactions(noteId: String) = navigate(route = "reactions/$noteId")
 
@@ -377,8 +377,8 @@ fun PrimalAppNavigation() {
                 navController = navController,
             )
 
-            longFormThread(
-                route = "longFormThread/{$NADDR}",
+            articleDetails(
+                route = "article/{$NADDR}",
                 arguments = listOf(
                     navArgument(NADDR) {
                         type = NavType.StringType
@@ -755,7 +755,7 @@ private fun NavGraphBuilder.search(route: String, navController: NavController) 
             onClose = { navController.navigateUp() },
             onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
             onNoteClick = { noteId -> navController.navigateToThread(noteId) },
-            onNaddrClick = { naddr -> navController.navigateToLongFormThread(naddr) },
+            onNaddrClick = { naddr -> navController.navigateToArticleDetails(naddr) },
             onSearchContent = { query -> navController.navigateToExploreFeed(query) },
         )
     }
@@ -950,7 +950,7 @@ private fun NavGraphBuilder.thread(
     )
 }
 
-private fun NavGraphBuilder.longFormThread(
+private fun NavGraphBuilder.articleDetails(
     route: String,
     arguments: List<NamedNavArgument>,
     navController: NavController,
@@ -962,10 +962,10 @@ private fun NavGraphBuilder.longFormThread(
     popEnterTransition = { primalScaleIn },
     popExitTransition = { primalSlideOutHorizontallyToEnd },
 ) { navBackEntry ->
-    val viewModel = hiltViewModel<LongFormThreadViewModel>(navBackEntry)
+    val viewModel = hiltViewModel<ArticleDetailsViewModel>(navBackEntry)
     ApplyEdgeToEdge()
     LockToOrientationPortrait()
-    LongFormThreadScreen(
+    ArticleDetailsScreen(
         viewModel = viewModel,
         onClose = { navController.navigateUp() },
         onNoteClick = { postId -> navController.navigateToThread(postId) },
