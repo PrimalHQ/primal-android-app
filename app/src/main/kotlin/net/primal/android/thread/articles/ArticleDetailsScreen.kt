@@ -1,4 +1,4 @@
-package net.primal.android.thread.blogs
+package net.primal.android.thread.articles
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -25,12 +25,12 @@ import net.primal.android.core.compose.feed.note.events.MediaClickEvent
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
-import net.primal.android.thread.blogs.LongFormThreadContract.UiEvent
-import net.primal.android.thread.blogs.LongFormThreadContract.UiState.LongFormThreadError
+import net.primal.android.thread.articles.ArticleDetailsContract.UiEvent
+import net.primal.android.thread.articles.ArticleDetailsContract.UiState.ArticleDetailsError
 
 @Composable
-fun LongFormThreadScreen(
-    viewModel: LongFormThreadViewModel,
+fun ArticleDetailsScreen(
+    viewModel: ArticleDetailsViewModel,
     onClose: () -> Unit,
     onNoteClick: (noteId: String) -> Unit,
     onNoteReplyClick: (String) -> Unit,
@@ -54,7 +54,7 @@ fun LongFormThreadScreen(
         }
     }
 
-    LongFormThreadScreen(
+    ArticleDetailsScreen(
         state = uiState,
         eventPublisher = { viewModel.setEvent(it) },
         onClose = onClose,
@@ -63,8 +63,8 @@ fun LongFormThreadScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun LongFormThreadScreen(
-    state: LongFormThreadContract.UiState,
+private fun ArticleDetailsScreen(
+    state: ArticleDetailsContract.UiState,
     eventPublisher: (UiEvent) -> Unit,
     onClose: () -> Unit,
 ) {
@@ -76,31 +76,31 @@ private fun LongFormThreadScreen(
         snackbarHostState = snackbarHostState,
         errorMessageResolver = {
             when (it) {
-                LongFormThreadError.InvalidNaddr -> context.getString(
+                ArticleDetailsError.InvalidNaddr -> context.getString(
                     R.string.long_form_thread_invalid_naddr,
                 )
 
-                is LongFormThreadError.InvalidZapRequest -> context.getString(
+                is ArticleDetailsError.InvalidZapRequest -> context.getString(
                     R.string.post_action_invalid_zap_request,
                 )
 
-                is LongFormThreadError.MissingLightningAddress -> context.getString(
+                is ArticleDetailsError.MissingLightningAddress -> context.getString(
                     R.string.post_action_missing_lightning_address,
                 )
 
-                is LongFormThreadError.FailedToPublishZapEvent -> context.getString(
+                is ArticleDetailsError.FailedToPublishZapEvent -> context.getString(
                     R.string.post_action_zap_failed,
                 )
 
-                is LongFormThreadError.FailedToPublishLikeEvent -> context.getString(
+                is ArticleDetailsError.FailedToPublishLikeEvent -> context.getString(
                     R.string.post_action_like_failed,
                 )
 
-                is LongFormThreadError.FailedToPublishRepostEvent -> context.getString(
+                is ArticleDetailsError.FailedToPublishRepostEvent -> context.getString(
                     R.string.post_action_repost_failed,
                 )
 
-                is LongFormThreadError.MissingRelaysConfiguration -> context.getString(
+                is ArticleDetailsError.MissingRelaysConfiguration -> context.getString(
                     R.string.app_missing_relays_config,
                 )
             }

@@ -1,15 +1,15 @@
-package net.primal.android.read
+package net.primal.android.articles
 
 import javax.inject.Inject
 import kotlinx.coroutines.withContext
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.nostr.model.NostrEventKind
-import net.primal.android.read.api.ReadsApi
-import net.primal.android.read.api.model.BlogThreadRequestBody
+import net.primal.android.articles.api.ArticlesApi
+import net.primal.android.articles.api.model.ArticleDetailsRequestBody
 
-class ReadRepository @Inject constructor(
+class ArticlesRepository @Inject constructor(
     private val dispatchers: CoroutineDispatcherProvider,
-    private val readsApi: ReadsApi,
+    private val articlesApi: ArticlesApi,
 ) {
 
     suspend fun fetchBlogContentAndReplies(
@@ -17,8 +17,8 @@ class ReadRepository @Inject constructor(
         authorUserId: String,
         identifier: String,
     ) = withContext(dispatchers.io()) {
-        readsApi.getBlogThread(
-            body = BlogThreadRequestBody(
+        articlesApi.getArticleDetails(
+            body = ArticleDetailsRequestBody(
                 userId = userId,
                 authorUserId = authorUserId,
                 identifier = identifier,
