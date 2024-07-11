@@ -29,6 +29,7 @@ fun ReferencedNoteCard(
     modifier: Modifier = Modifier,
     data: FeedPostUi,
     onPostClick: ((String) -> Unit)? = null,
+    onArticleClick: ((naddr: String) -> Unit)? = null,
     onMediaClick: ((MediaClickEvent) -> Unit)? = null,
     onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
     colors: CardColors = CardDefaults.cardColors(
@@ -65,6 +66,7 @@ fun ReferencedNoteCard(
             onClick = { onPostClick?.invoke(data.postId) },
             onProfileClick = { onPostClick?.invoke(data.postId) },
             onPostClick = { postId -> onPostClick?.invoke(postId) },
+            onArticleClick = onArticleClick,
             onUrlClick = { onPostClick?.invoke(data.postId) },
             onHashtagClick = { onPostClick?.invoke(data.postId) },
             onMediaClick = onMediaClick,
@@ -112,6 +114,7 @@ fun PreviewReferencedPostListItemLight() {
                 replyToAuthorHandle = "alex",
             ),
             onPostClick = {},
+            onArticleClick = {},
             onMediaClick = {},
         )
     }
@@ -154,6 +157,7 @@ fun PreviewReferencedPostListItemDark() {
                 replyToAuthorHandle = null,
             ),
             onPostClick = {},
+            onArticleClick = {},
             onMediaClick = {},
         )
     }

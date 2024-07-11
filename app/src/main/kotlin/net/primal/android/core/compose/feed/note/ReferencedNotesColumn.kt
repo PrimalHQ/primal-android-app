@@ -24,6 +24,7 @@ fun ReferencedNotesColumn(
     expanded: Boolean,
     containerColor: Color,
     onPostClick: ((noteId: String) -> Unit)? = null,
+    onArticleClick: ((naddr: String) -> Unit)? = null,
     onMediaClick: ((MediaClickEvent) -> Unit)? = null,
     onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
 ) {
@@ -59,6 +60,7 @@ fun ReferencedNotesColumn(
                     replyToAuthorHandle = null,
                 ),
                 onPostClick = onPostClick,
+                onArticleClick = onArticleClick,
                 onMediaClick = onMediaClick,
                 onPayInvoiceClick = onPayInvoiceClick,
                 colors = CardDefaults.cardColors(containerColor = containerColor),
