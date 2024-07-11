@@ -62,6 +62,7 @@ fun NotificationListItem(
     isSeen: Boolean,
     onProfileClick: ((String) -> Unit)? = null,
     onNoteClick: ((String) -> Unit)? = null,
+    onArticleClick: ((naddr: String) -> Unit)? = null,
     onHashtagClick: ((String) -> Unit)? = null,
     onMediaClick: ((MediaClickEvent) -> Unit)? = null,
     onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
@@ -105,6 +106,7 @@ fun NotificationListItem(
         ),
         onProfileClick = onProfileClick,
         onPostClick = onNoteClick,
+        onArticleClick = onArticleClick,
         onHashtagClick = onHashtagClick,
         onMediaClick = onMediaClick,
         onPayInvoiceClick = onPayInvoiceClick,
@@ -134,6 +136,7 @@ private fun NotificationListItem(
     suffixText: String,
     onProfileClick: ((String) -> Unit)? = null,
     onPostClick: ((String) -> Unit)? = null,
+    onArticleClick: ((naddr: String) -> Unit)? = null,
     onHashtagClick: ((String) -> Unit)? = null,
     onMediaClick: ((MediaClickEvent) -> Unit)? = null,
     onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
@@ -171,6 +174,7 @@ private fun NotificationListItem(
             suffixText = suffixText,
             onProfileClick = onProfileClick,
             onPostClick = onPostClick,
+            onArticleClick = onArticleClick,
             onHashtagClick = onHashtagClick,
             onMediaClick = onMediaClick,
             onPostAction = onPostAction,
@@ -187,6 +191,7 @@ private fun NotificationContent(
     suffixText: String,
     onProfileClick: ((String) -> Unit)?,
     onPostClick: ((String) -> Unit)?,
+    onArticleClick: ((naddr: String) -> Unit)?,
     onHashtagClick: ((String) -> Unit)?,
     onMediaClick: ((MediaClickEvent) -> Unit)?,
     onPostAction: ((FeedPostAction) -> Unit)?,
@@ -226,6 +231,7 @@ private fun NotificationContent(
                 onClick = { onPostClick?.invoke(actionPost.postId) },
                 onProfileClick = onProfileClick,
                 onPostClick = onPostClick,
+                onArticleClick = onArticleClick,
                 onUrlClick = { localUriHandler.openUriSafely(it) },
                 onHashtagClick = onHashtagClick,
                 onMediaClick = onMediaClick,
@@ -705,6 +711,7 @@ private fun PreviewUnseenNotificationsListItem(
                 notifications = notifications,
                 type = notifications.first().notificationType,
                 isSeen = false,
+                onArticleClick = {},
             )
         }
     }
@@ -725,6 +732,7 @@ private fun PreviewSeenNotificationsListItem(
                 notifications = notifications,
                 type = notifications.first().notificationType,
                 isSeen = true,
+                onArticleClick = {},
             )
         }
     }

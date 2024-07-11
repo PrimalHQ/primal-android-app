@@ -55,6 +55,7 @@ fun FeedLazyColumn(
     listState: LazyListState,
     zappingState: ZappingState,
     onPostClick: (String) -> Unit,
+    onArticleClick: (naddr: String) -> Unit,
     onProfileClick: (String) -> Unit,
     onPostLikeClick: (FeedPostUi) -> Unit,
     onRepostClick: (FeedPostUi) -> Unit,
@@ -161,6 +162,7 @@ fun FeedLazyColumn(
                         cardPadding = PaddingValues(all = 0.dp),
                         showReplyTo = showReplyTo,
                         onPostClick = { postId -> onPostClick(postId) },
+                        onArticleClick = { naddr -> onArticleClick(naddr)},
                         onProfileClick = { profileId -> onProfileClick(profileId) },
                         onPostAction = { postAction ->
                             when (postAction) {

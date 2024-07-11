@@ -469,6 +469,7 @@ private fun ReplyToNote(replyToNote: FeedPostUi, connectionLineColor: Color) {
             expanded = true,
             onProfileClick = {},
             onPostClick = {},
+            onArticleClick = {},
             onClick = {},
             onUrlClick = {},
             onHashtagClick = {},
