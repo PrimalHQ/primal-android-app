@@ -131,6 +131,7 @@ fun NoteContent(
     referencedNoteContainerColor: Color = AppTheme.extraColorScheme.surfaceVariantAlt1,
     onProfileClick: ((String) -> Unit)? = null,
     onPostClick: ((String) -> Unit)? = null,
+    onArticleClick: ((naddr: String) -> Unit)? = null,
     onClick: ((Offset) -> Unit)? = null,
     onUrlClick: ((String) -> Unit)? = null,
     onHashtagClick: ((String) -> Unit)? = null,
@@ -171,6 +172,7 @@ fun NoteContent(
                         onUrlClick = onUrlClick,
                         onPostClick = onPostClick,
                         onHashtagClick = onHashtagClick,
+                        onArticleClick = onArticleClick,
                     ) ?: onClick?.invoke(offset)
                 },
             )
@@ -201,6 +203,7 @@ fun NoteContent(
                 expanded = expanded,
                 containerColor = referencedNoteContainerColor,
                 onPostClick = onPostClick,
+                onArticleClick = onArticleClick,
                 onMediaClick = onMediaClick,
                 onPayInvoiceClick = onPayInvoiceClick,
             )
@@ -213,6 +216,7 @@ private fun AnnotatedString.Range<String>.handleAnnotationClick(
     onUrlClick: ((String) -> Unit)?,
     onPostClick: ((String) -> Unit)?,
     onHashtagClick: ((String) -> Unit)?,
+    onArticleClick: ((naddr: String) -> Unit)?,
 ) = when (this.tag) {
     PROFILE_ID_ANNOTATION_TAG -> onProfileClick?.invoke(this.item)
     URL_ANNOTATION_TAG -> onUrlClick?.invoke(this.item)
@@ -220,10 +224,9 @@ private fun AnnotatedString.Range<String>.handleAnnotationClick(
     HASHTAG_ANNOTATION_TAG -> onHashtagClick?.invoke(this.item)
     NOSTR_ADDRESS_ANNOTATION_TAG -> {
         this.item.split(":").lastOrNull()?.let { address ->
-            onUrlClick?.invoke("https://highlighter.com/a/$address")
+            onArticleClick?.invoke(address)
         }
     }
-
     else -> Unit
 }
 
@@ -417,6 +420,7 @@ fun PreviewPostContent() {
                     expanded = false,
                     onProfileClick = {},
                     onPostClick = {},
+                    onArticleClick = {},
                     onClick = {},
                     onUrlClick = {},
                     onHashtagClick = {},
@@ -493,6 +497,7 @@ fun PreviewPostContentWithReferencedPost() {
                     expanded = false,
                     onProfileClick = {},
                     onPostClick = {},
+                    onArticleClick = {},
                     onClick = {},
                     onUrlClick = {},
                     onHashtagClick = {},

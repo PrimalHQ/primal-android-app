@@ -38,6 +38,7 @@ fun FeedNote(
     expanded: Boolean,
     textSelectable: Boolean,
     onPostClick: ((String) -> Unit)? = null,
+    onArticleClick: ((naddr: String) -> Unit)? = null,
     onProfileClick: ((String) -> Unit)? = null,
     onHashtagClick: ((String) -> Unit)? = null,
     onMediaClick: ((MediaClickEvent) -> Unit)? = null,
@@ -113,6 +114,7 @@ fun FeedNote(
                 },
                 onProfileClick = onProfileClick,
                 onPostClick = onPostClick,
+                onArticleClick = onArticleClick,
                 onUrlClick = {
                     localUriHandler.openUriSafely(it)
                 },

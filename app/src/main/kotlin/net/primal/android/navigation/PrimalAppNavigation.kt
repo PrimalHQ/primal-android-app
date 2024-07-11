@@ -608,6 +608,7 @@ private fun NavGraphBuilder.feed(
         onFeedsClick = { navController.navigateToFeedList() },
         onNewPostClick = { preFillContent -> navController.navigateToNoteEditor(preFillContent?.asNoteEditorArgs()) },
         onPostClick = { postId -> navController.navigateToThread(noteId = postId) },
+        onArticleClick = { naddr -> navController.navigateToArticleDetails(naddr = naddr)},
         onPostReplyClick = { postId -> navController.navigateToNoteEditor(NoteEditorArgs(replyToNoteId = postId)) },
         onProfileClick = { profileId -> navController.navigateToProfile(profileId = profileId) },
         onHashtagClick = { hashtag -> navController.navigateToExploreFeed(query = hashtag) },
@@ -721,6 +722,7 @@ private fun NavGraphBuilder.exploreFeed(
         viewModel = viewModel,
         onClose = { navController.navigateUp() },
         onPostClick = { postId -> navController.navigateToThread(postId) },
+        onArticleClick = { naddr -> navController.navigateToArticleDetails(naddr = naddr)},
         onPostReplyClick = { postId -> navController.navigateToNoteEditor(NoteEditorArgs(replyToNoteId = postId)) },
         onPostQuoteClick = { preFillContent -> navController.navigateToNoteEditor(preFillContent.asNoteEditorArgs()) },
         onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
@@ -821,6 +823,7 @@ private fun NavGraphBuilder.chat(
         onClose = { navController.navigateUp() },
         onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
         onNoteClick = { noteId -> navController.navigateToThread(noteId) },
+        onArticleClick = { naddr -> navController.navigateToArticleDetails(naddr = naddr)},
         onHashtagClick = { hashtag -> navController.navigateToExploreFeed(hashtag) },
         onMediaClick = {
             navController.navigateToMediaGallery(
@@ -890,6 +893,7 @@ private fun NavGraphBuilder.notifications(
         viewModel = viewModel,
         onProfileClick = { navController.navigateToProfile(profileId = it) },
         onNoteClick = { navController.navigateToThread(noteId = it) },
+        onArticleClick = { naddr -> navController.navigateToArticleDetails(naddr = naddr) },
         onNoteReplyClick = { noteId -> navController.navigateToNoteEditor(NoteEditorArgs(replyToNoteId = noteId)) },
         onHashtagClick = { navController.navigateToExploreFeed(query = it) },
         onMediaClick = {
@@ -930,6 +934,7 @@ private fun NavGraphBuilder.thread(
         viewModel = viewModel,
         onClose = { navController.navigateUp() },
         onPostClick = { postId -> navController.navigateToThread(postId) },
+        onArticleClick = { naddr -> navController.navigateToArticleDetails(naddr) },
         onPostReplyClick = { postId -> navController.navigateToNoteEditor(NoteEditorArgs(replyToNoteId = postId)) },
         onPostQuoteClick = { preFillContent -> navController.navigateToNoteEditor(preFillContent.asNoteEditorArgs()) },
         onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
@@ -1052,6 +1057,7 @@ private fun NavGraphBuilder.profile(
         viewModel = viewModel,
         onClose = { navController.navigateUp() },
         onPostClick = { postId -> navController.navigateToThread(noteId = postId) },
+        onArticleClick = { naddr -> navController.navigateToArticleDetails(naddr = naddr) },
         onPostReplyClick = { postId -> navController.navigateToNoteEditor(NoteEditorArgs(replyToNoteId = postId)) },
         onPostQuoteClick = { preFillContent -> navController.navigateToNoteEditor(preFillContent.asNoteEditorArgs()) },
         onProfileClick = { profileId -> navController.navigateToProfile(profileId = profileId) },
