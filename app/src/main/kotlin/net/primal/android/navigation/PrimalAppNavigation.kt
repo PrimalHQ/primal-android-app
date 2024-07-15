@@ -608,7 +608,7 @@ private fun NavGraphBuilder.feed(
         onFeedsClick = { navController.navigateToFeedList() },
         onNewPostClick = { preFillContent -> navController.navigateToNoteEditor(preFillContent?.asNoteEditorArgs()) },
         onPostClick = { postId -> navController.navigateToThread(noteId = postId) },
-        onArticleClick = { naddr -> navController.navigateToArticleDetails(naddr = naddr)},
+        onArticleClick = { naddr -> navController.navigateToArticleDetails(naddr = naddr) },
         onPostReplyClick = { postId -> navController.navigateToNoteEditor(NoteEditorArgs(replyToNoteId = postId)) },
         onProfileClick = { profileId -> navController.navigateToProfile(profileId = profileId) },
         onHashtagClick = { hashtag -> navController.navigateToExploreFeed(query = hashtag) },
@@ -722,7 +722,7 @@ private fun NavGraphBuilder.exploreFeed(
         viewModel = viewModel,
         onClose = { navController.navigateUp() },
         onPostClick = { postId -> navController.navigateToThread(postId) },
-        onArticleClick = { naddr -> navController.navigateToArticleDetails(naddr = naddr)},
+        onArticleClick = { naddr -> navController.navigateToArticleDetails(naddr = naddr) },
         onPostReplyClick = { postId -> navController.navigateToNoteEditor(NoteEditorArgs(replyToNoteId = postId)) },
         onPostQuoteClick = { preFillContent -> navController.navigateToNoteEditor(preFillContent.asNoteEditorArgs()) },
         onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
@@ -823,7 +823,7 @@ private fun NavGraphBuilder.chat(
         onClose = { navController.navigateUp() },
         onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
         onNoteClick = { noteId -> navController.navigateToThread(noteId) },
-        onArticleClick = { naddr -> navController.navigateToArticleDetails(naddr = naddr)},
+        onArticleClick = { naddr -> navController.navigateToArticleDetails(naddr = naddr) },
         onHashtagClick = { hashtag -> navController.navigateToExploreFeed(hashtag) },
         onMediaClick = {
             navController.navigateToMediaGallery(

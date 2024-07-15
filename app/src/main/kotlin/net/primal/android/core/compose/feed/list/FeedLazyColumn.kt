@@ -162,7 +162,7 @@ fun FeedLazyColumn(
                         cardPadding = PaddingValues(all = 0.dp),
                         showReplyTo = showReplyTo,
                         onPostClick = { postId -> onPostClick(postId) },
-                        onArticleClick = { naddr -> onArticleClick(naddr)},
+                        onArticleClick = { naddr -> onArticleClick(naddr) },
                         onProfileClick = { profileId -> onProfileClick(profileId) },
                         onPostAction = { postAction ->
                             when (postAction) {
