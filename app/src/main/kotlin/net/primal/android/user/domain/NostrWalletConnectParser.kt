@@ -14,10 +14,10 @@ fun String.parseNWCUrl(): NostrWalletConnect {
         else -> null
     }
 
-    val relay = uri.getQueryParameter("relay")
-    val lud16 = uri.getQueryParameter("lud16")
+    val relay = uri.getQueryParameterOrNull("relay")
+    val lud16 = uri.getQueryParameterOrNull("lud16")
 
-    val secretParam = uri.getQueryParameter("secret")
+    val secretParam = uri.getQueryParameterOrNull("secret")
     val keypairSecret = when {
         secretParam != null && secretParam.toByteArray().size == 64 -> secretParam
         else -> null
@@ -36,6 +36,10 @@ fun String.parseNWCUrl(): NostrWalletConnect {
             pubkey = CryptoUtils.publicKeyCreate(Hex.decode(keypairSecret)).toHex(),
         ),
     )
+}
+
+private fun Uri.getQueryParameterOrNull(key: String): String? {
+    return runCatching { this.getQueryParameter(key) }.getOrNull()
 }
 
 fun String.isNwcUrl(): Boolean {

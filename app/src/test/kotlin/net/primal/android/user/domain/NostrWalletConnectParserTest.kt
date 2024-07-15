@@ -44,4 +44,32 @@ class NostrWalletConnectParserTest {
     fun isNwcUrl_returnsTrueForValidUrl() {
         functioningNostrWalletConnectUrl.isNwcUrl() shouldBe true
     }
+
+    @Test(expected = NWCParseException::class)
+    fun parseNWCUrl_throwsNWCParseException_ifRelayIsMissing() {
+        "nostr+walletconnect://$expectedPubkey" +
+            "?$expectedSecret&lud16=nikola@getalby.com"
+                .parseNWCUrl()
+    }
+
+    @Test(expected = NWCParseException::class)
+    fun parseNWCUrl_throwsNWCParseException_ifLud16IsMissing() {
+        "nostr+walletconnect://$expectedPubkey" +
+            "?relay=wss://relay.getalby.com/v1&secret="
+                .parseNWCUrl()
+    }
+
+    @Test(expected = NWCParseException::class)
+    fun parseNWCUrl_throwsNWCParseException_ifSecretIsMissing() {
+        "nostr+walletconnect://$expectedPubkey" +
+            "?relay=wss://relay.getalby.com/v1$expectedSecret&lud16=nikola@getalby.com"
+                .parseNWCUrl()
+    }
+
+    @Test(expected = NWCParseException::class)
+    fun parseNWCUrl_throwsNWCParseException_ifSecretIsInvalid() {
+        "nostr+walletconnect://$expectedPubkey" +
+            "?relay=wss://relay.getalby.com/v1$expectedSecret&lud16=nikola@getalby.com&secret=111"
+                .parseNWCUrl()
+    }
 }
