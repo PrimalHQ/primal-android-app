@@ -29,6 +29,8 @@ import com.google.accompanist.navigation.material.rememberBottomSheetNavigator
 import java.net.URLEncoder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import net.primal.android.articles.feed.ArticleFeedScreen
+import net.primal.android.articles.feed.ArticleFeedViewModel
 import net.primal.android.attachments.gallery.MediaGalleryScreen
 import net.primal.android.attachments.gallery.MediaGalleryViewModel
 import net.primal.android.auth.login.LoginScreen
@@ -132,9 +134,9 @@ fun NavController.navigateToFeed(directive: String? = null) =
         navOptions = navOptions { clearBackStack() },
     )
 
-private fun NavController.navigateToExplore() =
+fun NavController.navigateToArticleFeed() =
     navigate(
-        route = "explore",
+        route = "articleFeed",
         navOptions = topLevelNavOptions,
     )
 
@@ -219,7 +221,7 @@ fun PrimalAppNavigation() {
     val topLevelDestinationHandler: (PrimalTopLevelDestination) -> Unit = {
         when (it) {
             PrimalTopLevelDestination.Home -> navController.popBackStack()
-            PrimalTopLevelDestination.Explore -> navController.navigateToExplore()
+            PrimalTopLevelDestination.Reads -> navController.navigateToArticleFeed()
             PrimalTopLevelDestination.Wallet -> navController.navigateToWallet()
             PrimalTopLevelDestination.Messages -> navController.navigateToMessages()
             PrimalTopLevelDestination.Notifications -> navController.navigateToNotifications()
@@ -298,8 +300,9 @@ fun PrimalAppNavigation() {
                 onDrawerScreenClick = drawerDestinationHandler,
             )
 
-            explore(
-                route = "explore",
+            articleFeed(
+                route = "articleFeed",
+                arguments = emptyList(),
                 navController = navController,
                 onTopLevelDestinationChanged = topLevelDestinationHandler,
                 onDrawerScreenClick = drawerDestinationHandler,
@@ -626,6 +629,48 @@ private fun NavGraphBuilder.feed(
         onTopLevelDestinationChanged = onTopLevelDestinationChanged,
         onDrawerScreenClick = onDrawerScreenClick,
         onDrawerQrCodeClick = { navController.navigateToProfileQrCodeViewer() },
+        onSearchClick = { navController.navigateToSearch() },
+    )
+}
+
+private fun NavGraphBuilder.articleFeed(
+    route: String,
+    arguments: List<NamedNavArgument>,
+    navController: NavController,
+    onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
+    onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
+) = composable(
+    route = route,
+    arguments = arguments,
+    enterTransition = { null },
+    exitTransition = {
+        when {
+            targetState.destination.route.isMainScreenRoute() -> null
+            else -> primalScaleOut
+        }
+    },
+    popEnterTransition = {
+        when {
+            initialState.destination.route.isMainScreenRoute() -> null
+            else -> primalScaleIn
+        }
+    },
+    popExitTransition = {
+        when {
+            targetState.destination.route.isMainScreenRoute() -> null
+            else -> primalScaleOut
+        }
+    },
+) { navBackEntry ->
+    val viewModel = hiltViewModel<ArticleFeedViewModel>(navBackEntry)
+    ApplyEdgeToEdge()
+    LockToOrientationPortrait()
+    ArticleFeedScreen(
+        viewModel = viewModel,
+        onTopLevelDestinationChanged = onTopLevelDestinationChanged,
+        onDrawerScreenClick = onDrawerScreenClick,
+        onDrawerQrCodeClick = { navController.navigateToProfileQrCodeViewer() },
+        onSearchClick = { navController.navigateToSearch() },
     )
 }
 

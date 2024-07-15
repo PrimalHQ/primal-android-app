@@ -60,6 +60,7 @@ import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
 
 @Composable
+@Deprecated("Outdated top level screen replaced with Reads.")
 fun ExploreHomeScreen(
     viewModel: ExploreHomeViewModel,
     onHashtagClick: (String) -> Unit,
@@ -83,7 +84,8 @@ fun ExploreHomeScreen(
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-fun ExploreHomeScreen(
+@Deprecated("Outdated top level screen replaced with Reads.")
+private fun ExploreHomeScreen(
     state: ExploreHomeContract.UiState,
     onHashtagClick: (String) -> Unit,
     onSearchClick: () -> Unit,
@@ -98,7 +100,7 @@ fun ExploreHomeScreen(
 
     PrimalDrawerScaffold(
         drawerState = drawerState,
-        activeDestination = PrimalTopLevelDestination.Explore,
+        activeDestination = PrimalTopLevelDestination.Reads,
         onActiveDestinationClick = { uiScope.launch { listState.animateScrollToItem(0) } },
         onPrimaryDestinationChanged = onPrimaryDestinationChanged,
         onDrawerDestinationClick = onDrawerDestinationClick,

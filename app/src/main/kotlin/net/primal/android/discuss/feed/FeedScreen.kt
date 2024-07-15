@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
@@ -63,7 +64,7 @@ import net.primal.android.core.compose.feed.note.events.MediaClickEvent
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
-import net.primal.android.core.compose.icons.primaliconpack.FeedPicker
+import net.primal.android.core.compose.icons.primaliconpack.Search
 import net.primal.android.core.compose.isNotEmpty
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.crypto.hexToNoteHrp
@@ -90,6 +91,7 @@ fun FeedScreen(
     onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
     onDrawerQrCodeClick: () -> Unit,
+    onSearchClick: () -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
 
@@ -124,12 +126,13 @@ fun FeedScreen(
         onPrimaryDestinationChanged = onTopLevelDestinationChanged,
         onDrawerDestinationClick = onDrawerScreenClick,
         onDrawerQrCodeClick = onDrawerQrCodeClick,
+        onSearchClick = onSearchClick,
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FeedScreen(
+private fun FeedScreen(
     state: FeedContract.UiState,
     eventPublisher: (FeedContract.UiEvent) -> Unit,
     onFeedsClick: () -> Unit,
@@ -145,6 +148,7 @@ fun FeedScreen(
     onPrimaryDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
     onDrawerQrCodeClick: () -> Unit,
+    onSearchClick: () -> Unit,
 ) {
     val uiScope = rememberCoroutineScope()
     val drawerState: DrawerState = rememberDrawerState(DrawerValue.Closed)
@@ -206,16 +210,18 @@ fun FeedScreen(
         topBar = {
             PrimalTopAppBar(
                 title = state.feedTitle,
+                titleTrailingIcon = Icons.Default.ExpandMore,
                 avatarCdnImage = state.activeAccountAvatarCdnImage,
                 navigationIcon = PrimalIcons.AvatarDefault,
                 onNavigationIconClick = {
                     uiScope.launch { drawerState.open() }
                 },
+                onTitleClick = onFeedsClick,
                 actions = {
                     AppBarIcon(
-                        icon = PrimalIcons.FeedPicker,
-                        onClick = onFeedsClick,
-                        appBarIconContentDescription = stringResource(id = R.string.accessibility_feed_picker),
+                        icon = PrimalIcons.Search,
+                        onClick = onSearchClick,
+                        appBarIconContentDescription = stringResource(id = R.string.accessibility_search),
                     )
                 },
                 scrollBehavior = it,
@@ -409,6 +415,7 @@ fun FeedScreenPreview() {
             onPrimaryDestinationChanged = {},
             onDrawerDestinationClick = {},
             onDrawerQrCodeClick = {},
+            onSearchClick = {},
         )
     }
 }

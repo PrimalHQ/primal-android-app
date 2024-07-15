@@ -68,7 +68,7 @@
     <string name="logout_button">Sign out</string>
 
     <string name="primary_destination_feed_label">Feed</string>
-    <string name="primary_destination_read_label">Read</string>
+    <string name="primary_destination_reads_label">Reads</string>
     <string name="primary_destination_explore_label">Explore</string>
     <string name="primary_destination_wallet_label">Wallet</string>
     <string name="primary_destination_messages_label">Messages</string>
@@ -617,6 +617,7 @@
     <string name="accessibility_profile_drop_down">Profile drop-down</string>
     <string name="accessibility_media_drop_down">Media drop-down</string>
     <string name="accessibility_feed_picker">Feed picker</string>
+    <string name="accessibility_search">Search</string>
     <string name="accessibility_add_feed">Add feed</string>
     <string name="accessibility_remove_feed">Remove feed</string>
     <string name="accessibility_notification_settings">Notification settings</string>
