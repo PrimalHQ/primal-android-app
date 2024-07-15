@@ -1,6 +1,3 @@
-Reordering feeds.
-Caching service override feature.
-Publishing events through caching service proxy.
-Progress while uploading.
-Take photo on note editor and thread screen.
-Stability fixes.
+Reads App shell with empty articles feed;
+Article Details screen with simple native Markdown rendering;
+Feed naddr links connected to internal article details screen;
