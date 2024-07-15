@@ -42,14 +42,14 @@ import net.primal.android.core.compose.foundation.ClickDebounce
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.Home
 import net.primal.android.core.compose.icons.primaliconpack.HomeFilled
+import net.primal.android.core.compose.icons.primaliconpack.LongRead
+import net.primal.android.core.compose.icons.primaliconpack.LongReadFilled
 import net.primal.android.core.compose.icons.primaliconpack.Messages
 import net.primal.android.core.compose.icons.primaliconpack.MessagesFilled
 import net.primal.android.core.compose.icons.primaliconpack.NavWalletBolt
 import net.primal.android.core.compose.icons.primaliconpack.NavWalletBoltFilled
 import net.primal.android.core.compose.icons.primaliconpack.Notifications
 import net.primal.android.core.compose.icons.primaliconpack.NotificationsFilled
-import net.primal.android.core.compose.icons.primaliconpack.Search
-import net.primal.android.core.compose.icons.primaliconpack.SearchFilled
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.user.domain.Badges
@@ -150,7 +150,7 @@ fun PrimalNavigationBarLightningBolt(
                         )
 
                         NavItemDestination(
-                            destination = PrimalTopLevelDestination.Explore,
+                            destination = PrimalTopLevelDestination.Reads,
                             activeDestination = activeDestination,
                             onTopLevelDestinationChanged = onTopLevelDestinationChanged,
                             onActiveDestinationClick = onActiveDestinationClick,
@@ -305,7 +305,7 @@ private fun RowScope.PrimalNavigationBarItem(
 
 enum class PrimalTopLevelDestination {
     Home,
-    Explore,
+    Reads,
     Wallet,
     Notifications,
     Messages,
@@ -314,7 +314,7 @@ enum class PrimalTopLevelDestination {
 private fun PrimalTopLevelDestination.imageVector(): ImageVector {
     return when (this) {
         PrimalTopLevelDestination.Home -> PrimalIcons.Home
-        PrimalTopLevelDestination.Explore -> PrimalIcons.Search
+        PrimalTopLevelDestination.Reads -> PrimalIcons.LongRead
         PrimalTopLevelDestination.Wallet -> PrimalIcons.NavWalletBolt
         PrimalTopLevelDestination.Messages -> PrimalIcons.Messages
         PrimalTopLevelDestination.Notifications -> PrimalIcons.Notifications
@@ -324,7 +324,7 @@ private fun PrimalTopLevelDestination.imageVector(): ImageVector {
 private fun PrimalTopLevelDestination.imageVectorSelected(): ImageVector {
     return when (this) {
         PrimalTopLevelDestination.Home -> PrimalIcons.HomeFilled
-        PrimalTopLevelDestination.Explore -> PrimalIcons.SearchFilled
+        PrimalTopLevelDestination.Reads -> PrimalIcons.LongReadFilled
         PrimalTopLevelDestination.Wallet -> PrimalIcons.NavWalletBoltFilled
         PrimalTopLevelDestination.Messages -> PrimalIcons.MessagesFilled
         PrimalTopLevelDestination.Notifications -> PrimalIcons.NotificationsFilled
@@ -335,7 +335,7 @@ private fun PrimalTopLevelDestination.imageVectorSelected(): ImageVector {
 private fun PrimalTopLevelDestination.label(): String {
     return when (this) {
         PrimalTopLevelDestination.Home -> stringResource(id = R.string.primary_destination_feed_label)
-        PrimalTopLevelDestination.Explore -> stringResource(id = R.string.primary_destination_explore_label)
+        PrimalTopLevelDestination.Reads -> stringResource(id = R.string.primary_destination_reads_label)
         PrimalTopLevelDestination.Wallet -> stringResource(id = R.string.primary_destination_wallet_label)
         PrimalTopLevelDestination.Messages -> stringResource(id = R.string.primary_destination_messages_label)
         PrimalTopLevelDestination.Notifications -> stringResource(id = R.string.primary_destination_notifications_label)

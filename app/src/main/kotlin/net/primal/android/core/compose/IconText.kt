@@ -57,11 +57,11 @@ fun IconText(
     val contentText = buildAnnotatedString {
         if (leadingIcon != null) {
             appendInlineContent("leadingIcon", "[leadingIcon]")
-            append("  ")
+            append(" ")
         }
         append(text)
         if (trailingIcon != null) {
-            append("  ")
+            append(" ")
             appendInlineContent("trailingIcon", "[trailingIcon]")
         }
     }
