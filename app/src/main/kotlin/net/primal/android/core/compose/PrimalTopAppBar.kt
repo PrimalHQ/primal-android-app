@@ -31,6 +31,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.theme.AppTheme
 
@@ -41,6 +42,7 @@ fun PrimalTopAppBar(
     modifier: Modifier = Modifier,
     title: String = "",
     subtitle: String? = null,
+    titleTrailingIcon: ImageVector? = null,
     textColor: Color = LocalContentColor.current,
     navigationIcon: ImageVector? = null,
     navigationIconTintColor: Color = LocalContentColor.current,
@@ -51,6 +53,7 @@ fun PrimalTopAppBar(
     actions: (@Composable RowScope.() -> Unit)? = null,
     showDivider: Boolean = true,
     scrollBehavior: TopAppBarScrollBehavior? = null,
+    onTitleClick: (() -> Unit)? = null,
     onTitleLongClick: (() -> Unit)? = null,
     colors: TopAppBarColors = TopAppBarDefaults.centerAlignedTopAppBarColors(
         containerColor = AppTheme.colorScheme.surface,
@@ -101,15 +104,18 @@ fun PrimalTopAppBar(
                         .combinedClickable(
                             indication = null,
                             interactionSource = remember { MutableInteractionSource() },
-                            onClick = {},
+                            onClick = { onTitleClick?.invoke() },
                             onLongClick = onTitleLongClick,
                         ),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Top,
                 ) {
-                    Text(
+                    IconText(
                         text = title,
                         color = textColor,
+                        trailingIcon = if (title.isNotEmpty()) titleTrailingIcon else null,
+                        trailingIconTintColor = textColor,
+                        iconSize = 20.sp,
                     )
                     if (subtitle?.isNotBlank() == true) {
                         Text(
