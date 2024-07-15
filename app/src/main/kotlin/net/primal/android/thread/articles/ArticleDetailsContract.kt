@@ -4,6 +4,7 @@ interface ArticleDetailsContract {
     data class UiState(
         val loading: Boolean = true,
         val error: ArticleDetailsError? = null,
+        val markdown: String? = null,
     ) {
         sealed class ArticleDetailsError {
             data object InvalidNaddr : ArticleDetailsError()

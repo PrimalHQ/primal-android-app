@@ -10,11 +10,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
+import net.primal.android.articles.ArticlesRepository
 import net.primal.android.navigation.naddrOrThrow
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.utils.Naddr
 import net.primal.android.nostr.utils.Nip19TLV
-import net.primal.android.articles.ArticlesRepository
 import net.primal.android.thread.articles.ArticleDetailsContract.UiEvent
 import net.primal.android.thread.articles.ArticleDetailsContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
@@ -56,11 +56,21 @@ class ArticleDetailsViewModel @Inject constructor(
                 setState { copy(error = UiState.ArticleDetailsError.InvalidNaddr) }
             } else {
                 try {
-                    readsRepository.fetchBlogContentAndReplies(
+                    val response = readsRepository.fetchBlogContentAndReplies(
                         userId = activeAccountStore.activeUserId(),
                         authorUserId = naddr.userId,
                         identifier = naddr.identifier,
                     )
+                    val content = response.longFormContents.firstOrNull()?.content
+                    setState { copy(markdown = content) }
+
+//                    if (content != null) {
+//                        val flavour = CommonMarkFlavourDescriptor()
+//                        val parsedTree = MarkdownParser(flavour).buildMarkdownTreeFromString(content)
+//                        val html = HtmlGenerator(content, parsedTree, flavour).generateHtml()
+//                        Timber.e("Loaded content = $content")
+//                        setState { copy(rawContent = html) }
+//                    }
                 } catch (error: WssException) {
                     Timber.w(error)
                 }
