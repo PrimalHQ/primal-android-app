@@ -2,10 +2,10 @@ package net.primal.android.articles
 
 import javax.inject.Inject
 import kotlinx.coroutines.withContext
-import net.primal.android.core.coroutines.CoroutineDispatcherProvider
-import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.articles.api.ArticlesApi
 import net.primal.android.articles.api.model.ArticleDetailsRequestBody
+import net.primal.android.core.coroutines.CoroutineDispatcherProvider
+import net.primal.android.nostr.model.NostrEventKind
 
 class ArticlesRepository @Inject constructor(
     private val dispatchers: CoroutineDispatcherProvider,

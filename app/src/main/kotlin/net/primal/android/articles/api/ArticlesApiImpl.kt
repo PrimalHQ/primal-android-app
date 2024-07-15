@@ -2,6 +2,8 @@ package net.primal.android.articles.api
 
 import javax.inject.Inject
 import kotlinx.serialization.encodeToString
+import net.primal.android.articles.api.model.ArticleDetailsRequestBody
+import net.primal.android.articles.api.model.ArticleDetailsResponse
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.networking.di.PrimalCacheApiClient
@@ -9,8 +11,6 @@ import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.primal.PrimalCacheFilter
 import net.primal.android.networking.primal.PrimalVerb
 import net.primal.android.nostr.model.NostrEventKind
-import net.primal.android.articles.api.model.ArticleDetailsRequestBody
-import net.primal.android.articles.api.model.ArticleDetailsResponse
 
 class ArticlesApiImpl @Inject constructor(
     @PrimalCacheApiClient private val primalApiClient: PrimalApiClient,
