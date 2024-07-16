@@ -4,6 +4,8 @@ import javax.inject.Inject
 import kotlinx.serialization.encodeToString
 import net.primal.android.articles.api.model.ArticleDetailsRequestBody
 import net.primal.android.articles.api.model.ArticleDetailsResponse
+import net.primal.android.articles.api.model.ArticleFeedRequestBody
+import net.primal.android.articles.api.model.ArticleFeedResponse
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.networking.di.PrimalCacheApiClient
@@ -38,6 +40,32 @@ class ArticlesApiImpl @Inject constructor(
             cdnResources = queryResult.filterPrimalEvents(NostrEventKind.PrimalCdnResource),
             primalLinkPreviews = queryResult.filterPrimalEvents(NostrEventKind.PrimalLinkPreview),
             referencedNotes = queryResult.filterPrimalEvents(NostrEventKind.PrimalReferencedEvent),
+            primalRelayHints = queryResult.filterPrimalEvents(NostrEventKind.PrimalRelayHint),
+            primalLongFormWords = queryResult.filterPrimalEvents(NostrEventKind.PrimalLongFormWordsCount),
+        )
+    }
+
+    override suspend fun getArticleFeed(body: ArticleFeedRequestBody): ArticleFeedResponse {
+        val queryResult = primalApiClient.query(
+            message = PrimalCacheFilter(
+                primalVerb = PrimalVerb.BLOG_FEED,
+                optionsJson = NostrJson.encodeToString(body),
+            ),
+        )
+
+        return ArticleFeedResponse(
+            paging = queryResult.findPrimalEvent(NostrEventKind.PrimalPaging).let {
+                NostrJson.decodeFromStringOrNull(it?.content)
+            },
+            metadata = queryResult.filterNostrEvents(NostrEventKind.Metadata),
+            zaps = queryResult.filterNostrEvents(NostrEventKind.Zap),
+            longFormContents = queryResult.filterNostrEvents(NostrEventKind.LongFormContent),
+            referencedEvents = queryResult.filterPrimalEvents(NostrEventKind.PrimalReferencedEvent),
+            primalEventStats = queryResult.filterPrimalEvents(NostrEventKind.PrimalEventStats),
+            primalEventUserStats = queryResult.filterPrimalEvents(NostrEventKind.PrimalEventUserStats),
+            primalUserScores = queryResult.filterPrimalEvents(NostrEventKind.PrimalUserScores),
+            cdnResources = queryResult.filterPrimalEvents(NostrEventKind.PrimalCdnResource),
+            primalLinkPreviews = queryResult.filterPrimalEvents(NostrEventKind.PrimalLinkPreview),
             primalRelayHints = queryResult.filterPrimalEvents(NostrEventKind.PrimalRelayHint),
             primalLongFormWords = queryResult.filterPrimalEvents(NostrEventKind.PrimalLongFormWordsCount),
         )
