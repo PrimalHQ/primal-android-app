@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
+import net.primal.android.articles.ArticlesRepository
 import net.primal.android.articles.feed.ArticleFeedScreenContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.subscriptions.SubscriptionsManager
@@ -17,6 +18,7 @@ import net.primal.android.wallet.zaps.hasWallet
 class ArticleFeedViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val subscriptionsManager: SubscriptionsManager,
+    private val articlesRepository: ArticlesRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(UiState())
