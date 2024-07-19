@@ -3,11 +3,12 @@ package net.primal.android.nostr.ext
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.nostr.model.NostrEvent
-import net.primal.android.note.db.NoteZapData
+import net.primal.android.note.db.EventZap
+import net.primal.android.profile.db.ProfileData
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toBtc
 import net.primal.android.wallet.utils.LnInvoiceUtils
 
-fun List<NostrEvent>.mapAsNoteZapDO() =
+fun List<NostrEvent>.mapAsEventZapDO(profilesMap: Map<String, ProfileData>) =
     mapNotNull { zapReceipt ->
         val zapRequest = zapReceipt.extractZapRequestOrNull()
 
@@ -25,10 +26,16 @@ fun List<NostrEvent>.mapAsNoteZapDO() =
             ?.let(LnInvoiceUtils::getAmountInSats)
             ?: return@mapNotNull null
 
-        NoteZapData(
+        val profile = profilesMap[senderId]
+
+        EventZap(
+            eventId = noteId,
             zapSenderId = senderId,
+            zapSenderDisplayName = profile?.displayName,
+            zapSenderHandle = profile?.handle,
+            zapSenderInternetIdentifier = profile?.internetIdentifier,
+            zapSenderAvatarCdnImage = profile?.avatarCdnImage,
             zapReceiverId = receiverId,
-            noteId = noteId,
             zapRequestAt = zapRequest.createdAt,
             zapReceiptAt = zapReceipt.createdAt,
             amountInBtc = amountInSats.toBtc(),

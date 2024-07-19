@@ -4,9 +4,9 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class NoteZapsRequestBody(
-    @SerialName("event_id") val noteId: String,
-    @SerialName("user_pubkey") val userId: String,
+data class EventActionsRequestBody(
+    @SerialName("event_id") val eventId: String,
+    @SerialName("kind") val kind: Int,
     @SerialName("limit") val limit: Int,
     @SerialName("offset") val offset: Int = 0,
 )

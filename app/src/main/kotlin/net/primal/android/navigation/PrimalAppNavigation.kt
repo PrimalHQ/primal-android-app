@@ -29,8 +29,8 @@ import com.google.accompanist.navigation.material.rememberBottomSheetNavigator
 import java.net.URLEncoder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import net.primal.android.articles.feed.ArticleFeedScreen
 import net.primal.android.articles.feed.ArticleFeedViewModel
+import net.primal.android.articles.feed.ui.ArticleFeedScreen
 import net.primal.android.attachments.gallery.MediaGalleryScreen
 import net.primal.android.attachments.gallery.MediaGalleryViewModel
 import net.primal.android.auth.login.LoginScreen
@@ -671,6 +671,7 @@ private fun NavGraphBuilder.articleFeed(
         onDrawerScreenClick = onDrawerScreenClick,
         onDrawerQrCodeClick = { navController.navigateToProfileQrCodeViewer() },
         onSearchClick = { navController.navigateToSearch() },
+        onArticleClick = { naddr -> navController.navigateToArticleDetails(naddr) },
     )
 }
 

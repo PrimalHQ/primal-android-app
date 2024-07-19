@@ -15,7 +15,7 @@ import java.time.Instant
 import java.time.temporal.ChronoUnit
 import kotlin.time.Duration.Companion.minutes
 import net.primal.android.attachments.domain.CdnImage
-import net.primal.android.core.compose.feed.model.FeedPostStatsUi
+import net.primal.android.core.compose.feed.model.EventStatsUi
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.feed.model.toNoteContentUi
 import net.primal.android.core.compose.feed.note.events.InvoicePayClickEvent
@@ -102,7 +102,7 @@ fun PreviewReferencedPostListItemLight() {
                 authorAvatarCdnImage = CdnImage("https://i.imgur.com/Z8dpmvc.png"),
                 timestamp = Instant.now().minus(30.minutes.inWholeMinutes, ChronoUnit.MINUTES),
                 nostrUris = emptyList(),
-                stats = FeedPostStatsUi(
+                stats = EventStatsUi(
                     repliesCount = 11,
                     likesCount = 256,
                     userLiked = true,
@@ -145,7 +145,7 @@ fun PreviewReferencedPostListItemDark() {
                 authorAvatarCdnImage = CdnImage("https://i.imgur.com/Z8dpmvc.png"),
                 timestamp = Instant.now().minus(30.minutes.inWholeMinutes, ChronoUnit.MINUTES),
                 nostrUris = emptyList(),
-                stats = FeedPostStatsUi(
+                stats = EventStatsUi(
                     repliesCount = 11,
                     userReplied = true,
                     likesCount = 256,

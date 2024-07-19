@@ -65,7 +65,7 @@ import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalSwitch
 import net.primal.android.core.compose.PrimalTopAppBar
-import net.primal.android.core.compose.feed.model.FeedPostStatsUi
+import net.primal.android.core.compose.feed.model.EventStatsUi
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.feed.note.FeedNoteCard
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -510,7 +510,7 @@ private val NotePreviewTemplate = FeedPostUi(
     content = "Welcome to #Nostr! A magical place where you can speak " +
         "freely and truly own your account, content, and followers. ✨",
     hashtags = listOf("#Nostr"),
-    stats = FeedPostStatsUi(
+    stats = EventStatsUi(
         repliesCount = 21,
         satsZapped = 441,
         userZapped = true,

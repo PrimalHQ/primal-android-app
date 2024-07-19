@@ -2,6 +2,7 @@ package net.primal.android.nostr.utils
 
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import net.primal.android.crypto.Bech32
 import net.primal.android.crypto.bechToBytesOrThrow
 import net.primal.android.crypto.toHex
 
@@ -63,5 +64,55 @@ object Nip19TLV {
         } else {
             null
         }
+    }
+
+    fun Naddr.toNaddrString(): String {
+        val tlv = mutableListOf<Byte>()
+
+        // Add SPECIAL type
+        val identifierBytes = this.identifier.toByteArray(Charsets.US_ASCII)
+        tlv.add(Type.SPECIAL.id)
+        tlv.add(identifierBytes.size.toByte())
+        tlv.addAll(identifierBytes.toList())
+
+        // Add RELAY type if not empty
+        if (this.relays.isNotEmpty()) {
+            val relaysBytes = this.relays.joinToString(",").toByteArray(Charsets.US_ASCII)
+            tlv.add(Type.RELAY.id)
+            tlv.add(relaysBytes.size.toByte())
+            tlv.addAll(relaysBytes.toList())
+        }
+
+        // Add AUTHOR type
+        val authorBytes = this.userId.hexToBytes()
+        tlv.add(Type.AUTHOR.id)
+        tlv.add(authorBytes.size.toByte())
+        tlv.addAll(authorBytes.toList())
+
+        // Add KIND type
+        val kindBytes = ByteBuffer.allocate(4).order(ByteOrder.BIG_ENDIAN).putInt(this.kind).array()
+        tlv.add(Type.KIND.id)
+        tlv.add(kindBytes.size.toByte())
+        tlv.addAll(kindBytes.toList())
+
+        return Bech32.encodeBytes(
+            hrp = "naddr",
+            data = tlv.toByteArray(),
+            encoding = Bech32.Encoding.Bech32,
+        )
+    }
+
+    @Suppress("MagicNumber")
+    private fun String.hexToBytes(): ByteArray {
+        val cleanedInput = this.replace(Regex("[^0-9A-Fa-f]"), "")
+        val len = cleanedInput.length
+        val data = ByteArray(len / 2)
+        for (i in 0 until len step 2) {
+            data[i / 2] = (
+                (Character.digit(cleanedInput[i], 16) shl 4) +
+                    Character.digit(cleanedInput[i + 1], 16)
+                ).toByte()
+        }
+        return data
     }
 }

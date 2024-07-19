@@ -84,8 +84,8 @@ import net.primal.android.core.compose.ReplyingToText
 import net.primal.android.core.compose.TakePhotoIconButton
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.feed.RepostOrQuoteBottomSheet
+import net.primal.android.core.compose.feed.model.EventStatsUi
 import net.primal.android.core.compose.feed.model.FeedPostAction
-import net.primal.android.core.compose.feed.model.FeedPostStatsUi
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.feed.note.ConfirmFirstBookmarkAlertDialog
 import net.primal.android.core.compose.feed.note.FeedNoteCard
@@ -107,7 +107,7 @@ import net.primal.android.editor.di.noteEditorViewModel
 import net.primal.android.editor.domain.NoteEditorArgs
 import net.primal.android.editor.ui.NoteOutlinedTextField
 import net.primal.android.editor.ui.NoteTagUserLazyColumn
-import net.primal.android.note.ui.NoteZapUiModel
+import net.primal.android.note.ui.EventZapUiModel
 import net.primal.android.profile.report.OnReportContentClick
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
@@ -606,8 +606,8 @@ const val MaxOtherZaps = 4
 
 @Composable
 private fun TopZapsSection(
-    topZap: NoteZapUiModel?,
-    otherZaps: List<NoteZapUiModel>,
+    topZap: EventZapUiModel?,
+    otherZaps: List<EventZapUiModel>,
     onClick: () -> Unit,
 ) {
     Column(
@@ -662,7 +662,7 @@ private fun TopZapsSection(
 
 @Composable
 private fun NoteZapListItem(
-    noteZap: NoteZapUiModel,
+    noteZap: EventZapUiModel,
     showMessage: Boolean = false,
     onClick: () -> Unit,
 ) {
@@ -963,7 +963,7 @@ fun ThreadScreenPreview() {
                         attachments = emptyList(),
                         nostrUris = emptyList(),
                         timestamp = Instant.now().minusSeconds(3600.seconds.inWholeSeconds),
-                        stats = FeedPostStatsUi(),
+                        stats = EventStatsUi(),
                         hashtags = listOf("#nostr"),
                         rawNostrEventJson = "raaaw",
                         replyToAuthorHandle = "alex",
@@ -980,7 +980,7 @@ fun ThreadScreenPreview() {
                         attachments = emptyList(),
                         nostrUris = emptyList(),
                         timestamp = Instant.now(),
-                        stats = FeedPostStatsUi(),
+                        stats = EventStatsUi(),
                         hashtags = listOf("#nostr"),
                         rawNostrEventJson = "raaaw",
                         replyToAuthorHandle = "alex",

@@ -2,7 +2,7 @@ package net.primal.android.thread.notes
 
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.feed.model.ZappingState
-import net.primal.android.note.ui.NoteZapUiModel
+import net.primal.android.note.ui.EventZapUiModel
 import net.primal.android.profile.report.ReportType
 
 interface ThreadContract {
@@ -15,8 +15,8 @@ interface ThreadContract {
         val zappingState: ZappingState = ZappingState(),
         val fetching: Boolean = false,
         val confirmBookmarkingNoteId: String? = null,
-        val topZap: NoteZapUiModel? = null,
-        val otherZaps: List<NoteZapUiModel> = emptyList(),
+        val topZap: EventZapUiModel? = null,
+        val otherZaps: List<EventZapUiModel> = emptyList(),
         val error: ThreadError? = null,
     ) {
         sealed class ThreadError {
