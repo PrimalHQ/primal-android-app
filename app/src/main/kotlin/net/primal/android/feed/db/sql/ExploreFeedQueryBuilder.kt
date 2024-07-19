@@ -23,28 +23,28 @@ class ExploreFeedQueryBuilder(
                 PostData.hashtags,
                 NULL AS repostId,
                 NULL AS repostAuthorId,
-                NoteUserStats.liked AS userLiked,
-                NoteUserStats.replied AS userReplied,
-                NoteUserStats.reposted AS userReposted,
-                NoteUserStats.zapped AS userZapped,
+                EventUserStats.liked AS userLiked,
+                EventUserStats.replied AS userReplied,
+                EventUserStats.reposted AS userReposted,
+                EventUserStats.zapped AS userZapped,
                 NULL AS feedCreatedAt,
                 CASE WHEN MutedUserData.userId IS NOT NULL THEN 1 ELSE 0 END AS isMuted,
                 PostData.replyToPostId,
                 PostData.replyToAuthorId
             FROM PostData
             INNER JOIN FeedPostDataCrossRef ON FeedPostDataCrossRef.eventId = PostData.postId
-            INNER JOIN NoteStats ON PostData.postId = NoteStats.postId
-            LEFT JOIN NoteUserStats ON NoteUserStats.postId = PostData.postId AND NoteUserStats.userId = ?
+            INNER JOIN EventStats ON PostData.postId = EventStats.eventId
+            LEFT JOIN EventUserStats ON EventUserStats.eventId = PostData.postId AND EventUserStats.userId = ?
             LEFT JOIN MutedUserData ON MutedUserData.userId = PostData.authorId
             WHERE FeedPostDataCrossRef.feedDirective = ? AND isMuted = 0
         """
     }
 
     private val orderByClause = when {
-        feedDirective.isExplorePopularFeed() -> "ORDER BY NoteStats.score"
-        feedDirective.isExploreTrendingFeed() -> "ORDER BY NoteStats.score24h"
-        feedDirective.isExploreMostZapped4hFeed() -> "ORDER BY NoteStats.satsZapped"
-        feedDirective.isExploreMostZappedFeed() -> "ORDER BY NoteStats.satsZapped"
+        feedDirective.isExplorePopularFeed() -> "ORDER BY EventStats.score"
+        feedDirective.isExploreTrendingFeed() -> "ORDER BY EventStats.score24h"
+        feedDirective.isExploreMostZapped4hFeed() -> "ORDER BY EventStats.satsZapped"
+        feedDirective.isExploreMostZappedFeed() -> "ORDER BY EventStats.satsZapped"
         else -> "ORDER BY PostData.createdAt"
     }
 

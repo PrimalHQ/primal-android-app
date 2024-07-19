@@ -38,8 +38,8 @@ import net.primal.android.core.compose.AvatarThumbnailsRow
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.WrappedContentWithSuffix
 import net.primal.android.core.compose.asBeforeNowFormat
+import net.primal.android.core.compose.feed.model.EventStatsUi
 import net.primal.android.core.compose.feed.model.FeedPostAction
-import net.primal.android.core.compose.feed.model.FeedPostStatsUi
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.feed.model.toNoteContentUi
 import net.primal.android.core.compose.feed.note.FeedNoteStatsRow
@@ -243,7 +243,7 @@ private fun NotificationContent(
                     .fillMaxWidth()
                     .padding(vertical = 16.dp)
                     .padding(end = 16.dp),
-                postStats = actionPost.stats,
+                eventStats = actionPost.stats,
                 onPostAction = onPostAction,
                 onPostLongPressAction = onPostLongPressAction,
             )
@@ -564,7 +564,7 @@ private val PreviewExamplePost = FeedPostUi(
     hashtags = listOf("#Nostr"),
     postId = "",
     rawNostrEventJson = "",
-    stats = FeedPostStatsUi(),
+    stats = EventStatsUi(),
     timestamp = Instant.now(),
 )
 

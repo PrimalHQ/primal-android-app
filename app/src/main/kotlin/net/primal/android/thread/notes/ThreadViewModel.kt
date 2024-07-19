@@ -25,7 +25,7 @@ import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.note.repository.NoteRepository
-import net.primal.android.note.ui.asNoteZapUiModel
+import net.primal.android.note.ui.asEventZapUiModel
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.settings.muted.repository.MutedUserRepository
 import net.primal.android.thread.notes.ThreadContract.UiEvent
@@ -93,11 +93,11 @@ class ThreadViewModel @Inject constructor(
 
     private fun observeTopZappers() =
         viewModelScope.launch {
-            noteRepository.observeTopZappers(postId = highlightPostId).collect {
+            noteRepository.observeTopZappers(eventId = highlightPostId).collect {
                 setState {
                     copy(
-                        topZap = it.firstOrNull()?.asNoteZapUiModel() ?: this.topZap,
-                        otherZaps = it.drop(n = 1).map { it.asNoteZapUiModel() },
+                        topZap = it.firstOrNull()?.asEventZapUiModel() ?: this.topZap,
+                        otherZaps = it.drop(n = 1).map { it.asEventZapUiModel() },
                     )
                 }
             }
@@ -177,7 +177,7 @@ class ThreadViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 withContext(dispatcherProvider.io()) {
-                    noteRepository.fetchTopNoteZaps(noteId = highlightPostId)
+                    noteRepository.fetchTopNoteZaps(eventId = highlightPostId)
                 }
             } catch (error: WssException) {
                 Timber.w(error)

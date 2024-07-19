@@ -5,16 +5,16 @@ import androidx.room.Index
 
 @Entity(
     primaryKeys = [
-        "postId",
+        "eventId",
         "userId",
     ],
     indices = [
-        Index(value = ["postId"]),
+        Index(value = ["eventId"]),
         Index(value = ["userId"]),
     ],
 )
-data class NoteUserStats(
-    val postId: String,
+data class EventUserStats(
+    val eventId: String,
     val userId: String,
     val replied: Boolean = false,
     val liked: Boolean = false,

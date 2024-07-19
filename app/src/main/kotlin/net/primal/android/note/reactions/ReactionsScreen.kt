@@ -33,7 +33,7 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.FeedZaps
 import net.primal.android.core.utils.shortened
-import net.primal.android.note.ui.NoteZapUiModel
+import net.primal.android.note.ui.EventZapUiModel
 import net.primal.android.theme.AppTheme
 
 @Composable
@@ -96,7 +96,7 @@ private fun ReactionsScreen(
 }
 
 @Composable
-private fun NoteZapListItem(data: NoteZapUiModel, onProfileClick: (profileId: String) -> Unit) {
+private fun NoteZapListItem(data: EventZapUiModel, onProfileClick: (profileId: String) -> Unit) {
     Column {
         ListItem(
             modifier = Modifier.clickable { onProfileClick(data.zapperId) },

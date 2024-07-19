@@ -4,11 +4,11 @@ import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.nostr.model.primal.PrimalEvent
 import net.primal.android.nostr.model.primal.content.ContentPrimalEventStats
-import net.primal.android.note.db.NoteStats
+import net.primal.android.note.db.EventStats
 
-fun ContentPrimalEventStats.asNoteStatsPO() =
-    NoteStats(
-        postId = this.eventId,
+fun ContentPrimalEventStats.asEventStatsPO() =
+    EventStats(
+        eventId = this.eventId,
         likes = this.likes,
         replies = this.replies,
         mentions = this.mentions,
@@ -19,6 +19,6 @@ fun ContentPrimalEventStats.asNoteStatsPO() =
         score24h = this.score24h,
     )
 
-fun List<PrimalEvent>.mapNotNullAsNoteStatsPO() =
+fun List<PrimalEvent>.mapNotNullAsEventStatsPO() =
     this.mapNotNull { NostrJson.decodeFromStringOrNull<ContentPrimalEventStats>(it.content) }
-        .map { it.asNoteStatsPO() }
+        .map { it.asEventStatsPO() }

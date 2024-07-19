@@ -18,4 +18,6 @@ fun systemShareText(context: Context, text: String) {
 
 fun resolvePrimalNoteLink(noteId: String) = "https://primal.net/e/${noteId.hexToNoteHrp()}"
 
+fun resolvePrimalArticleLink(naddr: String) = "https://primal.net/e/$naddr"
+
 fun resolvePrimalProfileLink(profileId: String) = "https://primal.net/p/${profileId.hexToNpubHrp()}"

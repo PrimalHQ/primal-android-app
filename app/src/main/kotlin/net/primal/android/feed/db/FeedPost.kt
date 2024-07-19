@@ -5,7 +5,7 @@ import androidx.room.Relation
 import net.primal.android.attachments.db.NoteAttachment
 import net.primal.android.attachments.db.NoteNostrUri
 import net.primal.android.nostr.db.EventHints
-import net.primal.android.note.db.NoteStats
+import net.primal.android.note.db.EventStats
 import net.primal.android.profile.db.ProfileData
 
 data class FeedPost(
@@ -32,10 +32,10 @@ data class FeedPost(
     val author: ProfileData? = null,
 
     @Relation(
-        entityColumn = "postId",
+        entityColumn = "eventId",
         parentColumn = "postId",
     )
-    val noteStats: NoteStats? = null,
+    val eventStats: EventStats? = null,
 
     @Embedded
     val userStats: FeedPostUserStats? = null,

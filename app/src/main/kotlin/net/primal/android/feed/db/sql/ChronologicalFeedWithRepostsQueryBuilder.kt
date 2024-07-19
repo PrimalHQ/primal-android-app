@@ -19,17 +19,17 @@ class ChronologicalFeedWithRepostsQueryBuilder(
                 PostData.hashtags,
                 NULL AS repostId,
                 NULL AS repostAuthorId,
-                NoteUserStats.liked AS userLiked,
-                NoteUserStats.replied AS userReplied,
-                NoteUserStats.reposted AS userReposted,
-                NoteUserStats.zapped AS userZapped,
+                EventUserStats.liked AS userLiked,
+                EventUserStats.replied AS userReplied,
+                EventUserStats.reposted AS userReposted,
+                EventUserStats.zapped AS userZapped,
                 PostData.createdAt AS feedCreatedAt,
                 CASE WHEN MutedUserData.userId IS NOT NULL THEN 1 ELSE 0 END AS isMuted,
                 PostData.replyToPostId,
                 PostData.replyToAuthorId
             FROM PostData
             JOIN FeedPostDataCrossRef ON FeedPostDataCrossRef.eventId = PostData.postId
-            LEFT JOIN NoteUserStats ON NoteUserStats.postId = PostData.postId AND NoteUserStats.userId = ?
+            LEFT JOIN EventUserStats ON EventUserStats.eventId = PostData.postId AND EventUserStats.userId = ?
             LEFT JOIN MutedUserData ON MutedUserData.userId = PostData.authorId
             WHERE FeedPostDataCrossRef.feedDirective = ? AND isMuted = 0
 
@@ -45,10 +45,10 @@ class ChronologicalFeedWithRepostsQueryBuilder(
                 PostData.hashtags,
                 RepostData.repostId AS repostId,
                 RepostData.authorId AS repostAuthorId,
-                NoteUserStats.liked AS userLiked,
-                NoteUserStats.replied AS userReplied,
-                NoteUserStats.reposted AS userReposted,
-                NoteUserStats.zapped AS userZapped,
+                EventUserStats.liked AS userLiked,
+                EventUserStats.replied AS userReplied,
+                EventUserStats.reposted AS userReposted,
+                EventUserStats.zapped AS userZapped,
                 RepostData.createdAt AS feedCreatedAt,
                 CASE WHEN MutedUserData.userId IS NOT NULL THEN 1 ELSE 0 END AS isMuted,
                 PostData.replyToPostId,
@@ -56,7 +56,7 @@ class ChronologicalFeedWithRepostsQueryBuilder(
             FROM RepostData
             JOIN PostData ON RepostData.postId = PostData.postId
             JOIN FeedPostDataCrossRef ON FeedPostDataCrossRef.eventId = RepostData.repostId
-            LEFT JOIN NoteUserStats ON NoteUserStats.postId = PostData.postId AND NoteUserStats.userId = ?
+            LEFT JOIN EventUserStats ON EventUserStats.eventId = PostData.postId AND EventUserStats.userId = ?
             LEFT JOIN MutedUserData ON MutedUserData.userId = PostData.authorId
             WHERE FeedPostDataCrossRef.feedDirective = ? AND isMuted = 0
         """

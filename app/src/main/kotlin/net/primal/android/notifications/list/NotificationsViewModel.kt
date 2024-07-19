@@ -19,7 +19,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.core.compose.attachment.model.asNoteAttachmentUi
-import net.primal.android.core.compose.feed.model.FeedPostStatsUi
+import net.primal.android.core.compose.feed.model.EventStatsUi
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.feed.model.asNoteNostrUriUi
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
@@ -276,8 +276,8 @@ class NotificationsViewModel @Inject constructor(
             content = this.actionPost.content,
             attachments = this.actionPostNoteAttachments.map { it.asNoteAttachmentUi() },
             nostrUris = this.actionPostNostrUris.map { it.asNoteNostrUriUi() },
-            stats = FeedPostStatsUi.from(
-                noteStats = this.actionNoteStats,
+            stats = EventStatsUi.from(
+                eventStats = this.actionEventStats,
                 userStats = this.actionPostUserStats,
             ),
             hashtags = this.actionPost.hashtags,

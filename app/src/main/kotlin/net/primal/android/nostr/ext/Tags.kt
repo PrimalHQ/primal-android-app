@@ -34,6 +34,16 @@ fun List<JsonArray>.findFirstBolt11(): String? {
     return zapRequestTag?.getTagValueOrNull()
 }
 
+fun List<JsonArray>.findFirstTitle() = firstOrNull { it.isTitleTag() }?.getTagValueOrNull()
+
+fun List<JsonArray>.findFirstSummary() = firstOrNull { it.isSummaryTag() }?.getTagValueOrNull()
+
+fun List<JsonArray>.findFirstImage() = firstOrNull { it.isImageTag() }?.getTagValueOrNull()
+
+fun List<JsonArray>.findFirstPublishedAt() = firstOrNull { it.isPublishedAtTag() }?.getTagValueOrNull()
+
+fun List<JsonArray>.findFirstIdentifier() = firstOrNull { it.isIdentifierTag() }?.getTagValueOrNull()
+
 fun JsonArray.isBolt11Tag() = getOrNull(0)?.jsonPrimitive?.content == "bolt11"
 
 fun JsonArray.isDescriptionTag() = getOrNull(0)?.jsonPrimitive?.content == "description"
@@ -45,6 +55,16 @@ fun JsonArray.isEventIdTag() = getOrNull(0)?.jsonPrimitive?.content == "e"
 fun JsonArray.isPubKeyTag() = getOrNull(0)?.jsonPrimitive?.content == "p"
 
 fun JsonArray.isHashtagTag() = getOrNull(0)?.jsonPrimitive?.content == "t"
+
+fun JsonArray.isIdentifierTag() = getOrNull(0)?.jsonPrimitive?.content == "d"
+
+fun JsonArray.isTitleTag() = getOrNull(0)?.jsonPrimitive?.content == "title"
+
+fun JsonArray.isSummaryTag() = getOrNull(0)?.jsonPrimitive?.content == "summary"
+
+fun JsonArray.isImageTag() = getOrNull(0)?.jsonPrimitive?.content == "image"
+
+fun JsonArray.isPublishedAtTag() = getOrNull(0)?.jsonPrimitive?.content == "published_at"
 
 fun JsonArray.getTagValueOrNull() = getOrNull(1)?.jsonPrimitive?.content
 

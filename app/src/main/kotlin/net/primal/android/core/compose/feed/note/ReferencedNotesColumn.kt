@@ -9,7 +9,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import java.time.Instant
 import net.primal.android.core.compose.attachment.model.asNoteAttachmentUi
-import net.primal.android.core.compose.feed.model.FeedPostStatsUi
+import net.primal.android.core.compose.feed.model.EventStatsUi
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.feed.model.NoteNostrUriUi
 import net.primal.android.core.compose.feed.model.asNoteNostrUriUi
@@ -54,7 +54,7 @@ fun ReferencedNotesColumn(
                     nostrUris = data.nostrUris.map { it.asNoteNostrUriUi() },
                     timestamp = Instant.ofEpochSecond(data.createdAt),
                     content = data.content,
-                    stats = FeedPostStatsUi(),
+                    stats = EventStatsUi(),
                     hashtags = data.content.parseHashtags(),
                     rawNostrEventJson = "",
                     replyToAuthorHandle = null,
