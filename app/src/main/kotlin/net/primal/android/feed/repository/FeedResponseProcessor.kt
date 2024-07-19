@@ -13,8 +13,8 @@ import net.primal.android.nostr.ext.flatMapNotNullAsVideoThumbnailsMap
 import net.primal.android.nostr.ext.flatMapPostsAsNoteNostrUriPO
 import net.primal.android.nostr.ext.mapAsPostDataPO
 import net.primal.android.nostr.ext.mapAsProfileDataPO
-import net.primal.android.nostr.ext.mapNotNullAsNoteStatsPO
-import net.primal.android.nostr.ext.mapNotNullAsNoteUserStatsPO
+import net.primal.android.nostr.ext.mapNotNullAsEventStatsPO
+import net.primal.android.nostr.ext.mapNotNullAsEventUserStatsPO
 import net.primal.android.nostr.ext.mapNotNullAsPostDataPO
 import net.primal.android.nostr.ext.mapNotNullAsRepostDataPO
 
@@ -50,8 +50,8 @@ suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String, database
     )
 
     val reposts = reposts.mapNotNullAsRepostDataPO()
-    val postStats = primalEventStats.mapNotNullAsNoteStatsPO()
-    val userPostStats = primalEventUserStats.mapNotNullAsNoteUserStatsPO(userId = userId)
+    val postStats = primalEventStats.mapNotNullAsEventStatsPO()
+    val userPostStats = primalEventUserStats.mapNotNullAsEventUserStatsPO(userId = userId)
 
     database.withTransaction {
         database.profiles().upsertAll(data = profiles)
@@ -59,8 +59,8 @@ suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String, database
         database.attachments().upsertAllNoteAttachments(data = noteAttachments)
         database.attachments().upsertAllNostrUris(data = noteNostrUris)
         database.reposts().upsertAll(data = reposts)
-        database.postStats().upsertAll(data = postStats)
-        database.postUserStats().upsertAll(data = userPostStats)
+        database.eventStats().upsertAll(data = postStats)
+        database.eventUserStats().upsertAll(data = userPostStats)
 
         val eventHintsDao = database.eventHints()
         val hintsMap = eventHints.associateBy { it.eventId }

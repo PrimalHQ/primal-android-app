@@ -7,23 +7,29 @@ import androidx.paging.RemoteMediator
 import kotlinx.coroutines.withContext
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.db.PrimalDatabase
-import net.primal.android.note.api.NoteApi
-import net.primal.android.note.api.model.NoteZapsRequestBody
-import net.primal.android.note.db.NoteZap
+import net.primal.android.note.api.EventStatsApi
+import net.primal.android.note.api.model.EventZapsRequestBody
+import net.primal.android.note.db.EventZap
 import net.primal.android.note.repository.persistToDatabaseAsTransaction
 
 @ExperimentalPagingApi
-class NoteZapsMediator(
-    private val noteId: String,
+class EventZapsMediator(
+    private val eventId: String,
     private val userId: String,
     private val dispatcherProvider: CoroutineDispatcherProvider,
-    private val noteApi: NoteApi,
+    private val eventStatsApi: EventStatsApi,
     private val database: PrimalDatabase,
-) : RemoteMediator<Int, NoteZap>() {
+) : RemoteMediator<Int, EventZap>() {
 
-    override suspend fun load(loadType: LoadType, state: PagingState<Int, NoteZap>): MediatorResult {
+    override suspend fun load(loadType: LoadType, state: PagingState<Int, EventZap>): MediatorResult {
         withContext(dispatcherProvider.io()) {
-            val response = noteApi.getNoteZaps(NoteZapsRequestBody(noteId = noteId, userId = userId, limit = 100))
+            val response = eventStatsApi.getEventZaps(
+                EventZapsRequestBody(
+                    eventId = eventId,
+                    userId = userId,
+                    limit = 100,
+                ),
+            )
             response.persistToDatabaseAsTransaction(database)
         }
         return MediatorResult.Success(endOfPaginationReached = true)

@@ -4,9 +4,9 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity
-data class NoteStats(
+data class EventStats(
     @PrimaryKey
-    val postId: String,
+    val eventId: String,
     val likes: Long = 0,
     val replies: Long = 0,
     val mentions: Long = 0,

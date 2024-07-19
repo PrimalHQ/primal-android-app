@@ -25,10 +25,10 @@ import net.primal.android.nostr.ext.parseEventTags
 import net.primal.android.nostr.ext.parseHashtagTags
 import net.primal.android.nostr.ext.parsePubkeyTags
 import net.primal.android.nostr.publish.NostrPublisher
-import net.primal.android.note.api.NoteApi
-import net.primal.android.note.api.model.NoteZapsRequestBody
-import net.primal.android.note.db.NoteZap
-import net.primal.android.note.reactions.mediator.NoteZapsMediator
+import net.primal.android.note.api.EventStatsApi
+import net.primal.android.note.api.model.EventZapsRequestBody
+import net.primal.android.note.db.EventZap
+import net.primal.android.note.reactions.mediator.EventZapsMediator
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.domain.PublicBookmark
@@ -39,17 +39,17 @@ class NoteRepository @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val nostrPublisher: NostrPublisher,
     private val profileRepository: ProfileRepository,
-    private val noteApi: NoteApi,
+    private val eventStatsApi: EventStatsApi,
     private val database: PrimalDatabase,
 ) {
 
     @Throws(NostrPublishException::class)
     suspend fun likePost(postId: String, postAuthorId: String) {
         val userId = activeAccountStore.activeUserId()
-        val statsUpdater = NoteStatsUpdater(
-            postId = postId,
+        val statsUpdater = EventStatsUpdater(
+            eventId = postId,
             userId = userId,
-            postAuthorId = postAuthorId,
+            eventAuthorId = postAuthorId,
             database = database,
         )
 
@@ -70,10 +70,10 @@ class NoteRepository @Inject constructor(
         postRawNostrEvent: String,
     ) {
         val userId = activeAccountStore.activeUserId()
-        val statsUpdater = NoteStatsUpdater(
-            postId = postId,
+        val statsUpdater = EventStatsUpdater(
+            eventId = postId,
             userId = userId,
-            postAuthorId = postAuthorId,
+            eventAuthorId = postAuthorId,
             database = database,
         )
 
@@ -202,24 +202,24 @@ class NoteRepository @Inject constructor(
         }
     }
 
-    fun observeTopZappers(postId: String) = database.noteZaps().observeTopZaps(noteId = postId)
+    fun observeTopZappers(eventId: String) = database.eventZaps().observeTopZaps(noteId = eventId)
 
-    suspend fun fetchTopNoteZaps(noteId: String) {
+    suspend fun fetchTopNoteZaps(eventId: String) {
         val userId = activeAccountStore.activeUserId()
-        val response = noteApi.getNoteZaps(NoteZapsRequestBody(noteId = noteId, userId = userId, limit = 15))
+        val response = eventStatsApi.getEventZaps(EventZapsRequestBody(eventId = eventId, userId = userId, limit = 15))
         withContext(dispatcherProvider.io()) {
             response.persistToDatabaseAsTransaction(database = database)
         }
     }
 
-    fun pagedNoteZaps(noteId: String): Flow<PagingData<NoteZap>> {
-        return createPager(noteId = noteId) {
-            database.noteZaps().pagedNoteZaps(noteId = noteId)
+    fun pagedEventZaps(eventId: String): Flow<PagingData<EventZap>> {
+        return createPager(eventId = eventId) {
+            database.eventZaps().pagedNoteZaps(noteId = eventId)
         }.flow
     }
 
     @OptIn(ExperimentalPagingApi::class)
-    private fun createPager(noteId: String, pagingSourceFactory: () -> PagingSource<Int, NoteZap>) =
+    private fun createPager(eventId: String, pagingSourceFactory: () -> PagingSource<Int, EventZap>) =
         Pager(
             config = PagingConfig(
                 pageSize = 50,
@@ -227,11 +227,11 @@ class NoteRepository @Inject constructor(
                 initialLoadSize = 150,
                 enablePlaceholders = true,
             ),
-            remoteMediator = NoteZapsMediator(
-                noteId = noteId,
+            remoteMediator = EventZapsMediator(
+                eventId = eventId,
                 userId = activeAccountStore.activeUserId(),
                 dispatcherProvider = dispatcherProvider,
-                noteApi = noteApi,
+                eventStatsApi = eventStatsApi,
                 database = database,
             ),
             pagingSourceFactory = pagingSourceFactory,

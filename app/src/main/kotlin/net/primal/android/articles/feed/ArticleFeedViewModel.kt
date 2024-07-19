@@ -2,14 +2,18 @@ package net.primal.android.articles.feed
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.cachedIn
+import androidx.paging.map
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import net.primal.android.articles.ArticlesRepository
 import net.primal.android.articles.feed.ArticleFeedScreenContract.UiState
+import net.primal.android.articles.feed.ui.mapAsFeedArticleUi
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.subscriptions.SubscriptionsManager
 import net.primal.android.wallet.zaps.hasWallet
@@ -21,7 +25,12 @@ class ArticleFeedViewModel @Inject constructor(
     private val articlesRepository: ArticlesRepository,
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(UiState())
+    private fun buildFeedByDirective() =
+        articlesRepository.defaultFeed()
+            .map { it.map { article -> article.mapAsFeedArticleUi() } }
+            .cachedIn(viewModelScope)
+
+    private val _state = MutableStateFlow(UiState(articles = buildFeedByDirective()))
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
 

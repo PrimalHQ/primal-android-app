@@ -1,5 +1,6 @@
 package net.primal.android.thread.articles
 
+import android.content.Context
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
@@ -85,40 +86,8 @@ private fun ArticleDetailsScreen(
     SnackbarErrorHandler(
         error = state.error,
         snackbarHostState = snackbarHostState,
-        errorMessageResolver = {
-            when (it) {
-                ArticleDetailsError.InvalidNaddr -> context.getString(
-                    R.string.long_form_thread_invalid_naddr,
-                )
-
-                is ArticleDetailsError.InvalidZapRequest -> context.getString(
-                    R.string.post_action_invalid_zap_request,
-                )
-
-                is ArticleDetailsError.MissingLightningAddress -> context.getString(
-                    R.string.post_action_missing_lightning_address,
-                )
-
-                is ArticleDetailsError.FailedToPublishZapEvent -> context.getString(
-                    R.string.post_action_zap_failed,
-                )
-
-                is ArticleDetailsError.FailedToPublishLikeEvent -> context.getString(
-                    R.string.post_action_like_failed,
-                )
-
-                is ArticleDetailsError.FailedToPublishRepostEvent -> context.getString(
-                    R.string.post_action_repost_failed,
-                )
-
-                is ArticleDetailsError.MissingRelaysConfiguration -> context.getString(
-                    R.string.app_missing_relays_config,
-                )
-            }
-        },
-        onErrorDismiss = {
-            eventPublisher(UiEvent.DismissErrors)
-        },
+        errorMessageResolver = { it.resolveErrorMessage(context = context) },
+        onErrorDismiss = { eventPublisher(UiEvent.DismissErrors) },
     )
 
     Scaffold(
@@ -224,4 +193,36 @@ private fun ArticleDetailsScreen(
             SnackbarHost(hostState = snackbarHostState)
         },
     )
+}
+
+private fun ArticleDetailsError.resolveErrorMessage(context: Context): String {
+    return when (this) {
+        ArticleDetailsError.InvalidNaddr -> context.getString(
+            R.string.long_form_thread_invalid_naddr,
+        )
+
+        is ArticleDetailsError.InvalidZapRequest -> context.getString(
+            R.string.post_action_invalid_zap_request,
+        )
+
+        is ArticleDetailsError.MissingLightningAddress -> context.getString(
+            R.string.post_action_missing_lightning_address,
+        )
+
+        is ArticleDetailsError.FailedToPublishZapEvent -> context.getString(
+            R.string.post_action_zap_failed,
+        )
+
+        is ArticleDetailsError.FailedToPublishLikeEvent -> context.getString(
+            R.string.post_action_like_failed,
+        )
+
+        is ArticleDetailsError.FailedToPublishRepostEvent -> context.getString(
+            R.string.post_action_repost_failed,
+        )
+
+        is ArticleDetailsError.MissingRelaysConfiguration -> context.getString(
+            R.string.app_missing_relays_config,
+        )
+    }
 }

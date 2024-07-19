@@ -9,15 +9,15 @@ import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
 
 @Dao
-interface NoteZapDao {
+interface EventZapDao {
 
     @Insert
-    fun insert(data: NoteZapData)
+    fun insert(data: EventZap)
 
     @Query(
         """
-            DELETE FROM NoteZapData 
-            WHERE zapSenderId = :senderId AND zapReceiverId = :receiverId AND noteId = :noteId 
+            DELETE FROM EventZap 
+            WHERE zapSenderId = :senderId AND zapReceiverId = :receiverId AND eventId = :noteId 
                 AND (zapRequestAt = :timestamp OR zapReceiptAt = :timestamp)
         """,
     )
@@ -29,24 +29,24 @@ interface NoteZapDao {
     )
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun upsertAll(data: List<NoteZapData>)
+    fun upsertAll(data: List<EventZap>)
 
     @Transaction
     @Query(
         """
-            SELECT * FROM NoteZapData WHERE noteId = :noteId
+            SELECT * FROM EventZap WHERE eventId = :noteId
             ORDER BY CAST(amountInBtc AS REAL) DESC, zapReceiptAt ASC
             LIMIT 10
         """,
     )
-    fun observeTopZaps(noteId: String): Flow<List<NoteZap>>
+    fun observeTopZaps(noteId: String): Flow<List<EventZap>>
 
     @Transaction
     @Query(
         """
-            SELECT * FROM NoteZapData WHERE noteId = :noteId
+            SELECT * FROM EventZap WHERE eventId = :noteId
             ORDER BY CAST(amountInBtc AS REAL) DESC, zapReceiptAt ASC
         """,
     )
-    fun pagedNoteZaps(noteId: String): PagingSource<Int, NoteZap>
+    fun pagedNoteZaps(noteId: String): PagingSource<Int, EventZap>
 }

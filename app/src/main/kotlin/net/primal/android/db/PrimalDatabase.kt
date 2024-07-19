@@ -5,6 +5,8 @@ package net.primal.android.db
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import net.primal.android.articles.db.ArticleDao
+import net.primal.android.articles.db.ArticleData
 import net.primal.android.attachments.db.AttachmentDao
 import net.primal.android.attachments.db.NoteAttachment
 import net.primal.android.attachments.db.NoteNostrUri
@@ -29,12 +31,12 @@ import net.primal.android.messages.db.MessageConversationDao
 import net.primal.android.messages.db.MessageConversationData
 import net.primal.android.nostr.db.EventHints
 import net.primal.android.nostr.db.EventHintsDao
-import net.primal.android.note.db.NoteStats
-import net.primal.android.note.db.NoteStatsDao
-import net.primal.android.note.db.NoteUserStats
-import net.primal.android.note.db.NoteUserStatsDao
-import net.primal.android.note.db.NoteZapDao
-import net.primal.android.note.db.NoteZapData
+import net.primal.android.note.db.EventStats
+import net.primal.android.note.db.EventStatsDao
+import net.primal.android.note.db.EventUserStats
+import net.primal.android.note.db.EventUserStatsDao
+import net.primal.android.note.db.EventZap
+import net.primal.android.note.db.EventZapDao
 import net.primal.android.notifications.db.NotificationDao
 import net.primal.android.notifications.db.NotificationData
 import net.primal.android.profile.db.ProfileData
@@ -58,15 +60,15 @@ import net.primal.android.wallet.db.WalletTransactionData
         PostData::class,
         ProfileData::class,
         RepostData::class,
-        NoteStats::class,
+        EventStats::class,
+        EventZap::class,
+        EventUserStats::class,
         NoteNostrUri::class,
         NoteAttachment::class,
-        NoteZapData::class,
         Feed::class,
         FeedPostDataCrossRef::class,
         FeedPostRemoteKey::class,
         ThreadConversationCrossRef::class,
-        NoteUserStats::class,
         ProfileStats::class,
         TrendingHashtag::class,
         NotificationData::class,
@@ -77,8 +79,9 @@ import net.primal.android.wallet.db.WalletTransactionData
         Relay::class,
         EventHints::class,
         ProfileInteraction::class,
+        ArticleData::class,
     ],
-    version = 29,
+    version = 30,
     exportSchema = true,
 )
 @TypeConverters(
@@ -93,11 +96,17 @@ abstract class PrimalDatabase : RoomDatabase() {
 
     abstract fun reposts(): RepostDao
 
-    abstract fun postStats(): NoteStatsDao
+    abstract fun eventStats(): EventStatsDao
 
     abstract fun attachments(): AttachmentDao
 
     abstract fun feeds(): FeedDao
+
+    abstract fun eventUserStats(): EventUserStatsDao
+
+    abstract fun eventZaps(): EventZapDao
+
+    abstract fun profileStats(): ProfileStatsDao
 
     abstract fun feedsConnections(): FeedPostDataCrossRefDao
 
@@ -109,11 +118,7 @@ abstract class PrimalDatabase : RoomDatabase() {
 
     abstract fun threadConversations(): ThreadConversationDao
 
-    abstract fun postUserStats(): NoteUserStatsDao
-
     abstract fun trendingHashtags(): TrendingHashtagDao
-
-    abstract fun profileStats(): ProfileStatsDao
 
     abstract fun notifications(): NotificationDao
 
@@ -129,7 +134,7 @@ abstract class PrimalDatabase : RoomDatabase() {
 
     abstract fun eventHints(): EventHintsDao
 
-    abstract fun noteZaps(): NoteZapDao
-
     abstract fun profileInteractions(): ProfileInteractionDao
+
+    abstract fun articles(): ArticleDao
 }

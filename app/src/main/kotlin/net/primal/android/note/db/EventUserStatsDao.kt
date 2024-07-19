@@ -6,14 +6,14 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 
 @Dao
-interface NoteStatsDao {
+interface EventUserStatsDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun upsert(data: NoteStats)
+    fun upsert(data: EventUserStats)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun upsertAll(data: List<NoteStats>)
+    fun upsertAll(data: List<EventUserStats>)
 
-    @Query("SELECT * FROM NoteStats WHERE postId = :postId")
-    fun find(postId: String): NoteStats?
+    @Query("SELECT * FROM EventUserStats WHERE eventId = :eventId AND userId = :userId")
+    fun find(eventId: String, userId: String): EventUserStats?
 }

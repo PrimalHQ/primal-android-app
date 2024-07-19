@@ -5,6 +5,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.instanceOf
 import net.primal.android.crypto.toHex
 import net.primal.android.crypto.toNpub
+import net.primal.android.nostr.utils.Nip19TLV.toNaddrString
 import org.junit.Test
 
 class Nip19TLVTest {
@@ -12,9 +13,9 @@ class Nip19TLVTest {
     @Test
     fun parse_returnsProperValuesForNevent1() {
         val nevent1 = "nevent1qqsg6gechd3dhzx38n4z8a2lylzgsmmgeamhmtzz72m9ummsnf0xjfspsdmhxue69" +
-                "uhkummn9ekx7mpvwaehxw309ahx7um5wghx77r5wghxgetk93mhxue69uhhyetvv9ujumn0wd68ytn" +
-                "zvuk8wumn8ghj7mn0wd68ytn9d9h82mny0fmkzmn6d9njuumsv93k2trhwden5te0wfjkccte9ehx7" +
-                "um5wghxyctwvsk8wumn8ghj7un9d3shjtnyv9kh2uewd9hs3kqsdn"
+            "uhkummn9ekx7mpvwaehxw309ahx7um5wghx77r5wghxgetk93mhxue69uhhyetvv9ujumn0wd68ytn" +
+            "zvuk8wumn8ghj7mn0wd68ytn9d9h82mny0fmkzmn6d9njuumsv93k2trhwden5te0wfjkccte9ehx7" +
+            "um5wghxyctwvsk8wumn8ghj7un9d3shjtnyv9kh2uewd9hs3kqsdn"
 
         val expectedEventId = "8d2338bb62db88d13cea23f55f27c4886f68cf777dac42f2b65e6f709a5e6926"
         val expectedRelays = "wss://nos.lol,wss://nostr.oxtr.dev,wss://relay.nostr.bg," +
@@ -84,4 +85,49 @@ class Nip19TLVTest {
         result.kind shouldBe expectedKind
     }
 
+    @Test
+    fun toNaddrString_createsProperNaddr_forGivenNaddrStructureWithoutRelay() {
+        val expectedNaddr = "naddr1qqw9x6rfwpcxjmn894fks6ts09shyepdg3ty6tthv4unxmf5qgs04xzt" +
+            "6ldm9qhs0ctw0t58kf4z57umjzmjg6jywu0seadwtqqc75srqsqqqa28pl22da"
+
+        val naddr = Naddr(
+            identifier = "Shipping-Shipyard-DVM-wey3m4",
+            relays = emptyList(),
+            userId = "fa984bd7dbb282f07e16e7ae87b26a2a7b9b90b7246a44771f0cf5ae58018f52",
+            kind = 30023,
+        )
+
+        naddr.toNaddrString() shouldBe expectedNaddr
+    }
+
+    @Test
+    fun toNaddrString_createsProperNaddr_forGivenNaddrStructureWithSingleRelay() {
+        val expectedNaddr = "naddr1qqw9x6rfwpcxjmn894fks6ts09shyepdg3ty6tthv4unxmf5qy28wumn8ghj7un9d3shjtnyv" +
+            "9kh2uewd9hsyg86np9a0kajstc8u9h846rmy6320wdepdeydfz8w8cv7kh9sqv02gpsgqqqw4rsgwawdk"
+
+        val naddr = Naddr(
+            identifier = "Shipping-Shipyard-DVM-wey3m4",
+            relays = listOf("wss://relay.damus.io"),
+            userId = "fa984bd7dbb282f07e16e7ae87b26a2a7b9b90b7246a44771f0cf5ae58018f52",
+            kind = 30023,
+        )
+
+        naddr.toNaddrString() shouldBe expectedNaddr
+    }
+
+    @Test
+    fun toNaddrString_createsProperNaddr_forGivenNaddrStructureWithMultipleRelays() {
+        val expectedNaddr = "naddr1qqw9x6rfwpcxjmn894fks6ts09shyepdg3ty6tthv4unxmf5q" +
+            "y4hwumn8ghj7un9d3shjtnyv9kh2uewd9hjcamnwvaz7tmjv4kxz7fwwpexjmtpdshxuet5" +
+            "qgs04xzt6ldm9qhs0ctw0t58kf4z57umjzmjg6jywu0seadwtqqc75srqsqqqa28zkfejp"
+
+        val naddr = Naddr(
+            identifier = "Shipping-Shipyard-DVM-wey3m4",
+            relays = listOf("wss://relay.damus.io", "wss://relay.primal.net"),
+            userId = "fa984bd7dbb282f07e16e7ae87b26a2a7b9b90b7246a44771f0cf5ae58018f52",
+            kind = 30023,
+        )
+
+        naddr.toNaddrString() shouldBe expectedNaddr
+    }
 }

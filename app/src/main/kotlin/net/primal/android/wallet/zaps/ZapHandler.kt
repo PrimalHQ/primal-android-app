@@ -4,7 +4,7 @@ import javax.inject.Inject
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.networking.relays.FALLBACK_RELAYS
 import net.primal.android.nostr.notary.NostrNotary
-import net.primal.android.note.repository.NoteStatsUpdater
+import net.primal.android.note.repository.EventStatsUpdater
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.domain.RelayKind
 import net.primal.android.user.domain.UserAccount
@@ -99,10 +99,10 @@ class ZapHandler @Inject constructor(
 
     private fun ZapTarget.buildPostStatsUpdaterIfApplicable(userId: String) =
         when (this) {
-            is ZapTarget.Note -> NoteStatsUpdater(
+            is ZapTarget.Note -> EventStatsUpdater(
                 userId = userId,
-                postId = this.id,
-                postAuthorId = this.authorPubkey,
+                eventId = this.id,
+                eventAuthorId = this.authorPubkey,
                 database = database,
             )
 

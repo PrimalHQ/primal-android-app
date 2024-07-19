@@ -9,16 +9,16 @@ import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.primal.PrimalCacheFilter
 import net.primal.android.networking.primal.PrimalVerb
 import net.primal.android.nostr.model.NostrEventKind
-import net.primal.android.note.api.model.NoteActionsRequestBody
-import net.primal.android.note.api.model.NoteActionsResponse
-import net.primal.android.note.api.model.NoteZapsRequestBody
-import net.primal.android.note.api.model.NoteZapsResponse
+import net.primal.android.note.api.model.EventActionsRequestBody
+import net.primal.android.note.api.model.EventActionsResponse
+import net.primal.android.note.api.model.EventZapsRequestBody
+import net.primal.android.note.api.model.EventZapsResponse
 
-class NoteApiImpl @Inject constructor(
+class EventStatsApiImpl @Inject constructor(
     @PrimalCacheApiClient private val primalApiClient: PrimalApiClient,
-) : NoteApi {
+) : EventStatsApi {
 
-    override suspend fun getNoteZaps(body: NoteZapsRequestBody): NoteZapsResponse {
+    override suspend fun getEventZaps(body: EventZapsRequestBody): EventZapsResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.EVENT_ZAPS,
@@ -26,7 +26,7 @@ class NoteApiImpl @Inject constructor(
             ),
         )
 
-        return NoteZapsResponse(
+        return EventZapsResponse(
             paging = queryResult.findPrimalEvent(NostrEventKind.PrimalPaging).let {
                 NostrJson.decodeFromStringOrNull(it?.content)
             },
@@ -37,7 +37,7 @@ class NoteApiImpl @Inject constructor(
         )
     }
 
-    override suspend fun getNoteActions(body: NoteActionsRequestBody): NoteActionsResponse {
+    override suspend fun getEventActions(body: EventActionsRequestBody): EventActionsResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.EVENT_ACTIONS,
@@ -45,7 +45,7 @@ class NoteApiImpl @Inject constructor(
             ),
         )
 
-        return NoteActionsResponse(
+        return EventActionsResponse(
             profiles = queryResult.filterNostrEvents(NostrEventKind.Metadata),
             userScores = queryResult.findPrimalEvent(NostrEventKind.PrimalUserScores),
             userFollowersCount = queryResult.findPrimalEvent(NostrEventKind.PrimalUserFollowersCounts),

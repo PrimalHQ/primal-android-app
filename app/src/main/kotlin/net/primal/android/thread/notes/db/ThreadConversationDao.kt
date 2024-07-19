@@ -24,10 +24,10 @@ interface ThreadConversationDao {
                 FPD2.hashtags,
                 NULL AS repostId,
                 NULL AS repostAuthorId,
-                NoteUserStats.liked AS userLiked,
-                NoteUserStats.replied AS userReplied,
-                NoteUserStats.reposted AS userReposted,
-                NoteUserStats.zapped AS userZapped,
+                EventUserStats.liked AS userLiked,
+                EventUserStats.replied AS userReplied,
+                EventUserStats.reposted AS userReposted,
+                EventUserStats.zapped AS userZapped,
                 NULL AS feedCreatedAt,
                 CASE WHEN MutedUserData.userId IS NOT NULL THEN 1 ELSE 0 END AS isMuted,
                 NULL AS replyToPostId,
@@ -35,7 +35,7 @@ interface ThreadConversationDao {
             FROM PostData AS FPD1
             INNER JOIN ThreadConversationCrossRef ON FPD1.postId = ThreadConversationCrossRef.postId
             INNER JOIN PostData AS FPD2 ON ThreadConversationCrossRef.replyPostId = FPD2.postId
-            LEFT JOIN NoteUserStats ON NoteUserStats.postId = FPD2.postId AND NoteUserStats.userId = :userId
+            LEFT JOIN EventUserStats ON EventUserStats.eventId = FPD2.postId AND EventUserStats.userId = :userId
             LEFT JOIN MutedUserData ON MutedUserData.userId = FPD2.authorId
             WHERE FPD1.postId = :postId AND isMuted = 0
             ORDER BY FPD2.createdAt ASC

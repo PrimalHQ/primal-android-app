@@ -26,8 +26,8 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.sp
 import net.primal.android.R
+import net.primal.android.core.compose.feed.model.EventStatsUi
 import net.primal.android.core.compose.feed.model.FeedPostAction
-import net.primal.android.core.compose.feed.model.FeedPostStatsUi
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.FeedLikes
 import net.primal.android.core.compose.icons.primaliconpack.FeedLikesFilled
@@ -42,7 +42,7 @@ import net.primal.android.theme.AppTheme
 @Composable
 fun FeedNoteStatsRow(
     modifier: Modifier,
-    postStats: FeedPostStatsUi,
+    eventStats: EventStatsUi,
     onPostAction: ((FeedPostAction) -> Unit)? = null,
     onPostLongPressAction: ((FeedPostAction) -> Unit)? = null,
 ) {
@@ -51,8 +51,8 @@ fun FeedNoteStatsRow(
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         SinglePostStat(
-            textCount = postStats.repliesCount.toPostStatString(),
-            highlighted = postStats.userReplied,
+            textCount = eventStats.repliesCount.toPostStatString(),
+            highlighted = eventStats.userReplied,
             iconVector = PrimalIcons.FeedReplies,
             iconVectorHighlight = PrimalIcons.FeedRepliesFilled,
             colorHighlight = AppTheme.extraColorScheme.replied,
@@ -66,8 +66,8 @@ fun FeedNoteStatsRow(
         )
 
         SinglePostStat(
-            textCount = postStats.satsZapped.toPostStatString(),
-            highlighted = postStats.userZapped,
+            textCount = eventStats.satsZapped.toPostStatString(),
+            highlighted = eventStats.userZapped,
             iconVector = PrimalIcons.FeedZaps,
             iconVectorHighlight = PrimalIcons.FeedZapsFilled,
             colorHighlight = AppTheme.extraColorScheme.zapped,
@@ -81,12 +81,12 @@ fun FeedNoteStatsRow(
         )
 
         SinglePostStat(
-            textCount = postStats.likesCount.toPostStatString(),
-            highlighted = postStats.userLiked,
+            textCount = eventStats.likesCount.toPostStatString(),
+            highlighted = eventStats.userLiked,
             iconVector = PrimalIcons.FeedLikes,
             iconVectorHighlight = PrimalIcons.FeedLikesFilled,
             colorHighlight = AppTheme.extraColorScheme.liked,
-            onClick = if (!postStats.userLiked && onPostAction != null) {
+            onClick = if (!eventStats.userLiked && onPostAction != null) {
                 { onPostAction(FeedPostAction.Like) }
             } else {
                 null
@@ -98,8 +98,8 @@ fun FeedNoteStatsRow(
         )
 
         SinglePostStat(
-            textCount = postStats.repostsCount.toPostStatString(),
-            highlighted = postStats.userReposted,
+            textCount = eventStats.repostsCount.toPostStatString(),
+            highlighted = eventStats.userReposted,
             iconVector = PrimalIcons.FeedReposts,
             iconVectorHighlight = PrimalIcons.FeedRepostsFilled,
             colorHighlight = AppTheme.extraColorScheme.reposted,

@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.map
 import net.primal.android.navigation.noteIdOrThrow
 import net.primal.android.note.reactions.ReactionsContract.UiState
 import net.primal.android.note.repository.NoteRepository
-import net.primal.android.note.ui.asNoteZapUiModel
+import net.primal.android.note.ui.asEventZapUiModel
 
 @HiltViewModel
 class ReactionsViewModel @Inject constructor(
@@ -25,8 +25,8 @@ class ReactionsViewModel @Inject constructor(
 
     private val _state = MutableStateFlow(
         UiState(
-            zaps = noteRepository.pagedNoteZaps(noteId = noteId)
-                .map { it.map { noteZap -> noteZap.asNoteZapUiModel() } }
+            zaps = noteRepository.pagedEventZaps(eventId = noteId)
+                .map { it.map { noteZap -> noteZap.asEventZapUiModel() } }
                 .cachedIn(viewModelScope),
         ),
     )
