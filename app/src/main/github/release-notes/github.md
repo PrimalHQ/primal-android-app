@@ -1,4 +1,6 @@
 ## Features
-- Reads App shell with empty articles feed;
+
+- Reads App shell;
+- Default Nostr Reads feed;
 - Article Details screen with simple native Markdown rendering;
 - Feed naddr links connected to internal article details screen;
