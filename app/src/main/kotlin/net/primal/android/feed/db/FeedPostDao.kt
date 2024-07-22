@@ -41,8 +41,8 @@ interface FeedPostDao {
             NULL AS isMuted,
             PostData.replyToPostId,
             PostData.replyToAuthorId
-        FROM PostData WHERE postId = :postId LIMIT 1
+        FROM PostData WHERE postId IN (:postIds) LIMIT 1
         """,
     )
-    fun findPostById(postId: String): FeedPost?
+    fun findAllPostsByIds(postIds: List<String>): List<FeedPost>
 }
