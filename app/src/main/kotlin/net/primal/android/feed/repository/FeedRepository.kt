@@ -55,7 +55,7 @@ class FeedRepository @Inject constructor(
             )
         }
 
-    fun findPostById(postId: String): FeedPost? = database.feedPosts().findPostById(postId = postId)
+    fun findAllPostsByIds(postIds: String): List<FeedPost> = database.feedPosts().findAllPostsByIds(listOf(postIds))
 
     fun observeConversation(postId: String) =
         database.threadConversations().observeConversation(
