@@ -111,6 +111,7 @@ fun PrimalTopAppBar(
                     verticalArrangement = Arrangement.Top,
                 ) {
                     IconText(
+                        modifier = Modifier.padding(start = 20.dp),
                         text = title,
                         color = textColor,
                         trailingIcon = if (title.isNotEmpty()) titleTrailingIcon else null,
