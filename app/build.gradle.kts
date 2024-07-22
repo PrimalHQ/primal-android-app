@@ -54,12 +54,12 @@ fun extractSigningConfigProperties(storeName: String): SigningConfigProperties? 
 
 android {
     namespace = "net.primal.android"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "net.primal.android"
         minSdk = 26
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 140
         versionName = "1.5.1"
 
