@@ -2,5 +2,6 @@
 
 - Reads App shell;
 - Default Nostr Reads feed;
-- Article Details screen with simple native Markdown rendering;
+- Article Details screen with markdown rendering;
 - Feed naddr links connected to internal article details screen;
+- Support for profile and note mentions in article details;
