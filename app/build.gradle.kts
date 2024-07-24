@@ -232,14 +232,12 @@ dependencies {
 
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.emoji2.emojipicker)
+    implementation(libs.androidx.webkit)
 
     implementation("org.jetbrains:markdown:0.7.3")
-//    implementation("com.github.jeziellago:compose-markdown:0.5.0")
-//    implementation("com.meetup:twain:0.2.2")
-//    implementation("com.halilibo.compose-richtext:richtext-ui:1.0.0-alpha01")
-    implementation("com.halilibo.compose-richtext:richtext-ui-material3:1.0.0-alpha01")
-    implementation("com.halilibo.compose-richtext:richtext-commonmark:1.0.0-alpha01")
-//    implementation("com.halilibo.compose-richtext:richtext-markdown:1.0.0-alpha01")
+    implementation(libs.richtext.commonmark)
+    implementation(libs.richtext.ui)
+    implementation(libs.richtext.ui.material3)
 
     implementation(libs.navigation.material)
 

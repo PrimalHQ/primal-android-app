@@ -86,8 +86,8 @@ import net.primal.android.profile.qr.ui.ProfileQrCodeViewerScreen
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
-import net.primal.android.thread.articles.ArticleDetailsScreen
 import net.primal.android.thread.articles.ArticleDetailsViewModel
+import net.primal.android.thread.articles.ui.ArticleDetailsScreen
 import net.primal.android.thread.notes.ThreadScreen
 import net.primal.android.thread.notes.ThreadViewModel
 import net.primal.android.wallet.activation.WalletActivationViewModel
@@ -1020,6 +1020,7 @@ private fun NavGraphBuilder.articleDetails(
         viewModel = viewModel,
         onClose = { navController.navigateUp() },
         onNoteClick = { postId -> navController.navigateToThread(postId) },
+        onArticleClick = { naddr -> navController.navigateToArticleDetails(naddr) },
         onNoteReplyClick = { postId -> navController.navigateToNoteEditor(NoteEditorArgs(replyToNoteId = postId)) },
         onNoteQuoteClick = { preFillContent -> navController.navigateToNoteEditor(preFillContent.asNoteEditorArgs()) },
         onProfileClick = { profileId -> navController.navigateToProfile(profileId) },

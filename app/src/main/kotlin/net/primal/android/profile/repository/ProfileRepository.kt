@@ -4,6 +4,8 @@ import androidx.room.withTransaction
 import java.time.Instant
 import javax.inject.Inject
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.withContext
+import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.ext.asMapByKey
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.explore.api.model.UsersResponse
@@ -26,6 +28,7 @@ import net.primal.android.user.domain.asUserAccountFromFollowListEvent
 import net.primal.android.user.repository.UserRepository
 
 class ProfileRepository @Inject constructor(
+    private val dispatchers: CoroutineDispatcherProvider,
     private val database: PrimalDatabase,
     private val usersApi: UsersApi,
     private val userRepository: UserRepository,
@@ -35,13 +38,20 @@ class ProfileRepository @Inject constructor(
 
     fun findProfileDataOrNull(profileId: String) = database.profiles().findProfileData(profileId = profileId)
 
+    suspend fun findProfilesData(profileIds: List<String>) =
+        withContext(dispatchers.io()) {
+            database.profiles().findProfileData(profileIds = profileIds)
+        }
+
     fun observeProfile(profileId: String) = database.profiles().observeProfile(profileId = profileId).filterNotNull()
 
     fun observeProfileData(profileId: String) =
         database.profiles().observeProfileData(profileId = profileId).filterNotNull()
 
-    fun observeProfilesData(profileIds: List<String>) =
-        database.profiles().observeProfilesData(profileIds = profileIds).filterNotNull()
+    suspend fun observeProfilesData(profileIds: List<String>) =
+        withContext(dispatchers.io()) {
+            database.profiles().observeProfilesData(profileIds = profileIds).filterNotNull()
+        }
 
     fun observeProfileStats(profileId: String) =
         database.profileStats().observeProfileStats(profileId = profileId).filterNotNull()

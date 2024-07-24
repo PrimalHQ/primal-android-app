@@ -39,16 +39,11 @@ import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.Search
-import net.primal.android.crypto.bech32ToHexOrThrow
 import net.primal.android.explore.search.SearchContract
 import net.primal.android.explore.search.SearchViewModel
-import net.primal.android.nostr.ext.isNAddr
-import net.primal.android.nostr.ext.isNAddrUri
-import net.primal.android.nostr.ext.isNPub
-import net.primal.android.nostr.ext.isNPubUri
-import net.primal.android.nostr.ext.isNote
-import net.primal.android.nostr.ext.isNoteUri
-import net.primal.android.nostr.utils.Nip19TLV
+import net.primal.android.nostr.ext.takeAsNaddrOrNull
+import net.primal.android.nostr.ext.takeAsNoteHexIdOrNull
+import net.primal.android.nostr.ext.takeAsProfileHexIdOrNull
 import net.primal.android.theme.AppTheme
 
 @Composable
@@ -121,9 +116,9 @@ fun SearchScreen(
                             keyboardController?.hide()
                             scope.launch {
                                 val query = state.searchQuery
-                                val noteId = query.takeAsNoteHexId()
-                                val profileId = query.takeAsProfileHexId()
-                                val naddr = query.takeAsNaddr()
+                                val noteId = query.takeAsNoteHexIdOrNull()
+                                val profileId = query.takeAsProfileHexIdOrNull()
+                                val naddr = query.takeAsNaddrOrNull()
                                 when {
                                     noteId != null -> {
                                         delay(KEYBOARD_HIDE_DELAY)
@@ -162,43 +157,6 @@ fun SearchScreen(
 }
 
 private const val KEYBOARD_HIDE_DELAY = 150L
-
-private fun String.takeAsNoteHexId(): String? {
-    return if (isNote() || isNoteUri()) {
-        val result = runCatching {
-            bech32ToHexOrThrow()
-        }
-        result.getOrNull()
-    } else {
-        null
-    }
-}
-
-private fun String.takeAsProfileHexId(): String? {
-    return if (isNPub() || isNPubUri()) {
-        val result = runCatching {
-            bech32ToHexOrThrow()
-        }
-        result.getOrNull()
-    } else {
-        null
-    }
-}
-
-private fun String.takeAsNaddr(): String? {
-    return if (isNAddr() || isNAddrUri()) {
-        val result = runCatching {
-            Nip19TLV.parseAsNaddr(this)
-        }
-        if (result.getOrNull() != null) {
-            this
-        } else {
-            null
-        }
-    } else {
-        null
-    }
-}
 
 @Composable
 fun SearchTextField(

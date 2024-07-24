@@ -24,10 +24,10 @@ fun NostrEvent.parseHashtags(): List<String> {
     val hashtags = this.content.parseHashtags(hashtagRegex)
     val nip08MentionHashtags = this.content.parseHashtags(nip08MentionRegex)
     val hashtagsFromTags = this.tags
-        ?.filter { it.isHashtagTag() }
-        ?.mapNotNull { it.getTagValueOrNull() }
-        ?.map { "#$it" }
-        ?.toSet() ?: emptySet()
+        .filter { it.isHashtagTag() }
+        .mapNotNull { it.getTagValueOrNull() }
+        .map { "#$it" }
+        .toSet()
 
     val allTags = (hashtags - nip08MentionHashtags) + hashtagsFromTags
     return allTags.toList()

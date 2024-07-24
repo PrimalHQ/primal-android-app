@@ -6,6 +6,8 @@ import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.attachments.domain.CdnResource
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.toJsonObject
+import net.primal.android.core.utils.parseHashtags
+import net.primal.android.core.utils.parseUris
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.model.primal.PrimalEvent
@@ -51,6 +53,8 @@ fun NostrEvent.asArticleData(wordsCount: Int?, cdnResources: Map<String, CdnReso
         createdAt = this.createdAt,
         publishedAt = tags.findFirstPublishedAt()?.toLongOrNull() ?: this.createdAt,
         content = this.content,
+        uris = this.content.parseUris(),
+        hashtags = this.parseHashtags(),
         raw = raw,
         imageCdnImage = tags.findFirstImage()?.let { imageUrl ->
             CdnImage(
