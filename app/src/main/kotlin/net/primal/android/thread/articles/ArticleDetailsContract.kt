@@ -1,20 +1,29 @@
 package net.primal.android.thread.articles
 
+import net.primal.android.core.compose.feed.model.FeedPostUi
+
 interface ArticleDetailsContract {
     data class UiState(
-        val loading: Boolean = true,
+        val markdownContent: String = "",
+        val referencedNotes: List<FeedPostUi> = emptyList(),
+        val npubToDisplayNameMap: Map<String, String> = emptyMap(),
         val error: ArticleDetailsError? = null,
-        val markdown: String? = null,
-    ) {
-        sealed class ArticleDetailsError {
-            data object InvalidNaddr : ArticleDetailsError()
-            data class MissingLightningAddress(val cause: Throwable) : ArticleDetailsError()
-            data class InvalidZapRequest(val cause: Throwable) : ArticleDetailsError()
-            data class FailedToPublishZapEvent(val cause: Throwable) : ArticleDetailsError()
-            data class FailedToPublishRepostEvent(val cause: Throwable) : ArticleDetailsError()
-            data class FailedToPublishLikeEvent(val cause: Throwable) : ArticleDetailsError()
-            data class MissingRelaysConfiguration(val cause: Throwable) : ArticleDetailsError()
-        }
+    )
+
+    sealed class ArticleDetailsError {
+        data object InvalidNaddr : ArticleDetailsError()
+        data class MissingLightningAddress(val cause: Throwable) : ArticleDetailsError()
+        data class InvalidZapRequest(val cause: Throwable) : ArticleDetailsError()
+        data class FailedToPublishZapEvent(val cause: Throwable) : ArticleDetailsError()
+        data class FailedToPublishRepostEvent(val cause: Throwable) : ArticleDetailsError()
+        data class FailedToPublishLikeEvent(val cause: Throwable) : ArticleDetailsError()
+        data class MissingRelaysConfiguration(val cause: Throwable) : ArticleDetailsError()
+    }
+
+    sealed class ArticlePartRender {
+        data class MarkdownRender(val markdown: String) : ArticlePartRender()
+        data class HtmlRender(val html: String) : ArticlePartRender()
+        data class NoteRender(val note: FeedPostUi) : ArticlePartRender()
     }
 
     sealed class UiEvent {

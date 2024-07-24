@@ -18,4 +18,6 @@ data class ArticleData(
     val summary: String? = null,
     val authorMetadataId: String? = null,
     val wordsCount: Int? = null,
+    val uris: List<String> = emptyList(),
+    val hashtags: List<String> = emptyList(),
 )

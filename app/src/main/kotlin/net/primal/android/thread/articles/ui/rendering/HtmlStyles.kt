@@ -1,36 +1,36 @@
-package net.primal.android.thread.articles.rendering
+package net.primal.android.thread.articles.ui.rendering
 
 private val ARTICLE_BASE_CSS = """
 .sunset {
-  --text-primary: #ffffff;
-  --text-tertiary: #757575;
-  --subtile-devider: #444444;
-  --accent-links: #f800c1;
-  --background-input: #222222;
+  --text-primary: rgb(255, 255, 255);    
+  --text-tertiary: rgb(117, 117, 117);   
+  --subtile-devider: rgb(68, 68, 68);    
+  --accent-links: rgb(248, 0, 193);      
+  --background-input: rgb(34, 34, 34);   
 }
 
 .midnight {
-  --text-primary: #ffffff;
-  --text-tertiary: #757575;
-  --subtile-devider: #444444;
-  --accent-links: #2394EF;
-  --background-input: #222222;
+  --text-primary: rgb(255, 255, 255);    
+  --text-tertiary: rgb(117, 117, 117);   
+  --subtile-devider: rgb(68, 68, 68);    
+  --accent-links: rgb(35, 148, 239);     
+  --background-input: rgb(34, 34, 34);   
 }
 
 .sunrise {
-  --text-primary: #111111;
-  --text-tertiary: #808080;
-  --subtile-devider: #c8c8c8;
-  --accent-links: #CA077C;
-  --background-input: #e5e5e5;
+  --text-primary: rgb(17, 17, 17);       
+  --text-tertiary: rgb(128, 128, 128);   
+  --subtile-devider: rgb(200, 200, 200); 
+  --accent-links: rgb(202, 7, 124);      
+  --background-input: rgb(229, 229, 229);
 }
 
 .ice {
-  --text-primary: #111111;
-  --text-tertiary: #808080;
-  --subtile-devider: #c8c8c8;
-  --accent-links: #2394EF;
-  --background-input: #e5e5e5;
+  --text-primary: rgb(17, 17, 17);       
+  --text-tertiary: rgb(128, 128, 128);   
+  --subtile-devider: rgb(200, 200, 200); 
+  --accent-links: rgb(35, 148, 239);     
+  --background-input: rgb(229, 229, 229);
 }
     
 .small {
@@ -402,7 +402,20 @@ val ARTICLE_BASE_HTML = """
             overflow-x: hidden;
             word-wrap: break-word;
         }
+        
+        .ice, .sunrise{
+          background-color: white;
+        }
 
+        .midnight, .sunset {
+          background-color: black;
+        }
+        
+        @font-face {
+            font-family: 'Nacelle';
+            src: url('file:///android_asset/nacelle_regular.otf')
+        }
+        
         $ARTICLE_BASE_CSS
 
     </style>

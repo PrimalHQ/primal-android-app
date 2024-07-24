@@ -6,6 +6,7 @@ import net.primal.android.attachments.ext.flatMapPostsAsNoteAttachmentPO
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.core.utils.usernameUiFriendly
+import net.primal.android.crypto.bech32ToHexOrThrow
 import net.primal.android.crypto.bechToBytesOrThrow
 import net.primal.android.crypto.toHex
 import net.primal.android.feed.db.PostData
@@ -52,6 +53,8 @@ fun String.isNPub() = lowercase().startsWith(NPUB)
 fun String.isNProfile() = lowercase().startsWith(NPROFILE)
 
 fun String.isNAddr() = lowercase().startsWith(NADDR)
+
+fun String.isNEvent() = lowercase().startsWith(NEVENT)
 
 fun String.isNoteUri() = lowercase().startsWith(NOSTR + NOTE)
 
@@ -138,6 +141,41 @@ fun String.extractNoteId(): String? {
         }
     } catch (error: IllegalArgumentException) {
         Timber.w(error)
+        null
+    }
+}
+
+fun String.takeAsNoteHexIdOrNull(): String? {
+    return if (isNote() || isNoteUri() || isNEventUri() || isNEvent()) {
+        val result = runCatching { this.extractNoteId() }
+        result.getOrNull()
+    } else {
+        null
+    }
+}
+
+fun String.takeAsProfileHexIdOrNull(): String? {
+    return if (isNPub() || isNPubUri()) {
+        val result = runCatching {
+            this.bech32ToHexOrThrow()
+        }
+        result.getOrNull()
+    } else {
+        null
+    }
+}
+
+fun String.takeAsNaddrOrNull(): String? {
+    return if (isNAddr() || isNAddrUri()) {
+        val result = runCatching {
+            Nip19TLV.parseAsNaddr(this)
+        }
+        if (result.getOrNull() != null) {
+            this
+        } else {
+            null
+        }
+    } else {
         null
     }
 }

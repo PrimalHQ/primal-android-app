@@ -155,7 +155,7 @@ private fun FeedArticleList(
 
         items(
             count = pagingItems.itemCount,
-            key = pagingItems.itemKey(key = { "${it.articleId};${it.authorId}" }),
+            key = pagingItems.itemKey(key = { it.eventId }),
             contentType = pagingItems.itemContentType(),
         ) { index ->
             val item = pagingItems[index]
