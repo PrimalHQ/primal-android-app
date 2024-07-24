@@ -29,6 +29,7 @@ fun ReferencedNoteCard(
     modifier: Modifier = Modifier,
     data: FeedPostUi,
     onPostClick: ((String) -> Unit)? = null,
+    onProfileClick: ((profileId: String) -> Unit)? = null,
     onArticleClick: ((naddr: String) -> Unit)? = null,
     onMediaClick: ((MediaClickEvent) -> Unit)? = null,
     onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
@@ -55,6 +56,7 @@ fun ReferencedNoteCard(
             authorAvatarSize = 30.dp,
             authorAvatarCdnImage = data.authorAvatarCdnImage,
             authorInternetIdentifier = data.authorInternetIdentifier,
+            onAuthorAvatarClick = { onProfileClick?.invoke(data.authorId) },
         )
 
         NoteContent(

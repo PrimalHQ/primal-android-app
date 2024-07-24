@@ -8,9 +8,12 @@ import androidx.paging.PagingSource
 import androidx.sqlite.db.SimpleSQLiteQuery
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.withContext
 import net.primal.android.articles.api.ArticlesApi
 import net.primal.android.articles.api.mediator.ArticleFeedMediator
+import net.primal.android.articles.api.mediator.persistToDatabaseAsTransaction
 import net.primal.android.articles.api.model.ArticleDetailsRequestBody
 import net.primal.android.articles.db.Article
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
@@ -63,17 +66,29 @@ class ArticlesRepository @Inject constructor(
 
     suspend fun fetchBlogContentAndReplies(
         userId: String,
-        authorUserId: String,
-        identifier: String,
+        articleId: String,
+        articleAuthorId: String,
     ) = withContext(dispatchers.io()) {
-        articlesApi.getArticleDetails(
+        val response = articlesApi.getArticleDetails(
             body = ArticleDetailsRequestBody(
                 userId = userId,
-                authorUserId = authorUserId,
-                identifier = identifier,
+                authorUserId = articleAuthorId,
+                identifier = articleId,
                 kind = NostrEventKind.LongFormContent.value,
                 limit = 100,
             ),
         )
+
+        response.persistToDatabaseAsTransaction(
+            userId = userId,
+            database = database,
+        )
     }
+
+    suspend fun observeArticle(articleId: String, articleAuthorId: String) =
+        withContext(dispatchers.io()) {
+            database.articles().observeArticle(articleId = articleId, userId = articleAuthorId)
+                .distinctUntilChanged()
+                .filterNotNull()
+        }
 }

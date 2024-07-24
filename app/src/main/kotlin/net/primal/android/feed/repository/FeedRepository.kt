@@ -55,7 +55,10 @@ class FeedRepository @Inject constructor(
             )
         }
 
-    fun findAllPostsByIds(postIds: String): List<FeedPost> = database.feedPosts().findAllPostsByIds(listOf(postIds))
+    suspend fun findAllPostsByIds(postIds: List<String>): List<FeedPost> =
+        withContext(dispatcherProvider.io()) {
+            database.feedPosts().findAllPostsByIds(postIds)
+        }
 
     fun observeConversation(postId: String) =
         database.threadConversations().observeConversation(
