@@ -34,6 +34,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
@@ -43,6 +44,7 @@ import net.primal.android.theme.domain.PrimalTheme
 @Composable
 fun PrimalFilledButton(
     modifier: Modifier = Modifier,
+    height: Dp = 58.dp,
     enabled: Boolean = true,
     onClick: (() -> Unit)? = null,
     onLongClick: (() -> Unit)? = null,
@@ -67,7 +69,7 @@ fun PrimalFilledButton(
 
     Box(
         modifier = modifier
-            .height(58.dp)
+            .height(height)
             .semantics { role = Role.Button }
             .shadow(elevation = 0.dp, shape)
             .clip(shape)
