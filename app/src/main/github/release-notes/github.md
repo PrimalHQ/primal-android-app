@@ -5,3 +5,4 @@
 - Article Details screen with markdown rendering;
 - Feed naddr links connected to internal article details screen;
 - Support for profile and note mentions in article details;
+- Implement article details header and top zaps;
