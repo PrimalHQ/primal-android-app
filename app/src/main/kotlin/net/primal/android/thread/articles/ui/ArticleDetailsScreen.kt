@@ -128,7 +128,7 @@ private fun ArticleDetailsScreen(
             if (state.markdownContent.isEmpty()) {
                 PrimalLoadingSpinner()
             } else {
-                MarkdownContent(
+                ArticleContent(
                     state = state,
                     paddingValues = paddingValues,
                     onNoteClick = onNoteClick,
@@ -147,7 +147,7 @@ private fun ArticleDetailsScreen(
 }
 
 @Composable
-private fun MarkdownContent(
+private fun ArticleContent(
     state: ArticleDetailsContract.UiState,
     paddingValues: PaddingValues,
     onNoteClick: (noteId: String) -> Unit,
@@ -181,6 +181,7 @@ private fun MarkdownContent(
                     authorCdnImage = state.authorCdnImage,
                     authorDisplayName = state.authorDisplayName,
                     authorInternetIdentifier = state.authorInternetIdentifier,
+                    onAuthorAvatarClick = { state.authorId?.let(onProfileClick) },
                 )
                 PrimalDivider()
             }
