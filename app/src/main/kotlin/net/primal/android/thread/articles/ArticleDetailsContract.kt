@@ -2,9 +2,11 @@ package net.primal.android.thread.articles
 
 import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.feed.model.FeedPostUi
+import net.primal.android.note.ui.EventZapUiModel
 
 interface ArticleDetailsContract {
     data class UiState(
+        val eventId: String? = null,
         val title: String = "",
         val coverCdnImage: CdnImage? = null,
         val summary: String? = null,
@@ -15,6 +17,8 @@ interface ArticleDetailsContract {
         val authorInternetIdentifier: String? = null,
         val referencedNotes: List<FeedPostUi> = emptyList(),
         val npubToDisplayNameMap: Map<String, String> = emptyMap(),
+        val topZap: EventZapUiModel? = null,
+        val otherZaps: List<EventZapUiModel> = emptyList(),
         val error: ArticleDetailsError? = null,
     )
 

@@ -661,4 +661,6 @@
     <string name="article_feed_context_report_user">Report user</string>
     <string name="article_feed_context_mute_user">Mute user</string>
     <string name="article_feed_context_copied_toast">Copied!</string>
+
+    <string name="article_details_zap">Zap</string>
 </resources>

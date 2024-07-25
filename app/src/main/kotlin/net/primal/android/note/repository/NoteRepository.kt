@@ -214,7 +214,7 @@ class NoteRepository @Inject constructor(
 
     fun pagedEventZaps(eventId: String): Flow<PagingData<EventZap>> {
         return createPager(eventId = eventId) {
-            database.eventZaps().pagedNoteZaps(noteId = eventId)
+            database.eventZaps().pagedEventZaps(eventId = eventId)
         }.flow
     }
 
