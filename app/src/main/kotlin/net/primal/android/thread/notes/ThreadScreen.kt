@@ -602,7 +602,7 @@ private fun isConnectedForward(index: Int, highlightIndex: Int): Boolean {
     return index in 0 until highlightIndex
 }
 
-const val MaxOtherZaps = 4
+private const val MaxOtherZaps = 4
 
 @Composable
 private fun TopZapsSection(
