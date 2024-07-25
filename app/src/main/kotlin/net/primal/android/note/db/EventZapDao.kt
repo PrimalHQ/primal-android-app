@@ -36,7 +36,7 @@ interface EventZapDao {
         """
             SELECT * FROM EventZap WHERE eventId = :noteId
             ORDER BY CAST(amountInBtc AS REAL) DESC, zapReceiptAt ASC
-            LIMIT 10
+            LIMIT 5
         """,
     )
     fun observeTopZaps(noteId: String): Flow<List<EventZap>>
@@ -44,9 +44,9 @@ interface EventZapDao {
     @Transaction
     @Query(
         """
-            SELECT * FROM EventZap WHERE eventId = :noteId
+            SELECT * FROM EventZap WHERE eventId = :eventId
             ORDER BY CAST(amountInBtc AS REAL) DESC, zapReceiptAt ASC
         """,
     )
-    fun pagedNoteZaps(noteId: String): PagingSource<Int, EventZap>
+    fun pagedEventZaps(eventId: String): PagingSource<Int, EventZap>
 }

@@ -65,9 +65,9 @@ fun ArticleDetailsScreen(
     onArticleClick: (naddr: String) -> Unit,
     onHashtagClick: (String) -> Unit,
     onMediaClick: (MediaClickEvent) -> Unit,
-    onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
+    onPayInvoiceClick: (InvoicePayClickEvent) -> Unit,
     onGoToWallet: () -> Unit,
-    onReactionsClick: (noteId: String) -> Unit,
+    onReactionsClick: (eventId: String) -> Unit,
 ) {
     val uiState by viewModel.state.collectAsState()
 
@@ -87,6 +87,7 @@ fun ArticleDetailsScreen(
         onArticleClick = onArticleClick,
         onMediaClick = onMediaClick,
         onPayInvoiceClick = onPayInvoiceClick,
+        onReactionsClick = onReactionsClick,
     )
 }
 
@@ -100,7 +101,8 @@ private fun ArticleDetailsScreen(
     onProfileClick: (profileId: String) -> Unit,
     onArticleClick: (naddr: String) -> Unit,
     onMediaClick: (MediaClickEvent) -> Unit,
-    onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
+    onReactionsClick: (eventId: String) -> Unit,
+    onPayInvoiceClick: (InvoicePayClickEvent) -> Unit,
 ) {
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
@@ -133,6 +135,7 @@ private fun ArticleDetailsScreen(
                     onProfileClick = onProfileClick,
                     onArticleClick = onArticleClick,
                     onMediaClick = onMediaClick,
+                    onReactionsClick = onReactionsClick,
                     onPayInvoiceClick = onPayInvoiceClick,
                 )
             }
@@ -151,7 +154,8 @@ private fun MarkdownContent(
     onProfileClick: (profileId: String) -> Unit,
     onArticleClick: (naddr: String) -> Unit,
     onMediaClick: (MediaClickEvent) -> Unit,
-    onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
+    onReactionsClick: (eventId: String) -> Unit,
+    onPayInvoiceClick: (InvoicePayClickEvent) -> Unit,
 ) {
     val uriHandler = LocalUriHandler.current
     val renderParts by remember(state.markdownContent) {
@@ -194,9 +198,19 @@ private fun MarkdownContent(
             )
         }
 
-        items(
-            items = renderParts,
-        ) { part ->
+        if (state.topZap != null || state.otherZaps.isNotEmpty()) {
+            item {
+                ArticleTopZapsSection(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    topZap = state.topZap,
+                    otherZaps = state.otherZaps,
+                    onZapsClick = { state.eventId?.let(onReactionsClick) },
+                    onZapClick = {},
+                )
+            }
+        }
+
+        items(items = renderParts) { part ->
             when (part) {
                 is ArticlePartRender.HtmlRender -> {
                     HtmlRenderer(

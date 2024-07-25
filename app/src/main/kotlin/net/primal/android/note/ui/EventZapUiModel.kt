@@ -12,11 +12,11 @@ data class EventZapUiModel(
     val zapperId: String,
     val zapperName: String,
     val zapperHandle: String,
-    val zapperInternetIdentifier: String? = null,
-    val zapperAvatarCdnImage: CdnImage? = null,
     val zappedAt: Long,
     val message: String?,
     val amountInSats: ULong,
+    val zapperInternetIdentifier: String? = null,
+    val zapperAvatarCdnImage: CdnImage? = null,
 )
 
 fun EventZap.asEventZapUiModel() =
