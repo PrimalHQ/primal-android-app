@@ -1,10 +1,14 @@
 package net.primal.android.thread.articles
 
+import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.feed.model.FeedPostUi
 
 interface ArticleDetailsContract {
     data class UiState(
         val markdownContent: String = "",
+        val authorCdnImage: CdnImage? = null,
+        val authorDisplayName: String? = null,
+        val authorInternetIdentifier: String? = null,
         val referencedNotes: List<FeedPostUi> = emptyList(),
         val npubToDisplayNameMap: Map<String, String> = emptyMap(),
         val error: ArticleDetailsError? = null,

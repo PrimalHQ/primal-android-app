@@ -3,6 +3,7 @@ package net.primal.android.thread.articles.ui
 import android.content.Context
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -24,6 +25,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import net.primal.android.R
+import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.SnackbarErrorHandler
@@ -115,7 +117,7 @@ private fun ArticleDetailsScreen(
                 navigationIcon = PrimalIcons.ArrowBack,
                 navigationIconContentDescription = stringResource(id = R.string.accessibility_back_button),
                 onNavigationIconClick = onClose,
-                showDivider = true,
+                showDivider = state.authorDisplayName == null,
             )
         },
         content = { paddingValues ->
@@ -164,6 +166,20 @@ private fun MarkdownContent(
             .fillMaxSize()
             .padding(paddingValues),
     ) {
+        if (state.authorDisplayName != null) {
+            item {
+                ArticleAuthorRow(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    authorCdnImage = state.authorCdnImage,
+                    authorDisplayName = state.authorDisplayName,
+                    authorInternetIdentifier = state.authorInternetIdentifier,
+                )
+                PrimalDivider()
+            }
+        }
+
         items(
             items = renderParts,
         ) { part ->
