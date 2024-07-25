@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,14 +32,16 @@ fun ArticleAuthorRow(
     authorDisplayName: String,
     authorCdnImage: CdnImage? = null,
     authorInternetIdentifier: String? = null,
+    onAuthorAvatarClick: (() -> Unit)? = null,
 ) {
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
     ) {
         AvatarThumbnail(
-            avatarSize = 48.dp,
+            avatarSize = 42.dp,
             avatarCdnImage = authorCdnImage,
+            onClick = onAuthorAvatarClick,
         )
 
         Column(
@@ -50,6 +53,10 @@ fun ArticleAuthorRow(
                 displayName = authorDisplayName,
                 internetIdentifier = authorInternetIdentifier,
                 overflow = TextOverflow.Ellipsis,
+                style = LocalTextStyle.current.copy(
+                    fontSize = 16.sp,
+                    lineHeight = 16.sp,
+                ),
             )
 
             if (!authorInternetIdentifier.isNullOrBlank()) {

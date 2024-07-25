@@ -131,6 +131,7 @@ class ArticleDetailsViewModel @Inject constructor(
                     setState {
                         copy(
                             eventId = article.data.eventId,
+                            authorId = article.data.authorId,
                             authorCdnImage = article.author?.avatarCdnImage,
                             authorDisplayName = article.author?.authorNameUiFriendly()
                                 ?: article.data.authorId.asEllipsizedNpub(),
