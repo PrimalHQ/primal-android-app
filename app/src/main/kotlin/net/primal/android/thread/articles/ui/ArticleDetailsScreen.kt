@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -24,6 +25,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
+import java.time.Instant
 import net.primal.android.R
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalLoadingSpinner
@@ -180,12 +182,28 @@ private fun MarkdownContent(
             }
         }
 
+        item {
+            ArticleDetailsHeader(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                title = state.title,
+                date = state.timestamp?.let { Instant.ofEpochSecond(it) },
+                cover = state.coverCdnImage,
+                summary = state.summary,
+            )
+        }
+
         items(
             items = renderParts,
         ) { part ->
             when (part) {
                 is ArticlePartRender.HtmlRender -> {
                     HtmlRenderer(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .wrapContentHeight()
+                            .padding(horizontal = 8.dp),
                         html = part.html,
                         onProfileClick = onProfileClick,
                         onNoteClick = onNoteClick,
@@ -196,6 +214,7 @@ private fun MarkdownContent(
 
                 is ArticlePartRender.MarkdownRender -> {
                     MarkdownRenderer(
+                        modifier = Modifier.padding(all = 16.dp),
                         markdown = part.markdown,
                         onProfileClick = onProfileClick,
                         onNoteClick = onNoteClick,

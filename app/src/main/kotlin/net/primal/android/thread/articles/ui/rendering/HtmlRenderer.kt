@@ -3,9 +3,6 @@ package net.primal.android.thread.articles.ui.rendering
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -15,7 +12,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import net.primal.android.LocalContentDisplaySettings
 import net.primal.android.LocalPrimalTheme
@@ -24,6 +20,7 @@ import net.primal.android.user.domain.NoteAppearance
 
 @Composable
 fun HtmlRenderer(
+    modifier: Modifier,
     html: String,
     onProfileClick: (profileId: String) -> Unit,
     onNoteClick: (noteId: String) -> Unit,
@@ -69,10 +66,7 @@ fun HtmlRenderer(
 
         contentWebView?.let { webView ->
             AndroidView(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentHeight()
-                    .padding(horizontal = 8.dp),
+                modifier = modifier,
                 factory = { _ -> webView },
             )
 

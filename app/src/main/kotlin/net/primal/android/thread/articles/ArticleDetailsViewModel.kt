@@ -122,7 +122,11 @@ class ArticleDetailsViewModel @Inject constructor(
                             authorDisplayName = article.author?.authorNameUiFriendly()
                                 ?: article.data.authorId.asEllipsizedNpub(),
                             authorInternetIdentifier = article.author?.internetIdentifier,
+                            title = article.data.title,
+                            timestamp = article.data.publishedAt,
                             markdownContent = article.data.content,
+                            coverCdnImage = article.data.imageCdnImage,
+                            summary = article.data.summary,
                         )
                     }
                 }
