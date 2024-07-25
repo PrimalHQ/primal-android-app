@@ -6,10 +6,10 @@ import net.primal.android.nostr.ext.takeAsNoteHexIdOrNull
 import net.primal.android.nostr.ext.takeAsProfileHexIdOrNull
 
 fun String.handleArticleLinkClick(
-    onProfileClick: (profileId: String) -> Unit,
-    onNoteClick: (noteId: String) -> Unit,
-    onArticleClick: (naddr: String) -> Unit,
-    onUrlClick: (url: String) -> Unit,
+    onProfileClick: ((profileId: String) -> Unit)?,
+    onNoteClick: ((noteId: String) -> Unit)?,
+    onArticleClick: ((naddr: String) -> Unit)?,
+    onUrlClick: ((url: String) -> Unit)?,
 ) {
     Uri.parse(this)?.let { uri ->
         when (uri.scheme) {
@@ -20,13 +20,14 @@ fun String.handleArticleLinkClick(
                 val noteId = url.takeAsNoteHexIdOrNull()
 
                 when {
-                    profileId != null -> onProfileClick(profileId)
-                    noteId != null -> onNoteClick(noteId)
-                    naddr != null -> onArticleClick(naddr)
+                    profileId != null -> onProfileClick?.invoke(profileId)
+                    noteId != null -> onNoteClick?.invoke(noteId)
+                    naddr != null -> onArticleClick?.invoke(naddr)
+                    else -> Unit
                 }
             }
 
-            else -> onUrlClick(this)
+            else -> onUrlClick?.invoke(this)
         }
     }
 }
