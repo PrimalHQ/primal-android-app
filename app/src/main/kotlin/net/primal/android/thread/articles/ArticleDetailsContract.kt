@@ -12,6 +12,7 @@ interface ArticleDetailsContract {
         val summary: String? = null,
         val timestamp: Long? = null,
         val markdownContent: String = "",
+        val authorId: String? = null,
         val authorCdnImage: CdnImage? = null,
         val authorDisplayName: String? = null,
         val authorInternetIdentifier: String? = null,
