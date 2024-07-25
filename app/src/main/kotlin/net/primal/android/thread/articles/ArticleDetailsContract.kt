@@ -5,6 +5,10 @@ import net.primal.android.core.compose.feed.model.FeedPostUi
 
 interface ArticleDetailsContract {
     data class UiState(
+        val title: String = "",
+        val coverCdnImage: CdnImage? = null,
+        val summary: String? = null,
+        val timestamp: Long? = null,
         val markdownContent: String = "",
         val authorCdnImage: CdnImage? = null,
         val authorDisplayName: String? = null,

@@ -158,7 +158,7 @@ fun buildPrimalRichTextStyle(
 fun PrimalMarkdownStylesProvider(content: @Composable () -> Unit) {
     CompositionLocalProvider(
         LocalTextStyle provides primalMarkdownBodyTextStyle,
-        LocalContentColor provides AppTheme.colorScheme.onSurface,
+        LocalContentColor provides AppTheme.extraColorScheme.onBrand,
         content = content,
     )
 }
