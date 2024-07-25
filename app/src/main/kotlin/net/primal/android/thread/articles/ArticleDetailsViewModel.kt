@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.articles.ArticlesRepository
 import net.primal.android.core.compose.feed.model.asFeedPostUi
+import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.crypto.hexToNpubHrp
 import net.primal.android.feed.repository.FeedRepository
@@ -115,7 +116,15 @@ class ArticleDetailsViewModel @Inject constructor(
                         }
                     }
 
-                    setState { copy(markdownContent = article.data.content) }
+                    setState {
+                        copy(
+                            authorCdnImage = article.author?.avatarCdnImage,
+                            authorDisplayName = article.author?.authorNameUiFriendly()
+                                ?: article.data.authorId.asEllipsizedNpub(),
+                            authorInternetIdentifier = article.author?.internetIdentifier,
+                            markdownContent = article.data.content,
+                        )
+                    }
                 }
         }
 }

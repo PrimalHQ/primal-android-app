@@ -19,6 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import net.primal.android.core.compose.IconText
@@ -30,6 +31,7 @@ import net.primal.android.theme.domain.PrimalTheme
 fun PrimalLoadingButton(
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
+    height: Dp = 58.dp,
     shape: Shape = AppTheme.shapes.extraLarge,
     text: String? = null,
     icon: ImageVector? = null,
@@ -46,6 +48,7 @@ fun PrimalLoadingButton(
 ) {
     PrimalFilledButton(
         modifier = modifier,
+        height = height,
         onClick = onClick,
         shape = shape,
         enabled = enabled,
