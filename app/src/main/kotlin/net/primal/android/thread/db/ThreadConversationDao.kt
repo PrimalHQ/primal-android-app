@@ -56,13 +56,13 @@ interface ThreadConversationDao {
     @Query(
         """
             SELECT 
-                FPD1.postId,
-                FPD1.authorId,
-                FPD1.createdAt,
-                FPD1.content,
-                FPD1.raw,
-                FPD1.authorMetadataId,
-                FPD1.hashtags,
+                PostData.postId,
+                PostData.authorId,
+                PostData.createdAt,
+                PostData.content,
+                PostData.raw,
+                PostData.authorMetadataId,
+                PostData.hashtags,
                 NULL AS repostId,
                 NULL AS repostAuthorId,
                 EventUserStats.liked AS userLiked,
@@ -73,14 +73,14 @@ interface ThreadConversationDao {
                 CASE WHEN MutedUserData.userId IS NOT NULL THEN 1 ELSE 0 END AS isMuted,
                 NULL AS replyToPostId,
                 NULL AS replyToAuthorId
-            FROM PostData AS FPD1
-            INNER JOIN ArticleCommentCrossRef ON FPD1.postId = ArticleCommentCrossRef.commentNoteId
-            LEFT JOIN EventUserStats ON EventUserStats.eventId = FPD1.postId AND EventUserStats.userId = :userId
-            LEFT JOIN MutedUserData ON MutedUserData.userId = FPD1.authorId
+            FROM PostData
+            INNER JOIN ArticleCommentCrossRef ON PostData.postId = ArticleCommentCrossRef.commentNoteId
+            LEFT JOIN EventUserStats ON EventUserStats.eventId = PostData.postId AND EventUserStats.userId = :userId
+            LEFT JOIN MutedUserData ON MutedUserData.userId = PostData.authorId
             WHERE ArticleCommentCrossRef.articleId = :articleId 
                 AND ArticleCommentCrossRef.articleAuthorId = :articleAuthorId 
                 AND isMuted = 0
-            ORDER BY FPD1.createdAt ASC
+            ORDER BY PostData.createdAt DESC
         """,
     )
     fun observeArticleComments(
