@@ -1,29 +1,40 @@
 package net.primal.android.thread.articles.ui
 
 import android.content.Context
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import java.time.Instant
 import net.primal.android.R
@@ -31,7 +42,9 @@ import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.SnackbarErrorHandler
+import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.feed.model.FeedPostUi
+import net.primal.android.core.compose.feed.note.FeedNoteCard
 import net.primal.android.core.compose.feed.note.ReferencedNoteCard
 import net.primal.android.core.compose.feed.note.events.InvoicePayClickEvent
 import net.primal.android.core.compose.feed.note.events.MediaClickEvent
@@ -44,6 +57,7 @@ import net.primal.android.nostr.ext.isNEventUri
 import net.primal.android.nostr.ext.isNostrUri
 import net.primal.android.nostr.ext.isNote
 import net.primal.android.nostr.ext.takeAsNoteHexIdOrNull
+import net.primal.android.theme.AppTheme
 import net.primal.android.thread.articles.ArticleDetailsContract
 import net.primal.android.thread.articles.ArticleDetailsContract.ArticleDetailsError
 import net.primal.android.thread.articles.ArticleDetailsContract.ArticlePartRender
@@ -250,6 +264,70 @@ private fun ArticleContent(
                     )
                 }
             }
+        }
+
+        item {
+            CommentsHeaderSection(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(68.dp)
+                    .background(color = AppTheme.extraColorScheme.surfaceVariantAlt1)
+                    .padding(horizontal = 16.dp),
+                onPostCommentClick = {},
+            )
+        }
+
+        items(
+            items = state.comments,
+            key = { it.postId },
+        ) {
+            FeedNoteCard(
+                data = it,
+                shape = RectangleShape,
+                cardPadding = PaddingValues(vertical = 4.dp),
+                headerSingleLine = true,
+                showReplyTo = false,
+                onProfileClick = onProfileClick,
+                onPostClick = onNoteClick,
+                onArticleClick = onArticleClick,
+                onMediaClick = onMediaClick,
+                onPayInvoiceClick = onPayInvoiceClick,
+            )
+            PrimalDivider()
+        }
+
+        item {
+            Spacer(modifier = Modifier.height(64.dp))
+        }
+    }
+}
+
+@Composable
+private fun CommentsHeaderSection(modifier: Modifier, onPostCommentClick: () -> Unit) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        Text(
+            text = stringResource(id = R.string.article_details_comments_section_title),
+            style = LocalTextStyle.current.copy(
+                fontSize = 24.sp,
+                lineHeight = 24.sp,
+                fontWeight = FontWeight.Bold,
+                color = AppTheme.colorScheme.onSurface,
+            ),
+        )
+        PrimalFilledButton(
+            height = 38.dp,
+            onClick = onPostCommentClick,
+        ) {
+            Text(
+                text = stringResource(id = R.string.article_details_post_comment_button),
+                style = AppTheme.typography.bodySmall.copy(
+                    fontWeight = FontWeight.SemiBold,
+                ),
+            )
         }
     }
 }
