@@ -20,7 +20,7 @@ import net.primal.android.feed.db.FeedPost
 import net.primal.android.feed.db.sql.ChronologicalFeedWithRepostsQueryBuilder
 import net.primal.android.feed.db.sql.ExploreFeedQueryBuilder
 import net.primal.android.feed.db.sql.FeedQueryBuilder
-import net.primal.android.thread.notes.db.ThreadConversationCrossRef
+import net.primal.android.thread.db.NoteConversationCrossRef
 import net.primal.android.user.accounts.active.ActiveAccountStore
 
 class FeedRepository @Inject constructor(
@@ -60,25 +60,25 @@ class FeedRepository @Inject constructor(
             database.feedPosts().findAllPostsByIds(postIds)
         }
 
-    fun observeConversation(postId: String) =
-        database.threadConversations().observeConversation(
-            postId = postId,
+    fun observeConversation(noteId: String) =
+        database.threadConversations().observeNoteConversation(
+            postId = noteId,
             userId = activeAccountStore.activeUserId(),
         )
 
-    suspend fun fetchReplies(postId: String) {
+    suspend fun fetchReplies(noteId: String) {
         val userId = activeAccountStore.activeUserId()
         val response = feedApi.getThread(
-            ThreadRequestBody(postId = postId, userPubKey = userId, limit = 100),
+            ThreadRequestBody(postId = noteId, userPubKey = userId, limit = 100),
         )
 
         response.persistToDatabaseAsTransaction(userId = userId, database = database)
         withContext(dispatcherProvider.io()) {
-            database.conversationConnections().connect(
+            database.threadConversations().connectNoteWithReply(
                 data = response.posts.map {
-                    ThreadConversationCrossRef(
-                        postId = postId,
-                        replyPostId = it.id,
+                    NoteConversationCrossRef(
+                        noteId = noteId,
+                        replyNoteId = it.id,
                     )
                 },
             )

@@ -47,9 +47,9 @@ import net.primal.android.profile.db.ProfileStats
 import net.primal.android.profile.db.ProfileStatsDao
 import net.primal.android.settings.muted.db.MutedUserDao
 import net.primal.android.settings.muted.db.MutedUserData
-import net.primal.android.thread.notes.db.ThreadConversationCrossRef
-import net.primal.android.thread.notes.db.ThreadConversationCrossRefDao
-import net.primal.android.thread.notes.db.ThreadConversationDao
+import net.primal.android.thread.db.ArticleCommentCrossRef
+import net.primal.android.thread.db.NoteConversationCrossRef
+import net.primal.android.thread.db.ThreadConversationDao
 import net.primal.android.user.db.Relay
 import net.primal.android.user.db.RelayDao
 import net.primal.android.wallet.db.WalletTransactionDao
@@ -68,7 +68,7 @@ import net.primal.android.wallet.db.WalletTransactionData
         Feed::class,
         FeedPostDataCrossRef::class,
         FeedPostRemoteKey::class,
-        ThreadConversationCrossRef::class,
+        NoteConversationCrossRef::class,
         ProfileStats::class,
         TrendingHashtag::class,
         NotificationData::class,
@@ -80,8 +80,9 @@ import net.primal.android.wallet.db.WalletTransactionData
         EventHints::class,
         ProfileInteraction::class,
         ArticleData::class,
+        ArticleCommentCrossRef::class,
     ],
-    version = 31,
+    version = 32,
     exportSchema = true,
 )
 @TypeConverters(
@@ -113,8 +114,6 @@ abstract class PrimalDatabase : RoomDatabase() {
     abstract fun feedPosts(): FeedPostDao
 
     abstract fun feedPostsRemoteKeys(): FeedPostRemoteKeyDao
-
-    abstract fun conversationConnections(): ThreadConversationCrossRefDao
 
     abstract fun threadConversations(): ThreadConversationDao
 

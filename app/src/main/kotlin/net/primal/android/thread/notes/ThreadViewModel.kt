@@ -138,7 +138,7 @@ class ThreadViewModel @Inject constructor(
     private suspend fun delayShortlyToPropagateHighlightedPost() = delay(100.milliseconds)
 
     private suspend fun subscribeToConversationChanges() {
-        feedRepository.observeConversation(postId = highlightPostId)
+        feedRepository.observeConversation(noteId = highlightPostId)
             .filter { it.isNotEmpty() }
             .map { posts -> posts.map { it.asFeedPostUi() } }
             .collect { conversation ->
@@ -164,7 +164,7 @@ class ThreadViewModel @Inject constructor(
             setState { copy(fetching = true) }
             try {
                 withContext(dispatcherProvider.io()) {
-                    feedRepository.fetchReplies(postId = highlightPostId)
+                    feedRepository.fetchReplies(noteId = highlightPostId)
                 }
             } catch (error: WssException) {
                 Timber.w(error)

@@ -20,6 +20,7 @@ interface ArticleDetailsContract {
         val npubToDisplayNameMap: Map<String, String> = emptyMap(),
         val topZap: EventZapUiModel? = null,
         val otherZaps: List<EventZapUiModel> = emptyList(),
+        val comments: List<FeedPostUi> = emptyList(),
         val error: ArticleDetailsError? = null,
     )
 
