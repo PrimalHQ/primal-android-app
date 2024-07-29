@@ -18,6 +18,7 @@ import net.primal.android.nostr.ext.mapNotNullAsEventStatsPO
 import net.primal.android.nostr.ext.mapNotNullAsEventUserStatsPO
 import net.primal.android.nostr.ext.mapNotNullAsPostDataPO
 import net.primal.android.nostr.ext.mapNotNullReferencedEventsAsArticleDataPO
+import net.primal.android.thread.db.ArticleCommentCrossRef
 
 suspend fun ArticleResponse.persistToDatabaseAsTransaction(userId: String, database: PrimalDatabase) {
     val cdnResources = this.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
@@ -55,5 +56,26 @@ suspend fun ArticleResponse.persistToDatabaseAsTransaction(userId: String, datab
         eventHintsUpserter(dao = eventHintsDao, eventIds = eventHints.map { it.eventId }) {
             copy(relays = hintsMap[this.eventId]?.relays ?: emptyList())
         }
+    }
+}
+
+suspend fun ArticleResponse.persistCommentsToDatabase(
+    articleId: String,
+    articleAuthorId: String,
+    database: PrimalDatabase,
+) {
+    val referencedNotes = this.referencedEvents.mapNotNullAsPostDataPO()
+    val comments = this.notes.mapAsPostDataPO(referencedPosts = referencedNotes)
+
+    database.withTransaction {
+        database.threadConversations().connectArticleWithComment(
+            data = comments.map {
+                ArticleCommentCrossRef(
+                    articleId = articleId,
+                    articleAuthorId = articleAuthorId,
+                    commentNoteId = it.postId,
+                )
+            },
+        )
     }
 }

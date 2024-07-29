@@ -40,7 +40,7 @@ import timber.log.Timber
 class ArticleDetailsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val activeAccountStore: ActiveAccountStore,
-    private val readsRepository: ArticlesRepository,
+    private val articlesRepository: ArticlesRepository,
     private val feedRepository: FeedRepository,
     private val profileRepository: ProfileRepository,
     private val noteRepository: NoteRepository,
@@ -64,6 +64,7 @@ class ArticleDetailsViewModel @Inject constructor(
             setState { copy(error = ArticleDetailsError.InvalidNaddr) }
         } else {
             observeArticle(naddr)
+            observeArticleComments(naddr = naddr)
         }
     }
 
@@ -81,7 +82,7 @@ class ArticleDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             if (naddr != null) {
                 try {
-                    readsRepository.fetchBlogContentAndReplies(
+                    articlesRepository.fetchArticleAndComments(
                         userId = activeAccountStore.activeUserId(),
                         articleAuthorId = naddr.userId,
                         articleId = naddr.identifier,
@@ -97,7 +98,7 @@ class ArticleDetailsViewModel @Inject constructor(
             var eventId: String? = null
             var referencedNotesUris: Set<String> = emptySet()
             var referencedProfileUris: Set<String> = emptySet()
-            readsRepository.observeArticle(articleId = naddr.identifier, articleAuthorId = naddr.userId)
+            articlesRepository.observeArticle(articleId = naddr.identifier, articleAuthorId = naddr.userId)
                 .collect { article ->
                     if (article.data.eventId != eventId) {
                         eventId = article.data.eventId
@@ -159,4 +160,15 @@ class ArticleDetailsViewModel @Inject constructor(
             }
         }
     }
+
+    private fun observeArticleComments(naddr: Naddr) =
+        viewModelScope.launch {
+            articlesRepository.observeArticleComments(
+                articleId = naddr.identifier,
+                articleAuthorId = naddr.userId,
+                userId = activeAccountStore.activeUserId(),
+            ).collect { comments ->
+                setState { copy(comments = comments.map { it.asFeedPostUi() }) }
+            }
+        }
 }

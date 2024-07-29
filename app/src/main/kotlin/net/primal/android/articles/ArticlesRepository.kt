@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.withContext
 import net.primal.android.articles.api.ArticlesApi
 import net.primal.android.articles.api.mediator.ArticleFeedMediator
+import net.primal.android.articles.api.mediator.persistCommentsToDatabase
 import net.primal.android.articles.api.mediator.persistToDatabaseAsTransaction
 import net.primal.android.articles.api.model.ArticleDetailsRequestBody
 import net.primal.android.articles.db.Article
@@ -64,7 +65,7 @@ class ArticlesRepository @Inject constructor(
             pagingSourceFactory = pagingSourceFactory,
         )
 
-    suspend fun fetchBlogContentAndReplies(
+    suspend fun fetchArticleAndComments(
         userId: String,
         articleId: String,
         articleAuthorId: String,
@@ -79,8 +80,10 @@ class ArticlesRepository @Inject constructor(
             ),
         )
 
-        response.persistToDatabaseAsTransaction(
-            userId = userId,
+        response.persistToDatabaseAsTransaction(userId = userId, database = database)
+        response.persistCommentsToDatabase(
+            articleId = articleId,
+            articleAuthorId = articleAuthorId,
             database = database,
         )
     }
@@ -91,4 +94,16 @@ class ArticlesRepository @Inject constructor(
                 .distinctUntilChanged()
                 .filterNotNull()
         }
+
+    suspend fun observeArticleComments(
+        articleId: String,
+        articleAuthorId: String,
+        userId: String,
+    ) = withContext(dispatchers.io()) {
+        database.threadConversations().observeArticleComments(
+            articleId = articleId,
+            articleAuthorId = articleAuthorId,
+            userId = userId,
+        )
+    }
 }
