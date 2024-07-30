@@ -8,6 +8,7 @@ data class FeedResponse(
     val paging: ContentPrimalPaging?,
     val metadata: List<NostrEvent>,
     val posts: List<NostrEvent>,
+    val articles: List<NostrEvent>,
     val reposts: List<NostrEvent>,
     val referencedPosts: List<PrimalEvent>,
     val primalEventStats: List<PrimalEvent>,
