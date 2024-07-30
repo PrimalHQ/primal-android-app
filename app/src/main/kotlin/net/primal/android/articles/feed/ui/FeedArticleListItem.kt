@@ -67,6 +67,7 @@ fun FeedArticleListItem(
             enabled = onClick != null,
             onClick = { onClick?.invoke() },
         ),
+        color = AppTheme.colorScheme.surfaceVariant,
     ) {
         val infoTextStyle = AppTheme.typography.bodyMedium.copy(
             color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,

@@ -3,6 +3,8 @@ package net.primal.android.thread.articles.ui
 import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,7 +15,9 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Scaffold
@@ -22,6 +26,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -66,6 +71,7 @@ import net.primal.android.thread.articles.ArticleDetailsViewModel
 import net.primal.android.thread.articles.ui.rendering.HtmlRenderer
 import net.primal.android.thread.articles.ui.rendering.MarkdownRenderer
 import net.primal.android.thread.articles.ui.rendering.replaceProfileNostrUrisWithMarkdownLinks
+import net.primal.android.thread.articles.ui.rendering.splitIntoParagraphs
 import net.primal.android.thread.articles.ui.rendering.splitMarkdownByNostrUris
 
 @Composable
@@ -121,6 +127,9 @@ private fun ArticleDetailsScreen(
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
 
+    val listState = rememberLazyListState()
+    val scrolledToTop by remember { derivedStateOf { listState.firstVisibleItemIndex == 0 } }
+
     SnackbarErrorHandler(
         error = state.error,
         snackbarHostState = snackbarHostState,
@@ -135,7 +144,7 @@ private fun ArticleDetailsScreen(
                 navigationIcon = PrimalIcons.ArrowBack,
                 navigationIconContentDescription = stringResource(id = R.string.accessibility_back_button),
                 onNavigationIconClick = onClose,
-                showDivider = state.authorDisplayName == null,
+                showDivider = state.authorDisplayName == null || !scrolledToTop,
             )
         },
         content = { paddingValues ->
@@ -144,6 +153,7 @@ private fun ArticleDetailsScreen(
             } else {
                 ArticleContent(
                     state = state,
+                    listState = listState,
                     paddingValues = paddingValues,
                     onNoteClick = onNoteClick,
                     onProfileClick = onProfileClick,
@@ -163,6 +173,7 @@ private fun ArticleDetailsScreen(
 @Composable
 private fun ArticleContent(
     state: ArticleDetailsContract.UiState,
+    listState: LazyListState = rememberLazyListState(),
     paddingValues: PaddingValues,
     onNoteClick: (noteId: String) -> Unit,
     onProfileClick: (profileId: String) -> Unit,
@@ -176,6 +187,7 @@ private fun ArticleContent(
         mutableStateOf(
             state.markdownContent
                 .splitMarkdownByNostrUris()
+                .flatMap { it.splitIntoParagraphs() }
                 .replaceProfileNostrUrisWithMarkdownLinks(npubToDisplayNameMap = state.npubToDisplayNameMap)
                 .buildArticleRenderParts(referencedNotes = state.referencedNotes),
         )
@@ -185,11 +197,16 @@ private fun ArticleContent(
         modifier = Modifier
             .fillMaxSize()
             .padding(paddingValues),
+        state = listState,
     ) {
         if (state.authorDisplayName != null) {
-            item {
+            item(
+                key = "ArticleAuthor",
+                contentType = "ArticleAuthor",
+            ) {
                 ArticleAuthorRow(
                     modifier = Modifier
+                        .background(color = AppTheme.colorScheme.surface)
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 8.dp),
                     authorCdnImage = state.authorCdnImage,
@@ -201,9 +218,13 @@ private fun ArticleContent(
             }
         }
 
-        item {
+        item(
+            key = "ArticleHeader",
+            contentType = "ArticleHeader",
+        ) {
             ArticleDetailsHeader(
                 modifier = Modifier
+                    .background(color = AppTheme.colorScheme.surfaceVariant)
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp),
                 title = state.title,
@@ -214,9 +235,15 @@ private fun ArticleContent(
         }
 
         if (state.topZap != null || state.otherZaps.isNotEmpty()) {
-            item {
+            item(
+                key = "TopZapSection",
+                contentType = "TopZapSection",
+            ) {
                 ArticleTopZapsSection(
-                    modifier = Modifier.padding(horizontal = 16.dp),
+                    modifier = Modifier
+                        .background(color = AppTheme.colorScheme.surfaceVariant)
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
                     topZap = state.topZap,
                     otherZaps = state.otherZaps,
                     onZapsClick = { state.eventId?.let(onReactionsClick) },
@@ -225,11 +252,22 @@ private fun ArticleContent(
             }
         }
 
-        items(items = renderParts) { part ->
-            when (part) {
+        items(
+            count = renderParts.size,
+            key = { index -> "${renderParts[index]}#$index" },
+            contentType = { index ->
+                when (renderParts[index]) {
+                    is ArticlePartRender.HtmlRender -> "HtmlRender"
+                    is ArticlePartRender.MarkdownRender -> "MarkdownRender"
+                    is ArticlePartRender.NoteRender -> "NoteRender"
+                }
+            },
+        ) { index ->
+            when (val part = renderParts[index]) {
                 is ArticlePartRender.HtmlRender -> {
                     HtmlRenderer(
                         modifier = Modifier
+                            .background(color = AppTheme.colorScheme.surfaceVariant)
                             .fillMaxWidth()
                             .wrapContentHeight()
                             .padding(horizontal = 8.dp),
@@ -243,7 +281,10 @@ private fun ArticleContent(
 
                 is ArticlePartRender.MarkdownRender -> {
                     MarkdownRenderer(
-                        modifier = Modifier.padding(all = 16.dp),
+                        modifier = Modifier
+                            .background(color = AppTheme.colorScheme.surfaceVariant)
+                            .fillMaxWidth()
+                            .padding(all = 16.dp),
                         markdown = part.markdown,
                         onProfileClick = onProfileClick,
                         onNoteClick = onNoteClick,
@@ -253,50 +294,67 @@ private fun ArticleContent(
                 }
 
                 is ArticlePartRender.NoteRender -> {
-                    ReferencedNoteCard(
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                        data = part.note,
-                        onPostClick = onNoteClick,
-                        onProfileClick = onProfileClick,
-                        onArticleClick = onArticleClick,
-                        onMediaClick = onMediaClick,
-                        onPayInvoiceClick = onPayInvoiceClick,
-                    )
+                    Box(
+                        modifier = Modifier
+                            .background(color = AppTheme.colorScheme.surfaceVariant)
+                            .fillMaxWidth(),
+                    ) {
+                        ReferencedNoteCard(
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                            data = part.note,
+                            onPostClick = onNoteClick,
+                            onProfileClick = onProfileClick,
+                            onArticleClick = onArticleClick,
+                            onMediaClick = onMediaClick,
+                            onPayInvoiceClick = onPayInvoiceClick,
+                        )
+                    }
                 }
             }
         }
 
-        item {
-            CommentsHeaderSection(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(68.dp)
-                    .background(color = AppTheme.extraColorScheme.surfaceVariantAlt1)
-                    .padding(horizontal = 16.dp),
-                onPostCommentClick = {},
-            )
+        item(contentType = "CommentsHeader") {
+            Column {
+                PrimalDivider()
+                CommentsHeaderSection(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(68.dp)
+                        .background(color = AppTheme.extraColorScheme.surfaceVariantAlt1)
+                        .padding(horizontal = 16.dp),
+                    onPostCommentClick = {},
+                )
+                PrimalDivider()
+            }
         }
 
         items(
             items = state.comments,
             key = { it.postId },
+            contentType = { "NoteComment" },
         ) {
-            FeedNoteCard(
-                data = it,
-                shape = RectangleShape,
-                cardPadding = PaddingValues(vertical = 4.dp),
-                headerSingleLine = true,
-                showReplyTo = false,
-                onProfileClick = onProfileClick,
-                onPostClick = onNoteClick,
-                onArticleClick = onArticleClick,
-                onMediaClick = onMediaClick,
-                onPayInvoiceClick = onPayInvoiceClick,
-            )
-            PrimalDivider()
+            Column(
+                modifier = Modifier
+                    .background(color = AppTheme.colorScheme.surfaceVariant)
+                    .fillMaxWidth(),
+            ) {
+                FeedNoteCard(
+                    data = it,
+                    shape = RectangleShape,
+                    cardPadding = PaddingValues(vertical = 4.dp),
+                    headerSingleLine = true,
+                    showReplyTo = false,
+                    onProfileClick = onProfileClick,
+                    onPostClick = onNoteClick,
+                    onArticleClick = onArticleClick,
+                    onMediaClick = onMediaClick,
+                    onPayInvoiceClick = onPayInvoiceClick,
+                )
+                PrimalDivider()
+            }
         }
 
-        item {
+        item(contentType = "Spacer") {
             Spacer(modifier = Modifier.height(64.dp))
         }
     }
