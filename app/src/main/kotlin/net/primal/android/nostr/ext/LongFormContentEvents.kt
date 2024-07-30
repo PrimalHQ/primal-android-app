@@ -26,8 +26,8 @@ fun List<PrimalEvent>.mapNotNullReferencedEventsAsArticleDataPO(
     }
 
 fun List<NostrEvent>.mapNotNullAsArticleDataPO(
-    wordsCountMap: Map<String, Int>,
-    cdnResources: Map<String, CdnResource>,
+    wordsCountMap: Map<String, Int> = emptyMap(),
+    cdnResources: Map<String, CdnResource> = emptyMap(),
 ) = this.mapNotNull { event ->
     event.asArticleData(
         wordsCount = wordsCountMap[event.id],

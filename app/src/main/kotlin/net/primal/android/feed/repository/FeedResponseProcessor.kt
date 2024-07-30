@@ -13,10 +13,12 @@ import net.primal.android.nostr.ext.flatMapNotNullAsVideoThumbnailsMap
 import net.primal.android.nostr.ext.flatMapPostsAsNoteNostrUriPO
 import net.primal.android.nostr.ext.mapAsPostDataPO
 import net.primal.android.nostr.ext.mapAsProfileDataPO
+import net.primal.android.nostr.ext.mapNotNullAsArticleDataPO
 import net.primal.android.nostr.ext.mapNotNullAsEventStatsPO
 import net.primal.android.nostr.ext.mapNotNullAsEventUserStatsPO
 import net.primal.android.nostr.ext.mapNotNullAsPostDataPO
 import net.primal.android.nostr.ext.mapNotNullAsRepostDataPO
+import net.primal.android.thread.db.ArticleCommentCrossRef
 import net.primal.android.thread.db.NoteConversationCrossRef
 
 suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String, database: PrimalDatabase) {
@@ -72,12 +74,24 @@ suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String, database
 }
 
 suspend fun FeedResponse.persistNoteRepliesAndArticleCommentsToDatabase(noteId: String, database: PrimalDatabase) {
+    val cdnResources = this.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
+    val articles = this.articles.mapNotNullAsArticleDataPO(cdnResources = cdnResources)
+
     database.withTransaction {
         database.threadConversations().connectNoteWithReply(
             data = posts.map {
                 NoteConversationCrossRef(
                     noteId = noteId,
                     replyNoteId = it.id,
+                )
+            },
+        )
+        database.threadConversations().connectArticleWithComment(
+            data = articles.map { article ->
+                ArticleCommentCrossRef(
+                    articleId = article.articleId,
+                    articleAuthorId = article.authorId,
+                    commentNoteId = noteId,
                 )
             },
         )

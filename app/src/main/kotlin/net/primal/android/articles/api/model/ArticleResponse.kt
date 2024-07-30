@@ -9,7 +9,7 @@ import net.primal.android.nostr.model.primal.content.ContentPrimalPaging
 data class ArticleResponse(
     val paging: ContentPrimalPaging?,
     val metadata: List<NostrEvent>,
-    val longFormContents: List<NostrEvent>,
+    val articles: List<NostrEvent>,
     val zaps: List<NostrEvent>,
     val notes: List<NostrEvent>,
     val primalUserScores: List<PrimalEvent>,
