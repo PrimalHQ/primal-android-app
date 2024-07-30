@@ -1,5 +1,6 @@
 package net.primal.android.thread.notes
 
+import net.primal.android.articles.feed.ui.FeedArticleUi
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.feed.model.ZappingState
 import net.primal.android.note.ui.EventZapUiModel
@@ -17,6 +18,7 @@ interface ThreadContract {
         val confirmBookmarkingNoteId: String? = null,
         val topZap: EventZapUiModel? = null,
         val otherZaps: List<EventZapUiModel> = emptyList(),
+        val replyToArticle: FeedArticleUi? = null,
         val error: ThreadError? = null,
     ) {
         sealed class ThreadError {

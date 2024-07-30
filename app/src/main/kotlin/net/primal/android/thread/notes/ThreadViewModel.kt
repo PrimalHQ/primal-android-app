@@ -13,10 +13,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import net.primal.android.articles.ArticleRepository
+import net.primal.android.articles.feed.ui.mapAsFeedArticleUi
 import net.primal.android.core.compose.feed.model.asFeedPostUi
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.feed.repository.FeedRepository
@@ -48,6 +51,7 @@ class ThreadViewModel @Inject constructor(
     private val feedRepository: FeedRepository,
     private val noteRepository: NoteRepository,
     private val profileRepository: ProfileRepository,
+    private val articleRepository: ArticleRepository,
     private val zapHandler: ZapHandler,
     private val mutedUserRepository: MutedUserRepository,
 ) : ViewModel() {
@@ -66,6 +70,7 @@ class ThreadViewModel @Inject constructor(
         observeConversation()
         observeTopZappers()
         observeActiveAccount()
+        observeArticle()
     }
 
     private fun observeEvents() =
@@ -119,6 +124,15 @@ class ThreadViewModel @Inject constructor(
                             ),
                         )
                     }
+                }
+        }
+
+    private fun observeArticle() =
+        viewModelScope.launch {
+            articleRepository.observeArticleByCommentId(commentNoteId = highlightPostId)
+                .filterNotNull()
+                .collect { article ->
+                    setState { copy(replyToArticle = article.mapAsFeedArticleUi()) }
                 }
         }
 
