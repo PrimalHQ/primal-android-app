@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.withContext
 import net.primal.android.articles.api.ArticlesApi
 import net.primal.android.articles.api.mediator.ArticleFeedMediator
-import net.primal.android.articles.api.mediator.persistCommentsToDatabase
+import net.primal.android.articles.api.mediator.persistArticleCommentsToDatabase
 import net.primal.android.articles.api.mediator.persistToDatabaseAsTransaction
 import net.primal.android.articles.api.model.ArticleDetailsRequestBody
 import net.primal.android.articles.db.Article
@@ -81,7 +81,7 @@ class ArticlesRepository @Inject constructor(
         )
 
         response.persistToDatabaseAsTransaction(userId = userId, database = database)
-        response.persistCommentsToDatabase(
+        response.persistArticleCommentsToDatabase(
             articleId = articleId,
             articleAuthorId = articleAuthorId,
             database = database,

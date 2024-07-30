@@ -59,7 +59,7 @@ suspend fun ArticleResponse.persistToDatabaseAsTransaction(userId: String, datab
     }
 }
 
-suspend fun ArticleResponse.persistCommentsToDatabase(
+suspend fun ArticleResponse.persistArticleCommentsToDatabase(
     articleId: String,
     articleAuthorId: String,
     database: PrimalDatabase,
