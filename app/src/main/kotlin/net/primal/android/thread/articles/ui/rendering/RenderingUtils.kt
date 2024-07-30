@@ -43,6 +43,10 @@ fun String.splitMarkdownByNostrUris(): List<String> {
     return chunks.filter { it.isNotBlank() }
 }
 
+fun String.splitIntoParagraphs(): List<String> {
+    return this.split(Regex("\\n\\s*\\n")).map { it.trim() }
+}
+
 private fun String.markdownToHtml(): String {
     val flavour = CommonMarkFlavourDescriptor()
     val parsedTree = MarkdownParser(flavour).buildMarkdownTreeFromString(this)
