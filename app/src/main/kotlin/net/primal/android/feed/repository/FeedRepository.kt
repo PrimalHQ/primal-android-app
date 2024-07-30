@@ -20,7 +20,6 @@ import net.primal.android.feed.db.FeedPost
 import net.primal.android.feed.db.sql.ChronologicalFeedWithRepostsQueryBuilder
 import net.primal.android.feed.db.sql.ExploreFeedQueryBuilder
 import net.primal.android.feed.db.sql.FeedQueryBuilder
-import net.primal.android.thread.db.NoteConversationCrossRef
 import net.primal.android.user.accounts.active.ActiveAccountStore
 
 class FeedRepository @Inject constructor(
@@ -66,32 +65,20 @@ class FeedRepository @Inject constructor(
             userId = activeAccountStore.activeUserId(),
         )
 
-    suspend fun fetchReplies(noteId: String) {
-        val userId = activeAccountStore.activeUserId()
-        val response = feedApi.getThread(
-            ThreadRequestBody(postId = noteId, userPubKey = userId, limit = 100),
-        )
-
-        response.persistToDatabaseAsTransaction(userId = userId, database = database)
+    suspend fun fetchReplies(noteId: String) =
         withContext(dispatcherProvider.io()) {
-            database.threadConversations().connectNoteWithReply(
-                data = response.posts.map {
-                    NoteConversationCrossRef(
-                        noteId = noteId,
-                        replyNoteId = it.id,
-                    )
-                },
-            )
+            val userId = activeAccountStore.activeUserId()
+            val response = feedApi.getThread(ThreadRequestBody(postId = noteId, userPubKey = userId, limit = 100))
+            response.persistToDatabaseAsTransaction(userId = userId, database = database)
+            response.persistNoteRepliesAndArticleCommentsToDatabase(noteId = noteId, database = database)
         }
-    }
 
-    suspend fun removeFeedDirective(feedDirective: String) {
+    suspend fun removeFeedDirective(feedDirective: String) =
         withContext(dispatcherProvider.io()) {
             database.feedPostsRemoteKeys().deleteByDirective(feedDirective)
             database.feedsConnections().deleteConnectionsByDirective(feedDirective)
             database.posts().deleteOrphanPosts()
         }
-    }
 
     suspend fun replaceFeedDirective(
         userId: String,

@@ -17,6 +17,7 @@ import net.primal.android.nostr.ext.mapNotNullAsEventStatsPO
 import net.primal.android.nostr.ext.mapNotNullAsEventUserStatsPO
 import net.primal.android.nostr.ext.mapNotNullAsPostDataPO
 import net.primal.android.nostr.ext.mapNotNullAsRepostDataPO
+import net.primal.android.thread.db.NoteConversationCrossRef
 
 suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String, database: PrimalDatabase) {
     val cdnResources = this.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
@@ -67,5 +68,18 @@ suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String, database
         eventHintsUpserter(dao = eventHintsDao, eventIds = eventHints.map { it.eventId }) {
             copy(relays = hintsMap[this.eventId]?.relays ?: emptyList())
         }
+    }
+}
+
+suspend fun FeedResponse.persistNoteRepliesAndArticleCommentsToDatabase(noteId: String, database: PrimalDatabase) {
+    database.withTransaction {
+        database.threadConversations().connectNoteWithReply(
+            data = posts.map {
+                NoteConversationCrossRef(
+                    noteId = noteId,
+                    replyNoteId = it.id,
+                )
+            },
+        )
     }
 }
