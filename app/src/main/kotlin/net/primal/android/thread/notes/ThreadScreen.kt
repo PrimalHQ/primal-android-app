@@ -74,6 +74,7 @@ import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import net.primal.android.R
+import net.primal.android.articles.feed.ui.FeedArticleListItem
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.ImportPhotosIconButton
@@ -527,6 +528,22 @@ private fun ThreadLazyColumn(
             .onSizeChanged { threadListMaxHeightPx = it.height },
         contentPadding = paddingValues,
     ) {
+        if (state.replyToArticle != null) {
+            item(
+                key = state.replyToArticle.eventId,
+                contentType = "MentionedArticle",
+            ) {
+                Column {
+                    FeedArticleListItem(
+                        data = state.replyToArticle,
+                        modifier = Modifier.padding(all = 16.dp),
+                        onClick = onArticleClick,
+                    )
+                    PrimalDivider()
+                }
+            }
+        }
+
         itemsIndexed(
             items = state.conversation,
             key = { _, item -> item.postId },

@@ -52,9 +52,6 @@ import net.primal.android.core.compose.isEmpty
 import net.primal.android.core.compose.isNotEmpty
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.PrimalDrawerScaffold
-import net.primal.android.nostr.model.NostrEventKind
-import net.primal.android.nostr.utils.Naddr
-import net.primal.android.nostr.utils.Nip19TLV.toNaddrString
 import timber.log.Timber
 
 @Composable
@@ -165,15 +162,7 @@ private fun FeedArticleList(
                     FeedArticleListItem(
                         data = item,
                         modifier = Modifier.padding(all = 16.dp),
-                        onClick = {
-                            onArticleClick(
-                                Naddr(
-                                    identifier = item.articleId,
-                                    userId = item.authorId,
-                                    kind = NostrEventKind.LongFormContent.value,
-                                ).toNaddrString(),
-                            )
-                        },
+                        onClick = onArticleClick,
                     )
                     PrimalDivider()
                 }

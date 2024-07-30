@@ -70,7 +70,6 @@ class ThreadViewModel @Inject constructor(
         observeConversation()
         observeTopZappers()
         observeActiveAccount()
-        observeArticle()
     }
 
     private fun observeEvents() =
@@ -93,7 +92,8 @@ class ThreadViewModel @Inject constructor(
         viewModelScope.launch {
             loadHighlightedPost()
             delayShortlyToPropagateHighlightedPost()
-            subscribeToConversationChanges()
+            observeConversationChanges()
+            observeArticle()
         }
 
     private fun observeTopZappers() =
@@ -127,15 +127,6 @@ class ThreadViewModel @Inject constructor(
                 }
         }
 
-    private fun observeArticle() =
-        viewModelScope.launch {
-            articleRepository.observeArticleByCommentId(commentNoteId = highlightPostId)
-                .filterNotNull()
-                .collect { article ->
-                    setState { copy(replyToArticle = article.mapAsFeedArticleUi()) }
-                }
-        }
-
     private suspend fun loadHighlightedPost() {
         val rootPost = withContext(dispatcherProvider.io()) {
             feedRepository.findAllPostsByIds(postIds = listOf(highlightPostId))
@@ -151,22 +142,32 @@ class ThreadViewModel @Inject constructor(
 
     private suspend fun delayShortlyToPropagateHighlightedPost() = delay(100.milliseconds)
 
-    private suspend fun subscribeToConversationChanges() {
-        feedRepository.observeConversation(noteId = highlightPostId)
-            .filter { it.isNotEmpty() }
-            .map { posts -> posts.map { it.asFeedPostUi() } }
-            .collect { conversation ->
-                val highlightPostIndex = conversation.indexOfFirst { it.postId == highlightPostId }
-                val thread = conversation.subList(0, highlightPostIndex + 1)
-                val replies = conversation.subList(highlightPostIndex + 1, conversation.size)
-                setState {
-                    copy(
-                        conversation = thread + replies.sortedByDescending { it.timestamp },
-                        highlightPostIndex = highlightPostIndex,
-                    )
+    private suspend fun observeConversationChanges() =
+        viewModelScope.launch {
+            feedRepository.observeConversation(noteId = highlightPostId)
+                .filter { it.isNotEmpty() }
+                .map { posts -> posts.map { it.asFeedPostUi() } }
+                .collect { conversation ->
+                    val highlightPostIndex = conversation.indexOfFirst { it.postId == highlightPostId }
+                    val thread = conversation.subList(0, highlightPostIndex + 1)
+                    val replies = conversation.subList(highlightPostIndex + 1, conversation.size)
+                    setState {
+                        copy(
+                            conversation = thread + replies.sortedByDescending { it.timestamp },
+                            highlightPostIndex = highlightPostIndex,
+                        )
+                    }
                 }
-            }
-    }
+        }
+
+    private fun observeArticle() =
+        viewModelScope.launch {
+            articleRepository.observeArticleByCommentId(commentNoteId = highlightPostId)
+                .filterNotNull()
+                .collect { article ->
+                    setState { copy(replyToArticle = article.mapAsFeedArticleUi()) }
+                }
+        }
 
     private fun fetchData() {
         fetchNoteReplies()
