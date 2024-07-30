@@ -51,6 +51,9 @@ import net.primal.android.core.compose.feed.model.EventStatsUi
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.FeedReplies
 import net.primal.android.core.compose.icons.primaliconpack.LightningBolt
+import net.primal.android.nostr.model.NostrEventKind
+import net.primal.android.nostr.utils.Naddr
+import net.primal.android.nostr.utils.Nip19TLV.toNaddrString
 import net.primal.android.note.ui.EventZapUiModel
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
@@ -60,12 +63,19 @@ import net.primal.android.user.domain.ContentDisplaySettings
 fun FeedArticleListItem(
     data: FeedArticleUi,
     modifier: Modifier = Modifier,
-    onClick: (() -> Unit)? = null,
+    onClick: ((naddr: String) -> Unit)? = null,
 ) {
     Surface(
         modifier = Modifier.clickable(
             enabled = onClick != null,
-            onClick = { onClick?.invoke() },
+            onClick = {
+                val naddr = Naddr(
+                    identifier = data.articleId,
+                    userId = data.authorId,
+                    kind = NostrEventKind.LongFormContent.value,
+                ).toNaddrString()
+                onClick?.invoke(naddr)
+            },
         ),
         color = AppTheme.colorScheme.surfaceVariant,
     ) {
