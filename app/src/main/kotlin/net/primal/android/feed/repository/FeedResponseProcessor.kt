@@ -11,6 +11,7 @@ import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
 import net.primal.android.nostr.ext.flatMapNotNullAsLinkPreviewResource
 import net.primal.android.nostr.ext.flatMapNotNullAsVideoThumbnailsMap
 import net.primal.android.nostr.ext.flatMapPostsAsNoteNostrUriPO
+import net.primal.android.nostr.ext.mapAsEventZapDO
 import net.primal.android.nostr.ext.mapAsPostDataPO
 import net.primal.android.nostr.ext.mapAsProfileDataPO
 import net.primal.android.nostr.ext.mapNotNullAsArticleDataPO
@@ -33,6 +34,8 @@ suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String, database
     )
     val feedPosts = posts.mapAsPostDataPO(referencedPosts = referencedPostsWithReplyTo)
 
+    val articles = this.articles.mapNotNullAsArticleDataPO(cdnResources = cdnResources)
+
     val profiles = metadata.mapAsProfileDataPO(cdnResources = cdnResources)
     val profileIdToProfileDataMap = profiles.asMapByKey { it.ownerId }
 
@@ -52,6 +55,7 @@ suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String, database
         profileIdToProfileDataMap = profileIdToProfileDataMap,
     )
 
+    val eventZaps = zaps.mapAsEventZapDO(profilesMap = profiles.associateBy { it.ownerId })
     val reposts = reposts.mapNotNullAsRepostDataPO()
     val postStats = primalEventStats.mapNotNullAsEventStatsPO()
     val userPostStats = primalEventUserStats.mapNotNullAsEventUserStatsPO(userId = userId)
@@ -62,8 +66,10 @@ suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String, database
         database.attachments().upsertAllNoteAttachments(data = noteAttachments)
         database.attachments().upsertAllNostrUris(data = noteNostrUris)
         database.reposts().upsertAll(data = reposts)
+        database.eventZaps().upsertAll(data = eventZaps)
         database.eventStats().upsertAll(data = postStats)
         database.eventUserStats().upsertAll(data = userPostStats)
+        database.articles().upsertAll(list = articles)
 
         val eventHintsDao = database.eventHints()
         val hintsMap = eventHints.associateBy { it.eventId }
@@ -86,7 +92,6 @@ suspend fun FeedResponse.persistNoteRepliesAndArticleCommentsToDatabase(noteId: 
                 )
             },
         )
-        database.articles().upsertAll(list = articles)
         database.threadConversations().connectArticleWithComment(
             data = articles.map { article ->
                 ArticleCommentCrossRef(

@@ -118,6 +118,7 @@ class NotificationsRemoteMediator(
                 posts = response.notes,
                 articles = emptyList(),
                 reposts = emptyList(),
+                zaps = emptyList(),
                 referencedPosts = response.primalReferencedNotes,
                 primalEventStats = response.primalNoteStats,
                 primalEventUserStats = emptyList(),

@@ -10,6 +10,7 @@ data class FeedResponse(
     val posts: List<NostrEvent>,
     val articles: List<NostrEvent>,
     val reposts: List<NostrEvent>,
+    val zaps: List<NostrEvent>,
     val referencedPosts: List<PrimalEvent>,
     val primalEventStats: List<PrimalEvent>,
     val primalEventUserStats: List<PrimalEvent>,
