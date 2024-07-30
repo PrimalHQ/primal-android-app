@@ -86,6 +86,7 @@ suspend fun FeedResponse.persistNoteRepliesAndArticleCommentsToDatabase(noteId: 
                 )
             },
         )
+        database.articles().upsertAll(list = articles)
         database.threadConversations().connectArticleWithComment(
             data = articles.map { article ->
                 ArticleCommentCrossRef(
