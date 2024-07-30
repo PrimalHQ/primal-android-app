@@ -72,11 +72,11 @@ class ThreadViewModel @Inject constructor(
         viewModelScope.launch {
             events.collect {
                 when (it) {
+                    UiEvent.UpdateConversation -> fetchData()
                     is UiEvent.PostLikeAction -> likePost(it)
                     is UiEvent.RepostAction -> repostPost(it)
                     is UiEvent.ZapAction -> zapPost(it)
                     is UiEvent.MuteAction -> mute(it)
-                    UiEvent.UpdateConversation -> fetchData()
                     is UiEvent.ReportAbuse -> reportAbuse(it)
                     is UiEvent.BookmarkAction -> handleBookmark(it)
                     UiEvent.DismissBookmarkConfirmation -> setState { copy(confirmBookmarkingNoteId = null) }
