@@ -23,8 +23,8 @@ interface ArticleDao {
     @Transaction
     @Query(
         """
-        SELECT * FROM ArticleData WHERE articleId = :articleId AND authorId = :userId ORDER BY publishedAt DESC LIMIT 1
+        SELECT * FROM ArticleData WHERE articleId = :articleId AND authorId = :authorId ORDER BY publishedAt DESC LIMIT 1
         """,
     )
-    fun observeArticle(articleId: String, userId: String): Flow<Article>
+    fun observeArticle(articleId: String, authorId: String): Flow<Article>
 }
