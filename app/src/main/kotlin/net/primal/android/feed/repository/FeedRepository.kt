@@ -69,8 +69,8 @@ class FeedRepository @Inject constructor(
         withContext(dispatcherProvider.io()) {
             val userId = activeAccountStore.activeUserId()
             val response = feedApi.getThread(ThreadRequestBody(postId = noteId, userPubKey = userId, limit = 100))
-            response.persistToDatabaseAsTransaction(userId = userId, database = database)
             response.persistNoteRepliesAndArticleCommentsToDatabase(noteId = noteId, database = database)
+            response.persistToDatabaseAsTransaction(userId = userId, database = database)
         }
 
     suspend fun removeFeedDirective(feedDirective: String) =
