@@ -67,9 +67,9 @@ class ThreadViewModel @Inject constructor(
 
     init {
         observeEvents()
-        observeConversation()
-        observeTopZappers()
         observeActiveAccount()
+        observeConversationChanges()
+        observeTopZappers()
     }
 
     private fun observeEvents() =
@@ -86,14 +86,6 @@ class ThreadViewModel @Inject constructor(
                     UiEvent.DismissBookmarkConfirmation -> setState { copy(confirmBookmarkingNoteId = null) }
                 }
             }
-        }
-
-    private fun observeConversation() =
-        viewModelScope.launch {
-            loadHighlightedPost()
-            delayShortlyToPropagateHighlightedPost()
-            observeConversationChanges()
-            observeArticle()
         }
 
     private fun observeTopZappers() =
@@ -127,28 +119,25 @@ class ThreadViewModel @Inject constructor(
                 }
         }
 
-    private suspend fun loadHighlightedPost() {
-        val rootPost = withContext(dispatcherProvider.io()) {
-            feedRepository.findAllPostsByIds(postIds = listOf(highlightPostId))
-        }
-        setState {
-            copy(
-                conversation = rootPost.map { it.asFeedPostUi() },
-                highlightPostId = this@ThreadViewModel.highlightPostId,
-                highlightPostIndex = 0,
-            )
-        }
-    }
-
-    private suspend fun delayShortlyToPropagateHighlightedPost() = delay(100.milliseconds)
-
-    private suspend fun observeConversationChanges() =
+    private fun observeConversationChanges() =
         viewModelScope.launch {
+            var articleObserverStarted = false
             feedRepository.observeConversation(noteId = highlightPostId)
                 .filter { it.isNotEmpty() }
                 .map { posts -> posts.map { it.asFeedPostUi() } }
                 .collect { conversation ->
                     val highlightPostIndex = conversation.indexOfFirst { it.postId == highlightPostId }
+                    if (_state.value.conversation.isEmpty() && highlightPostIndex != -1) {
+                        setState {
+                            copy(
+                                conversation = listOf(conversation[highlightPostIndex]),
+                                highlightPostIndex = 0,
+                            )
+                        }
+                        // Delay shortly to propagate highlighted post to UI
+                        delay(100.milliseconds)
+                    }
+
                     val thread = conversation.subList(0, highlightPostIndex + 1)
                     val replies = conversation.subList(highlightPostIndex + 1, conversation.size)
                     setState {
@@ -156,6 +145,11 @@ class ThreadViewModel @Inject constructor(
                             conversation = thread + replies.sortedByDescending { it.timestamp },
                             highlightPostIndex = highlightPostIndex,
                         )
+                    }
+
+                    if (!articleObserverStarted) {
+                        articleObserverStarted = true
+                        observeArticle()
                     }
                 }
         }
