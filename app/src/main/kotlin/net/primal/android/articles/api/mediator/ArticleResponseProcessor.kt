@@ -33,7 +33,7 @@ suspend fun ArticleResponse.persistToDatabaseAsTransaction(userId: String, datab
         wordsCountMap = wordsCountMap,
         cdnResources = cdnResources,
     )
-    val allArticles = this.longFormContents.mapNotNullAsArticleDataPO(
+    val allArticles = this.articles.mapNotNullAsArticleDataPO(
         wordsCountMap = wordsCountMap,
         cdnResources = cdnResources,
     )
