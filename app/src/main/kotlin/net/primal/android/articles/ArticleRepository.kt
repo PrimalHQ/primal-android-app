@@ -10,6 +10,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.withContext
 import net.primal.android.articles.api.ArticlesApi
 import net.primal.android.articles.api.mediator.ArticleFeedMediator
@@ -22,7 +23,7 @@ import net.primal.android.db.PrimalDatabase
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.user.accounts.active.ActiveAccountStore
 
-class ArticlesRepository @Inject constructor(
+class ArticleRepository @Inject constructor(
     private val dispatchers: CoroutineDispatcherProvider,
     private val activeAccountStore: ActiveAccountStore,
     private val articlesApi: ArticlesApi,
@@ -90,7 +91,7 @@ class ArticlesRepository @Inject constructor(
 
     suspend fun observeArticle(articleId: String, articleAuthorId: String) =
         withContext(dispatchers.io()) {
-            database.articles().observeArticle(articleId = articleId, userId = articleAuthorId)
+            database.articles().observeArticle(articleId = articleId, authorId = articleAuthorId)
                 .distinctUntilChanged()
                 .filterNotNull()
         }
@@ -106,4 +107,19 @@ class ArticlesRepository @Inject constructor(
             userId = userId,
         )
     }
+
+    suspend fun observeArticleByCommentId(commentNoteId: String): Flow<Article?> =
+        withContext(dispatchers.io()) {
+            val crossRef = database.threadConversations().findCrossRefByCommentId(commentNoteId = commentNoteId)
+            if (crossRef != null) {
+                database.articles()
+                    .observeArticle(
+                        articleId = crossRef.articleId,
+                        authorId = crossRef.articleAuthorId,
+                    )
+                    .distinctUntilChanged()
+            } else {
+                flowOf(null)
+            }
+        }
 }

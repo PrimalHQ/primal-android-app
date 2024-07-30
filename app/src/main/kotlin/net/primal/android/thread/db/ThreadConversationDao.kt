@@ -88,4 +88,7 @@ interface ThreadConversationDao {
         articleAuthorId: String,
         userId: String,
     ): Flow<List<FeedPost>>
+
+    @Query("SELECT * FROM ArticleCommentCrossRef WHERE commentNoteId = :commentNoteId")
+    fun findCrossRefByCommentId(commentNoteId: String): ArticleCommentCrossRef?
 }
