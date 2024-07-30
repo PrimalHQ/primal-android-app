@@ -7,3 +7,4 @@
 - Support for profile and note mentions in article details;
 - Implemented article details header and top zaps;
 - Implemented rendering article comments;
+- Implemented rendering article on ThreadScreen;
