@@ -8,3 +8,5 @@
 - Implemented article details header and top zaps;
 - Implemented rendering article comments;
 - Implemented rendering article on ThreadScreen;
+- Implemented article commenting and commenting on article comments;
+- Implemented font size variations on articles;
