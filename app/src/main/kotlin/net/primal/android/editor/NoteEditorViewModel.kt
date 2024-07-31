@@ -206,6 +206,7 @@ class NoteEditorViewModel @AssistedInject constructor(
         viewModelScope.launch {
             setState { copy(publishing = true) }
             try {
+                val article = _state.value.replyToArticle
                 val rootPost = _state.value.conversation.firstOrNull()
                 val replyToPost = _state.value.conversation.lastOrNull()
                 val publishedAndImported = noteRepository.publishShortTextNote(
@@ -213,7 +214,9 @@ class NoteEditorViewModel @AssistedInject constructor(
                         users = _state.value.taggedUsers,
                     ),
                     attachments = _state.value.attachments,
-                    rootPostId = rootPost?.postId,
+                    rootArticleId = article?.articleId,
+                    rootArticleAuthorId = article?.authorId,
+                    rootPostId = if (article == null) rootPost?.postId else null,
                     replyToPostId = replyToPost?.postId,
                     replyToAuthorId = replyToPost?.authorId,
                 )
