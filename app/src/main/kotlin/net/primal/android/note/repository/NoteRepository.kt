@@ -147,8 +147,10 @@ class NoteRepository @Inject constructor(
         /* Pubkey tags */
         val existingPubkeyTags = replyPostData?.tags?.filter { it.isPubKeyTag() }?.toSet() ?: setOf()
         val replyAuthorPubkeyTag = replyToAuthorId?.asPubkeyTag()
+        val rootArticleAuthorPubkeyTag = rootArticleAuthorId?.asPubkeyTag()
         val mentionPubkeyTags = content.parsePubkeyTags(marker = "mention").toSet()
-        val pubkeyTags = existingPubkeyTags + setOfNotNull(replyAuthorPubkeyTag) + mentionPubkeyTags
+        val pubkeyTags = existingPubkeyTags + mentionPubkeyTags +
+            setOfNotNull(replyAuthorPubkeyTag, rootArticleAuthorPubkeyTag)
 
         /* Hashtag tags */
         val hashtagTags = content.parseHashtagTags().toSet()

@@ -66,28 +66,26 @@ class ArticleRepository @Inject constructor(
             pagingSourceFactory = pagingSourceFactory,
         )
 
-    suspend fun fetchArticleAndComments(
-        userId: String,
-        articleId: String,
-        articleAuthorId: String,
-    ) = withContext(dispatchers.io()) {
-        val response = articlesApi.getArticleDetails(
-            body = ArticleDetailsRequestBody(
-                userId = userId,
-                authorUserId = articleAuthorId,
-                identifier = articleId,
-                kind = NostrEventKind.LongFormContent.value,
-                limit = 100,
-            ),
-        )
+    suspend fun fetchArticleAndComments(articleId: String, articleAuthorId: String) =
+        withContext(dispatchers.io()) {
+            val userId = activeAccountStore.activeUserId()
+            val response = articlesApi.getArticleDetails(
+                body = ArticleDetailsRequestBody(
+                    userId = userId,
+                    authorUserId = articleAuthorId,
+                    identifier = articleId,
+                    kind = NostrEventKind.LongFormContent.value,
+                    limit = 100,
+                ),
+            )
 
-        response.persistToDatabaseAsTransaction(userId = userId, database = database)
-        response.persistArticleCommentsToDatabase(
-            articleId = articleId,
-            articleAuthorId = articleAuthorId,
-            database = database,
-        )
-    }
+            response.persistToDatabaseAsTransaction(userId = userId, database = database)
+            response.persistArticleCommentsToDatabase(
+                articleId = articleId,
+                articleAuthorId = articleAuthorId,
+                database = database,
+            )
+        }
 
     suspend fun observeArticle(articleId: String, articleAuthorId: String) =
         withContext(dispatchers.io()) {
@@ -96,17 +94,15 @@ class ArticleRepository @Inject constructor(
                 .filterNotNull()
         }
 
-    suspend fun observeArticleComments(
-        articleId: String,
-        articleAuthorId: String,
-        userId: String,
-    ) = withContext(dispatchers.io()) {
-        database.threadConversations().observeArticleComments(
-            articleId = articleId,
-            articleAuthorId = articleAuthorId,
-            userId = userId,
-        )
-    }
+    suspend fun observeArticleComments(articleId: String, articleAuthorId: String) =
+        withContext(dispatchers.io()) {
+            val userId = activeAccountStore.activeUserId()
+            database.threadConversations().observeArticleComments(
+                articleId = articleId,
+                articleAuthorId = articleAuthorId,
+                userId = userId,
+            )
+        }
 
     suspend fun observeArticleByCommentId(commentNoteId: String): Flow<Article?> =
         withContext(dispatchers.io()) {

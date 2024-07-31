@@ -1021,6 +1021,11 @@ private fun NavGraphBuilder.articleDetails(
         onClose = { navController.navigateUp() },
         onNoteClick = { postId -> navController.navigateToThread(postId) },
         onArticleClick = { naddr -> navController.navigateToArticleDetails(naddr) },
+        onArticleCommentClick = { naddr ->
+            navController.navigateToNoteEditor(
+                NoteEditorArgs(replyToArticleNaddr = naddr),
+            )
+        },
         onNoteReplyClick = { postId -> navController.navigateToNoteEditor(NoteEditorArgs(replyToNoteId = postId)) },
         onNoteQuoteClick = { preFillContent -> navController.navigateToNoteEditor(preFillContent.asNoteEditorArgs()) },
         onProfileClick = { profileId -> navController.navigateToProfile(profileId) },

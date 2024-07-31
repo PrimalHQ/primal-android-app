@@ -62,6 +62,7 @@ import net.primal.android.nostr.ext.isNEventUri
 import net.primal.android.nostr.ext.isNostrUri
 import net.primal.android.nostr.ext.isNote
 import net.primal.android.nostr.ext.takeAsNoteHexIdOrNull
+import net.primal.android.nostr.utils.Nip19TLV.toNaddrString
 import net.primal.android.theme.AppTheme
 import net.primal.android.thread.articles.ArticleDetailsContract
 import net.primal.android.thread.articles.ArticleDetailsContract.ArticleDetailsError
@@ -83,6 +84,7 @@ fun ArticleDetailsScreen(
     onNoteQuoteClick: (content: TextFieldValue) -> Unit,
     onProfileClick: (profileId: String) -> Unit,
     onArticleClick: (naddr: String) -> Unit,
+    onArticleCommentClick: (naddr: String) -> Unit,
     onHashtagClick: (String) -> Unit,
     onMediaClick: (MediaClickEvent) -> Unit,
     onPayInvoiceClick: (InvoicePayClickEvent) -> Unit,
@@ -105,6 +107,7 @@ fun ArticleDetailsScreen(
         onNoteClick = onNoteClick,
         onProfileClick = onProfileClick,
         onArticleClick = onArticleClick,
+        onArticleCommentClick = onArticleCommentClick,
         onMediaClick = onMediaClick,
         onPayInvoiceClick = onPayInvoiceClick,
         onReactionsClick = onReactionsClick,
@@ -120,6 +123,7 @@ private fun ArticleDetailsScreen(
     onNoteClick: (noteId: String) -> Unit,
     onProfileClick: (profileId: String) -> Unit,
     onArticleClick: (naddr: String) -> Unit,
+    onArticleCommentClick: (naddr: String) -> Unit,
     onMediaClick: (MediaClickEvent) -> Unit,
     onReactionsClick: (eventId: String) -> Unit,
     onPayInvoiceClick: (InvoicePayClickEvent) -> Unit,
@@ -158,6 +162,7 @@ private fun ArticleDetailsScreen(
                     onNoteClick = onNoteClick,
                     onProfileClick = onProfileClick,
                     onArticleClick = onArticleClick,
+                    onArticleCommentClick = onArticleCommentClick,
                     onMediaClick = onMediaClick,
                     onReactionsClick = onReactionsClick,
                     onPayInvoiceClick = onPayInvoiceClick,
@@ -178,6 +183,7 @@ private fun ArticleContent(
     onNoteClick: (noteId: String) -> Unit,
     onProfileClick: (profileId: String) -> Unit,
     onArticleClick: (naddr: String) -> Unit,
+    onArticleCommentClick: (naddr: String) -> Unit,
     onMediaClick: (MediaClickEvent) -> Unit,
     onReactionsClick: (eventId: String) -> Unit,
     onPayInvoiceClick: (InvoicePayClickEvent) -> Unit,
@@ -322,7 +328,7 @@ private fun ArticleContent(
                         .height(68.dp)
                         .background(color = AppTheme.extraColorScheme.surfaceVariantAlt1)
                         .padding(horizontal = 16.dp),
-                    onPostCommentClick = {},
+                    onPostCommentClick = { state.naddr?.toNaddrString()?.let(onArticleCommentClick) },
                 )
                 PrimalDivider()
             }
