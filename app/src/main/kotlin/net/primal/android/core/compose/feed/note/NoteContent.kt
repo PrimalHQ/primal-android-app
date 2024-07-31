@@ -149,15 +149,13 @@ fun NoteContent(
         )
     }
 
-    Column(
-        modifier = modifier,
-    ) {
+    Column(modifier = modifier) {
         if (contentText.isNotEmpty()) {
             PrimalClickableText(
                 style = AppTheme.typography.bodyMedium.copy(
                     color = contentColor,
-                    fontSize = displaySettings.noteAppearance.bodyFontSize,
-                    lineHeight = displaySettings.noteAppearance.bodyLineHeight,
+                    fontSize = displaySettings.contentAppearance.noteBodyFontSize,
+                    lineHeight = displaySettings.contentAppearance.noteBodyLineHeight,
                 ),
                 text = contentText,
                 textSelectable = textSelectable,

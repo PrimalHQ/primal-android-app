@@ -76,8 +76,8 @@ import net.primal.android.settings.appearance.AppearanceSettingsContract.UiEvent
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
+import net.primal.android.user.domain.ContentAppearance
 import net.primal.android.user.domain.ContentDisplaySettings
-import net.primal.android.user.domain.NoteAppearance
 
 @Composable
 fun AppearanceSettingsScreen(viewModel: AppearanceSettingsViewModel, onClose: () -> Unit) {
@@ -152,7 +152,7 @@ fun AppearanceSettingsScreen(
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 16.dp),
                     onNoteAppearanceChanged = {
-                        eventPublisher(UiEvent.ChangeNoteAppearance(noteAppearance = it))
+                        eventPublisher(UiEvent.ChangeContentAppearance(contentAppearance = it))
                     },
                 )
 
@@ -288,7 +288,7 @@ private fun ThemeBox(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun FontSizeSection(modifier: Modifier, onNoteAppearanceChanged: (NoteAppearance) -> Unit) {
+private fun FontSizeSection(modifier: Modifier, onNoteAppearanceChanged: (ContentAppearance) -> Unit) {
     val haptic = LocalHapticFeedback.current
     val contentDisplaySettings = LocalContentDisplaySettings.current
     Column(
@@ -318,7 +318,7 @@ private fun FontSizeSection(modifier: Modifier, onNoteAppearanceChanged: (NoteAp
                 modifier = Modifier
                     .weight(1f)
                     .padding(horizontal = 16.dp),
-                initialNoteAppearance = contentDisplaySettings.noteAppearance,
+                initialContentAppearance = contentDisplaySettings.contentAppearance,
                 onNoteAppearanceChanged = {
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     onNoteAppearanceChanged(it)
@@ -338,13 +338,13 @@ private fun FontSizeSection(modifier: Modifier, onNoteAppearanceChanged: (NoteAp
 @Composable
 private fun FontSizeSlider(
     modifier: Modifier,
-    initialNoteAppearance: NoteAppearance,
-    onNoteAppearanceChanged: (NoteAppearance) -> Unit,
+    initialContentAppearance: ContentAppearance,
+    onNoteAppearanceChanged: (ContentAppearance) -> Unit,
 ) {
     val state by remember {
         mutableStateOf(
             SliderState(
-                value = initialNoteAppearance.asFloat(),
+                value = initialContentAppearance.asFloat(),
                 steps = 2,
             ),
         )
@@ -354,7 +354,7 @@ private fun FontSizeSlider(
 
     LaunchedEffect(state.value) {
         if (!initialValueChange) {
-            val noteAppearance = state.value.toNoteAppearance()
+            val noteAppearance = state.value.toContentAppearance()
             onNoteAppearanceChanged(noteAppearance)
         } else {
             initialValueChange = false
@@ -408,12 +408,12 @@ private fun FontSizeTrack() {
     }
 }
 
-private fun NoteAppearance.asFloat(): Float {
+private fun ContentAppearance.asFloat(): Float {
     return when (this) {
-        NoteAppearance.Small -> FractionSmallFontSize
-        NoteAppearance.Default -> FractionDefaultFontSize
-        NoteAppearance.Large -> FractionLargeFontSize
-        NoteAppearance.ExtraLarge -> FractionExtraLargeFontSize
+        ContentAppearance.Small -> FractionSmallFontSize
+        ContentAppearance.Default -> FractionDefaultFontSize
+        ContentAppearance.Large -> FractionLargeFontSize
+        ContentAppearance.ExtraLarge -> FractionExtraLargeFontSize
     }
 }
 
@@ -421,12 +421,12 @@ private fun Float.aroundFraction(range: Float = FractionThresholdValue): ClosedF
     return (this - range)..(this + range)
 }
 
-private fun Float.toNoteAppearance(): NoteAppearance {
+private fun Float.toContentAppearance(): ContentAppearance {
     return when (this) {
-        in FractionSmallFontSize.aroundFraction() -> NoteAppearance.Small
-        in FractionDefaultFontSize.aroundFraction() -> NoteAppearance.Default
-        in FractionLargeFontSize.aroundFraction() -> NoteAppearance.Large
-        else -> NoteAppearance.ExtraLarge
+        in FractionSmallFontSize.aroundFraction() -> ContentAppearance.Small
+        in FractionDefaultFontSize.aroundFraction() -> ContentAppearance.Default
+        in FractionLargeFontSize.aroundFraction() -> ContentAppearance.Large
+        else -> ContentAppearance.ExtraLarge
     }
 }
 

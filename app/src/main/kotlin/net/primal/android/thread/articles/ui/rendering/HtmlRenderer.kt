@@ -16,7 +16,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import net.primal.android.LocalContentDisplaySettings
 import net.primal.android.LocalPrimalTheme
 import net.primal.android.thread.articles.ui.handleArticleLinkClick
-import net.primal.android.user.domain.NoteAppearance
+import net.primal.android.user.domain.ContentAppearance
 
 @Composable
 fun HtmlRenderer(
@@ -34,7 +34,7 @@ fun HtmlRenderer(
             mutableStateOf(
                 html.replace(
                     oldValue = "{{ THEME }}",
-                    newValue = "${activeTheme.themeName} ${displaySettings.noteAppearance.toArticleTextStyle()}",
+                    newValue = "${activeTheme.themeName} ${displaySettings.contentAppearance.toArticleTextStyle()}",
                 ),
             )
         }
@@ -83,11 +83,11 @@ fun HtmlRenderer(
     }
 }
 
-private fun NoteAppearance.toArticleTextStyle(): String {
+private fun ContentAppearance.toArticleTextStyle(): String {
     return when (this) {
-        NoteAppearance.Small -> "small"
-        NoteAppearance.Default -> "regular"
-        NoteAppearance.Large -> "large"
-        NoteAppearance.ExtraLarge -> "huge"
+        ContentAppearance.Small -> "small"
+        ContentAppearance.Default -> "regular"
+        ContentAppearance.Large -> "large"
+        ContentAppearance.ExtraLarge -> "huge"
     }
 }

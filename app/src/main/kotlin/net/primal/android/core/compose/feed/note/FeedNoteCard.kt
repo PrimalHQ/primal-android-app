@@ -90,7 +90,7 @@ fun FeedNoteCard(
     val displaySettings = LocalContentDisplaySettings.current
     val notePaddingDp = 4.dp
     val avatarPaddingDp = 8.dp
-    val avatarSizeDp = if (fullWidthNote) 30.dp else displaySettings.noteAppearance.avatarSize
+    val avatarSizeDp = if (fullWidthNote) 30.dp else displaySettings.contentAppearance.noteAvatarSize
     val overflowIconSizeDp = 40.dp
 
     NoteSurfaceCard(
