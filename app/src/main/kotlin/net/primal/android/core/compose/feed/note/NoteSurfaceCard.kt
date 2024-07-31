@@ -1,5 +1,6 @@
 package net.primal.android.core.compose.feed.note
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -28,6 +29,7 @@ import net.primal.android.theme.domain.PrimalTheme
 fun NoteSurfaceCard(
     modifier: Modifier = Modifier,
     shape: Shape = CardDefaults.shape,
+    border: BorderStroke? = null,
     drawLineAboveAvatar: Boolean = false,
     drawLineBelowAvatar: Boolean = false,
     lineOffsetX: Dp = 40.dp,
@@ -40,6 +42,7 @@ fun NoteSurfaceCard(
         modifier = modifier.clip(shape),
         shape = shape,
         colors = colors,
+        border = border,
     ) {
         if (drawLineAboveAvatar || drawLineBelowAvatar) {
             Column(
