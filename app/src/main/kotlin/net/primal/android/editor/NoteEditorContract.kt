@@ -3,6 +3,7 @@ package net.primal.android.editor
 import android.net.Uri
 import androidx.compose.ui.text.input.TextFieldValue
 import java.util.*
+import net.primal.android.articles.feed.ui.FeedArticleUi
 import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.profile.model.UserProfileItemUi
@@ -14,6 +15,7 @@ interface NoteEditorContract {
     data class UiState(
         val content: TextFieldValue = TextFieldValue(),
         val conversation: List<FeedPostUi> = emptyList(),
+        val replyToArticle: FeedArticleUi? = null,
         val publishing: Boolean = false,
         val error: NoteEditorError? = null,
         val activeAccountAvatarCdnImage: CdnImage? = null,

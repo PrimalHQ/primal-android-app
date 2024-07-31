@@ -63,6 +63,7 @@ import net.primal.android.user.domain.ContentDisplaySettings
 fun FeedArticleListItem(
     data: FeedArticleUi,
     modifier: Modifier = Modifier,
+    enabledDropdownMenu: Boolean = true,
     onClick: ((naddr: String) -> Unit)? = null,
 ) {
     Surface(
@@ -85,7 +86,11 @@ fun FeedArticleListItem(
             lineHeight = 15.sp,
         )
         Column(modifier = modifier) {
-            ListItemHeader(data = data, textStyle = infoTextStyle)
+            ListItemHeader(
+                data = data,
+                textStyle = infoTextStyle,
+                enabledDropdownMenu = enabledDropdownMenu,
+            )
 
             ListItemContent(data = data)
 
@@ -95,7 +100,11 @@ fun FeedArticleListItem(
 }
 
 @Composable
-private fun ListItemHeader(data: FeedArticleUi, textStyle: TextStyle) {
+private fun ListItemHeader(
+    data: FeedArticleUi,
+    textStyle: TextStyle,
+    enabledDropdownMenu: Boolean = true,
+) {
     Row(
         modifier = Modifier.height(32.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -115,20 +124,22 @@ private fun ListItemHeader(data: FeedArticleUi, textStyle: TextStyle) {
             style = textStyle,
         )
 
-        ArticleDropdownMenuIcon(
-            modifier = Modifier
-                .size(42.dp)
-                .padding(top = 6.dp)
-                .clip(CircleShape),
-            articleId = data.articleId,
-            noteContent = data.content,
-            noteRawData = data.rawNostrEventJson,
-            authorId = data.authorId,
-            isBookmarked = data.isBookmarked,
-            onBookmarkClick = { },
-            onMuteUserClick = { },
-            onReportContentClick = { },
-        )
+        if (enabledDropdownMenu) {
+            ArticleDropdownMenuIcon(
+                modifier = Modifier
+                    .size(42.dp)
+                    .padding(top = 6.dp)
+                    .clip(CircleShape),
+                articleId = data.articleId,
+                noteContent = data.content,
+                noteRawData = data.rawNostrEventJson,
+                authorId = data.authorId,
+                isBookmarked = data.isBookmarked,
+                onBookmarkClick = { },
+                onMuteUserClick = { },
+                onReportContentClick = { },
+            )
+        }
     }
 }
 
