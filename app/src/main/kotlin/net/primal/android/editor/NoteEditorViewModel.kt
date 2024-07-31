@@ -49,6 +49,8 @@ import net.primal.android.networking.primal.upload.domain.UploadJob
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.nostr.utils.Naddr
+import net.primal.android.nostr.utils.Nip19TLV
 import net.primal.android.note.repository.NoteRepository
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
@@ -69,6 +71,7 @@ class NoteEditorViewModel @AssistedInject constructor(
 ) : ViewModel() {
 
     private val replyToNoteId = args.replyToNoteId
+    private val replyToArticleNaddr = args.replyToArticleNaddr?.let(Nip19TLV::parseAsNaddr)
 
     private val _state = MutableStateFlow(UiState())
     val state = _state.asStateFlow()
@@ -94,27 +97,35 @@ class NoteEditorViewModel @AssistedInject constructor(
 
     private fun handleArgs() {
         viewModelScope.launch {
-            setState {
-                copy(
-                    content = TextFieldValue(
-                        text = args.content,
-                        selection = TextRange(
-                            start = args.contentSelectionStart,
-                            end = args.contentSelectionEnd,
-                        ),
-                    ),
-                    taggedUsers = args.taggedUsers,
-                )
-            }
+            setStateFromArgs()
 
             if (!replyToNoteId.isNullOrEmpty()) {
-                fetchRepliesFromNetwork(replyToNoteId)
-                observeConversation(replyToNoteId)
+                fetchNoteThreadFromNetwork(replyToNoteId)
+                observeThreadConversation(replyToNoteId)
+                observeArticleByCommentId(replyToNoteId = replyToNoteId)
+            } else if (replyToArticleNaddr != null) {
+                fetchArticleDetailsFromNetwork(replyToArticleNaddr)
+                observeArticleByNaddr(naddr = replyToArticleNaddr)
             }
 
             if (args.mediaUris.isNotEmpty()) {
                 importPhotos(args.mediaUris.mapNotNull { Uri.parse(it) })
             }
+        }
+    }
+
+    private fun setStateFromArgs() {
+        setState {
+            copy(
+                content = TextFieldValue(
+                    text = args.content,
+                    selection = TextRange(
+                        start = args.contentSelectionStart,
+                        end = args.contentSelectionEnd,
+                    ),
+                ),
+                taggedUsers = args.taggedUsers,
+            )
         }
     }
 
@@ -164,9 +175,8 @@ class NoteEditorViewModel @AssistedInject constructor(
                 }
         }
 
-    private fun observeConversation(replyToNoteId: String) =
+    private fun observeThreadConversation(replyToNoteId: String) {
         viewModelScope.launch {
-            var articleObserverStarted = false
             feedRepository.observeConversation(noteId = replyToNoteId)
                 .filter { it.isNotEmpty() }
                 .map { posts -> posts.map { it.asFeedPostUi() } }
@@ -174,15 +184,11 @@ class NoteEditorViewModel @AssistedInject constructor(
                     val replyToNoteIndex = conversation.indexOfFirst { it.postId == replyToNoteId }
                     val thread = conversation.subList(0, replyToNoteIndex + 1)
                     setState { copy(conversation = thread) }
-
-                    if (!articleObserverStarted) {
-                        articleObserverStarted = true
-                        observeArticle(replyToNoteId = replyToNoteId)
-                    }
                 }
         }
+    }
 
-    private fun observeArticle(replyToNoteId: String) =
+    private fun observeArticleByCommentId(replyToNoteId: String) =
         viewModelScope.launch {
             articleRepository.observeArticleByCommentId(commentNoteId = replyToNoteId)
                 .filterNotNull()
@@ -191,11 +197,34 @@ class NoteEditorViewModel @AssistedInject constructor(
                 }
         }
 
-    private fun fetchRepliesFromNetwork(replyToNoteId: String) =
+    private fun observeArticleByNaddr(naddr: Naddr) =
+        viewModelScope.launch {
+            articleRepository.observeArticle(articleId = naddr.identifier, articleAuthorId = naddr.userId)
+                .filterNotNull()
+                .collect { article ->
+                    setState { copy(replyToArticle = article.mapAsFeedArticleUi()) }
+                }
+        }
+
+    private fun fetchNoteThreadFromNetwork(replyToNoteId: String) =
         viewModelScope.launch {
             try {
                 withContext(dispatcherProvider.io()) {
                     feedRepository.fetchReplies(noteId = replyToNoteId)
+                }
+            } catch (error: WssException) {
+                Timber.w(error)
+            }
+        }
+
+    private fun fetchArticleDetailsFromNetwork(replyToArticleNaddr: Naddr) =
+        viewModelScope.launch {
+            try {
+                withContext(dispatcherProvider.io()) {
+                    articleRepository.fetchArticleAndComments(
+                        articleId = replyToArticleNaddr.identifier,
+                        articleAuthorId = replyToArticleNaddr.userId,
+                    )
                 }
             } catch (error: WssException) {
                 Timber.w(error)
@@ -245,7 +274,7 @@ class NoteEditorViewModel @AssistedInject constructor(
 
     private fun fetchNoteReplies() {
         if (replyToNoteId != null) {
-            fetchRepliesFromNetwork(replyToNoteId)
+            fetchNoteThreadFromNetwork(replyToNoteId)
         }
     }
 

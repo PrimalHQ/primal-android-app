@@ -2,10 +2,12 @@ package net.primal.android.thread.articles
 
 import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.feed.model.FeedPostUi
+import net.primal.android.nostr.utils.Naddr
 import net.primal.android.note.ui.EventZapUiModel
 
 interface ArticleDetailsContract {
     data class UiState(
+        val naddr: Naddr? = null,
         val eventId: String? = null,
         val title: String = "",
         val coverCdnImage: CdnImage? = null,

@@ -9,6 +9,7 @@ import net.primal.android.core.serialization.json.decodeFromStringOrNull
 @Serializable
 data class NoteEditorArgs(
     val replyToNoteId: String? = null,
+    val replyToArticleNaddr: String? = null,
     val mediaUris: List<String> = emptyList(),
     val content: String = "",
     val contentSelectionStart: Int = 0,

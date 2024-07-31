@@ -33,13 +33,11 @@ import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.thread.articles.ArticleDetailsContract.ArticleDetailsError
 import net.primal.android.thread.articles.ArticleDetailsContract.UiEvent
 import net.primal.android.thread.articles.ArticleDetailsContract.UiState
-import net.primal.android.user.accounts.active.ActiveAccountStore
 import timber.log.Timber
 
 @HiltViewModel
 class ArticleDetailsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val activeAccountStore: ActiveAccountStore,
     private val articleRepository: ArticleRepository,
     private val feedRepository: FeedRepository,
     private val profileRepository: ProfileRepository,
@@ -48,7 +46,7 @@ class ArticleDetailsViewModel @Inject constructor(
 
     private val naddr = Nip19TLV.parseAsNaddr(savedStateHandle.naddrOrThrow)
 
-    private val _state = MutableStateFlow(UiState())
+    private val _state = MutableStateFlow(UiState(naddr = naddr))
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
 
@@ -83,7 +81,6 @@ class ArticleDetailsViewModel @Inject constructor(
             if (naddr != null) {
                 try {
                     articleRepository.fetchArticleAndComments(
-                        userId = activeAccountStore.activeUserId(),
                         articleAuthorId = naddr.userId,
                         articleId = naddr.identifier,
                     )
@@ -166,7 +163,6 @@ class ArticleDetailsViewModel @Inject constructor(
             articleRepository.observeArticleComments(
                 articleId = naddr.identifier,
                 articleAuthorId = naddr.userId,
-                userId = activeAccountStore.activeUserId(),
             ).collect { comments ->
                 setState { copy(comments = comments.map { it.asFeedPostUi() }) }
             }

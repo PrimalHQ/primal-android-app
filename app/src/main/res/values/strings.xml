@@ -187,7 +187,7 @@
     <string name="note_editor_post_publishing_button">Posting…</string>
     <string name="note_editor_reply_publishing_button">Replying…</string>
     <string name="note_editor_uploading_attachments">Uploading…</string>
-    <string name="note_editor_content_placeholder">Type your post here…</string>
+    <string name="note_editor_content_placeholder">Type your note here…</string>
     <string name="note_editor_nostr_publish_error">Unable to publish your note to Nostr. Please try again soon.</string>
 
     <string name="post_action_missing_lightning_address">Unable to zap this user since they don\'t have a lightning address set up.</string>
