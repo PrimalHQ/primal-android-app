@@ -61,9 +61,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.util.*
 import net.primal.android.R
+import net.primal.android.articles.feed.ui.FeedArticleListItem
 import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.ImportPhotosIconButton
 import net.primal.android.core.compose.PrimalDefaults
+import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.ReplyingToText
 import net.primal.android.core.compose.TakePhotoIconButton
@@ -219,6 +221,22 @@ private fun NoteEditorBox(
                 .onSizeChanged { noteEditorMaxHeightPx = it.height },
             state = editorListState,
         ) {
+            if (state.replyToArticle != null) {
+                item(
+                    key = state.replyToArticle.eventId,
+                    contentType = "MentionedArticle",
+                ) {
+                    Column {
+                        FeedArticleListItem(
+                            data = state.replyToArticle,
+                            modifier = Modifier.padding(all = 16.dp),
+                            enabledDropdownMenu = false,
+                        )
+                        PrimalDivider()
+                    }
+                }
+            }
+
             items(
                 items = state.conversation,
                 key = { it.postId },
