@@ -21,11 +21,14 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import net.primal.android.articles.ArticleRepository
+import net.primal.android.articles.feed.ui.mapAsFeedArticleUi
 import net.primal.android.attachments.repository.AttachmentsRepository
 import net.primal.android.core.compose.feed.model.asFeedPostUi
 import net.primal.android.core.compose.profile.model.mapAsUserProfileUi
@@ -62,6 +65,7 @@ class NoteEditorViewModel @AssistedInject constructor(
     private val attachmentRepository: AttachmentsRepository,
     private val exploreRepository: ExploreRepository,
     private val profileRepository: ProfileRepository,
+    private val articleRepository: ArticleRepository,
 ) : ViewModel() {
 
     private val replyToNoteId = args.replyToNoteId
@@ -162,6 +166,7 @@ class NoteEditorViewModel @AssistedInject constructor(
 
     private fun observeConversation(replyToNoteId: String) =
         viewModelScope.launch {
+            var articleObserverStarted = false
             feedRepository.observeConversation(noteId = replyToNoteId)
                 .filter { it.isNotEmpty() }
                 .map { posts -> posts.map { it.asFeedPostUi() } }
@@ -169,6 +174,20 @@ class NoteEditorViewModel @AssistedInject constructor(
                     val replyToNoteIndex = conversation.indexOfFirst { it.postId == replyToNoteId }
                     val thread = conversation.subList(0, replyToNoteIndex + 1)
                     setState { copy(conversation = thread) }
+
+                    if (!articleObserverStarted) {
+                        articleObserverStarted = true
+                        observeArticle(replyToNoteId = replyToNoteId)
+                    }
+                }
+        }
+
+    private fun observeArticle(replyToNoteId: String) =
+        viewModelScope.launch {
+            articleRepository.observeArticleByCommentId(commentNoteId = replyToNoteId)
+                .filterNotNull()
+                .collect { article ->
+                    setState { copy(replyToArticle = article.mapAsFeedArticleUi()) }
                 }
         }
 
