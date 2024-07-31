@@ -13,7 +13,7 @@ import net.primal.android.theme.active.ActiveThemeStore
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.theme.findThemeOrDefault
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.android.user.domain.NoteAppearance
+import net.primal.android.user.domain.ContentAppearance
 import net.primal.android.user.repository.UserRepository
 
 class AppearanceSettingsViewModel @AssistedInject constructor(
@@ -78,8 +78,8 @@ class AppearanceSettingsViewModel @AssistedInject constructor(
                         }
                     }
 
-                    is AppearanceSettingsContract.UiEvent.ChangeNoteAppearance -> {
-                        setNoteAppearance(noteAppearance = event.noteAppearance)
+                    is AppearanceSettingsContract.UiEvent.ChangeContentAppearance -> {
+                        setContentAppearance(contentAppearance = event.contentAppearance)
                     }
                 }
             }
@@ -93,10 +93,10 @@ class AppearanceSettingsViewModel @AssistedInject constructor(
         }
     }
 
-    private fun setNoteAppearance(noteAppearance: NoteAppearance) {
+    private fun setContentAppearance(contentAppearance: ContentAppearance) {
         viewModelScope.launch {
             userRepository.updateContentDisplaySettings(userId = activeAccountStore.activeUserId()) {
-                copy(noteAppearance = noteAppearance)
+                copy(contentAppearance = contentAppearance)
             }
         }
     }

@@ -53,8 +53,8 @@ fun FeedNoteHeader(
 ) {
     val displaySettings = LocalContentDisplaySettings.current
     val topRowTextStyle = AppTheme.typography.bodyMedium.copy(
-        fontSize = displaySettings.noteAppearance.usernameSize,
-        lineHeight = displaySettings.noteAppearance.usernameSize,
+        fontSize = displaySettings.contentAppearance.noteUsernameSize,
+        lineHeight = displaySettings.contentAppearance.noteUsernameSize,
     )
     Row(
         modifier = modifier,
@@ -79,7 +79,7 @@ fun FeedNoteHeader(
                         text = identifier,
                         spanStyle = SpanStyle(
                             color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-                            fontSize = displaySettings.noteAppearance.usernameSize,
+                            fontSize = displaySettings.contentAppearance.noteUsernameSize,
                         ),
                     ),
                 )
@@ -105,7 +105,7 @@ fun FeedNoteHeader(
                             textAlign = TextAlign.Center,
                             maxLines = 1,
                             style = topRowTextStyle,
-                            fontSize = (displaySettings.noteAppearance.usernameSize.value).sp,
+                            fontSize = (displaySettings.contentAppearance.noteUsernameSize.value).sp,
                             color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
                         )
                     }

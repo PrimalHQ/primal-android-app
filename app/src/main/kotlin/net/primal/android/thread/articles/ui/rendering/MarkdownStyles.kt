@@ -24,6 +24,7 @@ import com.halilibo.richtext.ui.ListStyle
 import com.halilibo.richtext.ui.RichTextStyle
 import com.halilibo.richtext.ui.TableStyle
 import com.halilibo.richtext.ui.string.RichTextStringStyle
+import net.primal.android.LocalContentDisplaySettings
 import net.primal.android.R
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.NacelleFontFamily
@@ -156,8 +157,12 @@ fun buildPrimalRichTextStyle(
 
 @Composable
 fun PrimalMarkdownStylesProvider(content: @Composable () -> Unit) {
+    val displaySettings = LocalContentDisplaySettings.current
     CompositionLocalProvider(
-        LocalTextStyle provides primalMarkdownBodyTextStyle,
+        LocalTextStyle provides primalMarkdownBodyTextStyle.copy(
+            fontSize = displaySettings.contentAppearance.articleTextFontSize,
+            lineHeight = displaySettings.contentAppearance.articleTextLineHeight,
+        ),
         LocalContentColor provides AppTheme.extraColorScheme.onBrand,
         content = content,
     )
