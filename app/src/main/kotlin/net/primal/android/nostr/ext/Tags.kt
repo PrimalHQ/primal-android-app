@@ -98,6 +98,17 @@ fun String.asIdentifierTag(): JsonArray =
         add(this@asIdentifierTag)
     }
 
+fun String.asReplaceableEventTag(relayHint: String? = null, marker: String? = null): JsonArray =
+    buildJsonArray {
+        add("a")
+        add(this@asReplaceableEventTag)
+        if (relayHint != null) add(relayHint)
+        if (marker != null) {
+            if (relayHint == null) add("")
+            add(marker)
+        }
+    }
+
 fun NoteAttachment.asIMetaTag(): JsonArray {
     require(this.remoteUrl != null)
     return buildJsonArray {
