@@ -20,10 +20,12 @@ import net.primal.android.nostr.db.eventHintsUpserter
 import net.primal.android.nostr.ext.asEventIdTag
 import net.primal.android.nostr.ext.asIMetaTag
 import net.primal.android.nostr.ext.asPubkeyTag
+import net.primal.android.nostr.ext.asReplaceableEventTag
 import net.primal.android.nostr.ext.isPubKeyTag
 import net.primal.android.nostr.ext.parseEventTags
 import net.primal.android.nostr.ext.parseHashtagTags
 import net.primal.android.nostr.ext.parsePubkeyTags
+import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.android.note.api.EventStatsApi
 import net.primal.android.note.api.model.EventZapsRequestBody
@@ -96,24 +98,39 @@ class NoteRepository @Inject constructor(
     suspend fun publishShortTextNote(
         content: String,
         attachments: List<NoteAttachment> = emptyList(),
+        rootArticleId: String? = null,
+        rootArticleAuthorId: String? = null,
         rootPostId: String? = null,
         replyToPostId: String? = null,
         replyToAuthorId: String? = null,
     ): Boolean {
+        if (rootArticleId != null && rootPostId != null) {
+            throw IllegalStateException("You can not have both article and post as root events.")
+        }
+
         val replyPostData = replyToPostId?.let {
             withContext(dispatcherProvider.io()) {
                 database.posts().findByPostId(postId = it)
             }
         }
 
+        /* Article tag */
+        val rootArticleTag = if (rootArticleId != null && rootArticleAuthorId != null) {
+            val tagContent = "${NostrEventKind.LongFormContent.value}:$rootArticleAuthorId:$rootArticleId"
+            tagContent.asReplaceableEventTag(marker = "root")
+        } else {
+            null
+        }
+
         /* Note tags */
         val mentionEventTags = content.parseEventTags(marker = "mention")
-        val rootEventTag = rootPostId?.asEventIdTag(marker = "root")
+        val rootPostTag = rootPostId?.asEventIdTag(marker = "root")
         val replyEventTag = if (rootPostId != replyToPostId) {
             replyToPostId?.asEventIdTag(marker = "reply")
         } else {
             null
         }
+        val rootEventTag = rootArticleTag ?: rootPostTag
         val eventTags = setOfNotNull(rootEventTag, replyEventTag) + mentionEventTags
 
         val relayHintsMap = withContext(dispatcherProvider.io()) {
