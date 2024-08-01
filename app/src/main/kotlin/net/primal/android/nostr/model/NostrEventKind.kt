@@ -66,6 +66,7 @@ enum class NostrEventKind(val value: Int) {
     PrimalRelayHint(value = 10_000_141),
     PrimalLongFormWordsCount(value = 10_000_144),
     PrimalBroadcastResult(value = 10_000_149),
+    PrimalLongFormContentFeeds(value = 10_000_152),
     PrimalWalletOperation(value = 10_000_300),
     PrimalWalletBalance(value = 10_000_301),
     PrimalWalletDepositInvoice(value = 10_000_302),
@@ -83,6 +84,7 @@ enum class NostrEventKind(val value: Int) {
     PrimalWalletOnChainAddress(value = 10_000_316),
     PrimalWalletUpdatedAt(value = 10_000_317),
     PrimalAppState(value = 10_000_999),
+    PrimalLongFormContent(value = 10_030_023),
     Unknown(value = -1),
     ;
 

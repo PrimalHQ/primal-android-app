@@ -7,6 +7,8 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import net.primal.android.articles.db.ArticleDao
 import net.primal.android.articles.db.ArticleData
+import net.primal.android.articles.db.ArticleFeed
+import net.primal.android.articles.db.ArticleFeedDao
 import net.primal.android.attachments.db.AttachmentDao
 import net.primal.android.attachments.db.NoteAttachment
 import net.primal.android.attachments.db.NoteNostrUri
@@ -81,8 +83,9 @@ import net.primal.android.wallet.db.WalletTransactionData
         ProfileInteraction::class,
         ArticleData::class,
         ArticleCommentCrossRef::class,
+        ArticleFeed::class,
     ],
-    version = 32,
+    version = 33,
     exportSchema = true,
 )
 @TypeConverters(
@@ -136,4 +139,6 @@ abstract class PrimalDatabase : RoomDatabase() {
     abstract fun profileInteractions(): ProfileInteractionDao
 
     abstract fun articles(): ArticleDao
+
+    abstract fun articleFeeds(): ArticleFeedDao
 }

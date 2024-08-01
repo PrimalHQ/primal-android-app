@@ -10,6 +10,8 @@ import net.primal.android.articles.api.model.ArticleFeedRequestBody
 import net.primal.android.articles.db.Article
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.db.PrimalDatabase
+import net.primal.android.networking.sockets.errors.WssException
+import timber.log.Timber
 
 @OptIn(ExperimentalPagingApi::class)
 class ArticleFeedMediator(
@@ -22,15 +24,21 @@ class ArticleFeedMediator(
     override suspend fun load(loadType: LoadType, state: PagingState<Int, Article>): MediatorResult {
         withContext(dispatcherProvider.io()) {
             val pageSize = state.config.pageSize
-            val response = articlesApi.getArticleFeed(
-                body = ArticleFeedRequestBody(
-                    userId = userId,
-                    feedUserId = userId,
-                    limit = pageSize,
-                ),
-            )
+            val response = try {
+                articlesApi.getArticleFeed(
+                    body = ArticleFeedRequestBody(
+//                        spec = "{\"id\":\"feed-reads\"}",
+                        spec = "{\"id\":\"feed-reads\",\"scope\":\"myfollowsinteractions\"}",
+                        userId = userId,
+                        limit = pageSize,
+                    ),
+                )
+            } catch (error: WssException) {
+                Timber.w(error)
+                null
+            }
 
-            response.persistToDatabaseAsTransaction(
+            response?.persistToDatabaseAsTransaction(
                 userId = userId,
                 database = database,
             )

@@ -4,6 +4,7 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import java.time.Instant
 import kotlin.time.Duration
+import net.primal.android.articles.ArticleRepository
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.notary.NostrSignUnauthorized
 import net.primal.android.settings.repository.SettingsRepository
@@ -18,6 +19,7 @@ class UserDataUpdater @AssistedInject constructor(
     private val userRepository: UserRepository,
     private val walletRepository: WalletRepository,
     private val relayRepository: RelayRepository,
+    private val articleRepository: ArticleRepository,
 ) {
 
     private var lastTimeFetched: Instant = Instant.EPOCH
@@ -47,5 +49,6 @@ class UserDataUpdater @AssistedInject constructor(
         } catch (error: NostrSignUnauthorized) {
             Timber.w(error)
         }
+        articleRepository.fetchAndPersistArticleFeeds()
     }
 }

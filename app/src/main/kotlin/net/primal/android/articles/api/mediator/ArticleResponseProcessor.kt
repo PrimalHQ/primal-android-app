@@ -17,6 +17,7 @@ import net.primal.android.nostr.ext.mapNotNullAsArticleDataPO
 import net.primal.android.nostr.ext.mapNotNullAsEventStatsPO
 import net.primal.android.nostr.ext.mapNotNullAsEventUserStatsPO
 import net.primal.android.nostr.ext.mapNotNullAsPostDataPO
+import net.primal.android.nostr.ext.mapNotNullPrimalEventAsArticleDataPO
 import net.primal.android.nostr.ext.mapNotNullReferencedEventsAsArticleDataPO
 import net.primal.android.thread.db.ArticleCommentCrossRef
 
@@ -33,11 +34,16 @@ suspend fun ArticleResponse.persistToDatabaseAsTransaction(userId: String, datab
         wordsCountMap = wordsCountMap,
         cdnResources = cdnResources,
     )
+
+    val allNotes = this.notes.mapAsPostDataPO(referencedPosts = referencedNotes)
+    val allPrimalArticles = this.primalArticles.mapNotNullPrimalEventAsArticleDataPO(
+        wordsCountMap = wordsCountMap,
+        cdnResources = cdnResources,
+    )
     val allArticles = this.articles.mapNotNullAsArticleDataPO(
         wordsCountMap = wordsCountMap,
         cdnResources = cdnResources,
     )
-    val allNotes = this.notes.mapAsPostDataPO(referencedPosts = referencedNotes)
 
     val eventZaps = this.zaps.mapAsEventZapDO(profilesMap = profiles.associateBy { it.ownerId })
     val eventStats = this.primalEventStats.mapNotNullAsEventStatsPO()
@@ -46,7 +52,7 @@ suspend fun ArticleResponse.persistToDatabaseAsTransaction(userId: String, datab
     database.withTransaction {
         database.profiles().upsertAll(data = profiles)
         database.posts().upsertAll(data = allNotes + referencedNotes)
-        database.articles().upsertAll(list = allArticles + referencedArticles)
+        database.articles().upsertAll(list = allPrimalArticles + allArticles + referencedArticles)
         database.eventStats().upsertAll(data = eventStats)
         database.eventUserStats().upsertAll(data = eventUserStats)
         database.eventZaps().upsertAll(data = eventZaps)
