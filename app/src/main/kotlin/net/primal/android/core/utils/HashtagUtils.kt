@@ -1,5 +1,6 @@
 package net.primal.android.core.utils
 
+import kotlinx.serialization.json.JsonArray
 import net.primal.android.nostr.ext.getTagValueOrNull
 import net.primal.android.nostr.ext.isHashtagTag
 import net.primal.android.nostr.model.NostrEvent
@@ -23,12 +24,14 @@ fun String.parseHashtags(): List<String> {
 fun NostrEvent.parseHashtags(): List<String> {
     val hashtags = this.content.parseHashtags(hashtagRegex)
     val nip08MentionHashtags = this.content.parseHashtags(nip08MentionRegex)
-    val hashtagsFromTags = this.tags
-        .filter { it.isHashtagTag() }
+    val hashtagsFromTags = this.tags.parseHashtagsFromNostrEventTags()
+    val allTags = (hashtags - nip08MentionHashtags) + hashtagsFromTags
+    return allTags.toList()
+}
+
+fun List<JsonArray>.parseHashtagsFromNostrEventTags(): Set<String> {
+    return filter { it.isHashtagTag() }
         .mapNotNull { it.getTagValueOrNull() }
         .map { "#$it" }
         .toSet()
-
-    val allTags = (hashtags - nip08MentionHashtags) + hashtagsFromTags
-    return allTags.toList()
 }

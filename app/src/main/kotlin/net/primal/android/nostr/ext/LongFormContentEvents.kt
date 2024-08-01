@@ -7,6 +7,7 @@ import net.primal.android.attachments.domain.CdnResource
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.toJsonObject
 import net.primal.android.core.utils.parseHashtags
+import net.primal.android.core.utils.parseHashtagsFromNostrEventTags
 import net.primal.android.core.utils.parseUris
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.NostrEventKind
@@ -25,6 +26,16 @@ fun List<PrimalEvent>.mapNotNullReferencedEventsAsArticleDataPO(
         )
     }
 
+fun List<PrimalEvent>.mapNotNullPrimalEventAsArticleDataPO(
+    wordsCountMap: Map<String, Int> = emptyMap(),
+    cdnResources: Map<String, CdnResource> = emptyMap(),
+) = this.mapNotNull { primalEvent ->
+    primalEvent.asArticleData(
+        wordsCount = wordsCountMap[primalEvent.id],
+        cdnResources = cdnResources,
+    )
+}
+
 fun List<NostrEvent>.mapNotNullAsArticleDataPO(
     wordsCountMap: Map<String, Int> = emptyMap(),
     cdnResources: Map<String, CdnResource> = emptyMap(),
@@ -35,7 +46,7 @@ fun List<NostrEvent>.mapNotNullAsArticleDataPO(
     )
 }
 
-fun NostrEvent.asArticleData(wordsCount: Int?, cdnResources: Map<String, CdnResource>): ArticleData? {
+private fun NostrEvent.asArticleData(wordsCount: Int?, cdnResources: Map<String, CdnResource>): ArticleData? {
     val identifier = tags.findFirstIdentifier()
     val title = tags.findFirstTitle()
     val raw = NostrJson.encodeToString(this.toJsonObject())
@@ -56,6 +67,40 @@ fun NostrEvent.asArticleData(wordsCount: Int?, cdnResources: Map<String, CdnReso
         uris = this.content.parseUris(),
         hashtags = this.parseHashtags(),
         raw = raw,
+        imageCdnImage = tags.findFirstImage()?.let { imageUrl ->
+            CdnImage(
+                sourceUrl = imageUrl,
+                variants = cdnResources[imageUrl]?.variants ?: emptyList(),
+            )
+        },
+        summary = tags.findFirstSummary(),
+        wordsCount = wordsCount,
+    )
+}
+
+private fun PrimalEvent.asArticleData(wordsCount: Int?, cdnResources: Map<String, CdnResource>): ArticleData? {
+    val identifier = tags.findFirstIdentifier()
+    val title = tags.findFirstTitle()
+    val authorId = this.pubKey
+    val eventId = this.id
+    val createdAt = this.createdAt
+
+    if (eventId == null || identifier == null || title == null || authorId == null || createdAt == null) {
+        Timber.w("Unable to parse long form content: $this")
+        return null
+    }
+
+    return ArticleData(
+        eventId = eventId,
+        articleId = identifier,
+        authorId = authorId,
+        title = title,
+        createdAt = createdAt,
+        publishedAt = tags.findFirstPublishedAt()?.toLongOrNull() ?: createdAt,
+        content = "",
+        uris = emptyList(),
+        hashtags = tags.parseHashtagsFromNostrEventTags().toList(),
+        raw = null,
         imageCdnImage = tags.findFirstImage()?.let { imageUrl ->
             CdnImage(
                 sourceUrl = imageUrl,

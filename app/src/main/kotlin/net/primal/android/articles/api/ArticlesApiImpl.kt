@@ -4,6 +4,7 @@ import javax.inject.Inject
 import kotlinx.serialization.encodeToString
 import net.primal.android.articles.api.model.ArticleDetailsRequestBody
 import net.primal.android.articles.api.model.ArticleFeedRequestBody
+import net.primal.android.articles.api.model.ArticleFeedsResponse
 import net.primal.android.articles.api.model.ArticleResponse
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.decodeFromStringOrNull
@@ -11,7 +12,9 @@ import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.primal.PrimalCacheFilter
 import net.primal.android.networking.primal.PrimalVerb
+import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.model.NostrEventKind
+import timber.log.Timber
 
 class ArticlesApiImpl @Inject constructor(
     @PrimalCacheApiClient private val primalApiClient: PrimalApiClient,
@@ -30,9 +33,10 @@ class ArticlesApiImpl @Inject constructor(
                 NostrJson.decodeFromStringOrNull(it?.content)
             },
             metadata = queryResult.filterNostrEvents(NostrEventKind.Metadata),
+            zaps = queryResult.filterNostrEvents(NostrEventKind.Zap),
             notes = queryResult.filterNostrEvents(NostrEventKind.ShortTextNote),
             articles = queryResult.filterNostrEvents(NostrEventKind.LongFormContent),
-            zaps = queryResult.filterNostrEvents(NostrEventKind.Zap),
+            primalArticles = emptyList(),
             primalEventStats = queryResult.filterPrimalEvents(NostrEventKind.PrimalEventStats),
             primalEventUserStats = queryResult.filterPrimalEvents(NostrEventKind.PrimalEventUserStats),
             primalUserScores = queryResult.filterPrimalEvents(NostrEventKind.PrimalUserScores),
@@ -47,7 +51,7 @@ class ArticlesApiImpl @Inject constructor(
     override suspend fun getArticleFeed(body: ArticleFeedRequestBody): ArticleResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.BLOG_FEED,
+                primalVerb = PrimalVerb.READS_FEED_DIRECTIVE,
                 optionsJson = NostrJson.encodeToString(body),
             ),
         )
@@ -59,7 +63,8 @@ class ArticlesApiImpl @Inject constructor(
             metadata = queryResult.filterNostrEvents(NostrEventKind.Metadata),
             zaps = queryResult.filterNostrEvents(NostrEventKind.Zap),
             notes = emptyList(),
-            articles = queryResult.filterNostrEvents(NostrEventKind.LongFormContent),
+            articles = emptyList(),
+            primalArticles = queryResult.filterPrimalEvents(NostrEventKind.PrimalLongFormContent),
             referencedEvents = queryResult.filterPrimalEvents(NostrEventKind.PrimalReferencedEvent),
             primalEventStats = queryResult.filterPrimalEvents(NostrEventKind.PrimalEventStats),
             primalEventUserStats = queryResult.filterPrimalEvents(NostrEventKind.PrimalEventUserStats),
@@ -69,5 +74,20 @@ class ArticlesApiImpl @Inject constructor(
             primalRelayHints = queryResult.filterPrimalEvents(NostrEventKind.PrimalRelayHint),
             primalLongFormWords = queryResult.filterPrimalEvents(NostrEventKind.PrimalLongFormWordsCount),
         )
+    }
+
+    override suspend fun getArticleFeeds(): ArticleFeedsResponse {
+        val queryResult = primalApiClient.query(
+            message = PrimalCacheFilter(primalVerb = PrimalVerb.READS_FEEDS),
+        )
+
+        val articleFeeds = queryResult.findPrimalEvent(NostrEventKind.PrimalLongFormContentFeeds)
+
+        if (articleFeeds == null) {
+            Timber.w(queryResult.toString())
+            throw WssException("Invalid response.")
+        }
+
+        return ArticleFeedsResponse(articleFeeds = articleFeeds)
     }
 }

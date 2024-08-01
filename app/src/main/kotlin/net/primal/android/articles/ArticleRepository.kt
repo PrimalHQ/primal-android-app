@@ -18,10 +18,16 @@ import net.primal.android.articles.api.mediator.persistArticleCommentsToDatabase
 import net.primal.android.articles.api.mediator.persistToDatabaseAsTransaction
 import net.primal.android.articles.api.model.ArticleDetailsRequestBody
 import net.primal.android.articles.db.Article
+import net.primal.android.articles.db.ArticleFeed
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
+import net.primal.android.core.serialization.json.NostrJson
+import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.db.PrimalDatabase
+import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.model.NostrEventKind
+import net.primal.android.nostr.model.primal.content.ContentArticleFeedData
 import net.primal.android.user.accounts.active.ActiveAccountStore
+import timber.log.Timber
 
 class ArticleRepository @Inject constructor(
     private val dispatchers: CoroutineDispatcherProvider,
@@ -118,4 +124,24 @@ class ArticleRepository @Inject constructor(
                 flowOf(null)
             }
         }
+
+    suspend fun fetchAndPersistArticleFeeds() {
+        withContext(dispatchers.io()) {
+            val feeds = try {
+                val response = articlesApi.getArticleFeeds()
+                NostrJson.decodeFromStringOrNull<List<ContentArticleFeedData>>(
+                    string = response.articleFeeds.content,
+                )
+            } catch (error: WssException) {
+                Timber.w(error)
+                null
+            }
+
+            if (feeds != null) {
+                database.articleFeeds().upsertAll(
+                    data = feeds.map { ArticleFeed(name = it.name, spec = it.spec) },
+                )
+            }
+        }
+    }
 }
