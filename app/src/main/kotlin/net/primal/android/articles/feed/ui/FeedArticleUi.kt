@@ -17,7 +17,7 @@ data class FeedArticleUi(
     val publishedAt: Instant,
     val authorId: String,
     val authorName: String,
-    val rawNostrEventJson: String,
+    val rawNostrEventJson: String?,
     val isBookmarked: Boolean,
     val stats: EventStatsUi,
     val authorAvatarCdnImage: CdnImage? = null,

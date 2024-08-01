@@ -42,8 +42,8 @@ import net.primal.android.nostr.utils.Nip19TLV.toNaddrString
 fun ArticleDropdownMenuIcon(
     modifier: Modifier,
     articleId: String,
-    noteContent: String,
-    noteRawData: String,
+    articleContent: String?,
+    articleRawData: String?,
     authorId: String,
     isBookmarked: Boolean,
     enabled: Boolean = true,
@@ -125,21 +125,24 @@ fun ArticleDropdownMenuIcon(
 //                    menuVisible = false
 //                },
 //            )
-            DropdownPrimalMenuItem(
-                trailingIconVector = PrimalIcons.ContextCopyNoteText,
-                text = stringResource(id = R.string.article_feed_context_copy_article_text),
-                onClick = {
-                    copyText(context = context, text = noteContent)
-                    menuVisible = false
-                    uiScope.launch {
-                        Toast.makeText(
-                            context,
-                            copyConfirmationText,
-                            Toast.LENGTH_SHORT,
-                        ).show()
-                    }
-                },
-            )
+            if (!articleContent.isNullOrEmpty()) {
+                DropdownPrimalMenuItem(
+                    trailingIconVector = PrimalIcons.ContextCopyNoteText,
+                    text = stringResource(id = R.string.article_feed_context_copy_article_text),
+                    onClick = {
+                        copyText(context = context, text = articleContent)
+                        menuVisible = false
+                        uiScope.launch {
+                            Toast.makeText(
+                                context,
+                                copyConfirmationText,
+                                Toast.LENGTH_SHORT,
+                            ).show()
+                        }
+                    },
+                )
+            }
+
             DropdownPrimalMenuItem(
                 trailingIconVector = PrimalIcons.ContextCopyNoteId,
                 text = stringResource(id = R.string.article_feed_context_copy_article_id),
@@ -155,21 +158,25 @@ fun ArticleDropdownMenuIcon(
                     }
                 },
             )
-            DropdownPrimalMenuItem(
-                trailingIconVector = PrimalIcons.ContextCopyRawData,
-                text = stringResource(id = R.string.article_feed_context_copy_raw_data),
-                onClick = {
-                    copyText(context = context, text = noteRawData)
-                    menuVisible = false
-                    uiScope.launch {
-                        Toast.makeText(
-                            context,
-                            copyConfirmationText,
-                            Toast.LENGTH_SHORT,
-                        ).show()
-                    }
-                },
-            )
+
+            if (articleRawData != null) {
+                DropdownPrimalMenuItem(
+                    trailingIconVector = PrimalIcons.ContextCopyRawData,
+                    text = stringResource(id = R.string.article_feed_context_copy_raw_data),
+                    onClick = {
+                        copyText(context = context, text = articleRawData)
+                        menuVisible = false
+                        uiScope.launch {
+                            Toast.makeText(
+                                context,
+                                copyConfirmationText,
+                                Toast.LENGTH_SHORT,
+                            ).show()
+                        }
+                    },
+                )
+            }
+
             DropdownPrimalMenuItem(
                 trailingIconVector = PrimalIcons.ContextCopyPublicKey,
                 text = stringResource(id = R.string.article_feed_context_copy_user_id),

@@ -37,5 +37,6 @@ enum class PrimalVerb(val identifier: String) {
     EVENT_ACTIONS("event_actions"),
     BROADCAST_EVENTS("broadcast_events"),
     BLOG_THREAD_VIEW("long_form_content_thread_view"),
-    BLOG_FEED("long_form_content_feed"),
+    READS_FEEDS("get_reads_feeds"),
+    READS_FEED_DIRECTIVE("reads_feed_directive"),
 }

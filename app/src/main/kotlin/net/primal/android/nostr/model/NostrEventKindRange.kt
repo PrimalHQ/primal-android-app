@@ -6,5 +6,5 @@ object NostrEventKindRange {
     val EphemeralEvents = IntRange(20000, 29999)
     val ParameterizedReplaceableEvents = IntRange(30000, 39999)
 
-    val PrimalEvents = IntRange(10000100, 10000999)
+    val PrimalEvents = IntRange(10_000_100, 10_099_999)
 }

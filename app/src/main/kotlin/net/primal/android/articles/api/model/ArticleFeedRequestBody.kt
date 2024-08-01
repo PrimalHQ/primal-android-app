@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ArticleFeedRequestBody(
-    @SerialName("pubkey") val feedUserId: String,
+    @SerialName("spec") val spec: String,
     @SerialName("user_pubkey") val userId: String? = null,
     @SerialName("limit") val limit: Int? = null,
     @SerialName("until") val until: Long? = null,

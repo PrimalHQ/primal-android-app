@@ -131,8 +131,8 @@ private fun ListItemHeader(
                     .padding(top = 6.dp)
                     .clip(CircleShape),
                 articleId = data.articleId,
-                noteContent = data.content,
-                noteRawData = data.rawNostrEventJson,
+                articleContent = data.content,
+                articleRawData = data.rawNostrEventJson,
                 authorId = data.authorId,
                 isBookmarked = data.isBookmarked,
                 onBookmarkClick = { },
