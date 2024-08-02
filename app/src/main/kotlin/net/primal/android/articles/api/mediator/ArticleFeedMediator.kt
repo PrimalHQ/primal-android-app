@@ -8,9 +8,11 @@ import kotlinx.coroutines.withContext
 import net.primal.android.articles.api.ArticlesApi
 import net.primal.android.articles.api.model.ArticleFeedRequestBody
 import net.primal.android.articles.db.Article
+import net.primal.android.articles.db.ArticleFeedCrossRef
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.nostr.ext.mapNotNullPrimalEventAsArticleDataPO
 import timber.log.Timber
 
 @OptIn(ExperimentalPagingApi::class)
@@ -38,11 +40,25 @@ class ArticleFeedMediator(
                 null
             }
 
+            val connections = response?.primalArticles
+                ?.mapNotNullPrimalEventAsArticleDataPO()
+                ?.map {
+                    ArticleFeedCrossRef(
+                        spec = feedSpec,
+                        articleId = it.articleId,
+                        articleAuthorId = it.authorId,
+                    )
+                }
+            if (!connections.isNullOrEmpty()) {
+                database.articleFeedsConnections().connect(data = connections)
+            }
+
             response?.persistToDatabaseAsTransaction(
                 userId = userId,
                 database = database,
             )
         }
+
         return MediatorResult.Success(endOfPaginationReached = true)
     }
 }

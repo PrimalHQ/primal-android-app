@@ -28,7 +28,7 @@ fun String?.asBase64Decoded(): String? {
 fun String?.isMainScreenRoute(): Boolean {
     return when (this) {
         "feed?$FEED_DIRECTIVE={$FEED_DIRECTIVE}",
-        "articleFeed",
+        "reads",
         "walletDashboard",
         "notifications",
         "messages",
