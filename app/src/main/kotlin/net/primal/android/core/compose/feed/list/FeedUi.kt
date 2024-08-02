@@ -1,4 +1,4 @@
-package net.primal.android.feed.ui
+package net.primal.android.core.compose.feed.list
 
 data class FeedUi(
     val directive: String,

@@ -40,8 +40,10 @@ class ArticleRepository @Inject constructor(
         private const val PAGE_SIZE = 25
     }
 
-    fun defaultFeed(): Flow<PagingData<Article>> {
-        return createPager {
+    fun observeFeeds() = database.articleFeeds().observeAllFeeds()
+
+    fun feedBySpec(feedSpec: String): Flow<PagingData<Article>> {
+        return createPager(feedSpec = feedSpec) {
             database.articles().feed(
                 query = SimpleSQLiteQuery(
                     query = """
@@ -54,8 +56,28 @@ class ArticleRepository @Inject constructor(
         }.flow
     }
 
+    suspend fun fetchAndPersistArticleFeeds() {
+        withContext(dispatchers.io()) {
+            val feeds = try {
+                val response = articlesApi.getArticleFeeds()
+                NostrJson.decodeFromStringOrNull<List<ContentArticleFeedData>>(
+                    string = response.articleFeeds.content,
+                )
+            } catch (error: WssException) {
+                Timber.w(error)
+                null
+            }
+
+            if (feeds != null) {
+                database.articleFeeds().upsertAll(
+                    data = feeds.map { ArticleFeed(name = it.name, spec = it.spec) },
+                )
+            }
+        }
+    }
+
     @OptIn(ExperimentalPagingApi::class)
-    private fun createPager(pagingSourceFactory: () -> PagingSource<Int, Article>) =
+    private fun createPager(feedSpec: String, pagingSourceFactory: () -> PagingSource<Int, Article>) =
         Pager(
             config = PagingConfig(
                 pageSize = PAGE_SIZE,
@@ -64,10 +86,11 @@ class ArticleRepository @Inject constructor(
                 enablePlaceholders = true,
             ),
             remoteMediator = ArticleFeedMediator(
-                dispatcherProvider = dispatchers,
                 userId = activeAccountStore.activeUserId(),
+                feedSpec = feedSpec,
                 articlesApi = articlesApi,
                 database = database,
+                dispatcherProvider = dispatchers,
             ),
             pagingSourceFactory = pagingSourceFactory,
         )
@@ -124,24 +147,4 @@ class ArticleRepository @Inject constructor(
                 flowOf(null)
             }
         }
-
-    suspend fun fetchAndPersistArticleFeeds() {
-        withContext(dispatchers.io()) {
-            val feeds = try {
-                val response = articlesApi.getArticleFeeds()
-                NostrJson.decodeFromStringOrNull<List<ContentArticleFeedData>>(
-                    string = response.articleFeeds.content,
-                )
-            } catch (error: WssException) {
-                Timber.w(error)
-                null
-            }
-
-            if (feeds != null) {
-                database.articleFeeds().upsertAll(
-                    data = feeds.map { ArticleFeed(name = it.name, spec = it.spec) },
-                )
-            }
-        }
-    }
 }

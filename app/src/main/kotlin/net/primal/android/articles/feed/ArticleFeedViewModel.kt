@@ -14,6 +14,7 @@ import kotlinx.coroutines.launch
 import net.primal.android.articles.ArticleRepository
 import net.primal.android.articles.feed.ArticleFeedScreenContract.UiState
 import net.primal.android.articles.feed.ui.mapAsFeedArticleUi
+import net.primal.android.core.compose.feed.list.FeedUi
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.subscriptions.SubscriptionsManager
 import net.primal.android.wallet.zaps.hasWallet
@@ -25,8 +26,10 @@ class ArticleFeedViewModel @Inject constructor(
     private val articleRepository: ArticleRepository,
 ) : ViewModel() {
 
+    private val tempFeedSpec = "{\"id\":\"feed-reads\",\"scope\":\"follows\"}"
+
     private fun buildFeedByDirective() =
-        articleRepository.defaultFeed()
+        articleRepository.feedBySpec(feedSpec = tempFeedSpec)
             .map { it.map { article -> article.mapAsFeedArticleUi() } }
             .cachedIn(viewModelScope)
 
@@ -37,7 +40,20 @@ class ArticleFeedViewModel @Inject constructor(
     init {
         subscribeToActiveAccount()
         subscribeToBadgesUpdates()
+        subscribeToFeeds()
     }
+
+    private fun subscribeToFeeds() =
+        viewModelScope.launch {
+            articleRepository.observeFeeds().collect { feeds ->
+                setState {
+                    copy(
+                        feeds = feeds.map { FeedUi(directive = it.spec, name = it.name) },
+                        feedTitle = feeds.find { it.spec == tempFeedSpec }?.name ?: "",
+                    )
+                }
+            }
+        }
 
     private fun subscribeToActiveAccount() =
         viewModelScope.launch {

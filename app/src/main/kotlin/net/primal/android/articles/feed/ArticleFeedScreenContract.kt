@@ -4,12 +4,15 @@ import androidx.paging.PagingData
 import kotlinx.coroutines.flow.Flow
 import net.primal.android.articles.feed.ui.FeedArticleUi
 import net.primal.android.attachments.domain.CdnImage
+import net.primal.android.core.compose.feed.list.FeedUi
 import net.primal.android.core.compose.feed.model.ZappingState
 import net.primal.android.user.domain.Badges
 
 interface ArticleFeedScreenContract {
 
     data class UiState(
+        val feeds: List<FeedUi> = emptyList(),
+        val feedTitle: String = "",
         val activeAccountAvatarCdnImage: CdnImage? = null,
         val zappingState: ZappingState = ZappingState(),
         val badges: Badges = Badges(),
