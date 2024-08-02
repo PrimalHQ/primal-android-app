@@ -27,8 +27,8 @@ class ArticleFeedMediator(
             val response = try {
                 articlesApi.getArticleFeed(
                     body = ArticleFeedRequestBody(
-//                        spec = "{\"id\":\"feed-reads\"}",
-                        spec = "{\"id\":\"feed-reads\",\"scope\":\"myfollowsinteractions\"}",
+                        spec = "{\"id\":\"feed-reads\",\"scope\":\"follows\"}",
+//                        spec = "{\"id\":\"feed-reads\"",
                         userId = userId,
                         limit = pageSize,
                     ),
