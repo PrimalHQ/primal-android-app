@@ -10,3 +10,4 @@
 - Implemented rendering article on ThreadScreen;
 - Implemented article commenting and commenting on article comments;
 - Implemented font size variations on articles;
+- Implemented feed picker and changing article feeds;
