@@ -1,4 +1,4 @@
-package net.primal.android.feed.ui
+package net.primal.android.feed
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -59,7 +59,9 @@ import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.AvatarThumbnailsRow
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.PrimalTopLevelDestination
-import net.primal.android.core.compose.feed.list.FeedNoteList
+import net.primal.android.core.compose.feed.FeedNoteList
+import net.primal.android.core.compose.feed.list.FeedListModalBottomSheet
+import net.primal.android.core.compose.feed.list.FeedUi
 import net.primal.android.core.compose.feed.model.FeedPostsSyncStats
 import net.primal.android.core.compose.feed.note.ConfirmFirstBookmarkAlertDialog
 import net.primal.android.core.compose.feed.note.events.InvoicePayClickEvent
@@ -74,9 +76,7 @@ import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.crypto.hexToNoteHrp
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.PrimalDrawerScaffold
-import net.primal.android.feed.FeedContract
 import net.primal.android.feed.FeedContract.UiState.FeedError
-import net.primal.android.feed.FeedViewModel
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 

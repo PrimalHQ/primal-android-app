@@ -52,8 +52,8 @@ import net.primal.android.explore.home.ExploreHomeScreen
 import net.primal.android.explore.home.ExploreHomeViewModel
 import net.primal.android.explore.search.SearchViewModel
 import net.primal.android.explore.search.ui.SearchScreen
+import net.primal.android.feed.FeedScreen
 import net.primal.android.feed.FeedViewModel
-import net.primal.android.feed.ui.FeedScreen
 import net.primal.android.messages.chat.ChatScreen
 import net.primal.android.messages.chat.ChatViewModel
 import net.primal.android.messages.conversation.MessageConversationListViewModel
@@ -98,8 +98,6 @@ private fun NavController.navigateToOnboarding() = navigate(route = "onboarding"
 private fun NavController.navigateToWalletOnboarding() = navigate(route = "onboardingWallet")
 
 private fun NavController.navigateToLogout() = navigate(route = "logout")
-
-private fun NavController.navigateToFeedList() = navigate(route = "feed/list")
 
 private fun NavController.navigateToSearch() = navigate(route = "search")
 

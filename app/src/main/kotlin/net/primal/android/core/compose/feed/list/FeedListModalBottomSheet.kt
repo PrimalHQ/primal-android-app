@@ -1,4 +1,4 @@
-package net.primal.android.feed.ui
+package net.primal.android.core.compose.feed.list
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable

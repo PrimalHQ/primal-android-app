@@ -1,4 +1,4 @@
-package net.primal.android.core.compose.feed.list
+package net.primal.android.core.compose.feed
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box

@@ -23,7 +23,7 @@ import net.primal.android.R
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.InvisibleAppBarIcon
 import net.primal.android.core.compose.PrimalTopAppBar
-import net.primal.android.core.compose.feed.list.FeedNoteList
+import net.primal.android.core.compose.feed.FeedNoteList
 import net.primal.android.core.compose.feed.note.ConfirmFirstBookmarkAlertDialog
 import net.primal.android.core.compose.feed.note.events.InvoicePayClickEvent
 import net.primal.android.core.compose.feed.note.events.MediaClickEvent
