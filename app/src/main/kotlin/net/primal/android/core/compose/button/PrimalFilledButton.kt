@@ -36,8 +36,8 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.theme.AppTheme
-import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -115,7 +115,7 @@ fun PrimalButtonPreview(
     @PreviewParameter(PrimalStatePreviewProvider::class)
     state: PrimalButtonPreviewState,
 ) {
-    PrimalTheme(primalTheme = PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
         PrimalFilledButton(
             modifier = Modifier.height(48.dp),
             onClick = { },

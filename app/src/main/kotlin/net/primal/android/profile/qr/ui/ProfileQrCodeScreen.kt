@@ -33,11 +33,11 @@ import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
+import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.profile.qr.ProfileQrCodeContract
 import net.primal.android.profile.qr.ProfileQrCodeViewModel
 import net.primal.android.theme.AppTheme
-import net.primal.android.theme.PrimalTheme
 import net.primal.android.wallet.domain.DraftTx
 
 @Composable
@@ -190,7 +190,7 @@ private fun QrCodeMode.invert(): QrCodeMode {
 @Preview
 @Composable
 private fun PreviewProfileQrCodeViewerScreen() {
-    PrimalTheme(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
         Surface {
             ProfileQrCodeViewerScreen(
                 state = ProfileQrCodeContract.UiState(

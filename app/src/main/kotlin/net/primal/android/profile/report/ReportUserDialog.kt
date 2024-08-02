@@ -25,8 +25,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.R
+import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.theme.AppTheme
-import net.primal.android.theme.PrimalTheme
 
 @ExperimentalMaterial3Api
 @Composable
@@ -121,7 +121,7 @@ private fun RadioTextButton(
 @Preview
 @Composable
 fun PreviewReportUserDialog() {
-    PrimalTheme(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
         Surface {
             ReportUserDialog(
                 onDismissRequest = {},

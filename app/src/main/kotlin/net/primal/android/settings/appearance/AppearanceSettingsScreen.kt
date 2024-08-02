@@ -29,7 +29,6 @@ import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.SliderState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -71,13 +70,12 @@ import net.primal.android.core.compose.feed.note.FeedNoteCard
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.FontSize
+import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.settings.SettingsItem
 import net.primal.android.settings.appearance.AppearanceSettingsContract.UiEvent
 import net.primal.android.theme.AppTheme
-import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.user.domain.ContentAppearance
-import net.primal.android.user.domain.ContentDisplaySettings
 
 @Composable
 fun AppearanceSettingsScreen(viewModel: AppearanceSettingsViewModel, onClose: () -> Unit) {
@@ -540,16 +538,12 @@ fun PreviewAppearanceSettingsScreen(
     @PreviewParameter(AppearanceSettingsUiStateProvider::class)
     state: AppearanceSettingsContract.UiState,
 ) {
-    CompositionLocalProvider(
-        LocalContentDisplaySettings provides ContentDisplaySettings(),
-    ) {
-        checkNotNull(state.selectedThemeName)
-        PrimalTheme(primalTheme = PrimalTheme.valueOf(themeName = state.selectedThemeName)!!) {
-            AppearanceSettingsScreen(
-                state = state,
-                onClose = {},
-                eventPublisher = {},
-            )
-        }
+    checkNotNull(state.selectedThemeName)
+    PrimalPreview(primalTheme = PrimalTheme.valueOf(themeName = state.selectedThemeName)!!) {
+        AppearanceSettingsScreen(
+            state = state,
+            onClose = {},
+            eventPublisher = {},
+        )
     }
 }

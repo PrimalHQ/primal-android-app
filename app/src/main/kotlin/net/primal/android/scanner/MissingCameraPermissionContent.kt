@@ -29,8 +29,8 @@ import net.primal.android.R
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromCamera
+import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.theme.AppTheme
-import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
 
 @Composable
@@ -125,7 +125,7 @@ fun missingCameraPermissionColors(
 @Preview(showBackground = true)
 @Composable
 fun MissingCameraPermissionContentPreview() {
-    PrimalTheme(primalTheme = PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
         MissingCameraPermissionContent(onPermissionChange = {})
     }
 }

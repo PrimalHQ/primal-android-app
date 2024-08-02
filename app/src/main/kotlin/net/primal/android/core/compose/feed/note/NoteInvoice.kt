@@ -32,9 +32,9 @@ import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.Copy
 import net.primal.android.core.compose.icons.primaliconpack.NavWalletBoltFilled
+import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.navigation.asUrlDecoded
 import net.primal.android.theme.AppTheme
-import net.primal.android.theme.PrimalTheme
 
 @Composable
 fun NoteLightningInvoice(
@@ -156,7 +156,7 @@ private fun InvoiceTitleRow(onCopyClick: () -> Unit) {
 @Preview
 @Composable
 private fun PreviewLightNoteInvoice() {
-    PrimalTheme(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunrise) {
+    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunrise) {
         Surface {
             NoteLightningInvoice(
                 invoice = "lnbc888550n1pnp6fz9pp5als09l5nfj9pkqk7mpj6cz6075nd4v95ljz0p65n8zkz03p75t3sdp9wdshgueqv" +
@@ -171,7 +171,7 @@ private fun PreviewLightNoteInvoice() {
 @Preview
 @Composable
 private fun PreviewDarkNoteInvoice() {
-    PrimalTheme(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
         Surface {
             NoteLightningInvoice(
                 invoice = "lnbc888550n1pnp6fz9pp5als09l5nfj9pkqk7mpj6cz6075nd4v95ljz0p65n8zkz03p75t3sdp9wdshgueqv" +

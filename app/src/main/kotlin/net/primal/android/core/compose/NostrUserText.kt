@@ -28,9 +28,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.Verified
+import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.utils.isPrimalIdentifier
 import net.primal.android.theme.AppTheme
-import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
 
 @Composable
@@ -113,7 +113,7 @@ fun NostrUserText(
 @Preview
 @Composable
 fun PreviewNostrUserTextWithPrimalBadge() {
-    PrimalTheme(primalTheme = PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
         Surface {
             NostrUserText(
                 displayName = "Nostr Adamus",
@@ -129,7 +129,7 @@ fun PreviewNostrUserTextWithPrimalBadge() {
 @Preview
 @Composable
 fun PreviewNostrUserTextWithRandomBadge() {
-    PrimalTheme(primalTheme = PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
         Surface {
             NostrUserText(
                 displayName = "Nostr Adamus",
@@ -145,7 +145,7 @@ fun PreviewNostrUserTextWithRandomBadge() {
 @Preview
 @Composable
 fun PreviewNostrUserTextWithoutBadge() {
-    PrimalTheme(primalTheme = PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
         Surface {
             NostrUserText(
                 displayName = "Nostr Adamus",

@@ -27,8 +27,8 @@ import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.Subtract
 import net.primal.android.core.compose.numericpad.PrimalNumericPadContract.UiEvent.NumericInputEvent
+import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.theme.AppTheme
-import net.primal.android.theme.PrimalTheme
 
 private val PadButtonMargin = 16.dp
 
@@ -236,7 +236,7 @@ fun NumericPadIconButton(
 @Preview
 @Composable
 fun PreviewPrimalNumericPad() {
-    PrimalTheme(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
         Surface {
             PrimalNumericPad(
                 amountInSats = "0",

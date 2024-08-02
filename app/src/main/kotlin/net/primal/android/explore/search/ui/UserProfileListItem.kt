@@ -25,11 +25,11 @@ import androidx.compose.ui.unit.dp
 import net.primal.android.R
 import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.button.FollowUnfollowButton
+import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.profile.model.UserProfileItemUi
 import net.primal.android.core.utils.formatNip05Identifier
 import net.primal.android.core.utils.shortened
 import net.primal.android.theme.AppTheme
-import net.primal.android.theme.PrimalTheme
 
 @Composable
 fun UserProfileListItem(
@@ -111,7 +111,7 @@ fun UserProfileListItem(
 @Preview
 @Composable
 fun PreviewUserProfileListItemWithFollow() {
-    PrimalTheme(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
         Surface {
             UserProfileListItem(
                 data = UserProfileItemUi(
@@ -131,7 +131,7 @@ fun PreviewUserProfileListItemWithFollow() {
 @Preview
 @Composable
 fun PreviewUserProfileListItemWithUnfollow() {
-    PrimalTheme(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
         Surface {
             UserProfileListItem(
                 data = UserProfileItemUi(
@@ -151,7 +151,7 @@ fun PreviewUserProfileListItemWithUnfollow() {
 @Preview
 @Composable
 fun PreviewUserProfileListItemWithInvisibleUnfollow() {
-    PrimalTheme(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
         Surface {
             UserProfileListItem(
                 data = UserProfileItemUi(
@@ -171,7 +171,7 @@ fun PreviewUserProfileListItemWithInvisibleUnfollow() {
 @Preview
 @Composable
 fun PreviewUserProfileListItemWithGoneUnfollow() {
-    PrimalTheme(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
         Surface {
             UserProfileListItem(
                 data = UserProfileItemUi(

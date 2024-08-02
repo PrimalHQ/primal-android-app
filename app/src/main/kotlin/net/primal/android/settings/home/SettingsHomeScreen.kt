@@ -25,8 +25,8 @@ import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
+import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.theme.AppTheme
-import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
 
 @Composable
@@ -166,7 +166,7 @@ private fun PrimalSettingsSection.title(): String {
 @Preview
 @Composable
 fun PreviewSettingsHomeScreen() {
-    PrimalTheme(primalTheme = PrimalTheme.Sunrise) {
+    PrimalPreview(primalTheme = PrimalTheme.Sunrise) {
         SettingsHomeScreen(
             state = SettingsHomeContract.UiState(version = "1.1"),
             onClose = { },

@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -24,15 +23,14 @@ import net.primal.android.core.compose.feed.model.NoteContentUi
 import net.primal.android.core.compose.feed.model.NoteNostrUriUi
 import net.primal.android.core.compose.feed.note.events.InvoicePayClickEvent
 import net.primal.android.core.compose.feed.note.events.MediaClickEvent
+import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.utils.HashtagMatch
 import net.primal.android.core.utils.HashtagMatcher
 import net.primal.android.feed.db.ReferencedPost
 import net.primal.android.feed.db.ReferencedUser
 import net.primal.android.nostr.ext.cleanNostrUris
 import net.primal.android.theme.AppTheme
-import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
-import net.primal.android.user.domain.ContentDisplaySettings
 
 private const val PROFILE_ID_ANNOTATION_TAG = "profileId"
 private const val URL_ANNOTATION_TAG = "url"
@@ -225,6 +223,7 @@ private fun AnnotatedString.Range<String>.handleAnnotationClick(
             onArticleClick?.invoke(address)
         }
     }
+
     else -> Unit
 }
 
@@ -392,40 +391,38 @@ private fun AnnotatedString.Builder.addNostrAddressAnnotation(
 @Preview
 @Composable
 fun PreviewPostContent() {
-    CompositionLocalProvider(LocalContentDisplaySettings provides ContentDisplaySettings()) {
-        PrimalTheme(primalTheme = PrimalTheme.Sunset) {
-            Surface {
-                NoteContent(
-                    data = NoteContentUi(
-                        noteId = "",
-                        content = """
+    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
+        Surface {
+            NoteContent(
+                data = NoteContentUi(
+                    noteId = "",
+                    content = """
                         Unfortunately the days of using pseudonyms in metaspace are numbered. #nostr 
                         nostr:referencedUser
-                        """.trimIndent(),
-                        attachments = emptyList(),
-                        nostrUris = listOf(
-                            NoteNostrUriUi(
-                                uri = "nostr:referencedUser",
-                                referencedPost = null,
-                                referencedUser = ReferencedUser(
-                                    userId = "nostr:referencedUser",
-                                    handle = "alex",
-                                ),
+                    """.trimIndent(),
+                    attachments = emptyList(),
+                    nostrUris = listOf(
+                        NoteNostrUriUi(
+                            uri = "nostr:referencedUser",
+                            referencedPost = null,
+                            referencedUser = ReferencedUser(
+                                userId = "nostr:referencedUser",
+                                handle = "alex",
                             ),
                         ),
-                        hashtags = listOf("#nostr"),
                     ),
-                    expanded = false,
-                    onProfileClick = {},
-                    onPostClick = {},
-                    onArticleClick = {},
-                    onClick = {},
-                    onUrlClick = {},
-                    onHashtagClick = {},
-                    onMediaClick = {},
-                    onPayInvoiceClick = {},
-                )
-            }
+                    hashtags = listOf("#nostr"),
+                ),
+                expanded = false,
+                onProfileClick = {},
+                onPostClick = {},
+                onArticleClick = {},
+                onClick = {},
+                onUrlClick = {},
+                onHashtagClick = {},
+                onMediaClick = {},
+                onPayInvoiceClick = {},
+            )
         }
     }
 }
@@ -433,13 +430,12 @@ fun PreviewPostContent() {
 @Preview
 @Composable
 fun PreviewPostContentWithReferencedPost() {
-    CompositionLocalProvider(LocalContentDisplaySettings provides ContentDisplaySettings()) {
-        PrimalTheme(primalTheme = PrimalTheme.Sunset) {
-            Surface {
-                NoteContent(
-                    data = NoteContentUi(
-                        noteId = "",
-                        content = """
+    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
+        Surface {
+            NoteContent(
+                data = NoteContentUi(
+                    noteId = "",
+                    content = """
                         Unfortunately the days of using pseudonyms in metaspace are numbered. #nostr
                         
                         nostr:referencedPost
@@ -447,62 +443,61 @@ fun PreviewPostContentWithReferencedPost() {
                         Or maybe not.
                         
                         nostr:referenced2Post
-                        """.trimIndent(),
-                        attachments = emptyList(),
-                        nostrUris = listOf(
-                            NoteNostrUriUi(
-                                uri = "nostr:referencedPost",
-                                referencedPost = ReferencedPost(
-                                    postId = "postId",
-                                    createdAt = 0,
-                                    content = "This is referenced post.",
-                                    authorId = "authorId",
-                                    authorName = "primal",
-                                    authorAvatarCdnImage = null,
-                                    authorInternetIdentifier = "hi@primal.net",
-                                    authorLightningAddress = "h@getalby.com",
-                                    attachments = emptyList(),
-                                    nostrUris = emptyList(),
-                                ),
-                                referencedUser = null,
+                    """.trimIndent(),
+                    attachments = emptyList(),
+                    nostrUris = listOf(
+                        NoteNostrUriUi(
+                            uri = "nostr:referencedPost",
+                            referencedPost = ReferencedPost(
+                                postId = "postId",
+                                createdAt = 0,
+                                content = "This is referenced post.",
+                                authorId = "authorId",
+                                authorName = "primal",
+                                authorAvatarCdnImage = null,
+                                authorInternetIdentifier = "hi@primal.net",
+                                authorLightningAddress = "h@getalby.com",
+                                attachments = emptyList(),
+                                nostrUris = emptyList(),
                             ),
-                            NoteNostrUriUi(
-                                uri = "nostr:referenced2Post",
-                                referencedPost = ReferencedPost(
-                                    postId = "postId",
-                                    createdAt = 0,
-                                    content = "This is referenced post #2.",
-                                    authorId = "authorId",
-                                    authorName = "primal",
-                                    authorAvatarCdnImage = null,
-                                    authorInternetIdentifier = "hi@primal.net",
-                                    authorLightningAddress = "h@getalby.com",
-                                    attachments = emptyList(),
-                                    nostrUris = emptyList(),
-                                ),
-                                referencedUser = null,
-                            ),
+                            referencedUser = null,
                         ),
-                        hashtags = listOf("#nostr"),
-                        invoices = listOf(
-                            "lnbc888550n1pnp6fz9pp5als09l5nfj9pkqk7mpj6cz6075nd4v95ljz0p65n8zkz03p75t3" +
-                                "sdp9wdshgueqvehhygr3v9q8qunfd4skctnwv46r5cqzzsxqrrs0fppqyyu34ypjxgclynk64hz2r6" +
-                                "ddudpaf5mesp5c8mv8xdu67pra93m3j9aw9mxh08gk09upmjsdpspjxcgcrfjyc0s9qyyssqng6uu0" +
-                                "z84h7wlcrlyqywl6jlfd4630k4yd056d3q9h9rg9tzmza5adpzjn489fees4vq0armdskuqgxxvug3" +
-                                "et34cqdxj6ldu8lkd2cqcvx5am",
+                        NoteNostrUriUi(
+                            uri = "nostr:referenced2Post",
+                            referencedPost = ReferencedPost(
+                                postId = "postId",
+                                createdAt = 0,
+                                content = "This is referenced post #2.",
+                                authorId = "authorId",
+                                authorName = "primal",
+                                authorAvatarCdnImage = null,
+                                authorInternetIdentifier = "hi@primal.net",
+                                authorLightningAddress = "h@getalby.com",
+                                attachments = emptyList(),
+                                nostrUris = emptyList(),
+                            ),
+                            referencedUser = null,
                         ),
                     ),
-                    expanded = false,
-                    onProfileClick = {},
-                    onPostClick = {},
-                    onArticleClick = {},
-                    onClick = {},
-                    onUrlClick = {},
-                    onHashtagClick = {},
-                    onMediaClick = {},
-                    onPayInvoiceClick = {},
-                )
-            }
+                    hashtags = listOf("#nostr"),
+                    invoices = listOf(
+                        "lnbc888550n1pnp6fz9pp5als09l5nfj9pkqk7mpj6cz6075nd4v95ljz0p65n8zkz03p75t3" +
+                            "sdp9wdshgueqvehhygr3v9q8qunfd4skctnwv46r5cqzzsxqrrs0fppqyyu34ypjxgclynk64hz2r6" +
+                            "ddudpaf5mesp5c8mv8xdu67pra93m3j9aw9mxh08gk09upmjsdpspjxcgcrfjyc0s9qyyssqng6uu0" +
+                            "z84h7wlcrlyqywl6jlfd4630k4yd056d3q9h9rg9tzmza5adpzjn489fees4vq0armdskuqgxxvug3" +
+                            "et34cqdxj6ldu8lkd2cqcvx5am",
+                    ),
+                ),
+                expanded = false,
+                onProfileClick = {},
+                onPostClick = {},
+                onArticleClick = {},
+                onClick = {},
+                onUrlClick = {},
+                onHashtagClick = {},
+                onMediaClick = {},
+                onPayInvoiceClick = {},
+            )
         }
     }
 }

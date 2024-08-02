@@ -36,8 +36,8 @@ import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.button.PrimalLoadingButton
+import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.theme.AppTheme
-import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.user.domain.NostrWalletConnect
 
@@ -275,7 +275,7 @@ private fun PreviewExternalWalletSettings(
     @PreviewParameter(WalletUiStateProvider::class)
     state: WalletSettingsContract.UiState,
 ) {
-    PrimalTheme(primalTheme = PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
         Surface {
             Column {
                 ExternalWalletSettings(

@@ -35,11 +35,11 @@ import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
+import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.utils.isValidEmail
 import net.primal.android.core.utils.isValidUsername
 import net.primal.android.profile.editor.ProfileEditorContract
 import net.primal.android.profile.editor.ProfileEditorViewModel
-import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
 
 @Composable
@@ -258,7 +258,7 @@ private fun ProfileEditorForm(
 @Preview
 @Composable
 fun PreviewEditProfileScreen() {
-    PrimalTheme(primalTheme = PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
         ProfileEditorScreen(
             state = ProfileEditorContract.UiState(
                 username = "Random Handle",

@@ -30,9 +30,9 @@ import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
+import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.settings.muted.list.model.MutedUserUi
 import net.primal.android.theme.AppTheme
-import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
 
 @Composable
@@ -168,7 +168,7 @@ fun MutedUserListItem(
 @Preview
 @Composable
 fun PreviewMutedScreen() {
-    PrimalTheme(primalTheme = PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
         MutedSettingsScreen(
             state = MutedSettingsContract.UiState(
                 mutedUsers = listOf(
