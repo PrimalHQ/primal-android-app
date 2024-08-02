@@ -15,6 +15,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.isActive
@@ -106,14 +108,17 @@ class FeedViewModel @Inject constructor(
 
     private fun subscribeToFeeds() =
         viewModelScope.launch {
-            feedRepository.observeFeeds().collect { feeds ->
-                setState {
-                    copy(
-                        feeds = feeds.map { FeedUi(directive = it.directive, name = it.name) },
-                        feedTitle = feeds.find { it.directive == feedDirective }?.name ?: "",
-                    )
+            feedRepository.observeFeeds()
+                .distinctUntilChanged()
+                .filter { it.isNotEmpty() }
+                .collect { feeds ->
+                    setState {
+                        copy(
+                            feeds = feeds.map { FeedUi(directive = it.directive, name = it.name) },
+                            feedTitle = feeds.find { it.directive == feedDirective }?.name ?: "",
+                        )
+                    }
                 }
-            }
         }
 
     private fun subscribeToActiveAccount() =
