@@ -21,7 +21,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -41,7 +40,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
 import coil.compose.SubcomposeAsyncImage
 import java.time.Instant
-import net.primal.android.LocalContentDisplaySettings
 import net.primal.android.R
 import net.primal.android.attachments.domain.findNearestOrNull
 import net.primal.android.core.compose.AvatarThumbnail
@@ -51,13 +49,12 @@ import net.primal.android.core.compose.feed.model.EventStatsUi
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.FeedReplies
 import net.primal.android.core.compose.icons.primaliconpack.LightningBolt
+import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.utils.Naddr
 import net.primal.android.nostr.utils.Nip19TLV.toNaddrString
 import net.primal.android.note.ui.EventZapUiModel
 import net.primal.android.theme.AppTheme
-import net.primal.android.theme.PrimalTheme
-import net.primal.android.user.domain.ContentDisplaySettings
 
 @Composable
 fun FeedArticleListItem(
@@ -293,57 +290,53 @@ private fun ArticleImagePlaceholder() {
 @Preview
 @Composable
 private fun PreviewFeedArticleListItem() {
-    CompositionLocalProvider(
-        LocalContentDisplaySettings provides ContentDisplaySettings(),
-    ) {
-        PrimalTheme(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
-            FeedArticleListItem(
-                data = FeedArticleUi(
-                    eventId = "",
-                    articleId = "",
-                    authorId = "1234",
-                    authorName = "JeffG",
-                    content = "This is content.",
-                    title = "Purple Tech",
-                    isBookmarked = false,
-                    publishedAt = Instant.now(),
-                    rawNostrEventJson = "raaaaw",
-                    readingTimeInMinutes = 5,
-                    stats = EventStatsUi(
-                        repliesCount = 23,
+    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
+        FeedArticleListItem(
+            data = FeedArticleUi(
+                eventId = "",
+                articleId = "",
+                authorId = "1234",
+                authorName = "JeffG",
+                content = "This is content.",
+                title = "Purple Tech",
+                isBookmarked = false,
+                publishedAt = Instant.now(),
+                rawNostrEventJson = "raaaaw",
+                readingTimeInMinutes = 5,
+                stats = EventStatsUi(
+                    repliesCount = 23,
+                ),
+                eventZaps = listOf(
+                    EventZapUiModel(
+                        id = "",
+                        zapperId = "",
+                        zapperName = "",
+                        zapperHandle = "",
+                        amountInSats = 200L.toULong(),
+                        message = "",
+                        zappedAt = 0,
                     ),
-                    eventZaps = listOf(
-                        EventZapUiModel(
-                            id = "",
-                            zapperId = "",
-                            zapperName = "",
-                            zapperHandle = "",
-                            amountInSats = 200L.toULong(),
-                            message = "",
-                            zappedAt = 0,
-                        ),
-                        EventZapUiModel(
-                            id = "",
-                            zapperId = "",
-                            zapperName = "",
-                            zapperHandle = "",
-                            amountInSats = 200L.toULong(),
-                            message = "",
-                            zappedAt = 0,
-                        ),
-                        EventZapUiModel(
-                            id = "",
-                            zapperId = "",
-                            zapperName = "",
-                            zapperHandle = "",
-                            amountInSats = 200L.toULong(),
-                            message = "",
-                            zappedAt = 0,
-                        ),
+                    EventZapUiModel(
+                        id = "",
+                        zapperId = "",
+                        zapperName = "",
+                        zapperHandle = "",
+                        amountInSats = 200L.toULong(),
+                        message = "",
+                        zappedAt = 0,
+                    ),
+                    EventZapUiModel(
+                        id = "",
+                        zapperId = "",
+                        zapperName = "",
+                        zapperHandle = "",
+                        amountInSats = 200L.toULong(),
+                        message = "",
+                        zappedAt = 0,
                     ),
                 ),
-                modifier = Modifier.padding(all = 16.dp),
-            )
-        }
+            ),
+            modifier = Modifier.padding(all = 16.dp),
+        )
     }
 }

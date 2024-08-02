@@ -48,11 +48,11 @@ import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
+import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.settings.feeds.model.Feed
 import net.primal.android.settings.feeds.model.FeedAction
 import net.primal.android.theme.AppTheme
-import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
 import sh.calvin.reorderable.ReorderableCollectionItemScope
 import sh.calvin.reorderable.ReorderableItem
@@ -379,7 +379,7 @@ private fun ConfirmActionAlertDialog(
 @Preview
 @Composable
 private fun PreviewSettingsScreen() {
-    PrimalTheme(primalTheme = PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
         FeedsSettingsScreen(
             state = FeedsSettingsContract.UiState(
                 feeds = listOf(

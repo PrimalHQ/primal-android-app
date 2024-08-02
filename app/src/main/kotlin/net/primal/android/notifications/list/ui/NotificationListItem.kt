@@ -14,7 +14,6 @@ import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -31,8 +30,6 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import java.time.Instant
-import net.primal.android.LocalContentDisplaySettings
-import net.primal.android.LocalPrimalTheme
 import net.primal.android.R
 import net.primal.android.core.compose.AvatarThumbnailsRow
 import net.primal.android.core.compose.NostrUserText
@@ -47,13 +44,12 @@ import net.primal.android.core.compose.feed.note.NoteContent
 import net.primal.android.core.compose.feed.note.events.InvoicePayClickEvent
 import net.primal.android.core.compose.feed.note.events.MediaClickEvent
 import net.primal.android.core.compose.notifications.toImagePainter
+import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.ext.openUriSafely
 import net.primal.android.core.utils.shortened
 import net.primal.android.notifications.domain.NotificationType
 import net.primal.android.theme.AppTheme
-import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme.Sunset
-import net.primal.android.user.domain.ContentDisplaySettings
 
 @Composable
 fun NotificationListItem(
@@ -702,18 +698,13 @@ private fun PreviewUnseenNotificationsListItem(
     @PreviewParameter(NotificationsParameterProvider::class)
     notifications: List<NotificationUi>,
 ) {
-    CompositionLocalProvider(
-        LocalPrimalTheme provides Sunset,
-        LocalContentDisplaySettings provides ContentDisplaySettings(),
-    ) {
-        PrimalTheme(primalTheme = Sunset) {
-            NotificationListItem(
-                notifications = notifications,
-                type = notifications.first().notificationType,
-                isSeen = false,
-                onArticleClick = {},
-            )
-        }
+    PrimalPreview(primalTheme = Sunset) {
+        NotificationListItem(
+            notifications = notifications,
+            type = notifications.first().notificationType,
+            isSeen = false,
+            onArticleClick = {},
+        )
     }
 }
 
@@ -723,17 +714,12 @@ private fun PreviewSeenNotificationsListItem(
     @PreviewParameter(NotificationsParameterProvider::class)
     notifications: List<NotificationUi>,
 ) {
-    CompositionLocalProvider(
-        LocalPrimalTheme provides Sunset,
-        LocalContentDisplaySettings provides ContentDisplaySettings(),
-    ) {
-        PrimalTheme(primalTheme = Sunset) {
-            NotificationListItem(
-                notifications = notifications,
-                type = notifications.first().notificationType,
-                isSeen = true,
-                onArticleClick = {},
-            )
-        }
+    PrimalPreview(primalTheme = Sunset) {
+        NotificationListItem(
+            notifications = notifications,
+            type = notifications.first().notificationType,
+            isSeen = true,
+            onArticleClick = {},
+        )
     }
 }

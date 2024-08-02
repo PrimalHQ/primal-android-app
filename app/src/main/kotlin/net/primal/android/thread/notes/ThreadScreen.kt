@@ -100,6 +100,7 @@ import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromCamera
 import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromGallery
 import net.primal.android.core.compose.icons.primaliconpack.More
+import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.pulltorefresh.PrimalPullToRefreshIndicator
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.crypto.hexToNoteHrp
@@ -111,7 +112,6 @@ import net.primal.android.editor.ui.NoteTagUserLazyColumn
 import net.primal.android.note.ui.EventZapUiModel
 import net.primal.android.profile.report.OnReportContentClick
 import net.primal.android.theme.AppTheme
-import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.thread.notes.ThreadContract.UiState.ThreadError
 import net.primal.android.wallet.zaps.canZap
@@ -963,7 +963,7 @@ private fun NoteEditorErrorHandler(
 @Preview
 @Composable
 fun ThreadScreenPreview() {
-    PrimalTheme(primalTheme = PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
         ThreadScreen(
             state = ThreadContract.UiState(
                 highlightPostId = "",

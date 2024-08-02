@@ -50,8 +50,8 @@ import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.WalletSuccess
+import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.theme.AppTheme
-import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.wallet.activation.WalletActivationContract
 import net.primal.android.wallet.activation.WalletActivationViewModel
@@ -341,7 +341,7 @@ private class UiStateProvider(
 private fun PreviewPendingDataScreen(
     @PreviewParameter(provider = UiStateProvider::class) uiState: WalletActivationContract.UiState,
 ) {
-    PrimalTheme(primalTheme = PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
         OnboardingWalletActivation(
             state = uiState,
             eventPublisher = {},

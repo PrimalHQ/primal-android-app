@@ -23,8 +23,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import net.primal.android.core.compose.IconText
+import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.theme.AppTheme
-import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
 
 @Composable
@@ -122,7 +122,7 @@ fun PrimalLoadingButtonPreview(
     @PreviewParameter(PrimalButtonStatePreviewProvider::class)
     state: PrimalLoadingButtonPreviewState,
 ) {
-    PrimalTheme(primalTheme = PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
         PrimalLoadingButton(
             modifier = Modifier.height(48.dp),
             onClick = { },

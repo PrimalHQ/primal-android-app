@@ -34,7 +34,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -64,8 +63,8 @@ import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.WalletSuccess
+import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.theme.AppTheme
-import net.primal.android.theme.PrimalTheme
 import net.primal.android.wallet.activation.WalletActivationContract
 import net.primal.android.wallet.activation.WalletActivationContract.UiEvent
 import net.primal.android.wallet.activation.WalletActivationViewModel
@@ -488,17 +487,13 @@ private fun PreviewWalletActivationScreen(
     @PreviewParameter(provider = UiStateProvider::class) uiState: WalletActivationContract.UiState,
 ) {
     val primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset
-    PrimalTheme(primalTheme = primalTheme) {
-        CompositionLocalProvider(
-            LocalPrimalTheme provides primalTheme,
-        ) {
-            Surface {
-                WalletActivationScreen(
-                    state = uiState,
-                    eventPublisher = {},
-                    onClose = {},
-                )
-            }
+    PrimalPreview(primalTheme = primalTheme) {
+        Surface {
+            WalletActivationScreen(
+                state = uiState,
+                eventPublisher = {},
+                onClose = {},
+            )
         }
     }
 }

@@ -46,8 +46,8 @@ import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.Key
+import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.theme.AppTheme
-import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
 
 @Composable
@@ -268,7 +268,7 @@ fun PrivateKeySection(nsec: String) {
 @Preview
 @Composable
 fun PreviewSettingsHomeScreen() {
-    PrimalTheme(primalTheme = PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
         AccountSettingsScreen(
             state = AccountSettingsContract.UiState(
                 avatarCdnImage = CdnImage("https://i.imgur.com/Z8dpmvc.png"),

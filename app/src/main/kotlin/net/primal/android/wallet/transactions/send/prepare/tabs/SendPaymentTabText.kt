@@ -30,8 +30,8 @@ import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.Paste
+import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.theme.AppTheme
-import net.primal.android.theme.PrimalTheme
 import net.primal.android.wallet.utils.isBitcoinAddress
 import net.primal.android.wallet.utils.isBitcoinUri
 import net.primal.android.wallet.utils.isLightningAddress
@@ -118,7 +118,7 @@ private fun String.hasValidPaymentInput(): Boolean {
 @Preview
 @Composable
 fun PreviewSendPaymentTabText() {
-    PrimalTheme(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunrise) {
+    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunrise) {
         Surface {
             SendPaymentTabText(
                 parsing = false,

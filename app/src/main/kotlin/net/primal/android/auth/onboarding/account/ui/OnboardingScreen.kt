@@ -20,7 +20,7 @@ import net.primal.android.auth.onboarding.account.OnboardingContract
 import net.primal.android.auth.onboarding.account.OnboardingStep
 import net.primal.android.auth.onboarding.account.OnboardingViewModel
 import net.primal.android.auth.onboarding.account.api.Suggestion
-import net.primal.android.theme.PrimalTheme
+import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.theme.domain.PrimalTheme
 
 @Composable
@@ -148,7 +148,7 @@ private class UiStateProvider(
 private fun PreviewOnboarding(
     @PreviewParameter(provider = UiStateProvider::class) uiState: OnboardingContract.UiState,
 ) {
-    PrimalTheme(primalTheme = PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
         OnboardingScreen(
             state = uiState,
             eventPublisher = {},

@@ -53,8 +53,8 @@ import net.primal.android.core.compose.icons.primaliconpack.WalletBitcoinPayment
 import net.primal.android.core.compose.icons.primaliconpack.WalletLightningPaymentAlt
 import net.primal.android.core.compose.icons.primaliconpack.WalletPay
 import net.primal.android.core.compose.icons.primaliconpack.WalletReceive
+import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.theme.AppTheme
-import net.primal.android.theme.PrimalTheme
 import net.primal.android.wallet.domain.TxState
 import net.primal.android.wallet.domain.TxType
 import net.primal.android.wallet.walletDepositColor
@@ -396,7 +396,7 @@ class TxDataProvider : PreviewParameterProvider<TransactionListItemDataUi> {
 @Preview
 @Composable
 fun PreviewTransactionListItem(@PreviewParameter(provider = TxDataProvider::class) tx: TransactionListItemDataUi) {
-    PrimalTheme(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
         Surface {
             TransactionListItem(
                 data = tx,

@@ -50,8 +50,8 @@ import net.primal.android.core.compose.icons.primaliconpack.NavWalletBolt
 import net.primal.android.core.compose.icons.primaliconpack.NavWalletBoltFilled
 import net.primal.android.core.compose.icons.primaliconpack.Notifications
 import net.primal.android.core.compose.icons.primaliconpack.NotificationsFilled
+import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.theme.AppTheme
-import net.primal.android.theme.PrimalTheme
 import net.primal.android.user.domain.Badges
 
 val NavigationBarFullHeightDp = 64.dp
@@ -345,7 +345,7 @@ private fun PrimalTopLevelDestination.label(): String {
 @Preview
 @Composable
 fun PreviewNavigationBar() {
-    PrimalTheme(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
         Surface(
             modifier = Modifier.wrapContentSize(),
         ) {
@@ -361,7 +361,7 @@ fun PreviewNavigationBar() {
 @Preview
 @Composable
 fun PreviewNavigationBarLightningBolt() {
-    PrimalTheme(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
         Surface(
             modifier = Modifier.wrapContentSize(),
         ) {
