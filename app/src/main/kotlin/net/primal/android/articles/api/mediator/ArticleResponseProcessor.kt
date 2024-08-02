@@ -52,7 +52,7 @@ suspend fun ArticleResponse.persistToDatabaseAsTransaction(userId: String, datab
     database.withTransaction {
         database.profiles().upsertAll(data = profiles)
         database.posts().upsertAll(data = allNotes + referencedNotes)
-        database.articles().upsertAll(list = allPrimalArticles + allArticles + referencedArticles)
+        database.articles().upsertAll(list = allPrimalArticles + referencedArticles + allArticles)
         database.eventStats().upsertAll(data = eventStats)
         database.eventUserStats().upsertAll(data = eventUserStats)
         database.eventZaps().upsertAll(data = eventZaps)
