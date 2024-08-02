@@ -9,7 +9,6 @@ import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -17,14 +16,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import net.primal.android.LocalContentDisplaySettings
 import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.button.PrimalLoadingButton
+import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.theme.AppTheme
-import net.primal.android.theme.PrimalTheme
-import net.primal.android.user.domain.ContentDisplaySettings
 
 @Composable
 fun ArticleAuthorRow(
@@ -84,17 +81,13 @@ fun ArticleAuthorRow(
 @Preview
 @Composable
 fun PreviewArticleAuthorRow() {
-    PrimalTheme(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
-        CompositionLocalProvider(
-            LocalContentDisplaySettings provides ContentDisplaySettings(),
-        ) {
-            Surface(modifier = Modifier.fillMaxWidth()) {
-                ArticleAuthorRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    authorDisplayName = "miljan",
-                    authorInternetIdentifier = "miljan@primal.net",
-                )
-            }
+    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
+        Surface(modifier = Modifier.fillMaxWidth()) {
+            ArticleAuthorRow(
+                modifier = Modifier.fillMaxWidth(),
+                authorDisplayName = "miljan",
+                authorInternetIdentifier = "miljan@primal.net",
+            )
         }
     }
 }

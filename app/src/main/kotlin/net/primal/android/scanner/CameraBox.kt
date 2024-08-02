@@ -12,9 +12,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import kotlin.time.Duration.Companion.seconds
 import net.primal.android.core.compose.foundation.KeepScreenOn
+import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.utils.isOlderThan
 import net.primal.android.scanner.domain.QrCodeResult
-import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
 
 @Composable
@@ -52,7 +52,7 @@ fun CameraBox(
 @Preview(showBackground = true)
 @Composable
 fun CameraContentPreview() {
-    PrimalTheme(primalTheme = PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
         CameraBox(
             cameraVisible = false,
             onQrCodeDetected = {},

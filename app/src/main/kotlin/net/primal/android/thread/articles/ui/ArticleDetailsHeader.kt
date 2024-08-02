@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
@@ -26,13 +25,11 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.*
-import net.primal.android.LocalContentDisplaySettings
 import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.attachments.domain.findNearestOrNull
+import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.theme.AppTheme
-import net.primal.android.theme.PrimalTheme
 import net.primal.android.thread.articles.ui.rendering.MarkdownRenderer
-import net.primal.android.user.domain.ContentDisplaySettings
 
 @Composable
 fun ArticleDetailsHeader(
@@ -132,23 +129,19 @@ private fun Instant.formatDate(): String {
 @Preview
 @Composable
 fun PreviewArticleDetailsHeader() {
-    PrimalTheme(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
-        CompositionLocalProvider(
-            LocalContentDisplaySettings provides ContentDisplaySettings(),
-        ) {
-            Surface(modifier = Modifier.fillMaxWidth()) {
-                ArticleDetailsHeader(
-                    modifier = Modifier.fillMaxWidth(),
-                    title = "Welcome to Article Header test",
-                    summary = """
+    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
+        Surface(modifier = Modifier.fillMaxWidth()) {
+            ArticleDetailsHeader(
+                modifier = Modifier.fillMaxWidth(),
+                title = "Welcome to Article Header test",
+                summary = """
                         This is a short summary of this preview test.
                         This is a short summary of this preview test.
                         This is a short summary of this preview test.
                         This is a short summary of this preview test.
-                    """.trimIndent(),
-                    date = Instant.now(),
-                )
-            }
+                """.trimIndent(),
+                date = Instant.now(),
+            )
         }
     }
 }

@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,16 +23,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.text.NumberFormat
-import net.primal.android.LocalContentDisplaySettings
 import net.primal.android.R
 import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.NavWalletBoltFilled
+import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.note.ui.EventZapUiModel
 import net.primal.android.theme.AppTheme
-import net.primal.android.theme.PrimalTheme
-import net.primal.android.user.domain.ContentDisplaySettings
 
 @Composable
 fun ArticleTopZapsSection(
@@ -192,55 +189,51 @@ private fun ZapButton(onClick: () -> Unit) {
 @Preview
 @Composable
 private fun PreviewArticleTopZapsSection() {
-    PrimalTheme(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
-        CompositionLocalProvider(
-            LocalContentDisplaySettings provides ContentDisplaySettings(),
-        ) {
-            Surface(modifier = Modifier.fillMaxWidth()) {
-                ArticleTopZapsSection(
-                    modifier = Modifier.fillMaxWidth(),
-                    topZap = EventZapUiModel(
+    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
+        Surface(modifier = Modifier.fillMaxWidth()) {
+            ArticleTopZapsSection(
+                modifier = Modifier.fillMaxWidth(),
+                topZap = EventZapUiModel(
+                    id = "id",
+                    zapperId = "id",
+                    zapperName = "topZapper",
+                    zapperHandle = "handle",
+                    zappedAt = 0,
+                    message = "Top zap message!!!",
+                    amountInSats = 21_21_21.toULong(),
+                ),
+                otherZaps = listOf(
+                    EventZapUiModel(
                         id = "id",
                         zapperId = "id",
                         zapperName = "topZapper",
                         zapperHandle = "handle",
                         zappedAt = 0,
-                        message = "Top zap message!!!",
-                        amountInSats = 21_21_21.toULong(),
+                        message = "",
+                        amountInSats = 20_000.toULong(),
                     ),
-                    otherZaps = listOf(
-                        EventZapUiModel(
-                            id = "id",
-                            zapperId = "id",
-                            zapperName = "topZapper",
-                            zapperHandle = "handle",
-                            zappedAt = 0,
-                            message = "",
-                            amountInSats = 20_000.toULong(),
-                        ),
-                        EventZapUiModel(
-                            id = "id",
-                            zapperId = "id",
-                            zapperName = "topZapper",
-                            zapperHandle = "handle",
-                            zappedAt = 0,
-                            message = "",
-                            amountInSats = 10_000.toULong(),
-                        ),
-                        EventZapUiModel(
-                            id = "id",
-                            zapperId = "id",
-                            zapperName = "topZapper",
-                            zapperHandle = "handle",
-                            zappedAt = 0,
-                            message = "",
-                            amountInSats = 8_888.toULong(),
-                        ),
+                    EventZapUiModel(
+                        id = "id",
+                        zapperId = "id",
+                        zapperName = "topZapper",
+                        zapperHandle = "handle",
+                        zappedAt = 0,
+                        message = "",
+                        amountInSats = 10_000.toULong(),
                     ),
-                    onZapsClick = {},
-                    onZapClick = {},
-                )
-            }
+                    EventZapUiModel(
+                        id = "id",
+                        zapperId = "id",
+                        zapperName = "topZapper",
+                        zapperHandle = "handle",
+                        zappedAt = 0,
+                        message = "",
+                        amountInSats = 8_888.toULong(),
+                    ),
+                ),
+                onZapsClick = {},
+                onZapClick = {},
+            )
         }
     }
 }

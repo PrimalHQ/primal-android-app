@@ -62,8 +62,8 @@ import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
+import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.theme.AppTheme
-import net.primal.android.theme.PrimalTheme
 
 @ExperimentalMaterial3Api
 @Composable
@@ -557,7 +557,7 @@ private fun SuccessAvatarBox(modifier: Modifier = Modifier, avatarUri: Uri?) {
 @Preview
 @Composable
 private fun PreviewOnboardingProfilePreviewScreen() {
-    PrimalTheme(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
         ColumnWithBackground(
             backgroundPainter = painterResource(id = R.drawable.onboarding_spot4),
         ) {
@@ -582,7 +582,7 @@ private fun PreviewOnboardingProfilePreviewScreen() {
 @Preview
 @Composable
 private fun PreviewOnboardingProfileSuccessScreen() {
-    PrimalTheme(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
         ColumnWithBackground(
             backgroundPainter = painterResource(id = R.drawable.onboarding_spot4),
         ) {

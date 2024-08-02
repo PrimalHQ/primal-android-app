@@ -41,11 +41,11 @@ import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.notifications.toImagePainter
+import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.notifications.domain.NotificationSection
 import net.primal.android.notifications.domain.NotificationType
 import net.primal.android.settings.notifications.NotificationsSettingsContract.UiState.ApiError
 import net.primal.android.theme.AppTheme
-import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
 
 @Composable
@@ -289,7 +289,7 @@ fun LaunchedErrorHandler(viewModel: NotificationsSettingsViewModel) {
 @Preview
 @Composable
 fun PreviewNotificationsSettingsScreen() {
-    PrimalTheme(primalTheme = PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
         NotificationsSettingsScreen(
             state = NotificationsSettingsContract.UiState(),
             onClose = {},

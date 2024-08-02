@@ -15,7 +15,6 @@ import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,11 +36,10 @@ import net.primal.android.core.compose.feed.model.FeedPostAction
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.feed.note.events.InvoicePayClickEvent
 import net.primal.android.core.compose.feed.note.events.MediaClickEvent
+import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.profile.report.OnReportContentClick
 import net.primal.android.profile.report.ReportUserDialog
-import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
-import net.primal.android.user.domain.ContentDisplaySettings
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -242,26 +240,22 @@ fun PreviewFeedNoteListItemLightMultiLineHeader(
     @PreviewParameter(FeedPostUiProvider::class)
     feedPostUi: FeedPostUi,
 ) {
-    CompositionLocalProvider(
-        LocalContentDisplaySettings provides ContentDisplaySettings(),
-    ) {
-        PrimalTheme(primalTheme = PrimalTheme.Sunrise) {
-            FeedNoteCard(
-                data = feedPostUi,
-                headerSingleLine = false,
-                fullWidthContent = false,
-                onPostClick = {},
-                onArticleClick = {},
-                onProfileClick = {},
-                onPostAction = {},
-                onPostLongClickAction = {},
-                onHashtagClick = {},
-                onMuteUserClick = {},
-                onMediaClick = {},
-                onReportContentClick = { _, _, _ -> },
-                onBookmarkClick = {},
-            )
-        }
+    PrimalPreview(primalTheme = PrimalTheme.Sunrise) {
+        FeedNoteCard(
+            data = feedPostUi,
+            headerSingleLine = false,
+            fullWidthContent = false,
+            onPostClick = {},
+            onArticleClick = {},
+            onProfileClick = {},
+            onPostAction = {},
+            onPostLongClickAction = {},
+            onHashtagClick = {},
+            onMuteUserClick = {},
+            onMediaClick = {},
+            onReportContentClick = { _, _, _ -> },
+            onBookmarkClick = {},
+        )
     }
 }
 
@@ -271,26 +265,22 @@ fun PreviewFeedNoteListItemLightMultiLineHeaderFullWidth(
     @PreviewParameter(FeedPostUiProvider::class)
     feedPostUi: FeedPostUi,
 ) {
-    CompositionLocalProvider(
-        LocalContentDisplaySettings provides ContentDisplaySettings(),
-    ) {
-        PrimalTheme(primalTheme = PrimalTheme.Sunrise) {
-            FeedNoteCard(
-                data = feedPostUi,
-                headerSingleLine = false,
-                fullWidthContent = true,
-                onPostClick = {},
-                onArticleClick = {},
-                onProfileClick = {},
-                onPostAction = {},
-                onPostLongClickAction = {},
-                onHashtagClick = {},
-                onMuteUserClick = {},
-                onMediaClick = {},
-                onReportContentClick = { _, _, _ -> },
-                onBookmarkClick = {},
-            )
-        }
+    PrimalPreview(primalTheme = PrimalTheme.Sunrise) {
+        FeedNoteCard(
+            data = feedPostUi,
+            headerSingleLine = false,
+            fullWidthContent = true,
+            onPostClick = {},
+            onArticleClick = {},
+            onProfileClick = {},
+            onPostAction = {},
+            onPostLongClickAction = {},
+            onHashtagClick = {},
+            onMuteUserClick = {},
+            onMediaClick = {},
+            onReportContentClick = { _, _, _ -> },
+            onBookmarkClick = {},
+        )
     }
 }
 
@@ -300,26 +290,22 @@ fun PreviewFeedNoteListItemDarkSingleLineHeader(
     @PreviewParameter(FeedPostUiProvider::class)
     feedPostUi: FeedPostUi,
 ) {
-    CompositionLocalProvider(
-        LocalContentDisplaySettings provides ContentDisplaySettings(),
-    ) {
-        PrimalTheme(primalTheme = PrimalTheme.Sunset) {
-            FeedNoteCard(
-                data = feedPostUi,
-                headerSingleLine = true,
-                fullWidthContent = false,
-                onPostClick = {},
-                onArticleClick = {},
-                onProfileClick = {},
-                onPostAction = {},
-                onPostLongClickAction = {},
-                onHashtagClick = {},
-                onMuteUserClick = {},
-                onMediaClick = {},
-                onReportContentClick = { _, _, _ -> },
-                onBookmarkClick = {},
-            )
-        }
+    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
+        FeedNoteCard(
+            data = feedPostUi,
+            headerSingleLine = true,
+            fullWidthContent = false,
+            onPostClick = {},
+            onArticleClick = {},
+            onProfileClick = {},
+            onPostAction = {},
+            onPostLongClickAction = {},
+            onHashtagClick = {},
+            onMuteUserClick = {},
+            onMediaClick = {},
+            onReportContentClick = { _, _, _ -> },
+            onBookmarkClick = {},
+        )
     }
 }
 
@@ -329,26 +315,22 @@ fun PreviewFeedNoteListItemDarkSingleLineHeaderFullWidth(
     @PreviewParameter(FeedPostUiProvider::class)
     feedPostUi: FeedPostUi,
 ) {
-    CompositionLocalProvider(
-        LocalContentDisplaySettings provides ContentDisplaySettings(),
-    ) {
-        PrimalTheme(primalTheme = PrimalTheme.Sunset) {
-            FeedNoteCard(
-                data = feedPostUi,
-                headerSingleLine = true,
-                fullWidthContent = true,
-                onPostClick = {},
-                onArticleClick = {},
-                onProfileClick = {},
-                onPostAction = {},
-                onPostLongClickAction = {},
-                onHashtagClick = {},
-                onMuteUserClick = {},
-                onMediaClick = {},
-                onReportContentClick = { _, _, _ -> },
-                onBookmarkClick = {},
-            )
-        }
+    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
+        FeedNoteCard(
+            data = feedPostUi,
+            headerSingleLine = true,
+            fullWidthContent = true,
+            onPostClick = {},
+            onArticleClick = {},
+            onProfileClick = {},
+            onPostAction = {},
+            onPostLongClickAction = {},
+            onHashtagClick = {},
+            onMuteUserClick = {},
+            onMediaClick = {},
+            onReportContentClick = { _, _, _ -> },
+            onBookmarkClick = {},
+        )
     }
 }
 
@@ -358,28 +340,24 @@ fun PreviewFeedNoteListItemLightForcedContentIndentFullWidthSingleLineHeader(
     @PreviewParameter(FeedPostUiProvider::class)
     feedPostUi: FeedPostUi,
 ) {
-    CompositionLocalProvider(
-        LocalContentDisplaySettings provides ContentDisplaySettings(),
-    ) {
-        PrimalTheme(primalTheme = PrimalTheme.Sunrise) {
-            FeedNoteCard(
-                data = feedPostUi,
-                headerSingleLine = true,
-                fullWidthContent = true,
-                forceContentIndent = true,
-                drawLineBelowAvatar = true,
-                onPostClick = {},
-                onArticleClick = {},
-                onProfileClick = {},
-                onPostAction = {},
-                onPostLongClickAction = {},
-                onHashtagClick = {},
-                onMuteUserClick = {},
-                onMediaClick = {},
-                onReportContentClick = { _, _, _ -> },
-                onBookmarkClick = {},
-            )
-        }
+    PrimalPreview(primalTheme = PrimalTheme.Sunrise) {
+        FeedNoteCard(
+            data = feedPostUi,
+            headerSingleLine = true,
+            fullWidthContent = true,
+            forceContentIndent = true,
+            drawLineBelowAvatar = true,
+            onPostClick = {},
+            onArticleClick = {},
+            onProfileClick = {},
+            onPostAction = {},
+            onPostLongClickAction = {},
+            onHashtagClick = {},
+            onMuteUserClick = {},
+            onMediaClick = {},
+            onReportContentClick = { _, _, _ -> },
+            onBookmarkClick = {},
+        )
     }
 }
 
@@ -389,27 +367,23 @@ fun PreviewFeedNoteListItemDarkForcedContentIndentSingleLineHeader(
     @PreviewParameter(FeedPostUiProvider::class)
     feedPostUi: FeedPostUi,
 ) {
-    CompositionLocalProvider(
-        LocalContentDisplaySettings provides ContentDisplaySettings(),
-    ) {
-        PrimalTheme(primalTheme = PrimalTheme.Sunset) {
-            FeedNoteCard(
-                data = feedPostUi,
-                headerSingleLine = true,
-                fullWidthContent = false,
-                forceContentIndent = true,
-                drawLineBelowAvatar = true,
-                onPostClick = {},
-                onArticleClick = {},
-                onProfileClick = {},
-                onPostAction = {},
-                onPostLongClickAction = {},
-                onHashtagClick = {},
-                onMuteUserClick = {},
-                onMediaClick = {},
-                onReportContentClick = { _, _, _ -> },
-                onBookmarkClick = {},
-            )
-        }
+    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
+        FeedNoteCard(
+            data = feedPostUi,
+            headerSingleLine = true,
+            fullWidthContent = false,
+            forceContentIndent = true,
+            drawLineBelowAvatar = true,
+            onPostClick = {},
+            onArticleClick = {},
+            onProfileClick = {},
+            onPostAction = {},
+            onPostLongClickAction = {},
+            onHashtagClick = {},
+            onMuteUserClick = {},
+            onMediaClick = {},
+            onReportContentClick = { _, _, _ -> },
+            onBookmarkClick = {},
+        )
     }
 }

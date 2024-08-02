@@ -52,11 +52,11 @@ import net.primal.android.core.compose.ListLoading
 import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopLevelDestination
+import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.PrimalDrawerScaffold
 import net.primal.android.explore.home.ExploreHomeContract.UiEvent
 import net.primal.android.theme.AppTheme
-import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
 
 @Composable
@@ -258,7 +258,7 @@ fun SearchBar(onClick: () -> Unit) {
 @Preview
 @Composable
 fun PreviewExploreTopAppBar() {
-    PrimalTheme(primalTheme = PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
         Surface {
             ExploreTopAppBar(
                 title = {

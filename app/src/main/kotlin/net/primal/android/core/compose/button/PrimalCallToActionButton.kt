@@ -20,8 +20,8 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.theme.AppTheme
-import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
 
 @Composable
@@ -94,7 +94,7 @@ fun PrimalCallToActionButton(
 @Preview
 @Composable
 fun PreviewButton() {
-    PrimalTheme(primalTheme = PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
         PrimalCallToActionButton(
             title = "Sign in",
             subtitle = "Already have a Nostr account? Sign in with your Nostr key.",
@@ -106,7 +106,7 @@ fun PreviewButton() {
 @Preview
 @Composable
 fun PreviewButtonWithoutDescription() {
-    PrimalTheme(primalTheme = PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
         PrimalCallToActionButton(
             title = "Sign in",
             subtitle = null,

@@ -63,12 +63,12 @@ import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.FeedZaps
+import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.nostr.model.primal.content.ContentZapConfigItem
 import net.primal.android.nostr.model.primal.content.ContentZapDefault
 import net.primal.android.nostr.model.primal.content.DEFAULT_ZAP_CONFIG
 import net.primal.android.nostr.model.primal.content.DEFAULT_ZAP_DEFAULT
 import net.primal.android.theme.AppTheme
-import net.primal.android.theme.PrimalTheme
 
 @Composable
 fun ZapSettingsScreen(viewModel: ZapSettingsViewModel, onClose: () -> Unit) {
@@ -544,7 +544,7 @@ fun EmojiPicker(onEmojiSelected: (String) -> Unit, onDismissRequest: () -> Unit)
 @Preview
 @Composable
 private fun ZapSettingsPreview() {
-    PrimalTheme(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
         ZapSettingsScreen(
             uiState = ZapSettingsContract.UiState(
                 editPresetIndex = 0,

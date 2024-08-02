@@ -17,7 +17,6 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshContainer
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableFloatStateOf
@@ -44,7 +43,6 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import net.primal.android.LocalPrimalTheme
 import net.primal.android.R
 import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.feed.list.FeedLazyColumn
@@ -53,6 +51,7 @@ import net.primal.android.core.compose.feed.note.ConfirmFirstBookmarkAlertDialog
 import net.primal.android.core.compose.feed.note.events.InvoicePayClickEvent
 import net.primal.android.core.compose.feed.note.events.MediaClickEvent
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
+import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.core.compose.pulltorefresh.LaunchedPullToRefreshEndingEffect
 import net.primal.android.core.compose.pulltorefresh.PrimalPullToRefreshIndicator
@@ -63,7 +62,6 @@ import net.primal.android.profile.details.ProfileDetailsContract.UiState.Profile
 import net.primal.android.profile.details.ProfileDetailsViewModel
 import net.primal.android.profile.domain.ProfileFollowsType
 import net.primal.android.theme.AppTheme
-import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.wallet.domain.DraftTx
 
@@ -251,7 +249,9 @@ fun ProfileDetailsScreen(
             modifier = Modifier.nestedScroll(pullToRefreshState.nestedScrollConnection),
         ) {
             FeedLazyColumn(
-                modifier = Modifier.fillMaxSize().navigationBarsPadding(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .navigationBarsPadding(),
                 contentPadding = PaddingValues(0.dp),
                 pagingItems = if (!state.isProfileMuted) pagingItems else noPagingItems,
                 zappingState = state.zappingState,
@@ -419,46 +419,42 @@ private fun ProfileError.asHumanReadableText(context: Context): String {
 @Preview
 @Composable
 private fun PreviewProfileScreen() {
-    PrimalTheme(primalTheme = PrimalTheme.Sunset) {
-        CompositionLocalProvider(
-            LocalPrimalTheme provides PrimalTheme.Sunset,
-        ) {
-            ProfileDetailsScreen(
-                state = ProfileDetailsContract.UiState(
-                    profileId = "b10b0d5e5fae9c6c48a8c77f7e5abd42a79e9480e25a4094051d4ba4ce14456b",
-                    profileDetails = ProfileDetailsUi(
-                        pubkey = "b10b0d5e5fae9c6c48a8c77f7e5abd42a79e9480e25a4094051d4ba4ce14456b",
-                        authorDisplayName = "alex",
-                        userDisplayName = "alex",
-                        coverCdnImage = null,
-                        avatarCdnImage = null,
-                        internetIdentifier = "alex@primal.net",
-                        lightningAddress = "alex@primal.net",
-                        about = "Primal Android",
-                        website = "https://appollo41.com",
-                    ),
-                    isProfileFollowed = false,
-                    isProfileMuted = false,
-                    isActiveUser = true,
-                    isProfileFeedInActiveUserFeeds = false,
-                    notes = emptyFlow(),
+    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
+        ProfileDetailsScreen(
+            state = ProfileDetailsContract.UiState(
+                profileId = "b10b0d5e5fae9c6c48a8c77f7e5abd42a79e9480e25a4094051d4ba4ce14456b",
+                profileDetails = ProfileDetailsUi(
+                    pubkey = "b10b0d5e5fae9c6c48a8c77f7e5abd42a79e9480e25a4094051d4ba4ce14456b",
+                    authorDisplayName = "alex",
+                    userDisplayName = "alex",
+                    coverCdnImage = null,
+                    avatarCdnImage = null,
+                    internetIdentifier = "alex@primal.net",
+                    lightningAddress = "alex@primal.net",
+                    about = "Primal Android",
+                    website = "https://appollo41.com",
                 ),
-                onClose = {},
-                onPostClick = {},
-                onArticleClick = {},
-                onPostReplyClick = {},
-                onPostQuoteClick = {},
-                onProfileClick = {},
-                onEditProfileClick = {},
-                onMessageClick = {},
-                onZapProfileClick = {},
-                onDrawerQrCodeClick = {},
-                onHashtagClick = {},
-                onMediaClick = {},
-                onFollowsClick = { _, _ -> },
-                onGoToWallet = {},
-                eventPublisher = {},
-            )
-        }
+                isProfileFollowed = false,
+                isProfileMuted = false,
+                isActiveUser = true,
+                isProfileFeedInActiveUserFeeds = false,
+                notes = emptyFlow(),
+            ),
+            onClose = {},
+            onPostClick = {},
+            onArticleClick = {},
+            onPostReplyClick = {},
+            onPostQuoteClick = {},
+            onProfileClick = {},
+            onEditProfileClick = {},
+            onMessageClick = {},
+            onZapProfileClick = {},
+            onDrawerQrCodeClick = {},
+            onHashtagClick = {},
+            onMediaClick = {},
+            onFollowsClick = { _, _ -> },
+            onGoToWallet = {},
+            eventPublisher = {},
+        )
     }
 }

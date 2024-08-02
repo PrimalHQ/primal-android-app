@@ -32,6 +32,7 @@ import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.isEmpty
+import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.core.ext.openUriSafely
 import net.primal.android.core.utils.asEllipsizedNpub
@@ -40,7 +41,6 @@ import net.primal.android.profile.details.ProfileDetailsContract
 import net.primal.android.profile.domain.ProfileFeedDirective
 import net.primal.android.profile.domain.ProfileFollowsType
 import net.primal.android.theme.AppTheme
-import net.primal.android.theme.PrimalTheme
 import net.primal.android.wallet.domain.DraftTx
 import net.primal.android.wallet.utils.isLightningAddress
 
@@ -307,7 +307,7 @@ private fun UserInternetIdentifier(modifier: Modifier = Modifier, internetIdenti
 @Preview
 @Composable
 private fun PreviewProfileHeaderDetails() {
-    PrimalTheme(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunrise) {
+    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunrise) {
         Surface {
             ProfileHeaderDetails(
                 state = ProfileDetailsContract.UiState(
