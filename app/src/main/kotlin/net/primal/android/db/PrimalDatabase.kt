@@ -8,6 +8,8 @@ import androidx.room.TypeConverters
 import net.primal.android.articles.db.ArticleDao
 import net.primal.android.articles.db.ArticleData
 import net.primal.android.articles.db.ArticleFeed
+import net.primal.android.articles.db.ArticleFeedCrossRef
+import net.primal.android.articles.db.ArticleFeedCrossRefDao
 import net.primal.android.articles.db.ArticleFeedDao
 import net.primal.android.attachments.db.AttachmentDao
 import net.primal.android.attachments.db.NoteAttachment
@@ -84,8 +86,9 @@ import net.primal.android.wallet.db.WalletTransactionData
         ArticleData::class,
         ArticleCommentCrossRef::class,
         ArticleFeed::class,
+        ArticleFeedCrossRef::class,
     ],
-    version = 33,
+    version = 34,
     exportSchema = true,
 )
 @TypeConverters(
@@ -141,4 +144,6 @@ abstract class PrimalDatabase : RoomDatabase() {
     abstract fun articles(): ArticleDao
 
     abstract fun articleFeeds(): ArticleFeedDao
+
+    abstract fun articleFeedsConnections(): ArticleFeedCrossRefDao
 }

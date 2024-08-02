@@ -25,8 +25,8 @@ import androidx.navigation.navOptions
 import java.net.URLEncoder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import net.primal.android.articles.feed.ArticleFeedViewModel
-import net.primal.android.articles.feed.ui.ArticleFeedScreen
+import net.primal.android.articles.reads.ReadsScreen
+import net.primal.android.articles.reads.ReadsViewModel
 import net.primal.android.attachments.gallery.MediaGalleryScreen
 import net.primal.android.attachments.gallery.MediaGalleryViewModel
 import net.primal.android.auth.login.LoginScreen
@@ -125,9 +125,9 @@ fun NavController.navigateToFeed(directive: String? = null) =
         navOptions = navOptions { clearBackStack() },
     )
 
-fun NavController.navigateToArticleFeed() =
+fun NavController.navigateToReads() =
     navigate(
-        route = "articleFeed",
+        route = "reads",
         navOptions = topLevelNavOptions,
     )
 
@@ -210,7 +210,7 @@ fun PrimalAppNavigation() {
     val topLevelDestinationHandler: (PrimalTopLevelDestination) -> Unit = {
         when (it) {
             PrimalTopLevelDestination.Home -> navController.popBackStack()
-            PrimalTopLevelDestination.Reads -> navController.navigateToArticleFeed()
+            PrimalTopLevelDestination.Reads -> navController.navigateToReads()
             PrimalTopLevelDestination.Wallet -> navController.navigateToWallet()
             PrimalTopLevelDestination.Messages -> navController.navigateToMessages()
             PrimalTopLevelDestination.Notifications -> navController.navigateToNotifications()
@@ -285,8 +285,8 @@ fun PrimalAppNavigation() {
             onDrawerScreenClick = drawerDestinationHandler,
         )
 
-        articleFeed(
-            route = "articleFeed",
+        reads(
+            route = "reads",
             arguments = emptyList(),
             navController = navController,
             onTopLevelDestinationChanged = topLevelDestinationHandler,
@@ -612,7 +612,7 @@ private fun NavGraphBuilder.feed(
     )
 }
 
-private fun NavGraphBuilder.articleFeed(
+private fun NavGraphBuilder.reads(
     route: String,
     arguments: List<NamedNavArgument>,
     navController: NavController,
@@ -641,10 +641,10 @@ private fun NavGraphBuilder.articleFeed(
         }
     },
 ) { navBackEntry ->
-    val viewModel = hiltViewModel<ArticleFeedViewModel>(navBackEntry)
+    val viewModel = hiltViewModel<ReadsViewModel>(navBackEntry)
     ApplyEdgeToEdge()
     LockToOrientationPortrait()
-    ArticleFeedScreen(
+    ReadsScreen(
         viewModel = viewModel,
         onTopLevelDestinationChanged = onTopLevelDestinationChanged,
         onDrawerScreenClick = onDrawerScreenClick,

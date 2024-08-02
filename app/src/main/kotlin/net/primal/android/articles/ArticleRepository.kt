@@ -5,7 +5,6 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.PagingSource
-import androidx.sqlite.db.SimpleSQLiteQuery
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -37,22 +36,14 @@ class ArticleRepository @Inject constructor(
 ) {
 
     companion object {
-        private const val PAGE_SIZE = 25
+        private const val PAGE_SIZE = 50
     }
 
     fun observeFeeds() = database.articleFeeds().observeAllFeeds()
 
     fun feedBySpec(feedSpec: String): Flow<PagingData<Article>> {
         return createPager(feedSpec = feedSpec) {
-            database.articles().feed(
-                query = SimpleSQLiteQuery(
-                    query = """
-                        SELECT * 
-                        FROM ArticleData
-                        ORDER BY ArticleData.publishedAt DESC
-                    """.trimIndent(),
-                ),
-            )
+            database.articles().feed(feedSpec)
         }.flow
     }
 
