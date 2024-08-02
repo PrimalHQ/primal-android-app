@@ -103,7 +103,7 @@ private fun ArticleFeedScreen(
         focusModeEnabled = LocalContentDisplaySettings.current.focusModeEnabled && pagingItems.isNotEmpty(),
         topBar = {
             PrimalTopAppBar(
-                title = "Nostr Reads",
+                title = "My reads",
                 titleTrailingIcon = Icons.Default.ExpandMore,
                 avatarCdnImage = state.activeAccountAvatarCdnImage,
                 navigationIcon = PrimalIcons.AvatarDefault,
