@@ -1,4 +1,4 @@
-package net.primal.android.discuss.feed
+package net.primal.android.feed.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -21,7 +21,9 @@ import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberDrawerState
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -52,6 +54,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.LocalContentDisplaySettings
 import net.primal.android.R
+import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.AvatarThumbnailsRow
 import net.primal.android.core.compose.PrimalTopAppBar
@@ -69,16 +72,18 @@ import net.primal.android.core.compose.isNotEmpty
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.crypto.hexToNoteHrp
-import net.primal.android.discuss.feed.FeedContract.UiState.FeedError
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.PrimalDrawerScaffold
+import net.primal.android.feed.FeedContract
+import net.primal.android.feed.FeedContract.UiState.FeedError
+import net.primal.android.feed.FeedViewModel
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 
 @Composable
 fun FeedScreen(
     viewModel: FeedViewModel,
-    onFeedsClick: () -> Unit,
+    onFeedClick: (directive: String) -> Unit,
     onNewPostClick: (content: TextFieldValue?) -> Unit,
     onPostClick: (String) -> Unit,
     onArticleClick: (naddr: String) -> Unit,
@@ -113,7 +118,7 @@ fun FeedScreen(
     FeedScreen(
         state = uiState.value,
         eventPublisher = { viewModel.setEvent(it) },
-        onFeedsClick = onFeedsClick,
+        onFeedClick = onFeedClick,
         onNewPostClick = onNewPostClick,
         onPostClick = onPostClick,
         onArticleClick = onArticleClick,
@@ -134,8 +139,8 @@ fun FeedScreen(
 @Composable
 private fun FeedScreen(
     state: FeedContract.UiState,
+    onFeedClick: (directive: String) -> Unit,
     eventPublisher: (FeedContract.UiEvent) -> Unit,
-    onFeedsClick: () -> Unit,
     onNewPostClick: (content: TextFieldValue?) -> Unit,
     onPostClick: (String) -> Unit,
     onArticleClick: (naddr: String) -> Unit,
@@ -207,24 +212,15 @@ private fun FeedScreen(
         onDrawerQrCodeClick = onDrawerQrCodeClick,
         badges = state.badges,
         focusModeEnabled = LocalContentDisplaySettings.current.focusModeEnabled && pagingItems.isNotEmpty(),
-        topBar = {
-            PrimalTopAppBar(
-                title = state.feedTitle,
-                titleTrailingIcon = Icons.Default.ExpandMore,
+        topBar = { scrollBehavior ->
+            FeedTopAppBar(
                 avatarCdnImage = state.activeAccountAvatarCdnImage,
-                navigationIcon = PrimalIcons.AvatarDefault,
-                onNavigationIconClick = {
-                    uiScope.launch { drawerState.open() }
-                },
-                onTitleClick = onFeedsClick,
-                actions = {
-                    AppBarIcon(
-                        icon = PrimalIcons.Search,
-                        onClick = onSearchClick,
-                        appBarIconContentDescription = stringResource(id = R.string.accessibility_search),
-                    )
-                },
-                scrollBehavior = it,
+                title = state.feedTitle,
+                feeds = state.feeds,
+                onNavigationClick = { uiScope.launch { drawerState.open() } },
+                onFeedChanged = { feed -> onFeedClick(feed.directive) },
+                onSearchClick = onSearchClick,
+                scrollBehavior = scrollBehavior,
             )
         },
         content = { paddingValues ->
@@ -324,6 +320,49 @@ private fun FeedScreen(
     )
 }
 
+@ExperimentalMaterial3Api
+@Composable
+private fun FeedTopAppBar(
+    avatarCdnImage: CdnImage?,
+    title: String,
+    feeds: List<FeedUi>,
+    onNavigationClick: () -> Unit,
+    onFeedChanged: (FeedUi) -> Unit,
+    onSearchClick: () -> Unit,
+    scrollBehavior: TopAppBarScrollBehavior? = null,
+) {
+    var feedPickerVisible by remember { mutableStateOf(false) }
+
+    if (feedPickerVisible) {
+        FeedListModalBottomSheet(
+            feeds = feeds,
+            onDismissRequest = { feedPickerVisible = false },
+            onFeedClick = { feed ->
+                feedPickerVisible = false
+                onFeedChanged(feed)
+            },
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        )
+    }
+
+    PrimalTopAppBar(
+        title = title,
+        titleTrailingIcon = Icons.Default.ExpandMore,
+        avatarCdnImage = avatarCdnImage,
+        navigationIcon = PrimalIcons.AvatarDefault,
+        onNavigationIconClick = onNavigationClick,
+        onTitleClick = { feedPickerVisible = true },
+        actions = {
+            AppBarIcon(
+                icon = PrimalIcons.Search,
+                onClick = onSearchClick,
+                appBarIconContentDescription = stringResource(id = R.string.accessibility_search),
+            )
+        },
+        scrollBehavior = scrollBehavior,
+    )
+}
+
 @Composable
 private fun NewPostsButton(syncStats: FeedPostsSyncStats, onClick: () -> Unit) {
     Row(
@@ -402,8 +441,8 @@ fun FeedScreenPreview() {
     PrimalPreview(primalTheme = PrimalTheme.Sunset) {
         FeedScreen(
             state = FeedContract.UiState(posts = flow { }),
+            onFeedClick = {},
             eventPublisher = {},
-            onFeedsClick = {},
             onNewPostClick = {},
             onPostClick = {},
             onArticleClick = {},
