@@ -1,4 +1,4 @@
-package net.primal.android.discuss.feed
+package net.primal.android.feed
 
 import androidx.paging.PagingData
 import kotlinx.coroutines.flow.Flow
@@ -6,17 +6,19 @@ import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.feed.model.FeedPostsSyncStats
 import net.primal.android.core.compose.feed.model.ZappingState
+import net.primal.android.feed.ui.FeedUi
 import net.primal.android.profile.report.ReportType
 import net.primal.android.user.domain.Badges
 
 interface FeedContract {
     data class UiState(
+        val posts: Flow<PagingData<FeedPostUi>>,
+        val feeds: List<FeedUi> = emptyList(),
         val feedPostsCount: Int = 0,
         val feedTitle: String = "",
         val feedAutoRefresh: Boolean = false,
         val activeAccountAvatarCdnImage: CdnImage? = null,
         val zappingState: ZappingState = ZappingState(),
-        val posts: Flow<PagingData<FeedPostUi>>,
         val syncStats: FeedPostsSyncStats = FeedPostsSyncStats(),
         val badges: Badges = Badges(),
         val confirmBookmarkingNoteId: String? = null,
