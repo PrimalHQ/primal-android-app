@@ -22,10 +22,6 @@ import androidx.navigation.compose.dialog
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navOptions
-import com.google.accompanist.navigation.material.ExperimentalMaterialNavigationApi
-import com.google.accompanist.navigation.material.ModalBottomSheetLayout
-import com.google.accompanist.navigation.material.bottomSheet
-import com.google.accompanist.navigation.material.rememberBottomSheetNavigator
 import java.net.URLEncoder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -45,10 +41,6 @@ import net.primal.android.core.compose.ApplyEdgeToEdge
 import net.primal.android.core.compose.LockToOrientationPortrait
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.compose.findActivity
-import net.primal.android.discuss.feed.FeedScreen
-import net.primal.android.discuss.feed.FeedViewModel
-import net.primal.android.discuss.list.FeedListScreen
-import net.primal.android.discuss.list.FeedListViewModel
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.editor.di.noteEditorViewModel
 import net.primal.android.editor.domain.NoteEditorArgs
@@ -60,6 +52,8 @@ import net.primal.android.explore.home.ExploreHomeScreen
 import net.primal.android.explore.home.ExploreHomeViewModel
 import net.primal.android.explore.search.SearchViewModel
 import net.primal.android.explore.search.ui.SearchScreen
+import net.primal.android.feed.FeedViewModel
+import net.primal.android.feed.ui.FeedScreen
 import net.primal.android.messages.chat.ChatScreen
 import net.primal.android.messages.chat.ChatViewModel
 import net.primal.android.messages.conversation.MessageConversationListViewModel
@@ -83,7 +77,6 @@ import net.primal.android.profile.follows.ProfileFollowsScreen
 import net.primal.android.profile.follows.ProfileFollowsViewModel
 import net.primal.android.profile.qr.ProfileQrCodeViewModel
 import net.primal.android.profile.qr.ui.ProfileQrCodeViewerScreen
-import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.thread.articles.ArticleDetailsViewModel
@@ -212,11 +205,9 @@ fun NavController.navigateToExploreFeed(query: String) =
 private fun NavController.navigateToBookmarks(userId: String) =
     navigate(route = "explore?$EXPLORE_FEED_DIRECTIVE=${"bookmarks;$userId".asBase64Encoded()}")
 
-@OptIn(ExperimentalMaterialNavigationApi::class)
 @Composable
 fun PrimalAppNavigation() {
-    val bottomSheetNavigator = rememberBottomSheetNavigator()
-    val navController = rememberNavController(bottomSheetNavigator)
+    val navController = rememberNavController()
 
     val topLevelDestinationHandler: (PrimalTopLevelDestination) -> Unit = {
         when (it) {
@@ -267,209 +258,199 @@ fun PrimalAppNavigation() {
         }
     }
 
-    ModalBottomSheetLayout(
-        bottomSheetNavigator = bottomSheetNavigator,
-        sheetShape = AppTheme.shapes.medium,
+    NavHost(
+        navController = navController,
+        startDestination = "splash",
     ) {
-        NavHost(
+        splash(route = "splash")
+
+        welcome(route = "welcome", navController = navController)
+
+        login(route = "login", navController = navController)
+
+        onboarding(route = "onboarding", navController = navController)
+
+        onboardingWalletActivation(route = "onboardingWallet", navController)
+
+        logout(route = "logout", navController = navController)
+
+        feed(
+            route = "feed?$FEED_DIRECTIVE={$FEED_DIRECTIVE}",
+            arguments = listOf(
+                navArgument(FEED_DIRECTIVE) {
+                    type = NavType.StringType
+                    nullable = true
+                },
+            ),
             navController = navController,
-            startDestination = "splash",
-        ) {
-            splash(route = "splash")
+            onTopLevelDestinationChanged = topLevelDestinationHandler,
+            onDrawerScreenClick = drawerDestinationHandler,
+        )
 
-            welcome(route = "welcome", navController = navController)
+        articleFeed(
+            route = "articleFeed",
+            arguments = emptyList(),
+            navController = navController,
+            onTopLevelDestinationChanged = topLevelDestinationHandler,
+            onDrawerScreenClick = drawerDestinationHandler,
+        )
 
-            login(route = "login", navController = navController)
+        exploreFeed(
+            route = "explore?$EXPLORE_FEED_DIRECTIVE={$EXPLORE_FEED_DIRECTIVE}",
+            arguments = listOf(
+                navArgument(EXPLORE_FEED_DIRECTIVE) {
+                    type = NavType.StringType
+                    nullable = false
+                },
+            ),
+            navController = navController,
+        )
 
-            onboarding(route = "onboarding", navController = navController)
+        search(
+            route = "search",
+            navController = navController,
+        )
 
-            onboardingWalletActivation(route = "onboardingWallet", navController)
+        messages(
+            route = "messages",
+            navController = navController,
+            onTopLevelDestinationChanged = topLevelDestinationHandler,
+            onDrawerScreenClick = drawerDestinationHandler,
+        )
 
-            logout(route = "logout", navController = navController)
+        chat(
+            route = "messages/{$PROFILE_ID}",
+            arguments = listOf(
+                navArgument(PROFILE_ID) {
+                    type = NavType.StringType
+                },
+            ),
+            navController = navController,
+        )
 
-            feed(
-                route = "feed?$FEED_DIRECTIVE={$FEED_DIRECTIVE}",
-                arguments = listOf(
-                    navArgument(FEED_DIRECTIVE) {
-                        type = NavType.StringType
-                        nullable = true
-                    },
-                ),
-                navController = navController,
-                onTopLevelDestinationChanged = topLevelDestinationHandler,
-                onDrawerScreenClick = drawerDestinationHandler,
-            )
+        newMessage(
+            route = "messages/new",
+            navController = navController,
+        )
 
-            articleFeed(
-                route = "articleFeed",
-                arguments = emptyList(),
-                navController = navController,
-                onTopLevelDestinationChanged = topLevelDestinationHandler,
-                onDrawerScreenClick = drawerDestinationHandler,
-            )
+        notifications(
+            route = "notifications",
+            navController = navController,
+            onTopLevelDestinationChanged = topLevelDestinationHandler,
+            onDrawerScreenClick = drawerDestinationHandler,
+        )
 
-            exploreFeed(
-                route = "explore?$EXPLORE_FEED_DIRECTIVE={$EXPLORE_FEED_DIRECTIVE}",
-                arguments = listOf(
-                    navArgument(EXPLORE_FEED_DIRECTIVE) {
-                        type = NavType.StringType
-                        nullable = false
-                    },
-                ),
-                navController = navController,
-            )
+        noteEditor(
+            route = "noteEditor?$NOTE_EDITOR_ARGS={$NOTE_EDITOR_ARGS}",
+            arguments = listOf(
+                navArgument(NOTE_EDITOR_ARGS) {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                },
+            ),
+            navController = navController,
+        )
 
-            search(
-                route = "search",
-                navController = navController,
-            )
+        thread(
+            route = "thread/{$NOTE_ID}",
+            arguments = listOf(
+                navArgument(NOTE_ID) {
+                    type = NavType.StringType
+                },
+            ),
+            navController = navController,
+        )
 
-            messages(
-                route = "messages",
-                navController = navController,
-                onTopLevelDestinationChanged = topLevelDestinationHandler,
-                onDrawerScreenClick = drawerDestinationHandler,
-            )
+        articleDetails(
+            route = "article/{$NADDR}",
+            arguments = listOf(
+                navArgument(NADDR) {
+                    type = NavType.StringType
+                },
+            ),
+            navController = navController,
+        )
 
-            chat(
-                route = "messages/{$PROFILE_ID}",
-                arguments = listOf(
-                    navArgument(PROFILE_ID) {
-                        type = NavType.StringType
-                    },
-                ),
-                navController = navController,
-            )
+        noteReactions(
+            route = "reactions/{$NOTE_ID}",
+            arguments = listOf(
+                navArgument(NOTE_ID) {
+                    type = NavType.StringType
+                },
+            ),
+            navController = navController,
+        )
 
-            newMessage(
-                route = "messages/new",
-                navController = navController,
-            )
+        media(
+            route = "media/{$NOTE_ID}" +
+                "?$MEDIA_URL={$MEDIA_URL}" +
+                "&$MEDIA_POSITION_MS={$MEDIA_POSITION_MS}",
+            arguments = listOf(
+                navArgument(NOTE_ID) {
+                    type = NavType.StringType
+                },
+                navArgument(MEDIA_URL) {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                },
+                navArgument(MEDIA_POSITION_MS) {
+                    type = NavType.LongType
+                    nullable = false
+                    defaultValue = 0
+                },
+            ),
+            navController = navController,
+        )
 
-            notifications(
-                route = "notifications",
-                navController = navController,
-                onTopLevelDestinationChanged = topLevelDestinationHandler,
-                onDrawerScreenClick = drawerDestinationHandler,
-            )
+        profile(
+            route = "profile?$PROFILE_ID={$PROFILE_ID}",
+            arguments = listOf(
+                navArgument(PROFILE_ID) {
+                    type = NavType.StringType
+                    nullable = true
+                },
+            ),
+            navController = navController,
+        )
 
-            feedList(
-                route = "feed/list",
-                navController = navController,
-            )
+        profileFollows(
+            route = "profile/{$PROFILE_ID}/follows?$FOLLOWS_TYPE={$FOLLOWS_TYPE}",
+            arguments = listOf(
+                navArgument(PROFILE_ID) {
+                    type = NavType.StringType
+                },
+                navArgument(FOLLOWS_TYPE) {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = ProfileFollowsType.Following.name
+                },
+            ),
+            navController = navController,
+        )
 
-            noteEditor(
-                route = "noteEditor?$NOTE_EDITOR_ARGS={$NOTE_EDITOR_ARGS}",
-                arguments = listOf(
-                    navArgument(NOTE_EDITOR_ARGS) {
-                        type = NavType.StringType
-                        nullable = true
-                        defaultValue = null
-                    },
-                ),
-                navController = navController,
-            )
+        profileEditor(route = "profileEditor", navController = navController)
 
-            thread(
-                route = "thread/{$NOTE_ID}",
-                arguments = listOf(
-                    navArgument(NOTE_ID) {
-                        type = NavType.StringType
-                    },
-                ),
-                navController = navController,
-            )
+        profileQrCodeViewer(
+            route = "profileQrCodeViewer?$PROFILE_ID={$PROFILE_ID}",
+            arguments = listOf(
+                navArgument(PROFILE_ID) {
+                    type = NavType.StringType
+                    nullable = true
+                },
+            ),
+            navController = navController,
+        )
 
-            articleDetails(
-                route = "article/{$NADDR}",
-                arguments = listOf(
-                    navArgument(NADDR) {
-                        type = NavType.StringType
-                    },
-                ),
-                navController = navController,
-            )
+        settingsNavigation(route = "settings", navController = navController)
 
-            noteReactions(
-                route = "reactions/{$NOTE_ID}",
-                arguments = listOf(
-                    navArgument(NOTE_ID) {
-                        type = NavType.StringType
-                    },
-                ),
-                navController = navController,
-            )
-
-            media(
-                route = "media/{$NOTE_ID}" +
-                    "?$MEDIA_URL={$MEDIA_URL}" +
-                    "&$MEDIA_POSITION_MS={$MEDIA_POSITION_MS}",
-                arguments = listOf(
-                    navArgument(NOTE_ID) {
-                        type = NavType.StringType
-                    },
-                    navArgument(MEDIA_URL) {
-                        type = NavType.StringType
-                        nullable = true
-                        defaultValue = null
-                    },
-                    navArgument(MEDIA_POSITION_MS) {
-                        type = NavType.LongType
-                        nullable = false
-                        defaultValue = 0
-                    },
-                ),
-                navController = navController,
-            )
-
-            profile(
-                route = "profile?$PROFILE_ID={$PROFILE_ID}",
-                arguments = listOf(
-                    navArgument(PROFILE_ID) {
-                        type = NavType.StringType
-                        nullable = true
-                    },
-                ),
-                navController = navController,
-            )
-
-            profileFollows(
-                route = "profile/{$PROFILE_ID}/follows?$FOLLOWS_TYPE={$FOLLOWS_TYPE}",
-                arguments = listOf(
-                    navArgument(PROFILE_ID) {
-                        type = NavType.StringType
-                    },
-                    navArgument(FOLLOWS_TYPE) {
-                        type = NavType.StringType
-                        nullable = true
-                        defaultValue = ProfileFollowsType.Following.name
-                    },
-                ),
-                navController = navController,
-            )
-
-            profileEditor(route = "profileEditor", navController = navController)
-
-            profileQrCodeViewer(
-                route = "profileQrCodeViewer?$PROFILE_ID={$PROFILE_ID}",
-                arguments = listOf(
-                    navArgument(PROFILE_ID) {
-                        type = NavType.StringType
-                        nullable = true
-                    },
-                ),
-                navController = navController,
-            )
-
-            settingsNavigation(route = "settings", navController = navController)
-
-            walletNavigation(
-                route = "wallet",
-                navController = navController,
-                onTopLevelDestinationChanged = topLevelDestinationHandler,
-                onDrawerScreenClick = drawerDestinationHandler,
-            )
-        }
+        walletNavigation(
+            route = "wallet",
+            navController = navController,
+            onTopLevelDestinationChanged = topLevelDestinationHandler,
+            onDrawerScreenClick = drawerDestinationHandler,
+        )
     }
 }
 
@@ -608,7 +589,7 @@ private fun NavGraphBuilder.feed(
     LockToOrientationPortrait()
     FeedScreen(
         viewModel = viewModel,
-        onFeedsClick = { navController.navigateToFeedList() },
+        onFeedClick = { directive -> navController.navigateToFeed(directive = directive) },
         onNewPostClick = { preFillContent -> navController.navigateToNoteEditor(preFillContent?.asNoteEditorArgs()) },
         onPostClick = { postId -> navController.navigateToThread(noteId = postId) },
         onArticleClick = { naddr -> navController.navigateToArticleDetails(naddr = naddr) },
@@ -695,19 +676,6 @@ private fun NavGraphBuilder.noteEditor(
         onClose = { navController.navigateUp() },
     )
 }
-
-@OptIn(ExperimentalMaterialNavigationApi::class)
-private fun NavGraphBuilder.feedList(route: String, navController: NavController) =
-    bottomSheet(
-        route = route,
-    ) {
-        val viewModel = hiltViewModel<FeedListViewModel>(viewModelStoreOwner = it)
-        LockToOrientationPortrait()
-        FeedListScreen(
-            viewModel = viewModel,
-            onFeedSelected = { directive -> navController.navigateToFeed(directive = directive) },
-        )
-    }
 
 private fun NavGraphBuilder.explore(
     route: String,

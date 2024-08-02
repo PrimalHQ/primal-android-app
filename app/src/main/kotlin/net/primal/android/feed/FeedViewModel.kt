@@ -1,4 +1,4 @@
-package net.primal.android.discuss.feed
+package net.primal.android.feed
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -28,13 +28,13 @@ import net.primal.android.core.ext.asMapByKey
 import net.primal.android.core.ext.hasUpwardsPagination
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.decodeFromStringOrNull
-import net.primal.android.core.utils.ellipsizeMiddle
-import net.primal.android.discuss.feed.FeedContract.UiEvent
-import net.primal.android.discuss.feed.FeedContract.UiState
-import net.primal.android.discuss.feed.FeedContract.UiState.FeedError
+import net.primal.android.feed.FeedContract.UiEvent
+import net.primal.android.feed.FeedContract.UiState
+import net.primal.android.feed.FeedContract.UiState.FeedError
 import net.primal.android.feed.api.model.FeedResponse
 import net.primal.android.feed.db.FeedPost
 import net.primal.android.feed.repository.FeedRepository
+import net.primal.android.feed.ui.FeedUi
 import net.primal.android.navigation.feedDirective
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
@@ -76,15 +76,15 @@ class FeedViewModel @Inject constructor(
 
     private var userDataUpdater: UserDataUpdater? = null
 
-    private fun buildFeedByDirective() =
-        feedRepository.feedByDirective(feedDirective = feedDirective)
+    private fun buildFeedByDirective(directive: String) =
+        feedRepository.feedByDirective(feedDirective = directive)
             .map { it.map { feed -> feed.asFeedPostUi() } }
             .cachedIn(viewModelScope)
 
     private val _state = MutableStateFlow(
         UiState(
             feedAutoRefresh = feedDirective.hasUpwardsPagination(),
-            posts = buildFeedByDirective(),
+            posts = buildFeedByDirective(feedDirective),
         ),
     )
     val state = _state.asStateFlow()
@@ -98,17 +98,20 @@ class FeedViewModel @Inject constructor(
     private var pollingJob: Job? = null
 
     init {
-        subscribeToFeedTitle()
         subscribeToEvents()
         subscribeToActiveAccount()
         subscribeToBadgesUpdates()
+        subscribeToFeeds()
     }
 
-    private fun subscribeToFeedTitle() =
+    private fun subscribeToFeeds() =
         viewModelScope.launch {
-            feedRepository.observeFeedByDirective(feedDirective = feedDirective).collect {
+            feedRepository.observeFeeds().collect { feeds ->
                 setState {
-                    copy(feedTitle = it?.name ?: feedDirective.ellipsizeMiddle(size = 8))
+                    copy(
+                        feeds = feeds.map { FeedUi(directive = it.directive, name = it.name) },
+                        feedTitle = feeds.find { it.directive == feedDirective }?.name ?: "",
+                    )
                 }
             }
         }
@@ -145,12 +148,7 @@ class FeedViewModel @Inject constructor(
                 when (it) {
                     UiEvent.FeedScrolledToTop -> handleScrolledToTop()
                     UiEvent.RequestUserDataUpdate -> updateUserData()
-                    UiEvent.StartPolling -> {
-                        if (feedDirective.hasUpwardsPagination()) {
-                            startPolling()
-                        }
-                    }
-
+                    UiEvent.StartPolling -> startPollingIfSupported(feedDirective = feedDirective)
                     UiEvent.StopPolling -> stopPolling()
                     UiEvent.ShowLatestNotes -> showLatestNotes()
 
@@ -186,16 +184,18 @@ class FeedViewModel @Inject constructor(
             }
         }
 
-    private fun startPolling() {
-        pollingJob = viewModelScope.launch {
-            try {
-                while (isActive) {
-                    fetchLatestNotes()
-                    val pollInterval = POLL_INTERVAL + Random.nextInt(from = -5, until = 5)
-                    delay(pollInterval.seconds)
+    private fun startPollingIfSupported(feedDirective: String) {
+        if (feedDirective.hasUpwardsPagination()) {
+            pollingJob = viewModelScope.launch {
+                try {
+                    while (isActive) {
+                        fetchLatestNotes(feedDirective = feedDirective)
+                        val pollInterval = POLL_INTERVAL + Random.nextInt(from = -5, until = 5)
+                        delay(pollInterval.seconds)
+                    }
+                } catch (error: WssException) {
+                    Timber.e(error)
                 }
-            } catch (error: WssException) {
-                Timber.e(error)
             }
         }
     }
@@ -219,7 +219,7 @@ class FeedViewModel @Inject constructor(
         return newestNoteId == topNoteId
     }
 
-    private suspend fun fetchLatestNotes() {
+    private suspend fun fetchLatestNotes(feedDirective: String) {
         val feedResponse = feedRepository.fetchLatestNotes(
             userId = activeAccountStore.activeUserId(),
             feedDirective = feedDirective,
@@ -289,7 +289,7 @@ class FeedViewModel @Inject constructor(
             }
             setState {
                 copy(
-                    posts = buildFeedByDirective(),
+                    posts = buildFeedByDirective(feedDirective),
                     syncStats = FeedPostsSyncStats(),
                 )
             }

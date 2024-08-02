@@ -1,4 +1,4 @@
-package net.primal.android.discuss.list.model
+package net.primal.android.feed.ui
 
 data class FeedUi(
     val directive: String,
