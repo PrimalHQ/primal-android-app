@@ -16,6 +16,7 @@ import timber.log.Timber
 @OptIn(ExperimentalPagingApi::class)
 class ArticleFeedMediator(
     private val userId: String,
+    private val feedSpec: String,
     private val articlesApi: ArticlesApi,
     private val database: PrimalDatabase,
     private val dispatcherProvider: CoroutineDispatcherProvider,
@@ -27,8 +28,7 @@ class ArticleFeedMediator(
             val response = try {
                 articlesApi.getArticleFeed(
                     body = ArticleFeedRequestBody(
-                        spec = "{\"id\":\"feed-reads\",\"scope\":\"follows\"}",
-//                        spec = "{\"id\":\"feed-reads\"",
+                        spec = feedSpec,
                         userId = userId,
                         limit = pageSize,
                     ),

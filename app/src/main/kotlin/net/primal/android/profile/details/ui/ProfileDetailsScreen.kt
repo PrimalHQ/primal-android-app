@@ -45,7 +45,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.R
 import net.primal.android.core.compose.SnackbarErrorHandler
-import net.primal.android.core.compose.feed.list.FeedLazyColumn
+import net.primal.android.core.compose.feed.FeedLazyColumn
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.feed.note.ConfirmFirstBookmarkAlertDialog
 import net.primal.android.core.compose.feed.note.events.InvoicePayClickEvent

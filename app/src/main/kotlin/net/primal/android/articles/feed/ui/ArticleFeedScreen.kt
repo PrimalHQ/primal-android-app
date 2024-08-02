@@ -17,11 +17,16 @@ import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberDrawerState
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -36,6 +41,7 @@ import net.primal.android.LocalContentDisplaySettings
 import net.primal.android.R
 import net.primal.android.articles.feed.ArticleFeedScreenContract
 import net.primal.android.articles.feed.ArticleFeedViewModel
+import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.ListLoading
 import net.primal.android.core.compose.ListLoadingError
@@ -43,6 +49,8 @@ import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.PrimalTopLevelDestination
+import net.primal.android.core.compose.feed.list.FeedListModalBottomSheet
+import net.primal.android.core.compose.feed.list.FeedUi
 import net.primal.android.core.compose.feed.model.ZappingState
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -101,23 +109,17 @@ private fun ArticleFeedScreen(
         onDrawerQrCodeClick = onDrawerQrCodeClick,
         badges = state.badges,
         focusModeEnabled = LocalContentDisplaySettings.current.focusModeEnabled && pagingItems.isNotEmpty(),
-        topBar = {
-            PrimalTopAppBar(
-                title = "My reads",
-                titleTrailingIcon = Icons.Default.ExpandMore,
+        topBar = { scrollBehavior ->
+            ArticleFeedTopAppBar(
+                feeds = state.feeds,
+                title = state.feedTitle,
                 avatarCdnImage = state.activeAccountAvatarCdnImage,
-                navigationIcon = PrimalIcons.AvatarDefault,
-                onNavigationIconClick = {
-                    uiScope.launch { drawerState.open() }
+                onAvatarClick = { uiScope.launch { drawerState.open() } },
+                onSearchClick = onSearchClick,
+                onFeedChanged = { feed ->
+                    Timber.i(feed.toString())
                 },
-                actions = {
-                    AppBarIcon(
-                        icon = PrimalIcons.Search,
-                        onClick = onSearchClick,
-                        appBarIconContentDescription = stringResource(id = R.string.accessibility_search),
-                    )
-                },
-                scrollBehavior = it,
+                scrollBehavior = scrollBehavior,
             )
         },
         content = { paddingValues ->
@@ -132,6 +134,49 @@ private fun ArticleFeedScreen(
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState)
         },
+    )
+}
+
+@ExperimentalMaterial3Api
+@Composable
+private fun ArticleFeedTopAppBar(
+    title: String,
+    avatarCdnImage: CdnImage?,
+    onAvatarClick: () -> Unit,
+    onSearchClick: () -> Unit,
+    feeds: List<FeedUi>,
+    onFeedChanged: (FeedUi) -> Unit,
+    scrollBehavior: TopAppBarScrollBehavior? = null,
+) {
+    var feedPickerVisible by remember { mutableStateOf(false) }
+
+    if (feedPickerVisible) {
+        FeedListModalBottomSheet(
+            feeds = feeds,
+            onDismissRequest = { feedPickerVisible = false },
+            onFeedClick = { feed ->
+                feedPickerVisible = false
+                onFeedChanged(feed)
+            },
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        )
+    }
+
+    PrimalTopAppBar(
+        title = title,
+        titleTrailingIcon = Icons.Default.ExpandMore,
+        onTitleClick = { feedPickerVisible = true },
+        avatarCdnImage = avatarCdnImage,
+        navigationIcon = PrimalIcons.AvatarDefault,
+        onNavigationIconClick = onAvatarClick,
+        actions = {
+            AppBarIcon(
+                icon = PrimalIcons.Search,
+                onClick = onSearchClick,
+                appBarIconContentDescription = stringResource(id = R.string.accessibility_search),
+            )
+        },
+        scrollBehavior = scrollBehavior,
     )
 }
 
