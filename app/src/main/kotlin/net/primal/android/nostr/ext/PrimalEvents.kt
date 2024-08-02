@@ -3,7 +3,6 @@ package net.primal.android.nostr.ext
 import kotlinx.serialization.json.decodeFromJsonElement
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.nostr.model.primal.PrimalEvent
-import timber.log.Timber
 
 inline fun <reified T> PrimalEvent?.takeContentOrNull(): T? {
     if (this == null) return null
@@ -13,7 +12,6 @@ inline fun <reified T> PrimalEvent?.takeContentOrNull(): T? {
             NostrJson.parseToJsonElement(this.content),
         )
     } catch (error: IllegalArgumentException) {
-        Timber.w(error)
         null
     }
 }

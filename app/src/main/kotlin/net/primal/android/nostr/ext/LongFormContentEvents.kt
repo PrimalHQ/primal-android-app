@@ -17,14 +17,27 @@ import timber.log.Timber
 fun List<PrimalEvent>.mapNotNullReferencedEventsAsArticleDataPO(
     wordsCountMap: Map<String, Int>,
     cdnResources: Map<String, CdnResource>,
-) = this.mapNotNull { it.takeContentOrNull<NostrEvent>() }
-    .filter { event -> event.kind == NostrEventKind.LongFormContent.value }
-    .mapNotNull { event ->
-        event.asArticleData(
-            wordsCount = wordsCountMap[event.id],
-            cdnResources = cdnResources,
-        )
-    }
+): List<ArticleData> {
+    val mappedFromNostrEvents = this.mapNotNull { it.takeContentOrNull<NostrEvent>() }
+        .filter { event -> event.kind == NostrEventKind.LongFormContent.value }
+        .mapNotNull { event ->
+            event.asArticleData(
+                wordsCount = wordsCountMap[event.id],
+                cdnResources = cdnResources,
+            )
+        }
+
+    val mappedFromPrimalEvents = this.mapNotNull { it.takeContentOrNull<PrimalEvent>() }
+        .filter { event -> event.kind == NostrEventKind.PrimalLongFormContent.value }
+        .mapNotNull { event ->
+            event.asArticleData(
+                wordsCount = wordsCountMap[event.id],
+                cdnResources = cdnResources,
+            )
+        }
+
+    return mappedFromNostrEvents + mappedFromPrimalEvents
+}
 
 fun List<PrimalEvent>.mapNotNullPrimalEventAsArticleDataPO(
     wordsCountMap: Map<String, Int> = emptyMap(),
