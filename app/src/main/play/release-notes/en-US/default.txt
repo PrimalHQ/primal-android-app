@@ -1,11 +1,1 @@
-Reads App shell;
-Default Nostr Reads feed;
-Article Details screen with markdown rendering;
-Feed naddr links connected to internal article details screen;
-Support for profile and note mentions in article details;
-Implemented article details header and top zaps;
-Implemented rendering article comments;
-Implemented rendering article on ThreadScreen;
-Implemented article commenting and commenting on article comments;
-Implemented font size variations on articles;
-Implemented feed picker and changing article feeds;
+Primal Reads & Rocks.
