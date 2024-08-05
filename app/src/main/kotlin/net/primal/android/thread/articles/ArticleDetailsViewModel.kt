@@ -79,6 +79,7 @@ class ArticleDetailsViewModel @Inject constructor(
                     UiEvent.UpdateContent -> fetchData(naddr)
                     UiEvent.DismissErrors -> setState { copy(error = null) }
                     is UiEvent.ZapArticle -> zapArticle(zapAction = it)
+                    UiEvent.LikeArticle -> likeArticle()
                 }
             }
         }
@@ -181,6 +182,10 @@ class ArticleDetailsViewModel @Inject constructor(
         }
 
     private fun zapArticle(zapAction: UiEvent.ZapArticle) =
+        viewModelScope.launch {
+        }
+
+    private fun likeArticle() =
         viewModelScope.launch {
         }
 }
