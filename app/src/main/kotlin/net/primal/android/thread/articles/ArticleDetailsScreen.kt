@@ -31,6 +31,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
@@ -43,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import java.time.Instant
+import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalLoadingSpinner
@@ -133,10 +135,21 @@ private fun ArticleDetailsScreen(
     onPayInvoiceClick: (InvoicePayClickEvent) -> Unit,
 ) {
     val context = LocalContext.current
+    val uiScope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
 
     val listState = rememberLazyListState()
     val scrolledToTop by remember { derivedStateOf { listState.firstVisibleItemIndex == 0 } }
+
+    val articleParts by remember(state.markdownContent) {
+        mutableStateOf(
+            state.markdownContent
+                .splitMarkdownByNostrUris()
+                .flatMap { it.splitIntoParagraphs() }
+                .replaceProfileNostrUrisWithMarkdownLinks(npubToDisplayNameMap = state.npubToDisplayNameMap)
+                .buildArticleRenderParts(referencedNotes = state.referencedNotes),
+        )
+    }
 
     SnackbarErrorHandler(
         error = state.error,
@@ -161,6 +174,7 @@ private fun ArticleDetailsScreen(
             } else {
                 ArticleContent(
                     state = state,
+                    articleParts = articleParts,
                     listState = listState,
                     paddingValues = paddingValues,
                     onNoteClick = onNoteClick,
@@ -178,6 +192,13 @@ private fun ArticleDetailsScreen(
                 FloatingArticlePill(
                     commentsCount = state.eventStatsUi?.repliesCount,
                     satsZapped = state.eventStatsUi?.satsZapped,
+                    onCommentsClick = {
+                        uiScope.launch {
+                            listState.animateScrollToItem(
+                                index = state.calculateCommentsHeaderIndex(partsSize = articleParts.size),
+                            )
+                        }
+                    },
                 )
             }
         },
@@ -191,6 +212,7 @@ private fun ArticleDetailsScreen(
 @Composable
 private fun ArticleContent(
     state: ArticleDetailsContract.UiState,
+    articleParts: List<ArticlePartRender>,
     listState: LazyListState = rememberLazyListState(),
     paddingValues: PaddingValues,
     onNoteClick: (noteId: String) -> Unit,
@@ -202,15 +224,6 @@ private fun ArticleContent(
     onPayInvoiceClick: (InvoicePayClickEvent) -> Unit,
 ) {
     val uriHandler = LocalUriHandler.current
-    val renderParts by remember(state.markdownContent) {
-        mutableStateOf(
-            state.markdownContent
-                .splitMarkdownByNostrUris()
-                .flatMap { it.splitIntoParagraphs() }
-                .replaceProfileNostrUrisWithMarkdownLinks(npubToDisplayNameMap = state.npubToDisplayNameMap)
-                .buildArticleRenderParts(referencedNotes = state.referencedNotes),
-        )
-    }
 
     LazyColumn(
         modifier = Modifier
@@ -272,17 +285,17 @@ private fun ArticleContent(
         }
 
         items(
-            count = renderParts.size,
-            key = { index -> "${renderParts[index]}#$index" },
+            count = articleParts.size,
+            key = { index -> "${articleParts[index]}#$index" },
             contentType = { index ->
-                when (renderParts[index]) {
+                when (articleParts[index]) {
                     is ArticlePartRender.HtmlRender -> "HtmlRender"
                     is ArticlePartRender.MarkdownRender -> "MarkdownRender"
                     is ArticlePartRender.NoteRender -> "NoteRender"
                 }
             },
         ) { index ->
-            when (val part = renderParts[index]) {
+            when (val part = articleParts[index]) {
                 is ArticlePartRender.HtmlRender -> {
                     HtmlRenderer(
                         modifier = Modifier
@@ -386,6 +399,14 @@ private fun ArticleContent(
             Spacer(modifier = Modifier.height(64.dp))
         }
     }
+}
+
+private fun ArticleDetailsContract.UiState.calculateCommentsHeaderIndex(partsSize: Int): Int {
+    var count = 2
+    if (authorDisplayName != null) count++
+    if (topZap != null || otherZaps.isNotEmpty()) count++
+    count += partsSize
+    return count
 }
 
 @Composable
