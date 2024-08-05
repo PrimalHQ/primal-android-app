@@ -53,6 +53,7 @@ import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.feed.note.FeedNoteCard
+import net.primal.android.core.compose.feed.note.FeedNoteStatsRow
 import net.primal.android.core.compose.feed.note.ReferencedNoteCard
 import net.primal.android.core.compose.feed.note.events.InvoicePayClickEvent
 import net.primal.android.core.compose.feed.note.events.MediaClickEvent
@@ -172,7 +173,7 @@ private fun ArticleDetailsScreen(
             if (state.markdownContent.isEmpty()) {
                 PrimalLoadingSpinner()
             } else {
-                ArticleContent(
+                ArticleContentWithComments(
                     state = state,
                     articleParts = articleParts,
                     listState = listState,
@@ -210,7 +211,7 @@ private fun ArticleDetailsScreen(
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun ArticleContent(
+private fun ArticleContentWithComments(
     state: ArticleDetailsContract.UiState,
     articleParts: List<ArticlePartRender>,
     listState: LazyListState = rememberLazyListState(),
@@ -356,6 +357,17 @@ private fun ArticleContent(
             )
         }
 
+        item(contentType = "Stats") {
+            FeedNoteStatsRow(
+                modifier = Modifier
+                    .background(color = AppTheme.colorScheme.surfaceVariant)
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+                    .padding(bottom = 16.dp),
+                eventStats = state.eventStatsUi,
+            )
+        }
+
         item(contentType = "CommentsHeader") {
             PrimalDivider()
             CommentsHeaderSection(
@@ -402,7 +414,7 @@ private fun ArticleContent(
 }
 
 private fun ArticleDetailsContract.UiState.calculateCommentsHeaderIndex(partsSize: Int): Int {
-    var count = 2
+    var count = 3
     if (authorDisplayName != null) count++
     if (topZap != null || otherZaps.isNotEmpty()) count++
     count += partsSize
