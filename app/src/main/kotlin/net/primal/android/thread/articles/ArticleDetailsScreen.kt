@@ -1,10 +1,11 @@
-package net.primal.android.thread.articles.ui
+package net.primal.android.thread.articles
 
 import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -64,11 +65,13 @@ import net.primal.android.nostr.ext.isNote
 import net.primal.android.nostr.ext.takeAsNoteHexIdOrNull
 import net.primal.android.nostr.utils.Nip19TLV.toNaddrString
 import net.primal.android.theme.AppTheme
-import net.primal.android.thread.articles.ArticleDetailsContract
 import net.primal.android.thread.articles.ArticleDetailsContract.ArticleDetailsError
 import net.primal.android.thread.articles.ArticleDetailsContract.ArticlePartRender
 import net.primal.android.thread.articles.ArticleDetailsContract.UiEvent
-import net.primal.android.thread.articles.ArticleDetailsViewModel
+import net.primal.android.thread.articles.ui.ArticleAuthorRow
+import net.primal.android.thread.articles.ui.ArticleDetailsHeader
+import net.primal.android.thread.articles.ui.ArticleHashtags
+import net.primal.android.thread.articles.ui.ArticleTopZapsSection
 import net.primal.android.thread.articles.ui.rendering.HtmlRenderer
 import net.primal.android.thread.articles.ui.rendering.MarkdownRenderer
 import net.primal.android.thread.articles.ui.rendering.replaceProfileNostrUrisWithMarkdownLinks
@@ -175,6 +178,7 @@ private fun ArticleDetailsScreen(
     )
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun ArticleContent(
     state: ArticleDetailsContract.UiState,
@@ -319,19 +323,28 @@ private fun ArticleContent(
             }
         }
 
+        item(contentType = "Hashtags") {
+            ArticleHashtags(
+                modifier = Modifier
+                    .background(color = AppTheme.colorScheme.surfaceVariant)
+                    .padding(horizontal = 10.dp)
+                    .padding(bottom = 16.dp)
+                    .fillMaxWidth(),
+                hashtags = state.hashtags,
+            )
+        }
+
         item(contentType = "CommentsHeader") {
-            Column {
-                PrimalDivider()
-                CommentsHeaderSection(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(68.dp)
-                        .background(color = AppTheme.extraColorScheme.surfaceVariantAlt1)
-                        .padding(horizontal = 16.dp),
-                    onPostCommentClick = { state.naddr?.toNaddrString()?.let(onArticleCommentClick) },
-                )
-                PrimalDivider()
-            }
+            PrimalDivider()
+            CommentsHeaderSection(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(68.dp)
+                    .background(color = AppTheme.extraColorScheme.surfaceVariantAlt1)
+                    .padding(horizontal = 16.dp),
+                onPostCommentClick = { state.naddr?.toNaddrString()?.let(onArticleCommentClick) },
+            )
+            PrimalDivider()
         }
 
         items(
