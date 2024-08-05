@@ -98,6 +98,7 @@ class NoteRepository @Inject constructor(
     suspend fun publishShortTextNote(
         content: String,
         attachments: List<NoteAttachment> = emptyList(),
+        rootArticleEventId: String? = null,
         rootArticleId: String? = null,
         rootArticleAuthorId: String? = null,
         rootPostId: String? = null,
@@ -115,9 +116,12 @@ class NoteRepository @Inject constructor(
         }
 
         /* Article tag */
-        val rootArticleTag = if (rootArticleId != null && rootArticleAuthorId != null) {
+        val rootArticleTags = if (rootArticleId != null && rootArticleAuthorId != null && rootArticleEventId != null) {
             val tagContent = "${NostrEventKind.LongFormContent.value}:$rootArticleAuthorId:$rootArticleId"
-            tagContent.asReplaceableEventTag(marker = "root")
+            listOf(
+                rootArticleEventId.asEventIdTag(marker = "root"),
+                tagContent.asReplaceableEventTag(marker = "root"),
+            )
         } else {
             null
         }
@@ -130,8 +134,8 @@ class NoteRepository @Inject constructor(
         } else {
             null
         }
-        val rootEventTag = rootArticleTag ?: rootPostTag
-        val eventTags = setOfNotNull(rootEventTag, replyEventTag) + mentionEventTags
+        val rootEventTags = rootArticleTags ?: listOf(rootPostTag)
+        val eventTags = setOfNotNull(*rootEventTags.toTypedArray(), replyEventTag) + mentionEventTags
 
         val relayHintsMap = withContext(dispatcherProvider.io()) {
             val tagNoteIds = eventTags.map { it.get(index = 1).jsonPrimitive.content }
