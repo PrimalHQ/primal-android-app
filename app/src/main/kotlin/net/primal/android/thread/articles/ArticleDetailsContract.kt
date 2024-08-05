@@ -12,6 +12,7 @@ interface ArticleDetailsContract {
         val title: String = "",
         val coverCdnImage: CdnImage? = null,
         val summary: String? = null,
+        val hashtags: List<String> = emptyList(),
         val timestamp: Long? = null,
         val markdownContent: String = "",
         val authorId: String? = null,

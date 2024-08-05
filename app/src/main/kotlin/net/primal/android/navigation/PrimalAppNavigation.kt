@@ -79,8 +79,8 @@ import net.primal.android.profile.qr.ProfileQrCodeViewModel
 import net.primal.android.profile.qr.ui.ProfileQrCodeViewerScreen
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
+import net.primal.android.thread.articles.ArticleDetailsScreen
 import net.primal.android.thread.articles.ArticleDetailsViewModel
-import net.primal.android.thread.articles.ui.ArticleDetailsScreen
 import net.primal.android.thread.notes.ThreadScreen
 import net.primal.android.thread.notes.ThreadViewModel
 import net.primal.android.wallet.activation.WalletActivationViewModel
