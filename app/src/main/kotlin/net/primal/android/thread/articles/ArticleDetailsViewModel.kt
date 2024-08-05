@@ -139,6 +139,7 @@ class ArticleDetailsViewModel @Inject constructor(
                             markdownContent = article.data.content,
                             coverCdnImage = article.data.imageCdnImage,
                             summary = article.data.summary,
+                            hashtags = article.data.hashtags,
                         )
                     }
                 }
