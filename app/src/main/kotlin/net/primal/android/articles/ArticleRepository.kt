@@ -36,7 +36,7 @@ class ArticleRepository @Inject constructor(
 ) {
 
     companion object {
-        private const val PAGE_SIZE = 30
+        private const val PAGE_SIZE = 25
     }
 
     fun observeFeeds() = database.articleFeeds().observeAllFeeds().filterNotNull()
