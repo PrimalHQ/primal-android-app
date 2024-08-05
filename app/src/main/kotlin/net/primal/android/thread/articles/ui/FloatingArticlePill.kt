@@ -45,7 +45,7 @@ fun FloatingArticlePill(
     Surface(
         modifier = modifier
             .semantics { role = Role.Button }
-            .height(52.dp),
+            .height(48.dp),
         color = AppTheme.colorScheme.surface,
         contentColor = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
         shape = AppTheme.shapes.extraLarge,
@@ -73,6 +73,7 @@ fun FloatingArticlePill(
                 IconText(
                     text = commentsCount?.let { numberFormat.format(it) } ?: "0",
                     leadingIcon = PrimalIcons.FeedReplies,
+                    style = AppTheme.typography.bodySmall,
                 )
             }
 
@@ -90,6 +91,7 @@ fun FloatingArticlePill(
                 IconText(
                     text = satsZapped?.shortened() ?: "0",
                     leadingIcon = PrimalIcons.LightningBolt,
+                    style = AppTheme.typography.bodySmall,
                 )
             }
         }

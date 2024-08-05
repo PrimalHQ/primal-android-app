@@ -237,8 +237,7 @@ private fun ArticleDetailsScreen(
                             FeedPostAction.Like -> Unit
                             FeedPostAction.Repost -> Unit
                         }
-
-                    }
+                    },
                 )
             }
         },
