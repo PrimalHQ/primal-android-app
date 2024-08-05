@@ -13,6 +13,7 @@ import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -25,6 +26,7 @@ import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.sp
+import java.text.NumberFormat
 import net.primal.android.R
 import net.primal.android.core.compose.feed.model.EventStatsUi
 import net.primal.android.core.compose.feed.model.FeedPostAction
@@ -46,12 +48,13 @@ fun FeedNoteStatsRow(
     onPostAction: ((FeedPostAction) -> Unit)? = null,
     onPostLongPressAction: ((FeedPostAction) -> Unit)? = null,
 ) {
+    val numberFormat = remember { NumberFormat.getNumberInstance() }
     Row(
         modifier = modifier,
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         SinglePostStat(
-            textCount = eventStats.repliesCount.toPostStatString(),
+            textCount = eventStats.repliesCount.toPostStatString(numberFormat),
             highlighted = eventStats.userReplied,
             iconVector = PrimalIcons.FeedReplies,
             iconVectorHighlight = PrimalIcons.FeedRepliesFilled,
@@ -66,7 +69,7 @@ fun FeedNoteStatsRow(
         )
 
         SinglePostStat(
-            textCount = eventStats.satsZapped.toPostStatString(),
+            textCount = eventStats.satsZapped.toPostStatString(numberFormat),
             highlighted = eventStats.userZapped,
             iconVector = PrimalIcons.FeedZaps,
             iconVectorHighlight = PrimalIcons.FeedZapsFilled,
@@ -81,7 +84,7 @@ fun FeedNoteStatsRow(
         )
 
         SinglePostStat(
-            textCount = eventStats.likesCount.toPostStatString(),
+            textCount = eventStats.likesCount.toPostStatString(numberFormat),
             highlighted = eventStats.userLiked,
             iconVector = PrimalIcons.FeedLikes,
             iconVectorHighlight = PrimalIcons.FeedLikesFilled,
@@ -98,7 +101,7 @@ fun FeedNoteStatsRow(
         )
 
         SinglePostStat(
-            textCount = eventStats.repostsCount.toPostStatString(),
+            textCount = eventStats.repostsCount.toPostStatString(numberFormat),
             highlighted = eventStats.userReposted,
             iconVector = PrimalIcons.FeedReposts,
             iconVectorHighlight = PrimalIcons.FeedRepostsFilled,
@@ -173,4 +176,10 @@ private fun SinglePostStat(
     )
 }
 
-private fun Long.toPostStatString(): String = if (this > 0) toString() else ""
+private fun Long.toPostStatString(numberFormat: NumberFormat): String {
+    return if (this > 0) {
+        numberFormat.format(this)
+    } else {
+        ""
+    }
+}

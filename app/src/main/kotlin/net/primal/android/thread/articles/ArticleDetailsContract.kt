@@ -14,7 +14,7 @@ interface ArticleDetailsContract {
         val coverCdnImage: CdnImage? = null,
         val summary: String? = null,
         val hashtags: List<String> = emptyList(),
-        val eventStatsUi: EventStatsUi? = null,
+        val eventStatsUi: EventStatsUi = EventStatsUi(),
         val timestamp: Long? = null,
         val markdownContent: String = "",
         val authorId: String? = null,
