@@ -9,12 +9,11 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.articles.ArticleRepository
-import net.primal.android.core.compose.feed.model.EventStatsUi
 import net.primal.android.core.compose.feed.model.asFeedPostUi
-import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.crypto.hexToNpubHrp
 import net.primal.android.feed.repository.FeedRepository
@@ -34,11 +33,16 @@ import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.thread.articles.ArticleDetailsContract.ArticleDetailsError
 import net.primal.android.thread.articles.ArticleDetailsContract.UiEvent
 import net.primal.android.thread.articles.ArticleDetailsContract.UiState
+import net.primal.android.thread.articles.ui.mapAsArticleDetailsUi
+import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.android.user.accounts.active.ActiveUserAccountState
+import net.primal.android.wallet.zaps.hasWallet
 import timber.log.Timber
 
 @HiltViewModel
 class ArticleDetailsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
+    private val activeAccountStore: ActiveAccountStore,
     private val articleRepository: ArticleRepository,
     private val feedRepository: FeedRepository,
     private val profileRepository: ProfileRepository,
@@ -58,6 +62,7 @@ class ArticleDetailsViewModel @Inject constructor(
 
     init {
         observeEvents()
+        observeActiveAccount()
 
         if (naddr == null) {
             setState { copy(error = ArticleDetailsError.InvalidNaddr) }
@@ -73,6 +78,7 @@ class ArticleDetailsViewModel @Inject constructor(
                 when (it) {
                     UiEvent.UpdateContent -> fetchData(naddr)
                     UiEvent.DismissErrors -> setState { copy(error = null) }
+                    is UiEvent.ZapArticle -> zapArticle(zapAction = it)
                 }
             }
         }
@@ -127,23 +133,7 @@ class ArticleDetailsViewModel @Inject constructor(
                         }
                     }
 
-                    setState {
-                        copy(
-                            eventId = article.data.eventId,
-                            authorId = article.data.authorId,
-                            authorCdnImage = article.author?.avatarCdnImage,
-                            authorDisplayName = article.author?.authorNameUiFriendly()
-                                ?: article.data.authorId.asEllipsizedNpub(),
-                            authorInternetIdentifier = article.author?.internetIdentifier,
-                            title = article.data.title,
-                            timestamp = article.data.publishedAt,
-                            markdownContent = article.data.content,
-                            coverCdnImage = article.data.imageCdnImage,
-                            summary = article.data.summary,
-                            hashtags = article.data.hashtags,
-                            eventStatsUi = EventStatsUi.from(eventStats = article.eventStats, userStats = null),
-                        )
-                    }
+                    setState { copy(article = article.mapAsArticleDetailsUi()) }
                 }
         }
 
@@ -169,5 +159,28 @@ class ArticleDetailsViewModel @Inject constructor(
             ).collect { comments ->
                 setState { copy(comments = comments.map { it.asFeedPostUi() }) }
             }
+        }
+
+    private fun observeActiveAccount() =
+        viewModelScope.launch {
+            activeAccountStore.activeAccountState
+                .filterIsInstance<ActiveUserAccountState.ActiveUserAccount>()
+                .collect {
+                    setState {
+                        copy(
+                            zappingState = this.zappingState.copy(
+                                walletConnected = it.data.hasWallet(),
+                                walletPreference = it.data.walletPreference,
+                                zapDefault = it.data.appSettings?.zapDefault ?: this.zappingState.zapDefault,
+                                zapsConfig = it.data.appSettings?.zapsConfig ?: this.zappingState.zapsConfig,
+                                walletBalanceInBtc = it.data.primalWalletState.balanceInBtc,
+                            ),
+                        )
+                    }
+                }
+        }
+
+    private fun zapArticle(zapAction: UiEvent.ZapArticle) =
+        viewModelScope.launch {
         }
 }

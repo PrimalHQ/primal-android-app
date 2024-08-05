@@ -9,7 +9,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,10 +30,13 @@ import net.primal.android.R
 import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.icons.PrimalIcons
+import net.primal.android.core.compose.icons.primaliconpack.More
 import net.primal.android.core.compose.icons.primaliconpack.NavWalletBoltFilled
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.note.ui.EventZapUiModel
 import net.primal.android.theme.AppTheme
+
+private const val MaxOtherZaps = 4
 
 @Composable
 fun ArticleTopZapsSection(
@@ -38,7 +44,6 @@ fun ArticleTopZapsSection(
     topZap: EventZapUiModel?,
     otherZaps: List<EventZapUiModel>,
     onZapsClick: () -> Unit,
-    onZapClick: () -> Unit,
 ) {
     Column(
         modifier = modifier.animateContentSize(),
@@ -55,7 +60,7 @@ fun ArticleTopZapsSection(
 
         if (otherZaps.isNotEmpty()) {
             Row {
-                otherZaps.take(n = 3).forEach {
+                otherZaps.take(n = 4).forEach {
                     key(it.id) {
                         NoteZapListItem(
                             noteZap = it,
@@ -65,7 +70,20 @@ fun ArticleTopZapsSection(
                     }
                 }
 
-                ZapButton(onClick = onZapClick)
+                if (otherZaps.size > MaxOtherZaps) {
+                    Icon(
+                        modifier = Modifier
+                            .background(
+                                color = AppTheme.extraColorScheme.surfaceVariantAlt1,
+                                shape = CircleShape,
+                            )
+                            .size(26.dp)
+                            .padding(horizontal = 4.dp)
+                            .clickable(onClick = onZapsClick),
+                        imageVector = PrimalIcons.More,
+                        contentDescription = null,
+                    )
+                }
             }
             Spacer(modifier = Modifier.height(6.dp))
         }
@@ -230,9 +248,26 @@ private fun PreviewArticleTopZapsSection() {
                         message = "",
                         amountInSats = 8_888.toULong(),
                     ),
+                    EventZapUiModel(
+                        id = "id",
+                        zapperId = "id",
+                        zapperName = "topZapper",
+                        zapperHandle = "handle",
+                        zappedAt = 0,
+                        message = "",
+                        amountInSats = 2048.toULong(),
+                    ),
+                    EventZapUiModel(
+                        id = "id",
+                        zapperId = "id",
+                        zapperName = "topZapper",
+                        zapperHandle = "handle",
+                        zappedAt = 0,
+                        message = "",
+                        amountInSats = 1028.toULong(),
+                    ),
                 ),
                 onZapsClick = {},
-                onZapClick = {},
             )
         }
     }
