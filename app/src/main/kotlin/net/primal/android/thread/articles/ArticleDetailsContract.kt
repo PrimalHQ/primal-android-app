@@ -38,9 +38,7 @@ interface ArticleDetailsContract {
     sealed class UiEvent {
         data object UpdateContent : UiEvent()
         data object DismissErrors : UiEvent()
-        data class ZapArticle(
-            val zapAmount: ULong?,
-            val zapDescription: String?,
-        ) : UiEvent()
+        data class ZapArticle(val zapAmount: ULong?, val zapDescription: String?) : UiEvent()
+        data object LikeArticle : UiEvent()
     }
 }

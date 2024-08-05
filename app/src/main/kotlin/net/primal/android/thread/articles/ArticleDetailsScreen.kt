@@ -230,6 +230,15 @@ private fun ArticleDetailsScreen(
                     onReactionsClick = onReactionsClick,
                     onPayInvoiceClick = onPayInvoiceClick,
                     onZapOptionsClick = { invokeZapOptions() },
+                    onPostAction = { action ->
+                        when (action) {
+                            FeedPostAction.Reply -> state.naddr?.toNaddrString()?.let(onArticleCommentClick)
+                            FeedPostAction.Zap -> Unit
+                            FeedPostAction.Like -> Unit
+                            FeedPostAction.Repost -> Unit
+                        }
+
+                    }
                 )
             }
         },
@@ -270,6 +279,7 @@ private fun ArticleContentWithComments(
     onReactionsClick: (eventId: String) -> Unit,
     onPayInvoiceClick: (InvoicePayClickEvent) -> Unit,
     onZapOptionsClick: () -> Unit,
+    onPostAction: ((FeedPostAction) -> Unit)? = null,
 ) {
     val uriHandler = LocalUriHandler.current
 
@@ -414,6 +424,7 @@ private fun ArticleContentWithComments(
                         .padding(horizontal = 16.dp)
                         .padding(bottom = 16.dp),
                     eventStats = state.article.eventStatsUi,
+                    onPostAction = onPostAction,
                     onPostLongPressAction = { action ->
                         when (action) {
                             FeedPostAction.Zap -> onZapOptionsClick()
