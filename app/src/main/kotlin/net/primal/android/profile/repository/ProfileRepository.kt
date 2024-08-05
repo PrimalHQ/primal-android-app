@@ -36,7 +36,10 @@ class ProfileRepository @Inject constructor(
     private val nostrPublisher: NostrPublisher,
 ) {
 
-    fun findProfileDataOrNull(profileId: String) = database.profiles().findProfileData(profileId = profileId)
+    suspend fun findProfileDataOrNull(profileId: String) =
+        withContext(dispatchers.io()) {
+            database.profiles().findProfileData(profileId = profileId)
+        }
 
     suspend fun findProfilesData(profileIds: List<String>) =
         withContext(dispatchers.io()) {

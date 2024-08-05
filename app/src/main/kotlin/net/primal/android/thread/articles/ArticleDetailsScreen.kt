@@ -32,6 +32,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
@@ -43,7 +44,6 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
-import java.time.Instant
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.PrimalDivider
@@ -51,12 +51,15 @@ import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.button.PrimalFilledButton
+import net.primal.android.core.compose.feed.model.FeedPostAction
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.feed.note.FeedNoteCard
 import net.primal.android.core.compose.feed.note.FeedNoteStatsRow
 import net.primal.android.core.compose.feed.note.ReferencedNoteCard
 import net.primal.android.core.compose.feed.note.events.InvoicePayClickEvent
 import net.primal.android.core.compose.feed.note.events.MediaClickEvent
+import net.primal.android.core.compose.feed.zaps.UnableToZapBottomSheet
+import net.primal.android.core.compose.feed.zaps.ZapBottomSheet
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
@@ -81,6 +84,7 @@ import net.primal.android.thread.articles.ui.rendering.MarkdownRenderer
 import net.primal.android.thread.articles.ui.rendering.replaceProfileNostrUrisWithMarkdownLinks
 import net.primal.android.thread.articles.ui.rendering.splitIntoParagraphs
 import net.primal.android.thread.articles.ui.rendering.splitMarkdownByNostrUris
+import net.primal.android.wallet.zaps.canZap
 
 @Composable
 fun ArticleDetailsScreen(
@@ -118,6 +122,7 @@ fun ArticleDetailsScreen(
         onMediaClick = onMediaClick,
         onPayInvoiceClick = onPayInvoiceClick,
         onReactionsClick = onReactionsClick,
+        onGoToWallet = onGoToWallet,
     )
 }
 
@@ -134,6 +139,7 @@ private fun ArticleDetailsScreen(
     onMediaClick: (MediaClickEvent) -> Unit,
     onReactionsClick: (eventId: String) -> Unit,
     onPayInvoiceClick: (InvoicePayClickEvent) -> Unit,
+    onGoToWallet: () -> Unit,
 ) {
     val context = LocalContext.current
     val uiScope = rememberCoroutineScope()
@@ -142,14 +148,52 @@ private fun ArticleDetailsScreen(
     val listState = rememberLazyListState()
     val scrolledToTop by remember { derivedStateOf { listState.firstVisibleItemIndex == 0 } }
 
-    val articleParts by remember(state.markdownContent) {
+    val articleParts by remember(state.article?.content) {
         mutableStateOf(
-            state.markdownContent
+            (state.article?.content ?: "")
                 .splitMarkdownByNostrUris()
                 .flatMap { it.splitIntoParagraphs() }
                 .replaceProfileNostrUrisWithMarkdownLinks(npubToDisplayNameMap = state.npubToDisplayNameMap)
                 .buildArticleRenderParts(referencedNotes = state.referencedNotes),
         )
+    }
+
+    var showCantZapWarning by remember { mutableStateOf(false) }
+    if (showCantZapWarning) {
+        UnableToZapBottomSheet(
+            zappingState = state.zappingState,
+            onDismissRequest = { showCantZapWarning = false },
+            onGoToWallet = onGoToWallet,
+        )
+    }
+
+    var showZapOptions by remember { mutableStateOf(false) }
+    if (showZapOptions && state.article != null) {
+        ZapBottomSheet(
+            onDismissRequest = { showZapOptions = false },
+            receiverName = state.article.authorDisplayName,
+            zappingState = state.zappingState,
+            onZap = { zapAmount, zapDescription ->
+                if (state.zappingState.canZap(zapAmount)) {
+                    eventPublisher(
+                        UiEvent.ZapArticle(
+                            zapAmount = zapAmount.toULong(),
+                            zapDescription = zapDescription,
+                        ),
+                    )
+                } else {
+                    showCantZapWarning = true
+                }
+            },
+        )
+    }
+
+    fun invokeZapOptions() {
+        if (state.zappingState.walletConnected) {
+            showZapOptions = true
+        } else {
+            showCantZapWarning = true
+        }
     }
 
     SnackbarErrorHandler(
@@ -166,11 +210,11 @@ private fun ArticleDetailsScreen(
                 navigationIcon = PrimalIcons.ArrowBack,
                 navigationIconContentDescription = stringResource(id = R.string.accessibility_back_button),
                 onNavigationIconClick = onClose,
-                showDivider = state.authorDisplayName == null || !scrolledToTop,
+                showDivider = state.article?.authorDisplayName == null || !scrolledToTop,
             )
         },
         content = { paddingValues ->
-            if (state.markdownContent.isEmpty()) {
+            if (state.article == null) {
                 PrimalLoadingSpinner()
             } else {
                 ArticleContentWithComments(
@@ -185,14 +229,15 @@ private fun ArticleDetailsScreen(
                     onMediaClick = onMediaClick,
                     onReactionsClick = onReactionsClick,
                     onPayInvoiceClick = onPayInvoiceClick,
+                    onZapOptionsClick = { invokeZapOptions() },
                 )
             }
         },
         floatingActionButton = {
-            if (state.markdownContent.isNotEmpty()) {
+            if (state.article != null) {
                 FloatingArticlePill(
-                    commentsCount = state.eventStatsUi?.repliesCount,
-                    satsZapped = state.eventStatsUi?.satsZapped,
+                    commentsCount = state.article.eventStatsUi.repliesCount,
+                    satsZapped = state.article.eventStatsUi.satsZapped,
                     onCommentsClick = {
                         uiScope.launch {
                             listState.animateScrollToItem(
@@ -200,6 +245,7 @@ private fun ArticleDetailsScreen(
                             )
                         }
                     },
+                    onZapLongClick = { invokeZapOptions() },
                 )
             }
         },
@@ -223,6 +269,7 @@ private fun ArticleContentWithComments(
     onMediaClick: (MediaClickEvent) -> Unit,
     onReactionsClick: (eventId: String) -> Unit,
     onPayInvoiceClick: (InvoicePayClickEvent) -> Unit,
+    onZapOptionsClick: () -> Unit,
 ) {
     val uriHandler = LocalUriHandler.current
 
@@ -232,7 +279,7 @@ private fun ArticleContentWithComments(
             .padding(paddingValues),
         state = listState,
     ) {
-        if (state.authorDisplayName != null) {
+        if (state.article != null) {
             item(
                 key = "ArticleAuthor",
                 contentType = "ArticleAuthor",
@@ -242,10 +289,10 @@ private fun ArticleContentWithComments(
                         .background(color = AppTheme.colorScheme.surface)
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 8.dp),
-                    authorCdnImage = state.authorCdnImage,
-                    authorDisplayName = state.authorDisplayName,
-                    authorInternetIdentifier = state.authorInternetIdentifier,
-                    onAuthorAvatarClick = { state.authorId?.let(onProfileClick) },
+                    authorCdnImage = state.article.authorAvatarCdnImage,
+                    authorDisplayName = state.article.authorDisplayName,
+                    authorInternetIdentifier = state.article.authorInternetIdentifier,
+                    onAuthorAvatarClick = { onProfileClick(state.article.authorId) },
                 )
                 PrimalDivider()
             }
@@ -260,10 +307,10 @@ private fun ArticleContentWithComments(
                     .background(color = AppTheme.colorScheme.surfaceVariant)
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp),
-                title = state.title,
-                date = state.timestamp?.let { Instant.ofEpochSecond(it) },
-                cover = state.coverCdnImage,
-                summary = state.summary,
+                title = state.article?.title ?: "",
+                date = state.article?.publishedAt,
+                cover = state.article?.coverImageCdnImage,
+                summary = state.article?.summary,
             )
         }
 
@@ -279,8 +326,7 @@ private fun ArticleContentWithComments(
                         .padding(horizontal = 16.dp),
                     topZap = state.topZap,
                     otherZaps = state.otherZaps,
-                    onZapsClick = { state.eventId?.let(onReactionsClick) },
-                    onZapClick = {},
+                    onZapsClick = { state.article?.eventId?.let(onReactionsClick) },
                 )
             }
         }
@@ -346,26 +392,36 @@ private fun ArticleContentWithComments(
             }
         }
 
-        item(contentType = "Hashtags") {
-            ArticleHashtags(
-                modifier = Modifier
-                    .background(color = AppTheme.colorScheme.surfaceVariant)
-                    .padding(horizontal = 10.dp)
-                    .padding(bottom = 16.dp)
-                    .fillMaxWidth(),
-                hashtags = state.hashtags,
-            )
+        if (state.article?.hashtags?.isNotEmpty() == true) {
+            item(contentType = "Hashtags") {
+                ArticleHashtags(
+                    modifier = Modifier
+                        .background(color = AppTheme.colorScheme.surfaceVariant)
+                        .padding(horizontal = 10.dp)
+                        .padding(bottom = 16.dp)
+                        .fillMaxWidth(),
+                    hashtags = state.article.hashtags,
+                )
+            }
         }
 
-        item(contentType = "Stats") {
-            FeedNoteStatsRow(
-                modifier = Modifier
-                    .background(color = AppTheme.colorScheme.surfaceVariant)
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-                    .padding(bottom = 16.dp),
-                eventStats = state.eventStatsUi,
-            )
+        if (state.article?.eventStatsUi != null) {
+            item(contentType = "Stats") {
+                FeedNoteStatsRow(
+                    modifier = Modifier
+                        .background(color = AppTheme.colorScheme.surfaceVariant)
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                        .padding(bottom = 16.dp),
+                    eventStats = state.article.eventStatsUi,
+                    onPostLongPressAction = { action ->
+                        when (action) {
+                            FeedPostAction.Zap -> onZapOptionsClick()
+                            else -> Unit
+                        }
+                    },
+                )
+            }
         }
 
         item(contentType = "CommentsHeader") {
@@ -414,10 +470,12 @@ private fun ArticleContentWithComments(
 }
 
 private fun ArticleDetailsContract.UiState.calculateCommentsHeaderIndex(partsSize: Int): Int {
-    var count = 3
-    if (authorDisplayName != null) count++
+    var count = 1
+    if (article != null) count++
     if (topZap != null || otherZaps.isNotEmpty()) count++
     count += partsSize
+    if (article?.hashtags?.isNotEmpty() == true) count++
+    if (article?.eventStatsUi != null) count++
     return count
 }
 

@@ -48,7 +48,6 @@ interface ThreadContract {
             val postAuthorId: String,
             val zapAmount: ULong?,
             val zapDescription: String?,
-
         ) : UiEvent()
 
         data class MuteAction(val postAuthorId: String) : UiEvent()
