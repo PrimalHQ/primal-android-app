@@ -5,9 +5,11 @@
 - Article Details screen with markdown rendering;
 - Feed naddr links connected to internal article details screen;
 - Support for profile and note mentions in article details;
-- Implemented article details header and top zaps;
-- Implemented rendering article comments;
-- Implemented rendering article on ThreadScreen;
-- Implemented article commenting and commenting on article comments;
-- Implemented font size variations on articles;
-- Implemented feed picker and changing article feeds;
+- Article details header and top zaps;
+- Rendering article comments;
+- Rendering article on ThreadScreen;
+- Article commenting and commenting on article comments;
+- Font size variations on articles;
+- Feed picker and changing article feeds;
+- Article Pill;
+- Hashtags & Article stats rendering;
