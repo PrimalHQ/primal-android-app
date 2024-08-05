@@ -1,6 +1,7 @@
 package net.primal.android.thread.articles
 
 import net.primal.android.attachments.domain.CdnImage
+import net.primal.android.core.compose.feed.model.EventStatsUi
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.nostr.utils.Naddr
 import net.primal.android.note.ui.EventZapUiModel
@@ -13,6 +14,7 @@ interface ArticleDetailsContract {
         val coverCdnImage: CdnImage? = null,
         val summary: String? = null,
         val hashtags: List<String> = emptyList(),
+        val eventStatsUi: EventStatsUi? = null,
         val timestamp: Long? = null,
         val markdownContent: String = "",
         val authorId: String? = null,
