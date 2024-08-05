@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.articles.ArticleRepository
+import net.primal.android.core.compose.feed.model.EventStatsUi
 import net.primal.android.core.compose.feed.model.asFeedPostUi
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.authorNameUiFriendly
@@ -140,6 +141,7 @@ class ArticleDetailsViewModel @Inject constructor(
                             coverCdnImage = article.data.imageCdnImage,
                             summary = article.data.summary,
                             hashtags = article.data.hashtags,
+                            eventStatsUi = EventStatsUi.from(eventStats = article.eventStats, userStats = null),
                         )
                     }
                 }

@@ -72,6 +72,7 @@ import net.primal.android.thread.articles.ui.ArticleAuthorRow
 import net.primal.android.thread.articles.ui.ArticleDetailsHeader
 import net.primal.android.thread.articles.ui.ArticleHashtags
 import net.primal.android.thread.articles.ui.ArticleTopZapsSection
+import net.primal.android.thread.articles.ui.FloatingArticlePill
 import net.primal.android.thread.articles.ui.rendering.HtmlRenderer
 import net.primal.android.thread.articles.ui.rendering.MarkdownRenderer
 import net.primal.android.thread.articles.ui.rendering.replaceProfileNostrUrisWithMarkdownLinks
@@ -169,6 +170,14 @@ private fun ArticleDetailsScreen(
                     onMediaClick = onMediaClick,
                     onReactionsClick = onReactionsClick,
                     onPayInvoiceClick = onPayInvoiceClick,
+                )
+            }
+        },
+        floatingActionButton = {
+            if (state.markdownContent.isNotEmpty()) {
+                FloatingArticlePill(
+                    commentsCount = state.eventStatsUi?.repliesCount,
+                    satsZapped = state.eventStatsUi?.satsZapped,
                 )
             }
         },

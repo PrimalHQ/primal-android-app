@@ -39,11 +39,14 @@ class ArticleRepository @Inject constructor(
         private const val PAGE_SIZE = 30
     }
 
-    fun observeFeeds() = database.articleFeeds().observeAllFeeds()
+    fun observeFeeds() = database.articleFeeds().observeAllFeeds().filterNotNull()
 
     fun feedBySpec(feedSpec: String): Flow<PagingData<Article>> {
         return createPager(feedSpec = feedSpec) {
-            database.articles().feed(feedSpec)
+            database.articles().feed(
+                spec = feedSpec,
+                userId = activeAccountStore.activeUserId(),
+            )
         }.flow
     }
 

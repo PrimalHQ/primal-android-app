@@ -17,16 +17,17 @@ interface ArticleDao {
     @Transaction
     @Query(
         """
-            SELECT * 
+            SELECT *
             FROM ArticleData
             INNER JOIN ArticleFeedCrossRef 
                 ON ArticleFeedCrossRef.articleId = ArticleData.articleId 
                 AND ArticleFeedCrossRef.articleAuthorId = ArticleData.authorId
+            LEFT JOIN EventUserStats ON EventUserStats.eventId = ArticleData.eventId AND EventUserStats.userId = :userId
             WHERE ArticleFeedCrossRef.spec = :spec
             ORDER BY ArticleData.publishedAt DESC
         """,
     )
-    fun feed(spec: String): PagingSource<Int, Article>
+    fun feed(spec: String, userId: String): PagingSource<Int, Article>
 
     @Transaction
     @Query(
