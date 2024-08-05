@@ -243,6 +243,7 @@ class NoteEditorViewModel @AssistedInject constructor(
                         users = _state.value.taggedUsers,
                     ),
                     attachments = _state.value.attachments,
+                    rootArticleEventId = article?.eventId,
                     rootArticleId = article?.articleId,
                     rootArticleAuthorId = article?.authorId,
                     rootPostId = if (article == null) rootPost?.postId else null,
