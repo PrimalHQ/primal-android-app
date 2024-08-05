@@ -56,7 +56,7 @@ class ReadsViewModel @Inject constructor(
                 setState {
                     copy(
                         feeds = feeds.map { it.asFeedUi() },
-                        activeFeed = feeds.first().asFeedUi(),
+                        activeFeed = feeds.firstOrNull()?.asFeedUi(),
                     )
                 }
             }
