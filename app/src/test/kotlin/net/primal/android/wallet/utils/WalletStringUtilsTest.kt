@@ -145,8 +145,9 @@ class WalletStringUtilsTest {
 
     @Test
     fun parseBitcoinPaymentInstruction_shouldReturnBtcAddressAndLabelIfInputIsHasValidAddressAndUrlEscapedLabel() {
-        ("bitcoin:bc1q99ygnq68xrvqd9up7vgapnytwmss4am6ytessw" +
-            "?label=This+is+very+long+comment.+With+1234+and+%21%40%23%24%25%5E%26**%28%29_%2B."
+        (
+            "bitcoin:bc1q99ygnq68xrvqd9up7vgapnytwmss4am6ytessw" +
+                "?label=This+is+very+long+comment.+With+1234+and+%21%40%23%24%25%5E%26**%28%29_%2B."
             ).parseBitcoinPaymentInstructions() shouldBe
             BitcoinPaymentInstruction(
                 address = "bc1q99ygnq68xrvqd9up7vgapnytwmss4am6ytessw",
@@ -156,9 +157,10 @@ class WalletStringUtilsTest {
 
     @Test
     fun parseBitcoinPaymentInstruction_shouldReturnBtcAddressAndAmountAndLabelIfInputsAreValid() {
-        ("bitcoin:bc1q99ygnq68xrvqd9up7vgapnytwmss4am6ytessw" +
-            "?amount=1.234567" +
-            "&label=This+is+very+long+comment."
+        (
+            "bitcoin:bc1q99ygnq68xrvqd9up7vgapnytwmss4am6ytessw" +
+                "?amount=1.234567" +
+                "&label=This+is+very+long+comment."
             ).parseBitcoinPaymentInstructions() shouldBe
             BitcoinPaymentInstruction(
                 address = "bc1q99ygnq68xrvqd9up7vgapnytwmss4am6ytessw",
@@ -179,10 +181,11 @@ class WalletStringUtilsTest {
 
     @Test
     fun parseBitcoinPaymentInstruction_shouldReturnBtcAddressAndLightningAddressAndAmountAndLabelIfInputsAreValid() {
-        ("bitcoin:bc1q99ygnq68xrvqd9up7vgapnytwmss4am6ytessw" +
-            "?lightning=$validLnInvoice" +
-            "&amount=1.234567" +
-            "&label=This+is+very+long+comment."
+        (
+            "bitcoin:bc1q99ygnq68xrvqd9up7vgapnytwmss4am6ytessw" +
+                "?lightning=$validLnInvoice" +
+                "&amount=1.234567" +
+                "&label=This+is+very+long+comment."
             ).parseBitcoinPaymentInstructions() shouldBe
             BitcoinPaymentInstruction(
                 address = "bc1q99ygnq68xrvqd9up7vgapnytwmss4am6ytessw",

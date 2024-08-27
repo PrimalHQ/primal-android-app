@@ -1,10 +1,10 @@
 package net.primal.android.networking.sockets
 
 import io.kotest.matchers.shouldBe
+import java.util.UUID
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import org.junit.Test
-import java.util.UUID
 
 class NostrOutgoingMessageBuilderTest {
 
@@ -56,5 +56,4 @@ class NostrOutgoingMessageBuilderTest {
         val actual = subscriptionId.buildNostrCLOSEMessage()
         actual shouldBe """["${NostrVerb.Outgoing.CLOSE}","$subscriptionId"]"""
     }
-
 }

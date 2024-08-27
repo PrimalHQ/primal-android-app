@@ -17,17 +17,16 @@ import org.junit.Test
 
 class NostrJsonTest {
 
-    private fun buildNostrEvent(
-        tags: List<JsonArray>,
-    ): NostrEvent = NostrEvent(
-        id = "id",
-        pubKey = "pubkey",
-        createdAt = 100L,
-        kind = 100,
-        tags = tags,
-        content = "",
-        sig = "signature",
-    )
+    private fun buildNostrEvent(tags: List<JsonArray>): NostrEvent =
+        NostrEvent(
+            id = "id",
+            pubKey = "pubkey",
+            createdAt = 100L,
+            kind = 100,
+            tags = tags,
+            content = "",
+            sig = "signature",
+        )
 
     @Test
     fun `decodeFromStringOrNull returns decoded object`() {
@@ -41,7 +40,7 @@ class NostrJsonTest {
                 	"content": "Any Android users out there? \n\nWould you like to try the new Primal Android build? ",
                 	"sig": "d42332eb0e3d6ca268ab89cecc6f61cb545916749c492d35d48baf2b5959cfd930fd6c04645591aeb2c75b08d8a684d6f99ee6d738a1f2e10867ded1c4bd2f62"
                 }
-            """.trimIndent()
+            """.trimIndent(),
         )
         actual.shouldNotBeNull()
         actual.shouldBeTypeOf<NostrEvent>()
@@ -65,7 +64,7 @@ class NostrJsonTest {
             buildJsonArray {
                 add("e")
                 add("eventId")
-            }
+            },
         )
         val nostrEvent = buildNostrEvent(tags = tags)
         val actual = nostrEvent.toJsonObject()

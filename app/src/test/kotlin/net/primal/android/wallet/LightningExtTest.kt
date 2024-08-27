@@ -24,8 +24,10 @@ class LightningExtTest {
 
     @Test
     fun `decodeLNUrl() successfully decodes lnurl`() {
-        val actual = ("lnurl1dp68gurn8ghj7ampd3kx2ar0veekzar0wd5xjtnrdakj7" +
-                "tnhv4kxctttdehhwm30d3h82unvwqhk6ctcv3jk6ctjvdhs85fgps").decodeLNUrlOrNull()
+        val actual = (
+            "lnurl1dp68gurn8ghj7ampd3kx2ar0veekzar0wd5xjtnrdakj7" +
+                "tnhv4kxctttdehhwm30d3h82unvwqhk6ctcv3jk6ctjvdhs85fgps"
+            ).decodeLNUrlOrNull()
         actual shouldBe "https://walletofsatoshi.com/.well-known/lnurlp/maxdemarco"
     }
 

@@ -9,5 +9,4 @@ class WalletRepositoryTest {
 
     @get:Rule
     val coroutinesTestRule = CoroutinesTestRule()
-
 }

@@ -35,33 +35,35 @@ class RelaysSocketManagerTest {
         Relay(url = "wss://filter.nostr.wine/npubxyz\n", true, true),
     )
 
-    private fun buildActiveAccountStore() = mockk<ActiveAccountStore>(relaxed = true) {
-        every { activeAccountState } returns flowOf(
-            ActiveUserAccountState.ActiveUserAccount(
-                data = UserAccount
-                    .buildLocal(pubkey = expectedUserId),
-            ),
-        )
-        coEvery { activeUserId } returns MutableStateFlow(expectedUserId)
-    }
+    private fun buildActiveAccountStore() =
+        mockk<ActiveAccountStore>(relaxed = true) {
+            every { activeAccountState } returns flowOf(
+                ActiveUserAccountState.ActiveUserAccount(
+                    data = UserAccount
+                        .buildLocal(pubkey = expectedUserId),
+                ),
+            )
+            coEvery { activeUserId } returns MutableStateFlow(expectedUserId)
+        }
 
     @Test
-    fun `invalid relays does not cause the crash`() = runTest {
-        RelaysSocketManager(
-            dispatchers = coroutinesTestRule.dispatcherProvider,
-            activeAccountStore = buildActiveAccountStore(),
-            primalDatabase = mockk(relaxed = true) {
-                every { relays() } returns mockk(relaxed = true) {
-                    every { observeRelays(any()) } returns flowOf(
-                    invalidRelays.map {
-                        it.mapToRelayPO(userId = expectedUserId, kind = RelayKind.UserRelay)
-                    },
-                )
-                }
-            },
-            okHttpClient = mockk<OkHttpClient>(),
-            primalApiClient = mockk<PrimalApiClient>(),
-        )
-        advanceUntilIdleAndDelay()
-    }
+    fun `invalid relays does not cause the crash`() =
+        runTest {
+            RelaysSocketManager(
+                dispatchers = coroutinesTestRule.dispatcherProvider,
+                activeAccountStore = buildActiveAccountStore(),
+                primalDatabase = mockk(relaxed = true) {
+                    every { relays() } returns mockk(relaxed = true) {
+                        every { observeRelays(any()) } returns flowOf(
+                            invalidRelays.map {
+                                it.mapToRelayPO(userId = expectedUserId, kind = RelayKind.UserRelay)
+                            },
+                        )
+                    }
+                },
+                okHttpClient = mockk<OkHttpClient>(),
+                primalApiClient = mockk<PrimalApiClient>(),
+            )
+            advanceUntilIdleAndDelay()
+        }
 }

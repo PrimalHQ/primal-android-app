@@ -16,8 +16,8 @@ class AttachmentsTypeConvertersTest {
             CdnResourceVariant(
                 height = 100,
                 width = 100,
-                mediaUrl = "https://image.png"
-            )
+                mediaUrl = "https://image.png",
+            ),
         )
         val expected = NostrJson.encodeToString(input)
 
@@ -38,8 +38,8 @@ class AttachmentsTypeConvertersTest {
             CdnResourceVariant(
                 height = 100,
                 width = 100,
-                mediaUrl = "https://image.png"
-            )
+                mediaUrl = "https://image.png",
+            ),
         )
         val jsonString = NostrJson.encodeToString(input)
         val actual = AttachmentTypeConverters().stringToListOfCdnResourceVariant(jsonString)
@@ -57,5 +57,4 @@ class AttachmentsTypeConvertersTest {
         val actual = AttachmentTypeConverters().stringToListOfCdnResourceVariant(null)
         actual shouldBe null
     }
-
 }

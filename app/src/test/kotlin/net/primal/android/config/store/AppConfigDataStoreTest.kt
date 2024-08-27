@@ -33,7 +33,7 @@ class AppConfigDataStoreTest {
 
     private val persistence: DataStore<AppConfig> = DataStoreFactory.create(
         serializer = AppConfigSerialization(encryption = NoEncryption()),
-        produceFile = { testContext.dataStoreFile(DATA_STORE_FILE) }
+        produceFile = { testContext.dataStoreFile(DATA_STORE_FILE) },
     )
 
     private fun createAppConfigDataStore(
@@ -42,108 +42,113 @@ class AppConfigDataStoreTest {
     ): AppConfigDataStore {
         return AppConfigDataStore(
             dispatcherProvider = dispatcherProvider,
-            persistence = persistenceDataStore
+            persistence = persistenceDataStore,
         )
     }
 
     @Test
-    fun updateConfig_updatesAllFieldsWhenOverrideIsFalse() = runTest {
-        val store = createAppConfigDataStore()
+    fun updateConfig_updatesAllFieldsWhenOverrideIsFalse() =
+        runTest {
+            val store = createAppConfigDataStore()
 
-        val expectedWalletUrl = "walletUrl"
-        val expectedUploadUrl = "uploadUrl"
-        val expectedCacheUrl = "cacheUrl"
+            val expectedWalletUrl = "walletUrl"
+            val expectedUploadUrl = "uploadUrl"
+            val expectedCacheUrl = "cacheUrl"
 
-        val actual = store.updateConfig {
-            copy(
-                cacheUrl = expectedCacheUrl,
-                walletUrl = expectedWalletUrl,
-                uploadUrl = expectedUploadUrl,
-            )
+            val actual = store.updateConfig {
+                copy(
+                    cacheUrl = expectedCacheUrl,
+                    walletUrl = expectedWalletUrl,
+                    uploadUrl = expectedUploadUrl,
+                )
+            }
+
+            actual.cacheUrl shouldBe expectedCacheUrl
+            actual.walletUrl shouldBe expectedWalletUrl
+            actual.uploadUrl shouldBe expectedUploadUrl
         }
 
-        actual.cacheUrl shouldBe expectedCacheUrl
-        actual.walletUrl shouldBe expectedWalletUrl
-        actual.uploadUrl shouldBe expectedUploadUrl
-    }
-
     @Test
-    fun updateConfig_respectsCacheOverrideWhenUpdating() = runTest {
-        val store = createAppConfigDataStore()
-        val expectedOverriddenCacheUrl = "cacheOverride"
-        store.updateConfig {
-            copy(
-                cacheUrlOverride = true,
-                cacheUrl = expectedOverriddenCacheUrl,
-            )
+    fun updateConfig_respectsCacheOverrideWhenUpdating() =
+        runTest {
+            val store = createAppConfigDataStore()
+            val expectedOverriddenCacheUrl = "cacheOverride"
+            store.updateConfig {
+                copy(
+                    cacheUrlOverride = true,
+                    cacheUrl = expectedOverriddenCacheUrl,
+                )
+            }
+            val expectedUploadUrl = "uploadUrl"
+            val expectedWalletUrl = "walletUrl"
+
+            val actual = store.updateConfig {
+                copy(
+                    cacheUrl = "thisShouldNotBeUpdated",
+                    walletUrl = expectedWalletUrl,
+                    uploadUrl = expectedUploadUrl,
+                )
+            }
+
+            actual.uploadUrl shouldBe expectedUploadUrl
+            actual.walletUrl shouldBe expectedWalletUrl
+            actual.cacheUrlOverride shouldBe true
+            actual.cacheUrl shouldBe expectedOverriddenCacheUrl
         }
-        val expectedUploadUrl = "uploadUrl"
-        val expectedWalletUrl = "walletUrl"
 
-        val actual = store.updateConfig {
-            copy(
-                cacheUrl = "thisShouldNotBeUpdated",
-                walletUrl = expectedWalletUrl,
-                uploadUrl = expectedUploadUrl,
-            )
+    @Test
+    fun overrideCacheUrl_setsOverrideFlag() =
+        runTest {
+            val store = createAppConfigDataStore()
+
+            store.overrideCacheUrl(url = "cacheOverride")
+            advanceUntilIdle()
+
+            val actual = store.config.value
+            actual.cacheUrlOverride shouldBe true
         }
 
-        actual.uploadUrl shouldBe expectedUploadUrl
-        actual.walletUrl shouldBe expectedWalletUrl
-        actual.cacheUrlOverride shouldBe true
-        actual.cacheUrl shouldBe expectedOverriddenCacheUrl
-    }
-
     @Test
-    fun overrideCacheUrl_setsOverrideFlag() = runTest {
-        val store = createAppConfigDataStore()
+    fun overrideCacheUrl_doesNotUpdateOtherUrls() =
+        runTest {
+            val store = createAppConfigDataStore()
 
-        store.overrideCacheUrl(url = "cacheOverride")
-        advanceUntilIdle()
+            val initial = store.config.value
+            store.overrideCacheUrl(url = "cacheOverride")
+            advanceUntilIdle()
 
-        val actual = store.config.value
-        actual.cacheUrlOverride shouldBe true
-    }
-
-    @Test
-    fun overrideCacheUrl_doesNotUpdateOtherUrls() = runTest {
-        val store = createAppConfigDataStore()
-
-        val initial = store.config.value
-        store.overrideCacheUrl(url = "cacheOverride")
-        advanceUntilIdle()
-
-        val actual = store.config.value
-        actual.uploadUrl shouldBe initial.uploadUrl
-        actual.walletUrl shouldBe initial.walletUrl
-    }
-
-    @Test
-    fun overrideCacheUrl_setsGivenCacheUrl() = runTest {
-        val store = createAppConfigDataStore()
-        val expectedOverriddenCacheUrl = "cacheOverride"
-
-        store.overrideCacheUrl(url = expectedOverriddenCacheUrl)
-        advanceUntilIdle()
-
-        val actual = store.config.value
-        actual.cacheUrl shouldBe expectedOverriddenCacheUrl
-    }
-
-    @Test
-    fun revertCacheUrlOverrideFlag_disabledOverrideFlag() = runTest {
-        val store = createAppConfigDataStore()
-        store.updateConfig {
-            copy(
-                cacheUrlOverride = true,
-                cacheUrl = "overridden",
-            )
+            val actual = store.config.value
+            actual.uploadUrl shouldBe initial.uploadUrl
+            actual.walletUrl shouldBe initial.walletUrl
         }
-        store.revertCacheUrlOverrideFlag()
-        advanceUntilIdle()
 
-        val actual = store.config.value
-        actual.cacheUrlOverride shouldBe false
-    }
+    @Test
+    fun overrideCacheUrl_setsGivenCacheUrl() =
+        runTest {
+            val store = createAppConfigDataStore()
+            val expectedOverriddenCacheUrl = "cacheOverride"
 
+            store.overrideCacheUrl(url = expectedOverriddenCacheUrl)
+            advanceUntilIdle()
+
+            val actual = store.config.value
+            actual.cacheUrl shouldBe expectedOverriddenCacheUrl
+        }
+
+    @Test
+    fun revertCacheUrlOverrideFlag_disabledOverrideFlag() =
+        runTest {
+            val store = createAppConfigDataStore()
+            store.updateConfig {
+                copy(
+                    cacheUrlOverride = true,
+                    cacheUrl = "overridden",
+                )
+            }
+            store.revertCacheUrlOverrideFlag()
+            advanceUntilIdle()
+
+            val actual = store.config.value
+            actual.cacheUrlOverride shouldBe false
+        }
 }

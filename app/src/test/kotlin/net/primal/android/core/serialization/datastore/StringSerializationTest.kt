@@ -16,26 +16,27 @@ class StringSerializationTest {
     }
 
     @Test
-    fun `readFrom returns proper String`() = runTest {
-        val serializer = StringSerializer()
+    fun `readFrom returns proper String`() =
+        runTest {
+            val serializer = StringSerializer()
 
-        val expected = "Hello World!"
-        val inputStream = ByteArrayInputStream(expected.toByteArray())
+            val expected = "Hello World!"
+            val inputStream = ByteArrayInputStream(expected.toByteArray())
 
-        val actual = serializer.readFrom(inputStream)
-        actual shouldBe expected
-    }
+            val actual = serializer.readFrom(inputStream)
+            actual shouldBe expected
+        }
 
     @Test
-    fun `writeTo writes input to given outputStream`() = runTest {
-        val serializer = StringSerializer()
+    fun `writeTo writes input to given outputStream`() =
+        runTest {
+            val serializer = StringSerializer()
 
-        val expected = "Hello Nostr!"
-        val outputStream = ByteArrayOutputStream()
-        serializer.writeTo(expected, outputStream)
+            val expected = "Hello Nostr!"
+            val outputStream = ByteArrayOutputStream()
+            serializer.writeTo(expected, outputStream)
 
-        val actual = String(outputStream.toByteArray())
-        actual shouldBe expected
-    }
-
+            val actual = String(outputStream.toByteArray())
+            actual shouldBe expected
+        }
 }

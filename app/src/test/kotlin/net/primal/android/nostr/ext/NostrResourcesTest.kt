@@ -92,10 +92,11 @@ class NostrResourcesTest {
 
     @Test
     fun parseNostrUris_returnsListWithMultipleValidNoteUris() {
-        val parsed = ("Some notes: " +
-            "note122p22tp49v3u2q0v0y0qk0cv07xxl8krs6z3y9x0ergx57ejl77qgray5l " +
-            "note17lf0wvdd4v2wvckrx550waytxryeq5k9cr9q8swnf43wrjhhhk0sh82aez " +
-            "some footer text."
+        val parsed = (
+            "Some notes: " +
+                "note122p22tp49v3u2q0v0y0qk0cv07xxl8krs6z3y9x0ergx57ejl77qgray5l " +
+                "note17lf0wvdd4v2wvckrx550waytxryeq5k9cr9q8swnf43wrjhhhk0sh82aez " +
+                "some footer text."
             ).parseNostrUris()
         parsed shouldContain "note122p22tp49v3u2q0v0y0qk0cv07xxl8krs6z3y9x0ergx57ejl77qgray5l"
         parsed shouldContain "note17lf0wvdd4v2wvckrx550waytxryeq5k9cr9q8swnf43wrjhhhk0sh82aez"
@@ -109,22 +110,24 @@ class NostrResourcesTest {
 
     @Test
     fun parseNostrUris_skipsInvalidNoteUris() {
-        val parsed = ("There is just one note here: " +
-            "note12fjf " +
-            "note17lf0wvdd4v2wvckrx550waytxryeq5k9cr9q8swnf43wrjhhhk0sh82aez"
-        ).parseNostrUris()
+        val parsed = (
+            "There is just one note here: " +
+                "note12fjf " +
+                "note17lf0wvdd4v2wvckrx550waytxryeq5k9cr9q8swnf43wrjhhhk0sh82aez"
+            ).parseNostrUris()
         parsed shouldContain "note17lf0wvdd4v2wvckrx550waytxryeq5k9cr9q8swnf43wrjhhhk0sh82aez"
         parsed.size shouldBe 1
     }
 
     @Test
     fun parseNostrUris_skipsInvalidNpubAndNoteUris() {
-        val parsed = ("There is just one note and npub here: " +
-            "note12fjf " +
-            "note17lf0wvdd4v2wvckrx550waytxryeq5k9cr9q8swnf43wrjhhhk0sh82aez " +
-            "npub121212 " +
-            "npub17nd4yu9anyd3004pumgrtazaacujjxwzj36thtqsxskjy0r5urgqf6950x " +
-            "and some footer text."
+        val parsed = (
+            "There is just one note and npub here: " +
+                "note12fjf " +
+                "note17lf0wvdd4v2wvckrx550waytxryeq5k9cr9q8swnf43wrjhhhk0sh82aez " +
+                "npub121212 " +
+                "npub17nd4yu9anyd3004pumgrtazaacujjxwzj36thtqsxskjy0r5urgqf6950x " +
+                "and some footer text."
             ).parseNostrUris()
         println(parsed)
         parsed shouldContain "note17lf0wvdd4v2wvckrx550waytxryeq5k9cr9q8swnf43wrjhhhk0sh82aez"

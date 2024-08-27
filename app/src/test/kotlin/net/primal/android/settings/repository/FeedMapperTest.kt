@@ -68,7 +68,7 @@ class FeedMapperTest {
 
     @Test
     fun isLatestWithRepliesDirective_returnsFalseForInvalidUserId() {
-        userId.substring(0, userId.length-3).isLatestWithRepliesDirective() shouldBe false
+        userId.substring(0, userId.length - 3).isLatestWithRepliesDirective() shouldBe false
     }
 
     @Test

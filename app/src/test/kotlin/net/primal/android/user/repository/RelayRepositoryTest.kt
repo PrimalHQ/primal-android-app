@@ -67,110 +67,145 @@ class RelayRepositoryTest {
     }
 
     @Test
-    fun bootstrapDefaultUserRelays_replaceUserRelaysInDatabase() = runTest {
-        val userId = "random"
-        val expectedRelays = listOf("wss://relay.primal.net", "wss://relay.damus.io")
-        val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
-        val repository = RelayRepository(
-            nostrPublisher = nostrPublisher,
-            usersApi = mockk(relaxed = true) {
-                coEvery { getDefaultRelays() } returns expectedRelays
-            },
-            primalDatabase = myDatabase,
-        )
-
-        repository.bootstrapUserRelays(userId = userId)
-
-        val actualRelays = myDatabase.relays().findRelays(userId = userId, kind = RelayKind.UserRelay)
-        actualRelays.map { it.url }.sorted() shouldBe expectedRelays.sorted()
-    }
-
-    @Test
-    fun removeRelayAndPublishRelayList_removesRelayFromDatabase() = runTest {
-        val userId = "random"
-        val relays = listOf("wss://relay.primal.net", "wss://nostr1.current.fyi/")
-        val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
-        val repository = RelayRepository(
-            nostrPublisher = nostrPublisher,
-            usersApi = mockk(relaxed = true) {
-                coEvery { getUserRelays(userId) } returns UserRelaysResponse(
-                    cachedRelayListEvent = buildPrimalUserRelaysListEvent(relays = relays),
-                )
-            },
-            primalDatabase = myDatabase,
-        )
-
-        repository.removeRelayAndPublishRelayList(userId = userId, url = relays.first())
-        val expectedRelays = relays.drop(1).map { it.cleanWebSocketUrl() }.sorted()
-
-        val actualRelays = myDatabase.relays().findRelays(userId = userId, kind = RelayKind.UserRelay)
-        actualRelays.map { it.url }.sorted() shouldBe expectedRelays
-    }
-
-    @Test
-    fun removeRelayAndPublishRelayList_removesEvenIfRelayUrlIsNotCleaned() = runTest {
-        val userId = "random"
-        val relays = listOf("wss://nostr1.current.fyi", "wss://relay.primal.net")
-        val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
-        val repository = RelayRepository(
-            nostrPublisher = nostrPublisher,
-            usersApi = mockk(relaxed = true) {
-                coEvery { getUserRelays(userId) } returns UserRelaysResponse(
-                    cachedRelayListEvent = buildPrimalUserRelaysListEvent(relays = relays),
-                )
-            },
-            primalDatabase = myDatabase,
-        )
-
-        repository.removeRelayAndPublishRelayList(userId = userId, url = "wss://nostr1.current.fyi/")
-        val expectedRelays = relays.drop(1).map { it.cleanWebSocketUrl() }.sorted()
-
-        val actualRelays = myDatabase.relays().findRelays(userId = userId, kind = RelayKind.UserRelay)
-        actualRelays.map { it.url }.sorted() shouldBe expectedRelays
-    }
-
-    @Test
-    fun removeRelayAndPublishRelayList_callsPublishWithNewRelayList() = runTest {
-        val userId = "random"
-        val relays = listOf("wss://relay.primal.net", "wss://nostr1.current.fyi/")
-        val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
-        val repository = RelayRepository(
-            nostrPublisher = nostrPublisher,
-            usersApi = mockk(relaxed = true) {
-                coEvery { getUserRelays(userId) } returns UserRelaysResponse(
-                    cachedRelayListEvent = buildPrimalUserRelaysListEvent(relays = relays),
-                )
-            },
-            primalDatabase = myDatabase,
-        )
-
-        repository.removeRelayAndPublishRelayList(userId = userId, url = relays.first())
-        val expectedRelays = relays.drop(1).map { Relay(url = it, read = true, write = true) }
-
-        coVerify {
-            nostrPublisher.publishRelayList(
-                withArg { it shouldBe userId },
-                withArg { it shouldBe expectedRelays },
+    fun bootstrapDefaultUserRelays_replaceUserRelaysInDatabase() =
+        runTest {
+            val userId = "random"
+            val expectedRelays = listOf("wss://relay.primal.net", "wss://relay.damus.io")
+            val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
+            val repository = RelayRepository(
+                nostrPublisher = nostrPublisher,
+                usersApi = mockk(relaxed = true) {
+                    coEvery { getDefaultRelays() } returns expectedRelays
+                },
+                primalDatabase = myDatabase,
             )
+
+            repository.bootstrapUserRelays(userId = userId)
+
+            val actualRelays = myDatabase.relays().findRelays(userId = userId, kind = RelayKind.UserRelay)
+            actualRelays.map { it.url }.sorted() shouldBe expectedRelays.sorted()
         }
-    }
 
     @Test
-    fun fetchAndUpdateUserRelays_clearsUserRelaysIfCachedNip65HasEmptyTags() = runTest {
-        val userId = "random"
-        val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
-        val repository = RelayRepository(
-            nostrPublisher = nostrPublisher,
-            usersApi = mockk(relaxed = true) {
-                coEvery { getUserRelays(userId) } returns UserRelaysResponse(
-                    cachedRelayListEvent = buildPrimalUserRelaysListEvent(relays = emptyList()),
-                )
-            },
-            primalDatabase = myDatabase,
-        )
+    fun removeRelayAndPublishRelayList_removesRelayFromDatabase() =
+        runTest {
+            val userId = "random"
+            val relays = listOf("wss://relay.primal.net", "wss://nostr1.current.fyi/")
+            val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
+            val repository = RelayRepository(
+                nostrPublisher = nostrPublisher,
+                usersApi = mockk(relaxed = true) {
+                    coEvery { getUserRelays(userId) } returns UserRelaysResponse(
+                        cachedRelayListEvent = buildPrimalUserRelaysListEvent(relays = relays),
+                    )
+                },
+                primalDatabase = myDatabase,
+            )
 
-        myDatabase.relays().upsertAll(
-            relays = listOf(
+            repository.removeRelayAndPublishRelayList(userId = userId, url = relays.first())
+            val expectedRelays = relays.drop(1).map { it.cleanWebSocketUrl() }.sorted()
+
+            val actualRelays = myDatabase.relays().findRelays(userId = userId, kind = RelayKind.UserRelay)
+            actualRelays.map { it.url }.sorted() shouldBe expectedRelays
+        }
+
+    @Test
+    fun removeRelayAndPublishRelayList_removesEvenIfRelayUrlIsNotCleaned() =
+        runTest {
+            val userId = "random"
+            val relays = listOf("wss://nostr1.current.fyi", "wss://relay.primal.net")
+            val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
+            val repository = RelayRepository(
+                nostrPublisher = nostrPublisher,
+                usersApi = mockk(relaxed = true) {
+                    coEvery { getUserRelays(userId) } returns UserRelaysResponse(
+                        cachedRelayListEvent = buildPrimalUserRelaysListEvent(relays = relays),
+                    )
+                },
+                primalDatabase = myDatabase,
+            )
+
+            repository.removeRelayAndPublishRelayList(userId = userId, url = "wss://nostr1.current.fyi/")
+            val expectedRelays = relays.drop(1).map { it.cleanWebSocketUrl() }.sorted()
+
+            val actualRelays = myDatabase.relays().findRelays(userId = userId, kind = RelayKind.UserRelay)
+            actualRelays.map { it.url }.sorted() shouldBe expectedRelays
+        }
+
+    @Test
+    fun removeRelayAndPublishRelayList_callsPublishWithNewRelayList() =
+        runTest {
+            val userId = "random"
+            val relays = listOf("wss://relay.primal.net", "wss://nostr1.current.fyi/")
+            val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
+            val repository = RelayRepository(
+                nostrPublisher = nostrPublisher,
+                usersApi = mockk(relaxed = true) {
+                    coEvery { getUserRelays(userId) } returns UserRelaysResponse(
+                        cachedRelayListEvent = buildPrimalUserRelaysListEvent(relays = relays),
+                    )
+                },
+                primalDatabase = myDatabase,
+            )
+
+            repository.removeRelayAndPublishRelayList(userId = userId, url = relays.first())
+            val expectedRelays = relays.drop(1).map { Relay(url = it, read = true, write = true) }
+
+            coVerify {
+                nostrPublisher.publishRelayList(
+                    withArg { it shouldBe userId },
+                    withArg { it shouldBe expectedRelays },
+                )
+            }
+        }
+
+    @Test
+    fun fetchAndUpdateUserRelays_clearsUserRelaysIfCachedNip65HasEmptyTags() =
+        runTest {
+            val userId = "random"
+            val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
+            val repository = RelayRepository(
+                nostrPublisher = nostrPublisher,
+                usersApi = mockk(relaxed = true) {
+                    coEvery { getUserRelays(userId) } returns UserRelaysResponse(
+                        cachedRelayListEvent = buildPrimalUserRelaysListEvent(relays = emptyList()),
+                    )
+                },
+                primalDatabase = myDatabase,
+            )
+
+            myDatabase.relays().upsertAll(
+                relays = listOf(
+                    net.primal.android.user.db.Relay(
+                        userId = userId,
+                        kind = RelayKind.UserRelay,
+                        read = true,
+                        url = "wss://relay.primal.net",
+                        write = true,
+                    ),
+                ),
+            )
+
+            repository.fetchAndUpdateUserRelays(userId = userId)
+
+            val actualRelays = myDatabase.relays().findRelays(userId = userId, kind = RelayKind.UserRelay)
+            actualRelays shouldBe emptyList()
+        }
+
+    @Test
+    fun fetchAndUpdateUserRelays_ignoresFetchIfCachedNip65IsMissing() =
+        runTest {
+            val userId = "random"
+            val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
+            val repository = RelayRepository(
+                nostrPublisher = nostrPublisher,
+                usersApi = mockk(relaxed = true) {
+                    coEvery { getUserRelays(userId) } returns UserRelaysResponse(cachedRelayListEvent = null)
+                },
+                primalDatabase = myDatabase,
+            )
+
+            val expectedRelays = listOf(
                 net.primal.android.user.db.Relay(
                     userId = userId,
                     kind = RelayKind.UserRelay,
@@ -178,41 +213,12 @@ class RelayRepositoryTest {
                     url = "wss://relay.primal.net",
                     write = true,
                 ),
-            ),
-        )
+            )
+            myDatabase.relays().upsertAll(relays = expectedRelays)
 
-        repository.fetchAndUpdateUserRelays(userId = userId)
+            repository.fetchAndUpdateUserRelays(userId = userId)
 
-        val actualRelays = myDatabase.relays().findRelays(userId = userId, kind = RelayKind.UserRelay)
-        actualRelays shouldBe emptyList()
-    }
-
-    @Test
-    fun fetchAndUpdateUserRelays_ignoresFetchIfCachedNip65IsMissing() = runTest {
-        val userId = "random"
-        val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
-        val repository = RelayRepository(
-            nostrPublisher = nostrPublisher,
-            usersApi = mockk(relaxed = true) {
-                coEvery { getUserRelays(userId) } returns UserRelaysResponse(cachedRelayListEvent = null)
-            },
-            primalDatabase = myDatabase,
-        )
-
-        val expectedRelays = listOf(
-            net.primal.android.user.db.Relay(
-                userId = userId,
-                kind = RelayKind.UserRelay,
-                read = true,
-                url = "wss://relay.primal.net",
-                write = true,
-            ),
-        )
-        myDatabase.relays().upsertAll(relays = expectedRelays)
-
-        repository.fetchAndUpdateUserRelays(userId = userId)
-
-        val actualRelays = myDatabase.relays().findRelays(userId = userId, kind = RelayKind.UserRelay)
-        actualRelays shouldBe expectedRelays
-    }
+            val actualRelays = myDatabase.relays().findRelays(userId = userId, kind = RelayKind.UserRelay)
+            actualRelays shouldBe expectedRelays
+        }
 }

@@ -14,10 +14,12 @@ class NostrUnsignedEventExtTest {
         val unsignedEvent = NostrUnsignedEvent(
             content = "{\"description\":\"Sync app settings\"}",
             kind = 30078,
-            tags = listOf(buildJsonArray {
-                add("d")
-                add("Primal-Android App")
-            }),
+            tags = listOf(
+                buildJsonArray {
+                    add("d")
+                    add("Primal-Android App")
+                },
+            ),
             createdAt = 1687881599,
             pubKey = "9b46c3f4a8dcdafdfff12a97c59758f38ff55002370fcfa7d14c8c857e9b5812",
         )
@@ -29,22 +31,23 @@ class NostrUnsignedEventExtTest {
     @Test
     fun `sign returns correct signature`() {
         val expectedSig = "14e5c298d639ab4285452707d8e6b212e4554b8381bb0a312fa87d6bf5" +
-                "ae954bfadf13a9a69b9b5aac3dd37ea6d6020e07ae860e686fce804a408f49ce3c9765"
+            "ae954bfadf13a9a69b9b5aac3dd37ea6d6020e07ae860e686fce804a408f49ce3c9765"
         val unsignedEvent = NostrUnsignedEvent(
             content = "{\"description\":\"Sync app settings\"}",
             kind = 30078,
-            tags = listOf(buildJsonArray {
-                add("d")
-                add("Primal-Android App")
-            }),
+            tags = listOf(
+                buildJsonArray {
+                    add("d")
+                    add("Primal-Android App")
+                },
+            ),
             createdAt = 1687881599,
             pubKey = "9b46c3f4a8dcdafdfff12a97c59758f38ff55002370fcfa7d14c8c857e9b5812",
         )
 
         val signedEvent = unsignedEvent.signOrThrow(
-            "nsec18c2dg4s9j7ndlujesf4fq5m3ty6u92jpqffuckf75xyyxqsqy4pstyzq4l"
+            "nsec18c2dg4s9j7ndlujesf4fq5m3ty6u92jpqffuckf75xyyxqsqy4pstyzq4l",
         )
         signedEvent.sig shouldBe expectedSig
     }
-
 }

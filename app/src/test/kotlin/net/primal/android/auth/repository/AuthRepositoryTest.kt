@@ -10,22 +10,23 @@ import org.junit.Test
 class AuthRepositoryTest {
 
     @Test
-    fun login_callsSetActiveUserId_beforeCreateNewUserAccount() = runTest {
-        val activeAccountStore = mockk<ActiveAccountStore>(relaxed = true)
-        val userRepository = mockk<UserRepository>(relaxed = true)
-        val repository = AuthRepository(
-            credentialsStore = mockk(relaxed = true),
-            activeAccountStore = activeAccountStore,
-            userRepository = userRepository,
-        )
+    fun login_callsSetActiveUserId_beforeCreateNewUserAccount() =
+        runTest {
+            val activeAccountStore = mockk<ActiveAccountStore>(relaxed = true)
+            val userRepository = mockk<UserRepository>(relaxed = true)
+            val repository = AuthRepository(
+                credentialsStore = mockk(relaxed = true),
+                activeAccountStore = activeAccountStore,
+                userRepository = userRepository,
+            )
 
-        repository.login("nsec123456789")
+            repository.login("nsec123456789")
 
-        // This specific order is important because ActiveAccountStore
-        // otherwise will not propagate changes immediately
-        coVerifyOrder {
-            activeAccountStore.setActiveUserId(any())
-            userRepository.createNewUserAccount(any())
+            // This specific order is important because ActiveAccountStore
+            // otherwise will not propagate changes immediately
+            coVerifyOrder {
+                activeAccountStore.setActiveUserId(any())
+                userRepository.createNewUserAccount(any())
+            }
         }
-    }
 }
