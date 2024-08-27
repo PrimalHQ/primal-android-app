@@ -11,17 +11,18 @@ class ProfileDataExtTests {
     private fun buildProfileData(
         displayName: String? = null,
         name: String? = null,
-        ownerId: String = "b10b0d5e5fae9c6c48a8c77f7e5abd42a79e9480e25a4094051d4ba4ce14456b"
-    ): ProfileData = ProfileData(
-        createdAt = 0,
-        eventId = "eventId",
-        raw = "raw",
-        ownerId = ownerId,
-        displayName = displayName,
-        handle = name,
-        aboutHashtags = emptyList(),
-        aboutUris = emptyList(),
-    )
+        ownerId: String = "b10b0d5e5fae9c6c48a8c77f7e5abd42a79e9480e25a4094051d4ba4ce14456b",
+    ): ProfileData =
+        ProfileData(
+            createdAt = 0,
+            eventId = "eventId",
+            raw = "raw",
+            ownerId = ownerId,
+            displayName = displayName,
+            handle = name,
+            aboutHashtags = emptyList(),
+            aboutUris = emptyList(),
+        )
 
     @Test
     fun `authorNameUiFriendly returns first displayName if it is not empty`() {

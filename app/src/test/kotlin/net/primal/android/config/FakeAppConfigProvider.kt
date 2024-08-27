@@ -24,21 +24,30 @@ class FakeAppConfigProvider(
     private val walletStateFlow = MutableStateFlow(DEFAULT_APP_CONFIG.walletUrl)
     fun setWalletUrl(url: String) = walletStateFlow.getAndUpdate { url }
 
-    override suspend fun cacheUrl(): StateFlow<String> = cacheStateFlow.let {
-        if (startDelay != null && delayDispatcher != null) {
-            it.onStart { delay(startDelay) }.stateIn(CoroutineScope(delayDispatcher))
-        } else it
-    }
+    override suspend fun cacheUrl(): StateFlow<String> =
+        cacheStateFlow.let {
+            if (startDelay != null && delayDispatcher != null) {
+                it.onStart { delay(startDelay) }.stateIn(CoroutineScope(delayDispatcher))
+            } else {
+                it
+            }
+        }
 
-    override suspend fun uploadUrl(): StateFlow<String> = uploadStateFlow.let {
-        if (startDelay != null && delayDispatcher != null) {
-            it.onStart { delay(startDelay) }.stateIn(CoroutineScope(delayDispatcher))
-        } else it
-    }
+    override suspend fun uploadUrl(): StateFlow<String> =
+        uploadStateFlow.let {
+            if (startDelay != null && delayDispatcher != null) {
+                it.onStart { delay(startDelay) }.stateIn(CoroutineScope(delayDispatcher))
+            } else {
+                it
+            }
+        }
 
-    override suspend fun walletUrl(): StateFlow<String> = walletStateFlow.let {
-        if (startDelay != null && delayDispatcher != null) {
-            it.onStart { delay(startDelay) }.stateIn(CoroutineScope(delayDispatcher))
-        } else it
-    }
+    override suspend fun walletUrl(): StateFlow<String> =
+        walletStateFlow.let {
+            if (startDelay != null && delayDispatcher != null) {
+                it.onStart { delay(startDelay) }.stateIn(CoroutineScope(delayDispatcher))
+            } else {
+                it
+            }
+        }
 }

@@ -22,7 +22,7 @@ class NotificationsViewModelTest {
 
     private fun createViewModel(
         notificationsRepository: NotificationRepository = mockk(relaxed = true),
-    ) : NotificationsViewModel {
+    ): NotificationsViewModel {
         return NotificationsViewModel(
             dispatcherProvider = coroutineTestRule.dispatcherProvider,
             activeAccountStore = mockk(relaxed = true),
@@ -35,22 +35,24 @@ class NotificationsViewModelTest {
     }
 
     @Test
-    fun handleNotificationsSeen_handlesWssException() = runTest {
-        val viewModel = createViewModel(
-            notificationsRepository = mockk(relaxed = true) {
-                coEvery { markAllNotificationsAsSeen() } throws WssException()
-            }
-        )
-        viewModel.setEvent(NotificationsContract.UiEvent.NotificationsSeen)
-    }
+    fun handleNotificationsSeen_handlesWssException() =
+        runTest {
+            val viewModel = createViewModel(
+                notificationsRepository = mockk(relaxed = true) {
+                    coEvery { markAllNotificationsAsSeen() } throws WssException()
+                },
+            )
+            viewModel.setEvent(NotificationsContract.UiEvent.NotificationsSeen)
+        }
 
     @Test
-    fun handleNotificationsSeen_doesNotCrashIfUserSignsOutOnNotificationsScreen() = runTest {
-        val viewModel = createViewModel(
-            notificationsRepository = mockk(relaxed = true) {
-                coEvery { markAllNotificationsAsSeen() } throws NostrSignUnauthorized()
-            }
-        )
-        viewModel.setEvent(NotificationsContract.UiEvent.NotificationsSeen)
-    }
+    fun handleNotificationsSeen_doesNotCrashIfUserSignsOutOnNotificationsScreen() =
+        runTest {
+            val viewModel = createViewModel(
+                notificationsRepository = mockk(relaxed = true) {
+                    coEvery { markAllNotificationsAsSeen() } throws NostrSignUnauthorized()
+                },
+            )
+            viewModel.setEvent(NotificationsContract.UiEvent.NotificationsSeen)
+        }
 }

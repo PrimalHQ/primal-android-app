@@ -7,9 +7,9 @@ import io.mockk.spyk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.runTest
+import net.primal.android.config.AppConfigHandler
 import net.primal.android.config.AppConfigProvider
 import net.primal.android.config.FakeAppConfigProvider
-import net.primal.android.config.AppConfigHandler
 import net.primal.android.core.coroutines.CoroutinesTestRule
 import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.primal.PrimalServerType
@@ -37,7 +37,12 @@ class SubscriptionsManagerTest {
     }
 
     private val emptyNostrEvent = NostrEvent(
-        content = "", pubKey = "", createdAt = 0L, id = "", kind = NostrEventKind.WalletRequest.value, sig = "",
+        content = "",
+        pubKey = "",
+        createdAt = 0L,
+        id = "",
+        kind = NostrEventKind.WalletRequest.value,
+        sig = "",
     )
 
     private fun buildSubscriptionsManager(
@@ -51,7 +56,7 @@ class SubscriptionsManagerTest {
             activeAccountStore = activeAccountStore,
             userRepository = mockk(relaxed = true),
             nostrNotary = mockk(relaxed = true) {
-                every { signPrimalWalletOperationNostrEvent(any(), any())} returns emptyNostrEvent
+                every { signPrimalWalletOperationNostrEvent(any(), any()) } returns emptyNostrEvent
             },
             appConfigProvider = appConfigProvider,
             cacheApiClient = cacheApiClient,
@@ -75,32 +80,33 @@ class SubscriptionsManagerTest {
     }
 
     @Test
-    fun initializesSuccessfully_immediateAppConfigProvider() = runTest {
-        val fakeAppConfigProvider = FakeAppConfigProvider()
-        buildSubscriptionsManager(
-            activeAccountStore = activeAccountStoreMock,
-            appConfigProvider = fakeAppConfigProvider,
-            cacheApiClient = buildPrimalApiClient(
-                serverType = PrimalServerType.Caching,
-                appConfigProvider = FakeAppConfigProvider()
-            ),
-        )
-    }
+    fun initializesSuccessfully_immediateAppConfigProvider() =
+        runTest {
+            val fakeAppConfigProvider = FakeAppConfigProvider()
+            buildSubscriptionsManager(
+                activeAccountStore = activeAccountStoreMock,
+                appConfigProvider = fakeAppConfigProvider,
+                cacheApiClient = buildPrimalApiClient(
+                    serverType = PrimalServerType.Caching,
+                    appConfigProvider = FakeAppConfigProvider(),
+                ),
+            )
+        }
 
     @Test
-    fun initializesSuccessfully_delayedAppConfigProvider() = runTest {
-        val fakeAppConfigProvider = FakeAppConfigProvider(
-            startDelay = 1_000L,
-            delayDispatcher = coroutinesTestRule.dispatcherProvider.main(),
-        )
-        buildSubscriptionsManager(
-            activeAccountStore = activeAccountStoreMock,
-            appConfigProvider = fakeAppConfigProvider,
-            cacheApiClient = buildPrimalApiClient(
-                serverType = PrimalServerType.Caching,
+    fun initializesSuccessfully_delayedAppConfigProvider() =
+        runTest {
+            val fakeAppConfigProvider = FakeAppConfigProvider(
+                startDelay = 1_000L,
+                delayDispatcher = coroutinesTestRule.dispatcherProvider.main(),
+            )
+            buildSubscriptionsManager(
+                activeAccountStore = activeAccountStoreMock,
                 appConfigProvider = fakeAppConfigProvider,
-            ),
-        )
-
-    }
+                cacheApiClient = buildPrimalApiClient(
+                    serverType = PrimalServerType.Caching,
+                    appConfigProvider = fakeAppConfigProvider,
+                ),
+            )
+        }
 }

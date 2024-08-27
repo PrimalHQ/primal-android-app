@@ -10,7 +10,11 @@ import org.junit.Test
 
 class ParsersTest {
 
-    private fun createRelayJsonArray(url: String, read: Boolean = true, write: Boolean = true): JsonArray {
+    private fun createRelayJsonArray(
+        url: String,
+        read: Boolean = true,
+        write: Boolean = true,
+    ): JsonArray {
         return buildJsonArray {
             add("r")
             add(url)
@@ -183,5 +187,4 @@ class ParsersTest {
         actual.shouldNotBeEmpty()
         actual.size shouldBe tags.size
     }
-
 }

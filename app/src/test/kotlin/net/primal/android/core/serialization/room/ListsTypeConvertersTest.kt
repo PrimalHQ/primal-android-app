@@ -17,7 +17,7 @@ class ListsTypeConvertersTest {
                 ["t","bitcoin"],
                 ["t","grownostr"]
             ]
-        """.trimIndent()
+    """.trimIndent()
 
     @Test
     fun `listOfJsonArrayToString returns correct json String`() {
@@ -55,7 +55,6 @@ class ListsTypeConvertersTest {
         val actual = ListsTypeConverters().stringToListOfJsonArray(null)
         actual shouldBe null
     }
-
 
     @Test
     fun `listOfStringsToJsonString returns correct String`() {

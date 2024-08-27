@@ -47,48 +47,52 @@ class CredentialsStoreTest {
 
     private val persistence: DataStore<List<Credential>> = DataStoreFactory.create(
         serializer = CredentialsSerialization(encryption = NoEncryption()),
-        produceFile = { testContext.dataStoreFile(DATA_STORE_FILE) }
+        produceFile = { testContext.dataStoreFile(DATA_STORE_FILE) },
     )
 
     @Test
-    fun `saving invalid input should throw InvalidNostrKeyException`() = runTest {
-        val credentialsStore = CredentialsStore(persistence = persistence)
-        shouldThrow<InvalidNostrPrivateKeyException> {
-            credentialsStore.save(nostrKey = "invalid nsec")
+    fun `saving invalid input should throw InvalidNostrKeyException`() =
+        runTest {
+            val credentialsStore = CredentialsStore(persistence = persistence)
+            shouldThrow<InvalidNostrPrivateKeyException> {
+                credentialsStore.save(nostrKey = "invalid nsec")
+            }
         }
-    }
 
     @Test
-    fun `save stores nsec to data store as Credential`() = runTest {
-        val credentialsStore = CredentialsStore(persistence = persistence)
-        credentialsStore.save(nostrKey = expectedNsec)
-        advanceUntilIdleAndDelay()
+    fun `save stores nsec to data store as Credential`() =
+        runTest {
+            val credentialsStore = CredentialsStore(persistence = persistence)
+            credentialsStore.save(nostrKey = expectedNsec)
+            advanceUntilIdleAndDelay()
 
-        val actual = credentialsStore.credentials.value
-        actual.size shouldBe 1
-        actual.first() shouldBeEqual expectedCredential
-    }
-
-    @Test
-    fun `save returns pubkey in hex value`() = runTest {
-        val credentialsStore = CredentialsStore(persistence = persistence)
-        val actual = credentialsStore.save(nostrKey = expectedNsec)
-        actual shouldBe Bech32.decodeBytes(expectedCredential.npub).second.toHex()
-    }
-
-    @Test
-    fun `findOrThrow finds credential by given npub`() = runTest {
-        persistence.updateData {
-            listOf(
-                expectedCredential,
-                Credential(nsec = "invalidNsec", npub = "invalidNpub")
-            )
+            val actual = credentialsStore.credentials.value
+            actual.size shouldBe 1
+            actual.first() shouldBeEqual expectedCredential
         }
-        val credentialsStore = CredentialsStore(persistence = persistence)
 
-        val actual = credentialsStore.findOrThrow(expectedCredential.npub)
-        actual shouldBe expectedCredential
-    }
+    @Test
+    fun `save returns pubkey in hex value`() =
+        runTest {
+            val credentialsStore = CredentialsStore(persistence = persistence)
+            val actual = credentialsStore.save(nostrKey = expectedNsec)
+            actual shouldBe Bech32.decodeBytes(expectedCredential.npub).second.toHex()
+        }
+
+    @Test
+    fun `findOrThrow finds credential by given npub`() =
+        runTest {
+            persistence.updateData {
+                listOf(
+                    expectedCredential,
+                    Credential(nsec = "invalidNsec", npub = "invalidNpub"),
+                )
+            }
+            val credentialsStore = CredentialsStore(persistence = persistence)
+
+            val actual = credentialsStore.findOrThrow(expectedCredential.npub)
+            actual shouldBe expectedCredential
+        }
 
     @Test
     fun `findOrThrow throws IllegalArgumentException if credential is not found`() {
@@ -99,15 +103,15 @@ class CredentialsStoreTest {
     }
 
     @Test
-    fun `clearCredentials removes all credentials from data store`() = runTest {
-        persistence.updateData { listOf(expectedCredential) }
-        val credentialsStore = CredentialsStore(persistence = persistence)
+    fun `clearCredentials removes all credentials from data store`() =
+        runTest {
+            persistence.updateData { listOf(expectedCredential) }
+            val credentialsStore = CredentialsStore(persistence = persistence)
 
-        credentialsStore.clearCredentials()
-        advanceUntilIdleAndDelay()
+            credentialsStore.clearCredentials()
+            advanceUntilIdleAndDelay()
 
-        val actual = credentialsStore.credentials.value
-        actual shouldBe emptyList()
-    }
-
+            val actual = credentialsStore.credentials.value
+            actual shouldBe emptyList()
+        }
 }

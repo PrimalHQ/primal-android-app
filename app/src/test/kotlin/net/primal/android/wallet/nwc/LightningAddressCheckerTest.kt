@@ -21,30 +21,32 @@ class LightningAddressCheckerTest {
         val response = mockk<Response>(relaxed = true) {
             every { code } returns responseCode
         }
-        val mockCall = mockk<Call>() {
+        val mockCall = mockk<Call> {
             every { execute() } returns response
         }
-        val okHttpClient = mockk<OkHttpClient>() {
+        val okHttpClient = mockk<OkHttpClient> {
             every { newCall(any()) } returns mockCall
         }
         return okHttpClient
     }
 
     @Test
-    fun validateLightningAddress_doesNotRaiseExceptionForValidAddress() = runTest {
-        val checker = LightningAddressChecker(
-            dispatcherProvider = coroutinesTestRule.dispatcherProvider,
-            okHttpClient = buildMockOkHttpClient(responseCode = 200),
-        )
-        checker.validateLightningAddress("alex@primal.net")
-    }
+    fun validateLightningAddress_doesNotRaiseExceptionForValidAddress() =
+        runTest {
+            val checker = LightningAddressChecker(
+                dispatcherProvider = coroutinesTestRule.dispatcherProvider,
+                okHttpClient = buildMockOkHttpClient(responseCode = 200),
+            )
+            checker.validateLightningAddress("alex@primal.net")
+        }
 
     @Test(expected = InvalidLud16Exception::class)
-    fun validateLightningAddress_throwsExceptionForInvalidAddress() = runTest {
-        val checker = LightningAddressChecker(
-            dispatcherProvider = coroutinesTestRule.dispatcherProvider,
-            okHttpClient = buildMockOkHttpClient(responseCode = 404),
-        )
-        checker.validateLightningAddress("invalidaddress123$^@primal.net")
-    }
+    fun validateLightningAddress_throwsExceptionForInvalidAddress() =
+        runTest {
+            val checker = LightningAddressChecker(
+                dispatcherProvider = coroutinesTestRule.dispatcherProvider,
+                okHttpClient = buildMockOkHttpClient(responseCode = 404),
+            )
+            checker.validateLightningAddress("invalidaddress123$^@primal.net")
+        }
 }

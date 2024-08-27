@@ -2,16 +2,16 @@ package net.primal.android.networking.sockets
 
 import io.kotest.matchers.should
 import io.kotest.matchers.types.beInstanceOf
+import java.time.Instant
+import java.util.UUID
 import kotlinx.serialization.json.add
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.json.put
-import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.core.serialization.json.NostrJson
+import net.primal.android.nostr.model.NostrEvent
 import org.junit.Test
-import java.time.Instant
-import java.util.UUID
 
 class NostrIncomingMessageParserTest {
 
@@ -30,8 +30,8 @@ class NostrIncomingMessageParserTest {
                         tags = emptyList(),
                         content = "",
                         sig = "signature",
-                    )
-                )
+                    ),
+                ),
             )
         }
 
@@ -103,9 +103,11 @@ class NostrIncomingMessageParserTest {
         val jsonMessage = buildJsonArray {
             add("COUNT")
             add(UUID.randomUUID().toString())
-            add(buildJsonObject {
-                put("count", 123)
-            })
+            add(
+                buildJsonObject {
+                    put("count", 123)
+                },
+            )
         }
 
         val actual = jsonMessage.toString().parseIncomingMessage()

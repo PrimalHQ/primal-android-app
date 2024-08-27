@@ -15,5 +15,4 @@ object AospBillingModule {
     @Provides
     @Singleton
     fun providePlayBillingClient(): PrimalBillingClient = AospBillingClient()
-
 }

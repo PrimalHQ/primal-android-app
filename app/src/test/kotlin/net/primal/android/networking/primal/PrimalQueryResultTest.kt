@@ -20,7 +20,7 @@ class PrimalQueryResultTest {
     private val nostrEvents = List(50) {
         NostrEventKind.entries
             .random()
-            .takeIf { it.isNotPrimalEventKind() && !it.isNotUnknown()}
+            .takeIf { it.isNotPrimalEventKind() && !it.isNotUnknown() }
             .let {
                 buildNostrEvent(kind = it ?: NostrEventKind.Unknown)
             }
@@ -35,13 +35,21 @@ class PrimalQueryResultTest {
             }
     }
 
-    private fun buildNostrEvent(kind: NostrEventKind) = NostrEvent(
-        id = "", content = "", createdAt = 0, pubKey = "", kind = kind.value, sig = ""
-    )
+    private fun buildNostrEvent(kind: NostrEventKind) =
+        NostrEvent(
+            id = "",
+            content = "",
+            createdAt = 0,
+            pubKey = "",
+            kind = kind.value,
+            sig = "",
+        )
 
-    private fun buildPrimalEvent(kind: NostrEventKind) = PrimalEvent(
-        kind = kind.value, content = "",
-    )
+    private fun buildPrimalEvent(kind: NostrEventKind) =
+        PrimalEvent(
+            kind = kind.value,
+            content = "",
+        )
 
     private fun buildQueryResult(
         nostrEvents: List<NostrEvent> = emptyList(),
@@ -62,7 +70,7 @@ class PrimalQueryResultTest {
             nostrEvents = nostrEvents.toMutableList().apply {
                 removeAll { it.kind == expectedKind.value }
                 add(expected)
-            }.toList()
+            }.toList(),
         )
 
         val actual = queryResult.findNostrEvent(kind = expectedKind)
@@ -85,7 +93,7 @@ class PrimalQueryResultTest {
             primalEvents = primalEvents.toMutableList().apply {
                 removeAll { it.kind == expectedKind.value }
                 add(expected)
-            }.toList()
+            }.toList(),
         )
 
         val actual = queryResult.findPrimalEvent(kind = expectedKind)
@@ -107,7 +115,7 @@ class PrimalQueryResultTest {
         val queryResult = buildQueryResult(
             nostrEvents = nostrEvents.toMutableList().apply {
                 add(expected)
-            }.toList()
+            }.toList(),
         )
 
         val actual = queryResult.filterNostrEvents(kind = expectedKind)
@@ -130,7 +138,7 @@ class PrimalQueryResultTest {
         val queryResult = buildQueryResult(
             primalEvents = primalEvents.toMutableList().apply {
                 add(expected)
-            }.toList()
+            }.toList(),
         )
 
         val actual = queryResult.filterPrimalEvents(kind = expectedKind)

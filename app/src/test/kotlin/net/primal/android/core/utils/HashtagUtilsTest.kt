@@ -11,18 +11,16 @@ import org.junit.Test
 
 class HashtagUtilsTest {
 
-    private fun buildNostrEvent(
-        content: String,
-        tags: List<JsonArray> = emptyList()
-    ) = NostrEvent(
-        id = "",
-        pubKey = "",
-        sig = "",
-        createdAt = 0,
-        tags = tags,
-        content = content,
-        kind = 1,
-    )
+    private fun buildNostrEvent(content: String, tags: List<JsonArray> = emptyList()) =
+        NostrEvent(
+            id = "",
+            pubKey = "",
+            sig = "",
+            createdAt = 0,
+            tags = tags,
+            content = content,
+            kind = 1,
+        )
 
     @Test
     fun `nostrEvent parseHashtags returns all hashtags`() {
@@ -36,7 +34,7 @@ class HashtagUtilsTest {
     @Test
     fun `nostrEvent parseHashtags returns hashtags with special chars before or after the hashtag`() {
         val event = buildNostrEvent(
-            content = "This hashtags in brackets (#Nostr, #Bitcoin, #Primal) should be fine!"
+            content = "This hashtags in brackets (#Nostr, #Bitcoin, #Primal) should be fine!",
         )
         val actual = event.parseHashtags()
         actual.size shouldBe 3
@@ -48,7 +46,7 @@ class HashtagUtilsTest {
     @Test
     fun `nostrEvent parseHashtags does not return the hashtags for deprecated mentions`() {
         val event = buildNostrEvent(
-            content = "This man #[1] and this one #[2] are part of #Nostr community!"
+            content = "This man #[1] and this one #[2] are part of #Nostr community!",
         )
         val actual = event.parseHashtags()
         actual.size shouldBe 1
@@ -69,8 +67,8 @@ class HashtagUtilsTest {
                 buildJsonArray {
                     add("t")
                     add("OpenSource")
-                }
-            )
+                },
+            ),
         )
         val actual = event.parseHashtags()
         actual.size shouldBe 3
@@ -107,5 +105,4 @@ class HashtagUtilsTest {
         actual.shouldNotContain("#[1]")
         actual.shouldNotContain("#[2]")
     }
-
 }

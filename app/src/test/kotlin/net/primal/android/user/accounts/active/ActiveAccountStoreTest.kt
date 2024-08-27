@@ -60,18 +60,15 @@ class ActiveAccountStoreTest {
         )
     }
 
-    private suspend fun fakeAccountsStore(
-        accounts: List<UserAccount> = emptyList(),
-    ) = UserAccountsStore(
-        dispatchers = coroutinesTestRule.dispatcherProvider,
-        persistence = persistenceAccounts,
-    ).apply {
-        accounts.forEach { upsertAccount(it) }
-    }
+    private suspend fun fakeAccountsStore(accounts: List<UserAccount> = emptyList()) =
+        UserAccountsStore(
+            dispatchers = coroutinesTestRule.dispatcherProvider,
+            persistence = persistenceAccounts,
+        ).apply {
+            accounts.forEach { upsertAccount(it) }
+        }
 
-    private fun fakeActiveAccountStore(
-        accountsStore: UserAccountsStore,
-    ): ActiveAccountStore {
+    private fun fakeActiveAccountStore(accountsStore: UserAccountsStore): ActiveAccountStore {
         return ActiveAccountStore(
             dispatchers = coroutinesTestRule.dispatcherProvider,
             persistence = persistenceActiveAccount,
@@ -80,104 +77,111 @@ class ActiveAccountStoreTest {
     }
 
     @Test
-    fun `initial activeAccountState is NoUserAccount`() = runTest {
-        val activeAccountStore = fakeActiveAccountStore(
-            accountsStore = fakeAccountsStore(),
-        )
+    fun `initial activeAccountState is NoUserAccount`() =
+        runTest {
+            val activeAccountStore = fakeActiveAccountStore(
+                accountsStore = fakeAccountsStore(),
+            )
 
-        val actual = activeAccountStore.activeAccountState.firstOrNull()
-        actual shouldBe ActiveUserAccountState.NoUserAccount
-    }
-
-    @Test
-    fun `initial userAccount is empty UserAccount`() = runTest {
-        val activeAccountStore = fakeActiveAccountStore(
-            accountsStore = fakeAccountsStore(),
-        )
-
-        val actual = activeAccountStore.activeUserAccount()
-        actual shouldBe UserAccount.EMPTY
-    }
+            val actual = activeAccountStore.activeAccountState.firstOrNull()
+            actual shouldBe ActiveUserAccountState.NoUserAccount
+        }
 
     @Test
-    fun `setActiveUserId stores active account to data store`() = runTest {
-        val expectedUserAccount = buildUserAccount()
-        val activeAccountStore = fakeActiveAccountStore(
-            accountsStore = fakeAccountsStore(
-                accounts = listOf(expectedUserAccount),
-            ),
-        )
+    fun `initial userAccount is empty UserAccount`() =
+        runTest {
+            val activeAccountStore = fakeActiveAccountStore(
+                accountsStore = fakeAccountsStore(),
+            )
 
-        activeAccountStore.setActiveUserId(expectedPubkey)
-        advanceUntilIdleAndDelay()
-
-        val actual = activeAccountStore.activeUserAccount()
-        actual shouldBe expectedUserAccount
-    }
+            val actual = activeAccountStore.activeUserAccount()
+            actual shouldBe UserAccount.EMPTY
+        }
 
     @Test
-    fun `activeUserId returns user pubkey of the active user`() = runTest {
-        val expectedUserAccount = buildUserAccount()
-        val activeAccountStore = fakeActiveAccountStore(
-            accountsStore = fakeAccountsStore(
-                accounts = listOf(expectedUserAccount),
-            ),
-        )
+    fun `setActiveUserId stores active account to data store`() =
+        runTest {
+            val expectedUserAccount = buildUserAccount()
+            val activeAccountStore = fakeActiveAccountStore(
+                accountsStore = fakeAccountsStore(
+                    accounts = listOf(expectedUserAccount),
+                ),
+            )
 
-        activeAccountStore.setActiveUserId(expectedPubkey)
-        advanceUntilIdleAndDelay()
+            activeAccountStore.setActiveUserId(expectedPubkey)
+            advanceUntilIdleAndDelay()
 
-        val actual = activeAccountStore.activeUserId()
-        actual shouldBe expectedPubkey
-    }
-
-    @Test
-    fun `clearActiveUserAccount reverts to empty UserAccount`() = runTest {
-        persistenceActiveAccount.updateData { expectedPubkey }
-        val activeAccountStore = fakeActiveAccountStore(
-            accountsStore = fakeAccountsStore(),
-        )
-
-        activeAccountStore.clearActiveUserAccount()
-        advanceUntilIdleAndDelay()
-
-        val actual = activeAccountStore.activeUserAccount()
-        actual shouldBe UserAccount.EMPTY
-    }
+            val actual = activeAccountStore.activeUserAccount()
+            actual shouldBe expectedUserAccount
+        }
 
     @Test
-    fun `clearActiveUserAccount reverts to NoUserAccount state`() = runTest {
-        persistenceActiveAccount.updateData { expectedPubkey }
-        val activeAccountStore = fakeActiveAccountStore(
-            accountsStore = fakeAccountsStore(
-                accounts = listOf(buildUserAccount()),
-            ),
-        )
+    fun `activeUserId returns user pubkey of the active user`() =
+        runTest {
+            val expectedUserAccount = buildUserAccount()
+            val activeAccountStore = fakeActiveAccountStore(
+                accountsStore = fakeAccountsStore(
+                    accounts = listOf(expectedUserAccount),
+                ),
+            )
 
-        activeAccountStore.clearActiveUserAccount()
-        advanceUntilIdleAndDelay()
+            activeAccountStore.setActiveUserId(expectedPubkey)
+            advanceUntilIdleAndDelay()
 
-        val actual = activeAccountStore.activeAccountState.firstOrNull()
-        actual shouldBe ActiveUserAccountState.NoUserAccount
-    }
+            val actual = activeAccountStore.activeUserId()
+            actual shouldBe expectedPubkey
+        }
 
     @Test
-    fun `updating account data triggers active account data to be updated`() = runTest {
-        val existingAccount = buildUserAccount(
-            pubkey = expectedPubkey,
-            authorDisplayName = "alex",
-        )
-        persistenceActiveAccount.updateData { existingAccount.pubkey }
-        val accountsStore = fakeAccountsStore(accounts = listOf(existingAccount))
-        val activeAccountStore = fakeActiveAccountStore(
-            accountsStore = accountsStore,
-        )
+    fun `clearActiveUserAccount reverts to empty UserAccount`() =
+        runTest {
+            persistenceActiveAccount.updateData { expectedPubkey }
+            val activeAccountStore = fakeActiveAccountStore(
+                accountsStore = fakeAccountsStore(),
+            )
 
-        accountsStore.upsertAccount(existingAccount.copy(authorDisplayName = "nikola"))
-        advanceUntilIdleAndDelay()
+            activeAccountStore.clearActiveUserAccount()
+            advanceUntilIdleAndDelay()
 
-        val updatedAccount = activeAccountStore.activeAccountState.firstOrNull()
-        updatedAccount.shouldBeInstanceOf<ActiveUserAccountState.ActiveUserAccount>()
-        updatedAccount.data.authorDisplayName shouldBe "nikola"
-    }
+            val actual = activeAccountStore.activeUserAccount()
+            actual shouldBe UserAccount.EMPTY
+        }
+
+    @Test
+    fun `clearActiveUserAccount reverts to NoUserAccount state`() =
+        runTest {
+            persistenceActiveAccount.updateData { expectedPubkey }
+            val activeAccountStore = fakeActiveAccountStore(
+                accountsStore = fakeAccountsStore(
+                    accounts = listOf(buildUserAccount()),
+                ),
+            )
+
+            activeAccountStore.clearActiveUserAccount()
+            advanceUntilIdleAndDelay()
+
+            val actual = activeAccountStore.activeAccountState.firstOrNull()
+            actual shouldBe ActiveUserAccountState.NoUserAccount
+        }
+
+    @Test
+    fun `updating account data triggers active account data to be updated`() =
+        runTest {
+            val existingAccount = buildUserAccount(
+                pubkey = expectedPubkey,
+                authorDisplayName = "alex",
+            )
+            persistenceActiveAccount.updateData { existingAccount.pubkey }
+            val accountsStore = fakeAccountsStore(accounts = listOf(existingAccount))
+            val activeAccountStore = fakeActiveAccountStore(
+                accountsStore = accountsStore,
+            )
+
+            accountsStore.upsertAccount(existingAccount.copy(authorDisplayName = "nikola"))
+            advanceUntilIdleAndDelay()
+
+            val updatedAccount = activeAccountStore.activeAccountState.firstOrNull()
+            updatedAccount.shouldBeInstanceOf<ActiveUserAccountState.ActiveUserAccount>()
+            updatedAccount.data.authorDisplayName shouldBe "nikola"
+        }
 }

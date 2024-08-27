@@ -1,5 +1,6 @@
 package net.primal.android.core
 
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
@@ -7,7 +8,6 @@ import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.withContext
-import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Calls [advanceUntilIdle][TestCoroutineScheduler.advanceUntilIdle] and then switches the

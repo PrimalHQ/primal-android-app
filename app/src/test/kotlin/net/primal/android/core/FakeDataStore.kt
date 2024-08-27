@@ -4,7 +4,6 @@ import androidx.datastore.core.DataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 
-
 open class FakeDataStore<T>(initialValue: T) : DataStore<T> {
 
     var latestData: T = initialValue
@@ -17,5 +16,4 @@ open class FakeDataStore<T>(initialValue: T) : DataStore<T> {
         latestData = newData
         return newData
     }
-
 }

@@ -58,180 +58,186 @@ class CreateAccountHandlerTest {
     )
 
     @Test
-    fun createNostrAccount_logsUserIn() = runTest {
-        val keyPair = CryptoUtils.generateHexEncodedKeypair()
-        val authRepository = mockk<AuthRepository>(relaxed = true)
-        val handler = createAccountHandler(
-            authRepository = authRepository,
-        )
-        handler.createNostrAccount(
-            privateKey = keyPair.privateKey,
-            profileMetadata = ProfileMetadata(displayName = "Test", username = null),
-            interests = emptyList(),
-        )
-
-        coVerify {
-            authRepository.login(
-                withArg { it shouldBe keyPair.privateKey }
+    fun createNostrAccount_logsUserIn() =
+        runTest {
+            val keyPair = CryptoUtils.generateHexEncodedKeypair()
+            val authRepository = mockk<AuthRepository>(relaxed = true)
+            val handler = createAccountHandler(
+                authRepository = authRepository,
             )
-        }
-    }
-
-    @Test
-    fun createNostrAccount_setsGivenProfileMetadata() = runTest {
-        val keyPair = CryptoUtils.generateHexEncodedKeypair()
-        val userRepository = mockk<UserRepository>(relaxed = true)
-        val handler = createAccountHandler(
-            authRepository = createAuthRepository(),
-            userRepository = userRepository,
-        )
-
-        val expectedProfileMetadata = ProfileMetadata(displayName = "Test", username = null)
-        handler.createNostrAccount(
-            privateKey = keyPair.privateKey,
-            profileMetadata = expectedProfileMetadata,
-            interests = emptyList(),
-        )
-
-        coVerify {
-            userRepository.setProfileMetadata(
-                withArg { it shouldBe keyPair.pubKey },
-                withArg { it shouldBe expectedProfileMetadata },
-            )
-        }
-    }
-
-    @Test
-    fun createNostrAccount_alwaysFollowsSelf() = runTest {
-        val keyPair = CryptoUtils.generateHexEncodedKeypair()
-        val profileRepository = mockk<ProfileRepository>(relaxed = true)
-        val handler = createAccountHandler(
-            authRepository = createAuthRepository(),
-            profileRepository = profileRepository,
-        )
-
-        handler.createNostrAccount(
-            privateKey = keyPair.privateKey,
-            profileMetadata = ProfileMetadata(displayName = "Test", username = null),
-            interests = emptyList(),
-        )
-
-        coVerify {
-            profileRepository.setFollowList(
-                withArg { it shouldBe keyPair.pubKey },
-                withArg { it shouldContain keyPair.pubKey },
-            )
-        }
-    }
-
-    @Test
-    fun createNostrAccount_followsEveryoneFromInterestsLists() = runTest {
-        val keyPair = CryptoUtils.generateHexEncodedKeypair()
-        val profileRepository = mockk<ProfileRepository>(relaxed = true)
-        val handler = createAccountHandler(
-            authRepository = createAuthRepository(),
-            profileRepository = profileRepository,
-        )
-
-        val interestsList = listOf(Suggestion(group = "dev", members = primalTeamMembers))
-        handler.createNostrAccount(
-            privateKey = keyPair.privateKey,
-            profileMetadata = ProfileMetadata(displayName = "Test", username = null),
-            interests = interestsList,
-        )
-
-        coVerify {
-            profileRepository.setFollowList(
-                withArg { it shouldBe keyPair.pubKey },
-                withArg {
-                    it shouldContain keyPair.pubKey
-                    it shouldContainAll primalTeamMembers.map { member -> member.userId }
-                }
-            )
-        }
-    }
-
-    @Test
-    fun createNostrAccount_bootstrapsTheDefaultRelays_withProperUserId() = runTest {
-        val keyPair = CryptoUtils.generateHexEncodedKeypair()
-        val relayRepository = mockk<RelayRepository>(relaxed = true)
-        val handler = createAccountHandler(
-            authRepository = createAuthRepository(),
-            relayRepository = relayRepository,
-        )
-
-        handler.createNostrAccount(
-            privateKey = keyPair.privateKey,
-            profileMetadata = ProfileMetadata(displayName = "Test", username = null),
-            interests = emptyList(),
-        )
-
-        coVerify {
-            relayRepository.bootstrapUserRelays(
-                withArg { it shouldBe keyPair.pubKey },
-            )
-        }
-    }
-
-    @Test
-    fun createNostrAccount_fetchesAppSettings_withProperUserId() = runTest {
-        val keyPair = CryptoUtils.generateHexEncodedKeypair()
-        val settingsRepository = mockk<SettingsRepository>(relaxed = true)
-        val handler = createAccountHandler(
-            authRepository = createAuthRepository(),
-            settingsRepository = settingsRepository,
-        )
-
-        handler.createNostrAccount(
-            privateKey = keyPair.privateKey,
-            profileMetadata = ProfileMetadata(displayName = "Test", username = null),
-            interests = emptyList(),
-        )
-
-        coVerify {
-            settingsRepository.fetchAndPersistAppSettings(
-                withArg { it shouldBe keyPair.pubKey },
-            )
-        }
-    }
-
-    @Test
-    fun createNostrAccount_revertsAuthData_ifAnyOfApiCallsFail() = runTest {
-        val keyPair = CryptoUtils.generateHexEncodedKeypair()
-        val credentialsPersistence = FakeDataStore(emptyList<Credential>())
-        val credentialsStore = CredentialsStore(persistence = credentialsPersistence)
-
-        val activeAccountPersistence = FakeDataStore(initialValue = "")
-        val activeAccountStore = ActiveAccountStore(
-            dispatchers = coroutinesTestRule.dispatcherProvider,
-            accountsStore = mockk(relaxed = true),
-            persistence = activeAccountPersistence,
-        )
-
-        val authRepository = createAuthRepository(
-            credentialsStore = credentialsStore,
-            activeAccountStore = activeAccountStore,
-        )
-        val profileRepository = mockk<ProfileRepository>(relaxed = true) {
-            coEvery { setFollowList(any(), any()) } throws WssException()
-        }
-        val handler = createAccountHandler(
-            authRepository = authRepository,
-            profileRepository = profileRepository,
-        )
-
-        try {
             handler.createNostrAccount(
                 privateKey = keyPair.privateKey,
                 profileMetadata = ProfileMetadata(displayName = "Test", username = null),
                 interests = emptyList(),
             )
-        } catch (_: CreateAccountHandler.AccountCreationException) { }
 
-        credentialsPersistence.latestData shouldBe emptyList()
-        activeAccountPersistence.latestData shouldBe ""
-    }
+            coVerify {
+                authRepository.login(
+                    withArg { it shouldBe keyPair.privateKey },
+                )
+            }
+        }
 
+    @Test
+    fun createNostrAccount_setsGivenProfileMetadata() =
+        runTest {
+            val keyPair = CryptoUtils.generateHexEncodedKeypair()
+            val userRepository = mockk<UserRepository>(relaxed = true)
+            val handler = createAccountHandler(
+                authRepository = createAuthRepository(),
+                userRepository = userRepository,
+            )
+
+            val expectedProfileMetadata = ProfileMetadata(displayName = "Test", username = null)
+            handler.createNostrAccount(
+                privateKey = keyPair.privateKey,
+                profileMetadata = expectedProfileMetadata,
+                interests = emptyList(),
+            )
+
+            coVerify {
+                userRepository.setProfileMetadata(
+                    withArg { it shouldBe keyPair.pubKey },
+                    withArg { it shouldBe expectedProfileMetadata },
+                )
+            }
+        }
+
+    @Test
+    fun createNostrAccount_alwaysFollowsSelf() =
+        runTest {
+            val keyPair = CryptoUtils.generateHexEncodedKeypair()
+            val profileRepository = mockk<ProfileRepository>(relaxed = true)
+            val handler = createAccountHandler(
+                authRepository = createAuthRepository(),
+                profileRepository = profileRepository,
+            )
+
+            handler.createNostrAccount(
+                privateKey = keyPair.privateKey,
+                profileMetadata = ProfileMetadata(displayName = "Test", username = null),
+                interests = emptyList(),
+            )
+
+            coVerify {
+                profileRepository.setFollowList(
+                    withArg { it shouldBe keyPair.pubKey },
+                    withArg { it shouldContain keyPair.pubKey },
+                )
+            }
+        }
+
+    @Test
+    fun createNostrAccount_followsEveryoneFromInterestsLists() =
+        runTest {
+            val keyPair = CryptoUtils.generateHexEncodedKeypair()
+            val profileRepository = mockk<ProfileRepository>(relaxed = true)
+            val handler = createAccountHandler(
+                authRepository = createAuthRepository(),
+                profileRepository = profileRepository,
+            )
+
+            val interestsList = listOf(Suggestion(group = "dev", members = primalTeamMembers))
+            handler.createNostrAccount(
+                privateKey = keyPair.privateKey,
+                profileMetadata = ProfileMetadata(displayName = "Test", username = null),
+                interests = interestsList,
+            )
+
+            coVerify {
+                profileRepository.setFollowList(
+                    withArg { it shouldBe keyPair.pubKey },
+                    withArg {
+                        it shouldContain keyPair.pubKey
+                        it shouldContainAll primalTeamMembers.map { member -> member.userId }
+                    },
+                )
+            }
+        }
+
+    @Test
+    fun createNostrAccount_bootstrapsTheDefaultRelays_withProperUserId() =
+        runTest {
+            val keyPair = CryptoUtils.generateHexEncodedKeypair()
+            val relayRepository = mockk<RelayRepository>(relaxed = true)
+            val handler = createAccountHandler(
+                authRepository = createAuthRepository(),
+                relayRepository = relayRepository,
+            )
+
+            handler.createNostrAccount(
+                privateKey = keyPair.privateKey,
+                profileMetadata = ProfileMetadata(displayName = "Test", username = null),
+                interests = emptyList(),
+            )
+
+            coVerify {
+                relayRepository.bootstrapUserRelays(
+                    withArg { it shouldBe keyPair.pubKey },
+                )
+            }
+        }
+
+    @Test
+    fun createNostrAccount_fetchesAppSettings_withProperUserId() =
+        runTest {
+            val keyPair = CryptoUtils.generateHexEncodedKeypair()
+            val settingsRepository = mockk<SettingsRepository>(relaxed = true)
+            val handler = createAccountHandler(
+                authRepository = createAuthRepository(),
+                settingsRepository = settingsRepository,
+            )
+
+            handler.createNostrAccount(
+                privateKey = keyPair.privateKey,
+                profileMetadata = ProfileMetadata(displayName = "Test", username = null),
+                interests = emptyList(),
+            )
+
+            coVerify {
+                settingsRepository.fetchAndPersistAppSettings(
+                    withArg { it shouldBe keyPair.pubKey },
+                )
+            }
+        }
+
+    @Test
+    fun createNostrAccount_revertsAuthData_ifAnyOfApiCallsFail() =
+        runTest {
+            val keyPair = CryptoUtils.generateHexEncodedKeypair()
+            val credentialsPersistence = FakeDataStore(emptyList<Credential>())
+            val credentialsStore = CredentialsStore(persistence = credentialsPersistence)
+
+            val activeAccountPersistence = FakeDataStore(initialValue = "")
+            val activeAccountStore = ActiveAccountStore(
+                dispatchers = coroutinesTestRule.dispatcherProvider,
+                accountsStore = mockk(relaxed = true),
+                persistence = activeAccountPersistence,
+            )
+
+            val authRepository = createAuthRepository(
+                credentialsStore = credentialsStore,
+                activeAccountStore = activeAccountStore,
+            )
+            val profileRepository = mockk<ProfileRepository>(relaxed = true) {
+                coEvery { setFollowList(any(), any()) } throws WssException()
+            }
+            val handler = createAccountHandler(
+                authRepository = authRepository,
+                profileRepository = profileRepository,
+            )
+
+            try {
+                handler.createNostrAccount(
+                    privateKey = keyPair.privateKey,
+                    profileMetadata = ProfileMetadata(displayName = "Test", username = null),
+                    interests = emptyList(),
+                )
+            } catch (_: CreateAccountHandler.AccountCreationException) { }
+
+            credentialsPersistence.latestData shouldBe emptyList()
+            activeAccountPersistence.latestData shouldBe ""
+        }
 
     private val primalTeamMembers = listOf(
         SuggestionMember(

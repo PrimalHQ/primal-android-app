@@ -35,7 +35,6 @@ class LnInvoiceUtilsTest {
         val amount = LnInvoiceUtils.getAmountInSats(validLnInvoice)
 
         amount.toInt() shouldBe expectedValue
-
     }
 
     @Test
@@ -45,20 +44,15 @@ class LnInvoiceUtilsTest {
         val amount = LnInvoiceUtils.getAmountInSats(validLnInvoiceNoAmount)
 
         amount.toInt() shouldBe expectedValue
-
     }
 
     @Test(expected = IllegalArgumentException::class)
     fun getAmountInSatsInvalidInvoice() {
-
         LnInvoiceUtils.getAmountInSats(invalidLnInvoice)
-
     }
 
     @Test(expected = IllegalArgumentException::class)
     fun getAmountInSatsInvalidCharacter() {
-
         LnInvoiceUtils.getAmountInSats(invoiceInvalidCharacter)
-
     }
 }

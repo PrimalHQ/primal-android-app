@@ -35,7 +35,7 @@ class UserAccountsStoreTest {
 
     private val persistence: DataStore<List<UserAccount>> = DataStoreFactory.create(
         serializer = UserAccountsSerialization(encryption = NoEncryption()),
-        produceFile = { testContext.dataStoreFile(DATA_STORE_FILE) }
+        produceFile = { testContext.dataStoreFile(DATA_STORE_FILE) },
     )
 
     private val expectedPubkey = "pubkey"
@@ -62,80 +62,86 @@ class UserAccountsStoreTest {
     }
 
     @Test
-    fun `initial accounts are empty`() = runTest {
-        val accountsStore = createUserAccountStore()
-        val actual = accountsStore.userAccounts.value
-        actual.shouldBeEmpty()
-    }
+    fun `initial accounts are empty`() =
+        runTest {
+            val accountsStore = createUserAccountStore()
+            val actual = accountsStore.userAccounts.value
+            actual.shouldBeEmpty()
+        }
 
     @Test
-    fun `upsertAccount inserts given account to data store`() = runTest {
-        val expectedAccount = buildUserAccount()
-        val accountsStore = createUserAccountStore()
+    fun `upsertAccount inserts given account to data store`() =
+        runTest {
+            val expectedAccount = buildUserAccount()
+            val accountsStore = createUserAccountStore()
 
-        accountsStore.upsertAccount(expectedAccount)
-        advanceUntilIdleAndDelay()
+            accountsStore.upsertAccount(expectedAccount)
+            advanceUntilIdleAndDelay()
 
-        val accounts = accountsStore.userAccounts.value
-        val actual = accounts.find { it.pubkey == expectedPubkey }
+            val accounts = accountsStore.userAccounts.value
+            val actual = accounts.find { it.pubkey == expectedPubkey }
 
-        actual shouldBe expectedAccount
-    }
-
-    @Test
-    fun `upsertAccount updates account in data store`() = runTest {
-        val existingAccount = buildUserAccount(expectedAuthorDisplayName = "alex")
-        persistence.updateData { it.toMutableList().apply { add((existingAccount)) } }
-        val accountsStore = createUserAccountStore()
-
-        val expectedAccount = buildUserAccount(expectedAuthorDisplayName = "updated")
-        accountsStore.upsertAccount(expectedAccount)
-        advanceUntilIdleAndDelay()
-
-        val accounts = accountsStore.userAccounts.value
-        val actual = accounts.find { it.pubkey == expectedPubkey }
-
-        actual shouldBe expectedAccount
-    }
+            actual shouldBe expectedAccount
+        }
 
     @Test
-    fun `deleteAccount deletes given account from data store`() = runTest {
-        val existingAccount = buildUserAccount()
-        persistence.updateData { it.toMutableList().apply { add((existingAccount)) } }
-        val accountsStore = createUserAccountStore()
+    fun `upsertAccount updates account in data store`() =
+        runTest {
+            val existingAccount = buildUserAccount(expectedAuthorDisplayName = "alex")
+            persistence.updateData { it.toMutableList().apply { add((existingAccount)) } }
+            val accountsStore = createUserAccountStore()
 
-        accountsStore.deleteAccount(pubkey = expectedPubkey)
-        advanceUntilIdleAndDelay()
+            val expectedAccount = buildUserAccount(expectedAuthorDisplayName = "updated")
+            accountsStore.upsertAccount(expectedAccount)
+            advanceUntilIdleAndDelay()
 
-        val accounts = accountsStore.userAccounts.value
-        val actual = accounts.find { it.pubkey == expectedPubkey }
+            val accounts = accountsStore.userAccounts.value
+            val actual = accounts.find { it.pubkey == expectedPubkey }
 
-        actual.shouldBeNull()
-    }
-
-    @Test
-    fun `clearAllAccounts deletes all accounts from data store`() = runTest {
-        val existingAccount = buildUserAccount()
-        persistence.updateData { it.toMutableList().apply { add((existingAccount)) } }
-        val accountsStore = createUserAccountStore()
-
-        accountsStore.clearAllAccounts()
-        advanceUntilIdleAndDelay()
-
-        val actual = accountsStore.userAccounts.value
-        actual.shouldBeEmpty()
-    }
+            actual shouldBe expectedAccount
+        }
 
     @Test
-    fun `findByIdOrNull finds account by id`() = runTest {
-        val existingAccount = buildUserAccount()
-        persistence.updateData { it.toMutableList().apply { add((existingAccount)) } }
-        val accountsStore = createUserAccountStore()
+    fun `deleteAccount deletes given account from data store`() =
+        runTest {
+            val existingAccount = buildUserAccount()
+            persistence.updateData { it.toMutableList().apply { add((existingAccount)) } }
+            val accountsStore = createUserAccountStore()
 
-        val actual = accountsStore.findByIdOrNull(userId = expectedPubkey)
-        actual.shouldNotBeNull()
-        actual shouldBe existingAccount
-    }
+            accountsStore.deleteAccount(pubkey = expectedPubkey)
+            advanceUntilIdleAndDelay()
+
+            val accounts = accountsStore.userAccounts.value
+            val actual = accounts.find { it.pubkey == expectedPubkey }
+
+            actual.shouldBeNull()
+        }
+
+    @Test
+    fun `clearAllAccounts deletes all accounts from data store`() =
+        runTest {
+            val existingAccount = buildUserAccount()
+            persistence.updateData { it.toMutableList().apply { add((existingAccount)) } }
+            val accountsStore = createUserAccountStore()
+
+            accountsStore.clearAllAccounts()
+            advanceUntilIdleAndDelay()
+
+            val actual = accountsStore.userAccounts.value
+            actual.shouldBeEmpty()
+        }
+
+    @Test
+    fun `findByIdOrNull finds account by id`() =
+        runTest {
+            val existingAccount = buildUserAccount()
+            persistence.updateData { it.toMutableList().apply { add((existingAccount)) } }
+            val accountsStore = createUserAccountStore()
+
+            val actual = accountsStore.findByIdOrNull(userId = expectedPubkey)
+            actual.shouldNotBeNull()
+            actual shouldBe existingAccount
+        }
 
     @Test
     fun `findByIdOrNull returns null for not found id`() {
@@ -143,5 +149,4 @@ class UserAccountsStoreTest {
         val actual = accountsStore.findByIdOrNull(userId = "nonExisting")
         actual.shouldBeNull()
     }
-
 }

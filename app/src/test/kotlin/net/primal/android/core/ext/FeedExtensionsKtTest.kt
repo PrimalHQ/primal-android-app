@@ -4,7 +4,6 @@ import io.kotest.matchers.shouldBe
 import net.primal.android.crypto.CryptoUtils
 import org.junit.Test
 
-
 class FeedExtensionsKtTest {
 
     @Test
@@ -288,7 +287,6 @@ class FeedExtensionsKtTest {
         "withreplies;${keypair.pubKey}".hasReposts() shouldBe true
         "authored;${keypair.pubKey}".hasReposts() shouldBe true
     }
-
 
     @Test
     fun hasReposts_returnsFalseForInvalidFeeds() {
