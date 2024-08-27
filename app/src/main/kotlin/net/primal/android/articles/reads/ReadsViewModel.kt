@@ -13,7 +13,7 @@ import net.primal.android.articles.ArticleRepository
 import net.primal.android.articles.db.ArticleFeed
 import net.primal.android.articles.reads.ReadsScreenContract.UiEvent
 import net.primal.android.articles.reads.ReadsScreenContract.UiState
-import net.primal.android.core.compose.feed.list.FeedUi
+import net.primal.android.feeds.ui.model.FeedUi
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.subscriptions.SubscriptionsManager
 
@@ -32,10 +32,10 @@ class ReadsViewModel @Inject constructor(
     fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
 
     init {
-        subscribeToActiveAccount()
-        subscribeToBadgesUpdates()
-        subscribeToFeeds()
+        observeActiveAccount()
+        observeBadgesUpdates()
         observeEvents()
+        loadDefaultReadsFeed()
     }
 
     private fun observeEvents() {
@@ -50,21 +50,20 @@ class ReadsViewModel @Inject constructor(
         }
     }
 
-    private fun subscribeToFeeds() =
+    private fun loadDefaultReadsFeed() =
         viewModelScope.launch {
-            articleRepository.observeFeeds().collect { feeds ->
-                setState {
-                    copy(
-                        feeds = feeds.map { it.asFeedUi() },
-                        activeFeed = feeds.firstOrNull()?.asFeedUi(),
-                    )
-                }
-            }
+            val defaultFeed = articleRepository.firstFeed()?.asFeedUi()
+            setState { copy(activeFeed = defaultFeed) }
         }
 
-    private fun ArticleFeed.asFeedUi() = FeedUi(directive = this.spec, name = this.name)
+    private fun ArticleFeed.asFeedUi() =
+        FeedUi(
+            directive = this.spec,
+            name = this.name,
+            description = this.description,
+        )
 
-    private fun subscribeToActiveAccount() =
+    private fun observeActiveAccount() =
         viewModelScope.launch {
             activeAccountStore.activeUserAccount.collect {
                 setState {
@@ -73,7 +72,7 @@ class ReadsViewModel @Inject constructor(
             }
         }
 
-    private fun subscribeToBadgesUpdates() =
+    private fun observeBadgesUpdates() =
         viewModelScope.launch {
             subscriptionsManager.badges.collect {
                 setState {

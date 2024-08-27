@@ -3,6 +3,7 @@ package net.primal.android.articles.api
 import javax.inject.Inject
 import kotlinx.serialization.encodeToString
 import net.primal.android.articles.api.model.ArticleDetailsRequestBody
+import net.primal.android.articles.api.model.ArticleDvmFeedRequestBody
 import net.primal.android.articles.api.model.ArticleFeedRequestBody
 import net.primal.android.articles.api.model.ArticleFeedsResponse
 import net.primal.android.articles.api.model.ArticleResponse
@@ -36,7 +37,6 @@ class ArticlesApiImpl @Inject constructor(
             zaps = queryResult.filterNostrEvents(NostrEventKind.Zap),
             notes = queryResult.filterNostrEvents(NostrEventKind.ShortTextNote),
             articles = queryResult.filterNostrEvents(NostrEventKind.LongFormContent),
-            primalArticles = emptyList(),
             primalEventStats = queryResult.filterPrimalEvents(NostrEventKind.PrimalEventStats),
             primalEventUserStats = queryResult.filterPrimalEvents(NostrEventKind.PrimalEventUserStats),
             primalUserScores = queryResult.filterPrimalEvents(NostrEventKind.PrimalUserScores),
@@ -48,10 +48,10 @@ class ArticlesApiImpl @Inject constructor(
         )
     }
 
-    override suspend fun getArticleFeed(body: ArticleFeedRequestBody): ArticleResponse {
+    private suspend inline fun <reified T> queryArticleFeed(verb: PrimalVerb, body: T): ArticleResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.READS_FEED_DIRECTIVE,
+                primalVerb = verb,
                 optionsJson = NostrJson.encodeToString(body),
             ),
         )
@@ -63,8 +63,7 @@ class ArticlesApiImpl @Inject constructor(
             metadata = queryResult.filterNostrEvents(NostrEventKind.Metadata),
             zaps = queryResult.filterNostrEvents(NostrEventKind.Zap),
             notes = emptyList(),
-            articles = emptyList(),
-            primalArticles = queryResult.filterPrimalEvents(NostrEventKind.PrimalLongFormContent),
+            articles = queryResult.filterNostrEvents(NostrEventKind.LongFormContent),
             referencedEvents = queryResult.filterPrimalEvents(NostrEventKind.PrimalReferencedEvent),
             primalEventStats = queryResult.filterPrimalEvents(NostrEventKind.PrimalEventStats),
             primalEventUserStats = queryResult.filterPrimalEvents(NostrEventKind.PrimalEventUserStats),
@@ -74,6 +73,14 @@ class ArticlesApiImpl @Inject constructor(
             primalRelayHints = queryResult.filterPrimalEvents(NostrEventKind.PrimalRelayHint),
             primalLongFormWords = queryResult.filterPrimalEvents(NostrEventKind.PrimalLongFormWordsCount),
         )
+    }
+
+    override suspend fun getArticleFeed(body: ArticleFeedRequestBody): ArticleResponse {
+        return queryArticleFeed(verb = PrimalVerb.MEGA_FEED_DIRECTIVE, body = body)
+    }
+
+    override suspend fun getArticleDvmFeed(body: ArticleDvmFeedRequestBody): ArticleResponse {
+        return queryArticleFeed(verb = PrimalVerb.DVM_FEED, body = body)
     }
 
     override suspend fun getArticleFeeds(): ArticleFeedsResponse {

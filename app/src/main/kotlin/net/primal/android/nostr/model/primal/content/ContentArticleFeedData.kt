@@ -6,4 +6,6 @@ import kotlinx.serialization.Serializable
 data class ContentArticleFeedData(
     val name: String,
     val spec: String,
+    val default: Boolean,
+    val description: String,
 )

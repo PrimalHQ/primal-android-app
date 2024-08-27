@@ -20,9 +20,9 @@ object PlayBillingModule {
     fun providePlayBillingClient(
         @ApplicationContext appContext: Context,
         dispatchers: CoroutineDispatcherProvider,
-    ): PrimalBillingClient = PlayBillingClient(
-        appContext = appContext,
-        dispatchers = dispatchers,
-    )
-
+    ): PrimalBillingClient =
+        PlayBillingClient(
+            appContext = appContext,
+            dispatchers = dispatchers,
+        )
 }

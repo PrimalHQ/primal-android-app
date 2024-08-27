@@ -23,7 +23,6 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.config.AppConfigHandler
-import net.primal.android.core.compose.feed.list.FeedUi
 import net.primal.android.core.compose.feed.model.FeedPostsSyncStats
 import net.primal.android.core.compose.feed.model.asFeedPostUi
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
@@ -37,6 +36,7 @@ import net.primal.android.feed.FeedContract.UiState.FeedError
 import net.primal.android.feed.api.model.FeedResponse
 import net.primal.android.feed.db.FeedPost
 import net.primal.android.feed.repository.FeedRepository
+import net.primal.android.feeds.ui.model.FeedUi
 import net.primal.android.navigation.feedDirective
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
@@ -114,7 +114,13 @@ class FeedViewModel @Inject constructor(
                 .collect { feeds ->
                     setState {
                         copy(
-                            feeds = feeds.map { FeedUi(directive = it.directive, name = it.name) },
+                            feeds = feeds.map {
+                                FeedUi(
+                                    directive = it.directive,
+                                    name = it.name,
+                                    description = "",
+                                )
+                            },
                             feedTitle = feeds.find { it.directive == feedDirective }?.name ?: "",
                         )
                     }

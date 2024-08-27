@@ -21,8 +21,8 @@ interface ArticleFeedDao {
     @Query("SELECT EXISTS(SELECT 1 FROM ArticleFeed WHERE spec = :spec)")
     fun observeContainsFeed(spec: String): Flow<Boolean>
 
-    @Query("SELECT * FROM ArticleFeed WHERE ArticleFeed.spec = :feedDirective")
-    fun observeFeedBySpec(feedDirective: String): Flow<ArticleFeed?>
+    @Query("SELECT * FROM ArticleFeed WHERE ArticleFeed.spec = :spec")
+    fun observeFeedBySpec(spec: String): Flow<ArticleFeed?>
 
     @Query("DELETE FROM ArticleFeed")
     fun deleteAll()

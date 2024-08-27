@@ -8,4 +8,7 @@ data class ArticleFeed(
     @PrimaryKey
     val spec: String,
     val name: String,
+    val description: String,
+    val enabled: Boolean,
+    val isDvm: Boolean,
 )

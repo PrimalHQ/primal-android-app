@@ -6,6 +6,7 @@ import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import kotlinx.coroutines.withContext
 import net.primal.android.articles.api.ArticlesApi
+import net.primal.android.articles.api.model.ArticleDvmFeedRequestBody
 import net.primal.android.articles.api.model.ArticleFeedRequestBody
 import net.primal.android.articles.db.Article
 import net.primal.android.articles.db.ArticleFeedCrossRef
@@ -28,19 +29,30 @@ class ArticleFeedMediator(
         withContext(dispatcherProvider.io()) {
             val pageSize = state.config.pageSize
             val response = try {
-                articlesApi.getArticleFeed(
-                    body = ArticleFeedRequestBody(
-                        spec = feedSpec,
-                        userId = userId,
-                        limit = pageSize,
-                    ),
-                )
+                if (feedSpec.startsWith("dvm:")) {
+                    val parts = feedSpec.substring(4).split(";")
+                    articlesApi.getArticleDvmFeed(
+                        body = ArticleDvmFeedRequestBody(
+                            dvmPubkey = parts.first(),
+                            dvmId = parts.last(),
+                            userPubKey = userId,
+                        ),
+                    )
+                } else {
+                    articlesApi.getArticleFeed(
+                        body = ArticleFeedRequestBody(
+                            spec = feedSpec,
+                            userId = userId,
+                            limit = pageSize,
+                        ),
+                    )
+                }
             } catch (error: WssException) {
                 Timber.w(error)
                 null
             }
 
-            val connections = response?.primalArticles
+            val connections = response?.articles
                 ?.mapNotNullPrimalEventAsArticleDataPO()
                 ?.map {
                     ArticleFeedCrossRef(

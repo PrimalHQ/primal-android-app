@@ -16,6 +16,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
 import kotlinx.coroutines.launch
@@ -26,13 +27,13 @@ import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.PrimalTopLevelDestination
-import net.primal.android.core.compose.feed.list.FeedListModalBottomSheet
-import net.primal.android.core.compose.feed.list.FeedUi
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 import net.primal.android.core.compose.icons.primaliconpack.Search
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.PrimalDrawerScaffold
+import net.primal.android.feeds.ReadsFeedsBottomSheet
+import net.primal.android.feeds.ui.model.FeedUi
 
 @Composable
 fun ReadsScreen(
@@ -84,8 +85,8 @@ private fun ReadsScreen(
         focusModeEnabled = LocalContentDisplaySettings.current.focusModeEnabled,
         topBar = { scrollBehavior ->
             ArticleFeedTopAppBar(
-                feeds = state.feeds,
                 title = state.activeFeed?.name ?: "",
+                activeFeed = state.activeFeed,
                 avatarCdnImage = state.activeAccountAvatarCdnImage,
                 onAvatarClick = { uiScope.launch { drawerState.open() } },
                 onSearchClick = onSearchClick,
@@ -96,7 +97,7 @@ private fun ReadsScreen(
         content = { paddingValues ->
             if (state.activeFeed != null) {
                 ArticleFeedList(
-                    feed = state.activeFeed,
+                    feedSpec = state.activeFeed.directive,
                     contentPadding = paddingValues,
                     onArticleClick = onArticleClick,
                 )
@@ -115,20 +116,20 @@ private fun ArticleFeedTopAppBar(
     avatarCdnImage: CdnImage?,
     onAvatarClick: () -> Unit,
     onSearchClick: () -> Unit,
-    feeds: List<FeedUi>,
+    activeFeed: FeedUi?,
     onFeedChanged: (FeedUi) -> Unit,
     scrollBehavior: TopAppBarScrollBehavior? = null,
 ) {
-    var feedPickerVisible by remember { mutableStateOf(false) }
+    var feedPickerVisible by rememberSaveable { mutableStateOf(false) }
 
-    if (feedPickerVisible) {
-        FeedListModalBottomSheet(
-            feeds = feeds,
-            onDismissRequest = { feedPickerVisible = false },
+    if (feedPickerVisible && activeFeed != null) {
+        ReadsFeedsBottomSheet(
+            activeFeed = activeFeed,
             onFeedClick = { feed ->
                 feedPickerVisible = false
                 onFeedChanged(feed)
             },
+            onDismissRequest = { feedPickerVisible = false },
             sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         )
     }
@@ -136,7 +137,11 @@ private fun ArticleFeedTopAppBar(
     PrimalTopAppBar(
         title = title,
         titleTrailingIcon = Icons.Default.ExpandMore,
-        onTitleClick = { feedPickerVisible = true },
+        onTitleClick = {
+            if (activeFeed != null) {
+                feedPickerVisible = true
+            }
+        },
         avatarCdnImage = avatarCdnImage,
         navigationIcon = PrimalIcons.AvatarDefault,
         onNavigationIconClick = onAvatarClick,
