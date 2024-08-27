@@ -93,7 +93,7 @@ class PlayBillingClient @Inject constructor(
                                 )
                             }
 
-                            override fun onBillingServiceDisconnected()  = Unit
+                            override fun onBillingServiceDisconnected() = Unit
                         },
                     )
                 }

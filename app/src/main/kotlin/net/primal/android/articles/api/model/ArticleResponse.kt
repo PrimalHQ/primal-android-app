@@ -12,7 +12,6 @@ data class ArticleResponse(
     val zaps: List<NostrEvent>,
     val notes: List<NostrEvent>,
     val articles: List<NostrEvent>,
-    val primalArticles: List<PrimalEvent>,
     val primalUserScores: List<PrimalEvent>,
     val referencedEvents: List<PrimalEvent>,
     val primalEventStats: List<PrimalEvent>,

@@ -14,5 +14,4 @@ object DebugCoreModule {
     @Provides
     @IntoSet
     fun timberLogger(): Timber.Tree = Timber.DebugTree()
-
 }

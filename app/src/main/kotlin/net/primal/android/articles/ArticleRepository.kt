@@ -5,6 +5,7 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.PagingSource
+import androidx.room.withTransaction
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -22,6 +23,7 @@ import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.db.PrimalDatabase
+import net.primal.android.feeds.repository.DvmFeed
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.model.primal.content.ContentArticleFeedData
@@ -38,6 +40,8 @@ class ArticleRepository @Inject constructor(
     companion object {
         private const val PAGE_SIZE = 25
     }
+
+    suspend fun firstFeed() = withContext(dispatchers.io()) { database.articleFeeds().first() }
 
     fun observeFeeds() = database.articleFeeds().observeAllFeeds()
 
@@ -63,10 +67,40 @@ class ArticleRepository @Inject constructor(
             }
 
             if (feeds != null) {
-                database.articleFeeds().upsertAll(
-                    data = feeds.map { ArticleFeed(name = it.name, spec = it.spec) },
-                )
+                database.withTransaction {
+                    database.articleFeeds().deleteAll()
+                    database.articleFeeds().upsertAll(
+                        data = feeds.map { data ->
+                            ArticleFeed(
+                                spec = data.spec,
+                                name = data.name,
+                                description = data.description,
+                                enabled = true,
+                                isDvm = false,
+                            )
+                        },
+                    )
+                }
             }
+        }
+    }
+
+    suspend fun addDvmFeed(dvmFeed: DvmFeed) {
+        withContext(dispatchers.io()) {
+            val feed = ArticleFeed(
+                spec = dvmFeed.dvmSpec,
+                name = dvmFeed.title,
+                description = dvmFeed.description,
+                enabled = true,
+                isDvm = true,
+            )
+            database.articleFeeds().upsertAll(listOf(feed))
+        }
+    }
+
+    suspend fun removeDvmFeed(dvmFeed: DvmFeed) {
+        withContext(dispatchers.io()) {
+            database.articleFeeds().delete(dvmFeed.dvmSpec)
         }
     }
 

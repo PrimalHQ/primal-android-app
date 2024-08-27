@@ -1,5 +1,6 @@
 package net.primal.android.articles.feed
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -8,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -20,6 +22,7 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
+import fr.acinq.lightning.utils.UUID
 import net.primal.android.BuildConfig
 import net.primal.android.R
 import net.primal.android.articles.feed.di.ArticleFeedViewModelFactory
@@ -29,7 +32,6 @@ import net.primal.android.core.compose.ListLoading
 import net.primal.android.core.compose.ListLoadingError
 import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.PrimalDivider
-import net.primal.android.core.compose.feed.list.FeedUi
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.isEmpty
 import net.primal.android.core.compose.isNotEmpty
@@ -37,27 +39,36 @@ import timber.log.Timber
 
 @Composable
 fun ArticleFeedList(
-    feed: FeedUi,
+    feedSpec: String,
     contentPadding: PaddingValues = PaddingValues(0.dp),
     onArticleClick: (naddr: String) -> Unit,
+    previewMode: Boolean = false,
+    header: @Composable (LazyItemScope.() -> Unit)? = null,
+    stickyHeader: @Composable (LazyItemScope.() -> Unit)? = null,
 ) {
-    val viewModel = hiltViewModel<ArticleFeedViewModel, ArticleFeedViewModelFactory>(key = feed.directive) {
-        it.create(spec = feed.directive)
-    }
+    val viewModel = hiltViewModel<ArticleFeedViewModel, ArticleFeedViewModelFactory>(
+        key = if (!previewMode) feedSpec else UUID.randomUUID().toString(),
+        creationCallback = { factory -> factory.create(spec = feedSpec) },
+    )
     val uiState = viewModel.state.collectAsState()
 
     ArticleFeedList(
         state = uiState.value,
         contentPadding = contentPadding,
         onArticleClick = onArticleClick,
+        header = header,
+        stickyHeader = stickyHeader,
     )
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ArticleFeedList(
     state: ArticleFeedContract.UiState,
     contentPadding: PaddingValues = PaddingValues(0.dp),
     onArticleClick: (naddr: String) -> Unit,
+    header: @Composable (LazyItemScope.() -> Unit)? = null,
+    stickyHeader: @Composable (LazyItemScope.() -> Unit)? = null,
 ) {
     val pagingItems = state.articles.collectAsLazyPagingItems()
     val feedListState = pagingItems.rememberLazyListStatePagingWorkaround()
@@ -68,6 +79,18 @@ fun ArticleFeedList(
         state = feedListState,
     ) {
         handleMediatorPrependState(pagingItems)
+
+        if (stickyHeader != null) {
+            stickyHeader {
+                stickyHeader()
+            }
+        }
+
+        if (header != null) {
+            item {
+                header()
+            }
+        }
 
         items(
             count = pagingItems.itemCount,

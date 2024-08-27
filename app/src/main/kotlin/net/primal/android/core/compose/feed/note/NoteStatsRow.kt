@@ -23,8 +23,10 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
 import java.text.NumberFormat
 import net.primal.android.R
@@ -53,7 +55,7 @@ fun FeedNoteStatsRow(
         modifier = modifier,
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
-        SinglePostStat(
+        SingleEventStat(
             textCount = eventStats.repliesCount.toPostStatString(numberFormat),
             highlighted = eventStats.userReplied,
             iconVector = PrimalIcons.FeedReplies,
@@ -68,7 +70,7 @@ fun FeedNoteStatsRow(
             iconContentDescription = stringResource(id = R.string.accessibility_replies_count),
         )
 
-        SinglePostStat(
+        SingleEventStat(
             textCount = eventStats.satsZapped.toPostStatString(numberFormat),
             highlighted = eventStats.userZapped,
             iconVector = PrimalIcons.FeedZaps,
@@ -83,7 +85,7 @@ fun FeedNoteStatsRow(
             iconContentDescription = stringResource(id = R.string.accessibility_zaps_count),
         )
 
-        SinglePostStat(
+        SingleEventStat(
             textCount = eventStats.likesCount.toPostStatString(numberFormat),
             highlighted = eventStats.userLiked,
             iconVector = PrimalIcons.FeedLikes,
@@ -100,7 +102,7 @@ fun FeedNoteStatsRow(
             iconContentDescription = stringResource(id = R.string.accessibility_likes_count),
         )
 
-        SinglePostStat(
+        SingleEventStat(
             textCount = eventStats.repostsCount.toPostStatString(numberFormat),
             highlighted = eventStats.userReposted,
             iconVector = PrimalIcons.FeedReposts,
@@ -119,7 +121,7 @@ fun FeedNoteStatsRow(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun SinglePostStat(
+fun SingleEventStat(
     textCount: String,
     highlighted: Boolean,
     iconVector: ImageVector,
@@ -128,6 +130,8 @@ private fun SinglePostStat(
     onClick: (() -> Unit)? = null,
     onLongClick: (() -> Unit)? = null,
     iconContentDescription: String? = null,
+    iconSize: TextUnit = 24.sp,
+    textStyle: TextStyle = AppTheme.typography.bodyMedium,
 ) {
     val titleText = buildAnnotatedString {
         appendInlineContent("icon", "[icon]")
@@ -138,7 +142,7 @@ private fun SinglePostStat(
     val inlineContent = mapOf(
         "icon" to InlineTextContent(
             placeholder = Placeholder(
-                24.sp, 24.sp, PlaceholderVerticalAlign.TextCenter,
+                iconSize, iconSize, PlaceholderVerticalAlign.TextCenter,
             ),
         ) {
             Box(
@@ -170,7 +174,7 @@ private fun SinglePostStat(
         text = titleText,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
-        style = AppTheme.typography.bodyMedium,
+        style = textStyle,
         color = if (!highlighted) AppTheme.extraColorScheme.onSurfaceVariantAlt4 else colorHighlight,
         inlineContent = inlineContent,
     )

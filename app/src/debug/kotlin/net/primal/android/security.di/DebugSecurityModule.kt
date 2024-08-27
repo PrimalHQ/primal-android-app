@@ -20,5 +20,4 @@ object DebugSecurityModule {
     fun provideDatabaseOpenHelper(): SupportSQLiteOpenHelper.Factory {
         return FrameworkSQLiteOpenHelperFactory()
     }
-
 }

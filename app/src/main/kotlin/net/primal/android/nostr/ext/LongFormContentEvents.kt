@@ -39,12 +39,12 @@ fun List<PrimalEvent>.mapNotNullReferencedEventsAsArticleDataPO(
     return mappedFromNostrEvents + mappedFromPrimalEvents
 }
 
-fun List<PrimalEvent>.mapNotNullPrimalEventAsArticleDataPO(
+fun List<NostrEvent>.mapNotNullPrimalEventAsArticleDataPO(
     wordsCountMap: Map<String, Int> = emptyMap(),
     cdnResources: Map<String, CdnResource> = emptyMap(),
-) = this.mapNotNull { primalEvent ->
-    primalEvent.asArticleData(
-        wordsCount = wordsCountMap[primalEvent.id],
+) = this.mapNotNull { nostrEvent ->
+    nostrEvent.asArticleData(
+        wordsCount = wordsCountMap[nostrEvent.id],
         cdnResources = cdnResources,
     )
 }

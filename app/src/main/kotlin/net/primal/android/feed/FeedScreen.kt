@@ -60,8 +60,6 @@ import net.primal.android.core.compose.AvatarThumbnailsRow
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.compose.feed.FeedNoteList
-import net.primal.android.core.compose.feed.list.FeedListModalBottomSheet
-import net.primal.android.core.compose.feed.list.FeedUi
 import net.primal.android.core.compose.feed.model.FeedPostsSyncStats
 import net.primal.android.core.compose.feed.note.ConfirmFirstBookmarkAlertDialog
 import net.primal.android.core.compose.feed.note.events.InvoicePayClickEvent
@@ -77,6 +75,8 @@ import net.primal.android.crypto.hexToNoteHrp
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.PrimalDrawerScaffold
 import net.primal.android.feed.FeedContract.UiState.FeedError
+import net.primal.android.feeds.FeedsModalBottomSheet
+import net.primal.android.feeds.ui.model.FeedUi
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 
@@ -334,8 +334,10 @@ private fun FeedTopAppBar(
     var feedPickerVisible by remember { mutableStateOf(false) }
 
     if (feedPickerVisible) {
-        FeedListModalBottomSheet(
+        FeedsModalBottomSheet(
+            title = stringResource(id = R.string.home_feeds_title),
             feeds = feeds,
+            activeFeed = null,
             onDismissRequest = { feedPickerVisible = false },
             onFeedClick = { feed ->
                 feedPickerVisible = false

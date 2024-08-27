@@ -37,6 +37,8 @@ enum class NostrEventKind(val value: Int) {
     BadgeDefinition(value = 30_009),
     LongFormContent(value = 30_023),
     ApplicationSpecificData(value = 30_078),
+    AppRecommendation(value = 31_989),
+    AppHandler(value = 31_990),
     PrimalEventStats(value = 10_000_100),
     PrimalNetStats(value = 10_000_101),
     PrimalExploreLegendCounts(value = 10_000_102),

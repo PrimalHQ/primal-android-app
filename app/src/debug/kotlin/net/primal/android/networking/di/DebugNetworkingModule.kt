@@ -14,8 +14,8 @@ object DebugNetworkingModule {
 
     @Provides
     @IntoSet
-    fun provideLoggingInterceptor(): Interceptor = HttpLoggingInterceptor().apply {
-        setLevel(HttpLoggingInterceptor.Level.BODY)
-    }
-
+    fun provideLoggingInterceptor(): Interceptor =
+        HttpLoggingInterceptor().apply {
+            setLevel(HttpLoggingInterceptor.Level.BODY)
+        }
 }
