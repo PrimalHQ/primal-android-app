@@ -95,6 +95,15 @@ class NostrNotary @Inject constructor(
         ).signOrThrow(nsec = findNsecOrThrow(userId))
     }
 
+    fun signAppSpecificDataNostrEvent(userId: String, content: String): NostrEvent {
+        return NostrUnsignedEvent(
+            pubKey = userId,
+            kind = NostrEventKind.ApplicationSpecificData.value,
+            tags = listOf("${UserAgentProvider.APP_NAME} App".asIdentifierTag()),
+            content = content,
+        ).signOrThrow(nsec = findNsecOrThrow(userId))
+    }
+
     fun signLikeReactionNostrEvent(
         userId: String,
         postId: String,

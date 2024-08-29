@@ -5,7 +5,6 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.PagingSource
-import androidx.room.withTransaction
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -18,17 +17,10 @@ import net.primal.android.articles.api.mediator.persistArticleCommentsToDatabase
 import net.primal.android.articles.api.mediator.persistToDatabaseAsTransaction
 import net.primal.android.articles.api.model.ArticleDetailsRequestBody
 import net.primal.android.articles.db.Article
-import net.primal.android.articles.db.ArticleFeed
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
-import net.primal.android.core.serialization.json.NostrJson
-import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.db.PrimalDatabase
-import net.primal.android.feeds.repository.DvmFeed
-import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.model.NostrEventKind
-import net.primal.android.nostr.model.primal.content.ContentArticleFeedData
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import timber.log.Timber
 
 class ArticleRepository @Inject constructor(
     private val dispatchers: CoroutineDispatcherProvider,
@@ -41,8 +33,6 @@ class ArticleRepository @Inject constructor(
         private const val PAGE_SIZE = 25
     }
 
-    fun observeFeeds() = database.articleFeeds().observeAllFeeds()
-
     fun feedBySpec(feedSpec: String): Flow<PagingData<Article>> {
         return createPager(feedSpec = feedSpec) {
             database.articles().feed(
@@ -50,56 +40,6 @@ class ArticleRepository @Inject constructor(
                 userId = activeAccountStore.activeUserId(),
             )
         }.flow
-    }
-
-    suspend fun fetchAndPersistArticleFeeds() {
-        withContext(dispatchers.io()) {
-            val feeds = try {
-                val response = articlesApi.getArticleFeeds()
-                NostrJson.decodeFromStringOrNull<List<ContentArticleFeedData>>(
-                    string = response.articleFeeds.content,
-                )
-            } catch (error: WssException) {
-                Timber.w(error)
-                null
-            }
-
-            if (feeds != null) {
-                database.withTransaction {
-                    database.articleFeeds().deleteAll()
-                    database.articleFeeds().upsertAll(
-                        data = feeds.map { data ->
-                            ArticleFeed(
-                                spec = data.spec,
-                                name = data.name,
-                                description = data.description,
-                                enabled = true,
-                                isDvm = false,
-                            )
-                        },
-                    )
-                }
-            }
-        }
-    }
-
-    suspend fun addDvmFeed(dvmFeed: DvmFeed) {
-        withContext(dispatchers.io()) {
-            val feed = ArticleFeed(
-                spec = dvmFeed.dvmSpec,
-                name = dvmFeed.title,
-                description = dvmFeed.description,
-                enabled = true,
-                isDvm = true,
-            )
-            database.articleFeeds().upsertAll(listOf(feed))
-        }
-    }
-
-    suspend fun removeDvmFeed(dvmFeed: DvmFeed) {
-        withContext(dispatchers.io()) {
-            database.articleFeeds().delete(dvmFeed.dvmSpec)
-        }
     }
 
     @OptIn(ExperimentalPagingApi::class)

@@ -9,6 +9,6 @@ data class ArticleFeed(
     val spec: String,
     val name: String,
     val description: String,
-    val enabled: Boolean,
-    val isDvm: Boolean,
+    val enabled: Boolean = true,
+    val kind: String? = null,
 )

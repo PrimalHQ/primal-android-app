@@ -13,13 +13,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
-import net.primal.android.articles.ArticleRepository
 import net.primal.android.articles.db.ArticleFeed
 import net.primal.android.feeds.ReadsFeedsContract.UiEvent
 import net.primal.android.feeds.ReadsFeedsContract.UiState
 import net.primal.android.feeds.ReadsFeedsContract.UiState.FeedMarketplaceStage
 import net.primal.android.feeds.repository.DvmFeed
-import net.primal.android.feeds.repository.FeedMarketplaceRepository
+import net.primal.android.feeds.repository.FeedsRepository
 import net.primal.android.feeds.ui.model.FeedUi
 import net.primal.android.networking.sockets.errors.WssException
 import timber.log.Timber
@@ -27,8 +26,7 @@ import timber.log.Timber
 @HiltViewModel(assistedFactory = ReadsFeedsViewModel.Factory::class)
 class ReadsFeedsViewModel @AssistedInject constructor(
     @Assisted activeFeed: FeedUi,
-    private val articleRepository: ArticleRepository,
-    private val marketplaceRepository: FeedMarketplaceRepository,
+    private val feedsRepository: FeedsRepository,
 ) : ViewModel() {
 
     @AssistedFactory
@@ -96,7 +94,7 @@ class ReadsFeedsViewModel @AssistedInject constructor(
 
     private fun observeReadsFeeds() =
         viewModelScope.launch {
-            articleRepository.observeFeeds().collect { feeds ->
+            feedsRepository.observeReadsFeeds().collect { feeds ->
                 setState { copy(feeds = feeds.map { it.asFeedUi() }) }
             }
         }
@@ -112,7 +110,7 @@ class ReadsFeedsViewModel @AssistedInject constructor(
         viewModelScope.launch {
             setState { copy(fetchingDvmFeeds = true) }
             try {
-                val dvmFeeds = marketplaceRepository.fetchRecommendedDvmFeeds()
+                val dvmFeeds = feedsRepository.fetchRecommendedDvmFeeds()
                 setState { copy(dvmFeeds = dvmFeeds) }
             } catch (error: WssException) {
                 Timber.w(error)
@@ -124,17 +122,17 @@ class ReadsFeedsViewModel @AssistedInject constructor(
     private fun scheduleClearingDvmFeed(dvmFeed: DvmFeed) =
         viewModelScope.launch {
             delay(400.milliseconds)
-            marketplaceRepository.clearDvmFeed(dvmFeed)
+            feedsRepository.clearDvmFeed(dvmFeed)
             setState { copy(selectedDvmFeed = null) }
         }
 
     private fun addToUserFeeds(dvmFeed: DvmFeed) =
         viewModelScope.launch {
-            articleRepository.addDvmFeed(dvmFeed)
+            feedsRepository.addDvmFeed(dvmFeed)
         }
 
     private fun removeFromUserFeeds(dvmFeed: DvmFeed) =
         viewModelScope.launch {
-            articleRepository.removeDvmFeed(dvmFeed)
+            feedsRepository.removeDvmFeed(dvmFeed)
         }
 }
