@@ -57,6 +57,8 @@ class ReadsViewModel @Inject constructor(
             directive = this.spec,
             name = this.name,
             description = this.description,
+            enabled = this.enabled,
+            deletable = this.isDvm,
         )
 
     private fun observeActiveAccount() =
