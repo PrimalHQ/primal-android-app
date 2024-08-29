@@ -8,12 +8,9 @@ interface ReadsScreenContract {
 
     data class UiState(
         val feeds: List<FeedUi> = emptyList(),
-        val activeFeed: FeedUi? = null,
         val activeAccountAvatarCdnImage: CdnImage? = null,
         val badges: Badges = Badges(),
     )
 
-    sealed class UiEvent {
-        data class ChangeFeed(val feed: FeedUi) : UiEvent()
-    }
+    sealed class UiEvent
 }

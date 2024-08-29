@@ -1,5 +1,10 @@
 package net.primal.android.articles.reads
 
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerDefaults
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.DrawerState
@@ -11,6 +16,7 @@ import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -18,6 +24,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.res.stringResource
 import kotlinx.coroutines.launch
 import net.primal.android.LocalContentDisplaySettings
@@ -57,7 +64,7 @@ fun ReadsScreen(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 private fun ReadsScreen(
     state: ReadsScreenContract.UiState,
@@ -72,6 +79,17 @@ private fun ReadsScreen(
     val drawerState: DrawerState = rememberDrawerState(DrawerValue.Closed)
     val snackbarHostState = remember { SnackbarHostState() }
 
+    var activeFeed by remember { mutableStateOf<FeedUi?>(null) }
+    val pagerState = rememberPagerState(pageCount = { state.feeds.size })
+    LaunchedEffect(pagerState, state.feeds) {
+        snapshotFlow { pagerState.currentPage }
+            .collect { index ->
+                if (state.feeds.isNotEmpty()) {
+                    activeFeed = state.feeds[index]
+                }
+            }
+    }
+
     PrimalDrawerScaffold(
         drawerState = drawerState,
         activeDestination = PrimalTopLevelDestination.Reads,
@@ -85,22 +103,33 @@ private fun ReadsScreen(
         focusModeEnabled = LocalContentDisplaySettings.current.focusModeEnabled,
         topBar = { scrollBehavior ->
             ArticleFeedTopAppBar(
-                title = state.activeFeed?.name ?: "",
-                activeFeed = state.activeFeed,
+                title = activeFeed?.name ?: "",
+                activeFeed = activeFeed,
                 avatarCdnImage = state.activeAccountAvatarCdnImage,
                 onAvatarClick = { uiScope.launch { drawerState.open() } },
                 onSearchClick = onSearchClick,
-                onFeedChanged = { feed -> eventPublisher(ReadsScreenContract.UiEvent.ChangeFeed(feed = feed)) },
+                onFeedChanged = { feed ->
+                    val pageIndex = state.feeds.indexOf(feed)
+                    uiScope.launch { pagerState.scrollToPage(page = pageIndex) }
+                },
                 scrollBehavior = scrollBehavior,
             )
         },
         content = { paddingValues ->
-            if (state.activeFeed != null) {
-                ArticleFeedList(
-                    feedSpec = state.activeFeed.directive,
-                    contentPadding = paddingValues,
-                    onArticleClick = onArticleClick,
-                )
+            if (state.feeds.isNotEmpty()) {
+                HorizontalPager(
+                    state = pagerState,
+                    key = { index -> state.feeds[index].directive },
+                    pageNestedScrollConnection = remember(pagerState) {
+                        PagerDefaults.pageNestedScrollConnection(pagerState, Orientation.Horizontal)
+                    },
+                ) { index ->
+                    ArticleFeedList(
+                        feedSpec = state.feeds[index].directive,
+                        contentPadding = paddingValues,
+                        onArticleClick = onArticleClick,
+                    )
+                }
             }
         },
         snackbarHost = {

@@ -14,9 +14,9 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.SubcomposeAsyncImage
-import com.google.accompanist.placeholder.PlaceholderHighlight
-import com.google.accompanist.placeholder.fade
-import com.google.accompanist.placeholder.material.placeholder
+import io.github.fornewid.placeholder.foundation.PlaceholderHighlight
+import io.github.fornewid.placeholder.foundation.fade
+import io.github.fornewid.placeholder.material3.placeholder
 import net.primal.android.attachments.domain.NoteAttachmentType
 import net.primal.android.attachments.domain.findNearestOrNull
 import net.primal.android.core.compose.attachment.model.NoteAttachmentUi

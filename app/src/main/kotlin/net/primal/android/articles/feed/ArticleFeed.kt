@@ -1,5 +1,6 @@
 package net.primal.android.articles.feed
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -31,6 +32,7 @@ import net.primal.android.articles.feed.ui.FeedArticleUi
 import net.primal.android.core.compose.ListLoading
 import net.primal.android.core.compose.ListLoadingError
 import net.primal.android.core.compose.ListNoContent
+import net.primal.android.core.compose.ListPlaceholderLoading
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.isEmpty
@@ -74,7 +76,9 @@ fun ArticleFeedList(
     val feedListState = pagingItems.rememberLazyListStatePagingWorkaround()
 
     LazyColumn(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .animateContentSize(),
         contentPadding = contentPadding,
         state = feedListState,
     ) {
@@ -131,8 +135,12 @@ private fun LazyListScope.handleRefreshLoadState(pagingItems: LazyPagingItems<Fe
     when (val refreshLoadState = pagingItems.loadState.refresh) {
         LoadState.Loading -> {
             item(contentType = "LoadingRefresh") {
-                ListLoading(
-                    modifier = Modifier.fillParentMaxSize(),
+                ListPlaceholderLoading(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(top = 8.dp),
+                    lightAnimationResId = R.raw.primal_loader_reads_list_light,
+                    darkAnimationResId = R.raw.primal_loader_reads_list_dark,
                 )
             }
         }
