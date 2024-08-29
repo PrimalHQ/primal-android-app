@@ -9,10 +9,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
-import net.primal.android.articles.ArticleRepository
 import net.primal.android.articles.db.ArticleFeed
 import net.primal.android.articles.reads.ReadsScreenContract.UiEvent
 import net.primal.android.articles.reads.ReadsScreenContract.UiState
+import net.primal.android.feeds.repository.FeedsRepository
 import net.primal.android.feeds.ui.model.FeedUi
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.subscriptions.SubscriptionsManager
@@ -21,7 +21,7 @@ import net.primal.android.user.subscriptions.SubscriptionsManager
 class ReadsViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val subscriptionsManager: SubscriptionsManager,
-    private val articleRepository: ArticleRepository,
+    private val feedsRepository: FeedsRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(UiState())
@@ -47,7 +47,7 @@ class ReadsViewModel @Inject constructor(
 
     private fun observeFeeds() =
         viewModelScope.launch {
-            articleRepository.observeFeeds().collect { feeds ->
+            feedsRepository.observeReadsFeeds().collect { feeds ->
                 setState { copy(feeds = feeds.map { it.asFeedUi() }) }
             }
         }
@@ -58,7 +58,7 @@ class ReadsViewModel @Inject constructor(
             name = this.name,
             description = this.description,
             enabled = this.enabled,
-            deletable = this.isDvm,
+            deletable = this.kind != "primal",
         )
 
     private fun observeActiveAccount() =

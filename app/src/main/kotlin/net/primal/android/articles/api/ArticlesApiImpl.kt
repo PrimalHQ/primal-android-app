@@ -5,7 +5,6 @@ import kotlinx.serialization.encodeToString
 import net.primal.android.articles.api.model.ArticleDetailsRequestBody
 import net.primal.android.articles.api.model.ArticleDvmFeedRequestBody
 import net.primal.android.articles.api.model.ArticleFeedRequestBody
-import net.primal.android.articles.api.model.ArticleFeedsResponse
 import net.primal.android.articles.api.model.ArticleResponse
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.decodeFromStringOrNull
@@ -13,9 +12,7 @@ import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.primal.PrimalCacheFilter
 import net.primal.android.networking.primal.PrimalVerb
-import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.model.NostrEventKind
-import timber.log.Timber
 
 class ArticlesApiImpl @Inject constructor(
     @PrimalCacheApiClient private val primalApiClient: PrimalApiClient,
@@ -81,20 +78,5 @@ class ArticlesApiImpl @Inject constructor(
 
     override suspend fun getArticleDvmFeed(body: ArticleDvmFeedRequestBody): ArticleResponse {
         return queryArticleFeed(verb = PrimalVerb.DVM_FEED, body = body)
-    }
-
-    override suspend fun getArticleFeeds(): ArticleFeedsResponse {
-        val queryResult = primalApiClient.query(
-            message = PrimalCacheFilter(primalVerb = PrimalVerb.READS_FEEDS),
-        )
-
-        val articleFeeds = queryResult.findPrimalEvent(NostrEventKind.PrimalLongFormContentFeeds)
-
-        if (articleFeeds == null) {
-            Timber.w(queryResult.toString())
-            throw WssException("Invalid response.")
-        }
-
-        return ArticleFeedsResponse(articleFeeds = articleFeeds)
     }
 }

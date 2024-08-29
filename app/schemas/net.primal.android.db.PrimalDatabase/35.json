@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 35,
-    "identityHash": "08c05ece350fc979d5b2a095dff3c177",
+    "identityHash": "3d1ea80497304f5dfb5f7e3920e51094",
     "entities": [
       {
         "tableName": "PostData",
@@ -1504,7 +1504,7 @@
       },
       {
         "tableName": "ArticleFeed",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`spec` TEXT NOT NULL, `name` TEXT NOT NULL, `description` TEXT NOT NULL, `enabled` INTEGER NOT NULL, `isDvm` INTEGER NOT NULL, PRIMARY KEY(`spec`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`spec` TEXT NOT NULL, `name` TEXT NOT NULL, `description` TEXT NOT NULL, `enabled` INTEGER NOT NULL, `kind` TEXT, PRIMARY KEY(`spec`))",
         "fields": [
           {
             "fieldPath": "spec",
@@ -1531,10 +1531,10 @@
             "notNull": true
           },
           {
-            "fieldPath": "isDvm",
-            "columnName": "isDvm",
-            "affinity": "INTEGER",
-            "notNull": true
+            "fieldPath": "kind",
+            "columnName": "kind",
+            "affinity": "TEXT",
+            "notNull": false
           }
         ],
         "primaryKey": {
@@ -1612,7 +1612,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '08c05ece350fc979d5b2a095dff3c177')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '3d1ea80497304f5dfb5f7e3920e51094')"
     ]
   }
 }
