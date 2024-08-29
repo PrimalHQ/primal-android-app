@@ -7,6 +7,7 @@ interface ReadsFeedsContract {
     data class UiState(
         val activeFeed: FeedUi,
         val feeds: List<FeedUi> = emptyList(),
+        val isEditMode: Boolean = false,
         val feedMarketplaceStage: FeedMarketplaceStage = FeedMarketplaceStage.FeedList,
         val fetchingDvmFeeds: Boolean = false,
         val dvmFeeds: List<DvmFeed> = emptyList(),
@@ -20,9 +21,14 @@ interface ReadsFeedsContract {
     }
 
     sealed class UiEvent {
+        data object OpenEditMode : UiEvent()
+        data object CloseEditMode : UiEvent()
+        data class FeedReordered(val feeds: List<FeedUi>) : UiEvent()
         data object ShowFeedMarketplace : UiEvent()
+
         data object CloseFeedMarketplace : UiEvent()
         data class ShowFeedDetails(val dvmFeed: DvmFeed) : UiEvent()
+
         data object CloseFeedDetails : UiEvent()
         data class AddDvmFeedToUserFeeds(val dvmFeed: DvmFeed) : UiEvent()
         data class RemoveDvmFeedFromUserFeeds(val dvmFeed: DvmFeed) : UiEvent()

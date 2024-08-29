@@ -93,8 +93,13 @@ private fun ReadsFeedsBottomSheet(
                         feeds = state.feeds,
                         activeFeed = state.activeFeed,
                         onFeedClick = onFeedClick,
+                        onEditFeedClick = { eventPublisher(ReadsFeedsContract.UiEvent.OpenEditMode) },
+                        enableEditMode = true,
+                        isEditMode = state.isEditMode,
                         onAddFeedClick = { eventPublisher(ReadsFeedsContract.UiEvent.ShowFeedMarketplace) },
-                        showAddFeed = true,
+                        onEditDoneClick = { eventPublisher(ReadsFeedsContract.UiEvent.CloseEditMode) },
+                        onFeedReordered = { eventPublisher(ReadsFeedsContract.UiEvent.FeedReordered(feeds = it)) },
+                        onFeedRemoved = { },
                     )
 
                 FeedMarketplaceStage.FeedMarketplace -> {

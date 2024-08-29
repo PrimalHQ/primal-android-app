@@ -45,8 +45,8 @@ fun FeedsModalBottomSheet(
             feeds = feeds,
             activeFeed = activeFeed,
             onFeedClick = onFeedClick,
-            onAddFeedClick = {},
-            showAddFeed = showAddFeed,
+            onEditFeedClick = {},
+            enableEditMode = showAddFeed,
         )
     }
 }

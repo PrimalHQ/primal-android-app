@@ -154,8 +154,11 @@
     <string name="feed_marketplace_free_feed_label">Free</string>
     <string name="feed_marketplace_paid_feed_label">Paid</string>
     <string name="feed_details_title">Feed Details</string>
-    <string name="feed_details_add_feed">Add feed</string>
-    <string name="feed_details_remove_feed">Remove feed</string>
+    <string name="feed_details_add_feed">Add Feed</string>
+    <string name="feed_details_remove_feed">Remove Feed</string>
+    <string name="feed_list_add_feed">Add Feed</string>
+    <string name="feed_list_edit">Edit</string>
+    <string name="feed_list_done">Done</string>
 
     <string name="feed_no_content">There is no content in this feed.</string>
     <string name="feed_error_loading">Unable to load content for this feed. Please try again.</string>

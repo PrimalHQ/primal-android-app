@@ -79,6 +79,17 @@ class ReadsFeedsViewModel @AssistedInject constructor(
 
                     is UiEvent.AddDvmFeedToUserFeeds -> addToUserFeeds(dvmFeed = it.dvmFeed)
                     is UiEvent.RemoveDvmFeedFromUserFeeds -> removeFromUserFeeds(dvmFeed = it.dvmFeed)
+
+                    UiEvent.OpenEditMode -> {
+                        setState { copy(isEditMode = true) }
+                    }
+                    UiEvent.CloseEditMode -> {
+                        setState { copy(isEditMode = false) }
+                        // TODO Save new feed
+                    }
+                    is UiEvent.FeedReordered -> {
+                        setState { copy(feeds = it.feeds) }
+                    }
                 }
             }
         }
@@ -86,11 +97,7 @@ class ReadsFeedsViewModel @AssistedInject constructor(
     private fun observeReadsFeeds() =
         viewModelScope.launch {
             articleRepository.observeFeeds().collect { feeds ->
-                setState {
-                    copy(
-                        feeds = feeds.map { it.asFeedUi() },
-                    )
-                }
+                setState { copy(feeds = feeds.map { it.asFeedUi() }) }
             }
         }
 
