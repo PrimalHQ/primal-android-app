@@ -72,7 +72,7 @@ private fun String.nostrUriToBytes(): ByteArray? {
     val key = matcher.group(3)?.lowercase() ?: return null
     return try {
         (type + key).bechToBytesOrThrow()
-    } catch (error: IllegalArgumentException) {
+    } catch (error: Exception) {
         Timber.w(error)
         null
     }
@@ -110,7 +110,7 @@ fun String.extractProfileId(): String? {
             }
             else -> null
         }
-    } catch (error: IllegalArgumentException) {
+    } catch (error: Exception) {
         Timber.w(error)
         null
     }
@@ -132,7 +132,7 @@ fun String.extractNoteId(): String? {
             }
             else -> null
         }
-    } catch (error: IllegalArgumentException) {
+    } catch (error: Exception) {
         Timber.w(error)
         null
     }
