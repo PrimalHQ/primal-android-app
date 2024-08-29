@@ -225,7 +225,8 @@ dependencies {
     implementation(libs.compose.ui.graphics)
     implementation(libs.compose.ui.tooling.preview)
     implementation(libs.compose.material3)
-    implementation(libs.compose.placeholdermaterial)
+    implementation(libs.compose.placeholder.foundation)
+    implementation(libs.compose.placeholder.material3)
 
     implementation(libs.compose.constraintlayout)
     implementation(libs.constraintlayout)

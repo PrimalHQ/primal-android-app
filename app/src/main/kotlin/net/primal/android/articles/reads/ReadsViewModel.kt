@@ -34,26 +34,22 @@ class ReadsViewModel @Inject constructor(
     init {
         observeActiveAccount()
         observeBadgesUpdates()
+        observeFeeds()
         observeEvents()
-        loadDefaultReadsFeed()
     }
 
     private fun observeEvents() {
         viewModelScope.launch {
             events.collect {
-                when (it) {
-                    is UiEvent.ChangeFeed -> {
-                        setState { copy(activeFeed = it.feed) }
-                    }
-                }
             }
         }
     }
 
-    private fun loadDefaultReadsFeed() =
+    private fun observeFeeds() =
         viewModelScope.launch {
-            val defaultFeed = articleRepository.firstFeed()?.asFeedUi()
-            setState { copy(activeFeed = defaultFeed) }
+            articleRepository.observeFeeds().collect { feeds ->
+                setState { copy(feeds = feeds.map { it.asFeedUi() }) }
+            }
         }
 
     private fun ArticleFeed.asFeedUi() =

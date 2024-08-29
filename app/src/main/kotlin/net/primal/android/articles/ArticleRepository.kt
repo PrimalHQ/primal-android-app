@@ -41,8 +41,6 @@ class ArticleRepository @Inject constructor(
         private const val PAGE_SIZE = 25
     }
 
-    suspend fun firstFeed() = withContext(dispatchers.io()) { database.articleFeeds().first() }
-
     fun observeFeeds() = database.articleFeeds().observeAllFeeds()
 
     fun feedBySpec(feedSpec: String): Flow<PagingData<Article>> {
