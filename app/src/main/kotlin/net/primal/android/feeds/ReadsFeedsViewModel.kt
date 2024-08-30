@@ -99,6 +99,10 @@ class ReadsFeedsViewModel @AssistedInject constructor(
                     is UiEvent.FeedReordered -> {
                         changeAllFeeds(feeds = it.feeds)
                     }
+
+                    is UiEvent.UpdateFeedSpecEnabled -> {
+                        updateFeedSpecEnabled(feedSpec = it.feedSpec, enabled = it.enabled)
+                    }
                 }
             }
         }
@@ -112,6 +116,18 @@ class ReadsFeedsViewModel @AssistedInject constructor(
 
     private fun changeAllFeeds(feeds: List<FeedUi>) {
         allFeeds = feeds
+        updateFeedsState()
+    }
+
+    private fun updateFeedSpecEnabled(feedSpec: String, enabled: Boolean) {
+        if (allFeeds.count { it.enabled } == 1 && !enabled) return
+
+        val index = allFeeds.indexOfFirst { it.directive == feedSpec }
+        if (index != -1) {
+            allFeeds = allFeeds.toMutableList().apply {
+                this[index] = this[index].copy(enabled = enabled)
+            }
+        }
         updateFeedsState()
     }
 

@@ -99,6 +99,14 @@ private fun ReadsFeedsBottomSheet(
                         onAddFeedClick = { eventPublisher(ReadsFeedsContract.UiEvent.ShowFeedMarketplace) },
                         onEditDoneClick = { eventPublisher(ReadsFeedsContract.UiEvent.CloseEditMode) },
                         onFeedReordered = { eventPublisher(ReadsFeedsContract.UiEvent.FeedReordered(feeds = it)) },
+                        onFeedEnabled = { spec, enabled ->
+                            eventPublisher(
+                                ReadsFeedsContract.UiEvent.UpdateFeedSpecEnabled(
+                                    feedSpec = spec,
+                                    enabled = enabled,
+                                ),
+                            )
+                        },
                         onFeedRemoved = { },
                     )
 

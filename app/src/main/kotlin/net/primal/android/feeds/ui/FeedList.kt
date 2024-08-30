@@ -59,6 +59,7 @@ fun FeedList(
     onAddFeedClick: (() -> Unit)? = null,
     onEditDoneClick: (() -> Unit)? = null,
     onFeedReordered: ((List<FeedUi>) -> Unit)? = null,
+    onFeedEnabled: ((feedSpec: String, enabled: Boolean) -> Unit)? = null,
     onFeedRemoved: ((FeedUi) -> Unit)? = null,
 ) {
     var data by remember(feeds) { mutableStateOf(feeds) }
@@ -121,9 +122,7 @@ fun FeedList(
                                     Row {
                                         PrimalSwitch(
                                             checked = item.enabled,
-                                            onCheckedChange = {
-                                                // TODO What now?
-                                            },
+                                            onCheckedChange = { onFeedEnabled?.invoke(item.directive, it) },
                                         )
                                         FeedDragHandle(
                                             haptic = haptic,

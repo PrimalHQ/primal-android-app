@@ -24,6 +24,7 @@ interface ReadsFeedsContract {
     sealed class UiEvent {
         data object OpenEditMode : UiEvent()
         data object CloseEditMode : UiEvent()
+        data class UpdateFeedSpecEnabled(val feedSpec: String, val enabled: Boolean) : UiEvent()
         data class FeedReordered(val feeds: List<FeedUi>) : UiEvent()
         data object ShowFeedMarketplace : UiEvent()
 
