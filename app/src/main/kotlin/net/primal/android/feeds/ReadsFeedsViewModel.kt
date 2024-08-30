@@ -13,13 +13,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
-import net.primal.android.articles.db.ArticleFeed
 import net.primal.android.feeds.ReadsFeedsContract.UiEvent
 import net.primal.android.feeds.ReadsFeedsContract.UiState
 import net.primal.android.feeds.ReadsFeedsContract.UiState.FeedMarketplaceStage
 import net.primal.android.feeds.repository.DvmFeed
 import net.primal.android.feeds.repository.FeedsRepository
 import net.primal.android.feeds.ui.model.FeedUi
+import net.primal.android.feeds.ui.model.asArticleFeedDb
+import net.primal.android.feeds.ui.model.asFeedUi
 import net.primal.android.networking.sockets.errors.WssException
 import timber.log.Timber
 
@@ -41,6 +42,8 @@ class ReadsFeedsViewModel @AssistedInject constructor(
     private val events: MutableSharedFlow<UiEvent> = MutableSharedFlow()
     fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
 
+    private var allFeeds: List<FeedUi> = emptyList()
+
     init {
         observeEvents()
         observeReadsFeeds()
@@ -56,11 +59,13 @@ class ReadsFeedsViewModel @AssistedInject constructor(
                             feedMarketplaceStage = FeedMarketplaceStage.FeedMarketplace,
                         )
                     }
+
                     UiEvent.CloseFeedMarketplace -> setState {
                         copy(
                             feedMarketplaceStage = FeedMarketplaceStage.FeedList,
                         )
                     }
+
                     is UiEvent.ShowFeedDetails -> {
                         setState {
                             copy(
@@ -69,6 +74,7 @@ class ReadsFeedsViewModel @AssistedInject constructor(
                             )
                         }
                     }
+
                     UiEvent.CloseFeedDetails -> {
                         val closingDvmFeed = _state.value.selectedDvmFeed
                         if (closingDvmFeed != null) scheduleClearingDvmFeed(dvmFeed = closingDvmFeed)
@@ -80,13 +86,17 @@ class ReadsFeedsViewModel @AssistedInject constructor(
 
                     UiEvent.OpenEditMode -> {
                         setState { copy(isEditMode = true) }
+                        updateFeedsState()
                     }
+
                     UiEvent.CloseEditMode -> {
                         setState { copy(isEditMode = false) }
-                        // TODO Save new feed
+                        updateFeedsState()
+                        persistReadsFeed()
                     }
+
                     is UiEvent.FeedReordered -> {
-                        setState { copy(feeds = it.feeds) }
+                        changeAllFeeds(feeds = it.feeds)
                     }
                 }
             }
@@ -95,16 +105,23 @@ class ReadsFeedsViewModel @AssistedInject constructor(
     private fun observeReadsFeeds() =
         viewModelScope.launch {
             feedsRepository.observeReadsFeeds().collect { feeds ->
-                setState { copy(feeds = feeds.map { it.asFeedUi() }) }
+                changeAllFeeds(feeds = feeds.map { it.asFeedUi() })
             }
         }
 
-    private fun ArticleFeed.asFeedUi() =
-        FeedUi(
-            directive = this.spec,
-            name = this.name,
-            description = this.description,
-        )
+    private fun changeAllFeeds(feeds: List<FeedUi>) {
+        allFeeds = feeds
+        updateFeedsState()
+    }
+
+    private fun updateFeedsState() {
+        val currentState = _state.value
+        if (currentState.isEditMode) {
+            setState { copy(feeds = allFeeds) }
+        } else {
+            setState { copy(feeds = allFeeds.filter { it.enabled }) }
+        }
+    }
 
     private fun fetchLatestFeedMarketplace() =
         viewModelScope.launch {
@@ -134,5 +151,15 @@ class ReadsFeedsViewModel @AssistedInject constructor(
     private fun removeFromUserFeeds(dvmFeed: DvmFeed) =
         viewModelScope.launch {
             feedsRepository.removeDvmFeed(dvmFeed)
+        }
+
+    private fun persistReadsFeed() =
+        viewModelScope.launch {
+            val currentFeeds = allFeeds.map { it.asArticleFeedDb() }
+            try {
+                feedsRepository.persistArticleFeeds(feeds = currentFeeds)
+            } catch (error: WssException) {
+                Timber.w(error)
+            }
         }
 }

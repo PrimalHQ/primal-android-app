@@ -6,8 +6,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class ContentArticleFeedData(
     val name: String,
-    val spec: String,
-    @SerialName("feedkind") val feedKind: String,
     val description: String,
+    val spec: String,
     val enabled: Boolean,
+    @SerialName("feedkind") val feedKind: String?,
 )
