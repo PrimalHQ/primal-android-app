@@ -10,13 +10,11 @@ import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.feeds.api.FeedsApi
-import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.ext.findFirstIdentifier
 import net.primal.android.nostr.model.primal.content.ContentArticleFeedData
 import net.primal.android.nostr.model.primal.content.ContentPrimalDvmFeedMetadata
 import net.primal.android.nostr.model.primal.content.ContentPrimalEventStats
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import timber.log.Timber
 
 class FeedsRepository @Inject constructor(
     private val dispatcherProvider: CoroutineDispatcherProvider,
@@ -29,15 +27,10 @@ class FeedsRepository @Inject constructor(
 
     suspend fun fetchAndPersistArticleFeeds() {
         withContext(dispatcherProvider.io()) {
-            val feeds = try {
-                val response = feedsApi.getReadsUserFeeds(userId = activeAccountStore.activeUserId())
-                NostrJson.decodeFromStringOrNull<List<ContentArticleFeedData>>(
-                    string = response.articleFeeds.content,
-                )
-            } catch (error: WssException) {
-                Timber.w(error)
-                null
-            }
+            val response = feedsApi.getReadsUserFeeds(userId = activeAccountStore.activeUserId())
+            val feeds = NostrJson.decodeFromStringOrNull<List<ContentArticleFeedData>>(
+                string = response.articleFeeds.content,
+            )
 
             if (feeds != null) {
                 database.withTransaction {
@@ -55,6 +48,28 @@ class FeedsRepository @Inject constructor(
                     )
                 }
             }
+        }
+    }
+
+    suspend fun persistArticleFeeds(feeds: List<ArticleFeed>) {
+        withContext(dispatcherProvider.io()) {
+            database.withTransaction {
+                database.articleFeeds().deleteAll()
+                database.articleFeeds().upsertAll(data = feeds)
+            }
+
+            feedsApi.setReadsUserFeeds(
+                userId = activeAccountStore.activeUserId(),
+                feeds = feeds.map {
+                    ContentArticleFeedData(
+                        name = it.name,
+                        spec = it.spec,
+                        feedKind = it.kind,
+                        description = it.description,
+                        enabled = it.enabled,
+                    )
+                },
+            )
         }
     }
 

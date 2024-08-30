@@ -14,6 +14,7 @@ import net.primal.android.networking.primal.PrimalVerb.GET_FEATURED_DVM_READS
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.model.primal.content.ContentAppSubSettings
+import net.primal.android.nostr.model.primal.content.ContentArticleFeedData
 import net.primal.android.nostr.notary.NostrNotary
 
 @Singleton
@@ -34,16 +35,16 @@ class FeedsApiImpl @Inject constructor(
         return queryUserFeeds(userId = userId, key = "user-reads-feeds")
     }
 
-    override suspend fun setAppSubSettings(userId: String) {
-        TODO("Not yet implemented")
+    override suspend fun setReadsUserFeeds(userId: String, feeds: List<ContentArticleFeedData>) {
+        setUserFeeds(userId = userId, feeds = feeds, key = "user-reads-feeds")
     }
 
     override suspend fun getHomeUserFeeds(userId: String): FeedsResponse {
         return queryUserFeeds(userId = userId, key = "user-home-feeds")
     }
 
-    override suspend fun setHomeUserFeeds(userId: String) {
-        TODO("Not yet implemented")
+    override suspend fun setHomeUserFeeds(userId: String, feeds: List<ContentArticleFeedData>) {
+        setUserFeeds(userId = userId, feeds = feeds, key = "user-home-feeds")
     }
 
     private suspend fun queryDvmFeeds(kind: String): DvmFeedsResponse {
@@ -79,5 +80,25 @@ class FeedsApiImpl @Inject constructor(
             ?: throw WssException("Invalid get users feeds response for key '$key'.")
 
         return FeedsResponse(articleFeeds = articleFeeds)
+    }
+
+    private suspend fun setUserFeeds(
+        userId: String,
+        key: String,
+        feeds: List<ContentArticleFeedData>,
+    ) {
+        val signedNostrEvent = nostrNotary.signAppSpecificDataNostrEvent(
+            userId = userId,
+            content = NostrJson.encodeToString(
+                ContentAppSubSettings(key = key, settings = feeds),
+            ),
+        )
+
+        primalApiClient.query(
+            message = PrimalCacheFilter(
+                primalVerb = PrimalVerb.SET_APP_SUB_SETTINGS,
+                optionsJson = NostrJson.encodeToString(SubSettingsAuthorization(event = signedNostrEvent)),
+            ),
+        )
     }
 }

@@ -1,6 +1,7 @@
 package net.primal.android.feeds.api
 
 import net.primal.android.feeds.api.model.FeedsResponse
+import net.primal.android.nostr.model.primal.content.ContentArticleFeedData
 
 interface FeedsApi {
 
@@ -10,9 +11,9 @@ interface FeedsApi {
 
     suspend fun getReadsUserFeeds(userId: String): FeedsResponse
 
-    suspend fun setAppSubSettings(userId: String)
+    suspend fun setReadsUserFeeds(userId: String, feeds: List<ContentArticleFeedData>)
 
     suspend fun getHomeUserFeeds(userId: String): FeedsResponse
 
-    suspend fun setHomeUserFeeds(userId: String)
+    suspend fun setHomeUserFeeds(userId: String, feeds: List<ContentArticleFeedData>)
 }
