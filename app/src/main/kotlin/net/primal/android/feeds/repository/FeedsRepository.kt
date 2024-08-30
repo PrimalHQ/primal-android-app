@@ -10,7 +10,9 @@ import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.feeds.api.FeedsApi
+import net.primal.android.feeds.api.model.FeedsResponse
 import net.primal.android.nostr.ext.findFirstIdentifier
+import net.primal.android.nostr.model.primal.content.ContentAppSubSettings
 import net.primal.android.nostr.model.primal.content.ContentArticleFeedData
 import net.primal.android.nostr.model.primal.content.ContentPrimalDvmFeedMetadata
 import net.primal.android.nostr.model.primal.content.ContentPrimalEventStats
@@ -27,29 +29,40 @@ class FeedsRepository @Inject constructor(
 
     suspend fun fetchAndPersistArticleFeeds() {
         withContext(dispatcherProvider.io()) {
-            val response = feedsApi.getReadsUserFeeds(userId = activeAccountStore.activeUserId())
-            val feeds = NostrJson.decodeFromStringOrNull<List<ContentArticleFeedData>>(
-                string = response.articleFeeds.content,
-            )
-
+            val feeds = parseFeeds { feedsApi.getReadsUserFeeds(userId = activeAccountStore.activeUserId()) }
             if (feeds != null) {
                 database.withTransaction {
                     database.articleFeeds().deleteAll()
-                    database.articleFeeds().upsertAll(
-                        data = feeds.map { data ->
-                            ArticleFeed(
-                                spec = data.spec,
-                                name = data.name,
-                                description = data.description,
-                                enabled = data.enabled,
-                                kind = data.feedKind,
-                            )
-                        },
-                    )
+                    database.articleFeeds().upsertAll(data = feeds)
                 }
             }
         }
     }
+
+    private suspend fun parseFeeds(feedsApiCall: suspend () -> FeedsResponse): List<ArticleFeed>? {
+        return withContext(dispatcherProvider.io()) {
+            val response = NostrJson.decodeFromStringOrNull<ContentAppSubSettings<List<ContentArticleFeedData>>>(
+                string = feedsApiCall().articleFeeds.content,
+            )
+
+            response?.settings?.map { it.asArticleFeedPO() }
+        }
+    }
+
+    private fun ContentArticleFeedData.asArticleFeedPO(): ArticleFeed {
+        return ArticleFeed(
+            spec = this.spec,
+            name = this.name,
+            description = this.description,
+            enabled = this.enabled,
+            kind = this.feedKind,
+        )
+    }
+
+    suspend fun fetchDefaultArticleFeeds() =
+        withContext(dispatcherProvider.io()) {
+            parseFeeds { feedsApi.getDefaultReadsUserFeeds(userId = activeAccountStore.activeUserId()) }
+        }
 
     suspend fun persistArticleFeeds(feeds: List<ArticleFeed>) {
         withContext(dispatcherProvider.io()) {

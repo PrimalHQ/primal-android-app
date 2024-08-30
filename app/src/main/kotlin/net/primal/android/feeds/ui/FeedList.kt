@@ -7,9 +7,9 @@ import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -21,6 +21,7 @@ import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
@@ -73,74 +74,83 @@ fun FeedList(
         haptic.performHapticFeedback(ReorderHapticFeedbackType.MOVE)
     }
 
-    Column(modifier = modifier) {
-        CenterAlignedTopAppBar(
-            colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
-            ),
-            title = {
-                Text(text = title)
-            },
-        )
-        LazyColumn(
-            modifier = modifier.weight(1f),
-            state = feedsListState,
-            // https://github.com/Calvin-LL/Reorderable/issues/32
-            contentPadding = PaddingValues(vertical = 1.dp),
-        ) {
-            itemsIndexed(
-                items = data,
-                key = { _, item -> item.uniqueKey() },
-            ) { _, item ->
-                ReorderableItem(
-                    state = reorderableFeedsListState,
-                    key = item.uniqueKey(),
-                ) {
-                    val interactionSource = remember { MutableInteractionSource() }
-                    FeedListItem(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp)
-                            .clip(AppTheme.shapes.large)
-                            .clickable(
-                                interactionSource = interactionSource,
-                                indication = LocalIndication.current,
-                                onClick = { onFeedClick(item) },
-                            ),
-                        data = item,
-                        selected = item.directive == activeFeed?.directive,
-                        editOptions = {
-                            if (isEditMode) {
-                                Row {
-                                    PrimalSwitch(
-                                        checked = item.enabled,
-                                        onCheckedChange = {
-                                            // TODO What now?
-                                        },
-                                    )
-                                    FeedDragHandle(
-                                        haptic = haptic,
-                                        interactionSource = interactionSource,
-                                    )
+    Scaffold(
+        modifier = modifier,
+        topBar = {
+            CenterAlignedTopAppBar(
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
+                ),
+                title = {
+                    Text(text = title)
+                },
+            )
+        },
+        content = { paddingValues ->
+            LazyColumn(
+                modifier = Modifier
+                    .padding(paddingValues)
+                    .fillMaxSize(),
+                state = feedsListState,
+                // https://github.com/Calvin-LL/Reorderable/issues/32
+                contentPadding = PaddingValues(vertical = 1.dp),
+            ) {
+                itemsIndexed(
+                    items = data,
+                    key = { _, item -> item.uniqueKey() },
+                ) { _, item ->
+                    ReorderableItem(
+                        state = reorderableFeedsListState,
+                        key = item.uniqueKey(),
+                    ) {
+                        val interactionSource = remember { MutableInteractionSource() }
+                        FeedListItem(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp)
+                                .clip(AppTheme.shapes.large)
+                                .clickable(
+                                    interactionSource = interactionSource,
+                                    indication = LocalIndication.current,
+                                    onClick = { onFeedClick(item) },
+                                ),
+                            data = item,
+                            selected = item.directive == activeFeed?.directive,
+                            editOptions = {
+                                if (isEditMode) {
+                                    Row {
+                                        PrimalSwitch(
+                                            checked = item.enabled,
+                                            onCheckedChange = {
+                                                // TODO What now?
+                                            },
+                                        )
+                                        FeedDragHandle(
+                                            haptic = haptic,
+                                            interactionSource = interactionSource,
+                                        )
+                                    }
                                 }
-                            }
-                        },
+                            },
+                        )
+                    }
+                }
+            }
+        },
+        bottomBar = {
+            if (enableEditMode) {
+                PrimalDivider()
+                if (!isEditMode) {
+                    RegularBottomBar(onEditFeedClick = { onEditFeedClick?.invoke() })
+                } else {
+                    EditModeBottomBar(
+                        onAddFeedClick = { onAddFeedClick?.invoke() },
+                        onDoneClick = { onEditDoneClick?.invoke() },
                     )
                 }
             }
-        }
-        if (enableEditMode) {
-            PrimalDivider()
-            if (!isEditMode) {
-                RegularBottomBar(onEditFeedClick = { onEditFeedClick?.invoke() })
-            } else {
-                EditModeBottomBar(
-                    onAddFeedClick = { onAddFeedClick?.invoke() },
-                    onDoneClick = { onEditDoneClick?.invoke() },
-                )
-            }
-        }
-    }
+        },
+    )
 }
 
 @Composable

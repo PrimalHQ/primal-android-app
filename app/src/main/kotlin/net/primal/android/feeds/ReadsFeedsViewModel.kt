@@ -47,6 +47,7 @@ class ReadsFeedsViewModel @AssistedInject constructor(
     init {
         observeEvents()
         observeReadsFeeds()
+        fetchDefaultReadsFeeds()
         fetchLatestFeedMarketplace()
     }
 
@@ -133,6 +134,18 @@ class ReadsFeedsViewModel @AssistedInject constructor(
                 Timber.w(error)
             } finally {
                 setState { copy(fetchingDvmFeeds = false) }
+            }
+        }
+
+    private fun fetchDefaultReadsFeeds() =
+        viewModelScope.launch {
+            try {
+                val defaultArticleFeeds = feedsRepository.fetchDefaultArticleFeeds()
+                if (defaultArticleFeeds != null) {
+                    setState { copy(defaultFeeds = defaultArticleFeeds.map { it.asFeedUi() }) }
+                }
+            } catch (error: WssException) {
+                Timber.w(error)
             }
         }
 

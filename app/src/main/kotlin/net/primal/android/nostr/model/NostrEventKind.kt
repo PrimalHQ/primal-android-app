@@ -69,6 +69,7 @@ enum class NostrEventKind(val value: Int) {
     PrimalLongFormWordsCount(value = 10_000_144),
     PrimalBroadcastResult(value = 10_000_149),
     PrimalLongFormContentFeeds(value = 10_000_152),
+    PrimalSubSettings(value = 10_000_155),
     PrimalWalletOperation(value = 10_000_300),
     PrimalWalletBalance(value = 10_000_301),
     PrimalWalletDepositInvoice(value = 10_000_302),

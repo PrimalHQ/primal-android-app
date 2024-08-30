@@ -9,11 +9,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
-import net.primal.android.articles.db.ArticleFeed
 import net.primal.android.articles.reads.ReadsScreenContract.UiEvent
 import net.primal.android.articles.reads.ReadsScreenContract.UiState
 import net.primal.android.feeds.repository.FeedsRepository
-import net.primal.android.feeds.ui.model.FeedUi
+import net.primal.android.feeds.ui.model.asFeedUi
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.subscriptions.SubscriptionsManager
 
@@ -47,19 +46,17 @@ class ReadsViewModel @Inject constructor(
 
     private fun observeFeeds() =
         viewModelScope.launch {
-            feedsRepository.observeReadsFeeds().collect { feeds ->
-                setState { copy(feeds = feeds.map { it.asFeedUi() }) }
-            }
+            feedsRepository.observeReadsFeeds()
+                .collect { feeds ->
+                    setState {
+                        copy(
+                            feeds = feeds
+                                .filter { it.enabled }
+                                .map { it.asFeedUi() },
+                        )
+                    }
+                }
         }
-
-    private fun ArticleFeed.asFeedUi() =
-        FeedUi(
-            directive = this.spec,
-            name = this.name,
-            description = this.description,
-            enabled = this.enabled,
-            deletable = this.kind != "primal",
-        )
 
     private fun observeActiveAccount() =
         viewModelScope.launch {

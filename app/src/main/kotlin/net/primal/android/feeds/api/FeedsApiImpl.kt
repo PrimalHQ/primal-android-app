@@ -31,16 +31,24 @@ class FeedsApiImpl @Inject constructor(
         return queryDvmFeeds(kind = "notes")
     }
 
+    override suspend fun getDefaultReadsUserFeeds(userId: String): FeedsResponse {
+        return queryUserFeeds(userId = userId, key = "user-reads-feeds", verb = PrimalVerb.GET_DEFAULT_APP_SUB_SETTINGS)
+    }
+
     override suspend fun getReadsUserFeeds(userId: String): FeedsResponse {
-        return queryUserFeeds(userId = userId, key = "user-reads-feeds")
+        return queryUserFeeds(userId = userId, key = "user-reads-feeds", verb = PrimalVerb.GET_APP_SUB_SETTINGS)
     }
 
     override suspend fun setReadsUserFeeds(userId: String, feeds: List<ContentArticleFeedData>) {
         setUserFeeds(userId = userId, feeds = feeds, key = "user-reads-feeds")
     }
 
+    override suspend fun getDefaultHomeUserFeeds(userId: String): FeedsResponse {
+        return queryUserFeeds(userId = userId, key = "user-home-feeds", verb = PrimalVerb.GET_DEFAULT_APP_SUB_SETTINGS)
+    }
+
     override suspend fun getHomeUserFeeds(userId: String): FeedsResponse {
-        return queryUserFeeds(userId = userId, key = "user-home-feeds")
+        return queryUserFeeds(userId = userId, key = "user-home-feeds", verb = PrimalVerb.GET_APP_SUB_SETTINGS)
     }
 
     override suspend fun setHomeUserFeeds(userId: String, feeds: List<ContentArticleFeedData>) {
@@ -61,7 +69,11 @@ class FeedsApiImpl @Inject constructor(
         )
     }
 
-    private suspend fun queryUserFeeds(userId: String, key: String): FeedsResponse {
+    private suspend fun queryUserFeeds(
+        userId: String,
+        key: String,
+        verb: PrimalVerb,
+    ): FeedsResponse {
         val signedNostrEvent = nostrNotary.signAppSpecificDataNostrEvent(
             userId = userId,
             content = NostrJson.encodeToString(
@@ -71,13 +83,13 @@ class FeedsApiImpl @Inject constructor(
 
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.GET_APP_SUB_SETTINGS,
+                primalVerb = verb,
                 optionsJson = NostrJson.encodeToString(SubSettingsAuthorization(event = signedNostrEvent)),
             ),
         )
 
-        val articleFeeds = queryResult.findPrimalEvent(NostrEventKind.PrimalLongFormContentFeeds)
-            ?: throw WssException("Invalid get users feeds response for key '$key'.")
+        val articleFeeds = queryResult.findPrimalEvent(NostrEventKind.PrimalSubSettings)
+            ?: throw WssException("Invalid feeds response for key '$key'.")
 
         return FeedsResponse(articleFeeds = articleFeeds)
     }
