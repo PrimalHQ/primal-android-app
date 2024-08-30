@@ -119,7 +119,7 @@ private fun ReadsScreen(
             if (state.feeds.isNotEmpty()) {
                 HorizontalPager(
                     state = pagerState,
-                    key = { index -> state.feeds[index].directive },
+                    key = { index -> state.feeds.getOrNull(index)?.directive ?: Unit },
                     pageNestedScrollConnection = remember(pagerState) {
                         PagerDefaults.pageNestedScrollConnection(pagerState, Orientation.Horizontal)
                     },
