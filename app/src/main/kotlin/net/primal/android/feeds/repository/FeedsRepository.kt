@@ -61,7 +61,7 @@ class FeedsRepository @Inject constructor(
 
     suspend fun fetchDefaultArticleFeeds() =
         withContext(dispatcherProvider.io()) {
-            parseFeeds { feedsApi.getDefaultReadsUserFeeds(userId = activeAccountStore.activeUserId()) }
+            parseFeeds { feedsApi.getDefaultReadsUserFeeds() }
         }
 
     suspend fun persistArticleFeeds(feeds: List<ArticleFeed>) {
@@ -128,9 +128,9 @@ class FeedsRepository @Inject constructor(
         }
     }
 
-    suspend fun removeDvmFeed(dvmFeed: DvmFeed) {
+    suspend fun removeFeed(feedSpec: String) {
         withContext(dispatcherProvider.io()) {
-            database.articleFeeds().delete(dvmFeed.dvmSpec)
+            database.articleFeeds().delete(feedSpec)
         }
     }
 

@@ -33,6 +33,6 @@ interface ReadsFeedsContract {
 
         data object CloseFeedDetails : UiEvent()
         data class AddDvmFeedToUserFeeds(val dvmFeed: DvmFeed) : UiEvent()
-        data class RemoveDvmFeedFromUserFeeds(val dvmFeed: DvmFeed) : UiEvent()
+        data class RemoveFeedFromUserFeeds(val spec: String) : UiEvent()
     }
 }

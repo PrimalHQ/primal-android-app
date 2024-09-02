@@ -159,6 +159,10 @@
     <string name="feed_list_add_feed">Add Feed</string>
     <string name="feed_list_edit">Edit</string>
     <string name="feed_list_done">Done</string>
+    <string name="feed_list_remove_feed_title">Remove feed?</string>
+    <string name="feed_list_remove_feed_text">Remove ‘%1$s’ from your feed list?</string>
+    <string name="feed_list_dialog_confirm">Confirm</string>
+    <string name="feed_list_dialog_dismiss">Dismiss</string>
 
     <string name="feed_no_content">There is no content in this feed.</string>
     <string name="feed_error_loading">Unable to load content for this feed. Please try again.</string>

@@ -99,15 +99,17 @@ private fun ReadsFeedsBottomSheet(
                         onAddFeedClick = { eventPublisher(ReadsFeedsContract.UiEvent.ShowFeedMarketplace) },
                         onEditDoneClick = { eventPublisher(ReadsFeedsContract.UiEvent.CloseEditMode) },
                         onFeedReordered = { eventPublisher(ReadsFeedsContract.UiEvent.FeedReordered(feeds = it)) },
-                        onFeedEnabled = { spec, enabled ->
+                        onFeedEnabled = { feed, enabled ->
                             eventPublisher(
                                 ReadsFeedsContract.UiEvent.UpdateFeedSpecEnabled(
-                                    feedSpec = spec,
+                                    feedSpec = feed.directive,
                                     enabled = enabled,
                                 ),
                             )
                         },
-                        onFeedRemoved = { },
+                        onFeedRemoved = {
+                            eventPublisher(ReadsFeedsContract.UiEvent.RemoveFeedFromUserFeeds(spec = it.directive))
+                        },
                     )
 
                 FeedMarketplaceStage.FeedMarketplace -> {
@@ -140,8 +142,8 @@ private fun ReadsFeedsBottomSheet(
                                 } else {
                                     addedToFeeds = true
                                     eventPublisher(
-                                        ReadsFeedsContract.UiEvent.RemoveDvmFeedFromUserFeeds(
-                                            dvmFeed = state.selectedDvmFeed,
+                                        ReadsFeedsContract.UiEvent.RemoveFeedFromUserFeeds(
+                                            spec = state.selectedDvmFeed.dvmSpec,
                                         ),
                                     )
                                 }

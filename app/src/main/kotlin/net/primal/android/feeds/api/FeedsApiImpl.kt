@@ -31,8 +31,8 @@ class FeedsApiImpl @Inject constructor(
         return queryDvmFeeds(kind = "notes")
     }
 
-    override suspend fun getDefaultReadsUserFeeds(userId: String): FeedsResponse {
-        return queryUserFeeds(userId = userId, key = "user-reads-feeds", verb = PrimalVerb.GET_DEFAULT_APP_SUB_SETTINGS)
+    override suspend fun getDefaultReadsUserFeeds(): FeedsResponse {
+        return queryDefaultUserFeeds(key = "user-reads-feeds")
     }
 
     override suspend fun getReadsUserFeeds(userId: String): FeedsResponse {
@@ -43,8 +43,8 @@ class FeedsApiImpl @Inject constructor(
         setUserFeeds(userId = userId, feeds = feeds, key = "user-reads-feeds")
     }
 
-    override suspend fun getDefaultHomeUserFeeds(userId: String): FeedsResponse {
-        return queryUserFeeds(userId = userId, key = "user-home-feeds", verb = PrimalVerb.GET_DEFAULT_APP_SUB_SETTINGS)
+    override suspend fun getDefaultHomeUserFeeds(): FeedsResponse {
+        return queryDefaultUserFeeds(key = "user-home-feeds")
     }
 
     override suspend fun getHomeUserFeeds(userId: String): FeedsResponse {
@@ -67,6 +67,20 @@ class FeedsApiImpl @Inject constructor(
             scores = queryResult.filterPrimalEvents(kind = NostrEventKind.PrimalEventStats),
             dvmHandlers = queryResult.filterNostrEvents(kind = NostrEventKind.AppHandler),
         )
+    }
+
+    private suspend fun queryDefaultUserFeeds(key: String): FeedsResponse {
+        val queryResult = primalApiClient.query(
+            message = PrimalCacheFilter(
+                primalVerb = PrimalVerb.GET_DEFAULT_APP_SUB_SETTINGS,
+                optionsJson = NostrJson.encodeToString(ContentAppSubSettings<String>(key = key)),
+            ),
+        )
+
+        val articleFeeds = queryResult.findPrimalEvent(NostrEventKind.PrimalSubSettings)
+            ?: throw WssException("Invalid default feeds response for key '$key'.")
+
+        return FeedsResponse(articleFeeds = articleFeeds)
     }
 
     private suspend fun queryUserFeeds(
