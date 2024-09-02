@@ -2,6 +2,7 @@ package net.primal.android.feeds.repository
 
 import androidx.room.withTransaction
 import javax.inject.Inject
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import net.primal.android.articles.db.ArticleFeed
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
@@ -39,6 +40,16 @@ class FeedsRepository @Inject constructor(
         }
     }
 
+    private suspend fun parseDefaultFeeds(feedsApiCall: suspend () -> FeedsResponse): List<ArticleFeed>? {
+        return withContext(dispatcherProvider.io()) {
+            val response = NostrJson.decodeFromStringOrNull<List<ContentArticleFeedData>>(
+                string = feedsApiCall().articleFeeds.content,
+            )
+
+            response?.map { it.asArticleFeedPO() }
+        }
+    }
+
     private suspend fun parseFeeds(feedsApiCall: suspend () -> FeedsResponse): List<ArticleFeed>? {
         return withContext(dispatcherProvider.io()) {
             val response = NostrJson.decodeFromStringOrNull<ContentAppSubSettings<List<ContentArticleFeedData>>>(
@@ -59,10 +70,25 @@ class FeedsRepository @Inject constructor(
         )
     }
 
-    suspend fun fetchDefaultArticleFeeds() =
-        withContext(dispatcherProvider.io()) {
-            parseFeeds { feedsApi.getDefaultReadsUserFeeds() }
+    suspend fun persistNewDefaultFeeds() {
+        val localFeeds = withContext(dispatcherProvider.io()) {
+            database.articleFeeds().observeAllFeeds().first()
         }
+        val defaultFeeds = withContext(dispatcherProvider.io()) {
+            parseDefaultFeeds { feedsApi.getDefaultReadsUserFeeds() } ?: emptyList()
+        }
+
+        val localFeedSpecs = localFeeds.map { it.spec }.toSet()
+        val newFeeds = defaultFeeds.toMutableList().apply {
+            removeIf { localFeedSpecs.contains(it.spec) }
+        }
+
+        if (newFeeds.isNotEmpty()) {
+            val disabledNewFeeds = newFeeds.map { it.copy(enabled = false) }
+            val mergedFeeds = localFeeds + disabledNewFeeds
+            persistArticleFeeds(mergedFeeds)
+        }
+    }
 
     suspend fun persistArticleFeeds(feeds: List<ArticleFeed>) {
         withContext(dispatcherProvider.io()) {
