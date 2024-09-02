@@ -9,13 +9,13 @@ interface FeedsApi {
 
     suspend fun getFeaturedHomeFeeds(): DvmFeedsResponse
 
-    suspend fun getDefaultReadsUserFeeds(userId: String): FeedsResponse
+    suspend fun getDefaultReadsUserFeeds(): FeedsResponse
 
     suspend fun getReadsUserFeeds(userId: String): FeedsResponse
 
     suspend fun setReadsUserFeeds(userId: String, feeds: List<ContentArticleFeedData>)
 
-    suspend fun getDefaultHomeUserFeeds(userId: String): FeedsResponse
+    suspend fun getDefaultHomeUserFeeds(): FeedsResponse
 
     suspend fun getHomeUserFeeds(userId: String): FeedsResponse
 

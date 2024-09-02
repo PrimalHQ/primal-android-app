@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Menu
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -51,16 +52,16 @@ fun FeedList(
     title: String,
     feeds: List<FeedUi>,
     activeFeed: FeedUi?,
-    onFeedClick: (FeedUi) -> Unit,
+    onFeedClick: (feed: FeedUi) -> Unit,
     modifier: Modifier = Modifier,
     enableEditMode: Boolean = false,
     isEditMode: Boolean = false,
     onEditFeedClick: (() -> Unit)? = null,
     onAddFeedClick: (() -> Unit)? = null,
     onEditDoneClick: (() -> Unit)? = null,
-    onFeedReordered: ((List<FeedUi>) -> Unit)? = null,
-    onFeedEnabled: ((feedSpec: String, enabled: Boolean) -> Unit)? = null,
-    onFeedRemoved: ((FeedUi) -> Unit)? = null,
+    onFeedReordered: ((feeds: List<FeedUi>) -> Unit)? = null,
+    onFeedEnabled: ((feed: FeedUi, enabled: Boolean) -> Unit)? = null,
+    onFeedRemoved: ((feed: FeedUi) -> Unit)? = null,
 ) {
     var data by remember(feeds) { mutableStateOf(feeds) }
     val haptic = rememberReorderHapticFeedback()
@@ -73,6 +74,24 @@ fun FeedList(
         data = newData
         onFeedReordered?.invoke(newData)
         haptic.performHapticFeedback(ReorderHapticFeedbackType.MOVE)
+    }
+
+    var deleteFeedDialogVisible by remember { mutableStateOf<FeedUi?>(null) }
+
+    if (deleteFeedDialogVisible != null) {
+        ConfirmActionAlertDialog(
+            dialogTitle = stringResource(R.string.feed_list_remove_feed_title),
+            dialogText = stringResource(R.string.feed_list_remove_feed_text, deleteFeedDialogVisible?.name ?: ""),
+            onConfirmation = {
+                if (onFeedRemoved != null) {
+                    deleteFeedDialogVisible?.let(onFeedRemoved)
+                }
+                deleteFeedDialogVisible = null
+            },
+            onDismissRequest = {
+                deleteFeedDialogVisible = null
+            },
+        )
     }
 
     Scaffold(
@@ -122,7 +141,13 @@ fun FeedList(
                                     Row {
                                         PrimalSwitch(
                                             checked = item.enabled,
-                                            onCheckedChange = { onFeedEnabled?.invoke(item.directive, it) },
+                                            onCheckedChange = { enabled ->
+                                                if (!enabled && item.deletable) {
+                                                    deleteFeedDialogVisible = item
+                                                } else {
+                                                    onFeedEnabled?.invoke(item, enabled)
+                                                }
+                                            },
                                         )
                                         FeedDragHandle(
                                             haptic = haptic,
@@ -244,4 +269,43 @@ private enum class ReorderHapticFeedbackType {
 
 private interface ReorderHapticFeedback {
     fun performHapticFeedback(type: ReorderHapticFeedbackType)
+}
+
+@Composable
+private fun ConfirmActionAlertDialog(
+    onDismissRequest: () -> Unit,
+    onConfirmation: () -> Unit,
+    dialogTitle: String? = null,
+    dialogText: String? = null,
+) {
+    AlertDialog(
+        containerColor = AppTheme.colorScheme.surfaceVariant,
+        title = {
+            if (dialogTitle != null) {
+                Text(text = dialogTitle)
+            }
+        },
+        text = {
+            if (dialogText != null) {
+                Text(text = dialogText)
+            }
+        },
+        onDismissRequest = {
+            onDismissRequest()
+        },
+        confirmButton = {
+            TextButton(
+                onClick = { onConfirmation() },
+            ) {
+                Text(text = stringResource(id = R.string.feed_list_dialog_confirm))
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = { onDismissRequest() },
+            ) {
+                Text(text = stringResource(id = R.string.feed_list_dialog_dismiss))
+            }
+        },
+    )
 }

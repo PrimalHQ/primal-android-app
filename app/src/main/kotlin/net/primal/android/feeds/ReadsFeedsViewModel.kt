@@ -83,7 +83,7 @@ class ReadsFeedsViewModel @AssistedInject constructor(
                     }
 
                     is UiEvent.AddDvmFeedToUserFeeds -> addToUserFeeds(dvmFeed = it.dvmFeed)
-                    is UiEvent.RemoveDvmFeedFromUserFeeds -> removeFromUserFeeds(dvmFeed = it.dvmFeed)
+                    is UiEvent.RemoveFeedFromUserFeeds -> removeFromUserFeeds(spec = it.spec)
 
                     UiEvent.OpenEditMode -> {
                         setState { copy(isEditMode = true) }
@@ -177,9 +177,14 @@ class ReadsFeedsViewModel @AssistedInject constructor(
             feedsRepository.addDvmFeed(dvmFeed)
         }
 
-    private fun removeFromUserFeeds(dvmFeed: DvmFeed) =
+    private fun removeFromUserFeeds(spec: String) =
         viewModelScope.launch {
-            feedsRepository.removeDvmFeed(dvmFeed)
+            allFeeds = allFeeds.toMutableList().apply {
+                removeIf { it.directive == spec }
+            }
+            updateFeedsState()
+            feedsRepository.removeFeed(feedSpec = spec)
+            persistReadsFeed()
         }
 
     private fun persistReadsFeed() =
