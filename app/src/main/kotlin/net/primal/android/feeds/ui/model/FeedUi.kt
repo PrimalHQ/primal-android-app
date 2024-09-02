@@ -1,6 +1,7 @@
 package net.primal.android.feeds.ui.model
 
 import net.primal.android.articles.db.ArticleFeed
+import net.primal.android.feeds.repository.FEED_KIND_PRIMAL
 
 data class FeedUi(
     val directive: String,
@@ -18,7 +19,7 @@ fun ArticleFeed.asFeedUi() =
         description = this.description,
         enabled = this.enabled,
         kind = this.kind,
-        deletable = this.kind != "primal",
+        deletable = this.kind != FEED_KIND_PRIMAL,
     )
 
 fun FeedUi.asArticleFeedDb() =

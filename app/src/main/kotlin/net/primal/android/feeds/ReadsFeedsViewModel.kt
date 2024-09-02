@@ -18,6 +18,8 @@ import net.primal.android.feeds.ReadsFeedsContract.UiState
 import net.primal.android.feeds.ReadsFeedsContract.UiState.FeedMarketplaceStage
 import net.primal.android.feeds.repository.DvmFeed
 import net.primal.android.feeds.repository.FeedsRepository
+import net.primal.android.feeds.repository.SPEC_KIND_READS
+import net.primal.android.feeds.repository.buildSpec
 import net.primal.android.feeds.ui.model.FeedUi
 import net.primal.android.feeds.ui.model.asArticleFeedDb
 import net.primal.android.feeds.ui.model.asFeedUi
@@ -82,8 +84,19 @@ class ReadsFeedsViewModel @AssistedInject constructor(
                         setState { copy(feedMarketplaceStage = FeedMarketplaceStage.FeedMarketplace) }
                     }
 
-                    is UiEvent.AddDvmFeedToUserFeeds -> addToUserFeeds(dvmFeed = it.dvmFeed)
-                    is UiEvent.RemoveFeedFromUserFeeds -> removeFromUserFeeds(spec = it.spec)
+                    is UiEvent.AddDvmFeedToUserFeeds -> {
+                        addToUserFeeds(dvmFeed = it.dvmFeed)
+                        setState { copy(feedMarketplaceStage = FeedMarketplaceStage.FeedList) }
+                    }
+
+                    is UiEvent.RemoveDvmFeedFromUserFeeds -> {
+                        removeFromUserFeeds(spec = it.dvmFeed.buildSpec(specKind = SPEC_KIND_READS))
+                        setState { copy(feedMarketplaceStage = FeedMarketplaceStage.FeedList) }
+                    }
+
+                    is UiEvent.RemoveFeedFromUserFeeds -> {
+                        removeFromUserFeeds(spec = it.spec)
+                    }
 
                     UiEvent.OpenEditMode -> {
                         setState { copy(isEditMode = true) }
@@ -165,13 +178,13 @@ class ReadsFeedsViewModel @AssistedInject constructor(
     private fun scheduleClearingDvmFeed(dvmFeed: DvmFeed) =
         viewModelScope.launch {
             delay(400.milliseconds)
-            feedsRepository.clearDvmFeed(dvmFeed)
+            feedsRepository.clearReadsDvmFeed(dvmFeed)
             setState { copy(selectedDvmFeed = null) }
         }
 
     private fun addToUserFeeds(dvmFeed: DvmFeed) =
         viewModelScope.launch {
-            feedsRepository.addDvmFeed(dvmFeed)
+            feedsRepository.addReadsDvmFeed(dvmFeed)
         }
 
     private fun removeFromUserFeeds(spec: String) =

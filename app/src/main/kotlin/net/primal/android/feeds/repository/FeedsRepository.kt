@@ -143,12 +143,15 @@ class FeedsRepository @Inject constructor(
         return dvmFeeds
     }
 
-    suspend fun addDvmFeed(dvmFeed: DvmFeed) {
+    suspend fun addReadsDvmFeed(dvmFeed: DvmFeed) = addDvmFeed(dvmFeed = dvmFeed, kind = SPEC_KIND_READS)
+
+    private suspend fun addDvmFeed(dvmFeed: DvmFeed, kind: String) {
         withContext(dispatcherProvider.io()) {
             val feed = ArticleFeed(
-                spec = dvmFeed.dvmSpec,
+                spec = dvmFeed.buildSpec(specKind = kind),
                 name = dvmFeed.title,
                 description = dvmFeed.description,
+                kind = FEED_KIND_DVM,
             )
             database.articleFeeds().upsertAll(listOf(feed))
         }
@@ -160,10 +163,12 @@ class FeedsRepository @Inject constructor(
         }
     }
 
-    suspend fun clearDvmFeed(dvmFeed: DvmFeed) {
+    suspend fun clearReadsDvmFeed(dvmFeed: DvmFeed) = clearDvmFeed(dvmFeed = dvmFeed, kind = SPEC_KIND_READS)
+
+    private suspend fun clearDvmFeed(dvmFeed: DvmFeed, kind: String) {
         withContext(dispatcherProvider.io()) {
             database.withTransaction {
-                database.articleFeedsConnections().deleteConnectionsBySpec(dvmFeed.dvmSpec)
+                database.articleFeedsConnections().deleteConnectionsBySpec(dvmFeed.buildSpec(specKind = kind))
             }
         }
     }

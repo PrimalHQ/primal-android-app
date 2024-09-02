@@ -6,6 +6,8 @@ import kotlinx.serialization.encodeToString
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.feeds.api.model.FeedsResponse
 import net.primal.android.feeds.api.model.SubSettingsAuthorization
+import net.primal.android.feeds.repository.SPEC_KIND_NOTES
+import net.primal.android.feeds.repository.SPEC_KIND_READS
 import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.primal.PrimalCacheFilter
@@ -24,11 +26,11 @@ class FeedsApiImpl @Inject constructor(
 ) : FeedsApi {
 
     override suspend fun getFeaturedReadsFeeds(): DvmFeedsResponse {
-        return queryDvmFeeds(kind = "reads")
+        return queryDvmFeeds(specKind = SPEC_KIND_READS)
     }
 
     override suspend fun getFeaturedHomeFeeds(): DvmFeedsResponse {
-        return queryDvmFeeds(kind = "notes")
+        return queryDvmFeeds(specKind = SPEC_KIND_NOTES)
     }
 
     override suspend fun getDefaultReadsUserFeeds(): FeedsResponse {
@@ -55,11 +57,11 @@ class FeedsApiImpl @Inject constructor(
         setUserFeeds(userId = userId, feeds = feeds, key = "user-home-feeds")
     }
 
-    private suspend fun queryDvmFeeds(kind: String): DvmFeedsResponse {
+    private suspend fun queryDvmFeeds(specKind: String): DvmFeedsResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = GET_FEATURED_DVM_READS,
-                optionsJson = NostrJson.encodeToString(DvmFeedsRequestBody(kind = kind)),
+                optionsJson = NostrJson.encodeToString(DvmFeedsRequestBody(specKind = specKind)),
             ),
         )
 

@@ -1,8 +1,9 @@
 package net.primal.android.feeds.api
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class DvmFeedsRequestBody(
-    val kind: String,
+    @SerialName("kind") val specKind: String,
 )
