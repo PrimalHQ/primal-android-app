@@ -20,12 +20,14 @@ import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.feeds.repository.DvmFeed
+import net.primal.android.feeds.repository.buildSpec
 import net.primal.android.theme.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DvmFeedDetails(
     dvmFeed: DvmFeed?,
+    specKind: String,
     onClose: () -> Unit,
     modifier: Modifier = Modifier,
     addedToFeeds: Boolean = false,
@@ -54,6 +56,7 @@ fun DvmFeedDetails(
                 DvmHeaderAndFeedList(
                     modifier = Modifier.padding(paddingValues),
                     dvmFeed = dvmFeed,
+                    specKind = specKind,
                 )
             }
         },
@@ -79,10 +82,14 @@ fun DvmFeedDetails(
 }
 
 @Composable
-private fun DvmHeaderAndFeedList(dvmFeed: DvmFeed, modifier: Modifier = Modifier) {
+private fun DvmHeaderAndFeedList(
+    dvmFeed: DvmFeed,
+    specKind: String,
+    modifier: Modifier = Modifier,
+) {
     Column(modifier = modifier) {
         ArticleFeedList(
-            feedSpec = dvmFeed.dvmSpec,
+            feedSpec = dvmFeed.buildSpec(specKind = specKind),
             onArticleClick = {},
             previewMode = true,
             header = {

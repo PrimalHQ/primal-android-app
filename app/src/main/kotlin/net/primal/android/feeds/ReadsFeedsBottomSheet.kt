@@ -26,6 +26,8 @@ import androidx.compose.ui.window.SecureFlagPolicy
 import androidx.hilt.navigation.compose.hiltViewModel
 import net.primal.android.R
 import net.primal.android.feeds.ReadsFeedsContract.UiState.FeedMarketplaceStage
+import net.primal.android.feeds.repository.SPEC_KIND_READS
+import net.primal.android.feeds.repository.buildSpec
 import net.primal.android.feeds.ui.DvmFeedDetails
 import net.primal.android.feeds.ui.DvmFeedMarketplace
 import net.primal.android.feeds.ui.FeedList
@@ -123,11 +125,13 @@ private fun ReadsFeedsBottomSheet(
 
                 FeedMarketplaceStage.FeedDetails -> {
                     var addedToFeeds by remember(state.selectedDvmFeed) {
-                        mutableStateOf(state.feeds.map { it.directive }.contains(state.selectedDvmFeed?.dvmSpec))
+                        val spec = state.selectedDvmFeed?.buildSpec(specKind = SPEC_KIND_READS)
+                        mutableStateOf(state.feeds.map { it.directive }.contains(spec))
                     }
                     DvmFeedDetails(
                         modifier = Modifier.fillMaxSize(),
                         dvmFeed = state.selectedDvmFeed,
+                        specKind = SPEC_KIND_READS,
                         addedToFeeds = addedToFeeds,
                         onClose = { eventPublisher(ReadsFeedsContract.UiEvent.CloseFeedDetails) },
                         onAddOrRemoveFeed = {
@@ -142,8 +146,8 @@ private fun ReadsFeedsBottomSheet(
                                 } else {
                                     addedToFeeds = true
                                     eventPublisher(
-                                        ReadsFeedsContract.UiEvent.RemoveFeedFromUserFeeds(
-                                            spec = state.selectedDvmFeed.dvmSpec,
+                                        ReadsFeedsContract.UiEvent.RemoveDvmFeedFromUserFeeds(
+                                            dvmFeed = state.selectedDvmFeed,
                                         ),
                                     )
                                 }
