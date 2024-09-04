@@ -39,7 +39,8 @@ import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 import net.primal.android.core.compose.icons.primaliconpack.Search
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.PrimalDrawerScaffold
-import net.primal.android.feeds.ReadsFeedsBottomSheet
+import net.primal.android.feeds.FeedsBottomSheet
+import net.primal.android.feeds.domain.FeedSpecKind
 import net.primal.android.feeds.ui.model.FeedUi
 
 @Composable
@@ -119,13 +120,13 @@ private fun ReadsScreen(
             if (state.feeds.isNotEmpty()) {
                 HorizontalPager(
                     state = pagerState,
-                    key = { index -> state.feeds.getOrNull(index)?.directive ?: Unit },
+                    key = { index -> state.feeds.getOrNull(index)?.spec ?: Unit },
                     pageNestedScrollConnection = remember(pagerState) {
                         PagerDefaults.pageNestedScrollConnection(pagerState, Orientation.Horizontal)
                     },
                 ) { index ->
                     ArticleFeedList(
-                        feedSpec = state.feeds[index].directive,
+                        feedSpec = state.feeds[index].spec,
                         contentPadding = paddingValues,
                         onArticleClick = onArticleClick,
                     )
@@ -152,8 +153,9 @@ private fun ArticleFeedTopAppBar(
     var feedPickerVisible by rememberSaveable { mutableStateOf(false) }
 
     if (feedPickerVisible && activeFeed != null) {
-        ReadsFeedsBottomSheet(
+        FeedsBottomSheet(
             activeFeed = activeFeed,
+            feedSpecKind = FeedSpecKind.Reads,
             onFeedClick = { feed ->
                 feedPickerVisible = false
                 onFeedChanged(feed)

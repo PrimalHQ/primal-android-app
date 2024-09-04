@@ -26,9 +26,9 @@ import net.primal.android.core.compose.feed.note.events.MediaClickEvent
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.utils.HashtagMatch
 import net.primal.android.core.utils.HashtagMatcher
-import net.primal.android.feed.db.ReferencedPost
-import net.primal.android.feed.db.ReferencedUser
 import net.primal.android.nostr.ext.cleanNostrUris
+import net.primal.android.notes.db.ReferencedPost
+import net.primal.android.notes.db.ReferencedUser
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 

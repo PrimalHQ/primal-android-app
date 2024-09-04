@@ -52,8 +52,6 @@ import net.primal.android.explore.home.ExploreHomeScreen
 import net.primal.android.explore.home.ExploreHomeViewModel
 import net.primal.android.explore.search.SearchViewModel
 import net.primal.android.explore.search.ui.SearchScreen
-import net.primal.android.feed.FeedScreen
-import net.primal.android.feed.FeedViewModel
 import net.primal.android.messages.chat.ChatScreen
 import net.primal.android.messages.chat.ChatViewModel
 import net.primal.android.messages.conversation.MessageConversationListViewModel
@@ -66,6 +64,10 @@ import net.primal.android.navigation.splash.SplashScreen
 import net.primal.android.navigation.splash.SplashViewModel
 import net.primal.android.note.reactions.ReactionsScreen
 import net.primal.android.note.reactions.ReactionsViewModel
+import net.primal.android.notes.FeedScreen
+import net.primal.android.notes.FeedViewModel
+import net.primal.android.notes.home.HomeFeedScreen
+import net.primal.android.notes.home.HomeFeedViewModel
 import net.primal.android.notifications.list.NotificationsScreen
 import net.primal.android.notifications.list.NotificationsViewModel
 import net.primal.android.profile.details.ProfileDetailsViewModel
@@ -109,19 +111,26 @@ private val NavController.topLevelNavOptions: NavOptions
     @SuppressWarnings("RestrictedApi")
     get() {
         val feedDestination = currentBackStack.value.find {
-            it.destination.route?.contains("feed") == true
+            it.destination.route?.contains("home") == true
         }
         return navOptions {
             popUpTo(id = feedDestination?.destination?.id ?: 0)
         }
     }
 
-fun NavController.navigateToFeed(directive: String? = null) =
+// @Deprecated("It's going to be deleted.")
+// fun NavController.navigateToFeed(directive: String? = null) =
+//    navigate(
+//        route = when (directive) {
+//            null -> "feed"
+//            else -> "feed?$FEED_DIRECTIVE=${directive.asUrlEncoded()}"
+//        },
+//        navOptions = navOptions { clearBackStack() },
+//    )
+
+fun NavController.navigateToHome() =
     navigate(
-        route = when (directive) {
-            null -> "feed"
-            else -> "feed?$FEED_DIRECTIVE=${directive.asUrlEncoded()}"
-        },
+        route = "home",
         navOptions = navOptions { clearBackStack() },
     )
 
@@ -239,7 +248,7 @@ fun PrimalAppNavigation() {
 
                     when (url.handleDeeplink()) {
                         is DeepLink.Profile, is DeepLink.Note, null -> {
-                            navController.navigateToFeed(directive = it.defaultFeedDirective)
+                            navController.navigateToHome()
                         }
 
                         is DeepLink.NostrWalletConnect -> {
@@ -280,6 +289,14 @@ fun PrimalAppNavigation() {
                     nullable = true
                 },
             ),
+            navController = navController,
+            onTopLevelDestinationChanged = topLevelDestinationHandler,
+            onDrawerScreenClick = drawerDestinationHandler,
+        )
+
+        home(
+            route = "home",
+            arguments = emptyList(),
             navController = navController,
             onTopLevelDestinationChanged = topLevelDestinationHandler,
             onDrawerScreenClick = drawerDestinationHandler,
@@ -505,7 +522,7 @@ private fun NavGraphBuilder.login(route: String, navController: NavController) =
             ApplyEdgeToEdge(isDarkTheme = true)
             LoginScreen(
                 viewModel = viewModel,
-                onLoginSuccess = { feedDirective -> navController.navigateToFeed(feedDirective) },
+                onLoginSuccess = { navController.navigateToHome() },
                 onClose = { navController.popBackStack() },
             )
         }
@@ -535,7 +552,7 @@ private fun NavGraphBuilder.onboarding(route: String, navController: NavControll
             OnboardingScreen(
                 viewModel = viewModel,
                 onClose = { navController.popBackStack() },
-                onOnboarded = { navController.navigateToFeed() },
+                onOnboarded = { navController.navigateToHome() },
                 onActivateWallet = { navController.navigateToWalletOnboarding() },
             )
         }
@@ -551,7 +568,7 @@ private fun NavGraphBuilder.onboardingWalletActivation(route: String, navControl
             ApplyEdgeToEdge(isDarkTheme = true)
             OnboardingWalletActivation(
                 viewModel = viewModel,
-                onDoneOrDismiss = { navController.navigateToFeed() },
+                onDoneOrDismiss = { navController.navigateToHome() },
             )
         }
     }
@@ -587,7 +604,7 @@ private fun NavGraphBuilder.feed(
     LockToOrientationPortrait()
     FeedScreen(
         viewModel = viewModel,
-        onFeedClick = { directive -> navController.navigateToFeed(directive = directive) },
+        onFeedClick = { /*directive -> navController.navigateToFeed(directive = directive)*/ },
         onNewPostClick = { preFillContent -> navController.navigateToNoteEditor(preFillContent?.asNoteEditorArgs()) },
         onPostClick = { postId -> navController.navigateToThread(noteId = postId) },
         onArticleClick = { naddr -> navController.navigateToArticleDetails(naddr = naddr) },
@@ -608,6 +625,63 @@ private fun NavGraphBuilder.feed(
         onTopLevelDestinationChanged = onTopLevelDestinationChanged,
         onDrawerScreenClick = onDrawerScreenClick,
         onDrawerQrCodeClick = { navController.navigateToProfileQrCodeViewer() },
+        onSearchClick = { navController.navigateToSearch() },
+    )
+}
+
+private fun NavGraphBuilder.home(
+    route: String,
+    arguments: List<NamedNavArgument>,
+    navController: NavController,
+    onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
+    onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
+) = composable(
+    route = route,
+    arguments = arguments,
+    enterTransition = { null },
+    exitTransition = {
+        when {
+            targetState.destination.route.isMainScreenRoute() -> null
+            else -> primalScaleOut
+        }
+    },
+    popEnterTransition = {
+        when {
+            initialState.destination.route.isMainScreenRoute() -> null
+            else -> primalScaleIn
+        }
+    },
+    popExitTransition = {
+        when {
+            targetState.destination.route.isMainScreenRoute() -> null
+            else -> primalScaleOut
+        }
+    },
+) { navBackEntry ->
+    val viewModel = hiltViewModel<HomeFeedViewModel>(navBackEntry)
+    ApplyEdgeToEdge()
+    LockToOrientationPortrait()
+    HomeFeedScreen(
+        viewModel = viewModel,
+        onTopLevelDestinationChanged = onTopLevelDestinationChanged,
+        onDrawerScreenClick = onDrawerScreenClick,
+        onDrawerQrCodeClick = { navController.navigateToProfileQrCodeViewer() },
+        onPostClick = { postId -> navController.navigateToThread(noteId = postId) },
+        onArticleClick = { naddr -> navController.navigateToArticleDetails(naddr = naddr) },
+        onPostReplyClick = { postId -> navController.navigateToNoteEditor(NoteEditorArgs(replyToNoteId = postId)) },
+        onProfileClick = { profileId -> navController.navigateToProfile(profileId = profileId) },
+        onHashtagClick = { hashtag -> navController.navigateToExploreFeed(query = hashtag) },
+        onMediaClick = {
+            navController.navigateToMediaGallery(
+                noteId = it.noteId,
+                mediaUrl = it.mediaUrl,
+                mediaPositionMs = it.positionMs,
+            )
+        },
+        onPayInvoiceClick = {
+            navController.navigateToWalletCreateTransaction(lnbc = it.lnbc)
+        },
+        onGoToWallet = { navController.navigateToWallet() },
         onSearchClick = { navController.navigateToSearch() },
     )
 }

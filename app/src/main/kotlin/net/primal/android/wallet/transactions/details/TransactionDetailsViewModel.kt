@@ -16,9 +16,9 @@ import kotlinx.coroutines.withContext
 import net.primal.android.core.compose.feed.model.asFeedPostUi
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.utils.authorNameUiFriendly
-import net.primal.android.feed.repository.FeedRepository
 import net.primal.android.navigation.transactionIdOrThrow
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.notes.repository.FeedRepository
 import net.primal.android.wallet.db.WalletTransaction
 import net.primal.android.wallet.repository.WalletRepository
 import net.primal.android.wallet.transactions.details.TransactionDetailsContract.UiState

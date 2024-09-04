@@ -1,8 +1,8 @@
 package net.primal.android.core.compose.feed.model
 
 import net.primal.android.attachments.db.NoteNostrUri
-import net.primal.android.feed.db.ReferencedPost
-import net.primal.android.feed.db.ReferencedUser
+import net.primal.android.notes.db.ReferencedPost
+import net.primal.android.notes.db.ReferencedUser
 
 data class NoteNostrUriUi(
     val uri: String,

@@ -26,12 +26,12 @@ import net.primal.android.core.ext.isBookmarkFeed
 import net.primal.android.explore.feed.ExploreFeedContract.UiEvent
 import net.primal.android.explore.feed.ExploreFeedContract.UiState
 import net.primal.android.explore.feed.ExploreFeedContract.UiState.ExploreFeedError
-import net.primal.android.feed.repository.FeedRepository
 import net.primal.android.navigation.exploreFeedDirectiveOrThrow
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.note.repository.NoteRepository
+import net.primal.android.notes.repository.FeedRepository
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.settings.muted.repository.MutedUserRepository
 import net.primal.android.settings.repository.SettingsRepository

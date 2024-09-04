@@ -4,16 +4,18 @@ import androidx.room.withTransaction
 import javax.inject.Inject
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
-import net.primal.android.articles.db.ArticleFeed
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.ext.asMapByKey
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.feeds.api.FeedsApi
-import net.primal.android.feeds.api.model.FeedsResponse
+import net.primal.android.feeds.db.Feed
+import net.primal.android.feeds.domain.DvmFeed
+import net.primal.android.feeds.domain.FEED_KIND_DVM
+import net.primal.android.feeds.domain.FeedSpecKind
+import net.primal.android.feeds.domain.buildSpec
 import net.primal.android.nostr.ext.findFirstIdentifier
-import net.primal.android.nostr.model.primal.content.ContentAppSubSettings
 import net.primal.android.nostr.model.primal.content.ContentArticleFeedData
 import net.primal.android.nostr.model.primal.content.ContentPrimalDvmFeedMetadata
 import net.primal.android.nostr.model.primal.content.ContentPrimalEventStats
@@ -26,57 +28,38 @@ class FeedsRepository @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
 ) {
 
-    fun observeReadsFeeds() = database.articleFeeds().observeAllFeeds()
+    fun observeReadsFeeds() = database.feeds().observeAllFeeds(specKind = FeedSpecKind.Reads)
 
-    suspend fun fetchAndPersistArticleFeeds() {
+    fun observeNotesFeeds() = database.feeds().observeAllFeeds(specKind = FeedSpecKind.Notes)
+
+    fun observeFeeds(specKind: FeedSpecKind) = database.feeds().observeAllFeeds(specKind = specKind)
+
+    suspend fun fetchAndPersistArticleFeeds() = fetchAndPersistFeeds(specKind = FeedSpecKind.Reads)
+
+    suspend fun fetchAndPersistNoteFeeds() = fetchAndPersistFeeds(specKind = FeedSpecKind.Notes)
+
+    private suspend fun fetchAndPersistFeeds(specKind: FeedSpecKind) {
         withContext(dispatcherProvider.io()) {
-            val feeds = parseFeeds { feedsApi.getReadsUserFeeds(userId = activeAccountStore.activeUserId()) }
+            val response = feedsApi.getUserFeeds(userId = activeAccountStore.activeUserId(), specKind = specKind)
+            val content = NostrJson.decodeFromStringOrNull<List<ContentArticleFeedData>>(
+                string = response.articleFeeds.content,
+            )
+            val feeds = content?.map { it.asFeedPO(specKind = specKind) }
+
             if (feeds != null) {
                 database.withTransaction {
-                    database.articleFeeds().deleteAll()
-                    database.articleFeeds().upsertAll(data = feeds)
+                    database.feeds().deleteAll(specKind = specKind)
+                    database.feeds().upsertAll(data = feeds)
                 }
             }
         }
     }
 
-    private suspend fun parseDefaultFeeds(feedsApiCall: suspend () -> FeedsResponse): List<ArticleFeed>? {
-        return withContext(dispatcherProvider.io()) {
-            val response = NostrJson.decodeFromStringOrNull<List<ContentArticleFeedData>>(
-                string = feedsApiCall().articleFeeds.content,
-            )
-
-            response?.map { it.asArticleFeedPO() }
-        }
-    }
-
-    private suspend fun parseFeeds(feedsApiCall: suspend () -> FeedsResponse): List<ArticleFeed>? {
-        return withContext(dispatcherProvider.io()) {
-            val response = NostrJson.decodeFromStringOrNull<ContentAppSubSettings<List<ContentArticleFeedData>>>(
-                string = feedsApiCall().articleFeeds.content,
-            )
-
-            response?.settings?.map { it.asArticleFeedPO() }
-        }
-    }
-
-    private fun ContentArticleFeedData.asArticleFeedPO(): ArticleFeed {
-        return ArticleFeed(
-            spec = this.spec,
-            name = this.name,
-            description = this.description,
-            enabled = this.enabled,
-            kind = this.feedKind,
-        )
-    }
-
-    suspend fun persistNewDefaultFeeds() {
+    suspend fun persistNewDefaultFeeds(specKind: FeedSpecKind) {
         val localFeeds = withContext(dispatcherProvider.io()) {
-            database.articleFeeds().observeAllFeeds().first()
+            database.feeds().observeAllFeeds(specKind = specKind).first()
         }
-        val defaultFeeds = withContext(dispatcherProvider.io()) {
-            parseDefaultFeeds { feedsApi.getDefaultReadsUserFeeds() } ?: emptyList()
-        }
+        val defaultFeeds = fetchDefaultFeeds(specKind = specKind) ?: emptyList()
 
         val localFeedSpecs = localFeeds.map { it.spec }.toSet()
         val newFeeds = defaultFeeds.toMutableList().apply {
@@ -86,34 +69,48 @@ class FeedsRepository @Inject constructor(
         if (newFeeds.isNotEmpty()) {
             val disabledNewFeeds = newFeeds.map { it.copy(enabled = false) }
             val mergedFeeds = localFeeds + disabledNewFeeds
-            persistArticleFeeds(mergedFeeds)
+            persistArticleFeeds(feeds = mergedFeeds, specKind = specKind)
         }
     }
 
-    suspend fun persistArticleFeeds(feeds: List<ArticleFeed>) {
+    private suspend fun fetchDefaultFeeds(specKind: FeedSpecKind): List<Feed>? {
+        return withContext(dispatcherProvider.io()) {
+            val response = feedsApi.getDefaultUserFeeds(specKind = specKind)
+            val content = NostrJson.decodeFromStringOrNull<List<ContentArticleFeedData>>(
+                string = response.articleFeeds.content,
+            )
+
+            content?.map { it.asFeedPO(specKind = specKind) }
+        }
+    }
+
+    suspend fun persistArticleFeeds(feeds: List<Feed>, specKind: FeedSpecKind) {
         withContext(dispatcherProvider.io()) {
             database.withTransaction {
-                database.articleFeeds().deleteAll()
-                database.articleFeeds().upsertAll(data = feeds)
+                database.feeds().deleteAll(specKind = specKind)
+                database.feeds().upsertAll(data = feeds)
             }
 
-            feedsApi.setReadsUserFeeds(
+            val apiFeeds = feeds.map {
+                ContentArticleFeedData(
+                    name = it.name,
+                    spec = it.spec,
+                    feedKind = it.feedKind,
+                    description = it.description,
+                    enabled = it.enabled,
+                )
+            }
+
+            feedsApi.setUserFeeds(
                 userId = activeAccountStore.activeUserId(),
-                feeds = feeds.map {
-                    ContentArticleFeedData(
-                        name = it.name,
-                        spec = it.spec,
-                        feedKind = it.kind,
-                        description = it.description,
-                        enabled = it.enabled,
-                    )
-                },
+                specKind = specKind,
+                feeds = apiFeeds,
             )
         }
     }
 
-    suspend fun fetchRecommendedDvmFeeds(): List<DvmFeed> {
-        val response = withContext(dispatcherProvider.io()) { feedsApi.getFeaturedReadsFeeds() }
+    suspend fun fetchRecommendedDvmFeeds(specKind: FeedSpecKind): List<DvmFeed> {
+        val response = withContext(dispatcherProvider.io()) { feedsApi.getFeaturedFeeds(specKind) }
         val eventStatsMap = response.scores.mapNotNull { primalEvent ->
             NostrJson.decodeFromStringOrNull<ContentPrimalEventStats>(primalEvent.content)
         }.asMapByKey { it.eventId }
@@ -123,12 +120,13 @@ class FeedsRepository @Inject constructor(
             .mapNotNull { nostrEvent ->
                 val dvmMetadata = NostrJson.decodeFromStringOrNull<ContentPrimalDvmFeedMetadata>(nostrEvent.content)
                 val dvmId = nostrEvent.tags.findFirstIdentifier()
-                if (dvmMetadata != null && dvmId != null) {
+                val dvmTitle = dvmMetadata?.name
+                if (dvmMetadata != null && dvmId != null && dvmTitle != null) {
                     DvmFeed(
                         dvmId = dvmId,
                         dvmPubkey = nostrEvent.pubKey,
                         avatarUrl = dvmMetadata.picture,
-                        title = dvmMetadata.name,
+                        title = dvmTitle,
                         description = dvmMetadata.about,
                         amountInSats = dvmMetadata.amount,
                         primalSubscriptionRequired = dvmMetadata.subscription == true,
@@ -143,32 +141,35 @@ class FeedsRepository @Inject constructor(
         return dvmFeeds
     }
 
-    suspend fun addReadsDvmFeed(dvmFeed: DvmFeed) = addDvmFeed(dvmFeed = dvmFeed, kind = SPEC_KIND_READS)
+    suspend fun addReadsDvmFeed(dvmFeed: DvmFeed, specKind: FeedSpecKind) =
+        addDvmFeed(dvmFeed = dvmFeed, specKind = specKind)
 
-    private suspend fun addDvmFeed(dvmFeed: DvmFeed, kind: String) {
+    private suspend fun addDvmFeed(dvmFeed: DvmFeed, specKind: FeedSpecKind) {
         withContext(dispatcherProvider.io()) {
-            val feed = ArticleFeed(
-                spec = dvmFeed.buildSpec(specKind = kind),
+            val feed = Feed(
+                spec = dvmFeed.buildSpec(specKind = specKind),
+                specKind = specKind,
                 name = dvmFeed.title,
-                description = dvmFeed.description,
-                kind = FEED_KIND_DVM,
+                description = dvmFeed.description ?: "",
+                feedKind = FEED_KIND_DVM,
             )
-            database.articleFeeds().upsertAll(listOf(feed))
+            database.feeds().upsertAll(listOf(feed))
         }
     }
 
     suspend fun removeFeed(feedSpec: String) {
         withContext(dispatcherProvider.io()) {
-            database.articleFeeds().delete(feedSpec)
+            database.feeds().delete(feedSpec)
         }
     }
 
-    suspend fun clearReadsDvmFeed(dvmFeed: DvmFeed) = clearDvmFeed(dvmFeed = dvmFeed, kind = SPEC_KIND_READS)
+    suspend fun clearReadsDvmFeed(dvmFeed: DvmFeed, specKind: FeedSpecKind) =
+        clearDvmFeed(dvmFeed = dvmFeed, specKind = specKind)
 
-    private suspend fun clearDvmFeed(dvmFeed: DvmFeed, kind: String) {
+    private suspend fun clearDvmFeed(dvmFeed: DvmFeed, specKind: FeedSpecKind) {
         withContext(dispatcherProvider.io()) {
             database.withTransaction {
-                database.articleFeedsConnections().deleteConnectionsBySpec(dvmFeed.buildSpec(specKind = kind))
+                database.articleFeedsConnections().deleteConnectionsBySpec(dvmFeed.buildSpec(specKind = specKind))
             }
         }
     }

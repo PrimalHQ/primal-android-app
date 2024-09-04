@@ -6,8 +6,7 @@ import kotlinx.serialization.encodeToString
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.feeds.api.model.FeedsResponse
 import net.primal.android.feeds.api.model.SubSettingsAuthorization
-import net.primal.android.feeds.repository.SPEC_KIND_NOTES
-import net.primal.android.feeds.repository.SPEC_KIND_READS
+import net.primal.android.feeds.domain.FeedSpecKind
 import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.primal.PrimalCacheFilter
@@ -25,43 +24,11 @@ class FeedsApiImpl @Inject constructor(
     private val nostrNotary: NostrNotary,
 ) : FeedsApi {
 
-    override suspend fun getFeaturedReadsFeeds(): DvmFeedsResponse {
-        return queryDvmFeeds(specKind = SPEC_KIND_READS)
-    }
-
-    override suspend fun getFeaturedHomeFeeds(): DvmFeedsResponse {
-        return queryDvmFeeds(specKind = SPEC_KIND_NOTES)
-    }
-
-    override suspend fun getDefaultReadsUserFeeds(): FeedsResponse {
-        return queryDefaultUserFeeds(key = "user-reads-feeds")
-    }
-
-    override suspend fun getReadsUserFeeds(userId: String): FeedsResponse {
-        return queryUserFeeds(userId = userId, key = "user-reads-feeds", verb = PrimalVerb.GET_APP_SUB_SETTINGS)
-    }
-
-    override suspend fun setReadsUserFeeds(userId: String, feeds: List<ContentArticleFeedData>) {
-        setUserFeeds(userId = userId, feeds = feeds, key = "user-reads-feeds")
-    }
-
-    override suspend fun getDefaultHomeUserFeeds(): FeedsResponse {
-        return queryDefaultUserFeeds(key = "user-home-feeds")
-    }
-
-    override suspend fun getHomeUserFeeds(userId: String): FeedsResponse {
-        return queryUserFeeds(userId = userId, key = "user-home-feeds", verb = PrimalVerb.GET_APP_SUB_SETTINGS)
-    }
-
-    override suspend fun setHomeUserFeeds(userId: String, feeds: List<ContentArticleFeedData>) {
-        setUserFeeds(userId = userId, feeds = feeds, key = "user-home-feeds")
-    }
-
-    private suspend fun queryDvmFeeds(specKind: String): DvmFeedsResponse {
+    override suspend fun getFeaturedFeeds(specKind: FeedSpecKind): DvmFeedsResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = GET_FEATURED_DVM_READS,
-                optionsJson = NostrJson.encodeToString(DvmFeedsRequestBody(specKind = specKind)),
+                optionsJson = NostrJson.encodeToString(DvmFeedsRequestBody(specKind = specKind.id)),
             ),
         )
 
@@ -71,7 +38,11 @@ class FeedsApiImpl @Inject constructor(
         )
     }
 
-    private suspend fun queryDefaultUserFeeds(key: String): FeedsResponse {
+    override suspend fun getDefaultUserFeeds(specKind: FeedSpecKind): FeedsResponse {
+        val key = when (specKind) {
+            FeedSpecKind.Reads -> "user-reads-feeds"
+            FeedSpecKind.Notes -> "user-home-feeds"
+        }
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.GET_DEFAULT_APP_SUB_SETTINGS,
@@ -85,11 +56,12 @@ class FeedsApiImpl @Inject constructor(
         return FeedsResponse(articleFeeds = articleFeeds)
     }
 
-    private suspend fun queryUserFeeds(
-        userId: String,
-        key: String,
-        verb: PrimalVerb,
-    ): FeedsResponse {
+    override suspend fun getUserFeeds(userId: String, specKind: FeedSpecKind): FeedsResponse {
+        val key = when (specKind) {
+            FeedSpecKind.Reads -> "user-reads-feeds"
+            FeedSpecKind.Notes -> "user-home-feeds"
+        }
+
         val signedNostrEvent = nostrNotary.signAppSpecificDataNostrEvent(
             userId = userId,
             content = NostrJson.encodeToString(
@@ -99,7 +71,7 @@ class FeedsApiImpl @Inject constructor(
 
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = verb,
+                primalVerb = PrimalVerb.GET_APP_SUB_SETTINGS,
                 optionsJson = NostrJson.encodeToString(SubSettingsAuthorization(event = signedNostrEvent)),
             ),
         )
@@ -110,15 +82,21 @@ class FeedsApiImpl @Inject constructor(
         return FeedsResponse(articleFeeds = articleFeeds)
     }
 
-    private suspend fun setUserFeeds(
+    override suspend fun setUserFeeds(
         userId: String,
-        key: String,
+        specKind: FeedSpecKind,
         feeds: List<ContentArticleFeedData>,
     ) {
         val signedNostrEvent = nostrNotary.signAppSpecificDataNostrEvent(
             userId = userId,
             content = NostrJson.encodeToString(
-                ContentAppSubSettings(key = key, settings = feeds),
+                ContentAppSubSettings(
+                    key = when (specKind) {
+                        FeedSpecKind.Reads -> "user-reads-feeds"
+                        FeedSpecKind.Notes -> "user-home-feeds"
+                    },
+                    settings = feeds,
+                ),
             ),
         )
 

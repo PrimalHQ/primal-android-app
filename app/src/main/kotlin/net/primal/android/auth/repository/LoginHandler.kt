@@ -1,7 +1,7 @@
 package net.primal.android.auth.repository
 
 import javax.inject.Inject
-import net.primal.android.feed.repository.FeedRepository
+import net.primal.android.notes.repository.FeedRepository
 import net.primal.android.settings.muted.repository.MutedUserRepository
 import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.user.repository.UserRepository

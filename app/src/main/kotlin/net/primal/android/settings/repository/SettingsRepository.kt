@@ -8,13 +8,13 @@ import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.db.PrimalDatabase
-import net.primal.android.feed.db.Feed
 import net.primal.android.nostr.model.primal.content.ContentAppSettings
 import net.primal.android.nostr.model.primal.content.ContentFeedData
 import net.primal.android.nostr.model.primal.content.ContentZapConfigItem
 import net.primal.android.nostr.model.primal.content.ContentZapDefault
 import net.primal.android.nostr.model.primal.content.DEFAULT_ZAP_CONFIG
 import net.primal.android.nostr.model.primal.content.DEFAULT_ZAP_DEFAULT
+import net.primal.android.notes.db.OldFeed
 import net.primal.android.settings.api.SettingsApi
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.domain.UserAccount
@@ -197,26 +197,26 @@ class SettingsRepository @Inject constructor(
         val hasLatestWithRepliesFeed = userFeeds.hasLatestWithRepliesFeed(userId)
 
         if (!hasLatestFeed && !hasLatestWithRepliesFeed) {
-            userFeeds.add(0, Feed(directive = userId, name = "Latest"))
-            userFeeds.add(0, Feed(directive = userId.toLatestWithRepliesDirective(), name = "Latest With Replies"))
+            userFeeds.add(0, OldFeed(directive = userId, name = "Latest"))
+            userFeeds.add(0, OldFeed(directive = userId.toLatestWithRepliesDirective(), name = "Latest With Replies"))
         } else if (!hasLatestFeed) {
-            userFeeds.add(0, Feed(directive = userId, name = "Latest"))
+            userFeeds.add(0, OldFeed(directive = userId, name = "Latest"))
         } else if (!hasLatestWithRepliesFeed) {
-            userFeeds.add(0, Feed(directive = userId.toLatestWithRepliesDirective(), name = "Latest With Replies"))
+            userFeeds.add(0, OldFeed(directive = userId.toLatestWithRepliesDirective(), name = "Latest With Replies"))
         }
 
         val localAppSettings = appSettings.copy(feeds = userFeeds.map { it.asContentFeedData() })
         accountsStore.upsertAccount(userAccount = currentUserAccount.copy(appSettings = localAppSettings))
 
         database.withTransaction {
-            database.feeds().deleteAll()
-            database.feeds().upsertAll(data = userFeeds)
+            database.oldFeeds().deleteAll()
+            database.oldFeeds().upsertAll(data = userFeeds)
         }
 
         return localAppSettings
     }
 
-    private fun List<Feed>.hasLatestFeed(userId: String) = find { it.isLatest(userId) } != null
+    private fun List<OldFeed>.hasLatestFeed(userId: String) = find { it.isLatest(userId) } != null
 
-    private fun List<Feed>.hasLatestWithRepliesFeed(userId: String) = find { it.isLatestWithReplies(userId) } != null
+    private fun List<OldFeed>.hasLatestWithRepliesFeed(userId: String) = find { it.isLatestWithReplies(userId) } != null
 }

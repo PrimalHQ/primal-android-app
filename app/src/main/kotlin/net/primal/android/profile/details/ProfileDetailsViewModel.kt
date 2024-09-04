@@ -21,13 +21,13 @@ import net.primal.android.core.compose.feed.model.asFeedPostUi
 import net.primal.android.core.compose.profile.model.asProfileDetailsUi
 import net.primal.android.core.compose.profile.model.asProfileStatsUi
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
-import net.primal.android.feed.repository.FeedRepository
 import net.primal.android.navigation.profileId
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.ext.extractProfileId
 import net.primal.android.note.repository.NoteRepository
+import net.primal.android.notes.repository.FeedRepository
 import net.primal.android.profile.details.ProfileDetailsContract.UiEvent
 import net.primal.android.profile.details.ProfileDetailsContract.UiState
 import net.primal.android.profile.details.ProfileDetailsContract.UiState.ProfileError

@@ -6,6 +6,7 @@ interface SplashContract {
         data object NoActiveAccount : SideEffect()
         data class ActiveAccount(
             val userPubkey: String,
+            @Deprecated("Unused with new api.")
             val defaultFeedDirective: String,
         ) : SideEffect()
     }

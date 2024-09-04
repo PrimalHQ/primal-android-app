@@ -8,7 +8,7 @@ import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.core.utils.formatNip05Identifier
 import net.primal.android.core.utils.usernameUiFriendly
-import net.primal.android.feed.db.FeedPost
+import net.primal.android.notes.db.FeedPost
 
 data class FeedPostUi(
     val postId: String,

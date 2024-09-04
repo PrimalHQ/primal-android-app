@@ -1,23 +1,20 @@
 package net.primal.android.feeds.api
 
 import net.primal.android.feeds.api.model.FeedsResponse
+import net.primal.android.feeds.domain.FeedSpecKind
 import net.primal.android.nostr.model.primal.content.ContentArticleFeedData
 
 interface FeedsApi {
 
-    suspend fun getFeaturedReadsFeeds(): DvmFeedsResponse
+    suspend fun getFeaturedFeeds(specKind: FeedSpecKind): DvmFeedsResponse
 
-    suspend fun getFeaturedHomeFeeds(): DvmFeedsResponse
+    suspend fun getDefaultUserFeeds(specKind: FeedSpecKind): FeedsResponse
 
-    suspend fun getDefaultReadsUserFeeds(): FeedsResponse
+    suspend fun getUserFeeds(userId: String, specKind: FeedSpecKind): FeedsResponse
 
-    suspend fun getReadsUserFeeds(userId: String): FeedsResponse
-
-    suspend fun setReadsUserFeeds(userId: String, feeds: List<ContentArticleFeedData>)
-
-    suspend fun getDefaultHomeUserFeeds(): FeedsResponse
-
-    suspend fun getHomeUserFeeds(userId: String): FeedsResponse
-
-    suspend fun setHomeUserFeeds(userId: String, feeds: List<ContentArticleFeedData>)
+    suspend fun setUserFeeds(
+        userId: String,
+        specKind: FeedSpecKind,
+        feeds: List<ContentArticleFeedData>,
+    )
 }

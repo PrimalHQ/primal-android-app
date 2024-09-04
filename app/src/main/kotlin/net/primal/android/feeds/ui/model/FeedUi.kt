@@ -1,32 +1,36 @@
 package net.primal.android.feeds.ui.model
 
-import net.primal.android.articles.db.ArticleFeed
-import net.primal.android.feeds.repository.FEED_KIND_PRIMAL
+import net.primal.android.feeds.db.Feed
+import net.primal.android.feeds.domain.FEED_KIND_PRIMAL
+import net.primal.android.feeds.domain.FeedSpecKind
 
 data class FeedUi(
-    val directive: String,
+    val spec: String,
+    val specKind: FeedSpecKind,
     val name: String,
     val description: String,
     val enabled: Boolean = true,
     val deletable: Boolean = true,
-    val kind: String? = null,
+    val feedKind: String? = null,
 )
 
-fun ArticleFeed.asFeedUi() =
+fun Feed.asFeedUi() =
     FeedUi(
-        directive = this.spec,
+        spec = this.spec,
+        specKind = this.specKind,
         name = this.name,
         description = this.description,
         enabled = this.enabled,
-        kind = this.kind,
-        deletable = this.kind != FEED_KIND_PRIMAL,
+        feedKind = this.feedKind,
+        deletable = this.feedKind != FEED_KIND_PRIMAL,
     )
 
-fun FeedUi.asArticleFeedDb() =
-    ArticleFeed(
-        spec = this.directive,
+fun FeedUi.asFeedPO() =
+    Feed(
+        spec = this.spec,
+        specKind = this.specKind,
         name = this.name,
         description = this.description,
         enabled = this.enabled,
-        kind = this.kind,
+        feedKind = this.feedKind,
     )

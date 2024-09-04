@@ -9,9 +9,9 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import net.primal.android.core.FakeDataStore
 import net.primal.android.core.coroutines.CoroutinesTestRule
-import net.primal.android.feed.db.Feed
-import net.primal.android.feed.repository.FeedRepository
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.notes.db.OldFeed
+import net.primal.android.notes.repository.FeedRepository
 import net.primal.android.settings.muted.repository.MutedUserRepository
 import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
@@ -47,7 +47,7 @@ class LoginHandlerTest {
         runTest {
             val expectedFeedDirective = "directive"
             val feedRepository = mockk<FeedRepository>(relaxed = true) {
-                every { defaultFeed() } returns Feed(directive = expectedFeedDirective, name = "Latest")
+                every { defaultFeed() } returns OldFeed(directive = expectedFeedDirective, name = "Latest")
             }
 
             val loginHandler = createLoginHandler(feedRepository = feedRepository)

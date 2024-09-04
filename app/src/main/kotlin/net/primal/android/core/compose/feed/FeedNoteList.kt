@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.pulltorefresh.PullToRefreshContainer
@@ -66,6 +67,8 @@ fun FeedNoteList(
     onMuteClick: ((String) -> Unit)? = null,
     onReportContentClick: OnReportContentClick,
     noContentText: String = stringResource(id = R.string.feed_no_content),
+    header: @Composable (LazyItemScope.() -> Unit)? = null,
+    stickyHeader: @Composable (LazyItemScope.() -> Unit)? = null,
 ) {
     LaunchedEffect(feedListState, onScrolledToTop) {
         withContext(Dispatchers.IO) {
@@ -139,6 +142,8 @@ fun FeedNoteList(
             onReportContentClick = onReportContentClick,
             onBookmarkClick = onBookmarkClick,
             noContentText = noContentText,
+            header = header,
+            stickyHeader = stickyHeader,
         )
 
         PullToRefreshContainer(
