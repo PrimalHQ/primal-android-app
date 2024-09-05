@@ -61,14 +61,12 @@ class ProfileDetailsViewModel @Inject constructor(
 
     private val isActiveUser = profileId == activeAccountStore.activeUserId()
 
-    private fun ProfileFeedDirective.toPrimalDirective() = "${this.prefix};$profileId"
-
     private val _state = MutableStateFlow(
         UiState(
             profileId = profileId,
             isActiveUser = isActiveUser,
             notes = feedRepository.feedByDirective(
-                feedDirective = ProfileFeedDirective.AuthoredNotes.toPrimalDirective(),
+                feedDirective = ProfileFeedDirective.AuthoredNotes.buildSpec(profileId),
             )
                 .map { it.map { feed -> feed.asFeedPostUi() } }
                 .cachedIn(viewModelScope),
@@ -456,7 +454,7 @@ class ProfileDetailsViewModel @Inject constructor(
             setState {
                 copy(
                     profileDirective = event.profileDirective,
-                    notes = feedRepository.feedByDirective(feedDirective = event.profileDirective.toPrimalDirective())
+                    notes = feedRepository.feedByDirective(feedDirective = event.profileDirective.buildSpec(profileId))
                         .map { it.map { feed -> feed.asFeedPostUi() } }
                         .cachedIn(viewModelScope),
                 )

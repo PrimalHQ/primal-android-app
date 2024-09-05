@@ -34,9 +34,6 @@ class FeedRepository @Inject constructor(
 
     fun observeContainsFeed(directive: String) = database.oldFeeds().observeContainsFeed(directive)
 
-    fun observeFeedByDirective(feedDirective: String) =
-        database.oldFeeds().observeFeedByDirective(feedDirective = feedDirective)
-
     fun feedByDirective(feedDirective: String): Flow<PagingData<FeedPost>> {
         return createPager(feedDirective = feedDirective) {
             database.feedPosts().feedQuery(
