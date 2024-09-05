@@ -51,12 +51,6 @@ import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.PrimalTopLevelDestination
-import net.primal.android.core.compose.feed.RepostOrQuoteBottomSheet
-import net.primal.android.core.compose.feed.model.FeedPostUi
-import net.primal.android.core.compose.feed.note.events.InvoicePayClickEvent
-import net.primal.android.core.compose.feed.note.events.MediaClickEvent
-import net.primal.android.core.compose.feed.zaps.UnableToZapBottomSheet
-import net.primal.android.core.compose.feed.zaps.ZapBottomSheet
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
@@ -67,6 +61,12 @@ import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.crypto.hexToNoteHrp
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.PrimalDrawerScaffold
+import net.primal.android.notes.feed.NoteRepostOrQuoteBottomSheet
+import net.primal.android.notes.feed.model.FeedPostUi
+import net.primal.android.notes.feed.note.events.InvoicePayClickEvent
+import net.primal.android.notes.feed.note.events.MediaClickEvent
+import net.primal.android.notes.feed.zaps.UnableToZapBottomSheet
+import net.primal.android.notes.feed.zaps.ZapBottomSheet
 import net.primal.android.notifications.list.ui.NotificationListItem
 import net.primal.android.notifications.list.ui.NotificationUi
 import net.primal.android.theme.AppTheme
@@ -284,7 +284,7 @@ private fun NotificationsList(
     var repostQuotePostConfirmation by remember { mutableStateOf<FeedPostUi?>(null) }
     if (repostQuotePostConfirmation != null) {
         repostQuotePostConfirmation?.let { post ->
-            RepostOrQuoteBottomSheet(
+            NoteRepostOrQuoteBottomSheet(
                 onDismiss = { repostQuotePostConfirmation = null },
                 onRepostClick = { onRepostClick(post) },
                 onPostQuoteClick = { onPostQuoteClick(post) },

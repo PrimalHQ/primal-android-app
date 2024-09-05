@@ -22,9 +22,6 @@ import net.primal.android.R
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.InvisibleAppBarIcon
 import net.primal.android.core.compose.PrimalTopAppBar
-import net.primal.android.core.compose.feed.FeedNoteList
-import net.primal.android.core.compose.feed.note.ConfirmFirstBookmarkAlertDialog
-import net.primal.android.core.compose.feed.note.events.NoteCallbacks
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
@@ -36,6 +33,9 @@ import net.primal.android.core.ext.removeSearchPrefix
 import net.primal.android.explore.feed.ExploreFeedContract.UiEvent.AddToUserFeeds
 import net.primal.android.explore.feed.ExploreFeedContract.UiEvent.RemoveFromUserFeeds
 import net.primal.android.explore.feed.ExploreFeedContract.UiState.ExploreFeedError
+import net.primal.android.notes.feed.NoteFeedList
+import net.primal.android.notes.feed.note.ConfirmFirstBookmarkAlertDialog
+import net.primal.android.notes.feed.note.events.NoteCallbacks
 
 @Composable
 fun ExploreFeedScreen(
@@ -136,7 +136,7 @@ fun ExploreFeedScreen(
             )
         },
         content = { paddingValues ->
-            FeedNoteList(
+            NoteFeedList(
                 feedListState = feedListState,
                 pagingItems = feedPagingItems,
                 zappingState = state.zappingState,

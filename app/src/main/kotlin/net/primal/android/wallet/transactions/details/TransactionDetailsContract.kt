@@ -1,6 +1,6 @@
 package net.primal.android.wallet.transactions.details
 
-import net.primal.android.core.compose.feed.model.FeedPostUi
+import net.primal.android.notes.feed.model.FeedPostUi
 
 interface TransactionDetailsContract {
     data class UiState(

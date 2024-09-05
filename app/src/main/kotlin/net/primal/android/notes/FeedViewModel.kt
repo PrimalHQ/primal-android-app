@@ -23,8 +23,6 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.config.AppConfigHandler
-import net.primal.android.core.compose.feed.model.FeedPostsSyncStats
-import net.primal.android.core.compose.feed.model.asFeedPostUi
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.ext.asMapByKey
 import net.primal.android.core.ext.hasUpwardsPagination
@@ -46,6 +44,8 @@ import net.primal.android.notes.FeedContract.UiState
 import net.primal.android.notes.FeedContract.UiState.FeedError
 import net.primal.android.notes.api.model.FeedResponse
 import net.primal.android.notes.db.FeedPost
+import net.primal.android.notes.feed.model.FeedPostsSyncStats
+import net.primal.android.notes.feed.model.asFeedPostUi
 import net.primal.android.notes.repository.FeedRepository
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.settings.muted.repository.MutedUserRepository

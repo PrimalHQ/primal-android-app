@@ -17,13 +17,13 @@ import net.primal.android.R
 import net.primal.android.articles.feed.ArticleFeedList
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.button.PrimalLoadingButton
-import net.primal.android.core.compose.feed.note.events.NoteCallbacks
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.feeds.domain.DvmFeed
 import net.primal.android.feeds.domain.FeedSpecKind
 import net.primal.android.feeds.domain.buildSpec
 import net.primal.android.notes.feed.NoteFeedList
+import net.primal.android.notes.feed.note.events.NoteCallbacks
 import net.primal.android.theme.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)

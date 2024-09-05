@@ -1,6 +1,6 @@
 package net.primal.android.wallet.zaps
 
-import net.primal.android.core.compose.feed.model.ZappingState
+import net.primal.android.notes.feed.model.ZappingState
 import net.primal.android.user.domain.UserAccount
 import net.primal.android.user.domain.WalletPreference
 import net.primal.android.wallet.domain.WalletKycLevel

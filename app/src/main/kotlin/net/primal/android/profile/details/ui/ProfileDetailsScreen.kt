@@ -44,16 +44,16 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.R
 import net.primal.android.core.compose.SnackbarErrorHandler
-import net.primal.android.core.compose.feed.FeedLazyColumn
-import net.primal.android.core.compose.feed.model.FeedPostUi
-import net.primal.android.core.compose.feed.note.ConfirmFirstBookmarkAlertDialog
-import net.primal.android.core.compose.feed.note.events.NoteCallbacks
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.core.compose.pulltorefresh.LaunchedPullToRefreshEndingEffect
 import net.primal.android.core.compose.pulltorefresh.PrimalPullToRefreshIndicator
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
+import net.primal.android.notes.feed.NoteFeedLazyColumn
+import net.primal.android.notes.feed.model.FeedPostUi
+import net.primal.android.notes.feed.note.ConfirmFirstBookmarkAlertDialog
+import net.primal.android.notes.feed.note.events.NoteCallbacks
 import net.primal.android.profile.details.ProfileDetailsContract
 import net.primal.android.profile.details.ProfileDetailsContract.UiState.ProfileError
 import net.primal.android.profile.details.ProfileDetailsViewModel
@@ -224,7 +224,7 @@ fun ProfileDetailsScreen(
         Box(
             modifier = Modifier.nestedScroll(pullToRefreshState.nestedScrollConnection),
         ) {
-            FeedLazyColumn(
+            NoteFeedLazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
                     .navigationBarsPadding(),

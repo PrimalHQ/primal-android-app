@@ -25,13 +25,13 @@ import java.text.NumberFormat
 import net.primal.android.R
 import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.AvatarThumbnail
-import net.primal.android.core.compose.feed.note.SingleEventStat
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.FeedLikes
 import net.primal.android.core.compose.icons.primaliconpack.FeedLikesFilled
 import net.primal.android.core.compose.icons.primaliconpack.FeedZaps
 import net.primal.android.core.compose.icons.primaliconpack.FeedZapsFilled
 import net.primal.android.feeds.domain.DvmFeed
+import net.primal.android.notes.feed.note.SingleEventStat
 import net.primal.android.theme.AppTheme
 
 private val PaidBackground = Color(0xFFFC6337)

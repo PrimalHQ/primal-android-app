@@ -13,7 +13,6 @@ import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.articles.ArticleRepository
-import net.primal.android.core.compose.feed.model.asFeedPostUi
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.crypto.hexToNpubHrp
 import net.primal.android.navigation.naddrOrThrow
@@ -28,6 +27,7 @@ import net.primal.android.nostr.utils.Naddr
 import net.primal.android.nostr.utils.Nip19TLV
 import net.primal.android.note.repository.NoteRepository
 import net.primal.android.note.ui.asEventZapUiModel
+import net.primal.android.notes.feed.model.asFeedPostUi
 import net.primal.android.notes.repository.FeedRepository
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.thread.articles.ArticleDetailsContract.ArticleDetailsError

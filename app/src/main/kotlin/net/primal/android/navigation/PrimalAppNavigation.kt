@@ -40,7 +40,6 @@ import net.primal.android.auth.welcome.WelcomeScreen
 import net.primal.android.core.compose.ApplyEdgeToEdge
 import net.primal.android.core.compose.LockToOrientationPortrait
 import net.primal.android.core.compose.PrimalTopLevelDestination
-import net.primal.android.core.compose.feed.note.events.NoteCallbacks
 import net.primal.android.core.compose.findActivity
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.editor.di.noteEditorViewModel
@@ -69,6 +68,7 @@ import net.primal.android.note.reactions.ReactionsScreen
 import net.primal.android.note.reactions.ReactionsViewModel
 import net.primal.android.notes.FeedScreen
 import net.primal.android.notes.FeedViewModel
+import net.primal.android.notes.feed.note.events.NoteCallbacks
 import net.primal.android.notes.home.HomeFeedScreen
 import net.primal.android.notes.home.HomeFeedViewModel
 import net.primal.android.notifications.list.NotificationsScreen
@@ -309,7 +309,6 @@ fun PrimalAppNavigation() {
 
         home(
             route = "home",
-            arguments = emptyList(),
             navController = navController,
             onTopLevelDestinationChanged = topLevelDestinationHandler,
             onDrawerScreenClick = drawerDestinationHandler,
@@ -317,7 +316,6 @@ fun PrimalAppNavigation() {
 
         reads(
             route = "reads",
-            arguments = emptyList(),
             navController = navController,
             onTopLevelDestinationChanged = topLevelDestinationHandler,
             onDrawerScreenClick = drawerDestinationHandler,
@@ -630,13 +628,11 @@ private fun NavGraphBuilder.feed(
 
 private fun NavGraphBuilder.home(
     route: String,
-    arguments: List<NamedNavArgument>,
     navController: NavController,
     onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
 ) = composable(
     route = route,
-    arguments = arguments,
     enterTransition = { null },
     exitTransition = {
         when {
@@ -673,13 +669,11 @@ private fun NavGraphBuilder.home(
 
 private fun NavGraphBuilder.reads(
     route: String,
-    arguments: List<NamedNavArgument>,
     navController: NavController,
     onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
 ) = composable(
     route = route,
-    arguments = arguments,
     enterTransition = { null },
     exitTransition = {
         when {

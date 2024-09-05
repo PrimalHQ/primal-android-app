@@ -34,7 +34,6 @@ import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.PrimalTopLevelDestination
-import net.primal.android.core.compose.feed.note.events.NoteCallbacks
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 import net.primal.android.core.compose.icons.primaliconpack.Search
@@ -45,6 +44,7 @@ import net.primal.android.feeds.FeedsBottomSheet
 import net.primal.android.feeds.domain.FeedSpecKind
 import net.primal.android.feeds.ui.model.FeedUi
 import net.primal.android.notes.feed.NoteFeedList
+import net.primal.android.notes.feed.note.events.NoteCallbacks
 import net.primal.android.notes.home.HomeFeedContract.UiEvent
 
 @Composable

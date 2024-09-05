@@ -80,10 +80,6 @@ import net.primal.android.R
 import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
-import net.primal.android.core.compose.feed.note.FeedNoteCard
-import net.primal.android.core.compose.feed.note.FeedNoteHeader
-import net.primal.android.core.compose.feed.note.events.InvoicePayClickEvent
-import net.primal.android.core.compose.feed.note.events.MediaClickEvent
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.Copy
@@ -92,6 +88,10 @@ import net.primal.android.core.compose.icons.primaliconpack.WalletLightningPayme
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.ext.openUriSafely
 import net.primal.android.core.utils.ellipsizeMiddle
+import net.primal.android.notes.feed.note.FeedNoteCard
+import net.primal.android.notes.feed.note.FeedNoteHeader
+import net.primal.android.notes.feed.note.events.InvoicePayClickEvent
+import net.primal.android.notes.feed.note.events.MediaClickEvent
 import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.dashboard.ui.BtcAmountText
 import net.primal.android.wallet.domain.TxState

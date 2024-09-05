@@ -2,8 +2,8 @@ package net.primal.android.explore.feed
 
 import androidx.paging.PagingData
 import kotlinx.coroutines.flow.Flow
-import net.primal.android.core.compose.feed.model.FeedPostUi
-import net.primal.android.core.compose.feed.model.ZappingState
+import net.primal.android.notes.feed.model.FeedPostUi
+import net.primal.android.notes.feed.model.ZappingState
 import net.primal.android.profile.report.ReportType
 
 interface ExploreFeedContract {

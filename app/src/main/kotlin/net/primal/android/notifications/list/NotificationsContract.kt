@@ -3,7 +3,7 @@ package net.primal.android.notifications.list
 import androidx.paging.PagingData
 import kotlinx.coroutines.flow.Flow
 import net.primal.android.attachments.domain.CdnImage
-import net.primal.android.core.compose.feed.model.ZappingState
+import net.primal.android.notes.feed.model.ZappingState
 import net.primal.android.notifications.list.ui.NotificationUi
 import net.primal.android.user.domain.Badges
 

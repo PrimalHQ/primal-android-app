@@ -59,10 +59,6 @@ import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.AvatarThumbnailsRow
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.PrimalTopLevelDestination
-import net.primal.android.core.compose.feed.FeedNoteList
-import net.primal.android.core.compose.feed.model.FeedPostsSyncStats
-import net.primal.android.core.compose.feed.note.ConfirmFirstBookmarkAlertDialog
-import net.primal.android.core.compose.feed.note.events.NoteCallbacks
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
@@ -75,6 +71,10 @@ import net.primal.android.drawer.PrimalDrawerScaffold
 import net.primal.android.feeds.OldFeedsModalBottomSheet
 import net.primal.android.feeds.ui.model.FeedUi
 import net.primal.android.notes.FeedContract.UiState.FeedError
+import net.primal.android.notes.feed.NoteFeedList
+import net.primal.android.notes.feed.model.FeedPostsSyncStats
+import net.primal.android.notes.feed.note.ConfirmFirstBookmarkAlertDialog
+import net.primal.android.notes.feed.note.events.NoteCallbacks
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 
@@ -205,7 +205,7 @@ private fun FeedScreen(
             )
         },
         content = { paddingValues ->
-            FeedNoteList(
+            NoteFeedList(
                 pagingItems = pagingItems,
                 feedListState = feedListState,
                 zappingState = state.zappingState,

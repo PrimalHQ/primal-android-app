@@ -61,10 +61,6 @@ import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.asBeforeNowFormat
-import net.primal.android.core.compose.feed.model.toNoteContentUi
-import net.primal.android.core.compose.feed.note.NoteContent
-import net.primal.android.core.compose.feed.note.events.InvoicePayClickEvent
-import net.primal.android.core.compose.feed.note.events.MediaClickEvent
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
@@ -74,6 +70,10 @@ import net.primal.android.core.ext.openUriSafely
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.formatNip05Identifier
 import net.primal.android.messages.chat.model.ChatMessageUi
+import net.primal.android.notes.feed.model.toNoteContentUi
+import net.primal.android.notes.feed.note.NoteContent
+import net.primal.android.notes.feed.note.events.InvoicePayClickEvent
+import net.primal.android.notes.feed.note.events.MediaClickEvent
 import net.primal.android.theme.AppTheme
 
 @Composable

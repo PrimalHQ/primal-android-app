@@ -3,10 +3,10 @@ package net.primal.android.notes
 import androidx.paging.PagingData
 import kotlinx.coroutines.flow.Flow
 import net.primal.android.attachments.domain.CdnImage
-import net.primal.android.core.compose.feed.model.FeedPostUi
-import net.primal.android.core.compose.feed.model.FeedPostsSyncStats
-import net.primal.android.core.compose.feed.model.ZappingState
 import net.primal.android.feeds.ui.model.FeedUi
+import net.primal.android.notes.feed.model.FeedPostUi
+import net.primal.android.notes.feed.model.FeedPostsSyncStats
+import net.primal.android.notes.feed.model.ZappingState
 import net.primal.android.profile.report.ReportType
 import net.primal.android.user.domain.Badges
 
