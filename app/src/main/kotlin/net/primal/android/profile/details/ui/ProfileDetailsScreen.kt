@@ -30,7 +30,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
@@ -48,15 +47,13 @@ import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.feed.FeedLazyColumn
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.feed.note.ConfirmFirstBookmarkAlertDialog
-import net.primal.android.core.compose.feed.note.events.InvoicePayClickEvent
-import net.primal.android.core.compose.feed.note.events.MediaClickEvent
+import net.primal.android.core.compose.feed.note.events.NoteCallbacks
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.core.compose.pulltorefresh.LaunchedPullToRefreshEndingEffect
 import net.primal.android.core.compose.pulltorefresh.PrimalPullToRefreshIndicator
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
-import net.primal.android.crypto.hexToNoteHrp
 import net.primal.android.profile.details.ProfileDetailsContract
 import net.primal.android.profile.details.ProfileDetailsContract.UiState.ProfileError
 import net.primal.android.profile.details.ProfileDetailsViewModel
@@ -69,18 +66,11 @@ import net.primal.android.wallet.domain.DraftTx
 fun ProfileDetailsScreen(
     viewModel: ProfileDetailsViewModel,
     onClose: () -> Unit,
-    onPostClick: (String) -> Unit,
-    onArticleClick: (naddr: String) -> Unit,
-    onPostReplyClick: (String) -> Unit,
-    onPostQuoteClick: (content: TextFieldValue) -> Unit,
-    onProfileClick: (String) -> Unit,
+    noteCallbacks: NoteCallbacks,
     onEditProfileClick: () -> Unit,
     onMessageClick: (String) -> Unit,
     onZapProfileClick: (DraftTx) -> Unit,
     onDrawerQrCodeClick: (String) -> Unit,
-    onHashtagClick: (String) -> Unit,
-    onMediaClick: (MediaClickEvent) -> Unit,
-    onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
     onFollowsClick: (String, ProfileFollowsType) -> Unit,
     onGoToWallet: () -> Unit,
 ) {
@@ -96,18 +86,11 @@ fun ProfileDetailsScreen(
     ProfileDetailsScreen(
         state = uiState.value,
         onClose = onClose,
-        onPostClick = onPostClick,
-        onArticleClick = onArticleClick,
-        onPostReplyClick = onPostReplyClick,
-        onPostQuoteClick = onPostQuoteClick,
-        onProfileClick = onProfileClick,
+        noteCallbacks = noteCallbacks,
         onEditProfileClick = onEditProfileClick,
         onMessageClick = onMessageClick,
         onZapProfileClick = onZapProfileClick,
         onDrawerQrCodeClick = onDrawerQrCodeClick,
-        onHashtagClick = onHashtagClick,
-        onMediaClick = onMediaClick,
-        onPayInvoiceClick = onPayInvoiceClick,
         onGoToWallet = onGoToWallet,
         onFollowsClick = onFollowsClick,
         eventPublisher = { viewModel.setEvent(it) },
@@ -122,18 +105,11 @@ private const val MAX_COVER_TRANSPARENCY = 0.70f
 fun ProfileDetailsScreen(
     state: ProfileDetailsContract.UiState,
     onClose: () -> Unit,
-    onPostClick: (String) -> Unit,
-    onArticleClick: (naddr: String) -> Unit,
-    onPostReplyClick: (String) -> Unit,
-    onPostQuoteClick: (content: TextFieldValue) -> Unit,
-    onProfileClick: (String) -> Unit,
+    noteCallbacks: NoteCallbacks,
     onEditProfileClick: () -> Unit,
     onMessageClick: (String) -> Unit,
     onZapProfileClick: (DraftTx) -> Unit,
     onDrawerQrCodeClick: (String) -> Unit,
-    onHashtagClick: (String) -> Unit,
-    onMediaClick: (MediaClickEvent) -> Unit,
-    onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
     onGoToWallet: () -> Unit,
     onFollowsClick: (String, ProfileFollowsType) -> Unit,
     eventPublisher: (ProfileDetailsContract.UiEvent) -> Unit,
@@ -255,11 +231,8 @@ fun ProfileDetailsScreen(
                 contentPadding = PaddingValues(0.dp),
                 pagingItems = if (!state.isProfileMuted) pagingItems else noPagingItems,
                 zappingState = state.zappingState,
+                noteCallbacks = noteCallbacks,
                 listState = listState,
-                onPostClick = onPostClick,
-                onArticleClick = onArticleClick,
-                onProfileClick = { if (state.profileId != it) onProfileClick(it) },
-                onPostReplyClick = onPostReplyClick,
                 onZapClick = { post, zapAmount, zapDescription ->
                     eventPublisher(
                         ProfileDetailsContract.UiEvent.ZapAction(
@@ -287,7 +260,6 @@ fun ProfileDetailsScreen(
                         ),
                     )
                 },
-                onPostQuoteClick = { onPostQuoteClick(TextFieldValue(text = "\n\nnostr:${it.postId.hexToNoteHrp()}")) },
                 onReportContentClick = { type, profileId, noteId ->
                     eventPublisher(
                         ProfileDetailsContract.UiEvent.ReportAbuse(
@@ -297,9 +269,6 @@ fun ProfileDetailsScreen(
                         ),
                     )
                 },
-                onHashtagClick = onHashtagClick,
-                onMediaClick = onMediaClick,
-                onPayInvoiceClick = onPayInvoiceClick,
                 onGoToWallet = onGoToWallet,
                 onBookmarkClick = { eventPublisher(ProfileDetailsContract.UiEvent.BookmarkAction(noteId = it)) },
                 shouldShowLoadingState = false,
@@ -344,8 +313,8 @@ fun ProfileDetailsScreen(
                             }
                         },
                         onFollowsClick = onFollowsClick,
-                        onProfileClick = onProfileClick,
-                        onHashtagClick = onHashtagClick,
+                        onProfileClick = { noteCallbacks.onProfileClick?.invoke(it) },
+                        onHashtagClick = { noteCallbacks.onHashtagClick?.invoke(it) },
                     )
                 },
             )
@@ -441,17 +410,11 @@ private fun PreviewProfileScreen() {
                 notes = emptyFlow(),
             ),
             onClose = {},
-            onPostClick = {},
-            onArticleClick = {},
-            onPostReplyClick = {},
-            onPostQuoteClick = {},
-            onProfileClick = {},
+            noteCallbacks = NoteCallbacks(),
             onEditProfileClick = {},
             onMessageClick = {},
             onZapProfileClick = {},
             onDrawerQrCodeClick = {},
-            onHashtagClick = {},
-            onMediaClick = {},
             onFollowsClick = { _, _ -> },
             onGoToWallet = {},
             eventPublisher = {},

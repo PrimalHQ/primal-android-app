@@ -34,8 +34,7 @@ import net.primal.android.core.compose.feed.model.FeedPostAction
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.feed.model.ZappingState
 import net.primal.android.core.compose.feed.note.FeedNoteCard
-import net.primal.android.core.compose.feed.note.events.InvoicePayClickEvent
-import net.primal.android.core.compose.feed.note.events.MediaClickEvent
+import net.primal.android.core.compose.feed.note.events.NoteCallbacks
 import net.primal.android.core.compose.feed.zaps.UnableToZapBottomSheet
 import net.primal.android.core.compose.feed.zaps.ZapBottomSheet
 import net.primal.android.core.compose.isEmpty
@@ -53,17 +52,10 @@ fun FeedLazyColumn(
     contentPadding: PaddingValues,
     listState: LazyListState,
     zappingState: ZappingState,
-    onPostClick: (String) -> Unit,
-    onArticleClick: (naddr: String) -> Unit,
-    onProfileClick: (String) -> Unit,
+    noteCallbacks: NoteCallbacks,
     onPostLikeClick: (FeedPostUi) -> Unit,
     onRepostClick: (FeedPostUi) -> Unit,
     onZapClick: (FeedPostUi, ULong?, String?) -> Unit,
-    onPostReplyClick: (String) -> Unit,
-    onPostQuoteClick: (FeedPostUi) -> Unit,
-    onHashtagClick: (String) -> Unit,
-    onMediaClick: (MediaClickEvent) -> Unit,
-    onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
     onGoToWallet: () -> Unit,
     onReportContentClick: OnReportContentClick,
     onMuteClick: ((String) -> Unit)? = null,
@@ -81,7 +73,7 @@ fun FeedLazyColumn(
             RepostOrQuoteBottomSheet(
                 onDismiss = { repostQuotePostConfirmation = null },
                 onRepostClick = { onRepostClick(post) },
-                onPostQuoteClick = { onPostQuoteClick(post) },
+                onPostQuoteClick = { noteCallbacks.onNoteQuoteClick?.invoke(post.postId) },
             )
         }
     }
@@ -160,12 +152,12 @@ fun FeedLazyColumn(
                         shape = RectangleShape,
                         cardPadding = PaddingValues(all = 0.dp),
                         showReplyTo = showReplyTo,
-                        onPostClick = { postId -> onPostClick(postId) },
-                        onArticleClick = { naddr -> onArticleClick(naddr) },
-                        onProfileClick = { profileId -> onProfileClick(profileId) },
+                        onPostClick = { postId -> noteCallbacks.onNoteClick?.invoke(postId) },
+                        onArticleClick = { naddr -> noteCallbacks.onArticleClick?.invoke(naddr) },
+                        onProfileClick = { profileId -> noteCallbacks.onProfileClick?.invoke(profileId) },
                         onPostAction = { postAction ->
                             when (postAction) {
-                                FeedPostAction.Reply -> onPostReplyClick(item.postId)
+                                FeedPostAction.Reply -> noteCallbacks.onNoteReplyClick?.invoke(item.postId)
                                 FeedPostAction.Zap -> {
                                     if (zappingState.canZap()) {
                                         onZapClick(item, null, null)
@@ -191,12 +183,12 @@ fun FeedLazyColumn(
                                 else -> Unit
                             }
                         },
-                        onHashtagClick = onHashtagClick,
+                        onHashtagClick = { hashtag -> noteCallbacks.onHashtagClick?.invoke(hashtag) },
                         onMuteUserClick = { onMuteClick?.invoke(item.authorId) },
-                        onMediaClick = onMediaClick,
+                        onMediaClick = { event -> noteCallbacks.onMediaClick?.invoke(event) },
                         onReportContentClick = onReportContentClick,
                         onBookmarkClick = { onBookmarkClick(item.postId) },
-                        onPayInvoiceClick = onPayInvoiceClick,
+                        onPayInvoiceClick = { event -> noteCallbacks.onPayInvoiceClick?.invoke(event) },
                     )
 
                     PrimalDivider()

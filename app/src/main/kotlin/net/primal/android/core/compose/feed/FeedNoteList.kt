@@ -37,8 +37,7 @@ import kotlinx.coroutines.withContext
 import net.primal.android.R
 import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.feed.model.ZappingState
-import net.primal.android.core.compose.feed.note.events.InvoicePayClickEvent
-import net.primal.android.core.compose.feed.note.events.MediaClickEvent
+import net.primal.android.core.compose.feed.note.events.NoteCallbacks
 import net.primal.android.core.compose.pulltorefresh.PrimalPullToRefreshIndicator
 import net.primal.android.profile.report.OnReportContentClick
 import net.primal.android.theme.AppTheme
@@ -49,17 +48,10 @@ fun FeedNoteList(
     feedListState: LazyListState,
     pagingItems: LazyPagingItems<FeedPostUi>,
     zappingState: ZappingState,
-    onPostClick: (String) -> Unit,
-    onArticleClick: (naddr: String) -> Unit,
-    onProfileClick: (String) -> Unit,
+    noteCallbacks: NoteCallbacks,
     onPostLikeClick: (FeedPostUi) -> Unit,
     onZapClick: (FeedPostUi, ULong?, String?) -> Unit,
     onRepostClick: (FeedPostUi) -> Unit,
-    onPostReplyClick: (String) -> Unit,
-    onPostQuoteClick: (FeedPostUi) -> Unit,
-    onHashtagClick: (String) -> Unit,
-    onMediaClick: (MediaClickEvent) -> Unit,
-    onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
     onGoToWallet: () -> Unit,
     onBookmarkClick: (noteId: String) -> Unit,
     paddingValues: PaddingValues = PaddingValues(0.dp),
@@ -126,17 +118,10 @@ fun FeedNoteList(
             pagingItems = pagingItems,
             listState = feedListState,
             zappingState = zappingState,
-            onPostClick = onPostClick,
-            onArticleClick = onArticleClick,
-            onProfileClick = onProfileClick,
+            noteCallbacks = noteCallbacks,
             onPostLikeClick = onPostLikeClick,
             onZapClick = onZapClick,
             onRepostClick = onRepostClick,
-            onPostReplyClick = onPostReplyClick,
-            onPostQuoteClick = onPostQuoteClick,
-            onHashtagClick = onHashtagClick,
-            onMediaClick = onMediaClick,
-            onPayInvoiceClick = onPayInvoiceClick,
             onGoToWallet = onGoToWallet,
             onMuteClick = onMuteClick,
             onReportContentClick = onReportContentClick,

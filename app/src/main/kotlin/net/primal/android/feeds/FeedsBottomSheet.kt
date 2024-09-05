@@ -86,7 +86,7 @@ private fun FeedsBottomSheet(
                 .navigationBarsPadding(),
             targetState = state.feedMarketplaceStage,
             transitionSpec = { transitionSpecBetweenStages() },
-            label = "FeedsModalBottomSheet",
+            label = "FeedsBottomSheet",
         ) { target ->
             when (target) {
                 FeedMarketplaceStage.FeedList ->

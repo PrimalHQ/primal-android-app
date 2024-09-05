@@ -62,8 +62,7 @@ import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.compose.feed.FeedNoteList
 import net.primal.android.core.compose.feed.model.FeedPostsSyncStats
 import net.primal.android.core.compose.feed.note.ConfirmFirstBookmarkAlertDialog
-import net.primal.android.core.compose.feed.note.events.InvoicePayClickEvent
-import net.primal.android.core.compose.feed.note.events.MediaClickEvent
+import net.primal.android.core.compose.feed.note.events.NoteCallbacks
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
@@ -71,7 +70,6 @@ import net.primal.android.core.compose.icons.primaliconpack.Search
 import net.primal.android.core.compose.isNotEmpty
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
-import net.primal.android.crypto.hexToNoteHrp
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.PrimalDrawerScaffold
 import net.primal.android.feeds.OldFeedsModalBottomSheet
@@ -86,13 +84,7 @@ fun FeedScreen(
     viewModel: FeedViewModel,
     onFeedClick: (directive: String) -> Unit,
     onNewPostClick: (content: TextFieldValue?) -> Unit,
-    onPostClick: (String) -> Unit,
-    onArticleClick: (naddr: String) -> Unit,
-    onPostReplyClick: (String) -> Unit,
-    onProfileClick: (String) -> Unit,
-    onHashtagClick: (String) -> Unit,
-    onMediaClick: (MediaClickEvent) -> Unit,
-    onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
+    noteCallbacks: NoteCallbacks,
     onGoToWallet: () -> Unit,
     onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
@@ -121,13 +113,7 @@ fun FeedScreen(
         eventPublisher = { viewModel.setEvent(it) },
         onFeedClick = onFeedClick,
         onNewPostClick = onNewPostClick,
-        onPostClick = onPostClick,
-        onArticleClick = onArticleClick,
-        onPostReplyClick = onPostReplyClick,
-        onProfileClick = onProfileClick,
-        onHashtagClick = onHashtagClick,
-        onMediaClick = onMediaClick,
-        onPayInvoiceClick = onPayInvoiceClick,
+        noteCallbacks = noteCallbacks,
         onGoToWallet = onGoToWallet,
         onPrimaryDestinationChanged = onTopLevelDestinationChanged,
         onDrawerDestinationClick = onDrawerScreenClick,
@@ -143,13 +129,7 @@ private fun FeedScreen(
     onFeedClick: (directive: String) -> Unit,
     eventPublisher: (FeedContract.UiEvent) -> Unit,
     onNewPostClick: (content: TextFieldValue?) -> Unit,
-    onPostClick: (String) -> Unit,
-    onArticleClick: (naddr: String) -> Unit,
-    onPostReplyClick: (String) -> Unit,
-    onProfileClick: (String) -> Unit,
-    onHashtagClick: (String) -> Unit,
-    onMediaClick: (MediaClickEvent) -> Unit,
-    onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
+    noteCallbacks: NoteCallbacks,
     onGoToWallet: () -> Unit,
     onPrimaryDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
@@ -229,10 +209,7 @@ private fun FeedScreen(
                 pagingItems = pagingItems,
                 feedListState = feedListState,
                 zappingState = state.zappingState,
-                onPostClick = onPostClick,
-                onArticleClick = onArticleClick,
-                onProfileClick = onProfileClick,
-                onPostReplyClick = onPostReplyClick,
+                noteCallbacks = noteCallbacks,
                 onZapClick = { post, zapAmount, zapDescription ->
                     eventPublisher(
                         FeedContract.UiEvent.ZapAction(
@@ -260,14 +237,10 @@ private fun FeedScreen(
                         ),
                     )
                 },
-                onPostQuoteClick = { onNewPostClick(TextFieldValue(text = "\n\nnostr:${it.postId.hexToNoteHrp()}")) },
-                onHashtagClick = onHashtagClick,
                 onGoToWallet = onGoToWallet,
                 paddingValues = paddingValues,
                 onScrolledToTop = { eventPublisher(FeedContract.UiEvent.FeedScrolledToTop) },
                 onMuteClick = { eventPublisher(FeedContract.UiEvent.MuteAction(it)) },
-                onMediaClick = onMediaClick,
-                onPayInvoiceClick = onPayInvoiceClick,
                 onBookmarkClick = { eventPublisher(FeedContract.UiEvent.BookmarkAction(noteId = it)) },
                 onReportContentClick = { type, profileId, noteId ->
                     eventPublisher(
@@ -447,12 +420,7 @@ fun FeedScreenPreview() {
             onFeedClick = {},
             eventPublisher = {},
             onNewPostClick = {},
-            onPostClick = {},
-            onArticleClick = {},
-            onPostReplyClick = {},
-            onProfileClick = {},
-            onHashtagClick = {},
-            onMediaClick = {},
+            noteCallbacks = NoteCallbacks(),
             onGoToWallet = {},
             onPrimaryDestinationChanged = {},
             onDrawerDestinationClick = {},

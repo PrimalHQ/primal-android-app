@@ -34,8 +34,7 @@ import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.PrimalTopLevelDestination
-import net.primal.android.core.compose.feed.note.events.InvoicePayClickEvent
-import net.primal.android.core.compose.feed.note.events.MediaClickEvent
+import net.primal.android.core.compose.feed.note.events.NoteCallbacks
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 import net.primal.android.core.compose.icons.primaliconpack.Search
@@ -55,13 +54,7 @@ fun HomeFeedScreen(
     onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
     onDrawerQrCodeClick: () -> Unit,
     onSearchClick: () -> Unit,
-    onPostClick: (String) -> Unit,
-    onArticleClick: (naddr: String) -> Unit,
-    onPostReplyClick: (String) -> Unit,
-    onProfileClick: (String) -> Unit,
-    onHashtagClick: (String) -> Unit,
-    onMediaClick: (MediaClickEvent) -> Unit,
-    onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
+    noteCallbacks: NoteCallbacks,
     onGoToWallet: () -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
@@ -81,13 +74,7 @@ fun HomeFeedScreen(
         onDrawerScreenClick = onDrawerScreenClick,
         onDrawerQrCodeClick = onDrawerQrCodeClick,
         onSearchClick = onSearchClick,
-        onPostClick = onPostClick,
-        onArticleClick = onArticleClick,
-        onPostReplyClick = onPostReplyClick,
-        onProfileClick = onProfileClick,
-        onHashtagClick = onHashtagClick,
-        onMediaClick = onMediaClick,
-        onPayInvoiceClick = onPayInvoiceClick,
+        noteCallbacks = noteCallbacks,
         onGoToWallet = onGoToWallet,
     )
 }
@@ -100,13 +87,7 @@ fun HomeFeedScreen(
     onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
     onDrawerQrCodeClick: () -> Unit,
     onSearchClick: () -> Unit,
-    onPostClick: (String) -> Unit,
-    onArticleClick: (naddr: String) -> Unit,
-    onPostReplyClick: (String) -> Unit,
-    onProfileClick: (String) -> Unit,
-    onHashtagClick: (String) -> Unit,
-    onMediaClick: (MediaClickEvent) -> Unit,
-    onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
+    noteCallbacks: NoteCallbacks,
     onGoToWallet: () -> Unit,
 ) {
     val uiScope = rememberCoroutineScope()
@@ -161,17 +142,9 @@ fun HomeFeedScreen(
                 ) { index ->
                     NoteFeedList(
                         feedSpec = state.feeds[index].spec,
+                        noteCallbacks = noteCallbacks,
                         contentPadding = paddingValues,
-                        onPostClick = onPostClick,
-                        onArticleClick = onArticleClick,
-                        onMediaClick = onMediaClick,
-                        onProfileClick = onProfileClick,
-                        onHashtagClick = onHashtagClick,
                         onGoToWallet = onGoToWallet,
-                        onPostReplyClick = onPostReplyClick,
-                        onPayInvoiceClick = onPayInvoiceClick,
-                        onNewPostClick = {
-                        },
                     )
                 }
             }
