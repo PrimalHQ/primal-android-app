@@ -3,7 +3,7 @@ package net.primal.android.notes.db.sql
 import androidx.sqlite.db.SimpleSQLiteQuery
 
 class ChronologicalFeedWithRepostsQueryBuilder(
-    private val feedDirective: String,
+    private val feedSpec: String,
     private val userPubkey: String,
 ) : FeedQueryBuilder {
 
@@ -65,21 +65,21 @@ class ChronologicalFeedWithRepostsQueryBuilder(
     override fun feedQuery(): SimpleSQLiteQuery {
         return SimpleSQLiteQuery(
             query = "$LATEST_BASIC_QUERY ORDER BY feedCreatedAt DESC",
-            bindArgs = arrayOf(userPubkey, feedDirective, userPubkey, feedDirective),
+            bindArgs = arrayOf(userPubkey, feedSpec, userPubkey, feedSpec),
         )
     }
 
     override fun newestFeedPostsQuery(limit: Int): SimpleSQLiteQuery {
         return SimpleSQLiteQuery(
             query = "$LATEST_BASIC_QUERY ORDER BY feedCreatedAt DESC LIMIT ?",
-            bindArgs = arrayOf(userPubkey, feedDirective, userPubkey, feedDirective, limit),
+            bindArgs = arrayOf(userPubkey, feedSpec, userPubkey, feedSpec, limit),
         )
     }
 
     override fun oldestFeedPostsQuery(limit: Int): SimpleSQLiteQuery {
         return SimpleSQLiteQuery(
             query = "$LATEST_BASIC_QUERY ORDER BY feedCreatedAt ASC LIMIT ?",
-            bindArgs = arrayOf(userPubkey, feedDirective, userPubkey, feedDirective, limit),
+            bindArgs = arrayOf(userPubkey, feedSpec, userPubkey, feedSpec, limit),
         )
     }
 }

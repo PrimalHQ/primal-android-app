@@ -22,12 +22,12 @@ import androidx.compose.ui.unit.sp
 import java.text.NumberFormat
 import net.primal.android.R
 import net.primal.android.core.utils.shortened
-import net.primal.android.profile.domain.ProfileFeedDirective
+import net.primal.android.profile.domain.ProfileFeedSpec
 import net.primal.android.theme.AppTheme
 
 @Composable
 fun ProfileTabs(
-    feedDirective: ProfileFeedDirective,
+    feedDirective: ProfileFeedSpec,
     notesCount: Int?,
     onNotesCountClick: () -> Unit,
     repliesCount: Int?,
@@ -42,8 +42,8 @@ fun ProfileTabs(
     var tabIndex by remember {
         mutableIntStateOf(
             when (feedDirective) {
-                ProfileFeedDirective.AuthoredNotes -> 0
-                ProfileFeedDirective.AuthoredReplies -> 1
+                ProfileFeedSpec.AuthoredNotes -> 0
+                ProfileFeedSpec.AuthoredReplies -> 1
             },
         )
     }

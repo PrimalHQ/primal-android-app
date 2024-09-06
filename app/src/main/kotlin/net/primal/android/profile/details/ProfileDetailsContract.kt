@@ -6,7 +6,7 @@ import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.core.compose.profile.model.ProfileStatsUi
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.model.ZappingState
-import net.primal.android.profile.domain.ProfileFeedDirective
+import net.primal.android.profile.domain.ProfileFeedSpec
 import net.primal.android.profile.report.ReportType
 
 interface ProfileDetailsContract {
@@ -22,7 +22,7 @@ interface ProfileDetailsContract {
         val referencedProfilesData: Set<ProfileDetailsUi> = emptySet(),
         val zappingState: ZappingState = ZappingState(),
         val notes: Flow<PagingData<FeedPostUi>>,
-        val profileDirective: ProfileFeedDirective = ProfileFeedDirective.AuthoredNotes,
+        val profileDirective: ProfileFeedSpec = ProfileFeedSpec.AuthoredNotes,
         val confirmBookmarkingNoteId: String? = null,
         val error: ProfileError? = null,
     ) {
@@ -63,7 +63,7 @@ interface ProfileDetailsContract {
         data class RemoveUserFeedAction(val directive: String) : UiEvent()
         data class MuteAction(val profileId: String) : UiEvent()
         data class UnmuteAction(val profileId: String) : UiEvent()
-        data class ChangeProfileFeed(val profileDirective: ProfileFeedDirective) : UiEvent()
+        data class ChangeProfileFeed(val profileDirective: ProfileFeedSpec) : UiEvent()
         data object RequestProfileUpdate : UiEvent()
         data class ReportAbuse(
             val reportType: ReportType,

@@ -31,7 +31,7 @@ import net.primal.android.notes.repository.FeedRepository
 import net.primal.android.profile.details.ProfileDetailsContract.UiEvent
 import net.primal.android.profile.details.ProfileDetailsContract.UiState
 import net.primal.android.profile.details.ProfileDetailsContract.UiState.ProfileError
-import net.primal.android.profile.domain.ProfileFeedDirective
+import net.primal.android.profile.domain.ProfileFeedSpec
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.settings.muted.repository.MutedUserRepository
 import net.primal.android.settings.repository.SettingsRepository
@@ -66,7 +66,7 @@ class ProfileDetailsViewModel @Inject constructor(
             profileId = profileId,
             isActiveUser = isActiveUser,
             notes = feedRepository.feedByDirective(
-                feedDirective = ProfileFeedDirective.AuthoredNotes.buildSpec(profileId),
+                feedDirective = ProfileFeedSpec.AuthoredNotes.buildSpec(profileId),
             )
                 .map { it.map { feed -> feed.asFeedPostUi() } }
                 .cachedIn(viewModelScope),

@@ -1,13 +1,13 @@
 package net.primal.android.notes.db.sql
 
 import androidx.sqlite.db.SimpleSQLiteQuery
-import net.primal.android.core.ext.isExploreMostZapped4hFeed
-import net.primal.android.core.ext.isExploreMostZappedFeed
-import net.primal.android.core.ext.isExplorePopularFeed
-import net.primal.android.core.ext.isExploreTrendingFeed
+import net.primal.android.feeds.domain.isExploreMostZapped4hFeed
+import net.primal.android.feeds.domain.isExploreMostZappedFeed
+import net.primal.android.feeds.domain.isExplorePopularFeed
+import net.primal.android.feeds.domain.isExploreTrendingFeed
 
 class ExploreFeedQueryBuilder(
-    private val feedDirective: String,
+    private val feedSpec: String,
     private val userPubkey: String,
 ) : FeedQueryBuilder {
 
@@ -40,32 +40,33 @@ class ExploreFeedQueryBuilder(
         """
     }
 
+    // TODO This needs to updated
     private val orderByClause = when {
-        feedDirective.isExplorePopularFeed() -> "ORDER BY EventStats.score"
-        feedDirective.isExploreTrendingFeed() -> "ORDER BY EventStats.score24h"
-        feedDirective.isExploreMostZapped4hFeed() -> "ORDER BY EventStats.satsZapped"
-        feedDirective.isExploreMostZappedFeed() -> "ORDER BY EventStats.satsZapped"
+        feedSpec.isExplorePopularFeed() -> "ORDER BY EventStats.score"
+        feedSpec.isExploreTrendingFeed() -> "ORDER BY EventStats.score24h"
+        feedSpec.isExploreMostZapped4hFeed() -> "ORDER BY EventStats.satsZapped"
+        feedSpec.isExploreMostZappedFeed() -> "ORDER BY EventStats.satsZapped"
         else -> "ORDER BY PostData.createdAt"
     }
 
     override fun feedQuery(): SimpleSQLiteQuery {
         return SimpleSQLiteQuery(
             query = "$EXPLORE_BASIC_QUERY $orderByClause DESC",
-            bindArgs = arrayOf(userPubkey, feedDirective),
+            bindArgs = arrayOf(userPubkey, feedSpec),
         )
     }
 
     override fun newestFeedPostsQuery(limit: Int): SimpleSQLiteQuery {
         return SimpleSQLiteQuery(
             query = "$EXPLORE_BASIC_QUERY $orderByClause DESC LIMIT ?",
-            bindArgs = arrayOf(userPubkey, feedDirective, limit),
+            bindArgs = arrayOf(userPubkey, feedSpec, limit),
         )
     }
 
     override fun oldestFeedPostsQuery(limit: Int): SimpleSQLiteQuery {
         return SimpleSQLiteQuery(
             query = "$EXPLORE_BASIC_QUERY $orderByClause ASC LIMIT ?",
-            bindArgs = arrayOf(userPubkey, feedDirective, limit),
+            bindArgs = arrayOf(userPubkey, feedSpec, limit),
         )
     }
 }

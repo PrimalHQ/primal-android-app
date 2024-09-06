@@ -14,10 +14,10 @@ import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
-import net.primal.android.core.ext.hasReposts
-import net.primal.android.core.ext.hasUpwardsPagination
-import net.primal.android.core.ext.isBookmarkFeed
 import net.primal.android.db.PrimalDatabase
+import net.primal.android.feeds.domain.isNotesBookmarkFeedSpec
+import net.primal.android.feeds.domain.supportsNoteReposts
+import net.primal.android.feeds.domain.supportsUpwardsNotesPagination
 import net.primal.android.networking.sockets.errors.NostrNoticeException
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.notes.api.FeedApi
@@ -34,27 +34,27 @@ import timber.log.Timber
 @ExperimentalPagingApi
 class FeedRemoteMediator(
     private val dispatcherProvider: CoroutineDispatcherProvider,
-    private val feedDirective: String,
+    private val feedSpec: String,
     private val userId: String,
     private val feedApi: FeedApi,
     private val database: PrimalDatabase,
 ) : RemoteMediator<Int, FeedPost>() {
 
     private val feedQueryBuilder: FeedQueryBuilder = when {
-        feedDirective.hasReposts() -> ChronologicalFeedWithRepostsQueryBuilder(
-            feedDirective = feedDirective,
+        feedSpec.supportsNoteReposts() -> ChronologicalFeedWithRepostsQueryBuilder(
+            feedSpec = feedSpec,
             userPubkey = userId,
         )
 
         else -> ExploreFeedQueryBuilder(
-            feedDirective = feedDirective,
+            feedSpec = feedSpec,
             userPubkey = userId,
         )
     }
 
     private val lastRequests: MutableMap<LoadType, Pair<FeedRequestBody, Long>> = mutableMapOf()
 
-    private val feedProcessor: FeedProcessor = FeedProcessor(feedDirective = feedDirective, database = database)
+    private val feedProcessor: FeedProcessor = FeedProcessor(feedSpec = feedSpec, database = database)
 
     private fun FeedPost?.isOlderThan(duration: Duration): Boolean {
         if (this == null) return true
@@ -76,9 +76,9 @@ class FeedRemoteMediator(
 
     private suspend fun shouldResetLocalCache() =
         when {
-            feedDirective.hasUpwardsPagination() -> shouldRefreshLatestFeed()
-            feedDirective.isBookmarkFeed() -> true
-            else -> shouldRefreshNonLatestFeed(feedDirective)
+            feedSpec.supportsUpwardsNotesPagination() -> shouldRefreshLatestFeed()
+            feedSpec.isNotesBookmarkFeedSpec() -> true
+            else -> shouldRefreshNonLatestFeed(feedSpec)
         }
 
     override suspend fun initialize(): InitializeAction {
@@ -90,9 +90,9 @@ class FeedRemoteMediator(
 
     @Suppress("CyclomaticComplexMethod")
     override suspend fun load(loadType: LoadType, state: PagingState<Int, FeedPost>): MediatorResult {
-        Timber.i("feed_directive $feedDirective load called ($loadType)")
+        Timber.i("feed_spec $feedSpec load called ($loadType)")
         if (loadType == LoadType.PREPEND) {
-            Timber.w("feed_directive $feedDirective load exit 9")
+            Timber.w("feed_spec $feedSpec load exit 9")
             return MediatorResult.Success(endOfPaginationReached = true)
         }
 
@@ -115,25 +115,25 @@ class FeedRemoteMediator(
                 )
             }
 
-            Timber.w("feed_directive $feedDirective load exit 6")
+            Timber.w("feed_spec $feedSpec load exit 6")
             MediatorResult.Success(endOfPaginationReached = false)
         } catch (error: IOException) {
-            Timber.w(error, "feed_directive $feedDirective load exit 7")
+            Timber.w(error, "feed_spec $feedSpec load exit 7")
             MediatorResult.Error(error)
         } catch (error: NostrNoticeException) {
-            Timber.w(error, "feed_directive $feedDirective load exit 8")
+            Timber.w(error, "feed_spec $feedSpec load exit 8")
             MediatorResult.Error(error)
         } catch (error: NoSuchFeedPostException) {
-            Timber.w(error, "feed_directive $feedDirective load exit 2")
+            Timber.w(error, "feed_spec $feedSpec load exit 2")
             MediatorResult.Success(endOfPaginationReached = true)
         } catch (error: RemoteKeyNotFoundException) {
-            Timber.w(error, "feed_directive $feedDirective load exit 3")
+            Timber.w(error, "feed_spec $feedSpec load exit 3")
             MediatorResult.Error(error)
         } catch (error: WssException) {
-            Timber.w(error, "feed_directive $feedDirective load exit 5")
+            Timber.w(error, "feed_spec $feedSpec load exit 5")
             MediatorResult.Error(error)
         } catch (error: RepeatingRequestBodyException) {
-            Timber.w(error, "feed_directive $feedDirective load exit 4")
+            Timber.w(error, "feed_spec $feedSpec load exit 4")
             MediatorResult.Success(endOfPaginationReached = true)
         }
     }
@@ -161,7 +161,7 @@ class FeedRemoteMediator(
 
     private suspend fun syncRefresh(pageSize: Int): Pair<FeedRequestBody, FeedResponse> {
         val requestBody = FeedRequestBody(
-            directive = feedDirective,
+            directive = feedSpec,
             userPubKey = userId,
             limit = pageSize,
         )
@@ -175,7 +175,7 @@ class FeedRemoteMediator(
 
     private suspend fun syncPrepend(remoteKey: FeedPostRemoteKey?, pageSize: Int): Pair<FeedRequestBody, FeedResponse> {
         val requestBody = FeedRequestBody(
-            directive = feedDirective,
+            directive = feedSpec,
             userPubKey = userId,
             limit = pageSize,
             since = remoteKey?.untilId,
@@ -199,7 +199,7 @@ class FeedRemoteMediator(
 
     private suspend fun syncAppend(remoteKey: FeedPostRemoteKey?, pageSize: Int): Pair<FeedRequestBody, FeedResponse> {
         val requestBody = FeedRequestBody(
-            directive = feedDirective,
+            directive = feedSpec,
             userPubKey = userId,
             limit = pageSize,
             until = remoteKey?.sinceId,
@@ -246,7 +246,7 @@ class FeedRemoteMediator(
 //
 //        return withContext(dispatcherProvider.io()) {
 //            Timber.i(
-//                "feed_directive $feedDirective looking for firstItem postId=${firstItem.data.postId}" +
+//                "feed_spec $feedDirective looking for firstItem postId=${firstItem.data.postId}" +
 //                    " and repostId=${firstItem.data.repostId}",
 //            )
 //            database.feedPostsRemoteKeys().find(
@@ -264,13 +264,13 @@ class FeedRemoteMediator(
 
         return withContext(dispatcherProvider.io()) {
             Timber.i(
-                "feed_directive $feedDirective looking for lastItem postId=${lastItem.data.postId}" +
+                "feed_spec $feedSpec looking for lastItem postId=${lastItem.data.postId}" +
                     " and repostId=${lastItem.data.repostId}",
             )
             database.feedPostsRemoteKeys().find(
                 postId = lastItem.data.postId,
                 repostId = lastItem.data.repostId,
-                directive = feedDirective,
+                directive = feedSpec,
             )
         }
     }

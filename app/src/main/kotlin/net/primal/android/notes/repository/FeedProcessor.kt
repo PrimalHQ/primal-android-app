@@ -10,7 +10,7 @@ import net.primal.android.notes.db.FeedPostDataCrossRef
 import net.primal.android.notes.db.FeedPostRemoteKey
 
 class FeedProcessor(
-    val feedDirective: String,
+    val feedSpec: String,
     val database: PrimalDatabase,
 ) {
 
@@ -22,8 +22,8 @@ class FeedProcessor(
         val pagingEvent = response.paging
         database.withTransaction {
             if (clearFeed) {
-                database.feedPostsRemoteKeys().deleteByDirective(feedDirective)
-                database.feedsConnections().deleteConnectionsByDirective(feedDirective)
+                database.feedPostsRemoteKeys().deleteByDirective(feedSpec)
+                database.feedsConnections().deleteConnectionsByDirective(feedSpec)
                 database.posts().deleteOrphanPosts()
             }
 
@@ -40,7 +40,7 @@ class FeedProcessor(
                 val remoteKeys = this.map {
                     FeedPostRemoteKey(
                         eventId = it.id,
-                        directive = feedDirective,
+                        directive = feedSpec,
                         sinceId = pagingEvent.sinceId,
                         untilId = pagingEvent.untilId,
                         cachedAt = Instant.now().epochSecond,
@@ -56,7 +56,7 @@ class FeedProcessor(
         database.feedsConnections().connect(
             data = this.map {
                 FeedPostDataCrossRef(
-                    feedDirective = feedDirective,
+                    feedDirective = feedSpec,
                     eventId = it.id,
                 )
             },

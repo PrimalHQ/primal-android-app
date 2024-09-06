@@ -1,13 +1,23 @@
 package net.primal.android.notes.feed
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshContainer
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
@@ -21,17 +31,20 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
-import fr.acinq.lightning.utils.UUID
+import java.util.*
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
@@ -39,13 +52,20 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.R
+import net.primal.android.core.compose.AvatarThumbnailsRow
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
+import net.primal.android.core.compose.isNotEmpty
 import net.primal.android.core.compose.pulltorefresh.PrimalPullToRefreshIndicator
+import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
+import net.primal.android.notes.feed.NoteFeedContract.UiEvent
 import net.primal.android.notes.feed.model.FeedPostUi
+import net.primal.android.notes.feed.model.FeedPostsSyncStats
 import net.primal.android.notes.feed.model.ZappingState
+import net.primal.android.notes.feed.note.ConfirmFirstBookmarkAlertDialog
 import net.primal.android.notes.feed.note.events.NoteCallbacks
 import net.primal.android.profile.report.OnReportContentClick
 import net.primal.android.theme.AppTheme
+import timber.log.Timber
 
 @Composable
 fun NoteFeedList(
@@ -54,6 +74,7 @@ fun NoteFeedList(
     noteCallbacks: NoteCallbacks,
     onGoToWallet: () -> Unit,
     previewMode: Boolean = false,
+    visible: Boolean = true,
     header: @Composable (LazyItemScope.() -> Unit)? = null,
     stickyHeader: @Composable (LazyItemScope.() -> Unit)? = null,
 ) {
@@ -63,6 +84,24 @@ fun NoteFeedList(
     )
     val uiState = viewModel.state.collectAsState()
 
+    var started by remember(viewModel) { mutableStateOf(false) }
+    DisposableLifecycleObserverEffect(viewModel) {
+        when (it) {
+            Lifecycle.Event.ON_START -> started = true
+            Lifecycle.Event.ON_STOP -> started = false
+            else -> Unit
+        }
+    }
+
+    val isPolling by remember(started, visible) { mutableStateOf(started && visible) }
+    LaunchedEffect(isPolling) {
+        if (isPolling) {
+            viewModel.setEvent(UiEvent.StartPolling)
+        } else {
+            viewModel.setEvent(UiEvent.StopPolling)
+        }
+    }
+
     NoteFeedList(
         state = uiState.value,
         noteCallbacks = noteCallbacks,
@@ -70,6 +109,7 @@ fun NoteFeedList(
         header = header,
         stickyHeader = stickyHeader,
         onGoToWallet = onGoToWallet,
+        eventPublisher = viewModel::setEvent,
     )
 }
 
@@ -81,66 +121,165 @@ private fun NoteFeedList(
     contentPadding: PaddingValues = PaddingValues(0.dp),
     header: @Composable (LazyItemScope.() -> Unit)? = null,
     stickyHeader: @Composable (LazyItemScope.() -> Unit)? = null,
+    eventPublisher: (UiEvent) -> Unit,
 ) {
     val pagingItems = state.notes.collectAsLazyPagingItems()
     val feedListState = pagingItems.rememberLazyListStatePagingWorkaround()
 
-    NoteFeedList(
-        pagingItems = pagingItems,
-        feedListState = feedListState,
-        // state.zappingState
-        zappingState = ZappingState(),
-        noteCallbacks = noteCallbacks,
-        onZapClick = { post, zapAmount, zapDescription ->
-//            eventPublisher(
-//                FeedContract.UiEvent.ZapAction(
-//                    postId = post.postId,
-//                    postAuthorId = post.authorId,
-//                    zapAmount = zapAmount,
-//                    zapDescription = zapDescription,
-//                ),
-//            )
-        },
-        onPostLikeClick = {
-//            eventPublisher(
-//                FeedContract.UiEvent.PostLikeAction(
-//                    postId = it.postId,
-//                    postAuthorId = it.authorId,
-//                ),
-//            )
-        },
-        onRepostClick = {
-//            eventPublisher(
-//                FeedContract.UiEvent.RepostAction(
-//                    postId = it.postId,
-//                    postAuthorId = it.authorId,
-//                    postNostrEvent = it.rawNostrEventJson,
-//                ),
-//            )
-        },
-        onGoToWallet = onGoToWallet,
-        paddingValues = contentPadding,
-        onScrolledToTop = {
-//            eventPublisher(FeedContract.UiEvent.FeedScrolledToTop)
-        },
-        onMuteClick = {
-//            eventPublisher(FeedContract.UiEvent.MuteAction(it))
-        },
-        onBookmarkClick = {
-//            eventPublisher(FeedContract.UiEvent.BookmarkAction(noteId = it))
-        },
-        onReportContentClick = { type, profileId, noteId ->
-//            eventPublisher(
-//                FeedContract.UiEvent.ReportAbuse(
-//                    reportType = type,
-//                    profileId = profileId,
-//                    noteId = noteId,
-//                ),
-//            )
-        },
-        header = header,
-        stickyHeader = stickyHeader,
-    )
+    // TODO Bring back error handler
+//    ErrorHandler(
+//        error = state.error,
+//        snackbarHostState = snackbarHostState,
+//    )
+
+    LaunchedEffect(feedListState, pagingItems) {
+        withContext(Dispatchers.IO) {
+            snapshotFlow { feedListState.firstVisibleItemIndex to pagingItems.itemCount }
+                .distinctUntilChanged()
+                .filter { (_, size) -> size > 0 }
+                .collect { (index, _) ->
+                    val firstVisibleNote = pagingItems.peek(index)
+                    if (firstVisibleNote != null) {
+                        eventPublisher(
+                            UiEvent.UpdateCurrentTopVisibleNote(
+                                noteId = firstVisibleNote.postId,
+                                repostId = firstVisibleNote.repostId,
+                            ),
+                        )
+                    }
+                }
+        }
+    }
+
+    if (state.confirmBookmarkingNoteId != null) {
+        ConfirmFirstBookmarkAlertDialog(
+            onBookmarkConfirmed = {
+                eventPublisher(
+                    UiEvent.BookmarkAction(
+                        noteId = state.confirmBookmarkingNoteId,
+                        forceUpdate = true,
+                    ),
+                )
+            },
+            onClose = {
+                eventPublisher(UiEvent.DismissBookmarkConfirmation)
+            },
+        )
+    }
+
+    Box {
+        NoteFeedList(
+            pagingItems = pagingItems,
+            feedListState = feedListState,
+            zappingState = state.zappingState,
+            noteCallbacks = noteCallbacks,
+            onZapClick = { post, zapAmount, zapDescription ->
+                eventPublisher(
+                    UiEvent.ZapAction(
+                        postId = post.postId,
+                        postAuthorId = post.authorId,
+                        zapAmount = zapAmount,
+                        zapDescription = zapDescription,
+                    ),
+                )
+            },
+            onPostLikeClick = {
+                eventPublisher(
+                    UiEvent.PostLikeAction(
+                        postId = it.postId,
+                        postAuthorId = it.authorId,
+                    ),
+                )
+            },
+            onRepostClick = {
+                eventPublisher(
+                    UiEvent.RepostAction(
+                        postId = it.postId,
+                        postAuthorId = it.authorId,
+                        postNostrEvent = it.rawNostrEventJson,
+                    ),
+                )
+            },
+            onGoToWallet = onGoToWallet,
+            paddingValues = contentPadding,
+            onScrolledToTop = { eventPublisher(UiEvent.FeedScrolledToTop) },
+            onMuteClick = { eventPublisher(UiEvent.MuteAction(it)) },
+            onBookmarkClick = { eventPublisher(UiEvent.BookmarkAction(noteId = it)) },
+            onReportContentClick = { type, profileId, noteId ->
+                eventPublisher(
+                    UiEvent.ReportAbuse(
+                        reportType = type,
+                        profileId = profileId,
+                        noteId = noteId,
+                    ),
+                )
+            },
+            header = header,
+            stickyHeader = stickyHeader,
+        )
+
+        AnimatedVisibility(
+            visible = true,
+            enter = fadeIn(),
+            exit = fadeOut(),
+            modifier = Modifier
+//                .padding(paddingValues)
+                .padding(top = 128.dp)
+                .wrapContentHeight()
+                .wrapContentWidth()
+                .align(Alignment.TopCenter),
+//                .graphicsLayer {
+//                    this.alpha = (1 - topAppBarState.collapsedFraction) * 1.0f
+//                },
+        ) {
+            Timber.e(state.syncStats.latestNoteIds.toString())
+            if (state.syncStats.latestNoteIds.isNotEmpty() && pagingItems.isNotEmpty()) {
+                var doneDelaying by remember { mutableStateOf(false) }
+                LaunchedEffect(true) {
+                    delay(0.21.seconds)
+                    doneDelaying = true
+                }
+                if (doneDelaying) {
+                    NewPostsButton(
+                        syncStats = state.syncStats,
+                        onClick = {
+                            eventPublisher(UiEvent.ShowLatestNotes)
+                        },
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun NewPostsButton(syncStats: FeedPostsSyncStats, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .height(40.dp)
+            .background(
+                color = AppTheme.colorScheme.primary,
+                shape = AppTheme.shapes.extraLarge,
+            )
+            .padding(horizontal = 2.dp)
+            .clickable { onClick() },
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        AvatarThumbnailsRow(
+            modifier = Modifier.padding(start = 6.dp),
+            avatarCdnImages = syncStats.latestAvatarCdnImages,
+            onClick = { onClick() },
+        )
+
+        Text(
+            modifier = Modifier
+                .padding(start = 12.dp, end = 16.dp)
+                .wrapContentHeight(),
+            text = stringResource(id = R.string.feed_new_posts_notice_general),
+            style = AppTheme.typography.bodySmall,
+            color = Color.White,
+        )
+    }
 }
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class, FlowPreview::class)

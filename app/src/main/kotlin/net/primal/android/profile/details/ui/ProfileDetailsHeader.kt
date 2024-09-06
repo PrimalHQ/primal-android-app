@@ -38,7 +38,7 @@ import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.formatNip05Identifier
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.profile.details.ProfileDetailsContract
-import net.primal.android.profile.domain.ProfileFeedDirective
+import net.primal.android.profile.domain.ProfileFeedSpec
 import net.primal.android.profile.domain.ProfileFollowsType
 import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.domain.DraftTx
@@ -193,11 +193,11 @@ private fun ProfileHeaderDetails(
             feedDirective = state.profileDirective,
             notesCount = state.profileStats?.notesCount,
             onNotesCountClick = {
-                eventPublisher(ProfileDetailsContract.UiEvent.ChangeProfileFeed(ProfileFeedDirective.AuthoredNotes))
+                eventPublisher(ProfileDetailsContract.UiEvent.ChangeProfileFeed(ProfileFeedSpec.AuthoredNotes))
             },
             repliesCount = state.profileStats?.repliesCount,
             onRepliesCountClick = {
-                eventPublisher(ProfileDetailsContract.UiEvent.ChangeProfileFeed(ProfileFeedDirective.AuthoredReplies))
+                eventPublisher(ProfileDetailsContract.UiEvent.ChangeProfileFeed(ProfileFeedSpec.AuthoredReplies))
             },
             followingCount = state.profileStats?.followingCount,
             onFollowingCountClick = { onFollowsClick(state.profileId, ProfileFollowsType.Following) },

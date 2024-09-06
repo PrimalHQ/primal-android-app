@@ -1,6 +1,6 @@
 @file:Suppress("TooManyFunctions")
 
-package net.primal.android.core.ext
+package net.primal.android.feeds.domain
 
 import net.primal.android.crypto.hexToNpubHrp
 

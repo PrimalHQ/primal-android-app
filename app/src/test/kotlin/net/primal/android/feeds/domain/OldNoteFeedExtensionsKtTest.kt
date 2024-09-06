@@ -1,10 +1,10 @@
-package net.primal.android.core.ext
+package net.primal.android.feeds.domain
 
 import io.kotest.matchers.shouldBe
 import net.primal.android.crypto.CryptoUtils
 import org.junit.Test
 
-class OldFeedExtensionsKtTest {
+class OldNoteFeedExtensionsKtTest {
 
     @Test
     fun isExploreTrendingFeed_returnsTrueForTrendingFeed() {

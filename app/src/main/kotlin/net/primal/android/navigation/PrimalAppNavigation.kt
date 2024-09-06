@@ -664,6 +664,7 @@ private fun NavGraphBuilder.home(
         noteCallbacks = noteCallbacksHandler(navController),
         onGoToWallet = { navController.navigateToWallet() },
         onSearchClick = { navController.navigateToSearch() },
+        onNewPostClick = { preFillContent -> navController.navigateToNoteEditor(preFillContent?.asNoteEditorArgs()) },
     )
 }
 

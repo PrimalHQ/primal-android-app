@@ -9,8 +9,8 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
-import net.primal.android.core.ext.hasReposts
 import net.primal.android.db.PrimalDatabase
+import net.primal.android.feeds.domain.hasReposts
 import net.primal.android.notes.api.FeedApi
 import net.primal.android.notes.api.mediator.FeedRemoteMediator
 import net.primal.android.notes.api.model.FeedRequestBody
@@ -79,21 +79,36 @@ class FeedRepository @Inject constructor(
 
     suspend fun replaceFeedDirective(
         userId: String,
-        feedDirective: String,
+        feedSpec: String,
         response: FeedResponse,
-    ) {
-        withContext(dispatcherProvider.io()) {
-            FeedProcessor(
-                feedDirective = feedDirective,
-                database = database,
-            ).processAndPersistToDatabase(
-                userId = userId,
-                response = response,
-                clearFeed = true,
-            )
-        }
+    ) = withContext(dispatcherProvider.io()) {
+        FeedProcessor(
+            feedSpec = feedSpec,
+            database = database,
+        ).processAndPersistToDatabase(
+            userId = userId,
+            response = response,
+            clearFeed = true,
+        )
     }
 
+    suspend fun fetchLatestNotes2(
+        userId: String,
+        feedSpec: String,
+        since: Long? = null,
+    ) = withContext(dispatcherProvider.io()) {
+        feedApi.getFeedMega(
+            body = FeedRequestBody(
+                directive = feedSpec,
+                userPubKey = userId,
+                since = since,
+                order = "desc",
+                limit = PAGE_SIZE,
+            ),
+        )
+    }
+
+    @Deprecated("Use fetchLatestNotes2()")
     suspend fun fetchLatestNotes(
         userId: String,
         feedDirective: String,
@@ -121,7 +136,7 @@ class FeedRepository @Inject constructor(
             ),
             remoteMediator = FeedRemoteMediator(
                 dispatcherProvider = dispatcherProvider,
-                feedDirective = feedDirective,
+                feedSpec = feedDirective,
                 userId = activeAccountStore.activeUserId(),
                 feedApi = feedApi,
                 database = database,
@@ -132,12 +147,12 @@ class FeedRepository @Inject constructor(
     private fun feedQueryBuilder(feedDirective: String): FeedQueryBuilder =
         when {
             feedDirective.hasReposts() -> ChronologicalFeedWithRepostsQueryBuilder(
-                feedDirective = feedDirective,
+                feedSpec = feedDirective,
                 userPubkey = activeAccountStore.activeUserId(),
             )
 
             else -> ExploreFeedQueryBuilder(
-                feedDirective = feedDirective,
+                feedSpec = feedDirective,
                 userPubkey = activeAccountStore.activeUserId(),
             )
         }

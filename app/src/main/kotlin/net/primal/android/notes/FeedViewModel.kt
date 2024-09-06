@@ -25,10 +25,10 @@ import kotlinx.coroutines.withContext
 import net.primal.android.config.AppConfigHandler
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.ext.asMapByKey
-import net.primal.android.core.ext.hasUpwardsPagination
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.feeds.domain.FeedSpecKind
+import net.primal.android.feeds.domain.hasUpwardsPagination
 import net.primal.android.feeds.ui.model.FeedUi
 import net.primal.android.navigation.feedDirective
 import net.primal.android.networking.relays.errors.MissingRelaysException
@@ -60,6 +60,7 @@ import net.primal.android.wallet.zaps.ZapHandler
 import net.primal.android.wallet.zaps.hasWallet
 import timber.log.Timber
 
+@Deprecated("Use NoteFeedViewModel.")
 @HiltViewModel
 class FeedViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
@@ -296,7 +297,7 @@ class FeedViewModel @Inject constructor(
             latestFeedResponse?.let {
                 feedRepository.replaceFeedDirective(
                     userId = activeAccountStore.activeUserId(),
-                    feedDirective = feedDirective,
+                    feedSpec = feedDirective,
                     response = it,
                 )
             }
