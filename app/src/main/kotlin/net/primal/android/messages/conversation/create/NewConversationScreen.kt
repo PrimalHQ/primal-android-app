@@ -5,29 +5,16 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import net.primal.android.R
-import net.primal.android.core.compose.PrimalDefaults
+import net.primal.android.core.compose.IconTextField
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
@@ -35,7 +22,6 @@ import net.primal.android.core.compose.icons.primaliconpack.Search
 import net.primal.android.explore.search.SearchContract
 import net.primal.android.explore.search.SearchViewModel
 import net.primal.android.explore.search.ui.UserProfileListItem
-import net.primal.android.theme.AppTheme
 
 @Composable
 fun NewConversationScreen(
@@ -71,11 +57,17 @@ fun NewConversationScreen(
                 onNavigationIconClick = onClose,
                 navigationIconContentDescription = stringResource(id = R.string.accessibility_back_button),
                 footer = {
-                    SearchBar(
-                        query = state.searchQuery,
-                        onQueryChange = {
+                    IconTextField(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp)
+                            .padding(bottom = 8.dp),
+                        value = state.searchQuery,
+                        onValueChange = {
                             eventPublisher(SearchContract.UiEvent.SearchQueryUpdated(query = it))
                         },
+                        placeholderText = stringResource(id = R.string.new_message_search_hint),
+                        iconImageVector = PrimalIcons.Search,
                     )
                 },
             )
@@ -105,53 +97,6 @@ fun NewConversationScreen(
                     )
                 }
             }
-        },
-    )
-}
-
-@Composable
-fun SearchBar(
-    query: String,
-    onQueryChange: (String) -> Unit,
-    focusRequester: FocusRequester? = remember { FocusRequester() },
-) {
-    var focusRequested by rememberSaveable { mutableStateOf(false) }
-
-    if (focusRequester != null) {
-        LaunchedEffect(focusRequester) {
-            if (!focusRequested) {
-                focusRequester.requestFocus()
-                focusRequested = true
-            }
-        }
-    }
-
-    OutlinedTextField(
-        modifier = Modifier
-            .then(if (focusRequester != null) Modifier.focusRequester(focusRequester) else Modifier)
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp)
-            .padding(bottom = 8.dp),
-        value = query,
-        onValueChange = onQueryChange,
-        shape = AppTheme.shapes.medium,
-        colors = PrimalDefaults.outlinedTextFieldColors(),
-        keyboardOptions = KeyboardOptions(
-            imeAction = ImeAction.Done,
-        ),
-        leadingIcon = {
-            Icon(
-                imageVector = PrimalIcons.Search,
-                contentDescription = null,
-                tint = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
-            )
-        },
-        placeholder = {
-            Text(
-                text = stringResource(id = R.string.new_message_search_hint),
-                color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
-                style = AppTheme.typography.bodyMedium,
-            )
         },
     )
 }
