@@ -200,6 +200,8 @@ fun NavController.navigateToMediaGallery(
         "&$MEDIA_POSITION_MS=$mediaPositionMs",
 )
 
+fun NavController.navigateToExplore() = navigate(route = "explore")
+
 fun NavController.navigateToExploreFeed(query: String) =
     navigate(route = "explore?$EXPLORE_FEED_SPEC=${"search;$query".asBase64Encoded()}")
 
@@ -328,6 +330,11 @@ fun PrimalAppNavigation() {
             navController = navController,
             onTopLevelDestinationChanged = topLevelDestinationHandler,
             onDrawerScreenClick = drawerDestinationHandler,
+        )
+
+        explore(
+            route = "explore",
+            navController = navController,
         )
 
         exploreFeed(
@@ -631,7 +638,7 @@ private fun NavGraphBuilder.feed(
         onTopLevelDestinationChanged = onTopLevelDestinationChanged,
         onDrawerScreenClick = onDrawerScreenClick,
         onDrawerQrCodeClick = { navController.navigateToProfileQrCodeViewer() },
-        onSearchClick = { navController.navigateToSearch() },
+        onSearchClick = { navController.navigateToExplore() },
     )
 }
 
@@ -712,7 +719,7 @@ private fun NavGraphBuilder.reads(
         onTopLevelDestinationChanged = onTopLevelDestinationChanged,
         onDrawerScreenClick = onDrawerScreenClick,
         onDrawerQrCodeClick = { navController.navigateToProfileQrCodeViewer() },
-        onSearchClick = { navController.navigateToSearch() },
+        onSearchClick = { navController.navigateToExplore() },
         onArticleClick = { naddr -> navController.navigateToArticleDetails(naddr) },
     )
 }
@@ -738,45 +745,39 @@ private fun NavGraphBuilder.noteEditor(
     )
 }
 
-private fun NavGraphBuilder.explore(
-    route: String,
-    navController: NavController,
-    onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
-    onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
-) = composable(
-    route = route,
-    enterTransition = { null },
-    exitTransition = {
-        when {
-            targetState.destination.route.isMainScreenRoute() -> null
-            else -> primalScaleOut
-        }
-    },
-    popEnterTransition = {
-        when {
-            initialState.destination.route.isMainScreenRoute() -> null
-            else -> primalScaleIn
-        }
-    },
-    popExitTransition = {
-        when {
-            targetState.destination.route.isMainScreenRoute() -> null
-            else -> primalScaleOut
-        }
-    },
-) {
-    val viewModel = hiltViewModel<ExploreHomeViewModel>(it)
-    ApplyEdgeToEdge()
-    LockToOrientationPortrait()
-    ExploreHomeScreen(
-        viewModel = viewModel,
-        onHashtagClick = { query -> navController.navigateToExploreFeed(query = query) },
-        onSearchClick = { navController.navigateToSearch() },
-        onTopLevelDestinationChanged = onTopLevelDestinationChanged,
-        onDrawerScreenClick = onDrawerScreenClick,
-        onDrawerQrCodeClick = { navController.navigateToProfileQrCodeViewer() },
-    )
-}
+private fun NavGraphBuilder.explore(route: String, navController: NavController) =
+    composable(
+        route = route,
+        enterTransition = { null },
+        exitTransition = {
+            when {
+                targetState.destination.route.isMainScreenRoute() -> null
+                else -> primalScaleOut
+            }
+        },
+        popEnterTransition = {
+            when {
+                initialState.destination.route.isMainScreenRoute() -> null
+                else -> primalScaleIn
+            }
+        },
+        popExitTransition = {
+            when {
+                targetState.destination.route.isMainScreenRoute() -> null
+                else -> primalScaleOut
+            }
+        },
+    ) {
+        val viewModel = hiltViewModel<ExploreHomeViewModel>(it)
+        ApplyEdgeToEdge()
+        LockToOrientationPortrait()
+        ExploreHomeScreen(
+            viewModel = viewModel,
+            onHashtagClick = { query -> navController.navigateToExploreFeed(query = query) },
+            onSearchClick = { navController.navigateToSearch() },
+            onTuneClick = { /* TODO(marko): navigate to new advanced search */ },
+        )
+    }
 
 private fun NavGraphBuilder.exploreFeed(
     route: String,
