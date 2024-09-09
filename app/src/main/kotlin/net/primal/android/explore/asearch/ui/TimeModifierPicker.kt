@@ -265,7 +265,9 @@ private fun TimeModifierListItem(
 }
 
 private enum class TimeModifierPickerState {
-    Custom, All;
+    Custom,
+    All,
+    ;
 
     fun isCustom() = this == Custom
     fun isAll() = this == All
