@@ -242,6 +242,8 @@
     <string name="asearch_time_posted_custom">Custom</string>
     <string name="asearch_search_kind_notes">Notes</string>
     <string name="asearch_search_kind_reads">Reads</string>
+    <string name="asearch_search_kind_note_replies">Note Replies</string>
+    <string name="asearch_search_kind_reads_comments">Reads Comments</string>
     <string name="asearch_search_kind_images">Images</string>
     <string name="asearch_search_kind_videos">Videos</string>
     <string name="asearch_search_kind_sound">Sound</string>

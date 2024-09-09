@@ -64,6 +64,8 @@ interface AdvancedSearchContract {
     enum class SearchKind {
         Notes,
         Reads,
+        NoteReplies,
+        ReadsComments,
         Images,
         Videos,
         Sound,

@@ -358,6 +358,10 @@ private fun AdvancedSearchContract.SearchKind.toDisplayName(): String =
         AdvancedSearchContract.SearchKind.Images -> stringResource(id = R.string.asearch_search_kind_images)
         AdvancedSearchContract.SearchKind.Videos -> stringResource(id = R.string.asearch_search_kind_videos)
         AdvancedSearchContract.SearchKind.Sound -> stringResource(id = R.string.asearch_search_kind_sound)
+        AdvancedSearchContract.SearchKind.NoteReplies -> stringResource(id = R.string.asearch_search_kind_note_replies)
+        AdvancedSearchContract.SearchKind.ReadsComments -> stringResource(
+            id = R.string.asearch_search_kind_reads_comments,
+        )
     }
 
 @Composable

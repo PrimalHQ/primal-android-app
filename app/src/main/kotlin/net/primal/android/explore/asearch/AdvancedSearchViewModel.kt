@@ -69,6 +69,8 @@ class AdvancedSearchViewModel @Inject constructor() : ViewModel() {
             AdvancedSearchContract.SearchKind.Images -> "filter:image"
             AdvancedSearchContract.SearchKind.Videos -> "filter:video"
             AdvancedSearchContract.SearchKind.Sound -> "filter:audio"
+            AdvancedSearchContract.SearchKind.NoteReplies -> "kind: 1 filter:replies"
+            AdvancedSearchContract.SearchKind.ReadsComments -> "kind:30023 filter:replies"
         }
 
     private fun AdvancedSearchContract.SearchOrderBy.toSearchCommand() =
