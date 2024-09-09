@@ -31,7 +31,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import net.primal.android.R
 import net.primal.android.core.compose.AvatarThumbnailsRow
-import net.primal.android.core.compose.IconTextField
+import net.primal.android.core.compose.PrimalIconTextField
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -68,6 +68,7 @@ private fun AdvancedSearchScreen(
                 textColor = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
                 navigationIcon = PrimalIcons.ArrowBack,
                 onNavigationIconClick = onBackClick,
+                showDivider = false,
             )
         },
         bottomBar = {
@@ -85,11 +86,11 @@ private fun AdvancedSearchScreen(
     ) { paddingValues ->
         Column(
             modifier = Modifier
-                .padding(top = 16.dp)
+                .padding(top = 8.dp)
                 .padding(paddingValues),
             verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
-            IconTextField(
+            PrimalIconTextField(
                 modifier = Modifier
                     .padding(horizontal = 8.dp)
                     .fillMaxWidth(),
@@ -98,8 +99,9 @@ private fun AdvancedSearchScreen(
                 placeholderText = stringResource(id = R.string.asearch_included_words_placeholder),
                 iconImageVector = Icons.Filled.Search,
                 focusRequester = null,
+                singleLine = true,
             )
-            IconTextField(
+            PrimalIconTextField(
                 modifier = Modifier
                     .padding(horizontal = 8.dp)
                     .fillMaxWidth(),
@@ -108,6 +110,7 @@ private fun AdvancedSearchScreen(
                 placeholderText = stringResource(id = R.string.asearch_excluded_words_placeholder),
                 iconImageVector = Icons.Filled.Close,
                 focusRequester = null,
+                singleLine = true,
             )
             Column {
                 var showSearchBottomSheetPicker by remember { mutableStateOf(false) }
@@ -326,6 +329,7 @@ private fun OptionListWithBottomSheetItem(
                 modifier = Modifier.padding(horizontal = 12.dp),
                 text = label,
                 color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+                style = AppTheme.typography.bodyMedium,
             )
         },
         trailingContent = {

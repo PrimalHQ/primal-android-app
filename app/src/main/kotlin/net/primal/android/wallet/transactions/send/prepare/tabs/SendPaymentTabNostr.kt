@@ -13,8 +13,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import net.primal.android.R
-import net.primal.android.core.compose.IconTextField
 import net.primal.android.core.compose.PrimalDivider
+import net.primal.android.core.compose.PrimalIconTextField
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.Search
 import net.primal.android.explore.search.SearchContract
@@ -29,7 +29,7 @@ fun SendPaymentTabNostr(onProfileClick: (String) -> Unit) {
     val keyboardController = LocalSoftwareKeyboardController.current
 
     Column {
-        IconTextField(
+        PrimalIconTextField(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)

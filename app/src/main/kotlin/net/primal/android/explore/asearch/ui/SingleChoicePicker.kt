@@ -45,6 +45,7 @@ fun <T> SingleChoicePicker(
         PrimalTopAppBar(
             title = titleText,
             textColor = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+            showDivider = false,
         )
         LazyColumn(
             modifier = Modifier
@@ -66,6 +67,7 @@ fun <T> SingleChoicePicker(
                         Text(
                             text = item.itemDisplayName(),
                             color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+                            style = AppTheme.typography.bodyMedium,
                         )
                     },
                     trailingContent = {

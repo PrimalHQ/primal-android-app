@@ -75,6 +75,7 @@ fun FilterPicker(
                 PrimalTopAppBar(
                     title = stringResource(id = R.string.asearch_filter_sheet_title),
                     textColor = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+                    showDivider = false,
                 )
             },
             bottomBar = {
@@ -120,6 +121,7 @@ fun FilterPicker(
                         Text(
                             text = stringResource(id = R.string.asearch_filter_orientation),
                             color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+                            style = AppTheme.typography.bodyMedium,
                         )
                         OrientationDropDownMenu(
                             currentOrientation = filterState.orientation ?: AdvancedSearchContract.Orientation.Any,
@@ -187,13 +189,27 @@ private fun SliderColumn(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
 
+    val sliderColors = SliderDefaults.colors(
+        thumbColor = if (value == 0) {
+            AppTheme.colorScheme.outline
+        } else {
+            AppTheme.extraColorScheme.onSurfaceVariantAlt2
+        },
+        activeTrackColor = AppTheme.colorScheme.tertiary,
+        activeTickColor = AppTheme.colorScheme.tertiary,
+        inactiveTrackColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
+        inactiveTickColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
+    )
+
     Column(
         modifier = modifier
             .fillMaxWidth(),
     ) {
         Text(
+            modifier = Modifier.padding(start = 8.dp),
             text = label,
             color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+            style = AppTheme.typography.bodyMedium,
         )
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -201,25 +217,16 @@ private fun SliderColumn(
             modifier = Modifier.fillMaxWidth(),
         ) {
             Slider(
+                modifier = Modifier.fillMaxWidth(fraction = 0.8f),
                 interactionSource = interactionSource,
-                colors = SliderDefaults.colors(
-                    thumbColor = if (value == 0) {
-                        AppTheme.colorScheme.outline
-                    } else {
-                        AppTheme.extraColorScheme.onSurfaceVariantAlt1
-                    },
-                ),
+                colors = sliderColors,
                 track = {
                     SliderDefaults.Track(
                         sliderState = it,
-                        modifier = Modifier.scale(scaleX = 1f, scaleY = 2f),
-                        colors = SliderDefaults.colors(
-                            activeTrackColor = Color.Transparent,
-                            inactiveTickColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
-                        ),
+                        modifier = Modifier.scale(scaleX = 1f, scaleY = 1.5f),
+                        colors = sliderColors,
                     )
                 },
-                modifier = Modifier.fillMaxWidth(fraction = 0.8f),
                 value = value.toFloat(),
                 onValueChange = { onValueChange(it.toInt()) },
                 steps = maxValue,

@@ -20,7 +20,7 @@ import androidx.compose.ui.text.input.ImeAction
 import net.primal.android.theme.AppTheme
 
 @Composable
-fun IconTextField(
+fun PrimalIconTextField(
     modifier: Modifier = Modifier,
     value: String,
     onValueChange: (String) -> Unit,
@@ -29,6 +29,9 @@ fun IconTextField(
     iconImageVector: ImageVector,
     iconTint: Color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
     focusRequester: FocusRequester? = remember { FocusRequester() },
+    singleLine: Boolean = false,
+    maxLines: Int = if (singleLine) 1 else Int.MAX_VALUE,
+    minLines: Int = 1,
 ) {
     var focusRequested by rememberSaveable { mutableStateOf(false) }
 
@@ -42,8 +45,7 @@ fun IconTextField(
     }
 
     OutlinedTextField(
-        modifier = modifier
-            .then(if (focusRequester != null) modifier.focusRequester(focusRequester) else modifier),
+        modifier = modifier.then(if (focusRequester != null) modifier.focusRequester(focusRequester) else modifier),
         value = value,
         onValueChange = onValueChange,
         shape = AppTheme.shapes.medium,
@@ -65,5 +67,8 @@ fun IconTextField(
                 style = AppTheme.typography.bodyMedium,
             )
         },
+        singleLine = singleLine,
+        maxLines = maxLines,
+        minLines = minLines,
     )
 }

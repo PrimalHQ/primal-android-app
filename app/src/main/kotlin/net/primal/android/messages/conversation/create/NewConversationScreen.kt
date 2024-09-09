@@ -14,7 +14,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import net.primal.android.R
-import net.primal.android.core.compose.IconTextField
+import net.primal.android.core.compose.PrimalIconTextField
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
@@ -57,7 +57,7 @@ fun NewConversationScreen(
                 onNavigationIconClick = onClose,
                 navigationIconContentDescription = stringResource(id = R.string.accessibility_back_button),
                 footer = {
-                    IconTextField(
+                    PrimalIconTextField(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp)

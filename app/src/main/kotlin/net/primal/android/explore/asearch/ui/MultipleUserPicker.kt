@@ -1,6 +1,7 @@
 package net.primal.android.explore.asearch.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,7 +22,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetState
-import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -35,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -42,8 +43,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.AvatarThumbnail
-import net.primal.android.core.compose.IconTextField
 import net.primal.android.core.compose.PrimalDivider
+import net.primal.android.core.compose.PrimalIconTextField
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -88,6 +89,7 @@ fun MultipleUserPicker(
                         textColor = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
                         navigationIcon = PrimalIcons.ArrowBack,
                         onNavigationIconClick = onDismissRequest,
+                        showDivider = false,
                     )
                     SelectedUsersIndicator(
                         selectedUsers = selectedUsers,
@@ -117,7 +119,7 @@ fun MultipleUserPicker(
             Column(
                 modifier = Modifier.padding(paddingValues),
             ) {
-                IconTextField(
+                PrimalIconTextField(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 8.dp)
@@ -167,46 +169,45 @@ private fun SelectedUsersIndicator(
 ) {
     Row(
         modifier = modifier
-            .padding(horizontal = 16.dp, vertical = 24.dp),
+            .padding(horizontal = 16.dp)
+            .padding(top = 4.dp, bottom = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.Start),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (selectedUsers.isEmpty()) {
-            SuggestionChip(
-                onClick = {},
-                label = {
-                    Text(
-                        modifier = Modifier
-                            .padding(vertical = 12.dp),
-                        text = stringResource(id = R.string.asearch_multiselect_anyone),
-                        style = AppTheme.typography.bodyLarge,
-                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
-                    )
-                },
+            Text(
+                modifier = Modifier
+                    .padding(top = 7.dp, bottom = 8.dp)
+                    .background(color = Color.Unspecified, shape = AppTheme.shapes.large)
+                    .border(width = (0.5).dp, color = AppTheme.colorScheme.outline, shape = AppTheme.shapes.large)
+                    .padding(all = 12.dp),
+                text = stringResource(id = R.string.asearch_multiselect_anyone),
+                style = AppTheme.typography.bodyMedium,
+                color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
             )
-        }
-
-        selectedUsers.forEach { user ->
-            Box(
-                modifier = Modifier.size(54.dp),
-                contentAlignment = Alignment.BottomEnd,
-            ) {
-                AvatarThumbnail(
-                    modifier = Modifier.offset(x = (-6).dp, y = (-6).dp),
-                    avatarSize = 48.dp,
-                    avatarCdnImage = user.avatarCdnImage,
-                    onClick = { onUserClick(user) },
-                )
-                Icon(
-                    modifier = Modifier
-                        .clipToBounds()
-                        .clip(CircleShape)
-                        .clickable { onUserClick(user) }
-                        .background(AppTheme.extraColorScheme.surfaceVariantAlt2),
-                    imageVector = Icons.Filled.Close,
-                    contentDescription = null,
-                    tint = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
-                )
+        } else {
+            selectedUsers.forEach { user ->
+                Box(
+                    modifier = Modifier.size(54.dp),
+                    contentAlignment = Alignment.BottomEnd,
+                ) {
+                    AvatarThumbnail(
+                        modifier = Modifier.offset(x = (-6).dp, y = (-6).dp),
+                        avatarSize = 48.dp,
+                        avatarCdnImage = user.avatarCdnImage,
+                        onClick = { onUserClick(user) },
+                    )
+                    Icon(
+                        modifier = Modifier
+                            .clipToBounds()
+                            .clip(CircleShape)
+                            .clickable { onUserClick(user) }
+                            .background(AppTheme.extraColorScheme.surfaceVariantAlt2),
+                        imageVector = Icons.Filled.Close,
+                        contentDescription = null,
+                        tint = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+                    )
+                }
             }
         }
     }
