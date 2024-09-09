@@ -6,15 +6,16 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -72,6 +73,7 @@ fun MultipleUserPicker(
     val scope = rememberCoroutineScope()
     val viewModel = hiltViewModel<SearchViewModel>()
     val state = viewModel.state.collectAsState()
+    val lazyListState = rememberLazyListState()
 
     var selectedUsers: Set<UserProfileItemUi> by remember { mutableStateOf(startingSelectedUsers.toSet()) }
 
@@ -93,6 +95,7 @@ fun MultipleUserPicker(
                         showDivider = false,
                     )
                     SelectedUsersIndicator(
+                        lazyListState = lazyListState,
                         selectedUsers = selectedUsers,
                         onUserClick = { user -> selectedUsers = selectedUsers - user },
                     )
@@ -153,6 +156,9 @@ fun MultipleUserPicker(
                             data = it,
                             onClick = { item ->
                                 selectedUsers = selectedUsers + item
+                                scope.launch {
+                                    lazyListState.animateScrollToItem(selectedUsers.size - 1)
+                                }
                             },
                         )
                     }
@@ -167,8 +173,10 @@ private fun SelectedUsersIndicator(
     modifier: Modifier = Modifier,
     selectedUsers: Set<UserProfileItemUi>,
     onUserClick: (UserProfileItemUi) -> Unit,
+    lazyListState: LazyListState = rememberLazyListState(),
 ) {
     LazyRow(
+        state = lazyListState,
         modifier = modifier
             .padding(horizontal = 16.dp)
             .padding(top = 4.dp, bottom = 8.dp),
