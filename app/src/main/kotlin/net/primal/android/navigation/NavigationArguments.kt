@@ -27,10 +27,10 @@ inline val SavedStateHandle.naddrOrThrow: String
 const val FOLLOWS_TYPE = "followsType"
 inline val SavedStateHandle.followsType: String? get() = get(FOLLOWS_TYPE)
 
-const val EXPLORE_FEED_DIRECTIVE = "exploreFeedDirective"
-inline val SavedStateHandle.exploreFeedDirectiveOrThrow: String
-    get() = get<String>(EXPLORE_FEED_DIRECTIVE)?.asBase64Decoded()?.ifEmpty { null }
-        ?: throw IllegalArgumentException("Missing required exploreFeedDirective argument.")
+const val EXPLORE_FEED_SPEC = "exploreFeedSpec"
+inline val SavedStateHandle.exploreFeedSpecOrThrow: String
+    get() = get<String>(EXPLORE_FEED_SPEC)?.asBase64Decoded()?.ifEmpty { null }
+        ?: throw IllegalArgumentException("Missing required exploreFeedSpec argument.")
 
 const val NOTE_EDITOR_ARGS = "preFillContent"
 

@@ -34,10 +34,10 @@ class FeedRepository @Inject constructor(
 
     fun observeContainsFeed(directive: String) = database.oldFeeds().observeContainsFeed(directive)
 
-    fun feedByDirective(feedDirective: String): Flow<PagingData<FeedPost>> {
-        return createPager(feedDirective = feedDirective) {
+    fun feedBySpec(feedSpec: String): Flow<PagingData<FeedPost>> {
+        return createPager(feedSpec = feedSpec) {
             database.feedPosts().feedQuery(
-                query = feedQueryBuilder(feedDirective = feedDirective).feedQuery(),
+                query = feedQueryBuilder(feedSpec = feedSpec).feedQuery(),
             )
         }.flow
     }
@@ -46,7 +46,7 @@ class FeedRepository @Inject constructor(
         withContext(dispatcherProvider.io()) {
             database.feedPosts().newestFeedPosts(
                 query = feedQueryBuilder(
-                    feedDirective = feedDirective,
+                    feedSpec = feedDirective,
                 ).newestFeedPostsQuery(limit = limit),
             )
         }
@@ -126,7 +126,7 @@ class FeedRepository @Inject constructor(
     }
 
     @OptIn(ExperimentalPagingApi::class)
-    private fun createPager(feedDirective: String, pagingSourceFactory: () -> PagingSource<Int, FeedPost>) =
+    private fun createPager(feedSpec: String, pagingSourceFactory: () -> PagingSource<Int, FeedPost>) =
         Pager(
             config = PagingConfig(
                 pageSize = PAGE_SIZE,
@@ -136,7 +136,7 @@ class FeedRepository @Inject constructor(
             ),
             remoteMediator = FeedRemoteMediator(
                 dispatcherProvider = dispatcherProvider,
-                feedSpec = feedDirective,
+                feedSpec = feedSpec,
                 userId = activeAccountStore.activeUserId(),
                 feedApi = feedApi,
                 database = database,
@@ -144,15 +144,15 @@ class FeedRepository @Inject constructor(
             pagingSourceFactory = pagingSourceFactory,
         )
 
-    private fun feedQueryBuilder(feedDirective: String): FeedQueryBuilder =
+    private fun feedQueryBuilder(feedSpec: String): FeedQueryBuilder =
         when {
-            feedDirective.hasReposts() -> ChronologicalFeedWithRepostsQueryBuilder(
-                feedSpec = feedDirective,
+            feedSpec.hasReposts() -> ChronologicalFeedWithRepostsQueryBuilder(
+                feedSpec = feedSpec,
                 userPubkey = activeAccountStore.activeUserId(),
             )
 
             else -> ExploreFeedQueryBuilder(
-                feedSpec = feedDirective,
+                feedSpec = feedSpec,
                 userPubkey = activeAccountStore.activeUserId(),
             )
         }

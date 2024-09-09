@@ -24,8 +24,8 @@ import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.explore.feed.ExploreFeedContract.UiEvent
 import net.primal.android.explore.feed.ExploreFeedContract.UiState
 import net.primal.android.explore.feed.ExploreFeedContract.UiState.ExploreFeedError
-import net.primal.android.feeds.domain.isBookmarkFeed
-import net.primal.android.navigation.exploreFeedDirectiveOrThrow
+import net.primal.android.feeds.domain.isNotesBookmarkFeedSpec
+import net.primal.android.navigation.exploreFeedSpecOrThrow
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
@@ -57,13 +57,13 @@ class ExploreFeedViewModel @Inject constructor(
     private val mutedUserRepository: MutedUserRepository,
 ) : ViewModel() {
 
-    private val exploreFeedDirective = savedStateHandle.exploreFeedDirectiveOrThrow
+    private val exploreFeedDirective = savedStateHandle.exploreFeedSpecOrThrow
 
     private val _state = MutableStateFlow(
         UiState(
             feedDirective = exploreFeedDirective,
-            canBeAddedInUserFeeds = !exploreFeedDirective.isBookmarkFeed(),
-            posts = feedRepository.feedByDirective(feedDirective = exploreFeedDirective)
+            canBeAddedInUserFeeds = !exploreFeedDirective.isNotesBookmarkFeedSpec(),
+            posts = feedRepository.feedBySpec(feedSpec = exploreFeedDirective)
                 .map { it.map { feed -> feed.asFeedPostUi() } }
                 .cachedIn(viewModelScope),
         ),

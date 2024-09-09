@@ -54,6 +54,7 @@ import net.primal.android.explore.home.ExploreHomeScreen
 import net.primal.android.explore.home.ExploreHomeViewModel
 import net.primal.android.explore.search.SearchViewModel
 import net.primal.android.explore.search.ui.SearchScreen
+import net.primal.android.feeds.domain.FeedSpecKind
 import net.primal.android.messages.chat.ChatScreen
 import net.primal.android.messages.chat.ChatViewModel
 import net.primal.android.messages.conversation.MessageConversationListViewModel
@@ -200,10 +201,15 @@ fun NavController.navigateToMediaGallery(
 )
 
 fun NavController.navigateToExploreFeed(query: String) =
-    navigate(route = "explore?$EXPLORE_FEED_DIRECTIVE=${"search;$query".asBase64Encoded()}")
+    navigate(route = "explore?$EXPLORE_FEED_SPEC=${"search;$query".asBase64Encoded()}")
 
-private fun NavController.navigateToBookmarks(userId: String) =
-    navigate(route = "explore?$EXPLORE_FEED_DIRECTIVE=${"bookmarks;$userId".asBase64Encoded()}")
+private fun NavController.navigateToBookmarks(userId: String, specKind: FeedSpecKind) {
+    val spec = when (specKind) {
+        FeedSpecKind.Reads -> ""
+        FeedSpecKind.Notes -> "{\"id\":\"feed\",\"kind\":\"notes\",\"notes\":\"bookmarks\",\"pubkey\":\"$userId\"}"
+    }
+    navigate(route = "explore?$EXPLORE_FEED_SPEC=${spec.asBase64Encoded()}")
+}
 
 private fun noteCallbacksHandler(navController: NavController) =
     NoteCallbacks(
@@ -242,7 +248,10 @@ fun PrimalAppNavigation() {
     val drawerDestinationHandler: (DrawerScreenDestination) -> Unit = {
         when (it) {
             DrawerScreenDestination.Profile -> navController.navigateToProfile()
-            is DrawerScreenDestination.Bookmarks -> navController.navigateToBookmarks(userId = it.userId)
+            is DrawerScreenDestination.Bookmarks -> navController.navigateToBookmarks(
+                userId = it.userId,
+                specKind = FeedSpecKind.Notes,
+            )
             DrawerScreenDestination.Settings -> navController.navigateToSettings()
             DrawerScreenDestination.SignOut -> navController.navigateToLogout()
         }
@@ -322,9 +331,9 @@ fun PrimalAppNavigation() {
         )
 
         exploreFeed(
-            route = "explore?$EXPLORE_FEED_DIRECTIVE={$EXPLORE_FEED_DIRECTIVE}",
+            route = "explore?$EXPLORE_FEED_SPEC={$EXPLORE_FEED_SPEC}",
             arguments = listOf(
-                navArgument(EXPLORE_FEED_DIRECTIVE) {
+                navArgument(EXPLORE_FEED_SPEC) {
                     type = NavType.StringType
                     nullable = false
                 },

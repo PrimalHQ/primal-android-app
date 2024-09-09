@@ -69,7 +69,7 @@ class NoteFeedViewModel @AssistedInject constructor(
     }
 
     private fun buildFeedByDirective(feedSpec: String) =
-        feedRepository.feedByDirective(feedDirective = feedSpec)
+        feedRepository.feedBySpec(feedSpec = feedSpec)
             .map { it.map { feedNote -> feedNote.asFeedPostUi() } }
             .cachedIn(viewModelScope)
 

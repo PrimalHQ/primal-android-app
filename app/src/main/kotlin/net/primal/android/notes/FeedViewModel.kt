@@ -81,7 +81,7 @@ class FeedViewModel @Inject constructor(
     private var userDataUpdater: UserDataUpdater? = null
 
     private fun buildFeedByDirective(directive: String) =
-        feedRepository.feedByDirective(feedDirective = directive)
+        feedRepository.feedBySpec(feedSpec = directive)
             .map { it.map { feed -> feed.asFeedPostUi() } }
             .cachedIn(viewModelScope)
 

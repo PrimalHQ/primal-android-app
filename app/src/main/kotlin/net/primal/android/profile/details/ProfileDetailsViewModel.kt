@@ -65,8 +65,8 @@ class ProfileDetailsViewModel @Inject constructor(
         UiState(
             profileId = profileId,
             isActiveUser = isActiveUser,
-            notes = feedRepository.feedByDirective(
-                feedDirective = ProfileFeedSpec.AuthoredNotes.buildSpec(profileId),
+            notes = feedRepository.feedBySpec(
+                feedSpec = ProfileFeedSpec.AuthoredNotes.buildSpec(profileId),
             )
                 .map { it.map { feed -> feed.asFeedPostUi() } }
                 .cachedIn(viewModelScope),
@@ -454,7 +454,7 @@ class ProfileDetailsViewModel @Inject constructor(
             setState {
                 copy(
                     profileDirective = event.profileDirective,
-                    notes = feedRepository.feedByDirective(feedDirective = event.profileDirective.buildSpec(profileId))
+                    notes = feedRepository.feedBySpec(feedSpec = event.profileDirective.buildSpec(profileId))
                         .map { it.map { feed -> feed.asFeedPostUi() } }
                         .cachedIn(viewModelScope),
                 )
