@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MenuDefaults
@@ -44,7 +45,6 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.PrimalDivider
-import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.dropdown.DropdownPrimalMenu
 import net.primal.android.explore.asearch.AdvancedSearchContract
@@ -72,10 +72,13 @@ fun FilterPicker(
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             topBar = {
-                PrimalTopAppBar(
-                    title = stringResource(id = R.string.asearch_filter_sheet_title),
-                    textColor = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
-                    showDivider = false,
+                CenterAlignedTopAppBar(
+                    title = {
+                        Text(
+                            text = stringResource(id = R.string.asearch_filter_sheet_title),
+                            color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+                        )
+                    }
                 )
             },
             bottomBar = {

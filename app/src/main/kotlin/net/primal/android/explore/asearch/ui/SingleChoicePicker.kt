@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
@@ -19,7 +20,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import net.primal.android.core.compose.PrimalDivider
-import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.theme.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -42,10 +42,13 @@ fun <T> SingleChoicePicker(
         onDismissRequest = onDismissRequest,
         sheetState = sheetState,
     ) {
-        PrimalTopAppBar(
-            title = titleText,
-            textColor = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
-            showDivider = false,
+        CenterAlignedTopAppBar(
+            title = {
+                Text(
+                    text = titleText,
+                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+                )
+            }
         )
         LazyColumn(
             modifier = Modifier

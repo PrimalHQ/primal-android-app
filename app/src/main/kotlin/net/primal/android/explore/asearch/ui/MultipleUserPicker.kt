@@ -19,8 +19,10 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetState
@@ -47,7 +49,6 @@ import net.primal.android.R
 import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalIconTextField
-import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
@@ -87,12 +88,20 @@ fun MultipleUserPicker(
             modifier = Modifier.fillMaxSize(),
             topBar = {
                 Column {
-                    PrimalTopAppBar(
-                        title = sheetTitle,
-                        textColor = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
-                        navigationIcon = PrimalIcons.ArrowBack,
-                        onNavigationIconClick = onDismissRequest,
-                        showDivider = false,
+                    CenterAlignedTopAppBar(
+                        title = {
+                            Text(
+                                text = sheetTitle,
+                                color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+                            )
+                        },
+                        navigationIcon = {
+                            IconButton(
+                                onClick = onDismissRequest,
+                            ) {
+                                Icon(imageVector = PrimalIcons.ArrowBack, contentDescription = null)
+                            }
+                        }
                     )
                     SelectedUsersIndicator(
                         lazyListState = lazyListState,

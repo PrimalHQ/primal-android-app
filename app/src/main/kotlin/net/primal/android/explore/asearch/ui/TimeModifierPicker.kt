@@ -14,10 +14,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.DateRangePicker
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
@@ -42,7 +44,6 @@ import java.time.format.FormatStyle
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.PrimalDivider
-import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
@@ -78,19 +79,27 @@ fun TimeModifierPicker(
         onDismissRequest = onDismissRequest,
         sheetState = sheetState,
     ) {
-        if (selectState.isAll()) {
-            PrimalTopAppBar(
-                title = titleText,
-                textColor = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
-            )
-        } else {
-            PrimalTopAppBar(
-                title = stringResource(id = R.string.asearch_custom_time_posted_label),
-                textColor = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
-                navigationIcon = PrimalIcons.ArrowBack,
-                onNavigationIconClick = { selectState = TimeModifierPickerState.All },
-            )
-        }
+        CenterAlignedTopAppBar(
+            title = {
+                Text(
+                    text = if (selectState.isCustom()) {
+                        stringResource(id = R.string.asearch_custom_time_posted_label)
+                    } else {
+                        stringResource(id = R.string.asearch_time_posted_label)
+                    },
+                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+                )
+            },
+            navigationIcon = {
+                if (selectState.isCustom()) {
+                    IconButton(
+                        onClick = { selectState = TimeModifierPickerState.All },
+                    ) {
+                        Icon(imageVector = PrimalIcons.ArrowBack, contentDescription = null)
+                    }
+                }
+            },
+        )
         AnimatedContent(
             targetState = selectState,
             transitionSpec = { transitionSpecBetweenStages() },
@@ -151,9 +160,11 @@ fun TimeModifierPicker(
                             ListItem(
                                 headlineContent = {
                                     Text(
-                                        text = "${selectedItem.startDate.formatToDefaultDateFormat(
-                                            FormatStyle.LONG,
-                                        )} - ${selectedItem.endDate.formatToDefaultDateFormat(FormatStyle.LONG)}",
+                                        text = "${
+                                            selectedItem.startDate.formatToDefaultDateFormat(
+                                                FormatStyle.LONG,
+                                            )
+                                        } - ${selectedItem.endDate.formatToDefaultDateFormat(FormatStyle.LONG)}",
                                         color = AppTheme.colorScheme.secondary,
                                     )
                                 },
@@ -279,6 +290,7 @@ private fun AnimatedContentTransitionScope<TimeModifierPickerState>.transitionSp
             slideInHorizontally(initialOffsetX = { -it })
                 .togetherWith(slideOutHorizontally(targetOffsetX = { it }))
         }
+
         TimeModifierPickerState.All -> {
             slideInHorizontally(initialOffsetX = { it })
                 .togetherWith(slideOutHorizontally(targetOffsetX = { -it }))
