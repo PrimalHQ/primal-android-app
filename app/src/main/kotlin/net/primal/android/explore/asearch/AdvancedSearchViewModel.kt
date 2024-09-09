@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.explore.asearch.AdvancedSearchContract.UiEvent
 import net.primal.android.explore.asearch.AdvancedSearchContract.UiState
-import timber.log.Timber
 
 @HiltViewModel
 class AdvancedSearchViewModel @Inject constructor() : ViewModel() {
@@ -58,8 +57,6 @@ class AdvancedSearchViewModel @Inject constructor() : ViewModel() {
         viewModelScope.launch {
             val searchKind = state.value.searchKind.toSearchCommand()
             val searchOrderBy = state.value.orderBy.toSearchCommand()
-
-            Timber.tag("asearch").i("$searchKind $searchOrderBy")
         }
 
     private fun AdvancedSearchContract.SearchKind.toSearchCommand() =
