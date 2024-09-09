@@ -22,7 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -113,7 +113,7 @@ private fun AdvancedSearchScreen(
                 singleLine = true,
             )
             Column {
-                var showSearchBottomSheetPicker by remember { mutableStateOf(false) }
+                var showSearchBottomSheetPicker by rememberSaveable { mutableStateOf(false) }
                 OptionListWithBottomSheetItem(
                     label = stringResource(id = R.string.asearch_search_kind_label),
                     onClick = { showSearchBottomSheetPicker = true },
@@ -167,7 +167,7 @@ private fun AdvancedSearchScreen(
                     sheetTitle = stringResource(id = R.string.asearch_zapped_by_label),
                 )
 
-                var showTimePostedBottomSheetPicker by remember { mutableStateOf(false) }
+                var showTimePostedBottomSheetPicker by rememberSaveable { mutableStateOf(false) }
                 OptionListWithBottomSheetItem(
                     label = stringResource(id = R.string.asearch_time_posted_label),
                     onClick = { showTimePostedBottomSheetPicker = true },
@@ -190,7 +190,7 @@ private fun AdvancedSearchScreen(
                     },
                     isBottomSheetVisible = showTimePostedBottomSheetPicker,
                 )
-                var showScopeBottomSheetPicker by remember { mutableStateOf(false) }
+                var showScopeBottomSheetPicker by rememberSaveable { mutableStateOf(false) }
                 OptionListWithBottomSheetItem(
                     label = stringResource(id = R.string.asearch_scope_label),
                     onClick = { showScopeBottomSheetPicker = true },
@@ -213,7 +213,7 @@ private fun AdvancedSearchScreen(
                     },
                     isBottomSheetVisible = showScopeBottomSheetPicker,
                 )
-                var showSearchFilterBottomSheetPicker by remember { mutableStateOf(false) }
+                var showSearchFilterBottomSheetPicker by rememberSaveable { mutableStateOf(false) }
                 OptionListWithBottomSheetItem(
                     label = stringResource(id = R.string.asearch_filter_label),
                     onClick = { showSearchFilterBottomSheetPicker = true },
@@ -236,7 +236,7 @@ private fun AdvancedSearchScreen(
                     },
                     isBottomSheetVisible = showSearchFilterBottomSheetPicker,
                 )
-                var showOrderByBottomSheetPicker by remember { mutableStateOf(false) }
+                var showOrderByBottomSheetPicker by rememberSaveable { mutableStateOf(false) }
                 OptionListWithBottomSheetItem(
                     label = stringResource(id = R.string.asearch_order_by_label),
                     onClick = { showOrderByBottomSheetPicker = true },
@@ -273,7 +273,7 @@ private fun MultipleUserPickerOptionListItem(
     selectedUsers: Set<UserProfileItemUi>,
     onUsersSelected: (Set<UserProfileItemUi>) -> Unit,
 ) {
-    var bottomSheetVisibility by remember { mutableStateOf(false) }
+    var bottomSheetVisibility by rememberSaveable { mutableStateOf(false) }
     OptionListWithBottomSheetItem(
         label = labelText,
         onClick = { bottomSheetVisibility = true },
