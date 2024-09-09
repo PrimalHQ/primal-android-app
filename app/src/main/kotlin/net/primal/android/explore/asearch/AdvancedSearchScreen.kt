@@ -44,13 +44,13 @@ import net.primal.android.explore.asearch.ui.TimeModifierPicker
 import net.primal.android.theme.AppTheme
 
 @Composable
-fun AdvancedSearchScreen(viewModel: AdvancedSearchViewModel, onBackClick: () -> Unit) {
+fun AdvancedSearchScreen(viewModel: AdvancedSearchViewModel, onClose: () -> Unit) {
     val state = viewModel.state.collectAsState()
 
     AdvancedSearchScreen(
         state = state.value,
         eventPublisher = viewModel::setEvent,
-        onBackClick = onBackClick,
+        onClose = onClose,
     )
 }
 
@@ -59,7 +59,7 @@ fun AdvancedSearchScreen(viewModel: AdvancedSearchViewModel, onBackClick: () -> 
 private fun AdvancedSearchScreen(
     state: AdvancedSearchContract.UiState,
     eventPublisher: (AdvancedSearchContract.UiEvent) -> Unit,
-    onBackClick: () -> Unit,
+    onClose: () -> Unit,
 ) {
     Scaffold(
         topBar = {
@@ -67,7 +67,7 @@ private fun AdvancedSearchScreen(
                 title = stringResource(id = R.string.asearch_top_app_bar_title),
                 textColor = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
                 navigationIcon = PrimalIcons.ArrowBack,
-                onNavigationIconClick = onBackClick,
+                onNavigationIconClick = onClose,
                 showDivider = false,
             )
         },

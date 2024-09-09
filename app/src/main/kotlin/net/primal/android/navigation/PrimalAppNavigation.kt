@@ -798,7 +798,7 @@ private fun NavGraphBuilder.advancedSearch(route: String, navController: NavCont
 
         AdvancedSearchScreen(
             viewModel = viewModel,
-            onBackClick = { navController.navigateUp() },
+            onClose = { navController.navigateUp() },
         )
     }
 
