@@ -193,7 +193,7 @@ private fun FeedScreen(
         onDrawerQrCodeClick = onDrawerQrCodeClick,
         badges = state.badges,
         focusModeEnabled = LocalContentDisplaySettings.current.focusModeEnabled && pagingItems.isNotEmpty(),
-        topBar = { scrollBehavior ->
+        topAppBar = { scrollBehavior ->
             FeedTopAppBar(
                 avatarCdnImage = state.activeAccountAvatarCdnImage,
                 title = state.feedTitle,

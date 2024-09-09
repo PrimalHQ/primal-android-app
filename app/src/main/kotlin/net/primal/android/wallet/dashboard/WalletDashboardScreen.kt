@@ -175,7 +175,7 @@ fun WalletDashboardScreen(
         onDrawerQrCodeClick = onDrawerQrCodeClick,
         badges = state.badges,
         focusModeEnabled = false,
-        topBar = { scrollBehaviour ->
+        topAppBar = { scrollBehaviour ->
             PrimalTopAppBar(
                 modifier = Modifier.onSizeChanged { topBarHeight = it.height },
                 title = stringResource(id = R.string.wallet_title),

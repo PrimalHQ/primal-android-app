@@ -159,7 +159,7 @@ fun MessageListScreen(
         onDrawerQrCodeClick = onDrawerQrCodeClick,
         badges = state.badges,
         focusModeEnabled = LocalContentDisplaySettings.current.focusModeEnabled && conversations.isNotEmpty(),
-        topBar = {
+        topAppBar = {
             PrimalTopAppBar(
                 title = stringResource(id = R.string.messages_title),
                 avatarCdnImage = state.activeAccountAvatarCdnImage,

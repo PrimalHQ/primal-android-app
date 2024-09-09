@@ -20,6 +20,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.TopAppBarScrollBehavior
+import androidx.compose.material3.TopAppBarState
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -121,6 +122,14 @@ fun HomeFeedScreen(
             }
     }
 
+    val topAppBarState = remember {
+        TopAppBarState(
+            initialHeightOffsetLimit = -Float.MAX_VALUE,
+            initialHeightOffset = 0f,
+            initialContentOffset = 0f,
+        )
+    }
+
     /** uiScope.launch { feedListState.animateScrollToItem(index = 0) } **/
     PrimalDrawerScaffold(
         drawerState = drawerState,
@@ -133,7 +142,8 @@ fun HomeFeedScreen(
         onDrawerQrCodeClick = onDrawerQrCodeClick,
         badges = state.badges,
         focusModeEnabled = LocalContentDisplaySettings.current.focusModeEnabled,
-        topBar = { scrollBehavior ->
+        topAppBarState = topAppBarState,
+        topAppBar = { scrollBehavior ->
             NoteFeedTopAppBar(
                 title = activeFeed?.name ?: "",
                 activeFeed = activeFeed,
@@ -159,10 +169,11 @@ fun HomeFeedScreen(
                     val spec = state.feeds[index].spec
                     NoteFeedList(
                         feedSpec = spec,
-                        visible = activeFeed?.spec == spec,
+                        isFeedSpecActive = activeFeed?.spec == spec,
                         noteCallbacks = noteCallbacks,
-                        contentPadding = paddingValues,
+                        newNotesNoticeAlpha = (1 - topAppBarState.collapsedFraction) * 1.0f,
                         onGoToWallet = onGoToWallet,
+                        contentPadding = paddingValues,
                     )
                 }
             }

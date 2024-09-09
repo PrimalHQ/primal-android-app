@@ -102,7 +102,7 @@ private fun ReadsScreen(
         onDrawerQrCodeClick = onDrawerQrCodeClick,
         badges = state.badges,
         focusModeEnabled = LocalContentDisplaySettings.current.focusModeEnabled,
-        topBar = { scrollBehavior ->
+        topAppBar = { scrollBehavior ->
             ArticleFeedTopAppBar(
                 title = activeFeed?.name ?: "",
                 activeFeed = activeFeed,

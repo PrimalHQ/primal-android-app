@@ -32,6 +32,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -57,6 +58,7 @@ import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWor
 import net.primal.android.core.compose.isNotEmpty
 import net.primal.android.core.compose.pulltorefresh.PrimalPullToRefreshIndicator
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
+import net.primal.android.drawer.FloatingNewDataHostTopPadding
 import net.primal.android.notes.feed.NoteFeedContract.UiEvent
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.model.FeedPostsSyncStats
@@ -65,16 +67,16 @@ import net.primal.android.notes.feed.note.ConfirmFirstBookmarkAlertDialog
 import net.primal.android.notes.feed.note.events.NoteCallbacks
 import net.primal.android.profile.report.OnReportContentClick
 import net.primal.android.theme.AppTheme
-import timber.log.Timber
 
 @Composable
 fun NoteFeedList(
     feedSpec: String,
-    contentPadding: PaddingValues = PaddingValues(0.dp),
     noteCallbacks: NoteCallbacks,
     onGoToWallet: () -> Unit,
+    contentPadding: PaddingValues = PaddingValues(0.dp),
+    newNotesNoticeAlpha: Float = 1.00f,
     previewMode: Boolean = false,
-    visible: Boolean = true,
+    isFeedSpecActive: Boolean = true,
     header: @Composable (LazyItemScope.() -> Unit)? = null,
     stickyHeader: @Composable (LazyItemScope.() -> Unit)? = null,
 ) {
@@ -93,7 +95,7 @@ fun NoteFeedList(
         }
     }
 
-    val isPolling by remember(started, visible) { mutableStateOf(started && visible) }
+    val isPolling by remember(started, isFeedSpecActive) { mutableStateOf(started && isFeedSpecActive) }
     LaunchedEffect(isPolling) {
         if (isPolling) {
             viewModel.setEvent(UiEvent.StartPolling)
@@ -105,10 +107,11 @@ fun NoteFeedList(
     NoteFeedList(
         state = uiState.value,
         noteCallbacks = noteCallbacks,
+        onGoToWallet = onGoToWallet,
+        newNotesNoticeAlpha = newNotesNoticeAlpha,
         contentPadding = contentPadding,
         header = header,
         stickyHeader = stickyHeader,
-        onGoToWallet = onGoToWallet,
         eventPublisher = viewModel::setEvent,
     )
 }
@@ -118,6 +121,7 @@ private fun NoteFeedList(
     state: NoteFeedContract.UiState,
     noteCallbacks: NoteCallbacks,
     onGoToWallet: () -> Unit,
+    newNotesNoticeAlpha: Float = 1.00f,
     contentPadding: PaddingValues = PaddingValues(0.dp),
     header: @Composable (LazyItemScope.() -> Unit)? = null,
     stickyHeader: @Composable (LazyItemScope.() -> Unit)? = null,
@@ -219,20 +223,17 @@ private fun NoteFeedList(
         )
 
         AnimatedVisibility(
-            visible = true,
+            visible = newNotesNoticeAlpha >= 0.5f,
             enter = fadeIn(),
             exit = fadeOut(),
             modifier = Modifier
-//                .padding(paddingValues)
-                .padding(top = 128.dp)
+                .padding(contentPadding)
+                .padding(top = FloatingNewDataHostTopPadding)
                 .wrapContentHeight()
                 .wrapContentWidth()
-                .align(Alignment.TopCenter),
-//                .graphicsLayer {
-//                    this.alpha = (1 - topAppBarState.collapsedFraction) * 1.0f
-//                },
+                .align(Alignment.TopCenter)
+                .graphicsLayer { this.alpha = newNotesNoticeAlpha },
         ) {
-            Timber.e(state.syncStats.latestNoteIds.toString())
             if (state.syncStats.latestNoteIds.isNotEmpty() && pagingItems.isNotEmpty()) {
                 var doneDelaying by remember { mutableStateOf(false) }
                 LaunchedEffect(true) {

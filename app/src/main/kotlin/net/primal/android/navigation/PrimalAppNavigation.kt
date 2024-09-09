@@ -679,7 +679,7 @@ private fun NavGraphBuilder.home(
         onDrawerQrCodeClick = { navController.navigateToProfileQrCodeViewer() },
         noteCallbacks = noteCallbacksHandler(navController),
         onGoToWallet = { navController.navigateToWallet() },
-        onSearchClick = { navController.navigateToSearch() },
+        onSearchClick = { navController.navigateToExplore() },
         onNewPostClick = { preFillContent -> navController.navigateToNoteEditor(preFillContent?.asNoteEditorArgs()) },
     )
 }

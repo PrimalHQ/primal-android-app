@@ -178,7 +178,7 @@ fun NotificationsScreen(
         onDrawerQrCodeClick = onDrawerQrCodeClick,
         badges = state.badges,
         focusModeEnabled = LocalContentDisplaySettings.current.focusModeEnabled,
-        topBar = {
+        topAppBar = {
             PrimalTopAppBar(
                 title = stringResource(id = R.string.notifications_title),
                 avatarCdnImage = state.activeAccountAvatarCdnImage,
