@@ -1,5 +1,7 @@
 package net.primal.android.notes.feed
 
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -34,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -129,12 +132,16 @@ private fun NoteFeedList(
 ) {
     val pagingItems = state.notes.collectAsLazyPagingItems()
     val feedListState = pagingItems.rememberLazyListStatePagingWorkaround()
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
 
-    // TODO Bring back error handler
-//    ErrorHandler(
-//        error = state.error,
-//        snackbarHostState = snackbarHostState,
-//    )
+    LaunchedEffect(state.error) {
+        if (state.error != null) {
+            scope.launch {
+                Toast.makeText(context, state.error.toErrorMessage(context), Toast.LENGTH_LONG).show()
+            }
+        }
+    }
 
     LaunchedEffect(feedListState, pagingItems) {
         withContext(Dispatchers.IO) {
@@ -379,6 +386,38 @@ fun NoteFeedList(
             state = pullToRefreshState,
             contentColor = AppTheme.colorScheme.primary,
             indicator = { PrimalPullToRefreshIndicator(state = pullToRefreshState) },
+        )
+    }
+}
+
+private fun NoteFeedContract.UiState.FeedError.toErrorMessage(context: Context): String {
+    return when (this) {
+        is NoteFeedContract.UiState.FeedError.InvalidZapRequest -> context.getString(
+            R.string.post_action_invalid_zap_request,
+        )
+
+        is NoteFeedContract.UiState.FeedError.MissingLightningAddress -> context.getString(
+            R.string.post_action_missing_lightning_address,
+        )
+
+        is NoteFeedContract.UiState.FeedError.FailedToPublishZapEvent -> context.getString(
+            R.string.post_action_zap_failed,
+        )
+
+        is NoteFeedContract.UiState.FeedError.FailedToPublishLikeEvent -> context.getString(
+            R.string.post_action_like_failed,
+        )
+
+        is NoteFeedContract.UiState.FeedError.FailedToPublishRepostEvent -> context.getString(
+            R.string.post_action_repost_failed,
+        )
+
+        is NoteFeedContract.UiState.FeedError.MissingRelaysConfiguration -> context.getString(
+            R.string.app_missing_relays_config,
+        )
+
+        is NoteFeedContract.UiState.FeedError.FailedToMuteUser -> context.getString(
+            R.string.app_error_muting_user,
         )
     }
 }

@@ -10,15 +10,15 @@ import androidx.compose.runtime.LaunchedEffect
 fun <T> SnackbarErrorHandler(
     error: T?,
     snackbarHostState: SnackbarHostState,
-    errorMessageResolver: (T) -> String,
+    errorMessageResolver: @Composable (T) -> String,
     actionLabel: String? = null,
     onErrorDismiss: (() -> Unit)? = null,
     onActionPerformed: ((T) -> Unit)? = null,
 ) {
-    LaunchedEffect(error ?: true) {
-        if (error == null) return@LaunchedEffect
+    val errorMessage = if (error != null) errorMessageResolver(error) else null
 
-        val errorMessage = errorMessageResolver(error)
+    LaunchedEffect(error ?: true) {
+        if (error == null || errorMessage == null) return@LaunchedEffect
 
         val result = snackbarHostState.showSnackbar(
             message = errorMessage,
