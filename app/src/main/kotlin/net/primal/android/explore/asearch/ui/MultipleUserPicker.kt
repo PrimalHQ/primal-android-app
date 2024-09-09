@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -167,7 +168,7 @@ private fun SelectedUsersIndicator(
     selectedUsers: Set<UserProfileItemUi>,
     onUserClick: (UserProfileItemUi) -> Unit,
 ) {
-    Row(
+    LazyRow(
         modifier = modifier
             .padding(horizontal = 16.dp)
             .padding(top = 4.dp, bottom = 8.dp),
@@ -175,18 +176,20 @@ private fun SelectedUsersIndicator(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (selectedUsers.isEmpty()) {
-            Text(
-                modifier = Modifier
-                    .padding(top = 7.dp, bottom = 8.dp)
-                    .background(color = Color.Unspecified, shape = AppTheme.shapes.large)
-                    .border(width = (0.5).dp, color = AppTheme.colorScheme.outline, shape = AppTheme.shapes.large)
-                    .padding(all = 12.dp),
-                text = stringResource(id = R.string.asearch_multiselect_anyone),
-                style = AppTheme.typography.bodyMedium,
-                color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
-            )
+            item {
+                Text(
+                    modifier = Modifier
+                        .padding(top = 7.dp, bottom = 8.dp)
+                        .background(color = Color.Unspecified, shape = AppTheme.shapes.large)
+                        .border(width = (0.5).dp, color = AppTheme.colorScheme.outline, shape = AppTheme.shapes.large)
+                        .padding(all = 12.dp),
+                    text = stringResource(id = R.string.asearch_multiselect_anyone),
+                    style = AppTheme.typography.bodyMedium,
+                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+                )
+            }
         } else {
-            selectedUsers.forEach { user ->
+            items(items = selectedUsers.toList()) { user ->
                 Box(
                     modifier = Modifier.size(54.dp),
                     contentAlignment = Alignment.BottomEnd,
