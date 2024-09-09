@@ -721,7 +721,7 @@ private fun NavGraphBuilder.explore(route: String, navController: NavController)
             viewModel = viewModel,
             onHashtagClick = { query -> navController.navigateToExploreFeed(query = query) },
             onSearchClick = { navController.navigateToSearch() },
-            onTuneClick = { /* TODO(marko): navigate to new advanced search */ },
+            onTuneClick = { navController.navigateToAdvancedSearch() },
             onClose = { navController.navigateUp() }
         )
     }
