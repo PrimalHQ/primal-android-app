@@ -7,67 +7,54 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.DrawerState
-import androidx.compose.material3.DrawerValue
+import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.SuggestionChipDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.TopAppBarScrollBehavior
-import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.launch
-import net.primal.android.LocalContentDisplaySettings
 import net.primal.android.R
-import net.primal.android.attachments.domain.CdnImage
-import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.IconText
-import net.primal.android.core.compose.InvisibleAppBarIcon
 import net.primal.android.core.compose.ListLoading
 import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.PrimalDivider
-import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.compose.preview.PrimalPreview
-import net.primal.android.drawer.DrawerScreenDestination
-import net.primal.android.drawer.PrimalDrawerScaffold
 import net.primal.android.explore.home.ExploreHomeContract.UiEvent
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 
 @Composable
-@Deprecated("Outdated top level screen replaced with Reads.")
 fun ExploreHomeScreen(
     viewModel: ExploreHomeViewModel,
     onHashtagClick: (String) -> Unit,
     onSearchClick: () -> Unit,
-    onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
-    onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
-    onDrawerQrCodeClick: () -> Unit,
+    onTuneClick: () -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
 
@@ -75,50 +62,28 @@ fun ExploreHomeScreen(
         state = uiState.value,
         onHashtagClick = onHashtagClick,
         onSearchClick = onSearchClick,
-        onPrimaryDestinationChanged = onTopLevelDestinationChanged,
-        onDrawerDestinationClick = onDrawerScreenClick,
-        onDrawerQrCodeClick = onDrawerQrCodeClick,
         eventPublisher = { viewModel.setEvent(it) },
+        onTuneClick = onTuneClick,
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-@Deprecated("Outdated top level screen replaced with Reads.")
 private fun ExploreHomeScreen(
     state: ExploreHomeContract.UiState,
     onHashtagClick: (String) -> Unit,
     onSearchClick: () -> Unit,
-    onPrimaryDestinationChanged: (PrimalTopLevelDestination) -> Unit,
-    onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
-    onDrawerQrCodeClick: () -> Unit,
     eventPublisher: (UiEvent) -> Unit,
+    onTuneClick: () -> Unit,
 ) {
-    val uiScope = rememberCoroutineScope()
-    val drawerState: DrawerState = rememberDrawerState(DrawerValue.Closed)
     val listState = rememberLazyListState()
 
-    PrimalDrawerScaffold(
-        drawerState = drawerState,
-        activeDestination = PrimalTopLevelDestination.Reads,
-        onActiveDestinationClick = { uiScope.launch { listState.animateScrollToItem(0) } },
-        onPrimaryDestinationChanged = onPrimaryDestinationChanged,
-        onDrawerDestinationClick = onDrawerDestinationClick,
-        onDrawerQrCodeClick = onDrawerQrCodeClick,
-        focusModeEnabled = LocalContentDisplaySettings.current.focusModeEnabled && state.hashtags.isNotEmpty(),
-        badges = state.badges,
+    Scaffold(
         topBar = {
-            ExploreTopAppBar(
-                title = {
-                    SearchBar(
-                        onClick = onSearchClick,
-                    )
-                },
-                avatarCdnImage = state.activeAccountAvatarCdnImage,
-                onNavigationIconClick = {
-                    uiScope.launch { drawerState.open() }
-                },
-                scrollBehavior = it,
+            ExploreTopRow(
+                onSearchClick = onSearchClick,
+                onActionIconClick = onTuneClick,
+                actionIcon = Icons.Filled.Tune,
             )
         },
         content = { paddingValues ->
@@ -194,56 +159,60 @@ private fun ExploreHomeScreen(
 
 @ExperimentalMaterial3Api
 @Composable
-fun ExploreTopAppBar(
-    title: @Composable () -> Unit,
-    onNavigationIconClick: () -> Unit,
-    avatarCdnImage: CdnImage? = null,
-    actions: (@Composable RowScope.() -> Unit)? = null,
-    scrollBehavior: TopAppBarScrollBehavior? = null,
+fun ExploreTopRow(
+    modifier: Modifier = Modifier,
+    onSearchClick: () -> Unit,
+    onActionIconClick: () -> Unit,
+    actionIcon: ImageVector,
 ) {
-    Column {
-        CenterAlignedTopAppBar(
-            navigationIcon = {
-                Box(
-                    modifier = Modifier
-                        .padding(horizontal = 8.dp)
-                        .clip(CircleShape),
-                ) {
-                    AvatarThumbnail(
-                        avatarCdnImage = avatarCdnImage,
-                        modifier = Modifier.size(32.dp),
-                        onClick = onNavigationIconClick,
-                    )
-                }
-            },
-            title = title,
-            actions = actions ?: { InvisibleAppBarIcon() },
-            colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                containerColor = AppTheme.colorScheme.surface,
-                scrolledContainerColor = AppTheme.colorScheme.surface,
-            ),
-            scrollBehavior = scrollBehavior,
-        )
-
+    Column(
+        modifier = modifier
+            .statusBarsPadding()
+            .wrapContentHeight(),
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .padding(vertical = 8.dp)
+                .padding(start = 16.dp, end = 8.dp)
+                .fillMaxWidth()
+                .background(AppTheme.colorScheme.surface),
+        ) {
+            SearchBar(
+                onClick = onSearchClick,
+                modifier = Modifier.weight(1.0f),
+            )
+            IconButton(
+                onClick = onActionIconClick,
+            ) {
+                Icon(
+                    imageVector = actionIcon,
+                    contentDescription = null,
+                    tint = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+                )
+            }
+        }
         PrimalDivider()
     }
 }
 
 @Composable
-fun SearchBar(onClick: () -> Unit) {
+fun SearchBar(onClick: () -> Unit, modifier: Modifier = Modifier) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .height(34.dp)
             .fillMaxWidth()
-            .padding(horizontal = 32.dp)
+            .clip(AppTheme.shapes.extraLarge)
             .clickable { onClick() }
             .background(
                 color = AppTheme.extraColorScheme.surfaceVariantAlt1,
                 shape = AppTheme.shapes.extraLarge,
             ),
-        contentAlignment = Alignment.Center,
+        contentAlignment = Alignment.CenterStart,
     ) {
         IconText(
+            modifier = Modifier.padding(horizontal = 8.dp),
             leadingIcon = Icons.Default.Search,
             leadingIconTintColor = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
             text = stringResource(id = R.string.explore_search_nostr).lowercase(),
@@ -260,13 +229,10 @@ fun SearchBar(onClick: () -> Unit) {
 fun PreviewExploreTopAppBar() {
     PrimalPreview(primalTheme = PrimalTheme.Sunset) {
         Surface {
-            ExploreTopAppBar(
-                title = {
-                    SearchBar(
-                        onClick = {},
-                    )
-                },
-                onNavigationIconClick = {},
+            ExploreTopRow(
+                onSearchClick = {},
+                onActionIconClick = {},
+                actionIcon = Icons.Filled.Tune,
             )
         }
     }
