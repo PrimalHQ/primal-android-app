@@ -29,6 +29,7 @@ import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.SuggestionChipDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
@@ -44,6 +45,8 @@ import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.ListLoading
 import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.PrimalDivider
+import net.primal.android.core.compose.icons.PrimalIcons
+import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.explore.home.ExploreHomeContract.UiEvent
 import net.primal.android.theme.AppTheme
@@ -55,6 +58,7 @@ fun ExploreHomeScreen(
     onHashtagClick: (String) -> Unit,
     onSearchClick: () -> Unit,
     onTuneClick: () -> Unit,
+    onClose: () -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
 
@@ -64,6 +68,7 @@ fun ExploreHomeScreen(
         onSearchClick = onSearchClick,
         eventPublisher = { viewModel.setEvent(it) },
         onTuneClick = onTuneClick,
+        onClose = onClose,
     )
 }
 
@@ -75,12 +80,14 @@ private fun ExploreHomeScreen(
     onSearchClick: () -> Unit,
     eventPublisher: (UiEvent) -> Unit,
     onTuneClick: () -> Unit,
+    onClose: () -> Unit,
 ) {
     val listState = rememberLazyListState()
 
     Scaffold(
         topBar = {
-            ExploreTopRow(
+            ExploreTopAppBar(
+                onClose = onClose,
                 onSearchClick = onSearchClick,
                 onActionIconClick = onTuneClick,
                 actionIcon = Icons.Filled.Tune,
@@ -159,10 +166,11 @@ private fun ExploreHomeScreen(
 
 @ExperimentalMaterial3Api
 @Composable
-fun ExploreTopRow(
+fun ExploreTopAppBar(
     modifier: Modifier = Modifier,
     onSearchClick: () -> Unit,
     onActionIconClick: () -> Unit,
+    onClose: () -> Unit,
     actionIcon: ImageVector,
 ) {
     Column(
@@ -170,29 +178,35 @@ fun ExploreTopRow(
             .statusBarsPadding()
             .wrapContentHeight(),
     ) {
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .padding(vertical = 8.dp)
-                .padding(start = 16.dp, end = 8.dp)
-                .fillMaxWidth()
-                .background(AppTheme.colorScheme.surface),
-        ) {
-            SearchBar(
-                onClick = onSearchClick,
-                modifier = Modifier.weight(1.0f),
-            )
-            IconButton(
-                onClick = onActionIconClick,
-            ) {
-                Icon(
-                    imageVector = actionIcon,
-                    contentDescription = null,
-                    tint = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+        TopAppBar(
+            title = {
+                SearchBar(
+                    onClick = onSearchClick,
                 )
+            },
+            navigationIcon = {
+                IconButton(
+                    onClick = onClose,
+                ) {
+                    Icon(
+                        imageVector = PrimalIcons.ArrowBack,
+                        contentDescription = null,
+                        tint = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+                    )
+                }
+            },
+            actions = {
+                IconButton(
+                    onClick = onActionIconClick,
+                ) {
+                    Icon(
+                        imageVector = actionIcon,
+                        contentDescription = null,
+                        tint = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+                    )
+                }
             }
-        }
+        )
         PrimalDivider()
     }
 }
@@ -229,9 +243,10 @@ fun SearchBar(onClick: () -> Unit, modifier: Modifier = Modifier) {
 fun PreviewExploreTopAppBar() {
     PrimalPreview(primalTheme = PrimalTheme.Sunset) {
         Surface {
-            ExploreTopRow(
+            ExploreTopAppBar(
                 onSearchClick = {},
                 onActionIconClick = {},
+                onClose = {},
                 actionIcon = Icons.Filled.Tune,
             )
         }
