@@ -14,6 +14,7 @@ interface AdvancedSearchContract {
         val zappedBy: Set<UserProfileItemUi> = emptySet(),
         val timePosted: TimeModifier = TimeModifier.Anytime,
         val scope: SearchScope = SearchScope.Global,
+        val filter: SearchFilter = SearchFilter(),
         val orderBy: SearchOrderBy = SearchOrderBy.Time,
 
     )
@@ -27,6 +28,7 @@ interface AdvancedSearchContract {
         data class ZappedBySelectUsers(val users: Set<UserProfileItemUi>) : UiEvent()
         data class TimePostedChanged(val timePosted: TimeModifier) : UiEvent()
         data class ScopeChanged(val scope: SearchScope) : UiEvent()
+        data class SearchFilterChanged(val filter: SearchFilter) : UiEvent()
         data class OrderByChanged(val orderBy: SearchOrderBy) : UiEvent()
 
         data object OnSearch : UiEvent()
@@ -41,12 +43,35 @@ interface AdvancedSearchContract {
         data class Custom(val startDate: Instant, val endDate: Instant) : TimeModifier()
     }
 
+    data class SearchFilter(
+        val orientation: Orientation? = null,
+        val minDuration: Int = 0,
+        val maxDuration: Int = 0,
+        val minContentScore: Int = 0,
+        val minInteractions: Int = 0,
+        val minLikes: Int = 0,
+        val minZaps: Int = 0,
+        val minReplies: Int = 0,
+        val minReposts: Int = 0,
+    )
+
+    enum class Orientation {
+        Any,
+        Horizontal,
+        Vertical,
+    }
+
     enum class SearchKind {
         Notes,
         Reads,
         Images,
         Videos,
         Sound,
+        ;
+
+        fun isImages() = this == Images
+        fun isVideos() = this == Videos
+        fun isSound() = this == Sound
     }
 
     enum class SearchScope {

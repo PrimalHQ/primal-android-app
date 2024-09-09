@@ -269,6 +269,23 @@
     <string name="asearch_custom_time_posted_cancel">Cancel</string>
     <string name="asearch_scope_label">Scope</string>
     <string name="asearch_order_by_label">Order By</string>
+    <string name="asearch_filter_label">Filter(s)</string>
+    <string name="asearch_filter_sheet_title">Search Filter</string>
+    <string name="asearch_filter_orientation">Orientation</string>
+    <string name="asearch_filter_min_duration">Min duration (seconds)</string>
+    <string name="asearch_filter_max_duration">Max duration (seconds)</string>
+    <string name="asearch_filter_min_content_score">Min content score</string>
+    <string name="asearch_filter_min_interactions">Min interactions</string>
+    <string name="asearch_filter_min_likes">Min likes</string>
+    <string name="asearch_filter_min_zaps">Min zaps</string>
+    <string name="asearch_filter_min_replies">Min replies</string>
+    <string name="asearch_filter_min_reposts">Min reposts</string>
+    <string name="asearch_filter_orientation_any">Any</string>
+    <string name="asearch_filter_orientation_horizontal">Horizontal</string>
+    <string name="asearch_filter_orientation_vertical">Vertical</string>
+    <string name="asearch_filter_apply_button">Apply</string>
+    <string name="asearch_filters_none">None</string>
+    <string name="asearch_filters_custom">Custom</string>
 
     <string name="wallet_title">Wallet</string>
 

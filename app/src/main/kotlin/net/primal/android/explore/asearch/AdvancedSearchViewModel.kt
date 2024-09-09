@@ -38,7 +38,16 @@ class AdvancedSearchViewModel @Inject constructor() : ViewModel() {
                     is UiEvent.ReplyingToSelectUsers -> setState { copy(replyingTo = it.users) }
                     is UiEvent.ZappedBySelectUsers -> setState { copy(zappedBy = it.users) }
                     is UiEvent.ScopeChanged -> setState { copy(scope = it.scope) }
-                    is UiEvent.SearchKindChanged -> setState { copy(searchKind = it.kind) }
+                    is UiEvent.SearchFilterChanged -> setState { copy(filter = it.filter) }
+                    is UiEvent.SearchKindChanged -> {
+                        setState {
+                            copy(
+                                filter = filter.copy(orientation = null, minDuration = 0, maxDuration = 0),
+                                searchKind = it.kind,
+                            )
+                        }
+                    }
+
                     is UiEvent.TimePostedChanged -> setState { copy(timePosted = it.timePosted) }
                     UiEvent.OnSearch -> onSearch()
                 }

@@ -37,6 +37,7 @@ import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.profile.model.UserProfileItemUi
+import net.primal.android.explore.asearch.ui.FilterPicker
 import net.primal.android.explore.asearch.ui.MultipleUserPicker
 import net.primal.android.explore.asearch.ui.SingleChoicePicker
 import net.primal.android.explore.asearch.ui.TimeModifierPicker
@@ -209,6 +210,29 @@ private fun AdvancedSearchScreen(
                     },
                     isBottomSheetVisible = showScopeBottomSheetPicker,
                 )
+                var showSearchFilterBottomSheetPicker by remember { mutableStateOf(false) }
+                OptionListWithBottomSheetItem(
+                    label = stringResource(id = R.string.asearch_filter_label),
+                    onClick = { showSearchFilterBottomSheetPicker = true },
+                    selectedContent = {
+                        Text(
+                            text = state.filter.toDisplayName(),
+                            style = AppTheme.typography.bodyMedium,
+                            color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+                        )
+                    },
+                    bottomSheet = {
+                        FilterPicker(
+                            filterSelected = {
+                                eventPublisher(AdvancedSearchContract.UiEvent.SearchFilterChanged(it))
+                            },
+                            onDismissRequest = { showSearchFilterBottomSheetPicker = false },
+                            searchKind = state.searchKind,
+                            startState = state.filter,
+                        )
+                    },
+                    isBottomSheetVisible = showSearchFilterBottomSheetPicker,
+                )
                 var showOrderByBottomSheetPicker by remember { mutableStateOf(false) }
                 OptionListWithBottomSheetItem(
                     label = stringResource(id = R.string.asearch_order_by_label),
@@ -278,7 +302,6 @@ private fun MultipleUserPickerOptionListItem(
         },
         isBottomSheetVisible = bottomSheetVisibility,
     )
-
 }
 
 @Composable
@@ -350,12 +373,24 @@ private fun AdvancedSearchContract.SearchScope.toDisplayName(): String =
         AdvancedSearchContract.SearchScope.Global -> stringResource(id = R.string.asearch_search_scope_global)
         AdvancedSearchContract.SearchScope.MyFollows -> stringResource(id = R.string.asearch_search_scope_my_follows)
         AdvancedSearchContract.SearchScope.MyNetwork -> stringResource(id = R.string.asearch_search_scope_my_network)
-        AdvancedSearchContract.SearchScope.MyFollowsInteractions -> stringResource(id = R.string.asearch_search_scope_my_follows_interactions)
+        AdvancedSearchContract.SearchScope.MyFollowsInteractions -> stringResource(
+            id = R.string.asearch_search_scope_my_follows_interactions,
+        )
+    }
+
+@Composable
+fun AdvancedSearchContract.SearchFilter.toDisplayName(): String =
+    if (this == AdvancedSearchContract.SearchFilter()) {
+        stringResource(id = R.string.asearch_filters_none)
+    } else {
+        stringResource(id = R.string.asearch_filters_custom)
     }
 
 @Composable
 private fun AdvancedSearchContract.SearchOrderBy.toDisplayName(): String =
     when (this) {
         AdvancedSearchContract.SearchOrderBy.Time -> stringResource(id = R.string.asearch_search_order_by_time)
-        AdvancedSearchContract.SearchOrderBy.ContentScore -> stringResource(id = R.string.asearch_search_order_by_content_score)
+        AdvancedSearchContract.SearchOrderBy.ContentScore -> stringResource(
+            id = R.string.asearch_search_order_by_content_score,
+        )
     }
