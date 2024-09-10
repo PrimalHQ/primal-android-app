@@ -1,4 +1,4 @@
 ## Features
 
-- New Reads app shell;
-- New Reads Feeds with Feed Marketplace;
+- New notes & reads app shell;
+- New notes & reads feeds with feed marketplace;
