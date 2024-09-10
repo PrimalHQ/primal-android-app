@@ -1,10 +1,8 @@
 package net.primal.android.navigation
 
 import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
@@ -54,7 +52,6 @@ import net.primal.android.explore.home.ExploreHomeScreen
 import net.primal.android.explore.home.ExploreHomeViewModel
 import net.primal.android.explore.search.SearchViewModel
 import net.primal.android.explore.search.ui.SearchScreen
-import net.primal.android.feeds.domain.FeedSpecKind
 import net.primal.android.messages.chat.ChatScreen
 import net.primal.android.messages.chat.ChatViewModel
 import net.primal.android.messages.conversation.MessageConversationListViewModel
@@ -67,8 +64,6 @@ import net.primal.android.navigation.splash.SplashScreen
 import net.primal.android.navigation.splash.SplashViewModel
 import net.primal.android.note.reactions.ReactionsScreen
 import net.primal.android.note.reactions.ReactionsViewModel
-import net.primal.android.notes.FeedScreen
-import net.primal.android.notes.FeedViewModel
 import net.primal.android.notes.feed.note.events.NoteCallbacks
 import net.primal.android.notes.home.HomeFeedScreen
 import net.primal.android.notes.home.HomeFeedViewModel
@@ -205,11 +200,8 @@ fun NavController.navigateToExplore() = navigate(route = "explore")
 fun NavController.navigateToExploreFeed(query: String) =
     navigate(route = "explore?$EXPLORE_FEED_SPEC=${"search;$query".asBase64Encoded()}")
 
-private fun NavController.navigateToBookmarks(userId: String, specKind: FeedSpecKind) {
-    val spec = when (specKind) {
-        FeedSpecKind.Reads -> ""
-        FeedSpecKind.Notes -> "{\"id\":\"feed\",\"kind\":\"notes\",\"notes\":\"bookmarks\",\"pubkey\":\"$userId\"}"
-    }
+private fun NavController.navigateToNotesBookmarks(userId: String) {
+    val spec = "{\"id\":\"feed\",\"kind\":\"notes\",\"notes\":\"bookmarks\",\"pubkey\":\"$userId\"}"
     navigate(route = "explore?$EXPLORE_FEED_SPEC=${spec.asBase64Encoded()}")
 }
 
@@ -250,10 +242,7 @@ fun PrimalAppNavigation() {
     val drawerDestinationHandler: (DrawerScreenDestination) -> Unit = {
         when (it) {
             DrawerScreenDestination.Profile -> navController.navigateToProfile()
-            is DrawerScreenDestination.Bookmarks -> navController.navigateToBookmarks(
-                userId = it.userId,
-                specKind = FeedSpecKind.Notes,
-            )
+            is DrawerScreenDestination.Bookmarks -> navController.navigateToNotesBookmarks(userId = it.userId)
             DrawerScreenDestination.Settings -> navController.navigateToSettings()
             DrawerScreenDestination.SignOut -> navController.navigateToLogout()
         }
@@ -304,19 +293,6 @@ fun PrimalAppNavigation() {
         onboardingWalletActivation(route = "onboardingWallet", navController)
 
         logout(route = "logout", navController = navController)
-
-        feed(
-            route = "feed?$FEED_DIRECTIVE={$FEED_DIRECTIVE}",
-            arguments = listOf(
-                navArgument(FEED_DIRECTIVE) {
-                    type = NavType.StringType
-                    nullable = true
-                },
-            ),
-            navController = navController,
-            onTopLevelDestinationChanged = topLevelDestinationHandler,
-            onDrawerScreenClick = drawerDestinationHandler,
-        )
 
         home(
             route = "home",
@@ -599,48 +575,6 @@ private fun NavGraphBuilder.onboardingWalletActivation(route: String, navControl
             )
         }
     }
-
-private fun NavGraphBuilder.feed(
-    route: String,
-    arguments: List<NamedNavArgument>,
-    navController: NavController,
-    onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
-    onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
-) = composable(
-    route = route,
-    enterTransition = { null },
-    exitTransition = {
-        when {
-            targetState.destination.route.isMainScreenRoute() ->
-                scaleOut(animationSpec = tween(), targetScale = 1.0f)
-
-            else -> primalScaleOut
-        }
-    },
-    popEnterTransition = {
-        when {
-            initialState.destination.route.isMainScreenRoute() -> null
-            else -> primalScaleIn
-        }
-    },
-    popExitTransition = { primalScaleOut },
-    arguments = arguments,
-) { navBackEntry ->
-    val viewModel = hiltViewModel<FeedViewModel>(navBackEntry)
-    ApplyEdgeToEdge()
-    LockToOrientationPortrait()
-    FeedScreen(
-        viewModel = viewModel,
-        onFeedClick = { /*directive -> navController.navigateToFeed(directive = directive)*/ },
-        onNewPostClick = { preFillContent -> navController.navigateToNoteEditor(preFillContent?.asNoteEditorArgs()) },
-        noteCallbacks = noteCallbacksHandler(navController),
-        onGoToWallet = { navController.navigateToWallet() },
-        onTopLevelDestinationChanged = onTopLevelDestinationChanged,
-        onDrawerScreenClick = onDrawerScreenClick,
-        onDrawerQrCodeClick = { navController.navigateToProfileQrCodeViewer() },
-        onSearchClick = { navController.navigateToExplore() },
-    )
-}
 
 private fun NavGraphBuilder.home(
     route: String,

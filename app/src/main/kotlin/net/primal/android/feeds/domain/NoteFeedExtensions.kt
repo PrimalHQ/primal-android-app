@@ -64,3 +64,10 @@ fun String.isNotesBookmarkFeedSpec(): Boolean {
         suffix = "}",
     )
 }
+
+fun String.isReadsBookmarkFeedSpec(): Boolean {
+    return isPubkeyFeedSpec(
+        prefix = "{\"id\":\"feed\",\"kind\":\"reads\",\"kinds\":[30023],\"notes\":\"bookmarks\"}",
+        suffix = "}",
+    )
+}

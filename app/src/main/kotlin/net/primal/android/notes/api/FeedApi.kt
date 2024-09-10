@@ -6,9 +6,6 @@ import net.primal.android.notes.api.model.ThreadRequestBody
 
 interface FeedApi {
 
-    @Deprecated("Use getFeedMega")
-    suspend fun getFeed(body: FeedRequestBody): FeedResponse
-
     suspend fun getFeedMega(body: FeedRequestBody): FeedResponse
 
     suspend fun getThread(body: ThreadRequestBody): FeedResponse

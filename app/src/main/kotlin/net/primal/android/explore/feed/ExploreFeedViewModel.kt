@@ -61,7 +61,7 @@ class ExploreFeedViewModel @Inject constructor(
 
     private val _state = MutableStateFlow(
         UiState(
-            feedDirective = exploreFeedDirective,
+            feedSpec = exploreFeedDirective,
             canBeAddedInUserFeeds = !exploreFeedDirective.isNotesBookmarkFeedSpec(),
             posts = feedRepository.feedBySpec(feedSpec = exploreFeedDirective)
                 .map { it.map { feed -> feed.asFeedPostUi() } }
@@ -87,13 +87,13 @@ class ExploreFeedViewModel @Inject constructor(
     @OptIn(DelicateCoroutinesApi::class)
     override fun onCleared() {
         GlobalScope.launch(dispatcherProvider.io()) {
-            feedRepository.removeFeedDirective(feedDirective = exploreFeedDirective)
+            feedRepository.removeFeedSpec(feedSpec = exploreFeedDirective)
         }
     }
 
     private fun observeContainsFeed() =
         viewModelScope.launch {
-            feedRepository.observeContainsFeed(directive = exploreFeedDirective).collect {
+            feedRepository.observeContainsFeed(feedSpec = exploreFeedDirective).collect {
                 setState {
                     copy(existsInUserFeeds = it)
                 }

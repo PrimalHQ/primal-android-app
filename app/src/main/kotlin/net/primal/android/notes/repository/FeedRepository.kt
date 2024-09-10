@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.db.PrimalDatabase
-import net.primal.android.feeds.domain.hasReposts
+import net.primal.android.feeds.domain.supportsNoteReposts
 import net.primal.android.notes.api.FeedApi
 import net.primal.android.notes.api.mediator.FeedRemoteMediator
 import net.primal.android.notes.api.model.FeedRequestBody
@@ -23,16 +23,12 @@ import net.primal.android.notes.db.sql.FeedQueryBuilder
 import net.primal.android.user.accounts.active.ActiveAccountStore
 
 class FeedRepository @Inject constructor(
-    private val dispatcherProvider: CoroutineDispatcherProvider,
     private val feedApi: FeedApi,
     private val database: PrimalDatabase,
     private val activeAccountStore: ActiveAccountStore,
+    private val dispatcherProvider: CoroutineDispatcherProvider,
 ) {
-    fun defaultFeed() = database.oldFeeds().first()
-
-    fun observeFeeds() = database.oldFeeds().observeAllFeeds()
-
-    fun observeContainsFeed(directive: String) = database.oldFeeds().observeContainsFeed(directive)
+    fun observeContainsFeed(feedSpec: String) = database.feeds().observeContainsFeed(feedSpec)
 
     fun feedBySpec(feedSpec: String): Flow<PagingData<FeedPost>> {
         return createPager(feedSpec = feedSpec) {
@@ -70,14 +66,14 @@ class FeedRepository @Inject constructor(
             response.persistToDatabaseAsTransaction(userId = userId, database = database)
         }
 
-    suspend fun removeFeedDirective(feedDirective: String) =
+    suspend fun removeFeedSpec(feedSpec: String) =
         withContext(dispatcherProvider.io()) {
-            database.feedPostsRemoteKeys().deleteByDirective(feedDirective)
-            database.feedsConnections().deleteConnectionsByDirective(feedDirective)
+            database.feedPostsRemoteKeys().deleteByDirective(feedSpec)
+            database.feedsConnections().deleteConnectionsByDirective(feedSpec)
             database.posts().deleteOrphanPosts()
         }
 
-    suspend fun replaceFeedDirective(
+    suspend fun replaceFeedSpec(
         userId: String,
         feedSpec: String,
         response: FeedResponse,
@@ -92,7 +88,7 @@ class FeedRepository @Inject constructor(
         )
     }
 
-    suspend fun fetchLatestNotes2(
+    suspend fun fetchLatestNotes(
         userId: String,
         feedSpec: String,
         since: Long? = null,
@@ -100,23 +96,6 @@ class FeedRepository @Inject constructor(
         feedApi.getFeedMega(
             body = FeedRequestBody(
                 directive = feedSpec,
-                userPubKey = userId,
-                since = since,
-                order = "desc",
-                limit = PAGE_SIZE,
-            ),
-        )
-    }
-
-    @Deprecated("Use fetchLatestNotes2()")
-    suspend fun fetchLatestNotes(
-        userId: String,
-        feedDirective: String,
-        since: Long? = null,
-    ) = withContext(dispatcherProvider.io()) {
-        feedApi.getFeed(
-            body = FeedRequestBody(
-                directive = feedDirective,
                 userPubKey = userId,
                 since = since,
                 order = "desc",
@@ -146,7 +125,7 @@ class FeedRepository @Inject constructor(
 
     private fun feedQueryBuilder(feedSpec: String): FeedQueryBuilder =
         when {
-            feedSpec.hasReposts() -> ChronologicalFeedWithRepostsQueryBuilder(
+            feedSpec.supportsNoteReposts() -> ChronologicalFeedWithRepostsQueryBuilder(
                 feedSpec = feedSpec,
                 userPubkey = activeAccountStore.activeUserId(),
             )

@@ -1,10 +1,6 @@
 package net.primal.android.notes.db.sql
 
 import androidx.sqlite.db.SimpleSQLiteQuery
-import net.primal.android.feeds.domain.isExploreMostZapped4hFeed
-import net.primal.android.feeds.domain.isExploreMostZappedFeed
-import net.primal.android.feeds.domain.isExplorePopularFeed
-import net.primal.android.feeds.domain.isExploreTrendingFeed
 
 class ExploreFeedQueryBuilder(
     private val feedSpec: String,
@@ -42,10 +38,10 @@ class ExploreFeedQueryBuilder(
 
     // TODO This needs to updated
     private val orderByClause = when {
-        feedSpec.isExplorePopularFeed() -> "ORDER BY EventStats.score"
-        feedSpec.isExploreTrendingFeed() -> "ORDER BY EventStats.score24h"
-        feedSpec.isExploreMostZapped4hFeed() -> "ORDER BY EventStats.satsZapped"
-        feedSpec.isExploreMostZappedFeed() -> "ORDER BY EventStats.satsZapped"
+//        feedSpec.isExplorePopularFeed() -> "ORDER BY EventStats.score"
+//        feedSpec.isExploreTrendingFeed() -> "ORDER BY EventStats.score24h"
+//        feedSpec.isExploreMostZapped4hFeed() -> "ORDER BY EventStats.satsZapped"
+//        feedSpec.isExploreMostZappedFeed() -> "ORDER BY EventStats.satsZapped"
         else -> "ORDER BY PostData.createdAt"
     }
 

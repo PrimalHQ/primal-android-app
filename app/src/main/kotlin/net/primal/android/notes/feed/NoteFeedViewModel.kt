@@ -166,7 +166,7 @@ class NoteFeedViewModel @AssistedInject constructor(
     }
 
     private suspend fun fetchLatestNotes() {
-        val feedResponse = feedRepository.fetchLatestNotes2(
+        val feedResponse = feedRepository.fetchLatestNotes(
             userId = activeAccountStore.activeUserId(),
             feedSpec = feedSpec,
         )
@@ -227,7 +227,7 @@ class NoteFeedViewModel @AssistedInject constructor(
     private fun showLatestNotes() =
         viewModelScope.launch {
             latestFeedResponse?.let {
-                feedRepository.replaceFeedDirective(
+                feedRepository.replaceFeedSpec(
                     userId = activeAccountStore.activeUserId(),
                     feedSpec = feedSpec,
                     response = it,

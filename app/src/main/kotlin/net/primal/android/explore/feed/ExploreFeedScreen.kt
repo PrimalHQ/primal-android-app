@@ -30,9 +30,7 @@ import net.primal.android.core.compose.icons.primaliconpack.UserFeedRemove
 import net.primal.android.explore.feed.ExploreFeedContract.UiEvent.AddToUserFeeds
 import net.primal.android.explore.feed.ExploreFeedContract.UiEvent.RemoveFromUserFeeds
 import net.primal.android.explore.feed.ExploreFeedContract.UiState.ExploreFeedError
-import net.primal.android.feeds.domain.isBookmarkFeed
-import net.primal.android.feeds.domain.isSearchFeed
-import net.primal.android.feeds.domain.removeSearchPrefix
+import net.primal.android.feeds.domain.isNotesBookmarkFeedSpec
 import net.primal.android.notes.feed.NoteFeedList
 import net.primal.android.notes.feed.note.ConfirmFirstBookmarkAlertDialog
 import net.primal.android.notes.feed.note.events.NoteCallbacks
@@ -182,7 +180,7 @@ fun ExploreFeedScreen(
                     )
                 },
                 noContentText = when {
-                    state.feedDirective.isBookmarkFeed() -> stringResource(id = R.string.bookmarks_no_content)
+                    state.feedSpec.isNotesBookmarkFeedSpec() -> stringResource(id = R.string.bookmarks_no_content)
                     else -> stringResource(id = R.string.feed_no_content)
                 },
             )
@@ -196,8 +194,8 @@ fun ExploreFeedScreen(
 @Composable
 private fun ExploreFeedContract.UiState.extractTitle() =
     when {
-        feedDirective.isSearchFeed() -> feedDirective.removeSearchPrefix()
-        feedDirective.isBookmarkFeed() -> stringResource(id = R.string.bookmarks_title)
+//        feedSpec.isSearchFeed() -> feedSpec.removeSearchPrefix()
+        feedSpec.isNotesBookmarkFeedSpec() -> stringResource(id = R.string.bookmarks_title)
         else -> stringResource(id = R.string.explore_fallback_title)
     }
 

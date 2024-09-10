@@ -22,6 +22,6 @@ interface LoginContract {
     }
 
     sealed class SideEffect {
-        data class LoginSuccess(val feedDirective: String) : SideEffect()
+        data object LoginSuccess : SideEffect()
     }
 }

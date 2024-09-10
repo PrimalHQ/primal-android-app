@@ -67,14 +67,28 @@ class NoteFeedExtensionsKtTest {
     }
 
     @Test
-    fun isBookmarkFeedSpec_forProperFeedSpec_returnsTrue() {
+    fun isNotesBookmarkFeedSpec_forProperFeedSpec_returnsTrue() {
         val spec = "{\"id\":\"feed\",\"kind\":\"notes\",\"notes\":\"bookmarks\",\"pubkey\":\"$profileId\"}"
         spec.isNotesBookmarkFeedSpec() shouldBe true
     }
 
     @Test
-    fun isBookmarkFeedSpec_forInvalidProfileIdInInFeedSpec_returnsFalse() {
+    fun isNotesBookmarkFeedSpec_forInvalidProfileIdInInFeedSpec_returnsFalse() {
         val spec = "{\"id\":\"feed\",\"kind\":\"notes\",\"notes\":\"bookmarks\",\"pubkey\":\"abc\"}"
         spec.isNotesBookmarkFeedSpec() shouldBe false
+    }
+
+    @Test
+    fun isReadsBookmarkFeedSpec_forProperFeedSpec_returnsTrue() {
+        val spec = "{\"id\":\"feed\",\"kind\":\"reads\"," +
+            "\"kinds\":[30023],\"notes\":\"bookmarks\"},\"pubkey\":\"$profileId\"}"
+        spec.isReadsBookmarkFeedSpec() shouldBe true
+    }
+
+    @Test
+    fun isReadsBookmarkFeedSpec_forInvalidProfileIdInInFeedSpec_returnsFalse() {
+        val spec = "{\"id\":\"feed\",\"kind\":\"reads\"," +
+            "\"kinds\":[30023],\"notes\":\"bookmarks\"},\"pubkey\":\"abc\"}"
+        spec.isReadsBookmarkFeedSpec() shouldBe false
     }
 }
