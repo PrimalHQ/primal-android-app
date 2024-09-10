@@ -78,7 +78,7 @@ fun FilterPicker(
                             text = stringResource(id = R.string.asearch_filter_sheet_title),
                             color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
                         )
-                    }
+                    },
                 )
             },
             bottomBar = {

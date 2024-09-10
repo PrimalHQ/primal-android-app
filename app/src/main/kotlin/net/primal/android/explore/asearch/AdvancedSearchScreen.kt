@@ -37,6 +37,7 @@ import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.profile.model.UserProfileItemUi
+import net.primal.android.explore.asearch.AdvancedSearchContract.SearchKind
 import net.primal.android.explore.asearch.ui.FilterPicker
 import net.primal.android.explore.asearch.ui.MultipleUserPicker
 import net.primal.android.explore.asearch.ui.SingleChoicePicker
@@ -113,28 +114,9 @@ private fun AdvancedSearchScreen(
                 singleLine = true,
             )
             Column {
-                var showSearchBottomSheetPicker by rememberSaveable { mutableStateOf(false) }
-                OptionListWithBottomSheetItem(
-                    label = stringResource(id = R.string.asearch_search_kind_label),
-                    onClick = { showSearchBottomSheetPicker = true },
-                    selectedContent = {
-                        Text(
-                            text = state.searchKind.toDisplayName(),
-                            style = AppTheme.typography.bodyMedium,
-                            color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
-                        )
-                    },
-                    bottomSheet = {
-                        SingleChoicePicker(
-                            items = AdvancedSearchContract.SearchKind.entries,
-                            itemDisplayName = { toDisplayName() },
-                            onDismissRequest = { showSearchBottomSheetPicker = false },
-                            onItemSelected = { eventPublisher(AdvancedSearchContract.UiEvent.SearchKindChanged(it)) },
-                            titleText = stringResource(id = R.string.asearch_search_kind_label),
-                            selectedItem = state.searchKind,
-                        )
-                    },
-                    isBottomSheetVisible = showSearchBottomSheetPicker,
+                SearchKindPicker(
+                    searchKind = state.searchKind,
+                    onSearchKindChanged = { eventPublisher(AdvancedSearchContract.UiEvent.SearchKindChanged(it)) },
                 )
 
                 MultipleUserPickerOptionListItem(
@@ -262,6 +244,34 @@ private fun AdvancedSearchScreen(
             }
         }
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SearchKindPicker(searchKind: SearchKind, onSearchKindChanged: (kind: SearchKind) -> Unit) {
+    var showSearchBottomSheetPicker by rememberSaveable { mutableStateOf(false) }
+    OptionListWithBottomSheetItem(
+        label = stringResource(id = R.string.asearch_search_kind_label),
+        onClick = { showSearchBottomSheetPicker = true },
+        selectedContent = {
+            Text(
+                text = searchKind.toDisplayName(),
+                style = AppTheme.typography.bodyMedium,
+                color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+            )
+        },
+        bottomSheet = {
+            SingleChoicePicker(
+                items = AdvancedSearchContract.SearchKind.entries,
+                itemDisplayName = { toDisplayName() },
+                onDismissRequest = { showSearchBottomSheetPicker = false },
+                onItemSelected = onSearchKindChanged,
+                titleText = stringResource(id = R.string.asearch_search_kind_label),
+                selectedItem = searchKind,
+            )
+        },
+        isBottomSheetVisible = showSearchBottomSheetPicker,
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

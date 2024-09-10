@@ -48,7 +48,7 @@ fun <T> SingleChoicePicker(
                     text = titleText,
                     color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
                 )
-            }
+            },
         )
         LazyColumn(
             modifier = Modifier

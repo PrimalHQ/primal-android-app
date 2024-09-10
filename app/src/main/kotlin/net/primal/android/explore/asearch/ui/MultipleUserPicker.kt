@@ -101,7 +101,7 @@ fun MultipleUserPicker(
                             ) {
                                 Icon(imageVector = PrimalIcons.ArrowBack, contentDescription = null)
                             }
-                        }
+                        },
                     )
                     SelectedUsersIndicator(
                         lazyListState = lazyListState,

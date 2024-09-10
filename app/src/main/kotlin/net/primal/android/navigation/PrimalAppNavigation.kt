@@ -722,7 +722,7 @@ private fun NavGraphBuilder.explore(route: String, navController: NavController)
             onHashtagClick = { query -> navController.navigateToExploreFeed(query = query) },
             onSearchClick = { navController.navigateToSearch() },
             onTuneClick = { navController.navigateToAdvancedSearch() },
-            onClose = { navController.navigateUp() }
+            onClose = { navController.navigateUp() },
         )
     }
 
