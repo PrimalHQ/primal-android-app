@@ -3,12 +3,15 @@ package net.primal.android.core.compose
 import androidx.annotation.RawRes
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
@@ -18,6 +21,7 @@ import net.primal.android.LocalPrimalTheme
 @Composable
 fun ListPlaceholderLoading(
     modifier: Modifier,
+    itemPadding: PaddingValues = PaddingValues(all = 0.dp),
     @RawRes lightAnimationResId: Int,
     @RawRes darkAnimationResId: Int,
     repeat: Int = 10,
@@ -29,13 +33,16 @@ fun ListPlaceholderLoading(
 
     Column(modifier = modifier) {
         repeat(times = repeat) {
-            InfiniteLottieAnimation(resId = animationRawResId)
+            InfiniteLottieAnimation(
+                modifier = Modifier.padding(itemPadding),
+                resId = animationRawResId,
+            )
         }
     }
 }
 
 @Composable
-fun InfiniteLottieAnimation(@RawRes resId: Int) {
+fun InfiniteLottieAnimation(modifier: Modifier = Modifier, @RawRes resId: Int) {
     val composition by rememberLottieComposition(
         spec = LottieCompositionSpec.RawRes(resId),
     )
@@ -46,7 +53,7 @@ fun InfiniteLottieAnimation(@RawRes resId: Int) {
     )
 
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .wrapContentSize(),
     ) {
