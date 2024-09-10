@@ -2,6 +2,7 @@ package net.primal.android.core.compose.icons
 
 import kotlin.collections.List as ____KtList
 import androidx.compose.ui.graphics.vector.ImageVector
+import net.primal.android.core.compose.icons.primaliconpack.AdvancedSearch
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 import net.primal.android.core.compose.icons.primaliconpack.AvatarNostrich
@@ -110,6 +111,7 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
         __PrimalIcons = listOf(
             AvatarDefault,
             AvatarNostrich,
+            AdvancedSearch,
             Search,
             SearchFilled,
             Home,

@@ -45,6 +45,7 @@ import net.primal.android.core.compose.ListLoading
 import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.icons.PrimalIcons
+import net.primal.android.core.compose.icons.primaliconpack.AdvancedSearch
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.explore.home.ExploreHomeContract.UiEvent
@@ -89,7 +90,7 @@ private fun ExploreHomeScreen(
                 onClose = onClose,
                 onSearchClick = onSearchClick,
                 onActionIconClick = onTuneClick,
-                actionIcon = Icons.Filled.Tune,
+                actionIcon = PrimalIcons.AdvancedSearch,
             )
         },
         content = { paddingValues ->
