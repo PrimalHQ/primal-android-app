@@ -8,6 +8,5 @@ enum class PrimalSettingsSection {
     Notifications,
     Network,
     Wallet,
-    Feeds,
     Zaps,
 }

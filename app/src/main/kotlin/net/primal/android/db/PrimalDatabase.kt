@@ -7,10 +7,8 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import net.primal.android.articles.db.ArticleDao
 import net.primal.android.articles.db.ArticleData
-import net.primal.android.articles.db.ArticleFeed
 import net.primal.android.articles.db.ArticleFeedCrossRef
 import net.primal.android.articles.db.ArticleFeedCrossRefDao
-import net.primal.android.articles.db.ArticleFeedDao
 import net.primal.android.attachments.db.AttachmentDao
 import net.primal.android.attachments.db.NoteAttachment
 import net.primal.android.attachments.db.NoteNostrUri
@@ -18,17 +16,8 @@ import net.primal.android.attachments.db.serialization.AttachmentTypeConverters
 import net.primal.android.core.serialization.room.ListsTypeConverters
 import net.primal.android.explore.db.TrendingHashtag
 import net.primal.android.explore.db.TrendingHashtagDao
-import net.primal.android.feed.db.Feed
-import net.primal.android.feed.db.FeedDao
-import net.primal.android.feed.db.FeedPostDao
-import net.primal.android.feed.db.FeedPostDataCrossRef
-import net.primal.android.feed.db.FeedPostDataCrossRefDao
-import net.primal.android.feed.db.FeedPostRemoteKey
-import net.primal.android.feed.db.FeedPostRemoteKeyDao
-import net.primal.android.feed.db.PostDao
-import net.primal.android.feed.db.PostData
-import net.primal.android.feed.db.RepostDao
-import net.primal.android.feed.db.RepostData
+import net.primal.android.feeds.db.Feed
+import net.primal.android.feeds.db.FeedDao
 import net.primal.android.messages.db.DirectMessageDao
 import net.primal.android.messages.db.DirectMessageData
 import net.primal.android.messages.db.MessageConversationDao
@@ -41,6 +30,15 @@ import net.primal.android.note.db.EventUserStats
 import net.primal.android.note.db.EventUserStatsDao
 import net.primal.android.note.db.EventZap
 import net.primal.android.note.db.EventZapDao
+import net.primal.android.notes.db.FeedPostDao
+import net.primal.android.notes.db.FeedPostDataCrossRef
+import net.primal.android.notes.db.FeedPostDataCrossRefDao
+import net.primal.android.notes.db.FeedPostRemoteKey
+import net.primal.android.notes.db.FeedPostRemoteKeyDao
+import net.primal.android.notes.db.PostDao
+import net.primal.android.notes.db.PostData
+import net.primal.android.notes.db.RepostDao
+import net.primal.android.notes.db.RepostData
 import net.primal.android.notifications.db.NotificationDao
 import net.primal.android.notifications.db.NotificationData
 import net.primal.android.profile.db.ProfileData
@@ -85,10 +83,9 @@ import net.primal.android.wallet.db.WalletTransactionData
         ProfileInteraction::class,
         ArticleData::class,
         ArticleCommentCrossRef::class,
-        ArticleFeed::class,
         ArticleFeedCrossRef::class,
     ],
-    version = 35,
+    version = 36,
     exportSchema = true,
 )
 @TypeConverters(
@@ -142,8 +139,6 @@ abstract class PrimalDatabase : RoomDatabase() {
     abstract fun profileInteractions(): ProfileInteractionDao
 
     abstract fun articles(): ArticleDao
-
-    abstract fun articleFeeds(): ArticleFeedDao
 
     abstract fun articleFeedsConnections(): ArticleFeedCrossRefDao
 }

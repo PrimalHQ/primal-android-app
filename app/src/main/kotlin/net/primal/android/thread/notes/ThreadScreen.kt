@@ -84,16 +84,6 @@ import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.ReplyingToText
 import net.primal.android.core.compose.TakePhotoIconButton
 import net.primal.android.core.compose.button.PrimalLoadingButton
-import net.primal.android.core.compose.feed.RepostOrQuoteBottomSheet
-import net.primal.android.core.compose.feed.model.EventStatsUi
-import net.primal.android.core.compose.feed.model.FeedPostAction
-import net.primal.android.core.compose.feed.model.FeedPostUi
-import net.primal.android.core.compose.feed.note.ConfirmFirstBookmarkAlertDialog
-import net.primal.android.core.compose.feed.note.FeedNoteCard
-import net.primal.android.core.compose.feed.note.events.InvoicePayClickEvent
-import net.primal.android.core.compose.feed.note.events.MediaClickEvent
-import net.primal.android.core.compose.feed.zaps.UnableToZapBottomSheet
-import net.primal.android.core.compose.feed.zaps.ZapBottomSheet
 import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
@@ -110,6 +100,16 @@ import net.primal.android.editor.domain.NoteEditorArgs
 import net.primal.android.editor.ui.NoteOutlinedTextField
 import net.primal.android.editor.ui.NoteTagUserLazyColumn
 import net.primal.android.note.ui.EventZapUiModel
+import net.primal.android.notes.feed.NoteRepostOrQuoteBottomSheet
+import net.primal.android.notes.feed.model.EventStatsUi
+import net.primal.android.notes.feed.model.FeedPostAction
+import net.primal.android.notes.feed.model.FeedPostUi
+import net.primal.android.notes.feed.note.ConfirmFirstBookmarkAlertDialog
+import net.primal.android.notes.feed.note.FeedNoteCard
+import net.primal.android.notes.feed.note.events.InvoicePayClickEvent
+import net.primal.android.notes.feed.note.events.MediaClickEvent
+import net.primal.android.notes.feed.zaps.UnableToZapBottomSheet
+import net.primal.android.notes.feed.zaps.ZapBottomSheet
 import net.primal.android.profile.report.OnReportContentClick
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
@@ -327,7 +327,7 @@ private fun ThreadConversationLazyColumn(
     var repostQuotePostConfirmation by remember { mutableStateOf<FeedPostUi?>(null) }
     if (repostQuotePostConfirmation != null) {
         repostQuotePostConfirmation?.let { post ->
-            RepostOrQuoteBottomSheet(
+            NoteRepostOrQuoteBottomSheet(
                 onDismiss = { repostQuotePostConfirmation = null },
                 onRepostClick = {
                     eventPublisher(

@@ -2,11 +2,11 @@ package net.primal.android.profile.details
 
 import androidx.paging.PagingData
 import kotlinx.coroutines.flow.Flow
-import net.primal.android.core.compose.feed.model.FeedPostUi
-import net.primal.android.core.compose.feed.model.ZappingState
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.core.compose.profile.model.ProfileStatsUi
-import net.primal.android.profile.domain.ProfileFeedDirective
+import net.primal.android.notes.feed.model.FeedPostUi
+import net.primal.android.notes.feed.model.ZappingState
+import net.primal.android.profile.domain.ProfileFeedSpec
 import net.primal.android.profile.report.ReportType
 
 interface ProfileDetailsContract {
@@ -22,7 +22,7 @@ interface ProfileDetailsContract {
         val referencedProfilesData: Set<ProfileDetailsUi> = emptySet(),
         val zappingState: ZappingState = ZappingState(),
         val notes: Flow<PagingData<FeedPostUi>>,
-        val profileDirective: ProfileFeedDirective = ProfileFeedDirective.AuthoredNotes,
+        val profileFeedSpec: ProfileFeedSpec = ProfileFeedSpec.AuthoredNotes,
         val confirmBookmarkingNoteId: String? = null,
         val error: ProfileError? = null,
     ) {
@@ -59,11 +59,11 @@ interface ProfileDetailsContract {
 
         data class FollowAction(val profileId: String) : UiEvent()
         data class UnfollowAction(val profileId: String) : UiEvent()
-        data class AddUserFeedAction(val name: String, val directive: String) : UiEvent()
-        data class RemoveUserFeedAction(val directive: String) : UiEvent()
+        data class AddUserFeedAction(val name: String, val profileId: String) : UiEvent()
+        data class RemoveUserFeedAction(val profileId: String) : UiEvent()
         data class MuteAction(val profileId: String) : UiEvent()
         data class UnmuteAction(val profileId: String) : UiEvent()
-        data class ChangeProfileFeed(val profileDirective: ProfileFeedDirective) : UiEvent()
+        data class ChangeProfileFeed(val profileFeedSpec: ProfileFeedSpec) : UiEvent()
         data object RequestProfileUpdate : UiEvent()
         data class ReportAbuse(
             val reportType: ReportType,

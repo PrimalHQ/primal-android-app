@@ -4,9 +4,6 @@ interface SplashContract {
 
     sealed class SideEffect {
         data object NoActiveAccount : SideEffect()
-        data class ActiveAccount(
-            val userPubkey: String,
-            val defaultFeedDirective: String,
-        ) : SideEffect()
+        data class ActiveAccount(val userPubkey: String) : SideEffect()
     }
 }

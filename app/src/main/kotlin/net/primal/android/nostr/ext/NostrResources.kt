@@ -9,11 +9,11 @@ import net.primal.android.core.utils.usernameUiFriendly
 import net.primal.android.crypto.bech32ToHexOrThrow
 import net.primal.android.crypto.bechToBytesOrThrow
 import net.primal.android.crypto.toHex
-import net.primal.android.feed.db.PostData
-import net.primal.android.feed.db.ReferencedPost
-import net.primal.android.feed.db.ReferencedUser
 import net.primal.android.messages.db.DirectMessageData
 import net.primal.android.nostr.utils.Nip19TLV
+import net.primal.android.notes.db.PostData
+import net.primal.android.notes.db.ReferencedPost
+import net.primal.android.notes.db.ReferencedUser
 import net.primal.android.profile.db.ProfileData
 import timber.log.Timber
 

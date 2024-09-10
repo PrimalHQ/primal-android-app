@@ -7,7 +7,7 @@ import androidx.room.Query
 import androidx.room.RewriteQueriesToDropUnusedColumns
 import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
-import net.primal.android.feed.db.FeedPost
+import net.primal.android.notes.db.FeedPost
 
 @Dao
 interface ThreadConversationDao {

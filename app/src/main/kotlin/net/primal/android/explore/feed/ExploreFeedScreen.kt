@@ -16,42 +16,30 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.paging.compose.collectAsLazyPagingItems
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.InvisibleAppBarIcon
 import net.primal.android.core.compose.PrimalTopAppBar
-import net.primal.android.core.compose.feed.FeedNoteList
-import net.primal.android.core.compose.feed.note.ConfirmFirstBookmarkAlertDialog
-import net.primal.android.core.compose.feed.note.events.InvoicePayClickEvent
-import net.primal.android.core.compose.feed.note.events.MediaClickEvent
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.UserFeedAdd
 import net.primal.android.core.compose.icons.primaliconpack.UserFeedRemove
-import net.primal.android.core.ext.isBookmarkFeed
-import net.primal.android.core.ext.isSearchFeed
-import net.primal.android.core.ext.removeSearchPrefix
-import net.primal.android.crypto.hexToNoteHrp
 import net.primal.android.explore.feed.ExploreFeedContract.UiEvent.AddToUserFeeds
 import net.primal.android.explore.feed.ExploreFeedContract.UiEvent.RemoveFromUserFeeds
 import net.primal.android.explore.feed.ExploreFeedContract.UiState.ExploreFeedError
+import net.primal.android.feeds.domain.isNotesBookmarkFeedSpec
+import net.primal.android.notes.feed.NoteFeedList
+import net.primal.android.notes.feed.note.ConfirmFirstBookmarkAlertDialog
+import net.primal.android.notes.feed.note.events.NoteCallbacks
 
 @Composable
 fun ExploreFeedScreen(
     viewModel: ExploreFeedViewModel,
     onClose: () -> Unit,
-    onPostClick: (String) -> Unit,
-    onArticleClick: (naddr: String) -> Unit,
-    onPostReplyClick: (String) -> Unit,
-    onPostQuoteClick: (content: TextFieldValue) -> Unit,
-    onProfileClick: (String) -> Unit,
-    onHashtagClick: (String) -> Unit,
-    onMediaClick: (MediaClickEvent) -> Unit,
-    onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
+    noteCallbacks: NoteCallbacks,
     onGoToWallet: () -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
@@ -59,14 +47,7 @@ fun ExploreFeedScreen(
     ExploreFeedScreen(
         state = uiState.value,
         onClose = onClose,
-        onPostClick = onPostClick,
-        onArticleClick = onArticleClick,
-        onPostReplyClick = onPostReplyClick,
-        onProfileClick = onProfileClick,
-        onPostQuoteClick = onPostQuoteClick,
-        onHashtagClick = onHashtagClick,
-        onMediaClick = onMediaClick,
-        onPayInvoiceClick = onPayInvoiceClick,
+        noteCallbacks = noteCallbacks,
         onGoToWallet = onGoToWallet,
         eventPublisher = { viewModel.setEvent(it) },
     )
@@ -77,14 +58,7 @@ fun ExploreFeedScreen(
 fun ExploreFeedScreen(
     state: ExploreFeedContract.UiState,
     onClose: () -> Unit,
-    onPostClick: (String) -> Unit,
-    onArticleClick: (naddr: String) -> Unit,
-    onPostReplyClick: (String) -> Unit,
-    onPostQuoteClick: (content: TextFieldValue) -> Unit,
-    onProfileClick: (String) -> Unit,
-    onHashtagClick: (String) -> Unit,
-    onMediaClick: (MediaClickEvent) -> Unit,
-    onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
+    noteCallbacks: NoteCallbacks,
     onGoToWallet: () -> Unit,
     eventPublisher: (ExploreFeedContract.UiEvent) -> Unit,
 ) {
@@ -160,15 +134,12 @@ fun ExploreFeedScreen(
             )
         },
         content = { paddingValues ->
-            FeedNoteList(
+            NoteFeedList(
                 feedListState = feedListState,
                 pagingItems = feedPagingItems,
                 zappingState = state.zappingState,
                 paddingValues = paddingValues,
-                onPostClick = onPostClick,
-                onArticleClick = onArticleClick,
-                onProfileClick = onProfileClick,
-                onPostReplyClick = onPostReplyClick,
+                noteCallbacks = noteCallbacks,
                 onZapClick = { post, zapAmount, zapDescription ->
                     eventPublisher(
                         ExploreFeedContract.UiEvent.ZapAction(
@@ -196,12 +167,8 @@ fun ExploreFeedScreen(
                         ),
                     )
                 },
-                onPostQuoteClick = { onPostQuoteClick(TextFieldValue(text = "\n\nnostr:${it.postId.hexToNoteHrp()}")) },
-                onHashtagClick = onHashtagClick,
                 onGoToWallet = onGoToWallet,
                 onMuteClick = { eventPublisher(ExploreFeedContract.UiEvent.MuteAction(profileId = it)) },
-                onMediaClick = onMediaClick,
-                onPayInvoiceClick = onPayInvoiceClick,
                 onBookmarkClick = { eventPublisher(ExploreFeedContract.UiEvent.BookmarkAction(noteId = it)) },
                 onReportContentClick = { type, profileId, noteId ->
                     eventPublisher(
@@ -213,7 +180,7 @@ fun ExploreFeedScreen(
                     )
                 },
                 noContentText = when {
-                    state.feedDirective.isBookmarkFeed() -> stringResource(id = R.string.bookmarks_no_content)
+                    state.feedSpec.isNotesBookmarkFeedSpec() -> stringResource(id = R.string.bookmarks_no_content)
                     else -> stringResource(id = R.string.feed_no_content)
                 },
             )
@@ -227,8 +194,9 @@ fun ExploreFeedScreen(
 @Composable
 private fun ExploreFeedContract.UiState.extractTitle() =
     when {
-        feedDirective.isSearchFeed() -> feedDirective.removeSearchPrefix()
-        feedDirective.isBookmarkFeed() -> stringResource(id = R.string.bookmarks_title)
+        // TODO Extract search title once api is implemented
+//        feedSpec.isSearchFeed() -> feedSpec.removeSearchPrefix()
+        feedSpec.isNotesBookmarkFeedSpec() -> stringResource(id = R.string.bookmarks_title)
         else -> stringResource(id = R.string.explore_fallback_title)
     }
 

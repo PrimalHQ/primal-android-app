@@ -1,0 +1,107 @@
+package net.primal.android.notes.home
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
+import kotlin.time.Duration.Companion.minutes
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.getAndUpdate
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import net.primal.android.config.AppConfigHandler
+import net.primal.android.core.coroutines.CoroutineDispatcherProvider
+import net.primal.android.feeds.repository.FeedsRepository
+import net.primal.android.feeds.ui.model.asFeedUi
+import net.primal.android.notes.home.HomeFeedContract.UiEvent
+import net.primal.android.notes.home.HomeFeedContract.UiState
+import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.android.user.subscriptions.SubscriptionsManager
+import net.primal.android.user.updater.UserDataUpdater
+import net.primal.android.user.updater.UserDataUpdaterFactory
+
+@HiltViewModel
+class HomeFeedViewModel @Inject constructor(
+    private val dispatcherProvider: CoroutineDispatcherProvider,
+    private val activeAccountStore: ActiveAccountStore,
+    private val appConfigHandler: AppConfigHandler,
+    private val subscriptionsManager: SubscriptionsManager,
+    private val feedsRepository: FeedsRepository,
+    private val userDataSyncerFactory: UserDataUpdaterFactory,
+) : ViewModel() {
+
+    private val _state = MutableStateFlow(UiState())
+    val state = _state.asStateFlow()
+    private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
+
+    private val events: MutableSharedFlow<UiEvent> = MutableSharedFlow()
+    fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
+
+    private var userDataUpdater: UserDataUpdater? = null
+
+    init {
+        observeEvents()
+        observeActiveAccount()
+        observeBadgesUpdates()
+        observeFeeds()
+    }
+
+    private fun observeEvents() {
+        viewModelScope.launch {
+            events.collect {
+                when (it) {
+                    UiEvent.RequestUserDataUpdate -> updateUserData()
+                }
+            }
+        }
+    }
+
+    private fun observeFeeds() =
+        viewModelScope.launch {
+            feedsRepository.observeNotesFeeds()
+                .collect { feeds ->
+                    setState {
+                        copy(
+                            feeds = feeds
+                                .filter { it.enabled }
+                                .map { it.asFeedUi() },
+                        )
+                    }
+                }
+        }
+
+    private fun observeActiveAccount() =
+        viewModelScope.launch {
+            activeAccountStore.activeUserAccount.collect {
+                initUserUpdater(activeUserId = it.pubkey)
+                setState { copy(activeAccountAvatarCdnImage = it.avatarCdnImage) }
+            }
+        }
+
+    private fun initUserUpdater(activeUserId: String) {
+        userDataUpdater = if (userDataUpdater?.userId != activeUserId) {
+            userDataSyncerFactory.create(userId = activeUserId)
+        } else {
+            userDataUpdater
+        }
+    }
+
+    private fun observeBadgesUpdates() =
+        viewModelScope.launch {
+            subscriptionsManager.badges.collect {
+                setState {
+                    copy(badges = it)
+                }
+            }
+        }
+
+    private fun updateUserData() =
+        viewModelScope.launch {
+            withContext(dispatcherProvider.io()) {
+                userDataUpdater?.updateUserDataWithDebounce(30.minutes)
+                appConfigHandler.updateAppConfigWithDebounce(30.minutes)
+            }
+        }
+}

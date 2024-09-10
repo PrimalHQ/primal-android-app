@@ -18,19 +18,20 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.text.NumberFormat
 import net.primal.android.R
 import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.AvatarThumbnail
-import net.primal.android.core.compose.feed.note.SingleEventStat
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.FeedLikes
 import net.primal.android.core.compose.icons.primaliconpack.FeedLikesFilled
 import net.primal.android.core.compose.icons.primaliconpack.FeedZaps
 import net.primal.android.core.compose.icons.primaliconpack.FeedZapsFilled
-import net.primal.android.feeds.repository.DvmFeed
+import net.primal.android.feeds.domain.DvmFeed
+import net.primal.android.notes.feed.note.SingleEventStat
 import net.primal.android.theme.AppTheme
 
 private val PaidBackground = Color(0xFFFC6337)
@@ -45,7 +46,7 @@ fun DvmFeedListItem(data: DvmFeed, onFeedClick: ((dvmFeed: DvmFeed) -> Unit)? = 
         leadingContent = {
             Column {
                 AvatarThumbnail(
-                    avatarCdnImage = CdnImage(sourceUrl = data.avatarUrl),
+                    avatarCdnImage = data.avatarUrl?.let { CdnImage(sourceUrl = it) },
                     avatarSize = 40.dp,
                 )
 
@@ -88,14 +89,18 @@ fun DvmFeedListItem(data: DvmFeed, onFeedClick: ((dvmFeed: DvmFeed) -> Unit)? = 
         },
         supportingContent = {
             Column {
-                Text(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 6.dp),
-                    style = AppTheme.typography.bodySmall,
-                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-                    text = data.description,
-                )
+                if (data.description != null) {
+                    Text(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 6.dp),
+                        style = AppTheme.typography.bodySmall,
+                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                        text = data.description,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
                 Row(modifier = Modifier.padding(top = 4.dp)) {
                     val numberFormat = NumberFormat.getNumberInstance()
 

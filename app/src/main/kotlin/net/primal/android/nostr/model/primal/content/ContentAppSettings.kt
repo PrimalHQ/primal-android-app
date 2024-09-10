@@ -7,7 +7,6 @@ import kotlinx.serialization.json.JsonObject
 @Serializable
 data class ContentAppSettings(
     val description: String? = null,
-    val feeds: List<ContentFeedData> = emptyList(),
     val notifications: JsonObject,
     @Deprecated("Replaced with zapDefault.")
     val defaultZapAmount: ULong? = null,

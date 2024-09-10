@@ -22,7 +22,6 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import net.primal.android.core.compose.attachment.model.asNoteAttachmentUi
-import net.primal.android.core.compose.feed.model.asNoteNostrUriUi
 import net.primal.android.core.compose.profile.model.asProfileDetailsUi
 import net.primal.android.messages.chat.ChatContract.UiEvent
 import net.primal.android.messages.chat.ChatContract.UiState
@@ -33,6 +32,7 @@ import net.primal.android.navigation.profileIdOrThrow
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.notes.feed.model.asNoteNostrUriUi
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.subscriptions.SubscriptionsManager

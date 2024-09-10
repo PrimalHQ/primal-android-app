@@ -3,7 +3,6 @@ package net.primal.android.articles.api
 import javax.inject.Inject
 import kotlinx.serialization.encodeToString
 import net.primal.android.articles.api.model.ArticleDetailsRequestBody
-import net.primal.android.articles.api.model.ArticleDvmFeedRequestBody
 import net.primal.android.articles.api.model.ArticleFeedRequestBody
 import net.primal.android.articles.api.model.ArticleResponse
 import net.primal.android.core.serialization.json.NostrJson
@@ -45,10 +44,10 @@ class ArticlesApiImpl @Inject constructor(
         )
     }
 
-    private suspend inline fun <reified T> queryArticleFeed(verb: PrimalVerb, body: T): ArticleResponse {
+    override suspend fun getArticleFeed(body: ArticleFeedRequestBody): ArticleResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = verb,
+                primalVerb = PrimalVerb.MEGA_FEED_DIRECTIVE,
                 optionsJson = NostrJson.encodeToString(body),
             ),
         )
@@ -70,13 +69,5 @@ class ArticlesApiImpl @Inject constructor(
             primalRelayHints = queryResult.filterPrimalEvents(NostrEventKind.PrimalRelayHint),
             primalLongFormWords = queryResult.filterPrimalEvents(NostrEventKind.PrimalLongFormWordsCount),
         )
-    }
-
-    override suspend fun getArticleFeed(body: ArticleFeedRequestBody): ArticleResponse {
-        return queryArticleFeed(verb = PrimalVerb.MEGA_FEED_DIRECTIVE, body = body)
-    }
-
-    override suspend fun getArticleDvmFeed(body: ArticleDvmFeedRequestBody): ArticleResponse {
-        return queryArticleFeed(verb = PrimalVerb.DVM_FEED, body = body)
     }
 }

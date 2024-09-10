@@ -30,7 +30,6 @@ import kotlinx.coroutines.withContext
 import net.primal.android.articles.ArticleRepository
 import net.primal.android.articles.feed.ui.mapAsFeedArticleUi
 import net.primal.android.attachments.repository.AttachmentsRepository
-import net.primal.android.core.compose.feed.model.asFeedPostUi
 import net.primal.android.core.compose.profile.model.mapAsUserProfileUi
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.files.FileAnalyser
@@ -42,7 +41,6 @@ import net.primal.android.editor.domain.NoteAttachment
 import net.primal.android.editor.domain.NoteEditorArgs
 import net.primal.android.editor.domain.NoteTaggedUser
 import net.primal.android.explore.repository.ExploreRepository
-import net.primal.android.feed.repository.FeedRepository
 import net.primal.android.networking.primal.upload.PrimalFileUploader
 import net.primal.android.networking.primal.upload.UnsuccessfulFileUpload
 import net.primal.android.networking.primal.upload.domain.UploadJob
@@ -52,6 +50,8 @@ import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.utils.Naddr
 import net.primal.android.nostr.utils.Nip19TLV
 import net.primal.android.note.repository.NoteRepository
+import net.primal.android.notes.feed.model.asFeedPostUi
+import net.primal.android.notes.repository.FeedRepository
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState

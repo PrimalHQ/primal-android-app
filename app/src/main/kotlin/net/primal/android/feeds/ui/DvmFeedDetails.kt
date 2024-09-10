@@ -19,15 +19,18 @@ import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
-import net.primal.android.feeds.repository.DvmFeed
-import net.primal.android.feeds.repository.buildSpec
+import net.primal.android.feeds.domain.DvmFeed
+import net.primal.android.feeds.domain.FeedSpecKind
+import net.primal.android.feeds.domain.buildSpec
+import net.primal.android.notes.feed.NoteFeedList
+import net.primal.android.notes.feed.note.events.NoteCallbacks
 import net.primal.android.theme.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DvmFeedDetails(
     dvmFeed: DvmFeed?,
-    specKind: String,
+    specKind: FeedSpecKind,
     onClose: () -> Unit,
     modifier: Modifier = Modifier,
     addedToFeeds: Boolean = false,
@@ -84,17 +87,29 @@ fun DvmFeedDetails(
 @Composable
 private fun DvmHeaderAndFeedList(
     dvmFeed: DvmFeed,
-    specKind: String,
+    specKind: FeedSpecKind,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier) {
-        ArticleFeedList(
-            feedSpec = dvmFeed.buildSpec(specKind = specKind),
-            onArticleClick = {},
-            previewMode = true,
-            header = {
-                DvmFeedListItem(data = dvmFeed)
-            },
-        )
+        when (specKind) {
+            FeedSpecKind.Reads -> {
+                ArticleFeedList(
+                    feedSpec = dvmFeed.buildSpec(specKind = specKind),
+                    previewMode = true,
+                    header = { DvmFeedListItem(data = dvmFeed) },
+                    onArticleClick = {},
+                )
+            }
+
+            FeedSpecKind.Notes -> {
+                NoteFeedList(
+                    feedSpec = dvmFeed.buildSpec(specKind = specKind),
+                    noteCallbacks = NoteCallbacks(),
+                    previewMode = true,
+                    header = { DvmFeedListItem(data = dvmFeed) },
+                    onGoToWallet = {},
+                )
+            }
+        }
     }
 }

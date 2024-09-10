@@ -3,8 +3,8 @@ package net.primal.android.attachments.db
 import androidx.room.Embedded
 import androidx.room.Entity
 import kotlinx.serialization.Serializable
-import net.primal.android.feed.db.ReferencedPost
-import net.primal.android.feed.db.ReferencedUser
+import net.primal.android.notes.db.ReferencedPost
+import net.primal.android.notes.db.ReferencedUser
 
 @Entity(
     primaryKeys = ["postId", "uri"],

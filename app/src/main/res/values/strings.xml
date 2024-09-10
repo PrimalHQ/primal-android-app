@@ -194,8 +194,8 @@
     <string name="feed_lightning_invoice_expires_in">Expires: %1$s</string>
     <string name="feed_lightning_invoice_expired">This invoice has expired</string>
 
-    <string name="post_repost_button_confirmation">Repost Note</string>
-    <string name="post_quote_button_confirmation">Quote Note</string>
+    <string name="post_repost_button_confirmation">Repost</string>
+    <string name="post_quote_button_confirmation">Quote</string>
 
     <string name="note_editor_post_publish_button">Post</string>
     <string name="note_editor_reply_publish_button">Reply</string>
@@ -439,16 +439,6 @@
     <string name="settings_network_add_relay_error">Unable to add relay. Please try again in few moments.</string>
     <string name="settings_network_enhanced_privacy_title">Enhanced Privacy</string>
     <string name="settings_network_enhanced_privacy_description">When enabled, your IP address will be visible to the caching service, but not to relays. Your content will be published to your specified relays using the caching service as a proxy.</string>
-
-    <string name="settings_feeds_title">Feeds</string>
-    <string name="settings_feeds_list_title">Your Nostr feeds</string>
-    <string name="settings_feeds_restore_default_title">Restore Defaults</string>
-    <string name="settings_feeds_remove_feed_prompt_title">Remove feed?</string>
-    <string name="settings_feeds_remove_feed_prompt_text">Are you sure you want to remove %1$s\?</string>
-    <string name="settings_feeds_restore_defaults_prompt_title">Remove defaults?</string>
-    <string name="settings_feeds_restore_defaults_prompt_text">Are you sure you want to restore your feeds to default values?</string>
-    <string name="settings_feeds_dialog_confirm">Confirm</string>
-    <string name="settings_feeds_dialog_dismiss">Dismiss</string>
 
     <string name="settings_zaps_title">Zaps</string>
     <string name="settings_zaps_description">Single tap zaps send the default amount &amp; message. Configure custom zap presets below:</string>

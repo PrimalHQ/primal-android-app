@@ -72,8 +72,6 @@ import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.compose.asBeforeNowFormat
-import net.primal.android.core.compose.feed.model.NoteContentUi
-import net.primal.android.core.compose.feed.note.renderContentAsAnnotatedString
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
@@ -89,6 +87,8 @@ import net.primal.android.messages.conversation.MessageConversationListContract.
 import net.primal.android.messages.conversation.MessageConversationListContract.UiEvent.MarkAllConversationsAsRead
 import net.primal.android.messages.conversation.model.MessageConversationUi
 import net.primal.android.messages.domain.ConversationRelation
+import net.primal.android.notes.feed.model.NoteContentUi
+import net.primal.android.notes.feed.note.renderContentAsAnnotatedString
 import net.primal.android.theme.AppTheme
 
 @Composable
@@ -159,7 +159,7 @@ fun MessageListScreen(
         onDrawerQrCodeClick = onDrawerQrCodeClick,
         badges = state.badges,
         focusModeEnabled = LocalContentDisplaySettings.current.focusModeEnabled && conversations.isNotEmpty(),
-        topBar = {
+        topAppBar = {
             PrimalTopAppBar(
                 title = stringResource(id = R.string.messages_title),
                 avatarCdnImage = state.activeAccountAvatarCdnImage,

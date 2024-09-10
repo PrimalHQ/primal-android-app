@@ -20,15 +20,15 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.articles.ArticleRepository
 import net.primal.android.articles.feed.ui.mapAsFeedArticleUi
-import net.primal.android.core.compose.feed.model.asFeedPostUi
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
-import net.primal.android.feed.repository.FeedRepository
 import net.primal.android.navigation.noteIdOrThrow
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.note.repository.NoteRepository
 import net.primal.android.note.ui.asEventZapUiModel
+import net.primal.android.notes.feed.model.asFeedPostUi
+import net.primal.android.notes.repository.FeedRepository
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.settings.muted.repository.MutedUserRepository
 import net.primal.android.thread.notes.ThreadContract.UiEvent

@@ -5,10 +5,10 @@ import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.toJsonObject
 import net.primal.android.core.utils.parseHashtags
 import net.primal.android.core.utils.parseUris
-import net.primal.android.feed.db.PostData
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.model.primal.PrimalEvent
+import net.primal.android.notes.db.PostData
 
 fun List<NostrEvent>.mapAsPostDataPO(referencedPosts: List<PostData>) = map { it.asPost(referencedPosts) }
 

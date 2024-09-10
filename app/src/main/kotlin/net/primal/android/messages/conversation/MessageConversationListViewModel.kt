@@ -16,7 +16,6 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import net.primal.android.core.compose.attachment.model.asNoteAttachmentUi
-import net.primal.android.core.compose.feed.model.asNoteNostrUriUi
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.usernameUiFriendly
 import net.primal.android.messages.conversation.MessageConversationListContract.UiEvent
@@ -26,6 +25,7 @@ import net.primal.android.messages.db.MessageConversation
 import net.primal.android.messages.domain.ConversationRelation
 import net.primal.android.messages.repository.MessageRepository
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.notes.feed.model.asNoteNostrUriUi
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.subscriptions.SubscriptionsManager
 import timber.log.Timber

@@ -19,9 +19,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.core.compose.attachment.model.asNoteAttachmentUi
-import net.primal.android.core.compose.feed.model.EventStatsUi
-import net.primal.android.core.compose.feed.model.FeedPostUi
-import net.primal.android.core.compose.feed.model.asNoteNostrUriUi
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.authorNameUiFriendly
@@ -31,6 +28,9 @@ import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.notary.NostrSignUnauthorized
 import net.primal.android.note.repository.NoteRepository
+import net.primal.android.notes.feed.model.EventStatsUi
+import net.primal.android.notes.feed.model.FeedPostUi
+import net.primal.android.notes.feed.model.asNoteNostrUriUi
 import net.primal.android.notifications.db.Notification
 import net.primal.android.notifications.list.NotificationsContract.UiEvent
 import net.primal.android.notifications.list.NotificationsContract.UiEvent.NotificationsSeen

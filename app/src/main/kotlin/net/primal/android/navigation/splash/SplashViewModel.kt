@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import net.primal.android.config.AppConfigHandler
 import net.primal.android.navigation.splash.SplashContract.SideEffect
-import net.primal.android.settings.repository.asFeedPO
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
 
@@ -48,11 +47,7 @@ class SplashViewModel @Inject constructor(
                     ActiveUserAccountState.NoUserAccount -> SideEffect.NoActiveAccount
                     is ActiveUserAccountState.ActiveUserAccount -> {
                         val userId = activeUserAccountState.data.pubkey
-                        val defaultFeed = activeUserAccountState.data.appSettings?.feeds?.first()?.asFeedPO()
-                        SideEffect.ActiveAccount(
-                            userPubkey = userId,
-                            defaultFeedDirective = defaultFeed?.directive ?: userId,
-                        )
+                        SideEffect.ActiveAccount(userPubkey = userId)
                     }
                 },
             )

@@ -45,7 +45,6 @@ import net.primal.android.attachments.domain.findNearestOrNull
 import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.asBeforeNowFormat
-import net.primal.android.core.compose.feed.model.EventStatsUi
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.FeedReplies
 import net.primal.android.core.compose.icons.primaliconpack.LightningBolt
@@ -54,6 +53,7 @@ import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.utils.Naddr
 import net.primal.android.nostr.utils.Nip19TLV.toNaddrString
 import net.primal.android.note.ui.EventZapUiModel
+import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.theme.AppTheme
 
 @Composable
