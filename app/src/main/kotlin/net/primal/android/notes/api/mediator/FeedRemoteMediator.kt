@@ -21,7 +21,7 @@ import net.primal.android.feeds.domain.supportsUpwardsNotesPagination
 import net.primal.android.networking.sockets.errors.NostrNoticeException
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.notes.api.FeedApi
-import net.primal.android.notes.api.model.FeedRequestBody
+import net.primal.android.notes.api.model.FeedBySpecRequestBody
 import net.primal.android.notes.api.model.FeedResponse
 import net.primal.android.notes.db.FeedPost
 import net.primal.android.notes.db.FeedPostRemoteKey
@@ -52,7 +52,7 @@ class FeedRemoteMediator(
         )
     }
 
-    private val lastRequests: MutableMap<LoadType, Pair<FeedRequestBody, Long>> = mutableMapOf()
+    private val lastRequests: MutableMap<LoadType, Pair<FeedBySpecRequestBody, Long>> = mutableMapOf()
 
     private val feedProcessor: FeedProcessor = FeedProcessor(feedSpec = feedSpec, database = database)
 
@@ -159,23 +159,26 @@ class FeedRemoteMediator(
         lastRequests[loadType] = request to Instant.now().epochSecond
     }
 
-    private suspend fun syncRefresh(pageSize: Int): Pair<FeedRequestBody, FeedResponse> {
-        val requestBody = FeedRequestBody(
-            directive = feedSpec,
+    private suspend fun syncRefresh(pageSize: Int): Pair<FeedBySpecRequestBody, FeedResponse> {
+        val requestBody = FeedBySpecRequestBody(
+            spec = feedSpec,
             userPubKey = userId,
             limit = pageSize,
         )
         val response = retry(times = 1, delay = RETRY_DELAY) {
-            val response = withContext(dispatcherProvider.io()) { feedApi.getFeedMega(body = requestBody) }
+            val response = withContext(dispatcherProvider.io()) { feedApi.getFeedBySpec(body = requestBody) }
             response.paging ?: throw WssException("PagingEvent not found.")
             response
         }
         return requestBody to response
     }
 
-    private suspend fun syncPrepend(remoteKey: FeedPostRemoteKey?, pageSize: Int): Pair<FeedRequestBody, FeedResponse> {
-        val requestBody = FeedRequestBody(
-            directive = feedSpec,
+    private suspend fun syncPrepend(
+        remoteKey: FeedPostRemoteKey?,
+        pageSize: Int,
+    ): Pair<FeedBySpecRequestBody, FeedResponse> {
+        val requestBody = FeedBySpecRequestBody(
+            spec = feedSpec,
             userPubKey = userId,
             limit = pageSize,
             since = remoteKey?.untilId,
@@ -189,7 +192,7 @@ class FeedRemoteMediator(
         }
 
         val feedResponse = retry(times = 1, delay = RETRY_DELAY) {
-            val response = withContext(dispatcherProvider.io()) { feedApi.getFeedMega(body = requestBody) }
+            val response = withContext(dispatcherProvider.io()) { feedApi.getFeedBySpec(body = requestBody) }
             if (response.paging == null) throw WssException("PagingEvent not found.")
             response
         }
@@ -197,9 +200,12 @@ class FeedRemoteMediator(
         return requestBody to feedResponse
     }
 
-    private suspend fun syncAppend(remoteKey: FeedPostRemoteKey?, pageSize: Int): Pair<FeedRequestBody, FeedResponse> {
-        val requestBody = FeedRequestBody(
-            directive = feedSpec,
+    private suspend fun syncAppend(
+        remoteKey: FeedPostRemoteKey?,
+        pageSize: Int,
+    ): Pair<FeedBySpecRequestBody, FeedResponse> {
+        val requestBody = FeedBySpecRequestBody(
+            spec = feedSpec,
             userPubKey = userId,
             limit = pageSize,
             until = remoteKey?.sinceId,
@@ -212,7 +218,7 @@ class FeedRemoteMediator(
         }
 
         val feedResponse = retry(times = 1, delay = RETRY_DELAY) {
-            val response = withContext(dispatcherProvider.io()) { feedApi.getFeedMega(body = requestBody) }
+            val response = withContext(dispatcherProvider.io()) { feedApi.getFeedBySpec(body = requestBody) }
             if (response.paging == null) throw WssException("PagingEvent not found.")
             response
         }

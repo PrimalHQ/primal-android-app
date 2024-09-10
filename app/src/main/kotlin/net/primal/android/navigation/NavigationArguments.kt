@@ -5,12 +5,6 @@ import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.wallet.domain.DraftTx
 import net.primal.android.wallet.transactions.send.prepare.tabs.SendPaymentTab
 
-const val FEED_DIRECTIVE = "directive"
-inline val SavedStateHandle.feedDirective: String?
-    get() = get<String>(
-        FEED_DIRECTIVE,
-    )?.asUrlDecoded()
-
 const val NOTE_ID = "noteId"
 inline val SavedStateHandle.noteIdOrThrow: String
     get() = get(NOTE_ID) ?: throw IllegalArgumentException("Missing required noteId argument.")

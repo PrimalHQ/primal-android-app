@@ -22,7 +22,7 @@ interface ProfileDetailsContract {
         val referencedProfilesData: Set<ProfileDetailsUi> = emptySet(),
         val zappingState: ZappingState = ZappingState(),
         val notes: Flow<PagingData<FeedPostUi>>,
-        val profileDirective: ProfileFeedSpec = ProfileFeedSpec.AuthoredNotes,
+        val profileFeedSpec: ProfileFeedSpec = ProfileFeedSpec.AuthoredNotes,
         val confirmBookmarkingNoteId: String? = null,
         val error: ProfileError? = null,
     ) {
@@ -59,11 +59,11 @@ interface ProfileDetailsContract {
 
         data class FollowAction(val profileId: String) : UiEvent()
         data class UnfollowAction(val profileId: String) : UiEvent()
-        data class AddUserFeedAction(val name: String, val directive: String) : UiEvent()
-        data class RemoveUserFeedAction(val directive: String) : UiEvent()
+        data class AddUserFeedAction(val name: String, val profileId: String) : UiEvent()
+        data class RemoveUserFeedAction(val profileId: String) : UiEvent()
         data class MuteAction(val profileId: String) : UiEvent()
         data class UnmuteAction(val profileId: String) : UiEvent()
-        data class ChangeProfileFeed(val profileDirective: ProfileFeedSpec) : UiEvent()
+        data class ChangeProfileFeed(val profileFeedSpec: ProfileFeedSpec) : UiEvent()
         data object RequestProfileUpdate : UiEvent()
         data class ReportAbuse(
             val reportType: ReportType,

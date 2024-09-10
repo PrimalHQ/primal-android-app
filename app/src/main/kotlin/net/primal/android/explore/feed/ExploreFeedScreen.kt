@@ -194,6 +194,7 @@ fun ExploreFeedScreen(
 @Composable
 private fun ExploreFeedContract.UiState.extractTitle() =
     when {
+        // TODO Extract search title once api is implemented
 //        feedSpec.isSearchFeed() -> feedSpec.removeSearchPrefix()
         feedSpec.isNotesBookmarkFeedSpec() -> stringResource(id = R.string.bookmarks_title)
         else -> stringResource(id = R.string.explore_fallback_title)

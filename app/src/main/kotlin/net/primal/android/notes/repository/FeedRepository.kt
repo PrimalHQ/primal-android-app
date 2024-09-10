@@ -13,7 +13,7 @@ import net.primal.android.db.PrimalDatabase
 import net.primal.android.feeds.domain.supportsNoteReposts
 import net.primal.android.notes.api.FeedApi
 import net.primal.android.notes.api.mediator.FeedRemoteMediator
-import net.primal.android.notes.api.model.FeedRequestBody
+import net.primal.android.notes.api.model.FeedBySpecRequestBody
 import net.primal.android.notes.api.model.FeedResponse
 import net.primal.android.notes.api.model.ThreadRequestBody
 import net.primal.android.notes.db.FeedPost
@@ -93,9 +93,9 @@ class FeedRepository @Inject constructor(
         feedSpec: String,
         since: Long? = null,
     ) = withContext(dispatcherProvider.io()) {
-        feedApi.getFeedMega(
-            body = FeedRequestBody(
-                directive = feedSpec,
+        feedApi.getFeedBySpec(
+            body = FeedBySpecRequestBody(
+                spec = feedSpec,
                 userPubKey = userId,
                 since = since,
                 order = "desc",

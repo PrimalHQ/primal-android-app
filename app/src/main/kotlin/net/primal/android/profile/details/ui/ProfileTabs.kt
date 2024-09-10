@@ -27,7 +27,7 @@ import net.primal.android.theme.AppTheme
 
 @Composable
 fun ProfileTabs(
-    feedDirective: ProfileFeedSpec,
+    feedFeedSpec: ProfileFeedSpec,
     notesCount: Int?,
     onNotesCountClick: () -> Unit,
     repliesCount: Int?,
@@ -41,7 +41,7 @@ fun ProfileTabs(
 ) {
     var tabIndex by remember {
         mutableIntStateOf(
-            when (feedDirective) {
+            when (feedFeedSpec) {
                 ProfileFeedSpec.AuthoredNotes -> 0
                 ProfileFeedSpec.AuthoredReplies -> 1
             },

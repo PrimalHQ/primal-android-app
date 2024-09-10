@@ -11,7 +11,7 @@ import net.primal.android.networking.primal.PrimalVerb
 import net.primal.android.networking.primal.PrimalVerb.NOTES
 import net.primal.android.networking.primal.PrimalVerb.THREAD_VIEW
 import net.primal.android.nostr.model.NostrEventKind
-import net.primal.android.notes.api.model.FeedRequestBody
+import net.primal.android.notes.api.model.FeedBySpecRequestBody
 import net.primal.android.notes.api.model.FeedResponse
 import net.primal.android.notes.api.model.NotesRequestBody
 import net.primal.android.notes.api.model.ThreadRequestBody
@@ -20,7 +20,7 @@ class FeedApiImpl @Inject constructor(
     @PrimalCacheApiClient private val primalApiClient: PrimalApiClient,
 ) : FeedApi {
 
-    override suspend fun getFeedMega(body: FeedRequestBody): FeedResponse {
+    override suspend fun getFeedBySpec(body: FeedBySpecRequestBody): FeedResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.MEGA_FEED_DIRECTIVE,

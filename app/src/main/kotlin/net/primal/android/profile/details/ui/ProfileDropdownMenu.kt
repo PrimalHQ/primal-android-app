@@ -160,7 +160,7 @@ private fun AddOrRemoveUserFeedMenuItem(
         },
         onClick = {
             if (isProfileFeedInActiveUserFeeds) {
-                eventPublisher(ProfileDetailsContract.UiEvent.RemoveUserFeedAction(directive = profileId))
+                eventPublisher(ProfileDetailsContract.UiEvent.RemoveUserFeedAction(profileId = profileId))
                 uiScope.launch {
                     snackbarHostState.showSnackbar(
                         message = removedFromUserFeedsMessage,
@@ -171,7 +171,7 @@ private fun AddOrRemoveUserFeedMenuItem(
                 eventPublisher(
                     ProfileDetailsContract.UiEvent.AddUserFeedAction(
                         name = title,
-                        directive = profileId,
+                        profileId = profileId,
                     ),
                 )
                 uiScope.launch {

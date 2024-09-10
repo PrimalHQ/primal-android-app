@@ -190,7 +190,7 @@ private fun ProfileHeaderDetails(
 
         ProfileTabs(
             modifier = Modifier.padding(bottom = 8.dp, top = 8.dp),
-            feedDirective = state.profileDirective,
+            feedFeedSpec = state.profileFeedSpec,
             notesCount = state.profileStats?.notesCount,
             onNotesCountClick = {
                 eventPublisher(ProfileDetailsContract.UiEvent.ChangeProfileFeed(ProfileFeedSpec.AuthoredNotes))

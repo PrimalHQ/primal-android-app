@@ -467,8 +467,8 @@ class ProfileDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             setState {
                 copy(
-                    profileDirective = event.profileDirective,
-                    notes = feedRepository.feedBySpec(feedSpec = event.profileDirective.buildSpec(profileId))
+                    profileFeedSpec = event.profileFeedSpec,
+                    notes = feedRepository.feedBySpec(feedSpec = event.profileFeedSpec.buildSpec(profileId))
                         .map { it.map { feed -> feed.asFeedPostUi() } }
                         .cachedIn(viewModelScope),
                 )

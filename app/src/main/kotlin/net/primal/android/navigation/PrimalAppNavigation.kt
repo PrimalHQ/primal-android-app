@@ -691,25 +691,10 @@ private fun NavGraphBuilder.noteEditor(
 private fun NavGraphBuilder.explore(route: String, navController: NavController) =
     composable(
         route = route,
-        enterTransition = { null },
-        exitTransition = {
-            when {
-                targetState.destination.route.isMainScreenRoute() -> null
-                else -> primalScaleOut
-            }
-        },
-        popEnterTransition = {
-            when {
-                initialState.destination.route.isMainScreenRoute() -> null
-                else -> primalScaleIn
-            }
-        },
-        popExitTransition = {
-            when {
-                targetState.destination.route.isMainScreenRoute() -> null
-                else -> primalScaleOut
-            }
-        },
+        enterTransition = { primalSlideInHorizontallyFromEnd },
+        exitTransition = { primalScaleOut },
+        popEnterTransition = { primalScaleIn },
+        popExitTransition = { primalSlideOutHorizontallyToEnd },
     ) {
         val viewModel = hiltViewModel<ExploreHomeViewModel>(it)
         ApplyEdgeToEdge()

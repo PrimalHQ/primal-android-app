@@ -4,8 +4,8 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class FeedRequestBody(
-    @SerialName("spec") val directive: String,
+data class FeedBySpecRequestBody(
+    @SerialName("spec") val spec: String,
     @SerialName("user_pubkey") val userPubKey: String,
     @SerialName("notes") val notes: String? = null,
     @SerialName("limit") val limit: Int? = null,

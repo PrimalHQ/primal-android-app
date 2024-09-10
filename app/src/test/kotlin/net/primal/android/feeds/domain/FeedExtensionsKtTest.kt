@@ -3,7 +3,7 @@ package net.primal.android.feeds.domain
 import io.kotest.matchers.shouldBe
 import org.junit.Test
 
-class NoteFeedExtensionsKtTest {
+class FeedExtensionsKtTest {
 
     private val profileId = "b10b0d5e5fae9c6c48a8c77f7e5abd42a79e9480e25a4094051d4ba4ce14456b"
 

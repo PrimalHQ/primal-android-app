@@ -34,7 +34,6 @@ import net.primal.android.notes.feed.model.asFeedPostUi
 import net.primal.android.notes.repository.FeedRepository
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.settings.muted.repository.MutedUserRepository
-import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
 import net.primal.android.wallet.domain.ZapTarget
@@ -53,17 +52,16 @@ class ExploreFeedViewModel @Inject constructor(
     private val postRepository: NoteRepository,
     private val profileRepository: ProfileRepository,
     private val zapHandler: ZapHandler,
-    private val settingsRepository: SettingsRepository,
     private val mutedUserRepository: MutedUserRepository,
 ) : ViewModel() {
 
-    private val exploreFeedDirective = savedStateHandle.exploreFeedSpecOrThrow
+    private val exploreFeedSpec = savedStateHandle.exploreFeedSpecOrThrow
 
     private val _state = MutableStateFlow(
         UiState(
-            feedSpec = exploreFeedDirective,
-            canBeAddedInUserFeeds = !exploreFeedDirective.isNotesBookmarkFeedSpec(),
-            posts = feedRepository.feedBySpec(feedSpec = exploreFeedDirective)
+            feedSpec = exploreFeedSpec,
+            canBeAddedInUserFeeds = !exploreFeedSpec.isNotesBookmarkFeedSpec(),
+            posts = feedRepository.feedBySpec(feedSpec = exploreFeedSpec)
                 .map { it.map { feed -> feed.asFeedPostUi() } }
                 .cachedIn(viewModelScope),
         ),
@@ -87,13 +85,13 @@ class ExploreFeedViewModel @Inject constructor(
     @OptIn(DelicateCoroutinesApi::class)
     override fun onCleared() {
         GlobalScope.launch(dispatcherProvider.io()) {
-            feedRepository.removeFeedSpec(feedSpec = exploreFeedDirective)
+            feedRepository.removeFeedSpec(feedSpec = exploreFeedSpec)
         }
     }
 
     private fun observeContainsFeed() =
         viewModelScope.launch {
-            feedRepository.observeContainsFeed(feedSpec = exploreFeedDirective).collect {
+            feedRepository.observeContainsFeed(feedSpec = exploreFeedSpec).collect {
                 setState { copy(existsInUserFeeds = it) }
             }
         }
