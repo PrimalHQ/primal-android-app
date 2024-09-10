@@ -78,7 +78,6 @@ private fun AdvancedSearchScreen(
         topBar = {
             PrimalTopAppBar(
                 title = stringResource(id = R.string.asearch_top_app_bar_title),
-                textColor = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
                 navigationIcon = PrimalIcons.ArrowBack,
                 onNavigationIconClick = onClose,
                 showDivider = false,

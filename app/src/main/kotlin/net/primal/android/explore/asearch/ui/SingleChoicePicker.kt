@@ -46,7 +46,6 @@ fun <T> SingleChoicePicker(
             title = {
                 Text(
                     text = titleText,
-                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
                 )
             },
         )
