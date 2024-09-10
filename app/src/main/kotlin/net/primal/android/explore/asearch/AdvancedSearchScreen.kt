@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.Close
@@ -28,7 +29,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import java.time.format.FormatStyle
 import net.primal.android.R
 import net.primal.android.core.compose.AvatarThumbnailsRow
 import net.primal.android.core.compose.PrimalIconTextField
@@ -37,6 +41,7 @@ import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.profile.model.UserProfileItemUi
+import net.primal.android.core.utils.formatToDefaultDateFormat
 import net.primal.android.explore.asearch.AdvancedSearchContract.SearchKind
 import net.primal.android.explore.asearch.ui.FilterPicker
 import net.primal.android.explore.asearch.ui.MultipleUserPicker
@@ -341,11 +346,27 @@ fun TimePostedPicker(
         label = stringResource(id = R.string.asearch_time_posted_label),
         onClick = { showTimePostedBottomSheetPicker = true },
         selectedContent = {
-            Text(
-                text = timePosted.toDisplayName(),
-                style = AppTheme.typography.bodyMedium,
-                color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
-            )
+            if (timePosted is AdvancedSearchContract.TimeModifier.Custom) {
+                Text(
+                    textAlign = TextAlign.End,
+                    modifier = Modifier.width(200.dp),
+                    text = "${
+                        timePosted.startDate.formatToDefaultDateFormat(
+                            FormatStyle.MEDIUM,
+                        )
+                    } - ${timePosted.endDate.formatToDefaultDateFormat(FormatStyle.MEDIUM)}",
+                    color = AppTheme.colorScheme.secondary,
+                    style = AppTheme.typography.bodyMedium,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1,
+                )
+            } else {
+                Text(
+                    text = timePosted.toDisplayName(),
+                    style = AppTheme.typography.bodyMedium,
+                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+                )
+            }
         },
     )
 }
@@ -409,6 +430,7 @@ private fun OptionListItem(
                 text = label,
                 color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
                 style = AppTheme.typography.bodyMedium,
+                maxLines = 1,
             )
         },
         trailingContent = {
