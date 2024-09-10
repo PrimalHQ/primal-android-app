@@ -42,7 +42,14 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.profile.model.UserProfileItemUi
 import net.primal.android.core.utils.formatToDefaultDateFormat
+import net.primal.android.explore.asearch.AdvancedSearchContract.Orientation
+import net.primal.android.explore.asearch.AdvancedSearchContract.SearchFilter
 import net.primal.android.explore.asearch.AdvancedSearchContract.SearchKind
+import net.primal.android.explore.asearch.AdvancedSearchContract.SearchOrderBy
+import net.primal.android.explore.asearch.AdvancedSearchContract.SearchScope
+import net.primal.android.explore.asearch.AdvancedSearchContract.TimeModifier
+import net.primal.android.explore.asearch.AdvancedSearchContract.UiEvent
+import net.primal.android.explore.asearch.AdvancedSearchContract.UiState
 import net.primal.android.explore.asearch.ui.FilterPicker
 import net.primal.android.explore.asearch.ui.MultipleUserPicker
 import net.primal.android.explore.asearch.ui.SingleChoicePicker
@@ -63,8 +70,8 @@ fun AdvancedSearchScreen(viewModel: AdvancedSearchViewModel, onClose: () -> Unit
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AdvancedSearchScreen(
-    state: AdvancedSearchContract.UiState,
-    eventPublisher: (AdvancedSearchContract.UiEvent) -> Unit,
+    state: UiState,
+    eventPublisher: (UiEvent) -> Unit,
     onClose: () -> Unit,
 ) {
     Scaffold(
@@ -84,7 +91,7 @@ private fun AdvancedSearchScreen(
                     .padding(horizontal = 16.dp)
                     .fillMaxWidth(),
                 text = stringResource(id = R.string.asearch_search_button),
-                onClick = { eventPublisher(AdvancedSearchContract.UiEvent.OnSearch) },
+                onClick = { eventPublisher(UiEvent.OnSearch) },
             )
         },
     ) { paddingValues ->
@@ -96,51 +103,51 @@ private fun AdvancedSearchScreen(
         ) {
             IncludedWordsTextField(
                 includedWords = state.includedWords,
-                onValueChange = { eventPublisher(AdvancedSearchContract.UiEvent.IncludedWordsValueChanged(it)) },
+                onValueChange = { eventPublisher(UiEvent.IncludedWordsValueChanged(it)) },
             )
             ExcludedWordsTextField(
                 excludedWords = state.excludedWords,
-                onValueChange = { eventPublisher(AdvancedSearchContract.UiEvent.ExcludedWordsValueChanged(it)) },
+                onValueChange = { eventPublisher(UiEvent.ExcludedWordsValueChanged(it)) },
             )
             Column {
                 SearchKindPicker(
                     searchKind = state.searchKind,
-                    onSearchKindChanged = { eventPublisher(AdvancedSearchContract.UiEvent.SearchKindChanged(it)) },
+                    onSearchKindChanged = { eventPublisher(UiEvent.SearchKindChanged(it)) },
                 )
 
                 PostedByPicker(
                     postedBy = state.postedBy,
-                    onUsersSelected = { eventPublisher(AdvancedSearchContract.UiEvent.PostedBySelectUsers(it)) },
+                    onUsersSelected = { eventPublisher(UiEvent.PostedBySelectUsers(it)) },
                 )
 
                 ReplyingToPicker(
                     replyingTo = state.replyingTo,
-                    onUsersSelected = { eventPublisher(AdvancedSearchContract.UiEvent.ReplyingToSelectUsers(it)) },
+                    onUsersSelected = { eventPublisher(UiEvent.ReplyingToSelectUsers(it)) },
                 )
 
                 ZappedByPicker(
                     zappedBy = state.zappedBy,
-                    onUsersSelected = { eventPublisher(AdvancedSearchContract.UiEvent.ZappedBySelectUsers(it)) },
+                    onUsersSelected = { eventPublisher(UiEvent.ZappedBySelectUsers(it)) },
                 )
 
                 TimePostedPicker(
                     timePosted = state.timePosted,
-                    onTimePostedChanged = { eventPublisher(AdvancedSearchContract.UiEvent.TimePostedChanged(it)) },
+                    onTimePostedChanged = { eventPublisher(UiEvent.TimePostedChanged(it)) },
                 )
 
                 SearchScopePicker(
                     scope = state.scope,
-                    onScopeChanged = { eventPublisher(AdvancedSearchContract.UiEvent.ScopeChanged(it)) },
+                    onScopeChanged = { eventPublisher(UiEvent.ScopeChanged(it)) },
                 )
 
                 SearchFilterPicker(
                     searchFilter = state.filter,
                     searchKind = state.searchKind,
-                    onFilterChanged = { eventPublisher(AdvancedSearchContract.UiEvent.SearchFilterChanged(it)) },
+                    onFilterChanged = { eventPublisher(UiEvent.SearchFilterChanged(it)) },
                 )
                 OrderByPicker(
                     orderBy = state.orderBy,
-                    onOrderByChanged = { eventPublisher(AdvancedSearchContract.UiEvent.OrderByChanged(it)) },
+                    onOrderByChanged = { eventPublisher(UiEvent.OrderByChanged(it)) },
                 )
             }
         }
@@ -213,13 +220,13 @@ private fun PostedByPicker(postedBy: Set<UserProfileItemUi>, onUsersSelected: (S
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun OrderByPicker(
-    orderBy: AdvancedSearchContract.SearchOrderBy,
-    onOrderByChanged: (AdvancedSearchContract.SearchOrderBy) -> Unit,
+    orderBy: SearchOrderBy,
+    onOrderByChanged: (SearchOrderBy) -> Unit,
 ) {
     var showOrderByBottomSheetPicker by rememberSaveable { mutableStateOf(false) }
     if (showOrderByBottomSheetPicker) {
         SingleChoicePicker(
-            items = AdvancedSearchContract.SearchOrderBy.entries,
+            items = SearchOrderBy.entries,
             itemDisplayName = { toDisplayName() },
             onDismissRequest = { showOrderByBottomSheetPicker = false },
             onItemSelected = onOrderByChanged,
@@ -243,9 +250,9 @@ private fun OrderByPicker(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SearchFilterPicker(
-    searchFilter: AdvancedSearchContract.SearchFilter,
+    searchFilter: SearchFilter,
     searchKind: SearchKind,
-    onFilterChanged: (AdvancedSearchContract.SearchFilter) -> Unit,
+    onFilterChanged: (SearchFilter) -> Unit,
 ) {
     var showSearchFilterBottomSheetPicker by rememberSaveable { mutableStateOf(false) }
     if (showSearchFilterBottomSheetPicker) {
@@ -261,9 +268,17 @@ private fun SearchFilterPicker(
         onClick = { showSearchFilterBottomSheetPicker = true },
         selectedContent = {
             Text(
+                textAlign = TextAlign.End,
+                modifier = Modifier.width(200.dp),
                 text = searchFilter.toDisplayName(),
                 style = AppTheme.typography.bodyMedium,
-                color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+                color = if (searchFilter.isEmpty()) {
+                    AppTheme.extraColorScheme.onSurfaceVariantAlt1
+                } else {
+                    AppTheme.colorScheme.secondary
+                },
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
             )
         },
     )
@@ -272,13 +287,13 @@ private fun SearchFilterPicker(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SearchScopePicker(
-    scope: AdvancedSearchContract.SearchScope,
-    onScopeChanged: (AdvancedSearchContract.SearchScope) -> Unit,
+    scope: SearchScope,
+    onScopeChanged: (SearchScope) -> Unit,
 ) {
     var showScopeBottomSheetPicker by rememberSaveable { mutableStateOf(false) }
     if (showScopeBottomSheetPicker) {
         SingleChoicePicker(
-            items = AdvancedSearchContract.SearchScope.entries,
+            items = SearchScope.entries,
             itemDisplayName = { toDisplayName() },
             onDismissRequest = { showScopeBottomSheetPicker = false },
             onItemSelected = onScopeChanged,
@@ -306,7 +321,7 @@ private fun SearchKindPicker(searchKind: SearchKind, onSearchKindChanged: (kind:
 
     if (showSearchBottomSheetPicker) {
         SingleChoicePicker(
-            items = AdvancedSearchContract.SearchKind.entries,
+            items = SearchKind.entries,
             itemDisplayName = { toDisplayName() },
             onDismissRequest = { showSearchBottomSheetPicker = false },
             onItemSelected = onSearchKindChanged,
@@ -331,8 +346,8 @@ private fun SearchKindPicker(searchKind: SearchKind, onSearchKindChanged: (kind:
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TimePostedPicker(
-    timePosted: AdvancedSearchContract.TimeModifier,
-    onTimePostedChanged: (AdvancedSearchContract.TimeModifier) -> Unit,
+    timePosted: TimeModifier,
+    onTimePostedChanged: (TimeModifier) -> Unit,
 ) {
     var showTimePostedBottomSheetPicker by rememberSaveable { mutableStateOf(false) }
     if (showTimePostedBottomSheetPicker) {
@@ -346,7 +361,7 @@ fun TimePostedPicker(
         label = stringResource(id = R.string.asearch_time_posted_label),
         onClick = { showTimePostedBottomSheetPicker = true },
         selectedContent = {
-            if (timePosted is AdvancedSearchContract.TimeModifier.Custom) {
+            if (timePosted is TimeModifier.Custom) {
                 Text(
                     textAlign = TextAlign.End,
                     modifier = Modifier.width(200.dp),
@@ -452,54 +467,99 @@ private fun OptionListItem(
 }
 
 @Composable
-private fun AdvancedSearchContract.SearchKind.toDisplayName(): String =
+private fun SearchKind.toDisplayName(): String =
     when (this) {
-        AdvancedSearchContract.SearchKind.Notes -> stringResource(id = R.string.asearch_search_kind_notes)
-        AdvancedSearchContract.SearchKind.Reads -> stringResource(id = R.string.asearch_search_kind_reads)
-        AdvancedSearchContract.SearchKind.Images -> stringResource(id = R.string.asearch_search_kind_images)
-        AdvancedSearchContract.SearchKind.Videos -> stringResource(id = R.string.asearch_search_kind_videos)
-        AdvancedSearchContract.SearchKind.Sound -> stringResource(id = R.string.asearch_search_kind_sound)
-        AdvancedSearchContract.SearchKind.NoteReplies -> stringResource(id = R.string.asearch_search_kind_note_replies)
-        AdvancedSearchContract.SearchKind.ReadsComments -> stringResource(
+        SearchKind.Notes -> stringResource(id = R.string.asearch_search_kind_notes)
+        SearchKind.Reads -> stringResource(id = R.string.asearch_search_kind_reads)
+        SearchKind.Images -> stringResource(id = R.string.asearch_search_kind_images)
+        SearchKind.Videos -> stringResource(id = R.string.asearch_search_kind_videos)
+        SearchKind.Sound -> stringResource(id = R.string.asearch_search_kind_sound)
+        SearchKind.NoteReplies -> stringResource(id = R.string.asearch_search_kind_note_replies)
+        SearchKind.ReadsComments -> stringResource(
             id = R.string.asearch_search_kind_reads_comments,
         )
     }
 
 @Composable
-fun AdvancedSearchContract.TimeModifier.toDisplayName(): String =
+fun TimeModifier.toDisplayName(): String =
     when (this) {
-        AdvancedSearchContract.TimeModifier.Anytime -> stringResource(id = R.string.asearch_time_posted_anytime)
-        AdvancedSearchContract.TimeModifier.Today -> stringResource(id = R.string.asearch_time_posted_today)
-        AdvancedSearchContract.TimeModifier.Week -> stringResource(id = R.string.asearch_time_posted_week)
-        AdvancedSearchContract.TimeModifier.Month -> stringResource(id = R.string.asearch_time_posted_month)
-        AdvancedSearchContract.TimeModifier.Year -> stringResource(id = R.string.asearch_time_posted_year)
-        is AdvancedSearchContract.TimeModifier.Custom -> stringResource(id = R.string.asearch_time_posted_custom)
+        TimeModifier.Anytime -> stringResource(id = R.string.asearch_time_posted_anytime)
+        TimeModifier.Today -> stringResource(id = R.string.asearch_time_posted_today)
+        TimeModifier.Week -> stringResource(id = R.string.asearch_time_posted_week)
+        TimeModifier.Month -> stringResource(id = R.string.asearch_time_posted_month)
+        TimeModifier.Year -> stringResource(id = R.string.asearch_time_posted_year)
+        is TimeModifier.Custom -> stringResource(id = R.string.asearch_time_posted_custom)
     }
 
 @Composable
-private fun AdvancedSearchContract.SearchScope.toDisplayName(): String =
+private fun SearchScope.toDisplayName(): String =
     when (this) {
-        AdvancedSearchContract.SearchScope.Global -> stringResource(id = R.string.asearch_search_scope_global)
-        AdvancedSearchContract.SearchScope.MyFollows -> stringResource(id = R.string.asearch_search_scope_my_follows)
-        AdvancedSearchContract.SearchScope.MyNetwork -> stringResource(id = R.string.asearch_search_scope_my_network)
-        AdvancedSearchContract.SearchScope.MyFollowsInteractions -> stringResource(
+        SearchScope.Global -> stringResource(id = R.string.asearch_search_scope_global)
+        SearchScope.MyFollows -> stringResource(id = R.string.asearch_search_scope_my_follows)
+        SearchScope.MyNetwork -> stringResource(id = R.string.asearch_search_scope_my_network)
+        SearchScope.MyFollowsInteractions -> stringResource(
             id = R.string.asearch_search_scope_my_follows_interactions,
         )
     }
 
 @Composable
-fun AdvancedSearchContract.SearchFilter.toDisplayName(): String =
-    if (this == AdvancedSearchContract.SearchFilter()) {
+fun SearchFilter.toDisplayName(): String =
+    if (this.isEmpty()) {
         stringResource(id = R.string.asearch_filters_none)
     } else {
-        stringResource(id = R.string.asearch_filters_custom)
+        val stringFilters = arrayOf(
+            this.orientation.toDisplayName(),
+            this.minDuration.toFilterQueryOrEmpty(stringResource(id = R.string.asearch_filter_min_duration)),
+            this.maxDuration.toFilterQueryOrEmpty(stringResource(id = R.string.asearch_filter_max_duration)),
+            this.minContentScore.toFilterQueryOrEmpty(stringResource(id = R.string.asearch_filter_min_content_score)),
+            this.minInteractions.toFilterQueryOrEmpty(stringResource(id = R.string.asearch_filter_min_interactions)),
+            this.minLikes.toFilterQueryOrEmpty(stringResource(id = R.string.asearch_filter_min_likes)),
+            this.minZaps.toFilterQueryOrEmpty(stringResource(id = R.string.asearch_filter_min_zaps)),
+            this.minReplies.toFilterQueryOrEmpty(stringResource(id = R.string.asearch_filter_min_replies)),
+            this.minReposts.toFilterQueryOrEmpty(stringResource(id = R.string.asearch_filter_min_reposts)),
+        )
+
+        stringFilters.filter { it.isNotEmpty() }.joinToString("; ")
     }
 
 @Composable
-private fun AdvancedSearchContract.SearchOrderBy.toDisplayName(): String =
+private fun SearchOrderBy.toDisplayName(): String =
     when (this) {
-        AdvancedSearchContract.SearchOrderBy.Time -> stringResource(id = R.string.asearch_search_order_by_time)
-        AdvancedSearchContract.SearchOrderBy.ContentScore -> stringResource(
+        SearchOrderBy.Time -> stringResource(id = R.string.asearch_search_order_by_time)
+        SearchOrderBy.ContentScore -> stringResource(
             id = R.string.asearch_search_order_by_content_score,
         )
     }
+
+@Composable
+private fun Orientation?.toDisplayName(): String =
+    when (this) {
+        null, Orientation.Any -> ""
+        Orientation.Horizontal ->
+            "${
+                stringResource(
+                    id = R.string.asearch_filter_orientation,
+                )
+            }=${stringResource(id = R.string.asearch_filter_orientation_horizontal)}"
+
+        Orientation.Vertical ->
+            "${
+                stringResource(
+                    id = R.string.asearch_filter_orientation,
+                )
+            }=${stringResource(id = R.string.asearch_filter_orientation_vertical)}"
+    }
+
+private fun Int.toFilterQueryOrEmpty(queryProperty: String): String =
+    this.run { if (this != 0) "$queryProperty=$this" else "" }
+
+private fun SearchFilter.isEmpty(): Boolean =
+    (this.orientation == null || this.orientation == Orientation.Any)
+        && this.minDuration == 0
+        && this.maxDuration == 0
+        && this.minContentScore == 0
+        && this.minInteractions == 0
+        && this.minLikes == 0
+        && this.minZaps == 0
+        && this.minReplies == 0
+        && this.minReposts == 0
