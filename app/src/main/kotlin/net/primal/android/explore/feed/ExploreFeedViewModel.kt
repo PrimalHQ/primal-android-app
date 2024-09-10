@@ -20,21 +20,20 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import net.primal.android.core.compose.feed.model.asFeedPostUi
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
-import net.primal.android.core.ext.isBookmarkFeed
 import net.primal.android.explore.feed.ExploreFeedContract.UiEvent
 import net.primal.android.explore.feed.ExploreFeedContract.UiState
 import net.primal.android.explore.feed.ExploreFeedContract.UiState.ExploreFeedError
-import net.primal.android.feed.repository.FeedRepository
-import net.primal.android.navigation.exploreFeedDirectiveOrThrow
+import net.primal.android.feeds.domain.isNotesBookmarkFeedSpec
+import net.primal.android.navigation.exploreFeedSpecOrThrow
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.note.repository.NoteRepository
+import net.primal.android.notes.feed.model.asFeedPostUi
+import net.primal.android.notes.repository.FeedRepository
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.settings.muted.repository.MutedUserRepository
-import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
 import net.primal.android.wallet.domain.ZapTarget
@@ -53,17 +52,16 @@ class ExploreFeedViewModel @Inject constructor(
     private val postRepository: NoteRepository,
     private val profileRepository: ProfileRepository,
     private val zapHandler: ZapHandler,
-    private val settingsRepository: SettingsRepository,
     private val mutedUserRepository: MutedUserRepository,
 ) : ViewModel() {
 
-    private val exploreFeedDirective = savedStateHandle.exploreFeedDirectiveOrThrow
+    private val exploreFeedSpec = savedStateHandle.exploreFeedSpecOrThrow
 
     private val _state = MutableStateFlow(
         UiState(
-            feedDirective = exploreFeedDirective,
-            canBeAddedInUserFeeds = !exploreFeedDirective.isBookmarkFeed(),
-            posts = feedRepository.feedByDirective(feedDirective = exploreFeedDirective)
+            feedSpec = exploreFeedSpec,
+            canBeAddedInUserFeeds = !exploreFeedSpec.isNotesBookmarkFeedSpec(),
+            posts = feedRepository.feedBySpec(feedSpec = exploreFeedSpec)
                 .map { it.map { feed -> feed.asFeedPostUi() } }
                 .cachedIn(viewModelScope),
         ),
@@ -87,16 +85,14 @@ class ExploreFeedViewModel @Inject constructor(
     @OptIn(DelicateCoroutinesApi::class)
     override fun onCleared() {
         GlobalScope.launch(dispatcherProvider.io()) {
-            feedRepository.removeFeedDirective(feedDirective = exploreFeedDirective)
+            feedRepository.removeFeedSpec(feedSpec = exploreFeedSpec)
         }
     }
 
     private fun observeContainsFeed() =
         viewModelScope.launch {
-            feedRepository.observeContainsFeed(directive = exploreFeedDirective).collect {
-                setState {
-                    copy(existsInUserFeeds = it)
-                }
+            feedRepository.observeContainsFeed(feedSpec = exploreFeedSpec).collect {
+                setState { copy(existsInUserFeeds = it) }
             }
         }
 
@@ -137,28 +133,32 @@ class ExploreFeedViewModel @Inject constructor(
         }
 
     private suspend fun addToMyFeeds(title: String) {
-        try {
-            settingsRepository.addAndPersistUserFeed(
-                userId = activeAccountStore.activeUserId(),
-                name = title,
-                directive = exploreFeedDirective,
-            )
-        } catch (error: WssException) {
-            Timber.w(error)
-            setErrorState(error = ExploreFeedError.FailedToAddToFeed(error))
-        }
+        setErrorState(error = ExploreFeedError.FailedToAddToFeed(RuntimeException("Api not implemented")))
+        // TODO Implement adding user feed in ExploreFeeds
+//        try {
+//            settingsRepository.addAndPersistUserFeed(
+//                userId = activeAccountStore.activeUserId(),
+//                name = title,
+//                directive = exploreFeedDirective,
+//            )
+//        } catch (error: WssException) {
+//            Timber.w(error)
+//            setErrorState(error = ExploreFeedError.FailedToAddToFeed(error))
+//        }
     }
 
     private suspend fun removeFromMyFeeds() {
-        try {
-            settingsRepository.removeAndPersistUserFeed(
-                userId = activeAccountStore.activeUserId(),
-                directive = exploreFeedDirective,
-            )
-        } catch (error: WssException) {
-            Timber.w(error)
-            setErrorState(error = ExploreFeedError.FailedToRemoveFeed(error))
-        }
+        setErrorState(error = ExploreFeedError.FailedToRemoveFeed(RuntimeException("Api not implemented")))
+        // TODO Implement removing user feed in ExploreFeeds
+//        try {
+//            settingsRepository.removeAndPersistUserFeed(
+//                userId = activeAccountStore.activeUserId(),
+//                directive = exploreFeedDirective,
+//            )
+//        } catch (error: WssException) {
+//            Timber.w(error)
+//            setErrorState(error = ExploreFeedError.FailedToRemoveFeed(error))
+//        }
     }
 
     private fun likePost(postLikeAction: UiEvent.PostLikeAction) =

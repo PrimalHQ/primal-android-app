@@ -2,13 +2,13 @@ package net.primal.android.explore.feed
 
 import androidx.paging.PagingData
 import kotlinx.coroutines.flow.Flow
-import net.primal.android.core.compose.feed.model.FeedPostUi
-import net.primal.android.core.compose.feed.model.ZappingState
+import net.primal.android.notes.feed.model.FeedPostUi
+import net.primal.android.notes.feed.model.ZappingState
 import net.primal.android.profile.report.ReportType
 
 interface ExploreFeedContract {
     data class UiState(
-        val feedDirective: String,
+        val feedSpec: String,
         val existsInUserFeeds: Boolean = false,
         val canBeAddedInUserFeeds: Boolean = true,
         val zappingState: ZappingState = ZappingState(),

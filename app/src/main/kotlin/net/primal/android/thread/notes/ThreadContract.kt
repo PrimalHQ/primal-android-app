@@ -1,9 +1,9 @@
 package net.primal.android.thread.notes
 
 import net.primal.android.articles.feed.ui.FeedArticleUi
-import net.primal.android.core.compose.feed.model.FeedPostUi
-import net.primal.android.core.compose.feed.model.ZappingState
 import net.primal.android.note.ui.EventZapUiModel
+import net.primal.android.notes.feed.model.FeedPostUi
+import net.primal.android.notes.feed.model.ZappingState
 import net.primal.android.profile.report.ReportType
 
 interface ThreadContract {

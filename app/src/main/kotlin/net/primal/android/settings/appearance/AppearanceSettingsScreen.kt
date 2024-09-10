@@ -64,14 +64,14 @@ import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalSwitch
 import net.primal.android.core.compose.PrimalTopAppBar
-import net.primal.android.core.compose.feed.model.EventStatsUi
-import net.primal.android.core.compose.feed.model.FeedPostUi
-import net.primal.android.core.compose.feed.note.FeedNoteCard
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.FontSize
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.settings.SettingsItem
+import net.primal.android.notes.feed.model.EventStatsUi
+import net.primal.android.notes.feed.model.FeedPostUi
+import net.primal.android.notes.feed.note.FeedNoteCard
 import net.primal.android.settings.appearance.AppearanceSettingsContract.UiEvent
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme

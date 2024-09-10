@@ -30,15 +30,15 @@ import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.ListLoading
 import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.NostrUserText
-import net.primal.android.core.compose.feed.model.FeedPostUi
 import net.primal.android.core.compose.isEmpty
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.core.ext.openUriSafely
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.formatNip05Identifier
+import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.profile.details.ProfileDetailsContract
-import net.primal.android.profile.domain.ProfileFeedDirective
+import net.primal.android.profile.domain.ProfileFeedSpec
 import net.primal.android.profile.domain.ProfileFollowsType
 import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.domain.DraftTx
@@ -190,14 +190,14 @@ private fun ProfileHeaderDetails(
 
         ProfileTabs(
             modifier = Modifier.padding(bottom = 8.dp, top = 8.dp),
-            feedDirective = state.profileDirective,
+            feedFeedSpec = state.profileFeedSpec,
             notesCount = state.profileStats?.notesCount,
             onNotesCountClick = {
-                eventPublisher(ProfileDetailsContract.UiEvent.ChangeProfileFeed(ProfileFeedDirective.AuthoredNotes))
+                eventPublisher(ProfileDetailsContract.UiEvent.ChangeProfileFeed(ProfileFeedSpec.AuthoredNotes))
             },
             repliesCount = state.profileStats?.repliesCount,
             onRepliesCountClick = {
-                eventPublisher(ProfileDetailsContract.UiEvent.ChangeProfileFeed(ProfileFeedDirective.AuthoredReplies))
+                eventPublisher(ProfileDetailsContract.UiEvent.ChangeProfileFeed(ProfileFeedSpec.AuthoredReplies))
             },
             followingCount = state.profileStats?.followingCount,
             onFollowingCountClick = { onFollowsClick(state.profileId, ProfileFollowsType.Following) },

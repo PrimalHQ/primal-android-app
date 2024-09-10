@@ -6,8 +6,6 @@ import net.primal.android.attachments.ext.flatMapMessagesAsNoteAttachmentPO
 import net.primal.android.core.ext.asMapByKey
 import net.primal.android.crypto.hexToNpubHrp
 import net.primal.android.db.PrimalDatabase
-import net.primal.android.feed.api.FeedApi
-import net.primal.android.feed.repository.persistToDatabaseAsTransaction
 import net.primal.android.messages.db.DirectMessageData
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.ext.extractNoteId
@@ -21,6 +19,8 @@ import net.primal.android.nostr.ext.mapAsProfileDataPO
 import net.primal.android.nostr.ext.mapNotNullAsPostDataPO
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.primal.PrimalEvent
+import net.primal.android.notes.api.FeedApi
+import net.primal.android.notes.repository.persistToDatabaseAsTransaction
 import net.primal.android.user.api.UsersApi
 import net.primal.android.user.credentials.CredentialsStore
 import timber.log.Timber

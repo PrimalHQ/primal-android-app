@@ -5,12 +5,6 @@ import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.wallet.domain.DraftTx
 import net.primal.android.wallet.transactions.send.prepare.tabs.SendPaymentTab
 
-const val FEED_DIRECTIVE = "directive"
-inline val SavedStateHandle.feedDirective: String?
-    get() = get<String>(
-        FEED_DIRECTIVE,
-    )?.asUrlDecoded()
-
 const val NOTE_ID = "noteId"
 inline val SavedStateHandle.noteIdOrThrow: String
     get() = get(NOTE_ID) ?: throw IllegalArgumentException("Missing required noteId argument.")
@@ -27,10 +21,10 @@ inline val SavedStateHandle.naddrOrThrow: String
 const val FOLLOWS_TYPE = "followsType"
 inline val SavedStateHandle.followsType: String? get() = get(FOLLOWS_TYPE)
 
-const val EXPLORE_FEED_DIRECTIVE = "exploreFeedDirective"
-inline val SavedStateHandle.exploreFeedDirectiveOrThrow: String
-    get() = get<String>(EXPLORE_FEED_DIRECTIVE)?.asBase64Decoded()?.ifEmpty { null }
-        ?: throw IllegalArgumentException("Missing required exploreFeedDirective argument.")
+const val EXPLORE_FEED_SPEC = "exploreFeedSpec"
+inline val SavedStateHandle.exploreFeedSpecOrThrow: String
+    get() = get<String>(EXPLORE_FEED_SPEC)?.asBase64Decoded()?.ifEmpty { null }
+        ?: throw IllegalArgumentException("Missing required exploreFeedSpec argument.")
 
 const val NOTE_EDITOR_ARGS = "preFillContent"
 

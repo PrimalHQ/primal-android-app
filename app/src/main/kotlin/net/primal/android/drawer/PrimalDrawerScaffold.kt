@@ -44,7 +44,14 @@ fun PrimalDrawerScaffold(
     onDrawerQrCodeClick: () -> Unit,
     badges: Badges = Badges(),
     onActiveDestinationClick: () -> Unit = {},
-    topBar: @Composable (TopAppBarScrollBehavior?) -> Unit = {},
+    topAppBarState: TopAppBarState = remember {
+        TopAppBarState(
+            initialHeightOffsetLimit = -Float.MAX_VALUE,
+            initialHeightOffset = 0f,
+            initialContentOffset = 0f,
+        )
+    },
+    topAppBar: @Composable (TopAppBarScrollBehavior?) -> Unit = {},
     content: @Composable (PaddingValues) -> Unit = {},
     floatingNewDataHost: @Composable () -> Unit = {},
     floatingActionButton: @Composable () -> Unit = {},
@@ -53,14 +60,6 @@ fun PrimalDrawerScaffold(
 ) {
     val localDensity = LocalDensity.current
 
-    // Required for popEnter scaleIn enter transition
-    val topAppBarState = remember {
-        TopAppBarState(
-            initialHeightOffsetLimit = -Float.MAX_VALUE,
-            initialHeightOffset = 0f,
-            initialContentOffset = 0f,
-        )
-    }
     val topAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(topAppBarState)
 
     var bottomBarInitialHeight by remember { mutableStateOf(0.dp) }
@@ -96,7 +95,7 @@ fun PrimalDrawerScaffold(
                 } else {
                     Modifier
                 },
-                topBar = { topBar(if (focusModeEnabled) topAppBarScrollBehavior else null) },
+                topBar = { topAppBar(if (focusModeEnabled) topAppBarScrollBehavior else null) },
                 content = { paddingValues ->
                     Box {
                         content(paddingValues)
@@ -107,7 +106,7 @@ fun PrimalDrawerScaffold(
                             exit = fadeOut(),
                             modifier = Modifier
                                 .padding(paddingValues)
-                                .padding(top = 42.dp)
+                                .padding(top = FloatingNewDataHostTopPadding)
                                 .wrapContentHeight()
                                 .wrapContentWidth()
                                 .align(Alignment.TopCenter)
@@ -162,3 +161,5 @@ fun PrimalDrawerScaffold(
         },
     )
 }
+
+val FloatingNewDataHostTopPadding = 42.dp

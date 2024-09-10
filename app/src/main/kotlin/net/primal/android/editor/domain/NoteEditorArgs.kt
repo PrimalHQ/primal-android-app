@@ -5,6 +5,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.decodeFromStringOrNull
+import net.primal.android.crypto.hexToNoteHrp
 
 @Serializable
 data class NoteEditorArgs(
@@ -19,7 +20,12 @@ data class NoteEditorArgs(
     fun toJson(): String = NostrJson.encodeToString(this)
 
     companion object {
-        fun String.asNoteEditorArgs(): NoteEditorArgs? {
+        fun String.noteIdToNoteEditorArgs(): NoteEditorArgs {
+            val preFillContent = TextFieldValue(text = "\n\nnostr:${this.hexToNoteHrp()}")
+            return preFillContent.asNoteEditorArgs()
+        }
+
+        fun String.jsonAsNoteEditorArgs(): NoteEditorArgs? {
             return NostrJson.decodeFromStringOrNull<NoteEditorArgs>(this)
         }
 

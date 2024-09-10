@@ -70,10 +70,10 @@ class LoginViewModel @Inject constructor(
         viewModelScope.launch {
             setState { copy(loading = true) }
             try {
-                val defaultFeedDirective = withContext(dispatcherProvider.io()) {
-                    loginHandler.loginAndReturnDefaultFeed(nostrKey)
+                withContext(dispatcherProvider.io()) {
+                    loginHandler.login(nostrKey)
                 }
-                setEffect(SideEffect.LoginSuccess(feedDirective = defaultFeedDirective))
+                setEffect(SideEffect.LoginSuccess)
             } catch (error: WssException) {
                 Timber.w(error)
                 setErrorState(error = UiState.LoginError.GenericError(error))

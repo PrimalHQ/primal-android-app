@@ -3,14 +3,11 @@ package net.primal.android.auth.repository
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.coVerify
-import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import net.primal.android.core.FakeDataStore
 import net.primal.android.core.coroutines.CoroutinesTestRule
-import net.primal.android.feed.db.Feed
-import net.primal.android.feed.repository.FeedRepository
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.settings.muted.repository.MutedUserRepository
 import net.primal.android.settings.repository.SettingsRepository
@@ -32,28 +29,13 @@ class LoginHandlerTest {
         authRepository: AuthRepository = mockk(relaxed = true),
         userRepository: UserRepository = mockk(relaxed = true),
         mutedUserRepository: MutedUserRepository = mockk(relaxed = true),
-        feedRepository: FeedRepository = mockk(relaxed = true),
     ): LoginHandler =
         LoginHandler(
             settingsRepository = settingsRepository,
             authRepository = authRepository,
             userRepository = userRepository,
             mutedUserRepository = mutedUserRepository,
-            feedRepository = feedRepository,
         )
-
-    @Test
-    fun login_returnsDefaultFeed() =
-        runTest {
-            val expectedFeedDirective = "directive"
-            val feedRepository = mockk<FeedRepository>(relaxed = true) {
-                every { defaultFeed() } returns Feed(directive = expectedFeedDirective, name = "Latest")
-            }
-
-            val loginHandler = createLoginHandler(feedRepository = feedRepository)
-            val actualFeedDirective = loginHandler.loginAndReturnDefaultFeed(nostrKey = "random")
-            actualFeedDirective shouldBe expectedFeedDirective
-        }
 
     @Test
     fun login_callsLoginFromAuthRepository_withGivenKey() =
@@ -61,7 +43,7 @@ class LoginHandlerTest {
             val expectedKey = "random"
             val authRepository = mockk<AuthRepository>(relaxed = true)
             val loginHandler = createLoginHandler(authRepository = authRepository)
-            loginHandler.loginAndReturnDefaultFeed(nostrKey = expectedKey)
+            loginHandler.login(nostrKey = expectedKey)
 
             coVerify {
                 authRepository.login(nostrKey = expectedKey)
@@ -80,7 +62,7 @@ class LoginHandlerTest {
                 authRepository = authRepository,
                 userRepository = userRepository,
             )
-            loginHandler.loginAndReturnDefaultFeed(nostrKey = "random")
+            loginHandler.login(nostrKey = "random")
 
             coVerify {
                 userRepository.fetchAndUpdateUserAccount(expectedUserId)
@@ -99,7 +81,7 @@ class LoginHandlerTest {
                 authRepository = authRepository,
                 settingsRepository = settingsRepository,
             )
-            loginHandler.loginAndReturnDefaultFeed(nostrKey = "random")
+            loginHandler.login(nostrKey = "random")
 
             coVerify {
                 settingsRepository.fetchAndPersistAppSettings(expectedUserId)
@@ -118,7 +100,7 @@ class LoginHandlerTest {
                 authRepository = authRepository,
                 mutedUserRepository = mutedUserRepository,
             )
-            loginHandler.loginAndReturnDefaultFeed(nostrKey = "random")
+            loginHandler.login(nostrKey = "random")
 
             coVerify {
                 mutedUserRepository.fetchAndPersistMuteList(expectedUserId)
@@ -154,7 +136,7 @@ class LoginHandlerTest {
             )
 
             try {
-                loginHandler.loginAndReturnDefaultFeed(nostrKey = nsec)
+                loginHandler.login(nostrKey = nsec)
             } catch (_: WssException) { }
 
             credentialsPersistence.latestData shouldBe emptyList()

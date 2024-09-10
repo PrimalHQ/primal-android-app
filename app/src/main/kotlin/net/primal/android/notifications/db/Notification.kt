@@ -4,9 +4,9 @@ import androidx.room.Embedded
 import androidx.room.Relation
 import net.primal.android.attachments.db.NoteAttachment
 import net.primal.android.attachments.db.NoteNostrUri
-import net.primal.android.feed.db.PostData
 import net.primal.android.note.db.EventStats
 import net.primal.android.note.db.EventUserStats
+import net.primal.android.notes.db.PostData
 import net.primal.android.profile.db.ProfileData
 
 data class Notification(

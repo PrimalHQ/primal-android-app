@@ -3,7 +3,7 @@ package net.primal.android.messages.conversation.model
 import java.time.Instant
 import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.attachment.model.NoteAttachmentUi
-import net.primal.android.core.compose.feed.model.NoteNostrUriUi
+import net.primal.android.notes.feed.model.NoteNostrUriUi
 
 data class MessageConversationUi(
     val participantId: String,

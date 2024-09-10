@@ -5,9 +5,9 @@ import net.primal.android.attachments.domain.CdnResource
 import net.primal.android.attachments.domain.LinkPreviewData
 import net.primal.android.attachments.domain.NoteAttachmentType
 import net.primal.android.core.utils.detectMimeType
-import net.primal.android.feed.db.PostData
 import net.primal.android.messages.db.DirectMessageData
 import net.primal.android.nostr.ext.isNostrUri
+import net.primal.android.notes.db.PostData
 
 fun List<PostData>.flatMapPostsAsNoteAttachmentPO(
     cdnResources: Map<String, CdnResource>,

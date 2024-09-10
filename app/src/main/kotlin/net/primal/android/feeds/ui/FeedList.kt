@@ -135,7 +135,7 @@ fun FeedList(
                                     onClick = { onFeedClick(item) },
                                 ),
                             data = item,
-                            selected = item.directive == activeFeed?.directive,
+                            selected = item.spec == activeFeed?.spec,
                             editOptions = {
                                 if (isEditMode) {
                                     Row {
@@ -209,7 +209,7 @@ private fun EditModeBottomBar(onAddFeedClick: () -> Unit, onDoneClick: () -> Uni
     }
 }
 
-private fun FeedUi.uniqueKey() = "$directive;$name"
+private fun FeedUi.uniqueKey() = "$spec;$name"
 
 @Composable
 private fun ReorderableCollectionItemScope.FeedDragHandle(

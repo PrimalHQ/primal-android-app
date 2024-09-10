@@ -1,10 +1,8 @@
 package net.primal.android.navigation
 
 import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
@@ -45,6 +43,8 @@ import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.editor.di.noteEditorViewModel
 import net.primal.android.editor.domain.NoteEditorArgs
 import net.primal.android.editor.domain.NoteEditorArgs.Companion.asNoteEditorArgs
+import net.primal.android.editor.domain.NoteEditorArgs.Companion.jsonAsNoteEditorArgs
+import net.primal.android.editor.domain.NoteEditorArgs.Companion.noteIdToNoteEditorArgs
 import net.primal.android.editor.ui.NoteEditorScreen
 import net.primal.android.explore.asearch.AdvancedSearchScreen
 import net.primal.android.explore.asearch.AdvancedSearchViewModel
@@ -54,8 +54,6 @@ import net.primal.android.explore.home.ExploreHomeScreen
 import net.primal.android.explore.home.ExploreHomeViewModel
 import net.primal.android.explore.search.SearchViewModel
 import net.primal.android.explore.search.ui.SearchScreen
-import net.primal.android.feed.FeedScreen
-import net.primal.android.feed.FeedViewModel
 import net.primal.android.messages.chat.ChatScreen
 import net.primal.android.messages.chat.ChatViewModel
 import net.primal.android.messages.conversation.MessageConversationListViewModel
@@ -68,6 +66,9 @@ import net.primal.android.navigation.splash.SplashScreen
 import net.primal.android.navigation.splash.SplashViewModel
 import net.primal.android.note.reactions.ReactionsScreen
 import net.primal.android.note.reactions.ReactionsViewModel
+import net.primal.android.notes.feed.note.events.NoteCallbacks
+import net.primal.android.notes.home.HomeFeedScreen
+import net.primal.android.notes.home.HomeFeedViewModel
 import net.primal.android.notifications.list.NotificationsScreen
 import net.primal.android.notifications.list.NotificationsViewModel
 import net.primal.android.profile.details.ProfileDetailsViewModel
@@ -113,19 +114,16 @@ private val NavController.topLevelNavOptions: NavOptions
     @SuppressWarnings("RestrictedApi")
     get() {
         val feedDestination = currentBackStack.value.find {
-            it.destination.route?.contains("feed") == true
+            it.destination.route?.contains("home") == true
         }
         return navOptions {
             popUpTo(id = feedDestination?.destination?.id ?: 0)
         }
     }
 
-fun NavController.navigateToFeed(directive: String? = null) =
+fun NavController.navigateToHome() =
     navigate(
-        route = when (directive) {
-            null -> "feed"
-            else -> "feed?$FEED_DIRECTIVE=${directive.asUrlEncoded()}"
-        },
+        route = "home",
         navOptions = navOptions { clearBackStack() },
     )
 
@@ -204,10 +202,32 @@ fun NavController.navigateToMediaGallery(
 fun NavController.navigateToExplore() = navigate(route = "explore")
 
 fun NavController.navigateToExploreFeed(query: String) =
-    navigate(route = "explore?$EXPLORE_FEED_DIRECTIVE=${"search;$query".asBase64Encoded()}")
+    navigate(route = "explore?$EXPLORE_FEED_SPEC=${"search;$query".asBase64Encoded()}")
 
-private fun NavController.navigateToBookmarks(userId: String) =
-    navigate(route = "explore?$EXPLORE_FEED_DIRECTIVE=${"bookmarks;$userId".asBase64Encoded()}")
+private fun NavController.navigateToNotesBookmarks(userId: String) {
+    val spec = "{\"id\":\"feed\",\"kind\":\"notes\",\"notes\":\"bookmarks\",\"pubkey\":\"$userId\"}"
+    navigate(route = "explore?$EXPLORE_FEED_SPEC=${spec.asBase64Encoded()}")
+}
+
+private fun noteCallbacksHandler(navController: NavController) =
+    NoteCallbacks(
+        onNoteClick = { postId -> navController.navigateToThread(noteId = postId) },
+        onArticleClick = { naddr -> navController.navigateToArticleDetails(naddr = naddr) },
+        onProfileClick = { profileId -> navController.navigateToProfile(profileId = profileId) },
+        onNoteReplyClick = { postId -> navController.navigateToNoteEditor(NoteEditorArgs(replyToNoteId = postId)) },
+        onNoteQuoteClick = { noteId -> navController.navigateToNoteEditor(noteId.noteIdToNoteEditorArgs()) },
+        onHashtagClick = { hashtag -> navController.navigateToExploreFeed(query = hashtag) },
+        onMediaClick = {
+            navController.navigateToMediaGallery(
+                noteId = it.noteId,
+                mediaUrl = it.mediaUrl,
+                mediaPositionMs = it.positionMs,
+            )
+        },
+        onPayInvoiceClick = {
+            navController.navigateToWalletCreateTransaction(lnbc = it.lnbc)
+        },
+    )
 
 @Composable
 fun PrimalAppNavigation() {
@@ -226,7 +246,7 @@ fun PrimalAppNavigation() {
     val drawerDestinationHandler: (DrawerScreenDestination) -> Unit = {
         when (it) {
             DrawerScreenDestination.Profile -> navController.navigateToProfile()
-            is DrawerScreenDestination.Bookmarks -> navController.navigateToBookmarks(userId = it.userId)
+            is DrawerScreenDestination.Bookmarks -> navController.navigateToNotesBookmarks(userId = it.userId)
             DrawerScreenDestination.Settings -> navController.navigateToSettings()
             DrawerScreenDestination.SignOut -> navController.navigateToLogout()
         }
@@ -245,7 +265,7 @@ fun PrimalAppNavigation() {
 
                     when (url.handleDeeplink()) {
                         is DeepLink.Profile, is DeepLink.Note, null -> {
-                            navController.navigateToFeed(directive = it.defaultFeedDirective)
+                            navController.navigateToHome()
                         }
 
                         is DeepLink.NostrWalletConnect -> {
@@ -278,14 +298,8 @@ fun PrimalAppNavigation() {
 
         logout(route = "logout", navController = navController)
 
-        feed(
-            route = "feed?$FEED_DIRECTIVE={$FEED_DIRECTIVE}",
-            arguments = listOf(
-                navArgument(FEED_DIRECTIVE) {
-                    type = NavType.StringType
-                    nullable = true
-                },
-            ),
+        home(
+            route = "home",
             navController = navController,
             onTopLevelDestinationChanged = topLevelDestinationHandler,
             onDrawerScreenClick = drawerDestinationHandler,
@@ -293,7 +307,6 @@ fun PrimalAppNavigation() {
 
         reads(
             route = "reads",
-            arguments = emptyList(),
             navController = navController,
             onTopLevelDestinationChanged = topLevelDestinationHandler,
             onDrawerScreenClick = drawerDestinationHandler,
@@ -305,9 +318,9 @@ fun PrimalAppNavigation() {
         )
 
         exploreFeed(
-            route = "explore?$EXPLORE_FEED_DIRECTIVE={$EXPLORE_FEED_DIRECTIVE}",
+            route = "explore?$EXPLORE_FEED_SPEC={$EXPLORE_FEED_SPEC}",
             arguments = listOf(
-                navArgument(EXPLORE_FEED_DIRECTIVE) {
+                navArgument(EXPLORE_FEED_SPEC) {
                     type = NavType.StringType
                     nullable = false
                 },
@@ -521,7 +534,7 @@ private fun NavGraphBuilder.login(route: String, navController: NavController) =
             ApplyEdgeToEdge(isDarkTheme = true)
             LoginScreen(
                 viewModel = viewModel,
-                onLoginSuccess = { feedDirective -> navController.navigateToFeed(feedDirective) },
+                onLoginSuccess = { navController.navigateToHome() },
                 onClose = { navController.popBackStack() },
             )
         }
@@ -551,7 +564,7 @@ private fun NavGraphBuilder.onboarding(route: String, navController: NavControll
             OnboardingScreen(
                 viewModel = viewModel,
                 onClose = { navController.popBackStack() },
-                onOnboarded = { navController.navigateToFeed() },
+                onOnboarded = { navController.navigateToHome() },
                 onActivateWallet = { navController.navigateToWalletOnboarding() },
             )
         }
@@ -567,14 +580,13 @@ private fun NavGraphBuilder.onboardingWalletActivation(route: String, navControl
             ApplyEdgeToEdge(isDarkTheme = true)
             OnboardingWalletActivation(
                 viewModel = viewModel,
-                onDoneOrDismiss = { navController.navigateToFeed() },
+                onDoneOrDismiss = { navController.navigateToHome() },
             )
         }
     }
 
-private fun NavGraphBuilder.feed(
+private fun NavGraphBuilder.home(
     route: String,
-    arguments: List<NamedNavArgument>,
     navController: NavController,
     onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
@@ -583,9 +595,7 @@ private fun NavGraphBuilder.feed(
     enterTransition = { null },
     exitTransition = {
         when {
-            targetState.destination.route.isMainScreenRoute() ->
-                scaleOut(animationSpec = tween(), targetScale = 1.0f)
-
+            targetState.destination.route.isMainScreenRoute() -> null
             else -> primalScaleOut
         }
     },
@@ -595,48 +605,35 @@ private fun NavGraphBuilder.feed(
             else -> primalScaleIn
         }
     },
-    popExitTransition = { primalScaleOut },
-    arguments = arguments,
+    popExitTransition = {
+        when {
+            targetState.destination.route.isMainScreenRoute() -> null
+            else -> primalScaleOut
+        }
+    },
 ) { navBackEntry ->
-    val viewModel = hiltViewModel<FeedViewModel>(navBackEntry)
+    val viewModel = hiltViewModel<HomeFeedViewModel>(navBackEntry)
     ApplyEdgeToEdge()
     LockToOrientationPortrait()
-    FeedScreen(
+    HomeFeedScreen(
         viewModel = viewModel,
-        onFeedClick = { directive -> navController.navigateToFeed(directive = directive) },
-        onNewPostClick = { preFillContent -> navController.navigateToNoteEditor(preFillContent?.asNoteEditorArgs()) },
-        onPostClick = { postId -> navController.navigateToThread(noteId = postId) },
-        onArticleClick = { naddr -> navController.navigateToArticleDetails(naddr = naddr) },
-        onPostReplyClick = { postId -> navController.navigateToNoteEditor(NoteEditorArgs(replyToNoteId = postId)) },
-        onProfileClick = { profileId -> navController.navigateToProfile(profileId = profileId) },
-        onHashtagClick = { hashtag -> navController.navigateToExploreFeed(query = hashtag) },
-        onMediaClick = {
-            navController.navigateToMediaGallery(
-                noteId = it.noteId,
-                mediaUrl = it.mediaUrl,
-                mediaPositionMs = it.positionMs,
-            )
-        },
-        onPayInvoiceClick = {
-            navController.navigateToWalletCreateTransaction(lnbc = it.lnbc)
-        },
-        onGoToWallet = { navController.navigateToWallet() },
         onTopLevelDestinationChanged = onTopLevelDestinationChanged,
         onDrawerScreenClick = onDrawerScreenClick,
         onDrawerQrCodeClick = { navController.navigateToProfileQrCodeViewer() },
+        noteCallbacks = noteCallbacksHandler(navController),
+        onGoToWallet = { navController.navigateToWallet() },
         onSearchClick = { navController.navigateToExplore() },
+        onNewPostClick = { preFillContent -> navController.navigateToNoteEditor(preFillContent?.asNoteEditorArgs()) },
     )
 }
 
 private fun NavGraphBuilder.reads(
     route: String,
-    arguments: List<NamedNavArgument>,
     navController: NavController,
     onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
 ) = composable(
     route = route,
-    arguments = arguments,
     enterTransition = { null },
     exitTransition = {
         when {
@@ -681,7 +678,7 @@ private fun NavGraphBuilder.noteEditor(
     val viewModel = noteEditorViewModel(
         args = it.arguments?.getString(NOTE_EDITOR_ARGS)
             ?.asBase64Decoded()
-            ?.asNoteEditorArgs(),
+            ?.jsonAsNoteEditorArgs(),
     )
     ApplyEdgeToEdge()
     LockToOrientationPortrait()
@@ -694,25 +691,10 @@ private fun NavGraphBuilder.noteEditor(
 private fun NavGraphBuilder.explore(route: String, navController: NavController) =
     composable(
         route = route,
-        enterTransition = { null },
-        exitTransition = {
-            when {
-                targetState.destination.route.isMainScreenRoute() -> null
-                else -> primalScaleOut
-            }
-        },
-        popEnterTransition = {
-            when {
-                initialState.destination.route.isMainScreenRoute() -> null
-                else -> primalScaleIn
-            }
-        },
-        popExitTransition = {
-            when {
-                targetState.destination.route.isMainScreenRoute() -> null
-                else -> primalScaleOut
-            }
-        },
+        enterTransition = { primalSlideInHorizontallyFromEnd },
+        exitTransition = { primalScaleOut },
+        popEnterTransition = { primalScaleIn },
+        popExitTransition = { primalSlideOutHorizontallyToEnd },
     ) {
         val viewModel = hiltViewModel<ExploreHomeViewModel>(it)
         ApplyEdgeToEdge()
@@ -744,22 +726,7 @@ private fun NavGraphBuilder.exploreFeed(
     ExploreFeedScreen(
         viewModel = viewModel,
         onClose = { navController.navigateUp() },
-        onPostClick = { postId -> navController.navigateToThread(postId) },
-        onArticleClick = { naddr -> navController.navigateToArticleDetails(naddr = naddr) },
-        onPostReplyClick = { postId -> navController.navigateToNoteEditor(NoteEditorArgs(replyToNoteId = postId)) },
-        onPostQuoteClick = { preFillContent -> navController.navigateToNoteEditor(preFillContent.asNoteEditorArgs()) },
-        onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
-        onHashtagClick = { hashtag -> navController.navigateToExploreFeed(query = hashtag) },
-        onMediaClick = {
-            navController.navigateToMediaGallery(
-                noteId = it.noteId,
-                mediaUrl = it.mediaUrl,
-                mediaPositionMs = it.positionMs,
-            )
-        },
-        onPayInvoiceClick = {
-            navController.navigateToWalletCreateTransaction(lnbc = it.lnbc)
-        },
+        noteCallbacks = noteCallbacksHandler(navController),
         onGoToWallet = { navController.navigateToWallet() },
     )
 }
@@ -1104,31 +1071,16 @@ private fun NavGraphBuilder.profile(
     ProfileDetailsScreen(
         viewModel = viewModel,
         onClose = { navController.navigateUp() },
-        onPostClick = { postId -> navController.navigateToThread(noteId = postId) },
-        onArticleClick = { naddr -> navController.navigateToArticleDetails(naddr = naddr) },
-        onPostReplyClick = { postId -> navController.navigateToNoteEditor(NoteEditorArgs(replyToNoteId = postId)) },
-        onPostQuoteClick = { preFillContent -> navController.navigateToNoteEditor(preFillContent.asNoteEditorArgs()) },
-        onProfileClick = { profileId -> navController.navigateToProfile(profileId = profileId) },
+        noteCallbacks = noteCallbacksHandler(navController),
         onEditProfileClick = { navController.navigateToProfileEditor() },
         onMessageClick = { profileId -> navController.navigateToChat(profileId = profileId) },
         onZapProfileClick = { transaction -> navController.navigateToWalletCreateTransaction(transaction) },
         onDrawerQrCodeClick = { profileId -> navController.navigateToProfileQrCodeViewer(profileId) },
-        onHashtagClick = { hashtag -> navController.navigateToExploreFeed(query = hashtag) },
         onFollowsClick = { profileId, followsType ->
             navController.navigateToProfileFollows(
                 profileId = profileId,
                 followsType = followsType,
             )
-        },
-        onMediaClick = {
-            navController.navigateToMediaGallery(
-                noteId = it.noteId,
-                mediaUrl = it.mediaUrl,
-                mediaPositionMs = it.positionMs,
-            )
-        },
-        onPayInvoiceClick = {
-            navController.navigateToWalletCreateTransaction(lnbc = it.lnbc)
         },
         onGoToWallet = { navController.navigateToWallet() },
     )

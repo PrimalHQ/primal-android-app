@@ -40,6 +40,7 @@ class UserDataUpdater @AssistedInject constructor(
     }
 
     private suspend fun updateData() {
+        feedsRepository.fetchAndPersistNoteFeeds()
         settingsRepository.fetchAndPersistAppSettings(userId = userId)
         settingsRepository.ensureZapConfig(userId = userId)
         relayRepository.fetchAndUpdateUserRelays(userId = userId)

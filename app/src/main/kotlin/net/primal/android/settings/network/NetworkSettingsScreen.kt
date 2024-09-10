@@ -487,7 +487,7 @@ fun ConfirmActionAlertDialog(
                 },
             ) {
                 Text(
-                    text = stringResource(id = R.string.settings_feeds_dialog_confirm),
+                    text = stringResource(id = R.string.settings_network_dialog_confirm),
                 )
             }
         },
@@ -498,7 +498,7 @@ fun ConfirmActionAlertDialog(
                 },
             ) {
                 Text(
-                    text = stringResource(id = R.string.settings_feeds_dialog_dismiss),
+                    text = stringResource(id = R.string.settings_network_dialog_dismiss),
                 )
             }
         },

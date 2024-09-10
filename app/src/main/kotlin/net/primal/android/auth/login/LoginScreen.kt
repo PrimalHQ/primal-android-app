@@ -73,13 +73,13 @@ import net.primal.android.theme.domain.PrimalTheme
 fun LoginScreen(
     viewModel: LoginViewModel,
     onClose: () -> Unit,
-    onLoginSuccess: (String) -> Unit,
+    onLoginSuccess: () -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     LaunchedEffect(viewModel, onLoginSuccess) {
         viewModel.effect.collect {
             when (it) {
-                is LoginContract.SideEffect.LoginSuccess -> onLoginSuccess(it.feedDirective)
+                is LoginContract.SideEffect.LoginSuccess -> onLoginSuccess()
             }
         }
     }

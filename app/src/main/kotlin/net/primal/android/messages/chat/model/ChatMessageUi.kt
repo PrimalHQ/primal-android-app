@@ -2,7 +2,7 @@ package net.primal.android.messages.chat.model
 
 import java.time.Instant
 import net.primal.android.core.compose.attachment.model.NoteAttachmentUi
-import net.primal.android.core.compose.feed.model.NoteNostrUriUi
+import net.primal.android.notes.feed.model.NoteNostrUriUi
 
 data class ChatMessageUi(
     val messageId: String,

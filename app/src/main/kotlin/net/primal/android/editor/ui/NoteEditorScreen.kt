@@ -70,10 +70,6 @@ import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.ReplyingToText
 import net.primal.android.core.compose.TakePhotoIconButton
 import net.primal.android.core.compose.button.PrimalLoadingButton
-import net.primal.android.core.compose.feed.model.FeedPostUi
-import net.primal.android.core.compose.feed.model.toNoteContentUi
-import net.primal.android.core.compose.feed.note.FeedNoteHeader
-import net.primal.android.core.compose.feed.note.NoteContent
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromCamera
 import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromGallery
@@ -82,6 +78,10 @@ import net.primal.android.editor.NoteEditorContract.UiEvent
 import net.primal.android.editor.NoteEditorContract.UiState.NoteEditorError
 import net.primal.android.editor.NoteEditorViewModel
 import net.primal.android.editor.domain.NoteAttachment
+import net.primal.android.notes.feed.model.FeedPostUi
+import net.primal.android.notes.feed.model.toNoteContentUi
+import net.primal.android.notes.feed.note.FeedNoteHeader
+import net.primal.android.notes.feed.note.NoteContent
 import net.primal.android.theme.AppTheme
 
 @Composable
