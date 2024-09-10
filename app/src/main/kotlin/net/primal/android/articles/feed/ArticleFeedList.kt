@@ -135,11 +135,10 @@ private fun LazyListScope.handleRefreshLoadState(pagingItems: LazyPagingItems<Fe
         LoadState.Loading -> {
             item(contentType = "LoadingRefresh") {
                 ListPlaceholderLoading(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(top = 8.dp),
-                    lightAnimationResId = R.raw.primal_loader_reads_list_light,
-                    darkAnimationResId = R.raw.primal_loader_reads_list_dark,
+                    modifier = Modifier.fillMaxSize(),
+                    itemPadding = PaddingValues(top = 8.dp),
+                    lightAnimationResId = R.raw.primal_loader_reads_light_v2,
+                    darkAnimationResId = R.raw.primal_loader_reads_dark_v2,
                 )
             }
         }

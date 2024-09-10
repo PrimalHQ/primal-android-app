@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -48,6 +49,7 @@ import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.ListLoading
 import net.primal.android.core.compose.ListLoadingError
 import net.primal.android.core.compose.ListNoContent
+import net.primal.android.core.compose.ListPlaceholderLoading
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.PrimalTopLevelDestination
@@ -412,8 +414,11 @@ private fun NotificationsList(
             when (seenPagingItems.loadState.refresh) {
                 LoadState.Loading -> {
                     item(contentType = "LoadingRefresh") {
-                        ListLoading(
-                            modifier = Modifier.fillParentMaxSize(),
+                        ListPlaceholderLoading(
+                            modifier = Modifier.fillMaxSize(),
+                            itemPadding = PaddingValues(top = 8.dp),
+                            lightAnimationResId = R.raw.primal_loader_notification_light_v2,
+                            darkAnimationResId = R.raw.primal_loader_notification_dark_v2,
                         )
                     }
                 }
