@@ -212,11 +212,12 @@ fun ExploreTopAppBar(
 }
 
 @Composable
-fun SearchBar(onClick: () -> Unit, modifier: Modifier = Modifier) {
+private fun SearchBar(onClick: () -> Unit, modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
             .height(34.dp)
             .fillMaxWidth()
+            .padding(horizontal = 8.dp)
             .clip(AppTheme.shapes.extraLarge)
             .clickable { onClick() }
             .background(
