@@ -53,7 +53,6 @@ class ProfileDetailsViewModel @Inject constructor(
     private val profileRepository: ProfileRepository,
     private val noteRepository: NoteRepository,
     private val zapHandler: ZapHandler,
-    private val settingsRepository: SettingsRepository,
     private val mutedUserRepository: MutedUserRepository,
 ) : ViewModel() {
 

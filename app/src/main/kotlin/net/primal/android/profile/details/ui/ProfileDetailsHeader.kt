@@ -213,10 +213,10 @@ private fun ProfileHeaderDetails(
             onRepliesCountClick = {
                 eventPublisher(ProfileDetailsContract.UiEvent.ChangeProfileFeed(ProfileFeedSpec.AuthoredReplies))
             },
-            followingCount = state.profileStats?.followingCount,
-            onFollowingCountClick = { onFollowsClick(state.profileId, ProfileFollowsType.Following) },
-            followersCount = state.profileStats?.followersCount,
-            onFollowersCountClick = { onFollowsClick(state.profileId, ProfileFollowsType.Followers) },
+            readsCount = state.profileStats?.readsCount,
+            onReadsCountClick = { },
+            mediaCount = state.profileStats?.mediaCount,
+            onMediaCountClick = { },
         )
     }
 }
@@ -400,8 +400,10 @@ private fun PreviewProfileHeaderDetails() {
                         userDisplayName = "qauser",
                         authorDisplayName = "qauser",
                         internetIdentifier = "qa@primal.net",
+                        about = "qauser",
                     ),
                     notes = flowOf(),
+                    profileStats = ProfileStatsUi(11, 12, 13, 14),
                 ),
                 eventPublisher = {},
                 onEditProfileClick = {},
