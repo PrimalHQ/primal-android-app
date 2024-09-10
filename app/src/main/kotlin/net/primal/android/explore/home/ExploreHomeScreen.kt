@@ -188,7 +188,6 @@ fun ExploreTopAppBar(
                     Icon(
                         imageVector = PrimalIcons.ArrowBack,
                         contentDescription = null,
-                        tint = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
                     )
                 }
             },
@@ -199,7 +198,6 @@ fun ExploreTopAppBar(
                     Icon(
                         imageVector = actionIcon,
                         contentDescription = null,
-                        tint = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
                     )
                 }
             },

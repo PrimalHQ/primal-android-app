@@ -199,7 +199,6 @@ private fun MultipleUserPickerTopAppBar(
             title = {
                 Text(
                     text = sheetTitle,
-                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
                 )
             },
             navigationIcon = {

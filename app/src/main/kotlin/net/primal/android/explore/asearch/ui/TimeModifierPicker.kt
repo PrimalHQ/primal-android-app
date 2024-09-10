@@ -77,7 +77,6 @@ fun TimeModifierPicker(
                     } else {
                         stringResource(id = R.string.asearch_time_posted_label)
                     },
-                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
                 )
             },
             navigationIcon = {
