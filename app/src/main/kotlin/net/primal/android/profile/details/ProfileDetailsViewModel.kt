@@ -86,6 +86,7 @@ class ProfileDetailsViewModel @Inject constructor(
         observeReferencedProfilesData()
         observeProfileStats()
         observeActiveAccount()
+        observeContainsFeed()
         observeMutedAccount()
         resolveFollowsMe()
         markProfileInteraction()
@@ -134,8 +135,6 @@ class ProfileDetailsViewModel @Inject constructor(
                 setState {
                     copy(
                         isProfileFollowed = it.following.contains(profileId),
-                        isProfileFeedInActiveUserFeeds = it.appSettings?.feeds
-                            ?.any { it.directive == profileId } ?: false,
                         zappingState = this.zappingState.copy(
                             walletConnected = it.hasWallet(),
                             walletPreference = it.walletPreference,
@@ -145,6 +144,15 @@ class ProfileDetailsViewModel @Inject constructor(
                         ),
                     )
                 }
+            }
+        }
+
+    private fun observeContainsFeed() =
+        viewModelScope.launch {
+            // TODO Update profile feed spec once api is implemented
+            val profileFeedSpec = profileId
+            feedRepository.observeContainsFeed(feedSpec = profileFeedSpec).collect {
+                setState { copy(isProfileFeedInActiveUserFeeds = it) }
             }
         }
 
@@ -378,32 +386,38 @@ class ProfileDetailsViewModel @Inject constructor(
             }
         }
 
-    private fun addUserFeed(action: UiEvent.AddUserFeedAction) =
-        viewModelScope.launch {
-            try {
-                settingsRepository.addAndPersistUserFeed(
-                    userId = activeAccountStore.activeUserId(),
-                    name = action.name,
-                    directive = action.directive,
-                )
-            } catch (error: WssException) {
-                Timber.w(error)
-                setErrorState(error = ProfileError.FailedToAddToFeed(error))
-            }
-        }
+    private fun addUserFeed(action: UiEvent.AddUserFeedAction) {
+        setErrorState(error = ProfileError.FailedToRemoveFeed(RuntimeException("Api not implemented")))
+        // TODO Implement adding user feed in ProfileDetails
+//        viewModelScope.launch {
+//            try {
+//                settingsRepository.addAndPersistUserFeed(
+//                    userId = activeAccountStore.activeUserId(),
+//                    name = action.name,
+//                    directive = action.directive,
+//                )
+//            } catch (error: WssException) {
+//                Timber.w(error)
+//                setErrorState(error = ProfileError.FailedToAddToFeed(error))
+//            }
+//        }
+    }
 
-    private fun removeUserFeed(action: UiEvent.RemoveUserFeedAction) =
-        viewModelScope.launch {
-            try {
-                settingsRepository.removeAndPersistUserFeed(
-                    userId = activeAccountStore.activeUserId(),
-                    directive = action.directive,
-                )
-            } catch (error: WssException) {
-                Timber.w(error)
-                setErrorState(error = ProfileError.FailedToRemoveFeed(error))
-            }
-        }
+    private fun removeUserFeed(action: UiEvent.RemoveUserFeedAction) {
+        setErrorState(error = ProfileError.FailedToRemoveFeed(RuntimeException("Api not implemented")))
+        // TODO Implement removing user feed in ProfileDetails
+//        viewModelScope.launch {
+//            try {
+//                settingsRepository.removeAndPersistUserFeed(
+//                    userId = activeAccountStore.activeUserId(),
+//                    directive = action.directive,
+//                )
+//            } catch (error: WssException) {
+//                Timber.w(error)
+//                setErrorState(error = ProfileError.FailedToRemoveFeed(error))
+//            }
+//        }
+    }
 
     private fun mute(action: UiEvent.MuteAction) =
         viewModelScope.launch {

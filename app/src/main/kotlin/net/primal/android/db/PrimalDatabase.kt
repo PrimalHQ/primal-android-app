@@ -35,8 +35,6 @@ import net.primal.android.notes.db.FeedPostDataCrossRef
 import net.primal.android.notes.db.FeedPostDataCrossRefDao
 import net.primal.android.notes.db.FeedPostRemoteKey
 import net.primal.android.notes.db.FeedPostRemoteKeyDao
-import net.primal.android.notes.db.OldFeed
-import net.primal.android.notes.db.OldFeedDao
 import net.primal.android.notes.db.PostDao
 import net.primal.android.notes.db.PostData
 import net.primal.android.notes.db.RepostDao
@@ -69,7 +67,7 @@ import net.primal.android.wallet.db.WalletTransactionData
         EventUserStats::class,
         NoteNostrUri::class,
         NoteAttachment::class,
-        OldFeed::class,
+        Feed::class,
         FeedPostDataCrossRef::class,
         FeedPostRemoteKey::class,
         NoteConversationCrossRef::class,
@@ -86,7 +84,6 @@ import net.primal.android.wallet.db.WalletTransactionData
         ArticleData::class,
         ArticleCommentCrossRef::class,
         ArticleFeedCrossRef::class,
-        Feed::class,
     ],
     version = 36,
     exportSchema = true,
@@ -107,8 +104,7 @@ abstract class PrimalDatabase : RoomDatabase() {
 
     abstract fun attachments(): AttachmentDao
 
-    @Deprecated("Use feeds()")
-    abstract fun oldFeeds(): OldFeedDao
+    abstract fun feeds(): FeedDao
 
     abstract fun eventUserStats(): EventUserStatsDao
 
@@ -143,8 +139,6 @@ abstract class PrimalDatabase : RoomDatabase() {
     abstract fun profileInteractions(): ProfileInteractionDao
 
     abstract fun articles(): ArticleDao
-
-    abstract fun feeds(): FeedDao
 
     abstract fun articleFeedsConnections(): ArticleFeedCrossRefDao
 }

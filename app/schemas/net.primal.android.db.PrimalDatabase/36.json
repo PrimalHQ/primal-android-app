@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 36,
-    "identityHash": "941635cc8fb10eccb933a768234f2939",
+    "identityHash": "35034f813d4100ded8beefc08d4cd810",
     "entities": [
       {
         "tableName": "PostData",
@@ -643,32 +643,6 @@
           "columnNames": [
             "eventId",
             "url"
-          ]
-        },
-        "indices": [],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "OldFeed",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`directive` TEXT NOT NULL, `name` TEXT NOT NULL, PRIMARY KEY(`directive`))",
-        "fields": [
-          {
-            "fieldPath": "directive",
-            "columnName": "directive",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "name",
-            "columnName": "name",
-            "affinity": "TEXT",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "autoGenerate": false,
-          "columnNames": [
-            "directive"
           ]
         },
         "indices": [],
@@ -1618,7 +1592,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '941635cc8fb10eccb933a768234f2939')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '35034f813d4100ded8beefc08d4cd810')"
     ]
   }
 }

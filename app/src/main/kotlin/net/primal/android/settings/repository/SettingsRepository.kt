@@ -1,20 +1,16 @@
 package net.primal.android.settings.repository
 
-import androidx.room.withTransaction
 import javax.inject.Inject
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonObject
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.decodeFromStringOrNull
-import net.primal.android.db.PrimalDatabase
 import net.primal.android.nostr.model.primal.content.ContentAppSettings
-import net.primal.android.nostr.model.primal.content.ContentFeedData
 import net.primal.android.nostr.model.primal.content.ContentZapConfigItem
 import net.primal.android.nostr.model.primal.content.ContentZapDefault
 import net.primal.android.nostr.model.primal.content.DEFAULT_ZAP_CONFIG
 import net.primal.android.nostr.model.primal.content.DEFAULT_ZAP_DEFAULT
-import net.primal.android.notes.db.OldFeed
 import net.primal.android.settings.api.SettingsApi
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.domain.UserAccount
@@ -22,17 +18,12 @@ import net.primal.android.user.domain.UserAccount
 class SettingsRepository @Inject constructor(
     private val dispatcherProvider: CoroutineDispatcherProvider,
     private val settingsApi: SettingsApi,
-    private val database: PrimalDatabase,
     private val accountsStore: UserAccountsStore,
 ) {
+
     suspend fun fetchAndPersistAppSettings(userId: String) {
         val appSettings = fetchAppSettings(userId = userId) ?: return
-        val persistedAppSettings = persistAppSettingsLocally(userId = userId, appSettings = appSettings)
-
-        val uniqueUserFeedsCount = appSettings.feeds.distinctBy { "${it.directive}${it.includeReplies}" }.count()
-        if (appSettings.feeds.size > uniqueUserFeedsCount) {
-            settingsApi.setAppSettings(userId = userId, appSettings = persistedAppSettings)
-        }
+        persistAppSettingsLocally(userId = userId, appSettings = appSettings)
     }
 
     suspend fun updateAndPersistZapDefault(userId: String, zapDefault: ContentZapDefault) {
@@ -58,53 +49,6 @@ class SettingsRepository @Inject constructor(
     suspend fun updateAndPersistNotifications(userId: String, notifications: JsonObject) {
         fetchAndUpdateAndPublishAppSettings(userId = userId) {
             copy(notifications = notifications)
-        }
-    }
-
-    suspend fun addAndPersistUserFeed(
-        userId: String,
-        name: String,
-        directive: String,
-    ) {
-        fetchAndUpdateAndPublishAppSettings(userId = userId) {
-            copy(
-                feeds = feeds.toMutableList().apply {
-                    add(ContentFeedData(name = name, directive = directive))
-                },
-            )
-        }
-    }
-
-    suspend fun removeAndPersistUserFeed(userId: String, directive: String) {
-        updateAndPublishAppSettings(userId = userId) {
-            copy(
-                feeds = feeds.toMutableList().apply {
-                    removeAll { it.directive == directive }
-                },
-            )
-        }
-    }
-
-    suspend fun reorderAndPersistUserFeeds(userId: String, newOrder: List<ContentFeedData>) {
-        updateAndPublishAppSettings(userId = userId) {
-            val feedsMap = this.feeds.associateBy { it.stableId() }
-            val newFeedOrder = newOrder.mapNotNull { feedsMap[it.stableId()] }
-            copy(feeds = newFeedOrder)
-        }
-    }
-
-    private fun ContentFeedData.stableId() = Pair(this.name, this.directive)
-
-    private suspend fun updateAndPersistFeeds(userId: String, feeds: List<ContentFeedData>) {
-        fetchAndUpdateAndPublishAppSettings(userId = userId) {
-            copy(feeds = feeds)
-        }
-    }
-
-    suspend fun restoreDefaultUserFeeds(userId: String) {
-        withContext(dispatcherProvider.io()) {
-            val remoteDefaultAppSettings = fetchDefaultAppSettings(userId = userId) ?: return@withContext
-            updateAndPersistFeeds(userId = userId, feeds = remoteDefaultAppSettings.feeds)
         }
     }
 
@@ -184,39 +128,10 @@ class SettingsRepository @Inject constructor(
         )
     }
 
-    private suspend fun persistAppSettingsLocally(userId: String, appSettings: ContentAppSettings): ContentAppSettings {
+    private suspend fun persistAppSettingsLocally(userId: String, appSettings: ContentAppSettings) {
         val currentUserAccount = accountsStore.findByIdOrNull(userId = userId)
             ?: UserAccount.buildLocal(pubkey = userId)
 
-        val userFeeds = appSettings.feeds
-            .distinctBy { "${it.directive}${it.includeReplies}" }
-            .mapNotNull { it.asFeedPO() }
-            .toMutableList()
-
-        val hasLatestFeed = userFeeds.hasLatestFeed(userId)
-        val hasLatestWithRepliesFeed = userFeeds.hasLatestWithRepliesFeed(userId)
-
-        if (!hasLatestFeed && !hasLatestWithRepliesFeed) {
-            userFeeds.add(0, OldFeed(directive = userId, name = "Latest"))
-            userFeeds.add(0, OldFeed(directive = userId.toLatestWithRepliesDirective(), name = "Latest With Replies"))
-        } else if (!hasLatestFeed) {
-            userFeeds.add(0, OldFeed(directive = userId, name = "Latest"))
-        } else if (!hasLatestWithRepliesFeed) {
-            userFeeds.add(0, OldFeed(directive = userId.toLatestWithRepliesDirective(), name = "Latest With Replies"))
-        }
-
-        val localAppSettings = appSettings.copy(feeds = userFeeds.map { it.asContentFeedData() })
-        accountsStore.upsertAccount(userAccount = currentUserAccount.copy(appSettings = localAppSettings))
-
-        database.withTransaction {
-            database.oldFeeds().deleteAll()
-            database.oldFeeds().upsertAll(data = userFeeds)
-        }
-
-        return localAppSettings
+        accountsStore.upsertAccount(userAccount = currentUserAccount.copy(appSettings = appSettings))
     }
-
-    private fun List<OldFeed>.hasLatestFeed(userId: String) = find { it.isLatest(userId) } != null
-
-    private fun List<OldFeed>.hasLatestWithRepliesFeed(userId: String) = find { it.isLatestWithReplies(userId) } != null
 }

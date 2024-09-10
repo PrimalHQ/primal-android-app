@@ -14,8 +14,6 @@ import net.primal.android.settings.appearance.AppearanceSettingsScreen
 import net.primal.android.settings.appearance.di.appearanceSettingsViewModel
 import net.primal.android.settings.content.ContentDisplaySettingsScreen
 import net.primal.android.settings.content.ContentDisplaySettingsViewModel
-import net.primal.android.settings.feeds.FeedsSettingsScreen
-import net.primal.android.settings.feeds.FeedsSettingsViewModel
 import net.primal.android.settings.home.PrimalSettingsSection
 import net.primal.android.settings.home.SettingsHomeScreen
 import net.primal.android.settings.home.SettingsHomeViewModel
@@ -41,7 +39,6 @@ private fun NavController.navigateToWalletScanNwcUrl() = navigate(route = "walle
 private fun NavController.navigateToAppearanceSettings() = navigate(route = "appearance_settings")
 private fun NavController.navigateToContentDisplaySettings() = navigate(route = "content_display")
 fun NavController.navigateToNotificationsSettings() = navigate(route = "notifications_settings")
-private fun NavController.navigateToFeedsSettings() = navigate(route = "feeds_settings")
 private fun NavController.navigateToZapsSettings() = navigate(route = "zaps_settings")
 private fun NavController.navigateToMutedAccounts() = navigate(route = "muted_accounts_settings")
 
@@ -61,7 +58,6 @@ fun NavGraphBuilder.settingsNavigation(route: String, navController: NavControll
                     PrimalSettingsSection.Appearance -> navController.navigateToAppearanceSettings()
                     PrimalSettingsSection.ContentDisplay -> navController.navigateToContentDisplaySettings()
                     PrimalSettingsSection.Notifications -> navController.navigateToNotificationsSettings()
-                    PrimalSettingsSection.Feeds -> navController.navigateToFeedsSettings()
                     PrimalSettingsSection.Zaps -> navController.navigateToZapsSettings()
                     PrimalSettingsSection.MutedAccounts -> navController.navigateToMutedAccounts()
                 }
@@ -85,7 +81,6 @@ fun NavGraphBuilder.settingsNavigation(route: String, navController: NavControll
         contentDisplay(route = "content_display", navController = navController)
         mutedAccounts(route = "muted_accounts_settings", navController = navController)
         notifications(route = "notifications_settings", navController = navController)
-        feeds(route = "feeds_settings", navController = navController)
         zaps(route = "zaps_settings", navController = navController)
     }
 
@@ -222,19 +217,6 @@ private fun NavGraphBuilder.contentDisplay(route: String, navController: NavCont
             viewModel = viewModel,
             onClose = { navController.navigateUp() },
         )
-    }
-
-private fun NavGraphBuilder.feeds(route: String, navController: NavController) =
-    composable(
-        route = route,
-        enterTransition = { primalSlideInHorizontallyFromEnd },
-        exitTransition = { primalScaleOut },
-        popEnterTransition = { primalScaleIn },
-        popExitTransition = { primalSlideOutHorizontallyToEnd },
-    ) {
-        val viewModel = hiltViewModel<FeedsSettingsViewModel>()
-        LockToOrientationPortrait()
-        FeedsSettingsScreen(viewModel = viewModel, onClose = { navController.navigateUp() })
     }
 
 private fun NavGraphBuilder.zaps(route: String, navController: NavController) =

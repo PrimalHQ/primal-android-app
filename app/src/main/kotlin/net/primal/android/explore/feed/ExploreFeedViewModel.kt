@@ -94,9 +94,7 @@ class ExploreFeedViewModel @Inject constructor(
     private fun observeContainsFeed() =
         viewModelScope.launch {
             feedRepository.observeContainsFeed(feedSpec = exploreFeedDirective).collect {
-                setState {
-                    copy(existsInUserFeeds = it)
-                }
+                setState { copy(existsInUserFeeds = it) }
             }
         }
 
@@ -137,28 +135,32 @@ class ExploreFeedViewModel @Inject constructor(
         }
 
     private suspend fun addToMyFeeds(title: String) {
-        try {
-            settingsRepository.addAndPersistUserFeed(
-                userId = activeAccountStore.activeUserId(),
-                name = title,
-                directive = exploreFeedDirective,
-            )
-        } catch (error: WssException) {
-            Timber.w(error)
-            setErrorState(error = ExploreFeedError.FailedToAddToFeed(error))
-        }
+        setErrorState(error = ExploreFeedError.FailedToAddToFeed(RuntimeException("Api not implemented")))
+        // TODO Implement adding user feed in ExploreFeeds
+//        try {
+//            settingsRepository.addAndPersistUserFeed(
+//                userId = activeAccountStore.activeUserId(),
+//                name = title,
+//                directive = exploreFeedDirective,
+//            )
+//        } catch (error: WssException) {
+//            Timber.w(error)
+//            setErrorState(error = ExploreFeedError.FailedToAddToFeed(error))
+//        }
     }
 
     private suspend fun removeFromMyFeeds() {
-        try {
-            settingsRepository.removeAndPersistUserFeed(
-                userId = activeAccountStore.activeUserId(),
-                directive = exploreFeedDirective,
-            )
-        } catch (error: WssException) {
-            Timber.w(error)
-            setErrorState(error = ExploreFeedError.FailedToRemoveFeed(error))
-        }
+        setErrorState(error = ExploreFeedError.FailedToRemoveFeed(RuntimeException("Api not implemented")))
+        // TODO Implement removing user feed in ExploreFeeds
+//        try {
+//            settingsRepository.removeAndPersistUserFeed(
+//                userId = activeAccountStore.activeUserId(),
+//                directive = exploreFeedDirective,
+//            )
+//        } catch (error: WssException) {
+//            Timber.w(error)
+//            setErrorState(error = ExploreFeedError.FailedToRemoveFeed(error))
+//        }
     }
 
     private fun likePost(postLikeAction: UiEvent.PostLikeAction) =
