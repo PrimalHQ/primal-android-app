@@ -219,10 +219,7 @@ private fun PostedByPicker(postedBy: Set<UserProfileItemUi>, onUsersSelected: (S
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun OrderByPicker(
-    orderBy: SearchOrderBy,
-    onOrderByChanged: (SearchOrderBy) -> Unit,
-) {
+private fun OrderByPicker(orderBy: SearchOrderBy, onOrderByChanged: (SearchOrderBy) -> Unit) {
     var showOrderByBottomSheetPicker by rememberSaveable { mutableStateOf(false) }
     if (showOrderByBottomSheetPicker) {
         SingleChoicePicker(
@@ -286,10 +283,7 @@ private fun SearchFilterPicker(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun SearchScopePicker(
-    scope: SearchScope,
-    onScopeChanged: (SearchScope) -> Unit,
-) {
+private fun SearchScopePicker(scope: SearchScope, onScopeChanged: (SearchScope) -> Unit) {
     var showScopeBottomSheetPicker by rememberSaveable { mutableStateOf(false) }
     if (showScopeBottomSheetPicker) {
         SingleChoicePicker(
@@ -345,10 +339,7 @@ private fun SearchKindPicker(searchKind: SearchKind, onSearchKindChanged: (kind:
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TimePostedPicker(
-    timePosted: TimeModifier,
-    onTimePostedChanged: (TimeModifier) -> Unit,
-) {
+fun TimePostedPicker(timePosted: TimeModifier, onTimePostedChanged: (TimeModifier) -> Unit) {
     var showTimePostedBottomSheetPicker by rememberSaveable { mutableStateOf(false) }
     if (showTimePostedBottomSheetPicker) {
         TimeModifierPicker(
@@ -554,12 +545,12 @@ private fun Int.toFilterQueryOrEmpty(queryProperty: String): String =
     this.run { if (this != 0) "$queryProperty=$this" else "" }
 
 private fun SearchFilter.isEmpty(): Boolean =
-    (this.orientation == null || this.orientation == Orientation.Any)
-        && this.minDuration == 0
-        && this.maxDuration == 0
-        && this.minContentScore == 0
-        && this.minInteractions == 0
-        && this.minLikes == 0
-        && this.minZaps == 0
-        && this.minReplies == 0
-        && this.minReposts == 0
+    (this.orientation == null || this.orientation == Orientation.Any) &&
+        this.minDuration == 0 &&
+        this.maxDuration == 0 &&
+        this.minContentScore == 0 &&
+        this.minInteractions == 0 &&
+        this.minLikes == 0 &&
+        this.minZaps == 0 &&
+        this.minReplies == 0 &&
+        this.minReposts == 0
