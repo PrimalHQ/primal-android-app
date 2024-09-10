@@ -11,6 +11,9 @@ interface FeedPostDataCrossRefDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun connect(data: List<FeedPostDataCrossRef>)
 
-    @Query("DELETE FROM FeedPostDataCrossRef WHERE feedDirective = :feedDirective")
-    fun deleteConnectionsByDirective(feedDirective: String)
+    @Query("SELECT MAX(orderIndex) FROM FeedPostDataCrossRef WHERE feedSpec = :feedSpec")
+    suspend fun getOrderIndexForFeedSpec(feedSpec: String): Int?
+
+    @Query("DELETE FROM FeedPostDataCrossRef WHERE feedSpec = :feedSpec")
+    fun deleteConnectionsByDirective(feedSpec: String)
 }

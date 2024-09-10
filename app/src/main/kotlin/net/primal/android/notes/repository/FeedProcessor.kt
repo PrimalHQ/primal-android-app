@@ -52,14 +52,19 @@ class FeedProcessor(
         }
     }
 
-    private fun List<NostrEvent>.processFeedConnections() {
-        database.feedsConnections().connect(
-            data = this.map {
-                FeedPostDataCrossRef(
-                    feedDirective = feedSpec,
-                    eventId = it.id,
-                )
-            },
-        )
+    private suspend fun List<NostrEvent>.processFeedConnections() {
+        database.withTransaction {
+            val maxIndex = database.feedsConnections().getOrderIndexForFeedSpec(feedSpec)
+            val indexOffset = maxIndex?.plus(other = 1) ?: 0
+            database.feedsConnections().connect(
+                data = this.mapIndexed { index, nostrEvent ->
+                    FeedPostDataCrossRef(
+                        feedSpec = feedSpec,
+                        eventId = nostrEvent.id,
+                        orderIndex = indexOffset + index,
+                    )
+                },
+            )
+        }
     }
 }

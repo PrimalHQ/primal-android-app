@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 36,
-    "identityHash": "35034f813d4100ded8beefc08d4cd810",
+    "identityHash": "022026340dd8486075c7f48d92c3c511",
     "entities": [
       {
         "tableName": "PostData",
@@ -649,12 +649,62 @@
         "foreignKeys": []
       },
       {
-        "tableName": "FeedPostDataCrossRef",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`feedDirective` TEXT NOT NULL, `eventId` TEXT NOT NULL, PRIMARY KEY(`feedDirective`, `eventId`))",
+        "tableName": "Feed",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`spec` TEXT NOT NULL, `specKind` TEXT NOT NULL, `name` TEXT NOT NULL, `description` TEXT NOT NULL, `enabled` INTEGER NOT NULL, `feedKind` TEXT, PRIMARY KEY(`spec`))",
         "fields": [
           {
-            "fieldPath": "feedDirective",
-            "columnName": "feedDirective",
+            "fieldPath": "spec",
+            "columnName": "spec",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "specKind",
+            "columnName": "specKind",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "enabled",
+            "columnName": "enabled",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "feedKind",
+            "columnName": "feedKind",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "spec"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "FeedPostDataCrossRef",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`feedSpec` TEXT NOT NULL, `eventId` TEXT NOT NULL, `orderIndex` INTEGER NOT NULL, PRIMARY KEY(`feedSpec`, `eventId`))",
+        "fields": [
+          {
+            "fieldPath": "feedSpec",
+            "columnName": "feedSpec",
             "affinity": "TEXT",
             "notNull": true
           },
@@ -663,24 +713,30 @@
             "columnName": "eventId",
             "affinity": "TEXT",
             "notNull": true
+          },
+          {
+            "fieldPath": "orderIndex",
+            "columnName": "orderIndex",
+            "affinity": "INTEGER",
+            "notNull": true
           }
         ],
         "primaryKey": {
           "autoGenerate": false,
           "columnNames": [
-            "feedDirective",
+            "feedSpec",
             "eventId"
           ]
         },
         "indices": [
           {
-            "name": "index_FeedPostDataCrossRef_feedDirective",
+            "name": "index_FeedPostDataCrossRef_feedSpec",
             "unique": false,
             "columnNames": [
-              "feedDirective"
+              "feedSpec"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_FeedPostDataCrossRef_feedDirective` ON `${TABLE_NAME}` (`feedDirective`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_FeedPostDataCrossRef_feedSpec` ON `${TABLE_NAME}` (`feedSpec`)"
           },
           {
             "name": "index_FeedPostDataCrossRef_eventId",
@@ -1537,62 +1593,12 @@
           }
         ],
         "foreignKeys": []
-      },
-      {
-        "tableName": "Feed",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`spec` TEXT NOT NULL, `specKind` TEXT NOT NULL, `name` TEXT NOT NULL, `description` TEXT NOT NULL, `enabled` INTEGER NOT NULL, `feedKind` TEXT, PRIMARY KEY(`spec`))",
-        "fields": [
-          {
-            "fieldPath": "spec",
-            "columnName": "spec",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "specKind",
-            "columnName": "specKind",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "name",
-            "columnName": "name",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "description",
-            "columnName": "description",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "enabled",
-            "columnName": "enabled",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "feedKind",
-            "columnName": "feedKind",
-            "affinity": "TEXT",
-            "notNull": false
-          }
-        ],
-        "primaryKey": {
-          "autoGenerate": false,
-          "columnNames": [
-            "spec"
-          ]
-        },
-        "indices": [],
-        "foreignKeys": []
       }
     ],
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '35034f813d4100ded8beefc08d4cd810')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '022026340dd8486075c7f48d92c3c511')"
     ]
   }
 }

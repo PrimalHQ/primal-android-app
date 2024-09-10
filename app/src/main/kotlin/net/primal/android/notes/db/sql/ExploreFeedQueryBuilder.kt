@@ -32,36 +32,31 @@ class ExploreFeedQueryBuilder(
             INNER JOIN EventStats ON PostData.postId = EventStats.eventId
             LEFT JOIN EventUserStats ON EventUserStats.eventId = PostData.postId AND EventUserStats.userId = ?
             LEFT JOIN MutedUserData ON MutedUserData.userId = PostData.authorId
-            WHERE FeedPostDataCrossRef.feedDirective = ? AND isMuted = 0
+            WHERE FeedPostDataCrossRef.feedSpec = ? AND isMuted = 0
         """
     }
 
-    // TODO This needs to updated
     private val orderByClause = when {
-//        feedSpec.isExplorePopularFeed() -> "ORDER BY EventStats.score"
-//        feedSpec.isExploreTrendingFeed() -> "ORDER BY EventStats.score24h"
-//        feedSpec.isExploreMostZapped4hFeed() -> "ORDER BY EventStats.satsZapped"
-//        feedSpec.isExploreMostZappedFeed() -> "ORDER BY EventStats.satsZapped"
-        else -> "ORDER BY PostData.createdAt"
+        else -> "ORDER BY FeedPostDataCrossRef.orderIndex"
     }
 
     override fun feedQuery(): SimpleSQLiteQuery {
         return SimpleSQLiteQuery(
-            query = "$EXPLORE_BASIC_QUERY $orderByClause DESC",
+            query = "$EXPLORE_BASIC_QUERY $orderByClause ASC",
             bindArgs = arrayOf(userPubkey, feedSpec),
         )
     }
 
     override fun newestFeedPostsQuery(limit: Int): SimpleSQLiteQuery {
         return SimpleSQLiteQuery(
-            query = "$EXPLORE_BASIC_QUERY $orderByClause DESC LIMIT ?",
+            query = "$EXPLORE_BASIC_QUERY $orderByClause ASC LIMIT ?",
             bindArgs = arrayOf(userPubkey, feedSpec, limit),
         )
     }
 
     override fun oldestFeedPostsQuery(limit: Int): SimpleSQLiteQuery {
         return SimpleSQLiteQuery(
-            query = "$EXPLORE_BASIC_QUERY $orderByClause ASC LIMIT ?",
+            query = "$EXPLORE_BASIC_QUERY $orderByClause DESC LIMIT ?",
             bindArgs = arrayOf(userPubkey, feedSpec, limit),
         )
     }

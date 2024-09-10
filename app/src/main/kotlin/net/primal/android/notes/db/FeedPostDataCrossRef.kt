@@ -5,15 +5,16 @@ import androidx.room.Index
 
 @Entity(
     primaryKeys = [
-        "feedDirective",
+        "feedSpec",
         "eventId",
     ],
     indices = [
-        Index(value = ["feedDirective"]),
+        Index(value = ["feedSpec"]),
         Index(value = ["eventId"]),
     ],
 )
 data class FeedPostDataCrossRef(
-    val feedDirective: String,
+    val feedSpec: String,
     val eventId: String,
+    val orderIndex: Int,
 )

@@ -31,7 +31,7 @@ class ChronologicalFeedWithRepostsQueryBuilder(
             JOIN FeedPostDataCrossRef ON FeedPostDataCrossRef.eventId = PostData.postId
             LEFT JOIN EventUserStats ON EventUserStats.eventId = PostData.postId AND EventUserStats.userId = ?
             LEFT JOIN MutedUserData ON MutedUserData.userId = PostData.authorId
-            WHERE FeedPostDataCrossRef.feedDirective = ? AND isMuted = 0
+            WHERE FeedPostDataCrossRef.feedSpec = ? AND isMuted = 0
 
             UNION ALL
 
@@ -58,7 +58,7 @@ class ChronologicalFeedWithRepostsQueryBuilder(
             JOIN FeedPostDataCrossRef ON FeedPostDataCrossRef.eventId = RepostData.repostId
             LEFT JOIN EventUserStats ON EventUserStats.eventId = PostData.postId AND EventUserStats.userId = ?
             LEFT JOIN MutedUserData ON MutedUserData.userId = PostData.authorId
-            WHERE FeedPostDataCrossRef.feedDirective = ? AND isMuted = 0
+            WHERE FeedPostDataCrossRef.feedSpec = ? AND isMuted = 0
         """
     }
 
