@@ -46,6 +46,8 @@ import net.primal.android.editor.domain.NoteEditorArgs.Companion.asNoteEditorArg
 import net.primal.android.editor.domain.NoteEditorArgs.Companion.jsonAsNoteEditorArgs
 import net.primal.android.editor.domain.NoteEditorArgs.Companion.noteIdToNoteEditorArgs
 import net.primal.android.editor.ui.NoteEditorScreen
+import net.primal.android.explore.asearch.AdvancedSearchScreen
+import net.primal.android.explore.asearch.AdvancedSearchViewModel
 import net.primal.android.explore.feed.ExploreFeedScreen
 import net.primal.android.explore.feed.ExploreFeedViewModel
 import net.primal.android.explore.home.ExploreHomeScreen
@@ -101,6 +103,8 @@ private fun NavController.navigateToWalletOnboarding() = navigate(route = "onboa
 private fun NavController.navigateToLogout() = navigate(route = "logout")
 
 private fun NavController.navigateToSearch() = navigate(route = "search")
+
+private fun NavController.navigateToAdvancedSearch() = navigate(route = "asearch")
 
 private fun NavController.navigateToNoteEditor(args: NoteEditorArgs? = null) {
     navigate(route = "noteEditor?$NOTE_EDITOR_ARGS=${args?.toJson()?.asBase64Encoded()}")
@@ -326,6 +330,11 @@ fun PrimalAppNavigation() {
 
         search(
             route = "search",
+            navController = navController,
+        )
+
+        advancedSearch(
+            route = "asearch",
             navController = navController,
         )
 
@@ -709,7 +718,8 @@ private fun NavGraphBuilder.explore(route: String, navController: NavController)
             viewModel = viewModel,
             onHashtagClick = { query -> navController.navigateToExploreFeed(query = query) },
             onSearchClick = { navController.navigateToSearch() },
-            onTuneClick = { /* TODO(marko): navigate to new advanced search */ },
+            onTuneClick = { navController.navigateToAdvancedSearch() },
+            onClose = { navController.navigateUp() },
         )
     }
 
@@ -754,6 +764,25 @@ private fun NavGraphBuilder.search(route: String, navController: NavController) 
             onNoteClick = { noteId -> navController.navigateToThread(noteId) },
             onNaddrClick = { naddr -> navController.navigateToArticleDetails(naddr) },
             onSearchContent = { query -> navController.navigateToExploreFeed(query) },
+        )
+    }
+
+private fun NavGraphBuilder.advancedSearch(route: String, navController: NavController) =
+    composable(
+        route = route,
+        enterTransition = { primalSlideInHorizontallyFromEnd },
+        exitTransition = { primalScaleOut },
+        popEnterTransition = { primalScaleIn },
+        popExitTransition = { primalSlideOutHorizontallyToEnd },
+    ) {
+        val viewModel = hiltViewModel<AdvancedSearchViewModel>()
+
+        ApplyEdgeToEdge()
+        LockToOrientationPortrait()
+
+        AdvancedSearchScreen(
+            viewModel = viewModel,
+            onClose = { navController.navigateUp() },
         )
     }
 

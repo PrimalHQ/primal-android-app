@@ -7,12 +7,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
@@ -29,6 +27,8 @@ import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.SuggestionChipDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
@@ -44,6 +44,8 @@ import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.ListLoading
 import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.PrimalDivider
+import net.primal.android.core.compose.icons.PrimalIcons
+import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.explore.home.ExploreHomeContract.UiEvent
 import net.primal.android.theme.AppTheme
@@ -55,6 +57,7 @@ fun ExploreHomeScreen(
     onHashtagClick: (String) -> Unit,
     onSearchClick: () -> Unit,
     onTuneClick: () -> Unit,
+    onClose: () -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
 
@@ -64,6 +67,7 @@ fun ExploreHomeScreen(
         onSearchClick = onSearchClick,
         eventPublisher = { viewModel.setEvent(it) },
         onTuneClick = onTuneClick,
+        onClose = onClose,
     )
 }
 
@@ -75,12 +79,14 @@ private fun ExploreHomeScreen(
     onSearchClick: () -> Unit,
     eventPublisher: (UiEvent) -> Unit,
     onTuneClick: () -> Unit,
+    onClose: () -> Unit,
 ) {
     val listState = rememberLazyListState()
 
     Scaffold(
         topBar = {
-            ExploreTopRow(
+            ExploreTopAppBar(
+                onClose = onClose,
                 onSearchClick = onSearchClick,
                 onActionIconClick = onTuneClick,
                 actionIcon = Icons.Filled.Tune,
@@ -159,40 +165,49 @@ private fun ExploreHomeScreen(
 
 @ExperimentalMaterial3Api
 @Composable
-fun ExploreTopRow(
+fun ExploreTopAppBar(
     modifier: Modifier = Modifier,
     onSearchClick: () -> Unit,
     onActionIconClick: () -> Unit,
+    onClose: () -> Unit,
     actionIcon: ImageVector,
 ) {
     Column(
-        modifier = modifier
-            .statusBarsPadding()
-            .wrapContentHeight(),
+        modifier = modifier.wrapContentHeight(),
     ) {
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .padding(vertical = 8.dp)
-                .padding(start = 16.dp, end = 8.dp)
-                .fillMaxWidth()
-                .background(AppTheme.colorScheme.surface),
-        ) {
-            SearchBar(
-                onClick = onSearchClick,
-                modifier = Modifier.weight(1.0f),
-            )
-            IconButton(
-                onClick = onActionIconClick,
-            ) {
-                Icon(
-                    imageVector = actionIcon,
-                    contentDescription = null,
-                    tint = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+        TopAppBar(
+            title = {
+                SearchBar(
+                    onClick = onSearchClick,
                 )
-            }
-        }
+            },
+            navigationIcon = {
+                IconButton(
+                    onClick = onClose,
+                ) {
+                    Icon(
+                        imageVector = PrimalIcons.ArrowBack,
+                        contentDescription = null,
+                        tint = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+                    )
+                }
+            },
+            actions = {
+                IconButton(
+                    onClick = onActionIconClick,
+                ) {
+                    Icon(
+                        imageVector = actionIcon,
+                        contentDescription = null,
+                        tint = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+                    )
+                }
+            },
+            colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                containerColor = AppTheme.colorScheme.surface,
+                scrolledContainerColor = AppTheme.colorScheme.surface,
+            ),
+        )
         PrimalDivider()
     }
 }
@@ -229,9 +244,10 @@ fun SearchBar(onClick: () -> Unit, modifier: Modifier = Modifier) {
 fun PreviewExploreTopAppBar() {
     PrimalPreview(primalTheme = PrimalTheme.Sunset) {
         Surface {
-            ExploreTopRow(
+            ExploreTopAppBar(
                 onSearchClick = {},
                 onActionIconClick = {},
+                onClose = {},
                 actionIcon = Icons.Filled.Tune,
             )
         }
