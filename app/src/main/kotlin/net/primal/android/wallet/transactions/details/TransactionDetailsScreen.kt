@@ -70,10 +70,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.text.NumberFormat
 import java.time.Instant
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
-import java.util.*
 import kotlin.time.Duration.Companion.seconds
 import net.primal.android.LocalPrimalTheme
 import net.primal.android.R
@@ -92,6 +89,7 @@ import net.primal.android.core.compose.icons.primaliconpack.WalletLightningPayme
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.ext.openUriSafely
 import net.primal.android.core.utils.ellipsizeMiddle
+import net.primal.android.core.utils.formatToDefaultDateTimeFormat
 import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.dashboard.ui.BtcAmountText
 import net.primal.android.wallet.domain.TxState
@@ -404,7 +402,7 @@ private fun TransactionExpandableDetails(txData: TransactionDetailDataUi) {
         PrimalDivider()
         TransactionDetailListItem(
             section = stringResource(id = R.string.wallet_transaction_details_date_item),
-            value = txData.txInstant.formatToDefaultFormat(FormatStyle.MEDIUM),
+            value = txData.txInstant.formatToDefaultDateTimeFormat(FormatStyle.MEDIUM),
         )
 
         PrimalDivider()
@@ -588,18 +586,6 @@ private fun TxState.toReadableString(isOnChainPayment: Boolean): String {
         TxState.FAILED -> stringResource(id = R.string.wallet_transaction_details_status_failed)
         TxState.CANCELED -> stringResource(id = R.string.wallet_transaction_details_status_canceled)
     }
-}
-
-@Composable
-fun Instant.formatToDefaultFormat(dateTimeStyle: FormatStyle): String {
-    val zoneId: ZoneId = ZoneId.systemDefault()
-    val locale: Locale = Locale.getDefault()
-
-    val formatter: DateTimeFormatter = DateTimeFormatter
-        .ofLocalizedDateTime(dateTimeStyle)
-        .withLocale(locale)
-
-    return formatter.format(this.atZone(zoneId))
 }
 
 @Composable

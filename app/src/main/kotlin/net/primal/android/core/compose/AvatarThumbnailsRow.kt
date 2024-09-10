@@ -27,11 +27,12 @@ fun AvatarThumbnailsRow(
     overlapAvatars: Boolean = true,
     hasAvatarBorder: Boolean = true,
     avatarBorderColor: Color = Color.White,
+    maxAvatarsToShow: Int? = null,
     onClick: (Int) -> Unit,
 ) {
     val avatarVisibleWidth = if (overlapAvatars) 24.dp else 36.dp
     BoxWithConstraints(modifier = modifier) {
-        val maxAvatars = (maxWidth.value / avatarVisibleWidth.value).toInt() - 2
+        val maxAvatars = maxAvatarsToShow ?: ((maxWidth.value / avatarVisibleWidth.value).toInt() - 2)
         val avatarsCount = avatarCdnImages.size
         val avatarsToRender = avatarsCount.coerceAtMost(maxAvatars)
         val avatarsOverflowCount = avatarsCount - avatarsToRender
