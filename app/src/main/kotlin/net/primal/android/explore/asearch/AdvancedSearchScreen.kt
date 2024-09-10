@@ -79,9 +79,7 @@ private fun AdvancedSearchScreen(
                     .padding(horizontal = 16.dp)
                     .fillMaxWidth(),
                 text = stringResource(id = R.string.asearch_search_button),
-                onClick = {
-                    eventPublisher(AdvancedSearchContract.UiEvent.OnSearch)
-                },
+                onClick = { eventPublisher(AdvancedSearchContract.UiEvent.OnSearch) },
             )
         },
     ) { paddingValues ->
@@ -91,27 +89,13 @@ private fun AdvancedSearchScreen(
                 .padding(paddingValues),
             verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
-            PrimalIconTextField(
-                modifier = Modifier
-                    .padding(horizontal = 8.dp)
-                    .fillMaxWidth(),
-                value = state.includedWords.orEmpty(),
+            IncludedWordsTextField(
+                includedWords = state.includedWords,
                 onValueChange = { eventPublisher(AdvancedSearchContract.UiEvent.IncludedWordsValueChanged(it)) },
-                placeholderText = stringResource(id = R.string.asearch_included_words_placeholder),
-                iconImageVector = Icons.Filled.Search,
-                focusRequester = null,
-                singleLine = true,
             )
-            PrimalIconTextField(
-                modifier = Modifier
-                    .padding(horizontal = 8.dp)
-                    .fillMaxWidth(),
-                value = state.excludedWords.orEmpty(),
+            ExcludedWordsTextField(
+                excludedWords = state.excludedWords,
                 onValueChange = { eventPublisher(AdvancedSearchContract.UiEvent.ExcludedWordsValueChanged(it)) },
-                placeholderText = stringResource(id = R.string.asearch_excluded_words_placeholder),
-                iconImageVector = Icons.Filled.Close,
-                focusRequester = null,
-                singleLine = true,
             )
             Column {
                 SearchKindPicker(
@@ -119,138 +103,214 @@ private fun AdvancedSearchScreen(
                     onSearchKindChanged = { eventPublisher(AdvancedSearchContract.UiEvent.SearchKindChanged(it)) },
                 )
 
-                MultipleUserPickerOptionListItem(
-                    labelText = stringResource(id = R.string.asearch_posted_by_label),
-                    onUsersSelected = {
-                        eventPublisher(AdvancedSearchContract.UiEvent.PostedBySelectUsers(it))
-                    },
-                    placeholderText = stringResource(R.string.asearch_posted_by_placeholder),
-                    selectedUsers = state.postedBy,
-                    sheetTitle = stringResource(id = R.string.asearch_posted_by_label),
+                PostedByPicker(
+                    postedBy = state.postedBy,
+                    onUsersSelected = { eventPublisher(AdvancedSearchContract.UiEvent.PostedBySelectUsers(it)) },
                 )
 
-                MultipleUserPickerOptionListItem(
-                    labelText = stringResource(id = R.string.asearch_replying_to_label),
-                    onUsersSelected = {
-                        eventPublisher(AdvancedSearchContract.UiEvent.ReplyingToSelectUsers(it))
-                    },
-                    placeholderText = stringResource(R.string.asearch_replying_to_placeholder),
-                    selectedUsers = state.replyingTo,
-                    sheetTitle = stringResource(id = R.string.asearch_replying_to_label),
+                ReplyingToPicker(
+                    replyingTo = state.replyingTo,
+                    onUsersSelected = { eventPublisher(AdvancedSearchContract.UiEvent.ReplyingToSelectUsers(it)) },
                 )
 
-                MultipleUserPickerOptionListItem(
-                    labelText = stringResource(id = R.string.asearch_zapped_by_label),
-                    onUsersSelected = {
-                        eventPublisher(AdvancedSearchContract.UiEvent.ZappedBySelectUsers(it))
-                    },
-                    placeholderText = stringResource(R.string.asearch_zapped_by_placeholder),
-                    selectedUsers = state.zappedBy,
-                    sheetTitle = stringResource(id = R.string.asearch_zapped_by_label),
+                ZappedByPicker(
+                    zappedBy = state.zappedBy,
+                    onUsersSelected = { eventPublisher(AdvancedSearchContract.UiEvent.ZappedBySelectUsers(it)) },
                 )
 
-                var showTimePostedBottomSheetPicker by rememberSaveable { mutableStateOf(false) }
-                OptionListWithBottomSheetItem(
-                    label = stringResource(id = R.string.asearch_time_posted_label),
-                    onClick = { showTimePostedBottomSheetPicker = true },
-                    selectedContent = {
-                        Text(
-                            text = state.timePosted.toDisplayName(),
-                            style = AppTheme.typography.bodyMedium,
-                            color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
-                        )
-                    },
-                    bottomSheet = {
-                        TimeModifierPicker(
-                            titleText = stringResource(id = R.string.asearch_time_posted_label),
-                            onDismissRequest = { showTimePostedBottomSheetPicker = false },
-                            onItemSelected = {
-                                eventPublisher(AdvancedSearchContract.UiEvent.TimePostedChanged(it))
-                            },
-                            selectedItem = state.timePosted,
-                        )
-                    },
-                    isBottomSheetVisible = showTimePostedBottomSheetPicker,
+                TimePostedPicker(
+                    timePosted = state.timePosted,
+                    onTimePostedChanged = { eventPublisher(AdvancedSearchContract.UiEvent.TimePostedChanged(it)) },
                 )
-                var showScopeBottomSheetPicker by rememberSaveable { mutableStateOf(false) }
-                OptionListWithBottomSheetItem(
-                    label = stringResource(id = R.string.asearch_scope_label),
-                    onClick = { showScopeBottomSheetPicker = true },
-                    selectedContent = {
-                        Text(
-                            text = state.scope.toDisplayName(),
-                            style = AppTheme.typography.bodyMedium,
-                            color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
-                        )
-                    },
-                    bottomSheet = {
-                        SingleChoicePicker(
-                            items = AdvancedSearchContract.SearchScope.entries,
-                            itemDisplayName = { toDisplayName() },
-                            onDismissRequest = { showScopeBottomSheetPicker = false },
-                            onItemSelected = { eventPublisher(AdvancedSearchContract.UiEvent.ScopeChanged(it)) },
-                            titleText = stringResource(id = R.string.asearch_scope_label),
-                            selectedItem = state.scope,
-                        )
-                    },
-                    isBottomSheetVisible = showScopeBottomSheetPicker,
+
+                SearchScopePicker(
+                    scope = state.scope,
+                    onScopeChanged = { eventPublisher(AdvancedSearchContract.UiEvent.ScopeChanged(it)) },
                 )
-                var showSearchFilterBottomSheetPicker by rememberSaveable { mutableStateOf(false) }
-                OptionListWithBottomSheetItem(
-                    label = stringResource(id = R.string.asearch_filter_label),
-                    onClick = { showSearchFilterBottomSheetPicker = true },
-                    selectedContent = {
-                        Text(
-                            text = state.filter.toDisplayName(),
-                            style = AppTheme.typography.bodyMedium,
-                            color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
-                        )
-                    },
-                    bottomSheet = {
-                        FilterPicker(
-                            filterSelected = {
-                                eventPublisher(AdvancedSearchContract.UiEvent.SearchFilterChanged(it))
-                            },
-                            onDismissRequest = { showSearchFilterBottomSheetPicker = false },
-                            searchKind = state.searchKind,
-                            startState = state.filter,
-                        )
-                    },
-                    isBottomSheetVisible = showSearchFilterBottomSheetPicker,
+
+                SearchFilterPicker(
+                    searchFilter = state.filter,
+                    searchKind = state.searchKind,
+                    onFilterChanged = { eventPublisher(AdvancedSearchContract.UiEvent.SearchFilterChanged(it)) },
                 )
-                var showOrderByBottomSheetPicker by rememberSaveable { mutableStateOf(false) }
-                OptionListWithBottomSheetItem(
-                    label = stringResource(id = R.string.asearch_order_by_label),
-                    onClick = { showOrderByBottomSheetPicker = true },
-                    selectedContent = {
-                        Text(
-                            text = state.orderBy.toDisplayName(),
-                            style = AppTheme.typography.bodyMedium,
-                            color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
-                        )
-                    },
-                    bottomSheet = {
-                        SingleChoicePicker(
-                            items = AdvancedSearchContract.SearchOrderBy.entries,
-                            itemDisplayName = { toDisplayName() },
-                            onDismissRequest = { showOrderByBottomSheetPicker = false },
-                            onItemSelected = { eventPublisher(AdvancedSearchContract.UiEvent.OrderByChanged(it)) },
-                            titleText = stringResource(id = R.string.asearch_order_by_label),
-                            selectedItem = state.orderBy,
-                        )
-                    },
-                    isBottomSheetVisible = showOrderByBottomSheetPicker,
+                OrderByPicker(
+                    orderBy = state.orderBy,
+                    onOrderByChanged = { eventPublisher(AdvancedSearchContract.UiEvent.OrderByChanged(it)) },
                 )
             }
         }
     }
 }
 
+@Composable
+private fun ExcludedWordsTextField(excludedWords: String?, onValueChange: (String) -> Unit) {
+    PrimalIconTextField(
+        modifier = Modifier
+            .padding(horizontal = 8.dp)
+            .fillMaxWidth(),
+        value = excludedWords.orEmpty(),
+        onValueChange = onValueChange,
+        placeholderText = stringResource(id = R.string.asearch_excluded_words_placeholder),
+        iconImageVector = Icons.Filled.Close,
+        focusRequester = null,
+        singleLine = true,
+    )
+}
+
+@Composable
+private fun IncludedWordsTextField(includedWords: String?, onValueChange: (String) -> Unit) {
+    PrimalIconTextField(
+        modifier = Modifier
+            .padding(horizontal = 8.dp)
+            .fillMaxWidth(),
+        value = includedWords.orEmpty(),
+        onValueChange = onValueChange,
+        placeholderText = stringResource(id = R.string.asearch_included_words_placeholder),
+        iconImageVector = Icons.Filled.Search,
+        focusRequester = null,
+        singleLine = true,
+    )
+}
+
+@Composable
+private fun ZappedByPicker(zappedBy: Set<UserProfileItemUi>, onUsersSelected: (Set<UserProfileItemUi>) -> Unit) {
+    MultipleUserPickerOptionListItem(
+        labelText = stringResource(id = R.string.asearch_zapped_by_label),
+        onUsersSelected = onUsersSelected,
+        placeholderText = stringResource(R.string.asearch_zapped_by_placeholder),
+        selectedUsers = zappedBy,
+        sheetTitle = stringResource(id = R.string.asearch_zapped_by_label),
+    )
+}
+
+@Composable
+private fun ReplyingToPicker(replyingTo: Set<UserProfileItemUi>, onUsersSelected: (Set<UserProfileItemUi>) -> Unit) {
+    MultipleUserPickerOptionListItem(
+        labelText = stringResource(id = R.string.asearch_replying_to_label),
+        onUsersSelected = onUsersSelected,
+        placeholderText = stringResource(R.string.asearch_replying_to_placeholder),
+        selectedUsers = replyingTo,
+        sheetTitle = stringResource(id = R.string.asearch_replying_to_label),
+    )
+}
+
+@Composable
+private fun PostedByPicker(postedBy: Set<UserProfileItemUi>, onUsersSelected: (Set<UserProfileItemUi>) -> Unit) {
+    MultipleUserPickerOptionListItem(
+        labelText = stringResource(id = R.string.asearch_posted_by_label),
+        onUsersSelected = onUsersSelected,
+        placeholderText = stringResource(R.string.asearch_posted_by_placeholder),
+        selectedUsers = postedBy,
+        sheetTitle = stringResource(id = R.string.asearch_posted_by_label),
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun OrderByPicker(
+    orderBy: AdvancedSearchContract.SearchOrderBy,
+    onOrderByChanged: (AdvancedSearchContract.SearchOrderBy) -> Unit,
+) {
+    var showOrderByBottomSheetPicker by rememberSaveable { mutableStateOf(false) }
+    if (showOrderByBottomSheetPicker) {
+        SingleChoicePicker(
+            items = AdvancedSearchContract.SearchOrderBy.entries,
+            itemDisplayName = { toDisplayName() },
+            onDismissRequest = { showOrderByBottomSheetPicker = false },
+            onItemSelected = onOrderByChanged,
+            titleText = stringResource(id = R.string.asearch_order_by_label),
+            selectedItem = orderBy,
+        )
+    }
+    OptionListItem(
+        label = stringResource(id = R.string.asearch_order_by_label),
+        onClick = { showOrderByBottomSheetPicker = true },
+        selectedContent = {
+            Text(
+                text = orderBy.toDisplayName(),
+                style = AppTheme.typography.bodyMedium,
+                color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+            )
+        },
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SearchFilterPicker(
+    searchFilter: AdvancedSearchContract.SearchFilter,
+    searchKind: SearchKind,
+    onFilterChanged: (AdvancedSearchContract.SearchFilter) -> Unit,
+) {
+    var showSearchFilterBottomSheetPicker by rememberSaveable { mutableStateOf(false) }
+    if (showSearchFilterBottomSheetPicker) {
+        FilterPicker(
+            filterSelected = onFilterChanged,
+            onDismissRequest = { showSearchFilterBottomSheetPicker = false },
+            searchKind = searchKind,
+            startState = searchFilter,
+        )
+    }
+    OptionListItem(
+        label = stringResource(id = R.string.asearch_filter_label),
+        onClick = { showSearchFilterBottomSheetPicker = true },
+        selectedContent = {
+            Text(
+                text = searchFilter.toDisplayName(),
+                style = AppTheme.typography.bodyMedium,
+                color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+            )
+        },
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SearchScopePicker(
+    scope: AdvancedSearchContract.SearchScope,
+    onScopeChanged: (AdvancedSearchContract.SearchScope) -> Unit,
+) {
+    var showScopeBottomSheetPicker by rememberSaveable { mutableStateOf(false) }
+    if (showScopeBottomSheetPicker) {
+        SingleChoicePicker(
+            items = AdvancedSearchContract.SearchScope.entries,
+            itemDisplayName = { toDisplayName() },
+            onDismissRequest = { showScopeBottomSheetPicker = false },
+            onItemSelected = onScopeChanged,
+            titleText = stringResource(id = R.string.asearch_scope_label),
+            selectedItem = scope,
+        )
+    }
+    OptionListItem(
+        label = stringResource(id = R.string.asearch_scope_label),
+        onClick = { showScopeBottomSheetPicker = true },
+        selectedContent = {
+            Text(
+                text = scope.toDisplayName(),
+                style = AppTheme.typography.bodyMedium,
+                color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+            )
+        },
+    )
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SearchKindPicker(searchKind: SearchKind, onSearchKindChanged: (kind: SearchKind) -> Unit) {
     var showSearchBottomSheetPicker by rememberSaveable { mutableStateOf(false) }
-    OptionListWithBottomSheetItem(
+
+    if (showSearchBottomSheetPicker) {
+        SingleChoicePicker(
+            items = AdvancedSearchContract.SearchKind.entries,
+            itemDisplayName = { toDisplayName() },
+            onDismissRequest = { showSearchBottomSheetPicker = false },
+            onItemSelected = onSearchKindChanged,
+            titleText = stringResource(id = R.string.asearch_search_kind_label),
+            selectedItem = searchKind,
+        )
+    }
+
+    OptionListItem(
         label = stringResource(id = R.string.asearch_search_kind_label),
         onClick = { showSearchBottomSheetPicker = true },
         selectedContent = {
@@ -260,17 +320,33 @@ private fun SearchKindPicker(searchKind: SearchKind, onSearchKindChanged: (kind:
                 color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
             )
         },
-        bottomSheet = {
-            SingleChoicePicker(
-                items = AdvancedSearchContract.SearchKind.entries,
-                itemDisplayName = { toDisplayName() },
-                onDismissRequest = { showSearchBottomSheetPicker = false },
-                onItemSelected = onSearchKindChanged,
-                titleText = stringResource(id = R.string.asearch_search_kind_label),
-                selectedItem = searchKind,
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TimePostedPicker(
+    timePosted: AdvancedSearchContract.TimeModifier,
+    onTimePostedChanged: (AdvancedSearchContract.TimeModifier) -> Unit,
+) {
+    var showTimePostedBottomSheetPicker by rememberSaveable { mutableStateOf(false) }
+    if (showTimePostedBottomSheetPicker) {
+        TimeModifierPicker(
+            onDismissRequest = { showTimePostedBottomSheetPicker = false },
+            onItemSelected = onTimePostedChanged,
+            selectedItem = timePosted,
+        )
+    }
+    OptionListItem(
+        label = stringResource(id = R.string.asearch_time_posted_label),
+        onClick = { showTimePostedBottomSheetPicker = true },
+        selectedContent = {
+            Text(
+                text = timePosted.toDisplayName(),
+                style = AppTheme.typography.bodyMedium,
+                color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
             )
         },
-        isBottomSheetVisible = showSearchBottomSheetPicker,
     )
 }
 
@@ -284,7 +360,16 @@ private fun MultipleUserPickerOptionListItem(
     onUsersSelected: (Set<UserProfileItemUi>) -> Unit,
 ) {
     var bottomSheetVisibility by rememberSaveable { mutableStateOf(false) }
-    OptionListWithBottomSheetItem(
+    if (bottomSheetVisibility) {
+        MultipleUserPicker(
+            onDismissRequest = { bottomSheetVisibility = false },
+            onUsersSelected = onUsersSelected,
+            placeholderText = placeholderText,
+            sheetTitle = sheetTitle,
+            startingSelectedUsers = selectedUsers,
+        )
+    }
+    OptionListItem(
         label = labelText,
         onClick = { bottomSheetVisibility = true },
         selectedContent = {
@@ -304,32 +389,16 @@ private fun MultipleUserPickerOptionListItem(
                 )
             }
         },
-        bottomSheet = {
-            MultipleUserPicker(
-                onDismissRequest = { bottomSheetVisibility = false },
-                onUsersSelected = onUsersSelected,
-                placeholderText = placeholderText,
-                sheetTitle = sheetTitle,
-                startingSelectedUsers = selectedUsers,
-            )
-        },
-        isBottomSheetVisible = bottomSheetVisibility,
     )
 }
 
 @Composable
-private fun OptionListWithBottomSheetItem(
+private fun OptionListItem(
     modifier: Modifier = Modifier,
     label: String,
     onClick: () -> Unit,
     selectedContent: @Composable (RowScope.() -> Unit),
-    isBottomSheetVisible: Boolean,
-    bottomSheet: @Composable () -> Unit,
 ) {
-    if (isBottomSheetVisible) {
-        bottomSheet()
-    }
-
     ListItem(
         modifier = modifier
             .fillMaxWidth()

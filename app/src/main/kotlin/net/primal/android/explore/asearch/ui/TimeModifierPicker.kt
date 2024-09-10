@@ -56,22 +56,12 @@ import net.primal.android.theme.AppTheme
 @Composable
 fun TimeModifierPicker(
     modifier: Modifier = Modifier,
-    titleText: String,
     onDismissRequest: () -> Unit,
     onItemSelected: (AdvancedSearchContract.TimeModifier) -> Unit,
     selectedItem: AdvancedSearchContract.TimeModifier? = null,
     sheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
 ) {
-    val scope = rememberCoroutineScope()
     var selectState by remember { mutableStateOf(TimeModifierPickerState.All) }
-
-    val timeModifiers: List<AdvancedSearchContract.TimeModifier> = listOf(
-        AdvancedSearchContract.TimeModifier.Anytime,
-        AdvancedSearchContract.TimeModifier.Today,
-        AdvancedSearchContract.TimeModifier.Week,
-        AdvancedSearchContract.TimeModifier.Month,
-        AdvancedSearchContract.TimeModifier.Year,
-    )
 
     ModalBottomSheet(
         tonalElevation = 0.dp,
@@ -107,74 +97,115 @@ fun TimeModifierPicker(
         ) {
             when (it) {
                 TimeModifierPickerState.Custom -> {
-                    var showCustomPicker by remember { mutableStateOf(true) }
-                    CustomTimePicker(
-                        onTimePicked = { start, end ->
-                            scope.launch { sheetState.hide() }
-                                .invokeOnCompletion {
-                                    if (!sheetState.isVisible) {
-                                        onDismissRequest()
-                                    }
-                                    onItemSelected(
-                                        AdvancedSearchContract.TimeModifier.Custom(
-                                            startDate = Instant.ofEpochMilli(start),
-                                            endDate = Instant.ofEpochMilli(end),
-                                        ),
-                                    )
-                                }
-                        },
-                        onDismissRequest = {
-                            showCustomPicker = false
-                            selectState = TimeModifierPickerState.All
-                        },
+                    CustomPickerStateContent(
+                        sheetState = sheetState,
+                        onDismissRequest = onDismissRequest,
+                        onCancelClick = { selectState = TimeModifierPickerState.All },
+                        onCustomTimePicked = onItemSelected,
                         selectedItem = selectedItem,
                     )
                 }
 
                 TimeModifierPickerState.All -> {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize(),
-                    ) {
-                        timeModifiers.forEach { timeModifier ->
-                            TimeModifierListItem(
-                                onClick = {
-                                    scope.launch { sheetState.hide() }
-                                        .invokeOnCompletion {
-                                            if (!sheetState.isVisible) {
-                                                onDismissRequest()
-                                            }
-                                            onItemSelected(timeModifier)
-                                        }
-                                },
-                                itemDisplayName = timeModifier.toDisplayName(),
-                                isSelected = selectedItem == timeModifier,
-                            )
-                        }
-                        TimeModifierListItem(
-                            onClick = { selectState = TimeModifierPickerState.Custom },
-                            itemDisplayName = stringResource(id = R.string.asearch_time_posted_custom),
-                            isSelected = selectedItem is AdvancedSearchContract.TimeModifier.Custom,
-                        )
-                        if (selectedItem is AdvancedSearchContract.TimeModifier.Custom) {
-                            ListItem(
-                                headlineContent = {
-                                    Text(
-                                        text = "${
-                                            selectedItem.startDate.formatToDefaultDateFormat(
-                                                FormatStyle.LONG,
-                                            )
-                                        } - ${selectedItem.endDate.formatToDefaultDateFormat(FormatStyle.LONG)}",
-                                        color = AppTheme.colorScheme.secondary,
-                                    )
-                                },
-                            )
-                        }
-                    }
+                    AllPickerStateContent(
+                        sheetState = sheetState,
+                        onDismissRequest = onDismissRequest,
+                        onItemSelected = onItemSelected,
+                        selectedItem = selectedItem,
+                        onCustomItemClicked = { selectState = TimeModifierPickerState.Custom },
+                    )
                 }
             }
         }
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun AllPickerStateContent(
+    sheetState: SheetState,
+    onDismissRequest: () -> Unit,
+    onItemSelected: (AdvancedSearchContract.TimeModifier) -> Unit,
+    onCustomItemClicked: () -> Unit,
+    selectedItem: AdvancedSearchContract.TimeModifier?,
+) {
+    val scope = rememberCoroutineScope()
+    val timeModifiers: List<AdvancedSearchContract.TimeModifier> = listOf(
+        AdvancedSearchContract.TimeModifier.Anytime,
+        AdvancedSearchContract.TimeModifier.Today,
+        AdvancedSearchContract.TimeModifier.Week,
+        AdvancedSearchContract.TimeModifier.Month,
+        AdvancedSearchContract.TimeModifier.Year,
+    )
+    Column(
+        modifier = Modifier
+            .fillMaxSize(),
+    ) {
+        timeModifiers.forEach { timeModifier ->
+            TimeModifierListItem(
+                onClick = {
+                    scope.launch { sheetState.hide() }
+                        .invokeOnCompletion {
+                            if (!sheetState.isVisible) {
+                                onDismissRequest()
+                            }
+                            onItemSelected(timeModifier)
+                        }
+                },
+                itemDisplayName = timeModifier.toDisplayName(),
+                isSelected = selectedItem == timeModifier,
+            )
+        }
+        TimeModifierListItem(
+            onClick = onCustomItemClicked,
+            itemDisplayName = stringResource(id = R.string.asearch_time_posted_custom),
+            isSelected = selectedItem is AdvancedSearchContract.TimeModifier.Custom,
+        )
+        if (selectedItem is AdvancedSearchContract.TimeModifier.Custom) {
+            ListItem(
+                headlineContent = {
+                    Text(
+                        text = "${
+                            selectedItem.startDate.formatToDefaultDateFormat(
+                                FormatStyle.LONG,
+                            )
+                        } - ${selectedItem.endDate.formatToDefaultDateFormat(FormatStyle.LONG)}",
+                        color = AppTheme.colorScheme.secondary,
+                    )
+                },
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun CustomPickerStateContent(
+    sheetState: SheetState,
+    onDismissRequest: () -> Unit,
+    onCancelClick: () -> Unit,
+    onCustomTimePicked: (AdvancedSearchContract.TimeModifier) -> Unit,
+    selectedItem: AdvancedSearchContract.TimeModifier?,
+) {
+    val scope = rememberCoroutineScope()
+    CustomTimePicker(
+        onTimePicked = { start, end ->
+            scope.launch { sheetState.hide() }
+                .invokeOnCompletion {
+                    if (!sheetState.isVisible) {
+                        onDismissRequest()
+                    }
+                    onCustomTimePicked(
+                        AdvancedSearchContract.TimeModifier.Custom(
+                            startDate = Instant.ofEpochMilli(start),
+                            endDate = Instant.ofEpochMilli(end),
+                        ),
+                    )
+                }
+        },
+        onDismissRequest = onCancelClick,
+        selectedItem = selectedItem,
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

@@ -60,7 +60,6 @@ fun FilterPicker(
     startState: AdvancedSearchContract.SearchFilter,
     sheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
 ) {
-    val scope = rememberCoroutineScope()
     var filterState by remember { mutableStateOf(startState) }
 
     ModalBottomSheet(
@@ -82,28 +81,11 @@ fun FilterPicker(
                 )
             },
             bottomBar = {
-                Box(
-                    modifier = Modifier
-                        .background(AppTheme.colorScheme.background)
-                        .fillMaxWidth(),
-                ) {
-                    PrimalLoadingButton(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        text = stringResource(id = R.string.asearch_filter_apply_button),
-                        onClick = {
-                            scope.launch { sheetState.hide() }
-                                .invokeOnCompletion {
-                                    if (!sheetState.isVisible) {
-                                        onDismissRequest()
-                                    }
-
-                                    filterSelected(filterState)
-                                }
-                        },
-                    )
-                }
+                FilterPickerBottomBar(
+                    sheetState = sheetState,
+                    onDismissRequest = onDismissRequest,
+                    onFiltersSelected = { filterSelected(filterState) },
+                )
             },
 
         ) { paddingValues ->
@@ -116,22 +98,10 @@ fun FilterPicker(
                     .padding(paddingValues = paddingValues),
             ) {
                 if (searchKind.isImages() || searchKind.isVideos()) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Text(
-                            text = stringResource(id = R.string.asearch_filter_orientation),
-                            color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
-                            style = AppTheme.typography.bodyMedium,
-                        )
-                        OrientationDropDownMenu(
-                            currentOrientation = filterState.orientation ?: AdvancedSearchContract.Orientation.Any,
-                            onOrientationSelected = { filterState = filterState.copy(orientation = it) },
-                        )
-                    }
-                    PrimalDivider()
+                    OrientationDropDownMenu(
+                        orientation = filterState.orientation,
+                        onOrientationSelected = { filterState = filterState.copy(orientation = it) },
+                    )
                 }
                 if (searchKind.isVideos() || searchKind.isSound()) {
                     SliderColumn(
@@ -145,38 +115,103 @@ fun FilterPicker(
                         onValueChange = { filterState = filterState.copy(maxDuration = it) },
                     )
                 }
-                SliderColumn(
-                    label = stringResource(id = R.string.asearch_filter_min_content_score),
-                    value = filterState.minContentScore,
-                    onValueChange = { filterState = filterState.copy(minContentScore = it) },
-                )
-                SliderColumn(
-                    label = stringResource(id = R.string.asearch_filter_min_interactions),
-                    value = filterState.minInteractions,
-                    onValueChange = { filterState = filterState.copy(minInteractions = it) },
-                )
-                SliderColumn(
-                    label = stringResource(id = R.string.asearch_filter_min_likes),
-                    value = filterState.minLikes,
-                    onValueChange = { filterState = filterState.copy(minLikes = it) },
-                )
-                SliderColumn(
-                    label = stringResource(id = R.string.asearch_filter_min_zaps),
-                    value = filterState.minZaps,
-                    onValueChange = { filterState = filterState.copy(minZaps = it) },
-                )
-                SliderColumn(
-                    label = stringResource(id = R.string.asearch_filter_min_replies),
-                    value = filterState.minReplies,
-                    onValueChange = { filterState = filterState.copy(minReplies = it) },
-                )
-                SliderColumn(
-                    label = stringResource(id = R.string.asearch_filter_min_reposts),
-                    value = filterState.minReposts,
-                    onValueChange = { filterState = filterState.copy(minReposts = it) },
+                CommonSliders(
+                    filterState = filterState,
+                    onFilterStateChange = { reducer -> filterState = filterState.reducer() },
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun CommonSliders(
+    filterState: AdvancedSearchContract.SearchFilter,
+    onFilterStateChange: (AdvancedSearchContract.SearchFilter.() -> AdvancedSearchContract.SearchFilter) -> Unit,
+) {
+    SliderColumn(
+        label = stringResource(id = R.string.asearch_filter_min_content_score),
+        value = filterState.minContentScore,
+        onValueChange = { onFilterStateChange { copy(minContentScore = it) } },
+    )
+    SliderColumn(
+        label = stringResource(id = R.string.asearch_filter_min_interactions),
+        value = filterState.minInteractions,
+        onValueChange = { onFilterStateChange { copy(minInteractions = it) } },
+    )
+    SliderColumn(
+        label = stringResource(id = R.string.asearch_filter_min_likes),
+        value = filterState.minLikes,
+        onValueChange = { onFilterStateChange { copy(minLikes = it) } },
+    )
+    SliderColumn(
+        label = stringResource(id = R.string.asearch_filter_min_zaps),
+        value = filterState.minZaps,
+        onValueChange = { onFilterStateChange { copy(minZaps = it) } },
+    )
+    SliderColumn(
+        label = stringResource(id = R.string.asearch_filter_min_replies),
+        value = filterState.minReplies,
+        onValueChange = { onFilterStateChange { copy(minReplies = it) } },
+    )
+    SliderColumn(
+        label = stringResource(id = R.string.asearch_filter_min_reposts),
+        value = filterState.minReposts,
+        onValueChange = { onFilterStateChange { copy(minReposts = it) } },
+    )
+}
+
+@Composable
+private fun OrientationDropDownMenu(
+    orientation: AdvancedSearchContract.Orientation?,
+    onOrientationSelected: (AdvancedSearchContract.Orientation) -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = stringResource(id = R.string.asearch_filter_orientation),
+            color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+            style = AppTheme.typography.bodyMedium,
+        )
+        OrientationDropDownMenu(
+            currentOrientation = orientation ?: AdvancedSearchContract.Orientation.Any,
+            onOrientationSelected = onOrientationSelected,
+        )
+    }
+    PrimalDivider()
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun FilterPickerBottomBar(
+    sheetState: SheetState,
+    onDismissRequest: () -> Unit,
+    onFiltersSelected: () -> Unit,
+) {
+    val scope = rememberCoroutineScope()
+    Box(
+        modifier = Modifier
+            .background(AppTheme.colorScheme.background)
+            .fillMaxWidth(),
+    ) {
+        PrimalLoadingButton(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            text = stringResource(id = R.string.asearch_filter_apply_button),
+            onClick = {
+                scope.launch { sheetState.hide() }
+                    .invokeOnCompletion {
+                        if (!sheetState.isVisible) {
+                            onDismissRequest()
+                        }
+                        onFiltersSelected()
+                    }
+            },
+        )
     }
 }
 

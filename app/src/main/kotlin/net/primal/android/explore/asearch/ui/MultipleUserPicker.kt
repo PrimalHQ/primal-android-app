@@ -40,7 +40,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -65,7 +64,6 @@ fun MultipleUserPicker(
     modifier: Modifier = Modifier,
     sheetTitle: String,
     placeholderText: String,
-    iconImageVector: ImageVector = PrimalIcons.Search,
     onDismissRequest: () -> Unit,
     onUsersSelected: (Set<UserProfileItemUi>) -> Unit,
     sheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
@@ -87,66 +85,30 @@ fun MultipleUserPicker(
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             topBar = {
-                Column {
-                    CenterAlignedTopAppBar(
-                        title = {
-                            Text(
-                                text = sheetTitle,
-                                color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
-                            )
-                        },
-                        navigationIcon = {
-                            IconButton(
-                                onClick = onDismissRequest,
-                            ) {
-                                Icon(imageVector = PrimalIcons.ArrowBack, contentDescription = null)
-                            }
-                        },
-                    )
-                    SelectedUsersIndicator(
-                        lazyListState = lazyListState,
-                        selectedUsers = selectedUsers,
-                        onUserClick = { user -> selectedUsers = selectedUsers - user },
-                    )
-                }
+                MultipleUserPickerTopAppBar(
+                    sheetTitle = sheetTitle,
+                    onDismissRequest = onDismissRequest,
+                    lazyListState = lazyListState,
+                    selectedUsers = selectedUsers,
+                    onUserClick = { user -> selectedUsers = selectedUsers - user },
+                )
             },
             bottomBar = {
-                PrimalLoadingButton(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    text = stringResource(id = R.string.asearch_multiselect_apply),
-                    onClick = {
-                        scope.launch { sheetState.hide() }
-                            .invokeOnCompletion {
-                                if (!sheetState.isVisible) {
-                                    onDismissRequest()
-                                }
-
-                                onUsersSelected(selectedUsers)
-                            }
-                    },
+                MultipleUserPickerBottomAppBar(
+                    sheetState = sheetState,
+                    onDismissRequest = onDismissRequest,
+                    onApplyClick = { onUsersSelected(selectedUsers) },
                 )
             },
         ) { paddingValues ->
             Column(
                 modifier = Modifier.padding(paddingValues),
             ) {
-                PrimalIconTextField(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 8.dp)
-                        .padding(bottom = 8.dp),
-                    value = state.value.searchQuery,
-                    focusRequester = null,
-                    onValueChange = {
-                        viewModel.setEvent(SearchContract.UiEvent.SearchQueryUpdated(it))
-                    },
+                SearchBar(
                     placeholderText = placeholderText,
-                    iconImageVector = iconImageVector,
+                    onSearchQueryChange = { viewModel.setEvent(SearchContract.UiEvent.SearchQueryUpdated(it)) },
+                    searchQuery = state.value.searchQuery,
                 )
-
-                PrimalDivider()
 
                 LazyColumn {
                     items(
@@ -174,6 +136,83 @@ fun MultipleUserPicker(
                 }
             }
         }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun MultipleUserPickerBottomAppBar(
+    sheetState: SheetState,
+    onDismissRequest: () -> Unit,
+    onApplyClick: () -> Unit,
+) {
+    val scope = rememberCoroutineScope()
+
+    PrimalLoadingButton(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        text = stringResource(id = R.string.asearch_multiselect_apply),
+        onClick = {
+            scope.launch { sheetState.hide() }
+                .invokeOnCompletion {
+                    if (!sheetState.isVisible) {
+                        onDismissRequest()
+                    }
+                    onApplyClick()
+                }
+        },
+    )
+}
+
+@Composable
+private fun SearchBar(
+    searchQuery: String,
+    onSearchQueryChange: (String) -> Unit,
+    placeholderText: String,
+) {
+    PrimalIconTextField(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp)
+            .padding(bottom = 8.dp),
+        value = searchQuery,
+        focusRequester = null,
+        onValueChange = onSearchQueryChange,
+        placeholderText = placeholderText,
+        iconImageVector = PrimalIcons.Search,
+    )
+    PrimalDivider()
+}
+
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+private fun MultipleUserPickerTopAppBar(
+    sheetTitle: String,
+    onDismissRequest: () -> Unit,
+    lazyListState: LazyListState,
+    selectedUsers: Set<UserProfileItemUi>,
+    onUserClick: (UserProfileItemUi) -> Unit,
+) {
+    Column {
+        CenterAlignedTopAppBar(
+            title = {
+                Text(
+                    text = sheetTitle,
+                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+                )
+            },
+            navigationIcon = {
+                IconButton(onClick = onDismissRequest) {
+                    Icon(imageVector = PrimalIcons.ArrowBack, contentDescription = null)
+                }
+            },
+        )
+        SelectedUsersIndicator(
+            lazyListState = lazyListState,
+            selectedUsers = selectedUsers,
+            onUserClick = onUserClick,
+        )
     }
 }
 
