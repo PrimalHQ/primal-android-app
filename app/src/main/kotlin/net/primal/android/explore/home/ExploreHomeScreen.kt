@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
@@ -29,6 +28,7 @@ import androidx.compose.material3.SuggestionChipDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
@@ -173,9 +173,7 @@ fun ExploreTopAppBar(
     actionIcon: ImageVector,
 ) {
     Column(
-        modifier = modifier
-            .statusBarsPadding()
-            .wrapContentHeight(),
+        modifier = modifier.wrapContentHeight(),
     ) {
         TopAppBar(
             title = {
@@ -205,6 +203,10 @@ fun ExploreTopAppBar(
                     )
                 }
             },
+            colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                containerColor = AppTheme.colorScheme.surface,
+                scrolledContainerColor = AppTheme.colorScheme.surface,
+            ),
         )
         PrimalDivider()
     }
