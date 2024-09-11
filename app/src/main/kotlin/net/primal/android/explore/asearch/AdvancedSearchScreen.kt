@@ -34,6 +34,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import java.time.format.FormatStyle
 import net.primal.android.R
+import net.primal.android.core.compose.AvatarOverlap
 import net.primal.android.core.compose.AvatarThumbnailsRow
 import net.primal.android.core.compose.PrimalIconTextField
 import net.primal.android.core.compose.PrimalTopAppBar
@@ -409,7 +410,7 @@ private fun MultipleUserPickerOptionListItem(
                 AvatarThumbnailsRow(
                     avatarCdnImages = selectedUsers.map { it.avatarCdnImage },
                     onClick = {},
-                    overlapAvatars = false,
+                    avatarOverlap = AvatarOverlap.None,
                     maxAvatarsToShow = 4,
                     avatarBorderColor = Color.Transparent,
                 )
