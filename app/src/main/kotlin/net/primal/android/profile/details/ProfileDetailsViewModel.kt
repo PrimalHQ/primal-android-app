@@ -34,7 +34,6 @@ import net.primal.android.profile.details.ProfileDetailsContract.UiState.Profile
 import net.primal.android.profile.domain.ProfileFeedSpec
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.settings.muted.repository.MutedUserRepository
-import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.domain.ZapTarget
 import net.primal.android.wallet.zaps.InvalidZapRequestException
@@ -84,6 +83,7 @@ class ProfileDetailsViewModel @Inject constructor(
         observeProfileData()
         observeReferencedProfilesData()
         observeProfileStats()
+        getProfileFollowedBy()
         observeActiveAccount()
         observeContainsFeed()
         observeMutedAccount()
@@ -126,6 +126,13 @@ class ProfileDetailsViewModel @Inject constructor(
                     UiEvent.DismissBookmarkConfirmation -> setState { copy(confirmBookmarkingNoteId = null) }
                 }
             }
+        }
+
+    private fun getProfileFollowedBy() =
+        viewModelScope.launch {
+            val profiles = profileRepository.getUserProfileFollowedBy(profileId, activeAccountStore.activeUserId(), 10)
+
+            setState { copy(userFollowedByProfiles = profiles.map { it.asProfileDetailsUi() }) }
         }
 
     private fun observeActiveAccount() =

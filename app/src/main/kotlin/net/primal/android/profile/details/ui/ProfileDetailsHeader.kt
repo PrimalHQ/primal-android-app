@@ -23,7 +23,10 @@ import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.paging.LoadState
@@ -31,6 +34,8 @@ import androidx.paging.compose.LazyPagingItems
 import java.text.NumberFormat
 import kotlinx.coroutines.flow.flowOf
 import net.primal.android.R
+import net.primal.android.core.compose.AvatarOverlap
+import net.primal.android.core.compose.AvatarThumbnailsRow
 import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.ListLoading
 import net.primal.android.core.compose.ListNoContent
@@ -202,6 +207,14 @@ private fun ProfileHeaderDetails(
             )
         }
 
+        if (state.userFollowedByProfiles.isNotEmpty()) {
+            UserFollowedByIndicator(
+                modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+                profiles = state.userFollowedByProfiles.filterNot { it == state.profileDetails },
+                onProfileClick = onProfileClick,
+            )
+        }
+
         ProfileTabs(
             modifier = Modifier.padding(bottom = 8.dp, top = 8.dp),
             feedFeedSpec = state.profileFeedSpec,
@@ -217,6 +230,41 @@ private fun ProfileHeaderDetails(
             onReadsCountClick = { },
             mediaCount = state.profileStats?.mediaCount,
             onMediaCountClick = { },
+        )
+    }
+}
+
+@Composable
+private fun UserFollowedByIndicator(
+    modifier: Modifier,
+    profiles: List<ProfileDetailsUi>,
+    onProfileClick: (String) -> Unit,
+) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier,
+    ) {
+        AvatarThumbnailsRow(
+            avatarBorderColor = AppTheme.colorScheme.background,
+            avatarCdnImages = profiles.map { it.avatarCdnImage },
+            onClick = {
+                onProfileClick(profiles[it].pubkey)
+            },
+            avatarOverlap = AvatarOverlap.Start,
+            avatarBorderSize = 1.dp,
+            avatarSize = 36.dp,
+            maxAvatarsToShow = 5,
+            displayAvatarOverflowIndicator = false,
+        )
+        val text =
+            stringResource(id = R.string.profile_followed_by) + " " + profiles.joinToString { it.userDisplayName }
+        Text(
+            text = text,
+            maxLines = 2,
+            color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
+            overflow = TextOverflow.Ellipsis,
+            style = AppTheme.typography.bodyMedium.copy(lineHeight = TextUnit(16.0f, TextUnitType.Sp)),
         )
     }
 }
