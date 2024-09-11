@@ -14,6 +14,7 @@ import net.primal.android.user.api.model.BookmarksResponse
 import net.primal.android.user.api.model.FollowListRequestBody
 import net.primal.android.user.api.model.IsUserFollowingRequestBody
 import net.primal.android.user.api.model.UserContactsResponse
+import net.primal.android.user.api.model.UserProfileFollowedByRequestBody
 import net.primal.android.user.api.model.UserProfileResponse
 import net.primal.android.user.api.model.UserProfilesRequestBody
 import net.primal.android.user.api.model.UserProfilesResponse
@@ -37,6 +38,41 @@ class UsersApiImpl @Inject constructor(
             profileStats = queryResult.findPrimalEvent(NostrEventKind.PrimalUserProfileStats),
             cdnResources = queryResult.filterPrimalEvents(NostrEventKind.PrimalCdnResource),
         )
+    }
+
+    override suspend fun getUserProfileFollowedBy(
+        userProfileId: String,
+        userId: String,
+        limit: Int,
+    ): List<UserProfileResponse> {
+        val queryResult = primalApiClient.query(
+            message = PrimalCacheFilter(
+                primalVerb = PrimalVerb.USER_PROFILE_FOLLOWED_BY,
+                optionsJson = NostrJson.encodeToString(
+                    UserProfileFollowedByRequestBody(
+                        userProfileId = userProfileId,
+                        userId = userId,
+                        limit = limit,
+                    ),
+                ),
+            ),
+        )
+
+        val userProfileResponses = mutableListOf<UserProfileResponse>()
+
+        val profileMetadatas = queryResult.filterNostrEvents(NostrEventKind.Metadata)
+        val profileCdns = queryResult.filterPrimalEvents(NostrEventKind.PrimalCdnResource)
+
+        profileMetadatas.zip(profileCdns).forEach { (metadata, cdn) ->
+            userProfileResponses.add(
+                UserProfileResponse(
+                    metadata = metadata,
+                    cdnResources = listOf(cdn),
+                ),
+            )
+        }
+
+        return userProfileResponses.toList()
     }
 
     override suspend fun getUserFollowList(userId: String): UserContactsResponse {
