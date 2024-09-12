@@ -557,6 +557,8 @@ private fun Int.toFilterQueryOrEmpty(queryProperty: String): String =
 
 private fun SearchFilter.isEmpty(): Boolean =
     (this.orientation == null || this.orientation == Orientation.Any) &&
+        this.minReadTime == 0 &&
+        this.maxReadTime == 0 &&
         this.minDuration == 0 &&
         this.maxDuration == 0 &&
         this.minContentScore == 0 &&
