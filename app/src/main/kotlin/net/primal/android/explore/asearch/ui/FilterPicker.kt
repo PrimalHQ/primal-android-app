@@ -99,6 +99,22 @@ fun FilterPicker(
                     .verticalScroll(scrollState)
                     .padding(paddingValues = paddingValues),
             ) {
+                if (searchKind.isReads()) {
+                    SliderColumn(
+                        label = stringResource(id = R.string.asearch_filter_min_read_time),
+                        value = filterState.minReadTime,
+                        onValueChange = { filterState = filterState.copy(minReadTime = it) },
+                        minValue = 0,
+                        maxValue = 20,
+                    )
+                    SliderColumn(
+                        label = stringResource(id = R.string.asearch_filter_max_read_time),
+                        value = filterState.maxReadTime,
+                        onValueChange = { filterState = filterState.copy(maxReadTime = it) },
+                        minValue = 0,
+                        maxValue = 20,
+                    )
+                }
                 if (searchKind.isImages() || searchKind.isVideos()) {
                     OrientationRow(
                         orientation = filterState.orientation,

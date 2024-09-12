@@ -509,8 +509,10 @@ fun SearchFilter.toDisplayName(): String =
     } else {
         val stringFilters = arrayOf(
             this.orientation.toDisplayName(),
-            this.minDuration.toFilterQueryOrEmpty(stringResource(id = R.string.asearch_filter_min_duration)),
-            this.maxDuration.toFilterQueryOrEmpty(stringResource(id = R.string.asearch_filter_max_duration)),
+            this.minReadTime.toFilterQueryOrEmpty(stringResource(id = R.string.asearch_filter_min_read_time_shorthand)),
+            this.maxReadTime.toFilterQueryOrEmpty(stringResource(id = R.string.asearch_filter_max_read_time_shorthand)),
+            this.minDuration.toFilterQueryOrEmpty(stringResource(id = R.string.asearch_filter_min_duration_shorthand)),
+            this.maxDuration.toFilterQueryOrEmpty(stringResource(id = R.string.asearch_filter_max_duration_shorthand)),
             this.minContentScore.toFilterQueryOrEmpty(stringResource(id = R.string.asearch_filter_min_content_score)),
             this.minInteractions.toFilterQueryOrEmpty(stringResource(id = R.string.asearch_filter_min_interactions)),
             this.minLikes.toFilterQueryOrEmpty(stringResource(id = R.string.asearch_filter_min_likes)),
