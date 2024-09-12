@@ -13,9 +13,6 @@ import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
-import androidx.compose.material3.pulltorefresh.PullToRefreshContainer
-import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
-import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -27,7 +24,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
@@ -47,8 +43,6 @@ import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
-import net.primal.android.core.compose.pulltorefresh.LaunchedPullToRefreshEndingEffect
-import net.primal.android.core.compose.pulltorefresh.PrimalPullToRefreshIndicator
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.notes.feed.NoteFeedLazyColumn
 import net.primal.android.notes.feed.model.FeedPostUi
@@ -58,7 +52,6 @@ import net.primal.android.profile.details.ProfileDetailsContract
 import net.primal.android.profile.details.ProfileDetailsContract.UiState.ProfileError
 import net.primal.android.profile.details.ProfileDetailsViewModel
 import net.primal.android.profile.domain.ProfileFollowsType
-import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.wallet.domain.DraftTx
 
@@ -204,25 +197,25 @@ fun ProfileDetailsScreen(
         }
     }
 
-    val pullToRefreshState = rememberPullToRefreshState(
-        positionalThreshold = PullToRefreshDefaults.PositionalThreshold.times(other = 1.5f),
-    )
+//    val pullToRefreshState = rememberPullToRefreshState(
+//        positionalThreshold = PullToRefreshDefaults.PositionalThreshold.times(other = 1.5f),
+//    )
+//
+//    LaunchedEffect(pullToRefreshState.isRefreshing) {
+//        if (pullToRefreshState.isRefreshing) {
+//            pagingItems.refresh()
+//            eventPublisher(ProfileDetailsContract.UiEvent.RequestProfileUpdate)
+//        }
+//    }
 
-    LaunchedEffect(pullToRefreshState.isRefreshing) {
-        if (pullToRefreshState.isRefreshing) {
-            pagingItems.refresh()
-            eventPublisher(ProfileDetailsContract.UiEvent.RequestProfileUpdate)
-        }
-    }
-
-    LaunchedPullToRefreshEndingEffect(
-        mediatorLoadStates = pagingItems.loadState.mediator,
-        onRefreshEnd = { pullToRefreshState.endRefresh() },
-    )
+//    LaunchedPullToRefreshEndingEffect(
+//        mediatorLoadStates = pagingItems.loadState.mediator,
+//        onRefreshEnd = { pullToRefreshState.endRefresh() },
+//    )
 
     Surface {
         Box(
-            modifier = Modifier.nestedScroll(pullToRefreshState.nestedScrollConnection),
+//            modifier = Modifier.nestedScroll(pullToRefreshState.nestedScrollConnection),
         ) {
             NoteFeedLazyColumn(
                 modifier = Modifier
@@ -319,12 +312,12 @@ fun ProfileDetailsScreen(
                 },
             )
 
-            PullToRefreshContainer(
-                modifier = Modifier.align(Alignment.TopCenter),
-                state = pullToRefreshState,
-                contentColor = AppTheme.colorScheme.primary,
-                indicator = { PrimalPullToRefreshIndicator(state = pullToRefreshState) },
-            )
+//            PullToRefreshContainer(
+//                modifier = Modifier.align(Alignment.TopCenter),
+//                state = pullToRefreshState,
+//                contentColor = AppTheme.colorScheme.primary,
+//                indicator = { PrimalPullToRefreshIndicator(state = pullToRefreshState) },
+//            )
 
             SnackbarHost(
                 hostState = snackbarHostState,

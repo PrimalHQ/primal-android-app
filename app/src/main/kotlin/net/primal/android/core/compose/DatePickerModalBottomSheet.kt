@@ -37,12 +37,14 @@ fun DatePickerModalBottomSheet(
         scrimColor = scrimColor,
         tonalElevation = 0.dp,
         onDismissRequest = onDismissRequest,
-        windowInsets = WindowInsets(
-            left = 0,
-            top = BottomSheetDefaults.windowInsets.getTop(LocalDensity.current),
-            right = 0,
-            bottom = 0,
-        ),
+        contentWindowInsets = {
+            WindowInsets(
+                left = 0,
+                top = BottomSheetDefaults.windowInsets.getTop(LocalDensity.current),
+                right = 0,
+                bottom = 0,
+            )
+        },
     ) {
         DatePicker(
             state = state,

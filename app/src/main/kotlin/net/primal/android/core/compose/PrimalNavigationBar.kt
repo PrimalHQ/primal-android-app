@@ -79,6 +79,7 @@ fun PrimalNavigationBar(
     NavigationBar(
         modifier = modifier,
         tonalElevation = 0.dp,
+        containerColor = AppTheme.colorScheme.surface,
     ) {
         val badgesMap = mapOf(
             Pair(PrimalTopLevelDestination.Messages, badges.unreadMessagesCount),
@@ -136,7 +137,7 @@ fun PrimalNavigationBarLightningBolt(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(color = NavigationBarDefaults.containerColor)
+                            .background(color = AppTheme.colorScheme.surface)
                             .height(NavigationBarVisibleHeightDp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceEvenly,

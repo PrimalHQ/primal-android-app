@@ -5,6 +5,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -91,9 +92,11 @@ fun PrimalDrawerScaffold(
         content = {
             Scaffold(
                 modifier = if (focusModeEnabled) {
-                    Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection)
-                } else {
                     Modifier
+                        .nestedScroll(topAppBarScrollBehavior.nestedScrollConnection)
+                        .navigationBarsPadding()
+                } else {
+                    Modifier.navigationBarsPadding()
                 },
                 topBar = { topAppBar(if (focusModeEnabled) topAppBarScrollBehavior else null) },
                 content = { paddingValues ->

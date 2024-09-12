@@ -10,10 +10,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -39,6 +39,7 @@ import net.primal.android.notes.feed.note.events.InvoicePayClickEvent
 import net.primal.android.notes.feed.note.events.MediaClickEvent
 import net.primal.android.profile.report.OnReportContentClick
 import net.primal.android.profile.report.ReportUserDialog
+import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -47,7 +48,9 @@ fun FeedNoteCard(
     data: FeedPostUi,
     modifier: Modifier = Modifier,
     shape: Shape = CardDefaults.shape,
-    colors: CardColors = CardDefaults.cardColors(),
+    colors: CardColors = CardDefaults.cardColors(
+        containerColor = AppTheme.colorScheme.surfaceVariant,
+    ),
     cardPadding: PaddingValues = PaddingValues(all = 0.dp),
     fullWidthNote: Boolean = false,
     headerSingleLine: Boolean = true,
@@ -98,7 +101,7 @@ fun FeedNoteCard(
             .clickable(
                 enabled = onPostClick != null,
                 interactionSource = interactionSource,
-                indication = rememberRipple(),
+                indication = ripple(),
                 onClick = { onPostClick?.invoke(data.postId) },
             ),
         shape = shape,

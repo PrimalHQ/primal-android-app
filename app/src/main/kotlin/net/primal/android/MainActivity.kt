@@ -4,7 +4,10 @@ import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.material.ripple.LocalRippleTheme
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.LocalRippleConfiguration
+import androidx.compose.material3.RippleConfiguration
+import androidx.compose.material3.RippleDefaults
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.compositionLocalOf
@@ -19,7 +22,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import net.primal.android.core.compose.ApplyEdgeToEdge
 import net.primal.android.navigation.PrimalAppNavigation
-import net.primal.android.theme.PrimalRippleTheme
+import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.active.ActiveThemeStore
 import net.primal.android.theme.defaultPrimalTheme
@@ -38,6 +41,7 @@ class MainActivity : ComponentActivity() {
 
     lateinit var primalTheme: PrimalTheme
 
+    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
@@ -54,12 +58,17 @@ class MainActivity : ComponentActivity() {
                     .collect { value = it }
             }
 
+            val primalRippleConfiguration = RippleConfiguration(
+                color = AppTheme.colorScheme.outline,
+                rippleAlpha = RippleDefaults.RippleAlpha,
+            )
+
             PrimalTheme(
                 primalTheme = primalTheme,
             ) {
                 CompositionLocalProvider(
                     LocalPrimalTheme provides primalTheme,
-                    LocalRippleTheme provides PrimalRippleTheme,
+                    LocalRippleConfiguration provides primalRippleConfiguration,
                     LocalContentDisplaySettings provides contentDisplaySettings.value,
                 ) {
                     ApplyEdgeToEdge()

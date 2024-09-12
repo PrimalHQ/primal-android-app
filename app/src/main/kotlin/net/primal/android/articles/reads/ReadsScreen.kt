@@ -121,9 +121,10 @@ private fun ReadsScreen(
                 HorizontalPager(
                     state = pagerState,
                     key = { index -> state.feeds.getOrNull(index)?.spec ?: Unit },
-                    pageNestedScrollConnection = remember(pagerState) {
-                        PagerDefaults.pageNestedScrollConnection(pagerState, Orientation.Horizontal)
-                    },
+                    pageNestedScrollConnection = PagerDefaults.pageNestedScrollConnection(
+                        state = pagerState,
+                        orientation = Orientation.Horizontal,
+                    ),
                 ) { index ->
                     ArticleFeedList(
                         feedSpec = state.feeds[index].spec,

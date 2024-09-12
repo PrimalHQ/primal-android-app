@@ -76,7 +76,6 @@ private fun FeedsBottomSheet(
         scrimColor = Color.Transparent,
         properties = ModalBottomSheetProperties(
             securePolicy = SecureFlagPolicy.Inherit,
-            isFocusable = true,
             shouldDismissOnBackPress = false,
         ),
     ) {
