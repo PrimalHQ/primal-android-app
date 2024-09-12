@@ -98,7 +98,7 @@ fun FilterPicker(
                     .padding(paddingValues = paddingValues),
             ) {
                 if (searchKind.isImages() || searchKind.isVideos()) {
-                    OrientationDropDownMenu(
+                    OrientationRow(
                         orientation = filterState.orientation,
                         onOrientationSelected = { filterState = filterState.copy(orientation = it) },
                     )
@@ -162,7 +162,7 @@ private fun CommonSliders(
 }
 
 @Composable
-private fun OrientationDropDownMenu(
+private fun OrientationRow(
     orientation: AdvancedSearchContract.Orientation?,
     onOrientationSelected: (AdvancedSearchContract.Orientation) -> Unit,
 ) {
@@ -294,7 +294,7 @@ private fun SliderColumn(
 }
 
 @Composable
-fun OrientationDropDownMenu(
+private fun OrientationDropDownMenu(
     modifier: Modifier = Modifier,
     currentOrientation: AdvancedSearchContract.Orientation,
     onOrientationSelected: (AdvancedSearchContract.Orientation) -> Unit,
