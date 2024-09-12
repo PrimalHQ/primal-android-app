@@ -46,12 +46,14 @@ fun RegionSelectionBottomSheet(
         onDismissRequest = onDismissRequest,
         sheetState = sheetState,
         scrimColor = scrimColor,
-        windowInsets = WindowInsets(
-            left = 0,
-            top = BottomSheetDefaults.windowInsets.getTop(LocalDensity.current),
-            right = 0,
-            bottom = 0,
-        ),
+        contentWindowInsets = {
+            WindowInsets(
+                left = 0,
+                top = BottomSheetDefaults.windowInsets.getTop(LocalDensity.current),
+                right = 0,
+                bottom = 0,
+            )
+        },
     ) {
         Surface(
             color = AppTheme.extraColorScheme.surfaceVariantAlt2,

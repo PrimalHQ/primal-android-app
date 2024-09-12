@@ -38,8 +38,6 @@ import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.pulltorefresh.PullToRefreshContainer
-import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -53,7 +51,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -91,7 +88,6 @@ import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromCamer
 import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromGallery
 import net.primal.android.core.compose.icons.primaliconpack.More
 import net.primal.android.core.compose.preview.PrimalPreview
-import net.primal.android.core.compose.pulltorefresh.PrimalPullToRefreshIndicator
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.crypto.hexToNoteHrp
 import net.primal.android.editor.NoteEditorContract
@@ -395,22 +391,22 @@ private fun ThreadConversationLazyColumn(
         )
     }
 
-    val pullToRefreshState = rememberPullToRefreshState()
-
-    LaunchedEffect(pullToRefreshState.isRefreshing) {
-        if (pullToRefreshState.isRefreshing) {
-            eventPublisher(ThreadContract.UiEvent.UpdateConversation)
-        }
-    }
-
-    LaunchedEffect(!state.fetching) {
-        if (!state.fetching) {
-            pullToRefreshState.endRefresh()
-        }
-    }
+//    val pullToRefreshState = rememberPullToRefreshState()
+//
+//    LaunchedEffect(pullToRefreshState.isRefreshing) {
+//        if (pullToRefreshState.isRefreshing) {
+//            eventPublisher(ThreadContract.UiEvent.UpdateConversation)
+//        }
+//    }
+//
+//    LaunchedEffect(!state.fetching) {
+//        if (!state.fetching) {
+//            pullToRefreshState.endRefresh()
+//        }
+//    }
 
     Box(
-        modifier = Modifier.nestedScroll(pullToRefreshState.nestedScrollConnection),
+//        modifier = Modifier.nestedScroll(pullToRefreshState.nestedScrollConnection),
     ) {
         ThreadLazyColumn(
             paddingValues = paddingValues,
@@ -482,14 +478,14 @@ private fun ThreadConversationLazyColumn(
             onReactionsClick = onReactionsClick,
         )
 
-        PullToRefreshContainer(
-            modifier = Modifier
-                .padding(paddingValues)
-                .align(Alignment.TopCenter),
-            state = pullToRefreshState,
-            contentColor = AppTheme.colorScheme.primary,
-            indicator = { PrimalPullToRefreshIndicator(state = pullToRefreshState) },
-        )
+//        PullToRefreshContainer(
+//            modifier = Modifier
+//                .padding(paddingValues)
+//                .align(Alignment.TopCenter),
+//            state = pullToRefreshState,
+//            contentColor = AppTheme.colorScheme.primary,
+//            indicator = { PrimalPullToRefreshIndicator(state = pullToRefreshState) },
+//        )
     }
 }
 

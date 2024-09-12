@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.pulltorefresh.PullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
@@ -44,13 +43,14 @@ private val ArrowHeight = 5.dp
 @ExperimentalMaterial3Api
 @Composable
 fun PrimalPullToRefreshIndicator(
-    state: PullToRefreshState,
+    isRefreshing: Boolean,
     modifier: Modifier = Modifier,
     color: Color = LocalContentColor.current,
 ) {
     Crossfade(
-        targetState = state.isRefreshing,
+        targetState = isRefreshing,
         animationSpec = tween(durationMillis = 100),
+        label = "PrimalPullToRefreshIndicator",
     ) { refreshing ->
         Box(
             modifier = modifier.fillMaxSize(),
@@ -64,7 +64,7 @@ fun PrimalPullToRefreshIndicator(
                 )
             } else {
                 CircularArrowProgressIndicator(
-                    progress = { state.progress },
+                    progress = { 100f },
                     color = color,
                 )
             }

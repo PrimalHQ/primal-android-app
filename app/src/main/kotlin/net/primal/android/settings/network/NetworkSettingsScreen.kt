@@ -392,7 +392,7 @@ private fun RelayOutlinedTextField(
             },
             keyboardOptions = KeyboardOptions.Default.copy(
                 capitalization = KeyboardCapitalization.None,
-                autoCorrect = false,
+                autoCorrectEnabled = false,
                 keyboardType = KeyboardType.Uri,
                 imeAction = ImeAction.Go,
             ),

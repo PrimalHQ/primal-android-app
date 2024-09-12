@@ -20,7 +20,6 @@ import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
-import androidx.compose.material3.pulltorefresh.PullToRefreshContainer
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -35,7 +34,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -59,7 +57,6 @@ import net.primal.android.R
 import net.primal.android.core.compose.AvatarThumbnailsRow
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.isNotEmpty
-import net.primal.android.core.compose.pulltorefresh.PrimalPullToRefreshIndicator
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.drawer.FloatingNewDataHostTopPadding
 import net.primal.android.notes.feed.NoteFeedContract.UiEvent
@@ -338,56 +335,68 @@ fun NoteFeedList(
     val pullToRefreshState = rememberPullToRefreshState()
     var pullToRefreshing by remember { mutableStateOf(false) }
 
-    if (pullToRefreshState.isRefreshing) {
-        LaunchedEffect(true) {
-            pagingItems.refresh()
-            pullToRefreshing = true
-            isMediatorRefreshing = true
-        }
-    }
+//    if (pullToRefreshState.isRefreshing) {
+//        LaunchedEffect(true) {
+//            pagingItems.refresh()
+//            pullToRefreshing = true
+//            isMediatorRefreshing = true
+//        }
+//    }
+//
+//    if (isMediatorRefreshing == false && pullToRefreshing) {
+//        LaunchedEffect(true) {
+//            uiScope.launch {
+//                feedListState.scrollToItem(index = 0)
+//                onScrolledToTop?.invoke()
+//                pullToRefreshState.endRefresh()
+//                pullToRefreshing = false
+//            }
+//        }
+//    }
 
-    if (isMediatorRefreshing == false && pullToRefreshing) {
-        LaunchedEffect(true) {
-            uiScope.launch {
-                feedListState.scrollToItem(index = 0)
-                onScrolledToTop?.invoke()
-                pullToRefreshState.endRefresh()
-                pullToRefreshing = false
-            }
-        }
-    }
-
-    Box(
-        modifier = Modifier.nestedScroll(pullToRefreshState.nestedScrollConnection),
-    ) {
-        NoteFeedLazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = paddingValues,
-            pagingItems = pagingItems,
-            listState = feedListState,
-            zappingState = zappingState,
-            noteCallbacks = noteCallbacks,
-            onPostLikeClick = onPostLikeClick,
-            onZapClick = onZapClick,
-            onRepostClick = onRepostClick,
-            onGoToWallet = onGoToWallet,
-            onMuteClick = onMuteClick,
-            onReportContentClick = onReportContentClick,
-            onBookmarkClick = onBookmarkClick,
-            noContentText = noContentText,
-            header = header,
-            stickyHeader = stickyHeader,
-        )
-
-        PullToRefreshContainer(
-            modifier = Modifier
-                .padding(paddingValues)
-                .align(Alignment.TopCenter),
-            state = pullToRefreshState,
-            contentColor = AppTheme.colorScheme.primary,
-            indicator = { PrimalPullToRefreshIndicator(state = pullToRefreshState) },
-        )
-    }
+//    val state = rememberPullToRefreshState()
+//    PullToRefreshBox(
+//        modifier = Modifier.fillMaxSize(),
+//        isRefreshing = isRefreshing,
+//        onRefresh = onRefresh,
+//        state = state,
+//        indicator = {
+//            PrimalPullToRefreshIndicator(isRefreshing = isRefreshing)
+//        }
+//    ) {
+    NoteFeedLazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = paddingValues,
+        pagingItems = pagingItems,
+        listState = feedListState,
+        zappingState = zappingState,
+        noteCallbacks = noteCallbacks,
+        onPostLikeClick = onPostLikeClick,
+        onZapClick = onZapClick,
+        onRepostClick = onRepostClick,
+        onGoToWallet = onGoToWallet,
+        onMuteClick = onMuteClick,
+        onReportContentClick = onReportContentClick,
+        onBookmarkClick = onBookmarkClick,
+        noContentText = noContentText,
+        header = header,
+        stickyHeader = stickyHeader,
+    )
+//    }
+//    Box(
+//        modifier = Modifier.nestedScroll(pullToRefreshState.nestedScrollConnection),
+//    ) {
+//
+//
+//        PullToRefreshContainer(
+//            modifier = Modifier
+//                .padding(paddingValues)
+//                .align(Alignment.TopCenter),
+//            state = pullToRefreshState,
+//            contentColor = AppTheme.colorScheme.primary,
+//            indicator = {  },
+//        )
+//    }
 }
 
 private fun NoteFeedContract.UiState.FeedError.toErrorMessage(context: Context): String {
