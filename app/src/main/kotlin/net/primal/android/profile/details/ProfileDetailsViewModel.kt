@@ -120,6 +120,7 @@ class ProfileDetailsViewModel @Inject constructor(
                         fetchLatestProfile()
                         fetchLatestMuteList()
                     }
+
                     is UiEvent.ReportAbuse -> reportAbuse(it)
                     UiEvent.DismissError -> setState { copy(error = null) }
                     is UiEvent.BookmarkAction -> handleBookmark(it)
@@ -130,7 +131,11 @@ class ProfileDetailsViewModel @Inject constructor(
 
     private fun fetchProfileFollowedBy() =
         viewModelScope.launch {
-            val profiles = profileRepository.fetchUserProfileFollowedBy(profileId, activeAccountStore.activeUserId(), 10)
+            val profiles = profileRepository.fetchUserProfileFollowedBy(
+                profileId = profileId,
+                userId = activeAccountStore.activeUserId(),
+                limit = 10,
+            )
 
             setState { copy(userFollowedByProfiles = profiles.map { it.asProfileDetailsUi() }) }
         }

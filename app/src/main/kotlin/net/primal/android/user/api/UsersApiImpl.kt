@@ -41,7 +41,7 @@ class UsersApiImpl @Inject constructor(
     }
 
     override suspend fun getUserProfileFollowedBy(
-        userProfileId: String,
+        profileId: String,
         userId: String,
         limit: Int,
     ): List<UserProfileResponse> {
@@ -50,7 +50,7 @@ class UsersApiImpl @Inject constructor(
                 primalVerb = PrimalVerb.USER_PROFILE_FOLLOWED_BY,
                 optionsJson = NostrJson.encodeToString(
                     UserProfileFollowedByRequestBody(
-                        userProfileId = userProfileId,
+                        profileId = profileId,
                         userId = userId,
                         limit = limit,
                     ),

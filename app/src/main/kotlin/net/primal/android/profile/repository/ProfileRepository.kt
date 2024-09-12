@@ -53,11 +53,11 @@ class ProfileRepository @Inject constructor(
         database.profiles().observeProfileData(profileId = profileId).filterNotNull()
 
     suspend fun fetchUserProfileFollowedBy(
-        userProfileId: String,
+        profileId: String,
         userId: String,
         limit: Int,
     ): List<ProfileData> {
-        val users = usersApi.getUserProfileFollowedBy(userProfileId, userId, limit)
+        val users = usersApi.getUserProfileFollowedBy(profileId, userId, limit)
 
         val profiles = users.mapNotNull { user ->
             val cdnResources = user.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }

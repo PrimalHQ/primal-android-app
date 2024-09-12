@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class UserProfileFollowedByRequestBody(
-    @SerialName("pubkey") val userProfileId: String,
+    @SerialName("pubkey") val profileId: String,
     @SerialName("user_pubkey") val userId: String,
     val limit: Int = 5,
 )

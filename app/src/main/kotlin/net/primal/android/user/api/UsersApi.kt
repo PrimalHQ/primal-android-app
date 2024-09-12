@@ -12,7 +12,7 @@ interface UsersApi {
     suspend fun getUserProfile(userId: String): UserProfileResponse
 
     suspend fun getUserProfileFollowedBy(
-        userProfileId: String,
+        profileId: String,
         userId: String,
         limit: Int = 5,
     ): List<UserProfileResponse>
