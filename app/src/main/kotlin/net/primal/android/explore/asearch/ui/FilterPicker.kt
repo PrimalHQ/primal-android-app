@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -26,6 +27,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -88,12 +90,12 @@ fun FilterPicker(
                 )
             },
 
-        ) { paddingValues ->
+            ) { paddingValues ->
             val scrollState = rememberScrollState()
             Column(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 modifier = Modifier
-                    .padding(16.dp)
+                    .padding(24.dp)
                     .verticalScroll(scrollState)
                     .padding(paddingValues = paddingValues),
             ) {
@@ -238,11 +240,9 @@ private fun SliderColumn(
     )
 
     Column(
-        modifier = modifier
-            .fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
     ) {
         Text(
-            modifier = Modifier.padding(start = 8.dp),
             text = label,
             color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
             style = AppTheme.typography.bodyMedium,
@@ -253,7 +253,7 @@ private fun SliderColumn(
             modifier = Modifier.fillMaxWidth(),
         ) {
             Slider(
-                modifier = Modifier.fillMaxWidth(fraction = 0.8f),
+                modifier = Modifier.weight(1.0f),
                 interactionSource = interactionSource,
                 colors = sliderColors,
                 track = {
@@ -268,6 +268,7 @@ private fun SliderColumn(
                 steps = maxValue,
                 valueRange = minValue.toFloat()..maxValue.toFloat(),
             )
+            Spacer(modifier = Modifier.width(10.dp))
             Box(
                 modifier = Modifier
                     .clip(RoundedCornerShape(percent = 50))
