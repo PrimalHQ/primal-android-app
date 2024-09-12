@@ -193,9 +193,7 @@ private fun FilterPickerBottomBar(
 ) {
     val scope = rememberCoroutineScope()
     Box(
-        modifier = Modifier
-            .background(AppTheme.colorScheme.background)
-            .fillMaxWidth(),
+        modifier = Modifier.background(AppTheme.colorScheme.background),
     ) {
         PrimalLoadingButton(
             modifier = Modifier
