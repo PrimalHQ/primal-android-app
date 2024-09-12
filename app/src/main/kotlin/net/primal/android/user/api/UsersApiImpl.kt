@@ -44,7 +44,7 @@ class UsersApiImpl @Inject constructor(
         profileId: String,
         userId: String,
         limit: Int,
-    ): List<UserProfileResponse> {
+    ): UserProfilesResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.USER_PROFILE_FOLLOWED_BY,
@@ -58,21 +58,10 @@ class UsersApiImpl @Inject constructor(
             ),
         )
 
-        val userProfileResponses = mutableListOf<UserProfileResponse>()
-
-        val profileMetadatas = queryResult.filterNostrEvents(NostrEventKind.Metadata)
-        val profileCdns = queryResult.filterPrimalEvents(NostrEventKind.PrimalCdnResource)
-
-        profileMetadatas.zip(profileCdns).forEach { (metadata, cdn) ->
-            userProfileResponses.add(
-                UserProfileResponse(
-                    metadata = metadata,
-                    cdnResources = listOf(cdn),
-                ),
-            )
-        }
-
-        return userProfileResponses.toList()
+        return UserProfilesResponse(
+            metadataEvents = queryResult.filterNostrEvents(NostrEventKind.Metadata),
+            cdnResources = queryResult.filterPrimalEvents(NostrEventKind.PrimalCdnResource),
+        )
     }
 
     override suspend fun getUserFollowList(userId: String): UserContactsResponse {

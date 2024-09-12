@@ -15,7 +15,7 @@ interface UsersApi {
         profileId: String,
         userId: String,
         limit: Int = 5,
-    ): List<UserProfileResponse>
+    ): UserProfilesResponse
 
     suspend fun getUserFollowList(userId: String): UserContactsResponse
 

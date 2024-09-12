@@ -59,10 +59,8 @@ class ProfileRepository @Inject constructor(
     ): List<ProfileData> {
         val users = usersApi.getUserProfileFollowedBy(profileId, userId, limit)
 
-        val profiles = users.mapNotNull { user ->
-            val cdnResources = user.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
-            user.metadata?.asProfileDataPO(cdnResources = cdnResources)
-        }
+        val cdnResources = users.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
+        val profiles = users.metadataEvents.mapAsProfileDataPO(cdnResources = cdnResources)
 
         withContext(dispatchers.io()) {
             database.profiles().upsertAll(data = profiles)
