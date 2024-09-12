@@ -79,7 +79,10 @@ fun MultipleUserPicker(
     ModalBottomSheet(
         tonalElevation = 0.dp,
         modifier = modifier,
-        onDismissRequest = onDismissRequest,
+        onDismissRequest = {
+            onDismissRequest()
+            viewModel.setEvent(SearchContract.UiEvent.ResetSearchQuery)
+        },
         sheetState = sheetState,
     ) {
         Scaffold(
@@ -87,7 +90,10 @@ fun MultipleUserPicker(
             topBar = {
                 MultipleUserPickerTopAppBar(
                     sheetTitle = sheetTitle,
-                    onDismissRequest = onDismissRequest,
+                    onDismissRequest = {
+                        onDismissRequest()
+                        viewModel.setEvent(SearchContract.UiEvent.ResetSearchQuery)
+                    },
                     lazyListState = lazyListState,
                     selectedUsers = selectedUsers,
                     onUserClick = { user -> selectedUsers = selectedUsers - user },
@@ -97,7 +103,10 @@ fun MultipleUserPicker(
                 MultipleUserPickerBottomAppBar(
                     sheetState = sheetState,
                     onDismissRequest = onDismissRequest,
-                    onApplyClick = { onUsersSelected(selectedUsers) },
+                    onApplyClick = {
+                        onUsersSelected(selectedUsers)
+                        viewModel.setEvent(SearchContract.UiEvent.ResetSearchQuery)
+                    },
                 )
             },
         ) { paddingValues ->

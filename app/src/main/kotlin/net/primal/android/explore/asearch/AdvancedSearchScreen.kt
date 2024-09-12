@@ -1,15 +1,20 @@
 package net.primal.android.explore.asearch
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.Close
@@ -85,19 +90,24 @@ private fun AdvancedSearchScreen(
             )
         },
         bottomBar = {
-            PrimalLoadingButton(
-                modifier = Modifier
-                    .navigationBarsPadding()
-                    .padding(horizontal = 16.dp)
-                    .fillMaxWidth(),
-                text = stringResource(id = R.string.asearch_search_button),
-                onClick = { eventPublisher(UiEvent.OnSearch) },
-            )
+            Box(
+                modifier = Modifier.background(AppTheme.colorScheme.background),
+            ) {
+                PrimalLoadingButton(
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp, vertical = 12.dp)
+                        .navigationBarsPadding()
+                        .fillMaxWidth(),
+                    text = stringResource(id = R.string.asearch_search_button),
+                    onClick = { eventPublisher(UiEvent.OnSearch) },
+                )
+            }
         },
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .padding(top = 8.dp)
+                .verticalScroll(rememberScrollState())
                 .padding(paddingValues),
             verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
@@ -266,7 +276,7 @@ private fun SearchFilterPicker(
         selectedContent = {
             Text(
                 textAlign = TextAlign.End,
-                modifier = Modifier.width(200.dp),
+                modifier = Modifier.weight(1.0f),
                 text = searchFilter.toDisplayName(),
                 style = AppTheme.typography.bodyMedium,
                 color = if (searchFilter.isEmpty()) {
@@ -355,7 +365,7 @@ fun TimePostedPicker(timePosted: TimeModifier, onTimePostedChanged: (TimeModifie
             if (timePosted is TimeModifier.Custom) {
                 Text(
                     textAlign = TextAlign.End,
-                    modifier = Modifier.width(200.dp),
+                    modifier = Modifier.weight(1.0f),
                     text = "${
                         timePosted.startDate.formatToDefaultDateFormat(
                             FormatStyle.MEDIUM,
@@ -431,27 +441,27 @@ private fun OptionListItem(
             .fillMaxWidth()
             .clickable { onClick() },
         headlineContent = {
-            Text(
-                modifier = Modifier.padding(horizontal = 12.dp),
-                text = label,
-                color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
-                style = AppTheme.typography.bodyMedium,
-                maxLines = 1,
-            )
-        },
-        trailingContent = {
-            Row(
-                modifier = Modifier.padding(horizontal = 12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.End),
-            ) {
-                selectedContent()
-                Icon(
-                    tint = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
-                    modifier = Modifier.size(12.dp),
-                    imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
-                    contentDescription = null,
+            Row {
+                Text(
+                    modifier = Modifier.padding(horizontal = 12.dp),
+                    text = label,
+                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+                    style = AppTheme.typography.bodyMedium,
+                    maxLines = 1,
                 )
+                Row(
+                    modifier = Modifier.weight(1.0f).padding(horizontal = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.End),
+                ) {
+                    selectedContent()
+                    Icon(
+                        tint = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+                        modifier = Modifier.size(12.dp),
+                        imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
+                        contentDescription = null,
+                    )
+                }
             }
         },
     )
@@ -500,8 +510,10 @@ fun SearchFilter.toDisplayName(): String =
     } else {
         val stringFilters = arrayOf(
             this.orientation.toDisplayName(),
-            this.minDuration.toFilterQueryOrEmpty(stringResource(id = R.string.asearch_filter_min_duration)),
-            this.maxDuration.toFilterQueryOrEmpty(stringResource(id = R.string.asearch_filter_max_duration)),
+            this.minReadTime.toFilterQueryOrEmpty(stringResource(id = R.string.asearch_filter_min_read_time_shorthand)),
+            this.maxReadTime.toFilterQueryOrEmpty(stringResource(id = R.string.asearch_filter_max_read_time_shorthand)),
+            this.minDuration.toFilterQueryOrEmpty(stringResource(id = R.string.asearch_filter_min_duration_shorthand)),
+            this.maxDuration.toFilterQueryOrEmpty(stringResource(id = R.string.asearch_filter_max_duration_shorthand)),
             this.minContentScore.toFilterQueryOrEmpty(stringResource(id = R.string.asearch_filter_min_content_score)),
             this.minInteractions.toFilterQueryOrEmpty(stringResource(id = R.string.asearch_filter_min_interactions)),
             this.minLikes.toFilterQueryOrEmpty(stringResource(id = R.string.asearch_filter_min_likes)),
@@ -546,6 +558,8 @@ private fun Int.toFilterQueryOrEmpty(queryProperty: String): String =
 
 private fun SearchFilter.isEmpty(): Boolean =
     (this.orientation == null || this.orientation == Orientation.Any) &&
+        this.minReadTime == 0 &&
+        this.maxReadTime == 0 &&
         this.minDuration == 0 &&
         this.maxDuration == 0 &&
         this.minContentScore == 0 &&
