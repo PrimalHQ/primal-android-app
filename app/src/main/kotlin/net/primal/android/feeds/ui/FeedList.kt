@@ -4,6 +4,7 @@ import android.os.Build
 import android.view.HapticFeedbackConstants
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.LocalIndication
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -109,6 +110,7 @@ fun FeedList(
         content = { paddingValues ->
             LazyColumn(
                 modifier = Modifier
+                    .background(color = AppTheme.extraColorScheme.surfaceVariantAlt2)
                     .padding(paddingValues)
                     .fillMaxSize(),
                 state = feedsListState,
