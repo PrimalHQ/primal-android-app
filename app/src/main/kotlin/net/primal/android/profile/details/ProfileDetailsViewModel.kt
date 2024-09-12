@@ -34,7 +34,6 @@ import net.primal.android.profile.details.ProfileDetailsContract.UiState.Profile
 import net.primal.android.profile.domain.ProfileFeedSpec
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.settings.muted.repository.MutedUserRepository
-import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.domain.ZapTarget
 import net.primal.android.wallet.zaps.InvalidZapRequestException
@@ -53,7 +52,6 @@ class ProfileDetailsViewModel @Inject constructor(
     private val profileRepository: ProfileRepository,
     private val noteRepository: NoteRepository,
     private val zapHandler: ZapHandler,
-    private val settingsRepository: SettingsRepository,
     private val mutedUserRepository: MutedUserRepository,
 ) : ViewModel() {
 
@@ -85,6 +83,7 @@ class ProfileDetailsViewModel @Inject constructor(
         observeProfileData()
         observeReferencedProfilesData()
         observeProfileStats()
+        fetchProfileFollowedBy()
         observeActiveAccount()
         observeContainsFeed()
         observeMutedAccount()
@@ -121,12 +120,24 @@ class ProfileDetailsViewModel @Inject constructor(
                         fetchLatestProfile()
                         fetchLatestMuteList()
                     }
+
                     is UiEvent.ReportAbuse -> reportAbuse(it)
                     UiEvent.DismissError -> setState { copy(error = null) }
                     is UiEvent.BookmarkAction -> handleBookmark(it)
                     UiEvent.DismissBookmarkConfirmation -> setState { copy(confirmBookmarkingNoteId = null) }
                 }
             }
+        }
+
+    private fun fetchProfileFollowedBy() =
+        viewModelScope.launch {
+            val profiles = profileRepository.fetchUserProfileFollowedBy(
+                profileId = profileId,
+                userId = activeAccountStore.activeUserId(),
+                limit = 10,
+            )
+
+            setState { copy(userFollowedByProfiles = profiles.map { it.asProfileDetailsUi() }) }
         }
 
     private fun observeActiveAccount() =

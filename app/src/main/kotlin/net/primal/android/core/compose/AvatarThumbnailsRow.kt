@@ -24,55 +24,117 @@ import net.primal.android.theme.AppTheme
 fun AvatarThumbnailsRow(
     modifier: Modifier = Modifier,
     avatarCdnImages: List<CdnImage?>,
-    overlapAvatars: Boolean = true,
+    avatarOverlap: AvatarOverlap = AvatarOverlap.End,
     hasAvatarBorder: Boolean = true,
+    avatarBorderSize: Dp = 2.dp,
+    avatarSize: Dp = 32.dp,
+    avatarSpacing: Dp = 4.dp,
+    avatarOverlapPercentage: Float = 0.25f,
     avatarBorderColor: Color = Color.White,
     maxAvatarsToShow: Int? = null,
+    displayAvatarOverflowIndicator: Boolean = true,
     onClick: (Int) -> Unit,
 ) {
-    val avatarVisibleWidth = if (overlapAvatars) 24.dp else 36.dp
+    val avatarVisibleWidth = if (avatarOverlap.isNone()) {
+        avatarSize + avatarSpacing
+    } else {
+        avatarSize.times(1f - avatarOverlapPercentage)
+    }
+
     BoxWithConstraints(modifier = modifier) {
         val maxAvatars = maxAvatarsToShow ?: ((maxWidth.value / avatarVisibleWidth.value).toInt() - 2)
         val avatarsCount = avatarCdnImages.size
         val avatarsToRender = avatarsCount.coerceAtMost(maxAvatars)
         val avatarsOverflowCount = avatarsCount - avatarsToRender
 
-        avatarCdnImages.take(avatarsToRender).forEachIndexed { index, imageCdnImage ->
-            AvatarSpacer(width = (index * avatarVisibleWidth.value).dp) {
-                AvatarThumbnail(
-                    modifier = Modifier.size(32.dp),
-                    avatarCdnImage = imageCdnImage,
-                    hasBorder = hasAvatarBorder,
-                    borderColor = avatarBorderColor,
-                    onClick = { onClick(index) },
-                )
-            }
+        if (avatarsToRender < avatarsCount && displayAvatarOverflowIndicator && avatarOverlap.isStart()) {
+            AvatarOverflowIndicator(
+                width = (avatarsToRender * avatarVisibleWidth.value).dp,
+                avatarSize = avatarSize,
+                hasAvatarBorder = hasAvatarBorder,
+                avatarBorderColor = avatarBorderColor,
+                avatarsOverflowCount = avatarsOverflowCount,
+                avatarBorderSize = avatarBorderSize,
+            )
         }
 
-        if (avatarsToRender < avatarsCount) {
-            AvatarSpacer(width = (avatarsToRender * avatarVisibleWidth.value).dp) {
-                Box(
-                    modifier = Modifier
-                        .size(32.dp)
-                        .adjustAvatarBackground(
-                            size = 48.dp,
-                            hasBorder = hasAvatarBorder,
-                            borderColor = avatarBorderColor,
-                        )
-                        .background(color = moreBackgroundColor)
-                        .fillMaxSize(),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        text = "+${avatarsOverflowCount.coerceAtMost(maximumValue = 99)}",
-                        fontSize = 12.sp,
-                        style = AppTheme.typography.bodySmall,
-                        color = moreForegroundColor,
+        avatarCdnImages
+            .take(avatarsToRender)
+            .run { if (avatarOverlap.isStart()) this.reversed() else this }
+            .forEachIndexed { index, imageCdnImage ->
+                val layoutIndex = if (avatarOverlap.isStart()) {
+                    avatarsToRender - index - 1
+                } else {
+                    index
+                }
+
+                AvatarSpacer(width = (layoutIndex * avatarVisibleWidth.value).dp) {
+                    AvatarThumbnail(
+                        modifier = Modifier.size(avatarSize),
+                        avatarCdnImage = imageCdnImage,
+                        hasBorder = hasAvatarBorder,
+                        borderColor = avatarBorderColor,
+                        borderSize = avatarBorderSize,
+                        onClick = { onClick(layoutIndex) },
                     )
                 }
             }
+
+        if (avatarsToRender < avatarsCount && displayAvatarOverflowIndicator && !avatarOverlap.isStart()) {
+            AvatarOverflowIndicator(
+                width = (avatarsToRender * avatarVisibleWidth.value).dp,
+                avatarSize = avatarSize,
+                hasAvatarBorder = hasAvatarBorder,
+                avatarBorderColor = avatarBorderColor,
+                avatarsOverflowCount = avatarsOverflowCount,
+                avatarBorderSize = avatarBorderSize,
+            )
         }
     }
+}
+
+@Composable
+private fun AvatarOverflowIndicator(
+    width: Dp,
+    avatarSize: Dp,
+    hasAvatarBorder: Boolean,
+    avatarBorderColor: Color,
+    avatarsOverflowCount: Int,
+    avatarBorderSize: Dp,
+) {
+    AvatarSpacer(width = width) {
+        Box(
+            modifier = Modifier
+                .size(avatarSize)
+                .adjustAvatarBackground(
+                    size = 48.dp,
+                    hasBorder = hasAvatarBorder,
+                    borderColor = avatarBorderColor,
+                    borderSize = avatarBorderSize,
+                )
+                .background(color = moreBackgroundColor)
+                .fillMaxSize(),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                text = "+${avatarsOverflowCount.coerceAtMost(maximumValue = 99)}",
+                fontSize = 12.sp,
+                style = AppTheme.typography.bodySmall,
+                color = moreForegroundColor,
+            )
+        }
+    }
+}
+
+enum class AvatarOverlap {
+    Start,
+    End,
+    None,
+    ;
+
+    fun isStart() = this == Start
+    fun isEnd() = this == End
+    fun isNone() = this == None
 }
 
 private val moreBackgroundColor = Color(0xFFC8C8C8)

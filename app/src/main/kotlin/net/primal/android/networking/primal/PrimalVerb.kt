@@ -4,6 +4,7 @@ enum class PrimalVerb(val identifier: String) {
     FOLLOW_LIST("contact_list"),
     USER_INFOS("user_infos"),
     USER_PROFILE("user_profile"),
+    USER_PROFILE_FOLLOWED_BY("user_profile_followed_by"),
     USER_FOLLOWERS("user_followers"),
     USER_RELAYS("get_user_relays"),
     TRENDING_HASHTAGS_7D("trending_hashtags_7d"),

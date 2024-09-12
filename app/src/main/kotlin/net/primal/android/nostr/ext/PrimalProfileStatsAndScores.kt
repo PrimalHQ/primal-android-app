@@ -15,10 +15,13 @@ fun PrimalEvent.asProfileStatsPO(): ProfileStats? {
         joinedAt = content.timeJoined,
         following = content.followsCount,
         followers = content.followersCount,
+        readsCount = content.readsCount,
+        mediaCount = content.mediaCount,
         notesCount = content.noteCount,
         repliesCount = content.replyCount,
         relaysCount = content.relayCount,
         totalReceivedZaps = content.totalZapCount,
+        contentZapCount = content.contentZapCount,
         totalReceivedSats = content.totalSatsZapped,
     )
 }
