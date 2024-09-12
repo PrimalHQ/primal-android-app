@@ -1,15 +1,20 @@
 package net.primal.android.explore.asearch
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.Close
@@ -84,19 +89,24 @@ private fun AdvancedSearchScreen(
             )
         },
         bottomBar = {
-            PrimalLoadingButton(
-                modifier = Modifier
-                    .navigationBarsPadding()
-                    .padding(horizontal = 16.dp)
-                    .fillMaxWidth(),
-                text = stringResource(id = R.string.asearch_search_button),
-                onClick = { eventPublisher(UiEvent.OnSearch) },
-            )
+            Box(
+                modifier = Modifier.background(AppTheme.colorScheme.background),
+            ) {
+                PrimalLoadingButton(
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp, vertical = 12.dp)
+                        .navigationBarsPadding()
+                        .fillMaxWidth(),
+                    text = stringResource(id = R.string.asearch_search_button),
+                    onClick = { eventPublisher(UiEvent.OnSearch) },
+                )
+            }
         },
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .padding(top = 8.dp)
+                .verticalScroll(rememberScrollState())
                 .padding(paddingValues),
             verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
