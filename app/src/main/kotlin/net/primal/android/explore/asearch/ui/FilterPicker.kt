@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.PrimalDivider
+import net.primal.android.core.compose.PrimalSliderThumb
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.dropdown.DropdownPrimalMenu
 import net.primal.android.explore.asearch.AdvancedSearchContract
@@ -280,7 +281,13 @@ private fun SliderColumn(
                 track = {
                     SliderDefaults.Track(
                         sliderState = it,
-                        modifier = Modifier.scale(scaleX = 1f, scaleY = 1.5f),
+                        modifier = Modifier.scale(scaleX = 1f, scaleY = 0.5f),
+                        colors = sliderColors,
+                    )
+                },
+                thumb = {
+                    PrimalSliderThumb(
+                        interactionSource = interactionSource,
                         colors = sliderColors,
                     )
                 },
