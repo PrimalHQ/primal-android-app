@@ -17,6 +17,7 @@ import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
 import net.primal.android.nostr.ext.mapAsProfileDataPO
 import net.primal.android.nostr.ext.takeContentAsPrimalUserFollowersCountsOrNull
 import net.primal.android.nostr.publish.NostrPublisher
+import net.primal.android.profile.db.ProfileData
 import net.primal.android.profile.db.ProfileInteraction
 import net.primal.android.profile.report.ReportType
 import net.primal.android.user.accounts.UserAccountFetcher
@@ -50,6 +51,23 @@ class ProfileRepository @Inject constructor(
 
     fun observeProfileData(profileId: String) =
         database.profiles().observeProfileData(profileId = profileId).filterNotNull()
+
+    suspend fun fetchUserProfileFollowedBy(
+        profileId: String,
+        userId: String,
+        limit: Int,
+    ): List<ProfileData> {
+        val users = usersApi.getUserProfileFollowedBy(profileId, userId, limit)
+
+        val cdnResources = users.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
+        val profiles = users.metadataEvents.mapAsProfileDataPO(cdnResources = cdnResources)
+
+        withContext(dispatchers.io()) {
+            database.profiles().upsertAll(data = profiles)
+        }
+
+        return profiles
+    }
 
     suspend fun observeProfilesData(profileIds: List<String>) =
         withContext(dispatchers.io()) {

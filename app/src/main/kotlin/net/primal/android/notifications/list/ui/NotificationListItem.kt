@@ -31,6 +31,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import java.time.Instant
 import net.primal.android.R
+import net.primal.android.core.compose.AvatarOverlap
 import net.primal.android.core.compose.AvatarThumbnailsRow
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.WrappedContentWithSuffix
@@ -358,7 +359,7 @@ private fun NotificationsGroupHeader(
                 AvatarThumbnailsRow(
                     modifier = Modifier.fillMaxWidth(),
                     avatarCdnImages = notifications.map { it.actionUserAvatarCdnImage },
-                    overlapAvatars = false,
+                    avatarOverlap = AvatarOverlap.None,
                     hasAvatarBorder = false,
                     onClick = { index ->
                         notifications.getOrNull(index)?.actionUserId?.let { onProfileClick?.invoke(it) }
@@ -412,7 +413,7 @@ private fun HeaderContent(
     if (showAvatars) {
         AvatarThumbnailsRow(
             avatarCdnImages = notifications.map { it.actionUserAvatarCdnImage },
-            overlapAvatars = false,
+            avatarOverlap = AvatarOverlap.None,
             hasAvatarBorder = false,
             onClick = { index ->
                 notifications.getOrNull(index)?.actionUserId?.let { onProfileClick?.invoke(it) }

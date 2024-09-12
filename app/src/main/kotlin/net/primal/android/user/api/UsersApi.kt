@@ -11,6 +11,12 @@ interface UsersApi {
 
     suspend fun getUserProfile(userId: String): UserProfileResponse
 
+    suspend fun getUserProfileFollowedBy(
+        profileId: String,
+        userId: String,
+        limit: Int = 5,
+    ): UserProfilesResponse
+
     suspend fun getUserFollowList(userId: String): UserContactsResponse
 
     suspend fun getUserProfilesMetadata(userIds: Set<String>): UserProfilesResponse

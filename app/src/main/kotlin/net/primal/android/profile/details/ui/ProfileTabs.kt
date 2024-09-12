@@ -32,10 +32,10 @@ fun ProfileTabs(
     onNotesCountClick: () -> Unit,
     repliesCount: Int?,
     onRepliesCountClick: () -> Unit,
-    followingCount: Int?,
-    onFollowingCountClick: () -> Unit,
-    followersCount: Int?,
-    onFollowersCountClick: () -> Unit,
+    readsCount: Int?,
+    onReadsCountClick: () -> Unit,
+    mediaCount: Int?,
+    onMediaCountClick: () -> Unit,
     modifier: Modifier = Modifier,
     placeholderText: String = "-",
 ) {
@@ -87,16 +87,16 @@ fun ProfileTabs(
 
         CustomTab(
             selected = false,
-            onClick = onFollowingCountClick,
-            text = followingCount?.asTabText() ?: placeholderText,
-            label = stringResource(id = R.string.profile_following_stat),
+            onClick = onReadsCountClick,
+            text = readsCount?.asTabText() ?: placeholderText,
+            label = stringResource(id = R.string.profile_reads_stat),
         )
 
         CustomTab(
             selected = false,
-            onClick = onFollowersCountClick,
-            text = followersCount?.asTabText() ?: placeholderText,
-            label = stringResource(id = R.string.profile_followers_stat),
+            onClick = onMediaCountClick,
+            text = mediaCount?.asTabText() ?: placeholderText,
+            label = stringResource(id = R.string.profile_media_stat),
         )
     }
 }

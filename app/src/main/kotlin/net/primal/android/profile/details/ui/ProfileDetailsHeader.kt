@@ -13,19 +13,29 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.PlaceholderVerticalAlign
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
+import java.text.NumberFormat
 import kotlinx.coroutines.flow.flowOf
 import net.primal.android.R
+import net.primal.android.core.compose.AvatarOverlap
+import net.primal.android.core.compose.AvatarThumbnailsRow
 import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.ListLoading
 import net.primal.android.core.compose.ListNoContent
@@ -33,6 +43,7 @@ import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.isEmpty
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
+import net.primal.android.core.compose.profile.model.ProfileStatsUi
 import net.primal.android.core.ext.openUriSafely
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.formatNip05Identifier
@@ -165,6 +176,14 @@ private fun ProfileHeaderDetails(
             )
         }
 
+        ProfileFollowIndicators(
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+            followingCount = state.profileStats?.followingCount,
+            followersCount = state.profileStats?.followersCount,
+            onFollowingClick = { onFollowsClick(state.profileId, ProfileFollowsType.Following) },
+            onFollowersClick = { onFollowsClick(state.profileId, ProfileFollowsType.Followers) },
+        )
+
         if (state.profileDetails?.about?.isNotEmpty() == true) {
             ProfileAboutSection(
                 modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
@@ -188,6 +207,14 @@ private fun ProfileHeaderDetails(
             )
         }
 
+        if (state.userFollowedByProfiles.isNotEmpty()) {
+            UserFollowedByIndicator(
+                modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+                profiles = state.userFollowedByProfiles.filterNot { it == state.profileDetails },
+                onProfileClick = onProfileClick,
+            )
+        }
+
         ProfileTabs(
             modifier = Modifier.padding(bottom = 8.dp, top = 8.dp),
             feedFeedSpec = state.profileFeedSpec,
@@ -199,10 +226,112 @@ private fun ProfileHeaderDetails(
             onRepliesCountClick = {
                 eventPublisher(ProfileDetailsContract.UiEvent.ChangeProfileFeed(ProfileFeedSpec.AuthoredReplies))
             },
-            followingCount = state.profileStats?.followingCount,
-            onFollowingCountClick = { onFollowsClick(state.profileId, ProfileFollowsType.Following) },
-            followersCount = state.profileStats?.followersCount,
-            onFollowersCountClick = { onFollowsClick(state.profileId, ProfileFollowsType.Followers) },
+            readsCount = state.profileStats?.readsCount,
+            onReadsCountClick = { },
+            mediaCount = state.profileStats?.mediaCount,
+            onMediaCountClick = { },
+        )
+    }
+}
+
+@Composable
+private fun UserFollowedByIndicator(
+    modifier: Modifier,
+    profiles: List<ProfileDetailsUi>,
+    onProfileClick: (String) -> Unit,
+) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier,
+    ) {
+        AvatarThumbnailsRow(
+            avatarBorderColor = AppTheme.colorScheme.background,
+            avatarCdnImages = profiles.map { it.avatarCdnImage },
+            onClick = {
+                onProfileClick(profiles[it].pubkey)
+            },
+            avatarOverlap = AvatarOverlap.Start,
+            avatarBorderSize = 1.dp,
+            avatarSize = 36.dp,
+            maxAvatarsToShow = 5,
+            displayAvatarOverflowIndicator = false,
+        )
+        val text =
+            stringResource(id = R.string.profile_followed_by) + " " + profiles.joinToString { it.userDisplayName }
+        Text(
+            text = text,
+            maxLines = 2,
+            color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
+            overflow = TextOverflow.Ellipsis,
+            style = AppTheme.typography.bodyMedium.copy(lineHeight = TextUnit(16.0f, TextUnitType.Sp)),
+        )
+    }
+}
+
+@Composable
+private fun ProfileFollowIndicators(
+    modifier: Modifier = Modifier,
+    followingCount: Int?,
+    followersCount: Int?,
+    onFollowingClick: () -> Unit,
+    onFollowersClick: () -> Unit,
+) {
+    val numberFormat = remember { NumberFormat.getNumberInstance() }
+    val followingAnnotatedString = buildAnnotatedString {
+        append(
+            AnnotatedString(
+                text = followingCount?.let { numberFormat.format(it) } ?: "-",
+                spanStyle = SpanStyle(
+                    color = AppTheme.colorScheme.onSurfaceVariant,
+                    fontStyle = AppTheme.typography.labelLarge.fontStyle,
+                ),
+            ),
+        )
+        append(
+            AnnotatedString(
+                text = " " + stringResource(id = R.string.drawer_following_suffix).lowercase(),
+                spanStyle = SpanStyle(
+                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
+                    fontStyle = AppTheme.typography.labelLarge.fontStyle,
+                ),
+            ),
+        )
+    }
+    val followersAnnotatedString = buildAnnotatedString {
+        append(
+            AnnotatedString(
+                text = followersCount?.let { numberFormat.format(it) } ?: "-",
+                spanStyle = SpanStyle(
+                    color = AppTheme.colorScheme.onSurfaceVariant,
+                    fontStyle = AppTheme.typography.labelLarge.fontStyle,
+                ),
+            ),
+        )
+        append(
+            AnnotatedString(
+                text = " " + stringResource(id = R.string.drawer_followers_suffix).lowercase(),
+                spanStyle = SpanStyle(
+                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
+                    fontStyle = AppTheme.typography.labelLarge.fontStyle,
+                ),
+            ),
+        )
+    }
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.Bottom,
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        Text(
+            modifier = Modifier.clickable { onFollowingClick() },
+            text = followingAnnotatedString,
+            style = AppTheme.typography.labelLarge,
+        )
+        Text(
+            modifier = Modifier.clickable { onFollowersClick() },
+            text = followersAnnotatedString,
+            style = AppTheme.typography.labelLarge,
         )
     }
 }
@@ -319,8 +448,10 @@ private fun PreviewProfileHeaderDetails() {
                         userDisplayName = "qauser",
                         authorDisplayName = "qauser",
                         internetIdentifier = "qa@primal.net",
+                        about = "qauser",
                     ),
                     notes = flowOf(),
+                    profileStats = ProfileStatsUi(11, 12, 13, 14),
                 ),
                 eventPublisher = {},
                 onEditProfileClick = {},

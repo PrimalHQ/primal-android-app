@@ -455,6 +455,8 @@
 
     <string name="profile_following_stat">following</string>
     <string name="profile_followers_stat">followers</string>
+    <string name="profile_reads_stat">reads</string>
+    <string name="profile_media_stat">media</string>
     <string name="profile_notes_stat">notes</string>
     <string name="profile_replies_stat">replies</string>
     <string name="profile_follow_button">Follow</string>
@@ -471,6 +473,7 @@
     <string name="profile_user_feed_title">%1$s\'s feed</string>
     <string name="profile_user_is_muted">%1$s is muted.</string>
     <string name="profile_follows_you">Follows you</string>
+    <string name="profile_followed_by">Followed by</string>
 
     <string name="profile_follow">Follow</string>
     <string name="profile_unfollow">Unfollow</string>

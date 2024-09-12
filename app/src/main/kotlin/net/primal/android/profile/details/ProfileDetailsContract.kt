@@ -18,6 +18,7 @@ interface ProfileDetailsContract {
         val isProfileMuted: Boolean = false,
         val isProfileFeedInActiveUserFeeds: Boolean = false,
         val profileDetails: ProfileDetailsUi? = null,
+        val userFollowedByProfiles: List<ProfileDetailsUi> = emptyList(),
         val profileStats: ProfileStatsUi? = null,
         val referencedProfilesData: Set<ProfileDetailsUi> = emptySet(),
         val zappingState: ZappingState = ZappingState(),

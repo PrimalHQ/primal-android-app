@@ -7,6 +7,8 @@ data class ProfileStatsUi(
     val followersCount: Int? = null,
     val notesCount: Int? = null,
     val repliesCount: Int? = null,
+    val readsCount: Int? = null,
+    val mediaCount: Int? = null,
 )
 
 fun ProfileStats.asProfileStatsUi() =
@@ -15,4 +17,6 @@ fun ProfileStats.asProfileStatsUi() =
         followersCount = this.followers,
         notesCount = this.notesCount,
         repliesCount = this.repliesCount,
+        readsCount = this.readsCount,
+        mediaCount = this.mediaCount,
     )
