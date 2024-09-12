@@ -83,7 +83,7 @@ class ProfileDetailsViewModel @Inject constructor(
         observeProfileData()
         observeReferencedProfilesData()
         observeProfileStats()
-        getProfileFollowedBy()
+        fetchProfileFollowedBy()
         observeActiveAccount()
         observeContainsFeed()
         observeMutedAccount()
@@ -128,9 +128,9 @@ class ProfileDetailsViewModel @Inject constructor(
             }
         }
 
-    private fun getProfileFollowedBy() =
+    private fun fetchProfileFollowedBy() =
         viewModelScope.launch {
-            val profiles = profileRepository.getUserProfileFollowedBy(profileId, activeAccountStore.activeUserId(), 10)
+            val profiles = profileRepository.fetchUserProfileFollowedBy(profileId, activeAccountStore.activeUserId(), 10)
 
             setState { copy(userFollowedByProfiles = profiles.map { it.asProfileDetailsUi() }) }
         }

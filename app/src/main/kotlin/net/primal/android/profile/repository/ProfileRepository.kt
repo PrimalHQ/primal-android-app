@@ -52,7 +52,7 @@ class ProfileRepository @Inject constructor(
     fun observeProfileData(profileId: String) =
         database.profiles().observeProfileData(profileId = profileId).filterNotNull()
 
-    suspend fun getUserProfileFollowedBy(
+    suspend fun fetchUserProfileFollowedBy(
         userProfileId: String,
         userId: String,
         limit: Int,
