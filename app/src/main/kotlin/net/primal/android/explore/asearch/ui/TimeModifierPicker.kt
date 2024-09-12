@@ -11,9 +11,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.DateRangePicker
@@ -21,12 +24,14 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDateRangePickerState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -41,6 +46,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import java.time.Instant
 import java.time.format.FormatStyle
+import kotlin.time.Duration.Companion.days
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.PrimalDivider
@@ -68,6 +74,14 @@ fun TimeModifierPicker(
         modifier = modifier,
         onDismissRequest = onDismissRequest,
         sheetState = sheetState,
+        dragHandle = if (selectState == TimeModifierPickerState.Custom) {
+            null
+        } else {
+            @Composable {
+                BottomSheetDefaults.DragHandle()
+            }
+        },
+        containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
     ) {
         CenterAlignedTopAppBar(
             title = {
@@ -88,8 +102,14 @@ fun TimeModifierPicker(
                     }
                 }
             },
+            colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
+            ),
         )
         AnimatedContent(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight(),
             targetState = selectState,
             transitionSpec = { transitionSpecBetweenStages() },
             label = "TimeModifierPicker",
@@ -138,7 +158,8 @@ private fun AllPickerStateContent(
     )
     Column(
         modifier = Modifier
-            .fillMaxSize(),
+            .fillMaxWidth()
+            .wrapContentHeight(),
     ) {
         timeModifiers.forEach { timeModifier ->
             TimeModifierListItem(
@@ -216,6 +237,7 @@ private fun CustomTimePicker(
     selectedItem: AdvancedSearchContract.TimeModifier?,
 ) {
     val dateRangePickerState = rememberDateRangePickerState(
+        initialDisplayedMonthMillis = Instant.now().minusSeconds(30.days.inWholeSeconds).toEpochMilli(),
         selectableDates = object : SelectableDates {
             override fun isSelectableDate(utcTimeMillis: Long): Boolean {
                 return Instant.ofEpochMilli(utcTimeMillis) < Instant.now()
@@ -232,11 +254,13 @@ private fun CustomTimePicker(
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
+        containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
         bottomBar = {
             Column(
                 verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.Top),
                 modifier = Modifier
-                    .padding(16.dp)
+                    .padding(horizontal = 16.dp)
+                    .padding(top = 8.dp)
                     .fillMaxWidth(),
             ) {
                 PrimalLoadingButton(
@@ -260,7 +284,7 @@ private fun CustomTimePicker(
                 ) {
                     Text(
                         text = stringResource(id = R.string.asearch_custom_time_posted_cancel),
-                        style = AppTheme.typography.bodyLarge,
+                        style = AppTheme.typography.bodyMedium,
                     )
                 }
             }
@@ -269,8 +293,10 @@ private fun CustomTimePicker(
         DateRangePicker(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues),
+                .padding(paddingValues)
+                .offset(y = (-16).dp),
             colors = DatePickerDefaults.colors(
+                containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
                 selectedDayContentColor = AppTheme.colorScheme.surfaceVariant,
             ),
             title = null,
@@ -294,6 +320,7 @@ private fun TimeModifierListItem(
             Text(
                 text = itemDisplayName,
                 color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+                style = AppTheme.typography.bodyMedium,
             )
         },
         trailingContent = {
@@ -301,6 +328,9 @@ private fun TimeModifierListItem(
                 Icon(imageVector = Icons.Filled.Check, contentDescription = null)
             }
         },
+        colors = ListItemDefaults.colors(
+            containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
+        ),
     )
     PrimalDivider()
 }
