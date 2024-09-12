@@ -274,8 +274,14 @@
     <string name="asearch_filter_label">Filter(s)</string>
     <string name="asearch_filter_sheet_title">Search Filter</string>
     <string name="asearch_filter_orientation">Orientation</string>
+    <string name="asearch_filter_min_read_time">Min read time (minutes)</string>
+    <string name="asearch_filter_max_read_time">Max read time (minutes)</string>
     <string name="asearch_filter_min_duration">Min duration (seconds)</string>
     <string name="asearch_filter_max_duration">Max duration (seconds)</string>
+    <string name="asearch_filter_min_read_time_shorthand">Min read time</string>
+    <string name="asearch_filter_max_read_time_shorthand">Max read time</string>
+    <string name="asearch_filter_min_duration_shorthand">Min duration</string>
+    <string name="asearch_filter_max_duration_shorthand">Max duration</string>
     <string name="asearch_filter_min_content_score">Min content score</string>
     <string name="asearch_filter_min_interactions">Min interactions</string>
     <string name="asearch_filter_min_likes">Min likes</string>

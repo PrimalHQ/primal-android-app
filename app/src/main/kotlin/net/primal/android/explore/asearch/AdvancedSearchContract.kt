@@ -45,6 +45,8 @@ interface AdvancedSearchContract {
 
     data class SearchFilter(
         val orientation: Orientation? = null,
+        val minReadTime: Int = 0,
+        val maxReadTime: Int = 0,
         val minDuration: Int = 0,
         val maxDuration: Int = 0,
         val minContentScore: Int = 0,
@@ -71,6 +73,7 @@ interface AdvancedSearchContract {
         Sound,
         ;
 
+        fun isReads() = this == Reads
         fun isImages() = this == Images
         fun isVideos() = this == Videos
         fun isSound() = this == Sound

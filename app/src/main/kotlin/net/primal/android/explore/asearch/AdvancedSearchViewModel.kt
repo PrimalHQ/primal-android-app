@@ -41,7 +41,13 @@ class AdvancedSearchViewModel @Inject constructor() : ViewModel() {
                     is UiEvent.SearchKindChanged -> {
                         setState {
                             copy(
-                                filter = filter.copy(orientation = null, minDuration = 0, maxDuration = 0),
+                                filter = filter.copy(
+                                    orientation = null,
+                                    minReadTime = 0,
+                                    maxReadTime = 0,
+                                    minDuration = 0,
+                                    maxDuration = 0,
+                                ),
                                 searchKind = it.kind,
                             )
                         }
