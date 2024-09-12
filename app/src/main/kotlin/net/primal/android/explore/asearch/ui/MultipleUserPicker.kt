@@ -27,6 +27,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -83,7 +84,9 @@ fun MultipleUserPicker(
             onDismissRequest()
             viewModel.setEvent(SearchContract.UiEvent.ResetSearchQuery)
         },
+        dragHandle = null,
         sheetState = sheetState,
+        containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
     ) {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
@@ -100,20 +103,30 @@ fun MultipleUserPicker(
                 )
             },
             bottomBar = {
-                MultipleUserPickerBottomAppBar(
-                    sheetState = sheetState,
-                    onDismissRequest = onDismissRequest,
-                    onApplyClick = {
-                        onUsersSelected(selectedUsers)
-                        viewModel.setEvent(SearchContract.UiEvent.ResetSearchQuery)
-                    },
-                )
+                Column(
+                    modifier = Modifier.background(color = AppTheme.extraColorScheme.surfaceVariantAlt2),
+                ) {
+                    PrimalDivider()
+                    MultipleUserPickerBottomAppBar(
+                        sheetState = sheetState,
+                        onDismissRequest = onDismissRequest,
+                        onApplyClick = {
+                            onUsersSelected(selectedUsers)
+                            viewModel.setEvent(SearchContract.UiEvent.ResetSearchQuery)
+                        },
+                    )
+                }
             },
         ) { paddingValues ->
             Column(
                 modifier = Modifier.padding(paddingValues),
             ) {
                 SearchBar(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(color = AppTheme.extraColorScheme.surfaceVariantAlt2)
+                        .padding(horizontal = 8.dp)
+                        .padding(bottom = 8.dp),
                     placeholderText = placeholderText,
                     onSearchQueryChange = { viewModel.setEvent(SearchContract.UiEvent.SearchQueryUpdated(it)) },
                     searchQuery = state.value.searchQuery,
@@ -176,22 +189,22 @@ private fun MultipleUserPickerBottomAppBar(
 
 @Composable
 private fun SearchBar(
+    modifier: Modifier,
     searchQuery: String,
     onSearchQueryChange: (String) -> Unit,
     placeholderText: String,
 ) {
-    PrimalIconTextField(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp)
-            .padding(bottom = 8.dp),
-        value = searchQuery,
-        focusRequester = null,
-        onValueChange = onSearchQueryChange,
-        placeholderText = placeholderText,
-        iconImageVector = PrimalIcons.Search,
-    )
-    PrimalDivider()
+    Column {
+        PrimalIconTextField(
+            modifier = modifier,
+            value = searchQuery,
+            focusRequester = null,
+            onValueChange = onSearchQueryChange,
+            placeholderText = placeholderText,
+            iconImageVector = PrimalIcons.Search,
+        )
+        PrimalDivider()
+    }
 }
 
 @Composable
@@ -203,18 +216,19 @@ private fun MultipleUserPickerTopAppBar(
     selectedUsers: Set<UserProfileItemUi>,
     onUserClick: (UserProfileItemUi) -> Unit,
 ) {
-    Column {
+    Column(
+        modifier = Modifier.background(color = AppTheme.extraColorScheme.surfaceVariantAlt2),
+    ) {
         CenterAlignedTopAppBar(
-            title = {
-                Text(
-                    text = sheetTitle,
-                )
-            },
+            title = { Text(text = sheetTitle) },
             navigationIcon = {
                 IconButton(onClick = onDismissRequest) {
                     Icon(imageVector = PrimalIcons.ArrowBack, contentDescription = null)
                 }
             },
+            colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
+            ),
         )
         SelectedUsersIndicator(
             lazyListState = lazyListState,
