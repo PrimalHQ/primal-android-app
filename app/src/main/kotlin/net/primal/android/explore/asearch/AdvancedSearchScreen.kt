@@ -275,7 +275,7 @@ private fun SearchFilterPicker(
         selectedContent = {
             Text(
                 textAlign = TextAlign.End,
-                modifier = Modifier.width(200.dp),
+                modifier = Modifier.weight(1.0f),
                 text = searchFilter.toDisplayName(),
                 style = AppTheme.typography.bodyMedium,
                 color = if (searchFilter.isEmpty()) {
@@ -364,7 +364,7 @@ fun TimePostedPicker(timePosted: TimeModifier, onTimePostedChanged: (TimeModifie
             if (timePosted is TimeModifier.Custom) {
                 Text(
                     textAlign = TextAlign.End,
-                    modifier = Modifier.width(200.dp),
+                    modifier = Modifier.weight(1.0f),
                     text = "${
                         timePosted.startDate.formatToDefaultDateFormat(
                             FormatStyle.MEDIUM,
@@ -440,27 +440,27 @@ private fun OptionListItem(
             .fillMaxWidth()
             .clickable { onClick() },
         headlineContent = {
-            Text(
-                modifier = Modifier.padding(horizontal = 12.dp),
-                text = label,
-                color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
-                style = AppTheme.typography.bodyMedium,
-                maxLines = 1,
-            )
-        },
-        trailingContent = {
-            Row(
-                modifier = Modifier.padding(horizontal = 12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.End),
-            ) {
-                selectedContent()
-                Icon(
-                    tint = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
-                    modifier = Modifier.size(12.dp),
-                    imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
-                    contentDescription = null,
+            Row {
+                Text(
+                    modifier = Modifier.padding(horizontal = 12.dp),
+                    text = label,
+                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+                    style = AppTheme.typography.bodyMedium,
+                    maxLines = 1,
                 )
+                Row(
+                    modifier = Modifier.weight(1.0f).padding(horizontal = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.End),
+                ) {
+                    selectedContent()
+                    Icon(
+                        tint = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+                        modifier = Modifier.size(12.dp),
+                        imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
+                        contentDescription = null,
+                    )
+                }
             }
         },
     )
