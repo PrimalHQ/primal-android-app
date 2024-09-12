@@ -29,6 +29,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import net.primal.android.core.compose.PrimalNavigationBarLightningBolt
 import net.primal.android.core.compose.PrimalTopLevelDestination
@@ -125,15 +126,16 @@ fun PrimalDrawerScaffold(
                     PrimalNavigationBarLightningBolt(
                         modifier = Modifier
                             .then(if (bottomBarInitialHeight == 0.dp) bottomBarMeasureHeightModifier else Modifier)
-                            .then(
-                                if (bottomBarInitialHeight > 0.dp) {
-                                    Modifier.offset(
-                                        y = bottomBarInitialHeight - bottomBarRealHeight,
-                                    )
-                                } else {
-                                    Modifier
-                                },
-                            ),
+                            .offset {
+                                IntOffset(
+                                    x = 0.dp.roundToPx(),
+                                    y = if (bottomBarInitialHeight > 0.dp) {
+                                        bottomBarInitialHeight - bottomBarRealHeight
+                                    } else {
+                                        0.dp
+                                    }.roundToPx(),
+                                )
+                            },
                         activeDestination = activeDestination,
                         onTopLevelDestinationChanged = onPrimaryDestinationChanged,
                         onActiveDestinationClick = onActiveDestinationClick,
