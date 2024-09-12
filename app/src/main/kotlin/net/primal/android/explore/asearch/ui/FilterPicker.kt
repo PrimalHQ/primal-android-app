@@ -104,14 +104,12 @@ fun FilterPicker(
                         label = stringResource(id = R.string.asearch_filter_min_read_time),
                         value = filterState.minReadTime,
                         onValueChange = { filterState = filterState.copy(minReadTime = it) },
-                        minValue = 0,
                         maxValue = 20,
                     )
                     SliderColumn(
                         label = stringResource(id = R.string.asearch_filter_max_read_time),
                         value = filterState.maxReadTime,
                         onValueChange = { filterState = filterState.copy(maxReadTime = it) },
-                        minValue = 0,
                         maxValue = 20,
                     )
                 }
@@ -126,11 +124,13 @@ fun FilterPicker(
                         label = stringResource(id = R.string.asearch_filter_min_duration),
                         value = filterState.minDuration,
                         onValueChange = { filterState = filterState.copy(minDuration = it) },
+                        maxValue = 600,
                     )
                     SliderColumn(
                         label = stringResource(id = R.string.asearch_filter_max_duration),
                         value = filterState.maxDuration,
                         onValueChange = { filterState = filterState.copy(maxDuration = it) },
+                        maxValue = 600,
                     )
                 }
                 CommonSliders(
@@ -151,31 +151,37 @@ private fun CommonSliders(
         label = stringResource(id = R.string.asearch_filter_min_content_score),
         value = filterState.minContentScore,
         onValueChange = { onFilterStateChange { copy(minContentScore = it) } },
+        maxValue = 100,
     )
     SliderColumn(
         label = stringResource(id = R.string.asearch_filter_min_interactions),
         value = filterState.minInteractions,
         onValueChange = { onFilterStateChange { copy(minInteractions = it) } },
+        maxValue = 100,
     )
     SliderColumn(
         label = stringResource(id = R.string.asearch_filter_min_likes),
         value = filterState.minLikes,
         onValueChange = { onFilterStateChange { copy(minLikes = it) } },
+        maxValue = 20,
     )
     SliderColumn(
         label = stringResource(id = R.string.asearch_filter_min_zaps),
         value = filterState.minZaps,
         onValueChange = { onFilterStateChange { copy(minZaps = it) } },
+        maxValue = 20,
     )
     SliderColumn(
         label = stringResource(id = R.string.asearch_filter_min_replies),
         value = filterState.minReplies,
         onValueChange = { onFilterStateChange { copy(minReplies = it) } },
+        maxValue = 20,
     )
     SliderColumn(
         label = stringResource(id = R.string.asearch_filter_min_reposts),
         value = filterState.minReposts,
         onValueChange = { onFilterStateChange { copy(minReposts = it) } },
+        maxValue = 20,
     )
 }
 
