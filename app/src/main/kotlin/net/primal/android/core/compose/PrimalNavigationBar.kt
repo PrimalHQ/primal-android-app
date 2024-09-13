@@ -116,8 +116,6 @@ fun PrimalNavigationBarLightningBolt(
         Pair(PrimalTopLevelDestination.Notifications, badges.unreadNotificationsCount),
     )
 
-    val navBarHeight = with(LocalDensity.current) { WindowInsets.navigationBars.getBottom(this).toDp() }
-
     Surface(color = Color.Transparent) {
         Column(modifier = modifier) {
             Box(
@@ -236,6 +234,7 @@ fun PrimalNavigationBarLightningBolt(
                 }
             }
 
+            val navBarHeight = with(LocalDensity.current) { WindowInsets.navigationBars.getBottom(this).toDp() }
             Spacer(
                 modifier = Modifier
                     .background(color = AppTheme.colorScheme.surface)
