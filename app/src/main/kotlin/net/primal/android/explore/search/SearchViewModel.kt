@@ -51,7 +51,7 @@ class SearchViewModel @Inject constructor(
                 when (it) {
                     is UiEvent.SearchQueryUpdated -> setState { copy(searching = true, searchQuery = it.query) }
                     is UiEvent.ProfileSelected -> markProfileInteraction(profileId = it.profileId)
-                    UiEvent.ResetSearchQuery -> setState { copy(searchQuery = "") }
+                    UiEvent.ResetSearchQuery -> setState { copy(searchQuery = "", searchResults = emptyList()) }
                 }
             }
         }
