@@ -2,7 +2,6 @@ package net.primal.android.profile.details.ui
 
 import android.content.Context
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,14 +12,19 @@ import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,6 +47,8 @@ import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
+import net.primal.android.core.compose.pulltorefresh.LaunchedPullToRefreshEndingEffect
+import net.primal.android.core.compose.pulltorefresh.PrimalIndicator
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.notes.feed.NoteFeedLazyColumn
 import net.primal.android.notes.feed.model.FeedPostUi
@@ -197,25 +203,32 @@ fun ProfileDetailsScreen(
         }
     }
 
-//    val pullToRefreshState = rememberPullToRefreshState(
-//        positionalThreshold = PullToRefreshDefaults.PositionalThreshold.times(other = 1.5f),
-//    )
-//
-//    LaunchedEffect(pullToRefreshState.isRefreshing) {
-//        if (pullToRefreshState.isRefreshing) {
-//            pagingItems.refresh()
-//            eventPublisher(ProfileDetailsContract.UiEvent.RequestProfileUpdate)
-//        }
-//    }
+    val pullToRefreshState = rememberPullToRefreshState()
+    var pullToRefreshing by remember { mutableStateOf(false) }
 
-//    LaunchedPullToRefreshEndingEffect(
-//        mediatorLoadStates = pagingItems.loadState.mediator,
-//        onRefreshEnd = { pullToRefreshState.endRefresh() },
-//    )
+    LaunchedPullToRefreshEndingEffect(
+        mediatorLoadStates = pagingItems.loadState.mediator,
+        onRefreshEnd = { pullToRefreshing = false },
+    )
 
     Surface {
-        Box(
-//            modifier = Modifier.nestedScroll(pullToRefreshState.nestedScrollConnection),
+        PullToRefreshBox(
+            modifier = Modifier.fillMaxSize(),
+            isRefreshing = pullToRefreshing,
+            onRefresh = {
+                pagingItems.refresh()
+                eventPublisher(ProfileDetailsContract.UiEvent.RequestProfileUpdate)
+                pullToRefreshing = true
+            },
+            state = pullToRefreshState,
+            indicator = {
+                PrimalIndicator(
+                    modifier = Modifier.align(Alignment.TopCenter),
+                    isRefreshing = pullToRefreshing,
+                    state = pullToRefreshState,
+                    threshold = PullToRefreshDefaults.PositionalThreshold.times(other = 1.5f),
+                )
+            },
         ) {
             NoteFeedLazyColumn(
                 modifier = Modifier
@@ -311,13 +324,6 @@ fun ProfileDetailsScreen(
                     )
                 },
             )
-
-//            PullToRefreshContainer(
-//                modifier = Modifier.align(Alignment.TopCenter),
-//                state = pullToRefreshState,
-//                contentColor = AppTheme.colorScheme.primary,
-//                indicator = { PrimalPullToRefreshIndicator(state = pullToRefreshState) },
-//            )
 
             SnackbarHost(
                 hostState = snackbarHostState,

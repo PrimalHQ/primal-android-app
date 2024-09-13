@@ -51,7 +51,6 @@ import timber.log.Timber
 fun NoteFeedLazyColumn(
     modifier: Modifier = Modifier,
     pagingItems: LazyPagingItems<FeedPostUi>,
-    contentPadding: PaddingValues,
     listState: LazyListState,
     zappingState: ZappingState,
     noteCallbacks: NoteCallbacks,
@@ -66,6 +65,7 @@ fun NoteFeedLazyColumn(
     shouldShowNoContentState: Boolean = true,
     showReplyTo: Boolean = true,
     noContentText: String = stringResource(id = R.string.feed_no_content),
+    contentPadding: PaddingValues = PaddingValues(all = 0.dp),
     header: @Composable (LazyItemScope.() -> Unit)? = null,
     stickyHeader: @Composable (LazyItemScope.() -> Unit)? = null,
 ) {
