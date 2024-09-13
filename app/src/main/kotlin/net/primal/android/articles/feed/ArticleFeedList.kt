@@ -12,8 +12,20 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -24,6 +36,11 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
 import fr.acinq.lightning.utils.UUID
+import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.launch
 import net.primal.android.BuildConfig
 import net.primal.android.R
 import net.primal.android.articles.feed.ui.FeedArticleListItem
@@ -36,6 +53,7 @@ import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.isEmpty
 import net.primal.android.core.compose.isNotEmpty
+import net.primal.android.core.compose.pulltorefresh.PrimalIndicator
 import timber.log.Timber
 
 @Composable
@@ -62,7 +80,7 @@ fun ArticleFeedList(
     )
 }
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class, FlowPreview::class)
 @Composable
 private fun ArticleFeedList(
     state: ArticleFeedContract.UiState,
@@ -71,15 +89,78 @@ private fun ArticleFeedList(
     header: @Composable (LazyItemScope.() -> Unit)? = null,
     stickyHeader: @Composable (LazyItemScope.() -> Unit)? = null,
 ) {
+    val uiScope = rememberCoroutineScope()
     val pagingItems = state.articles.collectAsLazyPagingItems()
     val feedListState = pagingItems.rememberLazyListStatePagingWorkaround()
 
+    val pullToRefreshState = rememberPullToRefreshState()
+    var pullToRefreshing by remember { mutableStateOf(false) }
+
+    var isMediatorRefreshing by remember { mutableStateOf<Boolean?>(null) }
+    LaunchedEffect(pagingItems) {
+        snapshotFlow { pagingItems.loadState }
+            .mapNotNull { it.mediator }
+            .debounce(0.21.seconds)
+            .collect { loadState ->
+                val isRefreshing = loadState.refresh == LoadState.Loading || loadState.prepend == LoadState.Loading
+                if (!isRefreshing) {
+                    isMediatorRefreshing = false
+                }
+            }
+    }
+
+    if (isMediatorRefreshing == false && pullToRefreshing) {
+        LaunchedEffect(true) {
+            uiScope.launch {
+                feedListState.scrollToItem(index = 0)
+                pullToRefreshing = false
+            }
+        }
+    }
+
+    PullToRefreshBox(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(contentPadding),
+        isRefreshing = pullToRefreshing,
+        onRefresh = {
+            pagingItems.refresh()
+            pullToRefreshing = true
+            isMediatorRefreshing = true
+        },
+        state = pullToRefreshState,
+        indicator = {
+            PrimalIndicator(
+                modifier = Modifier.align(Alignment.TopCenter),
+                isRefreshing = pullToRefreshing,
+                state = pullToRefreshState,
+            )
+        },
+    ) {
+        ArticleFeedLazyColumn(
+            pagingItems = pagingItems,
+            listState = feedListState,
+            onArticleClick = onArticleClick,
+            header = header,
+            stickyHeader = stickyHeader,
+        )
+    }
+}
+
+@ExperimentalFoundationApi
+@Composable
+private fun ArticleFeedLazyColumn(
+    pagingItems: LazyPagingItems<FeedArticleUi>,
+    listState: LazyListState,
+    onArticleClick: (naddr: String) -> Unit,
+    header: @Composable (LazyItemScope.() -> Unit)? = null,
+    stickyHeader: @Composable (LazyItemScope.() -> Unit)? = null,
+) {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .animateContentSize(),
-        contentPadding = contentPadding,
-        state = feedListState,
+        state = listState,
     ) {
         handleMediatorPrependState(pagingItems)
 
