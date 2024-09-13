@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -34,6 +35,7 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -85,20 +87,25 @@ fun FilterPicker(
 
     ModalBottomSheet(
         tonalElevation = 0.dp,
-        modifier = modifier,
+        modifier = modifier.statusBarsPadding(),
         onDismissRequest = onDismissRequest,
         sheetState = sheetState,
+        containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
+        dragHandle = null,
     ) {
         Scaffold(
+            containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
             modifier = Modifier.fillMaxSize(),
             topBar = {
                 CenterAlignedTopAppBar(
                     title = {
                         Text(
                             text = stringResource(id = R.string.asearch_filter_sheet_title),
-                            color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
                         )
                     },
+                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                        containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
+                    ),
                 )
             },
             bottomBar = {
@@ -116,6 +123,7 @@ fun FilterPicker(
                 modifier = Modifier
                     .padding(24.dp)
                     .verticalScroll(scrollState)
+                    .background(AppTheme.extraColorScheme.surfaceVariantAlt2)
                     .padding(paddingValues = paddingValues),
             ) {
                 if (searchKind.isReads()) {
@@ -236,7 +244,7 @@ private fun FilterPickerBottomBar(
 ) {
     val scope = rememberCoroutineScope()
     Box(
-        modifier = Modifier.background(AppTheme.colorScheme.background),
+        modifier = Modifier.background(AppTheme.extraColorScheme.surfaceVariantAlt2),
     ) {
         PrimalLoadingButton(
             modifier = Modifier
