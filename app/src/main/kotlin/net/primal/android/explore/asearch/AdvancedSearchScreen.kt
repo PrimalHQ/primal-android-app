@@ -551,10 +551,10 @@ private fun Orientation?.toDisplayName(): String =
             }=${stringResource(id = R.string.asearch_filter_orientation_vertical)}"
     }
 
-private fun Int.toFilterQueryOrEmpty(queryProperty: String): String =
-    this.run { if (this != 0) "$queryProperty=$this" else "" }
+fun Int.toFilterQueryOrEmpty(queryProperty: String, delimiter: String = "="): String =
+    this.run { if (this != 0) "$queryProperty$delimiter$this" else "" }
 
-private fun SearchFilter.isEmpty(): Boolean =
+fun SearchFilter.isEmpty(): Boolean =
     (this.orientation == null || this.orientation == Orientation.Any) &&
         this.minReadTime == 0 &&
         this.maxReadTime == 0 &&
