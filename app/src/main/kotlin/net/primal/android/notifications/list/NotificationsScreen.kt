@@ -417,8 +417,8 @@ private fun NotificationsList(
                         ListPlaceholderLoading(
                             modifier = Modifier.fillMaxSize(),
                             itemPadding = PaddingValues(top = 8.dp),
-                            lightAnimationResId = R.raw.primal_loader_notification_light_v2,
-                            darkAnimationResId = R.raw.primal_loader_notification_dark_v2,
+                            lightAnimationResId = R.raw.primal_loader_notification_light_v3,
+                            darkAnimationResId = R.raw.primal_loader_notification_v3,
                         )
                     }
                 }
