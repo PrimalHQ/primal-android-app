@@ -1,5 +1,6 @@
 package net.primal.android.explore.asearch.ui
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.slideInHorizontally
@@ -26,6 +27,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.ModalBottomSheetProperties
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.SheetState
@@ -74,6 +76,7 @@ fun TimeModifierPicker(
         modifier = modifier,
         onDismissRequest = onDismissRequest,
         sheetState = sheetState,
+        properties = ModalBottomSheetProperties(shouldDismissOnBackPress = selectState.isAll()),
         dragHandle = if (selectState == TimeModifierPickerState.Custom) {
             null
         } else {
@@ -83,6 +86,9 @@ fun TimeModifierPicker(
         },
         containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
     ) {
+        BackHandler(enabled = selectState.isCustom()) {
+            selectState = TimeModifierPickerState.All
+        }
         CenterAlignedTopAppBar(
             title = {
                 Text(
