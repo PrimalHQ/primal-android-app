@@ -131,13 +131,16 @@ class ProfileDetailsViewModel @Inject constructor(
 
     private fun fetchProfileFollowedBy() =
         viewModelScope.launch {
-            val profiles = profileRepository.fetchUserProfileFollowedBy(
-                profileId = profileId,
-                userId = activeAccountStore.activeUserId(),
-                limit = 10,
-            )
-
-            setState { copy(userFollowedByProfiles = profiles.map { it.asProfileDetailsUi() }) }
+            try {
+                val profiles = profileRepository.fetchUserProfileFollowedBy(
+                    profileId = profileId,
+                    userId = activeAccountStore.activeUserId(),
+                    limit = 10,
+                )
+                setState { copy(userFollowedByProfiles = profiles.map { it.asProfileDetailsUi() }) }
+            } catch (error: WssException) {
+                Timber.e(error)
+            }
         }
 
     private fun observeActiveAccount() =
