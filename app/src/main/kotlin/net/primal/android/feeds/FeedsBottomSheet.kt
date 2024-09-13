@@ -8,6 +8,7 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
@@ -66,12 +67,12 @@ private fun FeedsBottomSheet(
     eventPublisher: (FeedsContract.UiEvent) -> Unit,
 ) {
     ModalBottomSheet(
+        modifier = Modifier.statusBarsPadding(),
         sheetState = sheetState,
         onDismissRequest = onDismissRequest,
         containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
         contentColor = AppTheme.colorScheme.onSurfaceVariant,
         tonalElevation = 0.dp,
-        dragHandle = null,
     ) {
         BackHandler {
             when (state.feedMarketplaceStage) {
