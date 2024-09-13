@@ -4,6 +4,7 @@ import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
+import androidx.room.withTransaction
 import kotlinx.coroutines.withContext
 import net.primal.android.articles.api.ArticlesApi
 import net.primal.android.articles.api.model.ArticleFeedRequestBody
@@ -49,14 +50,21 @@ class ArticleFeedMediator(
                         articleAuthorId = it.authorId,
                     )
                 }
-            if (!connections.isNullOrEmpty()) {
-                database.articleFeedsConnections().connect(data = connections)
-            }
 
-            response?.persistToDatabaseAsTransaction(
-                userId = userId,
-                database = database,
-            )
+            database.withTransaction {
+                if (loadType == LoadType.REFRESH) {
+                    database.articleFeedsConnections().deleteConnectionsBySpec(spec = feedSpec)
+                }
+
+                if (!connections.isNullOrEmpty()) {
+                    database.articleFeedsConnections().connect(data = connections)
+                }
+
+                response?.persistToDatabaseAsTransaction(
+                    userId = userId,
+                    database = database,
+                )
+            }
         }
 
         return MediatorResult.Success(endOfPaginationReached = true)
