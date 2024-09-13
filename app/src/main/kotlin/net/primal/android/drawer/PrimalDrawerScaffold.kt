@@ -171,4 +171,5 @@ fun PrimalDrawerScaffold(
 
 val FloatingNewDataHostTopPadding = 42.dp
 
-private fun Dp.isZeroOrNavigationBarFullHeight() = this == 0.dp || this == NavigationBarFullHeightDp
+private fun Dp.isZeroOrNavigationBarFullHeight() =
+    this == 0.dp || (this >= (NavigationBarFullHeightDp - 1.dp) && this <= (NavigationBarFullHeightDp + 1.dp))
