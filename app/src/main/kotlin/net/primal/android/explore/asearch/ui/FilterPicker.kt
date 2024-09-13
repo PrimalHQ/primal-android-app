@@ -16,6 +16,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DropdownMenuItem
@@ -23,13 +26,17 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.MenuItemColors
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.OutlinedTextFieldDefaults.Container
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,16 +46,28 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import androidx.core.text.isDigitsOnly
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalSliderThumb
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.dropdown.DropdownPrimalMenu
+import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
+import net.primal.android.core.ext.onFocusSelectAll
 import net.primal.android.explore.asearch.AdvancedSearchContract
 import net.primal.android.theme.AppTheme
 
@@ -297,29 +316,107 @@ private fun SliderColumn(
                 valueRange = minValue.toFloat()..maxValue.toFloat(),
             )
             Spacer(modifier = Modifier.width(10.dp))
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(percent = 50))
-                    .width(72.dp)
-                    .height(42.dp)
-                    .background(AppTheme.extraColorScheme.surfaceVariantAlt1),
-                contentAlignment = Alignment.CenterEnd,
-            ) {
-                Text(
-                    modifier = Modifier
-                        .padding(end = 16.dp)
-                        .padding(vertical = 8.dp),
-                    maxLines = 1,
-                    text = value.toString(),
-                    color = if (value == 0) {
-                        AppTheme.extraColorScheme.onSurfaceVariantAlt4
-                    } else {
-                        AppTheme.colorScheme.onPrimary
-                    },
-                )
-            }
+
+            SliderIndicatorField(
+                interactionSource = interactionSource,
+                value = value,
+                onValueChange = onValueChange,
+            )
         }
     }
+}
+
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+private fun SliderIndicatorField(
+    interactionSource: MutableInteractionSource,
+    value: Int,
+    onValueChange: (Int) -> Unit,
+) {
+    val basicTextFieldValue = remember { mutableStateOf(TextFieldValue(text = value.toString())) }
+
+    LaunchedEffect(value) {
+        basicTextFieldValue.value = basicTextFieldValue.value.copy(text = value.toString())
+    }
+
+    val keyboardVisibility by keyboardVisibilityAsState()
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
+    val focusRequester = remember { FocusRequester() }
+    LaunchedEffect(keyboardVisibility) {
+        if (!keyboardVisibility) {
+            focusManager.clearFocus()
+        }
+    }
+
+    val textColor = if (value == 0) {
+        AppTheme.extraColorScheme.onSurfaceVariantAlt4
+    } else {
+        AppTheme.colorScheme.onPrimary
+    }
+    val containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1
+
+    val colors = TextFieldDefaults.colors(
+        focusedIndicatorColor = containerColor,
+        unfocusedIndicatorColor = containerColor,
+        focusedContainerColor = containerColor,
+        unfocusedContainerColor = containerColor,
+        disabledContainerColor = containerColor,
+        focusedTextColor = textColor,
+        unfocusedTextColor = textColor,
+    )
+
+    BasicTextField(
+        decorationBox = { innerTextField ->
+            OutlinedTextFieldDefaults.DecorationBox(
+                colors = colors,
+                singleLine = true,
+                enabled = true,
+                innerTextField = innerTextField,
+                interactionSource = interactionSource,
+                value = basicTextFieldValue.value.text,
+                visualTransformation = VisualTransformation.None,
+                contentPadding = PaddingValues(end = 16.dp),
+                container = {
+                    Container(
+                        enabled = true,
+                        isError = false,
+                        interactionSource = interactionSource,
+                        colors = colors,
+                        shape = RoundedCornerShape(percent = 50),
+                        focusedBorderThickness = 0.dp,
+                        unfocusedBorderThickness = 0.dp,
+                    )
+                },
+            )
+        },
+        textStyle = AppTheme.typography.bodyLarge.copy(color = textColor, textAlign = TextAlign.End),
+        modifier = Modifier
+            .height(42.dp)
+            .width(72.dp)
+            .focusRequester(focusRequester)
+            .onFocusSelectAll(basicTextFieldValue),
+        value = basicTextFieldValue.value,
+        onValueChange = {
+            if (!it.text.isDigitsOnly()) {
+                return@BasicTextField
+            }
+
+            basicTextFieldValue.value = it
+            runCatching {
+                onValueChange(
+                    it.text
+                        .ifEmpty { "0" }
+                        .toInt()
+                        .coerceAtLeast(0),
+                )
+            }
+        },
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done, keyboardType = KeyboardType.Number),
+        keyboardActions = KeyboardActions(
+            onDone = { keyboardController?.hide() },
+        ),
+    )
 }
 
 @Composable
