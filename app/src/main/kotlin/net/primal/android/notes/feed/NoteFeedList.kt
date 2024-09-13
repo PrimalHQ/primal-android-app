@@ -348,9 +348,6 @@ fun NoteFeedList(
     }
 
     PullToRefreshBox(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(paddingValues),
         isRefreshing = pullToRefreshing,
         onRefresh = {
             pagingItems.refresh()
@@ -360,7 +357,9 @@ fun NoteFeedList(
         state = pullToRefreshState,
         indicator = {
             PrimalIndicator(
-                modifier = Modifier.align(Alignment.TopCenter),
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(paddingValues),
                 isRefreshing = pullToRefreshing,
                 state = pullToRefreshState,
             )
@@ -368,6 +367,7 @@ fun NoteFeedList(
     ) {
         NoteFeedLazyColumn(
             modifier = Modifier.fillMaxSize(),
+            contentPadding = paddingValues,
             pagingItems = pagingItems,
             listState = feedListState,
             zappingState = zappingState,
