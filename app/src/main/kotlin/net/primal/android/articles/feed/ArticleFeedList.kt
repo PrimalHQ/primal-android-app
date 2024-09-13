@@ -119,9 +119,6 @@ private fun ArticleFeedList(
     }
 
     PullToRefreshBox(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(contentPadding),
         isRefreshing = pullToRefreshing,
         onRefresh = {
             pagingItems.refresh()
@@ -131,7 +128,9 @@ private fun ArticleFeedList(
         state = pullToRefreshState,
         indicator = {
             PrimalIndicator(
-                modifier = Modifier.align(Alignment.TopCenter),
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(contentPadding),
                 isRefreshing = pullToRefreshing,
                 state = pullToRefreshState,
             )
@@ -141,6 +140,7 @@ private fun ArticleFeedList(
             pagingItems = pagingItems,
             listState = feedListState,
             onArticleClick = onArticleClick,
+            contentPadding = contentPadding,
             header = header,
             stickyHeader = stickyHeader,
         )
@@ -153,6 +153,7 @@ private fun ArticleFeedLazyColumn(
     pagingItems: LazyPagingItems<FeedArticleUi>,
     listState: LazyListState,
     onArticleClick: (naddr: String) -> Unit,
+    contentPadding: PaddingValues = PaddingValues(all = 0.dp),
     header: @Composable (LazyItemScope.() -> Unit)? = null,
     stickyHeader: @Composable (LazyItemScope.() -> Unit)? = null,
 ) {
@@ -161,6 +162,7 @@ private fun ArticleFeedLazyColumn(
             .fillMaxSize()
             .animateContentSize(),
         state = listState,
+        contentPadding = contentPadding,
     ) {
         handleMediatorPrependState(pagingItems)
 
