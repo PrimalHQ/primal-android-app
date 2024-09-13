@@ -307,6 +307,9 @@ private fun SliderColumn(
                         sliderState = it,
                         modifier = Modifier.scale(scaleX = 1f, scaleY = 0.5f),
                         colors = sliderColors,
+                        drawStopIndicator = null,
+                        drawTick = { _, _ -> },
+                        thumbTrackGapSize = 0.dp,
                     )
                 },
                 thumb = {
@@ -320,6 +323,7 @@ private fun SliderColumn(
                 steps = maxValue,
                 valueRange = minValue.toFloat()..maxValue.toFloat(),
             )
+
             Spacer(modifier = Modifier.width(10.dp))
 
             SliderIndicatorField(
