@@ -1,5 +1,6 @@
 package net.primal.android.feeds
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.slideInHorizontally
@@ -9,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.ModalBottomSheetProperties
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -19,10 +19,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.SecureFlagPolicy
 import androidx.hilt.navigation.compose.hiltViewModel
 import net.primal.android.R
 import net.primal.android.feeds.FeedsContract.UiState.FeedMarketplaceStage
@@ -73,12 +71,20 @@ private fun FeedsBottomSheet(
         containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
         contentColor = AppTheme.colorScheme.onSurfaceVariant,
         tonalElevation = 0.dp,
-        scrimColor = Color.Transparent,
-        properties = ModalBottomSheetProperties(
-            securePolicy = SecureFlagPolicy.Inherit,
-            shouldDismissOnBackPress = false,
-        ),
+        dragHandle = null,
     ) {
+        BackHandler {
+            when (state.feedMarketplaceStage) {
+                FeedMarketplaceStage.FeedList -> if (state.isEditMode) {
+                    eventPublisher(FeedsContract.UiEvent.CloseEditMode)
+                } else {
+                    onDismissRequest()
+                }
+                FeedMarketplaceStage.FeedMarketplace -> eventPublisher(FeedsContract.UiEvent.CloseFeedMarketplace)
+                FeedMarketplaceStage.FeedDetails -> eventPublisher(FeedsContract.UiEvent.CloseFeedDetails)
+            }
+        }
+
         AnimatedContent(
             modifier = Modifier
                 .fillMaxSize()

@@ -1,7 +1,8 @@
 package net.primal.android.explore.asearch.ui
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -10,9 +11,11 @@ import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
@@ -41,17 +44,18 @@ fun <T> SingleChoicePicker(
         modifier = modifier,
         onDismissRequest = onDismissRequest,
         sheetState = sheetState,
+        containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
     ) {
         CenterAlignedTopAppBar(
-            title = {
-                Text(
-                    text = titleText,
-                )
-            },
+            title = { Text(text = titleText) },
+            colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
+            ),
         )
         LazyColumn(
             modifier = Modifier
-                .fillMaxSize(),
+                .fillMaxWidth()
+                .wrapContentHeight(),
         ) {
             items(items = items) { item ->
                 ListItem(
@@ -65,6 +69,9 @@ fun <T> SingleChoicePicker(
                                     onItemSelected(item)
                                 }
                         },
+                    colors = ListItemDefaults.colors(
+                        containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
+                    ),
                     headlineContent = {
                         Text(
                             text = item.itemDisplayName(),
