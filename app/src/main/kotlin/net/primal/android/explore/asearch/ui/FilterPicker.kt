@@ -376,7 +376,7 @@ private fun SliderIndicatorField(
                 interactionSource = interactionSource,
                 value = basicTextFieldValue.value.text,
                 visualTransformation = VisualTransformation.None,
-                contentPadding = PaddingValues(end = 16.dp),
+                contentPadding = PaddingValues(start = 10.dp, end = 16.dp),
                 container = {
                     Container(
                         enabled = true,
@@ -397,10 +397,9 @@ private fun SliderIndicatorField(
             .focusRequester(focusRequester)
             .onFocusSelectAll(basicTextFieldValue),
         value = basicTextFieldValue.value,
+        singleLine = true,
         onValueChange = {
-            if (!it.text.isDigitsOnly()) {
-                return@BasicTextField
-            }
+            if (!it.text.isDigitsOnly()) return@BasicTextField
 
             basicTextFieldValue.value = it
             runCatching {
