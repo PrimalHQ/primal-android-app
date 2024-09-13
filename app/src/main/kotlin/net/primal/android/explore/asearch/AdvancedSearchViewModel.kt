@@ -3,12 +3,20 @@ package net.primal.android.explore.asearch
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.time.Instant
+import java.time.ZoneId
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
+import net.primal.android.core.compose.profile.model.UserProfileItemUi
+import net.primal.android.crypto.hexToNpubHrp
+import net.primal.android.explore.asearch.AdvancedSearchContract.Orientation
+import net.primal.android.explore.asearch.AdvancedSearchContract.SearchFilter
 import net.primal.android.explore.asearch.AdvancedSearchContract.UiEvent
 import net.primal.android.explore.asearch.AdvancedSearchContract.UiState
 
@@ -18,6 +26,12 @@ class AdvancedSearchViewModel @Inject constructor() : ViewModel() {
     private val _state = MutableStateFlow(UiState())
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
+
+    companion object {
+        private const val DATE_TIME_FORMAT = "yyyy-MM-dd_HH:mm"
+    }
+
+    private val formatter = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT).withZone(ZoneId.systemDefault())
 
     private val events: MutableSharedFlow<UiEvent> = MutableSharedFlow()
     fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
@@ -61,18 +75,31 @@ class AdvancedSearchViewModel @Inject constructor() : ViewModel() {
 
     private fun onSearch() =
         viewModelScope.launch {
-            val searchKind = state.value.searchKind.toSearchCommand()
-            val searchOrderBy = state.value.orderBy.toSearchCommand()
+            val uiState = state.value
+            val searchParams = listOf(
+                uiState.includedWords,
+                uiState.excludedWords?.let { "-$this" },
+                uiState.searchKind.toSearchCommand(),
+                uiState.postedBy.joinWithPrefix("from:"),
+                uiState.replyingTo.joinWithPrefix("to:"),
+                uiState.zappedBy.joinWithPrefix("zappedby:"),
+                uiState.timePosted.toSearchCommand(),
+                uiState.scope.toSearchCommand(),
+                uiState.filter.toSearchCommand(),
+                uiState.orderBy.toSearchCommand(),
+            )
+
+            val searchCommand = searchParams.filterNot { it.isNullOrEmpty() }.joinToString(separator = " ")
         }
 
     private fun AdvancedSearchContract.SearchKind.toSearchCommand() =
         when (this) {
-            AdvancedSearchContract.SearchKind.Notes -> "kind: 1"
-            AdvancedSearchContract.SearchKind.Reads -> "kind: 30023"
+            AdvancedSearchContract.SearchKind.Notes -> "kind:1"
+            AdvancedSearchContract.SearchKind.Reads -> "kind:30023"
             AdvancedSearchContract.SearchKind.Images -> "filter:image"
             AdvancedSearchContract.SearchKind.Videos -> "filter:video"
             AdvancedSearchContract.SearchKind.Sound -> "filter:audio"
-            AdvancedSearchContract.SearchKind.NoteReplies -> "kind: 1 filter:replies"
+            AdvancedSearchContract.SearchKind.NoteReplies -> "kind:1 filter:replies"
             AdvancedSearchContract.SearchKind.ReadsComments -> "kind:30023 filter:replies"
         }
 
@@ -80,5 +107,65 @@ class AdvancedSearchViewModel @Inject constructor() : ViewModel() {
         when (this) {
             AdvancedSearchContract.SearchOrderBy.Time -> ""
             AdvancedSearchContract.SearchOrderBy.ContentScore -> "orderby:score"
+        }
+
+    private fun AdvancedSearchContract.TimeModifier.toSearchCommand(): String =
+        when (this) {
+            AdvancedSearchContract.TimeModifier.Anytime -> ""
+            AdvancedSearchContract.TimeModifier.Today ->
+                "since:" + ZonedDateTime.now().minusDays(1).toInstant().toCommandFormattedString()
+
+            AdvancedSearchContract.TimeModifier.Week ->
+                "since:" + ZonedDateTime.now().minusDays(7).toInstant().toCommandFormattedString()
+
+            AdvancedSearchContract.TimeModifier.Month ->
+                "since:" + ZonedDateTime.now().minusMonths(1).toInstant().toCommandFormattedString()
+
+            AdvancedSearchContract.TimeModifier.Year ->
+                "since:" + ZonedDateTime.now().minusYears(1).toInstant().toCommandFormattedString()
+
+            is AdvancedSearchContract.TimeModifier.Custom ->
+                "since:${this.startDate.toCommandFormattedString()} before:${this.endDate.toCommandFormattedString()}"
+        }
+
+    private fun AdvancedSearchContract.SearchScope.toSearchCommand() =
+        when (this) {
+            AdvancedSearchContract.SearchScope.Global -> ""
+            AdvancedSearchContract.SearchScope.MyFollows -> "scope:myfollows"
+            AdvancedSearchContract.SearchScope.MyNetwork -> "scope:mynetwork"
+            AdvancedSearchContract.SearchScope.MyFollowsInteractions -> "scope:myfollowinteractions"
+        }
+
+    private fun SearchFilter.toSearchCommand() =
+        if (this.isEmpty()) {
+            ""
+        } else {
+            val stringFilters = arrayOf(
+                this.orientation.toFilterQuery(),
+                this.minReadTime.times(238).toFilterQueryOrEmpty("minwords", delimiter = ":"),
+                this.maxReadTime.times(238).toFilterQueryOrEmpty("maxwords", delimiter = ":"),
+                this.minDuration.toFilterQueryOrEmpty("minduration", delimiter = ":"),
+                this.maxDuration.toFilterQueryOrEmpty("maxduration", delimiter = ":"),
+                this.minContentScore.toFilterQueryOrEmpty("minscore", delimiter = ":"),
+                this.minInteractions.toFilterQueryOrEmpty("mininteractions", delimiter = ":"),
+                this.minLikes.toFilterQueryOrEmpty("minlikes", delimiter = ":"),
+                this.minZaps.toFilterQueryOrEmpty("minzaps", delimiter = ":"),
+                this.minReplies.toFilterQueryOrEmpty("minreplies", delimiter = ":"),
+                this.minReposts.toFilterQueryOrEmpty("minreposts", delimiter = ":"),
+            )
+
+            stringFilters.filter { it.isNotEmpty() }.joinToString(" ")
+        }
+
+    private fun Instant.toCommandFormattedString() = formatter.format(this)
+
+    private fun Set<UserProfileItemUi>.joinWithPrefix(prefix: String) =
+        this.joinToString(separator = " ") { prefix + it.profileId.hexToNpubHrp() }
+
+    private fun Orientation?.toFilterQuery() =
+        when (this) {
+            Orientation.Any, null -> ""
+            Orientation.Horizontal -> "orientation:horizontal"
+            Orientation.Vertical -> "orientation:vertical"
         }
 }
