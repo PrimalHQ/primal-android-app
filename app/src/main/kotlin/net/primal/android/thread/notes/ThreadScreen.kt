@@ -38,6 +38,8 @@ import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -88,6 +90,7 @@ import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromCamer
 import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromGallery
 import net.primal.android.core.compose.icons.primaliconpack.More
 import net.primal.android.core.compose.preview.PrimalPreview
+import net.primal.android.core.compose.pulltorefresh.PrimalIndicator
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.crypto.hexToNoteHrp
 import net.primal.android.editor.NoteEditorContract
@@ -391,25 +394,35 @@ private fun ThreadConversationLazyColumn(
         )
     }
 
-//    val pullToRefreshState = rememberPullToRefreshState()
-//
-//    LaunchedEffect(pullToRefreshState.isRefreshing) {
-//        if (pullToRefreshState.isRefreshing) {
-//            eventPublisher(ThreadContract.UiEvent.UpdateConversation)
-//        }
-//    }
-//
-//    LaunchedEffect(!state.fetching) {
-//        if (!state.fetching) {
-//            pullToRefreshState.endRefresh()
-//        }
-//    }
+    val pullToRefreshState = rememberPullToRefreshState()
+    var pullToRefreshing by remember { mutableStateOf(false) }
 
-    Box(
-//        modifier = Modifier.nestedScroll(pullToRefreshState.nestedScrollConnection),
+    LaunchedEffect(!state.fetching) {
+        if (!state.fetching) {
+            pullToRefreshing = false
+        }
+    }
+
+    PullToRefreshBox(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(paddingValues),
+        isRefreshing = pullToRefreshing,
+        onRefresh = {
+            eventPublisher(ThreadContract.UiEvent.UpdateConversation)
+            pullToRefreshing = true
+        },
+        state = pullToRefreshState,
+        indicator = {
+            PrimalIndicator(
+                modifier = Modifier.align(Alignment.TopCenter),
+                isRefreshing = pullToRefreshing,
+                state = pullToRefreshState,
+            )
+        },
     ) {
         ThreadLazyColumn(
-            paddingValues = paddingValues,
+            modifier = Modifier.fillMaxSize(),
             state = state,
             scaffoldBarsMaxHeightPx = scaffoldBarsMaxHeightPx,
             onPostClick = onPostClick,
@@ -477,35 +490,27 @@ private fun ThreadConversationLazyColumn(
             },
             onReactionsClick = onReactionsClick,
         )
-
-//        PullToRefreshContainer(
-//            modifier = Modifier
-//                .padding(paddingValues)
-//                .align(Alignment.TopCenter),
-//            state = pullToRefreshState,
-//            contentColor = AppTheme.colorScheme.primary,
-//            indicator = { PrimalPullToRefreshIndicator(state = pullToRefreshState) },
-//        )
     }
 }
 
 @Composable
 private fun ThreadLazyColumn(
-    paddingValues: PaddingValues,
+    modifier: Modifier,
     state: ThreadContract.UiState,
     scaffoldBarsMaxHeightPx: Int,
     onPostClick: (String) -> Unit,
     onArticleClick: (naddr: String) -> Unit,
     onProfileClick: (String) -> Unit,
-    onPostAction: ((noteAction: FeedPostAction, note: FeedPostUi) -> Unit)? = null,
-    onPostLongClickAction: ((noteAction: FeedPostAction, note: FeedPostUi) -> Unit)? = null,
-    onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
     onHashtagClick: (String) -> Unit,
     onMediaClick: (MediaClickEvent) -> Unit,
     onBookmarkClick: (String) -> Unit,
     onMuteUserClick: (authorId: String) -> Unit,
     onReactionsClick: (noteId: String) -> Unit,
     onReportContentClick: OnReportContentClick,
+    paddingValues: PaddingValues = PaddingValues(all = 0.dp),
+    onPostAction: ((noteAction: FeedPostAction, note: FeedPostUi) -> Unit)? = null,
+    onPostLongClickAction: ((noteAction: FeedPostAction, note: FeedPostUi) -> Unit)? = null,
+    onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
 ) {
     var threadListMaxHeightPx by remember { mutableIntStateOf(0) }
     var highlightPostHeightPx by remember { mutableIntStateOf(0) }
@@ -518,10 +523,7 @@ private fun ThreadLazyColumn(
     }
 
     LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .navigationBarsPadding()
-            .onSizeChanged { threadListMaxHeightPx = it.height },
+        modifier = modifier.onSizeChanged { threadListMaxHeightPx = it.height },
         contentPadding = paddingValues,
     ) {
         if (state.replyToArticle != null) {
