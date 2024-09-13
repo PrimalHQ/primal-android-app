@@ -439,7 +439,7 @@ private fun OptionListItem(
             .fillMaxWidth()
             .clickable { onClick() },
         headlineContent = {
-            Row {
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     modifier = Modifier.padding(horizontal = 12.dp),
                     text = label,
@@ -448,7 +448,9 @@ private fun OptionListItem(
                     maxLines = 1,
                 )
                 Row(
-                    modifier = Modifier.weight(1.0f).padding(horizontal = 12.dp),
+                    modifier = Modifier
+                        .weight(1.0f)
+                        .padding(horizontal = 12.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.End),
                 ) {

@@ -2,7 +2,7 @@ package net.primal.android.explore.asearch.ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -41,7 +41,7 @@ fun <T> SingleChoicePicker(
 
     ModalBottomSheet(
         tonalElevation = 0.dp,
-        modifier = modifier,
+        modifier = modifier.statusBarsPadding(),
         onDismissRequest = onDismissRequest,
         sheetState = sheetState,
         containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
@@ -53,9 +53,7 @@ fun <T> SingleChoicePicker(
             ),
         )
         LazyColumn(
-            modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentHeight(),
+            modifier = Modifier.fillMaxWidth(),
         ) {
             items(items = items) { item ->
                 ListItem(

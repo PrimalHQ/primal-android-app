@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -29,7 +28,6 @@ import androidx.compose.material3.MenuItemColors
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.OutlinedTextFieldDefaults.Container
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
@@ -91,40 +89,29 @@ fun FilterPicker(
         onDismissRequest = onDismissRequest,
         sheetState = sheetState,
         containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
-        dragHandle = null,
     ) {
-        Scaffold(
-            containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
-            modifier = Modifier.fillMaxSize(),
-            topBar = {
-                CenterAlignedTopAppBar(
-                    title = {
-                        Text(
-                            text = stringResource(id = R.string.asearch_filter_sheet_title),
-                        )
-                    },
-                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                        containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
-                    ),
-                )
-            },
-            bottomBar = {
-                FilterPickerBottomBar(
-                    sheetState = sheetState,
-                    onDismissRequest = onDismissRequest,
-                    onFiltersSelected = { filterSelected(filterState) },
-                )
-            },
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(AppTheme.extraColorScheme.surfaceVariantAlt2),
+        ) {
+            CenterAlignedTopAppBar(
+                title = {
+                    Text(
+                        text = stringResource(id = R.string.asearch_filter_sheet_title),
+                    )
+                },
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
+                ),
+            )
 
-        ) { paddingValues ->
-            val scrollState = rememberScrollState()
             Column(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 modifier = Modifier
+                    .fillMaxWidth()
                     .padding(24.dp)
-                    .verticalScroll(scrollState)
-                    .background(AppTheme.extraColorScheme.surfaceVariantAlt2)
-                    .padding(paddingValues = paddingValues),
+                    .verticalScroll(rememberScrollState()),
             ) {
                 if (searchKind.isReads()) {
                     SliderColumn(
@@ -165,6 +152,12 @@ fun FilterPicker(
                     onFilterStateChange = { reducer -> filterState = filterState.reducer() },
                 )
             }
+
+            FilterPickerBottomBar(
+                sheetState = sheetState,
+                onDismissRequest = onDismissRequest,
+                onFiltersSelected = { filterSelected(filterState) },
+            )
         }
     }
 }
@@ -174,42 +167,44 @@ private fun CommonSliders(
     filterState: AdvancedSearchContract.SearchFilter,
     onFilterStateChange: (AdvancedSearchContract.SearchFilter.() -> AdvancedSearchContract.SearchFilter) -> Unit,
 ) {
-    SliderColumn(
-        label = stringResource(id = R.string.asearch_filter_min_content_score),
-        value = filterState.minContentScore,
-        onValueChange = { onFilterStateChange { copy(minContentScore = it) } },
-        maxValue = 100,
-    )
-    SliderColumn(
-        label = stringResource(id = R.string.asearch_filter_min_interactions),
-        value = filterState.minInteractions,
-        onValueChange = { onFilterStateChange { copy(minInteractions = it) } },
-        maxValue = 100,
-    )
-    SliderColumn(
-        label = stringResource(id = R.string.asearch_filter_min_likes),
-        value = filterState.minLikes,
-        onValueChange = { onFilterStateChange { copy(minLikes = it) } },
-        maxValue = 20,
-    )
-    SliderColumn(
-        label = stringResource(id = R.string.asearch_filter_min_zaps),
-        value = filterState.minZaps,
-        onValueChange = { onFilterStateChange { copy(minZaps = it) } },
-        maxValue = 20,
-    )
-    SliderColumn(
-        label = stringResource(id = R.string.asearch_filter_min_replies),
-        value = filterState.minReplies,
-        onValueChange = { onFilterStateChange { copy(minReplies = it) } },
-        maxValue = 20,
-    )
-    SliderColumn(
-        label = stringResource(id = R.string.asearch_filter_min_reposts),
-        value = filterState.minReposts,
-        onValueChange = { onFilterStateChange { copy(minReposts = it) } },
-        maxValue = 20,
-    )
+    Column {
+        SliderColumn(
+            label = stringResource(id = R.string.asearch_filter_min_content_score),
+            value = filterState.minContentScore,
+            onValueChange = { onFilterStateChange { copy(minContentScore = it) } },
+            maxValue = 100,
+        )
+        SliderColumn(
+            label = stringResource(id = R.string.asearch_filter_min_interactions),
+            value = filterState.minInteractions,
+            onValueChange = { onFilterStateChange { copy(minInteractions = it) } },
+            maxValue = 100,
+        )
+        SliderColumn(
+            label = stringResource(id = R.string.asearch_filter_min_likes),
+            value = filterState.minLikes,
+            onValueChange = { onFilterStateChange { copy(minLikes = it) } },
+            maxValue = 20,
+        )
+        SliderColumn(
+            label = stringResource(id = R.string.asearch_filter_min_zaps),
+            value = filterState.minZaps,
+            onValueChange = { onFilterStateChange { copy(minZaps = it) } },
+            maxValue = 20,
+        )
+        SliderColumn(
+            label = stringResource(id = R.string.asearch_filter_min_replies),
+            value = filterState.minReplies,
+            onValueChange = { onFilterStateChange { copy(minReplies = it) } },
+            maxValue = 20,
+        )
+        SliderColumn(
+            label = stringResource(id = R.string.asearch_filter_min_reposts),
+            value = filterState.minReposts,
+            onValueChange = { onFilterStateChange { copy(minReposts = it) } },
+            maxValue = 20,
+        )
+    }
 }
 
 @Composable
@@ -218,7 +213,9 @@ private fun OrientationRow(
     onOrientationSelected: (AdvancedSearchContract.Orientation) -> Unit,
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 4.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {

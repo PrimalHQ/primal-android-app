@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
@@ -73,7 +74,13 @@ fun TimeModifierPicker(
 
     ModalBottomSheet(
         tonalElevation = 0.dp,
-        modifier = modifier,
+        modifier = modifier.then(
+            if (selectState != TimeModifierPickerState.Custom) {
+                Modifier.statusBarsPadding()
+            } else {
+                Modifier
+            },
+        ),
         onDismissRequest = onDismissRequest,
         sheetState = sheetState,
         properties = ModalBottomSheetProperties(shouldDismissOnBackPress = selectState.isAll()),
@@ -243,7 +250,7 @@ private fun CustomTimePicker(
     selectedItem: AdvancedSearchContract.TimeModifier?,
 ) {
     val dateRangePickerState = rememberDateRangePickerState(
-        initialDisplayedMonthMillis = Instant.now().minusSeconds(30.days.inWholeSeconds).toEpochMilli(),
+        initialDisplayedMonthMillis = Instant.now().minusSeconds(21.days.inWholeSeconds).toEpochMilli(),
         selectableDates = object : SelectableDates {
             override fun isSelectableDate(utcTimeMillis: Long): Boolean {
                 return Instant.ofEpochMilli(utcTimeMillis) < Instant.now()

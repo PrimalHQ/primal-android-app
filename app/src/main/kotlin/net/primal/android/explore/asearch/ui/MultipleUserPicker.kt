@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
@@ -22,7 +23,6 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetState
@@ -51,7 +51,6 @@ import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalIconTextField
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
-import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.Search
 import net.primal.android.core.compose.profile.model.UserProfileItemUi
 import net.primal.android.explore.search.SearchContract
@@ -79,12 +78,11 @@ fun MultipleUserPicker(
 
     ModalBottomSheet(
         tonalElevation = 0.dp,
-        modifier = modifier,
+        modifier = modifier.statusBarsPadding(),
         onDismissRequest = {
             onDismissRequest()
             viewModel.setEvent(SearchContract.UiEvent.ResetSearchQuery)
         },
-        dragHandle = null,
         sheetState = sheetState,
         containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
     ) {
@@ -93,10 +91,6 @@ fun MultipleUserPicker(
             topBar = {
                 MultipleUserPickerTopAppBar(
                     sheetTitle = sheetTitle,
-                    onDismissRequest = {
-                        onDismissRequest()
-                        viewModel.setEvent(SearchContract.UiEvent.ResetSearchQuery)
-                    },
                     lazyListState = lazyListState,
                     selectedUsers = selectedUsers,
                     onUserClick = { user -> selectedUsers = selectedUsers - user },
@@ -111,8 +105,8 @@ fun MultipleUserPicker(
                         sheetState = sheetState,
                         onDismissRequest = onDismissRequest,
                         onApplyClick = {
-                            onUsersSelected(selectedUsers)
                             viewModel.setEvent(SearchContract.UiEvent.ResetSearchQuery)
+                            onUsersSelected(selectedUsers)
                         },
                     )
                 }
@@ -211,7 +205,6 @@ private fun SearchBar(
 @OptIn(ExperimentalMaterial3Api::class)
 private fun MultipleUserPickerTopAppBar(
     sheetTitle: String,
-    onDismissRequest: () -> Unit,
     lazyListState: LazyListState,
     selectedUsers: Set<UserProfileItemUi>,
     onUserClick: (UserProfileItemUi) -> Unit,
@@ -221,11 +214,6 @@ private fun MultipleUserPickerTopAppBar(
     ) {
         CenterAlignedTopAppBar(
             title = { Text(text = sheetTitle) },
-            navigationIcon = {
-                IconButton(onClick = onDismissRequest) {
-                    Icon(imageVector = PrimalIcons.ArrowBack, contentDescription = null)
-                }
-            },
             colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                 containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
             ),
