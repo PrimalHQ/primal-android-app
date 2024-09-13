@@ -237,7 +237,7 @@ private fun SelectedUsersIndicator(
         state = lazyListState,
         modifier = modifier
             .padding(horizontal = 16.dp)
-            .padding(top = 4.dp, bottom = 8.dp),
+            .padding(bottom = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.Start),
         verticalAlignment = Alignment.CenterVertically,
     ) {

@@ -12,13 +12,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.DateRangePicker
@@ -74,23 +72,10 @@ fun TimeModifierPicker(
 
     ModalBottomSheet(
         tonalElevation = 0.dp,
-        modifier = modifier.then(
-            if (selectState != TimeModifierPickerState.Custom) {
-                Modifier.statusBarsPadding()
-            } else {
-                Modifier
-            },
-        ),
+        modifier = modifier.statusBarsPadding(),
         onDismissRequest = onDismissRequest,
         sheetState = sheetState,
         properties = ModalBottomSheetProperties(shouldDismissOnBackPress = selectState.isAll()),
-        dragHandle = if (selectState == TimeModifierPickerState.Custom) {
-            null
-        } else {
-            @Composable {
-                BottomSheetDefaults.DragHandle()
-            }
-        },
         containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
     ) {
         BackHandler(enabled = selectState.isCustom()) {
@@ -306,8 +291,7 @@ private fun CustomTimePicker(
         DateRangePicker(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
-                .offset(y = (-16).dp),
+                .padding(paddingValues),
             colors = DatePickerDefaults.colors(
                 containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
                 selectedDayContentColor = AppTheme.colorScheme.surfaceVariant,
