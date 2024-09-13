@@ -5,7 +5,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -29,8 +28,10 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import net.primal.android.core.compose.NavigationBarFullHeightDp
 import net.primal.android.core.compose.PrimalNavigationBarLightningBolt
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.user.domain.Badges
@@ -93,11 +94,9 @@ fun PrimalDrawerScaffold(
         content = {
             Scaffold(
                 modifier = if (focusModeEnabled) {
-                    Modifier
-                        .nestedScroll(topAppBarScrollBehavior.nestedScrollConnection)
-                        .navigationBarsPadding()
+                    Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection)
                 } else {
-                    Modifier.navigationBarsPadding()
+                    Modifier
                 },
                 topBar = { topAppBar(if (focusModeEnabled) topAppBarScrollBehavior else null) },
                 content = { paddingValues ->
@@ -124,8 +123,11 @@ fun PrimalDrawerScaffold(
                 },
                 bottomBar = {
                     PrimalNavigationBarLightningBolt(
-                        modifier = Modifier
-                            .then(if (bottomBarInitialHeight == 0.dp) bottomBarMeasureHeightModifier else Modifier)
+                        modifier = if (bottomBarInitialHeight.isZeroOrNavigationBarFullHeight()) {
+                            bottomBarMeasureHeightModifier
+                        } else {
+                            Modifier
+                        }
                             .offset {
                                 IntOffset(
                                     x = 0.dp.roundToPx(),
@@ -168,3 +170,5 @@ fun PrimalDrawerScaffold(
 }
 
 val FloatingNewDataHostTopPadding = 42.dp
+
+private fun Dp.isZeroOrNavigationBarFullHeight() = this == 0.dp || this == NavigationBarFullHeightDp
