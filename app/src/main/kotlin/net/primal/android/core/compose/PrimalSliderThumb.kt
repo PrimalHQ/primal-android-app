@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.SliderColors
 import androidx.compose.material3.SliderDefaults.colors
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateListOf
@@ -53,23 +54,20 @@ fun PrimalSliderThumb(
     }
     val shape = CircleShape
 
-    @Suppress("DEPRECATION_ERROR")
-    (
-        Spacer(
-            modifier
-                .size(thumbSize)
-                .indication(
-                    interactionSource = interactionSource,
-                    indication = androidx.compose.material.ripple.rememberRipple(
-                        bounded = false,
-                        radius = 20.dp,
-                    ),
-                )
-                .hoverable(interactionSource = interactionSource)
-                .shadow(if (enabled) elevation else 0.dp, shape, clip = false)
-                .background(colors.thumbColor(enabled), shape),
-        )
-        )
+    Spacer(
+        modifier
+            .size(thumbSize)
+            .indication(
+                interactionSource = interactionSource,
+                indication = ripple(
+                    bounded = false,
+                    radius = 16.dp,
+                ),
+            )
+            .hoverable(interactionSource = interactionSource)
+            .shadow(if (enabled) elevation else 0.dp, shape, clip = false)
+            .background(colors.thumbColor(enabled), shape),
+    )
 }
 
 private fun SliderColors.thumbColor(enabled: Boolean) = if (enabled) this.thumbColor else this.disabledThumbColor
