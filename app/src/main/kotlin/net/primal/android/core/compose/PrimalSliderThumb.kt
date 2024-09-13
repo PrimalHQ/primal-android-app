@@ -21,7 +21,6 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 
-
 private val ThumbDefaultElevation = 1.dp
 private val ThumbPressedElevation = 6.dp
 
@@ -55,21 +54,22 @@ fun PrimalSliderThumb(
     val shape = CircleShape
 
     @Suppress("DEPRECATION_ERROR")
-    (Spacer(
-        modifier
-            .size(thumbSize)
-            .indication(
-                interactionSource = interactionSource,
-                indication = androidx.compose.material.ripple.rememberRipple(
-                    bounded = false,
-                    radius = 20.dp,
+    (
+        Spacer(
+            modifier
+                .size(thumbSize)
+                .indication(
+                    interactionSource = interactionSource,
+                    indication = androidx.compose.material.ripple.rememberRipple(
+                        bounded = false,
+                        radius = 20.dp,
+                    ),
                 )
-            )
-            .hoverable(interactionSource = interactionSource)
-            .shadow(if (enabled) elevation else 0.dp, shape, clip = false)
-            .background(colors.thumbColor(enabled), shape)
-    ))
+                .hoverable(interactionSource = interactionSource)
+                .shadow(if (enabled) elevation else 0.dp, shape, clip = false)
+                .background(colors.thumbColor(enabled), shape),
+        )
+        )
 }
 
-private fun SliderColors.thumbColor(enabled: Boolean) =
-    if (enabled) this.thumbColor else this.disabledThumbColor
+private fun SliderColors.thumbColor(enabled: Boolean) = if (enabled) this.thumbColor else this.disabledThumbColor
