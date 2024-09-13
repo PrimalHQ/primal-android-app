@@ -208,8 +208,8 @@ fun NoteFeedLazyColumn(
                             ListPlaceholderLoading(
                                 modifier = Modifier.fillMaxSize(),
                                 itemPadding = PaddingValues(top = 8.dp),
-                                lightAnimationResId = R.raw.primal_loader_notes_light_v2_1,
-                                darkAnimationResId = R.raw.primal_loader_notes_dark_v2_1,
+                                lightAnimationResId = R.raw.primal_loader_notes_light_v3,
+                                darkAnimationResId = R.raw.primal_loader_notes_v3,
                             )
                         }
                     }
