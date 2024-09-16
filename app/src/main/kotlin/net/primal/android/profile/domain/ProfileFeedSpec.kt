@@ -3,6 +3,7 @@ package net.primal.android.profile.domain
 enum class ProfileFeedSpec {
     AuthoredNotes,
     AuthoredReplies,
+    AuthoredArticles,
     ;
 
     fun buildSpec(profileId: String): String {
@@ -18,6 +19,13 @@ enum class ProfileFeedSpec {
                 "{\"id\":\"feed\"," +
                     "\"include_replies\":true," +
                     "\"kind\":\"notes\"," +
+                    "\"notes\":\"authored\"," +
+                    "\"pubkey\":\"$profileId\"}"
+            }
+
+            AuthoredArticles -> {
+                "{\"id\":\"feed\"," +
+                    "\"kind\":\"reads\"," +
                     "\"notes\":\"authored\"," +
                     "\"pubkey\":\"$profileId\"}"
             }
