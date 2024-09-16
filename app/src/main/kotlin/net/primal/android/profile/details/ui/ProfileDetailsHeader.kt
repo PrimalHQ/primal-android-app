@@ -58,7 +58,6 @@ import net.primal.android.wallet.utils.isLightningAddress
 @Composable
 fun ProfileDetailsHeader(
     state: ProfileDetailsContract.UiState,
-    pagingItems: LazyPagingItems<FeedPostUi>,
     eventPublisher: (ProfileDetailsContract.UiEvent) -> Unit,
     onEditProfileClick: () -> Unit,
     onMessageClick: (String) -> Unit,
@@ -72,7 +71,6 @@ fun ProfileDetailsHeader(
     Column {
         ProfileHeaderDetails(
             state = state,
-            eventPublisher = eventPublisher,
             onEditProfileClick = onEditProfileClick,
             onMessageClick = { onMessageClick(state.profileId) },
             onZapProfileClick = {
@@ -100,26 +98,6 @@ fun ProfileDetailsHeader(
                     eventPublisher(ProfileDetailsContract.UiEvent.UnmuteAction(state.profileId))
                 },
             )
-        } else {
-            if (pagingItems.isEmpty()) {
-                when (pagingItems.loadState.refresh) {
-                    LoadState.Loading -> ListLoading(
-                        modifier = Modifier
-                            .padding(vertical = 64.dp)
-                            .fillMaxWidth(),
-                    )
-
-                    is LoadState.NotLoading -> ListNoContent(
-                        modifier = Modifier
-                            .padding(vertical = 64.dp)
-                            .fillMaxWidth(),
-                        noContentText = stringResource(id = R.string.feed_no_content),
-                        onRefresh = { pagingItems.refresh() },
-                    )
-
-                    is LoadState.Error -> Unit
-                }
-            }
         }
     }
 }
@@ -127,7 +105,6 @@ fun ProfileDetailsHeader(
 @Composable
 private fun ProfileHeaderDetails(
     state: ProfileDetailsContract.UiState,
-    eventPublisher: (ProfileDetailsContract.UiEvent) -> Unit,
     onEditProfileClick: () -> Unit,
     onDrawerQrCodeClick: () -> Unit,
     onZapProfileClick: () -> Unit,
@@ -215,22 +192,6 @@ private fun ProfileHeaderDetails(
             )
         }
 
-        ProfileTabs(
-            modifier = Modifier.padding(bottom = 8.dp, top = 8.dp),
-            feedFeedSpec = state.profileFeedSpec,
-            notesCount = state.profileStats?.notesCount,
-            onNotesCountClick = {
-                eventPublisher(ProfileDetailsContract.UiEvent.ChangeProfileFeed(ProfileFeedSpec.AuthoredNotes))
-            },
-            repliesCount = state.profileStats?.repliesCount,
-            onRepliesCountClick = {
-                eventPublisher(ProfileDetailsContract.UiEvent.ChangeProfileFeed(ProfileFeedSpec.AuthoredReplies))
-            },
-            readsCount = state.profileStats?.readsCount,
-            onReadsCountClick = { },
-            mediaCount = state.profileStats?.mediaCount,
-            onMediaCountClick = { },
-        )
     }
 }
 
@@ -450,10 +411,8 @@ private fun PreviewProfileHeaderDetails() {
                         internetIdentifier = "qa@primal.net",
                         about = "qauser",
                     ),
-                    notes = flowOf(),
                     profileStats = ProfileStatsUi(11, 12, 13, 14),
                 ),
-                eventPublisher = {},
                 onEditProfileClick = {},
                 onZapProfileClick = {},
                 onMessageClick = {},

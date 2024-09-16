@@ -298,7 +298,6 @@ fun ProfileDetailsScreen(
                 header = {
                     ProfileDetailsHeader(
                         state = state,
-                        pagingItems = pagingItems,
                         eventPublisher = eventPublisher,
                         onEditProfileClick = onEditProfileClick,
                         onMessageClick = onMessageClick,
