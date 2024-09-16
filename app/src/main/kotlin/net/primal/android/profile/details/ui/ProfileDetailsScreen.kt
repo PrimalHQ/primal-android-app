@@ -2,16 +2,31 @@ package net.primal.android.profile.details.ui
 
 import android.content.Context
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.PrimaryScrollableTabRow
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
+import androidx.compose.material3.Tab
+import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -20,6 +35,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -28,6 +44,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
@@ -43,6 +64,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.R
+import net.primal.android.articles.feed.ArticleFeedList
+import net.primal.android.core.compose.HorizontalPagerIndicator
 import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.preview.PrimalPreview
@@ -50,16 +73,22 @@ import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.core.compose.pulltorefresh.LaunchedPullToRefreshEndingEffect
 import net.primal.android.core.compose.pulltorefresh.PrimalIndicator
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
-import net.primal.android.notes.feed.NoteFeedLazyColumn
+import net.primal.android.navigation.navigateToArticleDetails
+import net.primal.android.notes.feed.NoteFeedList
+import net.primal.android.notes.feed.model.FeedPostAction
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.note.ConfirmFirstBookmarkAlertDialog
+import net.primal.android.notes.feed.note.FeedNoteCard
 import net.primal.android.notes.feed.note.events.NoteCallbacks
 import net.primal.android.profile.details.ProfileDetailsContract
 import net.primal.android.profile.details.ProfileDetailsContract.UiState.ProfileError
 import net.primal.android.profile.details.ProfileDetailsViewModel
 import net.primal.android.profile.domain.ProfileFollowsType
+import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.wallet.domain.DraftTx
+import net.primal.android.wallet.zaps.canZap
+import timber.log.Timber
 
 @Composable
 fun ProfileDetailsScreen(
@@ -71,6 +100,7 @@ fun ProfileDetailsScreen(
     onZapProfileClick: (DraftTx) -> Unit,
     onDrawerQrCodeClick: (String) -> Unit,
     onFollowsClick: (String, ProfileFollowsType) -> Unit,
+    onArticleClick: (String) -> Unit,
     onGoToWallet: () -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
@@ -93,6 +123,7 @@ fun ProfileDetailsScreen(
         onGoToWallet = onGoToWallet,
         onFollowsClick = onFollowsClick,
         eventPublisher = { viewModel.setEvent(it) },
+        onArticleClick = onArticleClick,
     )
 }
 
@@ -109,6 +140,7 @@ fun ProfileDetailsScreen(
     onMessageClick: (String) -> Unit,
     onZapProfileClick: (DraftTx) -> Unit,
     onDrawerQrCodeClick: (String) -> Unit,
+    onArticleClick: (String) -> Unit,
     onGoToWallet: () -> Unit,
     onFollowsClick: (String, ProfileFollowsType) -> Unit,
     eventPublisher: (ProfileDetailsContract.UiEvent) -> Unit,
@@ -135,9 +167,7 @@ fun ProfileDetailsScreen(
     val topBarTitleVisible = rememberSaveable { mutableStateOf(false) }
     val coverTransparency = rememberSaveable { mutableFloatStateOf(0f) }
 
-    val noPagingItems = flowOf<PagingData<FeedPostUi>>().collectAsLazyPagingItems()
-    val pagingItems = state.notes.collectAsLazyPagingItems()
-    val listState = pagingItems.rememberLazyListStatePagingWorkaround()
+    val listState = rememberLazyListState()
 
     val snackbarHostState = remember { SnackbarHostState() }
     val uiScope = rememberCoroutineScope()
@@ -203,81 +233,38 @@ fun ProfileDetailsScreen(
         }
     }
 
-    val pullToRefreshState = rememberPullToRefreshState()
-    var pullToRefreshing by remember { mutableStateOf(false) }
-
-    LaunchedPullToRefreshEndingEffect(
-        mediatorLoadStates = pagingItems.loadState.mediator,
-        onRefreshEnd = { pullToRefreshing = false },
-    )
-
-    Surface {
-        PullToRefreshBox(
-            modifier = Modifier.fillMaxSize(),
-            isRefreshing = pullToRefreshing,
-            onRefresh = {
-                pagingItems.refresh()
-                eventPublisher(ProfileDetailsContract.UiEvent.RequestProfileUpdate)
-                pullToRefreshing = true
-            },
-            state = pullToRefreshState,
-            indicator = {
-                PrimalIndicator(
-                    modifier = Modifier.align(Alignment.TopCenter),
-                    isRefreshing = pullToRefreshing,
-                    state = pullToRefreshState,
-                    threshold = PullToRefreshDefaults.PositionalThreshold.times(other = 1.5f),
-                )
-            },
+    Scaffold(
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier.navigationBarsPadding(),
+            )
+        },
+    ) { paddingValues ->
+        BoxWithConstraints(
+            modifier = Modifier.nestedScroll(
+                remember {
+                    object : NestedScrollConnection {
+                        override fun onPreScroll(
+                            available: Offset,
+                            source: NestedScrollSource,
+                        ): Offset {
+                            return if (available.y > 0) Offset.Zero else Offset(
+                                x = 0f,
+                                y = -listState.dispatchRawDelta(-available.y),
+                            )
+                        }
+                    }
+                },
+            ),
         ) {
-            NoteFeedLazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(0.dp),
-                pagingItems = if (!state.isProfileMuted) pagingItems else noPagingItems,
-                zappingState = state.zappingState,
-                noteCallbacks = noteCallbacks,
-                listState = listState,
-                onZapClick = { post, zapAmount, zapDescription ->
-                    eventPublisher(
-                        ProfileDetailsContract.UiEvent.ZapAction(
-                            postId = post.postId,
-                            postAuthorId = post.authorId,
-                            zapAmount = zapAmount,
-                            zapDescription = zapDescription,
-                        ),
-                    )
-                },
-                onPostLikeClick = {
-                    eventPublisher(
-                        ProfileDetailsContract.UiEvent.PostLikeAction(
-                            postId = it.postId,
-                            postAuthorId = it.authorId,
-                        ),
-                    )
-                },
-                onRepostClick = {
-                    eventPublisher(
-                        ProfileDetailsContract.UiEvent.RepostAction(
-                            postId = it.postId,
-                            postAuthorId = it.authorId,
-                            postNostrEvent = it.rawNostrEventJson,
-                        ),
-                    )
-                },
-                onReportContentClick = { type, profileId, noteId ->
-                    eventPublisher(
-                        ProfileDetailsContract.UiEvent.ReportAbuse(
-                            reportType = type,
-                            profileId = profileId,
-                            noteId = noteId,
-                        ),
-                    )
-                },
-                onGoToWallet = onGoToWallet,
-                onBookmarkClick = { eventPublisher(ProfileDetailsContract.UiEvent.BookmarkAction(noteId = it)) },
-                shouldShowLoadingState = false,
-                shouldShowNoContentState = false,
-                stickyHeader = {
+            val screenHeight = maxHeight
+
+            LazyColumn(
+                state = listState,
+                modifier = Modifier.padding(paddingValues),
+            ) {
+                stickyHeader {
                     ProfileTopCoverBar(
                         state = state,
                         snackbarHostState = snackbarHostState,
@@ -294,8 +281,8 @@ fun ProfileDetailsScreen(
                         eventPublisher = eventPublisher,
                         onClose = onClose,
                     )
-                },
-                header = {
+                }
+                item {
                     ProfileDetailsHeader(
                         state = state,
                         eventPublisher = eventPublisher,
@@ -319,15 +306,50 @@ fun ProfileDetailsScreen(
                         onProfileClick = { noteCallbacks.onProfileClick?.invoke(it) },
                         onHashtagClick = { noteCallbacks.onHashtagClick?.invoke(it) },
                     )
-                },
-            )
+                }
+                item {
+                    Column(
+                        modifier = Modifier.height(screenHeight),
+                    ) {
+                        val pagerState = rememberPagerState { 4 }
+                        ProfileTabs(
+                            pagerState = pagerState,
+                            modifier = Modifier
+                                .background(AppTheme.colorScheme.background)
+                                .padding(bottom = 8.dp, top = 8.dp),
+                            notesCount = state.profileStats?.notesCount,
+                            onNotesCountClick = { },
+                            repliesCount = state.profileStats?.repliesCount,
+                            onRepliesCountClick = { },
+                            readsCount = state.profileStats?.readsCount,
+                            onReadsCountClick = {},
+                            mediaCount = state.profileStats?.mediaCount,
+                            onMediaCountClick = {},
+                        )
+                        HorizontalPager(
+                            state = pagerState,
+                            modifier = Modifier.fillMaxHeight(),
+                        ) { pageIndex ->
+                            when (pageIndex) {
+                                0, 1 -> {
+                                    NoteFeedList(
+                                        feedSpec = state.profileFeedSpecs[pageIndex].buildSpec(profileId = state.profileId),
+                                        noteCallbacks = noteCallbacks,
+                                        onGoToWallet = onGoToWallet,
+                                    )
+                                }
+                                2 -> {
+                                    ArticleFeedList(
+                                        feedSpec = state.profileFeedSpecs[pageIndex].buildSpec(profileId = state.profileId),
+                                        onArticleClick = onArticleClick,
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
 
-            SnackbarHost(
-                hostState = snackbarHostState,
-                modifier = Modifier
-                    .align(Alignment.BottomStart)
-                    .navigationBarsPadding(),
-            )
         }
     }
 }
@@ -403,7 +425,6 @@ private fun PreviewProfileScreen() {
                 isProfileMuted = false,
                 isActiveUser = true,
                 isProfileFeedInActiveUserFeeds = false,
-                notes = emptyFlow(),
             ),
             onClose = {},
             noteCallbacks = NoteCallbacks(),
@@ -414,6 +435,7 @@ private fun PreviewProfileScreen() {
             onFollowsClick = { _, _ -> },
             onGoToWallet = {},
             eventPublisher = {},
+            onArticleClick = {},
         )
     }
 }
