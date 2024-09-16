@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -56,7 +57,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.R
 import net.primal.android.core.compose.AvatarThumbnailsRow
-import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.isNotEmpty
 import net.primal.android.core.compose.pulltorefresh.PrimalIndicator
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
@@ -75,6 +75,7 @@ fun NoteFeedList(
     feedSpec: String,
     noteCallbacks: NoteCallbacks,
     onGoToWallet: () -> Unit,
+    listState: LazyListState = rememberLazyListState(),
     contentPadding: PaddingValues = PaddingValues(0.dp),
     newNotesNoticeAlpha: Float = 1.00f,
     previewMode: Boolean = false,
@@ -108,6 +109,7 @@ fun NoteFeedList(
 
     NoteFeedList(
         state = uiState.value,
+        listState = listState,
         noteCallbacks = noteCallbacks,
         onGoToWallet = onGoToWallet,
         newNotesNoticeAlpha = newNotesNoticeAlpha,
@@ -121,6 +123,7 @@ fun NoteFeedList(
 @Composable
 private fun NoteFeedList(
     state: NoteFeedContract.UiState,
+    listState: LazyListState,
     noteCallbacks: NoteCallbacks,
     onGoToWallet: () -> Unit,
     newNotesNoticeAlpha: Float = 1.00f,
@@ -130,7 +133,6 @@ private fun NoteFeedList(
     eventPublisher: (UiEvent) -> Unit,
 ) {
     val pagingItems = state.notes.collectAsLazyPagingItems()
-    val feedListState = pagingItems.rememberLazyListStatePagingWorkaround()
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
 
@@ -142,9 +144,9 @@ private fun NoteFeedList(
         }
     }
 
-    LaunchedEffect(feedListState, pagingItems) {
+    LaunchedEffect(listState, pagingItems) {
         withContext(Dispatchers.IO) {
-            snapshotFlow { feedListState.firstVisibleItemIndex to pagingItems.itemCount }
+            snapshotFlow { listState.firstVisibleItemIndex to pagingItems.itemCount }
                 .distinctUntilChanged()
                 .filter { (_, size) -> size > 0 }
                 .collect { (index, _) ->
@@ -180,7 +182,7 @@ private fun NoteFeedList(
     Box {
         NoteFeedList(
             pagingItems = pagingItems,
-            feedListState = feedListState,
+            feedListState = listState,
             zappingState = state.zappingState,
             noteCallbacks = noteCallbacks,
             onZapClick = { post, zapAmount, zapDescription ->
