@@ -63,11 +63,6 @@ class ProfileDetailsViewModel @Inject constructor(
         UiState(
             profileId = profileId,
             isActiveUser = isActiveUser,
-            notes = feedRepository.feedBySpec(
-                feedSpec = ProfileFeedSpec.AuthoredNotes.buildSpec(profileId),
-            )
-                .map { it.map { feed -> feed.asFeedPostUi() } }
-                .cachedIn(viewModelScope),
         ),
     )
     val state = _state.asStateFlow()
@@ -115,7 +110,6 @@ class ProfileDetailsViewModel @Inject constructor(
                     is UiEvent.RemoveUserFeedAction -> removeUserFeed(it)
                     is UiEvent.MuteAction -> mute(it)
                     is UiEvent.UnmuteAction -> unmute(it)
-                    is UiEvent.ChangeProfileFeed -> changeFeed(it)
                     UiEvent.RequestProfileUpdate -> {
                         fetchLatestProfile()
                         fetchLatestMuteList()
@@ -474,18 +468,6 @@ class ProfileDetailsViewModel @Inject constructor(
             } catch (error: WssException) {
                 Timber.w(error)
                 setErrorState(error = ProfileError.FailedToUnmuteProfile(error))
-            }
-        }
-
-    private fun changeFeed(event: UiEvent.ChangeProfileFeed) =
-        viewModelScope.launch {
-            setState {
-                copy(
-                    profileFeedSpec = event.profileFeedSpec,
-                    notes = feedRepository.feedBySpec(feedSpec = event.profileFeedSpec.buildSpec(profileId))
-                        .map { it.map { feed -> feed.asFeedPostUi() } }
-                        .cachedIn(viewModelScope),
-                )
             }
         }
 
