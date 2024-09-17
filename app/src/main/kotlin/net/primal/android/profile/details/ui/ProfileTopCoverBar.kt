@@ -7,12 +7,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.TopAppBar
@@ -62,11 +64,13 @@ fun ProfileTopCoverBar(
     titleVisible: Boolean,
     coverValues: CoverValues,
     avatarValues: AvatarValues,
+    modifier: Modifier = Modifier,
+    paddingValues: PaddingValues,
 ) {
     val coverBlur = AppTheme.colorScheme.surface.copy(alpha = coverValues.coverAlpha)
 
     BoxWithConstraints(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         contentAlignment = Alignment.TopCenter,
     ) {
         val variant = state.profileDetails?.coverCdnImage?.variants?.findNearestOrNull(
@@ -97,6 +101,7 @@ fun ProfileTopCoverBar(
             titleVisible = titleVisible,
             snackbarHostState = snackbarHostState,
             eventPublisher = eventPublisher,
+            paddingValues = paddingValues,
         )
 
         Box(
@@ -130,8 +135,11 @@ private fun ProfileTopAppBar(
     snackbarHostState: SnackbarHostState,
     eventPublisher: (ProfileDetailsContract.UiEvent) -> Unit,
     onClose: () -> Unit,
+    paddingValues: PaddingValues,
 ) {
-    Column {
+    Column(
+        modifier = Modifier.padding(paddingValues = paddingValues)
+    ) {
         TopAppBar(
             colors = TopAppBarDefaults.topAppBarColors(
                 containerColor = Color.Transparent,

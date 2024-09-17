@@ -5,11 +5,9 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -18,34 +16,22 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Tab
-import androidx.compose.material3.Text
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
-import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -54,31 +40,19 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
-import androidx.paging.PagingData
-import androidx.paging.compose.collectAsLazyPagingItems
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.R
 import net.primal.android.articles.feed.ArticleFeedList
-import net.primal.android.core.compose.HorizontalPagerIndicator
 import net.primal.android.core.compose.SnackbarErrorHandler
-import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
-import net.primal.android.core.compose.pulltorefresh.LaunchedPullToRefreshEndingEffect
-import net.primal.android.core.compose.pulltorefresh.PrimalIndicator
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
-import net.primal.android.navigation.navigateToArticleDetails
 import net.primal.android.notes.feed.NoteFeedList
-import net.primal.android.notes.feed.model.FeedPostAction
-import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.note.ConfirmFirstBookmarkAlertDialog
-import net.primal.android.notes.feed.note.FeedNoteCard
 import net.primal.android.notes.feed.note.events.NoteCallbacks
 import net.primal.android.profile.details.ProfileDetailsContract
 import net.primal.android.profile.details.ProfileDetailsContract.UiState.ProfileError
@@ -87,8 +61,6 @@ import net.primal.android.profile.domain.ProfileFollowsType
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.wallet.domain.DraftTx
-import net.primal.android.wallet.zaps.canZap
-import timber.log.Timber
 
 @Composable
 fun ProfileDetailsScreen(
@@ -242,7 +214,9 @@ fun ProfileDetailsScreen(
         },
     ) { paddingValues ->
         BoxWithConstraints(
-            modifier = Modifier.nestedScroll(
+            modifier = Modifier
+                .consumeWindowInsets(paddingValues)
+                .nestedScroll(
                 remember {
                     object : NestedScrollConnection {
                         override fun onPreScroll(
@@ -262,7 +236,6 @@ fun ProfileDetailsScreen(
 
             LazyColumn(
                 state = listState,
-                modifier = Modifier.padding(paddingValues),
             ) {
                 stickyHeader {
                     ProfileTopCoverBar(
@@ -280,6 +253,7 @@ fun ProfileDetailsScreen(
                         ),
                         eventPublisher = eventPublisher,
                         onClose = onClose,
+                        paddingValues = paddingValues,
                     )
                 }
                 item {
