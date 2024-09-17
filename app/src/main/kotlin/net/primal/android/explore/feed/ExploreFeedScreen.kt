@@ -32,8 +32,7 @@ import net.primal.android.explore.feed.ExploreFeedContract.UiEvent.RemoveFromUse
 import net.primal.android.explore.feed.ExploreFeedContract.UiState.ExploreFeedError
 import net.primal.android.feeds.domain.isNotesBookmarkFeedSpec
 import net.primal.android.notes.feed.NoteFeedList
-import net.primal.android.notes.feed.note.ConfirmFirstBookmarkAlertDialog
-import net.primal.android.notes.feed.note.events.NoteCallbacks
+import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 
 @Composable
 fun ExploreFeedScreen(
@@ -62,27 +61,11 @@ fun ExploreFeedScreen(
     onGoToWallet: () -> Unit,
     eventPublisher: (ExploreFeedContract.UiEvent) -> Unit,
 ) {
-    val feedPagingItems = state.posts.collectAsLazyPagingItems()
+    val feedPagingItems = state.notes.collectAsLazyPagingItems()
     val feedListState = feedPagingItems.rememberLazyListStatePagingWorkaround()
 
     val feedTitle = state.extractTitle()
     val snackbarHostState = remember { SnackbarHostState() }
-
-    if (state.confirmBookmarkingNoteId != null) {
-        ConfirmFirstBookmarkAlertDialog(
-            onBookmarkConfirmed = {
-                eventPublisher(
-                    ExploreFeedContract.UiEvent.BookmarkAction(
-                        noteId = state.confirmBookmarkingNoteId,
-                        forceUpdate = true,
-                    ),
-                )
-            },
-            onClose = {
-                eventPublisher(ExploreFeedContract.UiEvent.DismissBookmarkConfirmation)
-            },
-        )
-    }
 
     ErrorHandler(
         error = state.error,
@@ -137,48 +120,9 @@ fun ExploreFeedScreen(
             NoteFeedList(
                 feedListState = feedListState,
                 pagingItems = feedPagingItems,
-                zappingState = state.zappingState,
                 paddingValues = paddingValues,
                 noteCallbacks = noteCallbacks,
-                onZapClick = { post, zapAmount, zapDescription ->
-                    eventPublisher(
-                        ExploreFeedContract.UiEvent.ZapAction(
-                            postId = post.postId,
-                            postAuthorId = post.authorId,
-                            zapAmount = zapAmount,
-                            zapDescription = zapDescription,
-                        ),
-                    )
-                },
-                onPostLikeClick = {
-                    eventPublisher(
-                        ExploreFeedContract.UiEvent.PostLikeAction(
-                            postId = it.postId,
-                            postAuthorId = it.authorId,
-                        ),
-                    )
-                },
-                onRepostClick = {
-                    eventPublisher(
-                        ExploreFeedContract.UiEvent.RepostAction(
-                            postId = it.postId,
-                            postAuthorId = it.authorId,
-                            postNostrEvent = it.rawNostrEventJson,
-                        ),
-                    )
-                },
                 onGoToWallet = onGoToWallet,
-                onMuteClick = { eventPublisher(ExploreFeedContract.UiEvent.MuteAction(profileId = it)) },
-                onBookmarkClick = { eventPublisher(ExploreFeedContract.UiEvent.BookmarkAction(noteId = it)) },
-                onReportContentClick = { type, profileId, noteId ->
-                    eventPublisher(
-                        ExploreFeedContract.UiEvent.ReportAbuse(
-                            reportType = type,
-                            profileId = profileId,
-                            noteId = noteId,
-                        ),
-                    )
-                },
                 noContentText = when {
                     state.feedSpec.isNotesBookmarkFeedSpec() -> stringResource(id = R.string.bookmarks_no_content)
                     else -> stringResource(id = R.string.feed_no_content)
@@ -233,40 +177,12 @@ private fun ErrorHandler(error: ExploreFeedError?, snackbarHostState: SnackbarHo
     val context = LocalContext.current
     LaunchedEffect(error ?: true) {
         val errorMessage = when (error) {
-            is ExploreFeedError.InvalidZapRequest -> context.getString(
-                R.string.post_action_invalid_zap_request,
-            )
-
-            is ExploreFeedError.MissingLightningAddress -> context.getString(
-                R.string.post_action_missing_lightning_address,
-            )
-
-            is ExploreFeedError.FailedToPublishZapEvent -> context.getString(
-                R.string.post_action_zap_failed,
-            )
-
-            is ExploreFeedError.FailedToPublishLikeEvent -> context.getString(
-                R.string.post_action_like_failed,
-            )
-
-            is ExploreFeedError.FailedToPublishRepostEvent -> context.getString(
-                R.string.post_action_repost_failed,
-            )
-
-            is ExploreFeedError.MissingRelaysConfiguration -> context.getString(
-                R.string.app_missing_relays_config,
-            )
-
             is ExploreFeedError.FailedToAddToFeed -> context.getString(
                 R.string.app_error_adding_to_feed,
             )
 
             is ExploreFeedError.FailedToRemoveFeed -> context.getString(
                 R.string.app_error_removing_feed,
-            )
-
-            is ExploreFeedError.FailedToMuteUser -> context.getString(
-                R.string.app_error_muting_user,
             )
 
             null -> return@LaunchedEffect

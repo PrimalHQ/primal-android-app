@@ -1,4 +1,4 @@
-package net.primal.android.notes.feed.note.events
+package net.primal.android.notes.feed.note.ui.events
 
 data class NoteCallbacks(
     val onNoteClick: ((noteId: String) -> Unit)? = null,

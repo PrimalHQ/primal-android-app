@@ -256,19 +256,6 @@ private fun NavGraphBuilder.transactionDetails(
     TransactionDetailsScreen(
         viewModel = viewModel,
         onClose = { navController.navigateUp() },
-        onPostClick = { noteId -> navController.navigateToThread(noteId) },
-        onArticleClick = { naddr -> navController.navigateToArticleDetails(naddr = naddr) },
-        onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
-        onHashtagClick = { hashtag -> navController.navigateToExploreFeed(query = hashtag) },
-        onMediaClick = {
-            navController.navigateToMediaGallery(
-                noteId = it.noteId,
-                mediaUrl = it.mediaUrl,
-                mediaPositionMs = it.positionMs,
-            )
-        },
-        onPayInvoiceClick = {
-            navController.navigateToWalletCreateTransaction(lnbc = it.lnbc)
-        },
+        noteCallbacks = noteCallbacksHandler(navController),
     )
 }

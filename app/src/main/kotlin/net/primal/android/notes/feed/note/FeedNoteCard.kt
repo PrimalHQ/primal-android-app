@@ -2,9 +2,11 @@ package net.primal.android.notes.feed.note
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -15,32 +17,53 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import java.time.Instant
 import java.time.temporal.ChronoUnit
+import kotlinx.coroutines.launch
 import net.primal.android.LocalContentDisplaySettings
 import net.primal.android.attachments.domain.CdnImage
+import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.preview.PrimalPreview
+import net.primal.android.core.ext.openUriSafely
+import net.primal.android.notes.feed.NoteRepostOrQuoteBottomSheet
 import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.notes.feed.model.FeedPostAction
 import net.primal.android.notes.feed.model.FeedPostUi
-import net.primal.android.notes.feed.note.events.InvoicePayClickEvent
-import net.primal.android.notes.feed.note.events.MediaClickEvent
-import net.primal.android.profile.report.OnReportContentClick
+import net.primal.android.notes.feed.model.toNoteContentUi
+import net.primal.android.notes.feed.note.NoteContract.UiEvent
+import net.primal.android.notes.feed.note.ui.ConfirmFirstBookmarkAlertDialog
+import net.primal.android.notes.feed.note.ui.FeedNoteHeader
+import net.primal.android.notes.feed.note.ui.FeedNoteStatsRow
+import net.primal.android.notes.feed.note.ui.NoteContent
+import net.primal.android.notes.feed.note.ui.NoteDropdownMenuIcon
+import net.primal.android.notes.feed.note.ui.NoteSurfaceCard
+import net.primal.android.notes.feed.note.ui.RepostedNotice
+import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
+import net.primal.android.notes.feed.zaps.UnableToZapBottomSheet
+import net.primal.android.notes.feed.zaps.ZapBottomSheet
 import net.primal.android.profile.report.ReportUserDialog
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
+import net.primal.android.wallet.zaps.canZap
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -48,9 +71,7 @@ fun FeedNoteCard(
     data: FeedPostUi,
     modifier: Modifier = Modifier,
     shape: Shape = CardDefaults.shape,
-    colors: CardColors = CardDefaults.cardColors(
-        containerColor = AppTheme.colorScheme.surfaceVariant,
-    ),
+    colors: CardColors = noteCardColors(),
     cardPadding: PaddingValues = PaddingValues(all = 0.dp),
     fullWidthNote: Boolean = false,
     headerSingleLine: Boolean = true,
@@ -62,28 +83,141 @@ fun FeedNoteCard(
     textSelectable: Boolean = false,
     showReplyTo: Boolean = true,
     noteOptionsMenuEnabled: Boolean = true,
-    onPostClick: ((String) -> Unit)? = null,
-    onArticleClick: ((naddr: String) -> Unit)? = null,
-    onProfileClick: ((String) -> Unit)? = null,
-    onPostAction: ((FeedPostAction) -> Unit)? = null,
-    onPostLongClickAction: ((FeedPostAction) -> Unit)? = null,
-    onHashtagClick: ((String) -> Unit)? = null,
-    onMediaClick: ((MediaClickEvent) -> Unit)? = null,
-    onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
-    onBookmarkClick: (() -> Unit)? = null,
-    onMuteUserClick: (() -> Unit)? = null,
-    onReportContentClick: OnReportContentClick? = null,
+    noteCallbacks: NoteCallbacks = NoteCallbacks(),
+    onGoToWallet: (() -> Unit)? = null,
+    contentFooter: @Composable () -> Unit = {},
+) {
+    val viewModel = hiltViewModel<NoteViewModel>()
+    val uiState = viewModel.state.collectAsState()
+
+    FeedNoteCard(
+        data = data,
+        state = uiState.value,
+        eventPublisher = viewModel::setEvent,
+        modifier = modifier,
+        shape = shape,
+        colors = colors,
+        cardPadding = cardPadding,
+        fullWidthNote = fullWidthNote,
+        headerSingleLine = headerSingleLine,
+        fullWidthContent = fullWidthContent,
+        forceContentIndent = forceContentIndent,
+        drawLineAboveAvatar = drawLineAboveAvatar,
+        drawLineBelowAvatar = drawLineBelowAvatar,
+        expanded = expanded,
+        textSelectable = textSelectable,
+        showReplyTo = showReplyTo,
+        noteOptionsMenuEnabled = noteOptionsMenuEnabled,
+        noteCallbacks = noteCallbacks,
+        onGoToWallet = onGoToWallet,
+        contentFooter = contentFooter,
+    )
+}
+
+@ExperimentalMaterial3Api
+@Composable
+private fun FeedNoteCard(
+    data: FeedPostUi,
+    state: NoteContract.UiState,
+    eventPublisher: (UiEvent) -> Unit,
+    modifier: Modifier = Modifier,
+    shape: Shape = CardDefaults.shape,
+    colors: CardColors = noteCardColors(),
+    cardPadding: PaddingValues = PaddingValues(all = 0.dp),
+    fullWidthNote: Boolean = false,
+    headerSingleLine: Boolean = true,
+    fullWidthContent: Boolean = false,
+    forceContentIndent: Boolean = false,
+    drawLineAboveAvatar: Boolean = false,
+    drawLineBelowAvatar: Boolean = false,
+    expanded: Boolean = false,
+    textSelectable: Boolean = false,
+    showReplyTo: Boolean = true,
+    noteOptionsMenuEnabled: Boolean = true,
+    noteCallbacks: NoteCallbacks = NoteCallbacks(),
+    onGoToWallet: (() -> Unit)? = null,
     contentFooter: @Composable () -> Unit = {},
 ) {
     val interactionSource = remember { MutableInteractionSource() }
+
+    var showCantZapWarning by remember { mutableStateOf(false) }
+    if (showCantZapWarning) {
+        UnableToZapBottomSheet(
+            zappingState = state.zappingState,
+            onDismissRequest = { showCantZapWarning = false },
+            onGoToWallet = { onGoToWallet?.invoke() },
+        )
+    }
+
+    var showZapOptions by remember { mutableStateOf(false) }
+    if (showZapOptions) {
+        ZapBottomSheet(
+            onDismissRequest = { showZapOptions = false },
+            receiverName = data.authorName,
+            zappingState = state.zappingState,
+            onZap = { zapAmount, zapDescription ->
+                if (state.zappingState.canZap(zapAmount)) {
+                    eventPublisher(
+                        UiEvent.ZapAction(
+                            postId = data.postId,
+                            postAuthorId = data.authorId,
+                            zapAmount = zapAmount.toULong(),
+                            zapDescription = zapDescription,
+                        ),
+                    )
+                } else {
+                    showCantZapWarning = true
+                }
+            },
+        )
+    }
 
     var reportDialogVisible by remember { mutableStateOf(false) }
     if (reportDialogVisible) {
         ReportUserDialog(
             onDismissRequest = { reportDialogVisible = false },
-            onReportClick = {
+            onReportClick = { type ->
                 reportDialogVisible = false
-                onReportContentClick?.invoke(it, data.authorId, data.postId)
+                eventPublisher(
+                    UiEvent.ReportAbuse(
+                        reportType = type,
+                        profileId = data.authorId,
+                        noteId = data.postId,
+                    ),
+                )
+            },
+        )
+    }
+
+    var showRepostOrQuoteConfirmation by remember { mutableStateOf(false) }
+    if (showRepostOrQuoteConfirmation) {
+        NoteRepostOrQuoteBottomSheet(
+            onDismiss = { showRepostOrQuoteConfirmation = false },
+            onRepostClick = {
+                eventPublisher(
+                    UiEvent.RepostAction(
+                        postId = data.postId,
+                        postAuthorId = data.authorId,
+                        postNostrEvent = data.rawNostrEventJson,
+                    ),
+                )
+            },
+            onPostQuoteClick = { noteCallbacks.onNoteQuoteClick?.invoke(data.postId) },
+        )
+    }
+
+    if (state.shouldApproveBookmark) {
+        ConfirmFirstBookmarkAlertDialog(
+            onBookmarkConfirmed = {
+                eventPublisher(
+                    UiEvent.BookmarkAction(
+                        noteId = data.postId,
+                        forceUpdate = true,
+                    ),
+                )
+            },
+            onClose = {
+                eventPublisher(UiEvent.DismissBookmarkConfirmation(noteId = data.postId))
             },
         )
     }
@@ -99,10 +233,10 @@ fun FeedNoteCard(
             .wrapContentHeight()
             .padding(cardPadding)
             .clickable(
-                enabled = onPostClick != null,
+                enabled = noteCallbacks.onNoteClick != null,
                 interactionSource = interactionSource,
                 indication = ripple(),
-                onClick = { onPostClick?.invoke(data.postId) },
+                onClick = { noteCallbacks.onNoteClick?.invoke(data.postId) },
             ),
         shape = shape,
         colors = colors,
@@ -125,9 +259,15 @@ fun FeedNoteCard(
                 authorId = data.authorId,
                 isBookmarked = data.isBookmarked,
                 enabled = noteOptionsMenuEnabled,
-                onBookmarkClick = onBookmarkClick,
-                onMuteUserClick = onMuteUserClick,
-                onReportContentClick = { reportDialogVisible = true },
+                onBookmarkClick = {
+                    eventPublisher(UiEvent.BookmarkAction(noteId = data.postId))
+                },
+                onMuteUserClick = {
+                    eventPublisher(UiEvent.MuteAction(userId = data.authorId))
+                },
+                onReportContentClick = {
+                    reportDialogVisible = true
+                },
             )
 
             Column {
@@ -138,8 +278,8 @@ fun FeedNoteCard(
                             .padding(horizontal = avatarPaddingDp)
                             .padding(top = 4.dp),
                         repostedByAuthor = data.repostAuthorName,
-                        onRepostAuthorClick = if (data.repostAuthorId != null && onProfileClick != null) {
-                            { onProfileClick.invoke(data.repostAuthorId) }
+                        onRepostAuthorClick = if (data.repostAuthorId != null && noteCallbacks.onProfileClick != null) {
+                            { noteCallbacks.onProfileClick.invoke(data.repostAuthorId) }
                         } else {
                             null
                         },
@@ -161,17 +301,164 @@ fun FeedNoteCard(
                     forceContentIndent = forceContentIndent,
                     expanded = expanded,
                     textSelectable = textSelectable,
-                    onProfileClick = onProfileClick,
-                    onPostClick = onPostClick,
-                    onArticleClick = onArticleClick,
-                    onHashtagClick = onHashtagClick,
-                    onMediaClick = onMediaClick,
-                    onPostAction = onPostAction,
-                    onPostLongClickAction = onPostLongClickAction,
-                    onPayInvoiceClick = onPayInvoiceClick,
+                    noteCallbacks = noteCallbacks,
+                    onPostAction = { postAction ->
+                        when (postAction) {
+                            FeedPostAction.Reply -> {
+                                noteCallbacks.onNoteReplyClick?.invoke(data.postId)
+                            }
+
+                            FeedPostAction.Zap -> {
+                                if (state.zappingState.canZap()) {
+                                    eventPublisher(
+                                        UiEvent.ZapAction(
+                                            postId = data.postId,
+                                            postAuthorId = data.authorId,
+                                        ),
+                                    )
+                                } else {
+                                    showCantZapWarning = true
+                                }
+                            }
+
+                            FeedPostAction.Like -> {
+                                eventPublisher(
+                                    UiEvent.PostLikeAction(
+                                        postId = data.postId,
+                                        postAuthorId = data.authorId,
+                                    ),
+                                )
+                            }
+
+                            FeedPostAction.Repost -> {
+                                showRepostOrQuoteConfirmation = true
+                            }
+                        }
+                    },
+                    onPostLongClickAction = { postAction ->
+                        when (postAction) {
+                            FeedPostAction.Zap -> {
+                                if (state.zappingState.walletConnected) {
+                                    showZapOptions = true
+                                } else {
+                                    showCantZapWarning = true
+                                }
+                            }
+
+                            else -> Unit
+                        }
+                    },
                     contentFooter = contentFooter,
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun noteCardColors() =
+    CardDefaults.cardColors(
+        containerColor = AppTheme.colorScheme.surfaceVariant,
+    )
+
+@Composable
+private fun FeedNote(
+    data: FeedPostUi,
+    fullWidthContent: Boolean,
+    avatarSizeDp: Dp,
+    avatarPaddingValues: PaddingValues,
+    notePaddingValues: PaddingValues,
+    headerSingleLine: Boolean,
+    showReplyTo: Boolean,
+    forceContentIndent: Boolean,
+    expanded: Boolean,
+    textSelectable: Boolean,
+    noteCallbacks: NoteCallbacks,
+    onPostAction: ((FeedPostAction) -> Unit)? = null,
+    onPostLongClickAction: ((FeedPostAction) -> Unit)? = null,
+    contentFooter: @Composable () -> Unit = {},
+) {
+    val localUriHandler = LocalUriHandler.current
+    val uiScope = rememberCoroutineScope()
+    val interactionSource = remember { MutableInteractionSource() }
+
+    Row {
+        if (!fullWidthContent) {
+            AvatarThumbnail(
+                modifier = Modifier.padding(avatarPaddingValues),
+                avatarSize = avatarSizeDp,
+                avatarCdnImage = data.authorAvatarCdnImage,
+                onClick = if (noteCallbacks.onProfileClick != null) {
+                    { noteCallbacks.onProfileClick.invoke(data.authorId) }
+                } else {
+                    null
+                },
+            )
+        }
+
+        Column(
+            modifier = Modifier.padding(start = 0.dp),
+        ) {
+            FeedNoteHeader(
+                modifier = Modifier
+                    .padding(notePaddingValues)
+                    .fillMaxWidth(),
+                postTimestamp = data.timestamp,
+                singleLine = headerSingleLine,
+                authorAvatarVisible = fullWidthContent,
+                authorAvatarSize = avatarSizeDp,
+                authorDisplayName = data.authorName,
+                authorAvatarCdnImage = data.authorAvatarCdnImage,
+                authorInternetIdentifier = data.authorInternetIdentifier,
+                replyToAuthor = if (showReplyTo) data.replyToAuthorHandle else null,
+                onAuthorAvatarClick = if (noteCallbacks.onProfileClick != null) {
+                    { noteCallbacks.onProfileClick.invoke(data.authorId) }
+                } else {
+                    null
+                },
+            )
+
+            val postAuthorGuessHeight = with(LocalDensity.current) { 128.dp.toPx() }
+            val launchRippleEffect: (Offset) -> Unit = {
+                uiScope.launch {
+                    val press = PressInteraction.Press(it.copy(y = it.y + postAuthorGuessHeight))
+                    interactionSource.emit(press)
+                    interactionSource.emit(PressInteraction.Release(press))
+                }
+            }
+
+            NoteContent(
+                modifier = Modifier
+                    .padding(horizontal = if (fullWidthContent) 10.dp else 8.dp)
+                    .padding(start = if (forceContentIndent && fullWidthContent) avatarSizeDp + 6.dp else 0.dp)
+                    .padding(top = if (fullWidthContent || !headerSingleLine) 10.dp else 5.dp),
+                data = data.toNoteContentUi(),
+                expanded = expanded,
+                textSelectable = textSelectable,
+                onClick = if (noteCallbacks.onNoteClick != null) {
+                    {
+                        launchRippleEffect(it)
+                        noteCallbacks.onNoteClick.invoke(data.postId)
+                    }
+                } else {
+                    null
+                },
+                onUrlClick = { localUriHandler.openUriSafely(it) },
+                noteCallbacks = noteCallbacks,
+            )
+
+            contentFooter()
+
+            FeedNoteStatsRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp)
+                    .padding(top = 8.dp)
+                    .padding(bottom = 8.dp),
+                eventStats = data.stats,
+                onPostAction = onPostAction,
+                onPostLongPressAction = onPostLongClickAction,
+            )
         }
     }
 }
@@ -237,6 +524,7 @@ class FeedPostUiProvider : PreviewParameterProvider<FeedPostUi> {
         )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
 fun PreviewFeedNoteListItemLightMultiLineHeader(
@@ -246,22 +534,15 @@ fun PreviewFeedNoteListItemLightMultiLineHeader(
     PrimalPreview(primalTheme = PrimalTheme.Sunrise) {
         FeedNoteCard(
             data = feedPostUi,
+            state = NoteContract.UiState(),
+            eventPublisher = {},
             headerSingleLine = false,
             fullWidthContent = false,
-            onPostClick = {},
-            onArticleClick = {},
-            onProfileClick = {},
-            onPostAction = {},
-            onPostLongClickAction = {},
-            onHashtagClick = {},
-            onMuteUserClick = {},
-            onMediaClick = {},
-            onReportContentClick = { _, _, _ -> },
-            onBookmarkClick = {},
         )
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
 fun PreviewFeedNoteListItemLightMultiLineHeaderFullWidth(
@@ -271,22 +552,15 @@ fun PreviewFeedNoteListItemLightMultiLineHeaderFullWidth(
     PrimalPreview(primalTheme = PrimalTheme.Sunrise) {
         FeedNoteCard(
             data = feedPostUi,
+            state = NoteContract.UiState(),
+            eventPublisher = {},
             headerSingleLine = false,
             fullWidthContent = true,
-            onPostClick = {},
-            onArticleClick = {},
-            onProfileClick = {},
-            onPostAction = {},
-            onPostLongClickAction = {},
-            onHashtagClick = {},
-            onMuteUserClick = {},
-            onMediaClick = {},
-            onReportContentClick = { _, _, _ -> },
-            onBookmarkClick = {},
         )
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
 fun PreviewFeedNoteListItemDarkSingleLineHeader(
@@ -296,22 +570,15 @@ fun PreviewFeedNoteListItemDarkSingleLineHeader(
     PrimalPreview(primalTheme = PrimalTheme.Sunset) {
         FeedNoteCard(
             data = feedPostUi,
+            state = NoteContract.UiState(),
+            eventPublisher = {},
             headerSingleLine = true,
             fullWidthContent = false,
-            onPostClick = {},
-            onArticleClick = {},
-            onProfileClick = {},
-            onPostAction = {},
-            onPostLongClickAction = {},
-            onHashtagClick = {},
-            onMuteUserClick = {},
-            onMediaClick = {},
-            onReportContentClick = { _, _, _ -> },
-            onBookmarkClick = {},
         )
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
 fun PreviewFeedNoteListItemDarkSingleLineHeaderFullWidth(
@@ -321,22 +588,15 @@ fun PreviewFeedNoteListItemDarkSingleLineHeaderFullWidth(
     PrimalPreview(primalTheme = PrimalTheme.Sunset) {
         FeedNoteCard(
             data = feedPostUi,
+            state = NoteContract.UiState(),
+            eventPublisher = {},
             headerSingleLine = true,
             fullWidthContent = true,
-            onPostClick = {},
-            onArticleClick = {},
-            onProfileClick = {},
-            onPostAction = {},
-            onPostLongClickAction = {},
-            onHashtagClick = {},
-            onMuteUserClick = {},
-            onMediaClick = {},
-            onReportContentClick = { _, _, _ -> },
-            onBookmarkClick = {},
         )
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
 fun PreviewFeedNoteListItemLightForcedContentIndentFullWidthSingleLineHeader(
@@ -346,24 +606,17 @@ fun PreviewFeedNoteListItemLightForcedContentIndentFullWidthSingleLineHeader(
     PrimalPreview(primalTheme = PrimalTheme.Sunrise) {
         FeedNoteCard(
             data = feedPostUi,
+            state = NoteContract.UiState(),
+            eventPublisher = {},
             headerSingleLine = true,
             fullWidthContent = true,
             forceContentIndent = true,
             drawLineBelowAvatar = true,
-            onPostClick = {},
-            onArticleClick = {},
-            onProfileClick = {},
-            onPostAction = {},
-            onPostLongClickAction = {},
-            onHashtagClick = {},
-            onMuteUserClick = {},
-            onMediaClick = {},
-            onReportContentClick = { _, _, _ -> },
-            onBookmarkClick = {},
         )
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
 fun PreviewFeedNoteListItemDarkForcedContentIndentSingleLineHeader(
@@ -373,20 +626,12 @@ fun PreviewFeedNoteListItemDarkForcedContentIndentSingleLineHeader(
     PrimalPreview(primalTheme = PrimalTheme.Sunset) {
         FeedNoteCard(
             data = feedPostUi,
+            state = NoteContract.UiState(),
+            eventPublisher = {},
             headerSingleLine = true,
             fullWidthContent = false,
             forceContentIndent = true,
             drawLineBelowAvatar = true,
-            onPostClick = {},
-            onArticleClick = {},
-            onProfileClick = {},
-            onPostAction = {},
-            onPostLongClickAction = {},
-            onHashtagClick = {},
-            onMuteUserClick = {},
-            onMediaClick = {},
-            onReportContentClick = { _, _, _ -> },
-            onBookmarkClick = {},
         )
     }
 }

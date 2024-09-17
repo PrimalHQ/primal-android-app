@@ -491,7 +491,6 @@ private fun NotePreviewSection(modifier: Modifier) {
             modifier = Modifier.padding(horizontal = 4.dp),
             data = NotePreviewTemplate,
             noteOptionsMenuEnabled = false,
-            onArticleClick = {},
         )
     }
 }

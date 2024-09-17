@@ -1,4 +1,4 @@
-package net.primal.android.notes.feed.note
+package net.primal.android.notes.feed.note.ui
 
 import android.widget.Toast
 import androidx.compose.foundation.clickable

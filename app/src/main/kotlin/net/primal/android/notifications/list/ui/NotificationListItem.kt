@@ -44,10 +44,9 @@ import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.notes.feed.model.FeedPostAction
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.model.toNoteContentUi
-import net.primal.android.notes.feed.note.FeedNoteStatsRow
-import net.primal.android.notes.feed.note.NoteContent
-import net.primal.android.notes.feed.note.events.InvoicePayClickEvent
-import net.primal.android.notes.feed.note.events.MediaClickEvent
+import net.primal.android.notes.feed.note.ui.FeedNoteStatsRow
+import net.primal.android.notes.feed.note.ui.NoteContent
+import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.notifications.domain.NotificationType
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme.Sunset
@@ -57,12 +56,7 @@ fun NotificationListItem(
     notifications: List<NotificationUi>,
     type: NotificationType,
     isSeen: Boolean,
-    onProfileClick: ((String) -> Unit)? = null,
-    onNoteClick: ((String) -> Unit)? = null,
-    onArticleClick: ((naddr: String) -> Unit)? = null,
-    onHashtagClick: ((String) -> Unit)? = null,
-    onMediaClick: ((MediaClickEvent) -> Unit)? = null,
-    onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
+    noteCallbacks: NoteCallbacks,
     onReplyClick: ((String) -> Unit)? = null,
     onPostLikeClick: ((FeedPostUi) -> Unit)? = null,
     onRepostClick: ((FeedPostUi) -> Unit)? = null,
@@ -101,12 +95,7 @@ fun NotificationListItem(
                 postTotalSatsZapped?.shortened()
             },
         ),
-        onProfileClick = onProfileClick,
-        onPostClick = onNoteClick,
-        onArticleClick = onArticleClick,
-        onHashtagClick = onHashtagClick,
-        onMediaClick = onMediaClick,
-        onPayInvoiceClick = onPayInvoiceClick,
+        noteCallbacks = noteCallbacks,
         onPostAction = { postAction ->
             if (postData != null) {
                 when (postAction) {
@@ -131,12 +120,7 @@ private fun NotificationListItem(
     isSeen: Boolean,
     imagePainter: Painter,
     suffixText: String,
-    onProfileClick: ((String) -> Unit)? = null,
-    onPostClick: ((String) -> Unit)? = null,
-    onArticleClick: ((naddr: String) -> Unit)? = null,
-    onHashtagClick: ((String) -> Unit)? = null,
-    onMediaClick: ((MediaClickEvent) -> Unit)? = null,
-    onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
+    noteCallbacks: NoteCallbacks,
     onPostAction: ((FeedPostAction) -> Unit)? = null,
     onPostLongPressAction: ((FeedPostAction) -> Unit)? = null,
 ) {
@@ -150,12 +134,12 @@ private fun NotificationListItem(
                 onClick = {
                     if (notifications.size == 1) {
                         if (firstNotification.notificationType == NotificationType.NEW_USER_FOLLOWED_YOU) {
-                            firstNotification.actionUserId?.let { onProfileClick?.invoke(it) }
+                            firstNotification.actionUserId?.let { noteCallbacks.onProfileClick?.invoke(it) }
                         } else {
-                            firstNotification.actionPost?.postId?.let { onPostClick?.invoke(it) }
+                            firstNotification.actionPost?.postId?.let { noteCallbacks.onNoteClick?.invoke(it) }
                         }
                     } else {
-                        firstNotification.actionPost?.postId?.let { onPostClick?.invoke(it) }
+                        firstNotification.actionPost?.postId?.let { noteCallbacks.onNoteClick?.invoke(it) }
                     }
                 },
             ),
@@ -169,14 +153,9 @@ private fun NotificationListItem(
             notifications = notifications,
             isSeen = isSeen,
             suffixText = suffixText,
-            onProfileClick = onProfileClick,
-            onPostClick = onPostClick,
-            onArticleClick = onArticleClick,
-            onHashtagClick = onHashtagClick,
-            onMediaClick = onMediaClick,
             onPostAction = onPostAction,
             onPostLongPressAction = onPostLongPressAction,
-            onPayInvoiceClick = onPayInvoiceClick,
+            noteCallbacks = noteCallbacks,
         )
     }
 }
@@ -186,14 +165,9 @@ private fun NotificationContent(
     notifications: List<NotificationUi>,
     isSeen: Boolean,
     suffixText: String,
-    onProfileClick: ((String) -> Unit)?,
-    onPostClick: ((String) -> Unit)?,
-    onArticleClick: ((naddr: String) -> Unit)?,
-    onHashtagClick: ((String) -> Unit)?,
-    onMediaClick: ((MediaClickEvent) -> Unit)?,
     onPostAction: ((FeedPostAction) -> Unit)?,
     onPostLongPressAction: ((FeedPostAction) -> Unit)?,
-    onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
+    noteCallbacks: NoteCallbacks,
 ) {
     val firstNotification = notifications.first()
     val actionPost = firstNotification.actionPost
@@ -206,7 +180,7 @@ private fun NotificationContent(
                 notification = notifications.first(),
                 suffixText = suffixText,
                 isSeen = isSeen,
-                onProfileClick = onProfileClick,
+                onProfileClick = noteCallbacks.onProfileClick,
             )
         } else {
             NotificationsGroupHeader(
@@ -214,7 +188,7 @@ private fun NotificationContent(
                 notifications = notifications,
                 suffixText = suffixText,
                 isSeen = isSeen,
-                onProfileClick = onProfileClick,
+                onProfileClick = noteCallbacks.onProfileClick,
             )
         }
 
@@ -225,14 +199,9 @@ private fun NotificationContent(
                 modifier = Modifier.padding(end = 16.dp),
                 data = actionPost.toNoteContentUi(),
                 expanded = false,
-                onClick = { onPostClick?.invoke(actionPost.postId) },
-                onProfileClick = onProfileClick,
-                onPostClick = onPostClick,
-                onArticleClick = onArticleClick,
+                onClick = { noteCallbacks.onNoteClick?.invoke(actionPost.postId) },
                 onUrlClick = { localUriHandler.openUriSafely(it) },
-                onHashtagClick = onHashtagClick,
-                onMediaClick = onMediaClick,
-                onPayInvoiceClick = onPayInvoiceClick,
+                noteCallbacks = noteCallbacks,
             )
 
             FeedNoteStatsRow(
@@ -704,7 +673,7 @@ private fun PreviewUnseenNotificationsListItem(
             notifications = notifications,
             type = notifications.first().notificationType,
             isSeen = false,
-            onArticleClick = {},
+            noteCallbacks = NoteCallbacks(),
         )
     }
 }
@@ -720,7 +689,7 @@ private fun PreviewSeenNotificationsListItem(
             notifications = notifications,
             type = notifications.first().notificationType,
             isSeen = true,
-            onArticleClick = {},
+            noteCallbacks = NoteCallbacks(),
         )
     }
 }
