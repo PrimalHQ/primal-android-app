@@ -310,6 +310,7 @@ fun ProfileDetailsScreen(
                                         feedSpec = state.profileFeedSpecs[pageIndex].buildSpec(profileId = state.profileId),
                                         noteCallbacks = noteCallbacks,
                                         onGoToWallet = onGoToWallet,
+                                        pollingEnabled = false,
                                     )
                                 }
                                 2 -> {

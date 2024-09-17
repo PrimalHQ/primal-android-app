@@ -79,7 +79,7 @@ fun NoteFeedList(
     contentPadding: PaddingValues = PaddingValues(0.dp),
     newNotesNoticeAlpha: Float = 1.00f,
     previewMode: Boolean = false,
-    isFeedSpecActive: Boolean = true,
+    pollingEnabled: Boolean = true,
     header: @Composable (LazyItemScope.() -> Unit)? = null,
     stickyHeader: @Composable (LazyItemScope.() -> Unit)? = null,
 ) {
@@ -98,7 +98,7 @@ fun NoteFeedList(
         }
     }
 
-    val isPolling by remember(started, isFeedSpecActive) { mutableStateOf(started && isFeedSpecActive) }
+    val isPolling by remember(started, pollingEnabled) { mutableStateOf(started && pollingEnabled) }
     LaunchedEffect(isPolling) {
         if (isPolling) {
             viewModel.setEvent(UiEvent.StartPolling)
