@@ -24,6 +24,8 @@ import net.primal.android.R
 import net.primal.android.core.utils.shortened
 import net.primal.android.theme.AppTheme
 
+internal const val PROFILE_TAB_COUNT = 4
+
 @Composable
 fun ProfileTabs(
     notesCount: Int?,
@@ -57,10 +59,10 @@ fun ProfileTabs(
     ) {
         CustomTab(
             modifier = Modifier.fillMaxWidth(),
-            selected = pagerState.currentPage == 0,
+            selected = pagerState.currentPage == NOTES_TAB_INDEX,
             onClick = {
                 onNotesCountClick()
-                scope.launch { pagerState.animateScrollToPage(0) }
+                scope.launch { pagerState.animateScrollToPage(page = NOTES_TAB_INDEX) }
             },
             text = notesCount?.asTabText() ?: placeholderText,
             label = stringResource(id = R.string.profile_notes_stat),
@@ -68,30 +70,30 @@ fun ProfileTabs(
 
         CustomTab(
             modifier = Modifier.fillMaxWidth(),
-            selected = pagerState.currentPage == 1,
+            selected = pagerState.currentPage == REPLIES_TAB_INDEX,
             onClick = {
                 onRepliesCountClick()
-                scope.launch { pagerState.animateScrollToPage(1) }
+                scope.launch { pagerState.animateScrollToPage(page = REPLIES_TAB_INDEX) }
             },
             text = repliesCount?.asTabText() ?: placeholderText,
             label = stringResource(id = R.string.profile_replies_stat),
         )
 
         CustomTab(
-            selected = pagerState.currentPage == 2,
+            selected = pagerState.currentPage == READS_TAB_INDEX,
             onClick = {
                 onReadsCountClick()
-                scope.launch { pagerState.animateScrollToPage(2) }
+                scope.launch { pagerState.animateScrollToPage(READS_TAB_INDEX) }
             },
             text = readsCount?.asTabText() ?: placeholderText,
             label = stringResource(id = R.string.profile_reads_stat),
         )
 
         CustomTab(
-            selected = pagerState.currentPage == 3,
+            selected = pagerState.currentPage == MEDIA_TAB_INDEX,
             onClick = {
                 onMediaCountClick()
-                scope.launch { pagerState.animateScrollToPage(3) }
+                scope.launch { pagerState.animateScrollToPage(MEDIA_TAB_INDEX) }
             },
             text = mediaCount?.asTabText() ?: placeholderText,
             label = stringResource(id = R.string.profile_media_stat),

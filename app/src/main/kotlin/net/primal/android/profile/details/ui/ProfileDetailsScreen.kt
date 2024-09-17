@@ -19,7 +19,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
@@ -108,9 +107,13 @@ fun ProfileDetailsScreen(
 }
 
 private const val MAX_COVER_TRANSPARENCY = 0.70f
+internal const val NOTES_TAB_INDEX = 0
+internal const val REPLIES_TAB_INDEX = 1
+internal const val READS_TAB_INDEX = 2
+internal const val MEDIA_TAB_INDEX = 3
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ProfileDetailsScreen(
     state: ProfileDetailsContract.UiState,
@@ -294,7 +297,7 @@ fun ProfileDetailsScreen(
                     Column(
                         modifier = Modifier.height(screenHeight),
                     ) {
-                        val pagerState = rememberPagerState { 4 }
+                        val pagerState = rememberPagerState { PROFILE_TAB_COUNT }
                         ProfileTabs(
                             pagerState = pagerState,
                             modifier = Modifier
@@ -329,7 +332,7 @@ fun ProfileDetailsScreen(
                                     }
                                 }
 
-                                pageIndex == 0 || pageIndex == 1 -> {
+                                pageIndex == NOTES_TAB_INDEX || pageIndex == REPLIES_TAB_INDEX -> {
                                     NoteFeedList(
                                         feedSpec = state.profileFeedSpecs[pageIndex].buildSpec(
                                             profileId = state.profileId,
@@ -341,7 +344,7 @@ fun ProfileDetailsScreen(
                                     )
                                 }
 
-                                pageIndex == 2 -> {
+                                pageIndex == READS_TAB_INDEX -> {
                                     ArticleFeedList(
                                         feedSpec = state.profileFeedSpecs[pageIndex].buildSpec(
                                             profileId = state.profileId,
