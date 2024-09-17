@@ -4,12 +4,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
-import kotlin.time.Duration.Companion.seconds
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
@@ -17,6 +17,7 @@ import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.note.repository.NoteRepository
+import net.primal.android.notes.feed.note.NoteContract.SideEffect
 import net.primal.android.notes.feed.note.NoteContract.UiEvent
 import net.primal.android.notes.feed.note.NoteContract.UiState
 import net.primal.android.profile.repository.ProfileRepository
@@ -45,6 +46,10 @@ class NoteViewModel @Inject constructor(
 
     private val events: MutableSharedFlow<UiEvent> = MutableSharedFlow()
     fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
+
+    private val _effect: Channel<SideEffect> = Channel()
+    val effect = _effect.receiveAsFlow()
+    private fun setEffect(effect: SideEffect) = viewModelScope.launch { _effect.send(effect) }
 
     init {
         observeEvents()
@@ -92,10 +97,10 @@ class NoteViewModel @Inject constructor(
                 )
             } catch (error: NostrPublishException) {
                 Timber.w(error)
-//                setErrorState(error = FeedError.FailedToPublishLikeEvent(error))
+                setEffect(SideEffect.NoteError.FailedToPublishLikeEvent(error))
             } catch (error: MissingRelaysException) {
                 Timber.w(error)
-//                setErrorState(error = FeedError.MissingRelaysConfiguration(error))
+                setEffect(SideEffect.NoteError.MissingRelaysConfiguration(error))
             }
         }
 
@@ -109,10 +114,10 @@ class NoteViewModel @Inject constructor(
                 )
             } catch (error: NostrPublishException) {
                 Timber.w(error)
-//                setErrorState(error = FeedError.FailedToPublishRepostEvent(error))
+                setEffect(SideEffect.NoteError.FailedToPublishRepostEvent(error))
             } catch (error: MissingRelaysException) {
                 Timber.w(error)
-//                setErrorState(error = FeedError.MissingRelaysConfiguration(error))
+                setEffect(SideEffect.NoteError.MissingRelaysConfiguration(error))
             }
         }
 
@@ -123,7 +128,7 @@ class NoteViewModel @Inject constructor(
             }
 
             if (postAuthorProfileData?.lnUrlDecoded == null) {
-//                setErrorState(error = FeedError.MissingLightningAddress(IllegalStateException()))
+                setEffect(SideEffect.NoteError.MissingLightningAddress(IllegalStateException()))
                 return@launch
             }
 
@@ -142,13 +147,13 @@ class NoteViewModel @Inject constructor(
                 }
             } catch (error: ZapFailureException) {
                 Timber.w(error)
-//                setErrorState(error = FeedError.FailedToPublishZapEvent(error))
+                setEffect(SideEffect.NoteError.FailedToPublishZapEvent(error))
             } catch (error: MissingRelaysException) {
                 Timber.w(error)
-//                setErrorState(error = FeedError.MissingRelaysConfiguration(error))
+                setEffect(SideEffect.NoteError.MissingRelaysConfiguration(error))
             } catch (error: InvalidZapRequestException) {
                 Timber.w(error)
-//                setErrorState(error = FeedError.InvalidZapRequest(error))
+                setEffect(SideEffect.NoteError.InvalidZapRequest(error))
             }
         }
 
@@ -163,13 +168,13 @@ class NoteViewModel @Inject constructor(
                 }
             } catch (error: WssException) {
                 Timber.w(error)
-//                setErrorState(error = FeedError.FailedToMuteUser(error))
+                setEffect(SideEffect.NoteError.FailedToMuteUser(error))
             } catch (error: NostrPublishException) {
                 Timber.w(error)
-//                setErrorState(error = FeedError.FailedToMuteUser(error))
+                setEffect(SideEffect.NoteError.FailedToMuteUser(error))
             } catch (error: MissingRelaysException) {
                 Timber.w(error)
-//                setErrorState(error = FeedError.MissingRelaysConfiguration(error))
+                setEffect(SideEffect.NoteError.MissingRelaysConfiguration(error))
             }
         }
 
@@ -222,14 +227,4 @@ class NoteViewModel @Inject constructor(
         viewModelScope.launch {
             setState { copy(shouldApproveBookmark = false) }
         }
-
-    private fun setErrorState() {
-//        setState { copy(error = error) }
-        viewModelScope.launch {
-            delay(2.seconds)
-//            if (state.value.error == error) {
-//                setState { copy(error = null) }
-//            }
-        }
-    }
 }

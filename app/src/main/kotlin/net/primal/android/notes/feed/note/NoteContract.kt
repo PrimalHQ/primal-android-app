@@ -10,16 +10,6 @@ interface NoteContract {
         val shouldApproveBookmark: Boolean = false,
     )
 
-    sealed class NoteError {
-        data class MissingLightningAddress(val cause: Throwable) : NoteError()
-        data class InvalidZapRequest(val cause: Throwable) : NoteError()
-        data class FailedToPublishZapEvent(val cause: Throwable) : NoteError()
-        data class FailedToPublishRepostEvent(val cause: Throwable) : NoteError()
-        data class FailedToPublishLikeEvent(val cause: Throwable) : NoteError()
-        data class MissingRelaysConfiguration(val cause: Throwable) : NoteError()
-        data class FailedToMuteUser(val cause: Throwable) : NoteError()
-    }
-
     sealed class UiEvent {
         data class PostLikeAction(
             val postId: String,
@@ -57,5 +47,17 @@ interface NoteContract {
         data class DismissBookmarkConfirmation(
             val noteId: String,
         ) : UiEvent()
+    }
+
+    sealed class SideEffect {
+        sealed class NoteError : SideEffect() {
+            data class MissingLightningAddress(val cause: Throwable) : NoteError()
+            data class InvalidZapRequest(val cause: Throwable) : NoteError()
+            data class FailedToPublishZapEvent(val cause: Throwable) : NoteError()
+            data class FailedToPublishRepostEvent(val cause: Throwable) : NoteError()
+            data class FailedToPublishLikeEvent(val cause: Throwable) : NoteError()
+            data class MissingRelaysConfiguration(val cause: Throwable) : NoteError()
+            data class FailedToMuteUser(val cause: Throwable) : NoteError()
+        }
     }
 }

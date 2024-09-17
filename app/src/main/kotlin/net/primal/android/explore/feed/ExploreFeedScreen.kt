@@ -32,6 +32,7 @@ import net.primal.android.explore.feed.ExploreFeedContract.UiEvent.RemoveFromUse
 import net.primal.android.explore.feed.ExploreFeedContract.UiState.ExploreFeedError
 import net.primal.android.feeds.domain.isNotesBookmarkFeedSpec
 import net.primal.android.notes.feed.NoteFeedList
+import net.primal.android.notes.feed.note.showNoteErrorSnackbar
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 
 @Composable
@@ -61,6 +62,8 @@ fun ExploreFeedScreen(
     onGoToWallet: () -> Unit,
     eventPublisher: (ExploreFeedContract.UiEvent) -> Unit,
 ) {
+    val context = LocalContext.current
+    val uiScope = rememberCoroutineScope()
     val feedPagingItems = state.notes.collectAsLazyPagingItems()
     val feedListState = feedPagingItems.rememberLazyListStatePagingWorkaround()
 
@@ -85,7 +88,6 @@ fun ExploreFeedScreen(
                 navigationIconContentDescription = stringResource(id = R.string.accessibility_back_button),
                 actions = {
                     if (state.canBeAddedInUserFeeds) {
-                        val uiScope = rememberCoroutineScope()
                         val addedToUserFeedsMessage = stringResource(id = R.string.app_added_to_user_feeds)
                         val removedFromUserFeedsMessage = stringResource(id = R.string.app_removed_from_user_feeds)
                         AddRemoveUserFeedAppBarIcon(
@@ -126,6 +128,15 @@ fun ExploreFeedScreen(
                 noContentText = when {
                     state.feedSpec.isNotesBookmarkFeedSpec() -> stringResource(id = R.string.bookmarks_no_content)
                     else -> stringResource(id = R.string.feed_no_content)
+                },
+                onNoteError = { noteError ->
+                    uiScope.launch {
+                        showNoteErrorSnackbar(
+                            context = context,
+                            error = noteError,
+                            snackbarHostState = snackbarHostState,
+                        )
+                    }
                 },
             )
         },

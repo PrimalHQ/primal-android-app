@@ -3,7 +3,6 @@ package net.primal.android.thread.notes
 import net.primal.android.articles.feed.ui.FeedArticleUi
 import net.primal.android.note.ui.EventZapUiModel
 import net.primal.android.notes.feed.model.FeedPostUi
-import net.primal.android.notes.feed.model.ZappingState
 
 interface ThreadContract {
 

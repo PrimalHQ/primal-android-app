@@ -60,6 +60,7 @@ import net.primal.android.drawer.FloatingNewDataHostTopPadding
 import net.primal.android.notes.feed.NoteFeedContract.UiEvent
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.model.FeedPostsSyncStats
+import net.primal.android.notes.feed.note.NoteContract.SideEffect.NoteError
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.theme.AppTheme
 
@@ -74,6 +75,7 @@ fun NoteFeedList(
     previewMode: Boolean = false,
     pullToRefreshEnabled: Boolean = true,
     pollingEnabled: Boolean = true,
+    onNoteError: ((NoteError) -> Unit)? = null,
     header: @Composable (LazyItemScope.() -> Unit)? = null,
     stickyHeader: @Composable (LazyItemScope.() -> Unit)? = null,
 ) {
@@ -108,6 +110,7 @@ fun NoteFeedList(
         onGoToWallet = onGoToWallet,
         newNotesNoticeAlpha = newNotesNoticeAlpha,
         contentPadding = contentPadding,
+        onNoteError = onNoteError,
         header = header,
         stickyHeader = stickyHeader,
         eventPublisher = viewModel::setEvent,
@@ -124,22 +127,12 @@ private fun NoteFeedList(
     newNotesNoticeAlpha: Float = 1.00f,
     pullToRefreshEnabled: Boolean = true,
     contentPadding: PaddingValues = PaddingValues(0.dp),
+    onNoteError: ((NoteError) -> Unit)? = null,
     header: @Composable (LazyItemScope.() -> Unit)? = null,
     stickyHeader: @Composable (LazyItemScope.() -> Unit)? = null,
     eventPublisher: (UiEvent) -> Unit,
 ) {
     val pagingItems = state.notes.collectAsLazyPagingItems()
-
-    // TODO Cleanup this error handler
-//    val scope = rememberCoroutineScope()
-//    val context = LocalContext.current
-//    LaunchedEffect(state.error) {
-//        if (state.error != null) {
-//            scope.launch {
-//                Toast.makeText(context, state.error.toErrorMessage(context), Toast.LENGTH_LONG).show()
-//            }
-//        }
-//    }
 
     LaunchedEffect(listState, pagingItems) {
         withContext(Dispatchers.IO) {
@@ -169,6 +162,7 @@ private fun NoteFeedList(
             onGoToWallet = onGoToWallet,
             paddingValues = contentPadding,
             onScrolledToTop = { eventPublisher(UiEvent.FeedScrolledToTop) },
+            onNoteError = onNoteError,
             header = header,
             stickyHeader = stickyHeader,
         )
@@ -244,6 +238,7 @@ fun NoteFeedList(
     pullToRefreshEnabled: Boolean = true,
     paddingValues: PaddingValues = PaddingValues(0.dp),
     onScrolledToTop: (() -> Unit)? = null,
+    onNoteError: ((NoteError) -> Unit)? = null,
     noContentText: String = stringResource(id = R.string.feed_no_content),
     header: @Composable (LazyItemScope.() -> Unit)? = null,
     stickyHeader: @Composable (LazyItemScope.() -> Unit)? = null,
@@ -307,6 +302,7 @@ fun NoteFeedList(
             noContentText = noContentText,
             header = header,
             stickyHeader = stickyHeader,
+            onNoteError = onNoteError,
         )
     }
 }

@@ -59,6 +59,7 @@ import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.notes.feed.NoteFeedList
+import net.primal.android.notes.feed.note.showNoteErrorSnackbar
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.profile.details.ProfileDetailsContract
 import net.primal.android.profile.details.ProfileDetailsContract.UiState.ProfileError
@@ -324,6 +325,15 @@ fun ProfileDetailsScreen(
                                         onGoToWallet = onGoToWallet,
                                         pollingEnabled = false,
                                         pullToRefreshEnabled = false,
+                                        onNoteError = { noteError ->
+                                            uiScope.launch {
+                                                showNoteErrorSnackbar(
+                                                    context = context,
+                                                    error = noteError,
+                                                    snackbarHostState = snackbarHostState,
+                                                )
+                                            }
+                                        },
                                     )
                                 }
 
