@@ -14,7 +14,6 @@ import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -54,6 +53,7 @@ import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWor
 import net.primal.android.core.compose.isEmpty
 import net.primal.android.core.compose.isNotEmpty
 import net.primal.android.core.compose.pulltorefresh.PrimalIndicator
+import net.primal.android.core.compose.pulltorefresh.PrimalPullToRefreshBox
 import timber.log.Timber
 
 @Composable
@@ -61,6 +61,7 @@ fun ArticleFeedList(
     feedSpec: String,
     contentPadding: PaddingValues = PaddingValues(0.dp),
     onArticleClick: (naddr: String) -> Unit,
+    pullToRefreshEnabled: Boolean = true,
     previewMode: Boolean = false,
     header: @Composable (LazyItemScope.() -> Unit)? = null,
     stickyHeader: @Composable (LazyItemScope.() -> Unit)? = null,
@@ -77,6 +78,7 @@ fun ArticleFeedList(
         onArticleClick = onArticleClick,
         header = header,
         stickyHeader = stickyHeader,
+        pullToRefreshEnabled = pullToRefreshEnabled,
     )
 }
 
@@ -84,6 +86,7 @@ fun ArticleFeedList(
 @Composable
 private fun ArticleFeedList(
     state: ArticleFeedContract.UiState,
+    pullToRefreshEnabled: Boolean = true,
     contentPadding: PaddingValues = PaddingValues(0.dp),
     onArticleClick: (naddr: String) -> Unit,
     header: @Composable (LazyItemScope.() -> Unit)? = null,
@@ -118,7 +121,7 @@ private fun ArticleFeedList(
         }
     }
 
-    PullToRefreshBox(
+    PrimalPullToRefreshBox(
         isRefreshing = pullToRefreshing,
         onRefresh = {
             pagingItems.refresh()
@@ -126,6 +129,7 @@ private fun ArticleFeedList(
             isMediatorRefreshing = true
         },
         state = pullToRefreshState,
+        enabled = pullToRefreshEnabled,
         indicator = {
             PrimalIndicator(
                 modifier = Modifier

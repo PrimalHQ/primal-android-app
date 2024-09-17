@@ -311,12 +311,14 @@ fun ProfileDetailsScreen(
                                         noteCallbacks = noteCallbacks,
                                         onGoToWallet = onGoToWallet,
                                         pollingEnabled = false,
+                                        pullToRefreshEnabled = false,
                                     )
                                 }
                                 2 -> {
                                     ArticleFeedList(
                                         feedSpec = state.profileFeedSpecs[pageIndex].buildSpec(profileId = state.profileId),
                                         onArticleClick = onArticleClick,
+                                        pullToRefreshEnabled = false,
                                     )
                                 }
                             }

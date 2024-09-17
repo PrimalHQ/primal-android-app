@@ -21,7 +21,6 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -59,6 +58,7 @@ import net.primal.android.R
 import net.primal.android.core.compose.AvatarThumbnailsRow
 import net.primal.android.core.compose.isNotEmpty
 import net.primal.android.core.compose.pulltorefresh.PrimalIndicator
+import net.primal.android.core.compose.pulltorefresh.PrimalPullToRefreshBox
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.drawer.FloatingNewDataHostTopPadding
 import net.primal.android.notes.feed.NoteFeedContract.UiEvent
@@ -79,6 +79,7 @@ fun NoteFeedList(
     contentPadding: PaddingValues = PaddingValues(0.dp),
     newNotesNoticeAlpha: Float = 1.00f,
     previewMode: Boolean = false,
+    pullToRefreshEnabled: Boolean = true,
     pollingEnabled: Boolean = true,
     header: @Composable (LazyItemScope.() -> Unit)? = null,
     stickyHeader: @Composable (LazyItemScope.() -> Unit)? = null,
@@ -117,6 +118,7 @@ fun NoteFeedList(
         header = header,
         stickyHeader = stickyHeader,
         eventPublisher = viewModel::setEvent,
+        pullToRefreshEnabled = pullToRefreshEnabled,
     )
 }
 
@@ -127,6 +129,7 @@ private fun NoteFeedList(
     noteCallbacks: NoteCallbacks,
     onGoToWallet: () -> Unit,
     newNotesNoticeAlpha: Float = 1.00f,
+    pullToRefreshEnabled: Boolean = true,
     contentPadding: PaddingValues = PaddingValues(0.dp),
     header: @Composable (LazyItemScope.() -> Unit)? = null,
     stickyHeader: @Composable (LazyItemScope.() -> Unit)? = null,
@@ -182,6 +185,7 @@ private fun NoteFeedList(
     Box {
         NoteFeedList(
             pagingItems = pagingItems,
+            pullToRefreshEnabled = pullToRefreshEnabled,
             feedListState = listState,
             zappingState = state.zappingState,
             noteCallbacks = noteCallbacks,
@@ -303,6 +307,7 @@ fun NoteFeedList(
     onRepostClick: (FeedPostUi) -> Unit,
     onGoToWallet: () -> Unit,
     onBookmarkClick: (noteId: String) -> Unit,
+    pullToRefreshEnabled: Boolean = true,
     paddingValues: PaddingValues = PaddingValues(0.dp),
     onScrolledToTop: (() -> Unit)? = null,
     onMuteClick: ((String) -> Unit)? = null,
@@ -349,13 +354,14 @@ fun NoteFeedList(
         }
     }
 
-    PullToRefreshBox(
+    PrimalPullToRefreshBox(
         isRefreshing = pullToRefreshing,
         onRefresh = {
             pagingItems.refresh()
             pullToRefreshing = true
             isMediatorRefreshing = true
         },
+        enabled = pullToRefreshEnabled,
         state = pullToRefreshState,
         indicator = {
             PrimalIndicator(
