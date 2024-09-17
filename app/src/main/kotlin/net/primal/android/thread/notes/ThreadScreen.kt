@@ -92,41 +92,24 @@ import net.primal.android.core.compose.icons.primaliconpack.More
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.pulltorefresh.PrimalIndicator
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
-import net.primal.android.crypto.hexToNoteHrp
 import net.primal.android.editor.NoteEditorContract
 import net.primal.android.editor.di.noteEditorViewModel
 import net.primal.android.editor.domain.NoteEditorArgs
 import net.primal.android.editor.ui.NoteOutlinedTextField
 import net.primal.android.editor.ui.NoteTagUserLazyColumn
 import net.primal.android.note.ui.EventZapUiModel
-import net.primal.android.notes.feed.NoteRepostOrQuoteBottomSheet
 import net.primal.android.notes.feed.model.EventStatsUi
-import net.primal.android.notes.feed.model.FeedPostAction
 import net.primal.android.notes.feed.model.FeedPostUi
-import net.primal.android.notes.feed.note.ConfirmFirstBookmarkAlertDialog
 import net.primal.android.notes.feed.note.FeedNoteCard
-import net.primal.android.notes.feed.note.events.InvoicePayClickEvent
-import net.primal.android.notes.feed.note.events.MediaClickEvent
-import net.primal.android.notes.feed.zaps.UnableToZapBottomSheet
-import net.primal.android.notes.feed.zaps.ZapBottomSheet
-import net.primal.android.profile.report.OnReportContentClick
+import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
-import net.primal.android.thread.notes.ThreadContract.UiState.ThreadError
-import net.primal.android.wallet.zaps.canZap
 
 @Composable
 fun ThreadScreen(
     viewModel: ThreadViewModel,
     onClose: () -> Unit,
-    onPostClick: (noteId: String) -> Unit,
-    onArticleClick: (naddr: String) -> Unit,
-    onPostReplyClick: (String) -> Unit,
-    onPostQuoteClick: (content: TextFieldValue) -> Unit,
-    onProfileClick: (profileId: String) -> Unit,
-    onHashtagClick: (String) -> Unit,
-    onMediaClick: (MediaClickEvent) -> Unit,
-    onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
+    noteCallbacks: NoteCallbacks,
     onGoToWallet: () -> Unit,
     onExpandReply: (args: NoteEditorArgs) -> Unit,
     onReactionsClick: (noteId: String) -> Unit,
@@ -146,14 +129,7 @@ fun ThreadScreen(
     ThreadScreen(
         state = uiState,
         onClose = onClose,
-        onPostClick = onPostClick,
-        onArticleClick = onArticleClick,
-        onPostReplyClick = onPostReplyClick,
-        onPostQuoteClick = onPostQuoteClick,
-        onProfileClick = onProfileClick,
-        onHashtagClick = onHashtagClick,
-        onMediaClick = onMediaClick,
-        onPayInvoiceClick = onPayInvoiceClick,
+        noteCallbacks = noteCallbacks,
         onGoToWallet = onGoToWallet,
         onExpandReply = onExpandReply,
         onReactionsClick = onReactionsClick,
@@ -166,14 +142,7 @@ fun ThreadScreen(
 fun ThreadScreen(
     state: ThreadContract.UiState,
     onClose: () -> Unit,
-    onPostClick: (String) -> Unit,
-    onArticleClick: (naddr: String) -> Unit,
-    onPostReplyClick: (String) -> Unit,
-    onPostQuoteClick: (content: TextFieldValue) -> Unit,
-    onProfileClick: (String) -> Unit,
-    onHashtagClick: (String) -> Unit,
-    onMediaClick: (MediaClickEvent) -> Unit,
-    onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
+    noteCallbacks: NoteCallbacks,
     onGoToWallet: () -> Unit,
     onExpandReply: (args: NoteEditorArgs) -> Unit,
     onReactionsClick: (noteId: String) -> Unit,
@@ -182,11 +151,6 @@ fun ThreadScreen(
     val noteEditorViewModel = noteEditorViewModel(args = NoteEditorArgs(replyToNoteId = state.highlightPostId))
     val replyState by noteEditorViewModel.state.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
-
-    ThreadErrorHandler(
-        error = state.error,
-        snackbarHostState = snackbarHostState,
-    )
 
     NoteEditorErrorHandler(
         error = replyState.error,
@@ -216,14 +180,7 @@ fun ThreadScreen(
                     paddingValues = paddingValues,
                     state = state,
                     scaffoldBarsMaxHeightPx = bottomBarMaxHeightPx + topBarMaxHeightPx,
-                    onPostClick = onPostClick,
-                    onArticleClick = onArticleClick,
-                    onProfileClick = onProfileClick,
-                    onPostReplyClick = onPostReplyClick,
-                    onHashtagClick = onHashtagClick,
-                    onMediaClick = onMediaClick,
-                    onPayInvoiceClick = onPayInvoiceClick,
-                    onPostQuoteClick = onPostQuoteClick,
+                    noteCallbacks = noteCallbacks,
                     onGoToWallet = onGoToWallet,
                     onReactionsClick = onReactionsClick,
                     eventPublisher = eventPublisher,
@@ -311,89 +268,11 @@ private fun ThreadConversationLazyColumn(
     paddingValues: PaddingValues,
     state: ThreadContract.UiState,
     scaffoldBarsMaxHeightPx: Int,
-    onPostClick: (String) -> Unit,
-    onArticleClick: (naddr: String) -> Unit,
-    onProfileClick: (String) -> Unit,
-    onPostReplyClick: (String) -> Unit,
-    onHashtagClick: (String) -> Unit,
-    onMediaClick: (MediaClickEvent) -> Unit,
-    onPostQuoteClick: (content: TextFieldValue) -> Unit,
-    onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
+    noteCallbacks: NoteCallbacks,
     onGoToWallet: () -> Unit,
     onReactionsClick: (noteId: String) -> Unit,
     eventPublisher: (ThreadContract.UiEvent) -> Unit,
 ) {
-    var repostQuotePostConfirmation by remember { mutableStateOf<FeedPostUi?>(null) }
-    if (repostQuotePostConfirmation != null) {
-        repostQuotePostConfirmation?.let { post ->
-            NoteRepostOrQuoteBottomSheet(
-                onDismiss = { repostQuotePostConfirmation = null },
-                onRepostClick = {
-                    eventPublisher(
-                        ThreadContract.UiEvent.RepostAction(
-                            postId = post.postId,
-                            postAuthorId = post.authorId,
-                            postNostrEvent = post.rawNostrEventJson,
-                        ),
-                    )
-                },
-                onPostQuoteClick = {
-                    onPostQuoteClick(TextFieldValue(text = "\n\nnostr:${post.postId.hexToNoteHrp()}"))
-                },
-            )
-        }
-    }
-
-    var showCantZapWarning by remember { mutableStateOf(false) }
-    if (showCantZapWarning) {
-        UnableToZapBottomSheet(
-            zappingState = state.zappingState,
-            onDismissRequest = { showCantZapWarning = false },
-            onGoToWallet = onGoToWallet,
-        )
-    }
-
-    var zapOptionsPostConfirmation by remember { mutableStateOf<FeedPostUi?>(null) }
-    if (zapOptionsPostConfirmation != null) {
-        zapOptionsPostConfirmation?.let { post ->
-            ZapBottomSheet(
-                onDismissRequest = { zapOptionsPostConfirmation = null },
-                receiverName = post.authorName,
-                zappingState = state.zappingState,
-                onZap = { zapAmount, zapDescription ->
-                    if (state.zappingState.canZap(zapAmount)) {
-                        eventPublisher(
-                            ThreadContract.UiEvent.ZapAction(
-                                postId = post.postId,
-                                postAuthorId = post.authorId,
-                                zapAmount = zapAmount.toULong(),
-                                zapDescription = zapDescription,
-                            ),
-                        )
-                    } else {
-                        showCantZapWarning = true
-                    }
-                },
-            )
-        }
-    }
-
-    if (state.confirmBookmarkingNoteId != null) {
-        ConfirmFirstBookmarkAlertDialog(
-            onBookmarkConfirmed = {
-                eventPublisher(
-                    ThreadContract.UiEvent.BookmarkAction(
-                        noteId = state.confirmBookmarkingNoteId,
-                        forceUpdate = true,
-                    ),
-                )
-            },
-            onClose = {
-                eventPublisher(ThreadContract.UiEvent.DismissBookmarkConfirmation)
-            },
-        )
-    }
-
     val pullToRefreshState = rememberPullToRefreshState()
     var pullToRefreshing by remember { mutableStateOf(false) }
 
@@ -425,70 +304,9 @@ private fun ThreadConversationLazyColumn(
             modifier = Modifier.fillMaxSize(),
             state = state,
             scaffoldBarsMaxHeightPx = scaffoldBarsMaxHeightPx,
-            onPostClick = onPostClick,
-            onArticleClick = onArticleClick,
-            onProfileClick = onProfileClick,
-            onPostAction = { noteAction, note ->
-                when (noteAction) {
-                    FeedPostAction.Reply -> onPostReplyClick(note.postId)
-
-                    FeedPostAction.Zap -> {
-                        if (state.zappingState.canZap()) {
-                            eventPublisher(
-                                ThreadContract.UiEvent.ZapAction(
-                                    postId = note.postId,
-                                    postAuthorId = note.authorId,
-                                    zapAmount = null,
-                                    zapDescription = null,
-                                ),
-                            )
-                        } else {
-                            showCantZapWarning = true
-                        }
-                    }
-
-                    FeedPostAction.Like -> {
-                        eventPublisher(
-                            ThreadContract.UiEvent.PostLikeAction(
-                                postId = note.postId,
-                                postAuthorId = note.authorId,
-                            ),
-                        )
-                    }
-
-                    FeedPostAction.Repost -> {
-                        repostQuotePostConfirmation = note
-                    }
-                }
-            },
-            onPostLongClickAction = { noteAction, note ->
-                when (noteAction) {
-                    FeedPostAction.Zap -> {
-                        if (state.zappingState.walletConnected) {
-                            zapOptionsPostConfirmation = note
-                        } else {
-                            showCantZapWarning = true
-                        }
-                    }
-
-                    else -> Unit
-                }
-            },
-            onHashtagClick = onHashtagClick,
-            onMediaClick = onMediaClick,
-            onPayInvoiceClick = onPayInvoiceClick,
-            onMuteUserClick = { authorId -> eventPublisher(ThreadContract.UiEvent.MuteAction(authorId)) },
-            onBookmarkClick = { noteId -> eventPublisher(ThreadContract.UiEvent.BookmarkAction(noteId = noteId)) },
-            onReportContentClick = { reportType, profileId, noteId ->
-                eventPublisher(
-                    ThreadContract.UiEvent.ReportAbuse(
-                        reportType = reportType,
-                        profileId = profileId,
-                        noteId = noteId,
-                    ),
-                )
-            },
             onReactionsClick = onReactionsClick,
+            onGoToWallet = onGoToWallet,
+            noteCallbacks = noteCallbacks,
         )
     }
 }
@@ -498,19 +316,10 @@ private fun ThreadLazyColumn(
     modifier: Modifier,
     state: ThreadContract.UiState,
     scaffoldBarsMaxHeightPx: Int,
-    onPostClick: (String) -> Unit,
-    onArticleClick: (naddr: String) -> Unit,
-    onProfileClick: (String) -> Unit,
-    onHashtagClick: (String) -> Unit,
-    onMediaClick: (MediaClickEvent) -> Unit,
-    onBookmarkClick: (String) -> Unit,
-    onMuteUserClick: (authorId: String) -> Unit,
     onReactionsClick: (noteId: String) -> Unit,
-    onReportContentClick: OnReportContentClick,
+    noteCallbacks: NoteCallbacks,
+    onGoToWallet: (() -> Unit),
     paddingValues: PaddingValues = PaddingValues(all = 0.dp),
-    onPostAction: ((noteAction: FeedPostAction, note: FeedPostUi) -> Unit)? = null,
-    onPostLongClickAction: ((noteAction: FeedPostAction, note: FeedPostUi) -> Unit)? = null,
-    onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
 ) {
     var threadListMaxHeightPx by remember { mutableIntStateOf(0) }
     var highlightPostHeightPx by remember { mutableIntStateOf(0) }
@@ -535,7 +344,7 @@ private fun ThreadLazyColumn(
                     FeedArticleListItem(
                         data = state.replyToArticle,
                         modifier = Modifier.padding(all = 16.dp),
-                        onClick = onArticleClick,
+                        onClick = noteCallbacks.onArticleClick,
                     )
                     PrimalDivider()
                 }
@@ -569,21 +378,14 @@ private fun ThreadLazyColumn(
                     drawLineAboveAvatar = isConnectedBackward(index, state.highlightPostIndex),
                     drawLineBelowAvatar = isConnectedForward(index, state.highlightPostIndex),
                     showReplyTo = false,
-                    onPostClick = { postId ->
-                        if (state.highlightPostId != postId) {
-                            onPostClick(postId)
-                        }
-                    },
-                    onArticleClick = onArticleClick,
-                    onProfileClick = { profileId -> onProfileClick(profileId) },
-                    onPostAction = { onPostAction?.invoke(it, item) },
-                    onPostLongClickAction = { onPostLongClickAction?.invoke(it, item) },
-                    onHashtagClick = onHashtagClick,
-                    onMediaClick = onMediaClick,
-                    onMuteUserClick = { onMuteUserClick(item.authorId) },
-                    onReportContentClick = onReportContentClick,
-                    onBookmarkClick = { onBookmarkClick(item.postId) },
-                    onPayInvoiceClick = onPayInvoiceClick,
+                    noteCallbacks = noteCallbacks.copy(
+                        onNoteClick = { noteId ->
+                            if (state.highlightPostId != noteId) {
+                                noteCallbacks.onNoteClick?.invoke(noteId)
+                            }
+                        },
+                    ),
+                    onGoToWallet = onGoToWallet,
                     contentFooter = {
                         if (highlighted && (state.topZap != null || state.otherZaps.isNotEmpty())) {
                             TopZapsSection(
@@ -892,47 +694,6 @@ private fun ReplyToOptions(
 
 @Composable
 @Deprecated("Replace with SnackbarErrorHandler")
-private fun ThreadErrorHandler(error: ThreadError?, snackbarHostState: SnackbarHostState) {
-    val context = LocalContext.current
-    LaunchedEffect(error ?: true) {
-        val errorMessage = when (error) {
-            is ThreadError.InvalidZapRequest -> context.getString(
-                R.string.post_action_invalid_zap_request,
-            )
-
-            is ThreadError.MissingLightningAddress -> context.getString(
-                R.string.post_action_missing_lightning_address,
-            )
-
-            is ThreadError.FailedToPublishZapEvent -> context.getString(
-                R.string.post_action_zap_failed,
-            )
-
-            is ThreadError.FailedToPublishLikeEvent -> context.getString(
-                R.string.post_action_like_failed,
-            )
-
-            is ThreadError.FailedToPublishRepostEvent -> context.getString(
-                R.string.post_action_repost_failed,
-            )
-
-            is ThreadError.MissingRelaysConfiguration -> context.getString(
-                R.string.app_missing_relays_config,
-            )
-
-            is ThreadError.FailedToMuteUser -> context.getString(R.string.app_error_muting_user)
-            null -> return@LaunchedEffect
-        }
-
-        snackbarHostState.showSnackbar(
-            message = errorMessage,
-            duration = SnackbarDuration.Short,
-        )
-    }
-}
-
-@Composable
-@Deprecated("Replace with SnackbarErrorHandler")
 private fun NoteEditorErrorHandler(
     error: NoteEditorContract.UiState.NoteEditorError?,
     snackbarHostState: SnackbarHostState,
@@ -1003,13 +764,7 @@ fun ThreadScreenPreview() {
                 ),
             ),
             onClose = {},
-            onPostClick = {},
-            onArticleClick = {},
-            onPostReplyClick = {},
-            onPostQuoteClick = {},
-            onProfileClick = {},
-            onHashtagClick = {},
-            onMediaClick = {},
+            noteCallbacks = NoteCallbacks(),
             onGoToWallet = {},
             onExpandReply = {},
             onReactionsClick = {},

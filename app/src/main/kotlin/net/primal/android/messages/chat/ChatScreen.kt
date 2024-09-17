@@ -71,21 +71,15 @@ import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.formatNip05Identifier
 import net.primal.android.messages.chat.model.ChatMessageUi
 import net.primal.android.notes.feed.model.toNoteContentUi
-import net.primal.android.notes.feed.note.NoteContent
-import net.primal.android.notes.feed.note.events.InvoicePayClickEvent
-import net.primal.android.notes.feed.note.events.MediaClickEvent
+import net.primal.android.notes.feed.note.ui.NoteContent
+import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.theme.AppTheme
 
 @Composable
 fun ChatScreen(
     viewModel: ChatViewModel,
     onClose: () -> Unit,
-    onProfileClick: (String) -> Unit,
-    onNoteClick: (String) -> Unit,
-    onArticleClick: (naddr: String) -> Unit,
-    onHashtagClick: (String) -> Unit,
-    onMediaClick: (MediaClickEvent) -> Unit,
-    onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
+    noteCallbacks: NoteCallbacks,
 ) {
     val state = viewModel.state.collectAsState()
 
@@ -101,12 +95,7 @@ fun ChatScreen(
     ChatScreen(
         state = state.value,
         onClose = onClose,
-        onProfileClick = onProfileClick,
-        onNoteClick = onNoteClick,
-        onArticleClick = onArticleClick,
-        onHashtagClick = onHashtagClick,
-        onMediaClick = onMediaClick,
-        onPayInvoiceClick = onPayInvoiceClick,
+        noteCallbacks = noteCallbacks,
         eventPublisher = { viewModel.setEvent(it) },
     )
 }
@@ -116,12 +105,7 @@ fun ChatScreen(
 fun ChatScreen(
     state: ChatContract.UiState,
     onClose: () -> Unit,
-    onProfileClick: (String) -> Unit,
-    onNoteClick: (String) -> Unit,
-    onArticleClick: (naddr: String) -> Unit,
-    onHashtagClick: (String) -> Unit,
-    onMediaClick: (MediaClickEvent) -> Unit,
-    onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
+    noteCallbacks: NoteCallbacks,
     eventPublisher: (ChatContract.UiEvent) -> Unit,
 ) {
     val messagesPagingItems = state.messages.collectAsLazyPagingItems()
@@ -157,7 +141,7 @@ fun ChatScreen(
                         AvatarThumbnail(
                             avatarCdnImage = state.participantProfile?.avatarCdnImage,
                             modifier = Modifier.size(32.dp),
-                            onClick = { onProfileClick(state.participantId) },
+                            onClick = { noteCallbacks.onProfileClick?.invoke(state.participantId) },
                         )
                     }
                 },
@@ -171,12 +155,7 @@ fun ChatScreen(
                 state = listState,
                 contentPadding = contentPadding,
                 messages = messagesPagingItems,
-                onProfileClick = onProfileClick,
-                onNoteClick = onNoteClick,
-                onArticleClick = onArticleClick,
-                onHashtagClick = onHashtagClick,
-                onMediaClick = onMediaClick,
-                onPayInvoiceClick = onPayInvoiceClick,
+                noteCallbacks = noteCallbacks,
             )
         },
         bottomBar = {
@@ -210,15 +189,10 @@ fun ChatScreen(
 @Composable
 private fun ChatList(
     messages: LazyPagingItems<ChatMessageUi>,
+    noteCallbacks: NoteCallbacks,
     modifier: Modifier = Modifier,
     state: LazyListState = rememberLazyListState(),
     contentPadding: PaddingValues = PaddingValues(0.dp),
-    onProfileClick: (String) -> Unit,
-    onNoteClick: (String) -> Unit,
-    onArticleClick: (naddr: String) -> Unit,
-    onHashtagClick: (String) -> Unit,
-    onMediaClick: (MediaClickEvent) -> Unit,
-    onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
 ) {
     val localUriHandler = LocalUriHandler.current
 
@@ -262,15 +236,8 @@ private fun ChatList(
                         chatMessage = currentMessage,
                         previousMessage = previousMessage,
                         nextMessage = nextMessage,
-                        onProfileClick = onProfileClick,
-                        onArticleClick = onArticleClick,
-                        onNoteClick = onNoteClick,
-                        onUrlClick = {
-                            localUriHandler.openUriSafely(it)
-                        },
-                        onHashtagClick = onHashtagClick,
-                        onMediaClick = onMediaClick,
-                        onPayInvoiceClick = onPayInvoiceClick,
+                        onUrlClick = { localUriHandler.openUriSafely(it) },
+                        noteCallbacks = noteCallbacks,
                     )
                 }
 
@@ -327,13 +294,8 @@ private fun ChatMessageListItem(
     chatMessage: ChatMessageUi,
     previousMessage: ChatMessageUi? = null,
     nextMessage: ChatMessageUi? = null,
-    onProfileClick: (String) -> Unit,
-    onNoteClick: (String) -> Unit,
-    onArticleClick: ((naddr: String) -> Unit),
     onUrlClick: (String) -> Unit,
-    onHashtagClick: (String) -> Unit,
-    onMediaClick: (MediaClickEvent) -> Unit,
-    onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
+    noteCallbacks: NoteCallbacks,
 ) {
     val timeDiffBetweenThisAndNextMessage = (nextMessage?.timestamp ?: Instant.MAX).epochSecond -
         chatMessage.timestamp.epochSecond
@@ -407,12 +369,8 @@ private fun ChatMessageListItem(
                 data = chatMessage.toNoteContentUi(),
                 expanded = true,
                 onClick = { },
-                onProfileClick = onProfileClick,
-                onPostClick = onNoteClick,
-                onArticleClick = onArticleClick,
+                noteCallbacks = noteCallbacks,
                 onUrlClick = onUrlClick,
-                onHashtagClick = onHashtagClick,
-                onMediaClick = onMediaClick,
                 contentColor = if (chatMessage.isUserMessage) {
                     Color.White
                 } else {
@@ -428,7 +386,6 @@ private fun ChatMessageListItem(
                 } else {
                     AppTheme.extraColorScheme.surfaceVariantAlt2
                 },
-                onPayInvoiceClick = onPayInvoiceClick,
             )
         }
 

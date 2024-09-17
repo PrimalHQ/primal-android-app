@@ -1,4 +1,4 @@
-package net.primal.android.notes.feed.note
+package net.primal.android.notes.feed.note.ui
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box

@@ -50,7 +50,7 @@ fun ProfileDropdownMenu(
                 reportDialogVisible = false
                 eventPublisher(
                     ProfileDetailsContract.UiEvent.ReportAbuse(
-                        reportType = it,
+                        type = it,
                         profileId = profileId,
                     ),
                 )

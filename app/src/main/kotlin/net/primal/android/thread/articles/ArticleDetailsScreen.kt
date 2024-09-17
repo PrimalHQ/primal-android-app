@@ -40,7 +40,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
@@ -64,10 +63,9 @@ import net.primal.android.nostr.utils.Nip19TLV.toNaddrString
 import net.primal.android.notes.feed.model.FeedPostAction
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.note.FeedNoteCard
-import net.primal.android.notes.feed.note.FeedNoteStatsRow
-import net.primal.android.notes.feed.note.ReferencedNoteCard
-import net.primal.android.notes.feed.note.events.InvoicePayClickEvent
-import net.primal.android.notes.feed.note.events.MediaClickEvent
+import net.primal.android.notes.feed.note.ui.FeedNoteStatsRow
+import net.primal.android.notes.feed.note.ui.ReferencedNoteCard
+import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.notes.feed.zaps.UnableToZapBottomSheet
 import net.primal.android.notes.feed.zaps.ZapBottomSheet
 import net.primal.android.theme.AppTheme
@@ -90,15 +88,8 @@ import net.primal.android.wallet.zaps.canZap
 fun ArticleDetailsScreen(
     viewModel: ArticleDetailsViewModel,
     onClose: () -> Unit,
-    onNoteClick: (noteId: String) -> Unit,
-    onNoteReplyClick: (String) -> Unit,
-    onNoteQuoteClick: (content: TextFieldValue) -> Unit,
-    onProfileClick: (profileId: String) -> Unit,
-    onArticleClick: (naddr: String) -> Unit,
-    onArticleCommentClick: (naddr: String) -> Unit,
-    onHashtagClick: (String) -> Unit,
-    onMediaClick: (MediaClickEvent) -> Unit,
-    onPayInvoiceClick: (InvoicePayClickEvent) -> Unit,
+    onArticleReplyClick: (naddr: String) -> Unit,
+    noteCallbacks: NoteCallbacks,
     onGoToWallet: () -> Unit,
     onReactionsClick: (eventId: String) -> Unit,
 ) {
@@ -115,13 +106,9 @@ fun ArticleDetailsScreen(
         state = uiState,
         eventPublisher = { viewModel.setEvent(it) },
         onClose = onClose,
-        onNoteClick = onNoteClick,
-        onProfileClick = onProfileClick,
-        onArticleClick = onArticleClick,
-        onArticleCommentClick = onArticleCommentClick,
-        onMediaClick = onMediaClick,
-        onPayInvoiceClick = onPayInvoiceClick,
+        onArticleReplyClick = onArticleReplyClick,
         onReactionsClick = onReactionsClick,
+        noteCallbacks = noteCallbacks,
         onGoToWallet = onGoToWallet,
     )
 }
@@ -132,13 +119,9 @@ private fun ArticleDetailsScreen(
     state: ArticleDetailsContract.UiState,
     eventPublisher: (UiEvent) -> Unit,
     onClose: () -> Unit,
-    onNoteClick: (noteId: String) -> Unit,
-    onProfileClick: (profileId: String) -> Unit,
-    onArticleClick: (naddr: String) -> Unit,
-    onArticleCommentClick: (naddr: String) -> Unit,
-    onMediaClick: (MediaClickEvent) -> Unit,
+    onArticleReplyClick: (naddr: String) -> Unit,
     onReactionsClick: (eventId: String) -> Unit,
-    onPayInvoiceClick: (InvoicePayClickEvent) -> Unit,
+    noteCallbacks: NoteCallbacks,
     onGoToWallet: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -222,17 +205,14 @@ private fun ArticleDetailsScreen(
                     articleParts = articleParts,
                     listState = listState,
                     paddingValues = paddingValues,
-                    onNoteClick = onNoteClick,
-                    onProfileClick = onProfileClick,
-                    onArticleClick = onArticleClick,
-                    onArticleCommentClick = onArticleCommentClick,
-                    onMediaClick = onMediaClick,
+                    onArticleCommentClick = onArticleReplyClick,
                     onReactionsClick = onReactionsClick,
-                    onPayInvoiceClick = onPayInvoiceClick,
                     onZapOptionsClick = { invokeZapOptions() },
+                    onGoToWallet = onGoToWallet,
+                    noteCallbacks = noteCallbacks,
                     onPostAction = { action ->
                         when (action) {
-                            FeedPostAction.Reply -> state.naddr?.toNaddrString()?.let(onArticleCommentClick)
+                            FeedPostAction.Reply -> state.naddr?.toNaddrString()?.let(onArticleReplyClick)
                             FeedPostAction.Zap -> Unit
                             FeedPostAction.Like -> Unit
                             FeedPostAction.Repost -> Unit
@@ -270,14 +250,11 @@ private fun ArticleContentWithComments(
     articleParts: List<ArticlePartRender>,
     listState: LazyListState = rememberLazyListState(),
     paddingValues: PaddingValues,
-    onNoteClick: (noteId: String) -> Unit,
-    onProfileClick: (profileId: String) -> Unit,
-    onArticleClick: (naddr: String) -> Unit,
     onArticleCommentClick: (naddr: String) -> Unit,
-    onMediaClick: (MediaClickEvent) -> Unit,
     onReactionsClick: (eventId: String) -> Unit,
-    onPayInvoiceClick: (InvoicePayClickEvent) -> Unit,
     onZapOptionsClick: () -> Unit,
+    noteCallbacks: NoteCallbacks,
+    onGoToWallet: () -> Unit,
     onPostAction: ((FeedPostAction) -> Unit)? = null,
 ) {
     val uriHandler = LocalUriHandler.current
@@ -301,7 +278,7 @@ private fun ArticleContentWithComments(
                     authorCdnImage = state.article.authorAvatarCdnImage,
                     authorDisplayName = state.article.authorDisplayName,
                     authorInternetIdentifier = state.article.authorInternetIdentifier,
-                    onAuthorAvatarClick = { onProfileClick(state.article.authorId) },
+                    onAuthorAvatarClick = { noteCallbacks.onProfileClick?.invoke(state.article.authorId) },
                 )
                 PrimalDivider()
             }
@@ -360,9 +337,9 @@ private fun ArticleContentWithComments(
                             .wrapContentHeight()
                             .padding(horizontal = 8.dp),
                         html = part.html,
-                        onProfileClick = onProfileClick,
-                        onNoteClick = onNoteClick,
-                        onArticleClick = onArticleClick,
+                        onProfileClick = noteCallbacks.onProfileClick,
+                        onNoteClick = noteCallbacks.onNoteClick,
+                        onArticleClick = noteCallbacks.onArticleClick,
                         onUrlClick = { url -> uriHandler.openUriSafely(url) },
                     )
                 }
@@ -374,9 +351,9 @@ private fun ArticleContentWithComments(
                             .fillMaxWidth()
                             .padding(all = 16.dp),
                         markdown = part.markdown,
-                        onProfileClick = onProfileClick,
-                        onNoteClick = onNoteClick,
-                        onArticleClick = onArticleClick,
+                        onProfileClick = noteCallbacks.onProfileClick,
+                        onNoteClick = noteCallbacks.onNoteClick,
+                        onArticleClick = noteCallbacks.onArticleClick,
                         onUrlClick = { url -> uriHandler.openUriSafely(url) },
                     )
                 }
@@ -390,11 +367,7 @@ private fun ArticleContentWithComments(
                         ReferencedNoteCard(
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                             data = part.note,
-                            onPostClick = onNoteClick,
-                            onProfileClick = onProfileClick,
-                            onArticleClick = onArticleClick,
-                            onMediaClick = onMediaClick,
-                            onPayInvoiceClick = onPayInvoiceClick,
+                            noteCallbacks = noteCallbacks,
                         )
                     }
                 }
@@ -463,11 +436,8 @@ private fun ArticleContentWithComments(
                     cardPadding = PaddingValues(vertical = 4.dp),
                     headerSingleLine = true,
                     showReplyTo = false,
-                    onProfileClick = onProfileClick,
-                    onPostClick = onNoteClick,
-                    onArticleClick = onArticleClick,
-                    onMediaClick = onMediaClick,
-                    onPayInvoiceClick = onPayInvoiceClick,
+                    noteCallbacks = noteCallbacks,
+                    onGoToWallet = onGoToWallet,
                 )
                 PrimalDivider()
             }

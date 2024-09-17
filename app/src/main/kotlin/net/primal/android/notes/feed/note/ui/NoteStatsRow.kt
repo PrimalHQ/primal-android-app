@@ -1,4 +1,4 @@
-package net.primal.android.notes.feed.note
+package net.primal.android.notes.feed.note.ui
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi

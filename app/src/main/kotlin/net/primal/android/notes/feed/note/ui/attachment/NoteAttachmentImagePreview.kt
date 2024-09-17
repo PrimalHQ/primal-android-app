@@ -1,4 +1,4 @@
-package net.primal.android.notes.feed.note
+package net.primal.android.notes.feed.note.ui.attachment
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
