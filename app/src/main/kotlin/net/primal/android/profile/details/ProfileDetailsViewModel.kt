@@ -3,7 +3,6 @@ package net.primal.android.profile.details
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.paging.cachedIn
 import androidx.paging.map
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -26,12 +25,10 @@ import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.ext.extractProfileId
 import net.primal.android.note.repository.NoteRepository
-import net.primal.android.notes.feed.model.asFeedPostUi
 import net.primal.android.notes.repository.FeedRepository
 import net.primal.android.profile.details.ProfileDetailsContract.UiEvent
 import net.primal.android.profile.details.ProfileDetailsContract.UiState
 import net.primal.android.profile.details.ProfileDetailsContract.UiState.ProfileError
-import net.primal.android.profile.domain.ProfileFeedSpec
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.settings.muted.repository.MutedUserRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
@@ -63,11 +60,6 @@ class ProfileDetailsViewModel @Inject constructor(
         UiState(
             profileId = profileId,
             isActiveUser = isActiveUser,
-            notes = feedRepository.feedBySpec(
-                feedSpec = ProfileFeedSpec.AuthoredNotes.buildSpec(profileId),
-            )
-                .map { it.map { feed -> feed.asFeedPostUi() } }
-                .cachedIn(viewModelScope),
         ),
     )
     val state = _state.asStateFlow()
@@ -115,7 +107,6 @@ class ProfileDetailsViewModel @Inject constructor(
                     is UiEvent.RemoveUserFeedAction -> removeUserFeed(it)
                     is UiEvent.MuteAction -> mute(it)
                     is UiEvent.UnmuteAction -> unmute(it)
-                    is UiEvent.ChangeProfileFeed -> changeFeed(it)
                     UiEvent.RequestProfileUpdate -> {
                         fetchLatestProfile()
                         fetchLatestMuteList()
@@ -474,18 +465,6 @@ class ProfileDetailsViewModel @Inject constructor(
             } catch (error: WssException) {
                 Timber.w(error)
                 setErrorState(error = ProfileError.FailedToUnmuteProfile(error))
-            }
-        }
-
-    private fun changeFeed(event: UiEvent.ChangeProfileFeed) =
-        viewModelScope.launch {
-            setState {
-                copy(
-                    profileFeedSpec = event.profileFeedSpec,
-                    notes = feedRepository.feedBySpec(feedSpec = event.profileFeedSpec.buildSpec(profileId))
-                        .map { it.map { feed -> feed.asFeedPostUi() } }
-                        .cachedIn(viewModelScope),
-                )
             }
         }
 

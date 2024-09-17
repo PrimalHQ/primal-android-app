@@ -1,10 +1,7 @@
 package net.primal.android.profile.details
 
-import androidx.paging.PagingData
-import kotlinx.coroutines.flow.Flow
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.core.compose.profile.model.ProfileStatsUi
-import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.model.ZappingState
 import net.primal.android.profile.domain.ProfileFeedSpec
 import net.primal.android.profile.report.ReportType
@@ -22,8 +19,11 @@ interface ProfileDetailsContract {
         val profileStats: ProfileStatsUi? = null,
         val referencedProfilesData: Set<ProfileDetailsUi> = emptySet(),
         val zappingState: ZappingState = ZappingState(),
-        val notes: Flow<PagingData<FeedPostUi>>,
-        val profileFeedSpec: ProfileFeedSpec = ProfileFeedSpec.AuthoredNotes,
+        val profileFeedSpecs: List<ProfileFeedSpec> = listOf(
+            ProfileFeedSpec.AuthoredNotes,
+            ProfileFeedSpec.AuthoredReplies,
+            ProfileFeedSpec.AuthoredArticles,
+        ),
         val confirmBookmarkingNoteId: String? = null,
         val error: ProfileError? = null,
     ) {
@@ -64,7 +64,6 @@ interface ProfileDetailsContract {
         data class RemoveUserFeedAction(val profileId: String) : UiEvent()
         data class MuteAction(val profileId: String) : UiEvent()
         data class UnmuteAction(val profileId: String) : UiEvent()
-        data class ChangeProfileFeed(val profileFeedSpec: ProfileFeedSpec) : UiEvent()
         data object RequestProfileUpdate : UiEvent()
         data class ReportAbuse(
             val reportType: ReportType,

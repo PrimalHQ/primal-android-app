@@ -3,16 +3,15 @@ package net.primal.android.profile.details.ui
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -20,14 +19,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.text.NumberFormat
+import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.utils.shortened
-import net.primal.android.profile.domain.ProfileFeedSpec
 import net.primal.android.theme.AppTheme
+
+internal const val PROFILE_TAB_COUNT = 4
 
 @Composable
 fun ProfileTabs(
-    feedFeedSpec: ProfileFeedSpec,
     notesCount: Int?,
     onNotesCountClick: () -> Unit,
     repliesCount: Int?,
@@ -37,26 +37,20 @@ fun ProfileTabs(
     mediaCount: Int?,
     onMediaCountClick: () -> Unit,
     modifier: Modifier = Modifier,
+    pagerState: PagerState,
     placeholderText: String = "-",
 ) {
-    var tabIndex by remember {
-        mutableIntStateOf(
-            when (feedFeedSpec) {
-                ProfileFeedSpec.AuthoredNotes -> 0
-                ProfileFeedSpec.AuthoredReplies -> 1
-            },
-        )
-    }
+    val scope = rememberCoroutineScope()
 
     TabRow(
         modifier = modifier,
-        selectedTabIndex = tabIndex,
+        selectedTabIndex = pagerState.currentPage,
         containerColor = Color.Transparent,
         divider = { },
         indicator = { tabPositions ->
-            if (tabIndex < tabPositions.size) {
+            if (pagerState.currentPage < tabPositions.size) {
                 TabRowDefaults.SecondaryIndicator(
-                    modifier = Modifier.tabIndicatorOffset(tabPositions[tabIndex]),
+                    modifier = Modifier.tabIndicatorOffset(tabPositions[pagerState.currentPage]),
                     height = 4.dp,
                     color = AppTheme.colorScheme.tertiary,
                 )
@@ -65,10 +59,10 @@ fun ProfileTabs(
     ) {
         CustomTab(
             modifier = Modifier.fillMaxWidth(),
-            selected = tabIndex == 0,
+            selected = pagerState.currentPage == NOTES_TAB_INDEX,
             onClick = {
                 onNotesCountClick()
-                tabIndex = 0
+                scope.launch { pagerState.animateScrollToPage(page = NOTES_TAB_INDEX) }
             },
             text = notesCount?.asTabText() ?: placeholderText,
             label = stringResource(id = R.string.profile_notes_stat),
@@ -76,25 +70,31 @@ fun ProfileTabs(
 
         CustomTab(
             modifier = Modifier.fillMaxWidth(),
-            selected = tabIndex == 1,
+            selected = pagerState.currentPage == REPLIES_TAB_INDEX,
             onClick = {
                 onRepliesCountClick()
-                tabIndex = 1
+                scope.launch { pagerState.animateScrollToPage(page = REPLIES_TAB_INDEX) }
             },
             text = repliesCount?.asTabText() ?: placeholderText,
             label = stringResource(id = R.string.profile_replies_stat),
         )
 
         CustomTab(
-            selected = false,
-            onClick = onReadsCountClick,
+            selected = pagerState.currentPage == READS_TAB_INDEX,
+            onClick = {
+                onReadsCountClick()
+                scope.launch { pagerState.animateScrollToPage(READS_TAB_INDEX) }
+            },
             text = readsCount?.asTabText() ?: placeholderText,
             label = stringResource(id = R.string.profile_reads_stat),
         )
 
         CustomTab(
-            selected = false,
-            onClick = onMediaCountClick,
+            selected = pagerState.currentPage == MEDIA_TAB_INDEX,
+            onClick = {
+                onMediaCountClick()
+                scope.launch { pagerState.animateScrollToPage(MEDIA_TAB_INDEX) }
+            },
             text = mediaCount?.asTabText() ?: placeholderText,
             label = stringResource(id = R.string.profile_media_stat),
         )

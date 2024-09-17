@@ -1082,6 +1082,7 @@ private fun NavGraphBuilder.profile(
                 followsType = followsType,
             )
         },
+        onArticleClick = { naddr -> navController.navigateToArticleDetails(naddr) },
         onGoToWallet = { navController.navigateToWallet() },
     )
 }

@@ -170,7 +170,7 @@ fun HomeFeedScreen(
                     val spec = state.feeds[index].spec
                     NoteFeedList(
                         feedSpec = spec,
-                        isFeedSpecActive = activeFeed?.spec == spec,
+                        pollingEnabled = activeFeed?.spec == spec,
                         noteCallbacks = noteCallbacks,
                         newNotesNoticeAlpha = (1 - topAppBarState.collapsedFraction) * 1.0f,
                         onGoToWallet = onGoToWallet,
