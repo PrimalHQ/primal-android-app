@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -228,14 +227,15 @@ fun ProfileDetailsScreen(
                 .nestedScroll(
                     remember {
                         object : NestedScrollConnection {
-                            override fun onPreScroll(
-                                available: Offset,
-                                source: NestedScrollSource,
-                            ): Offset {
-                                return if (available.y > 0) Offset.Zero else Offset(
-                                    x = 0f,
-                                    y = -listState.dispatchRawDelta(-available.y),
-                                )
+                            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                                return if (available.y > 0) {
+                                    Offset.Zero
+                                } else {
+                                    Offset(
+                                        x = 0f,
+                                        y = -listState.dispatchRawDelta(-available.y),
+                                    )
+                                }
                             }
                         }
                     },
@@ -321,7 +321,9 @@ fun ProfileDetailsScreen(
                                             profileName = state.profileDetails?.authorDisplayName
                                                 ?: state.profileId.asEllipsizedNpub(),
                                             onUnmuteClick = {
-                                                eventPublisher(ProfileDetailsContract.UiEvent.UnmuteAction(state.profileId))
+                                                eventPublisher(
+                                                    ProfileDetailsContract.UiEvent.UnmuteAction(state.profileId),
+                                                )
                                             },
                                         )
                                     }
@@ -329,7 +331,9 @@ fun ProfileDetailsScreen(
 
                                 pageIndex == 0 || pageIndex == 1 -> {
                                     NoteFeedList(
-                                        feedSpec = state.profileFeedSpecs[pageIndex].buildSpec(profileId = state.profileId),
+                                        feedSpec = state.profileFeedSpecs[pageIndex].buildSpec(
+                                            profileId = state.profileId,
+                                        ),
                                         noteCallbacks = noteCallbacks,
                                         onGoToWallet = onGoToWallet,
                                         pollingEnabled = false,
@@ -339,7 +343,9 @@ fun ProfileDetailsScreen(
 
                                 pageIndex == 2 -> {
                                     ArticleFeedList(
-                                        feedSpec = state.profileFeedSpecs[pageIndex].buildSpec(profileId = state.profileId),
+                                        feedSpec = state.profileFeedSpecs[pageIndex].buildSpec(
+                                            profileId = state.profileId,
+                                        ),
                                         onArticleClick = onArticleClick,
                                         pullToRefreshEnabled = false,
                                     )
@@ -349,7 +355,6 @@ fun ProfileDetailsScreen(
                     }
                 }
             }
-
         }
     }
 }

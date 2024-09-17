@@ -81,7 +81,6 @@ fun ProfileDetailsHeader(
             onProfileClick = onProfileClick,
             onHashtagClick = onHashtagClick,
         )
-
     }
 }
 
@@ -174,7 +173,6 @@ private fun ProfileHeaderDetails(
                 onProfileClick = onProfileClick,
             )
         }
-
     }
 }
 

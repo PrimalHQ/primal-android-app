@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.TopAppBar
@@ -138,7 +137,7 @@ private fun ProfileTopAppBar(
     paddingValues: PaddingValues,
 ) {
     Column(
-        modifier = Modifier.padding(paddingValues = paddingValues)
+        modifier = Modifier.padding(paddingValues = paddingValues),
     ) {
         TopAppBar(
             colors = TopAppBarDefaults.topAppBarColors(
