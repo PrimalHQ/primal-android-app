@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -29,27 +28,19 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.paging.LoadState
-import androidx.paging.compose.LazyPagingItems
 import java.text.NumberFormat
-import kotlinx.coroutines.flow.flowOf
 import net.primal.android.R
 import net.primal.android.core.compose.AvatarOverlap
 import net.primal.android.core.compose.AvatarThumbnailsRow
 import net.primal.android.core.compose.IconText
-import net.primal.android.core.compose.ListLoading
-import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.NostrUserText
-import net.primal.android.core.compose.isEmpty
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.core.compose.profile.model.ProfileStatsUi
 import net.primal.android.core.ext.openUriSafely
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.formatNip05Identifier
-import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.profile.details.ProfileDetailsContract
-import net.primal.android.profile.domain.ProfileFeedSpec
 import net.primal.android.profile.domain.ProfileFollowsType
 import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.domain.DraftTx
@@ -91,14 +82,6 @@ fun ProfileDetailsHeader(
             onHashtagClick = onHashtagClick,
         )
 
-        if (state.isProfileMuted) {
-            ProfileMutedNotice(
-                profileName = state.profileDetails?.authorDisplayName ?: state.profileId.asEllipsizedNpub(),
-                onUnmuteClick = {
-                    eventPublisher(ProfileDetailsContract.UiEvent.UnmuteAction(state.profileId))
-                },
-            )
-        }
     }
 }
 
@@ -357,29 +340,6 @@ private fun UserWebsiteText(
         style = AppTheme.typography.bodyMedium,
         color = AppTheme.colorScheme.secondary,
     )
-}
-
-@Composable
-private fun ProfileMutedNotice(profileName: String, onUnmuteClick: () -> Unit) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 32.dp)
-            .padding(top = 32.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Text(
-            text = stringResource(id = R.string.profile_user_is_muted, profileName),
-            style = AppTheme.typography.bodyLarge,
-            color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
-        )
-        TextButton(onClick = onUnmuteClick) {
-            Text(
-                text = stringResource(id = R.string.context_menu_unmute_user).uppercase(),
-            )
-        }
-    }
 }
 
 @Composable
