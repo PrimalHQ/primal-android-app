@@ -295,22 +295,31 @@ fun ProfileDetailsScreen(
                 }
                 item {
                     Column(
-                        modifier = Modifier.height(screenHeight),
+                        modifier = Modifier
+                            .background(AppTheme.colorScheme.surfaceVariant)
+                            .height(screenHeight),
                     ) {
                         val pagerState = rememberPagerState { PROFILE_TAB_COUNT }
                         ProfileTabs(
-                            pagerState = pagerState,
+                            selectedTabIndex = pagerState.currentPage,
                             modifier = Modifier
-                                .background(AppTheme.colorScheme.background)
                                 .padding(bottom = 8.dp, top = 8.dp),
                             notesCount = state.profileStats?.notesCount,
-                            onNotesCountClick = { },
+                            onNotesCountClick = {
+                                uiScope.launch { pagerState.animateScrollToPage(page = NOTES_TAB_INDEX) }
+                            },
                             repliesCount = state.profileStats?.repliesCount,
-                            onRepliesCountClick = { },
+                            onRepliesCountClick = {
+                                uiScope.launch { pagerState.animateScrollToPage(page = REPLIES_TAB_INDEX) }
+                            },
                             readsCount = state.profileStats?.readsCount,
-                            onReadsCountClick = {},
+                            onReadsCountClick = {
+                                uiScope.launch { pagerState.animateScrollToPage(page = READS_TAB_INDEX) }
+                            },
                             mediaCount = state.profileStats?.mediaCount,
-                            onMediaCountClick = {},
+                            onMediaCountClick = {
+                                uiScope.launch { pagerState.animateScrollToPage(page = MEDIA_TAB_INDEX) }
+                            },
                         )
                         HorizontalPager(
                             state = pagerState,
