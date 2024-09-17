@@ -4,20 +4,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.PagerState
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableIntState
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -28,9 +22,7 @@ import java.text.NumberFormat
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.utils.shortened
-import net.primal.android.profile.domain.ProfileFeedSpec
 import net.primal.android.theme.AppTheme
-import timber.log.Timber
 
 @Composable
 fun ProfileTabs(
@@ -43,7 +35,7 @@ fun ProfileTabs(
     mediaCount: Int?,
     onMediaCountClick: () -> Unit,
     modifier: Modifier = Modifier,
-    pagerState: PagerState = rememberPagerState { 4 },
+    pagerState: PagerState,
     placeholderText: String = "-",
 ) {
     val scope = rememberCoroutineScope()
