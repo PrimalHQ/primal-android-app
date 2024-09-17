@@ -24,8 +24,7 @@ enum class ProfileFeedSpec {
             }
 
             AuthoredArticles -> {
-                "{\"id\":\"feed\"," +
-                    "\"kind\":\"reads\"," +
+                    "{\"kind\":\"reads\"," +
                     "\"notes\":\"authored\"," +
                     "\"pubkey\":\"$profileId\"}"
             }
