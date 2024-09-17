@@ -57,7 +57,6 @@ import kotlinx.coroutines.withContext
 import net.primal.android.R
 import net.primal.android.core.compose.AvatarThumbnailsRow
 import net.primal.android.core.compose.isNotEmpty
-import net.primal.android.core.compose.pulltorefresh.PrimalIndicator
 import net.primal.android.core.compose.pulltorefresh.PrimalPullToRefreshBox
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.drawer.FloatingNewDataHostTopPadding
@@ -363,15 +362,7 @@ fun NoteFeedList(
         },
         enabled = pullToRefreshEnabled,
         state = pullToRefreshState,
-        indicator = {
-            PrimalIndicator(
-                modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .padding(paddingValues),
-                isRefreshing = pullToRefreshing,
-                state = pullToRefreshState,
-            )
-        },
+        indicatorPaddingValues = paddingValues,
     ) {
         NoteFeedLazyColumn(
             modifier = Modifier.fillMaxSize(),

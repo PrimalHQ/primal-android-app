@@ -130,15 +130,7 @@ private fun ArticleFeedList(
         },
         state = pullToRefreshState,
         enabled = pullToRefreshEnabled,
-        indicator = {
-            PrimalIndicator(
-                modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .padding(contentPadding),
-                isRefreshing = pullToRefreshing,
-                state = pullToRefreshState,
-            )
-        },
+        indicatorPaddingValues = contentPadding,
     ) {
         ArticleFeedLazyColumn(
             pagingItems = pagingItems,
