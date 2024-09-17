@@ -14,7 +14,6 @@ import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -25,7 +24,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -53,7 +51,7 @@ import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.isEmpty
 import net.primal.android.core.compose.isNotEmpty
-import net.primal.android.core.compose.pulltorefresh.PrimalIndicator
+import net.primal.android.core.compose.pulltorefresh.PrimalPullToRefreshBox
 import timber.log.Timber
 
 @Composable
@@ -61,6 +59,7 @@ fun ArticleFeedList(
     feedSpec: String,
     contentPadding: PaddingValues = PaddingValues(0.dp),
     onArticleClick: (naddr: String) -> Unit,
+    pullToRefreshEnabled: Boolean = true,
     previewMode: Boolean = false,
     header: @Composable (LazyItemScope.() -> Unit)? = null,
     stickyHeader: @Composable (LazyItemScope.() -> Unit)? = null,
@@ -77,6 +76,7 @@ fun ArticleFeedList(
         onArticleClick = onArticleClick,
         header = header,
         stickyHeader = stickyHeader,
+        pullToRefreshEnabled = pullToRefreshEnabled,
     )
 }
 
@@ -84,6 +84,7 @@ fun ArticleFeedList(
 @Composable
 private fun ArticleFeedList(
     state: ArticleFeedContract.UiState,
+    pullToRefreshEnabled: Boolean = true,
     contentPadding: PaddingValues = PaddingValues(0.dp),
     onArticleClick: (naddr: String) -> Unit,
     header: @Composable (LazyItemScope.() -> Unit)? = null,
@@ -118,7 +119,7 @@ private fun ArticleFeedList(
         }
     }
 
-    PullToRefreshBox(
+    PrimalPullToRefreshBox(
         isRefreshing = pullToRefreshing,
         onRefresh = {
             pagingItems.refresh()
@@ -126,15 +127,8 @@ private fun ArticleFeedList(
             isMediatorRefreshing = true
         },
         state = pullToRefreshState,
-        indicator = {
-            PrimalIndicator(
-                modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .padding(contentPadding),
-                isRefreshing = pullToRefreshing,
-                state = pullToRefreshState,
-            )
-        },
+        enabled = pullToRefreshEnabled,
+        indicatorPaddingValues = contentPadding,
     ) {
         ArticleFeedLazyColumn(
             pagingItems = pagingItems,
