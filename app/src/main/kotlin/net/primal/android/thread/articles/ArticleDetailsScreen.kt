@@ -63,6 +63,8 @@ import net.primal.android.nostr.utils.Nip19TLV.toNaddrString
 import net.primal.android.notes.feed.model.FeedPostAction
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.note.FeedNoteCard
+import net.primal.android.notes.feed.note.NoteContract.SideEffect.NoteError
+import net.primal.android.notes.feed.note.showNoteErrorSnackbar
 import net.primal.android.notes.feed.note.ui.FeedNoteStatsRow
 import net.primal.android.notes.feed.note.ui.ReferencedNoteCard
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
@@ -218,6 +220,15 @@ private fun ArticleDetailsScreen(
                             FeedPostAction.Repost -> Unit
                         }
                     },
+                    onNoteError = { noteError ->
+                        uiScope.launch {
+                            showNoteErrorSnackbar(
+                                context = context,
+                                error = noteError,
+                                snackbarHostState = snackbarHostState,
+                            )
+                        }
+                    },
                 )
             }
         },
@@ -256,6 +267,7 @@ private fun ArticleContentWithComments(
     noteCallbacks: NoteCallbacks,
     onGoToWallet: () -> Unit,
     onPostAction: ((FeedPostAction) -> Unit)? = null,
+    onNoteError: ((NoteError) -> Unit)? = null,
 ) {
     val uriHandler = LocalUriHandler.current
 
@@ -438,6 +450,7 @@ private fun ArticleContentWithComments(
                     showReplyTo = false,
                     noteCallbacks = noteCallbacks,
                     onGoToWallet = onGoToWallet,
+                    onNoteError = onNoteError,
                 )
                 PrimalDivider()
             }

@@ -101,6 +101,8 @@ import net.primal.android.note.ui.EventZapUiModel
 import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.note.FeedNoteCard
+import net.primal.android.notes.feed.note.NoteContract.SideEffect.NoteError
+import net.primal.android.notes.feed.note.showNoteErrorSnackbar
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
@@ -148,6 +150,8 @@ fun ThreadScreen(
     onReactionsClick: (noteId: String) -> Unit,
     eventPublisher: (ThreadContract.UiEvent) -> Unit,
 ) {
+    val context = LocalContext.current
+    val uiScope = rememberCoroutineScope()
     val noteEditorViewModel = noteEditorViewModel(args = NoteEditorArgs(replyToNoteId = state.highlightPostId))
     val replyState by noteEditorViewModel.state.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -184,6 +188,15 @@ fun ThreadScreen(
                     onGoToWallet = onGoToWallet,
                     onReactionsClick = onReactionsClick,
                     eventPublisher = eventPublisher,
+                    onNoteError = { noteError ->
+                        uiScope.launch {
+                            showNoteErrorSnackbar(
+                                context = context,
+                                error = noteError,
+                                snackbarHostState = snackbarHostState,
+                            )
+                        }
+                    },
                 )
 
                 val mentionQuery = replyState.userTaggingQuery
@@ -272,6 +285,7 @@ private fun ThreadConversationLazyColumn(
     onGoToWallet: () -> Unit,
     onReactionsClick: (noteId: String) -> Unit,
     eventPublisher: (ThreadContract.UiEvent) -> Unit,
+    onNoteError: ((NoteError) -> Unit)? = null,
 ) {
     val pullToRefreshState = rememberPullToRefreshState()
     var pullToRefreshing by remember { mutableStateOf(false) }
@@ -307,6 +321,7 @@ private fun ThreadConversationLazyColumn(
             onReactionsClick = onReactionsClick,
             onGoToWallet = onGoToWallet,
             noteCallbacks = noteCallbacks,
+            onNoteError = onNoteError,
         )
     }
 }
@@ -320,6 +335,7 @@ private fun ThreadLazyColumn(
     noteCallbacks: NoteCallbacks,
     onGoToWallet: (() -> Unit),
     paddingValues: PaddingValues = PaddingValues(all = 0.dp),
+    onNoteError: ((NoteError) -> Unit)? = null,
 ) {
     var threadListMaxHeightPx by remember { mutableIntStateOf(0) }
     var highlightPostHeightPx by remember { mutableIntStateOf(0) }
@@ -395,6 +411,7 @@ private fun ThreadLazyColumn(
                             )
                         }
                     },
+                    onNoteError = onNoteError,
                 )
 
                 if (!isConnectedForward(index, state.highlightPostIndex)) {

@@ -17,6 +17,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -49,6 +50,7 @@ import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.notes.feed.model.FeedPostAction
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.model.toNoteContentUi
+import net.primal.android.notes.feed.note.NoteContract.SideEffect.NoteError
 import net.primal.android.notes.feed.note.NoteContract.UiEvent
 import net.primal.android.notes.feed.note.ui.ConfirmFirstBookmarkAlertDialog
 import net.primal.android.notes.feed.note.ui.FeedNoteHeader
@@ -85,10 +87,19 @@ fun FeedNoteCard(
     noteOptionsMenuEnabled: Boolean = true,
     noteCallbacks: NoteCallbacks = NoteCallbacks(),
     onGoToWallet: (() -> Unit)? = null,
+    onNoteError: ((NoteError) -> Unit)? = null,
     contentFooter: @Composable () -> Unit = {},
 ) {
     val viewModel = hiltViewModel<NoteViewModel>()
     val uiState = viewModel.state.collectAsState()
+
+    LaunchedEffect(viewModel, onNoteError) {
+        viewModel.effect.collect {
+            when (it) {
+                is NoteError -> onNoteError?.invoke(it)
+            }
+        }
+    }
 
     FeedNoteCard(
         data = data,

@@ -35,6 +35,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
@@ -56,6 +57,7 @@ import net.primal.android.feeds.FeedsBottomSheet
 import net.primal.android.feeds.domain.FeedSpecKind
 import net.primal.android.feeds.ui.model.FeedUi
 import net.primal.android.notes.feed.NoteFeedList
+import net.primal.android.notes.feed.note.showNoteErrorSnackbar
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.notes.home.HomeFeedContract.UiEvent
 import net.primal.android.theme.AppTheme
@@ -107,6 +109,7 @@ fun HomeFeedScreen(
     onGoToWallet: () -> Unit,
     onNewPostClick: (content: TextFieldValue?) -> Unit,
 ) {
+    val context = LocalContext.current
     val uiScope = rememberCoroutineScope()
     val drawerState: DrawerState = rememberDrawerState(DrawerValue.Closed)
     val snackbarHostState = remember { SnackbarHostState() }
@@ -175,6 +178,15 @@ fun HomeFeedScreen(
                         newNotesNoticeAlpha = (1 - topAppBarState.collapsedFraction) * 1.0f,
                         onGoToWallet = onGoToWallet,
                         contentPadding = paddingValues,
+                        onNoteError = { noteError ->
+                            uiScope.launch {
+                                showNoteErrorSnackbar(
+                                    context = context,
+                                    error = noteError,
+                                    snackbarHostState = snackbarHostState,
+                                )
+                            }
+                        },
                     )
                 }
             }

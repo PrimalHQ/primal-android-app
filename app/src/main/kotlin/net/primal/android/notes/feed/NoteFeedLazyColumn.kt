@@ -32,6 +32,7 @@ import net.primal.android.core.compose.isEmpty
 import net.primal.android.core.compose.isNotEmpty
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.note.FeedNoteCard
+import net.primal.android.notes.feed.note.NoteContract.SideEffect.NoteError
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import timber.log.Timber
 
@@ -51,6 +52,7 @@ fun NoteFeedLazyColumn(
     contentPadding: PaddingValues = PaddingValues(all = 0.dp),
     header: @Composable (LazyItemScope.() -> Unit)? = null,
     stickyHeader: @Composable (LazyItemScope.() -> Unit)? = null,
+    onNoteError: ((NoteError) -> Unit)? = null,
 ) {
     LazyColumn(
         modifier = modifier,
@@ -101,6 +103,7 @@ fun NoteFeedLazyColumn(
                         showReplyTo = showReplyTo,
                         noteCallbacks = noteCallbacks,
                         onGoToWallet = onGoToWallet,
+                        onNoteError = onNoteError,
                     )
 
                     PrimalDivider()
