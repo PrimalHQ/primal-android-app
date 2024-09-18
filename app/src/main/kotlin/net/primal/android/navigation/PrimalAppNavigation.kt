@@ -202,7 +202,7 @@ fun NavController.navigateToMediaGallery(
 fun NavController.navigateToExplore() = navigate(route = "explore")
 
 fun NavController.navigateToExploreFeed(query: String) =
-    navigate(route = "explore?$EXPLORE_FEED_SPEC=${"search;$query".asBase64Encoded()}")
+    navigate(route = "explore?$EXPLORE_FEED_SPEC=${query.asBase64Encoded()}")
 
 private fun NavController.navigateToNotesBookmarks(userId: String) {
     val spec = "{\"id\":\"feed\",\"kind\":\"notes\",\"notes\":\"bookmarks\",\"pubkey\":\"$userId\"}"
@@ -768,6 +768,7 @@ private fun NavGraphBuilder.advancedSearch(route: String, navController: NavCont
         AdvancedSearchScreen(
             viewModel = viewModel,
             onClose = { navController.navigateUp() },
+            onNavigateToExploreFeed = { feedSpec -> navController.navigateToExploreFeed(feedSpec) },
         )
     }
 

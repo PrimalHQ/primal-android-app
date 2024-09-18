@@ -23,6 +23,7 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -61,8 +62,20 @@ import net.primal.android.explore.asearch.ui.TimeModifierPicker
 import net.primal.android.theme.AppTheme
 
 @Composable
-fun AdvancedSearchScreen(viewModel: AdvancedSearchViewModel, onClose: () -> Unit) {
+fun AdvancedSearchScreen(
+    viewModel: AdvancedSearchViewModel,
+    onClose: () -> Unit,
+    onNavigateToExploreFeed: (feedSpec: String) -> Unit,
+) {
     val state = viewModel.state.collectAsState()
+
+    LaunchedEffect(viewModel) {
+        viewModel.effects.collect {
+            when (it) {
+                is AdvancedSearchContract.SideEffect.NavigateToExploreFeed -> onNavigateToExploreFeed(it.feedSpec)
+            }
+        }
+    }
 
     AdvancedSearchScreen(
         state = state.value,

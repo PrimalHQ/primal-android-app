@@ -34,6 +34,10 @@ interface AdvancedSearchContract {
         data object OnSearch : UiEvent()
     }
 
+    sealed class SideEffect {
+        data class NavigateToExploreFeed(val feedSpec: String) : SideEffect()
+    }
+
     sealed class TimeModifier {
         data object Anytime : TimeModifier()
         data object Today : TimeModifier()
