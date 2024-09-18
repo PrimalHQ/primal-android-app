@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -53,6 +52,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.R
 import net.primal.android.core.compose.AvatarThumbnailsRow
+import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.isNotEmpty
 import net.primal.android.core.compose.pulltorefresh.PrimalPullToRefreshBox
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
@@ -69,7 +69,6 @@ fun NoteFeedList(
     feedSpec: String,
     noteCallbacks: NoteCallbacks,
     onGoToWallet: () -> Unit,
-    listState: LazyListState = rememberLazyListState(),
     contentPadding: PaddingValues = PaddingValues(0.dp),
     newNotesNoticeAlpha: Float = 1.00f,
     previewMode: Boolean = false,
@@ -105,7 +104,6 @@ fun NoteFeedList(
 
     NoteFeedList(
         state = uiState.value,
-        listState = listState,
         noteCallbacks = noteCallbacks,
         onGoToWallet = onGoToWallet,
         newNotesNoticeAlpha = newNotesNoticeAlpha,
@@ -121,7 +119,6 @@ fun NoteFeedList(
 @Composable
 private fun NoteFeedList(
     state: NoteFeedContract.UiState,
-    listState: LazyListState,
     noteCallbacks: NoteCallbacks,
     onGoToWallet: () -> Unit,
     newNotesNoticeAlpha: Float = 1.00f,
@@ -133,6 +130,7 @@ private fun NoteFeedList(
     eventPublisher: (UiEvent) -> Unit,
 ) {
     val pagingItems = state.notes.collectAsLazyPagingItems()
+    val listState = pagingItems.rememberLazyListStatePagingWorkaround()
 
     LaunchedEffect(listState, pagingItems) {
         withContext(Dispatchers.IO) {
