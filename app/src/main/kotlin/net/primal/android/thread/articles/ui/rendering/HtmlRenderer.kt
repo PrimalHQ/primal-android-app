@@ -22,10 +22,10 @@ import net.primal.android.user.domain.ContentAppearance
 fun HtmlRenderer(
     modifier: Modifier,
     html: String,
-    onProfileClick: (profileId: String) -> Unit,
-    onNoteClick: (noteId: String) -> Unit,
-    onArticleClick: (naddr: String) -> Unit,
-    onUrlClick: (url: String) -> Unit,
+    onUrlClick: ((url: String) -> Unit)? = null,
+    onProfileClick: ((profileId: String) -> Unit)? = null,
+    onNoteClick: ((noteId: String) -> Unit)? = null,
+    onArticleClick: ((naddr: String) -> Unit)? = null,
 ) {
     Surface {
         val displaySettings = LocalContentDisplaySettings.current

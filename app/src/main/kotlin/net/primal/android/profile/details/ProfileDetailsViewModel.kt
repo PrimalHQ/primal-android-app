@@ -3,7 +3,6 @@ package net.primal.android.profile.details
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.paging.map
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.Job
@@ -12,7 +11,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.getAndUpdate
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -24,7 +22,6 @@ import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.ext.extractProfileId
-import net.primal.android.note.repository.NoteRepository
 import net.primal.android.notes.repository.FeedRepository
 import net.primal.android.profile.details.ProfileDetailsContract.UiEvent
 import net.primal.android.profile.details.ProfileDetailsContract.UiState
@@ -32,14 +29,8 @@ import net.primal.android.profile.details.ProfileDetailsContract.UiState.Profile
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.settings.muted.repository.MutedUserRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.android.wallet.domain.ZapTarget
-import net.primal.android.wallet.zaps.InvalidZapRequestException
-import net.primal.android.wallet.zaps.ZapFailureException
-import net.primal.android.wallet.zaps.ZapHandler
-import net.primal.android.wallet.zaps.hasWallet
 import timber.log.Timber
 
-@Suppress("LongParameterList")
 @HiltViewModel
 class ProfileDetailsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
@@ -47,8 +38,6 @@ class ProfileDetailsViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val feedRepository: FeedRepository,
     private val profileRepository: ProfileRepository,
-    private val noteRepository: NoteRepository,
-    private val zapHandler: ZapHandler,
     private val mutedUserRepository: MutedUserRepository,
 ) : ViewModel() {
 
@@ -93,16 +82,12 @@ class ProfileDetailsViewModel @Inject constructor(
         }
     }
 
-    @Suppress("CyclomaticComplexMethod")
     private fun observeEvents() =
         viewModelScope.launch {
             events.collect {
                 when (it) {
-                    is UiEvent.PostLikeAction -> likePost(it)
-                    is UiEvent.RepostAction -> repostPost(it)
                     is UiEvent.FollowAction -> follow(it)
                     is UiEvent.UnfollowAction -> unfollow(it)
-                    is UiEvent.ZapAction -> zapPost(it)
                     is UiEvent.AddUserFeedAction -> addUserFeed(it)
                     is UiEvent.RemoveUserFeedAction -> removeUserFeed(it)
                     is UiEvent.MuteAction -> mute(it)
@@ -114,8 +99,6 @@ class ProfileDetailsViewModel @Inject constructor(
 
                     is UiEvent.ReportAbuse -> reportAbuse(it)
                     UiEvent.DismissError -> setState { copy(error = null) }
-                    is UiEvent.BookmarkAction -> handleBookmark(it)
-                    UiEvent.DismissBookmarkConfirmation -> setState { copy(confirmBookmarkingNoteId = null) }
                 }
             }
         }
@@ -140,13 +123,6 @@ class ProfileDetailsViewModel @Inject constructor(
                 setState {
                     copy(
                         isProfileFollowed = it.following.contains(profileId),
-                        zappingState = this.zappingState.copy(
-                            walletConnected = it.hasWallet(),
-                            walletPreference = it.walletPreference,
-                            zapDefault = it.appSettings?.zapDefault ?: this.zappingState.zapDefault,
-                            zapsConfig = it.appSettings?.zapsConfig ?: this.zappingState.zapsConfig,
-                            walletBalanceInBtc = it.primalWalletState.balanceInBtc,
-                        ),
                     )
                 }
             }
@@ -257,79 +233,6 @@ class ProfileDetailsViewModel @Inject constructor(
                 }
             } catch (error: WssException) {
                 Timber.w(error)
-            }
-        }
-
-    private fun likePost(postLikeAction: UiEvent.PostLikeAction) =
-        viewModelScope.launch {
-            try {
-                noteRepository.likePost(
-                    postId = postLikeAction.postId,
-                    postAuthorId = postLikeAction.postAuthorId,
-                )
-            } catch (error: NostrPublishException) {
-                Timber.w(error)
-                setErrorState(error = ProfileError.FailedToPublishLikeEvent(error))
-            } catch (error: MissingRelaysException) {
-                Timber.w(error)
-                setErrorState(error = ProfileError.MissingRelaysConfiguration(error))
-            }
-        }
-
-    private fun repostPost(repostAction: UiEvent.RepostAction) =
-        viewModelScope.launch {
-            try {
-                noteRepository.repostPost(
-                    postId = repostAction.postId,
-                    postAuthorId = repostAction.postAuthorId,
-                    postRawNostrEvent = repostAction.postNostrEvent,
-                )
-            } catch (error: NostrPublishException) {
-                Timber.w(error)
-                setErrorState(error = ProfileError.FailedToPublishRepostEvent(error))
-            } catch (error: MissingRelaysException) {
-                Timber.w(error)
-                setErrorState(error = ProfileError.MissingRelaysConfiguration(error))
-            }
-        }
-
-    private fun zapPost(zapAction: UiEvent.ZapAction) =
-        viewModelScope.launch {
-            val postAuthorProfileData = withContext(dispatcherProvider.io()) {
-                profileRepository.findProfileDataOrNull(profileId = zapAction.postAuthorId)
-            }
-
-            if (postAuthorProfileData?.lnUrlDecoded == null) {
-                setErrorState(
-                    error = ProfileError.MissingLightningAddress(
-                        IllegalStateException("Missing lightning address."),
-                    ),
-                )
-                return@launch
-            }
-
-            try {
-                withContext(dispatcherProvider.io()) {
-                    zapHandler.zap(
-                        userId = activeAccountStore.activeUserId(),
-                        comment = zapAction.zapDescription,
-                        amountInSats = zapAction.zapAmount,
-                        target = ZapTarget.Note(
-                            zapAction.postId,
-                            zapAction.postAuthorId,
-                            postAuthorProfileData.lnUrlDecoded,
-                        ),
-                    )
-                }
-            } catch (error: ZapFailureException) {
-                Timber.w(error)
-                setErrorState(error = ProfileError.FailedToPublishZapEvent(error))
-            } catch (error: MissingRelaysException) {
-                Timber.w(error)
-                setErrorState(error = ProfileError.MissingRelaysConfiguration(error))
-            } catch (error: InvalidZapRequestException) {
-                Timber.w(error)
-                setErrorState(error = ProfileError.InvalidZapRequest(error))
             }
         }
 
@@ -474,42 +377,13 @@ class ProfileDetailsViewModel @Inject constructor(
                 withContext(dispatcherProvider.io()) {
                     profileRepository.reportAbuse(
                         userId = activeAccountStore.activeUserId(),
-                        reportType = event.reportType,
+                        reportType = event.type,
                         profileId = event.profileId,
                         noteId = event.noteId,
                     )
                 }
             } catch (error: NostrPublishException) {
                 Timber.w(error)
-            }
-        }
-
-    private fun handleBookmark(event: UiEvent.BookmarkAction) =
-        viewModelScope.launch {
-            val userId = activeAccountStore.activeUserId()
-            withContext(dispatcherProvider.io()) {
-                try {
-                    setState { copy(confirmBookmarkingNoteId = null) }
-                    val isBookmarked = noteRepository.isBookmarked(noteId = event.noteId)
-                    when (isBookmarked) {
-                        true -> noteRepository.removeFromBookmarks(
-                            userId = userId,
-                            forceUpdate = event.forceUpdate,
-                            noteId = event.noteId,
-                        )
-
-                        false -> noteRepository.addToBookmarks(
-                            userId = userId,
-                            forceUpdate = event.forceUpdate,
-                            noteId = event.noteId,
-                        )
-                    }
-                } catch (error: NostrPublishException) {
-                    Timber.w(error)
-                } catch (error: ProfileRepository.BookmarksListNotFound) {
-                    Timber.w(error)
-                    setState { copy(confirmBookmarkingNoteId = event.noteId) }
-                }
             }
         }
 

@@ -15,7 +15,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -32,10 +31,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
@@ -60,13 +58,13 @@ import net.primal.android.core.compose.icons.primaliconpack.Settings
 import net.primal.android.core.compose.isEmpty
 import net.primal.android.core.compose.isNotEmpty
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
-import net.primal.android.crypto.hexToNoteHrp
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.PrimalDrawerScaffold
 import net.primal.android.notes.feed.NoteRepostOrQuoteBottomSheet
 import net.primal.android.notes.feed.model.FeedPostUi
-import net.primal.android.notes.feed.note.events.InvoicePayClickEvent
-import net.primal.android.notes.feed.note.events.MediaClickEvent
+import net.primal.android.notes.feed.note.NoteContract
+import net.primal.android.notes.feed.note.NoteViewModel
+import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.notes.feed.zaps.UnableToZapBottomSheet
 import net.primal.android.notes.feed.zaps.ZapBottomSheet
 import net.primal.android.notifications.list.ui.NotificationListItem
@@ -77,21 +75,17 @@ import net.primal.android.wallet.zaps.canZap
 @Composable
 fun NotificationsScreen(
     viewModel: NotificationsViewModel,
-    onProfileClick: (String) -> Unit,
-    onNoteClick: (String) -> Unit,
-    onArticleClick: (naddr: String) -> Unit,
-    onNoteReplyClick: (String) -> Unit,
-    onPostQuoteClick: (content: TextFieldValue) -> Unit,
-    onHashtagClick: (String) -> Unit,
-    onMediaClick: (MediaClickEvent) -> Unit,
-    onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
     onNotificationSettings: () -> Unit,
     onGoToWallet: () -> Unit,
+    noteCallbacks: NoteCallbacks,
     onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
     onDrawerQrCodeClick: () -> Unit,
 ) {
+    val noteViewModel = hiltViewModel<NoteViewModel>()
+
     val uiState = viewModel.state.collectAsState()
+    val noteState = noteViewModel.state.collectAsState()
 
     DisposableLifecycleObserverEffect(viewModel) {
         when (it) {
@@ -105,20 +99,14 @@ fun NotificationsScreen(
 
     NotificationsScreen(
         state = uiState.value,
-        onProfileClick = onProfileClick,
-        onNoteClick = onNoteClick,
-        onArticleClick = onArticleClick,
-        onNoteReplyClick = onNoteReplyClick,
-        onHashtagClick = onHashtagClick,
-        onMediaClick = onMediaClick,
-        onPayInvoiceClick = onPayInvoiceClick,
+        noteState = noteState.value,
         onNotificationSettings = onNotificationSettings,
         onPrimaryDestinationChanged = onTopLevelDestinationChanged,
         onDrawerDestinationClick = onDrawerScreenClick,
         onDrawerQrCodeClick = onDrawerQrCodeClick,
         onGoToWallet = onGoToWallet,
-        onPostQuoteClick = onPostQuoteClick,
-        eventPublisher = { viewModel.setEvent(it) },
+        noteCallbacks = noteCallbacks,
+        noteEventPublisher = noteViewModel::setEvent,
     )
 }
 
@@ -126,20 +114,14 @@ fun NotificationsScreen(
 @Composable
 fun NotificationsScreen(
     state: NotificationsContract.UiState,
-    onProfileClick: (String) -> Unit,
-    onNoteClick: (String) -> Unit,
-    onArticleClick: (naddr: String) -> Unit,
-    onNoteReplyClick: (String) -> Unit,
-    onHashtagClick: (String) -> Unit,
-    onMediaClick: (MediaClickEvent) -> Unit,
-    onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
+    noteState: NoteContract.UiState,
+    noteCallbacks: NoteCallbacks,
     onGoToWallet: () -> Unit,
-    onPostQuoteClick: (content: TextFieldValue) -> Unit,
     onNotificationSettings: () -> Unit,
     onPrimaryDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
     onDrawerQrCodeClick: () -> Unit,
-    eventPublisher: (NotificationsContract.UiEvent) -> Unit,
+    noteEventPublisher: (NoteContract.UiEvent) -> Unit,
 ) {
     val uiScope = rememberCoroutineScope()
     val drawerState: DrawerState = rememberDrawerState(DrawerValue.Closed)
@@ -159,11 +141,6 @@ fun NotificationsScreen(
             seenNotificationsPagingItems.refresh()
         }
     }
-
-    ErrorHandler(
-        error = state.error,
-        snackbarHostState = snackbarHostState,
-    )
 
     PrimalDrawerScaffold(
         drawerState = drawerState,
@@ -206,28 +183,22 @@ fun NotificationsScreen(
         content = { paddingValues ->
             NotificationsList(
                 state = state,
+                noteState = noteState,
                 seenPagingItems = seenNotificationsPagingItems,
                 paddingValues = paddingValues,
                 listState = notificationsListState,
-                onProfileClick = onProfileClick,
-                onNoteClick = onNoteClick,
-                onArticleClick = onArticleClick,
-                onHashtagClick = onHashtagClick,
-                onMediaClick = onMediaClick,
-                onPayInvoiceClick = onPayInvoiceClick,
                 onGoToWallet = onGoToWallet,
-                onNoteReplyClick = onNoteReplyClick,
                 onPostLikeClick = {
-                    eventPublisher(
-                        NotificationsContract.UiEvent.PostLikeAction(
+                    noteEventPublisher(
+                        NoteContract.UiEvent.PostLikeAction(
                             postId = it.postId,
                             postAuthorId = it.authorId,
                         ),
                     )
                 },
                 onRepostClick = {
-                    eventPublisher(
-                        NotificationsContract.UiEvent.RepostAction(
+                    noteEventPublisher(
+                        NoteContract.UiEvent.RepostAction(
                             postId = it.postId,
                             postAuthorId = it.authorId,
                             postNostrEvent = it.rawNostrEventJson,
@@ -235,8 +206,8 @@ fun NotificationsScreen(
                     )
                 },
                 onZapClick = { postData, amount, description ->
-                    eventPublisher(
-                        NotificationsContract.UiEvent.ZapAction(
+                    noteEventPublisher(
+                        NoteContract.UiEvent.ZapAction(
                             postId = postData.postId,
                             postAuthorId = postData.authorId,
                             zapAmount = amount,
@@ -245,8 +216,9 @@ fun NotificationsScreen(
                     )
                 },
                 onPostQuoteClick = {
-                    onPostQuoteClick(TextFieldValue(text = "\n\nnostr:${it.postId.hexToNoteHrp()}"))
+                    noteCallbacks.onNoteQuoteClick?.invoke(it.postId)
                 },
+                noteCallbacks = noteCallbacks,
             )
         },
         floatingNewDataHost = {
@@ -267,16 +239,11 @@ fun NotificationsScreen(
 @Composable
 private fun NotificationsList(
     state: NotificationsContract.UiState,
+    noteState: NoteContract.UiState,
     listState: LazyListState,
     seenPagingItems: LazyPagingItems<NotificationUi>,
     paddingValues: PaddingValues,
-    onProfileClick: (String) -> Unit,
-    onNoteClick: (String) -> Unit,
-    onArticleClick: (naddr: String) -> Unit,
-    onNoteReplyClick: (String) -> Unit,
-    onHashtagClick: (String) -> Unit,
-    onMediaClick: (MediaClickEvent) -> Unit,
-    onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
+    noteCallbacks: NoteCallbacks,
     onGoToWallet: () -> Unit,
     onPostLikeClick: (FeedPostUi) -> Unit,
     onRepostClick: (FeedPostUi) -> Unit,
@@ -297,7 +264,7 @@ private fun NotificationsList(
     var showCantZapWarning by remember { mutableStateOf(false) }
     if (showCantZapWarning) {
         UnableToZapBottomSheet(
-            zappingState = state.zappingState,
+            zappingState = noteState.zappingState,
             onDismissRequest = { showCantZapWarning = false },
             onGoToWallet = onGoToWallet,
         )
@@ -309,9 +276,9 @@ private fun NotificationsList(
             ZapBottomSheet(
                 onDismissRequest = { zapOptionsPostConfirmation = null },
                 receiverName = post.authorName,
-                zappingState = state.zappingState,
+                zappingState = noteState.zappingState,
                 onZap = { zapAmount, zapDescription ->
-                    if (state.zappingState.canZap(zapAmount)) {
+                    if (noteState.zappingState.canZap(zapAmount)) {
                         onZapClick(post, zapAmount.toULong(), zapDescription)
                     } else {
                         showCantZapWarning = true
@@ -334,29 +301,24 @@ private fun NotificationsList(
                 notifications = it,
                 type = it.first().notificationType,
                 isSeen = false,
-                onProfileClick = onProfileClick,
-                onNoteClick = onNoteClick,
-                onArticleClick = onArticleClick,
-                onReplyClick = onNoteClick,
-                onHashtagClick = onHashtagClick,
-                onMediaClick = onMediaClick,
-                onPayInvoiceClick = onPayInvoiceClick,
+                onReplyClick = noteCallbacks.onNoteClick,
                 onPostLikeClick = onPostLikeClick,
                 onDefaultZapClick = { postData ->
-                    if (state.zappingState.canZap()) {
+                    if (noteState.zappingState.canZap()) {
                         onZapClick(postData, null, null)
                     } else {
                         showCantZapWarning = true
                     }
                 },
                 onZapOptionsClick = { postData ->
-                    if (state.zappingState.walletConnected) {
+                    if (noteState.zappingState.walletConnected) {
                         zapOptionsPostConfirmation = postData
                     } else {
                         showCantZapWarning = true
                     }
                 },
                 onRepostClick = { postData -> repostQuotePostConfirmation = postData },
+                noteCallbacks = noteCallbacks,
             )
 
             if (state.unseenNotifications.last() != it || seenPagingItems.isNotEmpty()) {
@@ -377,22 +339,18 @@ private fun NotificationsList(
                         notifications = listOf(item),
                         type = item.notificationType,
                         isSeen = true,
-                        onProfileClick = onProfileClick,
-                        onNoteClick = onNoteClick,
-                        onArticleClick = onArticleClick,
-                        onReplyClick = onNoteReplyClick,
-                        onHashtagClick = onHashtagClick,
-                        onMediaClick = onMediaClick,
+                        noteCallbacks = noteCallbacks,
+                        onReplyClick = noteCallbacks.onNoteReplyClick,
                         onPostLikeClick = onPostLikeClick,
                         onDefaultZapClick = { postData ->
-                            if (state.zappingState.canZap()) {
+                            if (noteState.zappingState.canZap()) {
                                 onZapClick(postData, null, null)
                             } else {
                                 showCantZapWarning = true
                             }
                         },
                         onZapOptionsClick = { postData ->
-                            if (state.zappingState.walletConnected) {
+                            if (noteState.zappingState.walletConnected) {
                                 zapOptionsPostConfirmation = postData
                             } else {
                                 showCantZapWarning = true
@@ -488,43 +446,6 @@ private fun NewNotificationsButton(onClick: () -> Unit) {
             text = stringResource(id = R.string.notification_list_button_jump_to_start),
             style = AppTheme.typography.bodySmall,
             color = Color.White,
-        )
-    }
-}
-
-@Composable
-@Deprecated("Replace with SnackbarErrorHandler")
-private fun ErrorHandler(
-    error: NotificationsContract.UiState.NotificationsError?,
-    snackbarHostState: SnackbarHostState,
-) {
-    val context = LocalContext.current
-    LaunchedEffect(error ?: true) {
-        val errorMessage = when (error) {
-            is NotificationsContract.UiState.NotificationsError.InvalidZapRequest ->
-                context.getString(R.string.post_action_invalid_zap_request)
-
-            is NotificationsContract.UiState.NotificationsError.MissingLightningAddress ->
-                context.getString(R.string.post_action_missing_lightning_address)
-
-            is NotificationsContract.UiState.NotificationsError.FailedToPublishZapEvent ->
-                context.getString(R.string.post_action_zap_failed)
-
-            is NotificationsContract.UiState.NotificationsError.FailedToPublishLikeEvent ->
-                context.getString(R.string.post_action_like_failed)
-
-            is NotificationsContract.UiState.NotificationsError.FailedToPublishRepostEvent ->
-                context.getString(R.string.post_action_repost_failed)
-
-            is NotificationsContract.UiState.NotificationsError.MissingRelaysConfiguration ->
-                context.getString(R.string.app_missing_relays_config)
-
-            null -> return@LaunchedEffect
-        }
-
-        snackbarHostState.showSnackbar(
-            message = errorMessage,
-            duration = SnackbarDuration.Short,
         )
     }
 }

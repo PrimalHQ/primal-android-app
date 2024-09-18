@@ -59,8 +59,8 @@ import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.notes.feed.NoteFeedList
-import net.primal.android.notes.feed.note.ConfirmFirstBookmarkAlertDialog
-import net.primal.android.notes.feed.note.events.NoteCallbacks
+import net.primal.android.notes.feed.note.showNoteErrorSnackbar
+import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.profile.details.ProfileDetailsContract
 import net.primal.android.profile.details.ProfileDetailsContract.UiState.ProfileError
 import net.primal.android.profile.details.ProfileDetailsViewModel
@@ -155,22 +155,6 @@ fun ProfileDetailsScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val uiScope = rememberCoroutineScope()
     val context = LocalContext.current
-
-    if (state.confirmBookmarkingNoteId != null) {
-        ConfirmFirstBookmarkAlertDialog(
-            onBookmarkConfirmed = {
-                eventPublisher(
-                    ProfileDetailsContract.UiEvent.BookmarkAction(
-                        noteId = state.confirmBookmarkingNoteId,
-                        forceUpdate = true,
-                    ),
-                )
-            },
-            onClose = {
-                eventPublisher(ProfileDetailsContract.UiEvent.DismissBookmarkConfirmation)
-            },
-        )
-    }
 
     SnackbarErrorHandler(
         error = state.error,
@@ -350,6 +334,15 @@ fun ProfileDetailsScreen(
                                         onGoToWallet = onGoToWallet,
                                         pollingEnabled = false,
                                         pullToRefreshEnabled = false,
+                                        onNoteError = { noteError ->
+                                            uiScope.launch {
+                                                showNoteErrorSnackbar(
+                                                    context = context,
+                                                    error = noteError,
+                                                    snackbarHostState = snackbarHostState,
+                                                )
+                                            }
+                                        },
                                     )
                                 }
 
@@ -396,26 +389,6 @@ private fun ProfileMutedNotice(profileName: String, onUnmuteClick: () -> Unit) {
 
 private fun ProfileError.asHumanReadableText(context: Context): String {
     return when (this) {
-        is ProfileError.InvalidZapRequest -> context.getString(
-            R.string.post_action_invalid_zap_request,
-        )
-
-        is ProfileError.MissingLightningAddress -> context.getString(
-            R.string.post_action_missing_lightning_address,
-        )
-
-        is ProfileError.FailedToPublishZapEvent -> context.getString(
-            R.string.post_action_zap_failed,
-        )
-
-        is ProfileError.FailedToPublishLikeEvent -> context.getString(
-            R.string.post_action_like_failed,
-        )
-
-        is ProfileError.FailedToPublishRepostEvent -> context.getString(
-            R.string.post_action_repost_failed,
-        )
-
         is ProfileError.FailedToFollowProfile -> context.getString(
             R.string.profile_error_unable_to_follow,
         )
@@ -436,7 +409,10 @@ private fun ProfileError.asHumanReadableText(context: Context): String {
             R.string.app_error_removing_feed,
         )
 
-        is ProfileError.FailedToMuteProfile -> context.getString(R.string.app_error_muting_user)
+        is ProfileError.FailedToMuteProfile -> context.getString(
+            R.string.app_error_muting_user,
+        )
+
         is ProfileError.FailedToUnmuteProfile -> context.getString(
             R.string.app_error_unmuting_user,
         )

@@ -88,7 +88,7 @@ import net.primal.android.messages.conversation.MessageConversationListContract.
 import net.primal.android.messages.conversation.model.MessageConversationUi
 import net.primal.android.messages.domain.ConversationRelation
 import net.primal.android.notes.feed.model.NoteContentUi
-import net.primal.android.notes.feed.note.renderContentAsAnnotatedString
+import net.primal.android.notes.feed.note.ui.renderContentAsAnnotatedString
 import net.primal.android.theme.AppTheme
 
 @Composable

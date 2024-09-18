@@ -38,6 +38,8 @@ import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -47,6 +49,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -57,6 +60,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
@@ -72,6 +76,7 @@ import java.text.NumberFormat
 import java.time.Instant
 import java.time.format.FormatStyle
 import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.launch
 import net.primal.android.LocalPrimalTheme
 import net.primal.android.R
 import net.primal.android.core.compose.IconText
@@ -87,9 +92,9 @@ import net.primal.android.core.ext.openUriSafely
 import net.primal.android.core.utils.ellipsizeMiddle
 import net.primal.android.core.utils.formatToDefaultDateTimeFormat
 import net.primal.android.notes.feed.note.FeedNoteCard
-import net.primal.android.notes.feed.note.FeedNoteHeader
-import net.primal.android.notes.feed.note.events.InvoicePayClickEvent
-import net.primal.android.notes.feed.note.events.MediaClickEvent
+import net.primal.android.notes.feed.note.showNoteErrorSnackbar
+import net.primal.android.notes.feed.note.ui.FeedNoteHeader
+import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.dashboard.ui.BtcAmountText
 import net.primal.android.wallet.domain.TxState
@@ -106,24 +111,14 @@ import timber.log.Timber
 fun TransactionDetailsScreen(
     viewModel: TransactionDetailsViewModel,
     onClose: () -> Unit,
-    onPostClick: (String) -> Unit,
-    onArticleClick: (naddr: String) -> Unit,
-    onProfileClick: (String) -> Unit,
-    onHashtagClick: (String) -> Unit,
-    onMediaClick: (MediaClickEvent) -> Unit,
-    onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
+    noteCallbacks: NoteCallbacks,
 ) {
     val uiState = viewModel.state.collectAsState()
 
     TransactionDetailsScreen(
         state = uiState.value,
         onClose = onClose,
-        onPostClick = onPostClick,
-        onArticleClick = onArticleClick,
-        onProfileClick = onProfileClick,
-        onHashtagClick = onHashtagClick,
-        onMediaClick = onMediaClick,
-        onPayInvoiceClick = onPayInvoiceClick,
+        noteCallbacks = noteCallbacks,
     )
 }
 
@@ -132,15 +127,14 @@ fun TransactionDetailsScreen(
 fun TransactionDetailsScreen(
     state: UiState,
     onClose: () -> Unit,
-    onPostClick: (String) -> Unit,
-    onArticleClick: (naddr: String) -> Unit,
-    onProfileClick: (String) -> Unit,
-    onHashtagClick: (String) -> Unit,
-    onMediaClick: (MediaClickEvent) -> Unit,
-    onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
+    noteCallbacks: NoteCallbacks,
 ) {
+    val context = LocalContext.current
+    val uiScope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
     val showTopBarDivider by remember { derivedStateOf { scrollState.value > 0 } }
+    val snackbarHostState = remember { SnackbarHostState() }
+
     Scaffold(
         topBar = {
             PrimalTopAppBar(
@@ -150,6 +144,9 @@ fun TransactionDetailsScreen(
                 showDivider = showTopBarDivider,
                 onNavigationIconClick = onClose,
             )
+        },
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
         },
         content = { paddingValues ->
             Column(
@@ -187,7 +184,7 @@ fun TransactionDetailsScreen(
 
                     TransactionCard(
                         txData = txData,
-                        onProfileClick = onProfileClick,
+                        onProfileClick = { profileId -> noteCallbacks.onProfileClick?.invoke(profileId) },
                     )
                 }
 
@@ -208,15 +205,16 @@ fun TransactionDetailsScreen(
                         data = it,
                         modifier = Modifier.padding(horizontal = 12.dp),
                         colors = transactionCardColors(),
-                        onPostClick = onPostClick,
-                        onArticleClick = onArticleClick,
-                        onProfileClick = onProfileClick,
-                        onHashtagClick = onHashtagClick,
-                        onMediaClick = onMediaClick,
-                        onPayInvoiceClick = onPayInvoiceClick,
-                        onMuteUserClick = {},
-                        onReportContentClick = { _, _, _ -> },
-                        onBookmarkClick = {},
+                        noteCallbacks = noteCallbacks,
+                        onNoteError = { noteError ->
+                            uiScope.launch {
+                                showNoteErrorSnackbar(
+                                    context = context,
+                                    error = noteError,
+                                    snackbarHostState = snackbarHostState,
+                                )
+                            }
+                        },
                     )
 
                     Spacer(modifier = Modifier.height(32.dp))
@@ -657,11 +655,7 @@ fun PreviewTransactionDetail(
                     txData = txDataParam,
                 ),
                 onClose = {},
-                onProfileClick = {},
-                onPostClick = {},
-                onArticleClick = {},
-                onHashtagClick = {},
-                onMediaClick = {},
+                noteCallbacks = NoteCallbacks(),
             )
         }
     }

@@ -66,7 +66,7 @@ import net.primal.android.navigation.splash.SplashScreen
 import net.primal.android.navigation.splash.SplashViewModel
 import net.primal.android.note.reactions.ReactionsScreen
 import net.primal.android.note.reactions.ReactionsViewModel
-import net.primal.android.notes.feed.note.events.NoteCallbacks
+import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.notes.home.HomeFeedScreen
 import net.primal.android.notes.home.HomeFeedViewModel
 import net.primal.android.notifications.list.NotificationsScreen
@@ -133,7 +133,7 @@ fun NavController.navigateToReads() =
         navOptions = topLevelNavOptions,
     )
 
-private fun NavController.navigateToWallet() =
+fun NavController.navigateToWallet() =
     navigate(
         route = "wallet",
         navOptions = topLevelNavOptions,
@@ -209,7 +209,7 @@ private fun NavController.navigateToNotesBookmarks(userId: String) {
     navigate(route = "explore?$EXPLORE_FEED_SPEC=${spec.asBase64Encoded()}")
 }
 
-private fun noteCallbacksHandler(navController: NavController) =
+fun noteCallbacksHandler(navController: NavController) =
     NoteCallbacks(
         onNoteClick = { postId -> navController.navigateToThread(noteId = postId) },
         onArticleClick = { naddr -> navController.navigateToArticleDetails(naddr = naddr) },
@@ -830,20 +830,7 @@ private fun NavGraphBuilder.chat(
     ChatScreen(
         viewModel = viewModel,
         onClose = { navController.navigateUp() },
-        onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
-        onNoteClick = { noteId -> navController.navigateToThread(noteId) },
-        onArticleClick = { naddr -> navController.navigateToArticleDetails(naddr = naddr) },
-        onHashtagClick = { hashtag -> navController.navigateToExploreFeed(hashtag) },
-        onMediaClick = {
-            navController.navigateToMediaGallery(
-                noteId = it.noteId,
-                mediaUrl = it.mediaUrl,
-                mediaPositionMs = it.positionMs,
-            )
-        },
-        onPayInvoiceClick = {
-            navController.navigateToWalletCreateTransaction(lnbc = it.lnbc)
-        },
+        noteCallbacks = noteCallbacksHandler(navController),
     )
 }
 
@@ -900,24 +887,9 @@ private fun NavGraphBuilder.notifications(
     LockToOrientationPortrait()
     NotificationsScreen(
         viewModel = viewModel,
-        onProfileClick = { navController.navigateToProfile(profileId = it) },
-        onNoteClick = { navController.navigateToThread(noteId = it) },
-        onArticleClick = { naddr -> navController.navigateToArticleDetails(naddr = naddr) },
-        onNoteReplyClick = { noteId -> navController.navigateToNoteEditor(NoteEditorArgs(replyToNoteId = noteId)) },
-        onHashtagClick = { navController.navigateToExploreFeed(query = it) },
-        onMediaClick = {
-            navController.navigateToMediaGallery(
-                noteId = it.noteId,
-                mediaUrl = it.mediaUrl,
-                mediaPositionMs = it.positionMs,
-            )
-        },
-        onPayInvoiceClick = {
-            navController.navigateToWalletCreateTransaction(lnbc = it.lnbc)
-        },
-        onPostQuoteClick = { preFillContent -> navController.navigateToNoteEditor(preFillContent.asNoteEditorArgs()) },
         onNotificationSettings = { navController.navigateToNotificationsSettings() },
         onGoToWallet = { navController.navigateToWallet() },
+        noteCallbacks = noteCallbacksHandler(navController),
         onTopLevelDestinationChanged = onTopLevelDestinationChanged,
         onDrawerScreenClick = onDrawerScreenClick,
         onDrawerQrCodeClick = { navController.navigateToProfileQrCodeViewer() },
@@ -942,22 +914,7 @@ private fun NavGraphBuilder.thread(
     ThreadScreen(
         viewModel = viewModel,
         onClose = { navController.navigateUp() },
-        onPostClick = { postId -> navController.navigateToThread(postId) },
-        onArticleClick = { naddr -> navController.navigateToArticleDetails(naddr) },
-        onPostReplyClick = { postId -> navController.navigateToNoteEditor(NoteEditorArgs(replyToNoteId = postId)) },
-        onPostQuoteClick = { preFillContent -> navController.navigateToNoteEditor(preFillContent.asNoteEditorArgs()) },
-        onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
-        onHashtagClick = { hashtag -> navController.navigateToExploreFeed(query = hashtag) },
-        onMediaClick = {
-            navController.navigateToMediaGallery(
-                noteId = it.noteId,
-                mediaUrl = it.mediaUrl,
-                mediaPositionMs = it.positionMs,
-            )
-        },
-        onPayInvoiceClick = {
-            navController.navigateToWalletCreateTransaction(lnbc = it.lnbc)
-        },
+        noteCallbacks = noteCallbacksHandler(navController),
         onGoToWallet = { navController.navigateToWallet() },
         onExpandReply = { args -> navController.navigateToNoteEditor(args) },
         onReactionsClick = { noteId -> navController.navigateToNoteReactions(noteId = noteId) },
@@ -982,27 +939,10 @@ private fun NavGraphBuilder.articleDetails(
     ArticleDetailsScreen(
         viewModel = viewModel,
         onClose = { navController.navigateUp() },
-        onNoteClick = { postId -> navController.navigateToThread(postId) },
-        onArticleClick = { naddr -> navController.navigateToArticleDetails(naddr) },
-        onArticleCommentClick = { naddr ->
-            navController.navigateToNoteEditor(
-                NoteEditorArgs(replyToArticleNaddr = naddr),
-            )
+        onArticleReplyClick = { naddr ->
+            navController.navigateToNoteEditor(NoteEditorArgs(replyToArticleNaddr = naddr))
         },
-        onNoteReplyClick = { postId -> navController.navigateToNoteEditor(NoteEditorArgs(replyToNoteId = postId)) },
-        onNoteQuoteClick = { preFillContent -> navController.navigateToNoteEditor(preFillContent.asNoteEditorArgs()) },
-        onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
-        onHashtagClick = { hashtag -> navController.navigateToExploreFeed(query = hashtag) },
-        onMediaClick = {
-            navController.navigateToMediaGallery(
-                noteId = it.noteId,
-                mediaUrl = it.mediaUrl,
-                mediaPositionMs = it.positionMs,
-            )
-        },
-        onPayInvoiceClick = {
-            navController.navigateToWalletCreateTransaction(lnbc = it.lnbc)
-        },
+        noteCallbacks = noteCallbacksHandler(navController),
         onGoToWallet = { navController.navigateToWallet() },
         onReactionsClick = { noteId -> navController.navigateToNoteReactions(noteId = noteId) },
     )
