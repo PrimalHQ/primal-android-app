@@ -1,6 +1,7 @@
 package net.primal.android.notes.feed
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -48,6 +49,8 @@ fun NoteFeedLazyColumn(
     shouldShowLoadingState: Boolean = true,
     shouldShowNoContentState: Boolean = true,
     showReplyTo: Boolean = true,
+    noContentVerticalArrangement: Arrangement.Vertical = Arrangement.Center,
+    noContentPaddingValues: PaddingValues = PaddingValues(all = 0.dp),
     noContentText: String = stringResource(id = R.string.feed_no_content),
     contentPadding: PaddingValues = PaddingValues(all = 0.dp),
     header: @Composable (LazyItemScope.() -> Unit)? = null,
@@ -135,6 +138,8 @@ fun NoteFeedLazyColumn(
                                 modifier = Modifier.fillParentMaxSize(),
                                 noContentText = noContentText,
                                 onRefresh = { pagingItems.refresh() },
+                                verticalArrangement = noContentVerticalArrangement,
+                                contentPadding = noContentPaddingValues,
                             )
                         }
                     }
@@ -148,6 +153,8 @@ fun NoteFeedLazyColumn(
                             modifier = Modifier.fillParentMaxSize(),
                             noContentText = stringResource(id = R.string.feed_error_loading),
                             onRefresh = { pagingItems.refresh() },
+                            verticalArrangement = noContentVerticalArrangement,
+                            contentPadding = noContentPaddingValues,
                         )
                     }
                 }

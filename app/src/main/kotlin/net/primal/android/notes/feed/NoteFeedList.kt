@@ -6,6 +6,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -16,7 +17,6 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -53,6 +53,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.R
 import net.primal.android.core.compose.AvatarThumbnailsRow
+import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.isNotEmpty
 import net.primal.android.core.compose.pulltorefresh.PrimalPullToRefreshBox
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
@@ -69,12 +70,13 @@ fun NoteFeedList(
     feedSpec: String,
     noteCallbacks: NoteCallbacks,
     onGoToWallet: () -> Unit,
-    listState: LazyListState = rememberLazyListState(),
     contentPadding: PaddingValues = PaddingValues(0.dp),
     newNotesNoticeAlpha: Float = 1.00f,
     previewMode: Boolean = false,
     pullToRefreshEnabled: Boolean = true,
     pollingEnabled: Boolean = true,
+    noContentVerticalArrangement: Arrangement.Vertical = Arrangement.Center,
+    noContentPaddingValues: PaddingValues = PaddingValues(all = 0.dp),
     onNoteError: ((NoteError) -> Unit)? = null,
     header: @Composable (LazyItemScope.() -> Unit)? = null,
     stickyHeader: @Composable (LazyItemScope.() -> Unit)? = null,
@@ -105,7 +107,6 @@ fun NoteFeedList(
 
     NoteFeedList(
         state = uiState.value,
-        listState = listState,
         noteCallbacks = noteCallbacks,
         onGoToWallet = onGoToWallet,
         newNotesNoticeAlpha = newNotesNoticeAlpha,
@@ -115,24 +116,28 @@ fun NoteFeedList(
         stickyHeader = stickyHeader,
         eventPublisher = viewModel::setEvent,
         pullToRefreshEnabled = pullToRefreshEnabled,
+        noContentVerticalArrangement = noContentVerticalArrangement,
+        noContentPaddingValues = noContentPaddingValues,
     )
 }
 
 @Composable
 private fun NoteFeedList(
     state: NoteFeedContract.UiState,
-    listState: LazyListState,
     noteCallbacks: NoteCallbacks,
     onGoToWallet: () -> Unit,
     newNotesNoticeAlpha: Float = 1.00f,
     pullToRefreshEnabled: Boolean = true,
     contentPadding: PaddingValues = PaddingValues(0.dp),
     onNoteError: ((NoteError) -> Unit)? = null,
+    noContentVerticalArrangement: Arrangement.Vertical = Arrangement.Center,
+    noContentPaddingValues: PaddingValues = PaddingValues(all = 0.dp),
     header: @Composable (LazyItemScope.() -> Unit)? = null,
     stickyHeader: @Composable (LazyItemScope.() -> Unit)? = null,
     eventPublisher: (UiEvent) -> Unit,
 ) {
     val pagingItems = state.notes.collectAsLazyPagingItems()
+    val listState = pagingItems.rememberLazyListStatePagingWorkaround()
 
     LaunchedEffect(listState, pagingItems) {
         withContext(Dispatchers.IO) {
@@ -165,6 +170,8 @@ private fun NoteFeedList(
             onNoteError = onNoteError,
             header = header,
             stickyHeader = stickyHeader,
+            noContentVerticalArrangement = noContentVerticalArrangement,
+            noContentPaddingValues = noContentPaddingValues,
         )
 
         AnimatedVisibility(
@@ -237,6 +244,8 @@ fun NoteFeedList(
     onGoToWallet: () -> Unit,
     pullToRefreshEnabled: Boolean = true,
     paddingValues: PaddingValues = PaddingValues(0.dp),
+    noContentVerticalArrangement: Arrangement.Vertical = Arrangement.Center,
+    noContentPaddingValues: PaddingValues = PaddingValues(all = 0.dp),
     onScrolledToTop: (() -> Unit)? = null,
     onNoteError: ((NoteError) -> Unit)? = null,
     noContentText: String = stringResource(id = R.string.feed_no_content),
@@ -303,6 +312,8 @@ fun NoteFeedList(
             header = header,
             stickyHeader = stickyHeader,
             onNoteError = onNoteError,
+            noContentVerticalArrangement = noContentVerticalArrangement,
+            noContentPaddingValues = noContentPaddingValues,
         )
     }
 }
