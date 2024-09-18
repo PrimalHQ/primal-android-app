@@ -79,10 +79,10 @@ fun NoteFeedList(
     header: @Composable (LazyItemScope.() -> Unit)? = null,
     stickyHeader: @Composable (LazyItemScope.() -> Unit)? = null,
 ) {
-    val viewModel = hiltViewModel<NoteFeedViewModel, NoteFeedViewModel.Factory>(
-        key = if (!previewMode) feedSpec else UUID.randomUUID().toString(),
-        creationCallback = { factory -> factory.create(feedSpec = feedSpec) },
-    )
+    val viewModelKey by remember { mutableStateOf(if (!previewMode) feedSpec else UUID.randomUUID().toString()) }
+    val viewModel = hiltViewModel<NoteFeedViewModel, NoteFeedViewModel.Factory>(key = viewModelKey) { factory ->
+        factory.create(feedSpec = feedSpec)
+    }
     val uiState = viewModel.state.collectAsState()
 
     var started by remember(viewModel) { mutableStateOf(false) }

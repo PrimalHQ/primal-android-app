@@ -64,10 +64,10 @@ fun ArticleFeedList(
     header: @Composable (LazyItemScope.() -> Unit)? = null,
     stickyHeader: @Composable (LazyItemScope.() -> Unit)? = null,
 ) {
-    val viewModel = hiltViewModel<ArticleFeedViewModel, ArticleFeedViewModel.Factory>(
-        key = if (!previewMode) feedSpec else UUID.randomUUID().toString(),
-        creationCallback = { factory -> factory.create(spec = feedSpec) },
-    )
+    val viewModelKey by remember { mutableStateOf(if (!previewMode) feedSpec else UUID.randomUUID().toString()) }
+    val viewModel = hiltViewModel<ArticleFeedViewModel, ArticleFeedViewModel.Factory>(key = viewModelKey) { factory ->
+        factory.create(spec = feedSpec)
+    }
     val uiState = viewModel.state.collectAsState()
 
     ArticleFeedList(
