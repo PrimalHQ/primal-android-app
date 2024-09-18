@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -32,13 +33,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -51,7 +50,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filter
@@ -63,7 +61,6 @@ import net.primal.android.articles.feed.ArticleFeedList
 import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
-import net.primal.android.core.compose.pulltorefresh.LaunchedPullToRefreshEndingEffect
 import net.primal.android.core.compose.pulltorefresh.PrimalPullToRefreshBox
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.core.utils.asEllipsizedNpub
@@ -253,7 +250,9 @@ fun ProfileDetailsScreen(
                     },
                 ),
         ) {
-            val screenHeight = maxHeight
+            val screenHeight = maxHeight - with(LocalDensity.current) {
+                WindowInsets.statusBars.getTop(this).toDp()
+            }
 
             PrimalPullToRefreshBox(
                 isRefreshing = pullToRefreshing.value,
@@ -312,16 +311,16 @@ fun ProfileDetailsScreen(
                         )
                     }
                     item {
+                        val tabVerticalPadding = 8.dp
                         Column(
                             modifier = Modifier
                                 .background(AppTheme.colorScheme.surfaceVariant)
-                                .height(screenHeight),
+                                .height(screenHeight + tabVerticalPadding * 2),
                         ) {
                             val pagerState = rememberPagerState { PROFILE_TAB_COUNT }
                             ProfileTabs(
                                 selectedTabIndex = pagerState.currentPage,
-                                modifier = Modifier
-                                    .padding(bottom = 8.dp, top = 8.dp),
+                                modifier = Modifier.padding(vertical = tabVerticalPadding),
                                 notesCount = state.profileStats?.notesCount,
                                 onNotesCountClick = {
                                     uiScope.launch { pagerState.animateScrollToPage(page = NOTES_TAB_INDEX) }
@@ -377,6 +376,8 @@ fun ProfileDetailsScreen(
                                                     )
                                                 }
                                             },
+                                            noContentVerticalArrangement = Arrangement.Top,
+                                            noContentPaddingValues = PaddingValues(top = 16.dp),
                                         )
                                     }
 
@@ -387,6 +388,8 @@ fun ProfileDetailsScreen(
                                             ),
                                             onArticleClick = onArticleClick,
                                             pullToRefreshEnabled = false,
+                                            noContentVerticalArrangement = Arrangement.Top,
+                                            noContentPaddingValues = PaddingValues(top = 16.dp),
                                         )
                                     }
                                 }
