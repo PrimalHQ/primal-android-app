@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,14 +20,18 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.pulltorefresh.PullToRefreshState
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -56,6 +61,7 @@ import net.primal.android.articles.feed.ArticleFeedList
 import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
+import net.primal.android.core.compose.pulltorefresh.PrimalPullToRefreshBox
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.notes.feed.NoteFeedList
@@ -69,6 +75,7 @@ import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.wallet.domain.DraftTx
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileDetailsScreen(
     viewModel: ProfileDetailsViewModel,
@@ -91,6 +98,17 @@ fun ProfileDetailsScreen(
         }
     }
 
+    val pullToRefreshState = rememberPullToRefreshState()
+    val pullToRefreshing = remember { mutableStateOf(false) }
+
+    LaunchedEffect(viewModel) {
+        viewModel.effects.collect {
+            when (it) {
+                ProfileDetailsContract.SideEffect.ProfileUpdateFinished -> pullToRefreshing.value = false
+            }
+        }
+    }
+
     ProfileDetailsScreen(
         state = uiState.value,
         onClose = onClose,
@@ -103,6 +121,8 @@ fun ProfileDetailsScreen(
         onFollowsClick = onFollowsClick,
         eventPublisher = { viewModel.setEvent(it) },
         onArticleClick = onArticleClick,
+        pullToRefreshState = pullToRefreshState,
+        pullToRefreshing = pullToRefreshing,
     )
 }
 
@@ -113,7 +133,7 @@ internal const val READS_TAB_INDEX = 2
 internal const val MEDIA_TAB_INDEX = 3
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileDetailsScreen(
     state: ProfileDetailsContract.UiState,
@@ -127,6 +147,8 @@ fun ProfileDetailsScreen(
     onGoToWallet: () -> Unit,
     onFollowsClick: (String, ProfileFollowsType) -> Unit,
     eventPublisher: (ProfileDetailsContract.UiEvent) -> Unit,
+    pullToRefreshState: PullToRefreshState,
+    pullToRefreshing: MutableState<Boolean>,
 ) {
     val density = LocalDensity.current
 
@@ -228,123 +250,148 @@ fun ProfileDetailsScreen(
                     },
                 ),
         ) {
-            val screenHeight = maxHeight
+            val screenHeight = maxHeight - with(LocalDensity.current) {
+                WindowInsets.statusBars.getTop(this).toDp()
+            }
 
-            LazyColumn(
-                state = listState,
+            PrimalPullToRefreshBox(
+                isRefreshing = pullToRefreshing.value,
+                state = pullToRefreshState,
+                indicatorPaddingValues = paddingValues,
+                onRefresh = {
+                    pullToRefreshing.value = true
+                    eventPublisher(ProfileDetailsContract.UiEvent.RequestProfileUpdate)
+                },
             ) {
-                stickyHeader {
-                    ProfileTopCoverBar(
-                        state = state,
-                        snackbarHostState = snackbarHostState,
-                        titleVisible = topBarTitleVisible.value,
-                        coverValues = CoverValues(
-                            coverHeight = with(density) { coverHeightPx.floatValue.toDp() },
-                            coverAlpha = coverTransparency.floatValue,
-                        ),
-                        avatarValues = AvatarValues(
-                            avatarSize = with(density) { avatarSizePx.floatValue.toDp() },
-                            avatarPadding = with(density) { (maxAvatarSizePx - avatarSizePx.floatValue).toDp() },
-                            avatarOffsetY = with(density) { maxAvatarSizePx.times(other = 0.65f).toDp() },
-                        ),
-                        eventPublisher = eventPublisher,
-                        onClose = onClose,
-                        paddingValues = paddingValues,
-                    )
-                }
-                item {
-                    ProfileDetailsHeader(
-                        state = state,
-                        eventPublisher = eventPublisher,
-                        onEditProfileClick = onEditProfileClick,
-                        onMessageClick = onMessageClick,
-                        onZapProfileClick = onZapProfileClick,
-                        onDrawerQrCodeClick = { onDrawerQrCodeClick(state.profileId) },
-                        onUnableToZapProfile = {
-                            uiScope.launch {
-                                snackbarHostState.showSnackbar(
-                                    message = context.getString(
-                                        R.string.wallet_send_payment_error_nostr_user_without_lightning_address,
-                                        state.profileDetails?.authorDisplayName
-                                            ?: context.getString(R.string.wallet_send_payment_this_user_chunk),
-                                    ),
-                                    duration = SnackbarDuration.Short,
-                                )
-                            }
-                        },
-                        onFollowsClick = onFollowsClick,
-                        onProfileClick = { noteCallbacks.onProfileClick?.invoke(it) },
-                        onHashtagClick = { noteCallbacks.onHashtagClick?.invoke(it) },
-                    )
-                }
-                item {
-                    Column(
-                        modifier = Modifier.height(screenHeight),
-                    ) {
-                        val pagerState = rememberPagerState { PROFILE_TAB_COUNT }
-                        ProfileTabs(
-                            pagerState = pagerState,
-                            modifier = Modifier
-                                .background(AppTheme.colorScheme.background)
-                                .padding(bottom = 8.dp, top = 8.dp),
-                            notesCount = state.profileStats?.notesCount,
-                            onNotesCountClick = { },
-                            repliesCount = state.profileStats?.repliesCount,
-                            onRepliesCountClick = { },
-                            readsCount = state.profileStats?.readsCount,
-                            onReadsCountClick = {},
-                            mediaCount = state.profileStats?.mediaCount,
-                            onMediaCountClick = {},
+                LazyColumn(
+                    state = listState,
+                ) {
+                    stickyHeader {
+                        ProfileTopCoverBar(
+                            state = state,
+                            snackbarHostState = snackbarHostState,
+                            titleVisible = topBarTitleVisible.value,
+                            coverValues = CoverValues(
+                                coverHeight = with(density) { coverHeightPx.floatValue.toDp() },
+                                coverAlpha = coverTransparency.floatValue,
+                            ),
+                            avatarValues = AvatarValues(
+                                avatarSize = with(density) { avatarSizePx.floatValue.toDp() },
+                                avatarPadding = with(density) { (maxAvatarSizePx - avatarSizePx.floatValue).toDp() },
+                                avatarOffsetY = with(density) { maxAvatarSizePx.times(other = 0.65f).toDp() },
+                            ),
+                            eventPublisher = eventPublisher,
+                            onClose = onClose,
+                            paddingValues = paddingValues,
                         )
-                        HorizontalPager(
-                            state = pagerState,
-                        ) { pageIndex ->
-                            when {
-                                state.isProfileMuted -> {
-                                    Box(
-                                        modifier = Modifier.fillMaxSize(),
-                                    ) {
-                                        ProfileMutedNotice(
-                                            profileName = state.profileDetails?.authorDisplayName
-                                                ?: state.profileId.asEllipsizedNpub(),
-                                            onUnmuteClick = {
-                                                eventPublisher(
-                                                    ProfileDetailsContract.UiEvent.UnmuteAction(state.profileId),
-                                                )
+                    }
+                    item {
+                        ProfileDetailsHeader(
+                            state = state,
+                            eventPublisher = eventPublisher,
+                            onEditProfileClick = onEditProfileClick,
+                            onMessageClick = onMessageClick,
+                            onZapProfileClick = onZapProfileClick,
+                            onDrawerQrCodeClick = { onDrawerQrCodeClick(state.profileId) },
+                            onUnableToZapProfile = {
+                                uiScope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = context.getString(
+                                            R.string.wallet_send_payment_error_nostr_user_without_lightning_address,
+                                            state.profileDetails?.authorDisplayName
+                                                ?: context.getString(R.string.wallet_send_payment_this_user_chunk),
+                                        ),
+                                        duration = SnackbarDuration.Short,
+                                    )
+                                }
+                            },
+                            onFollowsClick = onFollowsClick,
+                            onProfileClick = { noteCallbacks.onProfileClick?.invoke(it) },
+                            onHashtagClick = { noteCallbacks.onHashtagClick?.invoke(it) },
+                        )
+                    }
+                    item {
+                        val tabVerticalPadding = 8.dp
+                        Column(
+                            modifier = Modifier
+                                .background(AppTheme.colorScheme.surfaceVariant)
+                                .height(screenHeight + tabVerticalPadding * 2),
+                        ) {
+                            val pagerState = rememberPagerState { PROFILE_TAB_COUNT }
+                            ProfileTabs(
+                                selectedTabIndex = pagerState.currentPage,
+                                modifier = Modifier.padding(vertical = tabVerticalPadding),
+                                notesCount = state.profileStats?.notesCount,
+                                onNotesCountClick = {
+                                    uiScope.launch { pagerState.animateScrollToPage(page = NOTES_TAB_INDEX) }
+                                },
+                                repliesCount = state.profileStats?.repliesCount,
+                                onRepliesCountClick = {
+                                    uiScope.launch { pagerState.animateScrollToPage(page = REPLIES_TAB_INDEX) }
+                                },
+                                readsCount = state.profileStats?.readsCount,
+                                onReadsCountClick = {
+                                    uiScope.launch { pagerState.animateScrollToPage(page = READS_TAB_INDEX) }
+                                },
+                                mediaCount = state.profileStats?.mediaCount,
+                                onMediaCountClick = {
+                                    uiScope.launch { pagerState.animateScrollToPage(page = MEDIA_TAB_INDEX) }
+                                },
+                            )
+                            HorizontalPager(
+                                state = pagerState,
+                            ) { pageIndex ->
+                                when {
+                                    state.isProfileMuted -> {
+                                        Box(
+                                            modifier = Modifier.fillMaxSize(),
+                                        ) {
+                                            ProfileMutedNotice(
+                                                profileName = state.profileDetails?.authorDisplayName
+                                                    ?: state.profileId.asEllipsizedNpub(),
+                                                onUnmuteClick = {
+                                                    eventPublisher(
+                                                        ProfileDetailsContract.UiEvent.UnmuteAction(state.profileId),
+                                                    )
+                                                },
+                                            )
+                                        }
+                                    }
+
+                                    pageIndex == NOTES_TAB_INDEX || pageIndex == REPLIES_TAB_INDEX -> {
+                                        NoteFeedList(
+                                            feedSpec = state.profileFeedSpecs[pageIndex].buildSpec(
+                                                profileId = state.profileId,
+                                            ),
+                                            noteCallbacks = noteCallbacks,
+                                            onGoToWallet = onGoToWallet,
+                                            pollingEnabled = false,
+                                            pullToRefreshEnabled = false,
+                                            onNoteError = { noteError ->
+                                                uiScope.launch {
+                                                    showNoteErrorSnackbar(
+                                                        context = context,
+                                                        error = noteError,
+                                                        snackbarHostState = snackbarHostState,
+                                                    )
+                                                }
                                             },
+                                            noContentVerticalArrangement = Arrangement.Top,
+                                            noContentPaddingValues = PaddingValues(top = 16.dp),
                                         )
                                     }
-                                }
 
-                                pageIndex == NOTES_TAB_INDEX || pageIndex == REPLIES_TAB_INDEX -> {
-                                    NoteFeedList(
-                                        feedSpec = state.profileFeedSpecs[pageIndex].buildSpec(
-                                            profileId = state.profileId,
-                                        ),
-                                        noteCallbacks = noteCallbacks,
-                                        onGoToWallet = onGoToWallet,
-                                        pollingEnabled = false,
-                                        pullToRefreshEnabled = false,
-                                        onNoteError = { noteError ->
-                                            uiScope.launch {
-                                                showNoteErrorSnackbar(
-                                                    context = context,
-                                                    error = noteError,
-                                                    snackbarHostState = snackbarHostState,
-                                                )
-                                            }
-                                        },
-                                    )
-                                }
-
-                                pageIndex == READS_TAB_INDEX -> {
-                                    ArticleFeedList(
-                                        feedSpec = state.profileFeedSpecs[pageIndex].buildSpec(
-                                            profileId = state.profileId,
-                                        ),
-                                        onArticleClick = onArticleClick,
-                                        pullToRefreshEnabled = false,
-                                    )
+                                    pageIndex == READS_TAB_INDEX -> {
+                                        ArticleFeedList(
+                                            feedSpec = state.profileFeedSpecs[pageIndex].buildSpec(
+                                                profileId = state.profileId,
+                                            ),
+                                            onArticleClick = onArticleClick,
+                                            pullToRefreshEnabled = false,
+                                            noContentVerticalArrangement = Arrangement.Top,
+                                            noContentPaddingValues = PaddingValues(top = 16.dp),
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -410,6 +457,7 @@ private fun ProfileError.asHumanReadableText(context: Context): String {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
 private fun PreviewProfileScreen() {
@@ -443,6 +491,8 @@ private fun PreviewProfileScreen() {
             onGoToWallet = {},
             eventPublisher = {},
             onArticleClick = {},
+            pullToRefreshing = remember { mutableStateOf(false) },
+            pullToRefreshState = rememberPullToRefreshState(),
         )
     }
 }
