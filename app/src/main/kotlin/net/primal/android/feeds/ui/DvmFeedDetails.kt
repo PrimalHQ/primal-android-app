@@ -96,6 +96,7 @@ private fun DvmHeaderAndFeedList(
                 ArticleFeedList(
                     feedSpec = dvmFeed.buildSpec(specKind = specKind),
                     previewMode = true,
+                    pullToRefreshEnabled = false,
                     header = { DvmFeedListItem(data = dvmFeed) },
                     onArticleClick = {},
                 )
@@ -106,6 +107,8 @@ private fun DvmHeaderAndFeedList(
                     feedSpec = dvmFeed.buildSpec(specKind = specKind),
                     noteCallbacks = NoteCallbacks(),
                     previewMode = true,
+                    pullToRefreshEnabled = false,
+                    pollingEnabled = false,
                     header = { DvmFeedListItem(data = dvmFeed) },
                     onGoToWallet = {},
                 )
