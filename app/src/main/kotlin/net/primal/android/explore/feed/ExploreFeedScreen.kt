@@ -34,6 +34,7 @@ import net.primal.android.feeds.domain.isNotesBookmarkFeedSpec
 import net.primal.android.notes.feed.NoteFeedList
 import net.primal.android.notes.feed.note.showNoteErrorSnackbar
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
+import timber.log.Timber
 
 @Composable
 fun ExploreFeedScreen(
@@ -66,6 +67,7 @@ fun ExploreFeedScreen(
     val uiScope = rememberCoroutineScope()
     val feedPagingItems = state.notes.collectAsLazyPagingItems()
     val feedListState = feedPagingItems.rememberLazyListStatePagingWorkaround()
+    Timber.tag("explore").i(feedPagingItems.itemCount.toString())
 
     val feedTitle = state.extractTitle()
     val snackbarHostState = remember { SnackbarHostState() }

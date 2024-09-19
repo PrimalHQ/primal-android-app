@@ -25,6 +25,7 @@ import net.primal.android.feeds.domain.isNotesBookmarkFeedSpec
 import net.primal.android.navigation.exploreFeedSpecOrThrow
 import net.primal.android.notes.feed.model.asFeedPostUi
 import net.primal.android.notes.repository.FeedRepository
+import timber.log.Timber
 
 @HiltViewModel
 class ExploreFeedViewModel @Inject constructor(
@@ -55,6 +56,7 @@ class ExploreFeedViewModel @Inject constructor(
     }
 
     init {
+        Timber.tag("exploreFeedSpec").i(exploreFeedSpec)
         observeContainsFeed()
         observeEvents()
     }

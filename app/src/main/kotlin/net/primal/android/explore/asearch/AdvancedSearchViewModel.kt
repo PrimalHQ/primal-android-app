@@ -3,6 +3,8 @@ package net.primal.android.explore.asearch
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.ktor.util.decodeBase64String
+import io.ktor.util.encodeBase64
 import java.time.Instant
 import java.time.ZoneId
 import java.time.ZonedDateTime
@@ -21,6 +23,9 @@ import net.primal.android.explore.asearch.AdvancedSearchContract.Orientation
 import net.primal.android.explore.asearch.AdvancedSearchContract.SearchFilter
 import net.primal.android.explore.asearch.AdvancedSearchContract.UiEvent
 import net.primal.android.explore.asearch.AdvancedSearchContract.UiState
+import net.primal.android.navigation.asBase64Decoded
+import net.primal.android.navigation.asBase64Encoded
+import timber.log.Timber
 
 @HiltViewModel
 class AdvancedSearchViewModel @Inject constructor() : ViewModel() {
@@ -100,7 +105,7 @@ class AdvancedSearchViewModel @Inject constructor() : ViewModel() {
             setEffect(AdvancedSearchContract.SideEffect.NavigateToExploreFeed(searchCommand.buildFeedSpec()))
         }
 
-    private fun String.buildFeedSpec(): String = "{\"id\":\"advsearch\",\"query\":\"$this\"}"
+    private fun String.buildFeedSpec(): String = """{\"id\":\"advsearch\",\"query\":\"$this\"}""".trimIndent()
 
     private fun AdvancedSearchContract.SearchKind.toSearchCommand() =
         when (this) {
