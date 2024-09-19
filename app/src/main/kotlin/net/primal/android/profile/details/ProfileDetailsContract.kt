@@ -23,6 +23,7 @@ interface ProfileDetailsContract {
             ProfileFeedSpec.AuthoredNotes,
             ProfileFeedSpec.AuthoredReplies,
             ProfileFeedSpec.AuthoredArticles,
+            ProfileFeedSpec.AuthoredMedia,
         ),
         val confirmBookmarkingNoteId: String? = null,
         val error: ProfileError? = null,
