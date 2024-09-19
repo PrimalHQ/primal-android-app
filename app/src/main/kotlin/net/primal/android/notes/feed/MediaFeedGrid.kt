@@ -29,7 +29,6 @@ import net.primal.android.core.compose.isEmpty
 import net.primal.android.notes.feed.model.FeedPostUi
 import timber.log.Timber
 
-
 @Composable
 fun MediaFeedGrid(
     feedSpec: String,
@@ -54,7 +53,6 @@ fun MediaFeedGrid(
         noContentVerticalArrangement = noContentVerticalArrangement,
         noContentPaddingValues = noContentPaddingValues,
     )
-
 }
 
 @Composable
@@ -107,8 +105,6 @@ private fun MediaFeedGrid(
             }
         }
     }
-
-
 }
 
 @Composable

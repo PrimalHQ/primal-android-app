@@ -9,5 +9,4 @@ interface MediaFeedContract {
     data class UiState(
         val notes: Flow<PagingData<FeedPostUi>>,
     )
-
 }

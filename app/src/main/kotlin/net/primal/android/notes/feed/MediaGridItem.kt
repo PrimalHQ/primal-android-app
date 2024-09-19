@@ -11,7 +11,6 @@ import coil.request.ImageRequest
 import net.primal.android.attachments.domain.findNearestOrNull
 import net.primal.android.notes.feed.model.FeedPostUi
 
-
 @Composable
 fun MediaGridItem(
     modifier: Modifier = Modifier,
@@ -30,5 +29,4 @@ fun MediaGridItem(
         contentDescription = null,
         contentScale = ContentScale.Crop,
     )
-
 }

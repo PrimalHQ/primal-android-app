@@ -321,8 +321,8 @@ fun ProfileDetailsScreen(
                         ) {
                             val pagerState = rememberPagerState { PROFILE_TAB_COUNT }
                             val gridState = rememberLazyGridState()
-                        ProfileTabs(
-                            selectedTabIndex = pagerState.currentPage,
+                            ProfileTabs(
+                                selectedTabIndex = pagerState.currentPage,
                                 modifier = Modifier.padding(vertical = tabVerticalPadding),
                                 notesCount = state.profileStats?.notesCount,
                                 onNotesCountClick = {
