@@ -35,6 +35,10 @@ interface ProfileDetailsContract {
         }
     }
 
+    sealed class SideEffect {
+        data object ProfileUpdateFinished : SideEffect()
+    }
+
     sealed class UiEvent {
         data class FollowAction(val profileId: String) : UiEvent()
         data class UnfollowAction(val profileId: String) : UiEvent()

@@ -6,6 +6,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -74,6 +75,8 @@ fun NoteFeedList(
     previewMode: Boolean = false,
     pullToRefreshEnabled: Boolean = true,
     pollingEnabled: Boolean = true,
+    noContentVerticalArrangement: Arrangement.Vertical = Arrangement.Center,
+    noContentPaddingValues: PaddingValues = PaddingValues(all = 0.dp),
     onNoteError: ((NoteError) -> Unit)? = null,
     header: @Composable (LazyItemScope.() -> Unit)? = null,
     stickyHeader: @Composable (LazyItemScope.() -> Unit)? = null,
@@ -113,6 +116,8 @@ fun NoteFeedList(
         stickyHeader = stickyHeader,
         eventPublisher = viewModel::setEvent,
         pullToRefreshEnabled = pullToRefreshEnabled,
+        noContentVerticalArrangement = noContentVerticalArrangement,
+        noContentPaddingValues = noContentPaddingValues,
     )
 }
 
@@ -125,6 +130,8 @@ private fun NoteFeedList(
     pullToRefreshEnabled: Boolean = true,
     contentPadding: PaddingValues = PaddingValues(0.dp),
     onNoteError: ((NoteError) -> Unit)? = null,
+    noContentVerticalArrangement: Arrangement.Vertical = Arrangement.Center,
+    noContentPaddingValues: PaddingValues = PaddingValues(all = 0.dp),
     header: @Composable (LazyItemScope.() -> Unit)? = null,
     stickyHeader: @Composable (LazyItemScope.() -> Unit)? = null,
     eventPublisher: (UiEvent) -> Unit,
@@ -163,6 +170,8 @@ private fun NoteFeedList(
             onNoteError = onNoteError,
             header = header,
             stickyHeader = stickyHeader,
+            noContentVerticalArrangement = noContentVerticalArrangement,
+            noContentPaddingValues = noContentPaddingValues,
         )
 
         AnimatedVisibility(
@@ -235,6 +244,8 @@ fun NoteFeedList(
     onGoToWallet: () -> Unit,
     pullToRefreshEnabled: Boolean = true,
     paddingValues: PaddingValues = PaddingValues(0.dp),
+    noContentVerticalArrangement: Arrangement.Vertical = Arrangement.Center,
+    noContentPaddingValues: PaddingValues = PaddingValues(all = 0.dp),
     onScrolledToTop: (() -> Unit)? = null,
     onNoteError: ((NoteError) -> Unit)? = null,
     noContentText: String = stringResource(id = R.string.feed_no_content),
@@ -301,6 +312,8 @@ fun NoteFeedList(
             header = header,
             stickyHeader = stickyHeader,
             onNoteError = onNoteError,
+            noContentVerticalArrangement = noContentVerticalArrangement,
+            noContentPaddingValues = noContentPaddingValues,
         )
     }
 }

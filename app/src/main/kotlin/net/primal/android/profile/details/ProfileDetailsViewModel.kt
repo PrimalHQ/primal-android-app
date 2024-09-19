@@ -6,12 +6,14 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.core.compose.profile.model.asProfileDetailsUi
@@ -57,6 +59,10 @@ class ProfileDetailsViewModel @Inject constructor(
     private val events: MutableSharedFlow<UiEvent> = MutableSharedFlow()
     fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
 
+    private val _effects = Channel<ProfileDetailsContract.SideEffect>()
+    val effects = _effects.receiveAsFlow()
+    private fun setEffect(effect: ProfileDetailsContract.SideEffect) = viewModelScope.launch { _effects.send(effect) }
+
     private var referencedProfilesObserver: Job? = null
 
     init {
@@ -92,15 +98,19 @@ class ProfileDetailsViewModel @Inject constructor(
                     is UiEvent.RemoveUserFeedAction -> removeUserFeed(it)
                     is UiEvent.MuteAction -> mute(it)
                     is UiEvent.UnmuteAction -> unmute(it)
-                    UiEvent.RequestProfileUpdate -> {
-                        fetchLatestProfile()
-                        fetchLatestMuteList()
-                    }
+                    UiEvent.RequestProfileUpdate -> requestProfileUpdate()
 
                     is UiEvent.ReportAbuse -> reportAbuse(it)
                     UiEvent.DismissError -> setState { copy(error = null) }
                 }
             }
+        }
+
+    private fun requestProfileUpdate() =
+        viewModelScope.launch {
+            fetchLatestProfile()
+            fetchLatestMuteList()
+            setEffect(ProfileDetailsContract.SideEffect.ProfileUpdateFinished)
         }
 
     private fun fetchProfileFollowedBy() =
@@ -212,28 +222,24 @@ class ProfileDetailsViewModel @Inject constructor(
         }
     }
 
-    private fun fetchLatestMuteList() =
-        viewModelScope.launch {
-            try {
-                withContext(dispatcherProvider.io()) {
-                    mutedUserRepository.fetchAndPersistMuteList(
-                        userId = activeAccountStore.activeUserId(),
-                    )
-                }
-            } catch (error: WssException) {
-                Timber.w(error)
+    private suspend fun fetchLatestMuteList() =
+        try {
+            withContext(dispatcherProvider.io()) {
+                mutedUserRepository.fetchAndPersistMuteList(
+                    userId = activeAccountStore.activeUserId(),
+                )
             }
+        } catch (error: WssException) {
+            Timber.w(error)
         }
 
-    private fun fetchLatestProfile() =
-        viewModelScope.launch {
-            try {
-                withContext(dispatcherProvider.io()) {
-                    profileRepository.requestProfileUpdate(profileId = profileId)
-                }
-            } catch (error: WssException) {
-                Timber.w(error)
+    private suspend fun fetchLatestProfile() =
+        try {
+            withContext(dispatcherProvider.io()) {
+                profileRepository.requestProfileUpdate(profileId = profileId)
             }
+        } catch (error: WssException) {
+            Timber.w(error)
         }
 
     private fun updateStateProfileAsFollowed() = setState { copy(isProfileFollowed = true) }
