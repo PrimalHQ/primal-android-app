@@ -23,7 +23,7 @@ import net.primal.android.feeds.domain.DvmFeed
 import net.primal.android.feeds.domain.FeedSpecKind
 import net.primal.android.feeds.domain.buildSpec
 import net.primal.android.notes.feed.NoteFeedList
-import net.primal.android.notes.feed.note.events.NoteCallbacks
+import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.theme.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -96,6 +96,7 @@ private fun DvmHeaderAndFeedList(
                 ArticleFeedList(
                     feedSpec = dvmFeed.buildSpec(specKind = specKind),
                     previewMode = true,
+                    pullToRefreshEnabled = false,
                     header = { DvmFeedListItem(data = dvmFeed) },
                     onArticleClick = {},
                 )
@@ -106,6 +107,8 @@ private fun DvmHeaderAndFeedList(
                     feedSpec = dvmFeed.buildSpec(specKind = specKind),
                     noteCallbacks = NoteCallbacks(),
                     previewMode = true,
+                    pullToRefreshEnabled = false,
+                    pollingEnabled = false,
                     header = { DvmFeedListItem(data = dvmFeed) },
                     onGoToWallet = {},
                 )

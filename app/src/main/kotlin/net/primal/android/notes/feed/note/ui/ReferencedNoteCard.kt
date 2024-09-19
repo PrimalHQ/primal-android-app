@@ -1,4 +1,4 @@
-package net.primal.android.notes.feed.note
+package net.primal.android.notes.feed.note.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
@@ -20,8 +20,7 @@ import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.model.toNoteContentUi
-import net.primal.android.notes.feed.note.events.InvoicePayClickEvent
-import net.primal.android.notes.feed.note.events.MediaClickEvent
+import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 
@@ -29,21 +28,15 @@ import net.primal.android.theme.domain.PrimalTheme
 fun ReferencedNoteCard(
     modifier: Modifier = Modifier,
     data: FeedPostUi,
-    onPostClick: ((String) -> Unit)? = null,
-    onProfileClick: ((profileId: String) -> Unit)? = null,
-    onArticleClick: ((naddr: String) -> Unit)? = null,
-    onMediaClick: ((MediaClickEvent) -> Unit)? = null,
-    onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
-    colors: CardColors = CardDefaults.cardColors(
-        containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
-    ),
+    noteCallbacks: NoteCallbacks,
+    colors: CardColors = referencedNoteCardColors(),
 ) {
     NoteSurfaceCard(
         modifier = modifier
             .wrapContentHeight()
             .clickable(
-                enabled = onPostClick != null,
-                onClick = { onPostClick?.invoke(data.postId) },
+                enabled = noteCallbacks.onNoteClick != null,
+                onClick = { noteCallbacks.onNoteClick?.invoke(data.postId) },
             ),
         colors = colors,
         border = BorderStroke(width = 0.5.dp, color = AppTheme.colorScheme.outline),
@@ -58,7 +51,7 @@ fun ReferencedNoteCard(
             authorAvatarSize = 30.dp,
             authorAvatarCdnImage = data.authorAvatarCdnImage,
             authorInternetIdentifier = data.authorInternetIdentifier,
-            onAuthorAvatarClick = { onProfileClick?.invoke(data.authorId) },
+            onAuthorAvatarClick = { noteCallbacks.onProfileClick?.invoke(data.authorId) },
         )
 
         NoteContent(
@@ -67,19 +60,20 @@ fun ReferencedNoteCard(
                 .padding(top = 4.dp),
             data = data.toNoteContentUi(),
             expanded = false,
-            onClick = { onPostClick?.invoke(data.postId) },
-            onProfileClick = { onPostClick?.invoke(data.postId) },
-            onPostClick = { postId -> onPostClick?.invoke(postId) },
-            onArticleClick = onArticleClick,
-            onUrlClick = { onPostClick?.invoke(data.postId) },
-            onHashtagClick = { onPostClick?.invoke(data.postId) },
-            onMediaClick = onMediaClick,
-            onPayInvoiceClick = onPayInvoiceClick,
+            onClick = { noteCallbacks.onNoteClick?.invoke(data.postId) },
+            onUrlClick = { _ -> noteCallbacks.onNoteClick?.invoke(data.postId) },
+            noteCallbacks = noteCallbacks,
         )
 
         Spacer(modifier = Modifier.height(12.dp))
     }
 }
+
+@Composable
+private fun referencedNoteCardColors() =
+    CardDefaults.cardColors(
+        containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
+    )
 
 @Preview
 @Composable
@@ -117,9 +111,7 @@ fun PreviewReferencedPostListItemLight() {
                 rawNostrEventJson = "",
                 replyToAuthorHandle = "alex",
             ),
-            onPostClick = {},
-            onArticleClick = {},
-            onMediaClick = {},
+            noteCallbacks = NoteCallbacks(),
         )
     }
 }
@@ -160,9 +152,7 @@ fun PreviewReferencedPostListItemDark() {
                 rawNostrEventJson = "",
                 replyToAuthorHandle = null,
             ),
-            onPostClick = {},
-            onArticleClick = {},
-            onMediaClick = {},
+            noteCallbacks = NoteCallbacks(),
         )
     }
 }

@@ -1,13 +1,12 @@
 package net.primal.android.notes.feed
 
-import android.content.Context
-import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -18,7 +17,6 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -35,7 +33,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -56,6 +53,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.R
 import net.primal.android.core.compose.AvatarThumbnailsRow
+import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.isNotEmpty
 import net.primal.android.core.compose.pulltorefresh.PrimalPullToRefreshBox
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
@@ -63,10 +61,8 @@ import net.primal.android.drawer.FloatingNewDataHostTopPadding
 import net.primal.android.notes.feed.NoteFeedContract.UiEvent
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.model.FeedPostsSyncStats
-import net.primal.android.notes.feed.model.ZappingState
-import net.primal.android.notes.feed.note.ConfirmFirstBookmarkAlertDialog
-import net.primal.android.notes.feed.note.events.NoteCallbacks
-import net.primal.android.profile.report.OnReportContentClick
+import net.primal.android.notes.feed.note.NoteContract.SideEffect.NoteError
+import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.theme.AppTheme
 
 @Composable
@@ -74,19 +70,21 @@ fun NoteFeedList(
     feedSpec: String,
     noteCallbacks: NoteCallbacks,
     onGoToWallet: () -> Unit,
-    listState: LazyListState = rememberLazyListState(),
     contentPadding: PaddingValues = PaddingValues(0.dp),
     newNotesNoticeAlpha: Float = 1.00f,
     previewMode: Boolean = false,
     pullToRefreshEnabled: Boolean = true,
     pollingEnabled: Boolean = true,
+    noContentVerticalArrangement: Arrangement.Vertical = Arrangement.Center,
+    noContentPaddingValues: PaddingValues = PaddingValues(all = 0.dp),
+    onNoteError: ((NoteError) -> Unit)? = null,
     header: @Composable (LazyItemScope.() -> Unit)? = null,
     stickyHeader: @Composable (LazyItemScope.() -> Unit)? = null,
 ) {
-    val viewModel = hiltViewModel<NoteFeedViewModel, NoteFeedViewModel.Factory>(
-        key = if (!previewMode) feedSpec else UUID.randomUUID().toString(),
-        creationCallback = { factory -> factory.create(feedSpec = feedSpec) },
-    )
+    val viewModelKey by remember { mutableStateOf(if (!previewMode) feedSpec else UUID.randomUUID().toString()) }
+    val viewModel = hiltViewModel<NoteFeedViewModel, NoteFeedViewModel.Factory>(key = viewModelKey) { factory ->
+        factory.create(feedSpec = feedSpec)
+    }
     val uiState = viewModel.state.collectAsState()
 
     var started by remember(viewModel) { mutableStateOf(false) }
@@ -109,42 +107,37 @@ fun NoteFeedList(
 
     NoteFeedList(
         state = uiState.value,
-        listState = listState,
         noteCallbacks = noteCallbacks,
         onGoToWallet = onGoToWallet,
         newNotesNoticeAlpha = newNotesNoticeAlpha,
         contentPadding = contentPadding,
+        onNoteError = onNoteError,
         header = header,
         stickyHeader = stickyHeader,
         eventPublisher = viewModel::setEvent,
         pullToRefreshEnabled = pullToRefreshEnabled,
+        noContentVerticalArrangement = noContentVerticalArrangement,
+        noContentPaddingValues = noContentPaddingValues,
     )
 }
 
 @Composable
 private fun NoteFeedList(
     state: NoteFeedContract.UiState,
-    listState: LazyListState,
     noteCallbacks: NoteCallbacks,
     onGoToWallet: () -> Unit,
     newNotesNoticeAlpha: Float = 1.00f,
     pullToRefreshEnabled: Boolean = true,
     contentPadding: PaddingValues = PaddingValues(0.dp),
+    onNoteError: ((NoteError) -> Unit)? = null,
+    noContentVerticalArrangement: Arrangement.Vertical = Arrangement.Center,
+    noContentPaddingValues: PaddingValues = PaddingValues(all = 0.dp),
     header: @Composable (LazyItemScope.() -> Unit)? = null,
     stickyHeader: @Composable (LazyItemScope.() -> Unit)? = null,
     eventPublisher: (UiEvent) -> Unit,
 ) {
     val pagingItems = state.notes.collectAsLazyPagingItems()
-    val scope = rememberCoroutineScope()
-    val context = LocalContext.current
-
-    LaunchedEffect(state.error) {
-        if (state.error != null) {
-            scope.launch {
-                Toast.makeText(context, state.error.toErrorMessage(context), Toast.LENGTH_LONG).show()
-            }
-        }
-    }
+    val listState = pagingItems.rememberLazyListStatePagingWorkaround()
 
     LaunchedEffect(listState, pagingItems) {
         withContext(Dispatchers.IO) {
@@ -165,72 +158,20 @@ private fun NoteFeedList(
         }
     }
 
-    if (state.confirmBookmarkingNoteId != null) {
-        ConfirmFirstBookmarkAlertDialog(
-            onBookmarkConfirmed = {
-                eventPublisher(
-                    UiEvent.BookmarkAction(
-                        noteId = state.confirmBookmarkingNoteId,
-                        forceUpdate = true,
-                    ),
-                )
-            },
-            onClose = {
-                eventPublisher(UiEvent.DismissBookmarkConfirmation)
-            },
-        )
-    }
-
     Box {
         NoteFeedList(
             pagingItems = pagingItems,
             pullToRefreshEnabled = pullToRefreshEnabled,
             feedListState = listState,
-            zappingState = state.zappingState,
             noteCallbacks = noteCallbacks,
-            onZapClick = { post, zapAmount, zapDescription ->
-                eventPublisher(
-                    UiEvent.ZapAction(
-                        postId = post.postId,
-                        postAuthorId = post.authorId,
-                        zapAmount = zapAmount,
-                        zapDescription = zapDescription,
-                    ),
-                )
-            },
-            onPostLikeClick = {
-                eventPublisher(
-                    UiEvent.PostLikeAction(
-                        postId = it.postId,
-                        postAuthorId = it.authorId,
-                    ),
-                )
-            },
-            onRepostClick = {
-                eventPublisher(
-                    UiEvent.RepostAction(
-                        postId = it.postId,
-                        postAuthorId = it.authorId,
-                        postNostrEvent = it.rawNostrEventJson,
-                    ),
-                )
-            },
             onGoToWallet = onGoToWallet,
             paddingValues = contentPadding,
             onScrolledToTop = { eventPublisher(UiEvent.FeedScrolledToTop) },
-            onMuteClick = { eventPublisher(UiEvent.MuteAction(it)) },
-            onBookmarkClick = { eventPublisher(UiEvent.BookmarkAction(noteId = it)) },
-            onReportContentClick = { type, profileId, noteId ->
-                eventPublisher(
-                    UiEvent.ReportAbuse(
-                        reportType = type,
-                        profileId = profileId,
-                        noteId = noteId,
-                    ),
-                )
-            },
+            onNoteError = onNoteError,
             header = header,
             stickyHeader = stickyHeader,
+            noContentVerticalArrangement = noContentVerticalArrangement,
+            noContentPaddingValues = noContentPaddingValues,
         )
 
         AnimatedVisibility(
@@ -299,18 +240,14 @@ private fun NewPostsButton(syncStats: FeedPostsSyncStats, onClick: () -> Unit) {
 fun NoteFeedList(
     feedListState: LazyListState,
     pagingItems: LazyPagingItems<FeedPostUi>,
-    zappingState: ZappingState,
     noteCallbacks: NoteCallbacks,
-    onPostLikeClick: (FeedPostUi) -> Unit,
-    onZapClick: (FeedPostUi, ULong?, String?) -> Unit,
-    onRepostClick: (FeedPostUi) -> Unit,
     onGoToWallet: () -> Unit,
-    onBookmarkClick: (noteId: String) -> Unit,
     pullToRefreshEnabled: Boolean = true,
     paddingValues: PaddingValues = PaddingValues(0.dp),
+    noContentVerticalArrangement: Arrangement.Vertical = Arrangement.Center,
+    noContentPaddingValues: PaddingValues = PaddingValues(all = 0.dp),
     onScrolledToTop: (() -> Unit)? = null,
-    onMuteClick: ((String) -> Unit)? = null,
-    onReportContentClick: OnReportContentClick,
+    onNoteError: ((NoteError) -> Unit)? = null,
     noContentText: String = stringResource(id = R.string.feed_no_content),
     header: @Composable (LazyItemScope.() -> Unit)? = null,
     stickyHeader: @Composable (LazyItemScope.() -> Unit)? = null,
@@ -369,50 +306,14 @@ fun NoteFeedList(
             contentPadding = paddingValues,
             pagingItems = pagingItems,
             listState = feedListState,
-            zappingState = zappingState,
             noteCallbacks = noteCallbacks,
-            onPostLikeClick = onPostLikeClick,
-            onZapClick = onZapClick,
-            onRepostClick = onRepostClick,
             onGoToWallet = onGoToWallet,
-            onMuteClick = onMuteClick,
-            onReportContentClick = onReportContentClick,
-            onBookmarkClick = onBookmarkClick,
             noContentText = noContentText,
             header = header,
             stickyHeader = stickyHeader,
-        )
-    }
-}
-
-private fun NoteFeedContract.UiState.FeedError.toErrorMessage(context: Context): String {
-    return when (this) {
-        is NoteFeedContract.UiState.FeedError.InvalidZapRequest -> context.getString(
-            R.string.post_action_invalid_zap_request,
-        )
-
-        is NoteFeedContract.UiState.FeedError.MissingLightningAddress -> context.getString(
-            R.string.post_action_missing_lightning_address,
-        )
-
-        is NoteFeedContract.UiState.FeedError.FailedToPublishZapEvent -> context.getString(
-            R.string.post_action_zap_failed,
-        )
-
-        is NoteFeedContract.UiState.FeedError.FailedToPublishLikeEvent -> context.getString(
-            R.string.post_action_like_failed,
-        )
-
-        is NoteFeedContract.UiState.FeedError.FailedToPublishRepostEvent -> context.getString(
-            R.string.post_action_repost_failed,
-        )
-
-        is NoteFeedContract.UiState.FeedError.MissingRelaysConfiguration -> context.getString(
-            R.string.app_missing_relays_config,
-        )
-
-        is NoteFeedContract.UiState.FeedError.FailedToMuteUser -> context.getString(
-            R.string.app_error_muting_user,
+            onNoteError = onNoteError,
+            noContentVerticalArrangement = noContentVerticalArrangement,
+            noContentPaddingValues = noContentPaddingValues,
         )
     }
 }

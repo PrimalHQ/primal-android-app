@@ -1,4 +1,4 @@
-package net.primal.android.notes.feed.note
+package net.primal.android.notes.feed.note.ui
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
@@ -27,8 +27,9 @@ import net.primal.android.notes.db.ReferencedPost
 import net.primal.android.notes.db.ReferencedUser
 import net.primal.android.notes.feed.model.NoteContentUi
 import net.primal.android.notes.feed.model.NoteNostrUriUi
-import net.primal.android.notes.feed.note.events.InvoicePayClickEvent
-import net.primal.android.notes.feed.note.events.MediaClickEvent
+import net.primal.android.notes.feed.note.ui.attachment.NoteAttachments
+import net.primal.android.notes.feed.note.ui.events.InvoicePayClickEvent
+import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 
@@ -127,14 +128,9 @@ fun NoteContent(
     highlightColor: Color = AppTheme.colorScheme.secondary,
     contentColor: Color = AppTheme.colorScheme.onSurface,
     referencedNoteContainerColor: Color = AppTheme.extraColorScheme.surfaceVariantAlt1,
-    onProfileClick: ((String) -> Unit)? = null,
-    onPostClick: ((String) -> Unit)? = null,
-    onArticleClick: ((naddr: String) -> Unit)? = null,
-    onClick: ((Offset) -> Unit)? = null,
-    onUrlClick: ((String) -> Unit)? = null,
-    onHashtagClick: ((String) -> Unit)? = null,
-    onMediaClick: ((MediaClickEvent) -> Unit)? = null,
-    onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
+    onClick: ((offset: Offset) -> Unit)? = null,
+    onUrlClick: ((url: String) -> Unit)? = null,
+    noteCallbacks: NoteCallbacks,
 ) {
     val displaySettings = LocalContentDisplaySettings.current
     val seeMoreText = stringResource(id = R.string.feed_see_more)
@@ -164,11 +160,11 @@ fun NoteContent(
                     ).firstOrNull()
 
                     annotation?.handleAnnotationClick(
-                        onProfileClick = onProfileClick,
+                        onProfileClick = noteCallbacks.onProfileClick,
                         onUrlClick = onUrlClick,
-                        onPostClick = onPostClick,
-                        onHashtagClick = onHashtagClick,
-                        onArticleClick = onArticleClick,
+                        onPostClick = noteCallbacks.onNoteClick,
+                        onHashtagClick = noteCallbacks.onHashtagClick,
+                        onArticleClick = noteCallbacks.onArticleClick,
                     ) ?: onClick?.invoke(offset)
                 },
             )
@@ -178,7 +174,7 @@ fun NoteContent(
             NoteLightningInvoice(
                 modifier = Modifier.padding(top = if (contentText.isEmpty()) 4.dp else 6.dp),
                 invoice = data.invoices.first(),
-                onPayClick = { lnbc -> onPayInvoiceClick?.invoke(InvoicePayClickEvent(lnbc = lnbc)) },
+                onPayClick = { lnbc -> noteCallbacks.onPayInvoiceClick?.invoke(InvoicePayClickEvent(lnbc = lnbc)) },
             )
         }
 
@@ -187,7 +183,7 @@ fun NoteContent(
                 modifier = Modifier.padding(top = if (contentText.isEmpty()) 4.dp else 6.dp),
                 attachments = data.attachments,
                 onUrlClick = onUrlClick,
-                onMediaClick = onMediaClick,
+                onMediaClick = noteCallbacks.onMediaClick,
             )
         }
 
@@ -198,10 +194,7 @@ fun NoteContent(
                 postResources = referencedPostResources,
                 expanded = expanded,
                 containerColor = referencedNoteContainerColor,
-                onPostClick = onPostClick,
-                onArticleClick = onArticleClick,
-                onMediaClick = onMediaClick,
-                onPayInvoiceClick = onPayInvoiceClick,
+                noteCallbacks = noteCallbacks,
             )
         }
     }
@@ -414,14 +407,9 @@ fun PreviewPostContent() {
                     hashtags = listOf("#nostr"),
                 ),
                 expanded = false,
-                onProfileClick = {},
-                onPostClick = {},
-                onArticleClick = {},
                 onClick = {},
                 onUrlClick = {},
-                onHashtagClick = {},
-                onMediaClick = {},
-                onPayInvoiceClick = {},
+                noteCallbacks = NoteCallbacks(),
             )
         }
     }
@@ -489,14 +477,9 @@ fun PreviewPostContentWithReferencedPost() {
                     ),
                 ),
                 expanded = false,
-                onProfileClick = {},
-                onPostClick = {},
-                onArticleClick = {},
                 onClick = {},
                 onUrlClick = {},
-                onHashtagClick = {},
-                onMediaClick = {},
-                onPayInvoiceClick = {},
+                noteCallbacks = NoteCallbacks(),
             )
         }
     }

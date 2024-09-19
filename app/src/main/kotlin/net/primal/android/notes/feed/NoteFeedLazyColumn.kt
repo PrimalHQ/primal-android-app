@@ -1,6 +1,7 @@
 package net.primal.android.notes.feed
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -13,10 +14,6 @@ import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.stringResource
@@ -34,15 +31,10 @@ import net.primal.android.core.compose.ListPlaceholderLoading
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.isEmpty
 import net.primal.android.core.compose.isNotEmpty
-import net.primal.android.notes.feed.model.FeedPostAction
 import net.primal.android.notes.feed.model.FeedPostUi
-import net.primal.android.notes.feed.model.ZappingState
 import net.primal.android.notes.feed.note.FeedNoteCard
-import net.primal.android.notes.feed.note.events.NoteCallbacks
-import net.primal.android.notes.feed.zaps.UnableToZapBottomSheet
-import net.primal.android.notes.feed.zaps.ZapBottomSheet
-import net.primal.android.profile.report.OnReportContentClick
-import net.primal.android.wallet.zaps.canZap
+import net.primal.android.notes.feed.note.NoteContract.SideEffect.NoteError
+import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import timber.log.Timber
 
 @ExperimentalMaterial3Api
@@ -52,61 +44,19 @@ fun NoteFeedLazyColumn(
     modifier: Modifier = Modifier,
     pagingItems: LazyPagingItems<FeedPostUi>,
     listState: LazyListState,
-    zappingState: ZappingState,
     noteCallbacks: NoteCallbacks,
-    onPostLikeClick: (FeedPostUi) -> Unit,
-    onRepostClick: (FeedPostUi) -> Unit,
-    onZapClick: (FeedPostUi, ULong?, String?) -> Unit,
     onGoToWallet: () -> Unit,
-    onReportContentClick: OnReportContentClick,
-    onMuteClick: ((String) -> Unit)? = null,
-    onBookmarkClick: (noteId: String) -> Unit,
     shouldShowLoadingState: Boolean = true,
     shouldShowNoContentState: Boolean = true,
     showReplyTo: Boolean = true,
+    noContentVerticalArrangement: Arrangement.Vertical = Arrangement.Center,
+    noContentPaddingValues: PaddingValues = PaddingValues(all = 0.dp),
     noContentText: String = stringResource(id = R.string.feed_no_content),
     contentPadding: PaddingValues = PaddingValues(all = 0.dp),
     header: @Composable (LazyItemScope.() -> Unit)? = null,
     stickyHeader: @Composable (LazyItemScope.() -> Unit)? = null,
+    onNoteError: ((NoteError) -> Unit)? = null,
 ) {
-    var repostQuotePostConfirmation by remember { mutableStateOf<FeedPostUi?>(null) }
-    if (repostQuotePostConfirmation != null) {
-        repostQuotePostConfirmation?.let { post ->
-            NoteRepostOrQuoteBottomSheet(
-                onDismiss = { repostQuotePostConfirmation = null },
-                onRepostClick = { onRepostClick(post) },
-                onPostQuoteClick = { noteCallbacks.onNoteQuoteClick?.invoke(post.postId) },
-            )
-        }
-    }
-
-    var showCantZapWarning by remember { mutableStateOf(false) }
-    if (showCantZapWarning) {
-        UnableToZapBottomSheet(
-            zappingState = zappingState,
-            onDismissRequest = { showCantZapWarning = false },
-            onGoToWallet = onGoToWallet,
-        )
-    }
-
-    var zapOptionsPostConfirmation by remember { mutableStateOf<FeedPostUi?>(null) }
-    if (zapOptionsPostConfirmation != null) {
-        zapOptionsPostConfirmation?.let { post ->
-            ZapBottomSheet(
-                onDismissRequest = { zapOptionsPostConfirmation = null },
-                receiverName = post.authorName,
-                zappingState = zappingState,
-                onZap = { zapAmount, zapDescription ->
-                    if (zappingState.canZap(zapAmount)) {
-                        onZapClick(post, zapAmount.toULong(), zapDescription)
-                    } else {
-                        showCantZapWarning = true
-                    }
-                },
-            )
-        }
-    }
-
     LazyColumn(
         modifier = modifier,
         contentPadding = contentPadding,
@@ -154,43 +104,9 @@ fun NoteFeedLazyColumn(
                         shape = RectangleShape,
                         cardPadding = PaddingValues(all = 0.dp),
                         showReplyTo = showReplyTo,
-                        onPostClick = { postId -> noteCallbacks.onNoteClick?.invoke(postId) },
-                        onArticleClick = { naddr -> noteCallbacks.onArticleClick?.invoke(naddr) },
-                        onProfileClick = { profileId -> noteCallbacks.onProfileClick?.invoke(profileId) },
-                        onPostAction = { postAction ->
-                            when (postAction) {
-                                FeedPostAction.Reply -> noteCallbacks.onNoteReplyClick?.invoke(item.postId)
-                                FeedPostAction.Zap -> {
-                                    if (zappingState.canZap()) {
-                                        onZapClick(item, null, null)
-                                    } else {
-                                        showCantZapWarning = true
-                                    }
-                                }
-
-                                FeedPostAction.Like -> onPostLikeClick(item)
-                                FeedPostAction.Repost -> repostQuotePostConfirmation = item
-                            }
-                        },
-                        onPostLongClickAction = { postAction ->
-                            when (postAction) {
-                                FeedPostAction.Zap -> {
-                                    if (zappingState.walletConnected) {
-                                        zapOptionsPostConfirmation = item
-                                    } else {
-                                        showCantZapWarning = true
-                                    }
-                                }
-
-                                else -> Unit
-                            }
-                        },
-                        onHashtagClick = { hashtag -> noteCallbacks.onHashtagClick?.invoke(hashtag) },
-                        onMuteUserClick = { onMuteClick?.invoke(item.authorId) },
-                        onMediaClick = { event -> noteCallbacks.onMediaClick?.invoke(event) },
-                        onReportContentClick = onReportContentClick,
-                        onBookmarkClick = { onBookmarkClick(item.postId) },
-                        onPayInvoiceClick = { event -> noteCallbacks.onPayInvoiceClick?.invoke(event) },
+                        noteCallbacks = noteCallbacks,
+                        onGoToWallet = onGoToWallet,
+                        onNoteError = onNoteError,
                     )
 
                     PrimalDivider()
@@ -222,6 +138,8 @@ fun NoteFeedLazyColumn(
                                 modifier = Modifier.fillParentMaxSize(),
                                 noContentText = noContentText,
                                 onRefresh = { pagingItems.refresh() },
+                                verticalArrangement = noContentVerticalArrangement,
+                                contentPadding = noContentPaddingValues,
                             )
                         }
                     }
@@ -235,6 +153,8 @@ fun NoteFeedLazyColumn(
                             modifier = Modifier.fillParentMaxSize(),
                             noContentText = stringResource(id = R.string.feed_error_loading),
                             onRefresh = { pagingItems.refresh() },
+                            verticalArrangement = noContentVerticalArrangement,
+                            contentPadding = noContentPaddingValues,
                         )
                     }
                 }

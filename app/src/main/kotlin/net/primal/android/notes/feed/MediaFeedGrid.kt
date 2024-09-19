@@ -1,6 +1,7 @@
 package net.primal.android.notes.feed
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -35,6 +36,8 @@ fun MediaFeedGrid(
     onNoteClick: (String) -> Unit,
     modifier: Modifier = Modifier,
     gridState: LazyGridState = rememberLazyGridState(),
+    noContentVerticalArrangement: Arrangement.Vertical = Arrangement.Center,
+    noContentPaddingValues: PaddingValues = PaddingValues(all = 0.dp),
 ) {
     val viewModel = hiltViewModel<MediaFeedViewModel, MediaFeedViewModel.Factory>(
         key = feedSpec,
@@ -48,6 +51,8 @@ fun MediaFeedGrid(
         onNoteClick = onNoteClick,
         gridState = gridState,
         modifier = modifier,
+        noContentVerticalArrangement = noContentVerticalArrangement,
+        noContentPaddingValues = noContentPaddingValues,
     )
 
 }
@@ -58,11 +63,17 @@ private fun MediaFeedGrid(
     state: MediaFeedContract.UiState,
     onNoteClick: (String) -> Unit,
     gridState: LazyGridState = rememberLazyGridState(),
+    noContentVerticalArrangement: Arrangement.Vertical = Arrangement.Center,
+    noContentPaddingValues: PaddingValues = PaddingValues(all = 0.dp),
 ) {
     val pagingItems = state.notes.collectAsLazyPagingItems()
 
     if (pagingItems.isEmpty()) {
-        EmptyItemsContent(pagingItems)
+        EmptyItemsContent(
+            pagingItems = pagingItems,
+            noContentVerticalArrangement = noContentVerticalArrangement,
+            noContentPaddingValues = noContentPaddingValues,
+        )
     } else {
         BoxWithConstraints {
             val itemWidth = maxWidth / 3
@@ -101,7 +112,11 @@ private fun MediaFeedGrid(
 }
 
 @Composable
-private fun EmptyItemsContent(pagingItems: LazyPagingItems<FeedPostUi>) {
+private fun EmptyItemsContent(
+    pagingItems: LazyPagingItems<FeedPostUi>,
+    noContentVerticalArrangement: Arrangement.Vertical = Arrangement.Center,
+    noContentPaddingValues: PaddingValues = PaddingValues(all = 0.dp),
+) {
     when (val refreshLoadState = pagingItems.loadState.refresh) {
         LoadState.Loading -> {
             ListPlaceholderLoading(
@@ -117,6 +132,8 @@ private fun EmptyItemsContent(pagingItems: LazyPagingItems<FeedPostUi>) {
                 modifier = Modifier.fillMaxSize(),
                 noContentText = stringResource(id = R.string.feed_no_content),
                 onRefresh = { pagingItems.refresh() },
+                verticalArrangement = noContentVerticalArrangement,
+                contentPadding = noContentPaddingValues,
             )
         }
 
@@ -127,6 +144,8 @@ private fun EmptyItemsContent(pagingItems: LazyPagingItems<FeedPostUi>) {
                 modifier = Modifier.fillMaxSize(),
                 noContentText = stringResource(id = R.string.feed_error_loading),
                 onRefresh = { pagingItems.refresh() },
+                verticalArrangement = noContentVerticalArrangement,
+                contentPadding = noContentPaddingValues,
             )
         }
     }

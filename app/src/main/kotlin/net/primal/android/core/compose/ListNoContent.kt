@@ -5,6 +5,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.Text
@@ -28,6 +29,8 @@ fun ListNoContent(
     noContentText: String,
     refreshButtonVisible: Boolean = true,
     onRefresh: () -> Unit = {},
+    verticalArrangement: Arrangement.Vertical = Arrangement.Center,
+    contentPadding: PaddingValues = PaddingValues(all = 0.dp),
 ) {
     val visible = rememberSaveable { mutableStateOf(false) }
 
@@ -42,9 +45,9 @@ fun ListNoContent(
         exit = fadeOut(),
     ) {
         Column(
-            modifier = modifier,
+            modifier = modifier.padding(contentPadding),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
+            verticalArrangement = verticalArrangement,
         ) {
             Text(
                 modifier = Modifier

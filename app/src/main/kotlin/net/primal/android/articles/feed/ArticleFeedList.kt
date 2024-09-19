@@ -2,6 +2,7 @@ package net.primal.android.articles.feed
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -61,13 +62,15 @@ fun ArticleFeedList(
     onArticleClick: (naddr: String) -> Unit,
     pullToRefreshEnabled: Boolean = true,
     previewMode: Boolean = false,
+    noContentVerticalArrangement: Arrangement.Vertical = Arrangement.Center,
+    noContentPaddingValues: PaddingValues = PaddingValues(all = 0.dp),
     header: @Composable (LazyItemScope.() -> Unit)? = null,
     stickyHeader: @Composable (LazyItemScope.() -> Unit)? = null,
 ) {
-    val viewModel = hiltViewModel<ArticleFeedViewModel, ArticleFeedViewModel.Factory>(
-        key = if (!previewMode) feedSpec else UUID.randomUUID().toString(),
-        creationCallback = { factory -> factory.create(spec = feedSpec) },
-    )
+    val viewModelKey by remember { mutableStateOf(if (!previewMode) feedSpec else UUID.randomUUID().toString()) }
+    val viewModel = hiltViewModel<ArticleFeedViewModel, ArticleFeedViewModel.Factory>(key = viewModelKey) { factory ->
+        factory.create(spec = feedSpec)
+    }
     val uiState = viewModel.state.collectAsState()
 
     ArticleFeedList(
@@ -77,6 +80,8 @@ fun ArticleFeedList(
         header = header,
         stickyHeader = stickyHeader,
         pullToRefreshEnabled = pullToRefreshEnabled,
+        noContentVerticalArrangement = noContentVerticalArrangement,
+        noContentPaddingValues = noContentPaddingValues,
     )
 }
 
@@ -86,6 +91,8 @@ private fun ArticleFeedList(
     state: ArticleFeedContract.UiState,
     pullToRefreshEnabled: Boolean = true,
     contentPadding: PaddingValues = PaddingValues(0.dp),
+    noContentVerticalArrangement: Arrangement.Vertical = Arrangement.Center,
+    noContentPaddingValues: PaddingValues = PaddingValues(all = 0.dp),
     onArticleClick: (naddr: String) -> Unit,
     header: @Composable (LazyItemScope.() -> Unit)? = null,
     stickyHeader: @Composable (LazyItemScope.() -> Unit)? = null,
@@ -137,6 +144,8 @@ private fun ArticleFeedList(
             contentPadding = contentPadding,
             header = header,
             stickyHeader = stickyHeader,
+            noContentVerticalArrangement = noContentVerticalArrangement,
+            noContentPaddingValues = noContentPaddingValues,
         )
     }
 }
@@ -147,6 +156,8 @@ private fun ArticleFeedLazyColumn(
     pagingItems: LazyPagingItems<FeedArticleUi>,
     listState: LazyListState,
     onArticleClick: (naddr: String) -> Unit,
+    noContentVerticalArrangement: Arrangement.Vertical = Arrangement.Center,
+    noContentPaddingValues: PaddingValues = PaddingValues(all = 0.dp),
     contentPadding: PaddingValues = PaddingValues(all = 0.dp),
     header: @Composable (LazyItemScope.() -> Unit)? = null,
     stickyHeader: @Composable (LazyItemScope.() -> Unit)? = null,
@@ -194,7 +205,11 @@ private fun ArticleFeedLazyColumn(
         }
 
         if (pagingItems.isEmpty()) {
-            handleRefreshLoadState(pagingItems)
+            handleRefreshLoadState(
+                pagingItems = pagingItems,
+                noContentVerticalArrangement = noContentVerticalArrangement,
+                noContentPaddingValues = noContentPaddingValues,
+            )
         }
 
         handleMediatorAppendState(pagingItems)
@@ -207,7 +222,11 @@ private fun ArticleFeedLazyColumn(
     }
 }
 
-private fun LazyListScope.handleRefreshLoadState(pagingItems: LazyPagingItems<FeedArticleUi>) {
+private fun LazyListScope.handleRefreshLoadState(
+    pagingItems: LazyPagingItems<FeedArticleUi>,
+    noContentVerticalArrangement: Arrangement.Vertical = Arrangement.Center,
+    noContentPaddingValues: PaddingValues = PaddingValues(all = 0.dp),
+) {
     when (val refreshLoadState = pagingItems.loadState.refresh) {
         LoadState.Loading -> {
             item(contentType = "LoadingRefresh") {
@@ -226,6 +245,8 @@ private fun LazyListScope.handleRefreshLoadState(pagingItems: LazyPagingItems<Fe
                     modifier = Modifier.fillParentMaxSize(),
                     noContentText = stringResource(id = R.string.article_feed_no_content),
                     onRefresh = { pagingItems.refresh() },
+                    verticalArrangement = noContentVerticalArrangement,
+                    contentPadding = noContentPaddingValues,
                 )
             }
         }
@@ -238,6 +259,8 @@ private fun LazyListScope.handleRefreshLoadState(pagingItems: LazyPagingItems<Fe
                     modifier = Modifier.fillParentMaxSize(),
                     noContentText = stringResource(id = R.string.feed_error_loading),
                     onRefresh = { pagingItems.refresh() },
+                    verticalArrangement = noContentVerticalArrangement,
+                    contentPadding = noContentPaddingValues,
                 )
             }
         }

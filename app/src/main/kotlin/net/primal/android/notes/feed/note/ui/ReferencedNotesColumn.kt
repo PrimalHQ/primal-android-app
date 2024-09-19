@@ -1,4 +1,4 @@
-package net.primal.android.notes.feed.note
+package net.primal.android.notes.feed.note.ui
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -14,8 +14,7 @@ import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.model.NoteNostrUriUi
 import net.primal.android.notes.feed.model.asNoteNostrUriUi
-import net.primal.android.notes.feed.note.events.InvoicePayClickEvent
-import net.primal.android.notes.feed.note.events.MediaClickEvent
+import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 
 @Composable
 fun ReferencedNotesColumn(
@@ -23,10 +22,7 @@ fun ReferencedNotesColumn(
     postResources: List<NoteNostrUriUi>,
     expanded: Boolean,
     containerColor: Color,
-    onPostClick: ((noteId: String) -> Unit)? = null,
-    onArticleClick: ((naddr: String) -> Unit)? = null,
-    onMediaClick: ((MediaClickEvent) -> Unit)? = null,
-    onPayInvoiceClick: ((InvoicePayClickEvent) -> Unit)? = null,
+    noteCallbacks: NoteCallbacks,
 ) {
     val displayableNotes = if (postResources.isNotEmpty()) {
         if (expanded) postResources else postResources.subList(0, 1)
@@ -59,11 +55,8 @@ fun ReferencedNotesColumn(
                     rawNostrEventJson = "",
                     replyToAuthorHandle = null,
                 ),
-                onPostClick = onPostClick,
-                onArticleClick = onArticleClick,
-                onMediaClick = onMediaClick,
-                onPayInvoiceClick = onPayInvoiceClick,
                 colors = CardDefaults.cardColors(containerColor = containerColor),
+                noteCallbacks = noteCallbacks,
             )
         }
     }
