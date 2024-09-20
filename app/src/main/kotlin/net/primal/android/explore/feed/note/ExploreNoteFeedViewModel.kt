@@ -26,7 +26,6 @@ import net.primal.android.navigation.exploreFeedSpecOrThrow
 import net.primal.android.navigation.renderType
 import net.primal.android.notes.feed.model.asFeedPostUi
 import net.primal.android.notes.repository.FeedRepository
-import timber.log.Timber
 
 @HiltViewModel
 class ExploreNoteFeedViewModel @Inject constructor(

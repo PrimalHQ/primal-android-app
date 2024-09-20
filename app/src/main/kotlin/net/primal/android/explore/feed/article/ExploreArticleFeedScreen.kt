@@ -16,7 +16,6 @@ import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 
-
 @Composable
 fun ExploreArticleFeedScreen(
     viewModel: ExploreArticleFeedViewModel,
@@ -30,7 +29,6 @@ fun ExploreArticleFeedScreen(
         onArticleClick = onArticleClick,
         onClose = onClose,
     )
-
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -51,8 +49,7 @@ private fun ExploreArticleFeedScreen(
                 onNavigationIconClick = onClose,
                 navigationIconContentDescription = stringResource(id = R.string.accessibility_back_button),
             )
-
-        }
+        },
     ) { paddingValues ->
         ArticleFeedList(
             modifier = Modifier.padding(paddingValues),

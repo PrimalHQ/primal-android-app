@@ -34,7 +34,6 @@ import net.primal.android.feeds.domain.isNotesBookmarkFeedSpec
 import net.primal.android.notes.feed.NoteFeedList
 import net.primal.android.notes.feed.note.showNoteErrorSnackbar
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
-import timber.log.Timber
 
 @Composable
 fun ExploreNoteFeedScreen(
@@ -129,7 +128,9 @@ fun ExploreNoteFeedScreen(
                         noteCallbacks = noteCallbacks,
                         onGoToWallet = onGoToWallet,
                         noContentText = when {
-                            state.feedSpec.isNotesBookmarkFeedSpec() -> stringResource(id = R.string.bookmarks_no_content)
+                            state.feedSpec.isNotesBookmarkFeedSpec() -> stringResource(
+                                id = R.string.bookmarks_no_content,
+                            )
                             else -> stringResource(id = R.string.feed_no_content)
                         },
                         onNoteError = { noteError ->

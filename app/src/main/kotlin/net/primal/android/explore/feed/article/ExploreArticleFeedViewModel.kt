@@ -19,7 +19,7 @@ class ExploreArticleFeedViewModel @Inject constructor(
     private val _state = MutableStateFlow(
         UiState(
             feedSpec = exploreFeedSpec,
-        )
+        ),
     )
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }

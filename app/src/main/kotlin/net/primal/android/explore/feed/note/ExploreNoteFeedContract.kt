@@ -25,7 +25,9 @@ interface ExploreNoteFeedContract {
     }
 
     enum class RenderType {
-        List, Grid;
+        List,
+        Grid,
+        ;
 
         fun isList() = this == List
         fun isGrid() = this == Grid

@@ -208,14 +208,13 @@ fun NavController.navigateToExploreNoteFeed(
     query: String,
     renderType: ExploreNoteFeedContract.RenderType = ExploreNoteFeedContract.RenderType.List,
 ) = navigate(
-    route = "explore/note?$EXPLORE_FEED_SPEC=${query.asBase64Encoded()}&$RENDER_TYPE=${renderType}",
+    route = "explore/note?$EXPLORE_FEED_SPEC=${query.asBase64Encoded()}&$RENDER_TYPE=$renderType",
 )
 
-fun NavController.navigateToExploreArticleFeed(
-    feedSpec: String,
-) = navigate(
-    route = "explore/article?$EXPLORE_FEED_SPEC=${feedSpec.asBase64Encoded()}",
-)
+fun NavController.navigateToExploreArticleFeed(feedSpec: String) =
+    navigate(
+        route = "explore/article?$EXPLORE_FEED_SPEC=${feedSpec.asBase64Encoded()}",
+    )
 
 private fun NavController.navigateToNotesBookmarks(userId: String) {
     val spec = "{\"id\":\"feed\",\"kind\":\"notes\",\"notes\":\"bookmarks\",\"pubkey\":\"$userId\"}"
@@ -344,7 +343,7 @@ fun PrimalAppNavigation() {
             ),
             navController = navController,
         )
-        
+
         exploreArticleFeed(
             route = "explore/article?$EXPLORE_FEED_SPEC={$EXPLORE_FEED_SPEC}",
             arguments = listOf(
@@ -823,7 +822,7 @@ private fun NavGraphBuilder.advancedSearch(route: String, navController: NavCont
             },
             onNavigateToExploreArticleFeed = { feedSpec ->
                 navController.navigateToExploreArticleFeed(feedSpec)
-            }
+            },
         )
     }
 
