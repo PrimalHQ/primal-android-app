@@ -54,5 +54,11 @@ fun FeedPost.asFeedPostUi() =
         rawNostrEventJson = this.data.raw,
         replyToAuthorHandle = this.replyToAuthor?.usernameUiFriendly() ?: this.data.replyToAuthorId?.asEllipsizedNpub(),
         isBookmarked = this.eventHints?.isBookmarked == true,
-        eventZaps = this.eventZaps.map { it.asEventZapUiModel() }.sortedByDescending { it.amountInSats },
+        eventZaps = this.eventZaps
+            .map { it.asEventZapUiModel() }
+            .sortedWith(
+                // This sorting needs to be in sync with sorting in EventZapDao.kt
+                compareByDescending<EventZapUiModel> { it.amountInSats }
+                    .thenBy { it.zappedAt },
+            ),
     )
