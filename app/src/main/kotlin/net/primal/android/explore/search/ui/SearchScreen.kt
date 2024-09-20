@@ -126,7 +126,11 @@ fun SearchScreen(
                                     }
                                     profileId != null -> onProfileClick(profileId)
                                     naddr != null -> onNaddrClick(naddr)
-                                    else -> onSearchContent(query)
+                                    else -> {
+                                        val feedSpec = """{"id":"search","kind":"notes","query":"$query"}"""
+                                            .trimIndent()
+                                        onSearchContent(feedSpec)
+                                    }
                                 }
                             }
                         },
