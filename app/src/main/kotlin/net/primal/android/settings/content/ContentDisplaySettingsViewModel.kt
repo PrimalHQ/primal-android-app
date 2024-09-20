@@ -39,6 +39,7 @@ class ContentDisplaySettingsViewModel @Inject constructor(
                     is UiEvent.UpdateAutoPlayVideos -> handleAutoPlayVideosUpdate(it)
                     is UiEvent.UpdateShowAnimatedAvatars -> handleShowAnimatedAvatarsUpdate(it)
                     is UiEvent.UpdateShowFocusMode -> handleShowFocusModeUpdate(it)
+                    is UiEvent.UpdateEnableTweetMode -> handleEnableTweetModeUpdate(it)
                 }
             }
         }
@@ -52,6 +53,7 @@ class ContentDisplaySettingsViewModel @Inject constructor(
                         autoPlayVideos = it.contentDisplaySettings.autoPlayVideos,
                         showAnimatedAvatars = it.contentDisplaySettings.showAnimatedAvatars,
                         focusMode = it.contentDisplaySettings.focusModeEnabled,
+                        tweetMode = it.contentDisplaySettings.tweetsModeEnabled,
                     )
                 }
             }
@@ -80,6 +82,15 @@ class ContentDisplaySettingsViewModel @Inject constructor(
         viewModelScope.launch {
             userRepository.updateContentDisplaySettings(userId = activeAccountStore.activeUserId()) {
                 copy(focusModeEnabled = event.enabled)
+            }
+        }
+    }
+
+    private fun handleEnableTweetModeUpdate(event: UiEvent.UpdateEnableTweetMode) {
+        setState { copy(tweetMode = event.enabled) }
+        viewModelScope.launch {
+            userRepository.updateContentDisplaySettings(userId = activeAccountStore.activeUserId()) {
+                copy(tweetsModeEnabled = event.enabled)
             }
         }
     }

@@ -8,6 +8,7 @@ data class ContentDisplaySettings(
     val autoPlayVideos: Int = AUTO_PLAY_VIDEO_NEVER,
     val showAnimatedAvatars: Boolean = false,
     val focusModeEnabled: Boolean = true,
+    val tweetsModeEnabled: Boolean = true,
     @SerialName("noteAppearance") val contentAppearance: ContentAppearance = ContentAppearance.Default,
 ) {
     companion object {

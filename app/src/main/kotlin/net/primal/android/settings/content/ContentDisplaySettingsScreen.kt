@@ -21,6 +21,7 @@ import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.settings.SettingsItem
+import net.primal.android.notes.feed.note.ui.TWEET_MODE_THRESHOLD
 import net.primal.android.settings.content.ContentDisplaySettingsContract.UiEvent
 import net.primal.android.user.domain.ContentDisplaySettings
 
@@ -109,6 +110,24 @@ private fun ContentDisplaySettingsScreen(
                             checked = state.focusMode,
                             onCheckedChange = {
                                 eventPublisher(UiEvent.UpdateShowFocusMode(enabled = it))
+                            },
+                        )
+                    },
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                SettingsItem(
+                    headlineText = stringResource(id = R.string.settings_content_display_use_huge_font_for_tweets),
+                    supportText = stringResource(
+                        id = R.string.settings_content_display_use_huge_font_for_tweets_hint,
+                        TWEET_MODE_THRESHOLD,
+                    ),
+                    trailingContent = {
+                        PrimalSwitch(
+                            checked = state.tweetMode,
+                            onCheckedChange = {
+                                eventPublisher(UiEvent.UpdateEnableTweetMode(enabled = it))
                             },
                         )
                     },

@@ -430,6 +430,8 @@
     <string name="settings_content_display_animated_avatars_hint">Switch off to disable animated avatars in feeds. Profile will continue to show the full version.</string>
     <string name="settings_content_display_full_screen_feed_display">Full screen feed display</string>
     <string name="settings_content_display_full_screen_feed_display_hint">Maximize screen real estate by hiding app header &amp; footer as you scroll down the feed.</string>
+    <string name="settings_content_display_use_huge_font_for_tweets">Use huge font for "tweets"</string>
+    <string name="settings_content_display_use_huge_font_for_tweets_hint">Display short notes of up to %1$s characters using an unreasonably large font.</string>
 
     <string name="settings_network_title">Network</string>
     <string name="settings_network_relays_section">Relays</string>
