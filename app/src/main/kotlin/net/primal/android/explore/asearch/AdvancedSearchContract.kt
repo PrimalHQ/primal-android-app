@@ -2,6 +2,7 @@ package net.primal.android.explore.asearch
 
 import java.time.Instant
 import net.primal.android.core.compose.profile.model.UserProfileItemUi
+import net.primal.android.explore.feed.note.ExploreNoteFeedContract
 
 interface AdvancedSearchContract {
 
@@ -32,6 +33,16 @@ interface AdvancedSearchContract {
         data class OrderByChanged(val orderBy: SearchOrderBy) : UiEvent()
 
         data object OnSearch : UiEvent()
+    }
+
+    sealed class SideEffect {
+        data class NavigateToExploreNoteFeed(
+            val feedSpec: String,
+            val renderType: ExploreNoteFeedContract.RenderType,
+        ) : SideEffect()
+        data class NavigateToExploreArticleFeed(
+            val feedSpec: String,
+        ) : SideEffect()
     }
 
     sealed class TimeModifier {

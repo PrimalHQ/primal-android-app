@@ -8,10 +8,12 @@ import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import net.primal.android.core.compose.profile.model.UserProfileItemUi
 import net.primal.android.crypto.hexToNpubHrp
@@ -19,13 +21,10 @@ import net.primal.android.explore.asearch.AdvancedSearchContract.Orientation
 import net.primal.android.explore.asearch.AdvancedSearchContract.SearchFilter
 import net.primal.android.explore.asearch.AdvancedSearchContract.UiEvent
 import net.primal.android.explore.asearch.AdvancedSearchContract.UiState
+import net.primal.android.explore.feed.note.ExploreNoteFeedContract
 
 @HiltViewModel
 class AdvancedSearchViewModel @Inject constructor() : ViewModel() {
-
-    private val _state = MutableStateFlow(UiState())
-    val state = _state.asStateFlow()
-    private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
 
     companion object {
         private const val DATE_TIME_FORMAT = "yyyy-MM-dd_HH:mm"
@@ -33,8 +32,16 @@ class AdvancedSearchViewModel @Inject constructor() : ViewModel() {
 
     private val formatter = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT).withZone(ZoneId.systemDefault())
 
+    private val _state = MutableStateFlow(UiState())
+    val state = _state.asStateFlow()
+    private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
+
     private val events: MutableSharedFlow<UiEvent> = MutableSharedFlow()
     fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
+
+    private val _effects = Channel<AdvancedSearchContract.SideEffect>()
+    val effects = _effects.receiveAsFlow()
+    private fun setEffect(effect: AdvancedSearchContract.SideEffect) = viewModelScope.launch { _effects.send(effect) }
 
     init {
         observeEvents()
@@ -90,7 +97,29 @@ class AdvancedSearchViewModel @Inject constructor() : ViewModel() {
             )
 
             val searchCommand = searchParams.filterNot { it.isNullOrEmpty() }.joinToString(separator = " ")
+            val renderType = if (uiState.searchKind.isImages() || uiState.searchKind.isVideos()) {
+                ExploreNoteFeedContract.RenderType.Grid
+            } else {
+                ExploreNoteFeedContract.RenderType.List
+            }
+
+            if (uiState.searchKind.isReads()) {
+                setEffect(
+                    AdvancedSearchContract.SideEffect.NavigateToExploreArticleFeed(
+                        feedSpec = searchCommand.buildFeedSpec(),
+                    ),
+                )
+            } else {
+                setEffect(
+                    AdvancedSearchContract.SideEffect.NavigateToExploreNoteFeed(
+                        feedSpec = searchCommand.buildFeedSpec(),
+                        renderType = renderType,
+                    ),
+                )
+            }
         }
+
+    private fun String.buildFeedSpec(): String = """{"id":"advsearch","query":"$this"}""".trimIndent()
 
     private fun AdvancedSearchContract.SearchKind.toSearchCommand() =
         when (this) {
