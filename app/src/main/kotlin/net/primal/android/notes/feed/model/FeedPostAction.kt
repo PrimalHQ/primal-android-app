@@ -5,4 +5,5 @@ enum class FeedPostAction {
     Zap,
     Like,
     Repost,
+    Bookmark,
 }

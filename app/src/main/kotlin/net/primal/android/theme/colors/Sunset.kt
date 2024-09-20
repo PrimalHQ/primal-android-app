@@ -26,6 +26,7 @@ private val sunsetReplied = Color(0xFFCCCCCC)
 private val sunsetZapped = Color(0xFFFFA02F)
 private val sunsetLiked = Color(0xFFF800C1)
 private val sunsetReposted = Color(0xFF66E205)
+private val sunsetBookmarked = Color(0xFF0090F8)
 
 val sunsetColorScheme = darkColorScheme(
     primary = sunsetAccent0,
@@ -60,4 +61,5 @@ val sunsetExtraColorScheme = extraColorScheme(
     zapped = sunsetZapped,
     liked = sunsetLiked,
     reposted = sunsetReposted,
+    bookmarked = sunsetBookmarked,
 )

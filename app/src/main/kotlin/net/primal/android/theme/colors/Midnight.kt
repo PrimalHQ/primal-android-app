@@ -26,6 +26,7 @@ private val midnightReplied = Color(0xFFCCCCCC)
 private val midnightZapped = Color(0xFFFFA02F)
 private val midnightLiked = Color(0xFFF800C1)
 private val midnightReposted = Color(0xFF66E205)
+private val midnightBookmarked = Color(0xFF0090F8)
 
 val midnightColorScheme = darkColorScheme(
     primary = midnightAccent0,
@@ -60,4 +61,5 @@ val midnightExtraColorScheme = extraColorScheme(
     zapped = midnightZapped,
     liked = midnightLiked,
     reposted = midnightReposted,
+    bookmarked = midnightBookmarked,
 )

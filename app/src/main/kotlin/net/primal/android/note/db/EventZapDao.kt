@@ -36,7 +36,7 @@ interface EventZapDao {
         """
             SELECT * FROM EventZap WHERE eventId = :noteId
             ORDER BY CAST(amountInBtc AS REAL) DESC, zapReceiptAt ASC
-            LIMIT 5
+            LIMIT 10
         """,
     )
     fun observeTopZaps(noteId: String): Flow<List<EventZap>>

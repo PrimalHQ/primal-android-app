@@ -31,8 +31,16 @@ import net.primal.android.core.compose.icons.primaliconpack.Downloads
 import net.primal.android.core.compose.icons.primaliconpack.DownloadsFilled
 import net.primal.android.core.compose.icons.primaliconpack.Edit
 import net.primal.android.core.compose.icons.primaliconpack.Explore
+import net.primal.android.core.compose.icons.primaliconpack.FeedBookmark
+import net.primal.android.core.compose.icons.primaliconpack.FeedBookmarkFilled
 import net.primal.android.core.compose.icons.primaliconpack.FeedLikes
 import net.primal.android.core.compose.icons.primaliconpack.FeedLikesFilled
+import net.primal.android.core.compose.icons.primaliconpack.FeedNewLike
+import net.primal.android.core.compose.icons.primaliconpack.FeedNewLikeFilled
+import net.primal.android.core.compose.icons.primaliconpack.FeedNewReply
+import net.primal.android.core.compose.icons.primaliconpack.FeedNewReplyFilled
+import net.primal.android.core.compose.icons.primaliconpack.FeedNewZap
+import net.primal.android.core.compose.icons.primaliconpack.FeedNewZapFilled
 import net.primal.android.core.compose.icons.primaliconpack.FeedPicker
 import net.primal.android.core.compose.icons.primaliconpack.FeedPickerFilled
 import net.primal.android.core.compose.icons.primaliconpack.FeedReplies
@@ -209,6 +217,14 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             BookmarksFilled,
             Settings,
             SettingsFilled,
+            FeedNewReply,
+            FeedNewReplyFilled,
+            FeedNewZap,
+            FeedNewZapFilled,
+            FeedNewLike,
+            FeedNewLikeFilled,
+            FeedBookmark,
+            FeedBookmarkFilled,
         )
         return __PrimalIcons!!
     }

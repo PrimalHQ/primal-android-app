@@ -218,6 +218,7 @@ private fun ArticleDetailsScreen(
                             FeedPostAction.Zap -> Unit
                             FeedPostAction.Like -> Unit
                             FeedPostAction.Repost -> Unit
+                            FeedPostAction.Bookmark -> Unit
                         }
                     },
                     onNoteError = { noteError ->
@@ -408,6 +409,8 @@ private fun ArticleContentWithComments(
                         .padding(horizontal = 16.dp)
                         .padding(bottom = 16.dp),
                     eventStats = state.article.eventStatsUi,
+                    // TODO Pass info if article is bookmarked
+                    isBookmarked = false,
                     onPostAction = onPostAction,
                     onPostLongPressAction = { action ->
                         when (action) {

@@ -31,14 +31,16 @@ import androidx.compose.ui.unit.sp
 import java.text.NumberFormat
 import net.primal.android.R
 import net.primal.android.core.compose.icons.PrimalIcons
-import net.primal.android.core.compose.icons.primaliconpack.FeedLikes
-import net.primal.android.core.compose.icons.primaliconpack.FeedLikesFilled
-import net.primal.android.core.compose.icons.primaliconpack.FeedReplies
-import net.primal.android.core.compose.icons.primaliconpack.FeedRepliesFilled
-import net.primal.android.core.compose.icons.primaliconpack.FeedReposts
-import net.primal.android.core.compose.icons.primaliconpack.FeedRepostsFilled
-import net.primal.android.core.compose.icons.primaliconpack.FeedZaps
-import net.primal.android.core.compose.icons.primaliconpack.FeedZapsFilled
+import net.primal.android.core.compose.icons.primaliconpack.FeedBookmark
+import net.primal.android.core.compose.icons.primaliconpack.FeedBookmarkFilled
+import net.primal.android.core.compose.icons.primaliconpack.FeedNewLike
+import net.primal.android.core.compose.icons.primaliconpack.FeedNewLikeFilled
+import net.primal.android.core.compose.icons.primaliconpack.FeedNewReply
+import net.primal.android.core.compose.icons.primaliconpack.FeedNewReplyFilled
+import net.primal.android.core.compose.icons.primaliconpack.FeedNewReposts
+import net.primal.android.core.compose.icons.primaliconpack.FeedNewRepostsFilled
+import net.primal.android.core.compose.icons.primaliconpack.FeedNewZap
+import net.primal.android.core.compose.icons.primaliconpack.FeedNewZapFilled
 import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.notes.feed.model.FeedPostAction
 import net.primal.android.theme.AppTheme
@@ -47,9 +49,13 @@ import net.primal.android.theme.AppTheme
 fun FeedNoteStatsRow(
     modifier: Modifier,
     eventStats: EventStatsUi,
+    isBookmarked: Boolean,
+    highlightedNote: Boolean = false,
+    showBookmark: Boolean = false,
     onPostAction: ((FeedPostAction) -> Unit)? = null,
     onPostLongPressAction: ((FeedPostAction) -> Unit)? = null,
 ) {
+    val iconSize = if (highlightedNote) 26.sp else 22.sp
     val numberFormat = remember { NumberFormat.getNumberInstance() }
     Row(
         modifier = modifier,
@@ -58,8 +64,9 @@ fun FeedNoteStatsRow(
         SingleEventStat(
             textCount = eventStats.repliesCount.toPostStatString(numberFormat),
             highlighted = eventStats.userReplied,
-            iconVector = PrimalIcons.FeedReplies,
-            iconVectorHighlight = PrimalIcons.FeedRepliesFilled,
+            iconSize = iconSize,
+            iconVector = PrimalIcons.FeedNewReply,
+            iconVectorHighlight = PrimalIcons.FeedNewReplyFilled,
             colorHighlight = AppTheme.extraColorScheme.replied,
             onClick = onPostAction?.let {
                 { onPostAction(FeedPostAction.Reply) }
@@ -73,8 +80,9 @@ fun FeedNoteStatsRow(
         SingleEventStat(
             textCount = eventStats.satsZapped.toPostStatString(numberFormat),
             highlighted = eventStats.userZapped,
-            iconVector = PrimalIcons.FeedZaps,
-            iconVectorHighlight = PrimalIcons.FeedZapsFilled,
+            iconVector = PrimalIcons.FeedNewZap,
+            iconSize = iconSize,
+            iconVectorHighlight = PrimalIcons.FeedNewZapFilled,
             colorHighlight = AppTheme.extraColorScheme.zapped,
             onClick = onPostAction?.let {
                 { onPostAction(FeedPostAction.Zap) }
@@ -88,8 +96,9 @@ fun FeedNoteStatsRow(
         SingleEventStat(
             textCount = eventStats.likesCount.toPostStatString(numberFormat),
             highlighted = eventStats.userLiked,
-            iconVector = PrimalIcons.FeedLikes,
-            iconVectorHighlight = PrimalIcons.FeedLikesFilled,
+            iconSize = iconSize,
+            iconVector = PrimalIcons.FeedNewLike,
+            iconVectorHighlight = PrimalIcons.FeedNewLikeFilled,
             colorHighlight = AppTheme.extraColorScheme.liked,
             onClick = if (!eventStats.userLiked && onPostAction != null) {
                 { onPostAction(FeedPostAction.Like) }
@@ -105,8 +114,9 @@ fun FeedNoteStatsRow(
         SingleEventStat(
             textCount = eventStats.repostsCount.toPostStatString(numberFormat),
             highlighted = eventStats.userReposted,
-            iconVector = PrimalIcons.FeedReposts,
-            iconVectorHighlight = PrimalIcons.FeedRepostsFilled,
+            iconSize = iconSize,
+            iconVector = PrimalIcons.FeedNewReposts,
+            iconVectorHighlight = PrimalIcons.FeedNewRepostsFilled,
             colorHighlight = AppTheme.extraColorScheme.reposted,
             onClick = onPostAction?.let {
                 { onPostAction(FeedPostAction.Repost) }
@@ -116,6 +126,24 @@ fun FeedNoteStatsRow(
             },
             iconContentDescription = stringResource(id = R.string.accessibility_repost_count),
         )
+
+        if (showBookmark) {
+            SingleEventStat(
+                textCount = "",
+                highlighted = isBookmarked,
+                iconSize = iconSize,
+                iconVector = PrimalIcons.FeedBookmark,
+                iconVectorHighlight = PrimalIcons.FeedBookmarkFilled,
+                colorHighlight = AppTheme.extraColorScheme.bookmarked,
+                onClick = onPostAction?.let {
+                    { onPostAction(FeedPostAction.Bookmark) }
+                },
+                onLongClick = onPostLongPressAction?.let {
+                    { onPostLongPressAction(FeedPostAction.Bookmark) }
+                },
+                iconContentDescription = stringResource(id = R.string.accessibility_bookmark),
+            )
+        }
     }
 }
 
