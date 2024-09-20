@@ -117,7 +117,21 @@ class FeedsViewModel @AssistedInject constructor(
                     is UiEvent.UpdateFeedSpecEnabled -> {
                         updateFeedSpecEnabled(feedSpec = it.feedSpec, enabled = it.enabled)
                     }
+
+                    UiEvent.RestoreDefaultPrimalFeeds -> {
+                        setState { copy(isEditMode = false) }
+                        restoreDefaultPrimalFeeds()
+                    }
                 }
+            }
+        }
+
+    private fun restoreDefaultPrimalFeeds() =
+        viewModelScope.launch {
+            try {
+                feedsRepository.fetchAndPersistDefaultFeeds(FeedSpecKind.Notes)
+            } catch (error: WssException) {
+                Timber.w(error)
             }
         }
 

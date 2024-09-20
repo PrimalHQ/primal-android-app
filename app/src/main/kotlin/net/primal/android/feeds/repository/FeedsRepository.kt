@@ -109,6 +109,12 @@ class FeedsRepository @Inject constructor(
         }
     }
 
+    suspend fun fetchAndPersistDefaultFeeds(specKind: FeedSpecKind) =
+        withContext(dispatcherProvider.io()) {
+            val feeds = fetchDefaultFeeds(specKind = specKind) ?: return@withContext
+            persistArticleFeeds(feeds = feeds, specKind = specKind)
+        }
+
     suspend fun fetchRecommendedDvmFeeds(specKind: FeedSpecKind): List<DvmFeed> {
         val response = withContext(dispatcherProvider.io()) { feedsApi.getFeaturedFeeds(specKind) }
         val eventStatsMap = response.scores.mapNotNull { primalEvent ->

@@ -3,6 +3,7 @@ package net.primal.android.feeds
 import net.primal.android.feeds.domain.DvmFeed
 import net.primal.android.feeds.domain.FeedSpecKind
 import net.primal.android.feeds.ui.model.FeedUi
+import net.primal.android.notes.home.HomeFeedContract.UiEvent
 
 interface FeedsContract {
     data class UiState(
@@ -37,5 +38,7 @@ interface FeedsContract {
         data class AddDvmFeedToUserFeeds(val dvmFeed: DvmFeed) : UiEvent()
         data class RemoveDvmFeedFromUserFeeds(val dvmFeed: DvmFeed) : UiEvent()
         data class RemoveFeedFromUserFeeds(val spec: String) : UiEvent()
+
+        data object RestoreDefaultPrimalFeeds : UiEvent()
     }
 }

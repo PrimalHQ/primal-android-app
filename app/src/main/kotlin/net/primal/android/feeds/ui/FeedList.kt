@@ -23,6 +23,8 @@ import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -38,6 +40,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import net.primal.android.R
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalSwitch
@@ -54,6 +57,7 @@ fun FeedList(
     feeds: List<FeedUi>,
     activeFeed: FeedUi?,
     onFeedClick: (feed: FeedUi) -> Unit,
+    onRestoreDefaultPrimalFeeds: () -> Unit,
     modifier: Modifier = Modifier,
     enableEditMode: Boolean = false,
     isEditMode: Boolean = false,
@@ -91,6 +95,21 @@ fun FeedList(
             },
             onDismissRequest = {
                 deleteFeedDialogVisible = null
+            },
+        )
+    }
+
+    var restoreDefaultDialogVisible by remember { mutableStateOf(false) }
+    if (restoreDefaultDialogVisible) {
+        ConfirmActionAlertDialog(
+            dialogTitle = stringResource(id = R.string.feed_list_restore_default_feeds),
+            dialogText = stringResource(id = R.string.feed_list_restore_default_feeds_prompt_text),
+            onConfirmation = {
+                onRestoreDefaultPrimalFeeds()
+                restoreDefaultDialogVisible = false
+            },
+            onDismissRequest = {
+                restoreDefaultDialogVisible = false
             },
         )
     }
@@ -157,6 +176,27 @@ fun FeedList(
                                         )
                                     }
                                 }
+                            },
+                        )
+                    }
+                }
+                if (isEditMode) {
+                    item {
+                        ListItem(
+                            colors = ListItemDefaults.colors(
+                                containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
+                            ),
+                            modifier = Modifier
+                                .clip(AppTheme.shapes.large)
+                                .padding(horizontal = 16.dp)
+                                .clickable { restoreDefaultDialogVisible = true },
+                            headlineContent = {
+                                Text(
+                                    color = AppTheme.colorScheme.primary,
+                                    modifier = Modifier,
+                                    text = stringResource(id = R.string.feed_list_restore_default_feeds),
+                                    style = AppTheme.typography.bodySmall.copy(fontSize = 15.sp),
+                                )
                             },
                         )
                     }

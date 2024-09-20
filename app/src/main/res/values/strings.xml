@@ -163,6 +163,9 @@
     <string name="feed_list_remove_feed_text">Remove ‘%1$s’ from your feed list?</string>
     <string name="feed_list_dialog_confirm">Confirm</string>
     <string name="feed_list_dialog_dismiss">Dismiss</string>
+    <string name="feed_list_restore_default_feeds">Restore default feeds</string>
+    <string name="feed_list_restore_default_feeds_title">Restore default feeds</string>
+    <string name="feed_list_restore_default_feeds_prompt_text">This will replace your feed list with default Primal feeds. Do you wish to continue?</string>
 
     <string name="feed_no_content">There is no content in this feed.</string>
     <string name="feed_error_loading">Unable to load content for this feed. Please try again.</string>
@@ -224,7 +227,7 @@
     <string name="thread_stats_reposts">Reposts</string>
 
     <string name="long_form_thread_invalid_naddr">Unable to load content. The address is invalid.</string>
-    
+
     <string name="note_reactions_title">Note Zaps</string>
 
     <string name="bookmarks_title">Bookmarks</string>
