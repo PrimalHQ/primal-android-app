@@ -3,7 +3,6 @@ package net.primal.android.notes.feed
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
-import androidx.paging.filter
 import androidx.paging.map
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -12,7 +11,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
-import net.primal.android.core.compose.attachment.model.isMediaAttachment
 import net.primal.android.notes.feed.MediaFeedContract.UiState
 import net.primal.android.notes.feed.model.asFeedPostUi
 import net.primal.android.notes.repository.FeedRepository
@@ -31,7 +29,6 @@ class MediaFeedViewModel @AssistedInject constructor(
     private fun buildFeedByDirective(feedSpec: String) =
         feedRepository.feedBySpec(feedSpec = feedSpec)
             .map { it.map { feedNote -> feedNote.asFeedPostUi() } }
-            .map { it.filter { feedNote -> feedNote.attachments.any { it.isMediaAttachment() } } }
             .cachedIn(viewModelScope)
 
     private val _state = MutableStateFlow(UiState(notes = buildFeedByDirective(feedSpec = feedSpec)))
