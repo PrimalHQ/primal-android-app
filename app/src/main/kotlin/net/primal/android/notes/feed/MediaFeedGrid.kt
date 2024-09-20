@@ -24,7 +24,6 @@ import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
 import net.primal.android.R
 import net.primal.android.core.compose.ListNoContent
-import net.primal.android.core.compose.ListPlaceholderLoading
 import net.primal.android.core.compose.isEmpty
 import net.primal.android.notes.feed.model.FeedPostUi
 import timber.log.Timber
@@ -114,14 +113,7 @@ private fun EmptyItemsContent(
     noContentPaddingValues: PaddingValues = PaddingValues(all = 0.dp),
 ) {
     when (val refreshLoadState = pagingItems.loadState.refresh) {
-        LoadState.Loading -> {
-            ListPlaceholderLoading(
-                modifier = Modifier.fillMaxSize(),
-                itemPadding = PaddingValues(top = 8.dp),
-                lightAnimationResId = R.raw.primal_loader_notes_light_v3,
-                darkAnimationResId = R.raw.primal_loader_notes_v3,
-            )
-        }
+        LoadState.Loading -> Unit
 
         is LoadState.NotLoading -> {
             ListNoContent(
