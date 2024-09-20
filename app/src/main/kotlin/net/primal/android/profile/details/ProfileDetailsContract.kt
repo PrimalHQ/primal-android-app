@@ -21,6 +21,7 @@ interface ProfileDetailsContract {
             ProfileFeedSpec.AuthoredNotes,
             ProfileFeedSpec.AuthoredReplies,
             ProfileFeedSpec.AuthoredArticles,
+            ProfileFeedSpec.AuthoredMedia,
         ),
         val error: ProfileError? = null,
     ) {
