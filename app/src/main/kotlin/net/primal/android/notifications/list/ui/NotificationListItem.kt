@@ -44,7 +44,7 @@ import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.notes.feed.model.FeedPostAction
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.model.toNoteContentUi
-import net.primal.android.notes.feed.note.ui.FeedNoteStatsRow
+import net.primal.android.notes.feed.note.ui.FeedNoteActionsRow
 import net.primal.android.notes.feed.note.ui.NoteContent
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.notifications.domain.NotificationType
@@ -206,7 +206,7 @@ private fun NotificationContent(
                 noteCallbacks = noteCallbacks,
             )
 
-            FeedNoteStatsRow(
+            FeedNoteActionsRow(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 16.dp)

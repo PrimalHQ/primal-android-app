@@ -43,6 +43,7 @@ import kotlinx.coroutines.launch
 import net.primal.android.LocalContentDisplaySettings
 import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.AvatarThumbnail
+import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.ext.openUriSafely
 import net.primal.android.notes.feed.NoteRepostOrQuoteBottomSheet
@@ -53,8 +54,8 @@ import net.primal.android.notes.feed.model.toNoteContentUi
 import net.primal.android.notes.feed.note.NoteContract.SideEffect.NoteError
 import net.primal.android.notes.feed.note.NoteContract.UiEvent
 import net.primal.android.notes.feed.note.ui.ConfirmFirstBookmarkAlertDialog
+import net.primal.android.notes.feed.note.ui.FeedNoteActionsRow
 import net.primal.android.notes.feed.note.ui.FeedNoteHeader
-import net.primal.android.notes.feed.note.ui.FeedNoteStatsRow
 import net.primal.android.notes.feed.note.ui.NoteContent
 import net.primal.android.notes.feed.note.ui.NoteDropdownMenuIcon
 import net.primal.android.notes.feed.note.ui.NoteSurfaceCard
@@ -75,7 +76,6 @@ fun FeedNoteCard(
     shape: Shape = CardDefaults.shape,
     colors: CardColors = noteCardColors(),
     cardPadding: PaddingValues = PaddingValues(all = 0.dp),
-    fullWidthNote: Boolean = false,
     headerSingleLine: Boolean = true,
     fullWidthContent: Boolean = false,
     forceContentIndent: Boolean = false,
@@ -85,6 +85,7 @@ fun FeedNoteCard(
     textSelectable: Boolean = false,
     showReplyTo: Boolean = true,
     noteOptionsMenuEnabled: Boolean = true,
+    showNoteStatCounts: Boolean = true,
     noteCallbacks: NoteCallbacks = NoteCallbacks(),
     onGoToWallet: (() -> Unit)? = null,
     onNoteError: ((NoteError) -> Unit)? = null,
@@ -109,7 +110,6 @@ fun FeedNoteCard(
         shape = shape,
         colors = colors,
         cardPadding = cardPadding,
-        fullWidthNote = fullWidthNote,
         headerSingleLine = headerSingleLine,
         fullWidthContent = fullWidthContent,
         forceContentIndent = forceContentIndent,
@@ -118,6 +118,7 @@ fun FeedNoteCard(
         expanded = expanded,
         textSelectable = textSelectable,
         showReplyTo = showReplyTo,
+        showNoteStatCounts = showNoteStatCounts,
         noteOptionsMenuEnabled = noteOptionsMenuEnabled,
         noteCallbacks = noteCallbacks,
         onGoToWallet = onGoToWallet,
@@ -135,7 +136,6 @@ private fun FeedNoteCard(
     shape: Shape = CardDefaults.shape,
     colors: CardColors = noteCardColors(),
     cardPadding: PaddingValues = PaddingValues(all = 0.dp),
-    fullWidthNote: Boolean = false,
     headerSingleLine: Boolean = true,
     fullWidthContent: Boolean = false,
     forceContentIndent: Boolean = false,
@@ -145,6 +145,7 @@ private fun FeedNoteCard(
     textSelectable: Boolean = false,
     showReplyTo: Boolean = true,
     noteOptionsMenuEnabled: Boolean = true,
+    showNoteStatCounts: Boolean = true,
     noteCallbacks: NoteCallbacks = NoteCallbacks(),
     onGoToWallet: (() -> Unit)? = null,
     contentFooter: @Composable () -> Unit = {},
@@ -312,6 +313,7 @@ private fun FeedNoteCard(
                     forceContentIndent = forceContentIndent,
                     expanded = expanded,
                     textSelectable = textSelectable,
+                    showNoteStatCounts = showNoteStatCounts,
                     noteCallbacks = noteCallbacks,
                     onPostAction = { postAction ->
                         when (postAction) {
@@ -388,6 +390,7 @@ private fun FeedNote(
     forceContentIndent: Boolean,
     expanded: Boolean,
     textSelectable: Boolean,
+    showNoteStatCounts: Boolean,
     noteCallbacks: NoteCallbacks,
     onPostAction: ((FeedPostAction) -> Unit)? = null,
     onPostLongClickAction: ((FeedPostAction) -> Unit)? = null,
@@ -464,13 +467,17 @@ private fun FeedNote(
 
             contentFooter()
 
-            FeedNoteStatsRow(
+            if (!showNoteStatCounts) {
+                PrimalDivider(modifier = Modifier.padding(vertical = 4.dp))
+            }
+
+            FeedNoteActionsRow(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 8.dp)
-                    .padding(top = 8.dp)
-                    .padding(bottom = 8.dp),
+                    .padding(horizontal = if (showNoteStatCounts) 8.dp else 16.dp)
+                    .padding(vertical = if (showNoteStatCounts) 8.dp else 12.dp),
                 eventStats = data.stats,
+                showCounts = showNoteStatCounts,
                 isBookmarked = data.isBookmarked,
                 onPostAction = onPostAction,
                 onPostLongPressAction = onPostLongClickAction,

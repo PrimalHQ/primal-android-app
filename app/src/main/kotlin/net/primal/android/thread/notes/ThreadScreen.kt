@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
@@ -61,6 +62,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import java.time.Instant
+import java.time.format.FormatStyle
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
@@ -84,6 +86,8 @@ import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.pulltorefresh.PrimalIndicator
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.core.compose.zaps.ThreadNoteTopZapsSection
+import net.primal.android.core.utils.formatToDefaultDateFormat
+import net.primal.android.core.utils.formatToDefaultTimeFormat
 import net.primal.android.editor.NoteEditorContract
 import net.primal.android.editor.di.noteEditorViewModel
 import net.primal.android.editor.domain.NoteEditorArgs
@@ -385,6 +389,7 @@ private fun ThreadLazyColumn(
                     drawLineAboveAvatar = isConnectedBackward(index, state.highlightPostIndex),
                     drawLineBelowAvatar = isConnectedForward(index, state.highlightPostIndex),
                     showReplyTo = false,
+                    showNoteStatCounts = index != state.highlightPostIndex,
                     noteCallbacks = noteCallbacks.copy(
                         onNoteClick = { noteId ->
                             if (state.highlightPostId != noteId) {
@@ -394,11 +399,35 @@ private fun ThreadLazyColumn(
                     ),
                     onGoToWallet = onGoToWallet,
                     contentFooter = {
-                        if (highlighted && (state.topZaps.isNotEmpty())) {
-                            ThreadNoteTopZapsSection(
-                                zaps = state.topZaps,
-                                onClick = { onReactionsClick(item.postId) },
-                            )
+                        if (highlighted) {
+                            Column(
+                                modifier = Modifier.padding(horizontal = 10.dp),
+                            ) {
+                                if (state.topZaps.isNotEmpty()) {
+                                    ThreadNoteTopZapsSection(
+                                        zaps = state.topZaps,
+                                        onClick = { onReactionsClick(item.postId) },
+                                    )
+                                }
+
+                                val date = item.timestamp.formatToDefaultDateFormat(FormatStyle.FULL)
+                                val time = item.timestamp.formatToDefaultTimeFormat(FormatStyle.SHORT)
+                                Text(
+                                    modifier = Modifier.padding(top = 14.dp),
+                                    text = "$date • $time ",
+                                    style = AppTheme.typography.bodyMedium,
+                                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
+                                )
+
+                                if (item.stats.hasAnyCount()) {
+                                    NoteStatsRow(
+                                        modifier = Modifier.padding(top = 10.dp),
+                                        eventStats = item.stats,
+                                    )
+                                }
+
+                                Spacer(modifier = Modifier.height(12.dp))
+                            }
                         }
                     },
                     onNoteError = onNoteError,
@@ -424,6 +453,72 @@ private fun isConnectedBackward(index: Int, highlightIndex: Int): Boolean {
 
 private fun isConnectedForward(index: Int, highlightIndex: Int): Boolean {
     return index in 0 until highlightIndex
+}
+
+private fun EventStatsUi.hasAnyCount() = repliesCount > 0 || zapsCount > 0 || likesCount > 0 || repostsCount > 0
+
+@Composable
+private fun NoteStatsRow(eventStats: EventStatsUi, modifier: Modifier = Modifier) {
+    Row(modifier = modifier) {
+        if (eventStats.repliesCount > 0) {
+            SingleNoteStat(
+                count = eventStats.repliesCount,
+                text = stringResource(R.string.thread_stats_replies),
+            )
+        }
+
+        if (eventStats.zapsCount > 0) {
+            val hasPreviousStats = eventStats.repliesCount > 0
+            val startPadding = if (hasPreviousStats) 8.dp else 0.dp
+            SingleNoteStat(
+                modifier = Modifier.padding(start = startPadding),
+                count = eventStats.zapsCount,
+                text = stringResource(R.string.thread_stats_zaps),
+            )
+        }
+
+        if (eventStats.likesCount > 0) {
+            val hasPreviousStats = eventStats.repliesCount > 0 || eventStats.zapsCount > 0
+            val startPadding = if (hasPreviousStats) 8.dp else 0.dp
+            SingleNoteStat(
+                modifier = Modifier.padding(start = startPadding),
+                count = eventStats.likesCount,
+                text = stringResource(R.string.thread_stats_likes),
+            )
+        }
+
+        if (eventStats.repostsCount > 0) {
+            val hasPreviousStats = eventStats.repliesCount > 0 || eventStats.zapsCount > 0 || eventStats.likesCount > 0
+            val startPadding = if (hasPreviousStats) 8.dp else 0.dp
+            SingleNoteStat(
+                modifier = Modifier.padding(start = startPadding),
+                count = eventStats.repostsCount,
+                text = stringResource(R.string.thread_stats_reposts),
+            )
+        }
+    }
+}
+
+@Composable
+private fun SingleNoteStat(
+    count: Long,
+    text: String,
+    modifier: Modifier = Modifier,
+) {
+    Row(modifier = modifier) {
+        Text(
+            text = "$count",
+            style = AppTheme.typography.bodyMedium,
+            fontWeight = FontWeight.SemiBold,
+            color = AppTheme.colorScheme.onSurface,
+        )
+        Spacer(modifier = Modifier.width(4.dp))
+        Text(
+            text = text,
+            style = AppTheme.typography.bodyMedium,
+            color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
+        )
+    }
 }
 
 @Composable

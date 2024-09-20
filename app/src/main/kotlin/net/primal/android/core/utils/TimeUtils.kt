@@ -33,3 +33,14 @@ fun Instant.formatToDefaultDateFormat(dateStyle: FormatStyle): String {
 
     return formatter.format(this.atZone(zoneId))
 }
+
+fun Instant.formatToDefaultTimeFormat(dateStyle: FormatStyle): String {
+    val zoneId: ZoneId = ZoneId.systemDefault()
+    val locale: Locale = Locale.getDefault()
+
+    val formatter: DateTimeFormatter = DateTimeFormatter
+        .ofLocalizedTime(dateStyle)
+        .withLocale(locale)
+
+    return formatter.format(this.atZone(zoneId))
+}
