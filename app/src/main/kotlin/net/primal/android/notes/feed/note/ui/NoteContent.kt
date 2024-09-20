@@ -124,6 +124,7 @@ fun NoteContent(
     modifier: Modifier = Modifier,
     data: NoteContentUi,
     expanded: Boolean,
+    enableTweetsMode: Boolean = false,
     textSelectable: Boolean = false,
     highlightColor: Color = AppTheme.colorScheme.secondary,
     contentColor: Color = AppTheme.colorScheme.onSurface,
@@ -145,12 +146,21 @@ fun NoteContent(
 
     Column(modifier = modifier) {
         if (contentText.isNotEmpty()) {
+            val tweetMode = enableTweetsMode && contentText.length <= 42 && contentText.count { it == '\n' } < 3
             PrimalClickableText(
                 modifier = Modifier.padding(bottom = 4.dp),
                 style = AppTheme.typography.bodyMedium.copy(
                     color = contentColor,
-                    fontSize = displaySettings.contentAppearance.noteBodyFontSize,
-                    lineHeight = displaySettings.contentAppearance.noteBodyLineHeight,
+                    fontSize = if (!tweetMode) {
+                        displaySettings.contentAppearance.noteBodyFontSize
+                    } else {
+                        displaySettings.contentAppearance.tweetFontSize
+                    },
+                    lineHeight = if (!tweetMode) {
+                        displaySettings.contentAppearance.noteBodyLineHeight
+                    } else {
+                        displaySettings.contentAppearance.tweetLineHeight
+                    },
                 ),
                 text = contentText,
                 textSelectable = textSelectable,
@@ -408,6 +418,7 @@ fun PreviewPostContent() {
                     hashtags = listOf("#nostr"),
                 ),
                 expanded = false,
+                enableTweetsMode = false,
                 onClick = {},
                 onUrlClick = {},
                 noteCallbacks = NoteCallbacks(),
@@ -478,6 +489,28 @@ fun PreviewPostContentWithReferencedPost() {
                     ),
                 ),
                 expanded = false,
+                enableTweetsMode = false,
+                onClick = {},
+                onUrlClick = {},
+                noteCallbacks = NoteCallbacks(),
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+fun PreviewPostContentWithTweet() {
+    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
+        Surface {
+            NoteContent(
+                data = NoteContentUi(
+                    noteId = "",
+                    content = "Rise and shine!",
+                    attachments = emptyList(),
+                ),
+                expanded = false,
+                enableTweetsMode = true,
                 onClick = {},
                 onUrlClick = {},
                 noteCallbacks = NoteCallbacks(),
