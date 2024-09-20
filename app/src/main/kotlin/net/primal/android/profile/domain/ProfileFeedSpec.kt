@@ -4,6 +4,7 @@ enum class ProfileFeedSpec {
     AuthoredNotes,
     AuthoredReplies,
     AuthoredArticles,
+    AuthoredMedia,
     ;
 
     fun buildSpec(profileId: String): String {
@@ -26,6 +27,13 @@ enum class ProfileFeedSpec {
             AuthoredArticles -> {
                 "{\"kind\":\"reads\"," +
                     "\"notes\":\"authored\"," +
+                    "\"pubkey\":\"$profileId\"}"
+            }
+
+            AuthoredMedia -> {
+                "{\"id\":\"feed\"," +
+                    "\"kind\":\"notes\"," +
+                    "\"notes\":\"user_media_thumbnails\"," +
                     "\"pubkey\":\"$profileId\"}"
             }
         }
