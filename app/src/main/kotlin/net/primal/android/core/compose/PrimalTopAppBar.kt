@@ -2,6 +2,7 @@ package net.primal.android.core.compose
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -30,6 +31,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.attachments.domain.CdnImage
@@ -100,7 +102,6 @@ fun PrimalTopAppBar(
             title = {
                 Column(
                     modifier = Modifier
-                        .fillMaxWidth()
                         .combinedClickable(
                             indication = null,
                             interactionSource = remember { MutableInteractionSource() },
@@ -111,7 +112,14 @@ fun PrimalTopAppBar(
                     verticalArrangement = Arrangement.Top,
                 ) {
                     IconText(
-                        modifier = Modifier.padding(start = 20.dp),
+                        modifier = Modifier.run {
+                            if (titleTrailingIcon != null) {
+                                Modifier.padding(start = 20.dp)
+                            } else {
+                                Modifier
+                            }
+                        },
+                        textAlign = TextAlign.Center,
                         text = title,
                         color = textColor,
                         trailingIcon = if (title.isNotEmpty()) titleTrailingIcon else null,
@@ -127,7 +135,7 @@ fun PrimalTopAppBar(
                     }
                 }
             },
-            actions = actions ?: { InvisibleAppBarIcon() },
+            actions = actions ?: {},
             colors = colors,
             scrollBehavior = scrollBehavior,
         )
