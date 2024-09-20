@@ -146,6 +146,7 @@ fun NoteContent(
     Column(modifier = modifier) {
         if (contentText.isNotEmpty()) {
             PrimalClickableText(
+                modifier = Modifier.padding(bottom = 4.dp),
                 style = AppTheme.typography.bodyMedium.copy(
                     color = contentColor,
                     fontSize = displaySettings.contentAppearance.noteBodyFontSize,

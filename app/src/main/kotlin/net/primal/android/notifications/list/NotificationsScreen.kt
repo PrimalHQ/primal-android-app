@@ -218,6 +218,9 @@ fun NotificationsScreen(
                 onPostQuoteClick = {
                     noteCallbacks.onNoteQuoteClick?.invoke(it.postId)
                 },
+                onBookmarkClick = {
+                    noteEventPublisher(NoteContract.UiEvent.BookmarkAction(noteId = it.postId))
+                },
                 noteCallbacks = noteCallbacks,
             )
         },
@@ -249,6 +252,7 @@ private fun NotificationsList(
     onRepostClick: (FeedPostUi) -> Unit,
     onZapClick: (FeedPostUi, ULong?, String?) -> Unit,
     onPostQuoteClick: (FeedPostUi) -> Unit,
+    onBookmarkClick: (FeedPostUi) -> Unit,
 ) {
     var repostQuotePostConfirmation by remember { mutableStateOf<FeedPostUi?>(null) }
     if (repostQuotePostConfirmation != null) {
@@ -318,6 +322,7 @@ private fun NotificationsList(
                     }
                 },
                 onRepostClick = { postData -> repostQuotePostConfirmation = postData },
+                onBookmarkClick = onBookmarkClick,
                 noteCallbacks = noteCallbacks,
             )
 
@@ -357,6 +362,7 @@ private fun NotificationsList(
                             }
                         },
                         onRepostClick = { postData -> repostQuotePostConfirmation = postData },
+                        onBookmarkClick = onBookmarkClick,
                     )
 
                     if (it < seenPagingItems.itemCount - 1) {

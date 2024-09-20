@@ -31,6 +31,7 @@ import net.primal.android.core.compose.ListPlaceholderLoading
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.isEmpty
 import net.primal.android.core.compose.isNotEmpty
+import net.primal.android.core.compose.zaps.FeedNoteTopZapsSection
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.note.FeedNoteCard
 import net.primal.android.notes.feed.note.NoteContract.SideEffect.NoteError
@@ -46,6 +47,7 @@ fun NoteFeedLazyColumn(
     listState: LazyListState,
     noteCallbacks: NoteCallbacks,
     onGoToWallet: () -> Unit,
+    showTopZaps: Boolean = false,
     shouldShowLoadingState: Boolean = true,
     shouldShowNoContentState: Boolean = true,
     showReplyTo: Boolean = true,
@@ -103,10 +105,22 @@ fun NoteFeedLazyColumn(
                         data = item,
                         shape = RectangleShape,
                         cardPadding = PaddingValues(all = 0.dp),
+                        fullWidthContent = true,
                         showReplyTo = showReplyTo,
                         noteCallbacks = noteCallbacks,
                         onGoToWallet = onGoToWallet,
                         onNoteError = onNoteError,
+                        contentFooter = {
+                            if (showTopZaps && item.eventZaps.isNotEmpty()) {
+                                FeedNoteTopZapsSection(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 8.dp)
+                                        .padding(top = 4.dp),
+                                    zaps = item.eventZaps,
+                                )
+                            }
+                        },
                     )
 
                     PrimalDivider()

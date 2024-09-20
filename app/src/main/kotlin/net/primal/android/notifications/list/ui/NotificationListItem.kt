@@ -60,6 +60,7 @@ fun NotificationListItem(
     onReplyClick: ((String) -> Unit)? = null,
     onPostLikeClick: ((FeedPostUi) -> Unit)? = null,
     onRepostClick: ((FeedPostUi) -> Unit)? = null,
+    onBookmarkClick: ((FeedPostUi) -> Unit)? = null,
     onDefaultZapClick: ((FeedPostUi) -> Unit)? = null,
     onZapOptionsClick: ((FeedPostUi) -> Unit)? = null,
 ) {
@@ -103,6 +104,7 @@ fun NotificationListItem(
                     FeedPostAction.Zap -> onDefaultZapClick?.invoke(postData)
                     FeedPostAction.Like -> onPostLikeClick?.invoke(postData)
                     FeedPostAction.Repost -> onRepostClick?.invoke(postData)
+                    FeedPostAction.Bookmark -> onBookmarkClick?.invoke(postData)
                 }
             }
         },
@@ -210,6 +212,7 @@ private fun NotificationContent(
                     .padding(vertical = 16.dp)
                     .padding(end = 16.dp),
                 eventStats = actionPost.stats,
+                isBookmarked = actionPost.isBookmarked,
                 onPostAction = onPostAction,
                 onPostLongPressAction = onPostLongPressAction,
             )

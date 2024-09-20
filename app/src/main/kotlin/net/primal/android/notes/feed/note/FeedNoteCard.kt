@@ -236,7 +236,7 @@ private fun FeedNoteCard(
     val displaySettings = LocalContentDisplaySettings.current
     val notePaddingDp = 4.dp
     val avatarPaddingDp = 8.dp
-    val avatarSizeDp = if (fullWidthNote) 30.dp else displaySettings.contentAppearance.noteAvatarSize
+    val avatarSizeDp = displaySettings.contentAppearance.noteAvatarSize
     val overflowIconSizeDp = 40.dp
 
     NoteSurfaceCard(
@@ -343,6 +343,10 @@ private fun FeedNoteCard(
 
                             FeedPostAction.Repost -> {
                                 showRepostOrQuoteConfirmation = true
+                            }
+
+                            FeedPostAction.Bookmark -> {
+                                eventPublisher(UiEvent.BookmarkAction(noteId = data.postId))
                             }
                         }
                     },
@@ -467,8 +471,10 @@ private fun FeedNote(
                     .padding(top = 8.dp)
                     .padding(bottom = 8.dp),
                 eventStats = data.stats,
+                isBookmarked = data.isBookmarked,
                 onPostAction = onPostAction,
                 onPostLongPressAction = onPostLongClickAction,
+                showBookmark = fullWidthContent,
             )
         }
     }

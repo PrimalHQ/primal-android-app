@@ -37,7 +37,6 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.coerceIn
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.unit.times
 import coil.compose.SubcomposeAsyncImage
 import java.time.Instant
 import net.primal.android.R
@@ -49,6 +48,7 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.FeedReplies
 import net.primal.android.core.compose.icons.primaliconpack.LightningBolt
 import net.primal.android.core.compose.preview.PrimalPreview
+import net.primal.android.core.compose.zaps.ZappersAvatarThumbnailRow
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.utils.Naddr
 import net.primal.android.nostr.utils.Nip19TLV.toNaddrString
@@ -228,21 +228,7 @@ private fun ListItemFooter(data: FeedArticleUi, textStyle: TextStyle) {
                     tint = textStyle.color,
                 )
                 Spacer(modifier = Modifier.width(4.dp))
-                Box(
-                    modifier = Modifier,
-                    contentAlignment = Alignment.CenterEnd,
-                ) {
-                    repeat(times = zaps.size) { index ->
-                        AvatarThumbnail(
-                            modifier = Modifier.padding(end = index.times(18.dp)),
-                            avatarSize = 24.dp,
-                            avatarCdnImage = zaps[index].zapperAvatarCdnImage,
-                            hasBorder = true,
-                            borderSize = 1.dp,
-                            borderColor = AppTheme.colorScheme.surface,
-                        )
-                    }
-                }
+                ZappersAvatarThumbnailRow(zaps = zaps)
             }
         }
     }

@@ -12,8 +12,7 @@ interface ThreadContract {
         val highlightPostIndex: Int = 0,
         val conversation: List<FeedPostUi> = emptyList(),
         val fetching: Boolean = false,
-        val topZap: EventZapUiModel? = null,
-        val otherZaps: List<EventZapUiModel> = emptyList(),
+        val topZaps: List<EventZapUiModel> = emptyList(),
         val replyToArticle: FeedArticleUi? = null,
     )
 

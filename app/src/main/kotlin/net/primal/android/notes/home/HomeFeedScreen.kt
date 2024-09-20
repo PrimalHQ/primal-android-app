@@ -175,6 +175,7 @@ fun HomeFeedScreen(
                         feedSpec = spec,
                         pollingEnabled = activeFeed?.spec == spec,
                         noteCallbacks = noteCallbacks,
+                        showTopZaps = true,
                         newNotesNoticeAlpha = (1 - topAppBarState.collapsedFraction) * 1.0f,
                         onGoToWallet = onGoToWallet,
                         contentPadding = paddingValues,

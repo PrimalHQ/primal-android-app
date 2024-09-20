@@ -33,6 +33,7 @@ class ExtraColorScheme(
     zapped: Color,
     liked: Color,
     reposted: Color,
+    bookmarked: Color,
 ) {
     var onBrand by mutableStateOf(onBrand, structuralEqualityPolicy())
         internal set
@@ -79,6 +80,9 @@ class ExtraColorScheme(
     var reposted by mutableStateOf(reposted, structuralEqualityPolicy())
         internal set
 
+    var bookmarked by mutableStateOf(bookmarked, structuralEqualityPolicy())
+        internal set
+
     fun copy(
         onBrand: Color = this.onBrand,
         surfaceVariantAlt1: Color = this.surfaceVariantAlt1,
@@ -95,6 +99,7 @@ class ExtraColorScheme(
         zapped: Color = this.zapped,
         liked: Color = this.liked,
         reposted: Color = this.reposted,
+        bookmarked: Color = this.bookmarked,
     ): ExtraColorScheme =
         ExtraColorScheme(
             onBrand = onBrand,
@@ -112,6 +117,7 @@ class ExtraColorScheme(
             zapped = zapped,
             liked = liked,
             reposted = reposted,
+            bookmarked = bookmarked,
         )
 }
 
@@ -132,6 +138,7 @@ fun extraColorScheme(
     zapped: Color,
     liked: Color,
     reposted: Color,
+    bookmarked: Color,
 ): ExtraColorScheme =
     ExtraColorScheme(
         onBrand = onBrand,
@@ -149,6 +156,7 @@ fun extraColorScheme(
         zapped = zapped,
         liked = liked,
         reposted = reposted,
+        bookmarked = bookmarked,
     )
 
 internal val LocalExtraColors =

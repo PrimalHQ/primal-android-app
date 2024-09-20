@@ -26,6 +26,7 @@ private val iceReplied = Color(0xFF444444)
 private val iceZapped = Color(0xFFFFA02F)
 private val iceLiked = Color(0xFFCA079F)
 private val iceReposted = Color(0xFF52CE0A)
+private val iceBookmarked = Color(0xFF0090F8)
 
 val iceColorScheme = lightColorScheme(
     primary = iceAccent0,
@@ -60,4 +61,5 @@ val iceExtraColorScheme = extraColorScheme(
     zapped = iceZapped,
     liked = iceLiked,
     reposted = iceReposted,
+    bookmarked = iceBookmarked,
 )

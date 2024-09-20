@@ -65,12 +65,7 @@ class ThreadViewModel @Inject constructor(
     private fun observeTopZappers() =
         viewModelScope.launch {
             noteRepository.observeTopZappers(eventId = highlightPostId).collect {
-                setState {
-                    copy(
-                        topZap = it.firstOrNull()?.asEventZapUiModel() ?: this.topZap,
-                        otherZaps = it.drop(n = 1).map { it.asEventZapUiModel() },
-                    )
-                }
+                setState { copy(topZaps = it.map { it.asEventZapUiModel() }) }
             }
         }
 

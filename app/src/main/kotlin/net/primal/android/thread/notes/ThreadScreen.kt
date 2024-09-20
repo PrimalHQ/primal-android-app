@@ -2,15 +2,14 @@ package net.primal.android.thread.notes
 
 import android.net.Uri
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -20,13 +19,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AlternateEmail
 import androidx.compose.material.icons.outlined.OpenInFull
@@ -44,7 +40,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -60,13 +55,11 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
-import java.text.NumberFormat
 import java.time.Instant
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
@@ -75,7 +68,6 @@ import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.articles.feed.ui.FeedArticleListItem
 import net.primal.android.core.compose.AppBarIcon
-import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.ImportPhotosIconButton
 import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.PrimalDivider
@@ -88,16 +80,15 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromCamera
 import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromGallery
-import net.primal.android.core.compose.icons.primaliconpack.More
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.pulltorefresh.PrimalIndicator
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
+import net.primal.android.core.compose.zaps.ThreadNoteTopZapsSection
 import net.primal.android.editor.NoteEditorContract
 import net.primal.android.editor.di.noteEditorViewModel
 import net.primal.android.editor.domain.NoteEditorArgs
 import net.primal.android.editor.ui.NoteOutlinedTextField
 import net.primal.android.editor.ui.NoteTagUserLazyColumn
-import net.primal.android.note.ui.EventZapUiModel
 import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.note.FeedNoteCard
@@ -240,7 +231,6 @@ fun ThreadScreen(
             SnackbarHost(hostState = snackbarHostState)
         },
         bottomBar = {
-            val uiScope = rememberCoroutineScope()
             val replyToPost = state.conversation.getOrNull(state.highlightPostIndex)
             if (replyToPost != null) {
                 ReplyToBottomBar(
@@ -326,6 +316,7 @@ private fun ThreadConversationLazyColumn(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun ThreadLazyColumn(
     modifier: Modifier,
@@ -403,10 +394,9 @@ private fun ThreadLazyColumn(
                     ),
                     onGoToWallet = onGoToWallet,
                     contentFooter = {
-                        if (highlighted && (state.topZap != null || state.otherZaps.isNotEmpty())) {
-                            TopZapsSection(
-                                topZap = state.topZap,
-                                otherZaps = state.otherZaps,
+                        if (highlighted && (state.topZaps.isNotEmpty())) {
+                            ThreadNoteTopZapsSection(
+                                zaps = state.topZaps,
                                 onClick = { onReactionsClick(item.postId) },
                             )
                         }
@@ -436,114 +426,8 @@ private fun isConnectedForward(index: Int, highlightIndex: Int): Boolean {
     return index in 0 until highlightIndex
 }
 
-private const val MaxOtherZaps = 4
-
 @Composable
-private fun TopZapsSection(
-    topZap: EventZapUiModel?,
-    otherZaps: List<EventZapUiModel>,
-    onClick: () -> Unit,
-) {
-    Column(
-        modifier = Modifier
-            .animateContentSize()
-            .padding(horizontal = 10.dp),
-    ) {
-        Spacer(modifier = Modifier.height(12.dp))
-
-        if (topZap != null) {
-            NoteZapListItem(
-                noteZap = topZap,
-                showMessage = true,
-                onClick = onClick,
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-        }
-
-        if (otherZaps.isNotEmpty()) {
-            Row {
-                otherZaps.take(MaxOtherZaps).forEach {
-                    key(it.id) {
-                        NoteZapListItem(
-                            noteZap = it,
-                            showMessage = false,
-                            onClick = onClick,
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                    }
-                }
-
-                if (otherZaps.size > MaxOtherZaps) {
-                    Icon(
-                        modifier = Modifier
-                            .background(
-                                color = AppTheme.extraColorScheme.surfaceVariantAlt1,
-                                shape = CircleShape,
-                            )
-                            .size(26.dp)
-                            .padding(horizontal = 4.dp)
-                            .clickable { onClick() },
-                        imageVector = PrimalIcons.More,
-                        contentDescription = null,
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(6.dp))
-        }
-    }
-}
-
-@Composable
-private fun NoteZapListItem(
-    noteZap: EventZapUiModel,
-    showMessage: Boolean = false,
-    onClick: () -> Unit,
-) {
-    val numberFormat = NumberFormat.getNumberInstance()
-    Row(
-        modifier = Modifier
-            .height(26.dp)
-            .animateContentSize()
-            .background(
-                color = AppTheme.extraColorScheme.surfaceVariantAlt1,
-                shape = AppTheme.shapes.extraLarge,
-            )
-            .clickable { onClick() },
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        AvatarThumbnail(
-            modifier = Modifier.padding(start = 2.dp),
-            avatarCdnImage = noteZap.zapperAvatarCdnImage,
-            avatarSize = 24.dp,
-            onClick = onClick,
-        )
-
-        Text(
-            modifier = Modifier.padding(horizontal = 8.dp),
-            text = numberFormat.format(noteZap.amountInSats.toLong()),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            style = AppTheme.typography.bodySmall,
-            color = AppTheme.colorScheme.onSurface,
-            fontWeight = FontWeight.SemiBold,
-        )
-
-        if (showMessage && !noteZap.message.isNullOrEmpty()) {
-            Text(
-                modifier = Modifier.padding(end = 8.dp),
-                text = noteZap.message,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
-                style = AppTheme.typography.bodySmall,
-            )
-        }
-    }
-}
-
-@Composable
-fun ReplyToBottomBar(
+private fun ReplyToBottomBar(
     modifier: Modifier,
     replyState: NoteEditorContract.UiState,
     replyToPost: FeedPostUi,
