@@ -46,12 +46,13 @@ import net.primal.android.notes.feed.model.FeedPostAction
 import net.primal.android.theme.AppTheme
 
 @Composable
-fun FeedNoteStatsRow(
+fun FeedNoteActionsRow(
     modifier: Modifier,
     eventStats: EventStatsUi,
     isBookmarked: Boolean,
     highlightedNote: Boolean = false,
     showBookmark: Boolean = false,
+    showCounts: Boolean = true,
     onPostAction: ((FeedPostAction) -> Unit)? = null,
     onPostLongPressAction: ((FeedPostAction) -> Unit)? = null,
 ) {
@@ -62,7 +63,7 @@ fun FeedNoteStatsRow(
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         SingleEventStat(
-            textCount = eventStats.repliesCount.toPostStatString(numberFormat),
+            textCount = if (showCounts) eventStats.repliesCount.toPostStatString(numberFormat) else "",
             highlighted = eventStats.userReplied,
             iconSize = iconSize,
             iconVector = PrimalIcons.FeedNewReply,
@@ -78,7 +79,7 @@ fun FeedNoteStatsRow(
         )
 
         SingleEventStat(
-            textCount = eventStats.satsZapped.toPostStatString(numberFormat),
+            textCount = if (showCounts) eventStats.satsZapped.toPostStatString(numberFormat) else "",
             highlighted = eventStats.userZapped,
             iconVector = PrimalIcons.FeedNewZap,
             iconSize = iconSize,
@@ -94,7 +95,7 @@ fun FeedNoteStatsRow(
         )
 
         SingleEventStat(
-            textCount = eventStats.likesCount.toPostStatString(numberFormat),
+            textCount = if (showCounts) eventStats.likesCount.toPostStatString(numberFormat) else "",
             highlighted = eventStats.userLiked,
             iconSize = iconSize,
             iconVector = PrimalIcons.FeedNewLike,
@@ -112,7 +113,7 @@ fun FeedNoteStatsRow(
         )
 
         SingleEventStat(
-            textCount = eventStats.repostsCount.toPostStatString(numberFormat),
+            textCount = if (showCounts) eventStats.repostsCount.toPostStatString(numberFormat) else "",
             highlighted = eventStats.userReposted,
             iconSize = iconSize,
             iconVector = PrimalIcons.FeedNewReposts,

@@ -65,7 +65,7 @@ import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.note.FeedNoteCard
 import net.primal.android.notes.feed.note.NoteContract.SideEffect.NoteError
 import net.primal.android.notes.feed.note.showNoteErrorSnackbar
-import net.primal.android.notes.feed.note.ui.FeedNoteStatsRow
+import net.primal.android.notes.feed.note.ui.FeedNoteActionsRow
 import net.primal.android.notes.feed.note.ui.ReferencedNoteCard
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.notes.feed.zaps.UnableToZapBottomSheet
@@ -402,7 +402,7 @@ private fun ArticleContentWithComments(
 
         if (state.article?.eventStatsUi != null) {
             item(contentType = "Stats") {
-                FeedNoteStatsRow(
+                FeedNoteActionsRow(
                     modifier = Modifier
                         .background(color = AppTheme.colorScheme.surfaceVariant)
                         .fillMaxWidth()

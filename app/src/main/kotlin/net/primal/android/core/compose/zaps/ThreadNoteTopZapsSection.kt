@@ -4,6 +4,7 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ContextualFlowRow
 import androidx.compose.foundation.layout.ContextualFlowRowOverflow
@@ -27,23 +28,25 @@ import net.primal.android.theme.AppTheme
 
 @ExperimentalLayoutApi
 @Composable
-fun ThreadNoteTopZapsSection(zaps: List<EventZapUiModel>, onClick: () -> Unit) {
-    if (zaps.size > 3) {
-        TwoLineTopZapsSection(
-            modifier = Modifier
-                .animateContentSize()
-                .padding(horizontal = 10.dp),
-            zaps = zaps,
-            onClick = onClick,
-        )
-    } else {
-        SingleLineTopZapsSection(
-            modifier = Modifier
-                .animateContentSize()
-                .padding(horizontal = 10.dp),
-            zaps = zaps,
-            onClick = onClick,
-        )
+fun ThreadNoteTopZapsSection(
+    zaps: List<EventZapUiModel>,
+    modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null,
+) {
+    Box(modifier = modifier) {
+        if (zaps.size > 3) {
+            TwoLineTopZapsSection(
+                modifier = Modifier.animateContentSize(),
+                zaps = zaps,
+                onClick = onClick,
+            )
+        } else {
+            SingleLineTopZapsSection(
+                modifier = Modifier.animateContentSize(),
+                zaps = zaps,
+                onClick = onClick,
+            )
+        }
     }
 }
 
@@ -52,7 +55,7 @@ fun ThreadNoteTopZapsSection(zaps: List<EventZapUiModel>, onClick: () -> Unit) {
 private fun TwoLineTopZapsSection(
     modifier: Modifier,
     zaps: List<EventZapUiModel>,
-    onClick: () -> Unit,
+    onClick: (() -> Unit)? = null,
 ) {
     val topZap = zaps.firstOrNull()
     val otherZaps = zaps.drop(n = 1)
@@ -86,7 +89,7 @@ private fun TwoLineTopZapsSection(
 private fun ContextualZapsFlowRow(
     modifier: Modifier,
     zaps: List<EventZapUiModel>,
-    onClick: () -> Unit,
+    onClick: (() -> Unit)? = null,
 ) {
     ContextualFlowRow(
         modifier = modifier,
@@ -103,7 +106,10 @@ private fun ContextualZapsFlowRow(
                         )
                         .size(26.dp)
                         .padding(horizontal = 4.dp)
-                        .clickable { onClick() },
+                        .clickable(
+                            enabled = onClick != null,
+                            onClick = { onClick?.invoke() },
+                        ),
                     imageVector = PrimalIcons.More,
                     contentDescription = null,
                 )
@@ -127,7 +133,7 @@ private fun ContextualZapsFlowRow(
 private fun SingleLineTopZapsSection(
     modifier: Modifier,
     zaps: List<EventZapUiModel>,
-    onClick: () -> Unit,
+    onClick: (() -> Unit)? = null,
 ) {
     val topZap = zaps.firstOrNull()
     val otherZaps = zaps.drop(n = 1)
