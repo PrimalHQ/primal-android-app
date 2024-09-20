@@ -58,8 +58,9 @@ import timber.log.Timber
 @Composable
 fun ArticleFeedList(
     feedSpec: String,
-    contentPadding: PaddingValues = PaddingValues(0.dp),
     onArticleClick: (naddr: String) -> Unit,
+    modifier: Modifier = Modifier,
+    contentPadding: PaddingValues = PaddingValues(0.dp),
     pullToRefreshEnabled: Boolean = true,
     previewMode: Boolean = false,
     noContentVerticalArrangement: Arrangement.Vertical = Arrangement.Center,
@@ -75,6 +76,7 @@ fun ArticleFeedList(
 
     ArticleFeedList(
         state = uiState.value,
+        modifier = modifier,
         contentPadding = contentPadding,
         onArticleClick = onArticleClick,
         header = header,
@@ -89,6 +91,7 @@ fun ArticleFeedList(
 @Composable
 private fun ArticleFeedList(
     state: ArticleFeedContract.UiState,
+    modifier: Modifier = Modifier,
     pullToRefreshEnabled: Boolean = true,
     contentPadding: PaddingValues = PaddingValues(0.dp),
     noContentVerticalArrangement: Arrangement.Vertical = Arrangement.Center,
@@ -138,6 +141,7 @@ private fun ArticleFeedList(
         indicatorPaddingValues = contentPadding,
     ) {
         ArticleFeedLazyColumn(
+            modifier = modifier,
             pagingItems = pagingItems,
             listState = feedListState,
             onArticleClick = onArticleClick,
@@ -155,6 +159,7 @@ private fun ArticleFeedList(
 private fun ArticleFeedLazyColumn(
     pagingItems: LazyPagingItems<FeedArticleUi>,
     listState: LazyListState,
+    modifier: Modifier = Modifier,
     onArticleClick: (naddr: String) -> Unit,
     noContentVerticalArrangement: Arrangement.Vertical = Arrangement.Center,
     noContentPaddingValues: PaddingValues = PaddingValues(all = 0.dp),
@@ -163,7 +168,7 @@ private fun ArticleFeedLazyColumn(
     stickyHeader: @Composable (LazyItemScope.() -> Unit)? = null,
 ) {
     LazyColumn(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .animateContentSize(),
         state = listState,

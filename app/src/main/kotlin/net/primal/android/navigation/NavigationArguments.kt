@@ -21,6 +21,10 @@ inline val SavedStateHandle.naddrOrThrow: String
 const val FOLLOWS_TYPE = "followsType"
 inline val SavedStateHandle.followsType: String? get() = get(FOLLOWS_TYPE)
 
+const val RENDER_TYPE = "renderType"
+inline val SavedStateHandle.renderType: String
+    get() = get<String>(RENDER_TYPE) ?: throw IllegalArgumentException("Missing required renderType argument.")
+
 const val EXPLORE_FEED_SPEC = "exploreFeedSpec"
 inline val SavedStateHandle.exploreFeedSpecOrThrow: String
     get() = get<String>(EXPLORE_FEED_SPEC)?.asBase64Decoded()?.ifEmpty { null }
