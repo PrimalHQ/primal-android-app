@@ -3,8 +3,6 @@ package net.primal.android.explore.asearch
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.ktor.util.decodeBase64String
-import io.ktor.util.encodeBase64
 import java.time.Instant
 import java.time.ZoneId
 import java.time.ZonedDateTime
@@ -23,9 +21,7 @@ import net.primal.android.explore.asearch.AdvancedSearchContract.Orientation
 import net.primal.android.explore.asearch.AdvancedSearchContract.SearchFilter
 import net.primal.android.explore.asearch.AdvancedSearchContract.UiEvent
 import net.primal.android.explore.asearch.AdvancedSearchContract.UiState
-import net.primal.android.navigation.asBase64Decoded
-import net.primal.android.navigation.asBase64Encoded
-import timber.log.Timber
+import net.primal.android.explore.feed.note.ExploreNoteFeedContract
 
 @HiltViewModel
 class AdvancedSearchViewModel @Inject constructor() : ViewModel() {
@@ -101,11 +97,29 @@ class AdvancedSearchViewModel @Inject constructor() : ViewModel() {
             )
 
             val searchCommand = searchParams.filterNot { it.isNullOrEmpty() }.joinToString(separator = " ")
+            val renderType = if (uiState.searchKind.isImages() || uiState.searchKind.isVideos()) {
+                ExploreNoteFeedContract.RenderType.Grid
+            } else {
+                ExploreNoteFeedContract.RenderType.List
+            }
 
-            setEffect(AdvancedSearchContract.SideEffect.NavigateToExploreFeed(searchCommand.buildFeedSpec()))
+            if (uiState.searchKind.isReads()) {
+                setEffect(
+                    AdvancedSearchContract.SideEffect.NavigateToExploreArticleFeed(
+                        feedSpec = searchCommand.buildFeedSpec(),
+                    ),
+                )
+            } else {
+                setEffect(
+                    AdvancedSearchContract.SideEffect.NavigateToExploreNoteFeed(
+                        feedSpec = searchCommand.buildFeedSpec(),
+                        renderType = renderType,
+                    ),
+                )
+            }
         }
 
-    private fun String.buildFeedSpec(): String = """{\"id\":\"advsearch\",\"query\":\"$this\"}""".trimIndent()
+    private fun String.buildFeedSpec(): String = """{"id":"advsearch","query":"$this"}""".trimIndent()
 
     private fun AdvancedSearchContract.SearchKind.toSearchCommand() =
         when (this) {

@@ -1,4 +1,4 @@
-package net.primal.android.explore.feed
+package net.primal.android.explore.feed.note
 
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
@@ -27,9 +27,9 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.UserFeedAdd
 import net.primal.android.core.compose.icons.primaliconpack.UserFeedRemove
-import net.primal.android.explore.feed.ExploreFeedContract.UiEvent.AddToUserFeeds
-import net.primal.android.explore.feed.ExploreFeedContract.UiEvent.RemoveFromUserFeeds
-import net.primal.android.explore.feed.ExploreFeedContract.UiState.ExploreFeedError
+import net.primal.android.explore.feed.note.ExploreNoteFeedContract.UiEvent.AddToUserFeeds
+import net.primal.android.explore.feed.note.ExploreNoteFeedContract.UiEvent.RemoveFromUserFeeds
+import net.primal.android.explore.feed.note.ExploreNoteFeedContract.UiState.ExploreFeedError
 import net.primal.android.feeds.domain.isNotesBookmarkFeedSpec
 import net.primal.android.notes.feed.NoteFeedList
 import net.primal.android.notes.feed.note.showNoteErrorSnackbar
@@ -37,15 +37,15 @@ import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import timber.log.Timber
 
 @Composable
-fun ExploreFeedScreen(
-    viewModel: ExploreFeedViewModel,
+fun ExploreNoteFeedScreen(
+    viewModel: ExploreNoteFeedViewModel,
     onClose: () -> Unit,
     noteCallbacks: NoteCallbacks,
     onGoToWallet: () -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
 
-    ExploreFeedScreen(
+    ExploreNoteFeedScreen(
         state = uiState.value,
         onClose = onClose,
         noteCallbacks = noteCallbacks,
@@ -56,18 +56,17 @@ fun ExploreFeedScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ExploreFeedScreen(
-    state: ExploreFeedContract.UiState,
+fun ExploreNoteFeedScreen(
+    state: ExploreNoteFeedContract.UiState,
     onClose: () -> Unit,
     noteCallbacks: NoteCallbacks,
     onGoToWallet: () -> Unit,
-    eventPublisher: (ExploreFeedContract.UiEvent) -> Unit,
+    eventPublisher: (ExploreNoteFeedContract.UiEvent) -> Unit,
 ) {
     val context = LocalContext.current
     val uiScope = rememberCoroutineScope()
     val feedPagingItems = state.notes.collectAsLazyPagingItems()
     val feedListState = feedPagingItems.rememberLazyListStatePagingWorkaround()
-    Timber.tag("explore").i(feedPagingItems.itemCount.toString())
 
     val feedTitle = state.extractTitle()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -121,26 +120,33 @@ fun ExploreFeedScreen(
             )
         },
         content = { paddingValues ->
-            NoteFeedList(
-                feedListState = feedListState,
-                pagingItems = feedPagingItems,
-                paddingValues = paddingValues,
-                noteCallbacks = noteCallbacks,
-                onGoToWallet = onGoToWallet,
-                noContentText = when {
-                    state.feedSpec.isNotesBookmarkFeedSpec() -> stringResource(id = R.string.bookmarks_no_content)
-                    else -> stringResource(id = R.string.feed_no_content)
-                },
-                onNoteError = { noteError ->
-                    uiScope.launch {
-                        showNoteErrorSnackbar(
-                            context = context,
-                            error = noteError,
-                            snackbarHostState = snackbarHostState,
-                        )
-                    }
-                },
-            )
+            when (state.renderType) {
+                ExploreNoteFeedContract.RenderType.List -> {
+                    NoteFeedList(
+                        feedListState = feedListState,
+                        pagingItems = feedPagingItems,
+                        paddingValues = paddingValues,
+                        noteCallbacks = noteCallbacks,
+                        onGoToWallet = onGoToWallet,
+                        noContentText = when {
+                            state.feedSpec.isNotesBookmarkFeedSpec() -> stringResource(id = R.string.bookmarks_no_content)
+                            else -> stringResource(id = R.string.feed_no_content)
+                        },
+                        onNoteError = { noteError ->
+                            uiScope.launch {
+                                showNoteErrorSnackbar(
+                                    context = context,
+                                    error = noteError,
+                                    snackbarHostState = snackbarHostState,
+                                )
+                            }
+                        },
+                    )
+                }
+                ExploreNoteFeedContract.RenderType.Grid -> {
+                    // Media feed grid
+                }
+            }
         },
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState)
@@ -149,7 +155,7 @@ fun ExploreFeedScreen(
 }
 
 @Composable
-private fun ExploreFeedContract.UiState.extractTitle() =
+private fun ExploreNoteFeedContract.UiState.extractTitle() =
     when {
         // TODO Extract search title once api is implemented
 //        feedSpec.isSearchFeed() -> feedSpec.removeSearchPrefix()

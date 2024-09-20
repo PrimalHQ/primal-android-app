@@ -1,4 +1,4 @@
-package net.primal.android.explore.feed
+package net.primal.android.explore.feed.note
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -18,23 +18,25 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
-import net.primal.android.explore.feed.ExploreFeedContract.UiEvent
-import net.primal.android.explore.feed.ExploreFeedContract.UiState
-import net.primal.android.explore.feed.ExploreFeedContract.UiState.ExploreFeedError
+import net.primal.android.explore.feed.note.ExploreNoteFeedContract.UiEvent
+import net.primal.android.explore.feed.note.ExploreNoteFeedContract.UiState
+import net.primal.android.explore.feed.note.ExploreNoteFeedContract.UiState.ExploreFeedError
 import net.primal.android.feeds.domain.isNotesBookmarkFeedSpec
 import net.primal.android.navigation.exploreFeedSpecOrThrow
+import net.primal.android.navigation.renderType
 import net.primal.android.notes.feed.model.asFeedPostUi
 import net.primal.android.notes.repository.FeedRepository
 import timber.log.Timber
 
 @HiltViewModel
-class ExploreFeedViewModel @Inject constructor(
+class ExploreNoteFeedViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val dispatcherProvider: CoroutineDispatcherProvider,
     private val feedRepository: FeedRepository,
 ) : ViewModel() {
 
     private val exploreFeedSpec = savedStateHandle.exploreFeedSpecOrThrow
+    private val renderType = ExploreNoteFeedContract.RenderType.valueOf(savedStateHandle.renderType)
 
     private val _state = MutableStateFlow(
         UiState(
@@ -43,6 +45,7 @@ class ExploreFeedViewModel @Inject constructor(
             notes = feedRepository.feedBySpec(feedSpec = exploreFeedSpec)
                 .map { it.map { feed -> feed.asFeedPostUi() } }
                 .cachedIn(viewModelScope),
+            renderType = renderType,
         ),
     )
     val state = _state.asStateFlow()
@@ -56,7 +59,6 @@ class ExploreFeedViewModel @Inject constructor(
     }
 
     init {
-        Timber.tag("exploreFeedSpec").i(exploreFeedSpec)
         observeContainsFeed()
         observeEvents()
     }

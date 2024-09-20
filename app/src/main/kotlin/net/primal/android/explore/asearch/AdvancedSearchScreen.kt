@@ -59,20 +59,26 @@ import net.primal.android.explore.asearch.ui.FilterPicker
 import net.primal.android.explore.asearch.ui.MultipleUserPicker
 import net.primal.android.explore.asearch.ui.SingleChoicePicker
 import net.primal.android.explore.asearch.ui.TimeModifierPicker
+import net.primal.android.explore.feed.note.ExploreNoteFeedContract
 import net.primal.android.theme.AppTheme
 
 @Composable
 fun AdvancedSearchScreen(
     viewModel: AdvancedSearchViewModel,
     onClose: () -> Unit,
-    onNavigateToExploreFeed: (feedSpec: String) -> Unit,
+    onNavigateToExploreNoteFeed: (feedSpec: String, renderType: ExploreNoteFeedContract.RenderType) -> Unit,
+    onNavigateToExploreArticleFeed: (feedSpec: String) -> Unit,
 ) {
     val state = viewModel.state.collectAsState()
 
     LaunchedEffect(viewModel) {
         viewModel.effects.collect {
             when (it) {
-                is AdvancedSearchContract.SideEffect.NavigateToExploreFeed -> onNavigateToExploreFeed(it.feedSpec)
+                is AdvancedSearchContract.SideEffect.NavigateToExploreNoteFeed ->
+                    onNavigateToExploreNoteFeed(it.feedSpec, it.renderType)
+
+                is AdvancedSearchContract.SideEffect.NavigateToExploreArticleFeed ->
+                    onNavigateToExploreArticleFeed(it.feedSpec)
             }
         }
     }
