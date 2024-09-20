@@ -106,6 +106,7 @@ fun NoteFeedLazyColumn(
                         shape = RectangleShape,
                         cardPadding = PaddingValues(all = 0.dp),
                         fullWidthContent = true,
+                        enableTweetsMode = true,
                         showReplyTo = showReplyTo,
                         noteCallbacks = noteCallbacks,
                         onGoToWallet = onGoToWallet,
