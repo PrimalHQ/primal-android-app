@@ -44,7 +44,6 @@ import java.util.*
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
@@ -191,51 +190,14 @@ private fun NoteFeedList(
                 .graphicsLayer { this.alpha = newNotesNoticeAlpha },
         ) {
             if (state.syncStats.latestNoteIds.isNotEmpty() && pagingItems.isNotEmpty()) {
-                var doneDelaying by remember { mutableStateOf(false) }
-                LaunchedEffect(true) {
-                    delay(0.21.seconds)
-                    doneDelaying = true
-                }
-                if (doneDelaying) {
-                    NewPostsButton(
-                        syncStats = state.syncStats,
-                        onClick = {
-                            eventPublisher(UiEvent.ShowLatestNotes)
-                        },
-                    )
-                }
+                NewPostsButton(
+                    syncStats = state.syncStats,
+                    onClick = {
+                        eventPublisher(UiEvent.ShowLatestNotes)
+                    },
+                )
             }
         }
-    }
-}
-
-@Composable
-private fun NewPostsButton(syncStats: FeedPostsSyncStats, onClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .height(40.dp)
-            .background(
-                color = AppTheme.colorScheme.primary,
-                shape = AppTheme.shapes.extraLarge,
-            )
-            .padding(horizontal = 2.dp)
-            .clickable { onClick() },
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        AvatarThumbnailsRow(
-            modifier = Modifier.padding(start = 6.dp),
-            avatarCdnImages = syncStats.latestAvatarCdnImages,
-            onClick = { onClick() },
-        )
-
-        Text(
-            modifier = Modifier
-                .padding(start = 12.dp, end = 16.dp)
-                .wrapContentHeight(),
-            text = stringResource(id = R.string.feed_new_posts_notice_general),
-            style = AppTheme.typography.bodySmall,
-            color = Color.White,
-        )
     }
 }
 
@@ -320,6 +282,36 @@ fun NoteFeedList(
             onNoteError = onNoteError,
             noContentVerticalArrangement = noContentVerticalArrangement,
             noContentPaddingValues = noContentPaddingValues,
+        )
+    }
+}
+
+@Composable
+private fun NewPostsButton(syncStats: FeedPostsSyncStats, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .height(40.dp)
+            .background(
+                color = AppTheme.colorScheme.primary,
+                shape = AppTheme.shapes.extraLarge,
+            )
+            .padding(horizontal = 2.dp)
+            .clickable { onClick() },
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        AvatarThumbnailsRow(
+            modifier = Modifier.padding(start = 6.dp),
+            avatarCdnImages = syncStats.latestAvatarCdnImages,
+            onClick = { onClick() },
+        )
+
+        Text(
+            modifier = Modifier
+                .padding(start = 12.dp, end = 16.dp)
+                .wrapContentHeight(),
+            text = stringResource(id = R.string.feed_new_posts_notice_general),
+            style = AppTheme.typography.bodySmall,
+            color = Color.White,
         )
     }
 }
