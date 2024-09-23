@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -15,7 +16,9 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Tune
@@ -31,6 +34,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -39,6 +43,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.ListLoading
@@ -49,6 +54,13 @@ import net.primal.android.core.compose.icons.primaliconpack.AdvancedSearch
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.explore.home.ExploreHomeContract.UiEvent
+import net.primal.android.explore.home.ui.EXPLORE_HOME_TAB_COUNT
+import net.primal.android.explore.home.ui.ExploreHomeTabs
+import net.primal.android.explore.home.ui.FEEDS_INDEX
+import net.primal.android.explore.home.ui.MEDIA_INDEX
+import net.primal.android.explore.home.ui.PEOPLE_INDEX
+import net.primal.android.explore.home.ui.TOPICS_INDEX
+import net.primal.android.explore.home.ui.ZAPS_INDEX
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 
@@ -72,7 +84,7 @@ fun ExploreHomeScreen(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ExploreHomeScreen(
     state: ExploreHomeContract.UiState,
@@ -82,7 +94,7 @@ private fun ExploreHomeScreen(
     onTuneClick: () -> Unit,
     onClose: () -> Unit,
 ) {
-    val listState = rememberLazyListState()
+    val pagerState = rememberPagerState { EXPLORE_HOME_TAB_COUNT }
 
     Scaffold(
         topBar = {
@@ -91,72 +103,22 @@ private fun ExploreHomeScreen(
                 onSearchClick = onSearchClick,
                 onActionIconClick = onTuneClick,
                 actionIcon = PrimalIcons.AdvancedSearch,
+                pagerState = pagerState,
             )
         },
         content = { paddingValues ->
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = paddingValues,
-                state = listState,
-            ) {
-                items(
-                    items = state.hashtags,
-                    key = { it.first().name },
-                ) {
-                    FlowRow(
-                        modifier = Modifier
-                            .background(color = AppTheme.colorScheme.surfaceVariant)
-                            .wrapContentWidth()
-                            .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalArrangement = Arrangement.Top,
-                    ) {
-                        it.forEach {
-                            SuggestionChip(
-                                modifier = Modifier
-                                    .height(56.dp)
-                                    .padding(all = 8.dp),
-                                onClick = { onHashtagClick("#${it.name}") },
-                                shape = AppTheme.shapes.extraLarge,
-                                border = SuggestionChipDefaults.suggestionChipBorder(
-                                    enabled = true,
-                                    borderColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
-                                ),
-                                colors = SuggestionChipDefaults.suggestionChipColors(
-                                    containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
-                                    labelColor = AppTheme.colorScheme.onSurface,
-                                ),
-                                label = {
-                                    Text(
-                                        modifier = Modifier.padding(all = 4.dp),
-                                        text = it.name,
-                                        style = AppTheme.typography.bodyLarge,
-                                        fontWeight = FontWeight.Medium,
-                                    )
-                                },
-                            )
-                        }
-                    }
-                }
-
-                if (state.hashtags.isEmpty()) {
-                    if (state.refreshing) {
-                        item(contentType = "LoadingRefresh") {
-                            ListLoading(
-                                modifier = Modifier.fillParentMaxSize(),
-                            )
-                        }
-                    } else {
-                        item(contentType = "NoContent") {
-                            ListNoContent(
-                                modifier = Modifier.fillParentMaxSize(),
-                                noContentText = stringResource(
-                                    id = R.string.explore_trending_hashtags_no_content,
-                                ),
-                                refreshButtonVisible = true,
-                                onRefresh = { eventPublisher(UiEvent.RefreshTrendingHashtags) },
-                            )
-                        }
+            HorizontalPager(
+                state = pagerState,
+            ) { pageIndex ->
+                when (pageIndex) {
+                    TOPICS_INDEX -> {
+                        TopicsTabContent(
+                            paddingValues = paddingValues,
+                            refreshing = state.refreshing,
+                            hashtags = state.hashtags,
+                            onRefreshClick = { eventPublisher(UiEvent.RefreshTrendingHashtags) },
+                            onHashtagClick = onHashtagClick,
+                        )
                     }
                 }
             }
@@ -164,17 +126,98 @@ private fun ExploreHomeScreen(
     )
 }
 
+@Composable
+@OptIn(ExperimentalLayoutApi::class)
+private fun TopicsTabContent(
+    paddingValues: PaddingValues,
+    hashtags: List<List<HashtagUi>>,
+    refreshing: Boolean,
+    onHashtagClick: (String) -> Unit,
+    onRefreshClick: () -> Unit,
+) {
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = paddingValues,
+    ) {
+        items(
+            items = hashtags,
+            key = { it.first().name },
+        ) {
+            FlowRow(
+                modifier = Modifier
+                    .background(color = AppTheme.colorScheme.surfaceVariant)
+                    .wrapContentWidth()
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalArrangement = Arrangement.Top,
+            ) {
+                it.forEach {
+                    SuggestionChip(
+                        modifier = Modifier
+                            .height(56.dp)
+                            .padding(all = 8.dp),
+                        onClick = { onHashtagClick("#${it.name}") },
+                        shape = AppTheme.shapes.extraLarge,
+                        border = SuggestionChipDefaults.suggestionChipBorder(
+                            enabled = true,
+                            borderColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
+                        ),
+                        colors = SuggestionChipDefaults.suggestionChipColors(
+                            containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
+                            labelColor = AppTheme.colorScheme.onSurface,
+                        ),
+                        label = {
+                            Text(
+                                modifier = Modifier.padding(all = 4.dp),
+                                text = it.name,
+                                style = AppTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.Medium,
+                            )
+                        },
+                    )
+                }
+            }
+        }
+
+        if (hashtags.isEmpty()) {
+            if (refreshing) {
+                item(contentType = "LoadingRefresh") {
+                    ListLoading(
+                        modifier = Modifier.fillParentMaxSize(),
+                    )
+                }
+            } else {
+                item(contentType = "NoContent") {
+                    ListNoContent(
+                        modifier = Modifier.fillParentMaxSize(),
+                        noContentText = stringResource(
+                            id = R.string.explore_trending_hashtags_no_content,
+                        ),
+                        refreshButtonVisible = true,
+                        onRefresh = onRefreshClick,
+                    )
+                }
+            }
+        }
+    }
+}
+
 @ExperimentalMaterial3Api
 @Composable
 fun ExploreTopAppBar(
     modifier: Modifier = Modifier,
+    pagerState: PagerState,
     onSearchClick: () -> Unit,
     onActionIconClick: () -> Unit,
     onClose: () -> Unit,
     actionIcon: ImageVector,
 ) {
+    val scope = rememberCoroutineScope()
+
     Column(
-        modifier = modifier.wrapContentHeight(),
+        modifier = modifier
+            .background(AppTheme.colorScheme.background)
+            .wrapContentHeight(),
     ) {
         TopAppBar(
             title = {
@@ -206,6 +249,14 @@ fun ExploreTopAppBar(
                 containerColor = AppTheme.colorScheme.surface,
                 scrolledContainerColor = AppTheme.colorScheme.surface,
             ),
+        )
+        ExploreHomeTabs(
+            selectedTabIndex = pagerState.currentPage,
+            onFeedsTabClick = { scope.launch { pagerState.animateScrollToPage(FEEDS_INDEX) } },
+            onPeopleTabClick = { scope.launch { pagerState.animateScrollToPage(PEOPLE_INDEX) } },
+            onZapsTabClick = { scope.launch { pagerState.animateScrollToPage(ZAPS_INDEX) } },
+            onMediaTabClick = { scope.launch { pagerState.animateScrollToPage(MEDIA_INDEX) } },
+            onTopicsTabClick = { scope.launch { pagerState.animateScrollToPage(TOPICS_INDEX) } },
         )
         PrimalDivider()
     }
@@ -249,6 +300,7 @@ fun PreviewExploreTopAppBar() {
                 onActionIconClick = {},
                 onClose = {},
                 actionIcon = Icons.Filled.Tune,
+                pagerState = rememberPagerState { EXPLORE_HOME_TAB_COUNT },
             )
         }
     }
