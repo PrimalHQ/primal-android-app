@@ -1,5 +1,6 @@
 package net.primal.android.explore.feed.note
 
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
@@ -31,6 +32,7 @@ import net.primal.android.explore.feed.note.ExploreNoteFeedContract.UiEvent.AddT
 import net.primal.android.explore.feed.note.ExploreNoteFeedContract.UiEvent.RemoveFromUserFeeds
 import net.primal.android.explore.feed.note.ExploreNoteFeedContract.UiState.ExploreFeedError
 import net.primal.android.feeds.domain.isNotesBookmarkFeedSpec
+import net.primal.android.notes.feed.MediaFeedGrid
 import net.primal.android.notes.feed.NoteFeedList
 import net.primal.android.notes.feed.note.showNoteErrorSnackbar
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
@@ -145,7 +147,11 @@ fun ExploreNoteFeedScreen(
                     )
                 }
                 ExploreNoteFeedContract.RenderType.Grid -> {
-                    // Media feed grid
+                    MediaFeedGrid(
+                        modifier = Modifier.padding(paddingValues),
+                        feedSpec = state.feedSpec,
+                        onNoteClick = { noteCallbacks.onNoteClick?.invoke(it) },
+                    )
                 }
             }
         },

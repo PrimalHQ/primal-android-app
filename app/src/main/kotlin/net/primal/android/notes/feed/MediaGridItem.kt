@@ -17,12 +17,12 @@ fun MediaGridItem(
     item: FeedPostUi,
     maxWidthPx: Int,
 ) {
-    val attachment = item.attachments.first()
-    val cdnResource = attachment.variants.findNearestOrNull(maxWidthPx = maxWidthPx)
+    val attachment = item.attachments.firstOrNull()
+    val cdnResource = attachment?.variants.findNearestOrNull(maxWidthPx = maxWidthPx)
     SubcomposeAsyncImage(
         modifier = modifier.fillMaxSize(),
         model = ImageRequest.Builder(LocalContext.current)
-            .data(cdnResource?.mediaUrl ?: attachment.thumbnailUrl)
+            .data(cdnResource?.mediaUrl ?: attachment?.thumbnailUrl ?: attachment?.url)
             .crossfade(true)
             .memoryCachePolicy(CachePolicy.ENABLED)
             .build(),
