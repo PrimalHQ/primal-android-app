@@ -10,7 +10,6 @@ interface FeedsContract {
         val activeFeed: FeedUi,
         val specKind: FeedSpecKind,
         val feeds: List<FeedUi> = emptyList(),
-        val defaultFeeds: List<FeedUi> = emptyList(),
         val isEditMode: Boolean = false,
         val feedMarketplaceStage: FeedMarketplaceStage = FeedMarketplaceStage.FeedList,
         val fetchingDvmFeeds: Boolean = false,

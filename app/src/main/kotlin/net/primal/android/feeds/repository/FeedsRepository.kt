@@ -55,16 +55,14 @@ class FeedsRepository @Inject constructor(
         }
     }
 
-    suspend fun persistNewDefaultFeeds(specKind: FeedSpecKind) {
+    suspend fun persistNewDefaultFeeds(givenDefaultFeeds: List<Feed>, specKind: FeedSpecKind) {
         val localFeeds = withContext(dispatcherProvider.io()) {
             database.feeds().observeAllFeeds(specKind = specKind).first()
         }
-        val defaultFeeds = fetchDefaultFeeds(specKind = specKind) ?: emptyList()
+        val defaultFeeds = givenDefaultFeeds.ifEmpty { fetchDefaultFeeds(specKind = specKind) ?: emptyList() }
 
         val localFeedSpecs = localFeeds.map { it.spec }.toSet()
-        val newFeeds = defaultFeeds.toMutableList().apply {
-            removeIf { localFeedSpecs.contains(it.spec) }
-        }
+        val newFeeds = defaultFeeds.filterNot { localFeedSpecs.contains(it.spec) }
 
         if (newFeeds.isNotEmpty()) {
             val disabledNewFeeds = newFeeds.map { it.copy(enabled = false) }
@@ -73,7 +71,7 @@ class FeedsRepository @Inject constructor(
         }
     }
 
-    private suspend fun fetchDefaultFeeds(specKind: FeedSpecKind): List<Feed>? {
+    suspend fun fetchDefaultFeeds(specKind: FeedSpecKind): List<Feed>? {
         return withContext(dispatcherProvider.io()) {
             val response = feedsApi.getDefaultUserFeeds(specKind = specKind)
             val content = NostrJson.decodeFromStringOrNull<List<ContentArticleFeedData>>(
@@ -109,9 +107,9 @@ class FeedsRepository @Inject constructor(
         }
     }
 
-    suspend fun fetchAndPersistDefaultFeeds(specKind: FeedSpecKind) =
+    suspend fun fetchAndPersistDefaultFeeds(givenDefaultFeeds: List<Feed>, specKind: FeedSpecKind) =
         withContext(dispatcherProvider.io()) {
-            val feeds = fetchDefaultFeeds(specKind = specKind) ?: return@withContext
+            val feeds = givenDefaultFeeds.ifEmpty { fetchDefaultFeeds(specKind = specKind) ?: return@withContext }
             persistArticleFeeds(feeds = feeds, specKind = specKind)
         }
 

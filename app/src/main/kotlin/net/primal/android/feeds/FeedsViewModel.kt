@@ -16,6 +16,7 @@ import kotlinx.coroutines.launch
 import net.primal.android.feeds.FeedsContract.UiEvent
 import net.primal.android.feeds.FeedsContract.UiState
 import net.primal.android.feeds.FeedsContract.UiState.FeedMarketplaceStage
+import net.primal.android.feeds.db.Feed
 import net.primal.android.feeds.domain.DvmFeed
 import net.primal.android.feeds.domain.FeedSpecKind
 import net.primal.android.feeds.domain.buildSpec
@@ -46,13 +47,23 @@ class FeedsViewModel @AssistedInject constructor(
     fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
 
     private var allFeeds: List<FeedUi> = emptyList()
+    private var defaultFeeds: List<Feed> = emptyList()
 
     init {
         observeEvents()
         observeFeeds()
-        persistNewDefaultFeeds()
+        fetchDefaultFeeds()
         fetchLatestFeedMarketplace()
     }
+
+    private fun fetchDefaultFeeds() =
+        viewModelScope.launch {
+            defaultFeeds = feedsRepository
+                .fetchDefaultFeeds(specKind = specKind)
+                ?: emptyList()
+
+            persistNewDefaultFeeds()
+        }
 
     private fun observeEvents() =
         viewModelScope.launch {
@@ -128,8 +139,12 @@ class FeedsViewModel @AssistedInject constructor(
     private fun restoreDefaultPrimalFeeds() =
         viewModelScope.launch {
             try {
-                feedsRepository.fetchAndPersistDefaultFeeds(FeedSpecKind.Notes)
+                feedsRepository.fetchAndPersistDefaultFeeds(
+                    givenDefaultFeeds = defaultFeeds,
+                    specKind = FeedSpecKind.Notes,
+                )
                 setState { copy(isEditMode = false) }
+                updateFeedsState()
             } catch (error: WssException) {
                 Timber.w(error)
             }
@@ -185,7 +200,7 @@ class FeedsViewModel @AssistedInject constructor(
     private fun persistNewDefaultFeeds() =
         viewModelScope.launch {
             try {
-                feedsRepository.persistNewDefaultFeeds(specKind = specKind)
+                feedsRepository.persistNewDefaultFeeds(givenDefaultFeeds = defaultFeeds, specKind = specKind)
             } catch (error: WssException) {
                 Timber.w(error)
             }
