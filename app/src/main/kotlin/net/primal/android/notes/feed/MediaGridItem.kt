@@ -17,7 +17,7 @@ fun MediaGridItem(
     item: FeedPostUi,
     maxWidthPx: Int,
 ) {
-    val attachment = runCatching { item.attachments.first() }.getOrNull()
+    val attachment = item.attachments.firstOrNull()
     val cdnResource = attachment?.variants.findNearestOrNull(maxWidthPx = maxWidthPx)
     SubcomposeAsyncImage(
         modifier = modifier.fillMaxSize(),
