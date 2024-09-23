@@ -23,6 +23,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
 import net.primal.android.R
+import net.primal.android.core.compose.ListLoading
 import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.isEmpty
 import net.primal.android.notes.feed.model.FeedPostUi
@@ -113,7 +114,11 @@ private fun EmptyItemsContent(
     noContentPaddingValues: PaddingValues = PaddingValues(all = 0.dp),
 ) {
     when (val refreshLoadState = pagingItems.loadState.refresh) {
-        LoadState.Loading -> Unit
+        LoadState.Loading -> {
+            ListLoading(
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
 
         is LoadState.NotLoading -> {
             ListNoContent(
