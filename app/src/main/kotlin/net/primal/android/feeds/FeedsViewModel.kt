@@ -132,7 +132,7 @@ class FeedsViewModel @AssistedInject constructor(
             try {
                 feedsRepository.fetchAndPersistDefaultFeeds(
                     givenDefaultFeeds = defaultFeeds,
-                    specKind = FeedSpecKind.Notes,
+                    specKind = specKind,
                 )
                 setState { copy(isEditMode = false) }
                 updateFeedsState()
