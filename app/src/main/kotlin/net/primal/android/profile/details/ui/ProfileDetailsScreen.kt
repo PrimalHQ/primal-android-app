@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -320,7 +319,6 @@ fun ProfileDetailsScreen(
                                 .height(screenHeight + tabVerticalPadding * 2),
                         ) {
                             val pagerState = rememberPagerState { PROFILE_TAB_COUNT }
-                            val gridState = rememberLazyGridState()
                             ProfileTabs(
                                 selectedTabIndex = pagerState.currentPage,
                                 modifier = Modifier.padding(vertical = tabVerticalPadding),
@@ -402,7 +400,6 @@ fun ProfileDetailsScreen(
                                                 profileId = state.profileId,
                                             ),
                                             onNoteClick = { naddr -> noteCallbacks.onNoteClick?.let { it(naddr) } },
-                                            gridState = gridState,
                                             noContentVerticalArrangement = Arrangement.Top,
                                             noContentPaddingValues = PaddingValues(top = 16.dp),
                                         )
