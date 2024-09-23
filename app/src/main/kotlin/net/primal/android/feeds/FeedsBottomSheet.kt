@@ -104,7 +104,18 @@ private fun FeedsBottomSheet(
                         },
                         feeds = state.feeds,
                         activeFeed = state.activeFeed,
-                        onFeedClick = onFeedClick,
+                        onFeedClick = { feed ->
+                            if (state.isEditMode) {
+                                eventPublisher(
+                                    FeedsContract.UiEvent.UpdateFeedSpecEnabled(
+                                        feedSpec = feed.spec,
+                                        enabled = !feed.enabled,
+                                    ),
+                                )
+                            } else {
+                                onFeedClick(feed)
+                            }
+                        },
                         onEditFeedClick = { eventPublisher(FeedsContract.UiEvent.OpenEditMode) },
                         enableEditMode = true,
                         isEditMode = state.isEditMode,
