@@ -16,6 +16,7 @@ import kotlinx.coroutines.launch
 import net.primal.android.feeds.FeedsContract.UiEvent
 import net.primal.android.feeds.FeedsContract.UiState
 import net.primal.android.feeds.FeedsContract.UiState.FeedMarketplaceStage
+import net.primal.android.feeds.db.Feed
 import net.primal.android.feeds.domain.DvmFeed
 import net.primal.android.feeds.domain.FeedSpecKind
 import net.primal.android.feeds.domain.buildSpec
@@ -46,11 +47,12 @@ class FeedsViewModel @AssistedInject constructor(
     fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
 
     private var allFeeds: List<FeedUi> = emptyList()
+    private var defaultFeeds: List<Feed> = emptyList()
 
     init {
         observeEvents()
         observeFeeds()
-        persistNewDefaultFeeds()
+        fetchAndProcessDefaultFeeds()
         fetchLatestFeedMarketplace()
     }
 
@@ -117,7 +119,25 @@ class FeedsViewModel @AssistedInject constructor(
                     is UiEvent.UpdateFeedSpecEnabled -> {
                         updateFeedSpecEnabled(feedSpec = it.feedSpec, enabled = it.enabled)
                     }
+
+                    UiEvent.RestoreDefaultPrimalFeeds -> {
+                        restoreDefaultPrimalFeeds()
+                    }
                 }
+            }
+        }
+
+    private fun restoreDefaultPrimalFeeds() =
+        viewModelScope.launch {
+            try {
+                feedsRepository.fetchAndPersistDefaultFeeds(
+                    givenDefaultFeeds = defaultFeeds,
+                    specKind = FeedSpecKind.Notes,
+                )
+                setState { copy(isEditMode = false) }
+                updateFeedsState()
+            } catch (error: WssException) {
+                Timber.w(error)
             }
         }
 
@@ -155,6 +175,24 @@ class FeedsViewModel @AssistedInject constructor(
         }
     }
 
+    private fun fetchAndProcessDefaultFeeds() =
+        viewModelScope.launch {
+            try {
+                defaultFeeds = feedsRepository.fetchDefaultFeeds(specKind = specKind) ?: emptyList()
+            } catch (error: WssException) {
+                Timber.w(error)
+            }
+
+            try {
+                feedsRepository.persistNewDefaultFeeds(
+                    givenDefaultFeeds = defaultFeeds,
+                    specKind = specKind,
+                )
+            } catch (error: WssException) {
+                Timber.w(error)
+            }
+        }
+
     private fun fetchLatestFeedMarketplace() =
         viewModelScope.launch {
             setState { copy(fetchingDvmFeeds = true) }
@@ -165,15 +203,6 @@ class FeedsViewModel @AssistedInject constructor(
                 Timber.w(error)
             } finally {
                 setState { copy(fetchingDvmFeeds = false) }
-            }
-        }
-
-    private fun persistNewDefaultFeeds() =
-        viewModelScope.launch {
-            try {
-                feedsRepository.persistNewDefaultFeeds(specKind = specKind)
-            } catch (error: WssException) {
-                Timber.w(error)
             }
         }
 
