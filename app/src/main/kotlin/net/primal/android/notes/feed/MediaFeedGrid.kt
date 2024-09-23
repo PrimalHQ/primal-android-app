@@ -72,9 +72,7 @@ private fun MediaFeedGrid(
             noContentPaddingValues = noContentPaddingValues,
         )
     } else {
-        BoxWithConstraints(
-            modifier = modifier.fillMaxSize(),
-        ) {
+        BoxWithConstraints {
             val itemWidth = maxWidth / 3
             LazyVerticalGrid(
                 modifier = modifier,

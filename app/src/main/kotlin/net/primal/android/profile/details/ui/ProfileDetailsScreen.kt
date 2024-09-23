@@ -396,6 +396,7 @@ fun ProfileDetailsScreen(
 
                                     pageIndex == MEDIA_TAB_INDEX -> {
                                         MediaFeedGrid(
+                                            modifier = Modifier.fillMaxSize(),
                                             feedSpec = state.profileFeedSpecs[pageIndex].buildSpec(
                                                 profileId = state.profileId,
                                             ),
