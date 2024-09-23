@@ -122,6 +122,9 @@ private fun FeedsBottomSheet(
                         onFeedRemoved = {
                             eventPublisher(FeedsContract.UiEvent.RemoveFeedFromUserFeeds(spec = it.spec))
                         },
+                        onRestoreDefaultPrimalFeeds = {
+                            eventPublisher(FeedsContract.UiEvent.RestoreDefaultPrimalFeeds)
+                        },
                     )
 
                 FeedMarketplaceStage.FeedMarketplace -> {
