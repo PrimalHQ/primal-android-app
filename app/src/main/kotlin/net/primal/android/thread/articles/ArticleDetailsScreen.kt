@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -43,8 +44,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
+import java.text.NumberFormat
 import kotlinx.coroutines.launch
 import net.primal.android.R
+import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.PrimalTopAppBar
@@ -52,6 +55,7 @@ import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
+import net.primal.android.core.compose.icons.primaliconpack.FeedNewZapFilled
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.core.ext.openUriSafely
 import net.primal.android.nostr.ext.isNEvent
@@ -60,12 +64,14 @@ import net.primal.android.nostr.ext.isNostrUri
 import net.primal.android.nostr.ext.isNote
 import net.primal.android.nostr.ext.takeAsNoteHexIdOrNull
 import net.primal.android.nostr.utils.Nip19TLV.toNaddrString
+import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.notes.feed.model.FeedPostAction
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.note.FeedNoteCard
 import net.primal.android.notes.feed.note.NoteContract.SideEffect.NoteError
 import net.primal.android.notes.feed.note.showNoteErrorSnackbar
 import net.primal.android.notes.feed.note.ui.FeedNoteActionsRow
+import net.primal.android.notes.feed.note.ui.NoteStatsRow
 import net.primal.android.notes.feed.note.ui.ReferencedNoteCard
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.notes.feed.zaps.UnableToZapBottomSheet
@@ -402,23 +408,64 @@ private fun ArticleContentWithComments(
 
         if (state.article?.eventStatsUi != null) {
             item(contentType = "Stats") {
-                FeedNoteActionsRow(
+                Column(
                     modifier = Modifier
                         .background(color = AppTheme.colorScheme.surfaceVariant)
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
-                        .padding(bottom = 16.dp),
-                    eventStats = state.article.eventStatsUi,
-                    // TODO Pass info if article is bookmarked
-                    isBookmarked = false,
-                    onPostAction = onPostAction,
-                    onPostLongPressAction = { action ->
-                        when (action) {
-                            FeedPostAction.Zap -> onZapOptionsClick()
-                            else -> Unit
+                        .padding(horizontal = 16.dp),
+                ) {
+                    if (state.article.eventStatsUi.satsZapped > 0) {
+                        val numberFormat = NumberFormat.getNumberInstance()
+                        Row(
+                            verticalAlignment = Alignment.Bottom,
+                        ) {
+                            IconText(
+                                modifier = Modifier,
+                                text = numberFormat.format(state.article.eventStatsUi.satsZapped),
+                                style = AppTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.Bold,
+                                leadingIcon = PrimalIcons.FeedNewZapFilled,
+                                leadingIconTintColor = AppTheme.extraColorScheme.zapped,
+                                iconSize = 16.sp,
+                            )
+
+                            Spacer(modifier = Modifier.width(4.dp))
+
+                            Text(
+                                text = "sats",
+                                style = AppTheme.typography.bodySmall,
+                                modifier = Modifier.padding(bottom = 1.dp),
+                            )
                         }
-                    },
-                )
+                    }
+
+                    if (state.article.eventStatsUi.hasAnyCount()) {
+                        NoteStatsRow(
+                            modifier = Modifier.padding(top = 16.dp, bottom = 8.dp),
+                            eventStats = state.article.eventStatsUi,
+                        )
+                    }
+
+                    PrimalDivider(modifier = Modifier.padding(vertical = 16.dp))
+
+                    FeedNoteActionsRow(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 8.dp)
+                            .padding(bottom = 16.dp),
+                        eventStats = state.article.eventStatsUi,
+                        showCounts = false,
+                        showBookmark = true,
+                        // TODO Pass info if article is bookmarked
+                        isBookmarked = false,
+                        onPostAction = onPostAction,
+                        onPostLongPressAction = { action ->
+                            when (action) {
+                                FeedPostAction.Zap -> onZapOptionsClick()
+                                else -> Unit
+                            }
+                        },
+                    )
+                }
             }
         }
 
@@ -474,6 +521,8 @@ private fun ArticleDetailsContract.UiState.calculateCommentsHeaderIndex(partsSiz
     if (article?.eventStatsUi != null) count++
     return count
 }
+
+private fun EventStatsUi.hasAnyCount() = repliesCount > 0 || zapsCount > 0 || likesCount > 0 || repostsCount > 0
 
 @Composable
 private fun CommentsHeaderSection(modifier: Modifier, onPostCommentClick: () -> Unit) {

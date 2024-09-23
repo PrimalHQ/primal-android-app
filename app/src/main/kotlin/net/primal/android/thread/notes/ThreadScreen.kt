@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
@@ -98,6 +97,7 @@ import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.note.FeedNoteCard
 import net.primal.android.notes.feed.note.NoteContract.SideEffect.NoteError
 import net.primal.android.notes.feed.note.showNoteErrorSnackbar
+import net.primal.android.notes.feed.note.ui.NoteStatsRow
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
@@ -457,70 +457,6 @@ private fun isConnectedForward(index: Int, highlightIndex: Int): Boolean {
 }
 
 private fun EventStatsUi.hasAnyCount() = repliesCount > 0 || zapsCount > 0 || likesCount > 0 || repostsCount > 0
-
-@Composable
-private fun NoteStatsRow(eventStats: EventStatsUi, modifier: Modifier = Modifier) {
-    Row(modifier = modifier) {
-        if (eventStats.repliesCount > 0) {
-            SingleNoteStat(
-                count = eventStats.repliesCount,
-                text = stringResource(R.string.thread_stats_replies),
-            )
-        }
-
-        if (eventStats.zapsCount > 0) {
-            val hasPreviousStats = eventStats.repliesCount > 0
-            val startPadding = if (hasPreviousStats) 8.dp else 0.dp
-            SingleNoteStat(
-                modifier = Modifier.padding(start = startPadding),
-                count = eventStats.zapsCount,
-                text = stringResource(R.string.thread_stats_zaps),
-            )
-        }
-
-        if (eventStats.likesCount > 0) {
-            val hasPreviousStats = eventStats.repliesCount > 0 || eventStats.zapsCount > 0
-            val startPadding = if (hasPreviousStats) 8.dp else 0.dp
-            SingleNoteStat(
-                modifier = Modifier.padding(start = startPadding),
-                count = eventStats.likesCount,
-                text = stringResource(R.string.thread_stats_likes),
-            )
-        }
-
-        if (eventStats.repostsCount > 0) {
-            val hasPreviousStats = eventStats.repliesCount > 0 || eventStats.zapsCount > 0 || eventStats.likesCount > 0
-            val startPadding = if (hasPreviousStats) 8.dp else 0.dp
-            SingleNoteStat(
-                modifier = Modifier.padding(start = startPadding),
-                count = eventStats.repostsCount,
-                text = stringResource(R.string.thread_stats_reposts),
-            )
-        }
-    }
-}
-
-@Composable
-private fun SingleNoteStat(
-    count: Long,
-    text: String,
-    modifier: Modifier = Modifier,
-) {
-    Row(modifier = modifier) {
-        Text(
-            text = "$count",
-            style = AppTheme.typography.bodyMedium,
-            fontWeight = FontWeight.SemiBold,
-            color = AppTheme.colorScheme.onSurface,
-        )
-        Spacer(modifier = Modifier.width(4.dp))
-        Text(
-            text = text,
-            style = AppTheme.typography.bodyMedium,
-            color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
-        )
-    }
-}
 
 @Composable
 private fun ReplyToBottomBar(
