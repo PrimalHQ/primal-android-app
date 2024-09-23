@@ -182,14 +182,20 @@ fun FeedList(
                 }
                 if (isEditMode) {
                     item {
+                        val interactionSource = remember { MutableInteractionSource() }
                         ListItem(
                             colors = ListItemDefaults.colors(
                                 containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
                             ),
                             modifier = Modifier
-                                .clip(AppTheme.shapes.large)
+                                .fillMaxWidth()
                                 .padding(horizontal = 16.dp)
-                                .clickable { restoreDefaultDialogVisible = true },
+                                .clip(AppTheme.shapes.large)
+                                .clickable(
+                                    interactionSource = interactionSource,
+                                    indication = LocalIndication.current,
+                                    onClick = { restoreDefaultDialogVisible = true },
+                                ),
                             headlineContent = {
                                 Text(
                                     color = AppTheme.colorScheme.primary,
