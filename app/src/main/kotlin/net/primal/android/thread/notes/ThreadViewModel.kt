@@ -22,7 +22,6 @@ import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.navigation.noteIdOrThrow
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.note.repository.NoteRepository
-import net.primal.android.note.ui.asEventZapUiModel
 import net.primal.android.notes.feed.model.asFeedPostUi
 import net.primal.android.notes.repository.FeedRepository
 import net.primal.android.thread.notes.ThreadContract.UiEvent
@@ -50,7 +49,6 @@ class ThreadViewModel @Inject constructor(
     init {
         observeEvents()
         observeConversationChanges()
-        observeTopZappers()
     }
 
     private fun observeEvents() =
@@ -59,13 +57,6 @@ class ThreadViewModel @Inject constructor(
                 when (it) {
                     UiEvent.UpdateConversation -> fetchData()
                 }
-            }
-        }
-
-    private fun observeTopZappers() =
-        viewModelScope.launch {
-            noteRepository.observeTopZappers(eventId = highlightPostId).collect {
-                setState { copy(topZaps = it.map { it.asEventZapUiModel() }) }
             }
         }
 

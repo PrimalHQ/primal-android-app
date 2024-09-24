@@ -6,7 +6,6 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
-import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface EventZapDao {
@@ -30,16 +29,6 @@ interface EventZapDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun upsertAll(data: List<EventZap>)
-
-    @Transaction
-    @Query(
-        """
-            SELECT * FROM EventZap WHERE eventId = :noteId
-            ORDER BY CAST(amountInBtc AS REAL) DESC, zapReceiptAt ASC
-            LIMIT 10
-        """,
-    )
-    fun observeTopZaps(noteId: String): Flow<List<EventZap>>
 
     @Transaction
     @Query(

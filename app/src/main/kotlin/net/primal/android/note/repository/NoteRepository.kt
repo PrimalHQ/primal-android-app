@@ -225,8 +225,6 @@ class NoteRepository @Inject constructor(
         }
     }
 
-    fun observeTopZappers(eventId: String) = database.eventZaps().observeTopZaps(noteId = eventId)
-
     suspend fun fetchTopNoteZaps(eventId: String) {
         val userId = activeAccountStore.activeUserId()
         val response = eventStatsApi.getEventZaps(EventZapsRequestBody(eventId = eventId, userId = userId, limit = 15))

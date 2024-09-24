@@ -17,7 +17,11 @@ data class EventZapUiModel(
     val amountInSats: ULong,
     val zapperInternetIdentifier: String? = null,
     val zapperAvatarCdnImage: CdnImage? = null,
-)
+) {
+    companion object {
+        val DefaultComparator = compareByDescending<EventZapUiModel> { it.amountInSats }.thenBy { it.zappedAt }
+    }
+}
 
 fun EventZap.asEventZapUiModel() =
     EventZapUiModel(

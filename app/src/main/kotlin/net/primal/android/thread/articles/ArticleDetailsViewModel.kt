@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,7 +24,7 @@ import net.primal.android.nostr.ext.nostrUriToNoteId
 import net.primal.android.nostr.ext.nostrUriToPubkey
 import net.primal.android.nostr.utils.Naddr
 import net.primal.android.nostr.utils.Nip19TLV
-import net.primal.android.note.repository.NoteRepository
+import net.primal.android.note.ui.EventZapUiModel
 import net.primal.android.note.ui.asEventZapUiModel
 import net.primal.android.notes.feed.model.asFeedPostUi
 import net.primal.android.notes.repository.FeedRepository
@@ -46,7 +45,6 @@ class ArticleDetailsViewModel @Inject constructor(
     private val articleRepository: ArticleRepository,
     private val feedRepository: FeedRepository,
     private val profileRepository: ProfileRepository,
-    private val noteRepository: NoteRepository,
 ) : ViewModel() {
 
     private val naddr = Nip19TLV.parseAsNaddr(savedStateHandle.naddrOrThrow)
@@ -57,8 +55,6 @@ class ArticleDetailsViewModel @Inject constructor(
 
     private val events: MutableSharedFlow<UiEvent> = MutableSharedFlow()
     fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
-
-    private var topZappersObserveJob: Job? = null
 
     init {
         observeEvents()
@@ -100,23 +96,21 @@ class ArticleDetailsViewModel @Inject constructor(
 
     private fun observeArticle(naddr: Naddr) =
         viewModelScope.launch {
-            var eventId: String? = null
             var referencedNotesUris: Set<String> = emptySet()
             var referencedProfileUris: Set<String> = emptySet()
             articleRepository.observeArticle(articleId = naddr.identifier, articleAuthorId = naddr.userId)
                 .collect { article ->
-                    if (article.data.eventId != eventId) {
-                        eventId = article.data.eventId
-                        observeTopZappers(eventId = article.data.eventId)
-                    }
-
                     val nostrNoteUris = article.data.uris.filter { it.isNoteUri() || it.isNote() }.toSet()
                     if (nostrNoteUris != referencedNotesUris) {
                         referencedNotesUris = nostrNoteUris
                         val referencedNotes = feedRepository.findAllPostsByIds(
                             postIds = nostrNoteUris.mapNotNull { it.nostrUriToNoteId() },
                         )
-                        setState { copy(referencedNotes = referencedNotes.map { it.asFeedPostUi() }) }
+                        setState {
+                            copy(
+                                referencedNotes = referencedNotes.map { it.asFeedPostUi() },
+                            )
+                        }
                     }
 
                     val nostrProfileUris = article.data.uris.filter { it.isNPubUri() || it.isNPub() }.toSet()
@@ -134,23 +128,16 @@ class ArticleDetailsViewModel @Inject constructor(
                         }
                     }
 
-                    setState { copy(article = article.mapAsArticleDetailsUi()) }
+                    setState {
+                        copy(
+                            article = article.mapAsArticleDetailsUi(),
+                            topZaps = article.eventZaps
+                                .map { it.asEventZapUiModel() }
+                                .sortedWith(EventZapUiModel.DefaultComparator),
+                        )
+                    }
                 }
         }
-
-    private fun observeTopZappers(eventId: String) {
-        topZappersObserveJob?.cancel()
-        topZappersObserveJob = viewModelScope.launch {
-            noteRepository.observeTopZappers(eventId = eventId).collect {
-                setState {
-                    copy(
-                        topZap = it.firstOrNull()?.asEventZapUiModel() ?: this.topZap,
-                        otherZaps = it.drop(n = 1).map { it.asEventZapUiModel() },
-                    )
-                }
-            }
-        }
-    }
 
     private fun observeArticleComments(naddr: Naddr) =
         viewModelScope.launch {

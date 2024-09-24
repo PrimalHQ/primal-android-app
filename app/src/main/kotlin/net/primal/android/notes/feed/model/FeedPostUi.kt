@@ -56,9 +56,5 @@ fun FeedPost.asFeedPostUi() =
         isBookmarked = this.eventHints?.isBookmarked == true,
         eventZaps = this.eventZaps
             .map { it.asEventZapUiModel() }
-            .sortedWith(
-                // This sorting needs to be in sync with sorting in EventZapDao.kt
-                compareByDescending<EventZapUiModel> { it.amountInSats }
-                    .thenBy { it.zappedAt },
-            ),
+            .sortedWith(EventZapUiModel.DefaultComparator),
     )

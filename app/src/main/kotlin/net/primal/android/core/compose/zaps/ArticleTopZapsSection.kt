@@ -1,4 +1,4 @@
-package net.primal.android.thread.articles.ui
+package net.primal.android.core.compose.zaps
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
@@ -9,10 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,60 +27,45 @@ import net.primal.android.R
 import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.icons.PrimalIcons
-import net.primal.android.core.compose.icons.primaliconpack.More
 import net.primal.android.core.compose.icons.primaliconpack.NavWalletBoltFilled
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.note.ui.EventZapUiModel
 import net.primal.android.theme.AppTheme
 
-private const val MaxOtherZaps = 4
-
 @Composable
 fun ArticleTopZapsSection(
     modifier: Modifier,
-    topZap: EventZapUiModel?,
-    otherZaps: List<EventZapUiModel>,
-    onZapsClick: () -> Unit,
+    topZaps: List<EventZapUiModel>,
+    onZapClick: () -> Unit,
+    onTopZapsClick: () -> Unit,
 ) {
+    val topZap = topZaps.firstOrNull()
+    val otherZaps = topZaps.drop(n = 1)
     Column(
         modifier = modifier.animateContentSize(),
     ) {
         Spacer(modifier = Modifier.height(12.dp))
 
         if (topZap != null) {
-            TopNoteZapRow(
+            ArticleTopNoteZapRow(
                 noteZap = topZap,
-                onClick = onZapsClick,
+                onClick = onTopZapsClick,
             )
             Spacer(modifier = Modifier.height(8.dp))
         }
 
         if (otherZaps.isNotEmpty()) {
             Row {
-                otherZaps.take(n = 4).forEach {
+                otherZaps.take(n = 3).forEach {
                     key(it.id) {
-                        NoteZapListItem(
+                        ArticleNoteZapListItem(
                             noteZap = it,
-                            onClick = onZapsClick,
+                            onClick = onTopZapsClick,
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                     }
                 }
-
-                if (otherZaps.size > MaxOtherZaps) {
-                    Icon(
-                        modifier = Modifier
-                            .background(
-                                color = AppTheme.extraColorScheme.surfaceVariantAlt1,
-                                shape = CircleShape,
-                            )
-                            .size(26.dp)
-                            .padding(horizontal = 4.dp)
-                            .clickable(onClick = onZapsClick),
-                        imageVector = PrimalIcons.More,
-                        contentDescription = null,
-                    )
-                }
+                ZapButton(onClick = onZapClick)
             }
             Spacer(modifier = Modifier.height(6.dp))
         }
@@ -91,7 +73,7 @@ fun ArticleTopZapsSection(
 }
 
 @Composable
-private fun TopNoteZapRow(noteZap: EventZapUiModel, onClick: () -> Unit) {
+private fun ArticleTopNoteZapRow(noteZap: EventZapUiModel, onClick: () -> Unit) {
     val numberFormat = NumberFormat.getNumberInstance()
     Row(
         modifier = Modifier
@@ -139,7 +121,7 @@ private fun TopNoteZapRow(noteZap: EventZapUiModel, onClick: () -> Unit) {
 }
 
 @Composable
-private fun NoteZapListItem(noteZap: EventZapUiModel, onClick: () -> Unit) {
+private fun ArticleNoteZapListItem(noteZap: EventZapUiModel, onClick: () -> Unit) {
     val numberFormat = NumberFormat.getNumberInstance()
     Row(
         modifier = Modifier
@@ -211,16 +193,16 @@ private fun PreviewArticleTopZapsSection() {
         Surface(modifier = Modifier.fillMaxWidth()) {
             ArticleTopZapsSection(
                 modifier = Modifier.fillMaxWidth(),
-                topZap = EventZapUiModel(
-                    id = "id",
-                    zapperId = "id",
-                    zapperName = "topZapper",
-                    zapperHandle = "handle",
-                    zappedAt = 0,
-                    message = "Top zap message!!!",
-                    amountInSats = 21_21_21.toULong(),
-                ),
-                otherZaps = listOf(
+                topZaps = listOf(
+                    EventZapUiModel(
+                        id = "id",
+                        zapperId = "id",
+                        zapperName = "topZapper",
+                        zapperHandle = "handle",
+                        zappedAt = 0,
+                        message = "Top zap message!!!",
+                        amountInSats = 21_21_21.toULong(),
+                    ),
                     EventZapUiModel(
                         id = "id",
                         zapperId = "id",
@@ -267,7 +249,8 @@ private fun PreviewArticleTopZapsSection() {
                         amountInSats = 1028.toULong(),
                     ),
                 ),
-                onZapsClick = {},
+                onZapClick = {},
+                onTopZapsClick = {},
             )
         }
     }
