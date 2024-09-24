@@ -97,6 +97,7 @@ fun ArticleDetailsScreen(
     viewModel: ArticleDetailsViewModel,
     onClose: () -> Unit,
     onArticleReplyClick: (naddr: String) -> Unit,
+    onArticleHashtagClick: (hashtag: String) -> Unit,
     noteCallbacks: NoteCallbacks,
     onGoToWallet: () -> Unit,
     onReactionsClick: (eventId: String) -> Unit,
@@ -115,6 +116,7 @@ fun ArticleDetailsScreen(
         eventPublisher = { viewModel.setEvent(it) },
         onClose = onClose,
         onArticleReplyClick = onArticleReplyClick,
+        onArticleHashtagClick = onArticleHashtagClick,
         onReactionsClick = onReactionsClick,
         noteCallbacks = noteCallbacks,
         onGoToWallet = onGoToWallet,
@@ -127,6 +129,7 @@ private fun ArticleDetailsScreen(
     state: ArticleDetailsContract.UiState,
     eventPublisher: (UiEvent) -> Unit,
     onClose: () -> Unit,
+    onArticleHashtagClick: (hashtag: String) -> Unit,
     onArticleReplyClick: (naddr: String) -> Unit,
     onReactionsClick: (eventId: String) -> Unit,
     noteCallbacks: NoteCallbacks,
@@ -214,6 +217,7 @@ private fun ArticleDetailsScreen(
                     listState = listState,
                     paddingValues = paddingValues,
                     onArticleCommentClick = onArticleReplyClick,
+                    onArticleHashtagClick = onArticleHashtagClick,
                     onReactionsClick = onReactionsClick,
                     onZapOptionsClick = { invokeZapOptions() },
                     onGoToWallet = onGoToWallet,
@@ -269,6 +273,7 @@ private fun ArticleContentWithComments(
     listState: LazyListState = rememberLazyListState(),
     paddingValues: PaddingValues,
     onArticleCommentClick: (naddr: String) -> Unit,
+    onArticleHashtagClick: (hashtag: String) -> Unit,
     onReactionsClick: (eventId: String) -> Unit,
     onZapOptionsClick: () -> Unit,
     noteCallbacks: NoteCallbacks,
@@ -402,6 +407,7 @@ private fun ArticleContentWithComments(
                         .padding(bottom = 16.dp)
                         .fillMaxWidth(),
                     hashtags = state.article.hashtags,
+                    onHashtagClick = onArticleHashtagClick,
                 )
             }
         }

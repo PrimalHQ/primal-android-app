@@ -998,6 +998,11 @@ private fun NavGraphBuilder.articleDetails(
         onArticleReplyClick = { naddr ->
             navController.navigateToNoteEditor(NoteEditorArgs(replyToArticleNaddr = naddr))
         },
+        onArticleHashtagClick = { hashtag ->
+            navController.navigateToExploreArticleFeed(
+                feedSpec = "article $hashtag feed spec goes here",
+            )
+        },
         noteCallbacks = noteCallbacksHandler(navController),
         onGoToWallet = { navController.navigateToWallet() },
         onReactionsClick = { noteId -> navController.navigateToNoteReactions(noteId = noteId) },
