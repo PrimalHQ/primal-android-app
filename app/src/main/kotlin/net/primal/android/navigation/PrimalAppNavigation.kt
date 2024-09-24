@@ -729,6 +729,7 @@ private fun NavGraphBuilder.explore(route: String, navController: NavController)
         ExploreHomeScreen(
             viewModel = viewModel,
             onHashtagClick = { query -> navController.navigateToExploreNoteFeed(query = query) },
+            onNoteClick = { noteId -> navController.navigateToThread(noteId) },
             onSearchClick = { navController.navigateToSearch() },
             onTuneClick = { navController.navigateToAdvancedSearch() },
             onClose = { navController.navigateUp() },

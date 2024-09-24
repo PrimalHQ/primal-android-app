@@ -61,6 +61,7 @@ import net.primal.android.explore.home.ui.MEDIA_INDEX
 import net.primal.android.explore.home.ui.PEOPLE_INDEX
 import net.primal.android.explore.home.ui.TOPICS_INDEX
 import net.primal.android.explore.home.ui.ZAPS_INDEX
+import net.primal.android.notes.feed.MediaFeedGrid
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 
@@ -68,6 +69,7 @@ import net.primal.android.theme.domain.PrimalTheme
 fun ExploreHomeScreen(
     viewModel: ExploreHomeViewModel,
     onHashtagClick: (String) -> Unit,
+    onNoteClick: (String) -> Unit,
     onSearchClick: () -> Unit,
     onTuneClick: () -> Unit,
     onClose: () -> Unit,
@@ -77,6 +79,7 @@ fun ExploreHomeScreen(
     ExploreHomeScreen(
         state = uiState.value,
         onHashtagClick = onHashtagClick,
+        onNoteClick = onNoteClick,
         onSearchClick = onSearchClick,
         eventPublisher = { viewModel.setEvent(it) },
         onTuneClick = onTuneClick,
@@ -89,6 +92,7 @@ fun ExploreHomeScreen(
 private fun ExploreHomeScreen(
     state: ExploreHomeContract.UiState,
     onHashtagClick: (String) -> Unit,
+    onNoteClick: (String) -> Unit,
     onSearchClick: () -> Unit,
     eventPublisher: (UiEvent) -> Unit,
     onTuneClick: () -> Unit,
@@ -111,6 +115,12 @@ private fun ExploreHomeScreen(
                 state = pagerState,
             ) { pageIndex ->
                 when (pageIndex) {
+                    MEDIA_INDEX -> {
+                        MediaFeedGrid(
+                            feedSpec = """{"id":"explore-media"}""",
+                            onNoteClick = onNoteClick,
+                        )
+                    }
                     TOPICS_INDEX -> {
                         TopicsTabContent(
                             paddingValues = paddingValues,
