@@ -57,6 +57,7 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.FeedNewZapFilled
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
+import net.primal.android.core.compose.zaps.ArticleTopZapsSection
 import net.primal.android.core.ext.openUriSafely
 import net.primal.android.nostr.ext.isNEvent
 import net.primal.android.nostr.ext.isNEventUri
@@ -83,7 +84,6 @@ import net.primal.android.thread.articles.ArticleDetailsContract.UiEvent
 import net.primal.android.thread.articles.ui.ArticleAuthorRow
 import net.primal.android.thread.articles.ui.ArticleDetailsHeader
 import net.primal.android.thread.articles.ui.ArticleHashtags
-import net.primal.android.thread.articles.ui.ArticleTopZapsSection
 import net.primal.android.thread.articles.ui.FloatingArticlePill
 import net.primal.android.thread.articles.ui.rendering.HtmlRenderer
 import net.primal.android.thread.articles.ui.rendering.MarkdownRenderer
@@ -319,7 +319,7 @@ private fun ArticleContentWithComments(
             )
         }
 
-        if (state.topZap != null || state.otherZaps.isNotEmpty()) {
+        if (state.topZaps.isNotEmpty()) {
             item(
                 key = "TopZapSection",
                 contentType = "TopZapSection",
@@ -329,9 +329,9 @@ private fun ArticleContentWithComments(
                         .background(color = AppTheme.colorScheme.surfaceVariant)
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp),
-                    topZap = state.topZap,
-                    otherZaps = state.otherZaps,
-                    onZapsClick = { state.article?.eventId?.let(onReactionsClick) },
+                    topZaps = state.topZaps,
+                    onTopZapsClick = { state.article?.eventId?.let(onReactionsClick) },
+                    onZapClick = onZapOptionsClick,
                 )
             }
         }
@@ -515,7 +515,7 @@ private fun ArticleContentWithComments(
 private fun ArticleDetailsContract.UiState.calculateCommentsHeaderIndex(partsSize: Int): Int {
     var count = 1
     if (article != null) count++
-    if (topZap != null || otherZaps.isNotEmpty()) count++
+    if (topZaps.isNotEmpty()) count++
     count += partsSize
     if (article?.hashtags?.isNotEmpty() == true) count++
     if (article?.eventStatsUi != null) count++

@@ -404,9 +404,9 @@ private fun ThreadLazyColumn(
                             Column(
                                 modifier = Modifier.padding(horizontal = 10.dp),
                             ) {
-                                if (state.topZaps.isNotEmpty()) {
+                                if (item.eventZaps.isNotEmpty()) {
                                     ThreadNoteTopZapsSection(
-                                        zaps = state.topZaps,
+                                        zaps = item.eventZaps,
                                         onClick = { onReactionsClick(item.postId) },
                                     )
                                 }
