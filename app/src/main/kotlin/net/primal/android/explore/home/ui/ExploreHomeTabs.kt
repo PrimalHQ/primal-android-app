@@ -58,27 +58,27 @@ fun ExploreHomeTabs(
         CustomTab(
             selected = selectedTabIndex == FEEDS_INDEX,
             onClick = onFeedsTabClick,
-            text = stringResource(id = R.string.explore_feeds_tab),
+            text = stringResource(id = R.string.explore_feeds_tab).uppercase(),
         )
         CustomTab(
             selected = selectedTabIndex == PEOPLE_INDEX,
             onClick = onPeopleTabClick,
-            text = stringResource(id = R.string.explore_people_tab),
+            text = stringResource(id = R.string.explore_people_tab).uppercase(),
         )
         CustomTab(
             selected = selectedTabIndex == ZAPS_INDEX,
             onClick = onZapsTabClick,
-            text = stringResource(id = R.string.explore_zaps_tab),
+            text = stringResource(id = R.string.explore_zaps_tab).uppercase(),
         )
         CustomTab(
             selected = selectedTabIndex == MEDIA_INDEX,
             onClick = onMediaTabClick,
-            text = stringResource(id = R.string.explore_media_tab),
+            text = stringResource(id = R.string.explore_media_tab).uppercase(),
         )
         CustomTab(
             selected = selectedTabIndex == TOPICS_INDEX,
             onClick = onTopicsTabClick,
-            text = stringResource(id = R.string.explore_topics_tab),
+            text = stringResource(id = R.string.explore_topics_tab).uppercase(),
         )
     }
 }

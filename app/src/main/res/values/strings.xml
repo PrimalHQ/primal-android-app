@@ -237,11 +237,11 @@
     <string name="explore_enter_query">Enter text to search</string>
     <string name="explore_trending_hashtags_no_content">Trending hashtags will appear here.</string>
     <string name="explore_fallback_title">Feed</string>
-    <string name="explore_feeds_tab">FEEDS</string>
-    <string name="explore_people_tab">PEOPLE</string>
-    <string name="explore_zaps_tab">ZAPS</string>
-    <string name="explore_media_tab">MEDIA</string>
-    <string name="explore_topics_tab">TOPICS</string>
+    <string name="explore_feeds_tab">Feeds</string>
+    <string name="explore_people_tab">People</string>
+    <string name="explore_zaps_tab">Zaps</string>
+    <string name="explore_media_tab">Media</string>
+    <string name="explore_topics_tab">Topics</string>
 
     <string name="search_followers_text">Followers</string>
 
