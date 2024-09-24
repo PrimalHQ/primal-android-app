@@ -119,6 +119,7 @@ private fun ExploreHomeScreen(
                 when (pageIndex) {
                     MEDIA_INDEX -> {
                         MediaFeedGrid(
+                            modifier = Modifier.padding(paddingValues),
                             feedSpec = EXPLORE_MEDIA_FEED_SPEC,
                             onNoteClick = onNoteClick,
                         )
