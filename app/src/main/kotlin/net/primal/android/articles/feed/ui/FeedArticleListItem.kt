@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -33,8 +32,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.DpSize
-import androidx.compose.ui.unit.coerceIn
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.SubcomposeAsyncImage
@@ -146,7 +143,6 @@ private fun ListItemContent(data: FeedArticleUi) {
         Text(
             modifier = Modifier
                 .padding(top = 8.dp, end = 16.dp)
-                .heightIn(min = imageHeightMin)
                 .weight(1f),
             text = data.title,
             style = AppTheme.typography.titleLarge.copy(
@@ -158,12 +154,12 @@ private fun ListItemContent(data: FeedArticleUi) {
             overflow = TextOverflow.Ellipsis,
         )
 
-        val (imageSource, imageSize) = data.resolveImageUrlAndImageSize()
+        val imageSource = data.resolveImageUrl()
         SubcomposeAsyncImage(
             model = imageSource,
             modifier = Modifier
                 .padding(vertical = 4.dp)
-                .size(imageSize)
+                .size(width = imageWidth, height = imageHeight)
                 .border(
                     width = 0.5.dp,
                     color = AppTheme.colorScheme.outlineVariant,
@@ -235,30 +231,15 @@ private fun ListItemFooter(data: FeedArticleUi, textStyle: TextStyle) {
 }
 
 private val imageWidth = 100.dp
-private val imageHeightMax = 144.dp
-private val imageHeightMin = 36.dp
+private val imageHeight = 72.dp
 
 @Composable
-private fun FeedArticleUi.resolveImageUrlAndImageSize(): Pair<String?, DpSize> {
+private fun FeedArticleUi.resolveImageUrl(): String? {
     val density = LocalDensity.current
     val maxWidthPx = with(density) { imageWidth.roundToPx() }
     val variant = this.imageCdnImage?.variants.findNearestOrNull(maxWidthPx = maxWidthPx)
     val imageSource = variant?.mediaUrl ?: this.imageCdnImage?.sourceUrl
-
-    val imageSize = if (variant == null) {
-        DpSize(width = imageWidth, height = imageWidth)
-    } else {
-        val imageHeightPx = (variant.height / variant.width) * maxWidthPx
-        val imageHeight = with(density) { imageHeightPx.toDp() }
-        DpSize(
-            width = imageWidth,
-            height = imageHeight.coerceIn(
-                minimumValue = imageHeightMin,
-                maximumValue = imageHeightMax,
-            ),
-        )
-    }
-    return Pair(imageSource, imageSize)
+    return imageSource
 }
 
 @Composable
