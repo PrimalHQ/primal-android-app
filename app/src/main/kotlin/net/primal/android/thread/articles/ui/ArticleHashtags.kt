@@ -19,7 +19,11 @@ import net.primal.android.theme.domain.PrimalTheme
 
 @ExperimentalLayoutApi
 @Composable
-fun ArticleHashtags(hashtags: List<String>, modifier: Modifier = Modifier) {
+fun ArticleHashtags(
+    hashtags: List<String>,
+    onHashtagClick: (hashtag: String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     FlowRow(
         modifier = modifier,
         horizontalArrangement = Arrangement.Start,
@@ -28,7 +32,7 @@ fun ArticleHashtags(hashtags: List<String>, modifier: Modifier = Modifier) {
         hashtags.forEach { hashtag ->
             SuggestionChip(
                 modifier = Modifier.padding(horizontal = 3.dp),
-                onClick = {},
+                onClick = { onHashtagClick(hashtag) },
                 shape = AppTheme.shapes.extraLarge,
                 border = SuggestionChipDefaults.suggestionChipBorder(
                     enabled = true,
@@ -58,6 +62,7 @@ private fun PreviewArticleHashtags() {
         Surface {
             ArticleHashtags(
                 hashtags = listOf("#primal", "#nostr", "#wallet", "#bitcoin", "#mobile", "#android", "#freedom"),
+                onHashtagClick = {},
                 modifier = Modifier.fillMaxWidth(),
             )
         }
