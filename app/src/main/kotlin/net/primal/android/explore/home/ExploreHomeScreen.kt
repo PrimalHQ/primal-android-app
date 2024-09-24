@@ -65,6 +65,8 @@ import net.primal.android.notes.feed.MediaFeedGrid
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 
+internal const val EXPLORE_MEDIA_FEED_SPEC = """{"id":"explore-media"}"""
+
 @Composable
 fun ExploreHomeScreen(
     viewModel: ExploreHomeViewModel,
@@ -117,7 +119,7 @@ private fun ExploreHomeScreen(
                 when (pageIndex) {
                     MEDIA_INDEX -> {
                         MediaFeedGrid(
-                            feedSpec = """{"id":"explore-media"}""",
+                            feedSpec = EXPLORE_MEDIA_FEED_SPEC,
                             onNoteClick = onNoteClick,
                         )
                     }
