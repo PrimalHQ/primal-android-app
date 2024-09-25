@@ -1,6 +1,6 @@
 package net.primal.android.explore.home
 
-data class HashtagUi(
+data class TopicUi(
     val name: String,
     val score: Float,
 )
