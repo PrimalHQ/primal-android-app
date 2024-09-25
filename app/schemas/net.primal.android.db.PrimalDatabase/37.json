@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 37,
-    "identityHash": "fc0c8fecdfb21d640835f65c5fb527cb",
+    "identityHash": "e22e7a54baf8d1eff4dfa89369b5876d",
     "entities": [
       {
         "tableName": "PostData",
@@ -1361,13 +1361,19 @@
       },
       {
         "tableName": "EventHints",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`eventId` TEXT NOT NULL, `relays` TEXT NOT NULL, `isBookmarked` INTEGER, PRIMARY KEY(`eventId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`eventTag` TEXT NOT NULL, `eventId` TEXT, `relays` TEXT NOT NULL, `isBookmarked` INTEGER, PRIMARY KEY(`eventTag`))",
         "fields": [
+          {
+            "fieldPath": "eventTag",
+            "columnName": "eventTag",
+            "affinity": "TEXT",
+            "notNull": true
+          },
           {
             "fieldPath": "eventId",
             "columnName": "eventId",
             "affinity": "TEXT",
-            "notNull": true
+            "notNull": false
           },
           {
             "fieldPath": "relays",
@@ -1385,7 +1391,7 @@
         "primaryKey": {
           "autoGenerate": false,
           "columnNames": [
-            "eventId"
+            "eventTag"
           ]
         },
         "indices": [],
@@ -1419,7 +1425,7 @@
       },
       {
         "tableName": "ArticleData",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`eventId` TEXT NOT NULL, `articleId` TEXT NOT NULL, `authorId` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `content` TEXT NOT NULL, `title` TEXT NOT NULL, `publishedAt` INTEGER NOT NULL, `raw` TEXT, `imageCdnImage` TEXT, `summary` TEXT, `authorMetadataId` TEXT, `wordsCount` INTEGER, `uris` TEXT NOT NULL, `hashtags` TEXT NOT NULL, PRIMARY KEY(`articleId`, `authorId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`eventId` TEXT NOT NULL, `articleId` TEXT NOT NULL, `authorId` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `content` TEXT NOT NULL, `title` TEXT NOT NULL, `publishedAt` INTEGER NOT NULL, `articleTagValue` TEXT NOT NULL, `raw` TEXT, `imageCdnImage` TEXT, `summary` TEXT, `authorMetadataId` TEXT, `wordsCount` INTEGER, `uris` TEXT NOT NULL, `hashtags` TEXT NOT NULL, PRIMARY KEY(`articleId`, `authorId`))",
         "fields": [
           {
             "fieldPath": "eventId",
@@ -1461,6 +1467,12 @@
             "fieldPath": "publishedAt",
             "columnName": "publishedAt",
             "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "articleTagValue",
+            "columnName": "articleTagValue",
+            "affinity": "TEXT",
             "notNull": true
           },
           {
@@ -1616,7 +1628,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'fc0c8fecdfb21d640835f65c5fb527cb')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e22e7a54baf8d1eff4dfa89369b5876d')"
     ]
   }
 }

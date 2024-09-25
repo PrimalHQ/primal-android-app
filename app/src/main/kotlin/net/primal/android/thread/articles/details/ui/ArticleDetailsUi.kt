@@ -22,6 +22,7 @@ data class ArticleDetailsUi(
     val coverImageCdnImage: CdnImage? = null,
     val readingTimeInMinutes: Int? = null,
     val hashtags: List<String> = emptyList(),
+    val isBookmarked: Boolean = false,
     val eventStatsUi: EventStatsUi = EventStatsUi(),
 )
 
@@ -41,6 +42,7 @@ fun Article.mapAsArticleDetailsUi(): ArticleDetailsUi {
         coverImageCdnImage = this.data.imageCdnImage ?: this.author?.avatarCdnImage,
         readingTimeInMinutes = ((this.data.wordsCount ?: 1) / 200) + 1,
         hashtags = this.data.hashtags,
+        isBookmarked = this.eventHints?.isBookmarked == true,
         eventStatsUi = EventStatsUi.from(eventStats = this.eventStats, userStats = this.userEventStats),
     )
 }

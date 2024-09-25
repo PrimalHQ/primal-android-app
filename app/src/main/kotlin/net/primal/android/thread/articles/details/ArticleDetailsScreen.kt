@@ -596,10 +596,9 @@ private fun ArticleContentWithComments(
                             .padding(horizontal = 8.dp)
                             .padding(bottom = 16.dp),
                         eventStats = state.article.eventStatsUi,
+                        isBookmarked = state.article.isBookmarked,
                         showCounts = false,
                         showBookmark = true,
-                        // TODO Pass info if article is bookmarked
-                        isBookmarked = false,
                         onPostAction = onPostAction,
                         onPostLongPressAction = onPostLongPressAction,
                     )

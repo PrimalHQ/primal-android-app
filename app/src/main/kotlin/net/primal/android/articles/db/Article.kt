@@ -2,6 +2,7 @@ package net.primal.android.articles.db
 
 import androidx.room.Embedded
 import androidx.room.Relation
+import net.primal.android.nostr.db.EventHints
 import net.primal.android.note.db.EventStats
 import net.primal.android.note.db.EventUserStats
 import net.primal.android.note.db.EventZap
@@ -22,4 +23,7 @@ data class Article(
 
     @Relation(entityColumn = "eventId", parentColumn = "eventId")
     val eventZaps: List<EventZap> = emptyList(),
+
+    @Relation(entityColumn = "eventId", parentColumn = "eventId")
+    val eventHints: EventHints? = null,
 )

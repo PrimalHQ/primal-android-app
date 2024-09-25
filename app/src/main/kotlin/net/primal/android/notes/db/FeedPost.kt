@@ -54,7 +54,7 @@ data class FeedPost(
     val replyToAuthor: ProfileData? = null,
 
     @Relation(
-        entityColumn = "eventId",
+        entityColumn = "eventTag",
         parentColumn = "postId",
     )
     val eventHints: EventHints? = null,

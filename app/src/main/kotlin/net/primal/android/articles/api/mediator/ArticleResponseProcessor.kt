@@ -49,7 +49,7 @@ suspend fun ArticleResponse.persistToDatabaseAsTransaction(userId: String, datab
 
         val eventHintsDao = database.eventHints()
         val hintsMap = eventHints.associateBy { it.eventId }
-        eventHintsUpserter(dao = eventHintsDao, eventIds = eventHints.map { it.eventId }) {
+        eventHintsUpserter(dao = eventHintsDao, eventIds = eventHints.mapNotNull { it.eventId }) {
             copy(relays = hintsMap[this.eventId]?.relays ?: emptyList())
         }
     }

@@ -43,6 +43,7 @@ fun List<PrimalEvent>.mapReferencedEventsAsArticleDataPO(
 private fun NostrEvent.asArticleData(wordsCount: Int?, cdnResources: Map<String, CdnResource>): ArticleData? {
     val identifier = tags.findFirstIdentifier()
     val title = tags.findFirstTitle()
+    val authorId = this.pubKey
     val raw = NostrJson.encodeToString(this.toJsonObject())
 
     if (identifier == null || title == null) {
@@ -53,10 +54,11 @@ private fun NostrEvent.asArticleData(wordsCount: Int?, cdnResources: Map<String,
     return ArticleData(
         eventId = this.id,
         articleId = identifier,
-        authorId = this.pubKey,
+        authorId = authorId,
         title = title,
         createdAt = this.createdAt,
         publishedAt = tags.findFirstPublishedAt()?.toLongOrNull() ?: this.createdAt,
+        articleTagValue = "${NostrEventKind.LongFormContent.value}:$authorId:$identifier",
         content = this.content,
         uris = this.content.parseUris(),
         hashtags = this.parseHashtags(),

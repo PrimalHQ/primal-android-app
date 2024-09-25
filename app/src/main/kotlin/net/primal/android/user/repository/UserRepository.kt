@@ -13,6 +13,7 @@ import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.db.eventHintsUpserter
 import net.primal.android.nostr.ext.asProfileDataPO
+import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.model.content.ContentMetadata
 import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.android.profile.domain.ProfileMetadata
@@ -56,9 +57,22 @@ class UserRepository @Inject constructor(
         database.withTransaction {
             val eventHintsDao = database.eventHints()
             eventHintsDao.clearAllBookmarks()
-            bookmarksList?.bookmarks?.filter { it.type == "e" }?.map {
-                eventHintsUpserter(dao = eventHintsDao, eventId = it.value) {
+            bookmarksList?.bookmarks?.filter { it.type == "e" }?.forEach { tag ->
+                eventHintsUpserter(dao = eventHintsDao, eventId = tag.value) {
                     copy(isBookmarked = true)
+                }
+            }
+//            "30023:1739d937dc8c0c7370aa27585938c119e25c41f6c441a5d34c6d38503e3136ef:1720256910765"
+            bookmarksList?.bookmarks?.filter { it.type == "a" }?.forEach { tag ->
+                val values = tag.value.split(":")
+                val kind = values.getOrNull(index = 0)?.toIntOrNull()
+                val authorId = values.getOrNull(index = 1)
+                val identifier = values.getOrNull(index = 2)
+                if (kind == NostrEventKind.LongFormContent.value) {
+
+//                eventHintsUpserter(dao = eventHintsDao, eventId = it.value) {
+//                    copy(isBookmarked = true)
+//                }
                 }
             }
         }

@@ -6,7 +6,8 @@ import androidx.room.PrimaryKey
 @Entity
 data class EventHints(
     @PrimaryKey
-    val eventId: String,
+    val eventTag: String,
+    val eventId: String? = null,
     val relays: List<String> = emptyList(),
     val isBookmarked: Boolean? = null,
 )
