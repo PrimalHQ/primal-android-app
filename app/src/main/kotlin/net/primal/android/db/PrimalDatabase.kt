@@ -14,8 +14,8 @@ import net.primal.android.attachments.db.NoteAttachment
 import net.primal.android.attachments.db.NoteNostrUri
 import net.primal.android.attachments.db.serialization.AttachmentTypeConverters
 import net.primal.android.core.serialization.room.ListsTypeConverters
-import net.primal.android.explore.db.TrendingHashtag
-import net.primal.android.explore.db.TrendingHashtagDao
+import net.primal.android.explore.db.TrendingTopic
+import net.primal.android.explore.db.TrendingTopicDao
 import net.primal.android.feeds.db.Feed
 import net.primal.android.feeds.db.FeedDao
 import net.primal.android.messages.db.DirectMessageDao
@@ -72,7 +72,7 @@ import net.primal.android.wallet.db.WalletTransactionData
         FeedPostRemoteKey::class,
         NoteConversationCrossRef::class,
         ProfileStats::class,
-        TrendingHashtag::class,
+        TrendingTopic::class,
         NotificationData::class,
         MutedUserData::class,
         DirectMessageData::class,
@@ -85,7 +85,7 @@ import net.primal.android.wallet.db.WalletTransactionData
         ArticleCommentCrossRef::class,
         ArticleFeedCrossRef::class,
     ],
-    version = 37,
+    version = 38,
     exportSchema = true,
 )
 @TypeConverters(
@@ -120,7 +120,7 @@ abstract class PrimalDatabase : RoomDatabase() {
 
     abstract fun threadConversations(): ThreadConversationDao
 
-    abstract fun trendingHashtags(): TrendingHashtagDao
+    abstract fun trendingTopics(): TrendingTopicDao
 
     abstract fun notifications(): NotificationDao
 

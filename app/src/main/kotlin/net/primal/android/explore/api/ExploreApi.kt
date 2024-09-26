@@ -1,12 +1,12 @@
 package net.primal.android.explore.api
 
-import net.primal.android.explore.api.model.HashtagScore
 import net.primal.android.explore.api.model.SearchUsersRequestBody
+import net.primal.android.explore.api.model.TopicScore
 import net.primal.android.explore.api.model.UsersResponse
 
 interface ExploreApi {
 
-    suspend fun getTrendingHashtags(): List<HashtagScore>
+    suspend fun getTrendingTopics(): List<TopicScore>
 
     suspend fun getPopularUsers(): UsersResponse
 

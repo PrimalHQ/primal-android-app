@@ -235,7 +235,7 @@
 
     <string name="explore_search_nostr">Search Nostr</string>
     <string name="explore_enter_query">Enter text to search</string>
-    <string name="explore_trending_hashtags_no_content">Trending hashtags will appear here.</string>
+    <string name="explore_trending_topics_no_content">Trending topics will appear here.</string>
     <string name="explore_fallback_title">Feed</string>
     <string name="explore_feeds_tab">Feeds</string>
     <string name="explore_people_tab">People</string>
