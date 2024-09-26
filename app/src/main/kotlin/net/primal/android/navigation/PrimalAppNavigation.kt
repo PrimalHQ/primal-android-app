@@ -39,12 +39,13 @@ import net.primal.android.core.compose.ApplyEdgeToEdge
 import net.primal.android.core.compose.LockToOrientationPortrait
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.compose.findActivity
+import net.primal.android.crypto.hexToNoteHrp
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.editor.di.noteEditorViewModel
 import net.primal.android.editor.domain.NoteEditorArgs
 import net.primal.android.editor.domain.NoteEditorArgs.Companion.asNoteEditorArgs
 import net.primal.android.editor.domain.NoteEditorArgs.Companion.jsonAsNoteEditorArgs
-import net.primal.android.editor.domain.NoteEditorArgs.Companion.noteIdToNoteEditorArgs
+import net.primal.android.editor.domain.NoteEditorArgs.Companion.toNostrUriInNoteEditorArgs
 import net.primal.android.editor.ui.NoteEditorScreen
 import net.primal.android.explore.asearch.AdvancedSearchScreen
 import net.primal.android.explore.asearch.AdvancedSearchViewModel
@@ -212,22 +213,30 @@ fun NavController.navigateToExploreNoteFeed(
 )
 
 fun NavController.navigateToExploreArticleFeed(feedSpec: String) =
-    navigate(
-        route = "explore/article?$EXPLORE_FEED_SPEC=${feedSpec.asBase64Encoded()}",
-    )
+    navigate(route = "explore/article?$EXPLORE_FEED_SPEC=${feedSpec.asBase64Encoded()}")
 
 private fun NavController.navigateToNotesBookmarks(userId: String) {
     val spec = "{\"id\":\"feed\",\"kind\":\"notes\",\"notes\":\"bookmarks\",\"pubkey\":\"$userId\"}"
-    navigate(route = "explore?$EXPLORE_FEED_SPEC=${spec.asBase64Encoded()}")
+    navigateToExploreNoteFeed(query = spec)
 }
 
 fun noteCallbacksHandler(navController: NavController) =
     NoteCallbacks(
         onNoteClick = { postId -> navController.navigateToThread(noteId = postId) },
-        onArticleClick = { naddr -> navController.navigateToArticleDetails(naddr = naddr) },
-        onProfileClick = { profileId -> navController.navigateToProfile(profileId = profileId) },
         onNoteReplyClick = { postId -> navController.navigateToNoteEditor(NoteEditorArgs(replyToNoteId = postId)) },
-        onNoteQuoteClick = { noteId -> navController.navigateToNoteEditor(noteId.noteIdToNoteEditorArgs()) },
+        onNoteQuoteClick = { noteId ->
+            navController.navigateToNoteEditor(
+                noteId.hexToNoteHrp().toNostrUriInNoteEditorArgs(),
+            )
+        },
+        onArticleClick = { naddr -> navController.navigateToArticleDetails(naddr = naddr) },
+        onArticleReplyClick = { naddr ->
+            navController.navigateToNoteEditor(
+                NoteEditorArgs(replyToArticleNaddr = naddr),
+            )
+        },
+        onArticleQuoteClick = { naddr -> navController.navigateToNoteEditor(naddr.toNostrUriInNoteEditorArgs()) },
+        onProfileClick = { profileId -> navController.navigateToProfile(profileId = profileId) },
         onHashtagClick = { hashtag -> navController.navigateToExploreNoteFeed(query = hashtag) },
         onMediaClick = {
             navController.navigateToMediaGallery(
@@ -995,9 +1004,6 @@ private fun NavGraphBuilder.articleDetails(
     ArticleDetailsScreen(
         viewModel = viewModel,
         onClose = { navController.navigateUp() },
-        onArticleReplyClick = { naddr ->
-            navController.navigateToNoteEditor(NoteEditorArgs(replyToArticleNaddr = naddr))
-        },
         onArticleHashtagClick = { hashtag ->
             navController.navigateToExploreArticleFeed(
                 feedSpec = "article $hashtag feed spec goes here",
@@ -1083,7 +1089,6 @@ private fun NavGraphBuilder.profile(
                 followsType = followsType,
             )
         },
-        onArticleClick = { naddr -> navController.navigateToArticleDetails(naddr) },
         onGoToWallet = { navController.navigateToWallet() },
     )
 }

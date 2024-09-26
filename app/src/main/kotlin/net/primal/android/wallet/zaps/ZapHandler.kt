@@ -1,6 +1,8 @@
 package net.primal.android.wallet.zaps
 
 import javax.inject.Inject
+import kotlinx.coroutines.withContext
+import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.networking.relays.FALLBACK_RELAYS
 import net.primal.android.nostr.notary.NostrNotary
@@ -19,6 +21,7 @@ import net.primal.android.wallet.nwc.NwcNostrZapperFactory
 import net.primal.android.wallet.repository.WalletNostrZapper
 
 class ZapHandler @Inject constructor(
+    private val dispatcherProvider: CoroutineDispatcherProvider,
     private val accountsStore: UserAccountsStore,
     private val nwcNostrZapperFactory: NwcNostrZapperFactory,
     private val primalWalletZapper: WalletNostrZapper,
@@ -33,7 +36,7 @@ class ZapHandler @Inject constructor(
         target: ZapTarget,
         amountInSats: ULong? = null,
         comment: String? = null,
-    ) {
+    ) = withContext(dispatcherProvider.io()) {
         val userAccount = accountsStore.findByIdOrNull(userId = userId)
         val userRelays = relayRepository.findRelays(userId, RelayKind.UserRelay)
             .map { it.mapToRelayDO() }
@@ -103,6 +106,13 @@ class ZapHandler @Inject constructor(
                 userId = userId,
                 eventId = this.id,
                 eventAuthorId = this.authorPubkey,
+                database = database,
+            )
+
+            is ZapTarget.Article -> EventStatsUpdater(
+                userId = userId,
+                eventId = this.eventId,
+                eventAuthorId = this.eventAuthorId,
                 database = database,
             )
 

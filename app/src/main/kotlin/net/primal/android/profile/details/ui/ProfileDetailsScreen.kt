@@ -87,7 +87,6 @@ fun ProfileDetailsScreen(
     onZapProfileClick: (DraftTx) -> Unit,
     onDrawerQrCodeClick: (String) -> Unit,
     onFollowsClick: (String, ProfileFollowsType) -> Unit,
-    onArticleClick: (String) -> Unit,
     onGoToWallet: () -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
@@ -121,7 +120,6 @@ fun ProfileDetailsScreen(
         onGoToWallet = onGoToWallet,
         onFollowsClick = onFollowsClick,
         eventPublisher = { viewModel.setEvent(it) },
-        onArticleClick = onArticleClick,
         pullToRefreshState = pullToRefreshState,
         pullToRefreshing = pullToRefreshing,
     )
@@ -144,7 +142,6 @@ fun ProfileDetailsScreen(
     onMessageClick: (String) -> Unit,
     onZapProfileClick: (DraftTx) -> Unit,
     onDrawerQrCodeClick: (String) -> Unit,
-    onArticleClick: (String) -> Unit,
     onGoToWallet: () -> Unit,
     onFollowsClick: (String, ProfileFollowsType) -> Unit,
     eventPublisher: (ProfileDetailsContract.UiEvent) -> Unit,
@@ -387,7 +384,7 @@ fun ProfileDetailsScreen(
                                             feedSpec = state.profileFeedSpecs[pageIndex].buildSpec(
                                                 profileId = state.profileId,
                                             ),
-                                            onArticleClick = onArticleClick,
+                                            onArticleClick = { naddr -> noteCallbacks.onArticleClick?.invoke(naddr) },
                                             pullToRefreshEnabled = false,
                                             noContentVerticalArrangement = Arrangement.Top,
                                             noContentPaddingValues = PaddingValues(top = 16.dp),
@@ -503,7 +500,6 @@ private fun PreviewProfileScreen() {
             onFollowsClick = { _, _ -> },
             onGoToWallet = {},
             eventPublisher = {},
-            onArticleClick = {},
             pullToRefreshing = remember { mutableStateOf(false) },
             pullToRefreshState = rememberPullToRefreshState(),
         )

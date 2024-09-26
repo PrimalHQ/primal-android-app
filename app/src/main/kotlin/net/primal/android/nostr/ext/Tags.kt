@@ -7,6 +7,7 @@ import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.jsonPrimitive
 import net.primal.android.core.utils.parseHashtags
 import net.primal.android.editor.domain.NoteAttachment
+import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.wallet.domain.ZapTarget
 
 fun List<JsonArray>.findFirstEventId(): String? {
@@ -213,6 +214,12 @@ fun ZapTarget.toTags(): List<JsonArray> {
         is ZapTarget.Note -> {
             tags.add(id.asEventIdTag())
             tags.add(authorPubkey.asPubkeyTag())
+        }
+
+        is ZapTarget.Article -> {
+            tags.add(eventId.asEventIdTag())
+            tags.add(eventAuthorId.asPubkeyTag())
+            tags.add("${NostrEventKind.LongFormContent.value}:$eventAuthorId:$articleId".asReplaceableEventTag())
         }
     }
 

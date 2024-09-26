@@ -8,6 +8,7 @@ import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.content.ContentMetadata
 import net.primal.android.nostr.notary.NostrNotary
+import net.primal.android.nostr.notary.NostrUnsignedEvent
 import net.primal.android.profile.report.ReportType
 import net.primal.android.user.domain.NostrWalletConnect
 import net.primal.android.user.domain.PublicBookmark
@@ -30,6 +31,18 @@ class NostrPublisher @Inject constructor(
     }
 
     @Throws(NostrPublishException::class)
+    private suspend fun publishEvent(signedNostrEvent: NostrEvent) {
+        relaysSocketManager.publishEvent(signedNostrEvent)
+        importEvent(signedNostrEvent)
+    }
+
+    @Throws(NostrPublishException::class)
+    suspend fun signAndPublishNostrEvent(userId: String, unsignedNostrEvent: NostrUnsignedEvent) {
+        val signedNostrEvent = nostrNotary.signNostrEvent(userId = userId, event = unsignedNostrEvent)
+        publishEvent(signedNostrEvent = signedNostrEvent)
+    }
+
+    @Throws(NostrPublishException::class)
     suspend fun publishUserProfile(userId: String, contentMetadata: ContentMetadata): NostrEvent {
         val signedNostrEvent = nostrNotary.signMetadataNostrEvent(userId = userId, metadata = contentMetadata)
         relaysSocketManager.publishEvent(nostrEvent = signedNostrEvent)
@@ -48,8 +61,7 @@ class NostrPublisher @Inject constructor(
             contacts = contacts,
             content = content,
         )
-        relaysSocketManager.publishEvent(nostrEvent = signedNostrEvent)
-        importEvent(signedNostrEvent)
+        publishEvent(signedNostrEvent)
         return signedNostrEvent
     }
 
@@ -59,41 +71,8 @@ class NostrPublisher @Inject constructor(
             userId = userId,
             bookmarks = bookmarks,
         )
-        relaysSocketManager.publishEvent(nostrEvent = signedNostrEvent)
-        importEvent(signedNostrEvent)
+        publishEvent(signedNostrEvent)
         return signedNostrEvent
-    }
-
-    @Throws(NostrPublishException::class)
-    suspend fun publishLikeNote(
-        userId: String,
-        postId: String,
-        postAuthorId: String,
-    ) {
-        val signedNostrEvent = nostrNotary.signLikeReactionNostrEvent(
-            userId = userId,
-            postId = postId,
-            postAuthorId = postAuthorId,
-        )
-        relaysSocketManager.publishEvent(signedNostrEvent)
-        importEvent(signedNostrEvent)
-    }
-
-    @Throws(NostrPublishException::class)
-    suspend fun publishRepostNote(
-        userId: String,
-        postId: String,
-        postAuthorId: String,
-        postRawNostrEvent: String,
-    ) {
-        val signedNostrEvent = nostrNotary.signRepostNostrEvent(
-            userId = userId,
-            postId = postId,
-            postAuthorId = postAuthorId,
-            postRawNostrEvent = postRawNostrEvent,
-        )
-        relaysSocketManager.publishEvent(nostrEvent = signedNostrEvent)
-        importEvent(signedNostrEvent)
     }
 
     @Throws(NostrPublishException::class)
@@ -125,8 +104,7 @@ class NostrPublisher @Inject constructor(
     @Throws(NostrPublishException::class)
     suspend fun setMuteList(userId: String, muteList: Set<String>): NostrEvent {
         val signedNostrEvent = nostrNotary.signMuteListNostrEvent(userId = userId, mutedUserIds = muteList)
-        relaysSocketManager.publishEvent(signedNostrEvent)
-        importEvent(signedNostrEvent)
+        publishEvent(signedNostrEvent)
         return signedNostrEvent
     }
 
@@ -141,8 +119,7 @@ class NostrPublisher @Inject constructor(
             receiverId = receiverId,
             encryptedContent = encryptedContent,
         )
-        relaysSocketManager.publishEvent(signedNostrEvent)
-        importEvent(signedNostrEvent)
+        publishEvent(signedNostrEvent)
         return signedNostrEvent
     }
 
@@ -176,7 +153,6 @@ class NostrPublisher @Inject constructor(
             reportProfileId = reportProfileId,
             reportNoteId = reportNoteId,
         )
-        relaysSocketManager.publishEvent(signedNostrEvent)
-        importEvent(signedNostrEvent)
+        publishEvent(signedNostrEvent)
     }
 }

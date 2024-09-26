@@ -14,18 +14,23 @@ import net.primal.android.navigation.noteIdOrThrow
 import net.primal.android.note.reactions.ReactionsContract.UiState
 import net.primal.android.note.repository.NoteRepository
 import net.primal.android.note.ui.asEventZapUiModel
+import net.primal.android.user.accounts.active.ActiveAccountStore
 
 @HiltViewModel
 class ReactionsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     noteRepository: NoteRepository,
+    activeAccountStore: ActiveAccountStore,
 ) : ViewModel() {
 
     private val noteId = savedStateHandle.noteIdOrThrow
 
     private val _state = MutableStateFlow(
         UiState(
-            zaps = noteRepository.pagedEventZaps(eventId = noteId)
+            zaps = noteRepository.pagedEventZaps(
+                userId = activeAccountStore.activeUserId(),
+                eventId = noteId,
+            )
                 .map { it.map { noteZap -> noteZap.asEventZapUiModel() } }
                 .cachedIn(viewModelScope),
         ),
