@@ -15,15 +15,20 @@ import net.primal.android.articles.ArticleRepository
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.crypto.hexToNpubHrp
 import net.primal.android.navigation.naddrOrThrow
+import net.primal.android.networking.relays.errors.MissingRelaysException
+import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.nostr.ext.asReplaceableEventTag
 import net.primal.android.nostr.ext.isNPub
 import net.primal.android.nostr.ext.isNPubUri
 import net.primal.android.nostr.ext.isNote
 import net.primal.android.nostr.ext.isNoteUri
 import net.primal.android.nostr.ext.nostrUriToNoteId
 import net.primal.android.nostr.ext.nostrUriToPubkey
+import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.utils.Naddr
 import net.primal.android.nostr.utils.Nip19TLV
+import net.primal.android.note.repository.NoteRepository
 import net.primal.android.note.ui.EventZapUiModel
 import net.primal.android.note.ui.asEventZapUiModel
 import net.primal.android.notes.feed.model.asFeedPostUi
@@ -35,6 +40,10 @@ import net.primal.android.thread.articles.ArticleDetailsContract.UiState
 import net.primal.android.thread.articles.ui.mapAsArticleDetailsUi
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
+import net.primal.android.wallet.domain.ZapTarget
+import net.primal.android.wallet.zaps.InvalidZapRequestException
+import net.primal.android.wallet.zaps.ZapFailureException
+import net.primal.android.wallet.zaps.ZapHandler
 import net.primal.android.wallet.zaps.hasWallet
 import timber.log.Timber
 
@@ -45,6 +54,8 @@ class ArticleDetailsViewModel @Inject constructor(
     private val articleRepository: ArticleRepository,
     private val feedRepository: FeedRepository,
     private val profileRepository: ProfileRepository,
+    private val noteRepository: NoteRepository,
+    private val zapHandler: ZapHandler,
 ) : ViewModel() {
 
     private val naddr = Nip19TLV.parseAsNaddr(savedStateHandle.naddrOrThrow)
@@ -76,6 +87,9 @@ class ArticleDetailsViewModel @Inject constructor(
                     UiEvent.DismissErrors -> setState { copy(error = null) }
                     is UiEvent.ZapArticle -> zapArticle(zapAction = it)
                     UiEvent.LikeArticle -> likeArticle()
+                    UiEvent.RepostAction -> repostPost()
+                    is UiEvent.BookmarkAction -> handleBookmark(it)
+                    UiEvent.DismissBookmarkConfirmation -> dismissBookmarkConfirmation()
                 }
             }
         }
@@ -168,11 +182,102 @@ class ArticleDetailsViewModel @Inject constructor(
                 }
         }
 
-    private fun zapArticle(zapAction: UiEvent.ZapArticle) =
+    private fun zapArticle(zapAction: UiEvent.ZapArticle) {
+        val article = _state.value.article ?: return
+
         viewModelScope.launch {
+            val postAuthorProfileData = profileRepository.findProfileDataOrNull(profileId = article.authorId)
+            if (postAuthorProfileData?.lnUrlDecoded == null) {
+                setState { copy(error = ArticleDetailsError.MissingLightningAddress(IllegalStateException())) }
+                return@launch
+            }
+
+            try {
+                zapHandler.zap(
+                    userId = activeAccountStore.activeUserId(),
+                    comment = zapAction.zapDescription,
+                    amountInSats = zapAction.zapAmount,
+                    target = ZapTarget.Article(
+                        articleId = article.articleId,
+                        eventId = article.eventId,
+                        eventAuthorId = article.authorId,
+                        eventAuthorLnUrlDecoded = postAuthorProfileData.lnUrlDecoded,
+                    ),
+                )
+            } catch (error: ZapFailureException) {
+                Timber.w(error)
+                setState { copy(error = ArticleDetailsError.FailedToPublishZapEvent(error)) }
+            } catch (error: MissingRelaysException) {
+                Timber.w(error)
+                setState { copy(error = ArticleDetailsError.MissingRelaysConfiguration(error)) }
+            } catch (error: InvalidZapRequestException) {
+                Timber.w(error)
+                setState { copy(error = ArticleDetailsError.InvalidZapRequest(error)) }
+            }
         }
+    }
 
     private fun likeArticle() =
         viewModelScope.launch {
+            val article = _state.value.article
+            if (article != null) {
+                try {
+                    noteRepository.likeEvent(
+                        userId = activeAccountStore.activeUserId(),
+                        eventId = article.eventId,
+                        eventAuthorId = article.authorId,
+                        optionalTags = listOf(
+                            "${NostrEventKind.LongFormContent.value}:${article.authorId}:${article.articleId}"
+                                .asReplaceableEventTag(),
+                        ),
+                    )
+                } catch (error: NostrPublishException) {
+                    Timber.w(error)
+                } catch (error: MissingRelaysException) {
+                    Timber.w(error)
+                }
+            }
+        }
+
+    private fun repostPost() =
+        viewModelScope.launch {
+            val article = _state.value.article
+            if (article != null) {
+                try {
+                    noteRepository.repostEvent(
+                        userId = activeAccountStore.activeUserId(),
+                        eventId = article.eventId,
+                        eventAuthorId = article.authorId,
+                        eventKind = NostrEventKind.LongFormContent,
+                        eventRawNostrEvent = article.eventRawNostrEvent,
+                        optionalTags = listOf(
+                            "${NostrEventKind.LongFormContent.value}:${article.authorId}:${article.articleId}"
+                                .asReplaceableEventTag(),
+                        ),
+                    )
+                } catch (error: NostrPublishException) {
+                    Timber.w(error)
+                } catch (error: MissingRelaysException) {
+                    Timber.w(error)
+                }
+            }
+        }
+
+    private fun handleBookmark(event: UiEvent.BookmarkAction) =
+        viewModelScope.launch {
+            try {
+                setState { copy(shouldApproveBookmark = false) }
+                // TODO Check if it's bookmarked, then add or remove from bookmarks, and use dispatcherProvider.io
+            } catch (error: NostrPublishException) {
+                Timber.w(error)
+            } catch (error: ProfileRepository.BookmarksListNotFound) {
+                Timber.w(error)
+                setState { copy(shouldApproveBookmark = true) }
+            }
+        }
+
+    private fun dismissBookmarkConfirmation() =
+        viewModelScope.launch {
+            setState { copy(shouldApproveBookmark = false) }
         }
 }

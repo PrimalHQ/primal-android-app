@@ -11,11 +11,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.note.repository.NoteRepository
 import net.primal.android.notes.feed.note.NoteContract.SideEffect
 import net.primal.android.notes.feed.note.NoteContract.UiEvent
@@ -32,7 +31,6 @@ import timber.log.Timber
 
 @HiltViewModel
 class NoteViewModel @Inject constructor(
-    private val dispatcherProvider: CoroutineDispatcherProvider,
     private val activeAccountStore: ActiveAccountStore,
     private val noteRepository: NoteRepository,
     private val profileRepository: ProfileRepository,
@@ -91,9 +89,10 @@ class NoteViewModel @Inject constructor(
     private fun likePost(postLikeAction: UiEvent.PostLikeAction) =
         viewModelScope.launch {
             try {
-                noteRepository.likePost(
-                    postId = postLikeAction.postId,
-                    postAuthorId = postLikeAction.postAuthorId,
+                noteRepository.likeEvent(
+                    userId = activeAccountStore.activeUserId(),
+                    eventId = postLikeAction.postId,
+                    eventAuthorId = postLikeAction.postAuthorId,
                 )
             } catch (error: NostrPublishException) {
                 Timber.w(error)
@@ -107,10 +106,12 @@ class NoteViewModel @Inject constructor(
     private fun repostPost(repostAction: UiEvent.RepostAction) =
         viewModelScope.launch {
             try {
-                noteRepository.repostPost(
-                    postId = repostAction.postId,
-                    postAuthorId = repostAction.postAuthorId,
-                    postRawNostrEvent = repostAction.postNostrEvent,
+                noteRepository.repostEvent(
+                    userId = activeAccountStore.activeUserId(),
+                    eventId = repostAction.postId,
+                    eventAuthorId = repostAction.postAuthorId,
+                    eventKind = NostrEventKind.ShortTextNote,
+                    eventRawNostrEvent = repostAction.postNostrEvent,
                 )
             } catch (error: NostrPublishException) {
                 Timber.w(error)
@@ -123,28 +124,23 @@ class NoteViewModel @Inject constructor(
 
     private fun zapPost(zapAction: UiEvent.ZapAction) =
         viewModelScope.launch {
-            val postAuthorProfileData = withContext(dispatcherProvider.io()) {
-                profileRepository.findProfileDataOrNull(profileId = zapAction.postAuthorId)
-            }
-
+            val postAuthorProfileData = profileRepository.findProfileDataOrNull(profileId = zapAction.postAuthorId)
             if (postAuthorProfileData?.lnUrlDecoded == null) {
                 setEffect(SideEffect.NoteError.MissingLightningAddress(IllegalStateException()))
                 return@launch
             }
 
             try {
-                withContext(dispatcherProvider.io()) {
-                    zapHandler.zap(
-                        userId = activeAccountStore.activeUserId(),
-                        comment = zapAction.zapDescription,
-                        amountInSats = zapAction.zapAmount,
-                        target = ZapTarget.Note(
-                            zapAction.postId,
-                            zapAction.postAuthorId,
-                            postAuthorProfileData.lnUrlDecoded,
-                        ),
-                    )
-                }
+                zapHandler.zap(
+                    userId = activeAccountStore.activeUserId(),
+                    comment = zapAction.zapDescription,
+                    amountInSats = zapAction.zapAmount,
+                    target = ZapTarget.Note(
+                        zapAction.postId,
+                        zapAction.postAuthorId,
+                        postAuthorProfileData.lnUrlDecoded,
+                    ),
+                )
             } catch (error: ZapFailureException) {
                 Timber.w(error)
                 setEffect(SideEffect.NoteError.FailedToPublishZapEvent(error))
@@ -160,12 +156,10 @@ class NoteViewModel @Inject constructor(
     private fun mute(action: UiEvent.MuteAction) =
         viewModelScope.launch {
             try {
-                withContext(dispatcherProvider.io()) {
-                    mutedUserRepository.muteUserAndPersistMuteList(
-                        userId = activeAccountStore.activeUserId(),
-                        mutedUserId = action.userId,
-                    )
-                }
+                mutedUserRepository.muteUserAndPersistMuteList(
+                    userId = activeAccountStore.activeUserId(),
+                    mutedUserId = action.userId,
+                )
             } catch (error: WssException) {
                 Timber.w(error)
                 setEffect(SideEffect.NoteError.FailedToMuteUser(error))
@@ -181,14 +175,12 @@ class NoteViewModel @Inject constructor(
     private fun reportAbuse(event: UiEvent.ReportAbuse) =
         viewModelScope.launch {
             try {
-                withContext(dispatcherProvider.io()) {
-                    profileRepository.reportAbuse(
-                        userId = activeAccountStore.activeUserId(),
-                        reportType = event.reportType,
-                        profileId = event.profileId,
-                        noteId = event.noteId,
-                    )
-                }
+                profileRepository.reportAbuse(
+                    userId = activeAccountStore.activeUserId(),
+                    reportType = event.reportType,
+                    profileId = event.profileId,
+                    noteId = event.noteId,
+                )
             } catch (error: NostrPublishException) {
                 Timber.w(error)
             }
@@ -197,29 +189,27 @@ class NoteViewModel @Inject constructor(
     private fun handleBookmark(event: UiEvent.BookmarkAction) =
         viewModelScope.launch {
             val userId = activeAccountStore.activeUserId()
-            withContext(dispatcherProvider.io()) {
-                try {
-                    setState { copy(shouldApproveBookmark = false) }
-                    val isBookmarked = noteRepository.isBookmarked(noteId = event.noteId)
-                    when (isBookmarked) {
-                        true -> noteRepository.removeFromBookmarks(
-                            userId = userId,
-                            forceUpdate = event.forceUpdate,
-                            noteId = event.noteId,
-                        )
+            try {
+                setState { copy(shouldApproveBookmark = false) }
+                val isBookmarked = noteRepository.isBookmarked(noteId = event.noteId)
+                when (isBookmarked) {
+                    true -> noteRepository.removeFromBookmarks(
+                        userId = userId,
+                        forceUpdate = event.forceUpdate,
+                        noteId = event.noteId,
+                    )
 
-                        false -> noteRepository.addToBookmarks(
-                            userId = userId,
-                            forceUpdate = event.forceUpdate,
-                            noteId = event.noteId,
-                        )
-                    }
-                } catch (error: NostrPublishException) {
-                    Timber.w(error)
-                } catch (error: ProfileRepository.BookmarksListNotFound) {
-                    Timber.w(error)
-                    setState { copy(shouldApproveBookmark = true) }
+                    false -> noteRepository.addToBookmarks(
+                        userId = userId,
+                        forceUpdate = event.forceUpdate,
+                        noteId = event.noteId,
+                    )
                 }
+            } catch (error: NostrPublishException) {
+                Timber.w(error)
+            } catch (error: ProfileRepository.BookmarksListNotFound) {
+                Timber.w(error)
+                setState { copy(shouldApproveBookmark = true) }
             }
         }
 
