@@ -7,11 +7,5 @@ interface ExploreHomeContract {
     data class UiState(
         val activeAccountAvatarCdnImage: CdnImage? = null,
         val badges: Badges = Badges(),
-        val refreshing: Boolean = false,
-        val hashtags: List<List<HashtagUi>> = emptyList(),
     )
-
-    sealed class UiEvent {
-        data object RefreshTrendingHashtags : UiEvent()
-    }
 }

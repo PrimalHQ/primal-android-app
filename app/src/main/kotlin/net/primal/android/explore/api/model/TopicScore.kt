@@ -1,6 +1,6 @@
 package net.primal.android.explore.api.model
 
-data class HashtagScore(
+data class TopicScore(
     val name: String,
     val score: Float,
 )

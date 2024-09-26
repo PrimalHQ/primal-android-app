@@ -4,8 +4,8 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity
-data class TrendingHashtag(
+data class TrendingTopic(
     @PrimaryKey
-    val hashtag: String,
+    val topic: String,
     val score: Float,
 )
