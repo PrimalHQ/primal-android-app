@@ -41,6 +41,6 @@ fun Article.mapAsArticleDetailsUi(): ArticleDetailsUi {
         coverImageCdnImage = this.data.imageCdnImage ?: this.author?.avatarCdnImage,
         readingTimeInMinutes = ((this.data.wordsCount ?: 1) / 200) + 1,
         hashtags = this.data.hashtags,
-        eventStatsUi = EventStatsUi.from(eventStats = this.eventStats, userStats = null),
+        eventStatsUi = EventStatsUi.from(eventStats = this.eventStats, userStats = this.userEventStats),
     )
 }
