@@ -737,7 +737,11 @@ private fun NavGraphBuilder.explore(route: String, navController: NavController)
         LockToOrientationPortrait()
         ExploreHomeScreen(
             viewModel = viewModel,
-            onHashtagClick = { query -> navController.navigateToExploreNoteFeed(query = query) },
+            onHashtagClick = { query ->
+                navController.navigateToExploreNoteFeed(
+                    query = """{"id":"advsearch","query":"kind:1 $query"}""",
+                )
+            },
             onNoteClick = { noteId -> navController.navigateToThread(noteId) },
             onSearchClick = { navController.navigateToSearch() },
             onTuneClick = { navController.navigateToAdvancedSearch() },
@@ -1006,7 +1010,7 @@ private fun NavGraphBuilder.articleDetails(
         onClose = { navController.navigateUp() },
         onArticleHashtagClick = { hashtag ->
             navController.navigateToExploreArticleFeed(
-                feedSpec = "article $hashtag feed spec goes here",
+                feedSpec = """{"id":"advsearch","query":"kind:30023 $hashtag"}""",
             )
         },
         noteCallbacks = noteCallbacksHandler(navController),
