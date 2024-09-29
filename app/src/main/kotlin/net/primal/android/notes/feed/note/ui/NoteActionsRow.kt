@@ -209,7 +209,7 @@ fun SingleEventStat(
     )
 }
 
-private fun Long.toPostStatString(numberFormat: NumberFormat): String {
+fun Long.toPostStatString(numberFormat: NumberFormat): String {
     return if (this > 0) {
         numberFormat.format(this)
     } else {
