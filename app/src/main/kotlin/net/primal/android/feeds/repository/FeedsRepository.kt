@@ -1,6 +1,7 @@
 package net.primal.android.feeds.repository
 
 import androidx.room.withTransaction
+import java.util.*
 import javax.inject.Inject
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
@@ -17,8 +18,11 @@ import net.primal.android.feeds.domain.FeedSpecKind
 import net.primal.android.feeds.domain.buildSpec
 import net.primal.android.nostr.ext.findFirstIdentifier
 import net.primal.android.nostr.model.primal.content.ContentArticleFeedData
+import net.primal.android.nostr.model.primal.content.ContentDvmFeedFollowsAction
+import net.primal.android.nostr.model.primal.content.ContentDvmFeedMetadata
 import net.primal.android.nostr.model.primal.content.ContentPrimalDvmFeedMetadata
 import net.primal.android.nostr.model.primal.content.ContentPrimalEventStats
+import net.primal.android.nostr.model.primal.content.ContentPrimalEventUserStats
 import net.primal.android.user.accounts.active.ActiveAccountStore
 
 class FeedsRepository @Inject constructor(
@@ -113,10 +117,21 @@ class FeedsRepository @Inject constructor(
             persistArticleFeeds(feeds = feeds, specKind = specKind)
         }
 
-    suspend fun fetchRecommendedDvmFeeds(specKind: FeedSpecKind): List<DvmFeed> {
-        val response = withContext(dispatcherProvider.io()) { feedsApi.getFeaturedFeeds(specKind) }
+    suspend fun fetchRecommendedDvmFeeds(specKind: FeedSpecKind? = null, pubkey: String? = null): List<DvmFeed> {
+        val response = withContext(dispatcherProvider.io()) {
+            feedsApi.getFeaturedFeeds(specKind = specKind, pubkey = pubkey)
+        }
         val eventStatsMap = response.scores.mapNotNull { primalEvent ->
             NostrJson.decodeFromStringOrNull<ContentPrimalEventStats>(primalEvent.content)
+        }.asMapByKey { it.eventId }
+        val metadatas = response.feedMetadatas.mapNotNull { primalEvent ->
+            NostrJson.decodeFromStringOrNull<ContentDvmFeedMetadata>(primalEvent.content)
+        }.asMapByKey { it.eventId }
+        val userStats = response.feedMetadatas.mapNotNull { primalEvent ->
+            NostrJson.decodeFromStringOrNull<ContentPrimalEventUserStats>(primalEvent.content)
+        }.asMapByKey { it.eventId }
+        val followsActions = response.feedMetadatas.mapNotNull { primalEvent ->
+            NostrJson.decodeFromStringOrNull<ContentDvmFeedFollowsAction>(primalEvent.content)
         }.asMapByKey { it.eventId }
 
         val dvmFeeds = response.dvmHandlers
@@ -136,6 +151,13 @@ class FeedsRepository @Inject constructor(
                         primalSubscriptionRequired = dvmMetadata.subscription == true,
                         totalLikes = eventStatsMap[nostrEvent.id]?.likes,
                         totalSatsZapped = eventStatsMap[nostrEvent.id]?.satsZapped,
+                        kind = when (metadatas[nostrEvent.id]?.kind?.lowercase()) {
+                            "notes" -> FeedSpecKind.Notes
+                            "reads" -> FeedSpecKind.Reads
+                            else -> null
+                        },
+                        isPrimal = metadatas[nostrEvent.id]?.isPrimal,
+                        followsActions = followsActions[nostrEvent.id]?.userIds ?: emptyList(),
                     )
                 } else {
                     null

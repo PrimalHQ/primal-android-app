@@ -11,6 +11,9 @@ data class DvmFeed(
     val totalLikes: Long? = null,
     val totalSatsZapped: Long? = null,
     val isPaid: Boolean = amountInSats != null && amountInSats != "free" || primalSubscriptionRequired == true,
+    val kind: FeedSpecKind? = null,
+    val isPrimal: Boolean? = null,
+    val followsActions: List<String> = emptyList(),
 )
 
 fun DvmFeed.buildSpec(specKind: FeedSpecKind): String =

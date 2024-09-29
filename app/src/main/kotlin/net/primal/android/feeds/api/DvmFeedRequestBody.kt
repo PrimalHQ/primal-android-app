@@ -4,7 +4,8 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class DvmFeedsRequestBody(
-    @SerialName("kind") val specKind: String?,
+data class DvmFeedRequestBody(
+    @SerialName("dvm_pubkey") val dvmPubkey: String,
+    @SerialName("dvm_id") val dvmId: String,
     @SerialName("user_pubkey") val pubkey: String?,
 )

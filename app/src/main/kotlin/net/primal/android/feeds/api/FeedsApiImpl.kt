@@ -6,12 +6,14 @@ import kotlinx.serialization.encodeToString
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.feeds.api.model.FeedsResponse
 import net.primal.android.feeds.api.model.SubSettingsAuthorization
+import net.primal.android.feeds.domain.DvmFeed
 import net.primal.android.feeds.domain.FeedSpecKind
 import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.primal.PrimalCacheFilter
 import net.primal.android.networking.primal.PrimalVerb
-import net.primal.android.networking.primal.PrimalVerb.GET_FEATURED_DVM_READS
+import net.primal.android.networking.primal.PrimalVerb.GET_DVM_FEED
+import net.primal.android.networking.primal.PrimalVerb.GET_FEATURED_DVM_FEEDS
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.model.primal.content.ContentAppSubSettings
@@ -24,17 +26,45 @@ class FeedsApiImpl @Inject constructor(
     private val nostrNotary: NostrNotary,
 ) : FeedsApi {
 
-    override suspend fun getFeaturedFeeds(specKind: FeedSpecKind): DvmFeedsResponse {
+    override suspend fun getDvmFeed(
+        dvmPubkey: String,
+        dvmId: String,
+        pubkey: String?,
+    ): DvmFeed {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = GET_FEATURED_DVM_READS,
-                optionsJson = NostrJson.encodeToString(DvmFeedsRequestBody(specKind = specKind.id)),
+                primalVerb = GET_DVM_FEED,
+                optionsJson = NostrJson.encodeToString(
+                    DvmFeedRequestBody(
+                        dvmPubkey = dvmPubkey,
+                        dvmId = dvmId,
+                        pubkey = pubkey,
+                    ),
+                ),
+            ),
+        )
+        TODO()
+    }
+
+    override suspend fun getFeaturedFeeds(specKind: FeedSpecKind?, pubkey: String?): DvmFeedsResponse {
+        val queryResult = primalApiClient.query(
+            message = PrimalCacheFilter(
+                primalVerb = GET_FEATURED_DVM_FEEDS,
+                optionsJson = NostrJson.encodeToString(
+                    DvmFeedsRequestBody(
+                        specKind = specKind?.id,
+                        pubkey = pubkey,
+                    ),
+                ),
             ),
         )
 
         return DvmFeedsResponse(
             scores = queryResult.filterPrimalEvents(kind = NostrEventKind.PrimalEventStats),
             dvmHandlers = queryResult.filterNostrEvents(kind = NostrEventKind.AppHandler),
+            feedMetadatas = queryResult.filterPrimalEvents(kind = NostrEventKind.PrimalDvmFeedMetadata),
+            feedFollowActions = queryResult.filterPrimalEvents(kind = NostrEventKind.PrimalDvmFeedFollowsActions),
+            feedUserStats = queryResult.filterPrimalEvents(kind = NostrEventKind.PrimalEventUserStats),
         )
     }
 
