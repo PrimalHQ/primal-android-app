@@ -48,7 +48,6 @@ import net.primal.android.notes.feed.note.ui.SingleEventStat
 import net.primal.android.theme.AppTheme
 
 private val PaidBackground = Color(0xFFFC6337)
-private val FreeTextColor = Color(0xFF111111)
 
 @Composable
 fun DvmFeedListItem(
