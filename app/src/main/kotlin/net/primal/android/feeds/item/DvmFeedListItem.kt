@@ -14,7 +14,6 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -58,28 +57,23 @@ fun DvmFeedListItem(
     avatarSize: Dp = 48.dp,
     extended: Boolean = false,
 ) {
-    val viewModel = hiltViewModel<DvmFeedListItemViewModel, DvmFeedListItemViewModel.Factory>(
-        key = data.dvmId,
-        creationCallback = { factory -> factory.create(dvmFeed = data) },
-    )
-
-    val uiState = viewModel.state.collectAsState()
+    val viewModel = hiltViewModel<DvmFeedListItemViewModel>()
 
     DvmFeedListItem(
         modifier = modifier,
-        state = uiState.value,
         onFeedClick = onFeedClick,
         eventPublisher = viewModel::setEvent,
         listItemContainerColor = listItemContainerColor,
         avatarSize = avatarSize,
         extended = extended,
+        dvmFeed = data,
     )
 }
 
 @Composable
 private fun DvmFeedListItem(
     modifier: Modifier = Modifier,
-    state: DvmFeedListItemContract.UiState,
+    dvmFeed: DvmFeed,
     onFeedClick: ((dvmFeed: DvmFeed) -> Unit)? = null,
     eventPublisher: (DvmFeedListItemContract.UiEvent) -> Unit,
     listItemContainerColor: Color = AppTheme.extraColorScheme.surfaceVariantAlt2,
@@ -90,7 +84,7 @@ private fun DvmFeedListItem(
         modifier = Modifier
             .clip(AppTheme.shapes.small)
             .background(listItemContainerColor)
-            .clickable { onFeedClick?.invoke(state.dvmFeed) },
+            .clickable { onFeedClick?.invoke(dvmFeed) },
     ) {
         ListItem(
             modifier = modifier.fillMaxWidth(),
@@ -101,12 +95,12 @@ private fun DvmFeedListItem(
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     AvatarThumbnail(
-                        avatarCdnImage = state.dvmFeed.avatarUrl?.let { CdnImage(sourceUrl = it) },
+                        avatarCdnImage = dvmFeed.avatarUrl?.let { CdnImage(sourceUrl = it) },
                         avatarSize = avatarSize,
                     )
                     when {
-                        state.dvmFeed.primalSubscriptionRequired == true -> SubBadge(width = avatarSize)
-                        state.dvmFeed.isPaid -> PaidBadge(width = avatarSize)
+                        dvmFeed.primalSubscriptionRequired == true -> SubBadge(width = avatarSize)
+                        dvmFeed.isPaid -> PaidBadge(width = avatarSize)
                         else -> FreeBadge(width = avatarSize)
                     }
                 }
@@ -119,7 +113,7 @@ private fun DvmFeedListItem(
                     style = AppTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Bold,
                     color = AppTheme.colorScheme.onSurface,
-                    text = state.dvmFeed.title,
+                    text = dvmFeed.title,
                     maxLines = if (extended) 2 else 1,
                 )
             },
@@ -128,14 +122,14 @@ private fun DvmFeedListItem(
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     horizontalAlignment = Alignment.Start,
                 ) {
-                    if (state.dvmFeed.description != null) {
+                    if (dvmFeed.description != null) {
                         Text(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(vertical = 6.dp),
                             style = AppTheme.typography.bodyMedium,
                             color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-                            text = state.dvmFeed.description,
+                            text = dvmFeed.description,
                             maxLines = if (extended) 2 else 1,
                             overflow = TextOverflow.Ellipsis,
                         )
@@ -144,12 +138,12 @@ private fun DvmFeedListItem(
                         CreatedByPrimalRow()
                     }
                     DvmFeedActionRow(
-                        userLiked = state.dvmFeed.userLiked ?: false,
-                        userZapped = state.dvmFeed.userZapped ?: false,
-                        totalLikes = state.dvmFeed.totalLikes,
-                        totalSatsZapped = state.dvmFeed.totalSatsZapped,
-                        onLikeClick = { eventPublisher(DvmFeedListItemContract.UiEvent.OnLikeClick) },
-                        onZapClick = { eventPublisher(DvmFeedListItemContract.UiEvent.OnZapClick) },
+                        userLiked = dvmFeed.userLiked ?: false,
+                        userZapped = dvmFeed.userZapped ?: false,
+                        totalLikes = dvmFeed.totalLikes,
+                        totalSatsZapped = dvmFeed.totalSatsZapped,
+                        onLikeClick = { eventPublisher(DvmFeedListItemContract.UiEvent.OnLikeClick(dvmFeed = dvmFeed)) },
+                        onZapClick = { eventPublisher(DvmFeedListItemContract.UiEvent.OnZapClick(dvmFeed = dvmFeed)) },
                     )
                 }
             },

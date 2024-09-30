@@ -2,32 +2,14 @@ package net.primal.android.feeds.item
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.feeds.domain.DvmFeed
 import net.primal.android.feeds.item.DvmFeedListItemContract.UiEvent
-import net.primal.android.feeds.item.DvmFeedListItemContract.UiState
 
-@HiltViewModel(assistedFactory = DvmFeedListItemViewModel.Factory::class)
-class DvmFeedListItemViewModel @AssistedInject constructor(
-    @Assisted private val dvmFeed: DvmFeed,
-) : ViewModel() {
-
-    @AssistedFactory
-    interface Factory {
-        fun create(dvmFeed: DvmFeed): DvmFeedListItemViewModel
-    }
-
-    private val _state = MutableStateFlow(UiState(dvmFeed = dvmFeed))
-    val state = _state.asStateFlow()
-    private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate(reducer)
+@HiltViewModel
+class DvmFeedListItemViewModel : ViewModel() {
 
     private val event = MutableSharedFlow<UiEvent>()
     fun setEvent(e: UiEvent) = viewModelScope.launch { event.emit(e) }
@@ -40,18 +22,18 @@ class DvmFeedListItemViewModel @AssistedInject constructor(
         viewModelScope.launch {
             event.collect {
                 when (it) {
-                    UiEvent.OnLikeClick -> onLikeClick()
-                    UiEvent.OnZapClick -> onZapClick()
+                    is UiEvent.OnLikeClick -> onLikeClick(it.dvmFeed)
+                    is UiEvent.OnZapClick -> onZapClick(it.dvmFeed)
                 }
             }
         }
 
-    private fun onLikeClick() =
+    private fun onLikeClick(dvmFeed: DvmFeed) =
         viewModelScope.launch {
             // TODO(marko): handle like
         }
 
-    private fun onZapClick() =
+    private fun onZapClick(dvmFeed: DvmFeed) =
         viewModelScope.launch {
             // TODO(marko): handle zap
         }
