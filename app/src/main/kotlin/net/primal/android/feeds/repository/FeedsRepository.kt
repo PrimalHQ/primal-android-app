@@ -17,6 +17,7 @@ import net.primal.android.feeds.domain.FEED_KIND_DVM
 import net.primal.android.feeds.domain.FeedSpecKind
 import net.primal.android.feeds.domain.buildSpec
 import net.primal.android.nostr.ext.findFirstIdentifier
+import net.primal.android.nostr.model.primal.PrimalEvent
 import net.primal.android.nostr.model.primal.content.ContentArticleFeedData
 import net.primal.android.nostr.model.primal.content.ContentDvmFeedFollowsAction
 import net.primal.android.nostr.model.primal.content.ContentDvmFeedMetadata
@@ -121,18 +122,10 @@ class FeedsRepository @Inject constructor(
         val response = withContext(dispatcherProvider.io()) {
             feedsApi.getFeaturedFeeds(specKind = specKind, pubkey = pubkey)
         }
-        val eventStatsMap = response.scores.mapNotNull { primalEvent ->
-            NostrJson.decodeFromStringOrNull<ContentPrimalEventStats>(primalEvent.content)
-        }.asMapByKey { it.eventId }
-        val metadatas = response.feedMetadatas.mapNotNull { primalEvent ->
-            NostrJson.decodeFromStringOrNull<ContentDvmFeedMetadata>(primalEvent.content)
-        }.asMapByKey { it.eventId }
-        val userStats = response.feedMetadatas.mapNotNull { primalEvent ->
-            NostrJson.decodeFromStringOrNull<ContentPrimalEventUserStats>(primalEvent.content)
-        }.asMapByKey { it.eventId }
-        val followsActions = response.feedMetadatas.mapNotNull { primalEvent ->
-            NostrJson.decodeFromStringOrNull<ContentDvmFeedFollowsAction>(primalEvent.content)
-        }.asMapByKey { it.eventId }
+        val eventStatsMap = response.scores.parseAndMapContentByKey<ContentPrimalEventStats> { eventId }
+        val metadatas = response.feedMetadatas.parseAndMapContentByKey<ContentDvmFeedMetadata> { eventId }
+        val userStats = response.feedMetadatas.parseAndMapContentByKey<ContentPrimalEventUserStats> { eventId }
+        val followsActions = response.feedMetadatas.parseAndMapContentByKey<ContentDvmFeedFollowsAction> { eventId }
 
         val dvmFeeds = response.dvmHandlers
             .filter { it.content.isNotEmpty() }
@@ -201,4 +194,9 @@ class FeedsRepository @Inject constructor(
             }
         }
     }
+
+    private inline fun <reified T> List<PrimalEvent>.parseAndMapContentByKey(key: T.() -> String): Map<String, T> =
+        this.mapNotNull { primalEvent ->
+            NostrJson.decodeFromStringOrNull<T>(primalEvent.content)
+        }.asMapByKey { it.key() }
 }
