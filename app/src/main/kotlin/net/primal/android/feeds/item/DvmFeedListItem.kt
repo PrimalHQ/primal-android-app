@@ -257,7 +257,7 @@ private fun SubBadge(width: Dp) {
     Badge(
         text = "SUB",
         backgroundColor = AppTheme.colorScheme.tertiary,
-        textColor = AppTheme.colorScheme.onPrimary,
+        textColor = Color.White,
         width = width,
     )
 }
@@ -267,7 +267,7 @@ private fun PaidBadge(width: Dp) {
     Badge(
         text = "PAID",
         backgroundColor = PaidBackground,
-        textColor = AppTheme.colorScheme.onPrimary,
+        textColor = Color.White,
         width = width,
     )
 }
@@ -276,8 +276,8 @@ private fun PaidBadge(width: Dp) {
 private fun FreeBadge(width: Dp) {
     Badge(
         text = "FREE",
-        backgroundColor = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
-        textColor = FreeTextColor,
+        backgroundColor = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+        textColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
         width = width,
     )
 }
