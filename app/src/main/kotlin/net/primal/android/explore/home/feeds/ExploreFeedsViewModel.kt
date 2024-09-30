@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.explore.home.feeds.ExploreFeedsContract.UiState
 import net.primal.android.feeds.repository.FeedsRepository
+import timber.log.Timber
 
 @HiltViewModel(assistedFactory = ExploreFeedsViewModel.Factory::class)
 class ExploreFeedsViewModel @AssistedInject constructor(
@@ -34,7 +35,11 @@ class ExploreFeedsViewModel @AssistedInject constructor(
 
     private fun fetchExploreFeeds() =
         viewModelScope.launch {
-            val feeds = feedsRepository.fetchRecommendedDvmFeeds(pubkey = activeAccountPubkey)
-            setState { copy(feeds = feeds) }
+            runCatching {
+                val feeds = feedsRepository.fetchRecommendedDvmFeeds(pubkey = activeAccountPubkey)
+                setState { copy(feeds = feeds) }
+            }.onFailure {
+                Timber.w(it)
+            }
         }
 }
