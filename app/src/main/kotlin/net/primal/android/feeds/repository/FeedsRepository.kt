@@ -158,6 +158,8 @@ class FeedsRepository @Inject constructor(
                         },
                         isPrimal = metadatas[nostrEvent.id]?.isPrimal,
                         followsActions = followsActions[nostrEvent.id]?.userIds ?: emptyList(),
+                        userLiked = userStats[nostrEvent.id]?.liked,
+                        userZapped = userStats[nostrEvent.id]?.zapped,
                     )
                 } else {
                     null

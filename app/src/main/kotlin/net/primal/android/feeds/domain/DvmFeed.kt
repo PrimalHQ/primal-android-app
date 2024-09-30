@@ -14,6 +14,8 @@ data class DvmFeed(
     val kind: FeedSpecKind? = null,
     val isPrimal: Boolean? = null,
     val followsActions: List<String> = emptyList(),
+    val userLiked: Boolean? = false,
+    val userZapped: Boolean? = false,
 )
 
 fun DvmFeed.buildSpec(specKind: FeedSpecKind): String =
