@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -58,6 +59,7 @@ fun DvmFeedListItem(
     avatarSize: Dp = 48.dp,
     extended: Boolean = false,
     showFollowsActionsAvatarRow: Boolean = false,
+    clipShape: Shape? = AppTheme.shapes.small,
 ) {
     val viewModel = hiltViewModel<DvmFeedListItemViewModel>()
 
@@ -70,6 +72,7 @@ fun DvmFeedListItem(
         extended = extended,
         showFollowsActionsAvatarRow = showFollowsActionsAvatarRow,
         dvmFeed = data,
+        clipShape = clipShape,
     )
 }
 
@@ -80,15 +83,28 @@ private fun DvmFeedListItem(
     onFeedClick: ((dvmFeed: DvmFeed) -> Unit)? = null,
     eventPublisher: (DvmFeedListItemContract.UiEvent) -> Unit,
     listItemContainerColor: Color = AppTheme.extraColorScheme.surfaceVariantAlt2,
+    clipShape: Shape? = AppTheme.shapes.small,
     avatarSize: Dp = 48.dp,
     extended: Boolean = false,
     showFollowsActionsAvatarRow: Boolean = false,
 ) {
     Column(
         modifier = Modifier
-            .clip(AppTheme.shapes.small)
-            .background(listItemContainerColor)
-            .clickable { onFeedClick?.invoke(dvmFeed) },
+            .run {
+                if (clipShape != null) {
+                    this.clip(clipShape)
+                } else {
+                    this
+                }
+            }
+            .run {
+                if (onFeedClick != null) {
+                    this.clickable { onFeedClick(dvmFeed) }
+                } else {
+                    this
+                }
+            }
+            .background(listItemContainerColor),
     ) {
         ListItem(
             modifier = modifier.fillMaxWidth(),
