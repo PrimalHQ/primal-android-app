@@ -31,7 +31,6 @@ import net.primal.android.theme.AppTheme
 @Composable
 fun DvmFeedDetails(
     dvmFeed: DvmFeed?,
-    specKind: FeedSpecKind,
     onClose: () -> Unit,
     modifier: Modifier = Modifier,
     addedToFeeds: Boolean = false,
@@ -60,7 +59,6 @@ fun DvmFeedDetails(
                 DvmHeaderAndFeedList(
                     modifier = Modifier.padding(paddingValues),
                     dvmFeed = dvmFeed,
-                    specKind = specKind,
                 )
             }
         },
@@ -85,35 +83,3 @@ fun DvmFeedDetails(
     )
 }
 
-@Composable
-private fun DvmHeaderAndFeedList(
-    dvmFeed: DvmFeed,
-    specKind: FeedSpecKind,
-    modifier: Modifier = Modifier,
-) {
-    Column(modifier = modifier) {
-        when (specKind) {
-            FeedSpecKind.Reads -> {
-                ArticleFeedList(
-                    feedSpec = dvmFeed.buildSpec(specKind = specKind),
-                    previewMode = true,
-                    pullToRefreshEnabled = false,
-                    header = { DvmFeedListItem(data = dvmFeed) },
-                    onArticleClick = {},
-                )
-            }
-
-            FeedSpecKind.Notes -> {
-                NoteFeedList(
-                    feedSpec = dvmFeed.buildSpec(specKind = specKind),
-                    noteCallbacks = NoteCallbacks(),
-                    previewMode = true,
-                    pullToRefreshEnabled = false,
-                    pollingEnabled = false,
-                    header = { DvmFeedListItem(data = dvmFeed) },
-                    onGoToWallet = {},
-                )
-            }
-        }
-    }
-}
