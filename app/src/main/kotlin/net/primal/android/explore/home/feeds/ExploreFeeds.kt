@@ -89,6 +89,7 @@ fun ExploreFeeds(
                         null -> {}
                     }
                 },
+                showFollowsActionsAvatarRow = true,
             )
         }
     }

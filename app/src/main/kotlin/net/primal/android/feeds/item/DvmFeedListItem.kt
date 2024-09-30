@@ -58,6 +58,7 @@ fun DvmFeedListItem(
     listItemContainerColor: Color = AppTheme.extraColorScheme.surfaceVariantAlt2,
     avatarSize: Dp = 48.dp,
     extended: Boolean = false,
+    showFollowsActionsAvatarRow: Boolean = false,
 ) {
     val viewModel = hiltViewModel<DvmFeedListItemViewModel>()
 
@@ -68,6 +69,7 @@ fun DvmFeedListItem(
         listItemContainerColor = listItemContainerColor,
         avatarSize = avatarSize,
         extended = extended,
+        showFollowsActionsAvatarRow = showFollowsActionsAvatarRow,
         dvmFeed = data,
     )
 }
@@ -81,6 +83,7 @@ private fun DvmFeedListItem(
     listItemContainerColor: Color = AppTheme.extraColorScheme.surfaceVariantAlt2,
     avatarSize: Dp = 48.dp,
     extended: Boolean = false,
+    showFollowsActionsAvatarRow: Boolean = false,
 ) {
     Column(
         modifier = Modifier
@@ -152,23 +155,26 @@ private fun DvmFeedListItem(
                             onLikeClick = { eventPublisher(DvmFeedListItemContract.UiEvent.OnLikeClick(dvmFeed = dvmFeed)) },
                             onZapClick = { eventPublisher(DvmFeedListItemContract.UiEvent.OnZapClick(dvmFeed = dvmFeed)) },
                         )
-                        val profileAvatarSize = 28.dp
-                        val avatarVisiblePercentage = 0.75f
-                        val avatarsShown = dvmFeed.followsActions.size.coerceAtMost(4)
+                        if (showFollowsActionsAvatarRow) {
+                            val maxAvatarsToShow = 5
+                            val profileAvatarSize = 28.dp
+                            val avatarVisiblePercentage = 0.75f
+                            val avatarsShown = dvmFeed.followsActions.size.coerceAtMost(maxAvatarsToShow)
 
-                        AvatarThumbnailsRow(
-                            modifier = Modifier
-                                .size(
-                                    width = (profileAvatarSize * avatarVisiblePercentage * (avatarsShown - 1) + profileAvatarSize),
-                                    height = profileAvatarSize,
-                                ),
-                            avatarCdnImages = dvmFeed.followsActions.map { it.avatarCdnImage },
-                            onClick = {},
-                            maxAvatarsToShow = 4,
-                            displayAvatarOverflowIndicator = false,
-                            avatarBorderColor = listItemContainerColor,
-                            avatarSize = profileAvatarSize,
-                        )
+                            AvatarThumbnailsRow(
+                                modifier = Modifier
+                                    .size(
+                                        width = (profileAvatarSize * avatarVisiblePercentage * (avatarsShown - 1) + profileAvatarSize),
+                                        height = profileAvatarSize,
+                                    ),
+                                avatarCdnImages = dvmFeed.followsActions.map { it.avatarCdnImage },
+                                onClick = {},
+                                maxAvatarsToShow = maxAvatarsToShow,
+                                displayAvatarOverflowIndicator = false,
+                                avatarBorderColor = listItemContainerColor,
+                                avatarSize = profileAvatarSize,
+                            )
+                        }
                     }
                 }
             },
