@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -44,6 +45,7 @@ import net.primal.android.core.compose.asBeforeNowFormat
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.FeedReplies
 import net.primal.android.core.compose.icons.primaliconpack.LightningBolt
+import net.primal.android.core.compose.icons.primaliconpack.More
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.zaps.ZappersAvatarThumbnailRow
 import net.primal.android.nostr.model.NostrEventKind
@@ -132,6 +134,15 @@ private fun ListItemHeader(
                 onBookmarkClick = { },
                 onMuteUserClick = { },
                 onReportContentClick = { },
+                icon = {
+                    Icon(
+                        modifier = Modifier
+                            .padding(start = 14.dp, end = 8.dp)
+                            .wrapContentSize(align = Alignment.TopEnd),
+                        imageVector = PrimalIcons.More,
+                        contentDescription = stringResource(id = R.string.accessibility_article_drop_down),
+                    )
+                },
             )
         }
     }

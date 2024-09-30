@@ -14,13 +14,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -36,6 +39,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
@@ -47,6 +51,8 @@ import androidx.lifecycle.Lifecycle
 import java.text.NumberFormat
 import kotlinx.coroutines.launch
 import net.primal.android.R
+import net.primal.android.articles.feed.ui.ArticleDropdownMenuIcon
+import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalLoadingSpinner
@@ -55,7 +61,10 @@ import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
+import net.primal.android.core.compose.icons.primaliconpack.Bookmarks
+import net.primal.android.core.compose.icons.primaliconpack.BookmarksFilled
 import net.primal.android.core.compose.icons.primaliconpack.FeedNewZapFilled
+import net.primal.android.core.compose.icons.primaliconpack.More
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.core.compose.zaps.ArticleTopZapsSection
 import net.primal.android.core.ext.openUriSafely
@@ -224,6 +233,40 @@ private fun ArticleDetailsScreen(
                 navigationIconContentDescription = stringResource(id = R.string.accessibility_back_button),
                 onNavigationIconClick = onClose,
                 showDivider = state.article?.authorDisplayName == null || !scrolledToTop,
+                actions = {
+                    if (state.article != null) {
+                        // TODO Pass info if article is bookmarked
+                        val isBookmarked = false
+
+                        AppBarIcon(
+                            icon = if (isBookmarked) PrimalIcons.BookmarksFilled else PrimalIcons.Bookmarks,
+                            iconSize = 20.dp,
+                            appBarIconContentDescription = stringResource(id = R.string.accessibility_bookmark),
+                            onClick = {},
+                        )
+
+                        ArticleDropdownMenuIcon(
+                            modifier = Modifier
+                                .size(42.dp)
+                                .clip(CircleShape),
+                            articleId = state.article.articleId,
+                            articleContent = state.article.content,
+                            articleRawData = state.article.eventRawNostrEvent,
+                            authorId = state.article.authorId,
+                            isBookmarked = isBookmarked,
+                            onBookmarkClick = { },
+                            onMuteUserClick = { },
+                            onReportContentClick = { },
+                            icon = {
+                                Icon(
+                                    modifier = Modifier.padding(top = 10.dp),
+                                    imageVector = PrimalIcons.More,
+                                    contentDescription = stringResource(id = R.string.accessibility_article_drop_down),
+                                )
+                            },
+                        )
+                    }
+                },
             )
         },
         content = { paddingValues ->

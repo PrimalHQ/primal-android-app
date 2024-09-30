@@ -18,6 +18,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.Settings
@@ -30,6 +31,7 @@ fun AppBarIcon(
     icon: ImageVector,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    iconSize: Dp = 24.dp,
     enabled: Boolean = true,
     tint: Color = LocalContentColor.current,
     enabledBackgroundColor: Color = Color.Unspecified,
@@ -46,7 +48,7 @@ fun AppBarIcon(
         onClick = onClick,
     ) {
         Icon(
-            modifier = Modifier.size(24.dp),
+            modifier = Modifier.size(iconSize),
             imageVector = icon,
             contentDescription = appBarIconContentDescription,
             tint = tint,
