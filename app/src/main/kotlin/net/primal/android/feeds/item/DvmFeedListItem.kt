@@ -56,7 +56,7 @@ fun DvmFeedListItem(
     onFeedClick: ((dvmFeed: DvmFeed) -> Unit)? = null,
     listItemContainerColor: Color = AppTheme.extraColorScheme.surfaceVariantAlt2,
     avatarSize: Dp = 48.dp,
-    extendedView: Boolean = false,
+    extended: Boolean = false,
 ) {
     val viewModel = hiltViewModel<DvmFeedListItemViewModel, DvmFeedListItemViewModel.Factory>(
         key = data.dvmId,
@@ -72,7 +72,7 @@ fun DvmFeedListItem(
         eventPublisher = viewModel::setEvent,
         listItemContainerColor = listItemContainerColor,
         avatarSize = avatarSize,
-        extendedView = extendedView,
+        extended = extended,
     )
 }
 
@@ -84,7 +84,7 @@ private fun DvmFeedListItem(
     eventPublisher: (DvmFeedListItemContract.UiEvent) -> Unit,
     listItemContainerColor: Color = AppTheme.extraColorScheme.surfaceVariantAlt2,
     avatarSize: Dp = 48.dp,
-    extendedView: Boolean = false,
+    extended: Boolean = false,
 ) {
     Column(
         modifier = Modifier
@@ -120,7 +120,7 @@ private fun DvmFeedListItem(
                     fontWeight = FontWeight.Bold,
                     color = AppTheme.colorScheme.onSurface,
                     text = state.dvmFeed.title,
-                    maxLines = if (extendedView) 2 else 1,
+                    maxLines = if (extended) 2 else 1,
                 )
             },
             supportingContent = {
@@ -136,11 +136,11 @@ private fun DvmFeedListItem(
                             style = AppTheme.typography.bodyMedium,
                             color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
                             text = state.dvmFeed.description,
-                            maxLines = if (extendedView) 2 else 1,
+                            maxLines = if (extended) 2 else 1,
                             overflow = TextOverflow.Ellipsis,
                         )
                     }
-                    if (extendedView) {
+                    if (extended) {
                         CreatedByPrimalRow()
                     }
                     DvmFeedActionRow(
