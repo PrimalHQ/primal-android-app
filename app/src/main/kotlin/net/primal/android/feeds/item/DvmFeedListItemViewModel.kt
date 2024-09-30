@@ -3,13 +3,16 @@ package net.primal.android.feeds.item
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import net.primal.android.feeds.domain.DvmFeed
 import net.primal.android.feeds.item.DvmFeedListItemContract.UiEvent
 
 @HiltViewModel
-class DvmFeedListItemViewModel : ViewModel() {
+class DvmFeedListItemViewModel @Inject constructor(
+
+) : ViewModel() {
 
     private val event = MutableSharedFlow<UiEvent>()
     fun setEvent(e: UiEvent) = viewModelScope.launch { event.emit(e) }

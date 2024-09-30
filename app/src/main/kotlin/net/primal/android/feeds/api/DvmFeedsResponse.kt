@@ -9,4 +9,7 @@ data class DvmFeedsResponse(
     val feedMetadatas: List<PrimalEvent> = emptyList(),
     val feedFollowActions: List<PrimalEvent> = emptyList(),
     val feedUserStats: List<PrimalEvent> = emptyList(),
+    val userMetadatas: List<NostrEvent> = emptyList(),
+    val cdnResources: List<PrimalEvent> = emptyList(),
+    val userScores: List<PrimalEvent> = emptyList(),
 )

@@ -1,7 +1,7 @@
 package net.primal.android.feeds.repository
 
+import androidx.compose.ui.util.fastDistinctBy
 import androidx.room.withTransaction
-import java.util.*
 import javax.inject.Inject
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
@@ -17,6 +17,10 @@ import net.primal.android.feeds.domain.FEED_KIND_DVM
 import net.primal.android.feeds.domain.FeedSpecKind
 import net.primal.android.feeds.domain.buildSpec
 import net.primal.android.nostr.ext.findFirstIdentifier
+import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
+import net.primal.android.nostr.ext.mapAsProfileDataPO
+import net.primal.android.nostr.ext.takeContentAsPrimalUserScoresOrNull
+import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.primal.PrimalEvent
 import net.primal.android.nostr.model.primal.content.ContentArticleFeedData
 import net.primal.android.nostr.model.primal.content.ContentDvmFeedFollowsAction
@@ -124,8 +128,18 @@ class FeedsRepository @Inject constructor(
         }
         val eventStatsMap = response.scores.parseAndMapContentByKey<ContentPrimalEventStats> { eventId }
         val metadatas = response.feedMetadatas.parseAndMapContentByKey<ContentDvmFeedMetadata> { eventId }
-        val userStats = response.feedMetadatas.parseAndMapContentByKey<ContentPrimalEventUserStats> { eventId }
-        val followsActions = response.feedMetadatas.parseAndMapContentByKey<ContentDvmFeedFollowsAction> { eventId }
+        val userStats = response.feedUserStats.parseAndMapContentByKey<ContentPrimalEventUserStats> { eventId }
+        val followsActions = response.feedFollowActions.parseAndMapContentByKey<ContentDvmFeedFollowsAction> { eventId }
+
+        val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
+        val profiles = response.userMetadatas.mapAsProfileDataPO(cdnResources = cdnResources).distinctBy { it.ownerId }
+
+        val profileScores = response.userScores.map { it.takeContentAsPrimalUserScoresOrNull() }
+            .fold(emptyMap<String, Float>()) { acc, map -> acc + map }
+
+        withContext(dispatcherProvider.io()) {
+            database.profiles().upsertAll(data = profiles)
+        }
 
         val dvmFeeds = response.dvmHandlers
             .filter { it.content.isNotEmpty() }
@@ -133,6 +147,10 @@ class FeedsRepository @Inject constructor(
                 val dvmMetadata = NostrJson.decodeFromStringOrNull<ContentPrimalDvmFeedMetadata>(nostrEvent.content)
                 val dvmId = nostrEvent.tags.findFirstIdentifier()
                 val dvmTitle = dvmMetadata?.name
+                val profileDatasFromFollowsActions = profiles
+                    .filter { followsActions[nostrEvent.id]?.userIds?.contains(it.ownerId) == true }
+                    .sortedByDescending { profileData -> profileScores[profileData.ownerId] }
+
                 if (dvmMetadata != null && dvmId != null && dvmTitle != null) {
                     DvmFeed(
                         dvmId = dvmId,
@@ -150,7 +168,7 @@ class FeedsRepository @Inject constructor(
                             else -> null
                         },
                         isPrimal = metadatas[nostrEvent.id]?.isPrimal,
-                        followsActions = followsActions[nostrEvent.id]?.userIds ?: emptyList(),
+                        followsActions = profileDatasFromFollowsActions,
                         userLiked = userStats[nostrEvent.id]?.liked,
                         userZapped = userStats[nostrEvent.id]?.zapped,
                     )

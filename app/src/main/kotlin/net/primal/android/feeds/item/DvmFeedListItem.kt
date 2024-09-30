@@ -2,6 +2,7 @@ package net.primal.android.feeds.item
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -36,6 +37,7 @@ import java.text.NumberFormat
 import net.primal.android.R
 import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.AvatarThumbnail
+import net.primal.android.core.compose.AvatarThumbnailsRow
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.FeedLikes
 import net.primal.android.core.compose.icons.primaliconpack.FeedLikesFilled
@@ -137,14 +139,37 @@ private fun DvmFeedListItem(
                     if (extended) {
                         CreatedByPrimalRow()
                     }
-                    DvmFeedActionRow(
-                        userLiked = dvmFeed.userLiked ?: false,
-                        userZapped = dvmFeed.userZapped ?: false,
-                        totalLikes = dvmFeed.totalLikes,
-                        totalSatsZapped = dvmFeed.totalSatsZapped,
-                        onLikeClick = { eventPublisher(DvmFeedListItemContract.UiEvent.OnLikeClick(dvmFeed = dvmFeed)) },
-                        onZapClick = { eventPublisher(DvmFeedListItemContract.UiEvent.OnZapClick(dvmFeed = dvmFeed)) },
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        DvmFeedActionRow(
+                            userLiked = dvmFeed.userLiked ?: false,
+                            userZapped = dvmFeed.userZapped ?: false,
+                            totalLikes = dvmFeed.totalLikes,
+                            totalSatsZapped = dvmFeed.totalSatsZapped,
+                            onLikeClick = { eventPublisher(DvmFeedListItemContract.UiEvent.OnLikeClick(dvmFeed = dvmFeed)) },
+                            onZapClick = { eventPublisher(DvmFeedListItemContract.UiEvent.OnZapClick(dvmFeed = dvmFeed)) },
+                        )
+                        val profileAvatarSize = 28.dp
+                        val avatarVisiblePercentage = 0.75f
+                        val avatarsShown = dvmFeed.followsActions.size.coerceAtMost(4)
+
+                        AvatarThumbnailsRow(
+                            modifier = Modifier
+                                .size(
+                                    width = (profileAvatarSize * avatarVisiblePercentage * (avatarsShown - 1) + profileAvatarSize),
+                                    height = profileAvatarSize,
+                                ),
+                            avatarCdnImages = dvmFeed.followsActions.map { it.avatarCdnImage },
+                            onClick = {},
+                            maxAvatarsToShow = 4,
+                            displayAvatarOverflowIndicator = false,
+                            avatarBorderColor = listItemContainerColor,
+                            avatarSize = profileAvatarSize,
+                        )
+                    }
                 }
             },
         )
