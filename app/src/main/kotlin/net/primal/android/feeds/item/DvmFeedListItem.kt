@@ -144,6 +144,8 @@ private fun DvmFeedListItem(
                         CreatedByPrimalRow()
                     }
                     DvmFeedActionRow(
+                        userLiked = state.dvmFeed.userLiked ?: false,
+                        userZapped = state.dvmFeed.userZapped ?: false,
                         totalLikes = state.dvmFeed.totalLikes,
                         totalSatsZapped = state.dvmFeed.totalSatsZapped,
                         onLikeClick = { eventPublisher(DvmFeedListItemContract.UiEvent.OnLikeClick) },
@@ -187,6 +189,8 @@ private fun CreatedByPrimalRow() {
 
 @Composable
 private fun DvmFeedActionRow(
+    userLiked: Boolean,
+    userZapped: Boolean,
     totalLikes: Long?,
     totalSatsZapped: Long?,
     onLikeClick: () -> Unit,
@@ -199,7 +203,7 @@ private fun DvmFeedActionRow(
 
         SingleEventStat(
             textCount = numberFormat.format(totalLikes ?: 0),
-            highlighted = false,
+            highlighted = userLiked,
             iconVector = PrimalIcons.FeedLikes,
             iconVectorHighlight = PrimalIcons.FeedLikesFilled,
             colorHighlight = AppTheme.extraColorScheme.liked,
@@ -211,7 +215,7 @@ private fun DvmFeedActionRow(
 
         SingleEventStat(
             textCount = numberFormat.format(totalSatsZapped ?: 0),
-            highlighted = false,
+            highlighted = userZapped,
             iconVector = PrimalIcons.FeedZaps,
             iconVectorHighlight = PrimalIcons.FeedZapsFilled,
             colorHighlight = AppTheme.extraColorScheme.zapped,
