@@ -93,7 +93,7 @@ private fun DvmFeedListItem(
             colors = ListItemDefaults.colors(containerColor = listItemContainerColor),
             leadingContent = {
                 Column(
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     AvatarThumbnail(
