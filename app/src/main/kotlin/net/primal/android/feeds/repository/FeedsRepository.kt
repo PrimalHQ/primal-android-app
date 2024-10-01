@@ -21,6 +21,7 @@ import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
 import net.primal.android.nostr.ext.mapAsProfileDataPO
 import net.primal.android.nostr.ext.takeContentAsPrimalUserScoresOrNull
 import net.primal.android.nostr.model.NostrEvent
+import net.primal.android.nostr.mappers.asContentArticleFeedData
 import net.primal.android.nostr.model.primal.PrimalEvent
 import net.primal.android.nostr.model.primal.content.ContentArticleFeedData
 import net.primal.android.nostr.model.primal.content.ContentDvmFeedFollowsAction
@@ -98,15 +99,7 @@ class FeedsRepository @Inject constructor(
                 database.feeds().upsertAll(data = feeds)
             }
 
-            val apiFeeds = feeds.map {
-                ContentArticleFeedData(
-                    name = it.name,
-                    spec = it.spec,
-                    feedKind = it.feedKind,
-                    description = it.description,
-                    enabled = it.enabled,
-                )
-            }
+            val apiFeeds = feeds.map { it.asContentArticleFeedData() }
 
             feedsApi.setUserFeeds(
                 userId = activeAccountStore.activeUserId(),
