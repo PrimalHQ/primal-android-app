@@ -1,6 +1,5 @@
 package net.primal.android.feeds.repository
 
-import androidx.compose.ui.util.fastDistinctBy
 import androidx.room.withTransaction
 import javax.inject.Inject
 import kotlinx.coroutines.flow.first
@@ -20,7 +19,6 @@ import net.primal.android.nostr.ext.findFirstIdentifier
 import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
 import net.primal.android.nostr.ext.mapAsProfileDataPO
 import net.primal.android.nostr.ext.takeContentAsPrimalUserScoresOrNull
-import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.mappers.asContentArticleFeedData
 import net.primal.android.nostr.model.primal.PrimalEvent
 import net.primal.android.nostr.model.primal.content.ContentArticleFeedData
@@ -91,6 +89,27 @@ class FeedsRepository @Inject constructor(
             content?.map { it.asFeedPO(specKind = specKind) }
         }
     }
+
+    suspend fun persistAllLocalUserFeeds(userId: String) {
+        val readsFeeds = withContext(dispatcherProvider.io()) {
+            database.feeds().getAllFeedsBySpecKind(FeedSpecKind.Reads)
+        }
+        val noteFeeds = withContext(dispatcherProvider.io()) {
+            database.feeds().getAllFeedsBySpecKind(FeedSpecKind.Notes)
+        }
+
+        feedsApi.setUserFeeds(
+            userId = userId,
+            specKind = FeedSpecKind.Reads,
+            feeds = readsFeeds.map { it.asContentArticleFeedData() },
+        )
+        feedsApi.setUserFeeds(
+            userId = userId,
+            specKind = FeedSpecKind.Notes,
+            feeds = noteFeeds.map { it.asContentArticleFeedData() },
+        )
+    }
+
 
     suspend fun persistArticleFeeds(feeds: List<Feed>, specKind: FeedSpecKind) {
         withContext(dispatcherProvider.io()) {

@@ -73,15 +73,29 @@ class ExploreFeedsViewModel @AssistedInject constructor(
 
     private fun addToUserFeeds(dvmFeed: DvmFeed) =
         viewModelScope.launch {
-            dvmFeed.kind?.let {
-                feedsRepository.addDvmFeed(dvmFeed = dvmFeed, specKind = dvmFeed.kind)
+            try {
+                dvmFeed.kind?.let {
+                    feedsRepository.addDvmFeed(dvmFeed = dvmFeed, specKind = dvmFeed.kind)
+                }
+                activeAccountPubkey?.let {
+                    feedsRepository.persistAllLocalUserFeeds(userId = activeAccountPubkey)
+                }
+            } catch (error: WssException) {
+                Timber.w(error)
             }
         }
 
     private fun removeFromUserFeeds(dvmFeed: DvmFeed) =
         viewModelScope.launch {
-            dvmFeed.kind?.let {
-                feedsRepository.removeFeed(feedSpec = dvmFeed.buildSpec(specKind = dvmFeed.kind))
+            try {
+                dvmFeed.kind?.let {
+                    feedsRepository.removeFeed(feedSpec = dvmFeed.buildSpec(specKind = dvmFeed.kind))
+                }
+                activeAccountPubkey?.let {
+                    feedsRepository.persistAllLocalUserFeeds(userId = activeAccountPubkey)
+                }
+            } catch (error: WssException) {
+                Timber.w(error)
             }
         }
 

@@ -10,6 +10,9 @@ import net.primal.android.feeds.domain.FeedSpecKind
 @Dao
 interface FeedDao {
 
+    @Query("SELECT * FROM Feed WHERE specKind = :specKind")
+    fun getAllFeedsBySpecKind(specKind: FeedSpecKind): List<Feed>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun upsertAll(data: List<Feed>)
 
