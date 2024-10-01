@@ -183,7 +183,7 @@ class FeedsRepository @Inject constructor(
     suspend fun addReadsDvmFeed(dvmFeed: DvmFeed, specKind: FeedSpecKind) =
         addDvmFeed(dvmFeed = dvmFeed, specKind = specKind)
 
-    private suspend fun addDvmFeed(dvmFeed: DvmFeed, specKind: FeedSpecKind) {
+    suspend fun addDvmFeed(dvmFeed: DvmFeed, specKind: FeedSpecKind) {
         withContext(dispatcherProvider.io()) {
             val feed = Feed(
                 spec = dvmFeed.buildSpec(specKind = specKind),
