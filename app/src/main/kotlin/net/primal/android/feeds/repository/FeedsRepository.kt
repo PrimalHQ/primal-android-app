@@ -75,7 +75,7 @@ class FeedsRepository @Inject constructor(
         if (newFeeds.isNotEmpty()) {
             val disabledNewFeeds = newFeeds.map { it.copy(enabled = false) }
             val mergedFeeds = localFeeds + disabledNewFeeds
-            persistArticleFeeds(feeds = mergedFeeds, specKind = specKind)
+            persistGivenUserFeeds(feeds = mergedFeeds, specKind = specKind)
         }
     }
 
@@ -111,7 +111,7 @@ class FeedsRepository @Inject constructor(
     }
 
 
-    suspend fun persistArticleFeeds(feeds: List<Feed>, specKind: FeedSpecKind) {
+    suspend fun persistGivenUserFeeds(feeds: List<Feed>, specKind: FeedSpecKind) {
         withContext(dispatcherProvider.io()) {
             database.withTransaction {
                 database.feeds().deleteAll(specKind = specKind)
@@ -131,7 +131,7 @@ class FeedsRepository @Inject constructor(
     suspend fun fetchAndPersistDefaultFeeds(givenDefaultFeeds: List<Feed>, specKind: FeedSpecKind) =
         withContext(dispatcherProvider.io()) {
             val feeds = givenDefaultFeeds.ifEmpty { fetchDefaultFeeds(specKind = specKind) ?: return@withContext }
-            persistArticleFeeds(feeds = feeds, specKind = specKind)
+            persistGivenUserFeeds(feeds = feeds, specKind = specKind)
         }
 
     suspend fun fetchRecommendedDvmFeeds(specKind: FeedSpecKind? = null, pubkey: String? = null): List<DvmFeed> {

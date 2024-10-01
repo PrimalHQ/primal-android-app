@@ -232,7 +232,7 @@ class FeedsViewModel @AssistedInject constructor(
         viewModelScope.launch {
             val currentFeeds = allFeeds.map { it.asFeedPO() }
             try {
-                feedsRepository.persistArticleFeeds(feeds = currentFeeds, specKind = specKind)
+                feedsRepository.persistGivenUserFeeds(feeds = currentFeeds, specKind = specKind)
             } catch (error: WssException) {
                 Timber.w(error)
             }
