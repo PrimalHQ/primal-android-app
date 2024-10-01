@@ -16,6 +16,7 @@ data class ArticleDetailsUi(
     val summary: String?,
     val publishedAt: Instant,
     val authorDisplayName: String,
+    val eventRawNostrEvent: String,
     val authorInternetIdentifier: String? = null,
     val authorAvatarCdnImage: CdnImage? = null,
     val coverImageCdnImage: CdnImage? = null,
@@ -34,11 +35,12 @@ fun Article.mapAsArticleDetailsUi(): ArticleDetailsUi {
         summary = this.data.summary,
         publishedAt = Instant.ofEpochSecond(this.data.publishedAt),
         authorDisplayName = this.author?.authorNameUiFriendly() ?: this.data.authorId.asEllipsizedNpub(),
+        eventRawNostrEvent = this.data.raw,
         authorInternetIdentifier = this.author?.internetIdentifier,
         authorAvatarCdnImage = this.author?.avatarCdnImage,
         coverImageCdnImage = this.data.imageCdnImage ?: this.author?.avatarCdnImage,
         readingTimeInMinutes = ((this.data.wordsCount ?: 1) / 200) + 1,
         hashtags = this.data.hashtags,
-        eventStatsUi = EventStatsUi.from(eventStats = this.eventStats, userStats = null),
+        eventStatsUi = EventStatsUi.from(eventStats = this.eventStats, userStats = this.userEventStats),
     )
 }

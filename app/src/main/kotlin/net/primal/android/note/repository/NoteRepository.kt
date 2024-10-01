@@ -26,19 +26,18 @@ import net.primal.android.nostr.ext.parseEventTags
 import net.primal.android.nostr.ext.parseHashtagTags
 import net.primal.android.nostr.ext.parsePubkeyTags
 import net.primal.android.nostr.model.NostrEventKind
+import net.primal.android.nostr.notary.NostrUnsignedEvent
 import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.android.note.api.EventStatsApi
 import net.primal.android.note.api.model.EventZapsRequestBody
 import net.primal.android.note.db.EventZap
 import net.primal.android.note.reactions.mediator.EventZapsMediator
 import net.primal.android.profile.repository.ProfileRepository
-import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.domain.PublicBookmark
 import timber.log.Timber
 
 class NoteRepository @Inject constructor(
     private val dispatcherProvider: CoroutineDispatcherProvider,
-    private val activeAccountStore: ActiveAccountStore,
     private val nostrPublisher: NostrPublisher,
     private val profileRepository: ProfileRepository,
     private val eventStatsApi: EventStatsApi,
@@ -46,18 +45,30 @@ class NoteRepository @Inject constructor(
 ) {
 
     @Throws(NostrPublishException::class)
-    suspend fun likePost(postId: String, postAuthorId: String) {
-        val userId = activeAccountStore.activeUserId()
+    suspend fun likeEvent(
+        userId: String,
+        eventId: String,
+        eventAuthorId: String,
+        optionalTags: List<JsonArray> = emptyList(),
+    ) = withContext(dispatcherProvider.io()) {
         val statsUpdater = EventStatsUpdater(
-            eventId = postId,
+            eventId = eventId,
             userId = userId,
-            eventAuthorId = postAuthorId,
+            eventAuthorId = eventAuthorId,
             database = database,
         )
 
         try {
             statsUpdater.increaseLikeStats()
-            nostrPublisher.publishLikeNote(userId = userId, postId = postId, postAuthorId = postAuthorId)
+            nostrPublisher.signAndPublishNostrEvent(
+                userId = userId,
+                unsignedNostrEvent = NostrUnsignedEvent(
+                    pubKey = userId,
+                    kind = NostrEventKind.Reaction.value,
+                    tags = listOf(eventId.asEventIdTag(), eventAuthorId.asPubkeyTag()) + optionalTags,
+                    content = "+",
+                ),
+            )
         } catch (error: NostrPublishException) {
             Timber.w(error)
             statsUpdater.revertStats()
@@ -66,26 +77,35 @@ class NoteRepository @Inject constructor(
     }
 
     @Throws(NostrPublishException::class)
-    suspend fun repostPost(
-        postId: String,
-        postAuthorId: String,
-        postRawNostrEvent: String,
-    ) {
-        val userId = activeAccountStore.activeUserId()
+    suspend fun repostEvent(
+        userId: String,
+        eventId: String,
+        eventKind: NostrEventKind,
+        eventAuthorId: String,
+        eventRawNostrEvent: String,
+        optionalTags: List<JsonArray> = emptyList(),
+    ) = withContext(dispatcherProvider.io()) {
         val statsUpdater = EventStatsUpdater(
-            eventId = postId,
+            eventId = eventId,
             userId = userId,
-            eventAuthorId = postAuthorId,
+            eventAuthorId = eventAuthorId,
             database = database,
         )
 
         try {
             statsUpdater.increaseRepostStats()
-            nostrPublisher.publishRepostNote(
+            nostrPublisher.signAndPublishNostrEvent(
                 userId = userId,
-                postId = postId,
-                postAuthorId = postAuthorId,
-                postRawNostrEvent = postRawNostrEvent,
+                unsignedNostrEvent = NostrUnsignedEvent(
+                    pubKey = userId,
+                    kind = if (eventKind == NostrEventKind.ShortTextNote) {
+                        NostrEventKind.ShortTextNoteRepost.value
+                    } else {
+                        NostrEventKind.GenericRepost.value
+                    },
+                    tags = listOf(eventId.asEventIdTag(), eventAuthorId.asPubkeyTag()) + optionalTags,
+                    content = eventRawNostrEvent,
+                ),
             )
         } catch (error: NostrPublishException) {
             Timber.w(error)
@@ -96,6 +116,7 @@ class NoteRepository @Inject constructor(
 
     @Throws(NostrPublishException::class)
     suspend fun publishShortTextNote(
+        userId: String,
         content: String,
         attachments: List<NoteAttachment> = emptyList(),
         rootArticleEventId: String? = null,
@@ -181,24 +202,28 @@ class NoteRepository @Inject constructor(
         val outboxRelays = replyToPostId?.let { noteId ->
             relayHintsMap[noteId]?.let { relayUrl -> listOf(relayUrl) }
         } ?: emptyList()
-        return nostrPublisher.publishShortTextNote(
-            userId = activeAccountStore.activeUserId(),
-            content = refinedContent,
-            tags = pubkeyTags + noteTags + hashtagTags + iMetaTags,
-            outboxRelays = outboxRelays,
-        )
+
+        return withContext(dispatcherProvider.io()) {
+            nostrPublisher.publishShortTextNote(
+                userId = userId,
+                content = refinedContent,
+                tags = pubkeyTags + noteTags + hashtagTags + iMetaTags,
+                outboxRelays = outboxRelays,
+            )
+        }
     }
 
-    suspend fun isBookmarked(noteId: String): Boolean {
-        return database.eventHints().findById(eventId = noteId)?.isBookmarked == true
-    }
+    suspend fun isBookmarked(noteId: String) =
+        withContext(dispatcherProvider.io()) {
+            database.eventHints().findById(eventId = noteId)?.isBookmarked == true
+        }
 
     @Throws(ProfileRepository.BookmarksListNotFound::class, NostrPublishException::class)
     suspend fun addToBookmarks(
         userId: String,
         noteId: String,
         forceUpdate: Boolean,
-    ) {
+    ) = withContext(dispatcherProvider.io()) {
         profileRepository.addBookmark(
             userId = userId,
             bookmark = PublicBookmark(type = "e", value = noteId),
@@ -214,7 +239,7 @@ class NoteRepository @Inject constructor(
         userId: String,
         noteId: String,
         forceUpdate: Boolean,
-    ) {
+    ) = withContext(dispatcherProvider.io()) {
         profileRepository.removeBookmark(
             userId = userId,
             bookmark = PublicBookmark(type = "e", value = noteId),
@@ -225,36 +250,38 @@ class NoteRepository @Inject constructor(
         }
     }
 
-    suspend fun fetchTopNoteZaps(eventId: String) {
-        val userId = activeAccountStore.activeUserId()
+    suspend fun fetchTopNoteZaps(userId: String, eventId: String) {
         val response = eventStatsApi.getEventZaps(EventZapsRequestBody(eventId = eventId, userId = userId, limit = 15))
         withContext(dispatcherProvider.io()) {
             response.persistToDatabaseAsTransaction(database = database)
         }
     }
 
-    fun pagedEventZaps(eventId: String): Flow<PagingData<EventZap>> {
-        return createPager(eventId = eventId) {
+    fun pagedEventZaps(userId: String, eventId: String): Flow<PagingData<EventZap>> {
+        return createPager(userId = userId, eventId = eventId) {
             database.eventZaps().pagedEventZaps(eventId = eventId)
         }.flow
     }
 
     @OptIn(ExperimentalPagingApi::class)
-    private fun createPager(eventId: String, pagingSourceFactory: () -> PagingSource<Int, EventZap>) =
-        Pager(
-            config = PagingConfig(
-                pageSize = 50,
-                prefetchDistance = 50,
-                initialLoadSize = 150,
-                enablePlaceholders = true,
-            ),
-            remoteMediator = EventZapsMediator(
-                eventId = eventId,
-                userId = activeAccountStore.activeUserId(),
-                dispatcherProvider = dispatcherProvider,
-                eventStatsApi = eventStatsApi,
-                database = database,
-            ),
-            pagingSourceFactory = pagingSourceFactory,
-        )
+    private fun createPager(
+        userId: String,
+        eventId: String,
+        pagingSourceFactory: () -> PagingSource<Int, EventZap>,
+    ) = Pager(
+        config = PagingConfig(
+            pageSize = 50,
+            prefetchDistance = 50,
+            initialLoadSize = 150,
+            enablePlaceholders = true,
+        ),
+        remoteMediator = EventZapsMediator(
+            eventId = eventId,
+            userId = userId,
+            dispatcherProvider = dispatcherProvider,
+            eventStatsApi = eventStatsApi,
+            database = database,
+        ),
+        pagingSourceFactory = pagingSourceFactory,
+    )
 }

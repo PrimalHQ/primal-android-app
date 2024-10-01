@@ -2,8 +2,10 @@ package net.primal.android.settings.muted.repository
 
 import androidx.room.withTransaction
 import javax.inject.Inject
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.jsonPrimitive
+import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.ext.asMapByKey
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.networking.relays.errors.MissingRelaysException
@@ -14,6 +16,7 @@ import net.primal.android.settings.api.SettingsApi
 import net.primal.android.settings.muted.db.MutedUserData
 
 class MutedUserRepository @Inject constructor(
+    private val dispatcherProvider: CoroutineDispatcherProvider,
     private val database: PrimalDatabase,
     private val settingsApi: SettingsApi,
     private val nostrPublisher: NostrPublisher,
@@ -32,19 +35,20 @@ class MutedUserRepository @Inject constructor(
     }
 
     @Throws(MissingRelaysException::class)
-    suspend fun muteUserAndPersistMuteList(userId: String, mutedUserId: String) {
-        val userMetadataEventId = database.profiles().findMetadataEventId(mutedUserId)
-        updateAndPersistMuteList(userId = userId) {
-            toMutableSet().apply {
-                add(
-                    MutedUserData(
-                        userId = mutedUserId,
-                        userMetadataEventId = userMetadataEventId,
-                    ),
-                )
+    suspend fun muteUserAndPersistMuteList(userId: String, mutedUserId: String) =
+        withContext(dispatcherProvider.io()) {
+            val userMetadataEventId = database.profiles().findMetadataEventId(mutedUserId)
+            updateAndPersistMuteList(userId = userId) {
+                toMutableSet().apply {
+                    add(
+                        MutedUserData(
+                            userId = mutedUserId,
+                            userMetadataEventId = userMetadataEventId,
+                        ),
+                    )
+                }
             }
         }
-    }
 
     @Throws(MissingRelaysException::class)
     suspend fun unmuteUserAndPersistMuteList(userId: String, unmutedUserId: String) {
@@ -58,7 +62,7 @@ class MutedUserRepository @Inject constructor(
     private suspend fun updateAndPersistMuteList(
         userId: String,
         reducer: Set<MutedUserData>.() -> Set<MutedUserData>,
-    ) {
+    ) = withContext(dispatcherProvider.io()) {
         val remoteMuteList = fetchMuteListAndPersistProfiles(userId = userId)
         val newMuteList = remoteMuteList.reducer()
         nostrPublisher.setMuteList(userId = userId, muteList = newMuteList.map { it.userId }.toSet())

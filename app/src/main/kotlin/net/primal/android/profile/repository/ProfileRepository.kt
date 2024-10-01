@@ -218,12 +218,14 @@ class ProfileRepository @Inject constructor(
         profileId: String,
         noteId: String? = null,
     ) {
-        nostrPublisher.publishReportAbuseEvent(
-            userId = userId,
-            reportType = reportType,
-            reportProfileId = profileId,
-            reportNoteId = noteId,
-        )
+        withContext(dispatchers.io()) {
+            nostrPublisher.publishReportAbuseEvent(
+                userId = userId,
+                reportType = reportType,
+                reportProfileId = profileId,
+                reportNoteId = noteId,
+            )
+        }
     }
 
     suspend fun isUserFollowing(userId: String, targetUserId: String) = usersApi.isUserFollowing(userId, targetUserId)

@@ -26,11 +26,13 @@ import net.primal.android.notes.feed.model.asFeedPostUi
 import net.primal.android.notes.repository.FeedRepository
 import net.primal.android.thread.notes.ThreadContract.UiEvent
 import net.primal.android.thread.notes.ThreadContract.UiState
+import net.primal.android.user.accounts.active.ActiveAccountStore
 import timber.log.Timber
 
 @HiltViewModel
 class ThreadViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
+    private val activeAccountStore: ActiveAccountStore,
     private val dispatcherProvider: CoroutineDispatcherProvider,
     private val feedRepository: FeedRepository,
     private val noteRepository: NoteRepository,
@@ -127,7 +129,10 @@ class ThreadViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 withContext(dispatcherProvider.io()) {
-                    noteRepository.fetchTopNoteZaps(eventId = highlightPostId)
+                    noteRepository.fetchTopNoteZaps(
+                        userId = activeAccountStore.activeUserId(),
+                        eventId = highlightPostId,
+                    )
                 }
             } catch (error: WssException) {
                 Timber.w(error)

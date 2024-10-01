@@ -12,7 +12,7 @@ data class ArticleData(
     val content: String,
     val title: String,
     val publishedAt: Long,
-    val raw: String? = null,
+    val raw: String,
     val imageCdnImage: CdnImage? = null,
     val summary: String? = null,
     val authorMetadataId: String? = null,

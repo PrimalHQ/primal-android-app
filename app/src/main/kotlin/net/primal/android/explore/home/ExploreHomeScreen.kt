@@ -2,20 +2,12 @@ package net.primal.android.explore.home
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
@@ -26,10 +18,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SuggestionChip
-import androidx.compose.material3.SuggestionChipDefaults
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -46,15 +35,13 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.IconText
-import net.primal.android.core.compose.ListLoading
-import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AdvancedSearch
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.preview.PrimalPreview
-import net.primal.android.explore.home.ExploreHomeContract.UiEvent
 import net.primal.android.explore.home.feeds.ExploreFeeds
+import net.primal.android.explore.home.topics.ExploreTopics
 import net.primal.android.explore.home.ui.EXPLORE_HOME_TAB_COUNT
 import net.primal.android.explore.home.ui.ExploreHomeTabs
 import net.primal.android.explore.home.ui.FEEDS_INDEX
@@ -84,7 +71,6 @@ fun ExploreHomeScreen(
         onHashtagClick = onHashtagClick,
         onNoteClick = onNoteClick,
         onSearchClick = onSearchClick,
-        eventPublisher = { viewModel.setEvent(it) },
         onTuneClick = onTuneClick,
         onClose = onClose,
     )
@@ -97,7 +83,6 @@ private fun ExploreHomeScreen(
     onHashtagClick: (String) -> Unit,
     onNoteClick: (String) -> Unit,
     onSearchClick: () -> Unit,
-    eventPublisher: (UiEvent) -> Unit,
     onTuneClick: () -> Unit,
     onClose: () -> Unit,
 ) {
@@ -132,11 +117,8 @@ private fun ExploreHomeScreen(
                         )
                     }
                     TOPICS_INDEX -> {
-                        TopicsTabContent(
+                        ExploreTopics(
                             paddingValues = paddingValues,
-                            refreshing = state.refreshing,
-                            hashtags = state.hashtags,
-                            onRefreshClick = { eventPublisher(UiEvent.RefreshTrendingHashtags) },
                             onHashtagClick = onHashtagClick,
                         )
                     }
@@ -144,82 +126,6 @@ private fun ExploreHomeScreen(
             }
         },
     )
-}
-
-@Composable
-@OptIn(ExperimentalLayoutApi::class)
-private fun TopicsTabContent(
-    paddingValues: PaddingValues,
-    hashtags: List<List<HashtagUi>>,
-    refreshing: Boolean,
-    onHashtagClick: (String) -> Unit,
-    onRefreshClick: () -> Unit,
-) {
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = paddingValues,
-    ) {
-        items(
-            items = hashtags,
-            key = { it.first().name },
-        ) {
-            FlowRow(
-                modifier = Modifier
-                    .background(color = AppTheme.colorScheme.surfaceVariant)
-                    .wrapContentWidth()
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-                verticalArrangement = Arrangement.Top,
-            ) {
-                it.forEach {
-                    SuggestionChip(
-                        modifier = Modifier
-                            .height(56.dp)
-                            .padding(all = 8.dp),
-                        onClick = { onHashtagClick("#${it.name}") },
-                        shape = AppTheme.shapes.extraLarge,
-                        border = SuggestionChipDefaults.suggestionChipBorder(
-                            enabled = true,
-                            borderColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
-                        ),
-                        colors = SuggestionChipDefaults.suggestionChipColors(
-                            containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
-                            labelColor = AppTheme.colorScheme.onSurface,
-                        ),
-                        label = {
-                            Text(
-                                modifier = Modifier.padding(all = 4.dp),
-                                text = it.name,
-                                style = AppTheme.typography.bodyLarge,
-                                fontWeight = FontWeight.Medium,
-                            )
-                        },
-                    )
-                }
-            }
-        }
-
-        if (hashtags.isEmpty()) {
-            if (refreshing) {
-                item(contentType = "LoadingRefresh") {
-                    ListLoading(
-                        modifier = Modifier.fillParentMaxSize(),
-                    )
-                }
-            } else {
-                item(contentType = "NoContent") {
-                    ListNoContent(
-                        modifier = Modifier.fillParentMaxSize(),
-                        noContentText = stringResource(
-                            id = R.string.explore_trending_hashtags_no_content,
-                        ),
-                        refreshButtonVisible = true,
-                        onRefresh = onRefreshClick,
-                    )
-                }
-            }
-        }
-    }
 }
 
 @ExperimentalMaterial3Api

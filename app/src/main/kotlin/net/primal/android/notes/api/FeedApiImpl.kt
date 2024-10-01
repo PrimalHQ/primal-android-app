@@ -35,7 +35,7 @@ class FeedApiImpl @Inject constructor(
             metadata = queryResult.filterNostrEvents(NostrEventKind.Metadata),
             posts = queryResult.filterNostrEvents(NostrEventKind.ShortTextNote),
             articles = emptyList(),
-            reposts = queryResult.filterNostrEvents(NostrEventKind.Reposts),
+            reposts = queryResult.filterNostrEvents(NostrEventKind.ShortTextNoteRepost),
             zaps = queryResult.filterNostrEvents(NostrEventKind.Zap),
             primalEventStats = queryResult.filterPrimalEvents(NostrEventKind.PrimalEventStats),
             primalEventUserStats = queryResult.filterPrimalEvents(NostrEventKind.PrimalEventUserStats),

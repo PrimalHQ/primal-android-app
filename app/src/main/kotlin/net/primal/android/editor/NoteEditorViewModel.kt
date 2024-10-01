@@ -239,6 +239,7 @@ class NoteEditorViewModel @AssistedInject constructor(
                 val rootPost = _state.value.conversation.firstOrNull()
                 val replyToPost = _state.value.conversation.lastOrNull()
                 val publishedAndImported = noteRepository.publishShortTextNote(
+                    userId = activeAccountStore.activeUserId(),
                     content = _state.value.content.text.replaceUserMentionsWithUserIds(
                         users = _state.value.taggedUsers,
                     ),

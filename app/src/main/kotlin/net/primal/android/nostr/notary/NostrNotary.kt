@@ -11,7 +11,6 @@ import net.primal.android.core.serialization.json.NostrNotaryJson
 import net.primal.android.crypto.CryptoUtils
 import net.primal.android.crypto.toNpub
 import net.primal.android.networking.UserAgentProvider
-import net.primal.android.nostr.ext.asEventIdTag
 import net.primal.android.nostr.ext.asIdentifierTag
 import net.primal.android.nostr.ext.asPubkeyTag
 import net.primal.android.nostr.ext.toTags
@@ -101,33 +100,6 @@ class NostrNotary @Inject constructor(
             kind = NostrEventKind.ApplicationSpecificData.value,
             tags = listOf("${UserAgentProvider.APP_NAME} App".asIdentifierTag()),
             content = content,
-        ).signOrThrow(nsec = findNsecOrThrow(userId))
-    }
-
-    fun signLikeReactionNostrEvent(
-        userId: String,
-        postId: String,
-        postAuthorId: String,
-    ): NostrEvent {
-        return NostrUnsignedEvent(
-            pubKey = userId,
-            kind = NostrEventKind.Reaction.value,
-            tags = listOf(postId.asEventIdTag(), postAuthorId.asPubkeyTag()),
-            content = "+",
-        ).signOrThrow(nsec = findNsecOrThrow(userId))
-    }
-
-    fun signRepostNostrEvent(
-        userId: String,
-        postId: String,
-        postAuthorId: String,
-        postRawNostrEvent: String,
-    ): NostrEvent {
-        return NostrUnsignedEvent(
-            pubKey = userId,
-            kind = NostrEventKind.Reposts.value,
-            tags = listOf(postId.asEventIdTag(), postAuthorId.asPubkeyTag()),
-            content = postRawNostrEvent,
         ).signOrThrow(nsec = findNsecOrThrow(userId))
     }
 

@@ -65,12 +65,14 @@ import net.primal.android.nostr.ext.isNostrUri
 import net.primal.android.nostr.ext.isNote
 import net.primal.android.nostr.ext.takeAsNoteHexIdOrNull
 import net.primal.android.nostr.utils.Nip19TLV.toNaddrString
+import net.primal.android.notes.feed.NoteRepostOrQuoteBottomSheet
 import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.notes.feed.model.FeedPostAction
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.note.FeedNoteCard
 import net.primal.android.notes.feed.note.NoteContract.SideEffect.NoteError
 import net.primal.android.notes.feed.note.showNoteErrorSnackbar
+import net.primal.android.notes.feed.note.ui.ConfirmFirstBookmarkAlertDialog
 import net.primal.android.notes.feed.note.ui.FeedNoteActionsRow
 import net.primal.android.notes.feed.note.ui.NoteStatsRow
 import net.primal.android.notes.feed.note.ui.ReferencedNoteCard
@@ -96,7 +98,6 @@ import net.primal.android.wallet.zaps.canZap
 fun ArticleDetailsScreen(
     viewModel: ArticleDetailsViewModel,
     onClose: () -> Unit,
-    onArticleReplyClick: (naddr: String) -> Unit,
     onArticleHashtagClick: (hashtag: String) -> Unit,
     noteCallbacks: NoteCallbacks,
     onGoToWallet: () -> Unit,
@@ -115,7 +116,6 @@ fun ArticleDetailsScreen(
         state = uiState,
         eventPublisher = { viewModel.setEvent(it) },
         onClose = onClose,
-        onArticleReplyClick = onArticleReplyClick,
         onArticleHashtagClick = onArticleHashtagClick,
         onReactionsClick = onReactionsClick,
         noteCallbacks = noteCallbacks,
@@ -130,7 +130,6 @@ private fun ArticleDetailsScreen(
     eventPublisher: (UiEvent) -> Unit,
     onClose: () -> Unit,
     onArticleHashtagClick: (hashtag: String) -> Unit,
-    onArticleReplyClick: (naddr: String) -> Unit,
     onReactionsClick: (eventId: String) -> Unit,
     noteCallbacks: NoteCallbacks,
     onGoToWallet: () -> Unit,
@@ -182,12 +181,32 @@ private fun ArticleDetailsScreen(
         )
     }
 
-    fun invokeZapOptions() {
+    fun invokeZapOptionsOrShowWarning() {
         if (state.zappingState.walletConnected) {
             showZapOptions = true
         } else {
             showCantZapWarning = true
         }
+    }
+
+    var showRepostOrQuoteConfirmation by remember { mutableStateOf(false) }
+    if (showRepostOrQuoteConfirmation) {
+        NoteRepostOrQuoteBottomSheet(
+            onDismiss = { showRepostOrQuoteConfirmation = false },
+            onRepostClick = { eventPublisher(UiEvent.RepostAction) },
+            onPostQuoteClick = { state.naddr?.toNaddrString()?.let { noteCallbacks.onArticleQuoteClick?.invoke(it) } },
+        )
+    }
+
+    if (state.shouldApproveBookmark) {
+        ConfirmFirstBookmarkAlertDialog(
+            onBookmarkConfirmed = {
+                eventPublisher(UiEvent.BookmarkAction(forceUpdate = true))
+            },
+            onClose = {
+                eventPublisher(UiEvent.DismissBookmarkConfirmation)
+            },
+        )
     }
 
     SnackbarErrorHandler(
@@ -216,19 +235,41 @@ private fun ArticleDetailsScreen(
                     articleParts = articleParts,
                     listState = listState,
                     paddingValues = paddingValues,
-                    onArticleCommentClick = onArticleReplyClick,
+                    onArticleCommentClick = {
+                        state.naddr?.toNaddrString()?.let { noteCallbacks.onArticleReplyClick?.invoke(it) }
+                    },
                     onArticleHashtagClick = onArticleHashtagClick,
                     onReactionsClick = onReactionsClick,
-                    onZapOptionsClick = { invokeZapOptions() },
+                    onZapOptionsClick = { invokeZapOptionsOrShowWarning() },
                     onGoToWallet = onGoToWallet,
                     noteCallbacks = noteCallbacks,
                     onPostAction = { action ->
                         when (action) {
-                            FeedPostAction.Reply -> state.naddr?.toNaddrString()?.let(onArticleReplyClick)
-                            FeedPostAction.Zap -> Unit
-                            FeedPostAction.Like -> Unit
-                            FeedPostAction.Repost -> Unit
-                            FeedPostAction.Bookmark -> Unit
+                            FeedPostAction.Reply -> {
+                                state.naddr?.toNaddrString()?.let { noteCallbacks.onArticleReplyClick?.invoke(it) }
+                            }
+
+                            FeedPostAction.Zap -> {
+                                if (state.zappingState.canZap()) {
+                                    eventPublisher(UiEvent.ZapArticle())
+                                } else {
+                                    showCantZapWarning = true
+                                }
+                            }
+
+                            FeedPostAction.Like -> eventPublisher(UiEvent.LikeArticle)
+
+                            FeedPostAction.Repost -> {
+                                showRepostOrQuoteConfirmation = true
+                            }
+
+                            FeedPostAction.Bookmark -> eventPublisher(UiEvent.BookmarkAction())
+                        }
+                    },
+                    onPostLongPressAction = { action ->
+                        when (action) {
+                            FeedPostAction.Zap -> invokeZapOptionsOrShowWarning()
+                            else -> Unit
                         }
                     },
                     onNoteError = { noteError ->
@@ -255,7 +296,7 @@ private fun ArticleDetailsScreen(
                             )
                         }
                     },
-                    onZapLongClick = { invokeZapOptions() },
+                    onZapLongClick = { invokeZapOptionsOrShowWarning() },
                 )
             }
         },
@@ -279,6 +320,7 @@ private fun ArticleContentWithComments(
     noteCallbacks: NoteCallbacks,
     onGoToWallet: () -> Unit,
     onPostAction: ((FeedPostAction) -> Unit)? = null,
+    onPostLongPressAction: ((FeedPostAction) -> Unit)? = null,
     onNoteError: ((NoteError) -> Unit)? = null,
 ) {
     val uriHandler = LocalUriHandler.current
@@ -464,12 +506,7 @@ private fun ArticleContentWithComments(
                         // TODO Pass info if article is bookmarked
                         isBookmarked = false,
                         onPostAction = onPostAction,
-                        onPostLongPressAction = { action ->
-                            when (action) {
-                                FeedPostAction.Zap -> onZapOptionsClick()
-                                else -> Unit
-                            }
-                        },
+                        onPostLongPressAction = onPostLongPressAction,
                     )
                 }
             }
