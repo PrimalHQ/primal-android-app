@@ -60,6 +60,8 @@ fun FeedArticleListItem(
     data: FeedArticleUi,
     modifier: Modifier = Modifier,
     enabledDropdownMenu: Boolean = true,
+    showCommentsCount: Boolean = true,
+    color: Color = AppTheme.colorScheme.surfaceVariant,
     onClick: ((naddr: String) -> Unit)? = null,
 ) {
     Surface(
@@ -74,7 +76,7 @@ fun FeedArticleListItem(
                 onClick?.invoke(naddr)
             },
         ),
-        color = AppTheme.colorScheme.surfaceVariant,
+        color = color,
     ) {
         val infoTextStyle = AppTheme.typography.bodyMedium.copy(
             color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
@@ -90,7 +92,11 @@ fun FeedArticleListItem(
 
             ListItemContent(data = data)
 
-            ListItemFooter(data = data, textStyle = infoTextStyle)
+            ListItemFooter(
+                data = data,
+                textStyle = infoTextStyle,
+                showCommentsCount = showCommentsCount,
+            )
         }
     }
 }
@@ -187,7 +193,11 @@ private fun ListItemContent(data: FeedArticleUi) {
 }
 
 @Composable
-private fun ListItemFooter(data: FeedArticleUi, textStyle: TextStyle) {
+private fun ListItemFooter(
+    data: FeedArticleUi,
+    textStyle: TextStyle,
+    showCommentsCount: Boolean = true,
+) {
     Row(
         modifier = Modifier
             .padding(top = 8.dp)
@@ -208,18 +218,20 @@ private fun ListItemFooter(data: FeedArticleUi, textStyle: TextStyle) {
                 Spacer(modifier = Modifier.width(16.dp))
             }
 
-            val commentsCount = data.stats.repliesCount.toInt()
-            IconText(
-                modifier = Modifier,
-                text = pluralStringResource(
-                    id = R.plurals.article_feed_comments_count,
-                    count = commentsCount,
-                    commentsCount,
-                ),
-                leadingIcon = PrimalIcons.FeedReplies,
-                style = textStyle,
-                color = textStyle.color,
-            )
+            if (showCommentsCount) {
+                val commentsCount = data.stats.repliesCount.toInt()
+                IconText(
+                    modifier = Modifier,
+                    text = pluralStringResource(
+                        id = R.plurals.article_feed_comments_count,
+                        count = commentsCount,
+                        commentsCount,
+                    ),
+                    leadingIcon = PrimalIcons.FeedReplies,
+                    style = textStyle,
+                    color = textStyle.color,
+                )
+            }
         }
 
         if (data.eventZaps.isNotEmpty()) {

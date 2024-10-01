@@ -9,6 +9,8 @@ import net.primal.android.core.serialization.json.toJsonObject
 import net.primal.android.core.utils.parseHashtags
 import net.primal.android.core.utils.parseUris
 import net.primal.android.nostr.model.NostrEvent
+import net.primal.android.nostr.model.NostrEventKind
+import net.primal.android.nostr.model.primal.PrimalEvent
 import timber.log.Timber
 
 fun List<NostrEvent>.mapNotNullPrimalEventAsArticleDataPO(
@@ -30,6 +32,13 @@ fun List<NostrEvent>.mapNotNullAsArticleDataPO(
         cdnResources = cdnResources,
     )
 }
+
+fun List<PrimalEvent>.mapReferencedEventsAsArticleDataPO(
+    wordsCountMap: Map<String, Int> = emptyMap(),
+    cdnResources: Map<String, CdnResource> = emptyMap(),
+) = this.mapNotNull { it.takeContentOrNull<NostrEvent>() }
+    .filter { event -> event.kind == NostrEventKind.LongFormContent.value }
+    .mapNotNull { event -> event.asArticleData(wordsCount = wordsCountMap[event.id], cdnResources = cdnResources) }
 
 private fun NostrEvent.asArticleData(wordsCount: Int?, cdnResources: Map<String, CdnResource>): ArticleData? {
     val identifier = tags.findFirstIdentifier()

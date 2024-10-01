@@ -40,7 +40,9 @@ fun Article.mapAsFeedArticleUi(): FeedArticleUi {
         authorAvatarCdnImage = this.author?.avatarCdnImage,
         isBookmarked = false,
         stats = EventStatsUi.from(eventStats = this.eventStats, userStats = null),
-        readingTimeInMinutes = ((this.data.wordsCount ?: 1) / 200) + 1,
+        readingTimeInMinutes = this.data.wordsCount.wordsCountToReadingTime(),
         eventZaps = this.eventZaps.map { it.asEventZapUiModel() },
     )
 }
+
+fun Int?.wordsCountToReadingTime() = ((this ?: 1) / 200) + 1

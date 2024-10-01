@@ -41,7 +41,7 @@ object Nip19TLV {
     }
 
     fun parseAsNaddr(naddr: String): Naddr? {
-        val tlv = parse(naddr)
+        val tlv = runCatching { parse(naddr) }.getOrNull() ?: return null
         val identifier = tlv[Type.SPECIAL.id]?.first()?.let {
             String(bytes = it, charset = Charsets.US_ASCII)
         }
