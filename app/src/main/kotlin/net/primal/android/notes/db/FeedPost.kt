@@ -21,7 +21,7 @@ data class FeedPost(
     val attachments: List<NoteAttachment>,
 
     @Relation(
-        entityColumn = "postId",
+        entityColumn = "noteId",
         parentColumn = "postId",
     )
     val nostrUris: List<NoteNostrUri>,

@@ -17,7 +17,7 @@ data class DirectMessage(
     val attachments: List<NoteAttachment>,
 
     @Relation(
-        entityColumn = "postId",
+        entityColumn = "noteId",
         parentColumn = "messageId",
     )
     val nostrUris: List<NoteNostrUri>,

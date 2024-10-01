@@ -18,6 +18,7 @@ import net.primal.android.nostr.ext.mapNotNullAsEventStatsPO
 import net.primal.android.nostr.ext.mapNotNullAsEventUserStatsPO
 import net.primal.android.nostr.ext.mapNotNullAsPostDataPO
 import net.primal.android.nostr.ext.mapNotNullAsRepostDataPO
+import net.primal.android.nostr.ext.mapReferencedEventsAsArticleDataPO
 import net.primal.android.notes.api.model.FeedResponse
 import net.primal.android.thread.db.ArticleCommentCrossRef
 import net.primal.android.thread.db.NoteConversationCrossRef
@@ -28,13 +29,15 @@ suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String, database
     val linkPreviews = primalLinkPreviews.flatMapNotNullAsLinkPreviewResource().asMapByKey { it.url }
     val eventHints = this.primalRelayHints.flatMapAsEventHintsPO()
 
-    val referencedPostsWithoutReplyTo = referencedPosts.mapNotNullAsPostDataPO()
-    val referencedPostsWithReplyTo = referencedPosts.mapNotNullAsPostDataPO(
+    val referencedPostsWithoutReplyTo = referencedEvents.mapNotNullAsPostDataPO()
+    val referencedPostsWithReplyTo = referencedEvents.mapNotNullAsPostDataPO(
         referencedPosts = referencedPostsWithoutReplyTo,
     )
     val feedPosts = posts.mapAsPostDataPO(referencedPosts = referencedPostsWithReplyTo)
 
     val articles = this.articles.mapNotNullAsArticleDataPO(cdnResources = cdnResources)
+    val referencedArticles = this.referencedEvents.mapReferencedEventsAsArticleDataPO(cdnResources = cdnResources)
+    val allArticles = articles + referencedArticles
 
     val profiles = metadata.mapAsProfileDataPO(cdnResources = cdnResources)
     val profileIdToProfileDataMap = profiles.asMapByKey { it.ownerId }
@@ -52,6 +55,7 @@ suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String, database
 
     val noteNostrUris = allPosts.flatMapPostsAsNoteNostrUriPO(
         postIdToPostDataMap = allPosts.groupBy { it.postId }.mapValues { it.value.first() },
+        articleIdToArticle = allArticles.groupBy { it.articleId }.mapValues { it.value.first() },
         profileIdToProfileDataMap = profileIdToProfileDataMap,
     )
 
@@ -69,7 +73,7 @@ suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String, database
         database.eventZaps().upsertAll(data = eventZaps)
         database.eventStats().upsertAll(data = postStats)
         database.eventUserStats().upsertAll(data = userPostStats)
-        database.articles().upsertAll(list = articles)
+        database.articles().upsertAll(list = allArticles)
 
         val eventHintsDao = database.eventHints()
         val hintsMap = eventHints.associateBy { it.eventId }

@@ -137,7 +137,7 @@ class NoteFeedViewModel @AssistedInject constructor(
     }
 
     private fun FeedResponse.processSyncCount(newestLocalNote: FeedPost? = null) {
-        val allReferencedNotes = this.referencedPosts.mapNotNull {
+        val allReferencedNotes = this.referencedEvents.mapNotNull {
             NostrJson.decodeFromStringOrNull<NostrEvent>(it.content)
         }
 

@@ -41,7 +41,7 @@ class FeedApiImpl @Inject constructor(
             primalEventUserStats = queryResult.filterPrimalEvents(NostrEventKind.PrimalEventUserStats),
             cdnResources = queryResult.filterPrimalEvents(NostrEventKind.PrimalCdnResource),
             primalLinkPreviews = queryResult.filterPrimalEvents(NostrEventKind.PrimalLinkPreview),
-            referencedPosts = queryResult.filterPrimalEvents(NostrEventKind.PrimalReferencedEvent),
+            referencedEvents = queryResult.filterPrimalEvents(NostrEventKind.PrimalReferencedEvent),
             primalRelayHints = queryResult.filterPrimalEvents(NostrEventKind.PrimalRelayHint),
         )
     }
@@ -67,7 +67,7 @@ class FeedApiImpl @Inject constructor(
             primalEventUserStats = queryResult.filterPrimalEvents(NostrEventKind.PrimalEventUserStats),
             cdnResources = queryResult.filterPrimalEvents(NostrEventKind.PrimalCdnResource),
             primalLinkPreviews = queryResult.filterPrimalEvents(NostrEventKind.PrimalLinkPreview),
-            referencedPosts = queryResult.filterPrimalEvents(NostrEventKind.PrimalReferencedEvent),
+            referencedEvents = queryResult.filterPrimalEvents(NostrEventKind.PrimalReferencedEvent),
             primalRelayHints = queryResult.filterPrimalEvents(NostrEventKind.PrimalRelayHint),
         )
     }
@@ -89,7 +89,7 @@ class FeedApiImpl @Inject constructor(
             articles = queryResult.filterNostrEvents(NostrEventKind.LongFormContent),
             reposts = emptyList(),
             zaps = queryResult.filterNostrEvents(NostrEventKind.Zap),
-            referencedPosts = queryResult.filterPrimalEvents(NostrEventKind.PrimalReferencedEvent),
+            referencedEvents = queryResult.filterPrimalEvents(NostrEventKind.PrimalReferencedEvent),
             primalEventStats = queryResult.filterPrimalEvents(NostrEventKind.PrimalEventStats),
             primalEventUserStats = queryResult.filterPrimalEvents(NostrEventKind.PrimalEventUserStats),
             primalLinkPreviews = queryResult.filterPrimalEvents(NostrEventKind.PrimalLinkPreview),

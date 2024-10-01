@@ -6,7 +6,7 @@ import net.primal.android.attachments.db.NoteNostrUri
 import net.primal.android.attachments.domain.CdnImage
 
 @Serializable
-data class ReferencedPost(
+data class ReferencedNote(
     val postId: String,
     val createdAt: Long,
     val content: String,

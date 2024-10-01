@@ -68,8 +68,8 @@ class MessagesProcessor @Inject constructor(
                     userId = userId,
                     database = database,
                 )
-                val referencedPostsWithoutReplies = response.referencedPosts.mapNotNullAsPostDataPO()
-                val referencedPostsWithReplies = response.referencedPosts.mapNotNullAsPostDataPO(
+                val referencedPostsWithoutReplies = response.referencedEvents.mapNotNullAsPostDataPO()
+                val referencedPostsWithReplies = response.referencedEvents.mapNotNullAsPostDataPO(
                     referencedPostsWithoutReplies,
                 )
                 response.posts.mapAsPostDataPO(referencedPosts = referencedPostsWithReplies)
@@ -82,9 +82,7 @@ class MessagesProcessor @Inject constructor(
         }
 
         val allNotes = (localNotes + remoteNotes)
-        val referencedNotesMap = allNotes
-            .groupBy { it.postId }
-            .mapValues { it.value.first() }
+        val referencedNotesMap = allNotes.groupBy { it.postId }.mapValues { it.value.first() }
 
         val referencedProfileIds = nostrUris.mapNotNull { it.extractProfileId() }.toSet()
         val refNoteAuthorProfileIds = allNotes.map { it.authorId }.toSet()
@@ -113,6 +111,7 @@ class MessagesProcessor @Inject constructor(
         database.attachments().upsertAllNostrUris(
             data = messageDataList.flatMapMessagesAsNostrResourcePO(
                 postIdToPostDataMap = referencedNotesMap,
+                articleIdToArticle = emptyMap(),
                 profileIdToProfileDataMap = referencedProfilesMap,
             ),
         )
