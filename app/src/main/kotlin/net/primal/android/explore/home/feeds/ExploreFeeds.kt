@@ -229,7 +229,7 @@ private fun ActionButton(
             ),
         ) {
             Text(
-                text = "Remove from home feeds",
+                text = stringResource(id = R.string.explore_feeds_dvm_details_action_button_remove),
                 fontWeight = FontWeight.W600,
             )
         }
@@ -243,7 +243,7 @@ private fun ActionButton(
             ),
         ) {
             Text(
-                text = "Add to home feeds",
+                text = stringResource(id = R.string.explore_feeds_dvm_details_action_button_add),
                 fontWeight = FontWeight.W600,
             )
         }

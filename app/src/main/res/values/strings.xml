@@ -242,6 +242,8 @@
     <string name="explore_zaps_tab">Zaps</string>
     <string name="explore_media_tab">Media</string>
     <string name="explore_topics_tab">Topics</string>
+    <string name="explore_feeds_dvm_details_action_button_add">Add to home feeds</string>
+    <string name="explore_feeds_dvm_details_action_button_remove">Remove from home feeds</string>
 
     <string name="search_followers_text">Followers</string>
 
