@@ -1,6 +1,5 @@
-package net.primal.android.thread.articles
+package net.primal.android.thread.articles.details
 
-import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -47,6 +46,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import java.text.NumberFormat
 import kotlinx.coroutines.launch
@@ -67,6 +67,7 @@ import net.primal.android.core.compose.icons.primaliconpack.FeedNewZapFilled
 import net.primal.android.core.compose.icons.primaliconpack.More
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.core.compose.zaps.ArticleTopZapsSection
+import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.core.ext.openUriSafely
 import net.primal.android.nostr.ext.isNEvent
 import net.primal.android.nostr.ext.isNEventUri
@@ -88,19 +89,21 @@ import net.primal.android.notes.feed.note.ui.ReferencedNoteCard
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.notes.feed.zaps.UnableToZapBottomSheet
 import net.primal.android.notes.feed.zaps.ZapBottomSheet
+import net.primal.android.profile.report.ReportType
 import net.primal.android.theme.AppTheme
-import net.primal.android.thread.articles.ArticleDetailsContract.ArticleDetailsError
-import net.primal.android.thread.articles.ArticleDetailsContract.ArticlePartRender
-import net.primal.android.thread.articles.ArticleDetailsContract.UiEvent
-import net.primal.android.thread.articles.ui.ArticleAuthorRow
-import net.primal.android.thread.articles.ui.ArticleDetailsHeader
-import net.primal.android.thread.articles.ui.ArticleHashtags
-import net.primal.android.thread.articles.ui.FloatingArticlePill
-import net.primal.android.thread.articles.ui.rendering.HtmlRenderer
-import net.primal.android.thread.articles.ui.rendering.MarkdownRenderer
-import net.primal.android.thread.articles.ui.rendering.replaceProfileNostrUrisWithMarkdownLinks
-import net.primal.android.thread.articles.ui.rendering.splitIntoParagraphs
-import net.primal.android.thread.articles.ui.rendering.splitMarkdownByNostrUris
+import net.primal.android.thread.articles.ArticleContract
+import net.primal.android.thread.articles.ArticleViewModel
+import net.primal.android.thread.articles.details.ArticleDetailsContract.ArticlePartRender
+import net.primal.android.thread.articles.details.ArticleDetailsContract.UiEvent
+import net.primal.android.thread.articles.details.ui.ArticleAuthorRow
+import net.primal.android.thread.articles.details.ui.ArticleDetailsHeader
+import net.primal.android.thread.articles.details.ui.ArticleHashtags
+import net.primal.android.thread.articles.details.ui.FloatingArticlePill
+import net.primal.android.thread.articles.details.ui.rendering.HtmlRenderer
+import net.primal.android.thread.articles.details.ui.rendering.MarkdownRenderer
+import net.primal.android.thread.articles.details.ui.rendering.replaceProfileNostrUrisWithMarkdownLinks
+import net.primal.android.thread.articles.details.ui.rendering.splitIntoParagraphs
+import net.primal.android.thread.articles.details.ui.rendering.splitMarkdownByNostrUris
 import net.primal.android.wallet.zaps.canZap
 
 @Composable
@@ -112,8 +115,7 @@ fun ArticleDetailsScreen(
     onGoToWallet: () -> Unit,
     onReactionsClick: (eventId: String) -> Unit,
 ) {
-    val uiState by viewModel.state.collectAsState()
-
+    val detailsState by viewModel.state.collectAsState()
     DisposableLifecycleObserverEffect(viewModel) {
         when (it) {
             Lifecycle.Event.ON_START -> viewModel.setEvent(UiEvent.UpdateContent)
@@ -121,9 +123,14 @@ fun ArticleDetailsScreen(
         }
     }
 
+    val articleViewModel = hiltViewModel<ArticleViewModel>()
+    val articleState by articleViewModel.state.collectAsState()
+
     ArticleDetailsScreen(
-        state = uiState,
-        eventPublisher = { viewModel.setEvent(it) },
+        detailsState = detailsState,
+        articleState = articleState,
+        detailsEventPublisher = viewModel::setEvent,
+        articleEventPublisher = articleViewModel::setEvent,
         onClose = onClose,
         onArticleHashtagClick = onArticleHashtagClick,
         onReactionsClick = onReactionsClick,
@@ -135,13 +142,15 @@ fun ArticleDetailsScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ArticleDetailsScreen(
-    state: ArticleDetailsContract.UiState,
-    eventPublisher: (UiEvent) -> Unit,
-    onClose: () -> Unit,
+    detailsState: ArticleDetailsContract.UiState,
+    articleState: ArticleContract.UiState,
+    detailsEventPublisher: (UiEvent) -> Unit,
+    articleEventPublisher: (ArticleContract.UiEvent) -> Unit,
     onArticleHashtagClick: (hashtag: String) -> Unit,
     onReactionsClick: (eventId: String) -> Unit,
     noteCallbacks: NoteCallbacks,
     onGoToWallet: () -> Unit,
+    onClose: () -> Unit,
 ) {
     val context = LocalContext.current
     val uiScope = rememberCoroutineScope()
@@ -150,34 +159,34 @@ private fun ArticleDetailsScreen(
     val listState = rememberLazyListState()
     val scrolledToTop by remember { derivedStateOf { listState.firstVisibleItemIndex == 0 } }
 
-    val articleParts by remember(state.article?.content) {
+    val articleParts by remember(detailsState.article?.content) {
         mutableStateOf(
-            (state.article?.content ?: "")
+            (detailsState.article?.content ?: "")
                 .splitMarkdownByNostrUris()
                 .flatMap { it.splitIntoParagraphs() }
-                .replaceProfileNostrUrisWithMarkdownLinks(npubToDisplayNameMap = state.npubToDisplayNameMap)
-                .buildArticleRenderParts(referencedNotes = state.referencedNotes),
+                .replaceProfileNostrUrisWithMarkdownLinks(npubToDisplayNameMap = detailsState.npubToDisplayNameMap)
+                .buildArticleRenderParts(referencedNotes = detailsState.referencedNotes),
         )
     }
 
     var showCantZapWarning by remember { mutableStateOf(false) }
     if (showCantZapWarning) {
         UnableToZapBottomSheet(
-            zappingState = state.zappingState,
+            zappingState = detailsState.zappingState,
             onDismissRequest = { showCantZapWarning = false },
             onGoToWallet = onGoToWallet,
         )
     }
 
     var showZapOptions by remember { mutableStateOf(false) }
-    if (showZapOptions && state.article != null) {
+    if (showZapOptions && detailsState.article != null) {
         ZapBottomSheet(
             onDismissRequest = { showZapOptions = false },
-            receiverName = state.article.authorDisplayName,
-            zappingState = state.zappingState,
+            receiverName = detailsState.article.authorDisplayName,
+            zappingState = detailsState.zappingState,
             onZap = { zapAmount, zapDescription ->
-                if (state.zappingState.canZap(zapAmount)) {
-                    eventPublisher(
+                if (detailsState.zappingState.canZap(zapAmount)) {
+                    detailsEventPublisher(
                         UiEvent.ZapArticle(
                             zapAmount = zapAmount.toULong(),
                             zapDescription = zapDescription,
@@ -191,7 +200,7 @@ private fun ArticleDetailsScreen(
     }
 
     fun invokeZapOptionsOrShowWarning() {
-        if (state.zappingState.walletConnected) {
+        if (detailsState.zappingState.walletConnected) {
             showZapOptions = true
         } else {
             showCantZapWarning = true
@@ -202,84 +211,74 @@ private fun ArticleDetailsScreen(
     if (showRepostOrQuoteConfirmation) {
         NoteRepostOrQuoteBottomSheet(
             onDismiss = { showRepostOrQuoteConfirmation = false },
-            onRepostClick = { eventPublisher(UiEvent.RepostAction) },
-            onPostQuoteClick = { state.naddr?.toNaddrString()?.let { noteCallbacks.onArticleQuoteClick?.invoke(it) } },
+            onRepostClick = { detailsEventPublisher(UiEvent.RepostAction) },
+            onPostQuoteClick = {
+                detailsState.naddr?.toNaddrString()?.let { noteCallbacks.onArticleQuoteClick?.invoke(it) }
+            },
         )
     }
 
-    if (state.shouldApproveBookmark) {
+    if (detailsState.shouldApproveBookmark) {
         ConfirmFirstBookmarkAlertDialog(
             onBookmarkConfirmed = {
-                eventPublisher(UiEvent.BookmarkAction(forceUpdate = true))
+                detailsEventPublisher(UiEvent.BookmarkAction(forceUpdate = true))
             },
             onClose = {
-                eventPublisher(UiEvent.DismissBookmarkConfirmation)
+                detailsEventPublisher(UiEvent.DismissBookmarkConfirmation)
             },
         )
     }
 
     SnackbarErrorHandler(
-        error = state.error,
+        error = detailsState.error ?: articleState.error,
         snackbarHostState = snackbarHostState,
-        errorMessageResolver = { it.resolveErrorMessage(context = context) },
-        onErrorDismiss = { eventPublisher(UiEvent.DismissErrors) },
+        errorMessageResolver = { it.resolveUiErrorMessage(context = context) },
+        onErrorDismiss = {
+            detailsEventPublisher(UiEvent.DismissErrors)
+            articleEventPublisher(ArticleContract.UiEvent.DismissError)
+        },
     )
 
     Scaffold(
         modifier = Modifier.imePadding(),
         topBar = {
-            PrimalTopAppBar(
-                navigationIcon = PrimalIcons.ArrowBack,
-                navigationIconContentDescription = stringResource(id = R.string.accessibility_back_button),
-                onNavigationIconClick = onClose,
-                showDivider = state.article?.authorDisplayName == null || !scrolledToTop,
-                actions = {
-                    if (state.article != null) {
-                        // TODO Pass info if article is bookmarked
-                        val isBookmarked = false
-
-                        AppBarIcon(
-                            icon = if (isBookmarked) PrimalIcons.BookmarksFilled else PrimalIcons.Bookmarks,
-                            iconSize = 20.dp,
-                            appBarIconContentDescription = stringResource(id = R.string.accessibility_bookmark),
-                            onClick = {},
+            ArticleDetailsTopAppBar(
+                state = detailsState,
+                scrolledToTop = scrolledToTop,
+                onClose = onClose,
+                onBookmarkClick = { },
+                onMuteUserClick = {
+                    if (detailsState.article != null) {
+                        articleEventPublisher(
+                            ArticleContract.UiEvent.MuteAction(userId = detailsState.article.authorId),
                         )
-
-                        ArticleDropdownMenuIcon(
-                            modifier = Modifier
-                                .size(42.dp)
-                                .clip(CircleShape),
-                            articleId = state.article.articleId,
-                            articleContent = state.article.content,
-                            articleRawData = state.article.eventRawNostrEvent,
-                            authorId = state.article.authorId,
-                            isBookmarked = isBookmarked,
-                            onBookmarkClick = { },
-                            onMuteUserClick = { },
-                            onReportContentClick = { },
-                            icon = {
-                                Icon(
-                                    modifier = Modifier.padding(top = 10.dp),
-                                    imageVector = PrimalIcons.More,
-                                    contentDescription = stringResource(id = R.string.accessibility_article_drop_down),
-                                )
-                            },
+                    }
+                },
+                onReportContentClick = { reportType ->
+                    if (detailsState.article != null) {
+                        articleEventPublisher(
+                            ArticleContract.UiEvent.ReportAbuse(
+                                reportType = reportType,
+                                authorId = detailsState.article.authorId,
+                                eventId = detailsState.article.eventId,
+                                articleId = detailsState.article.articleId,
+                            ),
                         )
                     }
                 },
             )
         },
         content = { paddingValues ->
-            if (state.article == null) {
+            if (detailsState.article == null) {
                 PrimalLoadingSpinner()
             } else {
                 ArticleContentWithComments(
-                    state = state,
+                    state = detailsState,
                     articleParts = articleParts,
                     listState = listState,
                     paddingValues = paddingValues,
                     onArticleCommentClick = {
-                        state.naddr?.toNaddrString()?.let { noteCallbacks.onArticleReplyClick?.invoke(it) }
+                        detailsState.naddr?.toNaddrString()?.let { noteCallbacks.onArticleReplyClick?.invoke(it) }
                     },
                     onArticleHashtagClick = onArticleHashtagClick,
                     onReactionsClick = onReactionsClick,
@@ -289,24 +288,25 @@ private fun ArticleDetailsScreen(
                     onPostAction = { action ->
                         when (action) {
                             FeedPostAction.Reply -> {
-                                state.naddr?.toNaddrString()?.let { noteCallbacks.onArticleReplyClick?.invoke(it) }
+                                detailsState.naddr?.toNaddrString()
+                                    ?.let { noteCallbacks.onArticleReplyClick?.invoke(it) }
                             }
 
                             FeedPostAction.Zap -> {
-                                if (state.zappingState.canZap()) {
-                                    eventPublisher(UiEvent.ZapArticle())
+                                if (detailsState.zappingState.canZap()) {
+                                    detailsEventPublisher(UiEvent.ZapArticle())
                                 } else {
                                     showCantZapWarning = true
                                 }
                             }
 
-                            FeedPostAction.Like -> eventPublisher(UiEvent.LikeArticle)
+                            FeedPostAction.Like -> detailsEventPublisher(UiEvent.LikeArticle)
 
                             FeedPostAction.Repost -> {
                                 showRepostOrQuoteConfirmation = true
                             }
 
-                            FeedPostAction.Bookmark -> eventPublisher(UiEvent.BookmarkAction())
+                            FeedPostAction.Bookmark -> detailsEventPublisher(UiEvent.BookmarkAction())
                         }
                     },
                     onPostLongPressAction = { action ->
@@ -328,14 +328,14 @@ private fun ArticleDetailsScreen(
             }
         },
         floatingActionButton = {
-            if (state.article != null) {
+            if (detailsState.article != null) {
                 FloatingArticlePill(
-                    commentsCount = state.article.eventStatsUi.repliesCount,
-                    satsZapped = state.article.eventStatsUi.satsZapped,
+                    commentsCount = detailsState.article.eventStatsUi.repliesCount,
+                    satsZapped = detailsState.article.eventStatsUi.satsZapped,
                     onCommentsClick = {
                         uiScope.launch {
                             listState.animateScrollToItem(
-                                index = state.calculateCommentsHeaderIndex(partsSize = articleParts.size),
+                                index = detailsState.calculateCommentsHeaderIndex(partsSize = articleParts.size),
                             )
                         }
                     },
@@ -345,6 +345,58 @@ private fun ArticleDetailsScreen(
         },
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState)
+        },
+    )
+}
+
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+private fun ArticleDetailsTopAppBar(
+    state: ArticleDetailsContract.UiState,
+    scrolledToTop: Boolean,
+    onClose: () -> Unit,
+    onBookmarkClick: (() -> Unit)? = null,
+    onMuteUserClick: (() -> Unit)? = null,
+    onReportContentClick: ((reportType: ReportType) -> Unit)? = null,
+) {
+    PrimalTopAppBar(
+        navigationIcon = PrimalIcons.ArrowBack,
+        navigationIconContentDescription = stringResource(id = R.string.accessibility_back_button),
+        onNavigationIconClick = onClose,
+        showDivider = state.article?.authorDisplayName == null || !scrolledToTop,
+        actions = {
+            if (state.article != null) {
+                // TODO Pass info if article is bookmarked
+                val isBookmarked = false
+
+                AppBarIcon(
+                    icon = if (isBookmarked) PrimalIcons.BookmarksFilled else PrimalIcons.Bookmarks,
+                    iconSize = 20.dp,
+                    appBarIconContentDescription = stringResource(id = R.string.accessibility_bookmark),
+                    onClick = {},
+                )
+
+                ArticleDropdownMenuIcon(
+                    modifier = Modifier
+                        .size(42.dp)
+                        .clip(CircleShape),
+                    articleId = state.article.articleId,
+                    articleContent = state.article.content,
+                    articleRawData = state.article.eventRawNostrEvent,
+                    authorId = state.article.authorId,
+                    isBookmarked = isBookmarked,
+                    onBookmarkClick = onBookmarkClick,
+                    onMuteUserClick = onMuteUserClick,
+                    onReportContentClick = onReportContentClick,
+                    icon = {
+                        Icon(
+                            modifier = Modifier.padding(top = 10.dp),
+                            imageVector = PrimalIcons.More,
+                            contentDescription = stringResource(id = R.string.accessibility_article_drop_down),
+                        )
+                    },
+                )
+            }
         },
     )
 }
@@ -655,35 +707,3 @@ private fun List<String>.buildArticleRenderParts(referencedNotes: List<FeedPostU
 }
 
 private fun String.isNostrNote() = isNote() || isNostrUri() || isNEvent() || isNEventUri()
-
-private fun ArticleDetailsError.resolveErrorMessage(context: Context): String {
-    return when (this) {
-        ArticleDetailsError.InvalidNaddr -> context.getString(
-            R.string.long_form_thread_invalid_naddr,
-        )
-
-        is ArticleDetailsError.InvalidZapRequest -> context.getString(
-            R.string.post_action_invalid_zap_request,
-        )
-
-        is ArticleDetailsError.MissingLightningAddress -> context.getString(
-            R.string.post_action_missing_lightning_address,
-        )
-
-        is ArticleDetailsError.FailedToPublishZapEvent -> context.getString(
-            R.string.post_action_zap_failed,
-        )
-
-        is ArticleDetailsError.FailedToPublishLikeEvent -> context.getString(
-            R.string.post_action_like_failed,
-        )
-
-        is ArticleDetailsError.FailedToPublishRepostEvent -> context.getString(
-            R.string.post_action_repost_failed,
-        )
-
-        is ArticleDetailsError.MissingRelaysConfiguration -> context.getString(
-            R.string.app_missing_relays_config,
-        )
-    }
-}

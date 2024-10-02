@@ -1,4 +1,4 @@
-package net.primal.android.thread.articles.ui
+package net.primal.android.thread.articles.details.ui
 
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -29,7 +29,7 @@ import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.attachments.domain.findNearestOrNull
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.theme.AppTheme
-import net.primal.android.thread.articles.ui.rendering.MarkdownRenderer
+import net.primal.android.thread.articles.details.ui.rendering.MarkdownRenderer
 
 @Composable
 fun ArticleDetailsHeader(

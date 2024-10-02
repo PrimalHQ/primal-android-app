@@ -320,7 +320,7 @@ private fun ThreadConversationLazyColumn(
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
+@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
 private fun ThreadLazyColumn(
     modifier: Modifier,

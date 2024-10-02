@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.TopAppBarScrollBehavior
@@ -25,6 +26,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import kotlinx.coroutines.launch
 import net.primal.android.LocalContentDisplaySettings
@@ -37,6 +39,8 @@ import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 import net.primal.android.core.compose.icons.primaliconpack.Search
+import net.primal.android.core.errors.UiError
+import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.PrimalDrawerScaffold
 import net.primal.android.feeds.FeedsBottomSheet
@@ -61,11 +65,10 @@ fun ReadsScreen(
         onDrawerQrCodeClick = onDrawerQrCodeClick,
         onSearchClick = onSearchClick,
         onArticleClick = onArticleClick,
-        eventPublisher = viewModel::setEvent,
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ReadsScreen(
     state: ReadsScreenContract.UiState,
@@ -74,8 +77,8 @@ private fun ReadsScreen(
     onDrawerQrCodeClick: () -> Unit,
     onSearchClick: () -> Unit,
     onArticleClick: (naddr: String) -> Unit,
-    eventPublisher: (ReadsScreenContract.UiEvent) -> Unit,
 ) {
+    val context = LocalContext.current
     val uiScope = rememberCoroutineScope()
     val drawerState: DrawerState = rememberDrawerState(DrawerValue.Closed)
     val snackbarHostState = remember { SnackbarHostState() }
@@ -130,6 +133,14 @@ private fun ReadsScreen(
                         feedSpec = state.feeds[index].spec,
                         contentPadding = paddingValues,
                         onArticleClick = onArticleClick,
+                        onUiError = { uiError: UiError ->
+                            uiScope.launch {
+                                snackbarHostState.showSnackbar(
+                                    message = uiError.resolveUiErrorMessage(context),
+                                    duration = SnackbarDuration.Short,
+                                )
+                            }
+                        }
                     )
                 }
             }

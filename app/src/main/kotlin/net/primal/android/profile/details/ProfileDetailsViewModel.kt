@@ -385,7 +385,7 @@ class ProfileDetailsViewModel @Inject constructor(
                         userId = activeAccountStore.activeUserId(),
                         reportType = event.type,
                         profileId = event.profileId,
-                        noteId = event.noteId,
+                        eventId = event.noteId,
                     )
                 }
             } catch (error: NostrPublishException) {

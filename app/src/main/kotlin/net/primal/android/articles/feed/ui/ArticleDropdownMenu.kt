@@ -4,6 +4,7 @@ import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -24,7 +25,9 @@ import net.primal.android.core.compose.icons.primaliconpack.ContextCopyNoteLink
 import net.primal.android.core.compose.icons.primaliconpack.ContextCopyNoteText
 import net.primal.android.core.compose.icons.primaliconpack.ContextCopyPublicKey
 import net.primal.android.core.compose.icons.primaliconpack.ContextCopyRawData
+import net.primal.android.core.compose.icons.primaliconpack.ContextMuteUser
 import net.primal.android.core.compose.icons.primaliconpack.ContextRemoveBookmark
+import net.primal.android.core.compose.icons.primaliconpack.ContextReportUser
 import net.primal.android.core.compose.icons.primaliconpack.ContextShare
 import net.primal.android.core.utils.copyText
 import net.primal.android.core.utils.resolvePrimalArticleLink
@@ -33,7 +36,11 @@ import net.primal.android.crypto.hexToNpubHrp
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.utils.Naddr
 import net.primal.android.nostr.utils.Nip19TLV.toNaddrString
+import net.primal.android.profile.report.ReportType
+import net.primal.android.profile.report.ReportUserDialog
+import net.primal.android.theme.AppTheme
 
+@ExperimentalMaterial3Api
 @Composable
 fun ArticleDropdownMenuIcon(
     modifier: Modifier,
@@ -45,7 +52,7 @@ fun ArticleDropdownMenuIcon(
     enabled: Boolean = true,
     onBookmarkClick: (() -> Unit)? = null,
     onMuteUserClick: (() -> Unit)? = null,
-    onReportContentClick: (() -> Unit)? = null,
+    onReportContentClick: ((reportType: ReportType) -> Unit)? = null,
     icon: @Composable () -> Unit,
 ) {
     var menuVisible by remember { mutableStateOf(false) }
@@ -59,6 +66,17 @@ fun ArticleDropdownMenuIcon(
         userId = authorId,
         kind = NostrEventKind.LongFormContent.value,
     ).toNaddrString()
+
+    var reportDialogVisible by remember { mutableStateOf(false) }
+    if (reportDialogVisible) {
+        ReportUserDialog(
+            onDismissRequest = { reportDialogVisible = false },
+            onReportClick = { type ->
+                reportDialogVisible = false
+                onReportContentClick?.invoke(type)
+            },
+        )
+    }
 
     Box(
         modifier = modifier.clickable(
@@ -183,24 +201,26 @@ fun ArticleDropdownMenuIcon(
                     }
                 },
             )
-//            DropdownPrimalMenuItem(
-//                trailingIconVector = PrimalIcons.ContextMuteUser,
-//                tint = AppTheme.colorScheme.error,
-//                text = stringResource(id = R.string.article_context_menu_mute_user),
-//                onClick = {
-//                    onMuteUserClick?.invoke()
-//                    menuVisible = false
-//                },
-//            )
-//            DropdownPrimalMenuItem(
-//                trailingIconVector = PrimalIcons.ContextReportUser,
-//                tint = AppTheme.colorScheme.error,
-//                text = stringResource(id = R.string.article_context_menu_report_content),
-//                onClick = {
-//                    onReportContentClick?.invoke()
-//                    menuVisible = false
-//                },
-//            )
+
+            DropdownPrimalMenuItem(
+                trailingIconVector = PrimalIcons.ContextMuteUser,
+                tint = AppTheme.colorScheme.error,
+                text = stringResource(id = R.string.context_menu_mute_user),
+                onClick = {
+                    onMuteUserClick?.invoke()
+                    menuVisible = false
+                },
+            )
+
+            DropdownPrimalMenuItem(
+                trailingIconVector = PrimalIcons.ContextReportUser,
+                tint = AppTheme.colorScheme.error,
+                text = stringResource(id = R.string.context_menu_report_content),
+                onClick = {
+                    menuVisible = false
+                    reportDialogVisible = true
+                },
+            )
         }
     }
 }

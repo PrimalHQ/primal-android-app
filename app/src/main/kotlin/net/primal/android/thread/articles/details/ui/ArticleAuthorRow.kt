@@ -1,4 +1,4 @@
-package net.primal.android.thread.articles.ui
+package net.primal.android.thread.articles.details.ui
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues

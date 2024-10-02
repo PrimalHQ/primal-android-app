@@ -179,7 +179,7 @@ class NoteViewModel @Inject constructor(
                     userId = activeAccountStore.activeUserId(),
                     reportType = event.reportType,
                     profileId = event.profileId,
-                    noteId = event.noteId,
+                    eventId = event.noteId,
                 )
             } catch (error: NostrPublishException) {
                 Timber.w(error)
