@@ -17,13 +17,16 @@ interface ArticleDao {
     @Transaction
     @Query(
         """
-            SELECT *
+            SELECT 
+                ArticleData.*, 
+                CASE WHEN MutedUserData.userId IS NOT NULL THEN 1 ELSE 0 END AS isMuted
             FROM ArticleData
             INNER JOIN ArticleFeedCrossRef 
                 ON ArticleFeedCrossRef.articleId = ArticleData.articleId 
                 AND ArticleFeedCrossRef.articleAuthorId = ArticleData.authorId
             LEFT JOIN EventUserStats ON EventUserStats.eventId = ArticleData.eventId AND EventUserStats.userId = :userId
-            WHERE ArticleFeedCrossRef.spec = :spec
+            LEFT JOIN MutedUserData ON MutedUserData.userId = ArticleData.authorId
+            WHERE ArticleFeedCrossRef.spec = :spec AND isMuted = 0
             ORDER BY ArticleData.publishedAt DESC
         """,
     )
