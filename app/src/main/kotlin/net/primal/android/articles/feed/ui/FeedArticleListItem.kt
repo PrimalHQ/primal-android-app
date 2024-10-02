@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -53,8 +54,10 @@ import net.primal.android.nostr.utils.Naddr
 import net.primal.android.nostr.utils.Nip19TLV.toNaddrString
 import net.primal.android.note.ui.EventZapUiModel
 import net.primal.android.notes.feed.model.EventStatsUi
+import net.primal.android.profile.report.ReportType
 import net.primal.android.theme.AppTheme
 
+@ExperimentalMaterial3Api
 @Composable
 fun FeedArticleListItem(
     data: FeedArticleUi,
@@ -63,6 +66,9 @@ fun FeedArticleListItem(
     showCommentsCount: Boolean = true,
     color: Color = AppTheme.colorScheme.surfaceVariant,
     onClick: ((naddr: String) -> Unit)? = null,
+    onBookmarkClick: (() -> Unit)? = null,
+    onMuteUserClick: (() -> Unit)? = null,
+    onReportContentClick: ((reportType: ReportType) -> Unit)? = null,
 ) {
     Surface(
         modifier = Modifier.clickable(
@@ -88,6 +94,9 @@ fun FeedArticleListItem(
                 data = data,
                 textStyle = infoTextStyle,
                 enabledDropdownMenu = enabledDropdownMenu,
+                onBookmarkClick = onBookmarkClick,
+                onMuteUserClick = onMuteUserClick,
+                onReportContentClick = onReportContentClick,
             )
 
             ListItemContent(data = data)
@@ -101,11 +110,15 @@ fun FeedArticleListItem(
     }
 }
 
+@ExperimentalMaterial3Api
 @Composable
 private fun ListItemHeader(
     data: FeedArticleUi,
     textStyle: TextStyle,
     enabledDropdownMenu: Boolean = true,
+    onBookmarkClick: (() -> Unit)? = null,
+    onMuteUserClick: (() -> Unit)? = null,
+    onReportContentClick: ((reportType: ReportType) -> Unit)? = null,
 ) {
     Row(
         modifier = Modifier.height(32.dp),
@@ -137,9 +150,9 @@ private fun ListItemHeader(
                 articleRawData = data.rawNostrEventJson,
                 authorId = data.authorId,
                 isBookmarked = data.isBookmarked,
-                onBookmarkClick = { },
-                onMuteUserClick = { },
-                onReportContentClick = { },
+                onBookmarkClick = onBookmarkClick,
+                onMuteUserClick = onMuteUserClick,
+                onReportContentClick = onReportContentClick,
                 icon = {
                     Icon(
                         modifier = Modifier
@@ -277,6 +290,7 @@ private fun ArticleImagePlaceholder() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
 private fun PreviewFeedArticleListItem() {

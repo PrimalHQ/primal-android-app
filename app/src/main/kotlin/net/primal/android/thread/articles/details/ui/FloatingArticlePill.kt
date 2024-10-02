@@ -1,4 +1,4 @@
-package net.primal.android.thread.articles.ui
+package net.primal.android.thread.articles.details.ui
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.ExperimentalFoundationApi

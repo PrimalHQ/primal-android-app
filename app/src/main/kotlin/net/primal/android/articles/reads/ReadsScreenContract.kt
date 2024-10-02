@@ -5,12 +5,9 @@ import net.primal.android.feeds.ui.model.FeedUi
 import net.primal.android.user.domain.Badges
 
 interface ReadsScreenContract {
-
     data class UiState(
         val feeds: List<FeedUi> = emptyList(),
         val activeAccountAvatarCdnImage: CdnImage? = null,
         val badges: Badges = Badges(),
     )
-
-    sealed class UiEvent
 }

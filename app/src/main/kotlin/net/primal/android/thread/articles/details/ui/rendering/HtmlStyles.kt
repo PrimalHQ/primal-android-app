@@ -1,4 +1,4 @@
-package net.primal.android.thread.articles.ui.rendering
+package net.primal.android.thread.articles.details.ui.rendering
 
 private val ARTICLE_BASE_CSS = """
 .sunset {

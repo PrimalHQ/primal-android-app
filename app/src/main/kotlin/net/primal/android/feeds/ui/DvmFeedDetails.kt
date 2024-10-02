@@ -99,6 +99,7 @@ private fun DvmHeaderAndFeedList(
                     pullToRefreshEnabled = false,
                     header = { DvmFeedListItem(data = dvmFeed) },
                     onArticleClick = {},
+                    onUiError = {},
                 )
             }
 

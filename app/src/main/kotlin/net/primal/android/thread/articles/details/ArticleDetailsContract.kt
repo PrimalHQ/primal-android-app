@@ -1,10 +1,11 @@
-package net.primal.android.thread.articles
+package net.primal.android.thread.articles.details
 
+import net.primal.android.core.errors.UiError
 import net.primal.android.nostr.utils.Naddr
 import net.primal.android.note.ui.EventZapUiModel
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.model.ZappingState
-import net.primal.android.thread.articles.ui.ArticleDetailsUi
+import net.primal.android.thread.articles.details.ui.ArticleDetailsUi
 
 interface ArticleDetailsContract {
     data class UiState(
@@ -16,18 +17,8 @@ interface ArticleDetailsContract {
         val comments: List<FeedPostUi> = emptyList(),
         val zappingState: ZappingState = ZappingState(),
         val shouldApproveBookmark: Boolean = false,
-        val error: ArticleDetailsError? = null,
+        val error: UiError? = null,
     )
-
-    sealed class ArticleDetailsError {
-        data object InvalidNaddr : ArticleDetailsError()
-        data class MissingLightningAddress(val cause: Throwable) : ArticleDetailsError()
-        data class InvalidZapRequest(val cause: Throwable) : ArticleDetailsError()
-        data class FailedToPublishZapEvent(val cause: Throwable) : ArticleDetailsError()
-        data class FailedToPublishRepostEvent(val cause: Throwable) : ArticleDetailsError()
-        data class FailedToPublishLikeEvent(val cause: Throwable) : ArticleDetailsError()
-        data class MissingRelaysConfiguration(val cause: Throwable) : ArticleDetailsError()
-    }
 
     sealed class ArticlePartRender {
         data class MarkdownRender(val markdown: String) : ArticlePartRender()
