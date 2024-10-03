@@ -2,10 +2,8 @@ package net.primal.android.explore.home.feeds
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,18 +15,14 @@ import net.primal.android.feeds.domain.buildSpec
 import net.primal.android.feeds.repository.FeedsRepository
 import net.primal.android.feeds.ui.model.asFeedUi
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.user.accounts.active.ActiveAccountStore
 import timber.log.Timber
 
-@HiltViewModel(assistedFactory = ExploreFeedsViewModel.Factory::class)
-class ExploreFeedsViewModel @AssistedInject constructor(
-    @Assisted private val activeAccountPubkey: String?,
+@HiltViewModel
+class ExploreFeedsViewModel @Inject constructor(
+    private val activeAccountStore: ActiveAccountStore,
     private val feedsRepository: FeedsRepository,
 ) : ViewModel() {
-
-    @AssistedFactory
-    interface Factory {
-        fun create(activeAccountPubkey: String?): ExploreFeedsViewModel
-    }
 
     private val _state = MutableStateFlow(UiState())
     val state = _state.asStateFlow()
@@ -77,9 +71,7 @@ class ExploreFeedsViewModel @AssistedInject constructor(
                 dvmFeed.kind?.let {
                     feedsRepository.addDvmFeed(dvmFeed = dvmFeed, specKind = dvmFeed.kind)
                 }
-                activeAccountPubkey?.let {
-                    feedsRepository.persistAllLocalUserFeeds(userId = activeAccountPubkey)
-                }
+                feedsRepository.persistAllLocalUserFeeds(userId = activeAccountStore.activeUserId())
             } catch (error: WssException) {
                 Timber.w(error)
             }
@@ -91,9 +83,7 @@ class ExploreFeedsViewModel @AssistedInject constructor(
                 dvmFeed.kind?.let {
                     feedsRepository.removeFeed(feedSpec = dvmFeed.buildSpec(specKind = dvmFeed.kind))
                 }
-                activeAccountPubkey?.let {
-                    feedsRepository.persistAllLocalUserFeeds(userId = activeAccountPubkey)
-                }
+                feedsRepository.persistAllLocalUserFeeds(userId = activeAccountStore.activeUserId())
             } catch (error: WssException) {
                 Timber.w(error)
             }
@@ -103,7 +93,7 @@ class ExploreFeedsViewModel @AssistedInject constructor(
         viewModelScope.launch {
             setState { copy(loading = true) }
             try {
-                val feeds = feedsRepository.fetchRecommendedDvmFeeds(pubkey = activeAccountPubkey)
+                val feeds = feedsRepository.fetchRecommendedDvmFeeds(pubkey = activeAccountStore.activeUserId())
                 setState { copy(feeds = feeds) }
             } catch (error: WssException) {
                 Timber.w(error)

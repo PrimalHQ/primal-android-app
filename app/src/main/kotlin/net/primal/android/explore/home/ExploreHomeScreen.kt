@@ -106,7 +106,6 @@ private fun ExploreHomeScreen(
                     FEEDS_INDEX -> {
                         ExploreFeeds(
                             paddingValues = paddingValues,
-                            activeAccountPubkey = state.activeAccountPubkey,
                         )
                     }
                     MEDIA_INDEX -> {

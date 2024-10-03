@@ -52,12 +52,8 @@ import net.primal.android.theme.AppTheme
 fun ExploreFeeds(
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues = PaddingValues(all = 0.dp),
-    activeAccountPubkey: String?,
 ) {
-    val viewModel: ExploreFeedsViewModel =
-        hiltViewModel<ExploreFeedsViewModel, ExploreFeedsViewModel.Factory> { factory ->
-            factory.create(activeAccountPubkey = activeAccountPubkey)
-        }
+    val viewModel: ExploreFeedsViewModel = hiltViewModel<ExploreFeedsViewModel>()
     val uiState = viewModel.state.collectAsState()
 
     ExploreFeeds(
