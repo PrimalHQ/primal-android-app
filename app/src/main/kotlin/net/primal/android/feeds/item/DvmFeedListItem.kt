@@ -270,7 +270,7 @@ private fun DvmFeedActionRow(
 @Composable
 private fun SubBadge(width: Dp) {
     Badge(
-        text = "SUB",
+        text = stringResource(id = R.string.feed_marketplace_sub_feed_label).uppercase(),
         backgroundColor = AppTheme.colorScheme.tertiary,
         textColor = Color.White,
         width = width,
@@ -280,7 +280,7 @@ private fun SubBadge(width: Dp) {
 @Composable
 private fun PaidBadge(width: Dp) {
     Badge(
-        text = "PAID",
+        text = stringResource(id = R.string.feed_marketplace_paid_feed_label).uppercase(),
         backgroundColor = PaidBackground,
         textColor = Color.White,
         width = width,
@@ -290,7 +290,7 @@ private fun PaidBadge(width: Dp) {
 @Composable
 private fun FreeBadge(width: Dp) {
     Badge(
-        text = "FREE",
+        text = stringResource(id = R.string.feed_marketplace_free_feed_label).uppercase(),
         backgroundColor = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
         textColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
         width = width,
