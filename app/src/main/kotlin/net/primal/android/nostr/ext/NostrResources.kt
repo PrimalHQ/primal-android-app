@@ -1,6 +1,8 @@
 package net.primal.android.nostr.ext
 
 import java.util.regex.Pattern
+import net.primal.android.articles.db.ArticleData
+import net.primal.android.articles.feed.ui.wordsCountToReadingTime
 import net.primal.android.attachments.db.NoteNostrUri
 import net.primal.android.attachments.ext.flatMapPostsAsNoteAttachmentPO
 import net.primal.android.core.utils.asEllipsizedNpub
@@ -10,9 +12,12 @@ import net.primal.android.crypto.bech32ToHexOrThrow
 import net.primal.android.crypto.bechToBytesOrThrow
 import net.primal.android.crypto.toHex
 import net.primal.android.messages.db.DirectMessageData
+import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.utils.Nip19TLV
+import net.primal.android.nostr.utils.Nip19TLV.toNaddrString
 import net.primal.android.notes.db.PostData
-import net.primal.android.notes.db.ReferencedPost
+import net.primal.android.notes.db.ReferencedArticle
+import net.primal.android.notes.db.ReferencedNote
 import net.primal.android.notes.db.ReferencedUser
 import net.primal.android.profile.db.ProfileData
 import timber.log.Timber
@@ -102,28 +107,34 @@ fun String.nostrUriToNoteIdAndRelay() = nostrUriToIdAndRelay()
 fun String.nostrUriToPubkeyAndRelay() = nostrUriToIdAndRelay()
 
 fun String.extractProfileId(): String? {
-    val matcher = nostrUriRegexPattern.matcher(this)
-    if (!matcher.find()) return null
-
-    val bechPrefix = matcher.group(2)
-    val key = matcher.group(3)
-
-    return try {
+    return extract { bechPrefix: String?, key: String? ->
         when (bechPrefix?.lowercase()) {
             NPUB -> (bechPrefix + key).bechToBytesOrThrow().toHex()
             NPROFILE -> {
                 val tlv = Nip19TLV.parse((bechPrefix + key).bechToBytesOrThrow())
                 tlv[Nip19TLV.Type.SPECIAL.id]?.first()?.toHex()
             }
+
             else -> null
         }
-    } catch (error: Exception) {
-        Timber.w(error)
-        null
     }
 }
 
 fun String.extractNoteId(): String? {
+    return extract { bechPrefix: String?, key: String? ->
+        when (bechPrefix?.lowercase()) {
+            NOTE -> (bechPrefix + key).bechToBytesOrThrow().toHex()
+            NEVENT -> {
+                val tlv = Nip19TLV.parse((bechPrefix + key).bechToBytesOrThrow())
+                tlv[Nip19TLV.Type.SPECIAL.id]?.first()?.toHex()
+            }
+
+            else -> null
+        }
+    }
+}
+
+private fun String.extract(parser: (bechPrefix: String?, key: String?) -> String?): String? {
     val matcher = nostrUriRegexPattern.matcher(this)
     if (!matcher.find()) return null
 
@@ -131,14 +142,7 @@ fun String.extractNoteId(): String? {
     val key = matcher.group(3)
 
     return try {
-        when (bechPrefix?.lowercase()) {
-            NOTE -> (bechPrefix + key).bechToBytesOrThrow().toHex()
-            NEVENT -> {
-                val tlv = Nip19TLV.parse((bechPrefix + key).bechToBytesOrThrow())
-                tlv[Nip19TLV.Type.SPECIAL.id]?.first()?.toHex()
-            }
-            else -> null
-        }
+        parser(bechPrefix, key)
     } catch (error: Exception) {
         Timber.w(error)
         null
@@ -182,23 +186,27 @@ fun String.takeAsNaddrOrNull(): String? {
 
 fun List<PostData>.flatMapPostsAsNoteNostrUriPO(
     postIdToPostDataMap: Map<String, PostData>,
+    articleIdToArticle: Map<String, ArticleData>,
     profileIdToProfileDataMap: Map<String, ProfileData>,
 ): List<NoteNostrUri> =
     flatMap { postData ->
         postData.uris.mapAsNoteNostrUriPO(
             eventId = postData.postId,
             postIdToPostDataMap = postIdToPostDataMap,
+            articleIdToArticle = articleIdToArticle,
             profileIdToProfileDataMap = profileIdToProfileDataMap,
         )
     }
 
 fun List<DirectMessageData>.flatMapMessagesAsNostrResourcePO(
     postIdToPostDataMap: Map<String, PostData>,
+    articleIdToArticle: Map<String, ArticleData>,
     profileIdToProfileDataMap: Map<String, ProfileData>,
 ) = flatMap { messageData ->
     messageData.uris.mapAsNoteNostrUriPO(
         eventId = messageData.messageId,
         postIdToPostDataMap = postIdToPostDataMap,
+        articleIdToArticle = articleIdToArticle,
         profileIdToProfileDataMap = profileIdToProfileDataMap,
     )
 }
@@ -206,45 +214,72 @@ fun List<DirectMessageData>.flatMapMessagesAsNostrResourcePO(
 fun List<String>.mapAsNoteNostrUriPO(
     eventId: String,
     postIdToPostDataMap: Map<String, PostData>,
+    articleIdToArticle: Map<String, ArticleData>,
     profileIdToProfileDataMap: Map<String, ProfileData>,
 ) = filter { it.isNostrUri() }.map { link ->
-    val refPostId = link.extractNoteId()
     val refUserProfileId = link.extractProfileId()
-    val refPost = postIdToPostDataMap[refPostId]
-    val refPostAuthor = profileIdToProfileDataMap[refPost?.authorId]
+
+    val refNoteId = link.extractNoteId()
+    val refNote = postIdToPostDataMap[refNoteId]
+    val refPostAuthor = profileIdToProfileDataMap[refNote?.authorId]
+
+    val refNaddr = Nip19TLV.parseAsNaddr(link.removePrefix("nostr:"))
+    val refArticle = articleIdToArticle[refNaddr?.identifier]
+    val refArticleAuthor = profileIdToProfileDataMap[refNaddr?.userId]
 
     NoteNostrUri(
-        postId = eventId,
+        noteId = eventId,
         uri = link,
         referencedUser = if (refUserProfileId != null) {
             ReferencedUser(
                 userId = refUserProfileId,
-                handle = profileIdToProfileDataMap[refUserProfileId]
-                    ?.usernameUiFriendly()
+                handle = profileIdToProfileDataMap[refUserProfileId]?.usernameUiFriendly()
                     ?: refUserProfileId.asEllipsizedNpub(),
             )
         } else {
             null
         },
-        referencedPost = if (refPost != null && refPostAuthor != null) {
-            ReferencedPost(
-                postId = refPost.postId,
-                createdAt = refPost.createdAt,
-                content = refPost.content,
-                authorId = refPost.authorId,
+        referencedNote = if (refNote != null && refPostAuthor != null) {
+            ReferencedNote(
+                postId = refNote.postId,
+                createdAt = refNote.createdAt,
+                content = refNote.content,
+                authorId = refNote.authorId,
                 authorName = refPostAuthor.authorNameUiFriendly(),
                 authorAvatarCdnImage = refPostAuthor.avatarCdnImage,
                 authorInternetIdentifier = refPostAuthor.internetIdentifier,
                 authorLightningAddress = refPostAuthor.lightningAddress,
-                attachments = listOf(refPost).flatMapPostsAsNoteAttachmentPO(
+                attachments = listOf(refNote).flatMapPostsAsNoteAttachmentPO(
                     cdnResources = emptyMap(),
                     linkPreviews = emptyMap(),
                     videoThumbnails = emptyMap(),
                 ),
-                nostrUris = listOf(refPost).flatMapPostsAsNoteNostrUriPO(
+                nostrUris = listOf(refNote).flatMapPostsAsNoteNostrUriPO(
                     postIdToPostDataMap = postIdToPostDataMap,
+                    articleIdToArticle = articleIdToArticle,
                     profileIdToProfileDataMap = profileIdToProfileDataMap,
                 ),
+            )
+        } else {
+            null
+        },
+        referencedArticle = if (
+            refNaddr?.kind == NostrEventKind.LongFormContent.value &&
+            refArticle != null &&
+            refArticleAuthor != null
+        ) {
+            ReferencedArticle(
+                naddr = refNaddr.toNaddrString(),
+                eventId = refArticle.eventId,
+                articleId = refArticle.articleId,
+                articleTitle = refArticle.title,
+                authorId = refArticle.authorId,
+                authorName = refArticleAuthor.authorNameUiFriendly(),
+                authorAvatarCdnImage = refArticleAuthor.avatarCdnImage,
+                createdAt = refArticle.createdAt,
+                raw = refArticle.raw,
+                articleImageCdnImage = refArticle.imageCdnImage,
+                articleReadingTimeInMinutes = refArticle.wordsCount.wordsCountToReadingTime(),
             )
         } else {
             null

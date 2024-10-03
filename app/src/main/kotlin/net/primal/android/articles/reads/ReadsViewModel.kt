@@ -4,12 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
-import net.primal.android.articles.reads.ReadsScreenContract.UiEvent
 import net.primal.android.articles.reads.ReadsScreenContract.UiState
 import net.primal.android.feeds.repository.FeedsRepository
 import net.primal.android.feeds.ui.model.asFeedUi
@@ -27,21 +25,10 @@ class ReadsViewModel @Inject constructor(
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
 
-    private val events: MutableSharedFlow<UiEvent> = MutableSharedFlow()
-    fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
-
     init {
         observeActiveAccount()
         observeBadgesUpdates()
         observeFeeds()
-        observeEvents()
-    }
-
-    private fun observeEvents() {
-        viewModelScope.launch {
-            events.collect {
-            }
-        }
     }
 
     private fun observeFeeds() =

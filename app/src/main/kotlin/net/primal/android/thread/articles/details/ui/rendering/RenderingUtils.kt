@@ -1,4 +1,4 @@
-package net.primal.android.thread.articles.ui.rendering
+package net.primal.android.thread.articles.details.ui.rendering
 
 import org.intellij.markdown.flavours.commonmark.CommonMarkFlavourDescriptor
 import org.intellij.markdown.html.HtmlGenerator

@@ -53,6 +53,9 @@ import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWor
 import net.primal.android.core.compose.isEmpty
 import net.primal.android.core.compose.isNotEmpty
 import net.primal.android.core.compose.pulltorefresh.PrimalPullToRefreshBox
+import net.primal.android.core.errors.UiError
+import net.primal.android.thread.articles.ArticleContract
+import net.primal.android.thread.articles.ArticleViewModel
 import timber.log.Timber
 
 @Composable
@@ -60,11 +63,12 @@ fun ArticleFeedList(
     feedSpec: String,
     onArticleClick: (naddr: String) -> Unit,
     modifier: Modifier = Modifier,
-    contentPadding: PaddingValues = PaddingValues(0.dp),
     pullToRefreshEnabled: Boolean = true,
     previewMode: Boolean = false,
     noContentVerticalArrangement: Arrangement.Vertical = Arrangement.Center,
     noContentPaddingValues: PaddingValues = PaddingValues(all = 0.dp),
+    contentPadding: PaddingValues = PaddingValues(0.dp),
+    onUiError: (UiError) -> Unit,
     header: @Composable (LazyItemScope.() -> Unit)? = null,
     stickyHeader: @Composable (LazyItemScope.() -> Unit)? = null,
 ) {
@@ -74,8 +78,15 @@ fun ArticleFeedList(
     }
     val uiState = viewModel.state.collectAsState()
 
+    val articleViewModel = hiltViewModel<ArticleViewModel>()
+    val articleState by articleViewModel.state.collectAsState()
+    LaunchedEffect(articleState.error) {
+        articleState.error?.let { onUiError(it) }
+        articleViewModel.setEvent(ArticleContract.UiEvent.DismissError)
+    }
+
     ArticleFeedList(
-        state = uiState.value,
+        feedState = uiState.value,
         modifier = modifier,
         contentPadding = contentPadding,
         onArticleClick = onArticleClick,
@@ -84,14 +95,16 @@ fun ArticleFeedList(
         pullToRefreshEnabled = pullToRefreshEnabled,
         noContentVerticalArrangement = noContentVerticalArrangement,
         noContentPaddingValues = noContentPaddingValues,
+        articleEventPublisher = articleViewModel::setEvent,
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class, FlowPreview::class)
 @Composable
 private fun ArticleFeedList(
-    state: ArticleFeedContract.UiState,
+    feedState: ArticleFeedContract.UiState,
     modifier: Modifier = Modifier,
+    articleEventPublisher: (ArticleContract.UiEvent) -> Unit,
     pullToRefreshEnabled: Boolean = true,
     contentPadding: PaddingValues = PaddingValues(0.dp),
     noContentVerticalArrangement: Arrangement.Vertical = Arrangement.Center,
@@ -101,7 +114,7 @@ private fun ArticleFeedList(
     stickyHeader: @Composable (LazyItemScope.() -> Unit)? = null,
 ) {
     val uiScope = rememberCoroutineScope()
-    val pagingItems = state.articles.collectAsLazyPagingItems()
+    val pagingItems = feedState.articles.collectAsLazyPagingItems()
     val feedListState = pagingItems.rememberLazyListStatePagingWorkaround()
 
     val pullToRefreshState = rememberPullToRefreshState()
@@ -145,6 +158,7 @@ private fun ArticleFeedList(
             pagingItems = pagingItems,
             listState = feedListState,
             onArticleClick = onArticleClick,
+            articleEventPublisher = articleEventPublisher,
             contentPadding = contentPadding,
             header = header,
             stickyHeader = stickyHeader,
@@ -154,6 +168,7 @@ private fun ArticleFeedList(
     }
 }
 
+@ExperimentalMaterial3Api
 @ExperimentalFoundationApi
 @Composable
 private fun ArticleFeedLazyColumn(
@@ -161,6 +176,7 @@ private fun ArticleFeedLazyColumn(
     listState: LazyListState,
     modifier: Modifier = Modifier,
     onArticleClick: (naddr: String) -> Unit,
+    articleEventPublisher: (ArticleContract.UiEvent) -> Unit,
     noContentVerticalArrangement: Arrangement.Vertical = Arrangement.Center,
     noContentPaddingValues: PaddingValues = PaddingValues(all = 0.dp),
     contentPadding: PaddingValues = PaddingValues(all = 0.dp),
@@ -201,6 +217,21 @@ private fun ArticleFeedLazyColumn(
                         data = item,
                         modifier = Modifier.padding(all = 16.dp),
                         onClick = onArticleClick,
+                        onBookmarkClick = {
+                        },
+                        onMuteUserClick = {
+                            articleEventPublisher(ArticleContract.UiEvent.MuteAction(userId = item.authorId))
+                        },
+                        onReportContentClick = { reportType ->
+                            articleEventPublisher(
+                                ArticleContract.UiEvent.ReportAbuse(
+                                    reportType = reportType,
+                                    authorId = item.authorId,
+                                    eventId = item.eventId,
+                                    articleId = item.articleId,
+                                ),
+                            )
+                        },
                     )
                     PrimalDivider()
                 }

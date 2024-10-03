@@ -63,6 +63,8 @@ import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.core.compose.pulltorefresh.PrimalPullToRefreshBox
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
+import net.primal.android.core.errors.UiError
+import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.notes.feed.MediaFeedGrid
 import net.primal.android.notes.feed.NoteFeedList
@@ -388,6 +390,14 @@ fun ProfileDetailsScreen(
                                             pullToRefreshEnabled = false,
                                             noContentVerticalArrangement = Arrangement.Top,
                                             noContentPaddingValues = PaddingValues(top = 16.dp),
+                                            onUiError = { uiError: UiError ->
+                                                uiScope.launch {
+                                                    snackbarHostState.showSnackbar(
+                                                        message = uiError.resolveUiErrorMessage(context),
+                                                        duration = SnackbarDuration.Short,
+                                                    )
+                                                }
+                                            }
                                         )
                                     }
 

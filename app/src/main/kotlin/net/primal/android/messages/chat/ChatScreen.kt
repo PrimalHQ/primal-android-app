@@ -381,7 +381,7 @@ private fun ChatMessageListItem(
                 } else {
                     AppTheme.colorScheme.primary
                 },
-                referencedNoteContainerColor = if (chatMessage.isUserMessage) {
+                referencedEventsContainerColor = if (chatMessage.isUserMessage) {
                     AppTheme.extraColorScheme.surfaceVariantAlt1
                 } else {
                     AppTheme.extraColorScheme.surfaceVariantAlt2

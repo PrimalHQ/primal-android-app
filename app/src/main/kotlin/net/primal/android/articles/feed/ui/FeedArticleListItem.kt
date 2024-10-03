@@ -12,10 +12,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -44,6 +46,7 @@ import net.primal.android.core.compose.asBeforeNowFormat
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.FeedReplies
 import net.primal.android.core.compose.icons.primaliconpack.LightningBolt
+import net.primal.android.core.compose.icons.primaliconpack.More
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.zaps.ZappersAvatarThumbnailRow
 import net.primal.android.nostr.model.NostrEventKind
@@ -51,14 +54,21 @@ import net.primal.android.nostr.utils.Naddr
 import net.primal.android.nostr.utils.Nip19TLV.toNaddrString
 import net.primal.android.note.ui.EventZapUiModel
 import net.primal.android.notes.feed.model.EventStatsUi
+import net.primal.android.profile.report.ReportType
 import net.primal.android.theme.AppTheme
 
+@ExperimentalMaterial3Api
 @Composable
 fun FeedArticleListItem(
     data: FeedArticleUi,
     modifier: Modifier = Modifier,
     enabledDropdownMenu: Boolean = true,
+    showCommentsCount: Boolean = true,
+    color: Color = AppTheme.colorScheme.surfaceVariant,
     onClick: ((naddr: String) -> Unit)? = null,
+    onBookmarkClick: (() -> Unit)? = null,
+    onMuteUserClick: (() -> Unit)? = null,
+    onReportContentClick: ((reportType: ReportType) -> Unit)? = null,
 ) {
     Surface(
         modifier = Modifier.clickable(
@@ -72,7 +82,7 @@ fun FeedArticleListItem(
                 onClick?.invoke(naddr)
             },
         ),
-        color = AppTheme.colorScheme.surfaceVariant,
+        color = color,
     ) {
         val infoTextStyle = AppTheme.typography.bodyMedium.copy(
             color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
@@ -84,20 +94,31 @@ fun FeedArticleListItem(
                 data = data,
                 textStyle = infoTextStyle,
                 enabledDropdownMenu = enabledDropdownMenu,
+                onBookmarkClick = onBookmarkClick,
+                onMuteUserClick = onMuteUserClick,
+                onReportContentClick = onReportContentClick,
             )
 
             ListItemContent(data = data)
 
-            ListItemFooter(data = data, textStyle = infoTextStyle)
+            ListItemFooter(
+                data = data,
+                textStyle = infoTextStyle,
+                showCommentsCount = showCommentsCount,
+            )
         }
     }
 }
 
+@ExperimentalMaterial3Api
 @Composable
 private fun ListItemHeader(
     data: FeedArticleUi,
     textStyle: TextStyle,
     enabledDropdownMenu: Boolean = true,
+    onBookmarkClick: (() -> Unit)? = null,
+    onMuteUserClick: (() -> Unit)? = null,
+    onReportContentClick: ((reportType: ReportType) -> Unit)? = null,
 ) {
     Row(
         modifier = Modifier.height(32.dp),
@@ -129,9 +150,18 @@ private fun ListItemHeader(
                 articleRawData = data.rawNostrEventJson,
                 authorId = data.authorId,
                 isBookmarked = data.isBookmarked,
-                onBookmarkClick = { },
-                onMuteUserClick = { },
-                onReportContentClick = { },
+                onBookmarkClick = onBookmarkClick,
+                onMuteUserClick = onMuteUserClick,
+                onReportContentClick = onReportContentClick,
+                icon = {
+                    Icon(
+                        modifier = Modifier
+                            .padding(start = 14.dp, end = 8.dp)
+                            .wrapContentSize(align = Alignment.TopEnd),
+                        imageVector = PrimalIcons.More,
+                        contentDescription = stringResource(id = R.string.accessibility_article_drop_down),
+                    )
+                },
             )
         }
     }
@@ -176,7 +206,11 @@ private fun ListItemContent(data: FeedArticleUi) {
 }
 
 @Composable
-private fun ListItemFooter(data: FeedArticleUi, textStyle: TextStyle) {
+private fun ListItemFooter(
+    data: FeedArticleUi,
+    textStyle: TextStyle,
+    showCommentsCount: Boolean = true,
+) {
     Row(
         modifier = Modifier
             .padding(top = 8.dp)
@@ -197,18 +231,20 @@ private fun ListItemFooter(data: FeedArticleUi, textStyle: TextStyle) {
                 Spacer(modifier = Modifier.width(16.dp))
             }
 
-            val commentsCount = data.stats.repliesCount.toInt()
-            IconText(
-                modifier = Modifier,
-                text = pluralStringResource(
-                    id = R.plurals.article_feed_comments_count,
-                    count = commentsCount,
-                    commentsCount,
-                ),
-                leadingIcon = PrimalIcons.FeedReplies,
-                style = textStyle,
-                color = textStyle.color,
-            )
+            if (showCommentsCount) {
+                val commentsCount = data.stats.repliesCount.toInt()
+                IconText(
+                    modifier = Modifier,
+                    text = pluralStringResource(
+                        id = R.plurals.article_feed_comments_count,
+                        count = commentsCount,
+                        commentsCount,
+                    ),
+                    leadingIcon = PrimalIcons.FeedReplies,
+                    style = textStyle,
+                    color = textStyle.color,
+                )
+            }
         }
 
         if (data.eventZaps.isNotEmpty()) {
@@ -254,6 +290,7 @@ private fun ArticleImagePlaceholder() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
 private fun PreviewFeedArticleListItem() {

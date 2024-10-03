@@ -1,4 +1,4 @@
-package net.primal.android.thread.articles
+package net.primal.android.thread.articles.details
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.articles.ArticleRepository
+import net.primal.android.core.errors.UiError
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.crypto.hexToNpubHrp
 import net.primal.android.navigation.naddrOrThrow
@@ -34,10 +35,9 @@ import net.primal.android.note.ui.asEventZapUiModel
 import net.primal.android.notes.feed.model.asFeedPostUi
 import net.primal.android.notes.repository.FeedRepository
 import net.primal.android.profile.repository.ProfileRepository
-import net.primal.android.thread.articles.ArticleDetailsContract.ArticleDetailsError
-import net.primal.android.thread.articles.ArticleDetailsContract.UiEvent
-import net.primal.android.thread.articles.ArticleDetailsContract.UiState
-import net.primal.android.thread.articles.ui.mapAsArticleDetailsUi
+import net.primal.android.thread.articles.details.ArticleDetailsContract.UiEvent
+import net.primal.android.thread.articles.details.ArticleDetailsContract.UiState
+import net.primal.android.thread.articles.details.ui.mapAsArticleDetailsUi
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
 import net.primal.android.wallet.domain.ZapTarget
@@ -72,7 +72,7 @@ class ArticleDetailsViewModel @Inject constructor(
         observeActiveAccount()
 
         if (naddr == null) {
-            setState { copy(error = ArticleDetailsError.InvalidNaddr) }
+            setState { copy(error = UiError.InvalidNaddr) }
         } else {
             observeArticle(naddr)
             observeArticleComments(naddr = naddr)
@@ -188,7 +188,7 @@ class ArticleDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             val postAuthorProfileData = profileRepository.findProfileDataOrNull(profileId = article.authorId)
             if (postAuthorProfileData?.lnUrlDecoded == null) {
-                setState { copy(error = ArticleDetailsError.MissingLightningAddress(IllegalStateException())) }
+                setState { copy(error = UiError.MissingLightningAddress(IllegalStateException())) }
                 return@launch
             }
 
@@ -206,13 +206,13 @@ class ArticleDetailsViewModel @Inject constructor(
                 )
             } catch (error: ZapFailureException) {
                 Timber.w(error)
-                setState { copy(error = ArticleDetailsError.FailedToPublishZapEvent(error)) }
+                setState { copy(error = UiError.FailedToPublishZapEvent(error)) }
             } catch (error: MissingRelaysException) {
                 Timber.w(error)
-                setState { copy(error = ArticleDetailsError.MissingRelaysConfiguration(error)) }
+                setState { copy(error = UiError.MissingRelaysConfiguration(error)) }
             } catch (error: InvalidZapRequestException) {
                 Timber.w(error)
-                setState { copy(error = ArticleDetailsError.InvalidZapRequest(error)) }
+                setState { copy(error = UiError.InvalidZapRequest(error)) }
             }
         }
     }

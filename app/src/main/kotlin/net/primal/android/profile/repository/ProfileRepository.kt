@@ -11,11 +11,16 @@ import net.primal.android.db.PrimalDatabase
 import net.primal.android.explore.api.model.UsersResponse
 import net.primal.android.explore.domain.UserProfileSearchItem
 import net.primal.android.networking.relays.errors.NostrPublishException
+import net.primal.android.nostr.ext.asEventIdTag
 import net.primal.android.nostr.ext.asProfileDataPO
 import net.primal.android.nostr.ext.asProfileStatsPO
+import net.primal.android.nostr.ext.asPubkeyTag
+import net.primal.android.nostr.ext.asReplaceableEventTag
 import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
 import net.primal.android.nostr.ext.mapAsProfileDataPO
 import net.primal.android.nostr.ext.takeContentAsPrimalUserFollowersCountsOrNull
+import net.primal.android.nostr.model.NostrEventKind
+import net.primal.android.nostr.notary.NostrUnsignedEvent
 import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.android.profile.db.ProfileData
 import net.primal.android.profile.db.ProfileInteraction
@@ -216,14 +221,24 @@ class ProfileRepository @Inject constructor(
         userId: String,
         reportType: ReportType,
         profileId: String,
-        noteId: String? = null,
+        eventId: String? = null,
+        articleId: String? = null,
     ) {
         withContext(dispatchers.io()) {
-            nostrPublisher.publishReportAbuseEvent(
+            val profileTag = profileId.asPubkeyTag(optional = if (eventId == null) reportType.id else null)
+            val eventTag = eventId?.asEventIdTag(marker = reportType.id)
+            val articleTag = articleId?.let {
+                "${NostrEventKind.LongFormContent.value}:$profileId:$articleId".asReplaceableEventTag()
+            }
+
+            nostrPublisher.signAndPublishNostrEvent(
                 userId = userId,
-                reportType = reportType,
-                reportProfileId = profileId,
-                reportNoteId = noteId,
+                unsignedNostrEvent = NostrUnsignedEvent(
+                    pubKey = userId,
+                    content = "",
+                    kind = NostrEventKind.Reporting.value,
+                    tags = listOfNotNull(profileTag, eventTag, articleTag),
+                ),
             )
         }
     }

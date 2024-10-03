@@ -37,6 +37,7 @@ fun DvmHeaderAndFeedList(
                         )
                     },
                     onArticleClick = {},
+                    onUiError = {},
                 )
             }
 

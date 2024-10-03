@@ -19,6 +19,7 @@
     <string name="app_invalid_lud16_address">Invalid lightning (lud16) address.</string>
     <string name="app_invalid_lud16_address_user_not_found">Invalid lightning address. User \'%1$s\' doesn\'t exist on %2$s.</string>
     <string name="app_invalid_nip05_address">Invalid nostr verification address.</string>
+    <string name="app_error_invalid_naddr">Unable to load content. The address is invalid.</string>
 
     <string name="welcome_sign_in_button_title">Sign In</string>
     <string name="welcome_create_account_button_title">Create Account</string>
@@ -226,8 +227,6 @@
     <string name="thread_stats_zaps">Zaps</string>
     <string name="thread_stats_likes">Likes</string>
     <string name="thread_stats_reposts">Reposts</string>
-
-    <string name="long_form_thread_invalid_naddr">Unable to load content. The address is invalid.</string>
 
     <string name="note_reactions_title">Note Zaps</string>
 

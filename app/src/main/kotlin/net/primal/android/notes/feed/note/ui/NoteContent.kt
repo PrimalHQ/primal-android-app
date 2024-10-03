@@ -23,7 +23,7 @@ import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.utils.HashtagMatch
 import net.primal.android.core.utils.HashtagMatcher
 import net.primal.android.nostr.ext.cleanNostrUris
-import net.primal.android.notes.db.ReferencedPost
+import net.primal.android.notes.db.ReferencedNote
 import net.primal.android.notes.db.ReferencedUser
 import net.primal.android.notes.feed.model.NoteContentUi
 import net.primal.android.notes.feed.model.NoteNostrUriUi
@@ -39,13 +39,15 @@ private const val NOTE_ANNOTATION_TAG = "note"
 private const val HASHTAG_ANNOTATION_TAG = "hashtag"
 private const val NOSTR_ADDRESS_ANNOTATION_TAG = "naddr"
 
-private fun List<NoteNostrUriUi>.filterMentionedPosts() = filter { it.referencedPost != null }
+private fun List<NoteNostrUriUi>.filterMentionedNotes() = filter { it.referencedNote != null }
+
+private fun List<NoteNostrUriUi>.filterMentionedArticles() = filter { it.referencedArticle != null }
 
 private fun List<NoteNostrUriUi>.filterMentionedUsers() = filter { it.referencedUser != null }
 
 private fun List<NoteNostrUriUi>.filterUnhandledNostrAddressUris() =
     filter {
-        it.uri.contains("naddr") && it.referencedUser == null && it.referencedPost == null
+        it.uri.contains("naddr") && it.referencedUser == null && it.referencedNote == null
     }
 
 private fun String.remove(texts: List<String>): String {
@@ -130,7 +132,7 @@ fun NoteContent(
     textSelectable: Boolean = false,
     highlightColor: Color = AppTheme.colorScheme.secondary,
     contentColor: Color = AppTheme.colorScheme.onSurface,
-    referencedNoteContainerColor: Color = AppTheme.extraColorScheme.surfaceVariantAlt1,
+    referencedEventsContainerColor: Color = AppTheme.extraColorScheme.surfaceVariantAlt1,
     onClick: ((offset: Offset) -> Unit)? = null,
     onUrlClick: ((url: String) -> Unit)? = null,
     noteCallbacks: NoteCallbacks,
@@ -203,13 +205,24 @@ fun NoteContent(
             )
         }
 
-        val referencedPostResources = data.nostrUris.filterMentionedPosts()
+        val referencedPostResources = data.nostrUris.filterMentionedNotes()
         if (referencedPostResources.isNotEmpty()) {
             ReferencedNotesColumn(
                 modifier = Modifier.padding(top = 4.dp),
                 postResources = referencedPostResources,
                 expanded = expanded,
-                containerColor = referencedNoteContainerColor,
+                containerColor = referencedEventsContainerColor,
+                noteCallbacks = noteCallbacks,
+            )
+        }
+
+        val referencedArticleResources = data.nostrUris.filterMentionedArticles()
+        if (referencedArticleResources.isNotEmpty()) {
+            ReferencedArticlesColumn(
+                modifier = Modifier.padding(top = 4.dp),
+                articleResources = referencedArticleResources,
+                expanded = expanded,
+                containerColor = referencedEventsContainerColor,
                 noteCallbacks = noteCallbacks,
             )
         }
@@ -245,7 +258,7 @@ fun renderContentAsAnnotatedString(
 ): AnnotatedString {
     val mediaAttachments = data.attachments.filter { it.isMediaAttachment() }
     val linkAttachments = data.attachments.filterNot { it.isMediaAttachment() }
-    val mentionedPosts = data.nostrUris.filterMentionedPosts()
+    val mentionedEvents = data.nostrUris.filterMentionedNotes() + data.nostrUris.filterMentionedArticles()
     val mentionedUsers = data.nostrUris.filterMentionedUsers()
     val unhandledNostrAddressUris = data.nostrUris.filterUnhandledNostrAddressUris()
 
@@ -258,7 +271,7 @@ fun renderContentAsAnnotatedString(
     val refinedContent = data.content
         .cleanNostrUris()
         .remove(texts = mediaAttachments.map { it.url })
-        .remove(texts = if (!shouldKeepNostrNoteUris) mentionedPosts.map { it.uri } else emptyList())
+        .remove(texts = if (!shouldKeepNostrNoteUris) mentionedEvents.map { it.uri } else emptyList())
         .remove(texts = if (shouldDeleteLinks) linkAttachments.map { it.url } else emptyList())
         .remove(texts = data.invoices)
         .replaceNostrProfileUrisWithHandles(resources = mentionedUsers)
@@ -413,11 +426,12 @@ fun PreviewPostContent() {
                     nostrUris = listOf(
                         NoteNostrUriUi(
                             uri = "nostr:referencedUser",
-                            referencedPost = null,
+                            referencedNote = null,
                             referencedUser = ReferencedUser(
                                 userId = "nostr:referencedUser",
                                 handle = "alex",
                             ),
+                            referencedArticle = null,
                         ),
                     ),
                     hashtags = listOf("#nostr"),
@@ -453,7 +467,7 @@ fun PreviewPostContentWithReferencedPost() {
                     nostrUris = listOf(
                         NoteNostrUriUi(
                             uri = "nostr:referencedPost",
-                            referencedPost = ReferencedPost(
+                            referencedNote = ReferencedNote(
                                 postId = "postId",
                                 createdAt = 0,
                                 content = "This is referenced post.",
@@ -466,10 +480,11 @@ fun PreviewPostContentWithReferencedPost() {
                                 nostrUris = emptyList(),
                             ),
                             referencedUser = null,
+                            referencedArticle = null,
                         ),
                         NoteNostrUriUi(
                             uri = "nostr:referenced2Post",
-                            referencedPost = ReferencedPost(
+                            referencedNote = ReferencedNote(
                                 postId = "postId",
                                 createdAt = 0,
                                 content = "This is referenced post #2.",
@@ -482,6 +497,7 @@ fun PreviewPostContentWithReferencedPost() {
                                 nostrUris = emptyList(),
                             ),
                             referencedUser = null,
+                            referencedArticle = null,
                         ),
                     ),
                     hashtags = listOf("#nostr"),

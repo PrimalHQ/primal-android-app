@@ -178,6 +178,7 @@ private fun NoteEditorContract.UiState.resolvePublishNoteButtonText() =
         }
     }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun NoteEditorBox(
     state: NoteEditorContract.UiState,

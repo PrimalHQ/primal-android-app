@@ -1,4 +1,4 @@
-package net.primal.android.thread.articles.ui
+package net.primal.android.thread.articles.details.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.ExperimentalLayoutApi

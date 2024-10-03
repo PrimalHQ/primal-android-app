@@ -32,7 +32,7 @@ fun ReferencedNotesColumn(
 
     Column(modifier = modifier) {
         displayableNotes.forEach { nostrResourceUi ->
-            val data = nostrResourceUi.referencedPost
+            val data = nostrResourceUi.referencedNote
             checkNotNull(data)
             ReferencedNoteCard(
                 modifier = Modifier.padding(vertical = 4.dp),
