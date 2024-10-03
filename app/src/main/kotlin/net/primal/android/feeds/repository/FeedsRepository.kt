@@ -92,22 +92,19 @@ class FeedsRepository @Inject constructor(
     }
 
     suspend fun persistAllLocalUserFeeds(userId: String) {
-        val readsFeeds = withContext(dispatcherProvider.io()) {
-            database.feeds().getAllFeedsBySpecKind(FeedSpecKind.Reads)
-        }
-        val noteFeeds = withContext(dispatcherProvider.io()) {
-            database.feeds().getAllFeedsBySpecKind(FeedSpecKind.Notes)
+        persistLocalUserFeedsBySpecKind(userId = userId, specKind = FeedSpecKind.Notes)
+        persistLocalUserFeedsBySpecKind(userId = userId, specKind = FeedSpecKind.Reads)
+    }
+
+    private suspend fun persistLocalUserFeedsBySpecKind(userId: String, specKind: FeedSpecKind) {
+        val feeds = withContext(dispatcherProvider.io()) {
+            database.feeds().getAllFeedsBySpecKind(specKind = specKind)
         }
 
         feedsApi.setUserFeeds(
             userId = userId,
-            specKind = FeedSpecKind.Reads,
-            feeds = readsFeeds.map { it.asContentArticleFeedData() },
-        )
-        feedsApi.setUserFeeds(
-            userId = userId,
             specKind = FeedSpecKind.Notes,
-            feeds = noteFeeds.map { it.asContentArticleFeedData() },
+            feeds = feeds.map { it.asContentArticleFeedData() },
         )
     }
 
