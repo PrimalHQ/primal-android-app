@@ -71,25 +71,22 @@ fun ExploreFeeds(
     paddingValues: PaddingValues = PaddingValues(all = 0.dp),
     eventPublisher: (ExploreFeedsContract.UiEvent) -> Unit,
 ) {
-    var showDvmFeedDetailsBottomSheet by remember { mutableStateOf(false) }
-    var dvmFeedToShow by remember { mutableStateOf(state.feeds.firstOrNull()) }
+    var dvmFeedToShow by remember { mutableStateOf<DvmFeed?>(null) }
 
-    if (showDvmFeedDetailsBottomSheet) {
-        dvmFeedToShow?.let {
-            val addedToFeed by remember(dvmFeedToShow, state.userFeedSpecs) {
-                val kind = dvmFeedToShow?.kind
-                mutableStateOf(
-                    kind?.let { state.userFeedSpecs.contains(dvmFeedToShow?.buildSpec(specKind = kind)) } ?: false,
-                )
-            }
-            DvmFeedDetailsBottomSheet(
-                onDismissRequest = { showDvmFeedDetailsBottomSheet = false },
-                dvmFeed = it,
-                addedToFeed = addedToFeed,
-                addToUserFeeds = { eventPublisher(ExploreFeedsContract.UiEvent.AddToUserFeeds(it)) },
-                removeFromUserFeeds = { eventPublisher(ExploreFeedsContract.UiEvent.RemoveFromUserFeeds(it)) },
+    dvmFeedToShow?.let {
+        val addedToFeed by remember(dvmFeedToShow, state.userFeedSpecs) {
+            val kind = dvmFeedToShow?.kind
+            mutableStateOf(
+                kind?.let { state.userFeedSpecs.contains(dvmFeedToShow?.buildSpec(specKind = kind)) } ?: false,
             )
         }
+        DvmFeedDetailsBottomSheet(
+            onDismissRequest = { dvmFeedToShow = null },
+            dvmFeed = it,
+            addedToFeed = addedToFeed,
+            addToUserFeeds = { eventPublisher(ExploreFeedsContract.UiEvent.AddToUserFeeds(it)) },
+            removeFromUserFeeds = { eventPublisher(ExploreFeedsContract.UiEvent.RemoveFromUserFeeds(it)) },
+        )
     }
 
     if (state.loading && state.feeds.isEmpty()) {
@@ -122,10 +119,7 @@ fun ExploreFeeds(
                     modifier = Modifier.padding(top = 8.dp),
                     data = dvmFeed,
                     listItemContainerColor = AppTheme.extraColorScheme.surfaceVariantAlt3,
-                    onFeedClick = {
-                        dvmFeedToShow = it
-                        showDvmFeedDetailsBottomSheet = true
-                    },
+                    onFeedClick = { dvmFeedToShow = it },
                     showFollowsActionsAvatarRow = true,
                 )
             }
