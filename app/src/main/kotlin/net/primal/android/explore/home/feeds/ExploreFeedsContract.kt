@@ -1,7 +1,6 @@
 package net.primal.android.explore.home.feeds
 
 import net.primal.android.feeds.domain.DvmFeed
-import net.primal.android.feeds.ui.model.FeedUi
 
 interface ExploreFeedsContract {
     data class UiState(

@@ -108,7 +108,6 @@ class FeedsRepository @Inject constructor(
         )
     }
 
-
     suspend fun persistGivenUserFeeds(feeds: List<Feed>, specKind: FeedSpecKind) {
         withContext(dispatcherProvider.io()) {
             database.withTransaction {

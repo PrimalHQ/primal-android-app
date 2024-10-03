@@ -14,7 +14,6 @@ import net.primal.android.explore.home.feeds.ExploreFeedsContract.UiState
 import net.primal.android.feeds.domain.DvmFeed
 import net.primal.android.feeds.domain.buildSpec
 import net.primal.android.feeds.repository.FeedsRepository
-import net.primal.android.feeds.ui.model.asFeedUi
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import timber.log.Timber

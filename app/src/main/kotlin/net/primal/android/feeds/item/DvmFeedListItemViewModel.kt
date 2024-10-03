@@ -10,9 +10,7 @@ import net.primal.android.feeds.domain.DvmFeed
 import net.primal.android.feeds.item.DvmFeedListItemContract.UiEvent
 
 @HiltViewModel
-class DvmFeedListItemViewModel @Inject constructor(
-
-) : ViewModel() {
+class DvmFeedListItemViewModel @Inject constructor() : ViewModel() {
 
     private val event = MutableSharedFlow<UiEvent>()
     fun setEvent(e: UiEvent) = viewModelScope.launch { event.emit(e) }

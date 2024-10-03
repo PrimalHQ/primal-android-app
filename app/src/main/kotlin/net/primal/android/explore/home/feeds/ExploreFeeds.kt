@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -37,22 +36,16 @@ import net.primal.android.R
 import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalLoadingSpinner
-import net.primal.android.core.compose.PrimalTopAppBar
-import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.feeds.domain.DvmFeed
-import net.primal.android.feeds.domain.FeedSpecKind
 import net.primal.android.feeds.domain.buildSpec
 import net.primal.android.feeds.item.DvmFeedListItem
 import net.primal.android.feeds.ui.DvmHeaderAndFeedList
 import net.primal.android.theme.AppTheme
 
 @Composable
-fun ExploreFeeds(
-    modifier: Modifier = Modifier,
-    paddingValues: PaddingValues = PaddingValues(all = 0.dp),
-) {
+fun ExploreFeeds(modifier: Modifier = Modifier, paddingValues: PaddingValues = PaddingValues(all = 0.dp)) {
     val viewModel: ExploreFeedsViewModel = hiltViewModel<ExploreFeedsViewModel>()
     val uiState = viewModel.state.collectAsState()
 
@@ -233,6 +226,5 @@ private fun ActionButton(
                 fontWeight = FontWeight.W600,
             )
         }
-
     }
 }
