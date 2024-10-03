@@ -3,6 +3,7 @@ package net.primal.android.notes.feed.note.ui
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -13,6 +14,7 @@ import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.notes.feed.model.NoteNostrUriUi
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReferencedArticlesColumn(
     modifier: Modifier = Modifier,
