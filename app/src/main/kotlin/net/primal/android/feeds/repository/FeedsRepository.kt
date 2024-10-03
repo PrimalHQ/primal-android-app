@@ -35,6 +35,7 @@ class FeedsRepository @Inject constructor(
     private val database: PrimalDatabase,
     private val activeAccountStore: ActiveAccountStore,
 ) {
+    fun observeAllFeeds() = database.feeds().observeAllFeeds()
 
     fun observeReadsFeeds() = database.feeds().observeAllFeeds(specKind = FeedSpecKind.Reads)
 

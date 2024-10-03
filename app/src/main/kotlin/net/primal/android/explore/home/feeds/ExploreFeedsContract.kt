@@ -6,8 +6,7 @@ import net.primal.android.feeds.ui.model.FeedUi
 interface ExploreFeedsContract {
     data class UiState(
         val feeds: List<DvmFeed> = emptyList(),
-        val userReadFeeds: List<FeedUi> = emptyList(),
-        val userNoteFeeds: List<FeedUi> = emptyList(),
+        val userFeedSpecs: List<String> = emptyList(),
         val loading: Boolean = true,
         val error: Throwable? = null,
     )

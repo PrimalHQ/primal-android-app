@@ -2,6 +2,7 @@ package net.primal.android.explore.home.feeds
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.room.util.copy
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -33,24 +34,15 @@ class ExploreFeedsViewModel @Inject constructor(
 
     init {
         fetchExploreFeeds()
-        observeUserReadFeeds()
-        observeUserNoteFeeds()
+        observeAllUserFeeds()
         observeEvents()
     }
 
-    private fun observeUserReadFeeds() =
+    private fun observeAllUserFeeds() =
         viewModelScope.launch {
-            feedsRepository.observeReadsFeeds()
+            feedsRepository.observeAllFeeds()
                 .collect {
-                    setState { copy(userReadFeeds = it.map { it.asFeedUi() }) }
-                }
-        }
-
-    private fun observeUserNoteFeeds() =
-        viewModelScope.launch {
-            feedsRepository.observeNotesFeeds()
-                .collect {
-                    setState { copy(userNoteFeeds = it.map { it.asFeedUi() }) }
+                    setState { copy(userFeedSpecs = it.map { it.spec }) }
                 }
         }
 

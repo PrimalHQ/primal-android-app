@@ -19,6 +19,9 @@ interface FeedDao {
     @Query("SELECT * FROM Feed WHERE specKind = :specKind LIMIT 1")
     fun first(specKind: FeedSpecKind): Feed?
 
+    @Query("SELECT * FROM Feed")
+    fun observeAllFeeds(): Flow<List<Feed>>
+
     @Query("SELECT * FROM Feed WHERE specKind = :specKind")
     fun observeAllFeeds(specKind: FeedSpecKind): Flow<List<Feed>>
 

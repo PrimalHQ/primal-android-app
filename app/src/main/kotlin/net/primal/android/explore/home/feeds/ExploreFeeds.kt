@@ -76,15 +76,11 @@ fun ExploreFeeds(
 
     if (showDvmFeedDetailsBottomSheet) {
         dvmFeedToShow?.let {
-            val addedToFeed by remember(dvmFeedToShow, state.userNoteFeeds, state.userReadFeeds) {
-                val spec = dvmFeedToShow?.let { dvmFeed ->
-                    it.kind?.let { kind -> dvmFeed.buildSpec(specKind = kind) }
-                }
-                when (dvmFeedToShow?.kind) {
-                    FeedSpecKind.Reads -> mutableStateOf(state.userReadFeeds.map { it.spec }.contains(spec))
-                    FeedSpecKind.Notes -> mutableStateOf(state.userNoteFeeds.map { it.spec }.contains(spec))
-                    null -> mutableStateOf(false)
-                }
+            val addedToFeed by remember(dvmFeedToShow, state.userFeedSpecs) {
+                val kind = dvmFeedToShow?.kind
+                mutableStateOf(
+                    kind?.let { state.userFeedSpecs.contains(dvmFeedToShow?.buildSpec(specKind = kind)) } ?: false,
+                )
             }
             DvmFeedDetailsBottomSheet(
                 onDismissRequest = { showDvmFeedDetailsBottomSheet = false },
@@ -126,8 +122,8 @@ fun ExploreFeeds(
                     modifier = Modifier.padding(top = 8.dp),
                     data = dvmFeed,
                     listItemContainerColor = AppTheme.extraColorScheme.surfaceVariantAlt3,
-                    onFeedClick = { dvmFeed ->
-                        dvmFeedToShow = dvmFeed
+                    onFeedClick = {
+                        dvmFeedToShow = it
                         showDvmFeedDetailsBottomSheet = true
                     },
                     showFollowsActionsAvatarRow = true,
