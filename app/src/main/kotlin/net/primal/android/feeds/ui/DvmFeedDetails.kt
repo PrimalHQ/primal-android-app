@@ -1,6 +1,5 @@
 package net.primal.android.feeds.ui
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -14,23 +13,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import net.primal.android.R
-import net.primal.android.articles.feed.ArticleFeedList
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.feeds.domain.DvmFeed
-import net.primal.android.feeds.domain.FeedSpecKind
-import net.primal.android.feeds.domain.buildSpec
-import net.primal.android.notes.feed.NoteFeedList
-import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.theme.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DvmFeedDetails(
     dvmFeed: DvmFeed?,
-    specKind: FeedSpecKind,
     onClose: () -> Unit,
     modifier: Modifier = Modifier,
     addedToFeeds: Boolean = false,
@@ -59,7 +52,6 @@ fun DvmFeedDetails(
                 DvmHeaderAndFeedList(
                     modifier = Modifier.padding(paddingValues),
                     dvmFeed = dvmFeed,
-                    specKind = specKind,
                 )
             }
         },
@@ -82,38 +74,4 @@ fun DvmFeedDetails(
             }
         },
     )
-}
-
-@Composable
-private fun DvmHeaderAndFeedList(
-    dvmFeed: DvmFeed,
-    specKind: FeedSpecKind,
-    modifier: Modifier = Modifier,
-) {
-    Column(modifier = modifier) {
-        when (specKind) {
-            FeedSpecKind.Reads -> {
-                ArticleFeedList(
-                    feedSpec = dvmFeed.buildSpec(specKind = specKind),
-                    previewMode = true,
-                    pullToRefreshEnabled = false,
-                    header = { DvmFeedListItem(data = dvmFeed) },
-                    onArticleClick = {},
-                    onUiError = {},
-                )
-            }
-
-            FeedSpecKind.Notes -> {
-                NoteFeedList(
-                    feedSpec = dvmFeed.buildSpec(specKind = specKind),
-                    noteCallbacks = NoteCallbacks(),
-                    previewMode = true,
-                    pullToRefreshEnabled = false,
-                    pollingEnabled = false,
-                    header = { DvmFeedListItem(data = dvmFeed) },
-                    onGoToWallet = {},
-                )
-            }
-        }
-    }
 }

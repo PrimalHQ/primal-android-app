@@ -16,17 +16,24 @@ import net.primal.android.feeds.domain.FEED_KIND_DVM
 import net.primal.android.feeds.domain.FeedSpecKind
 import net.primal.android.feeds.domain.buildSpec
 import net.primal.android.nostr.ext.findFirstIdentifier
+import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
+import net.primal.android.nostr.ext.mapAsProfileDataPO
+import net.primal.android.nostr.ext.takeContentAsPrimalUserScoresOrNull
+import net.primal.android.nostr.mappers.asContentArticleFeedData
+import net.primal.android.nostr.model.primal.PrimalEvent
 import net.primal.android.nostr.model.primal.content.ContentArticleFeedData
+import net.primal.android.nostr.model.primal.content.ContentDvmFeedFollowsAction
+import net.primal.android.nostr.model.primal.content.ContentDvmFeedMetadata
 import net.primal.android.nostr.model.primal.content.ContentPrimalDvmFeedMetadata
 import net.primal.android.nostr.model.primal.content.ContentPrimalEventStats
-import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.android.nostr.model.primal.content.ContentPrimalEventUserStats
 
 class FeedsRepository @Inject constructor(
     private val dispatcherProvider: CoroutineDispatcherProvider,
     private val feedsApi: FeedsApi,
     private val database: PrimalDatabase,
-    private val activeAccountStore: ActiveAccountStore,
 ) {
+    fun observeAllFeeds() = database.feeds().observeAllFeeds()
 
     fun observeReadsFeeds() = database.feeds().observeAllFeeds(specKind = FeedSpecKind.Reads)
 
@@ -34,13 +41,15 @@ class FeedsRepository @Inject constructor(
 
     fun observeFeeds(specKind: FeedSpecKind) = database.feeds().observeAllFeeds(specKind = specKind)
 
-    suspend fun fetchAndPersistArticleFeeds() = fetchAndPersistFeeds(specKind = FeedSpecKind.Reads)
+    suspend fun fetchAndPersistArticleFeeds(userId: String) =
+        fetchAndPersistFeeds(userId = userId, specKind = FeedSpecKind.Reads)
 
-    suspend fun fetchAndPersistNoteFeeds() = fetchAndPersistFeeds(specKind = FeedSpecKind.Notes)
+    suspend fun fetchAndPersistNoteFeeds(userId: String) =
+        fetchAndPersistFeeds(userId = userId, specKind = FeedSpecKind.Notes)
 
-    private suspend fun fetchAndPersistFeeds(specKind: FeedSpecKind) {
+    private suspend fun fetchAndPersistFeeds(userId: String, specKind: FeedSpecKind) {
         withContext(dispatcherProvider.io()) {
-            val response = feedsApi.getUserFeeds(userId = activeAccountStore.activeUserId(), specKind = specKind)
+            val response = feedsApi.getUserFeeds(userId = userId, specKind = specKind)
             val content = NostrJson.decodeFromStringOrNull<List<ContentArticleFeedData>>(
                 string = response.articleFeeds.content,
             )
@@ -55,7 +64,11 @@ class FeedsRepository @Inject constructor(
         }
     }
 
-    suspend fun persistNewDefaultFeeds(givenDefaultFeeds: List<Feed>, specKind: FeedSpecKind) {
+    suspend fun persistNewDefaultFeeds(
+        userId: String,
+        givenDefaultFeeds: List<Feed>,
+        specKind: FeedSpecKind,
+    ) {
         val localFeeds = withContext(dispatcherProvider.io()) {
             database.feeds().observeAllFeeds(specKind = specKind).first()
         }
@@ -67,7 +80,7 @@ class FeedsRepository @Inject constructor(
         if (newFeeds.isNotEmpty()) {
             val disabledNewFeeds = newFeeds.map { it.copy(enabled = false) }
             val mergedFeeds = localFeeds + disabledNewFeeds
-            persistArticleFeeds(feeds = mergedFeeds, specKind = specKind)
+            persistGivenUserFeeds(userId = userId, feeds = mergedFeeds, specKind = specKind)
         }
     }
 
@@ -82,42 +95,71 @@ class FeedsRepository @Inject constructor(
         }
     }
 
-    suspend fun persistArticleFeeds(feeds: List<Feed>, specKind: FeedSpecKind) {
+    suspend fun persistAllLocalUserFeeds(userId: String) {
+        persistLocalUserFeedsBySpecKind(userId = userId, specKind = FeedSpecKind.Notes)
+        persistLocalUserFeedsBySpecKind(userId = userId, specKind = FeedSpecKind.Reads)
+    }
+
+    private suspend fun persistLocalUserFeedsBySpecKind(userId: String, specKind: FeedSpecKind) {
+        val feeds = withContext(dispatcherProvider.io()) {
+            database.feeds().getAllFeedsBySpecKind(specKind = specKind)
+        }
+
+        feedsApi.setUserFeeds(
+            userId = userId,
+            specKind = FeedSpecKind.Notes,
+            feeds = feeds.map { it.asContentArticleFeedData() },
+        )
+    }
+
+    suspend fun persistGivenUserFeeds(
+        userId: String,
+        feeds: List<Feed>,
+        specKind: FeedSpecKind,
+    ) {
         withContext(dispatcherProvider.io()) {
             database.withTransaction {
                 database.feeds().deleteAll(specKind = specKind)
                 database.feeds().upsertAll(data = feeds)
             }
 
-            val apiFeeds = feeds.map {
-                ContentArticleFeedData(
-                    name = it.name,
-                    spec = it.spec,
-                    feedKind = it.feedKind,
-                    description = it.description,
-                    enabled = it.enabled,
-                )
-            }
+            val apiFeeds = feeds.map { it.asContentArticleFeedData() }
 
             feedsApi.setUserFeeds(
-                userId = activeAccountStore.activeUserId(),
+                userId = userId,
                 specKind = specKind,
                 feeds = apiFeeds,
             )
         }
     }
 
-    suspend fun fetchAndPersistDefaultFeeds(givenDefaultFeeds: List<Feed>, specKind: FeedSpecKind) =
-        withContext(dispatcherProvider.io()) {
-            val feeds = givenDefaultFeeds.ifEmpty { fetchDefaultFeeds(specKind = specKind) ?: return@withContext }
-            persistArticleFeeds(feeds = feeds, specKind = specKind)
-        }
+    suspend fun fetchAndPersistDefaultFeeds(
+        userId: String,
+        givenDefaultFeeds: List<Feed>,
+        specKind: FeedSpecKind,
+    ) = withContext(dispatcherProvider.io()) {
+        val feeds = givenDefaultFeeds.ifEmpty { fetchDefaultFeeds(specKind = specKind) ?: return@withContext }
+        persistGivenUserFeeds(userId = userId, feeds = feeds, specKind = specKind)
+    }
 
-    suspend fun fetchRecommendedDvmFeeds(specKind: FeedSpecKind): List<DvmFeed> {
-        val response = withContext(dispatcherProvider.io()) { feedsApi.getFeaturedFeeds(specKind) }
-        val eventStatsMap = response.scores.mapNotNull { primalEvent ->
-            NostrJson.decodeFromStringOrNull<ContentPrimalEventStats>(primalEvent.content)
-        }.asMapByKey { it.eventId }
+    suspend fun fetchRecommendedDvmFeeds(specKind: FeedSpecKind? = null, pubkey: String? = null): List<DvmFeed> {
+        val response = withContext(dispatcherProvider.io()) {
+            feedsApi.getFeaturedFeeds(specKind = specKind, pubkey = pubkey)
+        }
+        val eventStatsMap = response.scores.parseAndMapContentByKey<ContentPrimalEventStats> { eventId }
+        val metadatas = response.feedMetadatas.parseAndMapContentByKey<ContentDvmFeedMetadata> { eventId }
+        val userStats = response.feedUserStats.parseAndMapContentByKey<ContentPrimalEventUserStats> { eventId }
+        val followsActions = response.feedFollowActions.parseAndMapContentByKey<ContentDvmFeedFollowsAction> { eventId }
+
+        val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
+        val profiles = response.userMetadatas.mapAsProfileDataPO(cdnResources = cdnResources).distinctBy { it.ownerId }
+
+        val profileScores = response.userScores.map { it.takeContentAsPrimalUserScoresOrNull() }
+            .fold(emptyMap<String, Float>()) { acc, map -> acc + map }
+
+        withContext(dispatcherProvider.io()) {
+            database.profiles().upsertAll(data = profiles)
+        }
 
         val dvmFeeds = response.dvmHandlers
             .filter { it.content.isNotEmpty() }
@@ -125,6 +167,10 @@ class FeedsRepository @Inject constructor(
                 val dvmMetadata = NostrJson.decodeFromStringOrNull<ContentPrimalDvmFeedMetadata>(nostrEvent.content)
                 val dvmId = nostrEvent.tags.findFirstIdentifier()
                 val dvmTitle = dvmMetadata?.name
+                val profileDatasFromFollowsActions = profiles
+                    .filter { followsActions[nostrEvent.id]?.userIds?.contains(it.ownerId) == true }
+                    .sortedByDescending { profileData -> profileScores[profileData.ownerId] }
+
                 if (dvmMetadata != null && dvmId != null && dvmTitle != null) {
                     DvmFeed(
                         dvmId = dvmId,
@@ -136,6 +182,15 @@ class FeedsRepository @Inject constructor(
                         primalSubscriptionRequired = dvmMetadata.subscription == true,
                         totalLikes = eventStatsMap[nostrEvent.id]?.likes,
                         totalSatsZapped = eventStatsMap[nostrEvent.id]?.satsZapped,
+                        kind = when (metadatas[nostrEvent.id]?.kind?.lowercase()) {
+                            "notes" -> FeedSpecKind.Notes
+                            "reads" -> FeedSpecKind.Reads
+                            else -> null
+                        },
+                        isPrimal = metadatas[nostrEvent.id]?.isPrimal,
+                        followsActions = profileDatasFromFollowsActions,
+                        userLiked = userStats[nostrEvent.id]?.liked,
+                        userZapped = userStats[nostrEvent.id]?.zapped,
                     )
                 } else {
                     null
@@ -148,7 +203,7 @@ class FeedsRepository @Inject constructor(
     suspend fun addReadsDvmFeed(dvmFeed: DvmFeed, specKind: FeedSpecKind) =
         addDvmFeed(dvmFeed = dvmFeed, specKind = specKind)
 
-    private suspend fun addDvmFeed(dvmFeed: DvmFeed, specKind: FeedSpecKind) {
+    suspend fun addDvmFeed(dvmFeed: DvmFeed, specKind: FeedSpecKind) {
         withContext(dispatcherProvider.io()) {
             val feed = Feed(
                 spec = dvmFeed.buildSpec(specKind = specKind),
@@ -177,4 +232,9 @@ class FeedsRepository @Inject constructor(
             }
         }
     }
+
+    private inline fun <reified T> List<PrimalEvent>.parseAndMapContentByKey(key: T.() -> String): Map<String, T> =
+        this.mapNotNull { primalEvent ->
+            NostrJson.decodeFromStringOrNull<T>(primalEvent.content)
+        }.asMapByKey { it.key() }
 }

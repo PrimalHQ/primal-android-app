@@ -11,7 +11,7 @@ import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.primal.PrimalCacheFilter
 import net.primal.android.networking.primal.PrimalVerb
-import net.primal.android.networking.primal.PrimalVerb.GET_FEATURED_DVM_READS
+import net.primal.android.networking.primal.PrimalVerb.GET_FEATURED_DVM_FEEDS
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.model.primal.content.ContentAppSubSettings
@@ -24,17 +24,28 @@ class FeedsApiImpl @Inject constructor(
     private val nostrNotary: NostrNotary,
 ) : FeedsApi {
 
-    override suspend fun getFeaturedFeeds(specKind: FeedSpecKind): DvmFeedsResponse {
+    override suspend fun getFeaturedFeeds(specKind: FeedSpecKind?, pubkey: String?): DvmFeedsResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = GET_FEATURED_DVM_READS,
-                optionsJson = NostrJson.encodeToString(DvmFeedsRequestBody(specKind = specKind.id)),
+                primalVerb = GET_FEATURED_DVM_FEEDS,
+                optionsJson = NostrJson.encodeToString(
+                    DvmFeedsRequestBody(
+                        specKind = specKind?.id,
+                        pubkey = pubkey,
+                    ),
+                ),
             ),
         )
 
         return DvmFeedsResponse(
             scores = queryResult.filterPrimalEvents(kind = NostrEventKind.PrimalEventStats),
             dvmHandlers = queryResult.filterNostrEvents(kind = NostrEventKind.AppHandler),
+            feedMetadatas = queryResult.filterPrimalEvents(kind = NostrEventKind.PrimalDvmFeedMetadata),
+            feedFollowActions = queryResult.filterPrimalEvents(kind = NostrEventKind.PrimalDvmFeedFollowsActions),
+            feedUserStats = queryResult.filterPrimalEvents(kind = NostrEventKind.PrimalEventUserStats),
+            userMetadatas = queryResult.filterNostrEvents(kind = NostrEventKind.Metadata),
+            cdnResources = queryResult.filterPrimalEvents(kind = NostrEventKind.PrimalCdnResource),
+            userScores = queryResult.filterPrimalEvents(kind = NostrEventKind.PrimalUserScores),
         )
     }
 

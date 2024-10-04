@@ -155,7 +155,6 @@ private fun FeedsBottomSheet(
                     DvmFeedDetails(
                         modifier = Modifier.fillMaxSize(),
                         dvmFeed = state.selectedDvmFeed,
-                        specKind = state.specKind,
                         addedToFeeds = addedToFeeds,
                         onClose = { eventPublisher(FeedsContract.UiEvent.CloseFeedDetails) },
                         onAddOrRemoveFeed = {

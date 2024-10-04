@@ -6,6 +6,7 @@ import net.primal.android.user.domain.Badges
 interface ExploreHomeContract {
     data class UiState(
         val activeAccountAvatarCdnImage: CdnImage? = null,
+        val activeAccountPubkey: String? = null,
         val badges: Badges = Badges(),
     )
 }

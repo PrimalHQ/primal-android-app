@@ -40,6 +40,7 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AdvancedSearch
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.preview.PrimalPreview
+import net.primal.android.explore.home.feeds.ExploreFeeds
 import net.primal.android.explore.home.topics.ExploreTopics
 import net.primal.android.explore.home.ui.EXPLORE_HOME_TAB_COUNT
 import net.primal.android.explore.home.ui.ExploreHomeTabs
@@ -102,6 +103,11 @@ private fun ExploreHomeScreen(
                 state = pagerState,
             ) { pageIndex ->
                 when (pageIndex) {
+                    FEEDS_INDEX -> {
+                        ExploreFeeds(
+                            paddingValues = paddingValues,
+                        )
+                    }
                     MEDIA_INDEX -> {
                         MediaFeedGrid(
                             modifier = Modifier.padding(paddingValues),
