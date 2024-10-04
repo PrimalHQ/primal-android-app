@@ -220,7 +220,7 @@ private fun CreatedByPrimalRow() {
             text = buildAnnotatedString {
                 withStyle(
                     style = SpanStyle(
-                        fontWeight = FontWeight.W400,
+                        fontWeight = FontWeight.Normal,
                         color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
                     ),
                 ) {
