@@ -7,9 +7,10 @@ import kotlinx.serialization.json.float
 import kotlinx.serialization.json.jsonPrimitive
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.decodeFromStringOrNull
+import net.primal.android.explore.api.model.ExploreRequestBody
 import net.primal.android.explore.api.model.SearchUsersRequestBody
 import net.primal.android.explore.api.model.TopicScore
-import net.primal.android.explore.api.model.TrendingPeoplesResponse
+import net.primal.android.explore.api.model.TrendingPeopleResponse
 import net.primal.android.explore.api.model.UsersResponse
 import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.android.networking.primal.PrimalApiClient
@@ -24,20 +25,23 @@ class ExploreApiImpl @Inject constructor(
     @PrimalCacheApiClient private val primalApiClient: PrimalApiClient,
 ) : ExploreApi {
 
-    override suspend fun getTrendingPeople(): TrendingPeoplesResponse {
+    override suspend fun getTrendingPeople(body: ExploreRequestBody): TrendingPeopleResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = EXPLORE_PEOPLE,
+                optionsJson = NostrJson.encodeToString(body),
             ),
         )
 
-        return TrendingPeoplesResponse(
-            metadatas = queryResult.filterNostrEvents(NostrEventKind.Metadata),
+        return TrendingPeopleResponse(
+            paging = queryResult.findPrimalEvent(NostrEventKind.PrimalPaging).let {
+                NostrJson.decodeFromStringOrNull(it?.content)
+            },
+            metadata = queryResult.filterNostrEvents(NostrEventKind.Metadata),
             cdnResources = queryResult.filterPrimalEvents(NostrEventKind.PrimalCdnResource),
             usersFollowStats = queryResult.findPrimalEvent(NostrEventKind.PrimalExplorePeopleNewFollowStats),
             usersScores = queryResult.findPrimalEvent(NostrEventKind.PrimalUserScores),
             usersFollowCount = queryResult.findPrimalEvent(NostrEventKind.PrimalUserFollowersCounts),
-            primalPaging = queryResult.findPrimalEvent(NostrEventKind.PrimalPaging),
         )
     }
 

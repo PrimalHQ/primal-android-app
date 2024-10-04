@@ -58,18 +58,15 @@ class ProfileRepository @Inject constructor(
         profileId: String,
         userId: String,
         limit: Int,
-    ): List<ProfileData> {
-        val users = usersApi.getUserProfileFollowedBy(profileId, userId, limit)
-
-        val cdnResources = users.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
-        val profiles = users.metadataEvents.mapAsProfileDataPO(cdnResources = cdnResources)
-
+    ): List<ProfileData> =
         withContext(dispatchers.io()) {
-            database.profiles().upsertAll(data = profiles)
-        }
+            val users = usersApi.getUserProfileFollowedBy(profileId, userId, limit)
 
-        return profiles
-    }
+            val cdnResources = users.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
+            val profiles = users.metadataEvents.mapAsProfileDataPO(cdnResources = cdnResources)
+            database.profiles().upsertAll(data = profiles)
+            profiles
+        }
 
     suspend fun observeProfilesData(profileIds: List<String>) =
         withContext(dispatchers.io()) {
@@ -79,22 +76,23 @@ class ProfileRepository @Inject constructor(
     fun observeProfileStats(profileId: String) =
         database.profileStats().observeProfileStats(profileId = profileId).filterNotNull()
 
-    suspend fun requestProfileUpdate(profileId: String) {
-        val response = usersApi.getUserProfile(userId = profileId)
-        val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
-        val profileMetadata = response.metadata?.asProfileDataPO(cdnResources = cdnResources)
-        val profileStats = response.profileStats?.asProfileStatsPO()
+    suspend fun requestProfileUpdate(profileId: String) =
+        withContext(dispatchers.io()) {
+            val response = usersApi.getUserProfile(userId = profileId)
+            val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
+            val profileMetadata = response.metadata?.asProfileDataPO(cdnResources = cdnResources)
+            val profileStats = response.profileStats?.asProfileStatsPO()
 
-        database.withTransaction {
-            if (profileMetadata != null) {
-                database.profiles().upsertAll(data = listOf(profileMetadata))
-            }
+            database.withTransaction {
+                if (profileMetadata != null) {
+                    database.profiles().upsertAll(data = listOf(profileMetadata))
+                }
 
-            if (profileStats != null) {
-                database.profileStats().upsert(data = profileStats)
+                if (profileStats != null) {
+                    database.profileStats().upsert(data = profileStats)
+                }
             }
         }
-    }
 
     @Throws(FollowListNotFound::class, NostrPublishException::class)
     suspend fun follow(userId: String, followedUserId: String) {
@@ -111,25 +109,26 @@ class ProfileRepository @Inject constructor(
     }
 
     @Throws(FollowListNotFound::class, NostrPublishException::class)
-    private suspend fun updateFollowList(userId: String, reducer: Set<String>.() -> Set<String>) {
-        val userFollowList = userAccountFetcher.fetchUserFollowListOrNull(userId = userId)
-            ?: throw FollowListNotFound()
+    private suspend fun updateFollowList(userId: String, reducer: Set<String>.() -> Set<String>) =
+        withContext(dispatchers.io()) {
+            val userFollowList = userAccountFetcher.fetchUserFollowListOrNull(userId = userId)
+                ?: throw FollowListNotFound()
 
-        userRepository.updateFollowList(userId, userFollowList)
+            userRepository.updateFollowList(userId, userFollowList)
 
-        setFollowList(
-            userId = userId,
-            contacts = userFollowList.following.reducer(),
-            content = userFollowList.followListEventContent ?: "",
-        )
-    }
+            setFollowList(
+                userId = userId,
+                contacts = userFollowList.following.reducer(),
+                content = userFollowList.followListEventContent ?: "",
+            )
+        }
 
     @Throws(NostrPublishException::class)
     suspend fun setFollowList(
         userId: String,
         contacts: Set<String>,
         content: String = "",
-    ) {
+    ) = withContext(dispatchers.io()) {
         val nostrEventResponse = nostrPublisher.publishUserFollowList(
             userId = userId,
             contacts = contacts,
@@ -141,19 +140,20 @@ class ProfileRepository @Inject constructor(
         )
     }
 
-    private suspend fun queryRemoteUsers(apiBlock: suspend () -> UsersResponse): List<UserProfileSearchItem> {
-        val response = apiBlock()
-        val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
-        val profiles = response.contactsMetadata.mapAsProfileDataPO(cdnResources = cdnResources)
-        val followersCountsMap = response.followerCounts?.takeContentAsPrimalUserFollowersCountsOrNull()
+    private suspend fun queryRemoteUsers(apiBlock: suspend () -> UsersResponse): List<UserProfileSearchItem> =
+        withContext(dispatchers.io()) {
+            val response = apiBlock()
+            val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
+            val profiles = response.contactsMetadata.mapAsProfileDataPO(cdnResources = cdnResources)
+            val followersCountsMap = response.followerCounts?.takeContentAsPrimalUserFollowersCountsOrNull()
 
-        database.profiles().upsertAll(data = profiles)
+            database.profiles().upsertAll(data = profiles)
 
-        return profiles.map {
-            val score = followersCountsMap?.get(it.ownerId)
-            UserProfileSearchItem(metadata = it, followersCount = score)
-        }.sortedByDescending { it.followersCount }
-    }
+            profiles.map {
+                val score = followersCountsMap?.get(it.ownerId)
+                UserProfileSearchItem(metadata = it, followersCount = score)
+            }.sortedByDescending { it.followersCount }
+        }
 
     suspend fun fetchFollowers(userId: String) =
         queryRemoteUsers {
@@ -192,7 +192,10 @@ class ProfileRepository @Inject constructor(
         }
     }
 
-    suspend fun isUserFollowing(userId: String, targetUserId: String) = usersApi.isUserFollowing(userId, targetUserId)
+    suspend fun isUserFollowing(userId: String, targetUserId: String) =
+        withContext(dispatchers.io()) {
+            usersApi.isUserFollowing(userId, targetUserId)
+        }
 
     fun markAsInteracted(profileId: String) {
         database.profileInteractions().insertOrUpdate(

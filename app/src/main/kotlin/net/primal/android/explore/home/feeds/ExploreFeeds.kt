@@ -4,7 +4,9 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -84,27 +86,21 @@ fun ExploreFeeds(
 
     if (state.loading && state.feeds.isEmpty()) {
         PrimalLoadingSpinner()
-    } else if (state.error != null) {
+    } else if (state.error != null || state.feeds.isEmpty()) {
         ListNoContent(
             modifier = Modifier.fillMaxSize(),
-            noContentText = stringResource(id = R.string.feed_error_loading),
-            refreshButtonVisible = true,
-            onRefresh = { eventPublisher(ExploreFeedsContract.UiEvent.RefreshFeeds) },
-        )
-    } else if (state.feeds.isEmpty()) {
-        ListNoContent(
-            modifier = Modifier.fillMaxSize(),
-            noContentText = stringResource(id = R.string.feed_no_content),
+            noContentText = stringResource(id = R.string.explore_feeds_no_content),
             refreshButtonVisible = true,
             onRefresh = { eventPublisher(ExploreFeedsContract.UiEvent.RefreshFeeds) },
         )
     } else {
         LazyColumn(
-            modifier = modifier
-                .padding(16.dp)
-                .padding(paddingValues),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = modifier.padding(horizontal = 12.dp),
+            contentPadding = paddingValues,
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
+            item { Spacer(Modifier.height(4.dp)) }
+
             items(
                 items = state.feeds,
             ) { dvmFeed ->
@@ -116,6 +112,8 @@ fun ExploreFeeds(
                     showFollowsActionsAvatarRow = true,
                 )
             }
+
+            item { Spacer(Modifier.height(4.dp)) }
         }
     }
 }

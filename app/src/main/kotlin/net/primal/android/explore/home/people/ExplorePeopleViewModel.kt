@@ -9,8 +9,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.explore.home.people.ExplorePeopleContract.UiEvent
 import net.primal.android.explore.home.people.ExplorePeopleContract.UiState
 import net.primal.android.explore.repository.ExploreRepository
@@ -21,7 +19,6 @@ import timber.log.Timber
 
 @HiltViewModel
 class ExplorePeopleViewModel @Inject constructor(
-    private val dispatcherProvider: CoroutineDispatcherProvider,
     private val exploreRepository: ExploreRepository,
     private val activeAccountStore: ActiveAccountStore,
     private val profileRepository: ProfileRepository,
@@ -50,16 +47,16 @@ class ExplorePeopleViewModel @Inject constructor(
 
     private fun fetchFollowing() =
         viewModelScope.launch {
-            withContext(dispatcherProvider.io()) {
-                profileRepository.fetchFollowing(userId = activeAccountStore.activeUserId())
-            }
+            profileRepository.fetchFollowing(userId = activeAccountStore.activeUserId())
         }
 
     private fun fetchExplorePeople() =
         viewModelScope.launch {
             setState { copy(loading = true, error = null) }
             try {
-                val explorePeople = exploreRepository.fetchTrendingPeople()
+                val explorePeople = exploreRepository.fetchTrendingPeople(
+                    userId = activeAccountStore.activeUserId(),
+                )
                 setState { copy(people = explorePeople) }
             } catch (error: WssException) {
                 Timber.w(error)
