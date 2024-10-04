@@ -77,7 +77,7 @@ private fun ExploreArticleFeedScreen(
                         duration = SnackbarDuration.Short,
                     )
                 }
-            }
+            },
         )
     }
 }

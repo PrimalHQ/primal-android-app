@@ -397,7 +397,7 @@ fun ProfileDetailsScreen(
                                                         duration = SnackbarDuration.Short,
                                                     )
                                                 }
-                                            }
+                                            },
                                         )
                                     }
 

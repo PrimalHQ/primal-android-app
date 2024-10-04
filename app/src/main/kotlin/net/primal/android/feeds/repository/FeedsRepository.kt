@@ -64,7 +64,11 @@ class FeedsRepository @Inject constructor(
         }
     }
 
-    suspend fun persistNewDefaultFeeds(userId: String, givenDefaultFeeds: List<Feed>, specKind: FeedSpecKind) {
+    suspend fun persistNewDefaultFeeds(
+        userId: String,
+        givenDefaultFeeds: List<Feed>,
+        specKind: FeedSpecKind,
+    ) {
         val localFeeds = withContext(dispatcherProvider.io()) {
             database.feeds().observeAllFeeds(specKind = specKind).first()
         }
@@ -108,7 +112,11 @@ class FeedsRepository @Inject constructor(
         )
     }
 
-    suspend fun persistGivenUserFeeds(userId: String, feeds: List<Feed>, specKind: FeedSpecKind) {
+    suspend fun persistGivenUserFeeds(
+        userId: String,
+        feeds: List<Feed>,
+        specKind: FeedSpecKind,
+    ) {
         withContext(dispatcherProvider.io()) {
             database.withTransaction {
                 database.feeds().deleteAll(specKind = specKind)
@@ -125,11 +133,14 @@ class FeedsRepository @Inject constructor(
         }
     }
 
-    suspend fun fetchAndPersistDefaultFeeds(userId: String, givenDefaultFeeds: List<Feed>, specKind: FeedSpecKind) =
-        withContext(dispatcherProvider.io()) {
-            val feeds = givenDefaultFeeds.ifEmpty { fetchDefaultFeeds(specKind = specKind) ?: return@withContext }
-            persistGivenUserFeeds(userId = userId, feeds = feeds, specKind = specKind)
-        }
+    suspend fun fetchAndPersistDefaultFeeds(
+        userId: String,
+        givenDefaultFeeds: List<Feed>,
+        specKind: FeedSpecKind,
+    ) = withContext(dispatcherProvider.io()) {
+        val feeds = givenDefaultFeeds.ifEmpty { fetchDefaultFeeds(specKind = specKind) ?: return@withContext }
+        persistGivenUserFeeds(userId = userId, feeds = feeds, specKind = specKind)
+    }
 
     suspend fun fetchRecommendedDvmFeeds(specKind: FeedSpecKind? = null, pubkey: String? = null): List<DvmFeed> {
         val response = withContext(dispatcherProvider.io()) {
