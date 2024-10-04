@@ -4,7 +4,8 @@ import androidx.room.Embedded
 import androidx.room.Relation
 import net.primal.android.attachments.db.NoteAttachment
 import net.primal.android.attachments.db.NoteNostrUri
-import net.primal.android.nostr.db.EventHints
+import net.primal.android.bookmarks.db.PublicBookmark
+import net.primal.android.nostr.db.EventRelayHints
 import net.primal.android.note.db.EventStats
 import net.primal.android.note.db.EventZap
 import net.primal.android.profile.db.ProfileData
@@ -57,11 +58,17 @@ data class FeedPost(
         entityColumn = "eventId",
         parentColumn = "postId",
     )
-    val eventHints: EventHints? = null,
+    val eventRelayHints: EventRelayHints? = null,
 
     @Relation(
         entityColumn = "eventId",
         parentColumn = "postId",
     )
     val eventZaps: List<EventZap> = emptyList(),
+
+    @Relation(
+        entityColumn = "tagValue",
+        parentColumn = "postId",
+    )
+    val bookmark: PublicBookmark? = null,
 )

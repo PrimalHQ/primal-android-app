@@ -88,8 +88,6 @@ class ArticleDetailsViewModel @Inject constructor(
                     is UiEvent.ZapArticle -> zapArticle(zapAction = it)
                     UiEvent.LikeArticle -> likeArticle()
                     UiEvent.RepostAction -> repostPost()
-                    is UiEvent.BookmarkAction -> handleBookmark(it)
-                    UiEvent.DismissBookmarkConfirmation -> dismissBookmarkConfirmation()
                 }
             }
         }
@@ -261,23 +259,5 @@ class ArticleDetailsViewModel @Inject constructor(
                     Timber.w(error)
                 }
             }
-        }
-
-    private fun handleBookmark(event: UiEvent.BookmarkAction) =
-        viewModelScope.launch {
-            try {
-                setState { copy(shouldApproveBookmark = false) }
-                // TODO Check if it's bookmarked, then add or remove from bookmarks, and use dispatcherProvider.io
-            } catch (error: NostrPublishException) {
-                Timber.w(error)
-            } catch (error: ProfileRepository.BookmarksListNotFound) {
-                Timber.w(error)
-                setState { copy(shouldApproveBookmark = true) }
-            }
-        }
-
-    private fun dismissBookmarkConfirmation() =
-        viewModelScope.launch {
-            setState { copy(shouldApproveBookmark = false) }
         }
 }

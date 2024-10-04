@@ -13,7 +13,7 @@ import net.primal.android.articles.db.ArticleFeedCrossRef
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.networking.sockets.errors.WssException
-import net.primal.android.nostr.ext.mapNotNullPrimalEventAsArticleDataPO
+import net.primal.android.nostr.ext.mapNotNullAsArticleDataPO
 import timber.log.Timber
 
 @OptIn(ExperimentalPagingApi::class)
@@ -42,7 +42,7 @@ class ArticleFeedMediator(
             }
 
             val connections = response?.articles
-                ?.mapNotNullPrimalEventAsArticleDataPO()
+                ?.mapNotNullAsArticleDataPO()
                 ?.map {
                     ArticleFeedCrossRef(
                         spec = feedSpec,

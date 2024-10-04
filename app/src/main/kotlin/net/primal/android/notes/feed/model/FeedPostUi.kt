@@ -53,7 +53,7 @@ fun FeedPost.asFeedPostUi() =
         hashtags = this.data.hashtags,
         rawNostrEventJson = this.data.raw,
         replyToAuthorHandle = this.replyToAuthor?.usernameUiFriendly() ?: this.data.replyToAuthorId?.asEllipsizedNpub(),
-        isBookmarked = this.eventHints?.isBookmarked == true,
+        isBookmarked = this.bookmark != null,
         eventZaps = this.eventZaps
             .map { it.asEventZapUiModel() }
             .sortedWith(EventZapUiModel.DefaultComparator),

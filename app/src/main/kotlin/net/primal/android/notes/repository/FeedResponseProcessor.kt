@@ -4,7 +4,7 @@ import androidx.room.withTransaction
 import net.primal.android.attachments.ext.flatMapPostsAsNoteAttachmentPO
 import net.primal.android.core.ext.asMapByKey
 import net.primal.android.db.PrimalDatabase
-import net.primal.android.nostr.db.eventHintsUpserter
+import net.primal.android.nostr.db.eventRelayHintsUpserter
 import net.primal.android.nostr.ext.flatMapAsEventHintsPO
 import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
 import net.primal.android.nostr.ext.flatMapNotNullAsLinkPreviewResource
@@ -77,7 +77,7 @@ suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String, database
 
         val eventHintsDao = database.eventHints()
         val hintsMap = eventHints.associateBy { it.eventId }
-        eventHintsUpserter(dao = eventHintsDao, eventIds = eventHints.map { it.eventId }) {
+        eventRelayHintsUpserter(dao = eventHintsDao, eventIds = eventHints.map { it.eventId }) {
             copy(relays = hintsMap[this.eventId]?.relays ?: emptyList())
         }
     }

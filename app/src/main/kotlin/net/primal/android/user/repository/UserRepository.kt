@@ -1,6 +1,5 @@
 package net.primal.android.user.repository
 
-import androidx.room.withTransaction
 import javax.inject.Inject
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.decodeFromStringOrNull
@@ -11,14 +10,12 @@ import net.primal.android.networking.primal.upload.PrimalFileUploader
 import net.primal.android.networking.primal.upload.UnsuccessfulFileUpload
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
-import net.primal.android.nostr.db.eventHintsUpserter
 import net.primal.android.nostr.ext.asProfileDataPO
 import net.primal.android.nostr.model.content.ContentMetadata
 import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.android.profile.domain.ProfileMetadata
 import net.primal.android.user.accounts.UserAccountFetcher
 import net.primal.android.user.accounts.UserAccountsStore
-import net.primal.android.user.accounts.copyBookmarksListIfNotNull
 import net.primal.android.user.accounts.copyFollowListIfNotNull
 import net.primal.android.user.accounts.copyIfNotNull
 import net.primal.android.user.api.UsersApi
@@ -51,24 +48,12 @@ class UserRepository @Inject constructor(
             it.followersCount != null && it.followingCount != null && it.notesCount != null
         }
         val followList = userAccountFetcher.fetchUserFollowListOrNull(userId = userId)
-        val bookmarksList = userAccountFetcher.fetchUserBookmarksListOrNull(userId = userId)
-
-        database.withTransaction {
-            val eventHintsDao = database.eventHints()
-            eventHintsDao.clearAllBookmarks()
-            bookmarksList?.bookmarks?.filter { it.type == "e" }?.map {
-                eventHintsUpserter(dao = eventHintsDao, eventId = it.value) {
-                    copy(isBookmarked = true)
-                }
-            }
-        }
 
         return accountsStore.getAndUpdateAccount(userId = userId) {
             copyIfNotNull(
                 profile = userProfile,
                 stats = userStats,
                 followList = followList,
-                bookmarksList = bookmarksList,
             )
         }
     }
@@ -77,12 +62,6 @@ class UserRepository @Inject constructor(
         accountsStore.getAndUpdateAccount(userId = userId) {
             copyFollowListIfNotNull(followList = contactsUserAccount)
                 .copy(followingCount = contactsUserAccount.following.size)
-        }
-    }
-
-    suspend fun updateBookmarksList(userId: String, bookmarksUserAccount: UserAccount) {
-        accountsStore.getAndUpdateAccount(userId = userId) {
-            copyBookmarksListIfNotNull(bookmarksList = bookmarksUserAccount)
         }
     }
 

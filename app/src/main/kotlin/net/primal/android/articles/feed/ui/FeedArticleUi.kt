@@ -10,6 +10,7 @@ import net.primal.android.note.ui.asEventZapUiModel
 import net.primal.android.notes.feed.model.EventStatsUi
 
 data class FeedArticleUi(
+    val aTag: String,
     val eventId: String,
     val articleId: String,
     val title: String,
@@ -28,6 +29,7 @@ data class FeedArticleUi(
 
 fun Article.mapAsFeedArticleUi(): FeedArticleUi {
     return FeedArticleUi(
+        aTag = this.data.aTag,
         eventId = this.data.eventId,
         articleId = this.data.articleId,
         publishedAt = Instant.ofEpochSecond(this.data.publishedAt),
@@ -38,7 +40,7 @@ fun Article.mapAsFeedArticleUi(): FeedArticleUi {
         imageCdnImage = this.data.imageCdnImage ?: this.author?.avatarCdnImage,
         authorName = this.author?.authorNameUiFriendly() ?: this.data.authorId.asEllipsizedNpub(),
         authorAvatarCdnImage = this.author?.avatarCdnImage,
-        isBookmarked = false,
+        isBookmarked = this.bookmark != null,
         stats = EventStatsUi.from(eventStats = this.eventStats, userStats = null),
         readingTimeInMinutes = this.data.wordsCount.wordsCountToReadingTime(),
         eventZaps = this.eventZaps.map { it.asEventZapUiModel() },

@@ -9,6 +9,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
+import net.primal.android.bookmarks.BookmarksRepository
+import net.primal.android.bookmarks.domain.BookmarkType
 import net.primal.android.core.errors.UiError
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
@@ -25,6 +27,7 @@ class ArticleViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val profileRepository: ProfileRepository,
     private val mutedUserRepository: MutedUserRepository,
+    private val bookmarksRepository: BookmarksRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(UiState())
@@ -45,6 +48,8 @@ class ArticleViewModel @Inject constructor(
                     is UiEvent.MuteAction -> mute(it)
                     is UiEvent.ReportAbuse -> report(it)
                     UiEvent.DismissError -> setState { copy(error = null) }
+                    is UiEvent.BookmarkAction -> handleBookmark(it)
+                    UiEvent.DismissBookmarkConfirmation -> dismissBookmarkConfirmation()
                 }
             }
         }
@@ -81,5 +86,39 @@ class ArticleViewModel @Inject constructor(
             } catch (error: NostrPublishException) {
                 Timber.w(error)
             }
+        }
+
+    private fun handleBookmark(event: UiEvent.BookmarkAction) =
+        viewModelScope.launch {
+            val userId = activeAccountStore.activeUserId()
+            try {
+                setState { copy(shouldApproveBookmark = false) }
+                val isBookmarked = bookmarksRepository.isBookmarked(tagValue = event.articleATag)
+                when (isBookmarked) {
+                    true -> bookmarksRepository.removeFromBookmarks(
+                        userId = userId,
+                        forceUpdate = event.forceUpdate,
+                        bookmarkType = BookmarkType.Article,
+                        tagValue = event.articleATag,
+                    )
+
+                    false -> bookmarksRepository.addToBookmarks(
+                        userId = userId,
+                        forceUpdate = event.forceUpdate,
+                        bookmarkType = BookmarkType.Article,
+                        tagValue = event.articleATag,
+                    )
+                }
+            } catch (error: NostrPublishException) {
+                Timber.w(error)
+            } catch (error: BookmarksRepository.BookmarksListNotFound) {
+                Timber.w(error)
+                setState { copy(shouldApproveBookmark = true) }
+            }
+        }
+
+    private fun dismissBookmarkConfirmation() =
+        viewModelScope.launch {
+            setState { copy(shouldApproveBookmark = false) }
         }
 }

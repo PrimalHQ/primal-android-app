@@ -16,7 +16,6 @@ import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.editor.domain.NoteAttachment
 import net.primal.android.networking.relays.errors.NostrPublishException
-import net.primal.android.nostr.db.eventHintsUpserter
 import net.primal.android.nostr.ext.asEventIdTag
 import net.primal.android.nostr.ext.asIMetaTag
 import net.primal.android.nostr.ext.asPubkeyTag
@@ -32,14 +31,11 @@ import net.primal.android.note.api.EventStatsApi
 import net.primal.android.note.api.model.EventZapsRequestBody
 import net.primal.android.note.db.EventZap
 import net.primal.android.note.reactions.mediator.EventZapsMediator
-import net.primal.android.profile.repository.ProfileRepository
-import net.primal.android.user.domain.PublicBookmark
 import timber.log.Timber
 
 class NoteRepository @Inject constructor(
     private val dispatcherProvider: CoroutineDispatcherProvider,
     private val nostrPublisher: NostrPublisher,
-    private val profileRepository: ProfileRepository,
     private val eventStatsApi: EventStatsApi,
     private val database: PrimalDatabase,
 ) {
@@ -210,43 +206,6 @@ class NoteRepository @Inject constructor(
                 tags = pubkeyTags + noteTags + hashtagTags + iMetaTags,
                 outboxRelays = outboxRelays,
             )
-        }
-    }
-
-    suspend fun isBookmarked(noteId: String) =
-        withContext(dispatcherProvider.io()) {
-            database.eventHints().findById(eventId = noteId)?.isBookmarked == true
-        }
-
-    @Throws(ProfileRepository.BookmarksListNotFound::class, NostrPublishException::class)
-    suspend fun addToBookmarks(
-        userId: String,
-        noteId: String,
-        forceUpdate: Boolean,
-    ) = withContext(dispatcherProvider.io()) {
-        profileRepository.addBookmark(
-            userId = userId,
-            bookmark = PublicBookmark(type = "e", value = noteId),
-            forceUpdate = forceUpdate,
-        )
-        eventHintsUpserter(dao = database.eventHints(), eventId = noteId) {
-            copy(isBookmarked = true)
-        }
-    }
-
-    @Throws(ProfileRepository.BookmarksListNotFound::class, NostrPublishException::class)
-    suspend fun removeFromBookmarks(
-        userId: String,
-        noteId: String,
-        forceUpdate: Boolean,
-    ) = withContext(dispatcherProvider.io()) {
-        profileRepository.removeBookmark(
-            userId = userId,
-            bookmark = PublicBookmark(type = "e", value = noteId),
-            forceUpdate = forceUpdate,
-        )
-        eventHintsUpserter(dao = database.eventHints(), eventId = noteId) {
-            copy(isBookmarked = false)
         }
     }
 

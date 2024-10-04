@@ -1,17 +1,17 @@
 package net.primal.android.nostr.ext
 
-import net.primal.android.nostr.db.EventHints
+import net.primal.android.nostr.db.EventRelayHints
 import net.primal.android.nostr.model.primal.PrimalEvent
 
-fun List<PrimalEvent>.flatMapAsEventHintsPO(): List<EventHints> {
+fun List<PrimalEvent>.flatMapAsEventHintsPO(): List<EventRelayHints> {
     val map = mutableMapOf<String, String>()
     this.mapNotNull { it.takeContentOrNull<Map<String, String>>() }
         .forEach { map.putAll(it) }
 
-    val eventHints = mutableListOf<EventHints>()
+    val eventRelayHints = mutableListOf<EventRelayHints>()
     map.forEach { (eventId, relayHint) ->
-        val eventHint = EventHints(eventId = eventId, relays = listOf(relayHint))
-        eventHints.add(eventHint)
+        val eventHint = EventRelayHints(eventId = eventId, relays = listOf(relayHint))
+        eventRelayHints.add(eventHint)
     }
-    return eventHints
+    return eventRelayHints
 }

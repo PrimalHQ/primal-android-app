@@ -11,6 +11,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import net.primal.android.bookmarks.BookmarksRepository
+import net.primal.android.bookmarks.domain.BookmarkType
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
@@ -36,6 +38,7 @@ class NoteViewModel @Inject constructor(
     private val profileRepository: ProfileRepository,
     private val zapHandler: ZapHandler,
     private val mutedUserRepository: MutedUserRepository,
+    private val bookmarksRepository: BookmarksRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(UiState())
@@ -191,23 +194,25 @@ class NoteViewModel @Inject constructor(
             val userId = activeAccountStore.activeUserId()
             try {
                 setState { copy(shouldApproveBookmark = false) }
-                val isBookmarked = noteRepository.isBookmarked(noteId = event.noteId)
+                val isBookmarked = bookmarksRepository.isBookmarked(tagValue = event.noteId)
                 when (isBookmarked) {
-                    true -> noteRepository.removeFromBookmarks(
+                    true -> bookmarksRepository.removeFromBookmarks(
                         userId = userId,
                         forceUpdate = event.forceUpdate,
-                        noteId = event.noteId,
+                        bookmarkType = BookmarkType.Note,
+                        tagValue = event.noteId,
                     )
 
-                    false -> noteRepository.addToBookmarks(
+                    false -> bookmarksRepository.addToBookmarks(
                         userId = userId,
                         forceUpdate = event.forceUpdate,
-                        noteId = event.noteId,
+                        bookmarkType = BookmarkType.Note,
+                        tagValue = event.noteId,
                     )
                 }
             } catch (error: NostrPublishException) {
                 Timber.w(error)
-            } catch (error: ProfileRepository.BookmarksListNotFound) {
+            } catch (error: BookmarksRepository.BookmarksListNotFound) {
                 Timber.w(error)
                 setState { copy(shouldApproveBookmark = true) }
             }

@@ -54,6 +54,7 @@ import net.primal.android.core.compose.isEmpty
 import net.primal.android.core.compose.isNotEmpty
 import net.primal.android.core.compose.pulltorefresh.PrimalPullToRefreshBox
 import net.primal.android.core.errors.UiError
+import net.primal.android.notes.feed.note.ui.ConfirmFirstBookmarkAlertDialog
 import net.primal.android.thread.articles.ArticleContract
 import net.primal.android.thread.articles.ArticleViewModel
 import timber.log.Timber
@@ -76,7 +77,7 @@ fun ArticleFeedList(
     val viewModel = hiltViewModel<ArticleFeedViewModel, ArticleFeedViewModel.Factory>(key = viewModelKey) { factory ->
         factory.create(spec = feedSpec)
     }
-    val uiState = viewModel.state.collectAsState()
+    val feedState by viewModel.state.collectAsState()
 
     val articleViewModel = hiltViewModel<ArticleViewModel>()
     val articleState by articleViewModel.state.collectAsState()
@@ -86,7 +87,8 @@ fun ArticleFeedList(
     }
 
     ArticleFeedList(
-        feedState = uiState.value,
+        feedState = feedState,
+        articleState = articleState,
         modifier = modifier,
         contentPadding = contentPadding,
         onArticleClick = onArticleClick,
@@ -103,6 +105,7 @@ fun ArticleFeedList(
 @Composable
 private fun ArticleFeedList(
     feedState: ArticleFeedContract.UiState,
+    articleState: ArticleContract.UiState,
     modifier: Modifier = Modifier,
     articleEventPublisher: (ArticleContract.UiEvent) -> Unit,
     pullToRefreshEnabled: Boolean = true,
@@ -155,6 +158,7 @@ private fun ArticleFeedList(
     ) {
         ArticleFeedLazyColumn(
             modifier = modifier,
+            articleState = articleState,
             pagingItems = pagingItems,
             listState = feedListState,
             onArticleClick = onArticleClick,
@@ -172,6 +176,7 @@ private fun ArticleFeedList(
 @ExperimentalFoundationApi
 @Composable
 private fun ArticleFeedLazyColumn(
+    articleState: ArticleContract.UiState,
     pagingItems: LazyPagingItems<FeedArticleUi>,
     listState: LazyListState,
     modifier: Modifier = Modifier,
@@ -213,11 +218,28 @@ private fun ArticleFeedLazyColumn(
 
             when {
                 item != null -> Column {
+                    if (articleState.shouldApproveBookmark) {
+                        ConfirmFirstBookmarkAlertDialog(
+                            onBookmarkConfirmed = {
+                                articleEventPublisher(
+                                    ArticleContract.UiEvent.BookmarkAction(
+                                        forceUpdate = true,
+                                        articleATag = item.aTag,
+                                    ),
+                                )
+                            },
+                            onClose = {
+                                articleEventPublisher(ArticleContract.UiEvent.DismissBookmarkConfirmation)
+                            },
+                        )
+                    }
+
                     FeedArticleListItem(
                         data = item,
                         modifier = Modifier.padding(all = 16.dp),
                         onClick = onArticleClick,
                         onBookmarkClick = {
+                            articleEventPublisher(ArticleContract.UiEvent.BookmarkAction(articleATag = item.aTag))
                         },
                         onMuteUserClick = {
                             articleEventPublisher(ArticleContract.UiEvent.MuteAction(userId = item.authorId))

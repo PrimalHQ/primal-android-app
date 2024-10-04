@@ -1,9 +1,9 @@
-package net.primal.android.user.domain
+package net.primal.android.bookmarks.domain
 
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class PublicBookmark(
+data class TagBookmark(
     val type: String,
     val value: String,
 )

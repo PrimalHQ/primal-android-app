@@ -270,6 +270,7 @@ fun List<String>.mapAsNoteNostrUriPO(
         ) {
             ReferencedArticle(
                 naddr = refNaddr.toNaddrString(),
+                aTag = refArticle.aTag,
                 eventId = refArticle.eventId,
                 articleId = refArticle.articleId,
                 articleTitle = refArticle.title,

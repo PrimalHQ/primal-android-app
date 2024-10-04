@@ -16,7 +16,6 @@ interface ArticleDetailsContract {
         val topZaps: List<EventZapUiModel> = emptyList(),
         val comments: List<FeedPostUi> = emptyList(),
         val zappingState: ZappingState = ZappingState(),
-        val shouldApproveBookmark: Boolean = false,
         val error: UiError? = null,
     )
 
@@ -32,7 +31,5 @@ interface ArticleDetailsContract {
         data class ZapArticle(val zapAmount: ULong? = null, val zapDescription: String? = null) : UiEvent()
         data object LikeArticle : UiEvent()
         data object RepostAction : UiEvent()
-        data class BookmarkAction(val forceUpdate: Boolean = false) : UiEvent()
-        data object DismissBookmarkConfirmation : UiEvent()
     }
 }

@@ -13,16 +13,6 @@ import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.model.primal.PrimalEvent
 import timber.log.Timber
 
-fun List<NostrEvent>.mapNotNullPrimalEventAsArticleDataPO(
-    wordsCountMap: Map<String, Int> = emptyMap(),
-    cdnResources: Map<String, CdnResource> = emptyMap(),
-) = this.mapNotNull { nostrEvent ->
-    nostrEvent.asArticleData(
-        wordsCount = wordsCountMap[nostrEvent.id],
-        cdnResources = cdnResources,
-    )
-}
-
 fun List<NostrEvent>.mapNotNullAsArticleDataPO(
     wordsCountMap: Map<String, Int> = emptyMap(),
     cdnResources: Map<String, CdnResource> = emptyMap(),
@@ -51,6 +41,7 @@ private fun NostrEvent.asArticleData(wordsCount: Int?, cdnResources: Map<String,
     }
 
     return ArticleData(
+        aTag = "${NostrEventKind.LongFormContent.value}:${this.pubKey}:$identifier",
         eventId = this.id,
         articleId = identifier,
         authorId = this.pubKey,
