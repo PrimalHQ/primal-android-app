@@ -1,5 +1,6 @@
 package net.primal.android.explore.home.people
 
+import net.primal.android.core.errors.UiError
 import net.primal.android.explore.api.model.ExplorePeopleData
 
 interface ExplorePeopleContract {
@@ -8,7 +9,7 @@ interface ExplorePeopleContract {
         val loading: Boolean = true,
         val people: List<ExplorePeopleData> = emptyList(),
         val userFollowing: Set<String> = emptySet(),
-        val error: Throwable? = null,
+        val error: UiError? = null,
     )
 
     sealed class UiEvent {
@@ -16,5 +17,6 @@ interface ExplorePeopleContract {
         data class UnfollowUser(val userId: String) : UiEvent()
 
         data object RefreshPeople : UiEvent()
+        data object DismissError : UiEvent()
     }
 }

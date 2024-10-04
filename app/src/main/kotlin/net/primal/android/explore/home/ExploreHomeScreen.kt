@@ -18,16 +18,21 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -40,6 +45,8 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AdvancedSearch
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.preview.PrimalPreview
+import net.primal.android.core.errors.UiError
+import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.explore.home.feeds.ExploreFeeds
 import net.primal.android.explore.home.people.ExplorePeople
 import net.primal.android.explore.home.topics.ExploreTopics
@@ -90,6 +97,9 @@ private fun ExploreHomeScreen(
     onTuneClick: () -> Unit,
     onClose: () -> Unit,
 ) {
+    val context = LocalContext.current
+    val uiScope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
     val pagerState = rememberPagerState { EXPLORE_HOME_TAB_COUNT }
 
     Scaffold(
@@ -116,6 +126,14 @@ private fun ExploreHomeScreen(
                         ExplorePeople(
                             paddingValues = paddingValues,
                             onProfileClick = onProfileClick,
+                            onUiError = { uiError: UiError ->
+                                uiScope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = uiError.resolveUiErrorMessage(context),
+                                        duration = SnackbarDuration.Short,
+                                    )
+                                }
+                            },
                         )
                     }
                     MEDIA_INDEX -> {
@@ -133,6 +151,9 @@ private fun ExploreHomeScreen(
                     }
                 }
             }
+        },
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
         },
     )
 }

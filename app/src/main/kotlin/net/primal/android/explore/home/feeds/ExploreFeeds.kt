@@ -86,7 +86,7 @@ fun ExploreFeeds(
 
     if (state.loading && state.feeds.isEmpty()) {
         PrimalLoadingSpinner()
-    } else if (state.error != null || state.feeds.isEmpty()) {
+    } else if (state.feeds.isEmpty()) {
         ListNoContent(
             modifier = Modifier.fillMaxSize(),
             noContentText = stringResource(id = R.string.explore_feeds_no_content),
@@ -103,6 +103,7 @@ fun ExploreFeeds(
 
             items(
                 items = state.feeds,
+                key = { "${it.dvmPubkey}:${it.dvmId}" },
             ) { dvmFeed ->
                 DvmFeedListItem(
                     modifier = Modifier.padding(top = 8.dp),

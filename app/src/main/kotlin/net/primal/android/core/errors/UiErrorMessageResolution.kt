@@ -33,6 +33,10 @@ fun UiError.resolveUiErrorMessage(context: Context): String {
             R.string.app_error_muting_user,
         )
 
+        is UiError.FailedToFollowUser -> context.getString(R.string.app_error_unable_to_follow_profile)
+
+        is UiError.FailedToUnfollowUser -> context.getString(R.string.app_error_unable_to_unfollow_profile)
+
         is UiError.MissingRelaysConfiguration -> context.getString(
             R.string.app_missing_relays_config,
         )

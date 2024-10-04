@@ -18,7 +18,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -40,6 +42,7 @@ import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.button.FollowUnfollowButton
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
+import net.primal.android.core.errors.UiError
 import net.primal.android.core.utils.shortened
 import net.primal.android.explore.api.model.ExplorePeopleData
 import net.primal.android.theme.AppTheme
@@ -48,16 +51,22 @@ import net.primal.android.theme.domain.PrimalTheme
 @Composable
 fun ExplorePeople(
     modifier: Modifier = Modifier,
-    paddingValues: PaddingValues = PaddingValues(all = 0.dp),
     onProfileClick: (String) -> Unit,
+    paddingValues: PaddingValues = PaddingValues(all = 0.dp),
+    onUiError: ((UiError) -> Unit)? = null,
 ) {
     val viewModel: ExplorePeopleViewModel = hiltViewModel()
-    val uiState = viewModel.state.collectAsState()
+    val uiState by viewModel.state.collectAsState()
+
+    LaunchedEffect(viewModel, uiState.error, onUiError) {
+        uiState.error?.let { onUiError?.invoke(it) }
+        viewModel.setEvent(ExplorePeopleContract.UiEvent.DismissError)
+    }
 
     ExplorePeople(
         modifier = modifier,
         paddingValues = paddingValues,
-        state = uiState.value,
+        state = uiState,
         eventPublisher = viewModel::setEvent,
         onProfileClick = onProfileClick,
     )
@@ -73,7 +82,7 @@ fun ExplorePeople(
 ) {
     if (state.loading && state.people.isEmpty()) {
         PrimalLoadingSpinner()
-    } else if (state.error != null || state.people.isEmpty()) {
+    } else if (state.people.isEmpty()) {
         ListNoContent(
             modifier = Modifier.fillMaxSize(),
             noContentText = stringResource(id = R.string.explore_trending_people_no_content),
