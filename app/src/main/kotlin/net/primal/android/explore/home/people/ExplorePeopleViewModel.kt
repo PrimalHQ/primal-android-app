@@ -11,12 +11,10 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
+import net.primal.android.explore.home.people.ExplorePeopleContract.UiEvent
+import net.primal.android.explore.home.people.ExplorePeopleContract.UiState
 import net.primal.android.explore.repository.ExploreRepository
-import net.primal.android.explore.home.people.ExplorePeopleContract.*
-import net.primal.android.networking.relays.errors.MissingRelaysException
-import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
-import net.primal.android.profile.follows.ProfileFollowsContract
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import timber.log.Timber
@@ -58,12 +56,13 @@ class ExplorePeopleViewModel @Inject constructor(
 
     private fun fetchExplorePeople() =
         viewModelScope.launch {
-            setState { copy(loading = true) }
+            setState { copy(loading = true, error = null) }
             try {
                 val explorePeople = exploreRepository.fetchTrendingPeople()
                 setState { copy(people = explorePeople) }
             } catch (error: WssException) {
                 Timber.w(error)
+                setState { copy(error = error) }
             } finally {
                 setState { copy(loading = false) }
             }
@@ -88,16 +87,7 @@ class ExplorePeopleViewModel @Inject constructor(
                     userId = activeAccountStore.activeUserId(),
                     followedUserId = profileId,
                 )
-            } catch (error: WssException) {
-                Timber.w(error)
-                updateStateProfileUnfollow(profileId)
-            } catch (error: NostrPublishException) {
-                Timber.w(error)
-                updateStateProfileUnfollow(profileId)
-            } catch (error: MissingRelaysException) {
-                Timber.w(error)
-                updateStateProfileUnfollow(profileId)
-            } catch (error: ProfileRepository.FollowListNotFound) {
+            } catch (error: Exception) {
                 Timber.w(error)
                 updateStateProfileUnfollow(profileId)
             }
@@ -111,16 +101,7 @@ class ExplorePeopleViewModel @Inject constructor(
                     userId = activeAccountStore.activeUserId(),
                     unfollowedUserId = profileId,
                 )
-            } catch (error: WssException) {
-                Timber.w(error)
-                updateStateProfileFollow(profileId)
-            } catch (error: NostrPublishException) {
-                Timber.w(error)
-                updateStateProfileFollow(profileId)
-            } catch (error: MissingRelaysException) {
-                Timber.w(error)
-                updateStateProfileFollow(profileId)
-            } catch (error: ProfileRepository.FollowListNotFound) {
+            } catch (error: Exception) {
                 Timber.w(error)
                 updateStateProfileFollow(profileId)
             }
