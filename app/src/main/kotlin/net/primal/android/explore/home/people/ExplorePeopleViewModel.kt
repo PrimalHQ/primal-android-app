@@ -48,11 +48,12 @@ class ExplorePeopleViewModel @Inject constructor(
             }
         }
 
-    private fun fetchFollowing() = viewModelScope.launch {
-        withContext(dispatcherProvider.io()) {
-            profileRepository.fetchFollowing(userId = activeAccountStore.activeUserId())
+    private fun fetchFollowing() =
+        viewModelScope.launch {
+            withContext(dispatcherProvider.io()) {
+                profileRepository.fetchFollowing(userId = activeAccountStore.activeUserId())
+            }
         }
-    }
 
     private fun fetchExplorePeople() =
         viewModelScope.launch {

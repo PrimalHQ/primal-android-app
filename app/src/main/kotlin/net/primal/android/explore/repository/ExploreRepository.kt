@@ -16,8 +16,6 @@ import net.primal.android.explore.db.TrendingTopic
 import net.primal.android.explore.domain.UserProfileSearchItem
 import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
 import net.primal.android.nostr.ext.mapAsProfileDataPO
-import net.primal.android.nostr.ext.mapNotNullAsEventStatsPO
-import net.primal.android.nostr.ext.mapNotNullAsProfileStatsPO
 import net.primal.android.nostr.ext.takeContentAsPrimalUserFollowStats
 import net.primal.android.nostr.ext.takeContentAsPrimalUserFollowersCountsOrNull
 import net.primal.android.nostr.ext.takeContentAsPrimalUserScoresOrNull
@@ -36,7 +34,6 @@ class ExploreRepository @Inject constructor(
         val userScoresMap = response.usersScores?.takeContentAsPrimalUserScoresOrNull()
         val usersFollowStats = response.usersFollowStats?.takeContentAsPrimalUserFollowStats()
         val userFollowCount = response.usersFollowCount?.takeContentAsPrimalUserFollowersCountsOrNull()
-
 
         database.withTransaction {
             database.profiles().upsertAll(data = profiles)

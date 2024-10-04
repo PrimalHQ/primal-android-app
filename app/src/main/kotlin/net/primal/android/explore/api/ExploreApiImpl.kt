@@ -28,7 +28,7 @@ class ExploreApiImpl @Inject constructor(
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = EXPLORE_PEOPLE,
-            )
+            ),
         )
 
         return TrendingPeoplesResponse(

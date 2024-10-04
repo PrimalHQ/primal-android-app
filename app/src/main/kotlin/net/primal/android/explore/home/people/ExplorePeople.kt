@@ -40,7 +40,6 @@ import net.primal.android.core.utils.shortened
 import net.primal.android.explore.api.model.ExplorePeopleData
 import net.primal.android.theme.AppTheme
 
-
 @Composable
 fun ExplorePeople(
     modifier: Modifier = Modifier,
@@ -57,7 +56,6 @@ fun ExplorePeople(
         eventPublisher = viewModel::setEvent,
         onProfileClick = onProfileClick,
     )
-
 }
 
 @Composable
@@ -70,7 +68,6 @@ fun ExplorePeople(
 ) {
     if (state.loading && state.people.isEmpty()) {
         PrimalLoadingSpinner()
-
     } else if (state.error != null) {
         ListNoContent(
             modifier = Modifier.fillMaxSize(),
@@ -101,7 +98,11 @@ fun ExplorePeople(
                     isFollowed = state.userFollowing.contains(item.profile.pubkey),
                     onItemClick = { onProfileClick(item.profile.pubkey) },
                     onFollowClick = { eventPublisher(ExplorePeopleContract.UiEvent.FollowUser(item.profile.pubkey)) },
-                    onUnfollowClick = { eventPublisher(ExplorePeopleContract.UiEvent.UnfollowUser(item.profile.pubkey)) },
+                    onUnfollowClick = {
+                        eventPublisher(
+                            ExplorePeopleContract.UiEvent.UnfollowUser(item.profile.pubkey),
+                        )
+                    },
                 )
             }
         }
@@ -172,10 +173,7 @@ private fun ExplorePersonListItem(
 }
 
 @Composable
-private fun FollowersIndicator(
-    followersCount: Int,
-    increaseCount: Int,
-) {
+private fun FollowersIndicator(followersCount: Int, increaseCount: Int) {
     Text(
         text = buildAnnotatedString {
             withStyle(
