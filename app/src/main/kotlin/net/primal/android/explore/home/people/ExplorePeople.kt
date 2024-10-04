@@ -33,6 +33,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import net.primal.android.R
 import net.primal.android.core.compose.AvatarThumbnail
@@ -152,6 +153,7 @@ private fun ExplorePersonListItem(
                     modifier = Modifier.padding(bottom = 24.dp),
                     avatarSize = 64.dp,
                     avatarCdnImage = person.profile.avatarCdnImage,
+                    onClick = onItemClick,
                 )
             }
 
@@ -192,7 +194,10 @@ private fun ExplorePersonListItem(
                     .padding(horizontal = 12.dp)
                     .size(width = 64.dp, height = 36.dp),
                 isFollowed = isFollowed,
-                textStyle = AppTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold),
+                textStyle = AppTheme.typography.bodySmall.copy(
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold,
+                ),
                 onClick = {
                     if (isFollowed) {
                         onUnfollowClick()
