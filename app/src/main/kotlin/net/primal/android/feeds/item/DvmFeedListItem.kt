@@ -321,7 +321,8 @@ private fun Badge(
         text = text,
         fontWeight = FontWeight.Bold,
         color = textColor,
-        style = AppTheme.typography.bodySmall.copy(fontSize = TextUnit(10f, TextUnitType.Sp)),
+        style = AppTheme.typography.bodySmall,
+        fontSize = TextUnit(10f, TextUnitType.Sp),
         textAlign = TextAlign.Center,
     )
 }
