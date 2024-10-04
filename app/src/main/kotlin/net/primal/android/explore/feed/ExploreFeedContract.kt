@@ -1,16 +1,14 @@
-package net.primal.android.explore.feed.note
+package net.primal.android.explore.feed
 
-import androidx.paging.PagingData
-import kotlinx.coroutines.flow.Flow
-import net.primal.android.notes.feed.model.FeedPostUi
+import net.primal.android.feeds.domain.FeedSpecKind
 
-interface ExploreNoteFeedContract {
+interface ExploreFeedContract {
     data class UiState(
         val feedSpec: String,
+        val feedSpecKind: FeedSpecKind?,
         val renderType: RenderType,
         val existsInUserFeeds: Boolean = false,
         val canBeAddedInUserFeeds: Boolean = true,
-        val notes: Flow<PagingData<FeedPostUi>>,
         val error: ExploreFeedError? = null,
     ) {
         sealed class ExploreFeedError {

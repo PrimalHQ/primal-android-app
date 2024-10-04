@@ -68,7 +68,6 @@ import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.notes.feed.MediaFeedGrid
 import net.primal.android.notes.feed.NoteFeedList
-import net.primal.android.notes.feed.note.showNoteErrorSnackbar
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.profile.details.ProfileDetailsContract
 import net.primal.android.profile.details.ProfileDetailsContract.UiState.ProfileError
@@ -367,12 +366,11 @@ fun ProfileDetailsScreen(
                                             onGoToWallet = onGoToWallet,
                                             pollingEnabled = false,
                                             pullToRefreshEnabled = false,
-                                            onNoteError = { noteError ->
+                                            onUiError = { uiError ->
                                                 uiScope.launch {
-                                                    showNoteErrorSnackbar(
-                                                        context = context,
-                                                        error = noteError,
-                                                        snackbarHostState = snackbarHostState,
+                                                    snackbarHostState.showSnackbar(
+                                                        message = uiError.resolveUiErrorMessage(context),
+                                                        duration = SnackbarDuration.Short,
                                                     )
                                                 }
                                             },

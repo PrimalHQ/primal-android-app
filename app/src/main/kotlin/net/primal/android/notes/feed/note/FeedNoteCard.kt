@@ -45,13 +45,13 @@ import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.preview.PrimalPreview
+import net.primal.android.core.errors.UiError
 import net.primal.android.core.ext.openUriSafely
 import net.primal.android.notes.feed.NoteRepostOrQuoteBottomSheet
 import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.notes.feed.model.FeedPostAction
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.model.toNoteContentUi
-import net.primal.android.notes.feed.note.NoteContract.SideEffect.NoteError
 import net.primal.android.notes.feed.note.NoteContract.UiEvent
 import net.primal.android.notes.feed.note.ui.ConfirmFirstBookmarkAlertDialog
 import net.primal.android.notes.feed.note.ui.FeedNoteActionsRow
@@ -89,23 +89,20 @@ fun FeedNoteCard(
     showNoteStatCounts: Boolean = true,
     noteCallbacks: NoteCallbacks = NoteCallbacks(),
     onGoToWallet: (() -> Unit)? = null,
-    onNoteError: ((NoteError) -> Unit)? = null,
+    onUiError: ((UiError) -> Unit)? = null,
     contentFooter: @Composable () -> Unit = {},
 ) {
     val viewModel = hiltViewModel<NoteViewModel>()
-    val uiState = viewModel.state.collectAsState()
+    val uiState by viewModel.state.collectAsState()
 
-    LaunchedEffect(viewModel, onNoteError) {
-        viewModel.effect.collect {
-            when (it) {
-                is NoteError -> onNoteError?.invoke(it)
-            }
-        }
+    LaunchedEffect(viewModel, uiState.error, onUiError) {
+        uiState.error?.let { onUiError?.invoke(it) }
+        viewModel.setEvent(UiEvent.DismissError)
     }
 
     FeedNoteCard(
         data = data,
-        state = uiState.value,
+        state = uiState,
         eventPublisher = viewModel::setEvent,
         modifier = modifier,
         shape = shape,

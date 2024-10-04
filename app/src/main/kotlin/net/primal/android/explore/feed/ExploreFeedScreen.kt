@@ -1,11 +1,14 @@
-package net.primal.android.explore.feed.note
+package net.primal.android.explore.feed
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
@@ -13,40 +16,43 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.paging.compose.collectAsLazyPagingItems
 import kotlinx.coroutines.launch
 import net.primal.android.R
+import net.primal.android.articles.feed.ArticleFeedList
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.InvisibleAppBarIcon
 import net.primal.android.core.compose.PrimalTopAppBar
-import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.UserFeedAdd
 import net.primal.android.core.compose.icons.primaliconpack.UserFeedRemove
-import net.primal.android.explore.feed.note.ExploreNoteFeedContract.UiEvent.AddToUserFeeds
-import net.primal.android.explore.feed.note.ExploreNoteFeedContract.UiEvent.RemoveFromUserFeeds
-import net.primal.android.explore.feed.note.ExploreNoteFeedContract.UiState.ExploreFeedError
+import net.primal.android.core.errors.UiError
+import net.primal.android.core.errors.resolveUiErrorMessage
+import net.primal.android.explore.feed.ExploreFeedContract.UiEvent.AddToUserFeeds
+import net.primal.android.explore.feed.ExploreFeedContract.UiEvent.RemoveFromUserFeeds
+import net.primal.android.explore.feed.ExploreFeedContract.UiState.ExploreFeedError
+import net.primal.android.feeds.domain.FeedSpecKind
 import net.primal.android.feeds.domain.isNotesBookmarkFeedSpec
 import net.primal.android.notes.feed.MediaFeedGrid
 import net.primal.android.notes.feed.NoteFeedList
-import net.primal.android.notes.feed.note.showNoteErrorSnackbar
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
+import net.primal.android.theme.AppTheme
 
 @Composable
-fun ExploreNoteFeedScreen(
-    viewModel: ExploreNoteFeedViewModel,
+fun ExploreFeedScreen(
+    viewModel: ExploreFeedViewModel,
     onClose: () -> Unit,
     noteCallbacks: NoteCallbacks,
     onGoToWallet: () -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
 
-    ExploreNoteFeedScreen(
+    ExploreFeedScreen(
         state = uiState.value,
         onClose = onClose,
         noteCallbacks = noteCallbacks,
@@ -57,17 +63,15 @@ fun ExploreNoteFeedScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ExploreNoteFeedScreen(
-    state: ExploreNoteFeedContract.UiState,
+fun ExploreFeedScreen(
+    state: ExploreFeedContract.UiState,
     onClose: () -> Unit,
     noteCallbacks: NoteCallbacks,
     onGoToWallet: () -> Unit,
-    eventPublisher: (ExploreNoteFeedContract.UiEvent) -> Unit,
+    eventPublisher: (ExploreFeedContract.UiEvent) -> Unit,
 ) {
     val context = LocalContext.current
     val uiScope = rememberCoroutineScope()
-    val feedPagingItems = state.notes.collectAsLazyPagingItems()
-    val feedListState = feedPagingItems.rememberLazyListStatePagingWorkaround()
 
     val feedTitle = state.extractTitle()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -121,37 +125,29 @@ fun ExploreNoteFeedScreen(
             )
         },
         content = { paddingValues ->
-            when (state.renderType) {
-                ExploreNoteFeedContract.RenderType.List -> {
-                    NoteFeedList(
-                        feedListState = feedListState,
-                        pagingItems = feedPagingItems,
-                        paddingValues = paddingValues,
+            Box(modifier = Modifier.padding(paddingValues)) {
+                when (state.feedSpecKind) {
+                    FeedSpecKind.Reads -> ExploreArticleFeed(
+                        feedSpec = state.feedSpec,
+                        onArticleClick = { noteCallbacks.onArticleClick?.invoke(it) },
+                    )
+
+                    FeedSpecKind.Notes -> ExploreNoteFeed(
+                        feedSpec = state.feedSpec,
+                        renderType = state.renderType,
                         noteCallbacks = noteCallbacks,
                         onGoToWallet = onGoToWallet,
-                        noContentText = when {
-                            state.feedSpec.isNotesBookmarkFeedSpec() -> stringResource(
-                                id = R.string.bookmarks_no_content,
-                            )
-                            else -> stringResource(id = R.string.feed_no_content)
-                        },
-                        onNoteError = { noteError ->
+                        onUiError = { uiError ->
                             uiScope.launch {
-                                showNoteErrorSnackbar(
-                                    context = context,
-                                    error = noteError,
-                                    snackbarHostState = snackbarHostState,
+                                snackbarHostState.showSnackbar(
+                                    message = uiError.resolveUiErrorMessage(context),
+                                    duration = SnackbarDuration.Short,
                                 )
                             }
                         },
                     )
-                }
-                ExploreNoteFeedContract.RenderType.Grid -> {
-                    MediaFeedGrid(
-                        modifier = Modifier.padding(paddingValues),
-                        feedSpec = state.feedSpec,
-                        onNoteClick = { noteCallbacks.onNoteClick?.invoke(it) },
-                    )
+
+                    null -> UnknownFeedSpecKind(feedSpec = state.feedSpec)
                 }
             }
         },
@@ -162,7 +158,66 @@ fun ExploreNoteFeedScreen(
 }
 
 @Composable
-private fun ExploreNoteFeedContract.UiState.extractTitle() =
+private fun ExploreNoteFeed(
+    feedSpec: String,
+    renderType: ExploreFeedContract.RenderType,
+    noteCallbacks: NoteCallbacks,
+    onGoToWallet: () -> Unit,
+    onUiError: ((UiError) -> Unit)? = null,
+) {
+    when (renderType) {
+        ExploreFeedContract.RenderType.List -> {
+            NoteFeedList(
+                feedSpec = feedSpec,
+                noteCallbacks = noteCallbacks,
+                onGoToWallet = onGoToWallet,
+                noContentText = when {
+                    feedSpec.isNotesBookmarkFeedSpec() -> stringResource(
+                        id = R.string.bookmarks_no_content,
+                    )
+                    else -> stringResource(id = R.string.feed_no_content)
+                },
+                onUiError = onUiError,
+            )
+        }
+
+        ExploreFeedContract.RenderType.Grid -> {
+            MediaFeedGrid(
+                feedSpec = feedSpec,
+                onNoteClick = { noteCallbacks.onNoteClick?.invoke(it) },
+            )
+        }
+    }
+}
+
+@Composable
+private fun ExploreArticleFeed(
+    feedSpec: String,
+    onArticleClick: (naddr: String) -> Unit,
+    onUiError: ((UiError) -> Unit)? = null,
+) {
+    ArticleFeedList(
+        feedSpec = feedSpec,
+        onArticleClick = onArticleClick,
+        onUiError = onUiError,
+    )
+}
+
+@Composable
+fun UnknownFeedSpecKind(feedSpec: String) {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = "Unknown feed spec kind.\n$feedSpec",
+            style = AppTheme.typography.bodyLarge,
+        )
+    }
+}
+
+@Composable
+private fun ExploreFeedContract.UiState.extractTitle() =
     when {
         // TODO Extract search title once api is implemented
 //        feedSpec.isSearchFeed() -> feedSpec.removeSearchPrefix()

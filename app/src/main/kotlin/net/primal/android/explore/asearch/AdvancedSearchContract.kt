@@ -2,7 +2,7 @@ package net.primal.android.explore.asearch
 
 import java.time.Instant
 import net.primal.android.core.compose.profile.model.UserProfileItemUi
-import net.primal.android.explore.feed.note.ExploreNoteFeedContract
+import net.primal.android.explore.feed.ExploreFeedContract
 
 interface AdvancedSearchContract {
 
@@ -38,7 +38,7 @@ interface AdvancedSearchContract {
     sealed class SideEffect {
         data class NavigateToExploreNoteFeed(
             val feedSpec: String,
-            val renderType: ExploreNoteFeedContract.RenderType,
+            val renderType: ExploreFeedContract.RenderType,
         ) : SideEffect()
         data class NavigateToExploreArticleFeed(
             val feedSpec: String,

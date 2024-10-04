@@ -59,14 +59,14 @@ import net.primal.android.explore.asearch.ui.FilterPicker
 import net.primal.android.explore.asearch.ui.MultipleUserPicker
 import net.primal.android.explore.asearch.ui.SingleChoicePicker
 import net.primal.android.explore.asearch.ui.TimeModifierPicker
-import net.primal.android.explore.feed.note.ExploreNoteFeedContract
+import net.primal.android.explore.feed.ExploreFeedContract
 import net.primal.android.theme.AppTheme
 
 @Composable
 fun AdvancedSearchScreen(
     viewModel: AdvancedSearchViewModel,
     onClose: () -> Unit,
-    onNavigateToExploreNoteFeed: (feedSpec: String, renderType: ExploreNoteFeedContract.RenderType) -> Unit,
+    onNavigateToExploreNoteFeed: (feedSpec: String, renderType: ExploreFeedContract.RenderType) -> Unit,
     onNavigateToExploreArticleFeed: (feedSpec: String) -> Unit,
 ) {
     val state = viewModel.state.collectAsState()
