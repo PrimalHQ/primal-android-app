@@ -16,6 +16,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.TopAppBarScrollBehavior
@@ -51,13 +52,13 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 import net.primal.android.core.compose.icons.primaliconpack.Search
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
+import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.PrimalDrawerScaffold
 import net.primal.android.feeds.FeedsBottomSheet
 import net.primal.android.feeds.domain.FeedSpecKind
 import net.primal.android.feeds.ui.model.FeedUi
 import net.primal.android.notes.feed.NoteFeedList
-import net.primal.android.notes.feed.note.showNoteErrorSnackbar
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.notes.home.HomeFeedContract.UiEvent
 import net.primal.android.theme.AppTheme
@@ -179,12 +180,11 @@ fun HomeFeedScreen(
                         newNotesNoticeAlpha = (1 - topAppBarState.collapsedFraction) * 1.0f,
                         onGoToWallet = onGoToWallet,
                         contentPadding = paddingValues,
-                        onNoteError = { noteError ->
+                        onUiError = { uiError ->
                             uiScope.launch {
-                                showNoteErrorSnackbar(
-                                    context = context,
-                                    error = noteError,
-                                    snackbarHostState = snackbarHostState,
+                                snackbarHostState.showSnackbar(
+                                    message = uiError.resolveUiErrorMessage(context),
+                                    duration = SnackbarDuration.Short,
                                 )
                             }
                         },

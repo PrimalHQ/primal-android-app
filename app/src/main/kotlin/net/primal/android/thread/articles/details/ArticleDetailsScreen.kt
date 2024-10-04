@@ -25,6 +25,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -67,6 +68,7 @@ import net.primal.android.core.compose.icons.primaliconpack.FeedNewZapFilled
 import net.primal.android.core.compose.icons.primaliconpack.More
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.core.compose.zaps.ArticleTopZapsSection
+import net.primal.android.core.errors.UiError
 import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.core.ext.openUriSafely
 import net.primal.android.nostr.ext.isNEvent
@@ -80,8 +82,6 @@ import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.notes.feed.model.FeedPostAction
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.note.FeedNoteCard
-import net.primal.android.notes.feed.note.NoteContract.SideEffect.NoteError
-import net.primal.android.notes.feed.note.showNoteErrorSnackbar
 import net.primal.android.notes.feed.note.ui.ConfirmFirstBookmarkAlertDialog
 import net.primal.android.notes.feed.note.ui.FeedNoteActionsRow
 import net.primal.android.notes.feed.note.ui.NoteStatsRow
@@ -328,12 +328,11 @@ private fun ArticleDetailsScreen(
                             else -> Unit
                         }
                     },
-                    onNoteError = { noteError ->
+                    onUiError = { uiError ->
                         uiScope.launch {
-                            showNoteErrorSnackbar(
-                                context = context,
-                                error = noteError,
-                                snackbarHostState = snackbarHostState,
+                            snackbarHostState.showSnackbar(
+                                message = uiError.resolveUiErrorMessage(context),
+                                duration = SnackbarDuration.Short,
                             )
                         }
                     },
@@ -426,7 +425,7 @@ private fun ArticleContentWithComments(
     onGoToWallet: () -> Unit,
     onPostAction: ((FeedPostAction) -> Unit)? = null,
     onPostLongPressAction: ((FeedPostAction) -> Unit)? = null,
-    onNoteError: ((NoteError) -> Unit)? = null,
+    onUiError: ((UiError) -> Unit)? = null,
 ) {
     val uriHandler = LocalUriHandler.current
 
@@ -647,7 +646,7 @@ private fun ArticleContentWithComments(
                     showReplyTo = false,
                     noteCallbacks = noteCallbacks,
                     onGoToWallet = onGoToWallet,
-                    onNoteError = onNoteError,
+                    onUiError = onUiError,
                 )
                 PrimalDivider()
             }

@@ -1,10 +1,8 @@
-package net.primal.android.explore.feed.note
+package net.primal.android.explore.feed
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.paging.cachedIn
-import androidx.paging.map
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
@@ -15,35 +13,32 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
-import net.primal.android.explore.feed.note.ExploreNoteFeedContract.UiEvent
-import net.primal.android.explore.feed.note.ExploreNoteFeedContract.UiState
-import net.primal.android.explore.feed.note.ExploreNoteFeedContract.UiState.ExploreFeedError
+import net.primal.android.explore.feed.ExploreFeedContract.UiEvent
+import net.primal.android.explore.feed.ExploreFeedContract.UiState
+import net.primal.android.explore.feed.ExploreFeedContract.UiState.ExploreFeedError
 import net.primal.android.feeds.domain.isNotesBookmarkFeedSpec
+import net.primal.android.feeds.domain.resolveFeedSpecKind
 import net.primal.android.navigation.exploreFeedSpecOrThrow
 import net.primal.android.navigation.renderType
-import net.primal.android.notes.feed.model.asFeedPostUi
 import net.primal.android.notes.repository.FeedRepository
 
 @HiltViewModel
-class ExploreNoteFeedViewModel @Inject constructor(
+class ExploreFeedViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val dispatcherProvider: CoroutineDispatcherProvider,
     private val feedRepository: FeedRepository,
 ) : ViewModel() {
 
     private val exploreFeedSpec = savedStateHandle.exploreFeedSpecOrThrow
-    private val renderType = ExploreNoteFeedContract.RenderType.valueOf(savedStateHandle.renderType)
+    private val renderType = ExploreFeedContract.RenderType.valueOf(savedStateHandle.renderType)
 
     private val _state = MutableStateFlow(
         UiState(
             feedSpec = exploreFeedSpec,
+            feedSpecKind = exploreFeedSpec.resolveFeedSpecKind(),
             canBeAddedInUserFeeds = !exploreFeedSpec.isNotesBookmarkFeedSpec(),
-            notes = feedRepository.feedBySpec(feedSpec = exploreFeedSpec)
-                .map { it.map { feed -> feed.asFeedPostUi() } }
-                .cachedIn(viewModelScope),
             renderType = renderType,
         ),
     )

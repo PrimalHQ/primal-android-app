@@ -21,7 +21,7 @@ import net.primal.android.explore.asearch.AdvancedSearchContract.Orientation
 import net.primal.android.explore.asearch.AdvancedSearchContract.SearchFilter
 import net.primal.android.explore.asearch.AdvancedSearchContract.UiEvent
 import net.primal.android.explore.asearch.AdvancedSearchContract.UiState
-import net.primal.android.explore.feed.note.ExploreNoteFeedContract
+import net.primal.android.explore.feed.ExploreFeedContract
 
 @HiltViewModel
 class AdvancedSearchViewModel @Inject constructor() : ViewModel() {
@@ -98,9 +98,9 @@ class AdvancedSearchViewModel @Inject constructor() : ViewModel() {
 
             val searchCommand = searchParams.filterNot { it.isNullOrEmpty() }.joinToString(separator = " ")
             val renderType = if (uiState.searchKind.isImages() || uiState.searchKind.isVideos()) {
-                ExploreNoteFeedContract.RenderType.Grid
+                ExploreFeedContract.RenderType.Grid
             } else {
-                ExploreNoteFeedContract.RenderType.List
+                ExploreFeedContract.RenderType.List
             }
 
             if (uiState.searchKind.isReads()) {

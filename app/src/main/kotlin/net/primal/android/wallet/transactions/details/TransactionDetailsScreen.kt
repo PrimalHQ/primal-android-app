@@ -38,6 +38,7 @@ import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
@@ -88,11 +89,11 @@ import net.primal.android.core.compose.icons.primaliconpack.Copy
 import net.primal.android.core.compose.icons.primaliconpack.WalletBitcoinPayment
 import net.primal.android.core.compose.icons.primaliconpack.WalletLightningPaymentAlt
 import net.primal.android.core.compose.preview.PrimalPreview
+import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.core.ext.openUriSafely
 import net.primal.android.core.utils.ellipsizeMiddle
 import net.primal.android.core.utils.formatToDefaultDateTimeFormat
 import net.primal.android.notes.feed.note.FeedNoteCard
-import net.primal.android.notes.feed.note.showNoteErrorSnackbar
 import net.primal.android.notes.feed.note.ui.FeedNoteHeader
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.theme.AppTheme
@@ -206,12 +207,11 @@ fun TransactionDetailsScreen(
                         modifier = Modifier.padding(horizontal = 12.dp),
                         colors = transactionCardColors(),
                         noteCallbacks = noteCallbacks,
-                        onNoteError = { noteError ->
+                        onUiError = { uiError ->
                             uiScope.launch {
-                                showNoteErrorSnackbar(
-                                    context = context,
-                                    error = noteError,
-                                    snackbarHostState = snackbarHostState,
+                                snackbarHostState.showSnackbar(
+                                    message = uiError.resolveUiErrorMessage(context),
+                                    duration = SnackbarDuration.Short,
                                 )
                             }
                         },

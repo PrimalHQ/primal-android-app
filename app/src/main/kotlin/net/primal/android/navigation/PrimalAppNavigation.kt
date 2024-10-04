@@ -49,15 +49,16 @@ import net.primal.android.editor.domain.NoteEditorArgs.Companion.toNostrUriInNot
 import net.primal.android.editor.ui.NoteEditorScreen
 import net.primal.android.explore.asearch.AdvancedSearchScreen
 import net.primal.android.explore.asearch.AdvancedSearchViewModel
-import net.primal.android.explore.feed.article.ExploreArticleFeedScreen
-import net.primal.android.explore.feed.article.ExploreArticleFeedViewModel
-import net.primal.android.explore.feed.note.ExploreNoteFeedContract
-import net.primal.android.explore.feed.note.ExploreNoteFeedScreen
-import net.primal.android.explore.feed.note.ExploreNoteFeedViewModel
+import net.primal.android.explore.feed.ExploreFeedContract
+import net.primal.android.explore.feed.ExploreFeedScreen
+import net.primal.android.explore.feed.ExploreFeedViewModel
 import net.primal.android.explore.home.ExploreHomeScreen
 import net.primal.android.explore.home.ExploreHomeViewModel
 import net.primal.android.explore.search.SearchViewModel
 import net.primal.android.explore.search.ui.SearchScreen
+import net.primal.android.feeds.domain.buildAdvancedSearchArticlesFeedSpec
+import net.primal.android.feeds.domain.buildAdvancedSearchNotesFeedSpec
+import net.primal.android.feeds.domain.buildNotesBookmarksFeedSpec
 import net.primal.android.messages.chat.ChatScreen
 import net.primal.android.messages.chat.ChatViewModel
 import net.primal.android.messages.conversation.MessageConversationListViewModel
@@ -205,19 +206,15 @@ fun NavController.navigateToMediaGallery(
 
 fun NavController.navigateToExplore() = navigate(route = "explore")
 
-fun NavController.navigateToExploreNoteFeed(
-    query: String,
-    renderType: ExploreNoteFeedContract.RenderType = ExploreNoteFeedContract.RenderType.List,
+fun NavController.navigateToExploreFeed(
+    feedSpec: String,
+    renderType: ExploreFeedContract.RenderType = ExploreFeedContract.RenderType.List,
 ) = navigate(
-    route = "explore/note?$EXPLORE_FEED_SPEC=${query.asBase64Encoded()}&$RENDER_TYPE=$renderType",
+    route = "explore/note?$EXPLORE_FEED_SPEC=${feedSpec.asBase64Encoded()}&$RENDER_TYPE=$renderType",
 )
 
-fun NavController.navigateToExploreArticleFeed(feedSpec: String) =
-    navigate(route = "explore/article?$EXPLORE_FEED_SPEC=${feedSpec.asBase64Encoded()}")
-
 private fun NavController.navigateToNotesBookmarks(userId: String) {
-    val spec = "{\"id\":\"feed\",\"kind\":\"notes\",\"notes\":\"bookmarks\",\"pubkey\":\"$userId\"}"
-    navigateToExploreNoteFeed(query = spec)
+    navigateToExploreFeed(feedSpec = buildNotesBookmarksFeedSpec(userId = userId))
 }
 
 fun noteCallbacksHandler(navController: NavController) =
@@ -237,7 +234,9 @@ fun noteCallbacksHandler(navController: NavController) =
         },
         onArticleQuoteClick = { naddr -> navController.navigateToNoteEditor(naddr.toNostrUriInNoteEditorArgs()) },
         onProfileClick = { profileId -> navController.navigateToProfile(profileId = profileId) },
-        onHashtagClick = { hashtag -> navController.navigateToExploreNoteFeed(query = hashtag) },
+        onHashtagClick = { hashtag ->
+            navController.navigateToExploreFeed(feedSpec = buildAdvancedSearchNotesFeedSpec(query = hashtag))
+        },
         onMediaClick = {
             navController.navigateToMediaGallery(
                 noteId = it.noteId,
@@ -338,7 +337,7 @@ fun PrimalAppNavigation() {
             navController = navController,
         )
 
-        exploreNoteFeed(
+        exploreFeed(
             route = "explore/note?$EXPLORE_FEED_SPEC={$EXPLORE_FEED_SPEC}&$RENDER_TYPE={$RENDER_TYPE}",
             arguments = listOf(
                 navArgument(EXPLORE_FEED_SPEC) {
@@ -346,17 +345,6 @@ fun PrimalAppNavigation() {
                     nullable = false
                 },
                 navArgument(RENDER_TYPE) {
-                    type = NavType.StringType
-                    nullable = false
-                },
-            ),
-            navController = navController,
-        )
-
-        exploreArticleFeed(
-            route = "explore/article?$EXPLORE_FEED_SPEC={$EXPLORE_FEED_SPEC}",
-            arguments = listOf(
-                navArgument(EXPLORE_FEED_SPEC) {
                     type = NavType.StringType
                     nullable = false
                 },
@@ -737,9 +725,9 @@ private fun NavGraphBuilder.explore(route: String, navController: NavController)
         LockToOrientationPortrait()
         ExploreHomeScreen(
             viewModel = viewModel,
-            onHashtagClick = { query ->
-                navController.navigateToExploreNoteFeed(
-                    query = """{"id":"advsearch","query":"kind:1 $query"}""",
+            onHashtagClick = { hashtag ->
+                navController.navigateToExploreFeed(
+                    feedSpec = buildAdvancedSearchNotesFeedSpec(query = hashtag),
                 )
             },
             onNoteClick = { noteId -> navController.navigateToThread(noteId) },
@@ -749,7 +737,7 @@ private fun NavGraphBuilder.explore(route: String, navController: NavController)
         )
     }
 
-private fun NavGraphBuilder.exploreNoteFeed(
+private fun NavGraphBuilder.exploreFeed(
     route: String,
     arguments: List<NamedNavArgument>,
     navController: NavController,
@@ -761,36 +749,14 @@ private fun NavGraphBuilder.exploreNoteFeed(
     popEnterTransition = { primalScaleIn },
     popExitTransition = { primalSlideOutHorizontallyToEnd },
 ) {
-    val viewModel = hiltViewModel<ExploreNoteFeedViewModel>(it)
+    val viewModel = hiltViewModel<ExploreFeedViewModel>(it)
     ApplyEdgeToEdge()
     LockToOrientationPortrait()
-    ExploreNoteFeedScreen(
+    ExploreFeedScreen(
         viewModel = viewModel,
         onClose = { navController.navigateUp() },
         noteCallbacks = noteCallbacksHandler(navController),
         onGoToWallet = { navController.navigateToWallet() },
-    )
-}
-
-private fun NavGraphBuilder.exploreArticleFeed(
-    route: String,
-    arguments: List<NamedNavArgument>,
-    navController: NavController,
-) = composable(
-    route = route,
-    arguments = arguments,
-    enterTransition = { primalSlideInHorizontallyFromEnd },
-    exitTransition = { primalScaleOut },
-    popEnterTransition = { primalScaleIn },
-    popExitTransition = { primalSlideOutHorizontallyToEnd },
-) {
-    val viewModel = hiltViewModel<ExploreArticleFeedViewModel>(it)
-    ApplyEdgeToEdge()
-    LockToOrientationPortrait()
-    ExploreArticleFeedScreen(
-        viewModel = viewModel,
-        onArticleClick = { naddr -> navController.navigateToArticleDetails(naddr) },
-        onClose = { navController.navigateUp() },
     )
 }
 
@@ -811,7 +777,7 @@ private fun NavGraphBuilder.search(route: String, navController: NavController) 
             onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
             onNoteClick = { noteId -> navController.navigateToThread(noteId) },
             onNaddrClick = { naddr -> navController.navigateToArticleDetails(naddr) },
-            onSearchContent = { query -> navController.navigateToExploreNoteFeed(query) },
+            onSearchContent = { query -> navController.navigateToExploreFeed(query) },
         )
     }
 
@@ -832,11 +798,9 @@ private fun NavGraphBuilder.advancedSearch(route: String, navController: NavCont
             viewModel = viewModel,
             onClose = { navController.navigateUp() },
             onNavigateToExploreNoteFeed = { feedSpec, renderType ->
-                navController.navigateToExploreNoteFeed(feedSpec, renderType)
+                navController.navigateToExploreFeed(feedSpec, renderType)
             },
-            onNavigateToExploreArticleFeed = { feedSpec ->
-                navController.navigateToExploreArticleFeed(feedSpec)
-            },
+            onNavigateToExploreArticleFeed = { feedSpec -> navController.navigateToExploreFeed(feedSpec) },
         )
     }
 
@@ -1009,9 +973,7 @@ private fun NavGraphBuilder.articleDetails(
         viewModel = viewModel,
         onClose = { navController.navigateUp() },
         onArticleHashtagClick = { hashtag ->
-            navController.navigateToExploreArticleFeed(
-                feedSpec = """{"id":"advsearch","query":"kind:30023 $hashtag"}""",
-            )
+            navController.navigateToExploreFeed(feedSpec = buildAdvancedSearchArticlesFeedSpec(query = hashtag))
         },
         noteCallbacks = noteCallbacksHandler(navController),
         onGoToWallet = { navController.navigateToWallet() },

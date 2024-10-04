@@ -69,7 +69,7 @@ fun ArticleFeedList(
     noContentVerticalArrangement: Arrangement.Vertical = Arrangement.Center,
     noContentPaddingValues: PaddingValues = PaddingValues(all = 0.dp),
     contentPadding: PaddingValues = PaddingValues(0.dp),
-    onUiError: (UiError) -> Unit,
+    onUiError: ((UiError) -> Unit)? = null,
     header: @Composable (LazyItemScope.() -> Unit)? = null,
     stickyHeader: @Composable (LazyItemScope.() -> Unit)? = null,
 ) {
@@ -81,8 +81,8 @@ fun ArticleFeedList(
 
     val articleViewModel = hiltViewModel<ArticleViewModel>()
     val articleState by articleViewModel.state.collectAsState()
-    LaunchedEffect(articleState.error) {
-        articleState.error?.let { onUiError(it) }
+    LaunchedEffect(articleViewModel, articleState.error, onUiError) {
+        articleState.error?.let { onUiError?.invoke(it) }
         articleViewModel.setEvent(ArticleContract.UiEvent.DismissError)
     }
 

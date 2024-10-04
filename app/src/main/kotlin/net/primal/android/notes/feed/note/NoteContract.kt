@@ -1,13 +1,16 @@
 package net.primal.android.notes.feed.note
 
+import net.primal.android.core.errors.UiError
 import net.primal.android.notes.feed.model.ZappingState
 import net.primal.android.profile.report.ReportType
+import net.primal.android.thread.articles.ArticleContract.UiEvent
 
 interface NoteContract {
 
     data class UiState(
         val zappingState: ZappingState = ZappingState(),
         val shouldApproveBookmark: Boolean = false,
+        val error: UiError? = null,
     )
 
     sealed class UiEvent {
@@ -47,17 +50,7 @@ interface NoteContract {
         data class DismissBookmarkConfirmation(
             val noteId: String,
         ) : UiEvent()
-    }
 
-    sealed class SideEffect {
-        sealed class NoteError : SideEffect() {
-            data class MissingLightningAddress(val cause: Throwable) : NoteError()
-            data class InvalidZapRequest(val cause: Throwable) : NoteError()
-            data class FailedToPublishZapEvent(val cause: Throwable) : NoteError()
-            data class FailedToPublishRepostEvent(val cause: Throwable) : NoteError()
-            data class FailedToPublishLikeEvent(val cause: Throwable) : NoteError()
-            data class MissingRelaysConfiguration(val cause: Throwable) : NoteError()
-            data class FailedToMuteUser(val cause: Throwable) : NoteError()
-        }
+        data object DismissError : UiEvent()
     }
 }
