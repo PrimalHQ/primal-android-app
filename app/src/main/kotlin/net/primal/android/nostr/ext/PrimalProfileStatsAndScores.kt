@@ -2,6 +2,7 @@ package net.primal.android.nostr.ext
 
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.decodeFromStringOrNull
+import net.primal.android.explore.api.model.NewUserFollowStats
 import net.primal.android.nostr.model.primal.PrimalEvent
 import net.primal.android.nostr.model.primal.content.ContentUserProfileStats
 import net.primal.android.profile.db.ProfileStats
@@ -35,5 +36,9 @@ fun PrimalEvent.takeContentAsPrimalUserScoresOrNull(): Map<String, Float> {
 }
 
 fun PrimalEvent.takeContentAsPrimalUserFollowersCountsOrNull(): Map<String, Int> {
+    return NostrJson.decodeFromString(this.content)
+}
+
+fun PrimalEvent.takeContentAsPrimalUserFollowStats(): Map<String, NewUserFollowStats> {
     return NostrJson.decodeFromString(this.content)
 }

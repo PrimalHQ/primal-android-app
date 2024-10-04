@@ -7,12 +7,15 @@ import kotlinx.serialization.json.float
 import kotlinx.serialization.json.jsonPrimitive
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.decodeFromStringOrNull
+import net.primal.android.explore.api.model.ExploreRequestBody
 import net.primal.android.explore.api.model.SearchUsersRequestBody
 import net.primal.android.explore.api.model.TopicScore
+import net.primal.android.explore.api.model.TrendingPeopleResponse
 import net.primal.android.explore.api.model.UsersResponse
 import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.primal.PrimalCacheFilter
+import net.primal.android.networking.primal.PrimalVerb.EXPLORE_PEOPLE
 import net.primal.android.networking.primal.PrimalVerb.EXPLORE_TOPICS
 import net.primal.android.networking.primal.PrimalVerb.RECOMMENDED_USERS
 import net.primal.android.networking.primal.PrimalVerb.USER_SEARCH
@@ -21,6 +24,26 @@ import net.primal.android.nostr.model.NostrEventKind
 class ExploreApiImpl @Inject constructor(
     @PrimalCacheApiClient private val primalApiClient: PrimalApiClient,
 ) : ExploreApi {
+
+    override suspend fun getTrendingPeople(body: ExploreRequestBody): TrendingPeopleResponse {
+        val queryResult = primalApiClient.query(
+            message = PrimalCacheFilter(
+                primalVerb = EXPLORE_PEOPLE,
+                optionsJson = NostrJson.encodeToString(body),
+            ),
+        )
+
+        return TrendingPeopleResponse(
+            paging = queryResult.findPrimalEvent(NostrEventKind.PrimalPaging).let {
+                NostrJson.decodeFromStringOrNull(it?.content)
+            },
+            metadata = queryResult.filterNostrEvents(NostrEventKind.Metadata),
+            cdnResources = queryResult.filterPrimalEvents(NostrEventKind.PrimalCdnResource),
+            usersFollowStats = queryResult.findPrimalEvent(NostrEventKind.PrimalExplorePeopleNewFollowStats),
+            usersScores = queryResult.findPrimalEvent(NostrEventKind.PrimalUserScores),
+            usersFollowCount = queryResult.findPrimalEvent(NostrEventKind.PrimalUserFollowersCounts),
+        )
+    }
 
     override suspend fun getTrendingTopics(): List<TopicScore> {
         val queryResult = primalApiClient.query(

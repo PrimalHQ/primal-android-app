@@ -7,7 +7,6 @@ interface ExploreFeedsContract {
         val feeds: List<DvmFeed> = emptyList(),
         val userFeedSpecs: List<String> = emptyList(),
         val loading: Boolean = true,
-        val error: Throwable? = null,
     )
 
     sealed class UiEvent {
