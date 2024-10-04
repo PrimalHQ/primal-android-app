@@ -42,4 +42,5 @@ enum class PrimalVerb(val identifier: String) {
     GET_APP_SUB_SETTINGS("get_app_subsettings"),
     SET_APP_SUB_SETTINGS("set_app_subsettings"),
     EXPLORE_TOPICS("explore_topics"),
+    EXPLORE_PEOPLE("explore_people"),
 }
