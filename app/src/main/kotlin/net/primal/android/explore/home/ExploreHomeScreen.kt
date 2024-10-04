@@ -41,6 +41,7 @@ import net.primal.android.core.compose.icons.primaliconpack.AdvancedSearch
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.explore.home.feeds.ExploreFeeds
+import net.primal.android.explore.home.people.ExplorePeople
 import net.primal.android.explore.home.topics.ExploreTopics
 import net.primal.android.explore.home.ui.EXPLORE_HOME_TAB_COUNT
 import net.primal.android.explore.home.ui.ExploreHomeTabs
@@ -60,6 +61,7 @@ fun ExploreHomeScreen(
     viewModel: ExploreHomeViewModel,
     onHashtagClick: (String) -> Unit,
     onNoteClick: (String) -> Unit,
+    onProfileClick: (String) -> Unit,
     onSearchClick: () -> Unit,
     onTuneClick: () -> Unit,
     onClose: () -> Unit,
@@ -73,6 +75,7 @@ fun ExploreHomeScreen(
         onSearchClick = onSearchClick,
         onTuneClick = onTuneClick,
         onClose = onClose,
+        onProfileClick = onProfileClick,
     )
 }
 
@@ -83,6 +86,7 @@ private fun ExploreHomeScreen(
     onHashtagClick: (String) -> Unit,
     onNoteClick: (String) -> Unit,
     onSearchClick: () -> Unit,
+    onProfileClick: (String) -> Unit,
     onTuneClick: () -> Unit,
     onClose: () -> Unit,
 ) {
@@ -106,6 +110,12 @@ private fun ExploreHomeScreen(
                     FEEDS_INDEX -> {
                         ExploreFeeds(
                             paddingValues = paddingValues,
+                        )
+                    }
+                    PEOPLE_INDEX -> {
+                        ExplorePeople(
+                            paddingValues = paddingValues,
+                            onProfileClick = onProfileClick,
                         )
                     }
                     MEDIA_INDEX -> {
