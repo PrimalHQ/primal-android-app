@@ -17,12 +17,7 @@ fun FollowUnfollowButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues = PaddingValues(horizontal = 4.dp, vertical = 8.dp),
-    followTextStyle: TextStyle = AppTheme.typography.titleMedium.copy(
-        lineHeight = 14.sp,
-    ),
-    unfollowTextStyle: TextStyle = AppTheme.typography.titleMedium.copy(
-        lineHeight = 14.sp,
-    ),
+    textStyle: TextStyle = AppTheme.typography.titleMedium.copy(lineHeight = 14.sp),
 ) {
     PrimalFilledButton(
         modifier = modifier,
@@ -36,11 +31,7 @@ fun FollowUnfollowButton(
         } else {
             AppTheme.colorScheme.surface
         },
-        textStyle = if (isFollowed) {
-            unfollowTextStyle
-        } else {
-            followTextStyle
-        },
+        textStyle = textStyle,
         contentPadding = paddingValues,
         onClick = onClick,
     ) {

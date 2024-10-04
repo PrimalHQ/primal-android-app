@@ -179,12 +179,11 @@ private fun ExplorePersonListItem(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             FollowUnfollowButton(
-                unfollowTextStyle = AppTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold),
-                followTextStyle = AppTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold),
                 modifier = Modifier
                     .padding(horizontal = 12.dp)
                     .size(width = 64.dp, height = 36.dp),
                 isFollowed = isFollowed,
+                textStyle = AppTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold),
                 onClick = {
                     if (isFollowed) {
                         onUnfollowClick()
