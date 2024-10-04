@@ -1,5 +1,7 @@
 package net.primal.android.feeds.domain
 
+import net.primal.android.profile.db.ProfileData
+
 data class DvmFeed(
     val dvmPubkey: String,
     val dvmId: String,
@@ -11,6 +13,11 @@ data class DvmFeed(
     val totalLikes: Long? = null,
     val totalSatsZapped: Long? = null,
     val isPaid: Boolean = amountInSats != null && amountInSats != "free" || primalSubscriptionRequired == true,
+    val kind: FeedSpecKind? = null,
+    val isPrimal: Boolean? = null,
+    val followsActions: List<ProfileData> = emptyList(),
+    val userLiked: Boolean? = false,
+    val userZapped: Boolean? = false,
 )
 
 fun DvmFeed.buildSpec(specKind: FeedSpecKind): String =

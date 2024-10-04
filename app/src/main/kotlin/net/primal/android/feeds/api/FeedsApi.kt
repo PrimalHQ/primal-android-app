@@ -6,7 +6,7 @@ import net.primal.android.nostr.model.primal.content.ContentArticleFeedData
 
 interface FeedsApi {
 
-    suspend fun getFeaturedFeeds(specKind: FeedSpecKind): DvmFeedsResponse
+    suspend fun getFeaturedFeeds(specKind: FeedSpecKind? = null, pubkey: String? = null): DvmFeedsResponse
 
     suspend fun getDefaultUserFeeds(specKind: FeedSpecKind): FeedsResponse
 

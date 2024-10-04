@@ -1,6 +1,5 @@
 package net.primal.android.articles.reads
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerDefaults
@@ -140,7 +139,7 @@ private fun ReadsScreen(
                                     duration = SnackbarDuration.Short,
                                 )
                             }
-                        }
+                        },
                     )
                 }
             }
