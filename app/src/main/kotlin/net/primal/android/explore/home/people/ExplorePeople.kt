@@ -68,36 +68,31 @@ fun ExplorePeople(
     eventPublisher: (ExplorePeopleContract.UiEvent) -> Unit,
     onProfileClick: (String) -> Unit,
 ) {
-    LazyColumn(
-        modifier = modifier
-            .padding(paddingValues)
-            .padding(all = 16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        if (state.loading && state.people.isEmpty()) {
-            item { PrimalLoadingSpinner() }
+    if (state.loading && state.people.isEmpty()) {
+        PrimalLoadingSpinner()
 
-        } else if (state.error != null) {
-            item {
-                ListNoContent(
-                    modifier = Modifier.fillMaxSize(),
-                    noContentText = stringResource(id = R.string.feed_error_loading),
-                    refreshButtonVisible = true,
-                    onRefresh = { eventPublisher(ExplorePeopleContract.UiEvent.RefreshPeople) },
-                )
-            }
-        } else if (state.people.isEmpty()) {
-            item {
-                ListNoContent(
-                    modifier = Modifier.fillMaxSize(),
-                    noContentText = stringResource(id = R.string.feed_no_content),
-                    refreshButtonVisible = true,
-                    onRefresh = { eventPublisher(ExplorePeopleContract.UiEvent.RefreshPeople) },
-                )
-
-            }
-        } else {
+    } else if (state.error != null) {
+        ListNoContent(
+            modifier = Modifier.fillMaxSize(),
+            noContentText = stringResource(id = R.string.feed_error_loading),
+            refreshButtonVisible = true,
+            onRefresh = { eventPublisher(ExplorePeopleContract.UiEvent.RefreshPeople) },
+        )
+    } else if (state.people.isEmpty()) {
+        ListNoContent(
+            modifier = Modifier.fillMaxSize(),
+            noContentText = stringResource(id = R.string.feed_no_content),
+            refreshButtonVisible = true,
+            onRefresh = { eventPublisher(ExplorePeopleContract.UiEvent.RefreshPeople) },
+        )
+    } else {
+        LazyColumn(
+            modifier = modifier
+                .padding(paddingValues)
+                .padding(all = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
             items(
                 items = state.people,
             ) { item ->
