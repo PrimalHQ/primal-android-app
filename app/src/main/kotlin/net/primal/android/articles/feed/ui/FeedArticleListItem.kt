@@ -297,6 +297,7 @@ private fun PreviewFeedArticleListItem() {
     PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
         FeedArticleListItem(
             data = FeedArticleUi(
+                aTag = "",
                 eventId = "",
                 articleId = "",
                 authorId = "1234",

@@ -32,7 +32,6 @@ data class UserAccount(
     val contentDisplaySettings: ContentDisplaySettings = ContentDisplaySettings(),
     val following: Set<String> = emptySet(),
     val interests: List<String> = emptyList(),
-    val bookmarks: Set<PublicBookmark> = emptySet(),
     val followListEventContent: String? = null,
     val cachingProxyEnabled: Boolean = false,
 ) {

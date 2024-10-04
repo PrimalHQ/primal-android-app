@@ -6,6 +6,7 @@ import net.primal.android.attachments.domain.CdnImage
 @Serializable
 data class ReferencedArticle(
     val naddr: String,
+    val aTag: String,
     val eventId: String,
     val articleId: String,
     val articleTitle: String,

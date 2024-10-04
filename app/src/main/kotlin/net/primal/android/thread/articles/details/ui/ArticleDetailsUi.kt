@@ -8,6 +8,7 @@ import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.notes.feed.model.EventStatsUi
 
 data class ArticleDetailsUi(
+    val aTag: String,
     val eventId: String,
     val articleId: String,
     val authorId: String,
@@ -22,11 +23,13 @@ data class ArticleDetailsUi(
     val coverImageCdnImage: CdnImage? = null,
     val readingTimeInMinutes: Int? = null,
     val hashtags: List<String> = emptyList(),
+    val isBookmarked: Boolean = false,
     val eventStatsUi: EventStatsUi = EventStatsUi(),
 )
 
 fun Article.mapAsArticleDetailsUi(): ArticleDetailsUi {
     return ArticleDetailsUi(
+        aTag = this.data.aTag,
         eventId = this.data.eventId,
         articleId = this.data.articleId,
         authorId = this.data.authorId,
@@ -41,6 +44,7 @@ fun Article.mapAsArticleDetailsUi(): ArticleDetailsUi {
         coverImageCdnImage = this.data.imageCdnImage ?: this.author?.avatarCdnImage,
         readingTimeInMinutes = ((this.data.wordsCount ?: 1) / 200) + 1,
         hashtags = this.data.hashtags,
+        isBookmarked = this.bookmark != null,
         eventStatsUi = EventStatsUi.from(eventStats = this.eventStats, userStats = this.userEventStats),
     )
 }

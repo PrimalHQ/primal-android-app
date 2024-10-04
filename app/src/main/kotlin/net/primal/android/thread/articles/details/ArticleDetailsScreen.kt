@@ -218,13 +218,18 @@ private fun ArticleDetailsScreen(
         )
     }
 
-    if (detailsState.shouldApproveBookmark) {
+    if (articleState.shouldApproveBookmark && detailsState.article != null) {
         ConfirmFirstBookmarkAlertDialog(
             onBookmarkConfirmed = {
-                detailsEventPublisher(UiEvent.BookmarkAction(forceUpdate = true))
+                articleEventPublisher(
+                    ArticleContract.UiEvent.BookmarkAction(
+                        forceUpdate = true,
+                        articleATag = detailsState.article.aTag,
+                    ),
+                )
             },
             onClose = {
-                detailsEventPublisher(UiEvent.DismissBookmarkConfirmation)
+                articleEventPublisher(ArticleContract.UiEvent.DismissBookmarkConfirmation)
             },
         )
     }
@@ -246,7 +251,13 @@ private fun ArticleDetailsScreen(
                 state = detailsState,
                 scrolledToTop = scrolledToTop,
                 onClose = onClose,
-                onBookmarkClick = { },
+                onBookmarkClick = {
+                    if (detailsState.article != null) {
+                        articleEventPublisher(
+                            ArticleContract.UiEvent.BookmarkAction(articleATag = detailsState.article.aTag),
+                        )
+                    }
+                },
                 onMuteUserClick = {
                     if (detailsState.article != null) {
                         articleEventPublisher(
@@ -306,7 +317,9 @@ private fun ArticleDetailsScreen(
                                 showRepostOrQuoteConfirmation = true
                             }
 
-                            FeedPostAction.Bookmark -> detailsEventPublisher(UiEvent.BookmarkAction())
+                            FeedPostAction.Bookmark -> articleEventPublisher(
+                                ArticleContract.UiEvent.BookmarkAction(articleATag = detailsState.article.aTag),
+                            )
                         }
                     },
                     onPostLongPressAction = { action ->
@@ -366,14 +379,11 @@ private fun ArticleDetailsTopAppBar(
         showDivider = state.article?.authorDisplayName == null || !scrolledToTop,
         actions = {
             if (state.article != null) {
-                // TODO Pass info if article is bookmarked
-                val isBookmarked = false
-
                 AppBarIcon(
-                    icon = if (isBookmarked) PrimalIcons.BookmarksFilled else PrimalIcons.Bookmarks,
+                    icon = if (state.article.isBookmarked) PrimalIcons.BookmarksFilled else PrimalIcons.Bookmarks,
                     iconSize = 20.dp,
                     appBarIconContentDescription = stringResource(id = R.string.accessibility_bookmark),
-                    onClick = {},
+                    onClick = { onBookmarkClick?.invoke() },
                 )
 
                 ArticleDropdownMenuIcon(
@@ -384,7 +394,7 @@ private fun ArticleDetailsTopAppBar(
                     articleContent = state.article.content,
                     articleRawData = state.article.eventRawNostrEvent,
                     authorId = state.article.authorId,
-                    isBookmarked = isBookmarked,
+                    isBookmarked = state.article.isBookmarked,
                     onBookmarkClick = onBookmarkClick,
                     onMuteUserClick = onMuteUserClick,
                     onReportContentClick = onReportContentClick,
@@ -596,10 +606,9 @@ private fun ArticleContentWithComments(
                             .padding(horizontal = 8.dp)
                             .padding(bottom = 16.dp),
                         eventStats = state.article.eventStatsUi,
+                        isBookmarked = state.article.isBookmarked,
                         showCounts = false,
                         showBookmark = true,
-                        // TODO Pass info if article is bookmarked
-                        isBookmarked = false,
                         onPostAction = onPostAction,
                         onPostLongPressAction = onPostLongPressAction,
                     )

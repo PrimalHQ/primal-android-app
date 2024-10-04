@@ -1,10 +1,13 @@
 package net.primal.android.articles.db
 
 import androidx.room.Entity
+import androidx.room.PrimaryKey
 import net.primal.android.attachments.domain.CdnImage
 
-@Entity(primaryKeys = ["articleId", "authorId"])
+@Entity
 data class ArticleData(
+    @PrimaryKey
+    val aTag: String,
     val eventId: String,
     val articleId: String,
     val authorId: String,

@@ -6,6 +6,7 @@ import net.primal.android.profile.report.ReportType
 interface ArticleContract {
 
     data class UiState(
+        val shouldApproveBookmark: Boolean = false,
         val error: UiError? = null,
     )
 
@@ -20,6 +21,13 @@ interface ArticleContract {
             val eventId: String,
             val articleId: String,
         ) : UiEvent()
+
+        data class BookmarkAction(
+            val articleATag: String,
+            val forceUpdate: Boolean = false,
+        ) : UiEvent()
+
+        data object DismissBookmarkConfirmation : UiEvent()
 
         data object DismissError : UiEvent()
     }

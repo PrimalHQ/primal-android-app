@@ -36,6 +36,7 @@ fun ReferencedArticlesColumn(
             ReferencedArticleCard(
                 modifier = Modifier.padding(vertical = 4.dp),
                 data = FeedArticleUi(
+                    aTag = data.aTag,
                     eventId = data.eventId,
                     articleId = data.articleId,
                     title = data.articleTitle,

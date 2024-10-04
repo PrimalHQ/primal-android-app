@@ -10,7 +10,6 @@ import net.primal.android.nostr.model.content.ContentMetadata
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.nostr.notary.NostrUnsignedEvent
 import net.primal.android.user.domain.NostrWalletConnect
-import net.primal.android.user.domain.PublicBookmark
 import net.primal.android.user.domain.Relay
 import net.primal.android.wallet.nwc.model.LightningPayResponse
 import timber.log.Timber
@@ -58,16 +57,6 @@ class NostrPublisher @Inject constructor(
             userId = userId,
             contacts = contacts,
             content = content,
-        )
-        publishEvent(signedNostrEvent)
-        return signedNostrEvent
-    }
-
-    @Throws(NostrPublishException::class)
-    suspend fun publishUserBookmarksList(userId: String, bookmarks: Set<PublicBookmark>): NostrEvent {
-        val signedNostrEvent = nostrNotary.signBookmarksListNostrEvent(
-            userId = userId,
-            bookmarks = bookmarks,
         )
         publishEvent(signedNostrEvent)
         return signedNostrEvent

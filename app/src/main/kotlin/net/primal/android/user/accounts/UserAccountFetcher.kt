@@ -13,7 +13,6 @@ import net.primal.android.nostr.ext.asProfileStatsPO
 import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
 import net.primal.android.user.api.UsersApi
 import net.primal.android.user.domain.UserAccount
-import net.primal.android.user.domain.asUserAccountFromBookmarksListEvent
 import net.primal.android.user.domain.asUserAccountFromFollowListEvent
 
 class UserAccountFetcher @Inject constructor(
@@ -57,13 +56,5 @@ class UserAccountFetcher @Inject constructor(
         }
 
         return contactsResponse.followListEvent?.asUserAccountFromFollowListEvent()
-    }
-
-    suspend fun fetchUserBookmarksListOrNull(userId: String): UserAccount? {
-        val bookmarksResponse = withContext(dispatcherProvider.io()) {
-            usersApi.getUserBookmarksList(userId = userId)
-        }
-
-        return bookmarksResponse.bookmarksListEvent?.asUserAccountFromBookmarksListEvent()
     }
 }

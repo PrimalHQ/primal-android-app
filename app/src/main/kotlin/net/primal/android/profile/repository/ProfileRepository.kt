@@ -27,9 +27,6 @@ import net.primal.android.profile.db.ProfileInteraction
 import net.primal.android.profile.report.ReportType
 import net.primal.android.user.accounts.UserAccountFetcher
 import net.primal.android.user.api.UsersApi
-import net.primal.android.user.domain.PublicBookmark
-import net.primal.android.user.domain.UserAccount
-import net.primal.android.user.domain.asUserAccountFromBookmarksListEvent
 import net.primal.android.user.domain.asUserAccountFromFollowListEvent
 import net.primal.android.user.repository.UserRepository
 
@@ -144,54 +141,6 @@ class ProfileRepository @Inject constructor(
         )
     }
 
-    @Throws(BookmarksListNotFound::class, NostrPublishException::class)
-    suspend fun addBookmark(
-        userId: String,
-        forceUpdate: Boolean,
-        bookmark: PublicBookmark,
-    ) {
-        updateBookmarksList(userId = userId, forceUpdate = forceUpdate) {
-            toMutableSet().apply { add(bookmark) }
-        }
-    }
-
-    @Throws(BookmarksListNotFound::class, NostrPublishException::class)
-    suspend fun removeBookmark(
-        userId: String,
-        forceUpdate: Boolean,
-        bookmark: PublicBookmark,
-    ) {
-        updateBookmarksList(userId = userId, forceUpdate = forceUpdate) {
-            toMutableSet().apply { remove(bookmark) }
-        }
-    }
-
-    @Throws(BookmarksListNotFound::class, NostrPublishException::class)
-    private suspend fun updateBookmarksList(
-        userId: String,
-        forceUpdate: Boolean,
-        reducer: Set<PublicBookmark>.() -> Set<PublicBookmark>,
-    ) {
-        val bookmarksList = userAccountFetcher.fetchUserBookmarksListOrNull(userId = userId)
-            ?: if (forceUpdate) UserAccount.EMPTY else throw BookmarksListNotFound()
-
-        userRepository.updateBookmarksList(userId, bookmarksList)
-
-        setBookmarksList(userId = userId, bookmarks = bookmarksList.bookmarks.reducer())
-    }
-
-    @Throws(NostrPublishException::class)
-    suspend fun setBookmarksList(userId: String, bookmarks: Set<PublicBookmark>) {
-        val nostrEventResponse = nostrPublisher.publishUserBookmarksList(
-            userId = userId,
-            bookmarks = bookmarks,
-        )
-        userRepository.updateBookmarksList(
-            userId = userId,
-            bookmarksUserAccount = nostrEventResponse.asUserAccountFromBookmarksListEvent(),
-        )
-    }
-
     private suspend fun queryRemoteUsers(apiBlock: suspend () -> UsersResponse): List<UserProfileSearchItem> {
         val response = apiBlock()
         val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
@@ -255,6 +204,4 @@ class ProfileRepository @Inject constructor(
     }
 
     class FollowListNotFound : Exception()
-
-    class BookmarksListNotFound : Exception()
 }

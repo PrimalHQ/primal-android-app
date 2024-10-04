@@ -13,6 +13,8 @@ import net.primal.android.attachments.db.AttachmentDao
 import net.primal.android.attachments.db.NoteAttachment
 import net.primal.android.attachments.db.NoteNostrUri
 import net.primal.android.attachments.db.serialization.AttachmentTypeConverters
+import net.primal.android.bookmarks.db.PublicBookmark
+import net.primal.android.bookmarks.db.PublicBookmarkDao
 import net.primal.android.core.serialization.room.ListsTypeConverters
 import net.primal.android.explore.db.TrendingTopic
 import net.primal.android.explore.db.TrendingTopicDao
@@ -22,8 +24,8 @@ import net.primal.android.messages.db.DirectMessageDao
 import net.primal.android.messages.db.DirectMessageData
 import net.primal.android.messages.db.MessageConversationDao
 import net.primal.android.messages.db.MessageConversationData
-import net.primal.android.nostr.db.EventHints
-import net.primal.android.nostr.db.EventHintsDao
+import net.primal.android.nostr.db.EventRelayHints
+import net.primal.android.nostr.db.EventRelayHintsDao
 import net.primal.android.note.db.EventStats
 import net.primal.android.note.db.EventStatsDao
 import net.primal.android.note.db.EventUserStats
@@ -79,13 +81,14 @@ import net.primal.android.wallet.db.WalletTransactionData
         MessageConversationData::class,
         WalletTransactionData::class,
         Relay::class,
-        EventHints::class,
+        EventRelayHints::class,
+        PublicBookmark::class,
         ProfileInteraction::class,
         ArticleData::class,
         ArticleCommentCrossRef::class,
         ArticleFeedCrossRef::class,
     ],
-    version = 40,
+    version = 41,
     exportSchema = true,
 )
 @TypeConverters(
@@ -134,7 +137,9 @@ abstract class PrimalDatabase : RoomDatabase() {
 
     abstract fun relays(): RelayDao
 
-    abstract fun eventHints(): EventHintsDao
+    abstract fun eventHints(): EventRelayHintsDao
+
+    abstract fun publicBookmarks(): PublicBookmarkDao
 
     abstract fun profileInteractions(): ProfileInteractionDao
 
