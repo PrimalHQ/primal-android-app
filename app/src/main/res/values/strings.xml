@@ -20,6 +20,8 @@
     <string name="app_invalid_lud16_address_user_not_found">Invalid lightning address. User \'%1$s\' doesn\'t exist on %2$s.</string>
     <string name="app_invalid_nip05_address">Invalid nostr verification address.</string>
     <string name="app_error_invalid_naddr">Unable to load content. The address is invalid.</string>
+    <string name="app_error_unable_to_follow_profile">Unable to follow profile. Please try again.</string>
+    <string name="app_error_unable_to_unfollow_profile">Unable to unfollow profile. Please try again.</string>
 
     <string name="welcome_sign_in_button_title">Sign In</string>
     <string name="welcome_create_account_button_title">Create Account</string>
@@ -244,6 +246,8 @@
     <string name="explore_topics_tab">Topics</string>
     <string name="explore_feeds_dvm_details_action_button_add">Add to home feeds</string>
     <string name="explore_feeds_dvm_details_action_button_remove">Remove from home feeds</string>
+    <string name="explore_trending_people_no_content">Unable to load trending people. Please try again.</string>
+    <string name="explore_feeds_no_content">Unable to load feeds. Please try again.</string>
 
     <string name="search_followers_text">Followers</string>
 
@@ -484,8 +488,6 @@
     <string name="profile_follow_button">Follow</string>
     <string name="profile_unfollow_button">Unfollow</string>
     <string name="profile_edit_profile_button">Edit profile</string>
-    <string name="profile_error_unable_to_follow">Unable to follow profile. Please try again.</string>
-    <string name="profile_error_unable_to_unfollow">Unable to unfollow profile. Please try again.</string>
     <string name="profile_failed_to_publish_metadata">Unable to post edited metadata. Please try again.</string>
     <string name="profile_save_profile_button">Save profile</string>
     <string name="profile_edit_profile_title">Edit Profile</string>

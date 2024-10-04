@@ -446,11 +446,11 @@ private fun ProfileMutedNotice(profileName: String, onUnmuteClick: () -> Unit) {
 private fun ProfileError.asHumanReadableText(context: Context): String {
     return when (this) {
         is ProfileError.FailedToFollowProfile -> context.getString(
-            R.string.profile_error_unable_to_follow,
+            R.string.app_error_unable_to_follow_profile,
         )
 
         is ProfileError.FailedToUnfollowProfile -> context.getString(
-            R.string.profile_error_unable_to_unfollow,
+            R.string.app_error_unable_to_unfollow_profile,
         )
 
         is ProfileError.MissingRelaysConfiguration -> context.getString(

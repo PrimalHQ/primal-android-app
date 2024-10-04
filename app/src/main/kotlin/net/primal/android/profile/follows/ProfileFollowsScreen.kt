@@ -60,8 +60,8 @@ private fun ProfileFollowsScreen(
         snackbarHostState = snackbarHostState,
         errorMessageResolver = {
             when (it) {
-                is FollowsError.FailedToFollowUser -> context.getString(R.string.profile_error_unable_to_follow)
-                is FollowsError.FailedToUnfollowUser -> context.getString(R.string.profile_error_unable_to_unfollow)
+                is FollowsError.FailedToFollowUser -> context.getString(R.string.app_error_unable_to_follow_profile)
+                is FollowsError.FailedToUnfollowUser -> context.getString(R.string.app_error_unable_to_unfollow_profile)
                 is FollowsError.MissingRelaysConfiguration -> context.getString(R.string.app_missing_relays_config)
             }
         },

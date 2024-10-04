@@ -5,6 +5,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.R
@@ -15,6 +16,8 @@ fun FollowUnfollowButton(
     isFollowed: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    paddingValues: PaddingValues = PaddingValues(horizontal = 4.dp, vertical = 8.dp),
+    textStyle: TextStyle = AppTheme.typography.titleMedium.copy(lineHeight = 14.sp),
 ) {
     PrimalFilledButton(
         modifier = modifier,
@@ -28,10 +31,8 @@ fun FollowUnfollowButton(
         } else {
             AppTheme.colorScheme.surface
         },
-        textStyle = AppTheme.typography.titleMedium.copy(
-            lineHeight = 14.sp,
-        ),
-        contentPadding = PaddingValues(horizontal = 4.dp, vertical = 8.dp),
+        textStyle = textStyle,
+        contentPadding = paddingValues,
         onClick = onClick,
     ) {
         val text = if (isFollowed) {

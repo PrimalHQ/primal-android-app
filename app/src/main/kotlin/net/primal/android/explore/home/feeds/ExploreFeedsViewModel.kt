@@ -2,7 +2,6 @@ package net.primal.android.explore.home.feeds
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.room.util.copy
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -88,7 +87,6 @@ class ExploreFeedsViewModel @Inject constructor(
                 setState { copy(feeds = feeds) }
             } catch (error: WssException) {
                 Timber.w(error)
-                setState { copy(error = error) }
             } finally {
                 setState { copy(loading = false) }
             }
