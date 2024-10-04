@@ -27,13 +27,11 @@ import net.primal.android.nostr.model.primal.content.ContentDvmFeedMetadata
 import net.primal.android.nostr.model.primal.content.ContentPrimalDvmFeedMetadata
 import net.primal.android.nostr.model.primal.content.ContentPrimalEventStats
 import net.primal.android.nostr.model.primal.content.ContentPrimalEventUserStats
-import net.primal.android.user.accounts.active.ActiveAccountStore
 
 class FeedsRepository @Inject constructor(
     private val dispatcherProvider: CoroutineDispatcherProvider,
     private val feedsApi: FeedsApi,
     private val database: PrimalDatabase,
-    private val activeAccountStore: ActiveAccountStore,
 ) {
     fun observeAllFeeds() = database.feeds().observeAllFeeds()
 
@@ -43,13 +41,15 @@ class FeedsRepository @Inject constructor(
 
     fun observeFeeds(specKind: FeedSpecKind) = database.feeds().observeAllFeeds(specKind = specKind)
 
-    suspend fun fetchAndPersistArticleFeeds() = fetchAndPersistFeeds(specKind = FeedSpecKind.Reads)
+    suspend fun fetchAndPersistArticleFeeds(userId: String) =
+        fetchAndPersistFeeds(userId = userId, specKind = FeedSpecKind.Reads)
 
-    suspend fun fetchAndPersistNoteFeeds() = fetchAndPersistFeeds(specKind = FeedSpecKind.Notes)
+    suspend fun fetchAndPersistNoteFeeds(userId: String) =
+        fetchAndPersistFeeds(userId = userId, specKind = FeedSpecKind.Notes)
 
-    private suspend fun fetchAndPersistFeeds(specKind: FeedSpecKind) {
+    private suspend fun fetchAndPersistFeeds(userId: String, specKind: FeedSpecKind) {
         withContext(dispatcherProvider.io()) {
-            val response = feedsApi.getUserFeeds(userId = activeAccountStore.activeUserId(), specKind = specKind)
+            val response = feedsApi.getUserFeeds(userId = userId, specKind = specKind)
             val content = NostrJson.decodeFromStringOrNull<List<ContentArticleFeedData>>(
                 string = response.articleFeeds.content,
             )
@@ -64,7 +64,7 @@ class FeedsRepository @Inject constructor(
         }
     }
 
-    suspend fun persistNewDefaultFeeds(givenDefaultFeeds: List<Feed>, specKind: FeedSpecKind) {
+    suspend fun persistNewDefaultFeeds(userId: String, givenDefaultFeeds: List<Feed>, specKind: FeedSpecKind) {
         val localFeeds = withContext(dispatcherProvider.io()) {
             database.feeds().observeAllFeeds(specKind = specKind).first()
         }
@@ -76,7 +76,7 @@ class FeedsRepository @Inject constructor(
         if (newFeeds.isNotEmpty()) {
             val disabledNewFeeds = newFeeds.map { it.copy(enabled = false) }
             val mergedFeeds = localFeeds + disabledNewFeeds
-            persistGivenUserFeeds(feeds = mergedFeeds, specKind = specKind)
+            persistGivenUserFeeds(userId = userId, feeds = mergedFeeds, specKind = specKind)
         }
     }
 
@@ -108,7 +108,7 @@ class FeedsRepository @Inject constructor(
         )
     }
 
-    suspend fun persistGivenUserFeeds(feeds: List<Feed>, specKind: FeedSpecKind) {
+    suspend fun persistGivenUserFeeds(userId: String, feeds: List<Feed>, specKind: FeedSpecKind) {
         withContext(dispatcherProvider.io()) {
             database.withTransaction {
                 database.feeds().deleteAll(specKind = specKind)
@@ -118,17 +118,17 @@ class FeedsRepository @Inject constructor(
             val apiFeeds = feeds.map { it.asContentArticleFeedData() }
 
             feedsApi.setUserFeeds(
-                userId = activeAccountStore.activeUserId(),
+                userId = userId,
                 specKind = specKind,
                 feeds = apiFeeds,
             )
         }
     }
 
-    suspend fun fetchAndPersistDefaultFeeds(givenDefaultFeeds: List<Feed>, specKind: FeedSpecKind) =
+    suspend fun fetchAndPersistDefaultFeeds(userId: String, givenDefaultFeeds: List<Feed>, specKind: FeedSpecKind) =
         withContext(dispatcherProvider.io()) {
             val feeds = givenDefaultFeeds.ifEmpty { fetchDefaultFeeds(specKind = specKind) ?: return@withContext }
-            persistGivenUserFeeds(feeds = feeds, specKind = specKind)
+            persistGivenUserFeeds(userId = userId, feeds = feeds, specKind = specKind)
         }
 
     suspend fun fetchRecommendedDvmFeeds(specKind: FeedSpecKind? = null, pubkey: String? = null): List<DvmFeed> {

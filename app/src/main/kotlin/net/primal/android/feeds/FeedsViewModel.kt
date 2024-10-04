@@ -25,6 +25,7 @@ import net.primal.android.feeds.ui.model.FeedUi
 import net.primal.android.feeds.ui.model.asFeedPO
 import net.primal.android.feeds.ui.model.asFeedUi
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.user.accounts.active.ActiveAccountStore
 import timber.log.Timber
 
 @HiltViewModel(assistedFactory = FeedsViewModel.Factory::class)
@@ -32,6 +33,7 @@ class FeedsViewModel @AssistedInject constructor(
     @Assisted activeFeed: FeedUi,
     @Assisted private val specKind: FeedSpecKind,
     private val feedsRepository: FeedsRepository,
+    private val activeAccountStore: ActiveAccountStore,
 ) : ViewModel() {
 
     @AssistedFactory
@@ -131,6 +133,7 @@ class FeedsViewModel @AssistedInject constructor(
         viewModelScope.launch {
             try {
                 feedsRepository.fetchAndPersistDefaultFeeds(
+                    userId = activeAccountStore.activeUserId(),
                     givenDefaultFeeds = defaultFeeds,
                     specKind = specKind,
                 )
@@ -185,6 +188,7 @@ class FeedsViewModel @AssistedInject constructor(
 
             try {
                 feedsRepository.persistNewDefaultFeeds(
+                    userId = activeAccountStore.activeUserId(),
                     givenDefaultFeeds = defaultFeeds,
                     specKind = specKind,
                 )
@@ -232,7 +236,11 @@ class FeedsViewModel @AssistedInject constructor(
         viewModelScope.launch {
             val currentFeeds = allFeeds.map { it.asFeedPO() }
             try {
-                feedsRepository.persistGivenUserFeeds(feeds = currentFeeds, specKind = specKind)
+                feedsRepository.persistGivenUserFeeds(
+                    userId = activeAccountStore.activeUserId(),
+                    feeds = currentFeeds,
+                    specKind = specKind,
+                )
             } catch (error: WssException) {
                 Timber.w(error)
             }

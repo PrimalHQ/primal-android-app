@@ -40,7 +40,7 @@ class UserDataUpdater @AssistedInject constructor(
     }
 
     private suspend fun updateData() {
-        feedsRepository.fetchAndPersistNoteFeeds()
+        feedsRepository.fetchAndPersistNoteFeeds(userId = userId)
         settingsRepository.fetchAndPersistAppSettings(userId = userId)
         settingsRepository.ensureZapConfig(userId = userId)
         relayRepository.fetchAndUpdateUserRelays(userId = userId)
@@ -50,6 +50,6 @@ class UserDataUpdater @AssistedInject constructor(
         } catch (error: NostrSignUnauthorized) {
             Timber.w(error)
         }
-        feedsRepository.fetchAndPersistArticleFeeds()
+        feedsRepository.fetchAndPersistArticleFeeds(userId = userId)
     }
 }
