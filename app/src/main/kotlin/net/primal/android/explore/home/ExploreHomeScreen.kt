@@ -24,6 +24,9 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarScrollBehavior
+import androidx.compose.material3.TopAppBarState
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
@@ -32,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -101,7 +105,11 @@ private fun ExploreHomeScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val pagerState = rememberPagerState { EXPLORE_HOME_TAB_COUNT }
 
+    val topAppBarState: TopAppBarState = rememberTopAppBarState()
+    val topAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(topAppBarState)
+
     Scaffold(
+        modifier = Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection),
         topBar = {
             ExploreTopAppBar(
                 onClose = onClose,
@@ -109,6 +117,7 @@ private fun ExploreHomeScreen(
                 onActionIconClick = onTuneClick,
                 actionIcon = PrimalIcons.AdvancedSearch,
                 pagerState = pagerState,
+                scrollBehavior = topAppBarScrollBehavior,
             )
         },
         content = { paddingValues ->
@@ -166,6 +175,7 @@ fun ExploreTopAppBar(
     onActionIconClick: () -> Unit,
     onClose: () -> Unit,
     actionIcon: ImageVector,
+    scrollBehavior: TopAppBarScrollBehavior? = null,
 ) {
     val scope = rememberCoroutineScope()
 
@@ -204,6 +214,7 @@ fun ExploreTopAppBar(
                 containerColor = AppTheme.colorScheme.surface,
                 scrolledContainerColor = AppTheme.colorScheme.surface,
             ),
+            scrollBehavior = scrollBehavior,
         )
         ExploreHomeTabs(
             selectedTabIndex = pagerState.currentPage,
