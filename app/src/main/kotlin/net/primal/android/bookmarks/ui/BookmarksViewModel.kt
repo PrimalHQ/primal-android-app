@@ -9,9 +9,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
-import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.android.bookmarks.ui.BookmarksContract.*
+import net.primal.android.bookmarks.ui.BookmarksContract.UiEvent
+import net.primal.android.bookmarks.ui.BookmarksContract.UiState
 import net.primal.android.feeds.domain.FeedSpecKind
+import net.primal.android.user.accounts.active.ActiveAccountStore
 
 @HiltViewModel
 class BookmarksViewModel @Inject constructor(

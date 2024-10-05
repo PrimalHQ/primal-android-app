@@ -60,7 +60,6 @@ import net.primal.android.explore.search.SearchViewModel
 import net.primal.android.explore.search.ui.SearchScreen
 import net.primal.android.feeds.domain.buildAdvancedSearchArticlesFeedSpec
 import net.primal.android.feeds.domain.buildAdvancedSearchNotesFeedSpec
-import net.primal.android.feeds.domain.buildNotesBookmarksFeedSpec
 import net.primal.android.feeds.domain.buildSimpleSearchNotesFeedSpec
 import net.primal.android.messages.chat.ChatScreen
 import net.primal.android.messages.chat.ChatViewModel
@@ -854,21 +853,19 @@ private fun NavGraphBuilder.messages(
     )
 }
 
-private fun NavGraphBuilder.bookmarks(
-    route: String,
-    navController: NavController,
-) = composable(
-    route = route,
-) {
-    val viewModel: BookmarksViewModel = hiltViewModel()
-    ApplyEdgeToEdge()
-    BookmarksScreen(
-        viewModel = viewModel,
-        onClose = { navController.navigateUp() },
-        noteCallbacks = noteCallbacksHandler(navController),
-        onGoToWallet = { navController.navigateToWallet() },
-    )
-}
+private fun NavGraphBuilder.bookmarks(route: String, navController: NavController) =
+    composable(
+        route = route,
+    ) {
+        val viewModel: BookmarksViewModel = hiltViewModel()
+        ApplyEdgeToEdge()
+        BookmarksScreen(
+            viewModel = viewModel,
+            onClose = { navController.navigateUp() },
+            noteCallbacks = noteCallbacksHandler(navController),
+            onGoToWallet = { navController.navigateToWallet() },
+        )
+    }
 
 private fun NavGraphBuilder.chat(
     route: String,

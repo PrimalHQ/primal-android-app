@@ -39,7 +39,6 @@ import net.primal.android.notes.feed.NoteFeedList
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.theme.AppTheme
 
-
 @Composable
 fun BookmarksScreen(
     viewModel: BookmarksViewModel,
@@ -58,9 +57,8 @@ fun BookmarksScreen(
     )
 }
 
-
 @Composable
-fun BookmarksScreen(
+private fun BookmarksScreen(
     state: BookmarksContract.UiState,
     eventPublisher: (BookmarksContract.UiEvent) -> Unit,
     onClose: () -> Unit,
@@ -128,15 +126,11 @@ fun BookmarksScreen(
             }
         }
     }
-
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BookmarksTopAppBar(
-    onFeedSpecKindChanged: (FeedSpecKind) -> Unit,
-    onClose: () -> Unit,
-) {
+private fun BookmarksTopAppBar(onFeedSpecKindChanged: (FeedSpecKind) -> Unit, onClose: () -> Unit) {
     var bookmarksPickerVisibility by remember { mutableStateOf(false) }
 
     if (bookmarksPickerVisibility) {
@@ -157,7 +151,7 @@ fun BookmarksTopAppBar(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BookmarksBottomSheetPicker(
+private fun BookmarksBottomSheetPicker(
     onDismissRequest: () -> Unit,
     sheetState: SheetState = rememberModalBottomSheetState(),
     onFeedSpecKindChanged: (FeedSpecKind) -> Unit,
@@ -192,10 +186,7 @@ fun BookmarksBottomSheetPicker(
 }
 
 @Composable
-fun BookmarksBottomSheetListItem(
-    text: String,
-    onClick: () -> Unit,
-) {
+private fun BookmarksBottomSheetListItem(text: String, onClick: () -> Unit) {
     ListItem(
         modifier = Modifier
             .fillMaxWidth()
