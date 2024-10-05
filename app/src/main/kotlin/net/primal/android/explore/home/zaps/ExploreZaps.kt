@@ -216,7 +216,7 @@ private fun ZapHeader(
         Column(
             modifier = Modifier.padding(vertical = 4.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(4.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically),
         ) {
             val numberFormat = NumberFormat.getNumberInstance()
             Row(
@@ -235,12 +235,14 @@ private fun ZapHeader(
                     style = AppTheme.typography.bodyMedium,
                 )
             }
-            Text(
-                text = message ?: "",
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                style = AppTheme.typography.bodySmall,
-            )
+            if (!message.isNullOrEmpty()) {
+                Text(
+                    text = message,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    style = AppTheme.typography.bodySmall,
+                )
+            }
         }
 
         AvatarThumbnail(
