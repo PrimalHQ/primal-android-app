@@ -63,7 +63,6 @@ class ExploreApiImpl @Inject constructor(
             cdnResources = queryResult.filterPrimalEvents(NostrEventKind.PrimalCdnResource),
             usersScores = queryResult.findPrimalEvent(NostrEventKind.PrimalUserScores),
             nostrZapEvents = queryResult.filterNostrEvents(NostrEventKind.Zap),
-            primalZapEvents = queryResult.filterPrimalEvents(NostrEventKind.PrimalZapEvent),
             noteEvents = queryResult.filterNostrEvents(NostrEventKind.ShortTextNote),
         )
     }

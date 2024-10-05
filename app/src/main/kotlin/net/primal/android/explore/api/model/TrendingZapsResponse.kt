@@ -10,6 +10,5 @@ data class TrendingZapsResponse(
     val cdnResources: List<PrimalEvent> = emptyList(),
     val usersScores: PrimalEvent?,
     val nostrZapEvents: List<NostrEvent> = emptyList(),
-    val primalZapEvents: List<PrimalEvent> = emptyList(),
     val noteEvents: List<NostrEvent> = emptyList(),
 )
