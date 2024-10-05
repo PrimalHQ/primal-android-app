@@ -37,7 +37,9 @@ import net.primal.android.explore.feed.ExploreFeedContract.UiEvent.AddToUserFeed
 import net.primal.android.explore.feed.ExploreFeedContract.UiEvent.RemoveFromUserFeeds
 import net.primal.android.explore.feed.ExploreFeedContract.UiState.ExploreFeedError
 import net.primal.android.feeds.domain.FeedSpecKind
+import net.primal.android.feeds.domain.extractTopicFromFeedSpec
 import net.primal.android.feeds.domain.isNotesBookmarkFeedSpec
+import net.primal.android.feeds.domain.isSearchFeedSpec
 import net.primal.android.notes.feed.MediaFeedGrid
 import net.primal.android.notes.feed.NoteFeedList
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
@@ -217,13 +219,15 @@ fun UnknownFeedSpecKind(feedSpec: String) {
 }
 
 @Composable
-private fun ExploreFeedContract.UiState.extractTitle() =
-    when {
-        // TODO Extract search title once api is implemented
-//        feedSpec.isSearchFeed() -> feedSpec.removeSearchPrefix()
+private fun ExploreFeedContract.UiState.extractTitle(): String {
+    val topic = feedSpec.extractTopicFromFeedSpec()
+    return when {
+        topic != null -> topic
+        feedSpec.isSearchFeedSpec() -> stringResource(R.string.explore_feed_search_results)
         feedSpec.isNotesBookmarkFeedSpec() -> stringResource(id = R.string.bookmarks_title)
-        else -> stringResource(id = R.string.explore_fallback_title)
+        else -> stringResource(id = R.string.explore_feed_fallback_title)
     }
+}
 
 @Composable
 private fun AddRemoveUserFeedAppBarIcon(

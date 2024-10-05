@@ -53,7 +53,7 @@ fun SearchScreen(
     onProfileClick: (String) -> Unit,
     onNoteClick: (String) -> Unit,
     onNaddrClick: (String) -> Unit,
-    onSearchContent: (String) -> Unit,
+    onSearchContent: (query: String) -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
     SearchScreen(
@@ -76,7 +76,7 @@ fun SearchScreen(
     onProfileClick: (String) -> Unit,
     onNoteClick: (String) -> Unit,
     onNaddrClick: (String) -> Unit,
-    onSearchContent: (String) -> Unit,
+    onSearchContent: (query: String) -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val scope = rememberCoroutineScope()
@@ -126,11 +126,7 @@ fun SearchScreen(
                                     }
                                     profileId != null -> onProfileClick(profileId)
                                     naddr != null -> onNaddrClick(naddr)
-                                    else -> {
-                                        val feedSpec = """{"id":"search","kind":"notes","query":"$query"}"""
-                                            .trimIndent()
-                                        onSearchContent(feedSpec)
-                                    }
+                                    else -> onSearchContent(query)
                                 }
                             }
                         },
