@@ -93,6 +93,8 @@ fun buildSimpleSearchNotesFeedSpec(query: String): String = """{"id":"search","k
 
 fun buildAdvancedSearchArticlesFeedSpec(query: String): String = """{"id":"advsearch","query":"kind:30023 $query"}"""
 
+fun buildExploreMediaFeedSpec() = """{"id":"explore-media"}"""
+
 fun String.extractTopicFromFeedSpec(): String? {
     val noteQueryStartIndex = this.indexOf("\"query\":\"kind:1 #")
     val articleQueryStartIndex = this.indexOf("\"query\":\"kind:30023 #")
