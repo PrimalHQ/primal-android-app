@@ -60,6 +60,7 @@ enum class NostrEventKind(val value: Int) {
     PrimalDefaultRelaysList(value = 10_000_124),
     PrimalIsUserFollowing(value = 10_000_125),
     PrimalLinkPreview(value = 10_000_128),
+    PrimalZapEvent(value = 10_000_129),
     PrimalNotificationsSummary2(value = 10_000_132),
     PrimalUserFollowersCounts(value = 10_000_133),
     PrimalDirectMessagesUnreadCount2(value = 10_000_134),
