@@ -7,5 +7,5 @@ import kotlinx.serialization.Serializable
 data class NewUserFollowStats(
     @SerialName("increase") val increase: Int,
     @SerialName("ratio") val ratio: Float,
-    @SerialName("count") val count: Int,
+    @SerialName("count") val count: Int? = null,
 )
