@@ -1,1 +1,2 @@
-Explore topics; Explore Media; Restore default feeds; Article Stats; Article Actions; Article Hashtags feeds;
+All explore tabs implement.
+Article bookmarking, muting, reporting and remaining menu options implemented.
