@@ -78,6 +78,7 @@ private fun ExploreZaps(
         state.loading && state.zaps.isEmpty() -> {
             PrimalLoadingSpinner()
         }
+
         state.zaps.isEmpty() -> {
             ListNoContent(
                 modifier = Modifier.fillMaxSize(),
@@ -86,24 +87,27 @@ private fun ExploreZaps(
                 onRefresh = { eventPublisher(ExploreZapsContract.UiEvent.RefreshZaps) },
             )
         }
-    }
-    LazyColumn(
-        modifier = modifier.padding(horizontal = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-        contentPadding = paddingValues,
-    ) {
-        item { Spacer(modifier = Modifier.height(4.dp)) }
-        items(
-            items = state.zaps,
-            key = { "${it.noteId}${it.sender?.pubkey}" },
-        ) { item ->
-            ZapListItem(
-                zapData = item,
-                onProfileClick = onProfileClick,
-                onNoteClick = onNoteClick,
-            )
+
+        else -> {
+            LazyColumn(
+                modifier = modifier.padding(horizontal = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                contentPadding = paddingValues,
+            ) {
+                item { Spacer(modifier = Modifier.height(4.dp)) }
+                items(
+                    items = state.zaps,
+                    key = { "${it.noteId}${it.sender?.pubkey}" },
+                ) { item ->
+                    ZapListItem(
+                        zapData = item,
+                        onProfileClick = onProfileClick,
+                        onNoteClick = onNoteClick,
+                    )
+                }
+                item { Spacer(modifier = Modifier.height(4.dp)) }
+            }
         }
-        item { Spacer(modifier = Modifier.height(4.dp)) }
     }
 }
 
