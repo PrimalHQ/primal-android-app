@@ -89,4 +89,25 @@ fun buildNotesBookmarksFeedSpec(userId: String): String =
 
 fun buildAdvancedSearchNotesFeedSpec(query: String): String = """{"id":"advsearch","query":"kind:1 $query"}"""
 
+fun buildSimpleSearchNotesFeedSpec(query: String): String = """{"id":"search","kind":"notes","query":"$query"}"""
+
 fun buildAdvancedSearchArticlesFeedSpec(query: String): String = """{"id":"advsearch","query":"kind:30023 $query"}"""
+
+fun String.extractTopicFromFeedSpec(): String? {
+    val noteQueryStartIndex = this.indexOf("\"query\":\"kind:1 #")
+    val articleQueryStartIndex = this.indexOf("\"query\":\"kind:30023 #")
+
+    return if (noteQueryStartIndex != -1) {
+        val noteTopicStartIndex = this.indexOf("#", startIndex = noteQueryStartIndex)
+        val noteTopicEndIndex = this.indexOf("}", startIndex = noteQueryStartIndex) - 1
+        this.substring(startIndex = noteTopicStartIndex, endIndex = noteTopicEndIndex)
+    } else if (articleQueryStartIndex != -1) {
+        val articleTopicStartIndex = this.indexOf("#", startIndex = articleQueryStartIndex)
+        val articleTopicEndIndex = this.indexOf("}", startIndex = articleQueryStartIndex) - 1
+        this.substring(startIndex = articleTopicStartIndex, endIndex = articleTopicEndIndex)
+    } else {
+        null
+    }
+}
+
+fun String.isSearchFeedSpec(): Boolean = this.contains("\"id\":\"advsearch\"") || this.contains("\"id\":\"search\"")

@@ -59,6 +59,7 @@ import net.primal.android.explore.search.ui.SearchScreen
 import net.primal.android.feeds.domain.buildAdvancedSearchArticlesFeedSpec
 import net.primal.android.feeds.domain.buildAdvancedSearchNotesFeedSpec
 import net.primal.android.feeds.domain.buildNotesBookmarksFeedSpec
+import net.primal.android.feeds.domain.buildSimpleSearchNotesFeedSpec
 import net.primal.android.messages.chat.ChatScreen
 import net.primal.android.messages.chat.ChatViewModel
 import net.primal.android.messages.conversation.MessageConversationListViewModel
@@ -778,7 +779,9 @@ private fun NavGraphBuilder.search(route: String, navController: NavController) 
             onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
             onNoteClick = { noteId -> navController.navigateToThread(noteId) },
             onNaddrClick = { naddr -> navController.navigateToArticleDetails(naddr) },
-            onSearchContent = { query -> navController.navigateToExploreFeed(query) },
+            onSearchContent = { query ->
+                navController.navigateToExploreFeed(feedSpec = buildSimpleSearchNotesFeedSpec(query = query))
+            },
         )
     }
 
