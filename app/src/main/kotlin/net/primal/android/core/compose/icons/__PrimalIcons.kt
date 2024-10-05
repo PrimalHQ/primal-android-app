@@ -59,6 +59,7 @@ import net.primal.android.core.compose.icons.primaliconpack.Key
 import net.primal.android.core.compose.icons.primaliconpack.Keyboard
 import net.primal.android.core.compose.icons.primaliconpack.LightMode
 import net.primal.android.core.compose.icons.primaliconpack.LightningBolt
+import net.primal.android.core.compose.icons.primaliconpack.LightningBoltFilled
 import net.primal.android.core.compose.icons.primaliconpack.Link
 import net.primal.android.core.compose.icons.primaliconpack.LongRead
 import net.primal.android.core.compose.icons.primaliconpack.LongReadFilled
@@ -196,6 +197,7 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             WalletLightningPaymentFilled,
             WalletLightningPaymentAlt,
             LightningBolt,
+            LightningBoltFilled,
             Keyboard,
             PhotoFromGallery,
             Paste,
