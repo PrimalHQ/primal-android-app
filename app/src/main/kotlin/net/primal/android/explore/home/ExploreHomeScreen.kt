@@ -61,7 +61,9 @@ import net.primal.android.explore.home.ui.MEDIA_INDEX
 import net.primal.android.explore.home.ui.PEOPLE_INDEX
 import net.primal.android.explore.home.ui.TOPICS_INDEX
 import net.primal.android.explore.home.ui.ZAPS_INDEX
+import net.primal.android.explore.home.zaps.ExploreZaps
 import net.primal.android.feeds.domain.buildExploreMediaFeedSpec
+import net.primal.android.explore.home.zaps.ExploreZaps
 import net.primal.android.notes.feed.MediaFeedGrid
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
@@ -142,6 +144,13 @@ private fun ExploreHomeScreen(
                                     )
                                 }
                             },
+                        )
+                    }
+                    ZAPS_INDEX -> {
+                        ExploreZaps(
+                            paddingValues = paddingValues,
+                            onProfileClick = onProfileClick,
+                            onNoteClick = onNoteClick,
                         )
                     }
                     MEDIA_INDEX -> {
