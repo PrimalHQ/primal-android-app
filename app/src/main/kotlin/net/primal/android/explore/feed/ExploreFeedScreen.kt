@@ -1,8 +1,8 @@
 package net.primal.android.explore.feed
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
@@ -127,30 +127,30 @@ fun ExploreFeedScreen(
             )
         },
         content = { paddingValues ->
-            Box(modifier = Modifier.padding(paddingValues)) {
-                when (state.feedSpecKind) {
-                    FeedSpecKind.Reads -> ExploreArticleFeed(
-                        feedSpec = state.feedSpec,
-                        onArticleClick = { noteCallbacks.onArticleClick?.invoke(it) },
-                    )
+            when (state.feedSpecKind) {
+                FeedSpecKind.Reads -> ExploreArticleFeed(
+                    feedSpec = state.feedSpec,
+                    onArticleClick = { noteCallbacks.onArticleClick?.invoke(it) },
+                    contentPadding = paddingValues,
+                )
 
-                    FeedSpecKind.Notes -> ExploreNoteFeed(
-                        feedSpec = state.feedSpec,
-                        renderType = state.renderType,
-                        noteCallbacks = noteCallbacks,
-                        onGoToWallet = onGoToWallet,
-                        onUiError = { uiError ->
-                            uiScope.launch {
-                                snackbarHostState.showSnackbar(
-                                    message = uiError.resolveUiErrorMessage(context),
-                                    duration = SnackbarDuration.Short,
-                                )
-                            }
-                        },
-                    )
+                FeedSpecKind.Notes -> ExploreNoteFeed(
+                    feedSpec = state.feedSpec,
+                    renderType = state.renderType,
+                    noteCallbacks = noteCallbacks,
+                    contentPadding = paddingValues,
+                    onGoToWallet = onGoToWallet,
+                    onUiError = { uiError ->
+                        uiScope.launch {
+                            snackbarHostState.showSnackbar(
+                                message = uiError.resolveUiErrorMessage(context),
+                                duration = SnackbarDuration.Short,
+                            )
+                        }
+                    },
+                )
 
-                    null -> UnknownFeedSpecKind(feedSpec = state.feedSpec)
-                }
+                null -> UnknownFeedSpecKind(feedSpec = state.feedSpec)
             }
         },
         snackbarHost = {
@@ -163,6 +163,7 @@ fun ExploreFeedScreen(
 private fun ExploreNoteFeed(
     feedSpec: String,
     renderType: ExploreFeedContract.RenderType,
+    contentPadding: PaddingValues,
     noteCallbacks: NoteCallbacks,
     onGoToWallet: () -> Unit,
     onUiError: ((UiError) -> Unit)? = null,
@@ -173,10 +174,12 @@ private fun ExploreNoteFeed(
                 feedSpec = feedSpec,
                 noteCallbacks = noteCallbacks,
                 onGoToWallet = onGoToWallet,
+                contentPadding = contentPadding,
                 noContentText = when {
                     feedSpec.isNotesBookmarkFeedSpec() -> stringResource(
                         id = R.string.bookmarks_no_content,
                     )
+
                     else -> stringResource(id = R.string.feed_no_content)
                 },
                 onUiError = onUiError,
@@ -186,6 +189,7 @@ private fun ExploreNoteFeed(
         ExploreFeedContract.RenderType.Grid -> {
             MediaFeedGrid(
                 feedSpec = feedSpec,
+                contentPadding = contentPadding,
                 onNoteClick = { noteCallbacks.onNoteClick?.invoke(it) },
             )
         }
@@ -195,11 +199,13 @@ private fun ExploreNoteFeed(
 @Composable
 private fun ExploreArticleFeed(
     feedSpec: String,
+    contentPadding: PaddingValues,
     onArticleClick: (naddr: String) -> Unit,
     onUiError: ((UiError) -> Unit)? = null,
 ) {
     ArticleFeedList(
         feedSpec = feedSpec,
+        contentPadding = contentPadding,
         onArticleClick = onArticleClick,
         onUiError = onUiError,
     )

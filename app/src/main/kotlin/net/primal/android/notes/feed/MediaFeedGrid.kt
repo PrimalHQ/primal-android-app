@@ -35,6 +35,7 @@ fun MediaFeedGrid(
     onNoteClick: (String) -> Unit,
     modifier: Modifier = Modifier,
     gridState: LazyGridState = rememberLazyGridState(),
+    contentPadding: PaddingValues = PaddingValues(0.dp),
     noContentVerticalArrangement: Arrangement.Vertical = Arrangement.Center,
     noContentPaddingValues: PaddingValues = PaddingValues(all = 0.dp),
 ) {
@@ -50,6 +51,7 @@ fun MediaFeedGrid(
         onNoteClick = onNoteClick,
         gridState = gridState,
         modifier = modifier,
+        contentPadding = contentPadding,
         noContentVerticalArrangement = noContentVerticalArrangement,
         noContentPaddingValues = noContentPaddingValues,
     )
@@ -61,6 +63,7 @@ private fun MediaFeedGrid(
     state: MediaFeedContract.UiState,
     onNoteClick: (String) -> Unit,
     gridState: LazyGridState = rememberLazyGridState(),
+    contentPadding: PaddingValues = PaddingValues(0.dp),
     noContentVerticalArrangement: Arrangement.Vertical = Arrangement.Center,
     noContentPaddingValues: PaddingValues = PaddingValues(all = 0.dp),
 ) {
@@ -79,6 +82,7 @@ private fun MediaFeedGrid(
                 modifier = modifier,
                 columns = GridCells.Fixed(count = 3),
                 state = gridState,
+                contentPadding = contentPadding,
             ) {
                 items(
                     count = pagingItems.itemCount,
