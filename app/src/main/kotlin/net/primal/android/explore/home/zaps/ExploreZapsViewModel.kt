@@ -2,7 +2,6 @@ package net.primal.android.explore.home.zaps
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -10,10 +9,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
+import net.primal.android.explore.home.zaps.ExploreZapsContract.UiEvent
+import net.primal.android.explore.home.zaps.ExploreZapsContract.UiState
 import net.primal.android.explore.repository.ExploreRepository
-import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.android.explore.home.zaps.ExploreZapsContract.*
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.user.accounts.active.ActiveAccountStore
 import timber.log.Timber
 
 @HiltViewModel
@@ -57,5 +57,4 @@ class ExploreZapsViewModel @Inject constructor(
                 }
             }
         }
-
 }

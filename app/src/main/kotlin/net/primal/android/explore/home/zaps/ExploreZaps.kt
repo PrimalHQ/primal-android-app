@@ -43,7 +43,6 @@ import net.primal.android.core.compose.icons.primaliconpack.LightningBoltFilled
 import net.primal.android.explore.api.model.ExploreZapData
 import net.primal.android.theme.AppTheme
 
-
 @Composable
 fun ExploreZaps(
     modifier: Modifier = Modifier,
@@ -251,5 +250,4 @@ private fun ZapHeader(
             onClick = onReceiverAvatarClick,
         )
     }
-
 }

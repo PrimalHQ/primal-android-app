@@ -68,7 +68,6 @@ class ExploreRepository @Inject constructor(
             }
         }
 
-
     suspend fun fetchTrendingPeople(userId: String): List<ExplorePeopleData> =
         withContext(dispatchers.io()) {
             val response = exploreApi.getTrendingPeople(body = ExploreRequestBody(userPubKey = userId, limit = 100))
