@@ -36,6 +36,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import java.text.NumberFormat
 import net.primal.android.R
 import net.primal.android.attachments.domain.CdnImage
+import net.primal.android.core.compose.AvatarOverlap
 import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.AvatarThumbnailsRow
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -196,6 +197,7 @@ private fun DvmFeedListItem(
                                 displayAvatarOverflowIndicator = false,
                                 avatarBorderColor = listItemContainerColor,
                                 avatarSize = profileAvatarSize,
+                                avatarOverlap = AvatarOverlap.Start,
                             )
                         }
                     }

@@ -169,7 +169,7 @@ class FeedsRepository @Inject constructor(
                 val dvmTitle = dvmMetadata?.name
                 val profileDatasFromFollowsActions = profiles
                     .filter { followsActions[nostrEvent.id]?.userIds?.contains(it.ownerId) == true }
-                    .sortedByDescending { profileData -> profileScores[profileData.ownerId] }
+                    .sortedBy { profileData -> profileScores[profileData.ownerId] }
 
                 if (dvmMetadata != null && dvmId != null && dvmTitle != null) {
                     DvmFeed(
