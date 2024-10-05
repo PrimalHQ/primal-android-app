@@ -138,9 +138,6 @@ fun String.isNotesFeedSpec(): Boolean = this.contains("\"kind\":\"notes\"") || t
 
 fun String.isReadsFeedSpec(): Boolean = this.contains("\"kind\":\"reads\"") || this.contains("kind:30023")
 
-fun buildNotesBookmarksFeedSpec(userId: String): String =
-    "{\"id\":\"feed\",\"kind\":\"notes\",\"notes\":\"bookmarks\",\"pubkey\":\"$userId\"}"
-
 fun buildAdvancedSearchNotesFeedSpec(query: String): String = """{"id":"advsearch","query":"kind:1 $query"}"""
 
 fun buildSimpleSearchNotesFeedSpec(query: String): String = """{"id":"search","kind":"notes","query":"$query"}"""
