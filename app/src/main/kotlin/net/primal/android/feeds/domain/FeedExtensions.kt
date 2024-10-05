@@ -98,9 +98,9 @@ fun String.resolveDefaultTitle(): String =
         when {
             topic != null -> "Topic: $topic"
 
-            advancedQuery != null -> "Search: $advancedQuery"
+            isAdvancedSearchFeedSpec() && advancedQuery != null -> "Search: $advancedQuery"
 
-            simpleQuery != null -> "Search: $simpleQuery"
+            isSimpleSearchFeedSpec() && simpleQuery != null -> "Search: $simpleQuery"
 
             pubkey != null -> "User: ${pubkey.hexToNpubHrp().ellipsizeMiddle(size = 8)}"
 
@@ -149,12 +149,9 @@ fun buildAdvancedSearchArticlesFeedSpec(query: String): String = """{"id":"advse
 
 fun buildExploreMediaFeedSpec() = """{"id":"explore-media"}"""
 
-fun String.extractTopicFromFeedSpec(): String? = extractAdvancedSearchQuery(queryPrefix = "#")
-
-fun String.extractAdvancedSearchQuery(queryPrefix: String? = null): String? {
-    val query = if (queryPrefix != null) " $queryPrefix" else ""
-    val noteQueryStartIndex = this.indexOf("\"query\":\"kind:1$query")
-    val articleQueryStartIndex = this.indexOf("\"query\":\"kind:30023$query")
+fun String.extractTopicFromFeedSpec(): String? {
+    val noteQueryStartIndex = this.indexOf("\"query\":\"kind:1 #")
+    val articleQueryStartIndex = this.indexOf("\"query\":\"kind:30023 #")
 
     return if (noteQueryStartIndex != -1) {
         val noteTopicStartIndex = this.indexOf("#", startIndex = noteQueryStartIndex)
@@ -164,6 +161,25 @@ fun String.extractAdvancedSearchQuery(queryPrefix: String? = null): String? {
         val articleTopicStartIndex = this.indexOf("#", startIndex = articleQueryStartIndex)
         val articleTopicEndIndex = this.indexOf("}", startIndex = articleQueryStartIndex) - 1
         this.substring(startIndex = articleTopicStartIndex, endIndex = articleTopicEndIndex)
+    } else {
+        null
+    }
+}
+
+fun String.extractAdvancedSearchQuery(): String? {
+    val noteQueryField = "\"query\":\"kind:1"
+    val noteQueryFieldStartIndex = this.indexOf(noteQueryField)
+    val articleQueryField = "\"query\":\"kind:30023"
+    val articleQueryFieldStartIndex = this.indexOf(articleQueryField)
+
+    return if (noteQueryFieldStartIndex != -1) {
+        val noteQueryStartIndex = noteQueryFieldStartIndex + noteQueryField.length
+        val noteQueryEndIndex = this.indexOf("\"", startIndex = noteQueryStartIndex)
+        this.substring(startIndex = noteQueryStartIndex, endIndex = noteQueryEndIndex)
+    } else if (articleQueryFieldStartIndex != -1) {
+        val articleQueryStartIndex = articleQueryFieldStartIndex + articleQueryField.length
+        val articleQueryEndIndex = this.indexOf("\"", startIndex = articleQueryStartIndex)
+        this.substring(startIndex = articleQueryStartIndex, endIndex = articleQueryEndIndex)
     } else {
         null
     }
