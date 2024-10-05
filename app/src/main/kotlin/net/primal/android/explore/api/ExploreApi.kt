@@ -4,11 +4,14 @@ import net.primal.android.explore.api.model.ExploreRequestBody
 import net.primal.android.explore.api.model.SearchUsersRequestBody
 import net.primal.android.explore.api.model.TopicScore
 import net.primal.android.explore.api.model.TrendingPeopleResponse
+import net.primal.android.explore.api.model.TrendingZapsResponse
 import net.primal.android.explore.api.model.UsersResponse
 
 interface ExploreApi {
 
     suspend fun getTrendingPeople(body: ExploreRequestBody): TrendingPeopleResponse
+
+    suspend fun getTrendingZaps(body: ExploreRequestBody): TrendingZapsResponse
 
     suspend fun getTrendingTopics(): List<TopicScore>
 
