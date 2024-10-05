@@ -9,8 +9,8 @@ data class Feed(
     @PrimaryKey
     val spec: String,
     val specKind: FeedSpecKind,
-    val name: String,
+    val feedKind: String,
+    val title: String,
     val description: String,
     val enabled: Boolean = true,
-    val feedKind: String? = null,
 )

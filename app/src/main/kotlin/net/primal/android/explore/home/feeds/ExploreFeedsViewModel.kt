@@ -59,9 +59,9 @@ class ExploreFeedsViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 dvmFeed.kind?.let {
-                    feedsRepository.addDvmFeed(dvmFeed = dvmFeed, specKind = dvmFeed.kind)
+                    feedsRepository.addDvmFeedLocally(dvmFeed = dvmFeed, specKind = dvmFeed.kind)
                 }
-                feedsRepository.persistAllLocalUserFeeds(userId = activeAccountStore.activeUserId())
+                feedsRepository.persistRemotelyAllLocalUserFeeds(userId = activeAccountStore.activeUserId())
             } catch (error: WssException) {
                 Timber.w(error)
             }
@@ -71,9 +71,9 @@ class ExploreFeedsViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 dvmFeed.kind?.let {
-                    feedsRepository.removeFeed(feedSpec = dvmFeed.buildSpec(specKind = dvmFeed.kind))
+                    feedsRepository.removeFeedLocally(feedSpec = dvmFeed.buildSpec(specKind = dvmFeed.kind))
                 }
-                feedsRepository.persistAllLocalUserFeeds(userId = activeAccountStore.activeUserId())
+                feedsRepository.persistRemotelyAllLocalUserFeeds(userId = activeAccountStore.activeUserId())
             } catch (error: WssException) {
                 Timber.w(error)
             }

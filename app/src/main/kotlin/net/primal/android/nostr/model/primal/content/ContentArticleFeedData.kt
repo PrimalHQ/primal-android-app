@@ -9,5 +9,5 @@ data class ContentArticleFeedData(
     val description: String,
     val spec: String,
     val enabled: Boolean,
-    @SerialName("feedkind") val feedKind: String?,
+    @SerialName("feedkind") val feedKind: String,
 )

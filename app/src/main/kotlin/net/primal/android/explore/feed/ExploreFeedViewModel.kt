@@ -18,17 +18,26 @@ import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.explore.feed.ExploreFeedContract.UiEvent
 import net.primal.android.explore.feed.ExploreFeedContract.UiState
 import net.primal.android.explore.feed.ExploreFeedContract.UiState.ExploreFeedError
+import net.primal.android.feeds.domain.FEED_KIND_SEARCH
 import net.primal.android.feeds.domain.isNotesBookmarkFeedSpec
+import net.primal.android.feeds.domain.resolveDefaultDescription
+import net.primal.android.feeds.domain.resolveDefaultTitle
 import net.primal.android.feeds.domain.resolveFeedSpecKind
+import net.primal.android.feeds.repository.FeedsRepository
 import net.primal.android.navigation.exploreFeedSpecOrThrow
 import net.primal.android.navigation.renderType
+import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.notes.repository.FeedRepository
+import net.primal.android.user.accounts.active.ActiveAccountStore
+import timber.log.Timber
 
 @HiltViewModel
 class ExploreFeedViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val dispatcherProvider: CoroutineDispatcherProvider,
     private val feedRepository: FeedRepository,
+    private val feedsRepository: FeedsRepository,
+    private val activeAccountStore: ActiveAccountStore,
 ) : ViewModel() {
 
     private val exploreFeedSpec = savedStateHandle.exploreFeedSpecOrThrow
@@ -66,7 +75,7 @@ class ExploreFeedViewModel @Inject constructor(
 
     private fun observeContainsFeed() =
         viewModelScope.launch {
-            feedRepository.observeContainsFeed(feedSpec = exploreFeedSpec).collect {
+            feedsRepository.observeContainsFeedSpec(feedSpec = exploreFeedSpec).collect {
                 setState { copy(existsInUserFeeds = it) }
             }
         }
@@ -75,39 +84,39 @@ class ExploreFeedViewModel @Inject constructor(
         viewModelScope.launch {
             events.collect {
                 when (it) {
-                    is UiEvent.AddToUserFeeds -> addToMyFeeds(title = it.title)
+                    is UiEvent.AddToUserFeeds -> addToMyFeeds(it)
                     UiEvent.RemoveFromUserFeeds -> removeFromMyFeeds()
                 }
             }
         }
 
-    private suspend fun addToMyFeeds(title: String) {
-        setErrorState(error = ExploreFeedError.FailedToAddToFeed(RuntimeException("Api not implemented")))
-        // TODO Implement adding user feed in ExploreFeeds
-//        try {
-//            settingsRepository.addAndPersistUserFeed(
-//                userId = activeAccountStore.activeUserId(),
-//                name = title,
-//                directive = exploreFeedDirective,
-//            )
-//        } catch (error: WssException) {
-//            Timber.w(error)
-//            setErrorState(error = ExploreFeedError.FailedToAddToFeed(error))
-//        }
+    private suspend fun addToMyFeeds(event: UiEvent.AddToUserFeeds) {
+        try {
+            val feedSpecKind = exploreFeedSpec.resolveFeedSpecKind()
+            if (feedSpecKind != null) {
+                feedsRepository.addFeedLocally(
+                    feedSpec = exploreFeedSpec,
+                    title = exploreFeedSpec.resolveDefaultTitle(),
+                    description = exploreFeedSpec.resolveDefaultDescription(),
+                    feedSpecKind = feedSpecKind,
+                    feedKind = FEED_KIND_SEARCH,
+                )
+                feedsRepository.persistRemotelyAllLocalUserFeeds(userId = activeAccountStore.activeUserId())
+            }
+        } catch (error: WssException) {
+            Timber.w(error)
+            setErrorState(error = ExploreFeedError.FailedToAddToFeed(error))
+        }
     }
 
     private suspend fun removeFromMyFeeds() {
-        setErrorState(error = ExploreFeedError.FailedToRemoveFeed(RuntimeException("Api not implemented")))
-        // TODO Implement removing user feed in ExploreFeeds
-//        try {
-//            settingsRepository.removeAndPersistUserFeed(
-//                userId = activeAccountStore.activeUserId(),
-//                directive = exploreFeedDirective,
-//            )
-//        } catch (error: WssException) {
-//            Timber.w(error)
-//            setErrorState(error = ExploreFeedError.FailedToRemoveFeed(error))
-//        }
+        try {
+            feedsRepository.removeFeedLocally(feedSpec = exploreFeedSpec)
+            feedsRepository.persistRemotelyAllLocalUserFeeds(userId = activeAccountStore.activeUserId())
+        } catch (error: WssException) {
+            Timber.w(error)
+            setErrorState(error = ExploreFeedError.FailedToRemoveFeed(error))
+        }
     }
 
     private fun setErrorState(error: ExploreFeedError) {

@@ -6,6 +6,7 @@ import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
+import net.primal.android.bookmarks.BookmarksRepository
 import net.primal.android.core.FakeDataStore
 import net.primal.android.core.coroutines.CoroutinesTestRule
 import net.primal.android.networking.sockets.errors.WssException
@@ -29,12 +30,14 @@ class LoginHandlerTest {
         authRepository: AuthRepository = mockk(relaxed = true),
         userRepository: UserRepository = mockk(relaxed = true),
         mutedUserRepository: MutedUserRepository = mockk(relaxed = true),
+        bookmarksRepository: BookmarksRepository = mockk(relaxed = true),
     ): LoginHandler =
         LoginHandler(
             settingsRepository = settingsRepository,
             authRepository = authRepository,
             userRepository = userRepository,
             mutedUserRepository = mutedUserRepository,
+            bookmarksRepository = bookmarksRepository,
         )
 
     @Test

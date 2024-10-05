@@ -149,7 +149,7 @@ fun HomeFeedScreen(
         topAppBarState = topAppBarState,
         topAppBar = { scrollBehavior ->
             NoteFeedTopAppBar(
-                title = activeFeed?.name ?: "",
+                title = activeFeed?.title ?: "",
                 activeFeed = activeFeed,
                 avatarCdnImage = state.activeAccountAvatarCdnImage,
                 onAvatarClick = { uiScope.launch { drawerState.open() } },

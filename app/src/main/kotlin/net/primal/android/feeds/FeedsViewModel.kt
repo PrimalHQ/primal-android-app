@@ -25,6 +25,7 @@ import net.primal.android.feeds.ui.model.FeedUi
 import net.primal.android.feeds.ui.model.asFeedPO
 import net.primal.android.feeds.ui.model.asFeedUi
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.notes.repository.FeedRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import timber.log.Timber
 
@@ -32,6 +33,7 @@ import timber.log.Timber
 class FeedsViewModel @AssistedInject constructor(
     @Assisted activeFeed: FeedUi,
     @Assisted private val specKind: FeedSpecKind,
+    private val feedRepository: FeedRepository,
     private val feedsRepository: FeedsRepository,
     private val activeAccountStore: ActiveAccountStore,
 ) : ViewModel() {
@@ -111,7 +113,7 @@ class FeedsViewModel @AssistedInject constructor(
                     UiEvent.CloseEditMode -> {
                         setState { copy(isEditMode = false) }
                         updateFeedsState()
-                        persistReadsFeed()
+                        persistRemotelyFeeds()
                     }
 
                     is UiEvent.FeedReordered -> {
@@ -213,13 +215,13 @@ class FeedsViewModel @AssistedInject constructor(
     private fun scheduleClearingDvmFeed(dvmFeed: DvmFeed) =
         viewModelScope.launch {
             delay(400.milliseconds)
-            feedsRepository.clearReadsDvmFeed(dvmFeed = dvmFeed, specKind = specKind)
+            feedRepository.removeFeedSpec(feedSpec = dvmFeed.buildSpec(specKind = specKind))
             setState { copy(selectedDvmFeed = null) }
         }
 
     private fun addToUserFeeds(dvmFeed: DvmFeed) =
         viewModelScope.launch {
-            feedsRepository.addReadsDvmFeed(dvmFeed = dvmFeed, specKind = specKind)
+            feedsRepository.addDvmFeedLocally(dvmFeed = dvmFeed, specKind = specKind)
         }
 
     private fun removeFromUserFeeds(spec: String) =
@@ -228,15 +230,15 @@ class FeedsViewModel @AssistedInject constructor(
                 removeIf { it.spec == spec }
             }
             updateFeedsState()
-            feedsRepository.removeFeed(feedSpec = spec)
-            persistReadsFeed()
+            feedsRepository.removeFeedLocally(feedSpec = spec)
+            persistRemotelyFeeds()
         }
 
-    private fun persistReadsFeed() =
+    private fun persistRemotelyFeeds() =
         viewModelScope.launch {
             val currentFeeds = allFeeds.map { it.asFeedPO() }
             try {
-                feedsRepository.persistGivenUserFeeds(
+                feedsRepository.persistLocallyAndRemotelyUserFeeds(
                     userId = activeAccountStore.activeUserId(),
                     feeds = currentFeeds,
                     specKind = specKind,

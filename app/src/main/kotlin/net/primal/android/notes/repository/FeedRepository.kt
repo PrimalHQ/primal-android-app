@@ -28,7 +28,6 @@ class FeedRepository @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val dispatcherProvider: CoroutineDispatcherProvider,
 ) {
-    fun observeContainsFeed(feedSpec: String) = database.feeds().observeContainsFeed(feedSpec)
 
     fun feedBySpec(feedSpec: String): Flow<PagingData<FeedPost>> {
         return createPager(feedSpec = feedSpec) {
@@ -71,6 +70,8 @@ class FeedRepository @Inject constructor(
             database.feedPostsRemoteKeys().deleteByDirective(feedSpec)
             database.feedsConnections().deleteConnectionsByDirective(feedSpec)
             database.posts().deleteOrphanPosts()
+            // TODO Add removing article remote keys here (once implemented)
+            database.articleFeedsConnections().deleteConnectionsBySpec(feedSpec)
         }
 
     suspend fun replaceFeedSpec(

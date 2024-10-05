@@ -106,7 +106,7 @@ private fun ReadsScreen(
         focusModeEnabled = LocalContentDisplaySettings.current.focusModeEnabled,
         topAppBar = { scrollBehavior ->
             ArticleFeedTopAppBar(
-                title = activeFeed?.name ?: "",
+                title = activeFeed?.title ?: "",
                 activeFeed = activeFeed,
                 avatarCdnImage = state.activeAccountAvatarCdnImage,
                 onAvatarClick = { uiScope.launch { drawerState.open() } },
