@@ -856,6 +856,10 @@ private fun NavGraphBuilder.messages(
 private fun NavGraphBuilder.bookmarks(route: String, navController: NavController) =
     composable(
         route = route,
+        enterTransition = { primalSlideInHorizontallyFromEnd },
+        exitTransition = { primalScaleOut },
+        popEnterTransition = { primalScaleIn },
+        popExitTransition = { primalSlideOutHorizontallyToEnd },
     ) {
         val viewModel: BookmarksViewModel = hiltViewModel()
         ApplyEdgeToEdge()
