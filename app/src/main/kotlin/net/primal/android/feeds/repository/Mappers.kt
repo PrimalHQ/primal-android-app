@@ -8,7 +8,7 @@ fun ContentArticleFeedData.asFeedPO(specKind: FeedSpecKind): Feed {
     return Feed(
         spec = this.spec,
         specKind = specKind,
-        name = this.name,
+        title = this.name,
         description = this.description,
         enabled = this.enabled,
         feedKind = this.feedKind,

@@ -7,18 +7,18 @@ import net.primal.android.feeds.domain.FeedSpecKind
 data class FeedUi(
     val spec: String,
     val specKind: FeedSpecKind,
-    val name: String,
+    val feedKind: String,
+    val title: String,
     val description: String,
     val enabled: Boolean = true,
     val deletable: Boolean = true,
-    val feedKind: String? = null,
 )
 
 fun Feed.asFeedUi() =
     FeedUi(
         spec = this.spec,
         specKind = this.specKind,
-        name = this.name,
+        title = this.title,
         description = this.description,
         enabled = this.enabled,
         feedKind = this.feedKind,
@@ -29,7 +29,7 @@ fun FeedUi.asFeedPO() =
     Feed(
         spec = this.spec,
         specKind = this.specKind,
-        name = this.name,
+        title = this.title,
         description = this.description,
         enabled = this.enabled,
         feedKind = this.feedKind,

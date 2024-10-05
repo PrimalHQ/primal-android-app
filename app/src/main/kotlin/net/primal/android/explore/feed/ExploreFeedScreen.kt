@@ -14,7 +14,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -31,6 +30,7 @@ import net.primal.android.R
 import net.primal.android.articles.feed.ArticleFeedList
 import net.primal.android.core.compose.InvisibleAppBarIcon
 import net.primal.android.core.compose.PrimalTopAppBar
+import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
@@ -81,9 +81,19 @@ fun ExploreFeedScreen(
     val feedTitle = state.extractTitle()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    ErrorHandler(
+    SnackbarErrorHandler(
         error = state.error,
         snackbarHostState = snackbarHostState,
+        errorMessageResolver = { error ->
+            when (error) {
+                is ExploreFeedError.FailedToAddToFeed -> context.getString(
+                    R.string.app_error_adding_to_feed,
+                )
+                is ExploreFeedError.FailedToRemoveFeed -> context.getString(
+                    R.string.app_error_removing_feed,
+                )
+            }
+        },
     )
 
     val topAppBarState = rememberTopAppBarState()
@@ -109,7 +119,7 @@ fun ExploreFeedScreen(
                     }
                 },
                 onAddToUserFeedsClick = {
-                    eventPublisher(AddToUserFeeds(title = feedTitle))
+                    eventPublisher(AddToUserFeeds(title = "", description = ""))
                     uiScope.launch {
                         snackbarHostState.showSnackbar(
                             message = addedToUserFeedsMessage,
@@ -171,7 +181,7 @@ private fun ExploreFeedTopAppBar(
         navigationIconContentDescription = stringResource(id = R.string.accessibility_back_button),
         actions = {
             if (canBeAddedInUserFeeds) {
-                AddRemoveUserFeedAppBarIcon(
+                AddRemoveUserFeedButton(
                     existsInUserFeeds = existsInUserFeeds,
                     onRemoveFromUserFeedsClick = onRemoveFromUserFeedsClick,
                     onAddToUserFeedsClick = onAddToUserFeedsClick,
@@ -261,7 +271,7 @@ private fun ExploreFeedContract.UiState.extractTitle(): String {
 }
 
 @Composable
-private fun AddRemoveUserFeedAppBarIcon(
+private fun AddRemoveUserFeedButton(
     existsInUserFeeds: Boolean,
     onAddToUserFeedsClick: () -> Unit,
     onRemoveFromUserFeedsClick: () -> Unit,
@@ -285,28 +295,4 @@ private fun AddRemoveUserFeedAppBarIcon(
             }
         },
     )
-}
-
-@Composable
-@Deprecated("Replace with SnackbarErrorHandler")
-private fun ErrorHandler(error: ExploreFeedError?, snackbarHostState: SnackbarHostState) {
-    val context = LocalContext.current
-    LaunchedEffect(error ?: true) {
-        val errorMessage = when (error) {
-            is ExploreFeedError.FailedToAddToFeed -> context.getString(
-                R.string.app_error_adding_to_feed,
-            )
-
-            is ExploreFeedError.FailedToRemoveFeed -> context.getString(
-                R.string.app_error_removing_feed,
-            )
-
-            null -> return@LaunchedEffect
-        }
-
-        snackbarHostState.showSnackbar(
-            message = errorMessage,
-            duration = SnackbarDuration.Short,
-        )
-    }
 }

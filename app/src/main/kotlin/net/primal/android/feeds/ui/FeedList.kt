@@ -86,7 +86,7 @@ fun FeedList(
     if (deleteFeedDialogVisible != null) {
         ConfirmActionAlertDialog(
             dialogTitle = stringResource(R.string.feed_list_remove_feed_title),
-            dialogText = stringResource(R.string.feed_list_remove_feed_text, deleteFeedDialogVisible?.name ?: ""),
+            dialogText = stringResource(R.string.feed_list_remove_feed_text, deleteFeedDialogVisible?.title ?: ""),
             onConfirmation = {
                 if (onFeedRemoved != null) {
                     deleteFeedDialogVisible?.let(onFeedRemoved)
@@ -257,7 +257,7 @@ private fun EditModeBottomBar(onAddFeedClick: () -> Unit, onDoneClick: () -> Uni
     }
 }
 
-private fun FeedUi.uniqueKey() = "$spec;$name"
+private fun FeedUi.uniqueKey() = "$spec;$title"
 
 @Composable
 private fun ReorderableCollectionItemScope.FeedDragHandle(

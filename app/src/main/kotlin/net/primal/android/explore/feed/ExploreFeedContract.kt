@@ -18,7 +18,7 @@ interface ExploreFeedContract {
     }
 
     sealed class UiEvent {
-        data class AddToUserFeeds(val title: String) : UiEvent()
+        data class AddToUserFeeds(val title: String, val description: String) : UiEvent()
         data object RemoveFromUserFeeds : UiEvent()
     }
 

@@ -35,7 +35,7 @@ fun FeedListItem(
                 modifier = Modifier.fillMaxWidth(),
                 style = AppTheme.typography.bodyLarge,
                 color = AppTheme.colorScheme.onSurface,
-                text = data.name,
+                text = data.title,
                 textAlign = if (data.description.isNotEmpty()) TextAlign.Start else TextAlign.Center,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,

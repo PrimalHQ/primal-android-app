@@ -1,5 +1,6 @@
 package net.primal.android.feeds.domain
 
+import net.primal.android.core.utils.ellipsizeMiddle
 import net.primal.android.crypto.hexToNpubHrp
 
 fun String.isUserNotesFeedSpec(): Boolean {
@@ -18,16 +19,24 @@ private fun String?.isValidProfileId(): Boolean {
     }
 }
 
-private fun String.isPubkeyFeedSpec(prefix: String, suffix: String): Boolean {
-    val beforeProfileId = "$prefix,\"pubkey\":\""
-    val afterProfileId = "\"$suffix"
-    val profileId = runCatching {
+private fun String.extractPubkeyFromFeedSpec(prefix: String? = null, suffix: String? = null): String? {
+    val beforeProfileId = if (prefix != null) "$prefix,\"pubkey\":\"" else "\"pubkey\":\""
+    val afterProfileId = if (suffix != null) "\"$suffix" else "\""
+    return runCatching {
         this.substring(
             startIndex = beforeProfileId.length,
             endIndex = this.length - afterProfileId.length,
         )
     }.getOrNull()
-    return this.startsWith(beforeProfileId) && this.endsWith(afterProfileId) && profileId.isValidProfileId()
+}
+
+private fun String.isPubkeyFeedSpec(prefix: String? = null, suffix: String? = null): Boolean {
+    val beforeProfileId = if (prefix != null) "$prefix,\"pubkey\":\"" else "\"pubkey\":\""
+    val afterProfileId = if (suffix != null) "\"$suffix" else "\""
+    val profileId = this.extractPubkeyFromFeedSpec(prefix = prefix, suffix = suffix)
+    val startsWithPrefix = if (prefix != null) this.startsWith(beforeProfileId) else true
+    val endsWithSuffix = if (suffix != null) this.endsWith(afterProfileId) else true
+    return startsWithPrefix && endsWithSuffix && profileId.isValidProfileId()
 }
 
 fun String.isProfileNotesFeedSpec(): Boolean {
@@ -80,6 +89,51 @@ fun String.resolveFeedSpecKind(): FeedSpecKind? {
     }
 }
 
+fun String.resolveDefaultTitle(): String =
+    runCatching {
+        val topic = extractTopicFromFeedSpec()?.substringAfter("#")
+        val advancedQuery = extractAdvancedSearchQuery()
+        val simpleQuery = extractSimpleSearchQuery()
+        val pubkey = extractPubkeyFromFeedSpec()
+        when {
+            topic != null -> "Topic: $topic"
+
+            advancedQuery != null -> "Search: $advancedQuery"
+
+            simpleQuery != null -> "Search: $simpleQuery"
+
+            pubkey != null -> "User: ${pubkey.hexToNpubHrp().ellipsizeMiddle(size = 8)}"
+
+            else -> ""
+        }
+    }.getOrDefault(defaultValue = "")
+
+fun String.resolveDefaultDescription(): String =
+    runCatching {
+        val topic = extractTopicFromFeedSpec()?.substringAfter("#")
+        return when {
+            topic != null -> if (isNotesFeedSpec()) {
+                "All notes tagged with $topic"
+            } else if (isReadsFeedSpec()) {
+                "All reads tagged with $topic"
+            } else {
+                "Tagged with $topic"
+            }
+
+            isSearchFeedSpec() -> "Primal Saved Search"
+
+            isPubkeyFeedSpec() -> if (isNotesFeedSpec()) {
+                "Latest notes by user follows"
+            } else if (isReadsFeedSpec()) {
+                "Latest articles by user follows"
+            } else {
+                "Latest by user follows"
+            }
+
+            else -> ""
+        }
+    }.getOrDefault(defaultValue = "")
+
 fun String.isNotesFeedSpec(): Boolean = this.contains("\"kind\":\"notes\"") || this.contains("kind:1")
 
 fun String.isReadsFeedSpec(): Boolean = this.contains("\"kind\":\"reads\"") || this.contains("kind:30023")
@@ -95,9 +149,12 @@ fun buildAdvancedSearchArticlesFeedSpec(query: String): String = """{"id":"advse
 
 fun buildExploreMediaFeedSpec() = """{"id":"explore-media"}"""
 
-fun String.extractTopicFromFeedSpec(): String? {
-    val noteQueryStartIndex = this.indexOf("\"query\":\"kind:1 #")
-    val articleQueryStartIndex = this.indexOf("\"query\":\"kind:30023 #")
+fun String.extractTopicFromFeedSpec(): String? = extractAdvancedSearchQuery(queryPrefix = "#")
+
+fun String.extractAdvancedSearchQuery(queryPrefix: String? = null): String? {
+    val query = if (queryPrefix != null) " $queryPrefix" else ""
+    val noteQueryStartIndex = this.indexOf("\"query\":\"kind:1$query")
+    val articleQueryStartIndex = this.indexOf("\"query\":\"kind:30023$query")
 
     return if (noteQueryStartIndex != -1) {
         val noteTopicStartIndex = this.indexOf("#", startIndex = noteQueryStartIndex)
@@ -112,4 +169,20 @@ fun String.extractTopicFromFeedSpec(): String? {
     }
 }
 
-fun String.isSearchFeedSpec(): Boolean = this.contains("\"id\":\"advsearch\"") || this.contains("\"id\":\"search\"")
+fun String.extractSimpleSearchQuery(): String? {
+    val queryField = "\"query\":\""
+    val queryFieldStartIndex = this.indexOf(queryField)
+    return if (queryFieldStartIndex != -1) {
+        val queryStartIndex = queryFieldStartIndex + queryField.length
+        val queryEndIndex = this.indexOf("\"", startIndex = queryStartIndex)
+        this.substring(queryStartIndex, queryEndIndex)
+    } else {
+        null
+    }
+}
+
+fun String.isSearchFeedSpec(): Boolean = isAdvancedSearchFeedSpec() || isSimpleSearchFeedSpec()
+
+fun String.isAdvancedSearchFeedSpec() = this.contains("\"id\":\"advsearch\"")
+
+fun String.isSimpleSearchFeedSpec() = this.contains("\"id\":\"search\"")

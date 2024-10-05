@@ -5,7 +5,7 @@ import net.primal.android.nostr.model.primal.content.ContentArticleFeedData
 
 fun Feed.asContentArticleFeedData() =
     ContentArticleFeedData(
-        name = this.name,
+        name = this.title,
         spec = this.spec,
         feedKind = this.feedKind,
         description = this.description,

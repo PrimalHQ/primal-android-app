@@ -27,9 +27,6 @@ class NotificationsViewModelTest {
             dispatcherProvider = coroutineTestRule.dispatcherProvider,
             activeAccountStore = mockk(relaxed = true),
             notificationsRepository = notificationsRepository,
-            noteRepository = mockk(relaxed = true),
-            profileRepository = mockk(relaxed = true),
-            zapHandler = mockk(relaxed = true),
             subscriptionsManager = mockk(relaxed = true),
         )
     }

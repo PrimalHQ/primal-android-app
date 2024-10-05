@@ -40,10 +40,10 @@ class FeedsApiImpl @Inject constructor(
         return DvmFeedsResponse(
             scores = queryResult.filterPrimalEvents(kind = NostrEventKind.PrimalEventStats),
             dvmHandlers = queryResult.filterNostrEvents(kind = NostrEventKind.AppHandler),
-            feedMetadatas = queryResult.filterPrimalEvents(kind = NostrEventKind.PrimalDvmFeedMetadata),
+            feedMetadata = queryResult.filterPrimalEvents(kind = NostrEventKind.PrimalDvmFeedMetadata),
             feedFollowActions = queryResult.filterPrimalEvents(kind = NostrEventKind.PrimalDvmFeedFollowsActions),
             feedUserStats = queryResult.filterPrimalEvents(kind = NostrEventKind.PrimalEventUserStats),
-            userMetadatas = queryResult.filterNostrEvents(kind = NostrEventKind.Metadata),
+            userMetadata = queryResult.filterNostrEvents(kind = NostrEventKind.Metadata),
             cdnResources = queryResult.filterPrimalEvents(kind = NostrEventKind.PrimalCdnResource),
             userScores = queryResult.filterPrimalEvents(kind = NostrEventKind.PrimalUserScores),
         )

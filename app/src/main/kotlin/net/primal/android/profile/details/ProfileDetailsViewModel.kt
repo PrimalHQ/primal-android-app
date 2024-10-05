@@ -19,12 +19,12 @@ import kotlinx.coroutines.withContext
 import net.primal.android.core.compose.profile.model.asProfileDetailsUi
 import net.primal.android.core.compose.profile.model.asProfileStatsUi
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
+import net.primal.android.feeds.repository.FeedsRepository
 import net.primal.android.navigation.profileId
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.ext.extractProfileId
-import net.primal.android.notes.repository.FeedRepository
 import net.primal.android.profile.details.ProfileDetailsContract.UiEvent
 import net.primal.android.profile.details.ProfileDetailsContract.UiState
 import net.primal.android.profile.details.ProfileDetailsContract.UiState.ProfileError
@@ -38,7 +38,7 @@ class ProfileDetailsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val dispatcherProvider: CoroutineDispatcherProvider,
     private val activeAccountStore: ActiveAccountStore,
-    private val feedRepository: FeedRepository,
+    private val feedsRepository: FeedsRepository,
     private val profileRepository: ProfileRepository,
     private val mutedUserRepository: MutedUserRepository,
 ) : ViewModel() {
@@ -142,7 +142,7 @@ class ProfileDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             // TODO Update profile feed spec once api is implemented
             val profileFeedSpec = profileId
-            feedRepository.observeContainsFeed(feedSpec = profileFeedSpec).collect {
+            feedsRepository.observeContainsFeedSpec(feedSpec = profileFeedSpec).collect {
                 setState { copy(isProfileFeedInActiveUserFeeds = it) }
             }
         }
