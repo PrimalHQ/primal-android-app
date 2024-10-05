@@ -230,7 +230,7 @@ private fun ZapHeader(
                 )
                 Text(
                     text = numberFormat.format(amountSats.toLong()),
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.ExtraBold,
                     style = AppTheme.typography.bodyMedium,
                 )
             }
