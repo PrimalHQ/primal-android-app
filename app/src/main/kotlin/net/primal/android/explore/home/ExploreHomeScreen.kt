@@ -138,8 +138,8 @@ private fun ExploreHomeScreen(
                     }
                     MEDIA_INDEX -> {
                         MediaFeedGrid(
-                            modifier = Modifier.padding(paddingValues),
                             feedSpec = EXPLORE_MEDIA_FEED_SPEC,
+                            contentPadding = paddingValues,
                             onNoteClick = onNoteClick,
                         )
                     }
