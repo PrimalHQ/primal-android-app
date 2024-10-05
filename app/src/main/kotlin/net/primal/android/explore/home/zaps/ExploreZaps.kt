@@ -41,7 +41,6 @@ import net.primal.android.core.compose.asBeforeNowFormat
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.LightningBoltFilled
 import net.primal.android.explore.api.model.ExploreZapData
-import net.primal.android.explore.home.people.ExplorePeopleContract
 import net.primal.android.theme.AppTheme
 
 
@@ -228,6 +227,7 @@ private fun ZapHeader(
                     imageVector = PrimalIcons.LightningBoltFilled,
                     contentDescription = null,
                     modifier = Modifier.size(16.dp),
+                    tint = AppTheme.colorScheme.onPrimary,
                 )
                 Text(
                     text = numberFormat.format(amountSats.toLong()),
