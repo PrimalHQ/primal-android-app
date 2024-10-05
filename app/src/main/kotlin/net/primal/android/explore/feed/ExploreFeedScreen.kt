@@ -3,6 +3,7 @@ package net.primal.android.explore.feed
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
@@ -10,6 +11,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -21,16 +23,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.articles.feed.ArticleFeedList
-import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.InvisibleAppBarIcon
 import net.primal.android.core.compose.PrimalTopAppBar
+import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
-import net.primal.android.core.compose.icons.primaliconpack.UserFeedAdd
-import net.primal.android.core.compose.icons.primaliconpack.UserFeedRemove
 import net.primal.android.core.errors.UiError
 import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.explore.feed.ExploreFeedContract.UiEvent.AddToUserFeeds
@@ -89,38 +92,29 @@ fun ExploreFeedScreen(
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            PrimalTopAppBar(
+            val addedToUserFeedsMessage = stringResource(id = R.string.app_added_to_user_feeds)
+            val removedFromUserFeedsMessage = stringResource(id = R.string.app_removed_from_user_feeds)
+            ExploreFeedTopAppBar(
                 title = feedTitle,
-                navigationIcon = PrimalIcons.ArrowBack,
-                onNavigationIconClick = onClose,
-                navigationIconContentDescription = stringResource(id = R.string.accessibility_back_button),
-                actions = {
-                    if (state.canBeAddedInUserFeeds) {
-                        val addedToUserFeedsMessage = stringResource(id = R.string.app_added_to_user_feeds)
-                        val removedFromUserFeedsMessage = stringResource(id = R.string.app_removed_from_user_feeds)
-                        AddRemoveUserFeedAppBarIcon(
-                            existsInUserFeeds = state.existsInUserFeeds,
-                            onRemoveFromUserFeedsClick = {
-                                eventPublisher(RemoveFromUserFeeds)
-                                uiScope.launch {
-                                    snackbarHostState.showSnackbar(
-                                        message = removedFromUserFeedsMessage,
-                                        duration = SnackbarDuration.Short,
-                                    )
-                                }
-                            },
-                            onAddToUserFeedsClick = {
-                                eventPublisher(AddToUserFeeds(title = feedTitle))
-                                uiScope.launch {
-                                    snackbarHostState.showSnackbar(
-                                        message = addedToUserFeedsMessage,
-                                        duration = SnackbarDuration.Short,
-                                    )
-                                }
-                            },
+                canBeAddedInUserFeeds = state.canBeAddedInUserFeeds,
+                existsInUserFeeds = state.existsInUserFeeds,
+                onClose = onClose,
+                onRemoveFromUserFeedsClick = {
+                    eventPublisher(RemoveFromUserFeeds)
+                    uiScope.launch {
+                        snackbarHostState.showSnackbar(
+                            message = removedFromUserFeedsMessage,
+                            duration = SnackbarDuration.Short,
                         )
-                    } else {
-                        InvisibleAppBarIcon()
+                    }
+                },
+                onAddToUserFeedsClick = {
+                    eventPublisher(AddToUserFeeds(title = feedTitle))
+                    uiScope.launch {
+                        snackbarHostState.showSnackbar(
+                            message = addedToUserFeedsMessage,
+                            duration = SnackbarDuration.Short,
+                        )
                     }
                 },
                 scrollBehavior = scrollBehavior,
@@ -156,6 +150,37 @@ fun ExploreFeedScreen(
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState)
         },
+    )
+}
+
+@ExperimentalMaterial3Api
+@Composable
+private fun ExploreFeedTopAppBar(
+    title: String,
+    canBeAddedInUserFeeds: Boolean,
+    existsInUserFeeds: Boolean,
+    onClose: () -> Unit,
+    onAddToUserFeedsClick: () -> Unit,
+    onRemoveFromUserFeedsClick: () -> Unit,
+    scrollBehavior: TopAppBarScrollBehavior? = null,
+) {
+    PrimalTopAppBar(
+        title = title,
+        navigationIcon = PrimalIcons.ArrowBack,
+        onNavigationIconClick = onClose,
+        navigationIconContentDescription = stringResource(id = R.string.accessibility_back_button),
+        actions = {
+            if (canBeAddedInUserFeeds) {
+                AddRemoveUserFeedAppBarIcon(
+                    existsInUserFeeds = existsInUserFeeds,
+                    onRemoveFromUserFeedsClick = onRemoveFromUserFeedsClick,
+                    onAddToUserFeedsClick = onAddToUserFeedsClick,
+                )
+            } else {
+                InvisibleAppBarIcon()
+            }
+        },
+        scrollBehavior = scrollBehavior,
     )
 }
 
@@ -241,17 +266,17 @@ private fun AddRemoveUserFeedAppBarIcon(
     onAddToUserFeedsClick: () -> Unit,
     onRemoveFromUserFeedsClick: () -> Unit,
 ) {
-    AppBarIcon(
-        icon = if (existsInUserFeeds) {
-            PrimalIcons.UserFeedRemove
+    PrimalLoadingButton(
+        modifier = Modifier.padding(end = 6.dp),
+        text = if (existsInUserFeeds) {
+            stringResource(R.string.explore_feed_remove_feed)
         } else {
-            PrimalIcons.UserFeedAdd
+            stringResource(R.string.explore_feed_save_feed)
         },
-        appBarIconContentDescription = if (existsInUserFeeds) {
-            stringResource(id = R.string.accessibility_remove_feed)
-        } else {
-            stringResource(id = R.string.accessibility_add_feed)
-        },
+        height = 36.dp,
+        fontSize = 14.sp,
+        fontWeight = FontWeight.SemiBold,
+        contentPadding = PaddingValues(horizontal = 18.dp),
         onClick = {
             if (existsInUserFeeds) {
                 onRemoveFromUserFeedsClick()
