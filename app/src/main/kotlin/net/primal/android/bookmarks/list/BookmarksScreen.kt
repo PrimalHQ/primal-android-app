@@ -92,6 +92,7 @@ private fun BookmarksScreen(
                     feedSpec = state.feedSpec,
                     onArticleClick = { naddr -> noteCallbacks.onArticleClick?.invoke(naddr) },
                     pullToRefreshEnabled = false,
+                    noContentText = stringResource(R.string.bookmarks_no_content),
                     onUiError = { uiError: UiError ->
                         uiScope.launch {
                             snackbarHostState.showSnackbar(
@@ -111,6 +112,7 @@ private fun BookmarksScreen(
                     onGoToWallet = onGoToWallet,
                     pollingEnabled = false,
                     pullToRefreshEnabled = false,
+                    noContentText = stringResource(R.string.bookmarks_no_content),
                     onUiError = { uiError ->
                         uiScope.launch {
                             snackbarHostState.showSnackbar(
