@@ -95,7 +95,7 @@ private fun ExploreZaps(
                 item { Spacer(modifier = Modifier.height(4.dp)) }
                 items(
                     items = state.zaps,
-                    key = { "${it.noteId}${it.sender?.pubkey}" },
+                    key = { "${it.noteId}:${it.sender?.pubkey}:${it.createdAt.toEpochMilli()}" },
                 ) { item ->
                     ZapListItem(
                         zapData = item,
