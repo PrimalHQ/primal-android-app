@@ -35,8 +35,8 @@ import net.primal.android.auth.onboarding.account.OnboardingViewModel
 import net.primal.android.auth.onboarding.account.ui.OnboardingScreen
 import net.primal.android.auth.onboarding.wallet.OnboardingWalletActivation
 import net.primal.android.auth.welcome.WelcomeScreen
-import net.primal.android.bookmarks.ui.BookmarksScreen
-import net.primal.android.bookmarks.ui.BookmarksViewModel
+import net.primal.android.bookmarks.list.BookmarksScreen
+import net.primal.android.bookmarks.list.BookmarksViewModel
 import net.primal.android.core.compose.ApplyEdgeToEdge
 import net.primal.android.core.compose.LockToOrientationPortrait
 import net.primal.android.core.compose.PrimalTopLevelDestination

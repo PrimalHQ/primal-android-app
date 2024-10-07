@@ -1,4 +1,4 @@
-package net.primal.android.bookmarks.ui
+package net.primal.android.bookmarks.list
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -9,9 +9,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
-import net.primal.android.bookmarks.ui.BookmarksContract.UiEvent
-import net.primal.android.bookmarks.ui.BookmarksContract.UiState
+import net.primal.android.bookmarks.list.BookmarksContract.UiEvent
+import net.primal.android.bookmarks.list.BookmarksContract.UiState
 import net.primal.android.feeds.domain.FeedSpecKind
+import net.primal.android.feeds.domain.buildArticleBookmarksFeedSpec
+import net.primal.android.feeds.domain.buildNotesBookmarksFeedSpec
 import net.primal.android.user.accounts.active.ActiveAccountStore
 
 @HiltViewModel
@@ -19,7 +21,12 @@ class BookmarksViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(UiState())
+    private val _state = MutableStateFlow(
+        UiState(
+            feedSpec = buildNotesBookmarksFeedSpec(userId = activeAccountStore.activeUserId()),
+            feedSpecKind = FeedSpecKind.Notes,
+        ),
+    )
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate(reducer)
 
@@ -27,7 +34,6 @@ class BookmarksViewModel @Inject constructor(
     fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
 
     init {
-        updateFeedSpec(FeedSpecKind.Notes)
         observeEvents()
     }
 
@@ -35,10 +41,7 @@ class BookmarksViewModel @Inject constructor(
         viewModelScope.launch {
             events.collect {
                 when (it) {
-                    is UiEvent.ChangeFeedSpecKind -> {
-                        setState { copy(feedSpecKind = it.feedSpecKind) }
-                        updateFeedSpec(it.feedSpecKind)
-                    }
+                    is UiEvent.ChangeFeedSpecKind -> updateFeedSpec(it.feedSpecKind)
                 }
             }
         }
@@ -47,12 +50,9 @@ class BookmarksViewModel @Inject constructor(
         viewModelScope.launch {
             val userId = activeAccountStore.activeUserId()
             val feedSpec = when (feedSpecKind) {
-//                FeedSpecKind.Notes -> "{\"id\":\"feed\",\"kind\":\"notes\",\"notes\":\"bookmarks\",\"pubkey\":\"$userId\"}"
-//                FeedSpecKind.Reads -> "{\"id\":\"feed\",\"kind\":\"reads\",\"notes\":\"bookmarks\",\"pubkey\":\"$userId\"}"
-                // TODO(marko): swap this with correct feed spec
-                FeedSpecKind.Reads -> """{"id":"nostr-reads-feed","kind":"reads"}"""
-                FeedSpecKind.Notes -> """{"id":"latest","kind":"notes"}"""
+                FeedSpecKind.Reads -> buildArticleBookmarksFeedSpec(userId = userId)
+                FeedSpecKind.Notes -> buildNotesBookmarksFeedSpec(userId = userId)
             }
-            setState { copy(feedSpec = feedSpec) }
+            setState { copy(feedSpec = feedSpec, feedSpecKind = feedSpecKind) }
         }
 }

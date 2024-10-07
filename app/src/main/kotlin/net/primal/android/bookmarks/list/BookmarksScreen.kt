@@ -1,4 +1,4 @@
-package net.primal.android.bookmarks.ui
+package net.primal.android.bookmarks.list
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -72,6 +72,7 @@ private fun BookmarksScreen(
     Scaffold(
         topBar = {
             BookmarksTopAppBar(
+                feedSpecKind = state.feedSpecKind,
                 onFeedSpecKindChanged = {
                     eventPublisher(BookmarksContract.UiEvent.ChangeFeedSpecKind(it))
                 },
@@ -86,43 +87,39 @@ private fun BookmarksScreen(
     ) { paddingValues ->
         when (state.feedSpecKind) {
             FeedSpecKind.Reads -> {
-                state.feedSpec?.let {
-                    ArticleFeedList(
-                        contentPadding = paddingValues,
-                        feedSpec = it,
-                        onArticleClick = { naddr -> noteCallbacks.onArticleClick?.invoke(naddr) },
-                        pullToRefreshEnabled = false,
-                        onUiError = { uiError: UiError ->
-                            uiScope.launch {
-                                snackbarHostState.showSnackbar(
-                                    message = uiError.resolveUiErrorMessage(context),
-                                    duration = SnackbarDuration.Short,
-                                )
-                            }
-                        },
-                    )
-                }
+                ArticleFeedList(
+                    contentPadding = paddingValues,
+                    feedSpec = state.feedSpec,
+                    onArticleClick = { naddr -> noteCallbacks.onArticleClick?.invoke(naddr) },
+                    pullToRefreshEnabled = false,
+                    onUiError = { uiError: UiError ->
+                        uiScope.launch {
+                            snackbarHostState.showSnackbar(
+                                message = uiError.resolveUiErrorMessage(context),
+                                duration = SnackbarDuration.Short,
+                            )
+                        }
+                    },
+                )
             }
 
             FeedSpecKind.Notes -> {
-                state.feedSpec?.let {
-                    NoteFeedList(
-                        contentPadding = paddingValues,
-                        feedSpec = it,
-                        noteCallbacks = noteCallbacks,
-                        onGoToWallet = onGoToWallet,
-                        pollingEnabled = false,
-                        pullToRefreshEnabled = false,
-                        onUiError = { uiError ->
-                            uiScope.launch {
-                                snackbarHostState.showSnackbar(
-                                    message = uiError.resolveUiErrorMessage(context),
-                                    duration = SnackbarDuration.Short,
-                                )
-                            }
-                        },
-                    )
-                }
+                NoteFeedList(
+                    contentPadding = paddingValues,
+                    feedSpec = state.feedSpec,
+                    noteCallbacks = noteCallbacks,
+                    onGoToWallet = onGoToWallet,
+                    pollingEnabled = false,
+                    pullToRefreshEnabled = false,
+                    onUiError = { uiError ->
+                        uiScope.launch {
+                            snackbarHostState.showSnackbar(
+                                message = uiError.resolveUiErrorMessage(context),
+                                duration = SnackbarDuration.Short,
+                            )
+                        }
+                    },
+                )
             }
         }
     }
@@ -130,7 +127,11 @@ private fun BookmarksScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun BookmarksTopAppBar(onFeedSpecKindChanged: (FeedSpecKind) -> Unit, onClose: () -> Unit) {
+private fun BookmarksTopAppBar(
+    feedSpecKind: FeedSpecKind,
+    onFeedSpecKindChanged: (FeedSpecKind) -> Unit,
+    onClose: () -> Unit,
+) {
     var bookmarksPickerVisibility by remember { mutableStateOf(false) }
 
     if (bookmarksPickerVisibility) {
@@ -141,7 +142,10 @@ private fun BookmarksTopAppBar(onFeedSpecKindChanged: (FeedSpecKind) -> Unit, on
     }
 
     PrimalTopAppBar(
-        title = stringResource(id = R.string.bookmarks_title),
+        title = when (feedSpecKind) {
+            FeedSpecKind.Notes -> stringResource(id = R.string.bookmarks_title_notes)
+            FeedSpecKind.Reads -> stringResource(id = R.string.bookmarks_title_reads)
+        },
         titleTrailingIcon = Icons.Default.ExpandMore,
         onTitleClick = { bookmarksPickerVisibility = true },
         navigationIcon = PrimalIcons.ArrowBack,

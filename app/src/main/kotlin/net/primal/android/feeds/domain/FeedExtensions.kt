@@ -67,12 +67,18 @@ fun String.supportsUpwardsNotesPagination(): Boolean {
 
 fun String.supportsNoteReposts() = supportsUpwardsNotesPagination()
 
+fun buildNotesBookmarksFeedSpec(userId: String): String =
+    "{\"id\":\"feed\",\"kind\":\"notes\",\"notes\":\"bookmarks\",\"pubkey\":\"$userId\"}"
+
 fun String.isNotesBookmarkFeedSpec(): Boolean {
     return isPubkeyFeedSpec(
         prefix = "{\"id\":\"feed\",\"kind\":\"notes\",\"notes\":\"bookmarks\"",
         suffix = "}",
     )
 }
+
+fun buildArticleBookmarksFeedSpec(userId: String): String =
+    "{\"id\":\"feed\",\"kind\":\"reads\",\"kinds\":[30023],\"notes\":\"bookmarks\",\"pubkey\":\"$userId\"}"
 
 fun String.isReadsBookmarkFeedSpec(): Boolean {
     return isPubkeyFeedSpec(

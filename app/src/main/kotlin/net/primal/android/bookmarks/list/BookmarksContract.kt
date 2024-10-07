@@ -1,11 +1,11 @@
-package net.primal.android.bookmarks.ui
+package net.primal.android.bookmarks.list
 
 import net.primal.android.feeds.domain.FeedSpecKind
 
 interface BookmarksContract {
     data class UiState(
-        val feedSpec: String? = null,
-        val feedSpecKind: FeedSpecKind = FeedSpecKind.Notes,
+        val feedSpec: String,
+        val feedSpecKind: FeedSpecKind,
     )
 
     sealed class UiEvent {
