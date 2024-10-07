@@ -19,7 +19,6 @@ import net.primal.android.explore.feed.ExploreFeedContract.UiEvent
 import net.primal.android.explore.feed.ExploreFeedContract.UiState
 import net.primal.android.explore.feed.ExploreFeedContract.UiState.ExploreFeedError
 import net.primal.android.feeds.domain.FEED_KIND_SEARCH
-import net.primal.android.feeds.domain.isNotesBookmarkFeedSpec
 import net.primal.android.feeds.domain.resolveDefaultDescription
 import net.primal.android.feeds.domain.resolveDefaultTitle
 import net.primal.android.feeds.domain.resolveFeedSpecKind
@@ -47,7 +46,6 @@ class ExploreFeedViewModel @Inject constructor(
         UiState(
             feedSpec = exploreFeedSpec,
             feedSpecKind = exploreFeedSpec.resolveFeedSpecKind(),
-            canBeAddedInUserFeeds = !exploreFeedSpec.isNotesBookmarkFeedSpec(),
             renderType = renderType,
         ),
     )
