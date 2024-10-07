@@ -252,8 +252,8 @@
 
     <string name="bookmarks_title_notes">Note Bookmarks</string>
     <string name="bookmarks_title_reads">Reads Bookmarks</string>
-    <string name="bookmarks_bottom_sheet_notes">Notes</string>
-    <string name="bookmarks_bottom_sheet_reads">Reads</string>
+    <string name="bookmarks_bottom_sheet_notes">Note Bookmarks</string>
+    <string name="bookmarks_bottom_sheet_reads">Reads Bookmarks</string>
     <string name="bookmarks_no_content">Your bookmarks will appear here.</string>
 
     <string name="search_followers_text">Followers</string>
