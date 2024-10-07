@@ -54,7 +54,7 @@ import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
-import net.primal.android.core.compose.icons.primaliconpack.Settings
+import net.primal.android.core.compose.icons.primaliconpack.Search
 import net.primal.android.core.compose.isEmpty
 import net.primal.android.core.compose.isNotEmpty
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
@@ -75,7 +75,7 @@ import net.primal.android.wallet.zaps.canZap
 @Composable
 fun NotificationsScreen(
     viewModel: NotificationsViewModel,
-    onNotificationSettings: () -> Unit,
+    onSearchClick: () -> Unit,
     onGoToWallet: () -> Unit,
     noteCallbacks: NoteCallbacks,
     onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
@@ -100,7 +100,7 @@ fun NotificationsScreen(
     NotificationsScreen(
         state = uiState.value,
         noteState = noteState.value,
-        onNotificationSettings = onNotificationSettings,
+        onSearchClick = onSearchClick,
         onPrimaryDestinationChanged = onTopLevelDestinationChanged,
         onDrawerDestinationClick = onDrawerScreenClick,
         onDrawerQrCodeClick = onDrawerQrCodeClick,
@@ -117,7 +117,7 @@ fun NotificationsScreen(
     noteState: NoteContract.UiState,
     noteCallbacks: NoteCallbacks,
     onGoToWallet: () -> Unit,
-    onNotificationSettings: () -> Unit,
+    onSearchClick: () -> Unit,
     onPrimaryDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
     onDrawerQrCodeClick: () -> Unit,
@@ -168,11 +168,9 @@ fun NotificationsScreen(
                 scrollBehavior = it,
                 actions = {
                     AppBarIcon(
-                        icon = PrimalIcons.Settings,
-                        onClick = onNotificationSettings,
-                        appBarIconContentDescription = stringResource(
-                            id = R.string.accessibility_notification_settings,
-                        ),
+                        icon = PrimalIcons.Search,
+                        onClick = onSearchClick,
+                        appBarIconContentDescription = stringResource(id = R.string.accessibility_search),
                     )
                 },
             )

@@ -844,6 +844,7 @@ private fun NavGraphBuilder.messages(
     LockToOrientationPortrait()
     MessageListScreen(
         viewModel = viewModel,
+        onSearchClick = { navController.navigateToExplore() },
         onTopLevelDestinationChanged = onTopLevelDestinationChanged,
         onDrawerScreenClick = onDrawerScreenClick,
         onConversationClick = { profileId -> navController.navigateToChat(profileId) },
@@ -946,7 +947,7 @@ private fun NavGraphBuilder.notifications(
     LockToOrientationPortrait()
     NotificationsScreen(
         viewModel = viewModel,
-        onNotificationSettings = { navController.navigateToNotificationsSettings() },
+        onSearchClick = { navController.navigateToExplore() },
         onGoToWallet = { navController.navigateToWallet() },
         noteCallbacks = noteCallbacksHandler(navController),
         onTopLevelDestinationChanged = onTopLevelDestinationChanged,

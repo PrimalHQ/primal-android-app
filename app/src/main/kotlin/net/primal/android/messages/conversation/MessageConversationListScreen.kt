@@ -64,6 +64,7 @@ import androidx.paging.compose.itemKey
 import kotlinx.coroutines.launch
 import net.primal.android.LocalContentDisplaySettings
 import net.primal.android.R
+import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.ListLoading
 import net.primal.android.core.compose.ListNoContent
@@ -76,6 +77,7 @@ import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWor
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 import net.primal.android.core.compose.icons.primaliconpack.NewDM
+import net.primal.android.core.compose.icons.primaliconpack.Search
 import net.primal.android.core.compose.isEmpty
 import net.primal.android.core.compose.isNotEmpty
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
@@ -94,6 +96,7 @@ import net.primal.android.theme.AppTheme
 @Composable
 fun MessageListScreen(
     viewModel: MessageConversationListViewModel,
+    onSearchClick: () -> Unit,
     onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
     onDrawerQrCodeClick: () -> Unit,
@@ -115,6 +118,7 @@ fun MessageListScreen(
 
     MessageListScreen(
         state = uiState.value,
+        onSearchClick = onSearchClick,
         onPrimaryDestinationChanged = onTopLevelDestinationChanged,
         onDrawerDestinationClick = onDrawerScreenClick,
         onDrawerQrCodeClick = onDrawerQrCodeClick,
@@ -129,6 +133,7 @@ fun MessageListScreen(
 @Composable
 fun MessageListScreen(
     state: MessageConversationListContract.UiState,
+    onSearchClick: () -> Unit,
     onPrimaryDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
     onDrawerQrCodeClick: () -> Unit,
@@ -180,6 +185,13 @@ fun MessageListScreen(
                         onMarkAllRead = {
                             eventPublisher(MarkAllConversationsAsRead)
                         },
+                    )
+                },
+                actions = {
+                    AppBarIcon(
+                        icon = PrimalIcons.Search,
+                        onClick = onSearchClick,
+                        appBarIconContentDescription = stringResource(id = R.string.accessibility_search),
                     )
                 },
             )
