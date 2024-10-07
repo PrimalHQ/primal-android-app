@@ -66,6 +66,7 @@ fun ArticleFeedList(
     modifier: Modifier = Modifier,
     pullToRefreshEnabled: Boolean = true,
     previewMode: Boolean = false,
+    noContentText: String = stringResource(id = R.string.article_feed_no_content),
     noContentVerticalArrangement: Arrangement.Vertical = Arrangement.Center,
     noContentPaddingValues: PaddingValues = PaddingValues(all = 0.dp),
     contentPadding: PaddingValues = PaddingValues(0.dp),
@@ -95,6 +96,7 @@ fun ArticleFeedList(
         header = header,
         stickyHeader = stickyHeader,
         pullToRefreshEnabled = pullToRefreshEnabled,
+        noContentText = noContentText,
         noContentVerticalArrangement = noContentVerticalArrangement,
         noContentPaddingValues = noContentPaddingValues,
         articleEventPublisher = articleViewModel::setEvent,
@@ -110,6 +112,7 @@ private fun ArticleFeedList(
     articleEventPublisher: (ArticleContract.UiEvent) -> Unit,
     pullToRefreshEnabled: Boolean = true,
     contentPadding: PaddingValues = PaddingValues(0.dp),
+    noContentText: String = stringResource(id = R.string.article_feed_no_content),
     noContentVerticalArrangement: Arrangement.Vertical = Arrangement.Center,
     noContentPaddingValues: PaddingValues = PaddingValues(all = 0.dp),
     onArticleClick: (naddr: String) -> Unit,
@@ -166,6 +169,7 @@ private fun ArticleFeedList(
             contentPadding = contentPadding,
             header = header,
             stickyHeader = stickyHeader,
+            noContentText = noContentText,
             noContentVerticalArrangement = noContentVerticalArrangement,
             noContentPaddingValues = noContentPaddingValues,
         )
@@ -182,6 +186,7 @@ private fun ArticleFeedLazyColumn(
     modifier: Modifier = Modifier,
     onArticleClick: (naddr: String) -> Unit,
     articleEventPublisher: (ArticleContract.UiEvent) -> Unit,
+    noContentText: String = stringResource(id = R.string.article_feed_no_content),
     noContentVerticalArrangement: Arrangement.Vertical = Arrangement.Center,
     noContentPaddingValues: PaddingValues = PaddingValues(all = 0.dp),
     contentPadding: PaddingValues = PaddingValues(all = 0.dp),
@@ -265,6 +270,7 @@ private fun ArticleFeedLazyColumn(
         if (pagingItems.isEmpty()) {
             handleRefreshLoadState(
                 pagingItems = pagingItems,
+                noContentText = noContentText,
                 noContentVerticalArrangement = noContentVerticalArrangement,
                 noContentPaddingValues = noContentPaddingValues,
             )
@@ -282,6 +288,7 @@ private fun ArticleFeedLazyColumn(
 
 private fun LazyListScope.handleRefreshLoadState(
     pagingItems: LazyPagingItems<FeedArticleUi>,
+    noContentText: String,
     noContentVerticalArrangement: Arrangement.Vertical = Arrangement.Center,
     noContentPaddingValues: PaddingValues = PaddingValues(all = 0.dp),
 ) {
@@ -301,7 +308,7 @@ private fun LazyListScope.handleRefreshLoadState(
             item(contentType = "NoContent") {
                 ListNoContent(
                     modifier = Modifier.fillParentMaxSize(),
-                    noContentText = stringResource(id = R.string.article_feed_no_content),
+                    noContentText = noContentText,
                     onRefresh = { pagingItems.refresh() },
                     verticalArrangement = noContentVerticalArrangement,
                     contentPadding = noContentPaddingValues,

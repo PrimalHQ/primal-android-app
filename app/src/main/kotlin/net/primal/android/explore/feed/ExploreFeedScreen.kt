@@ -40,7 +40,6 @@ import net.primal.android.explore.feed.ExploreFeedContract.UiEvent.RemoveFromUse
 import net.primal.android.explore.feed.ExploreFeedContract.UiState.ExploreFeedError
 import net.primal.android.feeds.domain.FeedSpecKind
 import net.primal.android.feeds.domain.extractTopicFromFeedSpec
-import net.primal.android.feeds.domain.isNotesBookmarkFeedSpec
 import net.primal.android.feeds.domain.isSearchFeedSpec
 import net.primal.android.notes.feed.MediaFeedGrid
 import net.primal.android.notes.feed.NoteFeedList
@@ -204,13 +203,6 @@ private fun ExploreNoteFeed(
                 noteCallbacks = noteCallbacks,
                 onGoToWallet = onGoToWallet,
                 contentPadding = contentPadding,
-                noContentText = when {
-                    feedSpec.isNotesBookmarkFeedSpec() -> stringResource(
-                        id = R.string.bookmarks_no_content,
-                    )
-
-                    else -> stringResource(id = R.string.feed_no_content)
-                },
                 onUiError = onUiError,
             )
         }
