@@ -78,11 +78,11 @@ fun String.isNotesBookmarkFeedSpec(): Boolean {
 }
 
 fun buildArticleBookmarksFeedSpec(userId: String): String =
-    "{\"id\":\"feed\",\"kind\":\"reads\",\"kinds\":[30023],\"notes\":\"bookmarks\",\"pubkey\":\"$userId\"}"
+    "{\"id\":\"feed\",\"kind\":\"notes\",\"kinds\":[30023],\"notes\":\"bookmarks\",\"pubkey\":\"$userId\"}"
 
 fun String.isReadsBookmarkFeedSpec(): Boolean {
     return isPubkeyFeedSpec(
-        prefix = "{\"id\":\"feed\",\"kind\":\"reads\",\"kinds\":[30023],\"notes\":\"bookmarks\"}",
+        prefix = "{\"id\":\"feed\",\"kind\":\"notes\",\"kinds\":[30023],\"notes\":\"bookmarks\"}",
         suffix = "}",
     )
 }
