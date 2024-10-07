@@ -70,8 +70,6 @@ class FeedRepository @Inject constructor(
             database.feedPostsRemoteKeys().deleteByDirective(feedSpec)
             database.feedsConnections().deleteConnectionsByDirective(feedSpec)
             database.posts().deleteOrphanPosts()
-            // TODO Add removing article remote keys here (once implemented)
-            database.articleFeedsConnections().deleteConnectionsBySpec(feedSpec)
         }
 
     suspend fun replaceFeedSpec(
