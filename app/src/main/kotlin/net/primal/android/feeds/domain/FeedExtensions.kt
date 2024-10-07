@@ -67,12 +67,18 @@ fun String.supportsUpwardsNotesPagination(): Boolean {
 
 fun String.supportsNoteReposts() = supportsUpwardsNotesPagination()
 
+fun buildNotesBookmarksFeedSpec(userId: String): String =
+    "{\"id\":\"feed\",\"kind\":\"notes\",\"notes\":\"bookmarks\",\"pubkey\":\"$userId\"}"
+
 fun String.isNotesBookmarkFeedSpec(): Boolean {
     return isPubkeyFeedSpec(
         prefix = "{\"id\":\"feed\",\"kind\":\"notes\",\"notes\":\"bookmarks\"",
         suffix = "}",
     )
 }
+
+fun buildArticleBookmarksFeedSpec(userId: String): String =
+    "{\"id\":\"feed\",\"kind\":\"reads\",\"kinds\":[30023],\"notes\":\"bookmarks\",\"pubkey\":\"$userId\"}"
 
 fun String.isReadsBookmarkFeedSpec(): Boolean {
     return isPubkeyFeedSpec(
@@ -137,9 +143,6 @@ fun String.resolveDefaultDescription(): String =
 fun String.isNotesFeedSpec(): Boolean = this.contains("\"kind\":\"notes\"") || this.contains("kind:1")
 
 fun String.isReadsFeedSpec(): Boolean = this.contains("\"kind\":\"reads\"") || this.contains("kind:30023")
-
-fun buildNotesBookmarksFeedSpec(userId: String): String =
-    "{\"id\":\"feed\",\"kind\":\"notes\",\"notes\":\"bookmarks\",\"pubkey\":\"$userId\"}"
 
 fun buildAdvancedSearchNotesFeedSpec(query: String): String = """{"id":"advsearch","query":"kind:1 $query"}"""
 

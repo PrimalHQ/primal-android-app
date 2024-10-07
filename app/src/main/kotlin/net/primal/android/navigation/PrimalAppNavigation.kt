@@ -35,6 +35,8 @@ import net.primal.android.auth.onboarding.account.OnboardingViewModel
 import net.primal.android.auth.onboarding.account.ui.OnboardingScreen
 import net.primal.android.auth.onboarding.wallet.OnboardingWalletActivation
 import net.primal.android.auth.welcome.WelcomeScreen
+import net.primal.android.bookmarks.list.BookmarksScreen
+import net.primal.android.bookmarks.list.BookmarksViewModel
 import net.primal.android.core.compose.ApplyEdgeToEdge
 import net.primal.android.core.compose.LockToOrientationPortrait
 import net.primal.android.core.compose.PrimalTopLevelDestination
@@ -58,7 +60,6 @@ import net.primal.android.explore.search.SearchViewModel
 import net.primal.android.explore.search.ui.SearchScreen
 import net.primal.android.feeds.domain.buildAdvancedSearchArticlesFeedSpec
 import net.primal.android.feeds.domain.buildAdvancedSearchNotesFeedSpec
-import net.primal.android.feeds.domain.buildNotesBookmarksFeedSpec
 import net.primal.android.feeds.domain.buildSimpleSearchNotesFeedSpec
 import net.primal.android.messages.chat.ChatScreen
 import net.primal.android.messages.chat.ChatViewModel
@@ -214,9 +215,7 @@ fun NavController.navigateToExploreFeed(
     route = "explore/note?$EXPLORE_FEED_SPEC=${feedSpec.asBase64Encoded()}&$RENDER_TYPE=$renderType",
 )
 
-private fun NavController.navigateToNotesBookmarks(userId: String) {
-    navigateToExploreFeed(feedSpec = buildNotesBookmarksFeedSpec(userId = userId))
-}
+private fun NavController.navigateToBookmarks() = navigate(route = "bookmarks")
 
 fun noteCallbacksHandler(navController: NavController) =
     NoteCallbacks(
@@ -267,7 +266,7 @@ fun PrimalAppNavigation() {
     val drawerDestinationHandler: (DrawerScreenDestination) -> Unit = {
         when (it) {
             DrawerScreenDestination.Profile -> navController.navigateToProfile()
-            is DrawerScreenDestination.Bookmarks -> navController.navigateToNotesBookmarks(userId = it.userId)
+            is DrawerScreenDestination.Bookmarks -> navController.navigateToBookmarks()
             DrawerScreenDestination.Settings -> navController.navigateToSettings()
             DrawerScreenDestination.SignOut -> navController.navigateToLogout()
         }
@@ -335,6 +334,11 @@ fun PrimalAppNavigation() {
 
         explore(
             route = "explore",
+            navController = navController,
+        )
+
+        bookmarks(
+            route = "bookmarks",
             navController = navController,
         )
 
@@ -848,6 +852,24 @@ private fun NavGraphBuilder.messages(
         onDrawerQrCodeClick = { navController.navigateToProfileQrCodeViewer() },
     )
 }
+
+private fun NavGraphBuilder.bookmarks(route: String, navController: NavController) =
+    composable(
+        route = route,
+        enterTransition = { primalSlideInHorizontallyFromEnd },
+        exitTransition = { primalScaleOut },
+        popEnterTransition = { primalScaleIn },
+        popExitTransition = { primalSlideOutHorizontallyToEnd },
+    ) {
+        val viewModel: BookmarksViewModel = hiltViewModel()
+        ApplyEdgeToEdge()
+        BookmarksScreen(
+            viewModel = viewModel,
+            onClose = { navController.navigateUp() },
+            noteCallbacks = noteCallbacksHandler(navController),
+            onGoToWallet = { navController.navigateToWallet() },
+        )
+    }
 
 private fun NavGraphBuilder.chat(
     route: String,

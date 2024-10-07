@@ -232,9 +232,6 @@
 
     <string name="note_reactions_title">Note Zaps</string>
 
-    <string name="bookmarks_title">Bookmarks</string>
-    <string name="bookmarks_no_content">Your bookmarks will appear here.</string>
-
     <string name="explore_search_nostr">Search Nostr</string>
     <string name="explore_enter_query">Enter text to search</string>
     <string name="explore_trending_topics_no_content">Trending topics will appear here.</string>
@@ -252,6 +249,12 @@
     <string name="explore_trending_people_no_content">Unable to load trending people. Please try again.</string>
     <string name="explore_trending_zaps_no_content">Unable to load trending zaps. Please try again.</string>
     <string name="explore_feeds_no_content">Unable to load feeds. Please try again.</string>
+
+    <string name="bookmarks_title_notes">Note Bookmarks</string>
+    <string name="bookmarks_title_reads">Reads Bookmarks</string>
+    <string name="bookmarks_bottom_sheet_notes">Notes</string>
+    <string name="bookmarks_bottom_sheet_reads">Reads</string>
+    <string name="bookmarks_no_content">Your bookmarks will appear here.</string>
 
     <string name="search_followers_text">Followers</string>
 

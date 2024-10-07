@@ -8,7 +8,6 @@ interface ExploreFeedContract {
         val feedSpecKind: FeedSpecKind?,
         val renderType: RenderType,
         val existsInUserFeeds: Boolean = false,
-        val canBeAddedInUserFeeds: Boolean = true,
         val error: ExploreFeedError? = null,
     ) {
         sealed class ExploreFeedError {

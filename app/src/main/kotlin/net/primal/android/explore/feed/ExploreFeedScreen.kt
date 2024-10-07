@@ -28,7 +28,6 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.articles.feed.ArticleFeedList
-import net.primal.android.core.compose.InvisibleAppBarIcon
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.button.PrimalLoadingButton
@@ -89,6 +88,7 @@ fun ExploreFeedScreen(
                 is ExploreFeedError.FailedToAddToFeed -> context.getString(
                     R.string.app_error_adding_to_feed,
                 )
+
                 is ExploreFeedError.FailedToRemoveFeed -> context.getString(
                     R.string.app_error_removing_feed,
                 )
@@ -106,7 +106,6 @@ fun ExploreFeedScreen(
             val removedFromUserFeedsMessage = stringResource(id = R.string.app_removed_from_user_feeds)
             ExploreFeedTopAppBar(
                 title = feedTitle,
-                canBeAddedInUserFeeds = state.canBeAddedInUserFeeds,
                 existsInUserFeeds = state.existsInUserFeeds,
                 onClose = onClose,
                 onRemoveFromUserFeedsClick = {
@@ -167,7 +166,6 @@ fun ExploreFeedScreen(
 @Composable
 private fun ExploreFeedTopAppBar(
     title: String,
-    canBeAddedInUserFeeds: Boolean,
     existsInUserFeeds: Boolean,
     onClose: () -> Unit,
     onAddToUserFeedsClick: () -> Unit,
@@ -180,15 +178,11 @@ private fun ExploreFeedTopAppBar(
         onNavigationIconClick = onClose,
         navigationIconContentDescription = stringResource(id = R.string.accessibility_back_button),
         actions = {
-            if (canBeAddedInUserFeeds) {
-                AddRemoveUserFeedButton(
-                    existsInUserFeeds = existsInUserFeeds,
-                    onRemoveFromUserFeedsClick = onRemoveFromUserFeedsClick,
-                    onAddToUserFeedsClick = onAddToUserFeedsClick,
-                )
-            } else {
-                InvisibleAppBarIcon()
-            }
+            AddRemoveUserFeedButton(
+                existsInUserFeeds = existsInUserFeeds,
+                onRemoveFromUserFeedsClick = onRemoveFromUserFeedsClick,
+                onAddToUserFeedsClick = onAddToUserFeedsClick,
+            )
         },
         scrollBehavior = scrollBehavior,
     )
@@ -265,7 +259,6 @@ private fun ExploreFeedContract.UiState.extractTitle(): String {
     return when {
         topic != null -> topic
         feedSpec.isSearchFeedSpec() -> stringResource(R.string.explore_feed_search_results)
-        feedSpec.isNotesBookmarkFeedSpec() -> stringResource(id = R.string.bookmarks_title)
         else -> stringResource(id = R.string.explore_feed_fallback_title)
     }
 }
