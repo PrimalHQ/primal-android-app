@@ -83,7 +83,10 @@ class FeedRemoteMediator(
 
     override suspend fun initialize(): InitializeAction {
         return when {
-            shouldResetLocalCache() -> InitializeAction.LAUNCH_INITIAL_REFRESH
+            shouldResetLocalCache() -> {
+                clearFeedSpec(feedSpec = feedSpec)
+                InitializeAction.LAUNCH_INITIAL_REFRESH
+            }
             else -> InitializeAction.SKIP_INITIAL_REFRESH
         }
     }
@@ -137,6 +140,13 @@ class FeedRemoteMediator(
             MediatorResult.Success(endOfPaginationReached = true)
         }
     }
+
+    private suspend fun clearFeedSpec(feedSpec: String) =
+        withContext(dispatcherProvider.io()) {
+            database.feedPostsRemoteKeys().deleteByDirective(feedSpec)
+            database.feedsConnections().deleteConnectionsByDirective(feedSpec)
+            database.posts().deleteOrphanPosts()
+        }
 
     private suspend fun FeedRemoteMediator.syncFeed(
         loadType: LoadType,
