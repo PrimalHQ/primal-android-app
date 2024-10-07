@@ -125,9 +125,9 @@ class AdvancedSearchViewModel @Inject constructor() : ViewModel() {
         when (this) {
             AdvancedSearchContract.SearchKind.Notes -> "kind:1"
             AdvancedSearchContract.SearchKind.Reads -> "kind:30023"
-            AdvancedSearchContract.SearchKind.Images -> "filter:image"
-            AdvancedSearchContract.SearchKind.Videos -> "filter:video"
-            AdvancedSearchContract.SearchKind.Sound -> "filter:audio"
+            AdvancedSearchContract.SearchKind.Images -> "kind:1 filter:image"
+            AdvancedSearchContract.SearchKind.Videos -> "kind:1 filter:video"
+            AdvancedSearchContract.SearchKind.Sound -> "kind:1 filter:audio"
             AdvancedSearchContract.SearchKind.NoteReplies -> "kind:1 filter:replies"
             AdvancedSearchContract.SearchKind.ReadsComments -> "kind:30023 filter:replies"
         }
