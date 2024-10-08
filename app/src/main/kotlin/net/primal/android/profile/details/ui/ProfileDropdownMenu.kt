@@ -147,7 +147,8 @@ private fun AddOrRemoveUserFeedMenuItem(
     onDismiss: () -> Unit,
 ) {
     val uiScope = rememberCoroutineScope()
-    val title = stringResource(id = R.string.profile_user_feed_title, profileName)
+    val title = stringResource(id = R.string.profile_save_user_feed_title, profileName)
+    val description = stringResource(id = R.string.profile_save_user_feed_description, profileName)
     val addedToUserFeedsMessage = stringResource(id = R.string.app_added_to_user_feeds)
     val removedFromUserFeedsMessage = stringResource(id = R.string.app_removed_from_user_feeds)
 
@@ -170,8 +171,9 @@ private fun AddOrRemoveUserFeedMenuItem(
             } else {
                 eventPublisher(
                     ProfileDetailsContract.UiEvent.AddUserFeedAction(
-                        name = title,
                         profileId = profileId,
+                        feedTitle = title,
+                        feedDescription = description,
                     ),
                 )
                 uiScope.launch {

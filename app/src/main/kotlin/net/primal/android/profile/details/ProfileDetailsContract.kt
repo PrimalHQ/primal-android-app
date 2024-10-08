@@ -43,7 +43,12 @@ interface ProfileDetailsContract {
     sealed class UiEvent {
         data class FollowAction(val profileId: String) : UiEvent()
         data class UnfollowAction(val profileId: String) : UiEvent()
-        data class AddUserFeedAction(val name: String, val profileId: String) : UiEvent()
+        data class AddUserFeedAction(
+            val profileId: String,
+            val feedTitle: String,
+            val feedDescription: String,
+        ) : UiEvent()
+
         data class RemoveUserFeedAction(val profileId: String) : UiEvent()
         data class MuteAction(val profileId: String) : UiEvent()
         data class UnmuteAction(val profileId: String) : UiEvent()
