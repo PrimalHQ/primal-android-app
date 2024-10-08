@@ -12,6 +12,7 @@
 /.idea/inspectionProfiles/
 /.idea/other.xml
 /.idea/deploymentTargetSelector.xml
+/.idea/runConfigurations.xml
 .DS_Store
 /build
 /captures
