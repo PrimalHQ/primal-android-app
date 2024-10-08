@@ -156,6 +156,7 @@ class NostrSocketClient(
         }
     }
 
+    @Suppress("unused")
     private fun compressMessage(message: String): ByteArray {
         val outputStream = ByteArrayOutputStream()
         val deflater = Deflater()
