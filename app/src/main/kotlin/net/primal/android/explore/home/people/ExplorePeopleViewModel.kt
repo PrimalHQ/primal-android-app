@@ -50,7 +50,11 @@ class ExplorePeopleViewModel @Inject constructor(
 
     private fun fetchFollowing() =
         viewModelScope.launch {
-            profileRepository.fetchFollowing(userId = activeAccountStore.activeUserId())
+            try {
+                profileRepository.fetchFollowing(userId = activeAccountStore.activeUserId())
+            } catch (error: WssException) {
+                Timber.w(error)
+            }
         }
 
     private fun fetchExplorePeople() =
