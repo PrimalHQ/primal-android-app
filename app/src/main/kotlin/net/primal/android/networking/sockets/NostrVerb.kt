@@ -42,5 +42,8 @@ sealed class NostrVerb {
 
         @SerialName("OK")
         OK,
+
+        @SerialName("EVENTS")
+        EVENTS,
     }
 }

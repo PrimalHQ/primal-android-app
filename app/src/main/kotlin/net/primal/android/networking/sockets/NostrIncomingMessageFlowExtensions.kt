@@ -9,6 +9,7 @@ fun Flow<NostrIncomingMessage>.filterBySubscriptionId(id: UUID) =
         (it is NostrIncomingMessage.EventMessage && it.subscriptionId == id) ||
             (it is NostrIncomingMessage.EoseMessage && it.subscriptionId == id) ||
             (it is NostrIncomingMessage.CountMessage && it.subscriptionId == id) ||
+            (it is NostrIncomingMessage.EventsMessage && it.subscriptionId == id) ||
             (it is NostrIncomingMessage.NoticeMessage)
     }
 

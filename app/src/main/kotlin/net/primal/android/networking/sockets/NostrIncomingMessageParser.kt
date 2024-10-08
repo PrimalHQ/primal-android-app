@@ -6,6 +6,7 @@ import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.intOrNull
+import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import net.primal.android.core.serialization.json.NostrJson
@@ -15,7 +16,9 @@ import net.primal.android.nostr.ext.asPrimalEventOrNull
 import net.primal.android.nostr.ext.isNotPrimalEventKind
 import net.primal.android.nostr.ext.isNotUnknown
 import net.primal.android.nostr.ext.isPrimalEventKind
+import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.NostrEventKind
+import net.primal.android.nostr.model.primal.PrimalEvent
 import timber.log.Timber
 
 fun String.parseIncomingMessage(): NostrIncomingMessage? {
@@ -30,6 +33,7 @@ fun String.parseIncomingMessage(): NostrIncomingMessage? {
             NostrVerb.Incoming.NOTICE -> jsonArray.takeAsNoticeIncomingMessage()
             NostrVerb.Incoming.AUTH -> jsonArray.takeAsAuthIncomingMessage()
             NostrVerb.Incoming.COUNT -> jsonArray.takeAsCountIncomingMessage()
+            NostrVerb.Incoming.EVENTS -> jsonArray.takeAsEventsIncomingMessage()
         }
     } catch (error: Exception) {
         Timber.w(error)
@@ -94,6 +98,45 @@ private fun JsonArray.takeAsEventIncomingMessage(): NostrIncomingMessage? {
     )
 }
 
+private fun JsonArray.takeAsEventsIncomingMessage(): NostrIncomingMessage? {
+    val subscriptionId = elementAtOrNull(1)?.toSubscriptionId()
+    val events = elementAtOrNull(2)?.jsonArray
+
+    if (subscriptionId == null || events == null) return null
+
+    val nostrEvents = mutableListOf<NostrEvent>()
+    val primalEvents = mutableListOf<PrimalEvent>()
+
+    events.map { it.jsonObject }.forEach { jsonEvent ->
+        val kind = jsonEvent.getMessageNostrEventKind()
+        when {
+            kind.isNotUnknown() && kind.isNotPrimalEventKind() -> {
+                val nostrEvent = jsonEvent.asNostrEventOrNull()
+                if (nostrEvent != null) {
+                    nostrEvents.add(nostrEvent)
+                } else {
+                    Timber.w("Unable to process as nostr event: $jsonEvent")
+                }
+            }
+
+            kind.isPrimalEventKind() -> {
+                val primalEvent = jsonEvent.asPrimalEventOrNull()
+                if (primalEvent != null) {
+                    primalEvents.add(primalEvent)
+                } else {
+                    Timber.w("Unable to process as primal event: $jsonEvent")
+                }
+            }
+        }
+    }
+
+    return NostrIncomingMessage.EventsMessage(
+        subscriptionId = subscriptionId,
+        nostrEvents = nostrEvents,
+        primalEvents = primalEvents,
+    )
+}
+
 private fun JsonObject.getMessageNostrEventKind(): NostrEventKind {
     val kind = this["kind"]?.jsonPrimitive?.content?.toIntOrNull()
     return if (kind != null) NostrEventKind.valueOf(kind) else NostrEventKind.Unknown
@@ -135,6 +178,7 @@ private fun JsonElement.toIncomingMessageType(): NostrVerb.Incoming {
         "OK" -> NostrVerb.Incoming.OK
         "AUTH" -> NostrVerb.Incoming.AUTH
         "COUNT" -> NostrVerb.Incoming.COUNT
+        "EVENTS" -> NostrVerb.Incoming.EVENTS
         else -> NostrVerb.Incoming.NOTICE
     }
 }

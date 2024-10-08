@@ -77,10 +77,11 @@ class PrimalApiClient(
             }
         }
 
-    private suspend fun buildAndInitializeSocketClient(apiUrl: String): NostrSocketClient {
+    private fun buildAndInitializeSocketClient(apiUrl: String): NostrSocketClient {
         return NostrSocketClient(
             dispatcherProvider = dispatcherProvider,
             okHttpClient = okHttpClient,
+            incomingCompressionEnabled = serverType.isIncomingCompressionSupported(),
             wssRequest = Request.Builder()
                 .url(apiUrl)
                 .addHeader("User-Agent", UserAgentProvider.USER_AGENT)
@@ -95,6 +96,10 @@ class PrimalApiClient(
                 }
             },
         )
+    }
+
+    private fun PrimalServerType.isIncomingCompressionSupported(): Boolean {
+        return this == PrimalServerType.Caching || this == PrimalServerType.Wallet
     }
 
     private suspend fun <T> retrySendMessage(times: Int, block: suspend (Int) -> T): T {
@@ -180,7 +185,7 @@ class PrimalApiClient(
         val messages = socketClient.incomingMessages
             .filterBySubscriptionId(id = subscriptionId)
             .transformWhileEventsAreIncoming()
-            .timeout(30.seconds)
+            .timeout(20.seconds)
             .toList()
 
         val terminationMessage = messages.last()
@@ -192,22 +197,26 @@ class PrimalApiClient(
             )
         }
 
-        val events = messages.filterIsInstance<NostrIncomingMessage.EventMessage>()
+        val eventMessages = messages.filterIsInstance<NostrIncomingMessage.EventMessage>()
+        val eventsMessage = messages.filterIsInstance<NostrIncomingMessage.EventsMessage>()
 
-        val nostrEvents = events.mapNotNull { it.nostrEvent }
-        val primalEvents = events.mapNotNull { it.primalEvent }
+        val allNostrEvents = eventMessages.mapNotNull { it.nostrEvent } +
+            eventsMessage.map { it.nostrEvents }.flatten()
+
+        val allPrimalEvents = eventMessages.mapNotNull { it.primalEvent } +
+            eventsMessage.map { it.primalEvents }.flatten()
 
         return PrimalQueryResult(
             terminationMessage = terminationMessage,
-            nostrEvents = nostrEvents,
-            primalEvents = primalEvents,
+            nostrEvents = allNostrEvents,
+            primalEvents = allPrimalEvents,
         )
     }
 
     private fun Flow<NostrIncomingMessage>.transformWhileEventsAreIncoming() =
         transformWhile {
             emit(it)
-            it is NostrIncomingMessage.EventMessage
+            it is NostrIncomingMessage.EventMessage || it is NostrIncomingMessage.EventsMessage
         }
 
     private suspend fun ensureSocketClientConnection() =

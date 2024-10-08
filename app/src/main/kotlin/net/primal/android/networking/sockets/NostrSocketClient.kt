@@ -1,6 +1,9 @@
 package net.primal.android.networking.sockets
 
+import java.io.ByteArrayOutputStream
 import java.util.*
+import java.util.zip.Deflater
+import java.util.zip.Inflater
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -15,12 +18,14 @@ import okhttp3.Request
 import okhttp3.Response
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
+import okio.ByteString
 import timber.log.Timber
 
 class NostrSocketClient(
     dispatcherProvider: CoroutineDispatcherProvider,
     private val okHttpClient: OkHttpClient,
     private val wssRequest: Request,
+    private val incomingCompressionEnabled: Boolean = false,
     private val onSocketConnectionOpened: SocketConnectionOpenedCallback? = null,
     private val onSocketConnectionClosed: SocketConnectionClosedCallback? = null,
 ) {
@@ -34,15 +39,21 @@ class NostrSocketClient(
     private val socketListener = object : WebSocketListener() {
         override fun onOpen(webSocket: WebSocket, response: Response) {
             onSocketConnectionOpened?.invoke(socketUrl)
+            if (incomingCompressionEnabled) {
+                val id = UUID.randomUUID()
+                sendMessage("""["REQ","$id",{"cache":["set_primal_protocol",{"compression":"zlib"}]}]""")
+            }
         }
 
         override fun onMessage(webSocket: WebSocket, text: String) {
-            Timber.d("<-- $text $socketUrl")
-            text.parseIncomingMessage()?.let {
-                scope.launch {
-                    mutableIncomingMessagesSharedFlow.emit(value = it)
-                }
-            }
+            logLargeText(text = text, url = socketUrl, incoming = true)
+            processIncomingMessage(text = text)
+        }
+
+        override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
+            val decompressedMessage = decompressMessage(bytes.toByteArray())
+            logLargeText(text = decompressedMessage, url = socketUrl, incoming = true)
+            processIncomingMessage(text = decompressedMessage)
         }
 
         override fun onFailure(
@@ -94,8 +105,16 @@ class NostrSocketClient(
         webSocket?.close(code = 1000, reason = "Closed by client.")
     }
 
+    private fun processIncomingMessage(text: String) {
+        text.parseIncomingMessage()?.let {
+            scope.launch {
+                mutableIncomingMessagesSharedFlow.emit(value = it)
+            }
+        }
+    }
+
     private fun sendMessage(text: String): Boolean {
-        Timber.i("--> $text $socketUrl")
+        logLargeText(text = text, url = socketUrl, incoming = false)
         return webSocket?.send(text) == true
     }
 
@@ -121,5 +140,40 @@ class NostrSocketClient(
 
     fun sendAUTH(signedEvent: JsonObject): Boolean {
         return sendMessage(text = signedEvent.buildNostrAUTHMessage())
+    }
+
+    private fun logLargeText(text: String, url: String, incoming: Boolean) {
+        val chunks = text.chunked(size = 3_500)
+        val chunksCount = chunks.size
+        chunks.forEachIndexed { index, chunk ->
+            val prefix = if (incoming) "<--" else "-->"
+            val suffix = if (index == chunksCount - 1) "[$url]" else ""
+            Timber.d("$prefix $chunk $suffix")
+        }
+    }
+
+    private fun compressMessage(message: String): ByteArray {
+        val outputStream = ByteArrayOutputStream()
+        val deflater = Deflater()
+        deflater.setInput(message.toByteArray())
+        deflater.finish()
+        val buffer = ByteArray(size = 1_024)
+        while (!deflater.finished()) {
+            val count = deflater.deflate(buffer)
+            outputStream.write(buffer, 0, count)
+        }
+        return outputStream.toByteArray()
+    }
+
+    private fun decompressMessage(compressedMessage: ByteArray): String {
+        val inflater = Inflater()
+        inflater.setInput(compressedMessage)
+        val outputStream = ByteArrayOutputStream()
+        val buffer = ByteArray(size = 1_024)
+        while (!inflater.finished()) {
+            val count = inflater.inflate(buffer)
+            outputStream.write(buffer, 0, count)
+        }
+        return outputStream.toString()
     }
 }

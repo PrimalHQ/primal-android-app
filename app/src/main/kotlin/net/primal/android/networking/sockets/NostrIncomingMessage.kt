@@ -35,4 +35,10 @@ sealed class NostrIncomingMessage {
         val subscriptionId: UUID,
         val count: Int,
     ) : NostrIncomingMessage()
+
+    data class EventsMessage(
+        val subscriptionId: UUID,
+        val nostrEvents: List<NostrEvent> = emptyList(),
+        val primalEvents: List<PrimalEvent> = emptyList(),
+    ) : NostrIncomingMessage()
 }
