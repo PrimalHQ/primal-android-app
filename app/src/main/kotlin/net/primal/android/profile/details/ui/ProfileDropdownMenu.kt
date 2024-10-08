@@ -1,17 +1,13 @@
 package net.primal.android.profile.details.ui
 
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.dropdown.DropdownPrimalMenu
@@ -36,7 +32,6 @@ fun ProfileDropdownMenu(
     isActiveUser: Boolean,
     isProfileMuted: Boolean,
     isProfileFeedInActiveUserFeeds: Boolean,
-    snackbarHostState: SnackbarHostState,
     eventPublisher: (ProfileDetailsContract.UiEvent) -> Unit,
 ) {
     val context = LocalContext.current
@@ -73,7 +68,6 @@ fun ProfileDropdownMenu(
                 profileId = profileId,
                 profileName = profileName,
                 isProfileFeedInActiveUserFeeds = isProfileFeedInActiveUserFeeds,
-                snackbarHostState = snackbarHostState,
                 eventPublisher = eventPublisher,
                 onDismiss = { menuVisible = false },
             )
@@ -142,15 +136,11 @@ private fun AddOrRemoveUserFeedMenuItem(
     profileId: String,
     profileName: String,
     isProfileFeedInActiveUserFeeds: Boolean,
-    snackbarHostState: SnackbarHostState,
     eventPublisher: (ProfileDetailsContract.UiEvent) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    val uiScope = rememberCoroutineScope()
     val title = stringResource(id = R.string.profile_save_user_feed_title, profileName)
     val description = stringResource(id = R.string.profile_save_user_feed_description, profileName)
-    val addedToUserFeedsMessage = stringResource(id = R.string.app_added_to_user_feeds)
-    val removedFromUserFeedsMessage = stringResource(id = R.string.app_removed_from_user_feeds)
 
     DropdownPrimalMenuItem(
         trailingIconVector = PrimalIcons.UserFeedAdd,
@@ -161,27 +151,15 @@ private fun AddOrRemoveUserFeedMenuItem(
         },
         onClick = {
             if (isProfileFeedInActiveUserFeeds) {
-                eventPublisher(ProfileDetailsContract.UiEvent.RemoveUserFeedAction(profileId = profileId))
-                uiScope.launch {
-                    snackbarHostState.showSnackbar(
-                        message = removedFromUserFeedsMessage,
-                        duration = SnackbarDuration.Short,
-                    )
-                }
+                eventPublisher(ProfileDetailsContract.UiEvent.RemoveProfileFeedAction(profileId = profileId))
             } else {
                 eventPublisher(
-                    ProfileDetailsContract.UiEvent.AddUserFeedAction(
+                    ProfileDetailsContract.UiEvent.AddProfileFeedAction(
                         profileId = profileId,
                         feedTitle = title,
                         feedDescription = description,
                     ),
                 )
-                uiScope.launch {
-                    snackbarHostState.showSnackbar(
-                        message = addedToUserFeedsMessage,
-                        duration = SnackbarDuration.Short,
-                    )
-                }
             }
             onDismiss()
         },

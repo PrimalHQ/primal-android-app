@@ -97,8 +97,8 @@ class ProfileDetailsViewModel @Inject constructor(
                 when (it) {
                     is UiEvent.FollowAction -> follow(it)
                     is UiEvent.UnfollowAction -> unfollow(it)
-                    is UiEvent.AddUserFeedAction -> addUserFeed(it)
-                    is UiEvent.RemoveUserFeedAction -> removeUserFeed(it)
+                    is UiEvent.AddProfileFeedAction -> addProfileFeed(it)
+                    is UiEvent.RemoveProfileFeedAction -> removeProfileFeed(it)
                     is UiEvent.MuteAction -> mute(it)
                     is UiEvent.UnmuteAction -> unmute(it)
                     UiEvent.RequestProfileUpdate -> requestProfileUpdate()
@@ -302,7 +302,7 @@ class ProfileDetailsViewModel @Inject constructor(
             }
         }
 
-    private fun addUserFeed(action: UiEvent.AddUserFeedAction) {
+    private fun addProfileFeed(action: UiEvent.AddProfileFeedAction) {
         viewModelScope.launch {
             try {
                 feedsRepository.addFeedLocally(
@@ -313,6 +313,7 @@ class ProfileDetailsViewModel @Inject constructor(
                     feedKind = FEED_KIND_USER,
                 )
                 feedsRepository.persistRemotelyAllLocalUserFeeds(userId = activeAccountStore.activeUserId())
+                setEffect(ProfileDetailsContract.SideEffect.ProfileFeedAdded)
             } catch (error: WssException) {
                 Timber.w(error)
                 setErrorState(error = ProfileError.FailedToAddToFeed(error))
@@ -320,11 +321,12 @@ class ProfileDetailsViewModel @Inject constructor(
         }
     }
 
-    private fun removeUserFeed(action: UiEvent.RemoveUserFeedAction) {
+    private fun removeProfileFeed(action: UiEvent.RemoveProfileFeedAction) {
         viewModelScope.launch {
             try {
                 feedsRepository.removeFeedLocally(buildLatestNotesUserFeedSpec(userId = action.profileId))
                 feedsRepository.persistRemotelyAllLocalUserFeeds(userId = activeAccountStore.activeUserId())
+                setEffect(ProfileDetailsContract.SideEffect.ProfileFeedRemoved)
             } catch (error: WssException) {
                 Timber.w(error)
                 setErrorState(error = ProfileError.FailedToRemoveFeed(error))
