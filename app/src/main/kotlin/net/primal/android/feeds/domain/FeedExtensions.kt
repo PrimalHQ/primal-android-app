@@ -87,6 +87,8 @@ fun String.isReadsBookmarkFeedSpec(): Boolean {
     )
 }
 
+fun buildLatestNotesUserFeedSpec(userId: String) = """{"id":"feed","kind":"notes","pubkey":"$userId"}"""
+
 fun String.resolveFeedSpecKind(): FeedSpecKind? {
     return when {
         this.isNotesFeedSpec() -> FeedSpecKind.Notes
