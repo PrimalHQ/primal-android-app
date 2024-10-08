@@ -58,8 +58,8 @@ import net.primal.android.explore.home.ExploreHomeScreen
 import net.primal.android.explore.home.ExploreHomeViewModel
 import net.primal.android.explore.search.SearchViewModel
 import net.primal.android.explore.search.ui.SearchScreen
-import net.primal.android.feeds.domain.buildAdvancedSearchArticlesFeedSpec
 import net.primal.android.feeds.domain.buildAdvancedSearchNotesFeedSpec
+import net.primal.android.feeds.domain.buildReadsTopicFeedSpec
 import net.primal.android.feeds.domain.buildSimpleSearchNotesFeedSpec
 import net.primal.android.messages.chat.ChatScreen
 import net.primal.android.messages.chat.ChatViewModel
@@ -1000,7 +1000,7 @@ private fun NavGraphBuilder.articleDetails(
         viewModel = viewModel,
         onClose = { navController.navigateUp() },
         onArticleHashtagClick = { hashtag ->
-            navController.navigateToExploreFeed(feedSpec = buildAdvancedSearchArticlesFeedSpec(query = hashtag))
+            navController.navigateToExploreFeed(feedSpec = buildReadsTopicFeedSpec(hashtag = hashtag))
         },
         noteCallbacks = noteCallbacksHandler(navController),
         onGoToWallet = { navController.navigateToWallet() },
