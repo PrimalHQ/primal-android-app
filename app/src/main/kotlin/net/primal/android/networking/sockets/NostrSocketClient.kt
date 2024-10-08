@@ -142,7 +142,11 @@ class NostrSocketClient(
         return sendMessage(text = signedEvent.buildNostrAUTHMessage())
     }
 
-    private fun logLargeText(text: String, url: String, incoming: Boolean) {
+    private fun logLargeText(
+        text: String,
+        url: String,
+        incoming: Boolean,
+    ) {
         val chunks = text.chunked(size = 3_500)
         val chunksCount = chunks.size
         chunks.forEachIndexed { index, chunk ->
