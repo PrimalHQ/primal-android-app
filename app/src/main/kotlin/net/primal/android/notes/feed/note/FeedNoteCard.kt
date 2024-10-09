@@ -262,8 +262,15 @@ private fun FeedNoteCard(
         ) {
             NoteDropdownMenuIcon(
                 modifier = Modifier
+                    .padding(end = 8.dp)
                     .size(overflowIconSizeDp)
-                    .padding(top = if (data.repostAuthorName != null) 4.dp else 6.dp)
+                    .padding(
+                        top = when {
+                            data.repostAuthorName != null -> 4.dp
+                            !fullWidthContent -> 6.dp
+                            else -> 13.dp
+                        },
+                    )
                     .clip(CircleShape),
                 noteId = data.postId,
                 noteContent = data.content,
@@ -422,6 +429,7 @@ private fun FeedNote(
             FeedNoteHeader(
                 modifier = Modifier
                     .padding(notePaddingValues)
+                    .padding(end = 4.dp)
                     .fillMaxWidth(),
                 postTimestamp = data.timestamp,
                 singleLine = headerSingleLine,
@@ -525,17 +533,40 @@ class FeedPostUiProvider : PreviewParameterProvider<FeedPostUi> {
                 repostAuthorId = "repostId",
                 repostAuthorName = "jack",
                 content = """
-                    Unfortunately the days of using pseudonyms in metaspace are numbered. #nostr 
-
-                    It won't be long before non-trivial numbers of individuals and businesses 
-                    have augmented reality HUDs that incorporate real-time facial recognition. 
-                    Hiding behind a pseudonym will become a distant dream.
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi et ligula feugiat enim faucibus volutpat ac et lorem. Vivamus tellus sem, rutrum non elit sed, congue efficitur nisl. 
                 """.trimIndent(),
                 attachments = emptyList(),
                 authorId = "npubSomething",
                 authorName = "android_robots_from_space",
                 authorHandle = "user",
                 authorInternetIdentifier = "android@primal.net",
+                authorAvatarCdnImage = CdnImage(sourceUrl = "https://i.imgur.com/Z8dpmvc.png"),
+                timestamp = Instant.now().minus(30, ChronoUnit.MINUTES),
+                nostrUris = emptyList(),
+                stats = EventStatsUi(
+                    repliesCount = 11,
+                    likesCount = 256,
+                    userLiked = true,
+                    repostsCount = 42,
+                    satsZapped = 555,
+                ),
+                hashtags = listOf("#nostr"),
+                rawNostrEventJson = "",
+                replyToAuthorHandle = null,
+            ),
+            FeedPostUi(
+                postId = "random",
+                repostId = "repostRandom",
+                content = """
+                    Curabitur convallis ante eget mi facilisis, vitae egestas libero accumsan.
+                    
+                    Duis ante turpis, dapibus vitae est vehicula, vulputate commodo libero. Vestibulum massa ante, semper sit amet urna vel, commodo maximus velit. Sed nec nisi laoreet, faucibus est ac, placerat orci. 
+                """.trimIndent(),
+                attachments = emptyList(),
+                authorId = "npubSomething",
+                authorName = "primal",
+                authorHandle = "primal",
+                authorInternetIdentifier = "primal@primal.net",
                 authorAvatarCdnImage = CdnImage(sourceUrl = "https://i.imgur.com/Z8dpmvc.png"),
                 timestamp = Instant.now().minus(30, ChronoUnit.MINUTES),
                 nostrUris = emptyList(),
